@@ -1,0 +1,22 @@
+
+
+.pane {
+  &.actions {
+    a,button {
+      background-color: transparent;
+      display: flex;
+      align-items: center;
+      color: $black;
+      svg {
+        margin-right: $xs;
+      }
+      svg, svg path {
+        stroke: unset;
+        fill: unset;
+      }
+      &:hover {
+        box-shadow: none;
+      }
+    }
+  }
+}

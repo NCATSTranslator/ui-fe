@@ -1,13 +1,27 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import App from './App';
+import Home from './Routes/home';
+import About from './Routes/about';
+import Four from './Routes/404';
+import Templates from './Routes/Templates';
+import Build from './Routes/Build';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<App/>} >
+        <Route index element={<Home/>} />
+        <Route path="about" element={<About/>} />
+        <Route path="templates" element={<Templates/>} />
+        <Route path="build" element={<Build/>} />
+        <Route path="*" element={<Four/>} />
+      </Route>
+    </Routes>
+  </BrowserRouter>,
   document.getElementById('root')
 );
 
