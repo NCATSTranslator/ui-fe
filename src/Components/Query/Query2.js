@@ -1,9 +1,5 @@
 import React, {useState, useEffect} from "react";
-import TextInput from "../FormFields/TextInput";
-import Select from "../FormFields/Select";
-import Toggle from "../Toggle/Toggle";
 import Button from "../FormFields/Button";
-import AnimateHeight from "react-animate-height";
 import {ReactComponent as Undo} from '../../Icons/Directional/Undo.svg';
 import {ReactComponent as Redo} from '../../Icons/Directional/Redo.svg';
 import {ReactComponent as Bookmark} from '../../Icons/Navigation/Bookmark.svg';
@@ -14,8 +10,11 @@ import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
+import { getHistory } from "../../data";
+import { setHistory } from "../../data";
 
-const Query = ({newQuery, handleAdd, handleRemove}) => {
+
+const Query = ({template, handleAdd, handleRemove}) => {
 
 
   const search = window.location.search;
@@ -26,12 +25,12 @@ const Query = ({newQuery, handleAdd, handleRemove}) => {
   const subjectTwo = new URLSearchParams(search).get('subjectTwo');
 
   const [proMode, setProMode] = useState(false);
+  const [isTemplate, setIsTemplate] = useState(template);
   const [currentSubjectOne, setCurrentSubjectOne] = useState(subjectOne);
   const [currentCurieOne, setCurrentCurieOne] = useState(curieOne);
   const [currentPredicate, setCurrentPredicate] = useState(predicate);
   const [currentSubjectTwo, setCurrentSubjectTwo] = useState(subjectTwo);
   const [currentCurieTwo, setCurrentCurieTwo] = useState(curieTwo);
-  const [isNewQuery, setIsNewQuery] = useState(newQuery);
   const [height, setHeight] = useState(0);
   const [queryOpen, setQueryOpen] = useState(true);
   const [isValidSubmission, setIsValidSubmission] = useState(false);
@@ -50,6 +49,10 @@ const Query = ({newQuery, handleAdd, handleRemove}) => {
   const [curieTwoError, setCurieTwoError] = useState(false);
   const curieTwoErrorText = "Please enter a valid CURIE";
 
+  const testArray = [
+
+  ];
+  const [queryItems, setQueryItems] = useState(testArray); 
 
   const handleChange = (e) => {
     // console.log(e);
@@ -92,13 +95,13 @@ const Query = ({newQuery, handleAdd, handleRemove}) => {
       setCurieTwoError(false);
     }
   }
+ 
 
-  const removeQueryItem = (idToRemove) => {
+  const removeQueryItem = (indexToRemove) => {
     let needsChange = false;
     let newItems = Array.from(queryItems);
-    queryItems.map(({id, name}, index) => {
-      console.log(id===idToRemove);
-      if(id === idToRemove) {
+    queryItems.map(({name}, index) => {
+      if(index === indexToRemove) {
         newItems.splice(index, 1);
         needsChange = true;
       }
@@ -120,41 +123,14 @@ const Query = ({newQuery, handleAdd, handleRemove}) => {
   }, [currentSubjectOne, currentCurieOne, currentPredicate, currentSubjectTwo, currentCurieTwo])
 
   useEffect(() => {
-    if(!newQuery) {
-      // console.log(fields);
-    }
-  }, [fields, newQuery])
-
-  useEffect(() => {
-    if(queryOpen === false)
-      setHeight(0);
-    else
-      setHeight('auto');
-  }, [queryOpen])
-
-  const testArray = [
-    {
-      id: '1',
-      name: 'What Chemical',
-    },
-    {
-      id: '2',
-      name: 'Downregulates',
-    },
-    {
-      id: '3',
-      name: 'a Gene that',
-    },
-    {
-      id: '4',
-      name: 'Upregulates',
-    },
-    {
-      id: '5',
-      name: 'RHOBTB2',
-    }
-  ];
-  const [queryItems, setQueryItems] = useState(testArray); 
+    // if(!queryItems)
+    //   return;
+    // let newHistory = getHistory();
+    // newHistory.push(queryItems);
+    // setHistory(newHistory);
+    // console.log(getHistory());
+  }, [queryItems])
+  
   const handleOnDragEnd = (result) => {
     if (!result.destination) return;
     
@@ -165,18 +141,21 @@ const Query = ({newQuery, handleAdd, handleRemove}) => {
     setQueryItems(items);
   }
 
+  const addQueryItem = (name) => {
+    const items = Array.from(queryItems);
+    items.push({name});
+    setQueryItems(items);
+  }
+
+  const updateQueryItems = (items) => {
+    setQueryItems(items);
+  }
+
   return (
     <>
       <div className={`query-window two`} >
         <div className="header">
-          <span className="current-query">
-            { 
-              // currentSubjectOne && 
-              // currentPredicate && 
-              // currentSubjectTwo && 
-              // `${currentSubjectOne} : ${currentPredicate} in ${currentSubjectTwo}`
-            }
-            </span>
+
         </div>
         {!proMode &&  
           <form onSubmit={handleSubmission}>
@@ -186,11 +165,11 @@ const Query = ({newQuery, handleAdd, handleRemove}) => {
                   <ul className="query-box" {...provided.droppableProps} ref={provided.innerRef}>
                     {queryItems.map(({id, name}, index) => {
                       return (
-                        <Draggable key={id} draggableId={id} index={index} >
+                        <Draggable key={index} draggableId={index.toString()} index={index} >
                           {(provided) => (
                             <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="query-item">
                               <div className="query-item-container"><p>{name}</p></div>
-                              <div onClick={()=>removeQueryItem(id)} className="remove"><Close/></div>
+                              <div onClick={()=>removeQueryItem(index)} className="remove"><Close/></div>
                             </li>
                           )}
                         </Draggable>
@@ -201,78 +180,38 @@ const Query = ({newQuery, handleAdd, handleRemove}) => {
                 )}
               </Droppable>
             </DragDropContext>
-            {/* <Select 
-              label="Subject" 
-              size="m" 
-              handleChange={(value)=>{
-                setCurrentSubjectOne(value);
-                handleChange(value);
-              }}
-              error={subjectOneError}
-              errorText={subjectOneErrorText}
-              value={currentSubjectOne}
-            >
-              <option value="Chemical" key="0">Chemical</option>
-              <option value="Subject2" key="1">Subject2</option>
-              <option value="Subject3" key="2">Subject3</option>
-            </Select>
-            <TextInput 
-              label="CURIE" 
-              size="m" 
-              placeholder="" 
-              handleChange={(value)=>{
-                setCurrentCurieOne(value);
-                handleChange(value);
-              }}
-              error={curieOneError}
-              errorText={curieOneErrorText}
-              value={currentCurieOne}
-            />
-            <Select 
-              label="Predicate" 
-              size="l" 
-              handleChange={(value)=>{
-                setCurrentPredicate(value);
-                handleChange(value);
-              }}
-              error={predicateError}
-              errorText={predicateErrorText}
-              value={currentPredicate}
-            >
-              <option value="Predicate1" key="0">Predicate1</option>
-              <option value="Predicate2" key="1">Predicate2</option>
-              <option value="Predicate3" key="2">Predicate3</option>
-            </Select>
-            <Select 
-              label="Subject" 
-              size="m" 
-              handleChange={(value)=>{
-                setCurrentSubjectTwo(value);
-                handleChange(value);
-              }}
-              error={subjectTwoError}
-              errorText={subjectTwoErrorText}
-              value={currentSubjectTwo}
-            >
-              <option value="Gene" key="0">Gene</option>
-              <option value="Protein" key="1">Protein</option>
-              <option value="Subject3" key="2">Subject3</option>
-            </Select>
-            <TextInput 
-              label="CURIE" 
-              size="m" 
-              placeholder="" 
-              handleChange={(value)=>{
-                setCurrentCurieTwo(value);
-                handleChange(value);
-              }}
-              error={curieTwoError}
-              errorText={curieTwoErrorText}
-              value={currentCurieTwo}
-            /> */}
             <Button type="submit" size="s">Submit Query</Button>
           </form>
+          
         }
+        <div className="query-items">
+          {!isTemplate && 
+            <>
+              <div className="subjects">
+                <button onClick={() => addQueryItem('Gene')}>Gene</button>
+                <button onClick={() => addQueryItem('Phenotype')}>Phenotype</button>
+              </div>
+              <div className="actions">
+                <button onClick={() => addQueryItem('Regulates')}>Regulate</button>
+                <button onClick={() => addQueryItem('Downregulates')}>Downregulate</button>
+              </div>
+              <button
+                onClick={() => {
+                  let newHistory = getHistory();
+                  newHistory.push(
+                    {
+                      queryItems
+                    }
+                  )
+                  setHistory(newHistory);
+                }}
+                >History Update</button>
+              <button
+                onClick={() => console.log(getHistory())}
+                >Show History</button>
+            </>
+          }
+        </div>
         {proMode &&  
           <>
           <h2>Pro Mode Interface TBD</h2>

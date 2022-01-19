@@ -1,27 +1,13 @@
-let history = [
-  {
-    query: {
-      subjectOne: "SubjectOne",
-      predicate: "Predicate",
-      subjectTwo: "SubjectTwo",
-    }
-  },
-  {
-    query: {
-      subjectOne: "SubjectOne",
-      predicate: "Predicate",
-      subjectTwo: "SubjectTwo",
-    }
-  },
-  {
-    query: {
-      subjectOne: "SubjectOne",
-      predicate: "Predicate",
-      subjectTwo: "SubjectTwo",
-    }
-  }
-];
+let history = {
+  past: [],
+  present: [],
+  future: []
+};
 
 export const getHistory = () => {
   return history;
+}
+
+export const setHistory = (newHistory) => {
+  history = newHistory;
 }

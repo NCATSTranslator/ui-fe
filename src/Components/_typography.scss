@@ -8,32 +8,32 @@
 
 h1, .h1 {
   font-size: $h1Size;
-  margin-bottom: .5em;
+  margin-bottom: $s;
 }
 h2, .h2 {
   font-size: $h2Size;
-  margin-bottom: .5em;
+  margin-bottom: $s;
 }
 h3, .h3 {
   font-size: $h3Size;
-  margin-bottom: .5em;
+  margin-bottom: $s;
 }
 h4, .h4 {
   font-size: $h4Size;
-  margin-bottom: .5em;
+  margin-bottom: $s;
 }
 h5, .h5 {
   font-size: $h5Size;
-  margin-bottom: .5em;
+  margin-bottom: $s;
 }
 h6 , .h6 {
   font-size: $h6Size;
-  margin-bottom: .5em;
+  margin-bottom: $s;
 }
 
 p, .p {
   font-size: $bodyOneSize; 
-  margin-bottom: 1em;
+  margin-bottom: $s;
 }
 .body-one {
   font-size: $bodyOneSize; 
@@ -43,6 +43,7 @@ p, .p {
 }
 .sub-one {
   font-size: $subOneSize; 
+  font-weight: bold;
 }
 .sub-two {
   font-size: $subTwoSize; 
@@ -55,4 +56,8 @@ p, .p {
 }
 .overline {
   font-size: $overlineSize;
+}
+
+ol, ul {
+  margin-bottom: $s;
 }

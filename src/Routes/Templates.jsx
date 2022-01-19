@@ -3,7 +3,7 @@ import Query2 from "../Components/Query/Query2";
 const Templates = () => {
   return (
     <div>
-      <Query2 />
+      <Query2 template/>
     </div>
   );
 }
