@@ -195,20 +195,6 @@ const Query = ({template, handleAdd, handleRemove}) => {
                 <button onClick={() => addQueryItem('Regulates')}>Regulate</button>
                 <button onClick={() => addQueryItem('Downregulates')}>Downregulate</button>
               </div>
-              <button
-                onClick={() => {
-                  let newHistory = getHistory();
-                  newHistory.push(
-                    {
-                      queryItems
-                    }
-                  )
-                  setHistory(newHistory);
-                }}
-                >History Update</button>
-              <button
-                onClick={() => console.log(getHistory())}
-                >Show History</button>
             </>
           }
         </div>

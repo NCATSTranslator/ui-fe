@@ -1,6 +1,6 @@
 import Button from '../FormFields/Button';
 import Toggle from '../Toggle/Toggle';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import {ReactComponent as Home} from '../../Icons/Navigation/Home.svg';
 import {ReactComponent as Bookmark} from '../../Icons/Navigation/Bookmark.svg';
 import {ReactComponent as History} from '../../Icons/Navigation/History.svg';
@@ -14,15 +14,6 @@ import { setHistory } from "../../data";
 
 const Header = ({children}) => {
 
-  const undo = () => {
-    let history = getHistory();
-    let undoIndex = history.lastIndex;
-    console.log(undoIndex);
-  }
-  const redo = () => {
-
-  }
-
 
   return (
     <header className="header">
@@ -32,7 +23,7 @@ const Header = ({children}) => {
             <h5>Biomedical Data Translator</h5>
           </div>
           <div className='right'>
-            <button><Home/>Dashboard</button>
+            <Link to="/"><Home/>Dashboard</Link>
             <button><History/>History</button>
             <button><Bookmark/>Bookmarks</button>
             <button><Export />Share</button>
