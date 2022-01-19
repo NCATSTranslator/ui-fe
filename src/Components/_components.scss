@@ -737,6 +737,7 @@ label.checkbox {
       .button {
         margin: 0;
       }
+
       .query-box {
         display: flex;
         list-style: none;
@@ -774,8 +775,39 @@ label.checkbox {
         }
       }
     }
+    .query-items {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      .subjects, .actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-column-gap: $s;
+        align-items: flex-start;
+      }
+      .how-to {
+        background-color: $lightGrey;
+        box-shadow: $dropShadow;
+        padding: $m;
+      }
+    }
   }
 }
+
+.query-template {
+  background-color: transparent;
+  display: grid;
+  justify-content: left;
+  text-align: left;
+  box-shadow: $dropShadow;
+  width: 100%;
+  padding: $m;
+  span {
+    display: block;
+    color: $black;
+    margin-bottom: $xxs;
+  }
+}
+
 
 .carousel-container {
   position: relative;

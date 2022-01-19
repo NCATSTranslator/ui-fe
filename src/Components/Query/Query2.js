@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react";
 import Button from "../FormFields/Button";
+import QueryTemplate from "../QueryComponents/QueryTemplate";
 import {ReactComponent as Undo} from '../../Icons/Directional/Undo.svg';
 import {ReactComponent as Redo} from '../../Icons/Directional/Redo.svg';
 import {ReactComponent as Bookmark} from '../../Icons/Navigation/Bookmark.svg';
@@ -95,7 +96,27 @@ const Query = ({template, handleAdd, handleRemove}) => {
       setCurieTwoError(false);
     }
   }
- 
+
+
+  const handleOnDragEnd = (result) => {
+    if (!result.destination) return;
+    
+    const items = Array.from(queryItems);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setQueryItems(items);
+  }
+
+  const addQueryItem = (name) => {
+    const items = Array.from(queryItems);
+    items.push({name});
+    setQueryItems(items);
+  }
+
+  const changeQueryItems = (items) => {
+    setQueryItems(items);
+  }
 
   const removeQueryItem = (indexToRemove) => {
     let needsChange = false;
@@ -109,6 +130,10 @@ const Query = ({template, handleAdd, handleRemove}) => {
 
     if(needsChange)
       setQueryItems(newItems);
+  } 
+
+  const updateQueryItems = (items) => {
+    setQueryItems(items);
   }
 
   useEffect(() => {
@@ -129,27 +154,38 @@ const Query = ({template, handleAdd, handleRemove}) => {
     // newHistory.push(queryItems);
     // setHistory(newHistory);
     // console.log(getHistory());
+    console.log(queryItems);
   }, [queryItems])
   
-  const handleOnDragEnd = (result) => {
-    if (!result.destination) return;
-    
-    const items = Array.from(queryItems);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+  const testOne = [
+    {
+      name: 'What Chemical'
+    },
+    {
+      name: 'Regulates a'
+    },
+    {
+      name: 'Gene'
+    }
+  ]
 
-    setQueryItems(items);
-  }
-
-  const addQueryItem = (name) => {
-    const items = Array.from(queryItems);
-    items.push({name});
-    setQueryItems(items);
-  }
-
-  const updateQueryItems = (items) => {
-    setQueryItems(items);
-  }
+  const testTwo = [
+    {
+      name: 'What Chemical'
+    },
+    {
+      name: 'Downregulates a'
+    },
+    {
+      name: 'Gene that'
+    },
+    {
+      name: 'Upregulates a'
+    },
+    {
+      name: 'Gene'
+    },
+  ]
 
   return (
     <>
@@ -197,6 +233,23 @@ const Query = ({template, handleAdd, handleRemove}) => {
               </div>
             </>
           }
+          {isTemplate && 
+            <>
+              <div className="subjects">
+                <QueryTemplate handleClick={() => changeQueryItems(testOne)} items={testOne}/>
+                <QueryTemplate handleClick={() => changeQueryItems(testTwo)} items={testTwo}/>
+              </div>
+            </>
+          }
+          <div className="how-to">
+            <p className="sub-one">How To Use Translator</p>
+            <ol>
+              <li>Click or drag in a template or  component to begin building a query.</li>
+              <li>If needed, remove component fields by hovering over them and clicking the “x.”</li>
+              <li>Select a component and type in your desired target subject.</li>
+              <li>Submit Query!</li>
+            </ol>
+          </div>
         </div>
         {proMode &&  
           <>
