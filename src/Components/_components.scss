@@ -778,11 +778,28 @@ label.checkbox {
     .query-items {
       display: grid;
       grid-template-columns: 3fr 1fr;
-      .subjects, .actions {
+      grid-column-gap: $s;
+      .panel {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         grid-column-gap: $s;
         align-items: flex-start;
+      }
+      .build {
+        .panel {
+          display: block;
+          button {
+            margin-right: $m;
+            background-color: transparent;
+            color: $blueOne;
+            font-size: $subOneSize;
+            box-shadow: $dropShadow;
+            transition: $defaultBoxShadowAnim;
+            &:hover {
+              box-shadow: $dropShadowHover;
+            }
+          }
+        }
       }
       .how-to {
         background-color: $lightGrey;

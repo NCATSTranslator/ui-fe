@@ -221,26 +221,28 @@ const Query = ({template, handleAdd, handleRemove}) => {
           
         }
         <div className="query-items">
-          {!isTemplate && 
-            <>
-              <div className="subjects">
-                <button onClick={() => addQueryItem('Gene')}>Gene</button>
-                <button onClick={() => addQueryItem('Phenotype')}>Phenotype</button>
+          <div className="panels">
+            {!isTemplate && 
+              <div className="build">
+                <div className="panel subjects">
+                  <button onClick={() => addQueryItem('Gene')}>Gene</button>
+                  <button onClick={() => addQueryItem('Phenotype')}>Phenotype</button>
+                </div>
+                <div className="panel actions">
+                  <button onClick={() => addQueryItem('Regulates')}>Regulate</button>
+                  <button onClick={() => addQueryItem('Downregulates')}>Downregulate</button>
+                </div>
               </div>
-              <div className="actions">
-                <button onClick={() => addQueryItem('Regulates')}>Regulate</button>
-                <button onClick={() => addQueryItem('Downregulates')}>Downregulate</button>
+            }
+            {isTemplate && 
+              <div className="templates">
+                <div className="panel subjects">
+                  <QueryTemplate handleClick={() => changeQueryItems(testOne)} items={testOne}/>
+                  <QueryTemplate handleClick={() => changeQueryItems(testTwo)} items={testTwo}/>
+                </div>
               </div>
-            </>
-          }
-          {isTemplate && 
-            <>
-              <div className="subjects">
-                <QueryTemplate handleClick={() => changeQueryItems(testOne)} items={testOne}/>
-                <QueryTemplate handleClick={() => changeQueryItems(testTwo)} items={testTwo}/>
-              </div>
-            </>
-          }
+            }
+          </div>
           <div className="how-to">
             <p className="sub-one">How To Use Translator</p>
             <ol>
