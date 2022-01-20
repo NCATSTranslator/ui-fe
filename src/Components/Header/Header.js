@@ -48,6 +48,9 @@ const Header = ({children}) => {
             <NavLink to="/build" 
               className={({isActive}) => {return (isActive) ? 'active' : '' }}
             >Build Your Own</NavLink>
+            <NavLink to="/results" 
+              className={({isActive}) => {return (isActive) ? 'active' : '' }}
+            >Results</NavLink>
           </div>
         </div>
       </div>

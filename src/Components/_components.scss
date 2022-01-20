@@ -732,20 +732,21 @@ label.checkbox {
   &.two {
     box-shadow: none;
     form {
-      display: flex;
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      grid-column-gap: 16px;
       margin-bottom: 34px;
       .button {
         margin: 0;
+        width: 100%;
       }
 
       .query-box {
         display: flex;
         list-style: none;
-        margin-bottom: 0;
-        width: 100%;
+        margin: 0;
         border: 1px solid $black;
         border-radius: $defaultBorderRadius;
-        margin-right: $m;
         padding: $xxs;
         .query-item {
           display: flex;

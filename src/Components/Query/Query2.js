@@ -1,12 +1,6 @@
 import React, {useState, useEffect} from "react";
 import Button from "../FormFields/Button";
 import QueryTemplate from "../QueryComponents/QueryTemplate";
-import {ReactComponent as Undo} from '../../Icons/Directional/Undo.svg';
-import {ReactComponent as Redo} from '../../Icons/Directional/Redo.svg';
-import {ReactComponent as Bookmark} from '../../Icons/Navigation/Bookmark.svg';
-import {ReactComponent as History} from '../../Icons/Navigation/History.svg';
-import {ReactComponent as Export} from '../../Icons/Buttons/Export.svg';
-import {ReactComponent as Warning} from '../../Icons/Alerts/Warning.svg';
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -27,37 +21,12 @@ const Query = ({template, handleAdd, handleRemove}) => {
 
   const [proMode, setProMode] = useState(false);
   const [isTemplate, setIsTemplate] = useState(template);
-  const [currentSubjectOne, setCurrentSubjectOne] = useState(subjectOne);
-  const [currentCurieOne, setCurrentCurieOne] = useState(curieOne);
-  const [currentPredicate, setCurrentPredicate] = useState(predicate);
-  const [currentSubjectTwo, setCurrentSubjectTwo] = useState(subjectTwo);
-  const [currentCurieTwo, setCurrentCurieTwo] = useState(curieTwo);
-  const [height, setHeight] = useState(0);
-  const [queryOpen, setQueryOpen] = useState(true);
   const [isValidSubmission, setIsValidSubmission] = useState(false);
-  // Remove after testing, use other state
-  const [fields, setFields] = useState({}); // Initial object state established below in useEffect
-  // const [fieldsNeedRefresh, setFieldsNeedRefresh] = useState(true);
-
-  const [subjectOneError, setSubjectOneError] = useState(false);
-  const subjectOneErrorText = "Please select a subject";
-  const [curieOneError, setCurieOneError] = useState(false);
-  const curieOneErrorText = "Please enter a valid CURIE";
-  const [predicateError, setPredicateError] = useState(false);
-  const predicateErrorText = "Please select a predicate";
-  const [subjectTwoError, setSubjectTwoError] = useState(false);
-  const subjectTwoErrorText = "Please select a subject";
-  const [curieTwoError, setCurieTwoError] = useState(false);
-  const curieTwoErrorText = "Please enter a valid CURIE";
 
   const testArray = [
 
   ];
   const [queryItems, setQueryItems] = useState(testArray); 
-
-  const handleChange = (e) => {
-    // console.log(e);
-  }
 
   const handleSubmission = (e) => {
     e.preventDefault();
@@ -66,35 +35,7 @@ const Query = ({template, handleAdd, handleRemove}) => {
   }
 
   const validateSubmission = (e) => {
-    if(!fields.subjectOne) {
-      setSubjectOneError(true);
-    } else {
-      setSubjectOneError(false);
-    }
-
-    if(!fields.predicate) {
-      setPredicateError(true);
-    } else {
-      setPredicateError(false);
-    }
-
-    if(!fields.subjectTwo) {
-      setSubjectTwoError(true);
-    } else {
-      setSubjectTwoError(false);
-    }
-
-    if(!fields.curieOne.includes(":")) {
-      setCurieOneError(true);
-    } else {
-      setCurieOneError(false);
-    }
-
-    if(!fields.curieTwo.includes(":")) {
-      setCurieTwoError(true);
-    } else {
-      setCurieTwoError(false);
-    }
+    console.log(queryItems);
   }
 
 
@@ -108,9 +49,9 @@ const Query = ({template, handleAdd, handleRemove}) => {
     setQueryItems(items);
   }
 
-  const addQueryItem = (name) => {
+  const addQueryItem = (item) => {
     const items = Array.from(queryItems);
-    items.push({name});
+    items.push(item);
     setQueryItems(items);
   }
 
@@ -126,6 +67,7 @@ const Query = ({template, handleAdd, handleRemove}) => {
         newItems.splice(index, 1);
         needsChange = true;
       }
+      return name;
     });
 
     if(needsChange)
@@ -137,53 +79,56 @@ const Query = ({template, handleAdd, handleRemove}) => {
   }
 
   useEffect(() => {
-    let newFields = {
-      subjectOne : currentSubjectOne,
-      curieOne : currentCurieOne,
-      predicate : currentPredicate,
-      subjectTwo : currentSubjectTwo,
-      curieTwo : currentCurieTwo,
-    }
-    setFields(newFields);
-  }, [currentSubjectOne, currentCurieOne, currentPredicate, currentSubjectTwo, currentCurieTwo])
-
-  useEffect(() => {
     // if(!queryItems)
     //   return;
     // let newHistory = getHistory();
     // newHistory.push(queryItems);
     // setHistory(newHistory);
     // console.log(getHistory());
-    console.log(queryItems);
+    if(queryItems.length > 0)
+      console.log(queryItems);
   }, [queryItems])
   
   const testOne = [
     {
-      name: 'What Chemical'
+      name: 'What Chemical',
+      type: 'subject',
+      category: 'chemical'
     },
     {
-      name: 'Regulates a'
+      name: 'Regulates a',
+      type: 'action'
     },
     {
-      name: 'Gene'
+      name: 'Gene',
+      type: 'subject',
+      category: 'gene'
     }
   ]
 
   const testTwo = [
     {
-      name: 'What Chemical'
+      name: 'What Chemical',
+      type: 'subject',
+      category: 'chemical'
     },
     {
-      name: 'Downregulates a'
+      name: 'Downregulates a',
+      type: 'action'
     },
     {
-      name: 'Gene that'
+      name: 'Gene that',
+      type: 'subject',
+      category: 'gene'
     },
     {
-      name: 'Upregulates a'
+      name: 'Upregulates a',
+      type: 'action'
     },
     {
-      name: 'Gene'
+      name: 'Gene',
+      type: 'subject',
+      category: 'gene'
     },
   ]
 
@@ -225,12 +170,12 @@ const Query = ({template, handleAdd, handleRemove}) => {
             {!isTemplate && 
               <div className="build">
                 <div className="panel subjects">
-                  <button onClick={() => addQueryItem('Gene')}>Gene</button>
-                  <button onClick={() => addQueryItem('Phenotype')}>Phenotype</button>
+                  <button onClick={() => addQueryItem({name: 'Gene', type: 'subject', category: 'gene'})}>Gene</button>
+                  <button onClick={() => addQueryItem({name: 'Phenotype', type: 'subject', category: 'phenotype'})}>Phenotype</button>
                 </div>
                 <div className="panel actions">
-                  <button onClick={() => addQueryItem('Regulates')}>Regulate</button>
-                  <button onClick={() => addQueryItem('Downregulates')}>Downregulate</button>
+                  <button onClick={() => addQueryItem({name: 'Regulates', type: 'action'})}>Regulate</button>
+                  <button onClick={() => addQueryItem({name: 'Downregulates', type: 'action'})}>Downregulate</button>
                 </div>
               </div>
             }
