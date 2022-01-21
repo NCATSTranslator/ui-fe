@@ -5,8 +5,8 @@ import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-import { incrementHistory, queryState } from "../../Redux/store";
-import { useSelector, useDispatch } from 'react-redux'
+// import { incrementHistory, queryState } from "../../Redux/store";
+// import { useSelector, useDispatch } from 'react-redux'
 
 const Query2 = ({template, handleAdd, handleRemove}) => {
 
@@ -24,16 +24,16 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
 
   const [queryItems, setQueryItems] = useState([]); 
 
-  const dispatch = useDispatch();
-  const queryHistoryState = useSelector(queryState);
+  // const dispatch = useDispatch();
+  // const queryHistoryState = useSelector(queryState);
 
   const handleSubmission = (e) => {
     e.preventDefault();
     console.log(e);
     validateSubmission(e);
 
-    if(isValidSubmission)
-      dispatch(incrementHistory(queryItems));
+    // if(isValidSubmission)
+    //   dispatch(incrementHistory(queryItems));
 
   }
 
@@ -91,7 +91,7 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     // console.log(getHistory());
     // if(queryItems.length > 0)
       // console.log(queryItems);
-      console.log(queryHistoryState)
+      // console.log(queryHistoryState)
   }, [queryItems])
   
   const testOne = [
