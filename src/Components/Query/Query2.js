@@ -5,7 +5,7 @@ import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-import { incrementHistory, queryState } from "../../App/store";
+import { incrementHistory, queryState } from "../../Redux/store";
 import { useSelector, useDispatch } from 'react-redux'
 
 const Query2 = ({template, handleAdd, handleRemove}) => {

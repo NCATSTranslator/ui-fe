@@ -11,7 +11,7 @@ import Build from './Routes/Build';
 import Results from './Routes/Results';
 import reportWebVitals from './reportWebVitals';
 import {Provider} from 'react-redux';
-import {store} from './App/store';
+import {store} from './Redux/store';
 
 ReactDOM.render(
   <Provider store={store}>
