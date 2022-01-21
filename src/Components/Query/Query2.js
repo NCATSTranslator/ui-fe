@@ -5,11 +5,10 @@ import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-import { getHistory } from "../../data";
-import { setHistory } from "../../data";
+import { incrementHistory, queryState } from "../../App/store";
+import { useSelector, useDispatch } from 'react-redux'
 
-
-const Query = ({template, handleAdd, handleRemove}) => {
+const Query2 = ({template, handleAdd, handleRemove}) => {
 
 
   const search = window.location.search;
@@ -23,19 +22,24 @@ const Query = ({template, handleAdd, handleRemove}) => {
   const [isTemplate, setIsTemplate] = useState(template);
   const [isValidSubmission, setIsValidSubmission] = useState(false);
 
-  const testArray = [
+  const [queryItems, setQueryItems] = useState([]); 
 
-  ];
-  const [queryItems, setQueryItems] = useState(testArray); 
+  const dispatch = useDispatch();
+  const queryHistoryState = useSelector(queryState);
 
   const handleSubmission = (e) => {
     e.preventDefault();
     console.log(e);
     validateSubmission(e);
+
+    if(isValidSubmission)
+      dispatch(incrementHistory(queryItems));
+
   }
 
   const validateSubmission = (e) => {
-    console.log(queryItems);
+    // console.log(queryItems);
+    setIsValidSubmission(true);
   }
 
 
@@ -85,8 +89,9 @@ const Query = ({template, handleAdd, handleRemove}) => {
     // newHistory.push(queryItems);
     // setHistory(newHistory);
     // console.log(getHistory());
-    if(queryItems.length > 0)
-      console.log(queryItems);
+    // if(queryItems.length > 0)
+      // console.log(queryItems);
+      console.log(queryHistoryState)
   }, [queryItems])
   
   const testOne = [
@@ -209,4 +214,4 @@ const Query = ({template, handleAdd, handleRemove}) => {
 }
 
 
-export default Query;
+export default Query2;

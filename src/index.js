@@ -10,20 +10,24 @@ import Templates from './Routes/Templates';
 import Build from './Routes/Build';
 import Results from './Routes/Results';
 import reportWebVitals from './reportWebVitals';
+import {Provider} from 'react-redux';
+import {store} from './App/store';
 
 ReactDOM.render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<App/>} >
-        <Route index element={<Home/>} />
-        <Route path="about" element={<About/>} />
-        <Route path="templates" element={<Templates/>} />
-        <Route path="build" element={<Build/>} />
-        <Route path="results" element={<Results/>} />
-        <Route path="*" element={<Four/>} />
-      </Route>
-    </Routes>
-  </BrowserRouter>,
+  <Provider store={store}>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App/>} >
+          <Route index element={<Home/>} />
+          <Route path="about" element={<About/>} />
+          <Route path="templates" element={<Templates/>} />
+          <Route path="build" element={<Build/>} />
+          <Route path="results" element={<Results/>} />
+          <Route path="*" element={<Four/>} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  </Provider>,
   document.getElementById('root')
 );
 
