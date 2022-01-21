@@ -9,8 +9,8 @@ import {ReactComponent as Warning} from '../../Icons/Alerts/Warning.svg';
 import {ReactComponent as Undo} from '../../Icons/Directional/Undo.svg';
 import {ReactComponent as Redo} from '../../Icons/Directional/Redo.svg';
 
-import { getHistory } from "../../data";
-import { setHistory } from "../../data";
+import { getHistory } from "../../App/store";
+import { setHistory } from "../../App/store";
 
 const Header = ({children}) => {
 
