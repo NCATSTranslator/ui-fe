@@ -9,8 +9,6 @@ import {ReactComponent as Warning} from '../../Icons/Alerts/Warning.svg';
 import {ReactComponent as Undo} from '../../Icons/Directional/Undo.svg';
 import {ReactComponent as Redo} from '../../Icons/Directional/Redo.svg';
 
-import { getHistory } from "../../Redux/store";
-import { setHistory } from "../../Redux/store";
 
 const Header = ({children}) => {
 
@@ -24,7 +22,7 @@ const Header = ({children}) => {
           </div>
           <div className='right'>
             <Link to="/"><Home/>Dashboard</Link>
-            <button><History/>History</button>
+            <Link to="/history"><History/>History</Link>
             <button><Bookmark/>Bookmarks</button>
             <button><Export />Share</button>
             <button><Warning/>Report Issue</button>

@@ -9,12 +9,13 @@ import Four from './PageRoutes/404';
 import Templates from './PageRoutes/Templates';
 import Build from './PageRoutes/Build';
 import Results from './PageRoutes/Results';
+import History from './PageRoutes/History';
 import reportWebVitals from './reportWebVitals';
-// import {Provider} from 'react-redux';
-// import {store} from './Redux/store';
+import {Provider} from 'react-redux';
+import {store} from './Redux/store';
 
 ReactDOM.render(
-  // <Provider store={store}>
+  <Provider store={store}>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App/>} >
@@ -23,11 +24,12 @@ ReactDOM.render(
           <Route path="templates" element={<Templates/>} />
           <Route path="build" element={<Build/>} />
           <Route path="results" element={<Results/>} />
+          <Route path="history" element={<History/>} />
           <Route path="*" element={<Four/>} />
         </Route>
       </Routes>
     </BrowserRouter>
-  // </Provider>
+  </Provider>
   ,
   document.getElementById('root')
 );
