@@ -4,11 +4,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import App from './App';
 // import Home from './Routes/Home';
-import About from './Routes/About';
-import Four from './Routes/404';
-import Templates from './Routes/Templates';
-import Build from './Routes/Build';
-import Results from './Routes/Results';
+// import About from './Routes/About';
+// import Four from './Routes/404';
+// import Templates from './Routes/Templates';
+// import Build from './Routes/Build';
+// import Results from './Routes/Results';
 import reportWebVitals from './reportWebVitals';
 // import {Provider} from 'react-redux';
 // import {store} from './Redux/store';
@@ -19,11 +19,11 @@ ReactDOM.render(
       <Routes>
         <Route path="/" element={<App/>} >
           {/* <Route index element={<Home/>} /> */}
-          <Route path="about" element={<About/>} />
+          {/* <Route path="about" element={<About/>} />
           <Route path="templates" element={<Templates/>} />
           <Route path="build" element={<Build/>} />
           <Route path="results" element={<Results/>} />
-          <Route path="*" element={<Four/>} />
+          <Route path="*" element={<Four/>} /> */}
         </Route>
       </Routes>
     </BrowserRouter>
