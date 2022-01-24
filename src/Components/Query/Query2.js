@@ -33,18 +33,20 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     validateSubmission(e);
   }
 
-  useEffect(() => {
-    if(isValidSubmission) {
-      dispatch(incrementHistory(queryItems));
-      setIsValidSubmission(false);
-    }
-
-  }, [isValidSubmission])
-
   const validateSubmission = (e) => {
     // console.log(queryItems);
     setIsValidSubmission(true);
   }
+
+  useEffect(() => {
+    if(isValidSubmission) {
+      dispatch(incrementHistory(queryItems));
+      setIsValidSubmission(false);
+      setQueryItems([]);
+    }
+
+  }, [isValidSubmission])
+
 
 
   const handleOnDragEnd = (result) => {
