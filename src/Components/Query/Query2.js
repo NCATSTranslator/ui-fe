@@ -180,10 +180,12 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
           <div className="panels">
             {!isTemplate && 
               <div className="build">
+                <h6>Subjects</h6>
                 <div className="panel subjects">
                   <button onClick={() => addQueryItem({name: 'Gene', type: 'subject', category: 'gene'})}>Gene</button>
                   <button onClick={() => addQueryItem({name: 'Phenotype', type: 'subject', category: 'phenotype'})}>Phenotype</button>
                 </div>
+                <h6>Actions</h6>
                 <div className="panel actions">
                   <button onClick={() => addQueryItem({name: 'Regulates', type: 'action'})}>Regulate</button>
                   <button onClick={() => addQueryItem({name: 'Downregulates', type: 'action'})}>Downregulate</button>

@@ -677,6 +677,54 @@ label.checkbox {
 }
 
 
+// Modal
+.modal-window {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transition: opacity .25s ease;
+  background-color: rgba(96, 99, 104, .5);
+  z-index: 10;
+  &.false {
+    opacity: 0;
+    visibility: hidden;
+    height: 0;
+    pointer-events: none;
+  }
+  &.true {
+    opacity: 1;
+    visibility: visible;
+    height: auto;
+  }
+  .modal-container {
+    background-color: $white;
+    width: 824px;
+    padding: $m;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }  
+  .close-container {
+    position: absolute;
+    top: $m;
+    right: $m;
+    .close-button {
+      background-color: transparent;
+      margin: 0;
+      padding: 0;
+      svg {
+        margin: 0;
+        height: $m;
+        width: $m;
+      }
+    }
+  }
+}
+
+
 // Query Window
 .query-window {
   box-shadow: $dropShadowHover;

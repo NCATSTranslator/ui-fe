@@ -25,11 +25,7 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
     setSelectOpen(!selectOpen);
     handleChange(e.target.dataset.value);
   }
-
-  // const getValue = () => {
-  //   return selectedItem;
-  // }
-
+  
   useEffect(() => {
     if(selectOpen === false)
       setHeight(0);
