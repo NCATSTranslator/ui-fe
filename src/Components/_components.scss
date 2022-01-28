@@ -738,9 +738,6 @@ label.checkbox {
   svg circle {
     fill: transparent;
   }
-  &.new {
-
-  }
   .header {
     display: flex;
     align-items: center;
@@ -837,17 +834,6 @@ label.checkbox {
       .build {
         .panel {
           display: block;
-          button {
-            margin-right: $m;
-            background-color: transparent;
-            color: $blueOne;
-            font-size: $subOneSize;
-            box-shadow: $dropShadow;
-            transition: $defaultBoxShadowAnim;
-            &:hover {
-              box-shadow: $dropShadowHover;
-            }
-          }
         }
       }
       .how-to {
@@ -856,6 +842,24 @@ label.checkbox {
         padding: $m;
       }
     }
+  }
+}
+
+// Query Item Button
+.query-item-button {
+  margin-right: $m;
+  background-color: transparent;
+  color: $blueOne;
+  font-size: $subOneSize;
+  box-shadow: $dropShadow;
+  // transition: $defaultBoxShadowAnim;
+  transition: $defaultAnim;
+  &:hover {
+    box-shadow: $dropShadowHover;
+  }
+  &.true {
+    pointer-events: none;
+    color: $purpleTwo20;
   }
 }
 

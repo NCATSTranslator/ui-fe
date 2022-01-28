@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import Button from "../FormFields/Button";
 import QueryTemplate from "../QueryComponents/QueryTemplate";
+import QueryItemButton from "../QueryComponents/QueryItemButton";
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -21,6 +22,7 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
   const [proMode, setProMode] = useState(false);
   const [isTemplate, setIsTemplate] = useState(template);
   const [isValidSubmission, setIsValidSubmission] = useState(false);
+  const [subjectsActive, setSubjectsActive] = useState(true);
 
   const [queryItems, setQueryItems] = useState([]); 
 
@@ -45,7 +47,7 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
       setQueryItems([]);
     }
 
-  }, [isValidSubmission])
+  }, [isValidSubmission, dispatch, queryItems])
 
 
 
@@ -89,15 +91,11 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
   }
 
   useEffect(() => {
-    // if(!queryItems)
-    //   return;
-    // let newHistory = getHistory();
-    // newHistory.push(queryItems);
-    // setHistory(newHistory);
-    // console.log(getHistory());
-    // if(queryItems.length > 0)
-      // console.log(queryItems);
-      // console.log(queryHistoryState)
+    if(queryItems.length === 0) {
+      setSubjectsActive(true);
+      return;
+    }
+    setSubjectsActive(s=>!s);
   }, [queryItems])
   
   const testOne = [
@@ -182,13 +180,53 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
               <div className="build">
                 <h6>Subjects</h6>
                 <div className="panel subjects">
-                  <button onClick={() => addQueryItem({name: 'Gene', type: 'subject', category: 'gene'})}>Gene</button>
-                  <button onClick={() => addQueryItem({name: 'Phenotype', type: 'subject', category: 'phenotype'})}>Phenotype</button>
+                  <QueryItemButton 
+                    disabled={!subjectsActive}
+                    handleClick={() => addQueryItem({name: 'Gene', type: 'subject', category: 'gene'})}
+                    >Gene</QueryItemButton>
+                  <QueryItemButton 
+                    disabled={!subjectsActive}
+                    handleClick={() => addQueryItem({name: 'Phenotype', type: 'subject', category: 'phenotype'})}
+                    >Phenotype</QueryItemButton>
+                  <QueryItemButton 
+                    disabled={!subjectsActive}
+                    handleClick={() => addQueryItem({name: 'Chemical', type: 'subject', category: 'chemical'})}
+                    >Chemical</QueryItemButton>
+                  <QueryItemButton 
+                    disabled={!subjectsActive}
+                    handleClick={() => addQueryItem({name: 'Disease', type: 'subject', category: 'disease'})}
+                    >Disease</QueryItemButton>
+                  <QueryItemButton 
+                    disabled={!subjectsActive}
+                    handleClick={() => addQueryItem({name: 'Concept', type: 'subject', category: 'concept'})}
+                    >Concept</QueryItemButton>
                 </div>
                 <h6>Actions</h6>
                 <div className="panel actions">
-                  <button onClick={() => addQueryItem({name: 'Regulates', type: 'action'})}>Regulate</button>
-                  <button onClick={() => addQueryItem({name: 'Downregulates', type: 'action'})}>Downregulate</button>
+                  <QueryItemButton 
+                  disabled={subjectsActive}
+                  handleClick={() => addQueryItem({name: 'Regulates', type: 'action'})}
+                  >Regulate</QueryItemButton>
+                  <QueryItemButton 
+                    disabled={subjectsActive}
+                    handleClick={() => addQueryItem({name: 'Downregulates', type: 'action'})}
+                    >Downregulate</QueryItemButton>
+                  <QueryItemButton 
+                    disabled={subjectsActive}
+                    handleClick={() => addQueryItem({name: 'Upregulate', type: 'action'})}
+                    >Upregulate</QueryItemButton>
+                  <QueryItemButton 
+                    disabled={subjectsActive}
+                    handleClick={() => addQueryItem({name: 'Treats', type: 'action'})}
+                    >Treats</QueryItemButton>
+                  <QueryItemButton 
+                    disabled={subjectsActive}
+                    handleClick={() => addQueryItem({name: 'Associated With', type: 'action'})}
+                    >Associated With</QueryItemButton>
+                  <QueryItemButton 
+                    disabled={subjectsActive}
+                    handleClick={() => addQueryItem({name: 'Node(s)', type: 'action'})}
+                    >Node(s)</QueryItemButton>
                 </div>
               </div>
             }
