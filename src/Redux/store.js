@@ -1,5 +1,11 @@
 import { createSlice, configureStore } from '@reduxjs/toolkit'
 
+const persistedState = localStorage.getItem('reduxState') 
+  ? JSON.parse(localStorage.getItem('reduxState'))
+  : {
+    queries: []
+  }
+
 const historySlice = createSlice({
   name: 'history',
   initialState: {
@@ -16,13 +22,19 @@ const historySlice = createSlice({
 export const { incrementHistory } = historySlice.actions;
 
 export const store = configureStore({
-  reducer: historySlice.reducer
+  reducer: historySlice.reducer,
+  preloadedState: persistedState
 })
 
 export const queryCount = state => state.queries.length;
 export const queryState = state => state.queries;
 
-// Can still subscribe to the store
-store.subscribe(() => console.log(store.getState()))
+
+store.subscribe(() =>  
+  {
+    console.log(store.getState())
+    localStorage.setItem('reduxState', JSON.stringify(store.getState()))
+  }
+)
 
 // store.dispatch(incremented())
