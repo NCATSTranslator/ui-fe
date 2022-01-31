@@ -15,11 +15,15 @@ const historySlice = createSlice({
     incrementHistory: (state, action) => {
       state.queries.push(action.payload);
       return state;
+    },
+    clearHistory: (state) => {
+      state.queries = [];
+      return state;
     }
   }
 })
 
-export const { incrementHistory } = historySlice.actions;
+export const { incrementHistory, clearHistory } = historySlice.actions;
 
 export const store = configureStore({
   reducer: historySlice.reducer,

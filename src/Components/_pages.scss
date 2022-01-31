@@ -20,3 +20,51 @@
     }
   }
 }
+
+// History Page
+.history {
+  .body {
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .button {
+        color: $black;
+        background-color: transparent;
+        padding: $s 0;
+        margin: 0;
+        width: auto;
+        &:hover {
+          box-shadow: none;
+        }
+      }
+    }
+    .history-list {
+      list-style: none;
+      .history-item {
+        padding: $m;
+        margin-bottom: $m;
+        box-shadow: $dropShadow;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: $defaultBorderRadius;
+        transition: $defaultBoxShadowAnim;
+        &:hover {
+          box-shadow: $dropShadowHover;
+        }
+        .remove-item {
+          background-color: transparent;
+          padding: $s;
+          margin: 0;
+          &:hover {
+            box-shadow: none;
+          }
+          svg {
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
+}
