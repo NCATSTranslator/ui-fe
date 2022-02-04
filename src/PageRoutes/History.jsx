@@ -1,9 +1,11 @@
 import React, {useState} from "react";
-import { queryState, clearHistory } from "../Redux/store";
+import { queryState, clearHistory, removeItemAtIndex } from "../Redux/store";
 import { useSelector, useDispatch } from 'react-redux'
+import { Link } from "react-router-dom";
 import Modal from "../Components/Modals/Modal";
 import Button from "../Components/FormFields/Button";
 import {ReactComponent as Close} from '../Icons/Buttons/Close.svg';
+import {ReactComponent as Warning} from '../Icons/Alerts/Warning.svg'
 
 const History = () => {
 
@@ -19,45 +21,58 @@ const History = () => {
         <Button handleClick={()=>setModalOpen(true)}>Clear All</Button>
       </div>
       <Modal isOpen={modalOpen} onClose={()=>setModalOpen(false)}>
-        <h6>Are you sure you want to delete your query history?</h6>
-        <p>*This action cannot be undone.</p>
+        <h6><Warning/>Warning!</h6>
+        <p>This action cannot be undone.</p>
         <div className="button-container">
           <Button 
+          isSecondary
             handleClick={()=>{
               dispatch(clearHistory()); 
               setModalOpen(false);
             }}>
-            Yes
+            Clear History
           </Button>
           <Button handleClick={()=>setModalOpen(false)}>
-            No
+            Go Back
           </Button>
         </div>
       </Modal>
-      <ul className="history-list">
         {
-          queryHistoryState.map((query, i)=> {
-            return (
-              <li key={i} className="history-item">
-                <span className="query">
-                  {query.map((item, j) => {
-                    return (
-                      <span key={j}>{item.name} </span>)
-                    })
-                  }
-                </span>
-                <button 
-                  className="remove-item"
-                  onClick={()=> {
-
-                  }}>
-                  <Close/>
-                </button>
-              </li>
-            )
-          })
+          queryHistoryState.length > 0 &&
+          <ul className="history-list">
+            {queryHistoryState.map((query, i)=> {
+              return (
+                <li key={i} className="history-item">
+                  <span className="query">
+                    {query.map((item, j) => {
+                      return (
+                        <span key={j}>{item.name} </span>)
+                      })
+                    }
+                  </span>
+                  <button 
+                    className="remove-item"
+                    onClick={(e)=> {
+                      console.log("Removing at " + i);
+                      dispatch(removeItemAtIndex(i)); 
+                    }}>
+                    <Close/>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
         }
-      </ul>
+        {
+          queryHistoryState.length <= 0 && 
+          <div className="no-history">
+            <h6>No query history to show!</h6>
+            <div className="button-container">
+              <Link to="/template">Templated Queries</Link>
+              <Link to="/build">Build Your Own</Link>
+            </div>
+          </div>
+        }
     </div>
   );
 }

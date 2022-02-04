@@ -19,11 +19,17 @@ const historySlice = createSlice({
     clearHistory: (state) => {
       state.queries = [];
       return state;
+    },
+    removeItemAtIndex: (state, action) => {
+      let newState = state;
+      console.log(action.payload);
+      newState.queries.splice(action.payload, 1);
+      return newState;
     }
   }
 })
 
-export const { incrementHistory, clearHistory } = historySlice.actions;
+export const { incrementHistory, clearHistory, removeItemAtIndex } = historySlice.actions;
 
 export const store = configureStore({
   reducer: historySlice.reducer,

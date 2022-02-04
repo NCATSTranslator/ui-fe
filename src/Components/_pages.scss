@@ -67,4 +67,27 @@
       }
     }
   }
+  .modal-window .modal-container {
+    text-align: center;
+    width: 300px;
+    .button-container {
+      display: grid;
+      justify-content: center;
+      .button {
+        width: auto;
+        white-space: nowrap;
+        &.primary {
+          background-color: transparent;
+          color: $black;
+          &:hover {
+            text-decoration: underline;
+            box-shadow: none;
+          }
+        }
+      }
+    }
+    .close-container {
+      display: none;
+    }
+  }
 }
