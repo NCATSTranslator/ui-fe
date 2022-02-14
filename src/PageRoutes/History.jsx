@@ -15,7 +15,7 @@ const History = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div>
+    <div className="history-inner">
       <div className="header">
         <h2>History</h2>
         <Button handleClick={()=>setModalOpen(true)}>Clear All</Button>
@@ -68,8 +68,8 @@ const History = () => {
           <div className="no-history">
             <h6>No query history to show!</h6>
             <div className="button-container">
-              <Link to="/template">Templated Queries</Link>
-              <Link to="/build">Build Your Own</Link>
+              <Link to="/templates" className="primary button">Templated Queries</Link>
+              <Link to="/build" className="primary button">Build Your Own</Link>
             </div>
           </div>
         }
