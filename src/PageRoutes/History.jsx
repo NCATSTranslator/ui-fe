@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import { queryState, clearHistory, removeItemAtIndex } from "../Redux/store";
+import { pastQueryState, clearHistory, removeItemAtIndex } from "../Redux/store";
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
 import Modal from "../Components/Modals/Modal";
@@ -9,14 +9,14 @@ import {ReactComponent as Warning} from '../Icons/Alerts/Warning.svg'
 
 const History = () => {
 
-  const queryHistoryState = useSelector(queryState);
+  const queryHistoryState = useSelector(pastQueryState);
   const dispatch = useDispatch();
 
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <div className="history-inner">
-      <div className="header">
+      <div className="head">
         <h2>History</h2>
         <Button handleClick={()=>setModalOpen(true)}>Clear All</Button>
       </div>

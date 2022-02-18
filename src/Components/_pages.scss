@@ -24,13 +24,16 @@
 
 // History Page
 .history {
+  .page-title {
+    display: none;
+  }
   .body {
     display: grid;
     .history-inner {
       display: grid;
       grid-template-rows: max-content;
     }
-    .header {
+    .head {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -112,5 +115,14 @@
     .button {
       white-space: nowrap;
     }
+  }
+}
+
+.home {
+  .page-title {
+    height: 0;
+    padding: 0;
+    margin: 0;
+    visibility: hidden;
   }
 }

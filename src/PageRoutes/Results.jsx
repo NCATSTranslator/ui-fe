@@ -1,9 +1,10 @@
-import Query2 from "../Components/Query/Query2";
+import ResultsList from "../Components/ResultsList/ResultsList";
 
 const Results = () => {
+
   return (
     <div>
-      <Query2 />
+      <ResultsList />
     </div>
   );
 }

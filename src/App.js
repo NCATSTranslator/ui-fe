@@ -9,9 +9,9 @@ const App = () => {
   const location = useLocation();
   let pathnameClass = location.pathname.replace('/', '');
   pathnameClass = (pathnameClass.includes('/')) ? pathnameClass.replace(/\//g, '-') : pathnameClass;
-
+  pathnameClass = (pathnameClass === "") ? "home" : pathnameClass;
   return (
-    <div className={`App ${pathnameClass}`}>
+    <div className={`app ${pathnameClass}`}>
       <Header>
       </Header>
       <div className='container body'>

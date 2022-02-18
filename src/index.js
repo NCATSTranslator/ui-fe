@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import App from './App';
+import Page from './Components/Page/Page';
 import Home from './PageRoutes/Home';
 import About from './PageRoutes/About';
 import Four from './PageRoutes/404';
@@ -19,12 +20,61 @@ ReactDOM.render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App/>} >
-          <Route index element={<Home/>} />
-          <Route path="about" element={<About/>} />
-          <Route path="templates" element={<Templates/>} />
-          <Route path="build" element={<Build/>} />
-          <Route path="results" element={<Results/>} />
-          <Route path="history" element={<History/>} />
+          <Route index 
+            element={
+              <Page title="Home">
+                <Home />
+              </Page>
+            }
+          />
+          <Route  
+            path="about"
+            element={
+              <Page title="About Translator">
+                <About />
+              </Page>
+            }
+          />
+          <Route  
+            path="templates"
+            element={
+              <Page title="Templated Queries">
+                <Templates />
+              </Page>
+            }
+          />
+          <Route  
+            path="build"
+            element={
+              <Page title="Build Your Own">
+                <Build />
+              </Page>
+            }
+          />
+          <Route  
+            path="results"
+            element={
+              <Page title="Results">
+                <Results />
+              </Page>
+            }
+          />
+          <Route  
+            path="history"
+            element={
+              <Page title="History">
+                <History />
+              </Page>
+            }
+          />
+          <Route  
+            path="*"
+            element={
+              <Page title="404 - Page Not Found">
+                <Four />
+              </Page>
+            }
+          />
           <Route path="*" element={<Four/>} />
         </Route>
       </Routes>

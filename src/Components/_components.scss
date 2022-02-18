@@ -728,7 +728,7 @@ label.checkbox {
 // Query Window
 .query-window {
   box-shadow: $dropShadowHover;
-  padding: 24px;
+  padding: 24px 0;
   border-radius: $defaultBorderRadius;
   margin-bottom: $m;
   svg, svg path, svg circle {
@@ -862,6 +862,13 @@ label.checkbox {
     color: $purpleTwo20;
   }
 }
+// Query Item 
+.query-item {
+  .input {
+    display: none;
+  }
+}
+
 
 .query-template {
   background-color: transparent;
@@ -973,7 +980,11 @@ label.checkbox {
 
 
 .container.body {
-  min-height: calc(100vh - 244px);
+  min-height: calc(100vh - 272px);
+  padding: 48px 20px 0;
+  .page-title {
+    color: $purpleTwo;
+  }
 }
 
 .header,.footer {
@@ -982,6 +993,7 @@ label.checkbox {
   }
 }
 .header {
+  box-shadow: $dropShadow;
   .right, .left {
     display: flex;
     justify-content: space-between;
@@ -993,6 +1005,7 @@ label.checkbox {
       justify-content: space-between;
       h5,h1,.h1 {
         margin-bottom: 0;
+        color: $purpleTwo;
       }
       button, a {
         color: $black;

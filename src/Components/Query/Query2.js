@@ -6,11 +6,11 @@ import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-import { incrementHistory, queryState } from "../../Redux/store";
+import { incrementHistory, pastQueryState, setCurrentQuery, currentQuery } from "../../Redux/store";
 import { useSelector, useDispatch } from 'react-redux'
+import QueryItem from "../QueryComponents/QueryItem";
 
 const Query2 = ({template, handleAdd, handleRemove}) => {
-
 
   const search = window.location.search;
   const curieOne = new URLSearchParams(search).get('curieOne');
@@ -24,10 +24,16 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
   const [isValidSubmission, setIsValidSubmission] = useState(false);
   const [subjectsActive, setSubjectsActive] = useState(true);
 
-  const [queryItems, setQueryItems] = useState([]); 
+  let startingQuery = useSelector(currentQuery);
+  startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
+  const [queryItems, setQueryItems] = useState(startingQuery);
 
   const dispatch = useDispatch();
-  var queryHistoryState = useSelector(queryState);
+  var queryHistoryState = useSelector(pastQueryState);
+
+  const onQueryItemSubjectClick = () => {
+
+  }
 
   const handleSubmission = (e) => {
     e.preventDefault();
@@ -49,7 +55,9 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
 
   }, [isValidSubmission, dispatch, queryItems])
 
-
+  useEffect(() => {
+    dispatch(setCurrentQuery(queryItems));
+  }, [dispatch, queryItems]);
 
   const handleOnDragEnd = (result) => {
     if (!result.destination) return;
@@ -90,28 +98,32 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     setQueryItems(items);
   }
 
+  // Determine active type
   useEffect(() => {
     if(queryItems.length === 0) {
       setSubjectsActive(true);
       return;
     }
-    setSubjectsActive(s=>!s);
+    let areSubjectsActive = (queryItems[queryItems.length - 1].type !== 'subject') ? true : false;
+    setSubjectsActive(areSubjectsActive);
   }, [queryItems])
   
   const testOne = [
     {
       name: 'What Chemical',
       type: 'subject',
-      category: 'chemical'
+      category: 'chemical',
+      value: ''
     },
     {
       name: 'Regulates a',
-      type: 'action'
+      type: 'action',
     },
     {
       name: 'Gene',
       type: 'subject',
-      category: 'gene'
+      category: 'gene',
+      value: ''
     }
   ]
 
@@ -119,7 +131,8 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     {
       name: 'What Chemical',
       type: 'subject',
-      category: 'chemical'
+      category: 'chemical',
+      value: ''
     },
     {
       name: 'Downregulates a',
@@ -128,7 +141,8 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     {
       name: 'Gene that',
       type: 'subject',
-      category: 'gene'
+      category: 'gene',
+      value: ''
     },
     {
       name: 'Upregulates a',
@@ -137,7 +151,8 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     {
       name: 'Gene',
       type: 'subject',
-      category: 'gene'
+      category: 'gene',
+      value: ''
     },
   ]
 
@@ -153,13 +168,20 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
               <Droppable droppableId="query-item" direction="horizontal">
                 {(provided) => (
                   <ul className="query-box" {...provided.droppableProps} ref={provided.innerRef}>
-                    {queryItems.map(({id, name}, index) => {
+                    {queryItems.map((item, index) => {
+                      let itemIsSubject = (item.type === "subject") ? true : false;
                       return (
                         <Draggable key={index} draggableId={index.toString()} index={index} >
                           {(provided) => (
-                            <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="query-item">
-                              <div className="query-item-container"><p>{name}</p></div>
-                              <div onClick={()=>removeQueryItem(index)} className="remove"><Close/></div>
+                            <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="query-list-item">
+                              <QueryItem 
+                                item={item} 
+                                handleClick={onQueryItemSubjectClick} 
+                                handleClose={()=>removeQueryItem(index)} 
+                                hasInput={itemIsSubject}
+                                name={item.name}
+                                inputActive>
+                              </QueryItem>
                             </li>
                           )}
                         </Draggable>

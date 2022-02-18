@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 
-const Checkbox = ({name, value, checked, children}) => {
+const Checkbox = ({name, value, checked, children, handleClick}) => {
 
   const [isChecked, setIsChecked] = useState(checked);
 
@@ -15,7 +15,7 @@ const Checkbox = ({name, value, checked, children}) => {
 
     <label className={`checkbox ${isCheckedClass}`}>
       <span className="circle"></span>
-      <input type="checkbox" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} />
+      <input type="checkbox" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} onClick={handleClick} />
       <span>{children}</span>
     </label>
 
