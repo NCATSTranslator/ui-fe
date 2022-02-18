@@ -91,4 +91,3 @@ store.subscribe(() =>
 )
 
 // store.dispatch(incremented())
-localStorage.clear();
