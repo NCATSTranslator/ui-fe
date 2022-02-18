@@ -24,9 +24,10 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
   const [isValidSubmission, setIsValidSubmission] = useState(false);
   const [subjectsActive, setSubjectsActive] = useState(true);
 
-  let startingQuery = useSelector(currentQuery);
-  startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
-  const [queryItems, setQueryItems] = useState(startingQuery);
+  // let startingQuery = useSelector(currentQuery);
+  // startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
+  // const [queryItems, setQueryItems] = useState(startingQuery);
+  const [queryItems, setQueryItems] = useState([]);
 
   const dispatch = useDispatch();
   var queryHistoryState = useSelector(pastQueryState);
