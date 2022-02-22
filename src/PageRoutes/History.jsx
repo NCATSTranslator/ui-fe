@@ -45,7 +45,6 @@ const History = () => {
                 <li key={i} className="history-item">
                   <span className="query">
                     {query.map((item, j) => {
-                      console.log(item)
                       let output = (item.value) ? item.value : item.name;
                       return (
                         <span key={j}>{output} </span>)

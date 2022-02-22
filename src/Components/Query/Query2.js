@@ -41,7 +41,6 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     let itemKey = e.target.dataset.inputkey;
     if(queryItems[itemKey].type === 'subject') {
       let items = JSON.parse(JSON.stringify(queryItems));
-      console.log(items);
       items[itemKey].value = updatedValue;
       setQueryItems(items);
     }
