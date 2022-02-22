@@ -864,8 +864,21 @@ label.checkbox {
 }
 // Query Item 
 .query-item {
+  position: relative;
   .input {
-    display: none;
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    right: 24px;
+    bottom: 0;
+    left: 0;
+  }
+  &.true .input {
+    visibility: visible;
+    pointer-events: all;
+    background-color: white;
+    border: none;
   }
 }
 

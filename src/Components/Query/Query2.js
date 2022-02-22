@@ -36,6 +36,17 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
 
   }
 
+  const handleQueryItemChange = (e) => {
+    let updatedValue = e.target.value;
+    let itemKey = e.target.dataset.inputkey;
+    if(queryItems[itemKey].type === 'subject') {
+      let items = JSON.parse(JSON.stringify(queryItems));
+      console.log(items);
+      items[itemKey].value = updatedValue;
+      setQueryItems(items);
+    }
+  }
+
   const handleSubmission = (e) => {
     e.preventDefault();
     console.log(e);
@@ -179,8 +190,10 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
                                 item={item} 
                                 handleClick={onQueryItemSubjectClick} 
                                 handleClose={()=>removeQueryItem(index)} 
+                                handleChange={handleQueryItemChange}
                                 hasInput={itemIsSubject}
                                 name={item.name}
+                                inputKey={index}
                                 inputActive>
                               </QueryItem>
                             </li>
@@ -205,23 +218,23 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
                 <div className="panel subjects">
                   <QueryItemButton 
                     disabled={!subjectsActive}
-                    handleClick={() => addQueryItem({name: 'Gene', type: 'subject', category: 'gene'})}
+                    handleClick={() => addQueryItem({name: 'Gene', type: 'subject', category: 'gene', value: ''})}
                     >Gene</QueryItemButton>
                   <QueryItemButton 
                     disabled={!subjectsActive}
-                    handleClick={() => addQueryItem({name: 'Phenotype', type: 'subject', category: 'phenotype'})}
+                    handleClick={() => addQueryItem({name: 'Phenotype', type: 'subject', category: 'phenotype', value: ''})}
                     >Phenotype</QueryItemButton>
                   <QueryItemButton 
                     disabled={!subjectsActive}
-                    handleClick={() => addQueryItem({name: 'Chemical', type: 'subject', category: 'chemical'})}
+                    handleClick={() => addQueryItem({name: 'Chemical', type: 'subject', category: 'chemical', value: ''})}
                     >Chemical</QueryItemButton>
                   <QueryItemButton 
                     disabled={!subjectsActive}
-                    handleClick={() => addQueryItem({name: 'Disease', type: 'subject', category: 'disease'})}
+                    handleClick={() => addQueryItem({name: 'Disease', type: 'subject', category: 'disease', value: ''})}
                     >Disease</QueryItemButton>
                   <QueryItemButton 
                     disabled={!subjectsActive}
-                    handleClick={() => addQueryItem({name: 'Concept', type: 'subject', category: 'concept'})}
+                    handleClick={() => addQueryItem({name: 'Concept', type: 'subject', category: 'concept', value: ''})}
                     >Concept</QueryItemButton>
                 </div>
                 <h6>Actions</h6>

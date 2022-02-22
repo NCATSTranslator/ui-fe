@@ -58,6 +58,7 @@ let currentHistoryValue;
 let currentQueryValue;
 const handleStoreUpdate = () => {
 
+  // Query History
   let previousHistoryValue = currentHistoryValue;
   currentHistoryValue = selectHistory(store.getState());
   if (previousHistoryValue !== currentHistoryValue
@@ -70,6 +71,7 @@ const handleStoreUpdate = () => {
     )
   }
 
+  // Current Query
   let previousQueryValue = currentQueryValue;
   currentQueryValue = selectCurrentQuery(store.getState());
   if (previousQueryValue !== currentQueryValue
@@ -89,5 +91,3 @@ store.subscribe(() =>
     localStorage.setItem('reduxState', JSON.stringify(store.getState()))
   }
 )
-
-// store.dispatch(incremented())
