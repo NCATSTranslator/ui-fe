@@ -732,11 +732,11 @@ label.checkbox {
   border-radius: $defaultBorderRadius;
   margin-bottom: $m;
   svg, svg path, svg circle {
-    stroke: $black;
+    // stroke: $black;
     margin-right: 0;
   }
   svg circle {
-    fill: transparent;
+    // fill: transparent;
   }
   .header {
     display: flex;
@@ -793,32 +793,7 @@ label.checkbox {
         border: 1px solid $black;
         border-radius: $defaultBorderRadius;
         padding: $xxs;
-        .query-item {
-          display: flex;
-          padding: $xxs;
-          align-items: center;
-          border-radius: $defaultBorderRadius;
-          transition: $defaultBoxShadowAnim;
-          .query-item-container {
-            p {
-              margin: 0;
-            }
-          }
-          .remove {
-            transition: $defaultAnim;
-            opacity: 0;
-            visibility: hidden;
-            box-shadow: none;
-          }
-          &:hover {
-            box-shadow: $dropShadowHover;
-            .remove {
-              opacity: 1;
-              visibility: visible;
-              cursor: pointer;
-            }
-          }
-        }
+
       }
     }
     .query-items {
@@ -860,11 +835,49 @@ label.checkbox {
   &.true {
     pointer-events: none;
     color: $purpleTwo20;
+    svg, svg path {
+      fill: $purpleTwo20;
+    }
   }
 }
 // Query Item 
 .query-item {
   position: relative;
+  display: flex;
+  padding: $xxs $xs;
+  align-items: center;
+  border-radius: $defaultBorderRadius;
+  transition: box-shadow .25s ease, min-width .5s ease, padding .5s ease;
+  width: auto;
+  min-width: 0;
+  .query-item-container {
+    p {
+      margin: 0;
+    }
+  }
+  .remove {
+    transition: $defaultAnim;
+    opacity: 0;
+    visibility: hidden;
+    box-shadow: none;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
+  &:hover, &.true {
+    box-shadow: $dropShadowHover;
+    padding-right: $m;
+    .remove {
+      opacity: 1;
+      visibility: visible;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
   .input {
     visibility: hidden;
     pointer-events: none;
@@ -872,13 +885,16 @@ label.checkbox {
     top: 0;
     right: 24px;
     bottom: 0;
-    left: 0;
+    left: 32px;
   }
-  &.true .input {
-    visibility: visible;
-    pointer-events: all;
-    background-color: white;
-    border: none;
+  &.true {
+    min-width: 220px;
+    .input {
+      visibility: visible;
+      pointer-events: all;
+      background-color: white;
+      border: none;
+    }
   }
 }
 
