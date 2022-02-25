@@ -133,6 +133,7 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     {
       name: 'Regulates a',
       type: 'action',
+      category: 'regulation'
     },
     {
       name: 'Gene',
@@ -151,7 +152,8 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     },
     {
       name: 'Downregulates a',
-      type: 'action'
+      type: 'action',
+      category: 'regulation'
     },
     {
       name: 'Gene that',
@@ -161,7 +163,8 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     },
     {
       name: 'Upregulates a',
-      type: 'action'
+      type: 'action',
+      category: 'regulation'
     },
     {
       name: 'Gene',
