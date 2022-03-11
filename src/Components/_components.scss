@@ -1137,7 +1137,7 @@ label.checkbox {
 
 .results-list {
   margin-bottom: $s;
-  padding: $s 0;
+  padding: 0 0 $s;
   .results-container {
     display: grid;
     grid-template-columns: 3fr 1fr;

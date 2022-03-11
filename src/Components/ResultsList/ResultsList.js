@@ -99,7 +99,6 @@ const ResultsList = () => {
               let itemClass = "kp";
               itemClass += (item.error) ? " error" : "";
               itemClass += (item.value < 1) ? " no-results" : "";
-
               return(
                 <li key={index} className={`${itemClass}`}>
                   <span className="kp-name">{item.name}</span>

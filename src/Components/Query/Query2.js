@@ -50,8 +50,9 @@ const Query2 = ({template, results, handleAdd, handleRemove}) => {
   }
 
   const validateSubmission = (e) => {
-    // console.log(queryItems);
-    setIsValidSubmission(true);
+    if(queryItems.length > 0) {
+      setIsValidSubmission(true);
+    }
   }
 
   useEffect(() => {
