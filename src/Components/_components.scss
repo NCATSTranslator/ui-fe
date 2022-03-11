@@ -1132,3 +1132,53 @@ label.checkbox {
     }
   }
 }
+
+// Results List
+
+.results-list {
+  margin-bottom: $s;
+  padding: $s 0;
+  .results-container {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    grid-column-gap: 16px;
+    align-items: flex-start;
+    .results-table {
+
+    }
+    .kps {
+      .time {
+        font-weight: 600;
+      }
+      .kp-list {
+        list-style: none;
+        padding-left: 0;
+        .kp {
+          display:flex;
+          justify-content: space-between;
+          margin-bottom: $xs;
+          .kp-name {
+
+          }
+          .kp-value {
+            padding: 4px 10px 2px;
+            border-radius: 30px;
+            color: $white;
+            background-color: $green;
+            line-height: 1;
+          }
+          &.no-results {
+            .kp-value {
+              background-color: $purpleTwo;
+            }
+          }
+          &.error {
+            .kp-value {
+              background-color: $red;
+            }
+          }
+        }
+      }
+    }
+  }
+}

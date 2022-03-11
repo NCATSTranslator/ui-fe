@@ -10,7 +10,7 @@ import { incrementHistory, pastQueryState, setCurrentQuery, currentQuery } from 
 import { useSelector, useDispatch } from 'react-redux'
 import QueryItem from "../QueryComponents/QueryItem";
 
-const Query2 = ({template, handleAdd, handleRemove}) => {
+const Query2 = ({template, results, handleAdd, handleRemove}) => {
 
   const search = window.location.search;
   const curieOne = new URLSearchParams(search).get('curieOne');
@@ -21,13 +21,14 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
 
   const [proMode, setProMode] = useState(false);
   const [isTemplate, setIsTemplate] = useState(template);
+  const [isResults, setIsResults] = useState(results);
   const [isValidSubmission, setIsValidSubmission] = useState(false);
   const [subjectsActive, setSubjectsActive] = useState(true);
 
-  // let startingQuery = useSelector(currentQuery);
-  // startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
-  // const [queryItems, setQueryItems] = useState(startingQuery);
-  const [queryItems, setQueryItems] = useState([]);
+  let startingQuery = useSelector(currentQuery);
+  startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
+  const [queryItems, setQueryItems] = useState(startingQuery);
+  // const [queryItems, setQueryItems] = useState([]);
 
   const dispatch = useDispatch();
   var queryHistoryState = useSelector(pastQueryState);
@@ -38,14 +39,6 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
     if(queryItems[itemKey].type === 'subject') {
       let items = JSON.parse(JSON.stringify(queryItems));
       items[itemKey].value = updatedValue;
-      setQueryItems(items);
-    }
-  }
-
-  const setItemSelected = (index) => {
-    let items = JSON.parse(JSON.stringify(queryItems));
-    if(items[index].type === 'subject' && items[index].selected === false) {
-      items[index].selected = true;
       setQueryItems(items);
     }
   }
@@ -183,7 +176,7 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
 
   const regulates = {name: 'Regulates', type: 'action', category: 'regulation'};
   const downregulates = {name: 'Downregulates', type: 'action', category: 'regulation'};
-  const upregulates = {name: 'Upregulate', type: 'action', category: 'regulation'};
+  const upregulates = {name: 'Upregulates', type: 'action', category: 'regulation'};
   const treats = {name: 'Treats', type: 'action', category: 'treats'};
   const associated = {name: 'Associated With', type: 'action', category: 'associated'};
   const nodes = {name: 'Node(s)', type: 'action', category: 'nodes'};
@@ -209,7 +202,6 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
                               ref={provided.innerRef} 
                               {...provided.draggableProps} 
                               {...provided.dragHandleProps} 
-                              // onClick={() => {setItemSelected(index)}}
                               className="query-list-item">
                               <QueryItem 
                                 item={item} 
@@ -238,6 +230,7 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
         <div className="query-items">
           <div className="panels">
             {!isTemplate && 
+             !isResults &&
               <div className="build">
                 <h6>Subjects</h6>
                 <div className="panel subjects">
@@ -311,15 +304,17 @@ const Query2 = ({template, handleAdd, handleRemove}) => {
               </div>
             }
           </div>
-          <div className="how-to">
-            <p className="sub-one">How To Use Translator</p>
-            <ol>
-              <li>Click or drag in a template or  component to begin building a query.</li>
-              <li>If needed, remove component fields by hovering over them and clicking the “x.”</li>
-              <li>Select a component and type in your desired target subject.</li>
-              <li>Submit Query!</li>
-            </ol>
-          </div>
+          {!isResults && 
+            <div className="how-to">
+              <p className="sub-one">How To Use Translator</p>
+              <ol>
+                <li>Click or drag in a template or  component to begin building a query.</li>
+                <li>If needed, remove component fields by hovering over them and clicking the “x.”</li>
+                <li>Select a component and type in your desired target subject.</li>
+                <li>Submit Query!</li>
+              </ol>
+            </div>
+          }
         </div>
         {proMode &&  
           <>

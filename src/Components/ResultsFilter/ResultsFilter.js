@@ -1,8 +1,6 @@
 
 const ResultsFilter = () => {
 
-
-
   return (
     <div className="results-filter">
 
