@@ -6,6 +6,7 @@ import App from './App';
 import Page from './Components/Page/Page';
 import Home from './PageRoutes/Home';
 import About from './PageRoutes/About';
+import Privacy from './PageRoutes/Privacy';
 import Four from './PageRoutes/404';
 import Templates from './PageRoutes/Templates';
 import Build from './PageRoutes/Build';
@@ -30,8 +31,16 @@ ReactDOM.render(
           <Route  
             path="about"
             element={
-              <Page title="About Translator">
+              <Page title="About Biomedical Data Translator">
                 <About />
+              </Page>
+            }
+          />
+          <Route  
+            path="privacy-policy"
+            element={
+              <Page title="Privacy Policy">
+                <Privacy />
               </Page>
             }
           />
