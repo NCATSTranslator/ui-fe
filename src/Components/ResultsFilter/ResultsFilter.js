@@ -9,7 +9,6 @@ const ResultsFilter = () => {
   const labelTwo = "Gene";
   
   const [optionState, setOptionState] = useState(''); 
-  console.log(optionState)
 
   return (
     <div className="results-filter">
@@ -20,20 +19,23 @@ const ResultsFilter = () => {
         <Toggle labelInternal={false} labelOne={labelOne} labelTwo={labelTwo} onClick={()=>{}} />
       </div>
       <div className="bottom">
-        <Select
-          label="" 
-          size="s" 
-          name="Options"
-          noanimate
-          handleChange={(value)=>{
-            setOptionState(value);
-          }}
-          value={optionState}
-          >
-          <option value="Highlight" key="0" >Highlight</option>
-          <option value="Hide" key="1">Hide</option>
-          <option value="Compare" key="2">Compare</option>
-        </Select>
+        <div className='left'>
+          <Select
+            label="" 
+            size="s" 
+            name="Options"
+            noanimate
+            handleChange={(value)=>{
+              setOptionState(value);
+            }}
+            value={optionState}
+            >
+            <option value="Highlight" key="0" >Highlight</option>
+            <option value="Hide" key="1">Hide</option>
+            <option value="Compare" key="2">Compare</option>
+          </Select>
+          <button>Apply</button>
+        </div>
 
         <Accordion 
           title="Filter & Sort"

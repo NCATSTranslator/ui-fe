@@ -295,8 +295,8 @@ label.radio, label.checkbox {
       content: "";
       width: 16px;
       height: 16px;
-      transform: scale(0);
-      transition: $defaultTransformAnim;
+      opacity: 0;
+      transition: all .25s ease ;
       background-color: $purpleOne;
       border-radius: 50%;
     }
@@ -304,7 +304,7 @@ label.radio, label.checkbox {
   &.checked {
     .circle {
       &:before {
-        transform: scale(1);
+        opacity: 1;
       }
     }
   }
@@ -323,8 +323,8 @@ label.checkbox {
       place-content: center;
       content: '\2713';
       color: $white;
-      width: 24px;
-      height: 24px;
+      width: 16px;
+      height: 16px;
       border-radius: 4px;
     }
   }
@@ -490,6 +490,32 @@ label.checkbox {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+      }
+    }
+  }
+  &.no-animate {
+    position: relative;
+    .select-list {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background-color: $white;
+      box-shadow: $dropShadow;
+      opacity: 0;
+      transition: all .25s ease;
+      border-radius: $defaultBorderRadius;
+      .option {
+        padding: $xs;
+      }
+    }
+    .select-container {
+      grid-template-columns: 1fr min-content;
+      &.open {
+        .select-list {
+          opacity: 1;
+          padding-top: 8px;
+        }
       }
     }
   }
@@ -1295,11 +1321,12 @@ label.checkbox {
 
 // Results Filter
 .results-filter {
-  .top,.bottom {
+  .top,.bottom,.left {
     display: flex;
     justify-content: space-between;
     .select {
-      height: min-content
+      height: min-content;
+      width: 115px;
     }
   }
   .filter-sort {

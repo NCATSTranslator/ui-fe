@@ -8,9 +8,7 @@ import {ReactComponent as CircleClose} from '../../Icons/Buttons/Circle Close.sv
 import {ReactComponent as CircleUp} from '../../Icons/Directional/Property 1=Up-1.svg'
 import AnimateHeight from "react-animate-height";
 
-
 const Query = ({newQuery, handleAdd, handleRemove}) => {
-
 
   const search = window.location.search;
   const curieOne = new URLSearchParams(search).get('curieOne');

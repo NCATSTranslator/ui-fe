@@ -5,6 +5,7 @@ const OutsideClickHandler = ({children, onOutsideClick, className}) => {
   const wrapperRef = useRef(null);
 
   const handleClickOutside = (e) => {
+    console.log(e.target);
     if (
       wrapperRef.current &&
       !wrapperRef.current.contains(e.target)
