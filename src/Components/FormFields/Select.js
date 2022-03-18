@@ -1,13 +1,14 @@
 import React, {useState, useEffect} from "react";
 import AnimateHeight from "react-animate-height";
 
-const Select = ({label, subtitle, value, name, size, error, errorText, handleChange, children}) => {
+const Select = ({label, subtitle, value, name, size, error, errorText, handleChange, noanimate, children}) => {
 
   value = (value) ? value : "";
   const [selectedItem, setSelectedItem] = useState(value);
   const [selectOpen, setSelectOpen] = useState(false);
   const [height, setHeight] = useState(0);
   let openClass = (selectOpen) ? 'open' : 'closed';
+  let animateClass = (noanimate) ? 'no-animate' : 'animate';
 
   size = (size) ? size : 's';
 
@@ -32,9 +33,10 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
     else
       setHeight('auto');
   }, [selectOpen])
+
   return (
     <> 
-      <label className={`select ${size}`} > 
+      <label className={`select ${size} ${animateClass}`} > 
         {label && <span className="label">{label}</span>}
         {subtitle && <span className="subtitle">{subtitle}</span>}
         <div className={`select-container ${openClass}`}>

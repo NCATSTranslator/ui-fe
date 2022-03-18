@@ -3,9 +3,7 @@ import Button from "../FormFields/Button";
 import QueryTemplate from "../QueryComponents/QueryTemplate";
 import QueryItemButton from "../QueryComponents/QueryItemButton";
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
-
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-
 import { incrementHistory, pastQueryState, setCurrentQuery, currentQuery } from "../../Redux/store";
 import { useSelector, useDispatch } from 'react-redux'
 import QueryItem from "../QueryComponents/QueryItem";
@@ -28,7 +26,40 @@ const Query2 = ({template, results, handleAdd, handleRemove}) => {
   let startingQuery = useSelector(currentQuery);
   startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
   const [queryItems, setQueryItems] = useState(startingQuery);
-  // const [queryItems, setQueryItems] = useState([]);
+  
+  var testJson = [
+    {
+      nodes:
+        [
+          {
+            name: '',
+            type: 'Chemical'
+          },
+          {
+            name: '',
+            type: 'Gene'
+          },
+          {
+            name: 'RHOBTB2',
+            type: 'Gene'
+          },
+        ],
+        edges:
+        [
+          {
+            source: 0,
+            target: 1,
+            type: "Downregulates"
+          }, 
+          {
+            source: 1,
+            target: 2,
+            type: "Upregulates"
+          }
+        ]
+    }
+  ]
+  testJson = JSON.stringify(testJson);
 
   const dispatch = useDispatch();
   var queryHistoryState = useSelector(pastQueryState);

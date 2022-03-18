@@ -1,7 +1,9 @@
+import { useState } from "react";
 import Checkbox from "../FormFields/Checkbox";
 import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
-import { useState } from "react";
+import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
+import { getIcon } from "../../Utilities/utilities";
 
 const ResultsList = () => {
 
@@ -12,6 +14,7 @@ const ResultsList = () => {
     {
       name: 'estradiol benzoate',
       effect: 'Downregulates CCND1, CCND2, CCND3',
+      type: 'chemical',
       fda: 3,
       evidence: 23,
       tags: ['2022', 'FDA', 'High']
@@ -19,6 +22,7 @@ const ResultsList = () => {
     {
       name: 'tretinoin',
       effect: 'Downregulates CCND2, CCND3',
+      type: 'chemical',
       fda: 3,
       evidence: 42,
       tags: ['2022', 'FDA', 'Med']
@@ -26,6 +30,7 @@ const ResultsList = () => {
     {
       name: '2-AMINO-1-METHYL-6- PHENYLIMIDAZO[4,5- B]PYRIDINE',
       effect: 'Downregulates CCND1',
+      type: 'chemical',
       fda: 4,
       evidence: 121,
       tags: ['2022', 'Med']
@@ -45,51 +50,57 @@ const ResultsList = () => {
   return (
     <div className="results-list">
       <Query2 results/>
-      <ResultsFilter/>
       <div className="results-container">
-        <table className="results-table">
-          <thead>
-            <tr>
-              <th><Checkbox handleClick={()=>{setSelectAll(true);}}/></th>
-              <th>Name</th>
-              <th>FDA</th>
-              <th>Evidence</th>
-              <th>Tags</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              exampleResults.map((item, i)=> {
-                return(
-                  <tr key={i}>
-                    <td>
-                    <Checkbox checked={selectAll}/>
-                    </td>
-                    <td>
-                      <span className="name">{item.name}</span>
-                      <span className="effect">{item.effect}</span>
-                    </td>
-                    <td>
-                      <span className="fda">{item.fda}</span>
-                    </td>
-                    <td>
-                      <span className="evidence">View All ({item.evidence})</span>
-                    </td>
-                    <td>
-                      <span className="tags">
-                        {item.tags.map((tag, j) => {
-                          return (
-                            <span key={j}>{tag}</span>  
-                          )
-                        })}
-                      </span>
-                    </td>
-                  </tr>
-                )
-              })
-            }
-          </tbody>
-        </table>
+        <div className="table-container">
+          <ResultsFilter/>
+          <div className="results-table">
+            <div className="table-body">
+              <div className="table-head result">
+                  <div className="checkbox-container checkbox-head">
+                    <Checkbox handleClick={()=>{setSelectAll(true);}}/>
+                  </div>
+                  <div className="name-head head">Name</div>
+                  <div className="fda-head head">FDA</div>
+                  <div className="evidence-head head">Evidence</div>
+                  <div className="tags-head head">Tags</div>
+              </div>
+              {
+                exampleResults.map((item, i)=> {
+                  console.log(item);
+                  let icon = getIcon(item.type);
+                  return(
+                    <div key={i} className="result">
+                      <div className="checkbox-container result-sub">
+                        <Checkbox checked={selectAll}/>
+                      </div>
+                      <div className="name-container result-sub">
+                        <span className="icon">{icon}</span>
+                        <span className="name">{item.name}</span>
+                        <span className="effect">{item.effect}</span>
+                      </div>
+                      <div className="fda-container result-sub">
+                        <span className="fda-icon"><CheckIcon /></span>
+                        <span className="fda">{item.fda}</span>
+                      </div>
+                      <div className="evidence-container result-sub">
+                        <span className="evidence-link"><span className="view-all">View All</span> ({item.evidence})</span>
+                      </div>
+                      <div className="tags-container result-sub">
+                        <span className="tags">
+                          {item.tags.map((tag, j) => {
+                            return (
+                              <span key={j} className={`tag ${tag}`}>{tag}</span>  
+                            )
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })
+              }
+            </div>
+          </div>
+        </div>
         <div className="kps">
           <h6>Knowledge Providers</h6>
           <p>Found in <span className="time">1.8 seconds</span></p>

@@ -282,8 +282,8 @@ label.radio, label.checkbox {
     display: grid;
     place-content: center;
     content: "";
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     transition: .5s transform ease-in-out;
     box-shadow: inset 1em 1em var(--form-control-color);
@@ -819,6 +819,10 @@ label.checkbox {
     }
   }
 }
+.results .query-window {
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
 
 // Query Item Button
 .query-item-button {
@@ -1144,7 +1148,113 @@ label.checkbox {
     grid-column-gap: 16px;
     align-items: flex-start;
     .results-table {
+      box-shadow: $dropShadow;
+      padding: $m;
+      font-size: $bodyTwoSize;
+      span {
+        font-size: $bodyTwoSize;
 
+      }
+      .table-body {
+        .table-head {
+          border-bottom: 1px solid $midGrey;
+          .checkbox {
+            margin: 0;
+          }
+          .head {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1.25;
+            text-transform: uppercase;
+            color: $darkGrey;
+            padding-bottom: 10px;
+          }
+          .name-head, .tags-head {
+            text-align: left;
+          }
+        }
+        .result {
+          display: grid;
+          grid-template-columns: min-content 6fr .75fr 1.75fr 2fr;
+          .result-sub {
+            padding: $xs 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .checkbox-container {
+            padding-right: $m;
+            .checkbox {
+              margin: 0;
+            }
+          }
+          .name-container {
+            display: grid;
+            grid-template-columns: min-content auto;
+            justify-content: flex-start;
+            grid-column-gap: 13.5px;
+            .icon {
+              grid-row: 1/3;
+              display: grid;
+              align-content: center;
+            }
+            .name {
+              display: block;
+              font-weight: 700;
+              text-transform: uppercase;
+            }
+            .effect {
+              grid-column: 2/3;
+              font-size: $captionSize;
+              color: $darkGrey
+            }
+          }
+          .tags-container {
+            justify-content: flex-start;
+          }
+          .fda-container, .evidence-container {
+            text-align: center;
+            padding-left: $s;
+            padding-right: $s;
+          }
+          .fda-icon {
+            height: 24px;
+            margin-right: $xxs;
+          }
+          .evidence-link {
+            font-size: $bodyTwoSize;
+              .view-all {
+              font-size: $bodyTwoSize;
+              font-weight: 700;
+            }
+          }
+          .tags-container {
+            .tags {
+              .tag {
+                font-size: $overlineSize;
+                color: white;
+                background-color: $green;
+                margin-right: 4px; 
+                padding: 4px 11.5px;
+                border-radius: 30px;
+                text-transform: uppercase;
+                font-weight: 700;
+                &.FDA {
+                  background-color: $yellow;
+                  color: $black;
+                }
+                &.High, &.Med {
+                  background-color: $red;
+                }
+              }
+              span:last-of-type {
+                margin-right: 0;
+              }
+            }
+          }
+        }
+      }
     }
     .kps {
       .time {
@@ -1161,7 +1271,7 @@ label.checkbox {
 
           }
           .kp-value {
-            padding: 4px 10px 2px;
+            padding: 4px 10px;
             border-radius: 30px;
             color: $white;
             background-color: $green;
@@ -1179,6 +1289,29 @@ label.checkbox {
           }
         }
       }
+    }
+  }
+}
+
+// Results Filter
+.results-filter {
+  .top,.bottom {
+    display: flex;
+    justify-content: space-between;
+    .select {
+      height: min-content
+    }
+  }
+  .filter-sort {
+    .accordion-panel div {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-column-gap: $m;
+    }
+    .accordion-button {
+      margin-left: auto;
+      margin-right: 0;
+      display: block;
     }
   }
 }
