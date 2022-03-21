@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Checkbox from "../FormFields/Checkbox";
 import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
@@ -7,8 +7,38 @@ import { getIcon } from "../../Utilities/utilities";
 
 const ResultsList = () => {
 
-  const [selectAll, setSelectAll] = useState(false);
+  const [allSelected, setAllSelected] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+
+  const handleSelected = (item) => {
+    let match = false;
+    let matchIndex = -1;
+    let items = [...selectedItems];
+    items.map((element, i) => {         
+      if(element.name === item.name && element.effect === item.effect) {
+        match = true;
+        matchIndex = i;
+      }
+      return element;
+    });
+    if(!match) {
+      items.push(item);
+      setSelectedItems(items);
+    } else {
+      items.splice(matchIndex, 1);
+      setSelectedItems(items);
+    }
+  }
+
+  const handleSelectAll = (items) => {
+    if(!allSelected) {
+      setSelectedItems(items);
+      setAllSelected(true);
+    } else {
+      setSelectedItems([]);
+      setAllSelected(false);
+    }
+  }
 
   const exampleResults = [
     {
@@ -57,7 +87,7 @@ const ResultsList = () => {
             <div className="table-body">
               <div className="table-head result">
                   <div className="checkbox-container checkbox-head">
-                    <Checkbox handleClick={()=>{setSelectAll(true);}}/>
+                    <Checkbox handleClick={()=>{handleSelectAll(exampleResults);}}/>
                   </div>
                   <div className="name-head head">Name</div>
                   <div className="fda-head head">FDA</div>
@@ -66,12 +96,11 @@ const ResultsList = () => {
               </div>
               {
                 exampleResults.map((item, i)=> {
-                  console.log(item);
                   let icon = getIcon(item.type);
                   return(
                     <div key={i} className="result">
                       <div className="checkbox-container result-sub">
-                        <Checkbox checked={selectAll}/>
+                        <Checkbox checked={allSelected} handleClick={()=>handleSelected(item)}/>
                       </div>
                       <div className="name-container result-sub">
                         <span className="icon">{icon}</span>

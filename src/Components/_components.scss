@@ -478,9 +478,10 @@ label.checkbox {
       overflow: hidden;
       text-overflow: ellipsis;
       transition: $defaultAnim;
+      pointer-events: none;
       &.open {
         padding-top: 10px;
-
+        pointer-events: all;
       }
       .option {
         display: block;
