@@ -287,14 +287,14 @@ label.radio, label.checkbox {
     border-radius: 50%;
     transition: .5s transform ease-in-out;
     box-shadow: inset 1em 1em var(--form-control-color);
-    background-color: transparent;
+    background-color: $white;
     border: 1px solid $darkGrey;
     transition: $defaultBoxShadowAnim;
 
     &:before {
       content: "";
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       opacity: 0;
       transition: all .25s ease ;
       background-color: $purpleOne;
@@ -317,15 +317,15 @@ label.radio, label.checkbox {
 // Checkbox 
 label.checkbox {
   .circle {
-    border-radius: $defaultBorderRadius;
+    border-radius: 2.5px;
     &:before {
       display: grid;
       place-content: center;
       content: '\2713';
       color: $white;
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 2.5px;
     }
   }
 }
@@ -1185,8 +1185,8 @@ label.checkbox {
       .table-body {
         .table-head {
           border-bottom: 1px solid $midGrey;
-          .checkbox {
-            margin: 0;
+          .checkbox-container {
+            margin: 0 0 $xs;
           }
           .head {
             text-align: center;
@@ -1325,21 +1325,74 @@ label.checkbox {
   .top,.bottom,.left {
     display: flex;
     justify-content: space-between;
+    height: fit-content;
     .select {
       height: min-content;
       width: 115px;
     }
   }
+  .bottom {
+    position: relative;
+    justify-content: flex-end;
+    .left {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
   .filter-sort {
-    .accordion-panel div {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-column-gap: $m;
+    width: 100%;
+    .accordion-panel {
+      &>div {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-column-gap: $m;
+        .filter-left,.filter-right {
+          background-color: $purpleTwo20;
+          border-radius: $defaultBorderRadius;
+          padding: $m;
+          .sub-one {
+            color: $darkGrey;
+          }
+          .sub-two {
+            font-weight: 700;
+          }
+          .checkbox,.radio {
+            padding-left: $xs;
+          }
+          label:last-of-type {
+            margin: 0;
+          }
+        }
+      }
     }
     .accordion-button {
-      margin-left: auto;
-      margin-right: 0;
+      background-color: transparent;
+      color: $black;
+      margin: 0 0 $m auto;
       display: block;
+      &:hover {
+        box-shadow: none;
+        text-decoration: underline;
+      }
+      &:after {
+        content:'';
+        margin-left: $xs;
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: transparent url('../Icons/Directional/Property 1=Down.svg') no-repeat center;
+        transition: $defaultTransformAnim;
+      }
+    }
+    &.open {
+      margin-bottom: $m;
+
+      .accordion-button {
+        &:after {
+          transform: rotate(-180deg);
+        }
+      }
     }
   }
 }

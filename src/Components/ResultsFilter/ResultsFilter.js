@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
 import Toggle from '../Toggle/Toggle';
 import Select from '../FormFields/Select';
+import Checkbox from '../FormFields/Checkbox';
+import Radio from '../FormFields/Radio';
 import Accordion from '../Accordion/Accordion';
 
 const ResultsFilter = () => {
@@ -36,18 +38,32 @@ const ResultsFilter = () => {
           </Select>
           <button>Apply</button>
         </div>
-
         <Accordion 
           title="Filter & Sort"
           className="filter-sort"
           >
           <div className="filter-left">
             <p className="sub-one">Filter</p>
-            <p className="sub-two">Toxicity</p>
+            <p className="sub-two">Evidence</p>
+            <p className="sub-two">Species</p>
+              <Checkbox>Human</Checkbox>
+              <Checkbox>Mouse</Checkbox>
+              <Checkbox>Zebrafish</Checkbox>
+            <p className="sub-two">Tags</p>
+              <Checkbox>FDA Approved</Checkbox>
+              <Checkbox>Pediatric Indications</Checkbox>
           </div>
           <div className="filter-right">
             <p className="sub-one">Sort By</p>
-            <p className="sub-two">Evidence</p>
+            <p className="sub-two">Toxicity</p>
+              <Radio>Low to High</Radio>
+              <Radio>High to Low</Radio>
+            <p className="sub-two">Date of Evidence</p>
+              <Radio>Newest</Radio>
+              <Radio>Oldest</Radio>
+            <p className="sub-two">Number of Evidence</p>
+              <Radio>Low to High</Radio>
+              <Radio>High to Low</Radio>
           </div>
         </Accordion>
       </div>
