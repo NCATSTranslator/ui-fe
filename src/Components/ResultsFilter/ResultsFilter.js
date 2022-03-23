@@ -4,6 +4,7 @@ import Select from '../FormFields/Select';
 import Checkbox from '../FormFields/Checkbox';
 import Radio from '../FormFields/Radio';
 import Accordion from '../Accordion/Accordion';
+import Range from '../Range/Range';
 
 const ResultsFilter = () => {
 
@@ -45,6 +46,7 @@ const ResultsFilter = () => {
           <div className="filter-left">
             <p className="sub-one">Filter</p>
             <p className="sub-two">Evidence</p>
+              <Range label="Minimum Number of Evidence" hideLabel min="1" max="99" />
             <p className="sub-two">Species</p>
               <Checkbox>Human</Checkbox>
               <Checkbox>Mouse</Checkbox>

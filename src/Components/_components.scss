@@ -1396,3 +1396,28 @@ label.checkbox {
     }
   }
 }
+
+// Range
+.range-container {
+  &.no-label {
+    label {
+      display: flex;
+      height: 0;
+      width: 0;
+      padding: 0;
+      margin: 0;
+      visibility: hidden;
+    }
+  }
+  .min,.max {
+
+  }
+  .bar-container {
+    position: relative;
+    display: inline-block;
+    input {
+      margin: 0;
+      padding: 0;
+    }
+  }
+}
