@@ -45,5 +45,8 @@
   },
   "engines": {
     "node": "17.x"
+  },
+  "devDependencies": {
+    "react-query": "^3.34.19"
   }
 }

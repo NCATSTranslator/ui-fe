@@ -1,19 +1,20 @@
 import { createSlice, configureStore } from '@reduxjs/toolkit'
 
+const initialState = {
+  pastQueries: [],
+  currentQuery: [], 
+  currentResults: {},
+  currentResultsQueryID: ''
+} 
+
 const persistedState = localStorage.getItem('reduxState') 
   ? JSON.parse(localStorage.getItem('reduxState'))
-  : {
-    pastQueries: [],
-    currentQuery: [], 
-    currentResults: {}
-  }
+  : initialState
 
 const historySlice = createSlice({
   name: 'history',
   initialState: {
-    pastQueries: [],
-    currentQuery: [], 
-    currentResults: {}
+    initialState
   }, 
   reducers: {
     incrementHistory: (state, action) => {
@@ -31,11 +32,24 @@ const historySlice = createSlice({
     },
     setCurrentQuery: (state, action) => {
       state.currentQuery = action.payload;
+    },
+    setCurrentQueryResultsID: (state, action) => {
+      state.currentResultsQueryID = action.payload
+    },
+    setCurrentResults: (state, action) => {
+      state.currentResults = action.payload;
     }
   }
 })
 
-export const { incrementHistory, clearHistory, removeItemAtIndex, setCurrentQuery } = historySlice.actions;
+export const { 
+  incrementHistory, 
+  clearHistory, 
+  removeItemAtIndex, 
+  setCurrentQuery, 
+  setCurrentQueryResultsID, 
+  setCurrentResults 
+} = historySlice.actions;
 
 export const store = configureStore({
   reducer: historySlice.reducer,
@@ -46,6 +60,7 @@ export const pastQueryCount = state => state.pastQueries.length;
 export const pastQueryState = state => state.pastQueries;
 export const currentQuery = state => state.currentQuery;
 export const currentResults = state => state.currentResults;
+export const currentResultsQueryID = state => state.currentResultsQueryID;
 
 
 function selectHistory(state) {

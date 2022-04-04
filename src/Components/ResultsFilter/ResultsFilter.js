@@ -22,52 +22,53 @@ const ResultsFilter = () => {
         <Toggle labelInternal={false} labelOne={labelOne} labelTwo={labelTwo} onClick={()=>{}} />
       </div>
       <div className="bottom">
-        <div className='left'>
-          <Select
-            label="" 
-            size="s" 
-            name="Options"
-            noanimate
-            handleChange={(value)=>{
-              setOptionState(value);
-            }}
-            value={optionState}
+          <div className='left'>
+            <Select
+              label="" 
+              size="s" 
+              name="Options"
+              noanimate
+              handleChange={(value)=>{
+                setOptionState(value);
+              }}
+              value={optionState}
+              >
+              <option value="Highlight" key="0" >Highlight</option>
+              <option value="Hide" key="1">Hide</option>
+              <option value="Compare" key="2">Compare</option>
+            </Select>
+            <button>Apply</button>
+          </div>
+          <Accordion 
+            title="Filter & Sort"
+            className="filter-sort"
             >
-            <option value="Highlight" key="0" >Highlight</option>
-            <option value="Hide" key="1">Hide</option>
-            <option value="Compare" key="2">Compare</option>
-          </Select>
-          <button>Apply</button>
-        </div>
-        <Accordion 
-          title="Filter & Sort"
-          className="filter-sort"
-          >
-          <div className="filter-left">
-            <p className="sub-one">Filter</p>
-            <p className="sub-two">Evidence</p>
-              <Range label="Minimum Number of Evidence" hideLabel min="1" max="99" />
-            <p className="sub-two">Species</p>
-              <Checkbox>Human</Checkbox>
-              <Checkbox>Mouse</Checkbox>
-              <Checkbox>Zebrafish</Checkbox>
-            <p className="sub-two">Tags</p>
-              <Checkbox>FDA Approved</Checkbox>
-              <Checkbox>Pediatric Indications</Checkbox>
-          </div>
-          <div className="filter-right">
-            <p className="sub-one">Sort By</p>
-            <p className="sub-two">Toxicity</p>
-              <Radio>Low to High</Radio>
-              <Radio>High to Low</Radio>
-            <p className="sub-two">Date of Evidence</p>
-              <Radio>Newest</Radio>
-              <Radio>Oldest</Radio>
-            <p className="sub-two">Number of Evidence</p>
-              <Radio>Low to High</Radio>
-              <Radio>High to Low</Radio>
-          </div>
-        </Accordion>
+            <div className="filter-left">
+              <p className="sub-one">Filter</p>
+              <p className="sub-two">Evidence</p>
+                <Checkbox>Minimum Number of Evidence</Checkbox>
+                <Range label="Minimum Number of Evidence" hideLabel min="1" max="99" />
+              <p className="sub-two">Species</p>
+                <Checkbox>Human</Checkbox>
+                <Checkbox>Mouse</Checkbox>
+                <Checkbox>Zebrafish</Checkbox>
+              <p className="sub-two">Tags</p>
+                <Checkbox>FDA Approved</Checkbox>
+                <Checkbox>Pediatric Indications</Checkbox>
+            </div>
+            <div className="filter-right">
+              <p className="sub-one">Sort By</p>
+              <p className="sub-two">Toxicity</p>
+                <Radio>Low to High</Radio>
+                <Radio>High to Low</Radio>
+              <p className="sub-two">Date of Evidence</p>
+                <Radio>Newest</Radio>
+                <Radio>Oldest</Radio>
+              <p className="sub-two">Number of Evidence</p>
+                <Radio>Low to High</Radio>
+                <Radio>High to Low</Radio>
+            </div>
+          </Accordion>
       </div>
     </div>
   );

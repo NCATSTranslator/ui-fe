@@ -17,17 +17,10 @@ const Range = ({min, max, step, label, hideLabel, onChange}) => {
   const handleChange = (e) => {
     setValue(e.target.value);
     onChange(e);
-
-    // var off = (inputRef.current.clientWidth - thumbWidth) / (max - min);
     var off = (inputRef.current.clientWidth - thumbWidth) / (max - min);
-    // var px = ((value - min) * off) - (inputRef.current.clientWidth / 2) + (thumbWidth / 2);
     var px = ((value - min) * 100) / (max - min);
-    
-    setTop(inputRef.current.offsetHeight - 5);
+    setTop(thumbWidth / 2);
     setLeft(px);
-
-    console.log(px);
-
   }
 
   useEffect(() => {
@@ -49,7 +42,8 @@ const Range = ({min, max, step, label, hideLabel, onChange}) => {
           ref={inputRef}
         />
         {/* Not perfect calculation, reimplement later */}
-        <span className="value" style={{position: 'absolute', top: top, left: `calc(${left}% + (${1 - left * 0.15}px))`}}>{value}</span>
+        <span className="fill" style={{position: 'absolute', top: "-1px", left: "2px", right: `calc((100% - ${left}%) - (${6 - left * 0.15}px))`}}></span>
+        <span className="value" style={{position: 'absolute', top: top, left: `calc(${left}% + (${4 - left * 0.15}px))`}}>{value}</span>
       </div>
       <span className="max">{max}</span>
     </div>

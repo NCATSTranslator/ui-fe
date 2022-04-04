@@ -2,67 +2,75 @@ import React, {useState, useEffect} from "react";
 import Button from "../FormFields/Button";
 import QueryTemplate from "../QueryComponents/QueryTemplate";
 import QueryItemButton from "../QueryComponents/QueryItemButton";
-import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { incrementHistory, pastQueryState, setCurrentQuery, currentQuery } from "../../Redux/store";
+import { incrementHistory, setCurrentQuery, currentQuery, currentResultsQueryID, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/store";
 import { useSelector, useDispatch } from 'react-redux'
 import QueryItem from "../QueryComponents/QueryItem";
+import { useNavigate } from 'react-router-dom';
 
 const Query2 = ({template, results, handleAdd, handleRemove}) => {
 
-  const search = window.location.search;
-  const curieOne = new URLSearchParams(search).get('curieOne');
-  const subjectOne = new URLSearchParams(search).get('subjectOne');
-  const predicate = new URLSearchParams(search).get('predicate');
-  const curieTwo = new URLSearchParams(search).get('curieTwo');
-  const subjectTwo = new URLSearchParams(search).get('subjectTwo');
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Query Variables from URL
+  // const search = window.location.search;
+  // const curieOne = new URLSearchParams(search).get('curieOne');
+  // const subjectOne = new URLSearchParams(search).get('subjectOne');
+  // const predicate = new URLSearchParams(search).get('predicate');
+  // const curieTwo = new URLSearchParams(search).get('curieTwo');
+  // const subjectTwo = new URLSearchParams(search).get('subjectTwo');
 
   const [proMode, setProMode] = useState(false);
   const [isTemplate, setIsTemplate] = useState(template);
   const [isResults, setIsResults] = useState(results);
+  const [resultsActive, setResultsActive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isValidSubmission, setIsValidSubmission] = useState(false);
   const [subjectsActive, setSubjectsActive] = useState(true);
+
+  let test = useSelector(currentResultsQueryID);
+  test = (test === undefined) ? '' : test; 
+  const [currentResultsID, setCurrentResultsID] = useState(test);
+
 
   let startingQuery = useSelector(currentQuery);
   startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
   const [queryItems, setQueryItems] = useState(startingQuery);
   
-  var testJson = [
+  var testJson = 
     {
       nodes:
-        [
-          {
-            name: '',
-            type: 'Chemical'
-          },
-          {
-            name: '',
-            type: 'Gene'
-          },
-          {
-            name: 'RHOBTB2',
-            type: 'Gene'
-          },
-        ],
-        edges:
-        [
-          {
-            source: 0,
-            target: 1,
-            type: "Downregulates"
-          }, 
-          {
-            source: 1,
-            target: 2,
-            type: "Upregulates"
-          }
-        ]
+      [
+        {
+          name: '',
+          type: 'ChemicalEntity'
+        },
+        // {
+        //   name: '',
+        //   type: 'Gene'
+        // },
+        {
+          name: 'RHOBTB2',
+          type: 'Gene'
+        },
+      ],
+      edges:
+      [
+        {
+          source: 0,
+          target: 1,
+          type: "entity_negatively_regulates_entity"
+        }, 
+        // {
+        //   source: 1,
+        //   target: 2,
+        //   type: "entity_positively_regulates_entity"
+        // }
+      ]
     }
-  ]
   testJson = JSON.stringify(testJson);
 
-  const dispatch = useDispatch();
-  var queryHistoryState = useSelector(pastQueryState);
 
   const handleQueryItemChange = (e) => {
     let updatedValue = e.target.value;
@@ -76,7 +84,7 @@ const Query2 = ({template, results, handleAdd, handleRemove}) => {
  
   const handleSubmission = (e) => {
     e.preventDefault();
-    console.log(e);
+    // console.log(e);
     validateSubmission(e);
   }
 
@@ -87,17 +95,47 @@ const Query2 = ({template, results, handleAdd, handleRemove}) => {
   }
 
   useEffect(() => {
+    dispatch(setCurrentQuery(queryItems));
+  }, [dispatch, queryItems]);
+
+  useEffect(() => {
     if(isValidSubmission) {
       dispatch(incrementHistory(queryItems));
+      dispatch(setCurrentResults({}));
       setIsValidSubmission(false);
-      setQueryItems([]);
+      // setQueryItems([]);
+
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: testJson
+      };
+      fetch('/query', requestOptions)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data)
+          if(data.data && data.status === 'success') {
+            setCurrentResultsID(data.data);
+            dispatch(setCurrentQueryResultsID(data.data));
+            setResultsActive(true);
+            setIsLoading(true);
+          }
+        });
     }
 
   }, [isValidSubmission, dispatch, queryItems])
 
   useEffect(() => {
-    dispatch(setCurrentQuery(queryItems));
-  }, [dispatch, queryItems]);
+    if(resultsActive) {
+      setIsResults(true);
+    }
+  }, [resultsActive]);
+
+  useEffect(() => {
+    if(isResults && !window.location.href.includes("results")) {
+      navigate('/results?loading=true');
+    }
+  }, [isResults]);
 
   const handleOnDragEnd = (result) => {
     if (!result.destination) return;
@@ -328,11 +366,17 @@ const Query2 = ({template, results, handleAdd, handleRemove}) => {
               </div>
             }
             {isTemplate && 
+             !isResults &&
               <div className="templates">
                 <div className="panel subjects">
                   <QueryTemplate handleClick={() => changeQueryItems(testOne)} items={testOne}/>
                   <QueryTemplate handleClick={() => changeQueryItems(testTwo)} items={testTwo}/>
                 </div>
+              </div>
+            }
+            {isResults && 
+             isLoading &&
+              <div className="loading-results">
               </div>
             }
           </div>

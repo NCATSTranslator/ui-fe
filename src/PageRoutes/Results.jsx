@@ -1,10 +1,15 @@
 import ResultsList from "../Components/ResultsList/ResultsList";
-
+import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 const Results = () => {
+  const queryClient = new QueryClient();
 
   return (
     <div>
-      <ResultsList />
+      <QueryClientProvider client={queryClient}>
+        <ResultsList />
+        <ReactQueryDevtools initialIsOpen={false} style className="dev-tools"/>
+      </QueryClientProvider>
     </div>
   );
 }
