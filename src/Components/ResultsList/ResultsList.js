@@ -70,10 +70,16 @@ const ResultsList = ({loading}) => {
     if(results.status !== 'running')
       setIsLoading(false);
     
-    if(results.status === 'done')
+    if(results.status === 'done') {
+      let newResults = getFormattedResults(results);
       dispatch(setCurrentResults(results));
+    }
     // setIsError((results.status === 'error'));
   }, [results]);
+
+  const getFormattedResults = (results) => {
+    
+  }
 
   useEffect(() => {
     
@@ -96,6 +102,7 @@ const ResultsList = ({loading}) => {
     //     // }
     //   });
   }, [currentQueryID]);
+
 
   const handleSelected = (item) => {
     let match = false;
