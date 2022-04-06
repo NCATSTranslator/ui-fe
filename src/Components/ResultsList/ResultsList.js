@@ -27,7 +27,8 @@ const ResultsList = ({loading}) => {
   const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentResultsQueryID));
   const [results, setResults] = useState(resultsState);
   const [resultsProgress, setResultsProgress] = useState(1);
-  const [resultsBarOpacity, setResultsBarOpacity] = useState(.2);
+  const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
+  var resultsBarOpacityClass = (resultsBarOpacity) ? 'dark': 'light';
 
   const [allSelected, setAllSelected] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -51,7 +52,7 @@ const ResultsList = ({loading}) => {
       .then(data => {
         // console.log(data);
         setResults(data);
-        // setIsError((status === 'error'));
+        setIsError((data.status === 'error'));
       });
   }, { 
     refetchInterval: 7000,
@@ -76,28 +77,6 @@ const ResultsList = ({loading}) => {
   const getFormattedResults = (results) => {
     
   }
-
-  useEffect(() => {
-    
-    // let queryIDJson = JSON.stringify({qid: currentQueryID});
-
-    // const requestOptions = {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: queryIDJson
-    // };
-    // fetch('/result', requestOptions)
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     console.log(data)
-    //     // if(data.data && data.status === 'success') {
-    //     //   setCurrentResultsID(data.data);
-    //     //   dispatch(setCurrentQueryResultsID(data.data));
-    //     //   setResultsActive(true);
-    //     //   setIsLoading(true);
-    //     // }
-    //   });
-  }, [currentQueryID]);
 
 
   const handleSelected = (item) => {
@@ -171,34 +150,39 @@ const ResultsList = ({loading}) => {
     if(resultsProgress >= 100) 
       return;
 
-    let randomTimeout = Math.random() * (3000 - 500) + 500;
+    let randomTimeout = Math.random() * (5000 - 500) + 500;
     const timer = setTimeout(() => {
       let newProgress = resultsProgress + 10;
-      let newResultsBarOpacity = resultsBarOpacity + .15;
       if(newProgress < 100) {
         setResultsProgress(newProgress);
       } else {
         setResultsProgress(100);
       }
-      if(newResultsBarOpacity < 1) {
-        setResultsBarOpacity(newResultsBarOpacity);
-      } else {
-        setResultsBarOpacity(1);
-      }
     }, randomTimeout);
     return () => clearTimeout(timer);
-  }, [resultsProgress,resultsBarOpacity]);
+  }, [resultsProgress]);
+
+  useEffect(() => {
+    if(!isLoading) 
+      return;
+
+    let timeout = 1500;
+    const timer = setTimeout(() => {
+      setResultsBarOpacity(!resultsBarOpacity);
+    }, timeout);
+    return () => clearTimeout(timer);
+  }, [resultsBarOpacity]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <div className="results-list">
-        <Query2 results/>
+        <Query2 results loading/>
         <div className="results-container">
           {
             isLoading &&
             <div className="loading-bar">
               <div className="bar-outer">
-                <div className="bar-inner" style={{width: `${resultsProgress}%`, opacity: `${resultsBarOpacity}`}}>
+                <div className={`bar-inner ${resultsBarOpacityClass}`} style={{width: `${resultsProgress}%`}}>
 
                 </div>
               </div>
@@ -220,12 +204,20 @@ const ResultsList = ({loading}) => {
                       <div className="tags-head head">Tags</div>
                   </div>
                   {
+                    isError &&
+                    <h3>There was an error when processing your query. Please try again.</h3>
+                  }
+                  {
                     !isLoading &&
+                    !isError &&
                     results && 
                     Object.keys(results.data[0].knowledge_graph.edges).map((key, i)=> {
                       // let icon = getIcon(item.type);
                       let icon = getIcon('chemical');
                       let item = results.data[0].knowledge_graph.edges[key];
+                      let evidenceCount = (item.attributes[3].value !== undefined) 
+                        ? item.attributes[3].value
+                        : 1;
                       return(
                         <div key={i} className="result">
                           <div className="checkbox-container result-sub">
@@ -241,7 +233,9 @@ const ResultsList = ({loading}) => {
                             {/* <span className="fda">{item.fda}</span> */}
                           </div>
                           <div className="evidence-container result-sub">
-                            {/* <span className="evidence-link"><span className="view-all">View All</span> ({item.evidence})</span> */}
+                            <span className="evidence-link">
+                              <span className="view-all">View All</span> ({evidenceCount})
+                            </span>
                           </div>
                           <div className="tags-container result-sub">
                             <span className="tags">

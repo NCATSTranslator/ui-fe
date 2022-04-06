@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 
-const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, children}) => {
+const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, children, disabled}) => {
 
   let buttonStyle = (isSecondary) ? 'secondary' : 'primary';
   buttonStyle += (iconOnly) ? ' icon-only': '';
@@ -19,12 +19,22 @@ const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, c
   return ( 
     <> 
       {href && 
-        <a className={`button ${buttonStyle} ${clicked && 'clicked'} ${size}`} onClick={handleClick} href={href} target={_blank && '_blank'}>
+        <a 
+          className={`button ${buttonStyle} ${clicked && 'clicked'} ${size}`} 
+          onClick={handleClick} 
+          href={href} 
+          target={_blank && '_blank'}
+        >
           {children}
         </a>
       }
       {!href && 
-        <button className={`button ${buttonStyle} ${clicked && 'clicked'} ${size}`} type={type} onClick={handleClick}>
+        <button 
+          className={`button ${buttonStyle} ${clicked && 'clicked'} ${size}`} 
+          type={type} 
+          onClick={handleClick}
+          disabled={disabled}
+        >
           {children}
         </button>
       }

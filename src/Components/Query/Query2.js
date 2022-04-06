@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import QueryItem from "../QueryComponents/QueryItem";
 import { useNavigate } from 'react-router-dom';
 
-const Query2 = ({template, results, handleAdd, handleRemove}) => {
+const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -20,12 +20,13 @@ const Query2 = ({template, results, handleAdd, handleRemove}) => {
   // const predicate = new URLSearchParams(search).get('predicate');
   // const curieTwo = new URLSearchParams(search).get('curieTwo');
   // const subjectTwo = new URLSearchParams(search).get('subjectTwo');
+  loading = (loading) ? true : false;
 
   const [proMode, setProMode] = useState(false);
   const [isTemplate, setIsTemplate] = useState(template);
   const [isResults, setIsResults] = useState(results);
   const [resultsActive, setResultsActive] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(loading);
   const [isValidSubmission, setIsValidSubmission] = useState(false);
   const [subjectsActive, setSubjectsActive] = useState(true);
 
@@ -103,6 +104,7 @@ const Query2 = ({template, results, handleAdd, handleRemove}) => {
       dispatch(incrementHistory(queryItems));
       dispatch(setCurrentResults({}));
       setIsValidSubmission(false);
+      setIsLoading(true);
       // setQueryItems([]);
 
       const requestOptions = {
@@ -118,7 +120,6 @@ const Query2 = ({template, results, handleAdd, handleRemove}) => {
             setCurrentResultsID(data.data);
             dispatch(setCurrentQueryResultsID(data.data));
             setResultsActive(true);
-            setIsLoading(true);
           }
         });
     }
@@ -293,7 +294,9 @@ const Query2 = ({template, results, handleAdd, handleRemove}) => {
                 )}
               </Droppable>
             </DragDropContext>
-            <Button type="submit" size="s">Submit Query</Button>
+            <Button type="submit" size="s" disabled={isLoading}>
+              <span>Submit Query</span>
+            </Button>
           </form>
           
         }

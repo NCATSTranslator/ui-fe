@@ -401,6 +401,13 @@ label.checkbox {
   &.clicked {
     box-shadow: $dropShadowPressed;
   }
+  &:disabled, &[disabled] {
+    color: $midGrey;
+    background-color: white;
+    border-color: $midGrey;
+    box-shadow: none;
+    cursor: default;
+  }
 }
 
 // Text Input 
@@ -1555,7 +1562,14 @@ label.checkbox {
       width: 25%;
       background-color: $purpleTwo;
       border-radius: 2px;
-      transition: width .5s ease;
+      transition: width .5s ease, opacity 2.5s ease;
+      &.dark {
+        opacity: 1;
+      }
+      &.light {
+        opacity: .2;
+      }
     }
   }
 }
+
