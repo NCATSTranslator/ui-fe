@@ -17,16 +17,15 @@ const ResultsList = ({loading}) => {
   const dispatch = useDispatch();
 
   loading = (loading) ? loading : false;
-  loading = (loadingParam) ? loadingParam : loading;
+  loading = (loadingParam === 'true') ? true : loading;
   let resultsState = useSelector(currentResults);
-  console.log(resultsState);
+  resultsState = (Object.keys(resultsState).length === 0) ? null : resultsState;
   loading = (resultsState && Object.keys(resultsState).length > 0) ? false : loading;
 
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(loading);
   const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentResultsQueryID));
-  // const [currentQueryID, setCurrentQueryID] = useState("2");
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState(resultsState);
   const [resultsProgress, setResultsProgress] = useState(1);
   const [resultsBarOpacity, setResultsBarOpacity] = useState(.2);
 
@@ -52,15 +51,12 @@ const ResultsList = ({loading}) => {
       .then(data => {
         // console.log(data);
         setResults(data);
-        console.log(data.status)
         // setIsError((status === 'error'));
       });
-  }, { retry: 2, retryDelay: 4000 });
-  // console.log(status)
-  // console.log(results)
-  // console.log(data)
-  // console.log(results)
-  console.log(isLoading);
+  }, { 
+    refetchInterval: 7000,
+    enabled: isLoading
+  });
 
   useEffect(() => {
     console.log(results);
