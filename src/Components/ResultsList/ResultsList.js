@@ -225,7 +225,7 @@ const ResultsList = ({loading}) => {
                           </div>
                           <div className="name-container result-sub">
                             <span className="icon">{icon}</span>
-                            <span className="name">{item.object}</span>
+                            <span className="name">{item.subject}</span>
                             <span className="effect">{item.predicate}</span>
                           </div>
                           <div className="fda-container result-sub">
