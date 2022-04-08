@@ -26,6 +26,7 @@ const ResultsList = ({loading}) => {
   const [isLoading, setIsLoading] = useState(loading);
   const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentResultsQueryID));
   const [results, setResults] = useState(resultsState);
+  const [formattedResults, setFormattedResults] = useState([]);
   const [resultsProgress, setResultsProgress] = useState(1);
   const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
   var resultsBarOpacityClass = (resultsBarOpacity) ? 'dark': 'light';
@@ -69,13 +70,19 @@ const ResultsList = ({loading}) => {
     
     if(results.status === 'done') {
       let newResults = getFormattedResults(results);
+      console.log(newResults);
+      // set formatted results
+      setFormattedResults(newResults);
+      // update app state for unformatted results
       dispatch(setCurrentResults(results));
     }
     // setIsError((results.status === 'error'));
   }, [results]);
 
   const getFormattedResults = (results) => {
-    
+    return Object.keys(results.data[0].knowledge_graph.edges).map(((key) => {
+      return results.data[0].knowledge_graph.edges[key]
+    }))
   }
 
 
@@ -84,7 +91,7 @@ const ResultsList = ({loading}) => {
     let matchIndex = -1;
     let items = [...selectedItems];
     items.map((element, i) => {         
-      if(element.name === item.name && element.effect === item.effect) {
+      if(element.subject === item.subject && element.predicate === item.predicate) {
         match = true;
         matchIndex = i;
       }
@@ -96,6 +103,8 @@ const ResultsList = ({loading}) => {
     } else {
       items.splice(matchIndex, 1);
       setSelectedItems(items);
+      if(items.length <= 0)
+        setAllSelected(false)
     }
   }
 
@@ -147,6 +156,10 @@ const ResultsList = ({loading}) => {
   ]
   
   useEffect(() => {
+    console.log(selectedItems)
+  }, [selectedItems]);
+
+  useEffect(() => {
     if(resultsProgress >= 100) 
       return;
 
@@ -196,7 +209,7 @@ const ResultsList = ({loading}) => {
                 <div className="table-body">
                   <div className="table-head result">
                       <div className="checkbox-container checkbox-head">
-                        <Checkbox handleClick={()=>{handleSelectAll(exampleResults);}}/>
+                        <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
                       </div>
                       <div className="name-head head">Name</div>
                       <div className="fda-head head">FDA</div>
@@ -210,12 +223,16 @@ const ResultsList = ({loading}) => {
                   {
                     !isLoading &&
                     !isError &&
-                    results && 
-                    Object.keys(results.data[0].knowledge_graph.edges).map((key, i)=> {
+                    formattedResults.length > 0 && 
+                    formattedResults.map((item, i) => {
                       // let icon = getIcon(item.type);
                       let icon = getIcon('chemical');
-                      let item = results.data[0].knowledge_graph.edges[key];
-                      let evidenceCount = (item.attributes[3].value !== undefined) 
+
+                      let evidenceCount = 
+                        (
+                          item.attributes !== undefined 
+                          && item.attributes[3].value !== undefined
+                        ) 
                         ? item.attributes[3].value
                         : 1;
                       return(
