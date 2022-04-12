@@ -279,17 +279,17 @@ const ResultsList = ({loading}) => {
               <span className="time">1.8 seconds</span></p>
             <ul className="kp-list">
             {
-              exampleKPResults.map((item, index)=> {
-                let itemClass = "kp";
-                itemClass += (item.error) ? " error" : "";
-                itemClass += (item.value < 1) ? " no-results" : "";
-                return(
-                  <li key={index} className={`${itemClass}`}>
-                    <span className="kp-name">{item.name}</span>
-                    <span className="kp-value sub-one">{item.value}</span>
-                  </li>
-                )
-              })
+              // exampleKPResults.map((item, index)=> {
+              //   let itemClass = "kp";
+              //   itemClass += (item.error) ? " error" : "";
+              //   itemClass += (item.value < 1) ? " no-results" : "";
+              //   return(
+              //     <li key={index} className={`${itemClass}`}>
+              //       <span className="kp-name">{item.name}</span>
+              //       <span className="kp-value sub-one">{item.value}</span>
+              //     </li>
+              //   )
+              // })
             }
             </ul>
           </div>
