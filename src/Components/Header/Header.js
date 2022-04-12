@@ -4,7 +4,7 @@ import TextInput from "../FormFields/TextInput";
 import Checkbox from "../FormFields/Checkbox";
 import Select from "../FormFields/Select";
 import Toggle from '../Toggle/Toggle';
-import ReportIssueModal from "../Modals/ReportIssueModal";
+import ReportIssueModal from "../Modals/SendFeedbackModal";
 import { NavLink, Link } from 'react-router-dom';
 import {ReactComponent as Home} from '../../Icons/Navigation/Home.svg';
 import {ReactComponent as Bookmark} from '../../Icons/Navigation/Bookmark.svg';
@@ -34,7 +34,7 @@ const Header = ({children}) => {
             <Link to="/history"><History/>History</Link>
             <button><Bookmark/>Bookmarks</button>
             <button><Export />Share</button>
-            <button onClick={()=>setModalOpen(true)}><Warning/>Report Issue</button>
+            <button onClick={()=>setModalOpen(true)}><Warning/>Send Feedback</button>
           </div>
         </div>
         <ReportIssueModal isOpen={modalOpen} onClose={()=>handleModalClose()} />

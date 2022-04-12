@@ -27,7 +27,7 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
 
   return (
     <Modal isOpen={modalIsOpen} onClose={onClose}>
-      <h5>Report Issue</h5>
+      <h5>Send Feedback</h5>
       <form onSubmit={(e)=>handleSubmission(e)}>
         <TextInput 
           label="Name" 
