@@ -101,7 +101,8 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
   useEffect(() => {
     if(isValidSubmission) {
-      dispatch(incrementHistory(queryItems));
+      let timestamp = new Date();
+      dispatch(incrementHistory({ items: queryItems, time: timestamp}));
       dispatch(setCurrentResults({}));
       setIsValidSubmission(false);
       setIsLoading(true);

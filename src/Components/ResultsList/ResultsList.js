@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import Checkbox from "../FormFields/Checkbox";
 import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
+import Modal from "../Modals/Modal";
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
 import { getIcon } from "../../Utilities/utilities";
 import { currentQuery, currentResultsQueryID, currentResults, setCurrentResults } from "../../Redux/store";
 import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { ReactQueryDevtoolsPanel } from 'react-query/devtools';
+import { current } from "@reduxjs/toolkit";
 
 const ResultsList = ({loading}) => {
 
@@ -24,7 +26,10 @@ const ResultsList = ({loading}) => {
 
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(loading);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentResultsQueryID));
+  const [currentQuerySubject, setCurrentQuerySubject] = useState();
+  const [currentEvidence, setCurrentEvidence] = useState([]);
   const [results, setResults] = useState(resultsState);
   const [formattedResults, setFormattedResults] = useState([]);
   const [resultsProgress, setResultsProgress] = useState(1);
@@ -38,10 +43,11 @@ const ResultsList = ({loading}) => {
 
   const resultsData = useQuery('resultsData', async () => {
 
-    if(!currentQueryID || !isLoading)
-      return;
+    // if(!currentQueryID || !isLoading)
+    //   return;
 
-    let queryIDJson = JSON.stringify({qid: currentQueryID});
+    // let queryIDJson = JSON.stringify({qid: currentQueryID});
+    let queryIDJson = JSON.stringify({qid: '3'});
 
     const requestOptions = {
       method: 'POST',
@@ -57,7 +63,7 @@ const ResultsList = ({loading}) => {
       });
   }, { 
     refetchInterval: 7000,
-    enabled: isLoading
+    // enabled: isLoading
   });
 
   useEffect(() => {
@@ -80,9 +86,7 @@ const ResultsList = ({loading}) => {
   }, [results]);
 
   const getFormattedResults = (results) => {
-    return Object.keys(results.data[0].knowledge_graph.edges).map(((key) => {
-      return results.data[0].knowledge_graph.edges[key]
-    }))
+    return results.summary;
   }
 
 
@@ -116,6 +120,15 @@ const ResultsList = ({loading}) => {
       setSelectedItems([]);
       setAllSelected(false);
     }
+  }
+
+  const handleModalClose = () => {
+    setEvidenceOpen(false);
+  }
+
+  const activateEvidence = (evidence) => {
+    setCurrentEvidence(evidence);
+    setEvidenceOpen(true);
   }
 
   const exampleResults = [
@@ -188,6 +201,19 @@ const ResultsList = ({loading}) => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <Modal isOpen={evidenceOpen} onClose={()=>handleModalClose()} className="evidence-modal">
+        <h5>Evidence</h5>
+        {
+          currentEvidence.length > 0 &&
+          currentEvidence.map((item, i)=> {
+            return <p key={i}>{item}</p>
+          })
+        } 
+        {
+          currentEvidence.length <= 0 &&
+          <p>No evidence is currently available for this item.</p>
+        }
+      </Modal>
       <div className="results-list">
         <Query2 results loading/>
         <div className="results-container">
@@ -225,16 +251,27 @@ const ResultsList = ({loading}) => {
                     !isError &&
                     formattedResults.length > 0 && 
                     formattedResults.map((item, i) => {
+                      if(i < 10)
+                      console.log(item);
                       // let icon = getIcon(item.type);
                       let icon = getIcon('chemical');
 
                       let evidenceCount = 
                         (
-                          item.attributes !== undefined 
-                          && item.attributes[3].value !== undefined
+                          item.edge !== undefined &&
+                          item.edge.evidence !== undefined 
                         ) 
-                        ? item.attributes[3].value
-                        : 1;
+                        ? item.edge.evidence.length
+                        : 0;
+                        
+                      let fdaLevel = (item.subject.fda_info ) 
+                        ? item.subject.fda_info.max_level 
+                        : 'N/A';
+
+                      let lastPubYear = (item.edge.last_publication_date)
+                        ? new Date(item.edge.last_publication_date).getFullYear()
+                        : null;
+
                       return(
                         <div key={i} className="result">
                           <div className="checkbox-container result-sub">
@@ -242,20 +279,30 @@ const ResultsList = ({loading}) => {
                           </div>
                           <div className="name-container result-sub">
                             <span className="icon">{icon}</span>
-                            <span className="name">{item.subject}</span>
-                            <span className="effect">{item.predicate}</span>
+                            <span className="name">{item.subject.name.toUpperCase()}</span>
+                            <span className="effect">{item.edge.predicate}</span>
                           </div>
                           <div className="fda-container result-sub">
-                            <span className="fda-icon"><CheckIcon /></span>
-                            {/* <span className="fda">{item.fda}</span> */}
+                            {fdaLevel !== 'N/A' &&
+                              <span className="fda-icon"><CheckIcon /></span>
+                            }
+                            <span className="fda">{fdaLevel}</span>
                           </div>
                           <div className="evidence-container result-sub">
-                            <span className="evidence-link">
+                            <span className="evidence-link" onClick={()=>{activateEvidence(item.edge.evidence)}}>
                               <span className="view-all">View All</span> ({evidenceCount})
                             </span>
                           </div>
                           <div className="tags-container result-sub">
                             <span className="tags">
+                              {
+                                item.subject.toxicity_info.level &&
+                                <span className={`tag toxicity`}>{item.subject.toxicity_info.level}</span>  
+                              }
+                              {
+                                lastPubYear &&
+                                <span className={`tag year`}>{lastPubYear}</span>  
+                              }
                               {/* {item.tags.map((tag, j) => {
                                 return (
                                   <span key={j} className={`tag ${tag}`}>{tag}</span>  

@@ -713,7 +713,7 @@ label.checkbox {
 
 // Modal
 .modal-window {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
@@ -740,6 +740,8 @@ label.checkbox {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    max-height: 80%;
+    overflow-y: auto;
   }  
   .close-container {
     position: absolute;
@@ -1237,6 +1239,9 @@ label.checkbox {
               display: block;
               font-weight: 700;
               text-transform: uppercase;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              overflow: hidden;
             }
             .effect {
               grid-column: 2/3;
@@ -1258,6 +1263,7 @@ label.checkbox {
           }
           .evidence-link {
             font-size: $bodyTwoSize;
+            cursor: pointer;
               .view-all {
               font-size: $bodyTwoSize;
               font-weight: 700;
@@ -1278,7 +1284,7 @@ label.checkbox {
                   background-color: $yellow;
                   color: $black;
                 }
-                &.High, &.Med {
+                &.toxicity {
                   background-color: $red;
                 }
               }

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import { pastQueryState, clearHistory, removeItemAtIndex } from "../Redux/store";
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
@@ -6,6 +6,7 @@ import Modal from "../Components/Modals/Modal";
 import Button from "../Components/FormFields/Button";
 import {ReactComponent as Close} from '../Icons/Buttons/Close.svg';
 import {ReactComponent as Warning} from '../Icons/Alerts/Warning.svg'
+import { current } from "@reduxjs/toolkit";
 
 const History = () => {
 
@@ -13,6 +14,27 @@ const History = () => {
   const dispatch = useDispatch();
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  useEffect(() => {
+    setCurrentDate(new Date());
+  }, []);
+
+  const getDifferenceInDays = (date2, date1) => {
+    const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+    // Discard the time and time-zone information.
+    const utc1 = Date.UTC(date1.getFullYear(), date1.getMonth(), date1.getDate());
+    const utc2 = Date.UTC(date2.getFullYear(), date2.getMonth(), date2.getDate());
+
+    return Math.round(Math.abs((utc2 - utc1) / _MS_PER_DAY));
+}
+console.log(getDifferenceInDays(new Date("2022-04-12"), new Date("2022-04-11") ))
+console.log(getDifferenceInDays(new Date(), new Date() ))
+console.log(getDifferenceInDays(new Date(), new Date("2022-04-10") ))
+console.log(getDifferenceInDays(new Date(), new Date("2022-04-8") ))
+console.log(getDifferenceInDays(new Date(), new Date("2022-03-31") ))
+console.log(getDifferenceInDays(new Date(), new Date("2022-03-15") ))
 
   return (
     <div className="history-inner">
@@ -41,13 +63,29 @@ const History = () => {
           queryHistoryState.length > 0 &&
           <ul className="history-list">
             {queryHistoryState.map((query, i)=> {
+                let itemTimestamp = new Date(query.time);
+                let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
+                let timeName = "";
+                switch (timestampDiff) {
+                  case 0:
+                    timeName = "Today";
+                    break;
+                  case 1:
+                    timeName = "Yesterday";
+                    break;
+                  default:
+                    timeName = itemTimestamp.toDateString();
+                    break;
+                }
+                
               return (
                 <li key={i} className="history-item">
+                  {timeName}
                   <span className="query">
-                    {query.map((item, j) => {
+                    {query.items.map((item, j) => {
                       let output = (item.value) ? item.value : item.name;
                       return (
-                        <span key={j}>{output} </span>)
+                        <span key={j} className={item.type}>{output} </span>)
                       })
                     }
                   </span>

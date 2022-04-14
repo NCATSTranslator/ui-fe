@@ -1,13 +1,13 @@
 import React from "react";
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
-const Modal = ({children, isOpen, onClose}) => {
+const Modal = ({children, isOpen, onClose, className}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
 
   return (
-      <div className={`modal-window ${modalIsOpen}`}>
+      <div className={`modal-window ${modalIsOpen} ${className}`}>
         <div className="modal-container">
           <div className="inner">
             {children}

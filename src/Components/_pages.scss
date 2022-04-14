@@ -62,6 +62,10 @@
         &:hover {
           box-shadow: $dropShadowHover;
         }
+        .subject,.action {
+          color: $purpleOne;
+          font-weight: 700;
+        }
         .remove-item {
           background-color: transparent;
           padding: $s;
