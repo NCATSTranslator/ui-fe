@@ -206,7 +206,7 @@ const ResultsList = ({loading}) => {
         {
           currentEvidence.length > 0 &&
           currentEvidence.map((item, i)=> {
-            return <p key={i}>{item}</p>
+            return <p key={i}><a href={item} target="_blank">{item}</a></p>
           })
         } 
         {
