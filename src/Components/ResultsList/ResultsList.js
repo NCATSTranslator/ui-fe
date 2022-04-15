@@ -25,7 +25,8 @@ const ResultsList = ({loading}) => {
   loading = (resultsState && Object.keys(resultsState).length > 0) ? false : loading;
 
   const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(loading);
+  // const [isLoading, setIsLoading] = useState(loading);
+  const [isLoading, setIsLoading] = useState(true);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentResultsQueryID));
   const [currentQuerySubject, setCurrentQuerySubject] = useState();
@@ -57,13 +58,12 @@ const ResultsList = ({loading}) => {
     const response = await fetch('/result', requestOptions)
       .then(response => response.json())
       .then(data => {
-        // console.log(data);
         setResults(data);
         setIsError((data.status === 'error'));
       });
   }, { 
     refetchInterval: 7000,
-    // enabled: isLoading
+    enabled: isLoading
   });
 
   useEffect(() => {
@@ -222,7 +222,6 @@ const ResultsList = ({loading}) => {
             <div className="loading-bar">
               <div className="bar-outer">
                 <div className={`bar-inner ${resultsBarOpacityClass}`} style={{width: `${resultsProgress}%`}}>
-
                 </div>
               </div>
             </div>
@@ -251,8 +250,6 @@ const ResultsList = ({loading}) => {
                     !isError &&
                     formattedResults.length > 0 && 
                     formattedResults.map((item, i) => {
-                      if(i < 10)
-                      console.log(item);
                       // let icon = getIcon(item.type);
                       let icon = getIcon('chemical');
 
@@ -303,11 +300,6 @@ const ResultsList = ({loading}) => {
                                 lastPubYear &&
                                 <span className={`tag year`}>{lastPubYear}</span>  
                               }
-                              {/* {item.tags.map((tag, j) => {
-                                return (
-                                  <span key={j} className={`tag ${tag}`}>{tag}</span>  
-                                )
-                              })} */}
                             </span>
                           </div>
                         </div>
@@ -342,7 +334,6 @@ const ResultsList = ({loading}) => {
           </div>
         </div>
       </div>
-      {/* <ReactQueryDevtoolsPanel style={{display: "block"}} className="query-devtools" /> */}
     </QueryClientProvider>
   );
 }
