@@ -19,7 +19,7 @@ const ResultsFilter = () => {
         <p className="results-count">
           Showing <span className="range">1-10</span> of <span className=" ">42</span> <span>Results</span>
         </p>
-        <Toggle labelInternal={false} labelOne={labelOne} labelTwo={labelTwo} onClick={()=>{}} />
+        {/* <Toggle labelInternal={false} labelOne={labelOne} labelTwo={labelTwo} onClick={()=>{}} /> */}
       </div>
       <div className="bottom">
           <div className='left'>
