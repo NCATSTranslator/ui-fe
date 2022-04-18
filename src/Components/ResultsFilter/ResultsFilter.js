@@ -6,7 +6,7 @@ import Radio from '../FormFields/Radio';
 import Accordion from '../Accordion/Accordion';
 import Range from '../Range/Range';
 
-const ResultsFilter = () => {
+const ResultsFilter = ({startIndex, endIndex, totalCount}) => {
 
   const labelOne = "Chemical";
   const labelTwo = "Gene";
@@ -17,7 +17,12 @@ const ResultsFilter = () => {
     <div className="results-filter">
       <div className="top">
         <p className="results-count">
-          Showing <span className="range">1-10</span> of <span className=" ">42</span> <span>Results</span>
+          Showing <span className="range">
+            <span className='start'>{startIndex}</span>
+            -
+            <span>{endIndex}</span>
+          </span> of 
+          <span className="total"> {totalCount}</span> <span>Results</span>
         </p>
         {/* <Toggle labelInternal={false} labelOne={labelOne} labelTwo={labelTwo} onClick={()=>{}} /> */}
       </div>

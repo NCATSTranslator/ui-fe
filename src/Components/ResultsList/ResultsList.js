@@ -35,12 +35,17 @@ const ResultsList = ({loading}) => {
   const [formattedResults, setFormattedResults] = useState([]);
   const [resultsProgress, setResultsProgress] = useState(1);
   const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
+
+  const [startResultIndex, setStartResultIndex] = useState(0);
+  const [endResultIndex, setEndResultIndex] = useState(9);
+
   var resultsBarOpacityClass = (resultsBarOpacity) ? 'dark': 'light';
 
   const [allSelected, setAllSelected] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
 
   const queryClient = new QueryClient();
+  const resultIncrement = 10;
 
   const resultsData = useQuery('resultsData', async () => {
 
@@ -131,32 +136,37 @@ const ResultsList = ({loading}) => {
     setEvidenceOpen(true);
   }
 
-  const exampleResults = [
-    {
-      name: 'estradiol benzoate',
-      effect: 'Downregulates CCND1, CCND2, CCND3',
-      type: 'chemical',
-      fda: 3,
-      evidence: 23,
-      tags: ['2022', 'FDA', 'High']
-    },
-    {
-      name: 'tretinoin',
-      effect: 'Downregulates CCND2, CCND3',
-      type: 'chemical',
-      fda: 3,
-      evidence: 42,
-      tags: ['2022', 'FDA', 'Med']
-    },
-    {
-      name: '2-AMINO-1-METHYL-6- PHENYLIMIDAZO[4,5- B]PYRIDINE',
-      effect: 'Downregulates CCND1',
-      type: 'chemical',
-      fda: 4,
-      evidence: 121,
-      tags: ['2022', 'Med']
+  const handlePrev = () => {
+    if(startResultIndex === 0) 
+      return;
+
+    if(startResultIndex - resultIncrement > 0) {
+      setStartResultIndex(startResultIndex - resultIncrement)
+      setEndResultIndex(startResultIndex - 1)
+    } else {
+      let increment = (startResultIndex);
+      setStartResultIndex(startResultIndex - increment)
+      setEndResultIndex(resultIncrement - 1)
     }
-  ]
+  }
+
+  const handleNext = () => {
+    if(formattedResults.length === (endResultIndex + 1))
+      return;
+
+    if(formattedResults.length > endResultIndex + resultIncrement) {
+      setStartResultIndex(startResultIndex + resultIncrement)
+      setEndResultIndex(endResultIndex + resultIncrement)
+    } else {
+      let increment = (formattedResults.length - endResultIndex);
+      setStartResultIndex(startResultIndex + resultIncrement)
+      setEndResultIndex(formattedResults.length - 1)
+    }
+  }
+  useEffect(() => {
+    console.log(startResultIndex);
+    console.log(endResultIndex);
+  }, [endResultIndex]);
 
   const exampleKPResults = [
     {name: 'BTE', value: '54', error: false},
@@ -229,7 +239,7 @@ const ResultsList = ({loading}) => {
           {
             !isLoading &&
             <div className="table-container">
-              <ResultsFilter/>
+              <ResultsFilter startIndex={startResultIndex+1} endIndex={endResultIndex+1} totalCount={formattedResults.length}/>
               <div className="results-table">
                 <div className="table-body">
                   <div className="table-head result">
@@ -250,6 +260,10 @@ const ResultsList = ({loading}) => {
                     !isError &&
                     formattedResults.length > 0 && 
                     formattedResults.map((item, i) => {
+
+                      if(i < startResultIndex || i > endResultIndex)
+                        return;
+
                       // let icon = getIcon(item.type);
                       let icon = getIcon('chemical');
 
@@ -308,6 +322,13 @@ const ResultsList = ({loading}) => {
                   }
                 </div>
               </div>
+              {
+                formattedResults.length > 0 && 
+                <div className="pagination">
+                  <button className="prev" onClick={handlePrev}>Previous</button>
+                  <button className="next" onClick={handleNext}>Next</button>
+                </div>
+              }
             </div>
           }
           <div className="kps">
