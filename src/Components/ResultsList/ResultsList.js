@@ -33,6 +33,8 @@ const ResultsList = ({loading}) => {
   const [currentEvidence, setCurrentEvidence] = useState([]);
   const [results, setResults] = useState(resultsState);
   const [formattedResults, setFormattedResults] = useState([]);
+  const [paginationNums, setPaginationNums] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
   const [resultsProgress, setResultsProgress] = useState(1);
   const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
 
@@ -89,6 +91,13 @@ const ResultsList = ({loading}) => {
     }
     // setIsError((results.status === 'error'));
   }, [results]);
+
+  useEffect(() => {
+    if(formattedResults.length <= 0)
+      return;
+    let pagination = getPaginationNums(formattedResults);
+    setPaginationNums(pagination);
+  }, [formattedResults]);
 
   const getFormattedResults = (results) => {
     return results.summary;
@@ -148,6 +157,7 @@ const ResultsList = ({loading}) => {
       setStartResultIndex(startResultIndex - increment)
       setEndResultIndex(resultIncrement - 1)
     }
+    setCurrentPage((currentPage) => currentPage - 1);
   }
 
   const handleNext = () => {
@@ -162,10 +172,45 @@ const ResultsList = ({loading}) => {
       setStartResultIndex(startResultIndex + resultIncrement)
       setEndResultIndex(formattedResults.length - 1)
     }
+    setCurrentPage((currentPage) => currentPage + 1);
   }
+
+  const setResultIndexes = (start, end, page) => {
+    setStartResultIndex(start);
+    setEndResultIndex(end);
+    setCurrentPage(page);
+  }
+
+  const getPaginationNums = (elements) => {
+    
+    let currentClass = (currentPage === 0) ? 'current' : '';
+    var numbers = [<li onClick={()=>setResultIndexes(0, resultIncrement - 1, 0)} className={`page-num ${currentClass}`}>1</li>];
+    // start with 2, since we already supplied '1'
+    var pageNum = 2;
+    for (let i = 0; i < elements.length; i++) {
+      if((i + 1) % resultIncrement === 0) {
+        let start = i + 1;
+        let end = ((start + resultIncrement) > elements.length) 
+          ? formattedResults.length - 1 
+          : i + resultIncrement;
+          currentClass = (currentPage === pageNum - 1) ? 'current' : '';
+        let newPage = pageNum - 1;
+        numbers.push(<li onClick={()=>{setResultIndexes(start, end, newPage)}} className={`page-num ${currentClass}`}>{pageNum}</li>);
+        pageNum++;
+      }
+    }
+    return numbers;
+  }
+
   useEffect(() => {
-    console.log(startResultIndex);
-    console.log(endResultIndex);
+    console.log(currentPage);
+    let pagination = getPaginationNums(formattedResults);
+    setPaginationNums(pagination);
+  }, [currentPage]);
+
+  useEffect(() => {
+    // console.log(startResultIndex);
+    // console.log(endResultIndex);
   }, [endResultIndex]);
 
   const exampleKPResults = [
@@ -179,6 +224,8 @@ const ResultsList = ({loading}) => {
   ]
   
   useEffect(() => {
+    if(selectedItems.length <= 0)
+      return;
     console.log(selectedItems)
   }, [selectedItems]);
 
@@ -326,6 +373,21 @@ const ResultsList = ({loading}) => {
                 formattedResults.length > 0 && 
                 <div className="pagination">
                   <button className="prev" onClick={handlePrev}>Previous</button>
+                  <ul className="page-nums">{
+                    paginationNums.map((item, i) => {
+                      if(paginationNums.length > 4) {
+                        if(i === currentPage 
+                          || (i === 0)
+                          || (i === currentPage - 1 && i > 0)
+                          || i === currentPage + 1
+                          || i >= paginationNums.length - 2) {
+                            return item;
+                          }
+                        if (i === currentPage + 2)
+                          return '...';
+                      }
+                    })
+                  }</ul>
                   <button className="next" onClick={handleNext}>Next</button>
                 </div>
               }

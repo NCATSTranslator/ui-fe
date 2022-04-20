@@ -1579,3 +1579,23 @@ label.checkbox {
   }
 }
 
+
+.pagination {
+  .page-nums {
+    list-style-type: none;
+    padding-left: 0;
+    .page-num {
+      display: inline;
+      cursor: pointer;
+      padding: 10px 15px;
+      line-height: 1;
+      margin: 8px;
+      transition: all .25s ease;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      &:hover, &.current {
+        border-color: $darkGrey;
+      }
+    }
+  }
+}
