@@ -30,6 +30,8 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   const [isValidSubmission, setIsValidSubmission] = useState(false);
   const [subjectsActive, setSubjectsActive] = useState(true);
 
+  const [activeMockID, setActiveMockID] = useState(0);
+
   let test = useSelector(currentResultsQueryID);
   test = (test === undefined) ? '' : test; 
   const [currentResultsID, setCurrentResultsID] = useState(test);
@@ -106,12 +108,15 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
       dispatch(setCurrentResults({}));
       setIsValidSubmission(false);
       setIsLoading(true);
+      
+      let mockJson = { id: activeMockID} 
+      mockJson = JSON.stringify(mockJson);
       // setQueryItems([]);
 
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: testJson
+        body: mockJson
       };
       fetch('/query', requestOptions)
         .then(response => response.json())
@@ -237,6 +242,49 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
       category: 'gene',
       value: ''
     },
+  ]
+
+  const cannedQueries = [
+    // One
+    [
+      {
+        name: 'What Chemical',
+        type: 'subject',
+        category: 'chemical',
+        value: ''
+      },
+      {
+        name: 'Treats',
+        type: 'action',
+        category: 'treats'
+      },
+      {
+        name: 'Nausea',
+        type: 'subject',
+        category: 'concept',
+        value: ''
+      }
+    ],
+    // Two
+    [
+      {
+        name: 'What Disease',
+        type: 'subject',
+        category: 'chemical',
+        value: ''
+      },
+      {
+        name: 'Causes',
+        type: 'action',
+        category: 'associated'
+      },
+      {
+        name: 'Heart Failure',
+        type: 'subject',
+        category: 'concept',
+        value: ''
+      }
+    ],
   ]
 
   // Query Button items
@@ -373,8 +421,20 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
              !isResults &&
               <div className="templates">
                 <div className="panel subjects">
-                  <QueryTemplate handleClick={() => changeQueryItems(testOne)} items={testOne}/>
-                  <QueryTemplate handleClick={() => changeQueryItems(testTwo)} items={testTwo}/>
+                  {
+                    cannedQueries.map((item, i)=> {
+                      return (
+                        <QueryTemplate 
+                          handleClick={() => {
+                            changeQueryItems(item);
+                            setActiveMockID(i);
+                          }}
+                          items={item} 
+                          key={i}
+                        />
+                      )
+                    })
+                  }
                 </div>
               </div>
             }

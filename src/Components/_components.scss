@@ -760,6 +760,18 @@ label.checkbox {
   }
 }
 
+// Evidence Modal
+.evidence-modal {
+  .table-body {
+    .table-head {
+      grid-template-columns: 1fr 4fr min-content;
+      .date {
+        padding: 0 20px 10px;
+      }
+    }
+  }
+}
+
 
 // Query Window
 .query-window {
@@ -1581,21 +1593,57 @@ label.checkbox {
 
 
 .pagination {
+  margin-top: $m;
   .page-nums {
+    display: flex;
+    align-items: center;
     list-style-type: none;
     padding-left: 0;
+    .button {
+      margin-bottom: 0;
+    }
     .page-num {
-      display: inline;
-      cursor: pointer;
-      padding: 10px 15px;
-      line-height: 1;
-      margin: 8px;
-      transition: all .25s ease;
-      border: 1px solid transparent;
-      border-radius: 5px;
-      &:hover, &.current {
-        border-color: $darkGrey;
+      a {
+        cursor: pointer;
+        padding: 10px 15px;
+        line-height: 1;
+        margin: 8px;
+        transition: all .25s ease;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        &:hover {
+          border-color: $darkGrey;
+        }
+      }
+      &.current {
+        a {
+          border-color: $darkGrey;
+        } 
       }
     }
   }
 }
+
+
+.table-body {
+  .table-head {
+    border-bottom: 1px solid $midGrey;
+    display: grid;
+    .checkbox-container {
+      margin: 0 0 $xs;
+    }
+    .head {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.25;
+      text-transform: uppercase;
+      color: $darkGrey;
+      padding-bottom: 10px;
+    }
+    .name-head, .tags-head {
+      text-align: left;
+    }
+  }
+}
+

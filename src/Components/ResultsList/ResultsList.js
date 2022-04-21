@@ -8,6 +8,7 @@ import { getIcon } from "../../Utilities/utilities";
 import { currentQuery, currentResultsQueryID, currentResults, setCurrentResults } from "../../Redux/store";
 import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
+import ReactPaginate from 'react-paginate';
 import { ReactQueryDevtoolsPanel } from 'react-query/devtools';
 import { current } from "@reduxjs/toolkit";
 
@@ -33,11 +34,18 @@ const ResultsList = ({loading}) => {
   const [currentEvidence, setCurrentEvidence] = useState([]);
   const [results, setResults] = useState(resultsState);
   const [formattedResults, setFormattedResults] = useState([]);
+  const [displayedResults, setDisplayedResults] = useState([]);
+
   const [paginationNums, setPaginationNums] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+  const [itemOffset, setItemOffset] = useState(0);
+  const itemsPerPage = 10;
+  
+  
   const [resultsProgress, setResultsProgress] = useState(1);
   const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
-
+  
   const [startResultIndex, setStartResultIndex] = useState(0);
   const [endResultIndex, setEndResultIndex] = useState(9);
 
@@ -47,7 +55,30 @@ const ResultsList = ({loading}) => {
   const [selectedItems, setSelectedItems] = useState([]);
 
   const queryClient = new QueryClient();
-  const resultIncrement = 10;
+  
+  useEffect(() => {
+    if(formattedResults.length === 0)
+      return
+    
+      // Fetch items from another resources.
+    const endOffset = (itemOffset + itemsPerPage > formattedResults.length)
+      ? formattedResults.length
+      : itemOffset + itemsPerPage;
+    setDisplayedResults(formattedResults.slice(itemOffset, endOffset));
+    setStartResultIndex(itemOffset);
+    setEndResultIndex(endOffset);
+    setPageCount(Math.ceil(formattedResults.length / itemsPerPage));
+    console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
+  }, [itemOffset, itemsPerPage, formattedResults]);
+
+  // Invoke when user click to request another page.
+  const handlePageClick = (event) => {
+    const newOffset = (event.selected * itemsPerPage) % formattedResults.length;
+    console.log(
+      `User requested page number ${event.selected}, which is offset ${newOffset}`
+    );
+    setItemOffset(newOffset);
+  };
 
   const resultsData = useQuery('resultsData', async () => {
 
@@ -92,12 +123,12 @@ const ResultsList = ({loading}) => {
     // setIsError((results.status === 'error'));
   }, [results]);
 
-  useEffect(() => {
-    if(formattedResults.length <= 0)
-      return;
-    let pagination = getPaginationNums(formattedResults);
-    setPaginationNums(pagination);
-  }, [formattedResults]);
+  // useEffect(() => {
+  //   if(formattedResults.length <= 0)
+  //     return;
+  //   let pagination = getPaginationNums(formattedResults);
+  //   setPaginationNums(pagination);
+  // }, [formattedResults]);
 
   const getFormattedResults = (results) => {
     return results.summary;
@@ -145,73 +176,73 @@ const ResultsList = ({loading}) => {
     setEvidenceOpen(true);
   }
 
-  const handlePrev = () => {
-    if(startResultIndex === 0) 
-      return;
+  // const handlePrev = () => {
+  //   if(startResultIndex === 0) 
+  //     return;
 
-    if(startResultIndex - resultIncrement > 0) {
-      setStartResultIndex(startResultIndex - resultIncrement)
-      setEndResultIndex(startResultIndex - 1)
-    } else {
-      let increment = (startResultIndex);
-      setStartResultIndex(startResultIndex - increment)
-      setEndResultIndex(resultIncrement - 1)
-    }
-    setCurrentPage((currentPage) => currentPage - 1);
-  }
+  //   if(startResultIndex - itemsPerPage > 0) {
+  //     setStartResultIndex(startResultIndex - itemsPerPage)
+  //     setEndResultIndex(startResultIndex - 1)
+  //   } else {
+  //     let increment = (startResultIndex);
+  //     setStartResultIndex(startResultIndex - increment)
+  //     setEndResultIndex(itemsPerPage - 1)
+  //   }
+  //   setCurrentPage((currentPage) => currentPage - 1);
+  // }
 
-  const handleNext = () => {
-    if(formattedResults.length === (endResultIndex + 1))
-      return;
+  // const handleNext = () => {
+  //   if(formattedResults.length === (endResultIndex + 1))
+  //     return;
 
-    if(formattedResults.length > endResultIndex + resultIncrement) {
-      setStartResultIndex(startResultIndex + resultIncrement)
-      setEndResultIndex(endResultIndex + resultIncrement)
-    } else {
-      let increment = (formattedResults.length - endResultIndex);
-      setStartResultIndex(startResultIndex + resultIncrement)
-      setEndResultIndex(formattedResults.length - 1)
-    }
-    setCurrentPage((currentPage) => currentPage + 1);
-  }
+  //   if(formattedResults.length > endResultIndex + itemsPerPage) {
+  //     setStartResultIndex(startResultIndex + itemsPerPage)
+  //     setEndResultIndex(endResultIndex + itemsPerPage)
+  //   } else {
+  //     let increment = (formattedResults.length - endResultIndex);
+  //     setStartResultIndex(startResultIndex + itemsPerPage)
+  //     setEndResultIndex(formattedResults.length - 1)
+  //   }
+  //   setCurrentPage((currentPage) => currentPage + 1);
+  // }
 
-  const setResultIndexes = (start, end, page) => {
-    setStartResultIndex(start);
-    setEndResultIndex(end);
-    setCurrentPage(page);
-  }
+  // const setResultIndexes = (start, end, page) => {
+  //   setStartResultIndex(start);
+  //   setEndResultIndex(end);
+  //   setCurrentPage(page);
+  // }
 
-  const getPaginationNums = (elements) => {
+  // const getPaginationNums = (elements) => {
     
-    let currentClass = (currentPage === 0) ? 'current' : '';
-    var numbers = [<li onClick={()=>setResultIndexes(0, resultIncrement - 1, 0)} className={`page-num ${currentClass}`}>1</li>];
-    // start with 2, since we already supplied '1'
-    var pageNum = 2;
-    for (let i = 0; i < elements.length; i++) {
-      if((i + 1) % resultIncrement === 0) {
-        let start = i + 1;
-        let end = ((start + resultIncrement) > elements.length) 
-          ? formattedResults.length - 1 
-          : i + resultIncrement;
-          currentClass = (currentPage === pageNum - 1) ? 'current' : '';
-        let newPage = pageNum - 1;
-        numbers.push(<li onClick={()=>{setResultIndexes(start, end, newPage)}} className={`page-num ${currentClass}`}>{pageNum}</li>);
-        pageNum++;
-      }
-    }
-    return numbers;
-  }
+  //   let currentClass = (currentPage === 0) ? 'current' : '';
+  //   var numbers = [<li onClick={()=>setResultIndexes(0, itemsPerPage - 1, 0)} className={`page-num ${currentClass}`}>1</li>];
+  //   // start with 2, since we already supplied '1'
+  //   var pageNum = 2;
+  //   for (let i = 0; i < elements.length; i++) {
+  //     if((i + 1) % itemsPerPage === 0) {
+  //       let start = i + 1;
+  //       let end = ((start + itemsPerPage) > elements.length) 
+  //         ? formattedResults.length - 1 
+  //         : i + itemsPerPage;
+  //         currentClass = (currentPage === pageNum - 1) ? 'current' : '';
+  //       let newPage = pageNum - 1;
+  //       numbers.push(<li onClick={()=>{setResultIndexes(start, end, newPage)}} className={`page-num ${currentClass}`}>{pageNum}</li>);
+  //       pageNum++;
+  //     }
+  //   }
+  //   return numbers;
+  // }
 
-  useEffect(() => {
-    console.log(currentPage);
-    let pagination = getPaginationNums(formattedResults);
-    setPaginationNums(pagination);
-  }, [currentPage]);
+  // useEffect(() => {
+  //   console.log(currentPage);
+  //   let pagination = getPaginationNums(formattedResults);
+  //   setPaginationNums(pagination);
+  // }, [currentPage]);
 
-  useEffect(() => {
-    // console.log(startResultIndex);
-    // console.log(endResultIndex);
-  }, [endResultIndex]);
+  // useEffect(() => {
+  //   // console.log(startResultIndex);
+  //   // console.log(endResultIndex);
+  // }, [endResultIndex]);
 
   const exampleKPResults = [
     {name: 'BTE', value: '54', error: false},
@@ -260,16 +291,23 @@ const ResultsList = ({loading}) => {
     <QueryClientProvider client={queryClient}>
       <Modal isOpen={evidenceOpen} onClose={()=>handleModalClose()} className="evidence-modal">
         <h5>Evidence</h5>
-        {
-          currentEvidence.length > 0 &&
-          currentEvidence.map((item, i)=> {
-            return <p key={i}><a href={item} target="_blank">{item}</a></p>
-          })
-        } 
-        {
-          currentEvidence.length <= 0 &&
-          <p>No evidence is currently available for this item.</p>
-        }
+        <div className="table-body">
+          <div className="table-head">
+            <div className="head title">Title</div>
+            <div className="head abstract">Abstract</div>
+            <div className="head date">Date</div>
+          </div>
+          {
+            currentEvidence.length > 0 &&
+            currentEvidence.map((item, i)=> {
+              return <p key={i}><a href={item} target="_blank">{item}</a></p>
+            })
+          } 
+          {
+            currentEvidence.length <= 0 &&
+            <p>No evidence is currently available for this item.</p>
+          }
+        </div>
       </Modal>
       <div className="results-list">
         <Query2 results loading/>
@@ -286,7 +324,7 @@ const ResultsList = ({loading}) => {
           {
             !isLoading &&
             <div className="table-container">
-              <ResultsFilter startIndex={startResultIndex+1} endIndex={endResultIndex+1} totalCount={formattedResults.length}/>
+              <ResultsFilter startIndex={itemOffset+1} endIndex={endResultIndex} totalCount={formattedResults.length}/>
               <div className="results-table">
                 <div className="table-body">
                   <div className="table-head result">
@@ -305,11 +343,12 @@ const ResultsList = ({loading}) => {
                   {
                     !isLoading &&
                     !isError &&
-                    formattedResults.length > 0 && 
-                    formattedResults.map((item, i) => {
-
-                      if(i < startResultIndex || i > endResultIndex)
-                        return;
+                    // formattedResults.length > 0 && 
+                    // formattedResults.map((item, i) => {
+                    displayedResults.length > 0 && 
+                    displayedResults.map((item, i) => {
+                      // if(i < startResultIndex || i > endResultIndex)
+                      //   return;
 
                       // let icon = getIcon(item.type);
                       let icon = getIcon('chemical');
@@ -372,7 +411,22 @@ const ResultsList = ({loading}) => {
               {
                 formattedResults.length > 0 && 
                 <div className="pagination">
-                  <button className="prev" onClick={handlePrev}>Previous</button>
+                  <ReactPaginate
+                    breakLabel="..."
+                    nextLabel="Next"
+                    previousLabel="Previous"
+                    onPageChange={handlePageClick}
+                    pageRangeDisplayed={5}
+                    marginPagesDisplayed={1}
+                    pageCount={pageCount}
+                    renderOnZeroPageCount={null}
+                    className="page-nums"
+                    pageClassName="page-num"
+                    activeClassName="current"
+                    previousLinkClassName="prev button"
+                    nextLinkClassName="next button"
+                  />
+                  {/* <button className="prev" onClick={handlePrev}>Previous</button>
                   <ul className="page-nums">{
                     paginationNums.map((item, i) => {
                       if(paginationNums.length > 4) {
@@ -388,7 +442,7 @@ const ResultsList = ({loading}) => {
                       }
                     })
                   }</ul>
-                  <button className="next" onClick={handleNext}>Next</button>
+                  <button className="next" onClick={handleNext}>Next</button> */}
                 </div>
               }
             </div>
