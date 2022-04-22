@@ -393,8 +393,8 @@ const ResultsList = ({loading}) => {
                           <div className="tags-container result-sub">
                             <span className="tags">
                               {
-                                item.subject.toxicity_info.level &&
-                                <span className={`tag toxicity`}>{item.subject.toxicity_info.level}</span>  
+                                // item.subject.toxicity_info.level &&
+                                // <span className={`tag toxicity`}>{item.subject.toxicity_info.level}</span>  
                               }
                               {
                                 lastPubYear &&
