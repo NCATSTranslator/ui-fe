@@ -4,7 +4,7 @@ import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import Modal from "../Modals/Modal";
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
-import { getIcon } from "../../Utilities/utilities";
+import { getIcon, capitalizeFirstLetter } from "../../Utilities/utilities";
 import { currentQuery, currentResultsQueryID, currentResults, setCurrentResults } from "../../Redux/store";
 import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
@@ -26,10 +26,9 @@ const ResultsList = ({loading}) => {
   loading = (resultsState && Object.keys(resultsState).length > 0) ? false : loading;
 
   const [isError, setIsError] = useState(false);
-  // const [isLoading, setIsLoading] = useState(loading);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(loading);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
-  const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentResultsQueryID));
+  const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentResultsQueryID).id);
   const [currentQuerySubject, setCurrentQuerySubject] = useState();
   const [currentEvidence, setCurrentEvidence] = useState([]);
   const [results, setResults] = useState(resultsState);
@@ -82,11 +81,11 @@ const ResultsList = ({loading}) => {
 
   const resultsData = useQuery('resultsData', async () => {
 
-    // if(!currentQueryID || !isLoading)
-    //   return;
+    if(!currentQueryID || !isLoading)
+      return;
 
-    // let queryIDJson = JSON.stringify({qid: currentQueryID});
-    let queryIDJson = JSON.stringify({qid: '3'});
+    let queryIDJson = JSON.stringify({qid: currentQueryID});
+    // let queryIDJson = JSON.stringify({qid: '3'});
 
     const requestOptions = {
       method: 'POST',
@@ -101,7 +100,8 @@ const ResultsList = ({loading}) => {
       });
   }, { 
     refetchInterval: 7000,
-    enabled: isLoading
+    enabled: isLoading,
+    refetchOnWindowFocus: false
   });
 
   useEffect(() => {
@@ -369,6 +369,10 @@ const ResultsList = ({loading}) => {
                         ? new Date(item.edge.last_publication_date).getFullYear()
                         : null;
 
+                      let predicate = (item.edge.predicate)
+                          ? item.edge.predicate.replace("biolink:", '')
+                          : '';
+
                       return(
                         <div key={i} className="result">
                           <div className="checkbox-container result-sub">
@@ -377,7 +381,7 @@ const ResultsList = ({loading}) => {
                           <div className="name-container result-sub">
                             <span className="icon">{icon}</span>
                             <span className="name">{item.subject.name.toUpperCase()}</span>
-                            <span className="effect">{item.edge.predicate}</span>
+                            <span className="effect">{capitalizeFirstLetter(predicate)}</span>
                           </div>
                           <div className="fda-container result-sub">
                             {fdaLevel !== 'N/A' &&

@@ -30,7 +30,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   const [isValidSubmission, setIsValidSubmission] = useState(false);
   const [subjectsActive, setSubjectsActive] = useState(true);
 
-  const [activeMockID, setActiveMockID] = useState(0);
+  const [activeMockID, setActiveMockID] = useState(-1);
 
   let test = useSelector(currentResultsQueryID);
   test = (test === undefined) ? '' : test; 
@@ -109,14 +109,16 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
       setIsValidSubmission(false);
       setIsLoading(true);
       
-      let mockJson = { id: activeMockID} 
-      mockJson = JSON.stringify(mockJson);
+      if(activeMockID != -1) {
+        let mockJson = { id: activeMockID} 
+        testJson = JSON.stringify(mockJson);
+      }
       // setQueryItems([]);
 
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: mockJson
+        body: testJson
       };
       fetch('/query', requestOptions)
         .then(response => response.json())
@@ -246,45 +248,51 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
   const cannedQueries = [
     // One
-    [
-      {
-        name: 'What Chemical',
-        type: 'subject',
-        category: 'chemical',
-        value: ''
-      },
-      {
-        name: 'Treats',
-        type: 'action',
-        category: 'treats'
-      },
-      {
-        name: 'Nausea',
-        type: 'subject',
-        category: 'concept',
-        value: ''
-      }
-    ],
+    {
+      id: 'e01',
+      query: [
+        {
+          name: 'What Chemical',
+          type: 'subject',
+          category: 'chemical',
+          value: ''
+        },
+        {
+          name: 'Treats',
+          type: 'action',
+          category: 'treats'
+        },
+        {
+          name: 'Nausea',
+          type: 'subject',
+          category: 'concept',
+          value: ''
+        }
+      ]
+    },
     // Two
-    [
-      {
-        name: 'What Disease',
-        type: 'subject',
-        category: 'chemical',
-        value: ''
-      },
-      {
-        name: 'Causes',
-        type: 'action',
-        category: 'associated'
-      },
-      {
-        name: 'Heart Failure',
-        type: 'subject',
-        category: 'concept',
-        value: ''
-      }
-    ],
+    {
+      id: 'e02',
+      query: [
+        {
+          name: 'What Disease',
+          type: 'subject',
+          category: 'chemical',
+          value: ''
+        },
+        {
+          name: 'Causes',
+          type: 'action',
+          category: 'associated'
+        },
+        {
+          name: 'Heart Failure',
+          type: 'subject',
+          category: 'concept',
+          value: ''
+        }
+      ]
+    },
   ]
 
   // Query Button items
@@ -426,10 +434,10 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
                       return (
                         <QueryTemplate 
                           handleClick={() => {
-                            changeQueryItems(item);
-                            setActiveMockID(i);
+                            changeQueryItems(item.query);
+                            setActiveMockID(item.id);
                           }}
-                          items={item} 
+                          items={item.query} 
                           key={i}
                         />
                       )
