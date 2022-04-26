@@ -762,12 +762,45 @@ label.checkbox {
 
 // Evidence Modal
 .evidence-modal {
+  .modal-container {
+    width: 1248px;
+    height: 100%;
+    overflow-y: hidden;
+    .inner {
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+  }
+  .table-head {
+    grid-template-columns: 1fr 4fr min-content;
+    .date {
+      padding: 0 20px 10px;
+    }
+  }
   .table-body {
-    .table-head {
-      grid-template-columns: 1fr 4fr min-content;
-      .date {
-        padding: 0 20px 10px;
-      }
+    overflow-y: auto;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    top: 80px;
+    .evidence-item {
+      display: grid;
+      grid-column-gap: $s;
+      grid-template-columns: 330px auto 100px;
+      padding: $s 0;
+      .title a {
+        color: $black;
+        text-decoration: none;
+        font-weight: 700;
+     }
+     .abstract a {
+       margin-left: $xs;
+       color: $black;
+       text-decoration: none;
+       font-weight: 700;
+     }
     }
   }
 }
@@ -960,7 +993,8 @@ label.checkbox {
   width: 100%;
   padding: $m;
   span {
-    display: block;
+    display: flex;
+    align-items: center;
     color: $black;
     margin-bottom: $xxs;
   }
@@ -1203,25 +1237,25 @@ label.checkbox {
         font-size: $bodyTwoSize;
 
       }
-      .table-body {
-        .table-head {
-          border-bottom: 1px solid $midGrey;
-          .checkbox-container {
-            margin: 0 0 $xs;
-          }
-          .head {
-            text-align: center;
-            font-size: 10px;
-            font-weight: 700;
-            line-height: 1.25;
-            text-transform: uppercase;
-            color: $darkGrey;
-            padding-bottom: 10px;
-          }
-          .name-head, .tags-head {
-            text-align: left;
-          }
+      .table-head {
+        border-bottom: 1px solid $midGrey;
+        .checkbox-container {
+          margin: 0 0 $xs;
         }
+        .head {
+          text-align: center;
+          font-size: 10px;
+          font-weight: 700;
+          line-height: 1.25;
+          text-transform: uppercase;
+          color: $darkGrey;
+          padding-bottom: 10px;
+        }
+        .name-head, .tags-head {
+          text-align: left;
+        }
+      }
+      .table-body {
         .result {
           display: grid;
           grid-template-columns: min-content 6fr .75fr 1.75fr 2fr;
@@ -1596,9 +1630,11 @@ label.checkbox {
   margin-top: $m;
   .page-nums {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     list-style-type: none;
     padding-left: 0;
+    width: 700px;
     .button {
       margin-bottom: 0;
     }
@@ -1625,25 +1661,23 @@ label.checkbox {
 }
 
 
-.table-body {
-  .table-head {
-    border-bottom: 1px solid $midGrey;
-    display: grid;
-    .checkbox-container {
-      margin: 0 0 $xs;
-    }
-    .head {
-      text-align: center;
-      font-size: 10px;
-      font-weight: 700;
-      line-height: 1.25;
-      text-transform: uppercase;
-      color: $darkGrey;
-      padding-bottom: 10px;
-    }
-    .name-head, .tags-head {
-      text-align: left;
-    }
+.table-head {
+  border-bottom: 1px solid $midGrey;
+  display: grid;
+  .checkbox-container {
+    margin: 0 0 $xs;
+  }
+  .head {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-transform: uppercase;
+    color: $darkGrey;
+    padding-bottom: 10px;
+  }
+  .name-head, .tags-head {
+    text-align: left;
   }
 }
 

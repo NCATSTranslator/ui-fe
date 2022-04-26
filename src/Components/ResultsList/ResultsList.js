@@ -264,7 +264,7 @@ const ResultsList = ({loading}) => {
     if(resultsProgress >= 100) 
       return;
 
-    let randomTimeout = Math.random() * (5000 - 500) + 500;
+    let randomTimeout = Math.random() * (3000 - 500) + 500;
     const timer = setTimeout(() => {
       let newProgress = resultsProgress + 10;
       if(newProgress < 100) {
@@ -291,16 +291,29 @@ const ResultsList = ({loading}) => {
     <QueryClientProvider client={queryClient}>
       <Modal isOpen={evidenceOpen} onClose={()=>handleModalClose()} className="evidence-modal">
         <h5>Evidence</h5>
+        <div className="table-head">
+          <div className="head title">Title</div>
+          <div className="head abstract">Abstract</div>
+          <div className="head date">Date</div>
+        </div>
         <div className="table-body">
-          <div className="table-head">
-            <div className="head title">Title</div>
-            <div className="head abstract">Abstract</div>
-            <div className="head date">Date</div>
-          </div>
           {
             currentEvidence.length > 0 &&
             currentEvidence.map((item, i)=> {
-              return <p key={i}><a href={item} target="_blank">{item}</a></p>
+              return (
+                <div className="evidence-item" key={i}>
+                  <span className="title">
+                    {item.title && item.url && <a href={item.url} target="_blank">{item.title}</a> }
+                  </span>
+                  <span className="abstract">
+                    {item.abstract && item.abstract}
+                    {item.url && <a href={item.url} target="_blank">Read More</a>}          
+                  </span>
+                  <span className="pubdate">
+                    {item.pubdate && item.pubdate }          
+                  </span>
+                </div>
+              )
             })
           } 
           {
@@ -365,13 +378,22 @@ const ResultsList = ({loading}) => {
                         ? item.subject.fda_info.max_level 
                         : 'N/A';
 
-                      let lastPubYear = (item.edge.last_publication_date)
-                        ? new Date(item.edge.last_publication_date).getFullYear()
-                        : null;
+                      var dateString = item.edge.last_publication_date;
+                      var date = null;
+                      if(dateString !== null && dateString.includes('/')) {
+                        var splitDate = dateString.split('/');
+                        var month = splitDate[1] - 1; //Javascript months are 0-11
+                        date = (splitDate.length === 2) ? new Date('1/' + dateString) : new Date(splitDate[2], month, splitDate[0]);
+                      }
+                      
+                      let lastPubYear = (date !== null)
+                        ? date.getFullYear()
+                        : date;
 
                       let predicate = (item.edge.predicate)
-                          ? item.edge.predicate.replace("biolink:", '')
-                          : '';
+                        ? item.edge.predicate.replace("biolink:", '') + ' ' + results.static_node.names[0]
+                        : '';
+
 
                       return(
                         <div key={i} className="result">

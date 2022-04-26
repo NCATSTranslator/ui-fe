@@ -6,6 +6,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { incrementHistory, setCurrentQuery, currentQuery, currentResultsQueryID, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/store";
 import { useSelector, useDispatch } from 'react-redux'
 import QueryItem from "../QueryComponents/QueryItem";
+import { cannedQueries } from "../../Data/cannedqueries";
 import { useNavigate } from 'react-router-dom';
 
 const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
@@ -246,54 +247,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     },
   ]
 
-  const cannedQueries = [
-    // One
-    {
-      id: 'e01',
-      query: [
-        {
-          name: 'What Chemical',
-          type: 'subject',
-          category: 'chemical',
-          value: ''
-        },
-        {
-          name: 'Treats',
-          type: 'action',
-          category: 'treats'
-        },
-        {
-          name: 'Nausea',
-          type: 'subject',
-          category: 'concept',
-          value: ''
-        }
-      ]
-    },
-    // Two
-    {
-      id: 'e02',
-      query: [
-        {
-          name: 'What Disease',
-          type: 'subject',
-          category: 'chemical',
-          value: ''
-        },
-        {
-          name: 'Causes',
-          type: 'action',
-          category: 'associated'
-        },
-        {
-          name: 'Heart Failure',
-          type: 'subject',
-          category: 'concept',
-          value: ''
-        }
-      ]
-    },
-  ]
+  
 
   // Query Button items
   const gene = {name: 'Gene', type: 'subject', category: 'gene', value: '', selected: false};

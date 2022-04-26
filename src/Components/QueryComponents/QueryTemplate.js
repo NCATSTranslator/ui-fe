@@ -1,3 +1,4 @@
+import { getIcon } from "../../Utilities/utilities";
 
 const QueryTemplate = ({handleClick, items}) => {
 
@@ -7,7 +8,7 @@ const QueryTemplate = ({handleClick, items}) => {
       {
         items.map((item, index)=> {
           return (
-            <span key={index}>{item.name}</span>
+            <span key={index}>{getIcon(item.category)}{item.name}</span>
           )
         })
       }
