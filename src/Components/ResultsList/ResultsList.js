@@ -4,14 +4,11 @@ import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import Modal from "../Modals/Modal";
-import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
-import { getIcon, capitalizeFirstLetter } from "../../Utilities/utilities";
 import { currentQuery, currentResultsQueryID, currentResults, setCurrentResults } from "../../Redux/store";
 import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
-import { ReactQueryDevtoolsPanel } from 'react-query/devtools';
-import { current } from "@reduxjs/toolkit";
+
 
 const ResultsList = ({loading}) => {
 
@@ -30,42 +27,30 @@ const ResultsList = ({loading}) => {
   const [isLoading, setIsLoading] = useState(loading);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentResultsQueryID).id);
-  const [currentQuerySubject, setCurrentQuerySubject] = useState();
   const [currentEvidence, setCurrentEvidence] = useState([]);
+  const [allSelected, setAllSelected] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
   const [results, setResults] = useState(resultsState);
   const [formattedResults, setFormattedResults] = useState([]);
   const [displayedResults, setDisplayedResults] = useState([]);
-
-  const [paginationNums, setPaginationNums] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageCount, setPageCount] = useState(0);
-  const [itemOffset, setItemOffset] = useState(0);
-  const itemsPerPage = 10;
-  
-  
   const [resultsProgress, setResultsProgress] = useState(1);
   const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
-  
-  const [startResultIndex, setStartResultIndex] = useState(0);
   const [endResultIndex, setEndResultIndex] = useState(9);
-
+  const [pageCount, setPageCount] = useState(0);
+  const [itemOffset, setItemOffset] = useState(0);
+  
   var resultsBarOpacityClass = (resultsBarOpacity) ? 'dark': 'light';
-
-  const [allSelected, setAllSelected] = useState(false);
-  const [selectedItems, setSelectedItems] = useState([]);
-
   const queryClient = new QueryClient();
+  const itemsPerPage = 10;
   
   useEffect(() => {
     if(formattedResults.length === 0)
       return
     
-      // Fetch items from another resources.
     const endOffset = (itemOffset + itemsPerPage > formattedResults.length)
       ? formattedResults.length
       : itemOffset + itemsPerPage;
     setDisplayedResults(formattedResults.slice(itemOffset, endOffset));
-    setStartResultIndex(itemOffset);
     setEndResultIndex(endOffset);
     setPageCount(Math.ceil(formattedResults.length / itemsPerPage));
     console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
@@ -86,7 +71,6 @@ const ResultsList = ({loading}) => {
       return;
 
     let queryIDJson = JSON.stringify({qid: currentQueryID});
-    // let queryIDJson = JSON.stringify({qid: '3'});
 
     const requestOptions = {
       method: 'POST',
@@ -124,17 +108,9 @@ const ResultsList = ({loading}) => {
     // setIsError((results.status === 'error'));
   }, [results]);
 
-  // useEffect(() => {
-  //   if(formattedResults.length <= 0)
-  //     return;
-  //   let pagination = getPaginationNums(formattedResults);
-  //   setPaginationNums(pagination);
-  // }, [formattedResults]);
-
   const getFormattedResults = (results) => {
     return results.summary;
   }
-
 
   const handleSelected = (item) => {
     let match = false;
@@ -284,7 +260,7 @@ const ResultsList = ({loading}) => {
                   </div>
                   {
                     isError &&
-                    <h3>There was an error when processing your query. Please try again.</h3>
+                    <h5>There was an error when processing your query. Please try again.</h5>
                   }
                   {
                     !isLoading &&
