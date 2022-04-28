@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Checkbox from "../FormFields/Checkbox";
 import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
+import ResultsItem from "../ResultsItem/ResultsItem";
 import Modal from "../Modals/Modal";
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
 import { getIcon, capitalizeFirstLetter } from "../../Utilities/utilities";
@@ -176,74 +177,6 @@ const ResultsList = ({loading}) => {
     setEvidenceOpen(true);
   }
 
-  // const handlePrev = () => {
-  //   if(startResultIndex === 0) 
-  //     return;
-
-  //   if(startResultIndex - itemsPerPage > 0) {
-  //     setStartResultIndex(startResultIndex - itemsPerPage)
-  //     setEndResultIndex(startResultIndex - 1)
-  //   } else {
-  //     let increment = (startResultIndex);
-  //     setStartResultIndex(startResultIndex - increment)
-  //     setEndResultIndex(itemsPerPage - 1)
-  //   }
-  //   setCurrentPage((currentPage) => currentPage - 1);
-  // }
-
-  // const handleNext = () => {
-  //   if(formattedResults.length === (endResultIndex + 1))
-  //     return;
-
-  //   if(formattedResults.length > endResultIndex + itemsPerPage) {
-  //     setStartResultIndex(startResultIndex + itemsPerPage)
-  //     setEndResultIndex(endResultIndex + itemsPerPage)
-  //   } else {
-  //     let increment = (formattedResults.length - endResultIndex);
-  //     setStartResultIndex(startResultIndex + itemsPerPage)
-  //     setEndResultIndex(formattedResults.length - 1)
-  //   }
-  //   setCurrentPage((currentPage) => currentPage + 1);
-  // }
-
-  // const setResultIndexes = (start, end, page) => {
-  //   setStartResultIndex(start);
-  //   setEndResultIndex(end);
-  //   setCurrentPage(page);
-  // }
-
-  // const getPaginationNums = (elements) => {
-    
-  //   let currentClass = (currentPage === 0) ? 'current' : '';
-  //   var numbers = [<li onClick={()=>setResultIndexes(0, itemsPerPage - 1, 0)} className={`page-num ${currentClass}`}>1</li>];
-  //   // start with 2, since we already supplied '1'
-  //   var pageNum = 2;
-  //   for (let i = 0; i < elements.length; i++) {
-  //     if((i + 1) % itemsPerPage === 0) {
-  //       let start = i + 1;
-  //       let end = ((start + itemsPerPage) > elements.length) 
-  //         ? formattedResults.length - 1 
-  //         : i + itemsPerPage;
-  //         currentClass = (currentPage === pageNum - 1) ? 'current' : '';
-  //       let newPage = pageNum - 1;
-  //       numbers.push(<li onClick={()=>{setResultIndexes(start, end, newPage)}} className={`page-num ${currentClass}`}>{pageNum}</li>);
-  //       pageNum++;
-  //     }
-  //   }
-  //   return numbers;
-  // }
-
-  // useEffect(() => {
-  //   console.log(currentPage);
-  //   let pagination = getPaginationNums(formattedResults);
-  //   setPaginationNums(pagination);
-  // }, [currentPage]);
-
-  // useEffect(() => {
-  //   // console.log(startResultIndex);
-  //   // console.log(endResultIndex);
-  // }, [endResultIndex]);
-
   const exampleKPResults = [
     {name: 'BTE', value: '54', error: false},
     {name: 'CHP', value: '0', error: false},
@@ -303,11 +236,11 @@ const ResultsList = ({loading}) => {
               return (
                 <div className="evidence-item" key={i}>
                   <span className="title">
-                    {item.title && item.url && <a href={item.url} target="_blank">{item.title}</a> }
+                    {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
                   </span>
                   <span className="abstract">
                     {item.abstract && item.abstract}
-                    {item.url && <a href={item.url} target="_blank">Read More</a>}          
+                    {item.url && <a href={item.url} target="_blank" rel="noreferrer">Read More</a>}          
                   </span>
                   <span className="pubdate">
                     {item.pubdate && item.pubdate }          
@@ -356,79 +289,18 @@ const ResultsList = ({loading}) => {
                   {
                     !isLoading &&
                     !isError &&
-                    // formattedResults.length > 0 && 
-                    // formattedResults.map((item, i) => {
                     displayedResults.length > 0 && 
                     displayedResults.map((item, i) => {
-                      // if(i < startResultIndex || i > endResultIndex)
-                      //   return;
-
-                      // let icon = getIcon(item.type);
-                      let icon = getIcon('chemical');
-
-                      let evidenceCount = 
-                        (
-                          item.edge !== undefined &&
-                          item.edge.evidence !== undefined 
-                        ) 
-                        ? item.edge.evidence.length
-                        : 0;
-                        
-                      let fdaLevel = (item.subject.fda_info ) 
-                        ? item.subject.fda_info.max_level 
-                        : 'N/A';
-
-                      var dateString = item.edge.last_publication_date;
-                      var date = null;
-                      if(dateString !== null && dateString.includes('/')) {
-                        var splitDate = dateString.split('/');
-                        var month = splitDate[1] - 1; //Javascript months are 0-11
-                        date = (splitDate.length === 2) ? new Date('1/' + dateString) : new Date(splitDate[2], month, splitDate[0]);
-                      }
-                      
-                      let lastPubYear = (date !== null)
-                        ? date.getFullYear()
-                        : date;
-
-                      let predicate = (item.edge.predicate)
-                        ? item.edge.predicate.replace("biolink:", '') + ' ' + results.static_node.names[0]
-                        : '';
-
 
                       return(
-                        <div key={i} className="result">
-                          <div className="checkbox-container result-sub">
-                            <Checkbox checked={allSelected} handleClick={()=>handleSelected(item)}/>
-                          </div>
-                          <div className="name-container result-sub">
-                            <span className="icon">{icon}</span>
-                            <span className="name">{item.subject.name.toUpperCase()}</span>
-                            <span className="effect">{capitalizeFirstLetter(predicate)}</span>
-                          </div>
-                          <div className="fda-container result-sub">
-                            {fdaLevel !== 'N/A' &&
-                              <span className="fda-icon"><CheckIcon /></span>
-                            }
-                            <span className="fda">{fdaLevel}</span>
-                          </div>
-                          <div className="evidence-container result-sub">
-                            <span className="evidence-link" onClick={()=>{activateEvidence(item.edge.evidence)}}>
-                              <span className="view-all">View All</span> ({evidenceCount})
-                            </span>
-                          </div>
-                          <div className="tags-container result-sub">
-                            <span className="tags">
-                              {
-                                // item.subject.toxicity_info.level &&
-                                // <span className={`tag toxicity`}>{item.subject.toxicity_info.level}</span>  
-                              }
-                              {
-                                lastPubYear &&
-                                <span className={`tag year`}>{lastPubYear}</span>  
-                              }
-                            </span>
-                          </div>
-                        </div>
+                        <ResultsItem 
+                          key={i} 
+                          item={item} 
+                          staticNode={results.static_node} 
+                          allSelected={allSelected}
+                          handleSelected={()=>handleSelected(item)}
+                          activateEvidence={()=>activateEvidence(item.edge.evidence)} 
+                        />
                       )
                     })
                   }
@@ -452,33 +324,16 @@ const ResultsList = ({loading}) => {
                     previousLinkClassName="prev button"
                     nextLinkClassName="next button"
                   />
-                  {/* <button className="prev" onClick={handlePrev}>Previous</button>
-                  <ul className="page-nums">{
-                    paginationNums.map((item, i) => {
-                      if(paginationNums.length > 4) {
-                        if(i === currentPage 
-                          || (i === 0)
-                          || (i === currentPage - 1 && i > 0)
-                          || i === currentPage + 1
-                          || i >= paginationNums.length - 2) {
-                            return item;
-                          }
-                        if (i === currentPage + 2)
-                          return '...';
-                      }
-                    })
-                  }</ul>
-                  <button className="next" onClick={handleNext}>Next</button> */}
                 </div>
               }
             </div>
           }
           <div className="kps">
-            <h6>Knowledge Providers</h6>
+            {/* <h6>Knowledge Providers</h6>
             <p>
               { isLoading && "Estimated Loading Time: " } 
               { !isLoading && "Found in " } 
-              <span className="time">1.8 seconds</span></p>
+              <span className="time">1.8 seconds</span></p> */}
             <ul className="kp-list">
             {
               // exampleKPResults.map((item, index)=> {
