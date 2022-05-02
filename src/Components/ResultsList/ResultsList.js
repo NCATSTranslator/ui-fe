@@ -38,6 +38,7 @@ const ResultsList = ({loading}) => {
   const [endResultIndex, setEndResultIndex] = useState(9);
   const [pageCount, setPageCount] = useState(0);
   const [itemOffset, setItemOffset] = useState(0);
+  const [activeFilters, setActiveFilters] = useState([]);
   
   var resultsBarOpacityClass = (resultsBarOpacity) ? 'dark': 'light';
   const queryClient = new QueryClient();
@@ -153,6 +154,49 @@ const ResultsList = ({loading}) => {
     setEvidenceOpen(true);
   }
 
+  const handleFilter = (filter) => {
+    let index = activeFilters.indexOf(filter);
+    let newFilters = [];
+    // Remove if we find a match
+    if(index > -1) {
+      newFilters = activeFilters.reduce((result, value, i) => {
+        if(i!=index) {
+          result.push(value);
+        }
+        return result;
+      }, []);
+    // Otherwise add the new filter to the list
+    } else {
+      newFilters = [...activeFilters, filter];
+    }
+    setActiveFilters(newFilters);
+  }
+
+  useEffect(() => {
+    console.log(activeFilters);
+    if(activeFilters.length <= 0) {
+      setFormattedResults(getFormattedResults(results));
+      return;
+    }
+
+    let filteredResults = [];
+    activeFilters.forEach(element => {
+      switch (element) {
+        case 'fda':
+          formattedResults.forEach((element) => {
+            if(element.subject.fda_info != null)
+              filteredResults.push(element);
+          })
+          break;
+      
+        default:
+          filteredResults = [...formattedResults];
+          break;
+      }
+    });
+    setFormattedResults(filteredResults);
+  }, [activeFilters]);
+
   const exampleKPResults = [
     {name: 'BTE', value: '54', error: false},
     {name: 'CHP', value: '0', error: false},
@@ -246,7 +290,12 @@ const ResultsList = ({loading}) => {
           {
             !isLoading &&
             <div className="table-container">
-              <ResultsFilter startIndex={itemOffset+1} endIndex={endResultIndex} totalCount={formattedResults.length}/>
+              <ResultsFilter 
+                startIndex={itemOffset+1} 
+                endIndex={endResultIndex} 
+                totalCount={formattedResults.length}
+                onSort={()=>{}} 
+                onFilter={handleFilter} />
               <div className="results-table">
                 <div className="table-body">
                   <div className="table-head result">

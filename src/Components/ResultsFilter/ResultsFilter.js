@@ -6,7 +6,7 @@ import Radio from '../FormFields/Radio';
 import Accordion from '../Accordion/Accordion';
 import Range from '../Range/Range';
 
-const ResultsFilter = ({startIndex, endIndex, totalCount}) => {
+const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => {
 
   const labelOne = "Chemical";
   const labelTwo = "Gene";
@@ -51,15 +51,15 @@ const ResultsFilter = ({startIndex, endIndex, totalCount}) => {
             <div className="filter-left">
               <p className="sub-one">Filter</p>
               <p className="sub-two">Evidence</p>
-                <Checkbox>Minimum Number of Evidence</Checkbox>
+                <Checkbox handleClick={()=>{onFilter('evi')}}>Minimum Number of Evidence</Checkbox>
                 <Range label="Minimum Number of Evidence" hideLabel min="1" max="99" />
               <p className="sub-two">Species</p>
-                <Checkbox>Human</Checkbox>
-                <Checkbox>Mouse</Checkbox>
-                <Checkbox>Zebrafish</Checkbox>
+                <Checkbox handleClick={()=>{onFilter('hum')}}>Human</Checkbox>
+                <Checkbox handleClick={()=>{onFilter('mou')}}>Mouse</Checkbox>
+                <Checkbox handleClick={()=>{onFilter('zeb')}}>Zebrafish</Checkbox>
               <p className="sub-two">Tags</p>
-                <Checkbox>FDA Approved</Checkbox>
-                <Checkbox>Pediatric Indications</Checkbox>
+                <Checkbox handleClick={()=>{onFilter('fda')}}>FDA Approved</Checkbox>
+                <Checkbox handleClick={()=>{onFilter('ped')}}>Pediatric Indications</Checkbox>
             </div>
             <div className="filter-right">
               <p className="sub-one">Sort By</p>
