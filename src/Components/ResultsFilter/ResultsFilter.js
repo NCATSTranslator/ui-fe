@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import Toggle from '../Toggle/Toggle';
 import Select from '../FormFields/Select';
 import Checkbox from '../FormFields/Checkbox';
@@ -8,10 +8,24 @@ import Range from '../Range/Range';
 
 const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => {
 
-  const labelOne = "Chemical";
-  const labelTwo = "Gene";
   
   const [optionState, setOptionState] = useState(''); 
+  const [minEvidence, setMinEvidence] = useState(1); 
+  const [minEvidenceActive, setMinEvidenceActive] = useState(false); 
+
+  const handleEvidenceActive = () => {
+    onFilter({tag:'evi', value: minEvidence});
+    setMinEvidenceActive(!minEvidenceActive)
+  }
+  const handleEvidenceRangeChange = (e) => {
+    setMinEvidence(e.target.value);
+  }
+  
+  useEffect(() => {
+    if(minEvidenceActive) {
+      onFilter({tag:'evi', value: minEvidence})
+    }
+  }, [minEvidence]);
 
   return (
     <div className="results-filter">
@@ -51,15 +65,15 @@ const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => 
             <div className="filter-left">
               <p className="sub-one">Filter</p>
               <p className="sub-two">Evidence</p>
-                <Checkbox handleClick={()=>{onFilter('evi')}}>Minimum Number of Evidence</Checkbox>
-                <Range label="Minimum Number of Evidence" hideLabel min="1" max="99" />
+                <Checkbox handleClick={handleEvidenceActive}>Minimum Number of Evidence</Checkbox>
+                <Range label="Minimum Number of Evidence" hideLabel min="1" max="99" onChange={e => handleEvidenceRangeChange(e)}/>
               <p className="sub-two">Species</p>
-                <Checkbox handleClick={()=>{onFilter('hum')}}>Human</Checkbox>
-                <Checkbox handleClick={()=>{onFilter('mou')}}>Mouse</Checkbox>
-                <Checkbox handleClick={()=>{onFilter('zeb')}}>Zebrafish</Checkbox>
+                <Checkbox handleClick={()=>{onFilter({tag:'hum', value: ''})}}>Human</Checkbox>
+                <Checkbox handleClick={()=>{onFilter({tag:'mou', value: ''})}}>Mouse</Checkbox>
+                <Checkbox handleClick={()=>{onFilter({tag:'zeb', value: ''})}}>Zebrafish</Checkbox>
               <p className="sub-two">Tags</p>
-                <Checkbox handleClick={()=>{onFilter('fda')}}>FDA Approved</Checkbox>
-                <Checkbox handleClick={()=>{onFilter('ped')}}>Pediatric Indications</Checkbox>
+                <Checkbox handleClick={()=>{onFilter({tag:'fda', value: ''})}}>FDA Approved</Checkbox>
+                <Checkbox handleClick={()=>{onFilter({tag:'ped', value: ''})}}>Pediatric Indications</Checkbox>
             </div>
             <div className="filter-right">
               <p className="sub-one">Sort By</p>

@@ -45,8 +45,8 @@ const ResultsList = ({loading}) => {
   const itemsPerPage = 10;
   
   useEffect(() => {
-    if(formattedResults.length === 0)
-      return
+    // if(formattedResults.length === 0)
+    //   return
     
     const endOffset = (itemOffset + itemsPerPage > formattedResults.length)
       ? formattedResults.length
@@ -155,16 +155,27 @@ const ResultsList = ({loading}) => {
   }
 
   const handleFilter = (filter) => {
-    let index = activeFilters.indexOf(filter);
+    let index = activeFilters.findIndex(value => (value.tag === filter.tag));
     let newFilters = [];
     // Remove if we find a match
     if(index > -1) {
-      newFilters = activeFilters.reduce((result, value, i) => {
-        if(i!=index) {
-          result.push(value);
-        }
-        return result;
-      }, []);
+      // if the values match, it's a real match
+      if (activeFilters[index].value === filter.value) {
+        newFilters = activeFilters.reduce((result, value, i) => {
+          if(i!=index) {
+            result.push(value);
+          }
+          return result;
+        }, []);
+        //  otherwise just update the value
+      } else {
+        newFilters = activeFilters.map((value, i) => {
+          if(i === index)
+            value.value = filter.value;
+
+          return value;
+        });
+      }
     // Otherwise add the new filter to the list
     } else {
       newFilters = [...activeFilters, filter];
@@ -180,20 +191,27 @@ const ResultsList = ({loading}) => {
     }
 
     let filteredResults = [];
-    activeFilters.forEach(element => {
-      switch (element) {
-        case 'fda':
-          formattedResults.forEach((element) => {
-            if(element.subject.fda_info != null)
-              filteredResults.push(element);
-          })
-          break;
-      
-        default:
-          filteredResults = [...formattedResults];
-          break;
+    let originalResults = getFormattedResults(results);
+    originalResults.forEach((element) => {
+      let addElement = true;
+      activeFilters.forEach((filter) => {
+        switch (filter.tag) {
+          case 'fda':
+            if(element.subject.fda_info === null)
+              addElement = false;
+            break;
+          case 'evi':
+            if(element.edge.evidence.length < filter.value)
+              addElement = false;
+            break;
+          default:
+            break;
+        }
+      })
+      if(addElement) {
+        filteredResults.push(element);
       }
-    });
+    })
     setFormattedResults(filteredResults);
   }, [activeFilters]);
 
