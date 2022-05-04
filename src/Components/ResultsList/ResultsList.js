@@ -15,6 +15,7 @@ const ResultsList = ({loading}) => {
   // URL search params
   const loadingParam = new URLSearchParams(window.location.search).get("loading")
   
+  // Initialize dispatch in order to send updates to the application state
   const dispatch = useDispatch();
 
   loading = (loading) ? loading : false;
@@ -23,27 +24,45 @@ const ResultsList = ({loading}) => {
   resultsState = (Object.keys(resultsState).length === 0) ? null : resultsState;
   loading = (resultsState && Object.keys(resultsState).length > 0) ? false : loading;
 
+  // Bool, did the results return an error
   const [isError, setIsError] = useState(false);
+  // Bool, are the results still loading
   const [isLoading, setIsLoading] = useState(loading);
+  // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
+  // Int, current query id
   const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentResultsQueryID).id);
+  // Array, evidence relating to the item last clicked
   const [currentEvidence, setCurrentEvidence] = useState([]);
+  // Bool, is the select all checkbox checked
   const [allSelected, setAllSelected] = useState(false);
+  // Array, all selected items
   const [selectedItems, setSelectedItems] = useState([]);
+  // Obj, original raw results from the BE
   const [results, setResults] = useState(resultsState);
+  // Array, results formatted by any active filters, sorted by any active sorting
   const [formattedResults, setFormattedResults] = useState([]);
+  // Array, results meant to display based on the pagination
   const [displayedResults, setDisplayedResults] = useState([]);
+  // Int, represents results progress bar
   const [resultsProgress, setResultsProgress] = useState(1);
+  // Bool, alternates opacity of progress bar while loading
   const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
   const [endResultIndex, setEndResultIndex] = useState(9);
+  // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
+  // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
+  // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
-  
+  // Str, class for results progress bar opacity
   var resultsBarOpacityClass = (resultsBarOpacity) ? 'dark': 'light';
+  // Initialize queryClient for React Query to fetch results
   const queryClient = new QueryClient();
+  // Int, how many items per page
   const itemsPerPage = 10;
   
+  // 
   useEffect(() => {
     // if(formattedResults.length === 0)
     //   return
@@ -57,7 +76,7 @@ const ResultsList = ({loading}) => {
     console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
   }, [itemOffset, itemsPerPage, formattedResults]);
 
-  // Invoke when user click to request another page.
+  // Handles direct page click
   const handlePageClick = (event) => {
     const newOffset = (event.selected * itemsPerPage) % formattedResults.length;
     console.log(
@@ -66,6 +85,7 @@ const ResultsList = ({loading}) => {
     setItemOffset(newOffset);
   };
 
+  // React Query call for results
   const resultsData = useQuery('resultsData', async () => {
 
     if(!currentQueryID || !isLoading)
@@ -90,29 +110,37 @@ const ResultsList = ({loading}) => {
     refetchOnWindowFocus: false
   });
 
+  /*
+    When the results change, which occurs when the React Query returns, handle the returned data
+    based on the returned data's status.
+  */ 
   useEffect(() => {
     console.log(results);
+    // if we're still loading, maintain that state
     if(results === null)
       return;
 
+    // if the status is no longer 'running', set loading to false
     if(results.status !== 'running')
       setIsLoading(false);
     
+    // if the status is 'done', handle setting the results
     if(results.status === 'done') {
-      let newResults = getFormattedResults(results);
+      let newResults = getSummarizedResults(results);
       console.log(newResults);
       // set formatted results
       setFormattedResults(newResults);
-      // update app state for unformatted results
+      // update app state for raw results
       dispatch(setCurrentResults(results));
     }
     // setIsError((results.status === 'error'));
   }, [results]);
 
-  const getFormattedResults = (results) => {
+  const getSummarizedResults = (results) => {
     return results.summary;
   }
 
+  // Click handler for item select checkboxes 
   const handleSelected = (item) => {
     let match = false;
     let matchIndex = -1;
@@ -124,9 +152,11 @@ const ResultsList = ({loading}) => {
       }
       return element;
     });
+    // if there's no match, add the item to the array of selected items
     if(!match) {
       items.push(item);
       setSelectedItems(items);
+    // if there is a match, remove the item from the array of selected items
     } else {
       items.splice(matchIndex, 1);
       setSelectedItems(items);
@@ -135,6 +165,7 @@ const ResultsList = ({loading}) => {
     }
   }
 
+  // Click handler for select all checkbox 
   const handleSelectAll = (items) => {
     if(!allSelected) {
       setSelectedItems(items);
@@ -145,21 +176,24 @@ const ResultsList = ({loading}) => {
     }
   }
 
+  // Click handler for the modal close button
   const handleModalClose = () => {
     setEvidenceOpen(false);
   }
 
+  // Click handler for opening the evidence modal and populating the evidence
   const activateEvidence = (evidence) => {
     setCurrentEvidence(evidence);
     setEvidenceOpen(true);
   }
 
+  // Handle the addition and removal of individual filters
   const handleFilter = (filter) => {
     let index = activeFilters.findIndex(value => (value.tag === filter.tag));
     let newFilters = [];
     // Remove if we find a match
     if(index > -1) {
-      // if the values match, it's a real match
+      // if the values also match, it's a real match
       if (activeFilters[index].value === filter.value) {
         newFilters = activeFilters.reduce((result, value, i) => {
           if(i!=index) {
@@ -167,7 +201,7 @@ const ResultsList = ({loading}) => {
           }
           return result;
         }, []);
-        //  otherwise just update the value
+        // otherwise just update the value
       } else {
         newFilters = activeFilters.map((value, i) => {
           if(i === index)
@@ -183,23 +217,31 @@ const ResultsList = ({loading}) => {
     setActiveFilters(newFilters);
   }
 
+  // Filter the results whenever the activated filters change 
   useEffect(() => {
     console.log(activeFilters);
+    // If there are no active filters, get the full result set
     if(activeFilters.length <= 0) {
-      setFormattedResults(getFormattedResults(results));
+      setFormattedResults(getSummarizedResults(results));
       return;
     }
 
     let filteredResults = [];
-    let originalResults = getFormattedResults(results);
+    let originalResults = getSummarizedResults(results);
+    /* 
+      For each result, check against each filter. If a filter is triggered, 
+      set addElement to false and don't add the element to the filtered results
+    */  
     originalResults.forEach((element) => {
       let addElement = true;
       activeFilters.forEach((filter) => {
         switch (filter.tag) {
+          // FDA approved filter 
           case 'fda':
             if(element.subject.fda_info === null)
               addElement = false;
             break;
+          // Minimum evidence filter
           case 'evi':
             if(element.edge.evidence.length < filter.value)
               addElement = false;
@@ -212,6 +254,7 @@ const ResultsList = ({loading}) => {
         filteredResults.push(element);
       }
     })
+    // Set the formatted results to the newly filtered results
     setFormattedResults(filteredResults);
   }, [activeFilters]);
 
@@ -231,6 +274,7 @@ const ResultsList = ({loading}) => {
     console.log(selectedItems)
   }, [selectedItems]);
 
+  // Spoofs progress bar
   useEffect(() => {
     if(resultsProgress >= 100) 
       return;
@@ -247,6 +291,7 @@ const ResultsList = ({loading}) => {
     return () => clearTimeout(timer);
   }, [resultsProgress]);
 
+  // Alternates progress bar opacity class on set timeout
   useEffect(() => {
     if(!isLoading) 
       return;

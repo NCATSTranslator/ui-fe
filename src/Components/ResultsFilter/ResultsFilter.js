@@ -77,9 +77,9 @@ const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => 
             </div>
             <div className="filter-right">
               <p className="sub-one">Sort By</p>
-              <p className="sub-two">Toxicity</p>
-                <Radio>Low to High</Radio>
-                <Radio>High to Low</Radio>
+              <p className="sub-two">Name</p>
+                <Radio>A &gt; Z</Radio>
+                <Radio>Z &lt; A </Radio>
               <p className="sub-two">Date of Evidence</p>
                 <Radio>Newest</Radio>
                 <Radio>Oldest</Radio>
