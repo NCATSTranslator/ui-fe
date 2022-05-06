@@ -136,7 +136,11 @@ const ResultsList = ({loading}) => {
     // setIsError((results.status === 'error'));
   }, [results]);
 
+  // Return summarized results
   const getSummarizedResults = (results) => {
+    if (results === null)
+      return [];
+  
     return results.summary;
   }
 
@@ -285,12 +289,6 @@ const ResultsList = ({loading}) => {
     // Set the formatted results to the newly filtered results
     setFormattedResults(filteredResults);
   }, [activeFilters]);
-
-  const sortByName = () => {
-    let sortedResults = [...formattedResults];
-    sortedResults.sort((a, b) => a.subject.name.localeCompare(b.subject.name));
-    setFormattedResults(sortedResults);
-  }
 
   const exampleKPResults = [
     {name: 'BTE', value: '54', error: false},
