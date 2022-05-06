@@ -8,6 +8,7 @@ import { currentQuery, currentResultsQueryID, currentResults, setCurrentResults 
 import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
 
 
 const ResultsList = ({loading}) => {
@@ -44,10 +45,7 @@ const ResultsList = ({loading}) => {
   const [formattedResults, setFormattedResults] = useState([]);
   // Array, results meant to display based on the pagination
   const [displayedResults, setDisplayedResults] = useState([]);
-  // Int, represents results progress bar
-  const [resultsProgress, setResultsProgress] = useState(1);
-  // Bool, alternates opacity of progress bar while loading
-  const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
+  // Int, last result item index
   const [endResultIndex, setEndResultIndex] = useState(9);
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
@@ -55,6 +53,11 @@ const ResultsList = ({loading}) => {
   const [itemOffset, setItemOffset] = useState(0);
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
+
+  // Int, represents results progress bar
+  const [resultsProgress, setResultsProgress] = useState(1);
+  // Bool, alternates opacity of progress bar while loading
+  const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
   // Str, class for results progress bar opacity
   var resultsBarOpacityClass = (resultsBarOpacity) ? 'dark': 'light';
   // Initialize queryClient for React Query to fetch results
@@ -62,11 +65,8 @@ const ResultsList = ({loading}) => {
   // Int, how many items per page
   const itemsPerPage = 10;
   
-  // 
-  useEffect(() => {
-    // if(formattedResults.length === 0)
-    //   return
-    
+  // Handle Page Offset
+  useEffect(() => {    
     const endOffset = (itemOffset + itemsPerPage > formattedResults.length)
       ? formattedResults.length
       : itemOffset + itemsPerPage;
@@ -217,6 +217,34 @@ const ResultsList = ({loading}) => {
     setActiveFilters(newFilters);
   }
 
+  // Handle the sorting 
+  const handleSort = (sortName) => {
+    let sortedResults = [...formattedResults];
+    switch (sortName) {
+      case 'nameLowHigh':
+        sortedResults = sortNameLowHigh(sortedResults);
+        break;
+      case 'nameHighLow':
+        sortedResults = sortNameHighLow(sortedResults);
+        break;
+      case 'evidenceLowHigh':
+        sortedResults = sortEvidenceLowHigh(sortedResults);
+        break;
+      case 'evidenceHighLow':
+        sortedResults = sortEvidenceHighLow(sortedResults);
+        break;
+      case 'dateLowHigh':
+        sortedResults = sortDateLowHigh(sortedResults);
+        break;
+      case 'dateHighLow':
+        sortedResults = sortDateHighLow(sortedResults);
+        break;
+      default:
+        break;
+    }
+    setFormattedResults(sortedResults);
+  }
+
   // Filter the results whenever the activated filters change 
   useEffect(() => {
     console.log(activeFilters);
@@ -257,6 +285,12 @@ const ResultsList = ({loading}) => {
     // Set the formatted results to the newly filtered results
     setFormattedResults(filteredResults);
   }, [activeFilters]);
+
+  const sortByName = () => {
+    let sortedResults = [...formattedResults];
+    sortedResults.sort((a, b) => a.subject.name.localeCompare(b.subject.name));
+    setFormattedResults(sortedResults);
+  }
 
   const exampleKPResults = [
     {name: 'BTE', value: '54', error: false},
@@ -357,7 +391,7 @@ const ResultsList = ({loading}) => {
                 startIndex={itemOffset+1} 
                 endIndex={endResultIndex} 
                 totalCount={formattedResults.length}
-                onSort={()=>{}} 
+                onSort={handleSort} 
                 onFilter={handleFilter} />
               <div className="results-table">
                 <div className="table-body">
@@ -365,7 +399,7 @@ const ResultsList = ({loading}) => {
                       <div className="checkbox-container checkbox-head">
                         <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
                       </div>
-                      <div className="name-head head">Name</div>
+                      <div className="name-head head" onClick={()=>{sortByName()}}>Name</div>
                       <div className="fda-head head">FDA</div>
                       <div className="evidence-head head">Evidence</div>
                       <div className="tags-head head">Tags</div>

@@ -43,3 +43,21 @@ export const getIcon = (category) => {
 export const capitalizeFirstLetter = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+export const getLastPubYear = (pubDate) => {
+  let dateString = pubDate;
+  let date = null;
+  if(dateString !== null && dateString.includes('/')) {
+    let splitDate = dateString.split('/');
+    let month = splitDate[1] - 1; //Javascript months are 0-11
+    date = (splitDate.length === 2) 
+      ? new Date('1/' + dateString) 
+      : new Date(splitDate[2], month, splitDate[0]);
+  }
+  
+  let lastPubYear = (date !== null)
+    ? date.getFullYear()
+    : date;
+
+  return lastPubYear;
+}

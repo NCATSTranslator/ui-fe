@@ -5,6 +5,7 @@ import Checkbox from '../FormFields/Checkbox';
 import Radio from '../FormFields/Radio';
 import Accordion from '../Accordion/Accordion';
 import Range from '../Range/Range';
+import cloneDeep from 'lodash/cloneDeep';
 
 const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => {
 
@@ -12,6 +13,51 @@ const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => 
   const [optionState, setOptionState] = useState(''); 
   const [minEvidence, setMinEvidence] = useState(1); 
   const [minEvidenceActive, setMinEvidenceActive] = useState(false); 
+  const [sortingActive, setSortingActive] = useState(false); 
+
+  const [sortingOptions, setSortingOptions] = useState(
+    {
+      nameLowHigh: {
+        name: 'nameLowHigh',
+        active: false
+      },
+      nameHighLow: {
+        name: 'nameHighLow',
+        active: false
+      },     
+      dateLowHigh: {
+        name: 'dateLowHigh',
+        active: false
+      },
+      dateHighLow: {
+        name: 'dateHighLow',
+        active: false
+      },   
+      evidenceLowHigh: {
+        name: 'evidenceLowHigh',
+        active: false
+      },
+      evidenceHighLow: {
+        name: 'evidenceHighLow',
+        active: false
+      },   
+    }
+  );
+
+  const handleSorting = (sortName) => {
+    setSortingActive(true);
+    let newSortingOptions = cloneDeep(sortingOptions);
+    Object.values(newSortingOptions).map((option)=> {
+      if(option.name === sortName)
+        option.active = true;
+      else 
+        option.active = false;
+      return option;
+    })
+    setSortingOptions(()=>newSortingOptions);
+    onSort(sortName);
+  }
+  
 
   const handleEvidenceActive = () => {
     onFilter({tag:'evi', value: minEvidence});
@@ -26,6 +72,10 @@ const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => 
       onFilter({tag:'evi', value: minEvidence})
     }
   }, [minEvidence]);
+
+  useEffect(() => {
+    console.log(sortingOptions)
+  }, [sortingOptions]);
 
   return (
     <div className="results-filter">
@@ -68,24 +118,54 @@ const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => 
                 <Checkbox handleClick={handleEvidenceActive}>Minimum Number of Evidence</Checkbox>
                 <Range label="Minimum Number of Evidence" hideLabel min="1" max="99" onChange={e => handleEvidenceRangeChange(e)}/>
               <p className="sub-two">Species</p>
-                <Checkbox handleClick={()=>{onFilter({tag:'hum', value: ''})}}>Human</Checkbox>
-                <Checkbox handleClick={()=>{onFilter({tag:'mou', value: ''})}}>Mouse</Checkbox>
-                <Checkbox handleClick={()=>{onFilter({tag:'zeb', value: ''})}}>Zebrafish</Checkbox>
+                <Checkbox handleClick={() => onFilter({tag:'hum', value: ''})}>Human</Checkbox>
+                <Checkbox handleClick={() => onFilter({tag:'mou', value: ''})}>Mouse</Checkbox>
+                <Checkbox handleClick={() => onFilter({tag:'zeb', value: ''})}>Zebrafish</Checkbox>
               <p className="sub-two">Tags</p>
-                <Checkbox handleClick={()=>{onFilter({tag:'fda', value: ''})}}>FDA Approved</Checkbox>
-                <Checkbox handleClick={()=>{onFilter({tag:'ped', value: ''})}}>Pediatric Indications</Checkbox>
+                <Checkbox handleClick={() => onFilter({tag:'fda', value: ''})}>FDA Approved</Checkbox>
+                <Checkbox handleClick={() => onFilter({tag:'ped', value: ''})}>Pediatric Indications</Checkbox>
             </div>
             <div className="filter-right">
               <p className="sub-one">Sort By</p>
               <p className="sub-two">Name</p>
-                <Radio>A &gt; Z</Radio>
-                <Radio>Z &lt; A </Radio>
+                <Radio 
+                  handleClick={() => handleSorting('nameLowHigh')} 
+                  checked={sortingOptions.nameLowHigh.active}
+                  >
+                  A &gt; Z
+                </Radio>
+                <Radio 
+                  handleClick={() => handleSorting('nameHighLow')} 
+                  checked={sortingOptions.nameHighLow.active}
+                  >
+                  Z &lt; A
+                </Radio>
               <p className="sub-two">Date of Evidence</p>
-                <Radio>Newest</Radio>
-                <Radio>Oldest</Radio>
+                <Radio 
+                  handleClick={() => handleSorting('dateHighLow')} 
+                  checked={sortingOptions.dateHighLow.active}
+                  >
+                  Newest
+                </Radio>
+                <Radio 
+                  handleClick={() => handleSorting('dateLowHigh')} 
+                  checked={sortingOptions.dateLowHigh.active}
+                  >
+                  Oldest
+                </Radio>
               <p className="sub-two">Number of Evidence</p>
-                <Radio>Low to High</Radio>
-                <Radio>High to Low</Radio>
+                <Radio 
+                  handleClick={() => handleSorting('evidenceLowHigh')} 
+                  checked={sortingOptions.evidenceLowHigh.active}
+                  >
+                  Low to High
+                </Radio>
+                <Radio 
+                  handleClick={() => handleSorting('evidenceHighLow')} 
+                  checked={sortingOptions.evidenceHighLow.active}
+                  >
+                  High to Low
+                </Radio>
             </div>
           </Accordion>
       </div>

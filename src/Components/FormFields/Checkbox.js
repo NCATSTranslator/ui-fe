@@ -10,6 +10,7 @@ const Checkbox = ({name, value, checked, children, handleClick}) => {
     setIsChecked(!isChecked);
     handleClick();
   }
+  
   useEffect(() => {
     setIsChecked(checked);
   }, [checked])

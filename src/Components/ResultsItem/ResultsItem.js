@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { getIcon, capitalizeFirstLetter } from '../../Utilities/utilities';
+import { getIcon, capitalizeFirstLetter, getLastPubYear } from '../../Utilities/utilities';
 import Checkbox from "../FormFields/Checkbox";
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
 
@@ -20,20 +20,8 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
   let fdaLevel = (item.subject.fda_info ) 
     ? item.subject.fda_info.max_level 
     : 'N/A';
-
-  var dateString = item.edge.last_publication_date;
-  var date = null;
-  if(dateString !== null && dateString.includes('/')) {
-    var splitDate = dateString.split('/');
-    var month = splitDate[1] - 1; //Javascript months are 0-11
-    date = (splitDate.length === 2) 
-      ? new Date('1/' + dateString) 
-      : new Date(splitDate[2], month, splitDate[0]);
-  }
-  
-  let lastPubYear = (date !== null)
-    ? date.getFullYear()
-    : date;
+    
+  let lastPubYear = getLastPubYear(item.edge.last_publication_date);
 
   let predicate = (item.edge.predicate)
     ? item.edge.predicate.replace("biolink:", '') + ' ' + staticNode.names[0]
