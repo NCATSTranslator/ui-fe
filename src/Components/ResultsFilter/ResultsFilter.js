@@ -7,13 +7,12 @@ import Accordion from '../Accordion/Accordion';
 import Range from '../Range/Range';
 import cloneDeep from 'lodash/cloneDeep';
 
-const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => {
+const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, totalCount, onSort, onFilter}) => {
 
   
   const [optionState, setOptionState] = useState(''); 
   const [minEvidence, setMinEvidence] = useState(1); 
   const [minEvidenceActive, setMinEvidenceActive] = useState(false); 
-  const [sortingActive, setSortingActive] = useState(false); 
 
   const [sortingOptions, setSortingOptions] = useState(
     {
@@ -45,7 +44,6 @@ const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => 
   );
 
   const handleSorting = (sortName) => {
-    setSortingActive(true);
     let newSortingOptions = cloneDeep(sortingOptions);
     Object.values(newSortingOptions).map((option)=> {
       if(option.name === sortName)
@@ -58,7 +56,6 @@ const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => 
     onSort(sortName);
   }
   
-
   const handleEvidenceActive = () => {
     onFilter({tag:'evi', value: minEvidence});
     setMinEvidenceActive(!minEvidenceActive)
@@ -86,7 +83,12 @@ const ResultsFilter = ({startIndex, endIndex, totalCount, onSort, onFilter}) => 
             -
             <span>{endIndex}</span>
           </span> of 
-          <span className="total"> {totalCount}</span> <span>Results</span>
+          <span className="count"> {formattedCount} </span>
+          {
+            (formattedCount !== totalCount) &&
+            <span className='total'>({totalCount}) </span>
+          }
+          <span> Results</span>
         </p>
         {/* <Toggle labelInternal={false} labelOne={labelOne} labelTwo={labelTwo} onClick={()=>{}} /> */}
       </div>

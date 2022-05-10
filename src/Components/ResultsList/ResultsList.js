@@ -399,9 +399,11 @@ const ResultsList = ({loading}) => {
               <ResultsFilter 
                 startIndex={itemOffset+1} 
                 endIndex={endResultIndex} 
-                totalCount={formattedResults.length}
+                formattedCount={formattedResults.length}
+                totalCount={sortedResults.length}
                 onSort={handleSort} 
-                onFilter={handleFilter} />
+                onFilter={handleFilter}
+                activeFilters={activeFilters} />
               <div className="results-table">
                 <div className="table-body">
                   <div className="table-head result">
