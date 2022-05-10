@@ -41,6 +41,8 @@ const ResultsList = ({loading}) => {
   const [selectedItems, setSelectedItems] = useState([]);
   // Obj, original raw results from the BE
   const [results, setResults] = useState(resultsState);
+  // Array, full result set sorted by any active sorting, but NOT filtered
+  const [sortedResults, setSortedResults] = useState([]);
   // Array, results formatted by any active filters, sorted by any active sorting
   const [formattedResults, setFormattedResults] = useState([]);
   // Array, results meant to display based on the pagination
@@ -130,6 +132,8 @@ const ResultsList = ({loading}) => {
       console.log(newResults);
       // set formatted results
       setFormattedResults(newResults);
+      // set formatted results
+      setSortedResults(newResults);
       // update app state for raw results
       dispatch(setCurrentResults(results));
     }
@@ -223,43 +227,45 @@ const ResultsList = ({loading}) => {
 
   // Handle the sorting 
   const handleSort = (sortName) => {
-    let sortedResults = [...formattedResults];
+    let newSortedResults = [...sortedResults]
     switch (sortName) {
       case 'nameLowHigh':
-        sortedResults = sortNameLowHigh(sortedResults);
+        newSortedResults = sortNameLowHigh(newSortedResults);
         break;
       case 'nameHighLow':
-        sortedResults = sortNameHighLow(sortedResults);
+        newSortedResults = sortNameHighLow(newSortedResults);
         break;
       case 'evidenceLowHigh':
-        sortedResults = sortEvidenceLowHigh(sortedResults);
+        newSortedResults = sortEvidenceLowHigh(newSortedResults);
         break;
       case 'evidenceHighLow':
-        sortedResults = sortEvidenceHighLow(sortedResults);
+        newSortedResults = sortEvidenceHighLow(newSortedResults);
         break;
       case 'dateLowHigh':
-        sortedResults = sortDateLowHigh(sortedResults);
+        newSortedResults = sortDateLowHigh(newSortedResults);
         break;
       case 'dateHighLow':
-        sortedResults = sortDateHighLow(sortedResults);
+        newSortedResults = sortDateHighLow(newSortedResults);
         break;
       default:
         break;
     }
-    setFormattedResults(sortedResults);
+    setSortedResults(newSortedResults);
+    setFormattedResults(newSortedResults);
   }
 
   // Filter the results whenever the activated filters change 
   useEffect(() => {
     console.log(activeFilters);
+    console.log(sortedResults);
     // If there are no active filters, get the full result set
     if(activeFilters.length <= 0) {
-      setFormattedResults(getSummarizedResults(results));
+      setFormattedResults(sortedResults);
       return;
     }
 
     let filteredResults = [];
-    let originalResults = getSummarizedResults(results);
+    let originalResults = [...sortedResults];
     /* 
       For each result, check against each filter. If a filter is triggered, 
       set addElement to false and don't add the element to the filtered results
@@ -288,7 +294,12 @@ const ResultsList = ({loading}) => {
     })
     // Set the formatted results to the newly filtered results
     setFormattedResults(filteredResults);
-  }, [activeFilters]);
+
+    /*
+      triggers on filter change and on sorting change in order to allow user to change 
+      the sorting on already filtered results
+    */
+  }, [activeFilters, sortedResults]);
 
   const exampleKPResults = [
     {name: 'BTE', value: '54', error: false},
@@ -397,7 +408,7 @@ const ResultsList = ({loading}) => {
                       <div className="checkbox-container checkbox-head">
                         <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
                       </div>
-                      <div className="name-head head" onClick={()=>{sortByName()}}>Name</div>
+                      <div className="name-head head">Name</div>
                       <div className="fda-head head">FDA</div>
                       <div className="evidence-head head">Evidence</div>
                       <div className="tags-head head">Tags</div>
