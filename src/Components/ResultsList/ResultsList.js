@@ -29,6 +29,10 @@ const ResultsList = ({loading}) => {
   const [isError, setIsError] = useState(false);
   // Bool, are the results still loading
   const [isLoading, setIsLoading] = useState(loading);
+  // Bool, are the results currently sorted by name
+  const [isSortedByName, setIsSortedByName] = useState(null);
+  // Bool, are the results currently sorted by evidence count
+  const [isSortedByEvidence, setIsSortedByEvidence] = useState(null);
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   // Int, current query id
@@ -231,21 +235,33 @@ const ResultsList = ({loading}) => {
     switch (sortName) {
       case 'nameLowHigh':
         newSortedResults = sortNameLowHigh(newSortedResults);
+        setIsSortedByName(true);
+        setIsSortedByEvidence(null);
         break;
       case 'nameHighLow':
         newSortedResults = sortNameHighLow(newSortedResults);
+        setIsSortedByName(false);
+        setIsSortedByEvidence(null);
         break;
       case 'evidenceLowHigh':
         newSortedResults = sortEvidenceLowHigh(newSortedResults);
+        setIsSortedByEvidence(true);
+        setIsSortedByName(null);
         break;
       case 'evidenceHighLow':
         newSortedResults = sortEvidenceHighLow(newSortedResults);
+        setIsSortedByEvidence(false);
+        setIsSortedByName(null);
         break;
       case 'dateLowHigh':
         newSortedResults = sortDateLowHigh(newSortedResults);
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
         break;
       case 'dateHighLow':
         newSortedResults = sortDateHighLow(newSortedResults);
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
         break;
       default:
         break;
@@ -410,9 +426,9 @@ const ResultsList = ({loading}) => {
                       <div className="checkbox-container checkbox-head">
                         <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
                       </div>
-                      <div className="name-head head">Name</div>
+                      <div className={`name-head head ${isSortedByName}`} onClick={()=>{handleSort((isSortedByName)?'nameHighLow': 'nameLowHigh')}}>Name</div>
                       <div className="fda-head head">FDA</div>
-                      <div className="evidence-head head">Evidence</div>
+                      <div className={`evidence-head head ${isSortedByEvidence}`} onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}>Evidence</div>
                       <div className="tags-head head">Tags</div>
                   </div>
                   {

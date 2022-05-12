@@ -29,12 +29,6 @@ const History = () => {
 
     return Math.round(Math.abs((utc2 - utc1) / _MS_PER_DAY));
 }
-console.log(getDifferenceInDays(new Date("2022-04-12"), new Date("2022-04-11") ))
-console.log(getDifferenceInDays(new Date(), new Date() ))
-console.log(getDifferenceInDays(new Date(), new Date("2022-04-10") ))
-console.log(getDifferenceInDays(new Date(), new Date("2022-04-8") ))
-console.log(getDifferenceInDays(new Date(), new Date("2022-03-31") ))
-console.log(getDifferenceInDays(new Date(), new Date("2022-03-15") ))
 
   return (
     <div className="history-inner">

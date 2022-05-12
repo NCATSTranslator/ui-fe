@@ -70,10 +70,6 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
     }
   }, [minEvidence]);
 
-  useEffect(() => {
-    console.log(sortingOptions)
-  }, [sortingOptions]);
-
   return (
     <div className="results-filter">
       <div className="top">
