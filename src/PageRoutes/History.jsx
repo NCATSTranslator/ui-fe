@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import { pastQueryState, clearHistory, removeItemAtIndex } from "../Redux/store";
+import { pastQueryState, clearHistory, removeItemAtIndex } from "../Redux/historySlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
 import Modal from "../Components/Modals/Modal";
@@ -29,7 +29,6 @@ const History = () => {
 
     return Math.round(Math.abs((utc2 - utc1) / _MS_PER_DAY));
 }
-
   return (
     <div className="history-inner">
       <div className="head">

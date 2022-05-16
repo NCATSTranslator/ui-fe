@@ -4,7 +4,7 @@ import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import Modal from "../Modals/Modal";
-import { currentQuery, currentResultsQueryID, currentResults, setCurrentResults } from "../../Redux/store";
+import { currentQuery, currentQueryResultsID, currentResults, setCurrentResults } from "../../Redux/querySlice";
 import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
@@ -21,8 +21,8 @@ const ResultsList = ({loading}) => {
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
-  let resultsState = useSelector(currentResults);
-  resultsState = (Object.keys(resultsState).length === 0) ? null : resultsState;
+  let resultsState = useSelector((state) => state.query.currentResults);
+  resultsState = (resultsState !== undefined && Object.keys(resultsState).length === 0) ? null : resultsState;
   loading = (resultsState && Object.keys(resultsState).length > 0) ? false : loading;
 
   // Bool, did the results return an error
@@ -36,7 +36,7 @@ const ResultsList = ({loading}) => {
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   // Int, current query id
-  const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentResultsQueryID).id);
+  const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentQueryResultsID));
   // Array, evidence relating to the item last clicked
   const [currentEvidence, setCurrentEvidence] = useState([]);
   // Bool, is the select all checkbox checked
@@ -93,6 +93,8 @@ const ResultsList = ({loading}) => {
 
   // React Query call for results
   const resultsData = useQuery('resultsData', async () => {
+    console.log(isLoading)
+    console.log(currentQueryID);
 
     if(!currentQueryID || !isLoading)
       return;
@@ -107,6 +109,7 @@ const ResultsList = ({loading}) => {
     const response = await fetch('/result', requestOptions)
       .then(response => response.json())
       .then(data => {
+        console.log(data);
         setResults(data);
         setIsError((data.status === 'error'));
       });
@@ -123,7 +126,7 @@ const ResultsList = ({loading}) => {
   useEffect(() => {
     console.log(results);
     // if we're still loading, maintain that state
-    if(results === null)
+    if(results == null)
       return;
 
     // if the status is no longer 'running', set loading to false

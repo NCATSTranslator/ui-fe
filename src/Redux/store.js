@@ -1,76 +1,41 @@
 import { createSlice, configureStore } from '@reduxjs/toolkit'
+import { combineReducers } from 'redux';
+import undoable from 'redux-undo';
+
+import historyReducer, { historySlice } from './historySlice';
+import queryReducer, { querySlice } from './querySlice';
 
 const initialState = {
   pastQueries: [],
   currentQuery: [], 
   currentResults: {},
-  currentResultsQueryID: ''
+  currentQueryResultsID: ''
 } 
+
+let savedState = JSON.parse(localStorage.getItem('reduxState'))
 
 const persistedState = localStorage.getItem('reduxState') 
   ? JSON.parse(localStorage.getItem('reduxState'))
   : initialState
 
-const historySlice = createSlice({
-  name: 'history',
-  initialState: {
-    initialState
-  }, 
-  reducers: {
-    incrementHistory: (state, action) => {
-      state.pastQueries.push(action.payload);
-      return state;
-    },
-    clearHistory: (state) => {
-      state.pastQueries = [];
-      return state;
-    },
-    removeItemAtIndex: (state, action) => {
-      let newState = state;
-      newState.pastQueries.splice(action.payload, 1);
-      return newState;
-    },
-    setCurrentQuery: (state, action) => {
-      state.currentQuery = action.payload;
-    },
-    setCurrentQueryResultsID: (state, action) => {
-      state.currentResultsQueryID = action.payload
-    },
-    setCurrentResults: (state, action) => {
-      state.currentResults = action.payload;
-    }
-  }
-})
-
-export const { 
-  incrementHistory, 
-  clearHistory, 
-  removeItemAtIndex, 
-  setCurrentQuery, 
-  setCurrentQueryResultsID, 
-  setCurrentResults 
-} = historySlice.actions;
-
 export const store = configureStore({
-  reducer: historySlice.reducer,
-  preloadedState: persistedState
+  reducer: {
+    history: historyReducer,
+    query: queryReducer
+  },
 })
 
-export const pastQueryCount = state => state.pastQueries.length;
-export const pastQueryState = state => state.pastQueries;
-export const currentQuery = state => state.currentQuery;
-export const currentResults = state => state.currentResults;
-export const currentResultsQueryID = state => state.currentResultsQueryID;
-
-
+// Utility functions/variables for store.subscribe() callback function handleStoreUpdate
 function selectHistory(state) {
-  return state.pastQueries;
+  return state.history.pastQueries;
 }
 function selectCurrentQuery(state) {
-  return state.currentQuery;
+  return state.query.currentQuery;
 }
 let currentHistoryValue;
 let currentQueryValue;
+
+// Callback that logs state changes to console through store.subscribe() 
 const handleStoreUpdate = () => {
 
   // Query History

@@ -3,7 +3,8 @@ import Button from "../FormFields/Button";
 import QueryTemplate from "../QueryComponents/QueryTemplate";
 import QueryItemButton from "../QueryComponents/QueryItemButton";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { incrementHistory, setCurrentQuery, currentQuery, currentResultsQueryID, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/store";
+import { incrementHistory } from "../../Redux/historySlice";
+import { setCurrentQuery, currentQuery, currentQueryResultsID, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/querySlice";
 import { useSelector, useDispatch } from 'react-redux'
 import QueryItem from "../QueryComponents/QueryItem";
 import { cannedQueries } from "../../Data/cannedqueries";
@@ -33,12 +34,12 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
   const [activeMockID, setActiveMockID] = useState(-1);
 
-  let test = useSelector(currentResultsQueryID);
+  let test = useSelector(currentQueryResultsID);
   test = (test === undefined) ? '' : test; 
   const [currentResultsID, setCurrentResultsID] = useState(test);
 
 
-  let startingQuery = useSelector(currentQuery);
+  let startingQuery = useSelector((state) => state.query.currentQuery);
   startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
   const [queryItems, setQueryItems] = useState(startingQuery);
   
@@ -105,7 +106,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   useEffect(() => {
     if(isValidSubmission) {
       let timestamp = new Date();
-      dispatch(incrementHistory({ items: queryItems, time: timestamp}));
+      dispatch(incrementHistory({ items: queryItems, time: timestamp.toDateString()}));
       dispatch(setCurrentResults({}));
       setIsValidSubmission(false);
       setIsLoading(true);
@@ -127,7 +128,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
           console.log(data)
           if(data.data && data.status === 'success') {
             setCurrentResultsID(data.data);
-            dispatch(setCurrentQueryResultsID(data.data));
+            dispatch(setCurrentQueryResultsID(data.data.id));
             setResultsActive(true);
           }
         });
