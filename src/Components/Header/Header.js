@@ -3,6 +3,7 @@ import Button from '../FormFields/Button';
 import TextInput from "../FormFields/TextInput";
 import Checkbox from "../FormFields/Checkbox";
 import Select from "../FormFields/Select";
+import UndoRedo from "../UndoRedo/UndoRedo";
 import Toggle from '../Toggle/Toggle';
 import ReportIssueModal from "../Modals/SendFeedbackModal";
 import { NavLink, Link } from 'react-router-dom';
@@ -11,8 +12,6 @@ import {ReactComponent as Bookmark} from '../../Icons/Navigation/Bookmark.svg';
 import {ReactComponent as History} from '../../Icons/Navigation/History.svg';
 import {ReactComponent as Export} from '../../Icons/Buttons/Export.svg';
 import {ReactComponent as Warning} from '../../Icons/Alerts/Warning.svg';
-import {ReactComponent as Undo} from '../../Icons/Directional/Undo.svg';
-import {ReactComponent as Redo} from '../../Icons/Directional/Redo.svg';
 
 
 const Header = ({children}) => {
@@ -42,8 +41,7 @@ const Header = ({children}) => {
       <div className="toolbar">
         <div className="container">
           <div className='left'>
-            <Button isSecondary handleClick={()=>{}} size="m"><Undo/>Undo</Button>
-            <Button isSecondary handleClick={()=>{}} size="m"><Redo/>Redo</Button>
+            <UndoRedo />
             <Toggle labelInternal={false} labelOne="Lite" labelTwo="Pro" checked onClick={()=>{}} />
           </div>
           <div className='right'>

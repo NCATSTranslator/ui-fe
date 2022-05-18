@@ -1,27 +1,14 @@
-import { createSlice, configureStore } from '@reduxjs/toolkit'
-import { combineReducers } from 'redux';
+import { configureStore } from '@reduxjs/toolkit'
 import undoable from 'redux-undo';
-
 import historyReducer, { historySlice } from './historySlice';
 import queryReducer, { querySlice } from './querySlice';
-
-const initialState = {
-  pastQueries: [],
-  currentQuery: [], 
-  currentResults: {},
-  currentQueryResultsID: ''
-} 
-
-let savedState = JSON.parse(localStorage.getItem('reduxState'))
-
-const persistedState = localStorage.getItem('reduxState') 
-  ? JSON.parse(localStorage.getItem('reduxState'))
-  : initialState
+import resultsReducer, { resultsSlice } from './resultsSlice';
 
 export const store = configureStore({
   reducer: {
     history: historyReducer,
-    query: queryReducer
+    query: undoable(queryReducer),
+    results: resultsReducer
   },
 })
 
@@ -30,7 +17,7 @@ function selectHistory(state) {
   return state.history.pastQueries;
 }
 function selectCurrentQuery(state) {
-  return state.query.currentQuery;
+  return state.query.present.currentQuery;
 }
 let currentHistoryValue;
 let currentQueryValue;

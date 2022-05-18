@@ -4,7 +4,8 @@ import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import Modal from "../Modals/Modal";
-import { currentQuery, currentQueryResultsID, currentResults, setCurrentResults } from "../../Redux/querySlice";
+import { currentQuery} from "../../Redux/querySlice";
+import { currentQueryResultsID, currentResults, setCurrentResults }from "../../Redux/resultsSlice";
 import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
@@ -124,7 +125,6 @@ const ResultsList = ({loading}) => {
     based on the returned data's status.
   */ 
   useEffect(() => {
-    console.log(results);
     // if we're still loading, maintain that state
     if(results == null)
       return;
@@ -338,7 +338,7 @@ const ResultsList = ({loading}) => {
 
   // Spoofs progress bar
   useEffect(() => {
-    if(resultsProgress >= 100) 
+    if(resultsProgress >= 100 || !isLoading) 
       return;
 
     let randomTimeout = Math.random() * (3000 - 500) + 500;

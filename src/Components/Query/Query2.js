@@ -1,14 +1,15 @@
 import React, {useState, useEffect} from "react";
+import { useSelector, useDispatch } from 'react-redux'
+import { cannedQueries } from "../../Data/cannedqueries";
+import { useNavigate } from 'react-router-dom';
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Button from "../FormFields/Button";
 import QueryTemplate from "../QueryComponents/QueryTemplate";
 import QueryItemButton from "../QueryComponents/QueryItemButton";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { incrementHistory } from "../../Redux/historySlice";
-import { setCurrentQuery, currentQuery, currentQueryResultsID, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/querySlice";
-import { useSelector, useDispatch } from 'react-redux'
 import QueryItem from "../QueryComponents/QueryItem";
-import { cannedQueries } from "../../Data/cannedqueries";
-import { useNavigate } from 'react-router-dom';
+import { incrementHistory } from "../../Redux/historySlice";
+import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
+import { currentQueryResultsID, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 
 const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
@@ -38,8 +39,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   test = (test === undefined) ? '' : test; 
   const [currentResultsID, setCurrentResultsID] = useState(test);
 
-
-  let startingQuery = useSelector((state) => state.query.currentQuery);
+  let startingQuery = useSelector(currentQuery);
   startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
   const [queryItems, setQueryItems] = useState(startingQuery);
   
@@ -104,6 +104,10 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   }, [dispatch, queryItems]);
 
   useEffect(() => {
+    setQueryItems(startingQuery);
+  }, [startingQuery]);
+
+  useEffect(() => {
     if(isValidSubmission) {
       let timestamp = new Date();
       dispatch(incrementHistory({ items: queryItems, time: timestamp.toDateString()}));
@@ -161,10 +165,6 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   const addQueryItem = (item) => {
     const items = Array.from(queryItems);
     items.push(item);
-    setQueryItems(items);
-  }
-
-  const changeQueryItems = (items) => {
     setQueryItems(items);
   }
 
@@ -389,7 +389,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
                       return (
                         <QueryTemplate 
                           handleClick={() => {
-                            changeQueryItems(item.query);
+                            setQueryItems(item.query);
                             setActiveMockID(item.id);
                           }}
                           items={item.query} 
