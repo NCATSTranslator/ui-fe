@@ -22,7 +22,7 @@ const ResultsList = ({loading}) => {
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
-  let resultsState = useSelector((state) => state.query.currentResults);
+  let resultsState = useSelector(currentResults);
   resultsState = (resultsState !== undefined && Object.keys(resultsState).length === 0) ? null : resultsState;
   loading = (resultsState && Object.keys(resultsState).length > 0) ? false : loading;
 

@@ -89,7 +89,6 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
  
   const handleSubmission = (e) => {
     e.preventDefault();
-    // console.log(e);
     validateSubmission(e);
   }
 
