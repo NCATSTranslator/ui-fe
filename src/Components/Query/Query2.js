@@ -35,9 +35,9 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
   const [activeMockID, setActiveMockID] = useState(-1);
 
-  let test = useSelector(currentQueryResultsID);
-  test = (test === undefined) ? '' : test; 
-  const [currentResultsID, setCurrentResultsID] = useState(test);
+  let startingResultsID = useSelector(currentQueryResultsID);
+  startingResultsID = (startingResultsID === undefined) ? '' : startingResultsID; 
+  const [currentResultsID, setCurrentResultsID] = useState(startingResultsID);
 
   let startingQuery = useSelector(currentQuery);
   startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
@@ -105,6 +105,11 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
   useEffect(() => {
     setQueryItems(startingQuery);
+    cannedQueries.forEach(element => {
+      if(element.query === startingQuery && activeMockID !== element.id) {
+        setActiveMockID(element.id);
+      }
+    });
   }, [startingQuery]);
 
   useEffect(() => {
@@ -196,58 +201,6 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     let areSubjectsActive = (queryItems[queryItems.length - 1].type !== 'subject') ? true : false;
     setSubjectsActive(areSubjectsActive);
   }, [queryItems])
-  
-  const testOne = [
-    {
-      name: 'What Chemical',
-      type: 'subject',
-      category: 'chemical',
-      value: ''
-    },
-    {
-      name: 'Regulates a',
-      type: 'action',
-      category: 'regulation'
-    },
-    {
-      name: 'Gene',
-      type: 'subject',
-      category: 'gene',
-      value: ''
-    }
-  ]
-
-  const testTwo = [
-    {
-      name: 'What Chemical',
-      type: 'subject',
-      category: 'chemical',
-      value: ''
-    },
-    {
-      name: 'Downregulates a',
-      type: 'action',
-      category: 'regulation'
-    },
-    {
-      name: 'Gene that',
-      type: 'subject',
-      category: 'gene',
-      value: ''
-    },
-    {
-      name: 'Upregulates a',
-      type: 'action',
-      category: 'regulation'
-    },
-    {
-      name: 'Gene',
-      type: 'subject',
-      category: 'gene',
-      value: ''
-    },
-  ]
-
   
 
   // Query Button items
