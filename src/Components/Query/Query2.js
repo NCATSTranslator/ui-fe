@@ -13,6 +13,7 @@ import { currentQueryResultsID, setCurrentQueryResultsID, setCurrentResults } fr
 
 const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
+  // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
