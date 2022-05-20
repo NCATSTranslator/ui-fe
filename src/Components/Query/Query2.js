@@ -16,33 +16,37 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Query Variables from URL
-  // const search = window.location.search;
-  // const curieOne = new URLSearchParams(search).get('curieOne');
-  // const subjectOne = new URLSearchParams(search).get('subjectOne');
-  // const predicate = new URLSearchParams(search).get('predicate');
-  // const curieTwo = new URLSearchParams(search).get('curieTwo');
-  // const subjectTwo = new URLSearchParams(search).get('subjectTwo');
   loading = (loading) ? true : false;
 
+  // Bool, pro mode toggle
   const [proMode, setProMode] = useState(false);
+  // Bool, are we on the templated queries page
   const [isTemplate, setIsTemplate] = useState(template);
+  // Bool, are we on the results page
   const [isResults, setIsResults] = useState(results);
+  // Bool, are results active
   const [resultsActive, setResultsActive] = useState(false);
+  // Bool, are the results loading
   const [isLoading, setIsLoading] = useState(loading);
+  // Bool, is the submitted query valid, determined by validateSubmission 
   const [isValidSubmission, setIsValidSubmission] = useState(false);
-  const [subjectsActive, setSubjectsActive] = useState(true);
-
+  // Bool, controls whether nodes or predicates are active on BYO query 
+  const [NodesActive, setNodesActive] = useState(true);
+  // Int, active mock ARS ID
   const [activeMockID, setActiveMockID] = useState(-1);
 
+  // 
   let startingResultsID = useSelector(currentQueryResultsID);
   startingResultsID = (startingResultsID === undefined) ? '' : startingResultsID; 
   const [currentResultsID, setCurrentResultsID] = useState(startingResultsID);
 
+  // Get the current query from the application state
   let startingQuery = useSelector(currentQuery);
   startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
+  // Array, currently selected query items
   const [queryItems, setQueryItems] = useState(startingQuery);
   
+  // Legacy json for testing purposes, to be removed
   var testJson = 
     {
       nodes:
@@ -74,34 +78,41 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
         // }
       ]
     }
-  testJson = JSON.stringify(testJson);
+  // testJson = JSON.stringify(testJson);
 
-
+  // Event handler called when a node's input is updated by the user 
   const handleQueryItemChange = (e) => {
     let updatedValue = e.target.value;
     let itemKey = e.target.dataset.inputkey;
-    if(queryItems[itemKey].type === 'subject') {
+    if(queryItems[itemKey].type === 'node') {
       let items = JSON.parse(JSON.stringify(queryItems));
       items[itemKey].value = updatedValue;
       setQueryItems(items);
     }
   }
  
+  // Event handler for form submission
   const handleSubmission = (e) => {
     e.preventDefault();
     validateSubmission(e);
   }
 
+  // Validation function for submission
   const validateSubmission = (e) => {
     if(queryItems.length > 0) {
       setIsValidSubmission(true);
     }
   }
 
+  // When the query items change, update the current query in the app state
   useEffect(() => {
     dispatch(setCurrentQuery(queryItems));
   }, [dispatch, queryItems]);
 
+  /* 
+    When the starting query is changed (on page reload), update the query items to match
+    Then check the canned queries list for a match in order to assign the proper mock ID
+  */
   useEffect(() => {
     setQueryItems(startingQuery);
     cannedQueries.forEach(element => {
@@ -111,20 +122,28 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     });
   }, [startingQuery]);
 
+
+  // When isValidSubmission changes
   useEffect(() => {
+    // If the submission is valid
     if(isValidSubmission) {
       let timestamp = new Date();
+      // Update the query history in the application state
       dispatch(incrementHistory({ items: queryItems, time: timestamp.toDateString()}));
+      // Reset the current results in the application state
       dispatch(setCurrentResults({}));
+      // Reset isValidSubmission
       setIsValidSubmission(false);
+      // Set isLoading to true
       setIsLoading(true);
       
+      // If the activeMockID has been set, prep the json to be sent to /query
       if(activeMockID != -1) {
         let mockJson = { id: activeMockID} 
         testJson = JSON.stringify(mockJson);
       }
-      // setQueryItems([]);
 
+      // submit query to /query
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,7 +154,9 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
         .then(data => {
           console.log(data)
           if(data.data && data.status === 'success') {
+            // Update the currentQueryResultsID 
             setCurrentResultsID(data.data);
+            // Update the currentQueryResultsID in the application state
             dispatch(setCurrentQueryResultsID(data.data.id));
             setResultsActive(true);
           }
@@ -144,18 +165,21 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
   }, [isValidSubmission, dispatch, queryItems])
 
+  // Reset isResults on rerender when resultsActive  
   useEffect(() => {
     if(resultsActive) {
       setIsResults(true);
     }
   }, [resultsActive]);
 
+  // If isResults is true and we aren't already, send us to the results page and set loading to true
   useEffect(() => {
     if(isResults && !window.location.href.includes("results")) {
       navigate('/results?loading=true');
     }
   }, [isResults]);
 
+  // Event handler for dragging individual query items
   const handleOnDragEnd = (result) => {
     if (!result.destination) return;
     
@@ -166,12 +190,14 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     setQueryItems(items);
   }
 
+  // Click handler for query items 
   const addQueryItem = (item) => {
     const items = Array.from(queryItems);
     items.push(item);
     setQueryItems(items);
   }
 
+  // Click handler to remove a query item from the list
   const removeQueryItem = (indexToRemove) => {
     let needsChange = false;
     let newItems = Array.from(queryItems);
@@ -187,27 +213,23 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
       setQueryItems(newItems);
   } 
 
-  const updateQueryItems = (items) => {
-    setQueryItems(items);
-  }
-
-  // Determine active type
+  // Alternate active query item type (nodes/predicates)
   useEffect(() => {
     if(queryItems.length === 0) {
-      setSubjectsActive(true);
+      setNodesActive(true);
       return;
     }
-    let areSubjectsActive = (queryItems[queryItems.length - 1].type !== 'subject') ? true : false;
-    setSubjectsActive(areSubjectsActive);
+    let areNodesActive = (queryItems[queryItems.length - 1].type !== 'node') ? true : false;
+    setNodesActive(areNodesActive);
   }, [queryItems])
   
 
   // Query Button items
-  const gene = {name: 'Gene', type: 'subject', category: 'gene', value: '', selected: false};
-  const phenotype = {name: 'Phenotype', type: 'subject', category: 'phenotype', value: '', selected: false};
-  const chemical = {name: 'Chemical', type: 'subject', category: 'chemical', value: '', selected: false};
-  const disease = {name: 'Disease', type: 'subject', category: 'disease', value: '', selected: false};
-  const concept = {name: 'Concept', type: 'subject', category: 'concept', value: '', selected: false};
+  const gene = {name: 'Gene', type: 'node', category: 'gene', value: '', selected: false};
+  const phenotype = {name: 'Phenotype', type: 'node', category: 'phenotype', value: '', selected: false};
+  const chemical = {name: 'Chemical', type: 'node', category: 'chemical', value: '', selected: false};
+  const disease = {name: 'Disease', type: 'node', category: 'disease', value: '', selected: false};
+  const concept = {name: 'Concept', type: 'node', category: 'concept', value: '', selected: false};
 
   const regulates = {name: 'Regulates', type: 'action', category: 'regulation'};
   const downregulates = {name: 'Downregulates', type: 'action', category: 'regulation'};
@@ -229,7 +251,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
                 {(provided) => (
                   <ul className="query-box" {...provided.droppableProps} ref={provided.innerRef}>
                     {queryItems.map((item, index) => {
-                      let itemIsSubject = (item.type === "subject") ? true : false;
+                      let itemIsNode = (item.type === "node") ? true : false;
                       return (
                         <Draggable key={index} draggableId={index.toString()} index={index} >
                           {(provided) => (
@@ -242,7 +264,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
                                 item={item} 
                                 handleClose={()=>removeQueryItem(index)} 
                                 handleChange={handleQueryItemChange}
-                                hasInput={itemIsSubject}
+                                hasInput={itemIsNode}
                                 name={item.name}
                                 inputKey={index}
                                 isSelected={item.selected}
@@ -269,30 +291,30 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
             {!isTemplate && 
              !isResults &&
               <div className="build">
-                <h6>Subjects</h6>
-                <div className="panel subjects">
+                <h6>Nodes</h6>
+                <div className="panel subjects nodes">
                   <QueryItemButton 
-                    disabled={!subjectsActive}
+                    disabled={!NodesActive}
                     item={gene}
                     handleClick={() => addQueryItem(gene)}
                     >Gene</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!subjectsActive}
+                    disabled={!NodesActive}
                     item={phenotype}
                     handleClick={() => addQueryItem(phenotype)}
                     >Phenotype</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!subjectsActive}
+                    disabled={!NodesActive}
                     item={chemical}
                     handleClick={() => addQueryItem(chemical)}
                     >Chemical</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!subjectsActive}
+                    disabled={!NodesActive}
                     item={disease}
                     handleClick={() => addQueryItem(disease)}
                     >Disease</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!subjectsActive}
+                    disabled={!NodesActive}
                     item={concept}
                     handleClick={() => addQueryItem(concept)}
                     >Concept</QueryItemButton>
@@ -300,32 +322,32 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
                 <h6>Actions</h6>
                 <div className="panel actions">
                   <QueryItemButton 
-                  disabled={subjectsActive}
+                  disabled={NodesActive}
                   item={regulates}
                   handleClick={() => addQueryItem(regulates)}
                   >Regulate</QueryItemButton>
                   <QueryItemButton 
-                    disabled={subjectsActive}
+                    disabled={NodesActive}
                     item={downregulates}
                     handleClick={() => addQueryItem(downregulates)}
                     >Downregulate</QueryItemButton>
                   <QueryItemButton 
-                    disabled={subjectsActive}
+                    disabled={NodesActive}
                     item={upregulates}
                     handleClick={() => addQueryItem(upregulates)}
                     >Upregulate</QueryItemButton>
                   <QueryItemButton 
-                    disabled={subjectsActive}
+                    disabled={NodesActive}
                     item={treats}
                     handleClick={() => addQueryItem(treats)}
                     >Treats</QueryItemButton>
                   <QueryItemButton 
-                    disabled={subjectsActive}
+                    disabled={NodesActive}
                     item={associated}
                     handleClick={() => addQueryItem(associated)}
                     >Associated With</QueryItemButton>
                   <QueryItemButton 
-                    disabled={subjectsActive}
+                    disabled={NodesActive}
                     item={nodes}
                     handleClick={() => addQueryItem(nodes)}
                     >Node(s)</QueryItemButton>
@@ -335,7 +357,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
             {isTemplate && 
              !isResults &&
               <div className="templates">
-                <div className="panel subjects">
+                <div className="panel subjects nodes">
                   {
                     cannedQueries.map((item, i)=> {
                       return (
@@ -365,7 +387,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
               <ol>
                 <li>Click or drag in a template or  component to begin building a query.</li>
                 <li>If needed, remove component fields by hovering over them and clicking the “x.”</li>
-                <li>Select a component and type in your desired target subject.</li>
+                <li>Select a component and type in your desired target node.</li>
                 <li>Submit Query!</li>
               </ol>
             </div>
