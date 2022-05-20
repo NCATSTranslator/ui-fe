@@ -1,12 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-
 let savedState = JSON.parse(localStorage.getItem('reduxState'))
 
-const persistedResults = (localStorage.getItem('reduxState') && savedState.results != null)
+const persistedResults = (savedState && savedState.results != null)
   ? savedState.results.currentResults
   : {}  
-const persistedResultsID = (localStorage.getItem('reduxState') && savedState.results != null)
+const persistedResultsID = (savedState && savedState.results != null)
   ? savedState.results.currentQueryResultsID
   : ''  
 

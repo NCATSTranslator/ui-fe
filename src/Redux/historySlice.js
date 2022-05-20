@@ -1,15 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const initialState = []
+let savedState = JSON.parse(localStorage.getItem('reduxState'))
 
-const state = (localStorage.getItem('reduxState') && JSON.parse(localStorage.getItem('reduxState')).pastQueries != undefined)
-  ? JSON.parse(localStorage.getItem('reduxState')).pastQueries
-  : initialState
+const state = 
+  (localStorage.getItem('reduxState') 
+  && savedState.history.pastQueries != undefined)
+    ? savedState.history.pastQueries
+    : []
 
 export const historySlice = createSlice({
   name: 'history',
   initialState: {
-    pastQueries: initialState
+    pastQueries: state
   }, 
   reducers: {
     incrementHistory: (state, action) => {

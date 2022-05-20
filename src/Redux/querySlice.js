@@ -1,12 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-
 let savedState = JSON.parse(localStorage.getItem('reduxState'))
 
-// const persistedQuery = localStorage.getItem('reduxState') 
-//   ? savedState.query.currentQuery
-//   : []
-const persistedQuery = []
+const persistedQuery = (savedState && savedState.query)
+  ? savedState.query.present.currentQuery
+  : []
 
 export const querySlice = createSlice({
   name: 'query',
