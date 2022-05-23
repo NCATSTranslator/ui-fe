@@ -6,7 +6,6 @@ import Modal from "../Components/Modals/Modal";
 import Button from "../Components/FormFields/Button";
 import {ReactComponent as Close} from '../Icons/Buttons/Close.svg';
 import {ReactComponent as Warning} from '../Icons/Alerts/Warning.svg'
-import { current } from "@reduxjs/toolkit";
 
 const History = () => {
 

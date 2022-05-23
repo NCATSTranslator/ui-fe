@@ -1,8 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit'
 import undoable from 'redux-undo';
-import historyReducer, { historySlice } from './historySlice';
-import queryReducer, { querySlice } from './querySlice';
-import resultsReducer, { resultsSlice } from './resultsSlice';
+import historyReducer from './historySlice';
+import queryReducer from './querySlice';
+import resultsReducer from './resultsSlice';
 
 export const store = configureStore({
   reducer: {

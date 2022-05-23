@@ -773,7 +773,7 @@ label.checkbox {
     }
   }
   .table-head {
-    grid-template-columns: 1fr 4fr min-content;
+    grid-template-columns: 1fr 1fr 2fr 2fr 1fr 1fr;
     .date {
       padding: 0 20px 10px;
     }
@@ -788,13 +788,21 @@ label.checkbox {
     .evidence-item {
       display: grid;
       grid-column-gap: $s;
-      grid-template-columns: 330px auto 100px;
+      grid-template-columns: 1fr 1fr 2fr 2fr 1fr 1fr;
       padding: $s 0;
-      .title a {
-        color: $black;
-        text-decoration: none;
-        font-weight: 700;
-     }
+      span {
+        font-size: 14px;
+      }
+      .summary {
+        font-size: 12px;
+      }
+      .title {
+        a {
+          color: $black;
+          text-decoration: none;
+          font-weight: 700;
+       }
+      } 
      .abstract a {
        margin-left: $xs;
        color: $black;

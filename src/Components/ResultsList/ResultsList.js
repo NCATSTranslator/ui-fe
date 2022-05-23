@@ -3,13 +3,13 @@ import Checkbox from "../FormFields/Checkbox";
 import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
-import Modal from "../Modals/Modal";
-import { currentQuery} from "../../Redux/querySlice";
-import { currentQueryResultsID, currentResults, setCurrentResults }from "../../Redux/resultsSlice";
+import EvidenceModal from "../Modals/EvidenceModal";
+import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
 import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, 
+  sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
 
 
 const ResultsList = ({loading}) => {
@@ -37,7 +37,7 @@ const ResultsList = ({loading}) => {
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   // Int, current query id
-  const [currentQueryID, setCurrentQueryID] = useState(useSelector(currentQueryResultsID));
+  const currentQueryID = useSelector(currentQueryResultsID);
   // Array, evidence relating to the item last clicked
   const [currentEvidence, setCurrentEvidence] = useState([]);
   // Bool, is the select all checkbox checked
@@ -142,10 +142,10 @@ const ResultsList = ({loading}) => {
       // set formatted results
       setSortedResults(newResults);
       // update app state for raw results
-      dispatch(setCurrentResults(results));
+      // dispatch(setCurrentResults(results));
     }
     // setIsError((results.status === 'error'));
-  }, [results]);
+  }, [results, isLoading]);
 
   // Return summarized results
   const getSummarizedResults = (results) => {
@@ -320,16 +320,6 @@ const ResultsList = ({loading}) => {
     */
   }, [activeFilters, sortedResults]);
 
-  const exampleKPResults = [
-    {name: 'BTE', value: '54', error: false},
-    {name: 'CHP', value: '0', error: false},
-    {name: 'COHD', value: '0', error: false},
-    {name: 'RTX-KG2', value: '6', error: false},
-    {name: 'NGD', value: '0', error: false},
-    {name: 'MolePro', value: '3', error: false},
-    {name: 'GeneticsKP', value: '0', error: true},
-  ]
-  
   useEffect(() => {
     if(selectedItems.length <= 0)
       return;
@@ -351,7 +341,7 @@ const ResultsList = ({loading}) => {
       }
     }, randomTimeout);
     return () => clearTimeout(timer);
-  }, [resultsProgress]);
+  }, [resultsProgress, isLoading]);
 
   // Alternates progress bar opacity class on set timeout
   useEffect(() => {
@@ -363,43 +353,17 @@ const ResultsList = ({loading}) => {
       setResultsBarOpacity(!resultsBarOpacity);
     }, timeout);
     return () => clearTimeout(timer);
-  }, [resultsBarOpacity]);
+  }, [resultsBarOpacity, isLoading]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Modal isOpen={evidenceOpen} onClose={()=>handleModalClose()} className="evidence-modal">
-        <h5>Evidence</h5>
-        <div className="table-head">
-          <div className="head title">Title</div>
-          <div className="head abstract">Abstract</div>
-          <div className="head date">Date</div>
-        </div>
-        <div className="table-body">
-          {
-            currentEvidence.length > 0 &&
-            currentEvidence.map((item, i)=> {
-              return (
-                <div className="evidence-item" key={i}>
-                  <span className="title">
-                    {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
-                  </span>
-                  <span className="abstract">
-                    {item.abstract && item.abstract}
-                    {item.url && <a href={item.url} target="_blank" rel="noreferrer">Read More</a>}          
-                  </span>
-                  <span className="pubdate">
-                    {item.pubdate && item.pubdate }          
-                  </span>
-                </div>
-              )
-            })
-          } 
-          {
-            currentEvidence.length <= 0 &&
-            <p>No evidence is currently available for this item.</p>
-          }
-        </div>
-      </Modal>
+      <EvidenceModal 
+        isOpen={evidenceOpen} 
+        onClose={()=>handleModalClose()}
+        className="evidence-modal"
+        currentEvidence={currentEvidence}
+        results={results}
+      />
       <div className="results-list">
         <Query2 results loading/>
         <div className="results-container">

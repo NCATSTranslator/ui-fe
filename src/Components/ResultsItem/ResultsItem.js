@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { getIcon, capitalizeFirstLetter, getLastPubYear } from '../../Utilities/utilities';
 import Checkbox from "../FormFields/Checkbox";
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"

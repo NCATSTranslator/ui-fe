@@ -1,5 +1,4 @@
 import React, {useState, useEffect} from 'react';
-import Toggle from '../Toggle/Toggle';
 import Select from '../FormFields/Select';
 import Checkbox from '../FormFields/Checkbox';
 import Radio from '../FormFields/Radio';
@@ -9,7 +8,6 @@ import cloneDeep from 'lodash/cloneDeep';
 
 const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, totalCount, onSort, onFilter}) => {
 
-  
   const [optionState, setOptionState] = useState(''); 
   const [minEvidence, setMinEvidence] = useState(1); 
   const [minEvidenceActive, setMinEvidenceActive] = useState(false); 
@@ -86,7 +84,6 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
           }
           <span> Results</span>
         </p>
-        {/* <Toggle labelInternal={false} labelOne={labelOne} labelTwo={labelTwo} onClick={()=>{}} /> */}
       </div>
       <div className="bottom">
           <div className='left'>

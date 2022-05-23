@@ -46,40 +46,6 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
   // Array, currently selected query items
   const [queryItems, setQueryItems] = useState(startingQuery);
-  
-  // Legacy json for testing purposes, to be removed
-  var testJson = 
-    {
-      nodes:
-      [
-        {
-          name: '',
-          type: 'ChemicalEntity'
-        },
-        // {
-        //   name: '',
-        //   type: 'Gene'
-        // },
-        {
-          name: 'RHOBTB2',
-          type: 'Gene'
-        },
-      ],
-      edges:
-      [
-        {
-          source: 0,
-          target: 1,
-          type: "entity_negatively_regulates_entity"
-        }, 
-        // {
-        //   source: 1,
-        //   target: 2,
-        //   type: "entity_positively_regulates_entity"
-        // }
-      ]
-    }
-  // testJson = JSON.stringify(testJson);
 
   // Event handler called when a node's input is updated by the user 
   const handleQueryItemChange = (e) => {
@@ -115,13 +81,15 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     Then check the canned queries list for a match in order to assign the proper mock ID
   */
   useEffect(() => {
+    if(!startingQuery)
+      return;
     setQueryItems(startingQuery);
     cannedQueries.forEach(element => {
       if(element.query === startingQuery && activeMockID !== element.id) {
         setActiveMockID(element.id);
       }
     });
-  }, [startingQuery]);
+  }, [startingQuery, activeMockID]);
 
 
   // When isValidSubmission changes
@@ -137,6 +105,8 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
       setIsValidSubmission(false);
       // Set isLoading to true
       setIsLoading(true);
+
+      let testJson = '';
       
       // If the activeMockID has been set, prep the json to be sent to /query
       if(activeMockID != -1) {
@@ -164,7 +134,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItems])
+  }, [isValidSubmission, dispatch, queryItems, activeMockID])
 
   // Reset isResults on rerender when resultsActive  
   useEffect(() => {
@@ -178,7 +148,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     if(isResults && !window.location.href.includes("results")) {
       navigate('/results?loading=true');
     }
-  }, [isResults]);
+  }, [isResults, navigate]);
 
   // Event handler for dragging individual query items
   const handleOnDragEnd = (result) => {

@@ -15,8 +15,6 @@ export const historySlice = createSlice({
   }, 
   reducers: {
     incrementHistory: (state, action) => {
-      console.log(state);
-      console.log(action.payload);
       return {pastQueries: [...state.pastQueries, action.payload]};
     },
     clearHistory: (state) => {
