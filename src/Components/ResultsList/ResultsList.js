@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Checkbox from "../FormFields/Checkbox";
 import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
@@ -8,6 +8,7 @@ import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
 import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
+import isEqual from 'lodash/isEqual';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, 
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
 
@@ -46,6 +47,12 @@ const ResultsList = ({loading}) => {
   const [selectedItems, setSelectedItems] = useState([]);
   // Obj, original raw results from the BE
   const [results, setResults] = useState(resultsState);
+  /* 
+    Ref, used to track changes in results for useEffect with 'results' obj as dependency
+    b/c react doesn't deep compare objects in useEffect hook, so the aforementioned useEffect 
+    will fire on every render.
+  */
+  const prevResults = useRef(results);
   // Array, full result set sorted by any active sorting, but NOT filtered
   const [sortedResults, setSortedResults] = useState([]);
   // Array, results formatted by any active filters, sorted by any active sorting
@@ -125,9 +132,12 @@ const ResultsList = ({loading}) => {
     based on the returned data's status.
   */ 
   useEffect(() => {
-    // if we're still loading, maintain that state
-    if(results == null)
+    // if we have no results, or the results aren't actually new, return
+    if(results == null || isEqual(results, prevResults.current))
       return;
+
+    // if results are new, set prevResults for future comparison
+    prevResults.current = results;
 
     // if the status is no longer 'running', set loading to false
     if(results.status !== 'running')
@@ -136,7 +146,6 @@ const ResultsList = ({loading}) => {
     // if the status is 'done', handle setting the results
     if(results.status === 'done') {
       let newResults = getSummarizedResults(results);
-      console.log(newResults);
       // set formatted results
       setFormattedResults(newResults);
       // set formatted results
@@ -145,7 +154,7 @@ const ResultsList = ({loading}) => {
       // dispatch(setCurrentResults(results));
     }
     // setIsError((results.status === 'error'));
-  }, [results, isLoading]);
+  }, [results]);
 
   // Return summarized results
   const getSummarizedResults = (results) => {
@@ -371,8 +380,7 @@ const ResultsList = ({loading}) => {
             isLoading &&
             <div className="loading-bar">
               <div className="bar-outer">
-                <div className={`bar-inner ${resultsBarOpacityClass}`} style={{width: `${resultsProgress}%`}}>
-                </div>
+                <div className={`bar-inner ${resultsBarOpacityClass}`} style={{width: `${resultsProgress}%`}}></div>
               </div>
             </div>
           }
@@ -390,13 +398,13 @@ const ResultsList = ({loading}) => {
               <div className="results-table">
                 <div className="table-body">
                   <div className="table-head result">
-                      <div className="checkbox-container checkbox-head">
-                        <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
-                      </div>
-                      <div className={`name-head head ${isSortedByName}`} onClick={()=>{handleSort((isSortedByName)?'nameHighLow': 'nameLowHigh')}}>Name</div>
-                      <div className="fda-head head">FDA</div>
-                      <div className={`evidence-head head ${isSortedByEvidence}`} onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}>Evidence</div>
-                      <div className="tags-head head">Tags</div>
+                    <div className="checkbox-container checkbox-head">
+                      <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
+                    </div>
+                    <div className={`name-head head ${isSortedByName}`} onClick={()=>{handleSort((isSortedByName)?'nameHighLow': 'nameLowHigh')}}>Name</div>
+                    <div className="fda-head head">FDA</div>
+                    <div className={`evidence-head head ${isSortedByEvidence}`} onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}>Evidence</div>
+                    <div className="tags-head head">Tags</div>
                   </div>
                   {
                     isError &&
@@ -444,28 +452,6 @@ const ResultsList = ({loading}) => {
               }
             </div>
           }
-          <div className="kps">
-            {/* <h6>Knowledge Providers</h6>
-            <p>
-              { isLoading && "Estimated Loading Time: " } 
-              { !isLoading && "Found in " } 
-              <span className="time">1.8 seconds</span></p> */}
-            <ul className="kp-list">
-            {
-              // exampleKPResults.map((item, index)=> {
-              //   let itemClass = "kp";
-              //   itemClass += (item.error) ? " error" : "";
-              //   itemClass += (item.value < 1) ? " no-results" : "";
-              //   return(
-              //     <li key={index} className={`${itemClass}`}>
-              //       <span className="kp-name">{item.name}</span>
-              //       <span className="kp-value sub-one">{item.value}</span>
-              //     </li>
-              //   )
-              // })
-            }
-            </ul>
-          </div>
         </div>
       </div>
     </QueryClientProvider>

@@ -1,7 +1,8 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { cannedQueries } from "../../Data/cannedqueries";
 import { useNavigate } from 'react-router-dom';
+import isEqual from 'lodash/isEqual';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Button from "../FormFields/Button";
 import QueryTemplate from "../QueryComponents/QueryTemplate";
@@ -10,6 +11,7 @@ import QueryItem from "../QueryComponents/QueryItem";
 import { incrementHistory } from "../../Redux/historySlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { currentQueryResultsID, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
+import cloneDeep from "lodash/cloneDeep";
 
 const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
@@ -41,11 +43,13 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   startingResultsID = (startingResultsID === undefined) ? '' : startingResultsID; 
   const [currentResultsID, setCurrentResultsID] = useState(startingResultsID);
 
+  let tempStartingQuery = useSelector(currentQuery);
   // Get the current query from the application state
-  let startingQuery = useSelector(currentQuery);
-  startingQuery = (startingQuery === undefined) ? [] : startingQuery; 
+  const startingQuery = (tempStartingQuery === undefined) ? [] : tempStartingQuery;
   // Array, currently selected query items
   const [queryItems, setQueryItems] = useState(startingQuery);
+  // Array, for use in useEffect hooks with queryItems as a dependency
+  const [prevQueryItems, setPrevQueryItems] = useState(JSON.parse(JSON.stringify(queryItems)));
 
   // Event handler called when a node's input is updated by the user 
   const handleQueryItemChange = (e) => {
@@ -71,19 +75,37 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     }
   }
 
-  // When the query items change, update the current query in the app state
-  useEffect(() => {
-    dispatch(setCurrentQuery(queryItems));
-  }, [dispatch, queryItems]);
-
   /* 
-    When the starting query is changed (on page reload), update the query items to match
-    Then check the canned queries list for a match in order to assign the proper mock ID
+    When the query items change, update the current query in the app state 
+    and alternate active query item type (nodes/predicates)
   */
   useEffect(() => {
-    if(!startingQuery)
+    // if prevQueryItems and queryItems are the same, return and don't update the current query in the app state
+    // console.log(queryItems);
+    // console.log(prevQueryItems);
+    // console.log(isEqual(queryItems, prevQueryItems))
+    // // return;
+    if(isEqual(queryItems, prevQueryItems)) {
+      console.log('match, returning');
       return;
-    setQueryItems(startingQuery);
+    }
+
+    setPrevQueryItems(JSON.parse(JSON.stringify(queryItems)));
+    dispatch(setCurrentQuery(queryItems));
+    
+    if(queryItems.length === 0) {
+      setNodesActive(true);
+      return;
+    }
+    let areNodesActive = (queryItems[queryItems.length - 1].type !== 'node') ? true : false;
+    setNodesActive(areNodesActive);
+  }, [queryItems]);
+
+  /* 
+    When the starting query is changed (on page reload), loop through the canned 
+    queries list for a match in order to assign the proper mock ID
+  */
+  useEffect(() => {
     cannedQueries.forEach(element => {
       if(element.query === startingQuery && activeMockID !== element.id) {
         setActiveMockID(element.id);
@@ -183,16 +205,6 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     if(needsChange)
       setQueryItems(newItems);
   } 
-
-  // Alternate active query item type (nodes/predicates)
-  useEffect(() => {
-    if(queryItems.length === 0) {
-      setNodesActive(true);
-      return;
-    }
-    let areNodesActive = (queryItems[queryItems.length - 1].type !== 'node') ? true : false;
-    setNodesActive(areNodesActive);
-  }, [queryItems])
   
 
   // Query Button items
