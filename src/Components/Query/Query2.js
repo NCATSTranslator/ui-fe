@@ -11,7 +11,9 @@ import QueryItem from "../QueryComponents/QueryItem";
 import { incrementHistory } from "../../Redux/historySlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { currentQueryResultsID, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
+import { store } from "../../Redux/store";
 import cloneDeep from "lodash/cloneDeep";
+
 
 const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
@@ -43,13 +45,13 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   startingResultsID = (startingResultsID === undefined) ? '' : startingResultsID; 
   const [currentResultsID, setCurrentResultsID] = useState(startingResultsID);
 
-  let tempStartingQuery = useSelector(currentQuery);
   // Get the current query from the application state
-  const startingQuery = (tempStartingQuery === undefined) ? [] : tempStartingQuery;
+  let storedQuery = useSelector(currentQuery);
+  storedQuery = (storedQuery === undefined) ? [] : storedQuery;
   // Array, currently selected query items
-  const [queryItems, setQueryItems] = useState(startingQuery);
+  const [queryItems, setQueryItems] = useState(storedQuery);
   // Array, for use in useEffect hooks with queryItems as a dependency
-  const [prevQueryItems, setPrevQueryItems] = useState(JSON.parse(JSON.stringify(queryItems)));
+  var prevQueryItems = useRef(storedQuery);
 
   // Event handler called when a node's input is updated by the user 
   const handleQueryItemChange = (e) => {
@@ -80,38 +82,40 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     and alternate active query item type (nodes/predicates)
   */
   useEffect(() => {
-    // if prevQueryItems and queryItems are the same, return and don't update the current query in the app state
-    // console.log(queryItems);
-    // console.log(prevQueryItems);
-    // console.log(isEqual(queryItems, prevQueryItems))
-    // // return;
-    if(isEqual(queryItems, prevQueryItems)) {
-      console.log('match, returning');
+    // since useEffect dependency update checks don't work on objects (thanks to shallow equals)
+    // check to see if queryItems has actually been updated, if not return
+    if(isEqual(prevQueryItems.current, queryItems))
       return;
-    }
 
-    setPrevQueryItems(JSON.parse(JSON.stringify(queryItems)));
-    dispatch(setCurrentQuery(queryItems));
-    
+    prevQueryItems.current = cloneDeep(queryItems);
+
+    // Control whether predicates or nodes are active after query items are changed
     if(queryItems.length === 0) {
       setNodesActive(true);
       return;
     }
     let areNodesActive = (queryItems[queryItems.length - 1].type !== 'node') ? true : false;
     setNodesActive(areNodesActive);
+
+    // if the current query items and the stored query match, return 
+    if(isEqual(queryItems, storedQuery)) 
+      return;
+    // otherwise, update the stored query in the app state
+    dispatch(setCurrentQuery(queryItems));
   }, [queryItems]);
 
   /* 
-    When the starting query is changed (on page reload), loop through the canned 
+    When the stored query is changed (on page reload or when undo/redo is invoked), loop through the canned 
     queries list for a match in order to assign the proper mock ID
+    Note: the proper mock id is already assigned when the query items are updated by clicking a template query
   */
   useEffect(() => {
     cannedQueries.forEach(element => {
-      if(element.query === startingQuery && activeMockID !== element.id) {
+      if(isEqual(element.query, storedQuery) && activeMockID !== element.id) {
         setActiveMockID(element.id);
       }
     });
-  }, [startingQuery, activeMockID]);
+  }, [storedQuery, activeMockID]);
 
 
   // When isValidSubmission changes
@@ -120,7 +124,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     if(isValidSubmission) {
       let timestamp = new Date();
       // Update the query history in the application state
-      dispatch(incrementHistory({ items: queryItems, time: timestamp.toDateString()}));
+      dispatch(incrementHistory({ items: storedQuery, time: timestamp.toDateString()}));
       // Reset the current results in the application state
       dispatch(setCurrentResults({}));
       // Reset isValidSubmission
@@ -233,7 +237,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
               <Droppable droppableId="query-item" direction="horizontal">
                 {(provided) => (
                   <ul className="query-box" {...provided.droppableProps} ref={provided.innerRef}>
-                    {queryItems.map((item, index) => {
+                    {storedQuery.map((item, index) => {
                       let itemIsNode = (item.type === "node") ? true : false;
                       return (
                         <Draggable key={index} draggableId={index.toString()} index={index} >

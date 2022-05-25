@@ -13,12 +13,13 @@ export const store = configureStore({
 })
 
 // Utility functions/variables for store.subscribe() callback function handleStoreUpdate
-function selectHistory(state) {
+function getHistory(state) {
   return state.history.pastQueries;
 }
-function selectCurrentQuery(state) {
+function getCurrentQuery(state) {
   return state.query.present.currentQuery;
 }
+
 let currentHistoryValue;
 let currentQueryValue;
 
@@ -27,7 +28,7 @@ const handleStoreUpdate = () => {
 
   // Query History
   let previousHistoryValue = currentHistoryValue;
-  currentHistoryValue = selectHistory(store.getState());
+  currentHistoryValue = getHistory(store.getState());
   if (previousHistoryValue !== currentHistoryValue
     && previousHistoryValue !== undefined) {
     console.log(
@@ -40,7 +41,7 @@ const handleStoreUpdate = () => {
 
   // Current Query
   let previousQueryValue = currentQueryValue;
-  currentQueryValue = selectCurrentQuery(store.getState());
+  currentQueryValue = getCurrentQuery(store.getState());
   if (previousQueryValue !== currentQueryValue
     && previousQueryValue !== undefined) {
     console.log(
