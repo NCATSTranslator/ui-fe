@@ -42,3 +42,11 @@ export const sortDateHighLow = (items) => {
     (a.edge.last_publication_date != null ? getLastPubYear(a.edge.last_publication_date) : 0)
   );
 }
+
+export const sortByHighlighted = (totalItems, highlightedItems) => {
+  let sortedItems = [
+    ...totalItems.filter(item => highlightedItems.includes(item)),
+    ...totalItems.filter(item => !highlightedItems.includes(item))
+  ];
+  return sortedItems;
+}

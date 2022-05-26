@@ -4,7 +4,7 @@ import Checkbox from "../FormFields/Checkbox";
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
 
 
-const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activateEvidence }) => {
+const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activateEvidence, checked, highlighted}) => {
 
   // let icon = getIcon(item.type);
   let icon = getIcon('chemical');
@@ -26,12 +26,14 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
   let predicate = (item.edge.predicate)
     ? item.edge.predicate.replace("biolink:", '') + ' ' + staticNode.names[0]
     : '';
-
+  
+  checked = (allSelected || checked) ? true : false;
+  let highlightedClass = (highlighted) ? 'highlighted' : false;
 
   return (
-    <div key={key} className="result">
+    <div key={key} className={`result ${highlightedClass}`}>
       <div className="checkbox-container result-sub">
-        <Checkbox checked={allSelected} handleClick={()=>handleSelected(item)}/>
+        <Checkbox checked={checked} handleClick={()=>handleSelected(item)}/>
       </div>
       <div className="name-container result-sub">
         <span className="icon">{icon}</span>

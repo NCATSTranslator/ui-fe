@@ -9,7 +9,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import isEqual from 'lodash/isEqual';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, 
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
 
 
@@ -45,12 +45,13 @@ const ResultsList = ({loading}) => {
   const [allSelected, setAllSelected] = useState(false);
   // Array, all selected items
   const [selectedItems, setSelectedItems] = useState([]);
+  // Array, all highlighted items
+  const [highlightedItems, setHighlightedItems] = useState([]);
   // Obj, original raw results from the BE
   const [results, setResults] = useState(resultsState);
   /* 
     Ref, used to track changes in results for useEffect with 'results' obj as dependency
-    b/c react doesn't deep compare objects in useEffect hook, so the aforementioned useEffect 
-    will fire on every render.
+    b/c react doesn't deep compare objects in useEffect hook
   */
   const prevResults = useRef(results);
   // Array, full result set sorted by any active sorting, but NOT filtered
@@ -87,7 +88,8 @@ const ResultsList = ({loading}) => {
     setDisplayedResults(formattedResults.slice(itemOffset, endOffset));
     setEndResultIndex(endOffset);
     setPageCount(Math.ceil(formattedResults.length / itemsPerPage));
-    console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
+    if(displayedResults.length > 0)
+      console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
   }, [itemOffset, itemsPerPage, formattedResults]);
 
   // Handles direct page click
@@ -278,6 +280,21 @@ const ResultsList = ({loading}) => {
       default:
         break;
     }
+    if(selectedItems.length > 0) {
+      newSortedResults = sortByHighlighted(newSortedResults, selectedItems);
+    }
+    setSortedResults(newSortedResults);
+    setFormattedResults(newSortedResults);
+  }
+
+  const handleResultHighlight = () => {
+    if(selectedItems.length <= 0) {
+      console.log("No items selected, unable to highlight.")
+      return;
+    }
+    
+    let newSortedResults = (sortByHighlighted(sortedResults, selectedItems))
+    setHighlightedItems(selectedItems);
     setSortedResults(newSortedResults);
     setFormattedResults(newSortedResults);
   }
@@ -394,6 +411,7 @@ const ResultsList = ({loading}) => {
                 totalCount={sortedResults.length}
                 onSort={handleSort} 
                 onFilter={handleFilter}
+                onHighlight={handleResultHighlight}
                 activeFilters={activeFilters} />
               <div className="results-table">
                 <div className="table-body">
@@ -415,10 +433,13 @@ const ResultsList = ({loading}) => {
                     !isError &&
                     displayedResults.length > 0 && 
                     displayedResults.map((item, i) => {
-
+                      let checked = (selectedItems.length > 0 && selectedItems.includes(item)) ? true : false;
+                      let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
                       return(
                         <ResultsItem 
                           key={i} 
+                          checked={checked}
+                          highlighted={highlighted}
                           item={item} 
                           staticNode={results.static_node} 
                           allSelected={allSelected}

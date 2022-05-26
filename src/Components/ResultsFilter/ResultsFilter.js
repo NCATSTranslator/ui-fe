@@ -6,11 +6,13 @@ import Accordion from '../Accordion/Accordion';
 import Range from '../Range/Range';
 import cloneDeep from 'lodash/cloneDeep';
 
-const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, totalCount, onSort, onFilter}) => {
+const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, totalCount, onSort, onFilter, onHighlight}) => {
 
   const [optionState, setOptionState] = useState(''); 
   const [minEvidence, setMinEvidence] = useState(1); 
   const [minEvidenceActive, setMinEvidenceActive] = useState(false); 
+
+  onHighlight = (!onHighlight) ? () => console.log("No highlight function specified in ResultsFilter.") : onHighlight; 
 
   const [sortingOptions, setSortingOptions] = useState(
     {
@@ -61,6 +63,23 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
   const handleEvidenceRangeChange = (e) => {
     setMinEvidence(e.target.value);
   }
+
+  const handleHighlight = () => {
+    onHighlight();
+  }
+
+  const handleOptionApply = () => {
+
+    switch (optionState) {
+      case "Highlight":
+        handleHighlight();
+        break;
+    
+      default:
+        console.log("No handler function yet created for this option.");
+        break;
+    }
+  }
   
   useEffect(() => {
     if(minEvidenceActive) {
@@ -101,7 +120,7 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
               <option value="Hide" key="1">Hide</option>
               <option value="Compare" key="2">Compare</option>
             </Select>
-            <button>Apply</button>
+            <button onClick={handleOptionApply}>Apply</button>
           </div>
           <Accordion 
             title="Filter & Sort"
