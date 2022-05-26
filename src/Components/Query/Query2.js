@@ -162,7 +162,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
   }, [isValidSubmission, dispatch, queryItems, activeMockID])
 
-  // Reset isResults on rerender when resultsActive  
+  // Set isResults to true when resultsActive  
   useEffect(() => {
     if(resultsActive) {
       setIsResults(true);

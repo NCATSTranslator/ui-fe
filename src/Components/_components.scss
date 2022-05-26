@@ -1265,9 +1265,20 @@ label.checkbox {
         }
       }
       .table-body {
+        
         .result {
           display: grid;
           grid-template-columns: min-content 6fr .75fr 1.75fr 2fr;
+          &:nth-child(even) {
+            &.highlighted {
+              background-color: $yellow20;
+            }
+          }
+          &:nth-child(odd) {
+            &.highlighted {
+              background-color: $yellow50;
+            }
+          }
           .result-sub {
             padding: $xs 0;
             display: flex;
@@ -1276,6 +1287,7 @@ label.checkbox {
           }
           .checkbox-container {
             padding-right: $m;
+            padding-left: $xs;
             .checkbox {
               margin: 0;
             }
