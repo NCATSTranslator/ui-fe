@@ -486,6 +486,7 @@ label.checkbox {
       text-overflow: ellipsis;
       transition: $defaultAnim;
       pointer-events: none;
+      z-index: 10;
       &.open {
         padding-top: 10px;
         pointer-events: all;
@@ -1473,6 +1474,38 @@ label.checkbox {
           transform: rotate(-180deg);
         }
       }
+    }
+  }
+}
+.active-filters {
+  margin: 0 0 30px;
+  .filter-tag {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: $s;
+    padding: 7px 4px 7px 12px;
+    font-size: 14px;
+    line-height: 1;
+    box-shadow: $dropShadow;
+    transition: $defaultBoxShadowAnim;
+    border-radius: $defaultBorderRadius;
+    span {
+      font-weight: 700;
+      color: $purpleOne;
+    }
+    .close {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      
+      &:hover {
+        cursor: pointer;
+      }
+    }
+    &:hover {
+      box-shadow: $dropShadowHover;
+      cursor:default;
     }
   }
 }

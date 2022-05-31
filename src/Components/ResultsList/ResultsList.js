@@ -4,6 +4,7 @@ import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
+import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
 import { useSelector, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
@@ -243,6 +244,25 @@ const ResultsList = ({loading}) => {
     setActiveFilters(newFilters);
   }
 
+  // Output jsx for selected filters
+  const getSelectedFilterDisplay = (element) => {
+    let filterDisplay;
+    switch (element.tag) {
+    case "hum":
+      filterDisplay = <div>Species: <span>Human</span></div>;
+      break;
+    case "evi":
+      filterDisplay = <div>Minimum Evidence: <span>{element.value}</span></div>;
+      break;
+    case "fda":
+      filterDisplay = <div><span>FDA Approved</span></div>;
+      break;
+    default:
+      break;
+    }
+    return filterDisplay;
+  }
+
   // Handle the sorting 
   const handleSort = (sortName) => {
     let newSortedResults = [...sortedResults]
@@ -287,6 +307,7 @@ const ResultsList = ({loading}) => {
     setFormattedResults(newSortedResults);
   }
 
+  // Handle highlighting of results
   const handleResultHighlight = () => {
     if(selectedItems.length <= 0) {
       console.log("No items selected, unable to highlight.")
@@ -413,6 +434,21 @@ const ResultsList = ({loading}) => {
                 onFilter={handleFilter}
                 onHighlight={handleResultHighlight}
                 activeFilters={activeFilters} />
+              {
+                activeFilters.length > 0 &&
+                <div className="active-filters">
+                  {
+                    activeFilters.map((element, i)=> {
+                      return(
+                        <span key={i} className={`filter-tag ${element.tag}`}>
+                          { getSelectedFilterDisplay(element) }
+                          <span className="close" onClick={()=>{handleFilter(element)}}><CloseIcon/></span>
+                        </span>
+                      )
+                    })
+                  }
+                </div>
+              }
               <div className="results-table">
                 <div className="table-body">
                   <div className="table-head result">

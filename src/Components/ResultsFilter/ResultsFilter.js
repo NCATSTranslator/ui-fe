@@ -10,7 +10,10 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
 
   const [optionState, setOptionState] = useState(''); 
   const [minEvidence, setMinEvidence] = useState(1); 
-  const [minEvidenceActive, setMinEvidenceActive] = useState(false); 
+  const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: minEvidence});
+  const humanSpeciesObject = {tag:'hum', value: ''};
+  const mouseSpeciesObject = {tag:'mou', value: ''};
+  const fdaObject = {tag:'fda', value: ''};
 
   onHighlight = (!onHighlight) ? () => console.log("No highlight function specified in ResultsFilter.") : onHighlight; 
 
@@ -57,11 +60,13 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
   }
   
   const handleEvidenceActive = () => {
-    onFilter({tag:'evi', value: minEvidence});
-    setMinEvidenceActive(!minEvidenceActive)
+    onFilter(evidenceObject);
   }
   const handleEvidenceRangeChange = (e) => {
-    setMinEvidence(e.target.value);
+    let newEviObj  = structuredClone(evidenceObject);
+    newEviObj.value = e.target.value;
+    setEvidenceObject(newEviObj);
+    onFilter(newEviObj);
   }
 
   const handleHighlight = () => {
@@ -80,12 +85,6 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
         break;
     }
   }
-  
-  useEffect(() => {
-    if(minEvidenceActive) {
-      onFilter({tag:'evi', value: minEvidence})
-    }
-  }, [minEvidence]);
 
   return (
     <div className="results-filter">
@@ -129,15 +128,25 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
             <div className="filter-left">
               <p className="sub-one">Filter</p>
               <p className="sub-two">Evidence</p>
-                <Checkbox handleClick={handleEvidenceActive}>Minimum Number of Evidence</Checkbox>
+                <Checkbox handleClick={handleEvidenceActive} 
+                  checked={activeFilters.some(e => e.tag === evidenceObject.tag)}>
+                    Minimum Number of Evidence
+                </Checkbox>
                 <Range label="Minimum Number of Evidence" hideLabel min="1" max="99" onChange={e => handleEvidenceRangeChange(e)}/>
               <p className="sub-two">Species</p>
-                <Checkbox handleClick={() => onFilter({tag:'hum', value: ''})}>Human</Checkbox>
-                <Checkbox handleClick={() => onFilter({tag:'mou', value: ''})}>Mouse</Checkbox>
-                <Checkbox handleClick={() => onFilter({tag:'zeb', value: ''})}>Zebrafish</Checkbox>
+                <Checkbox handleClick={() => onFilter(humanSpeciesObject)} 
+                  checked={activeFilters.some(e => e.tag === humanSpeciesObject.tag)}>
+                    Human
+                </Checkbox>
+                <Checkbox handleClick={() => onFilter(mouseSpeciesObject)} 
+                  checked={activeFilters.some(e => e.tag === mouseSpeciesObject.tag)}>
+                    Mouse
+                </Checkbox>
               <p className="sub-two">Tags</p>
-                <Checkbox handleClick={() => onFilter({tag:'fda', value: ''})}>FDA Approved</Checkbox>
-                <Checkbox handleClick={() => onFilter({tag:'ped', value: ''})}>Pediatric Indications</Checkbox>
+                <Checkbox handleClick={() => onFilter(fdaObject)} 
+                  checked={activeFilters.some(e => e.tag === fdaObject.tag)}>
+                    FDA Approved
+                </Checkbox>
             </div>
             <div className="filter-right">
               <p className="sub-one">Sort By</p>
