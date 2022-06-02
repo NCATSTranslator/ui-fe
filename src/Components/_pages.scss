@@ -51,32 +51,47 @@
     .history-list {
       list-style: none;
       .history-item {
-        padding: $m;
-        margin-bottom: $m;
-        box-shadow: $dropShadow;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: $defaultBorderRadius;
-        transition: $defaultBoxShadowAnim;
-        &:hover {
-          box-shadow: $dropShadowHover;
+        &:first-of-type {
+          .time-name {
+            margin: 0 0 $m;
+          }
         }
-        .subject,.action {
-          color: $purpleOne;
+        .time-name {
+          font-size: 20px;
+          line-height: 1.25;
           font-weight: 700;
+          color: $darkGrey;
+          margin: $xl 0 $m;
+
         }
-        .remove-item {
-          background-color: transparent;
-          padding: $s;
-          margin: 0;
+        .item-container {
+          padding: $m;
+          margin-bottom: $m;
+          box-shadow: $dropShadow;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-radius: $defaultBorderRadius;
+          transition: $defaultBoxShadowAnim;
           &:hover {
-            box-shadow: none;
+            box-shadow: $dropShadowHover;
           }
-          svg {
+          .subject,.action {
+            color: $purpleOne;
+            font-weight: 700;
+          }
+          .remove-item {
+            background-color: transparent;
+            padding: $s;
             margin: 0;
+            &:hover {
+              box-shadow: none;
+            }
+            svg {
+              margin: 0;
+            }
           }
-        }
+        }  
       }
     }
   }

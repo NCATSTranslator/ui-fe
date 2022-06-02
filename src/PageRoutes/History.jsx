@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import { pastQueryState, clearHistory, removeItemAtIndex } from "../Redux/historySlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
@@ -9,15 +9,12 @@ import {ReactComponent as Warning} from '../Icons/Alerts/Warning.svg'
 
 const History = () => {
 
-  const queryHistoryState = useSelector(pastQueryState);
   const dispatch = useDispatch();
-
+  let tempQueryHistory = useSelector(pastQueryState);
+  const [queryHistoryState, setQueryHistoryState] = useState(structuredClone(tempQueryHistory).reverse());
   const [modalOpen, setModalOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
-
-  useEffect(() => {
-    setCurrentDate(new Date());
-  }, []);
+  
 
   const getDifferenceInDays = (date2, date1) => {
     const _MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -27,7 +24,60 @@ const History = () => {
     const utc2 = Date.UTC(date2.getFullYear(), date2.getMonth(), date2.getDate());
 
     return Math.round(Math.abs((utc2 - utc1) / _MS_PER_DAY));
-}
+  }
+
+  const getQueryHistoryOutput = (queryHistory) => {
+    let previousTimeName;
+    return queryHistory.map((query, i)=> {
+      let itemTimestamp = new Date(query.time);
+      let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
+      let timeName = "";
+      let showNewTimeName = false;
+      switch (timestampDiff) {
+        case 0:
+          timeName = "Today";
+          break;
+        case 1:
+          timeName = "Yesterday";
+          break;
+        default:
+          timeName = itemTimestamp.toDateString();
+          break;
+      }
+      if(timeName !== previousTimeName) {
+        previousTimeName = timeName;
+        showNewTimeName = true;
+      }
+      
+      return (
+        <li key={i} className="history-item">
+          {
+            showNewTimeName &&
+            <div className="time-name">{timeName}</div>            
+          }
+          <div className="item-container">
+            <span className="query">
+              {query.items.map((item, j) => {
+                let output = (item.value) ? item.value : item.name;
+                return (
+                  <span key={j} className={item.type}>{output} </span>)
+                })
+              }
+            </span>
+            <button 
+              className="remove-item"
+              onClick={(e)=> {
+                console.log("Removing at " + i);
+                dispatch(removeItemAtIndex(i)); 
+              }}>
+              <Close/>
+            </button>
+          </div>
+        </li>
+      )
+    })
+  }
+
   return (
     <div className="history-inner">
       <div className="head">
@@ -54,44 +104,7 @@ const History = () => {
         {
           queryHistoryState.length > 0 &&
           <ul className="history-list">
-            {queryHistoryState.map((query, i)=> {
-                let itemTimestamp = new Date(query.time);
-                let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
-                let timeName = "";
-                switch (timestampDiff) {
-                  case 0:
-                    timeName = "Today";
-                    break;
-                  case 1:
-                    timeName = "Yesterday";
-                    break;
-                  default:
-                    timeName = itemTimestamp.toDateString();
-                    break;
-                }
-                
-              return (
-                <li key={i} className="history-item">
-                  {timeName}
-                  <span className="query">
-                    {query.items.map((item, j) => {
-                      let output = (item.value) ? item.value : item.name;
-                      return (
-                        <span key={j} className={item.type}>{output} </span>)
-                      })
-                    }
-                  </span>
-                  <button 
-                    className="remove-item"
-                    onClick={(e)=> {
-                      console.log("Removing at " + i);
-                      dispatch(removeItemAtIndex(i)); 
-                    }}>
-                    <Close/>
-                  </button>
-                </li>
-              )
-            })}
+            {getQueryHistoryOutput(queryHistoryState)}
           </ul>
         }
         {
