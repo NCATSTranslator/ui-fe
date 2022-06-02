@@ -3,7 +3,8 @@ import Select from '../FormFields/Select';
 import Checkbox from '../FormFields/Checkbox';
 import Radio from '../FormFields/Radio';
 import Accordion from '../Accordion/Accordion';
-import Range from '../Range/Range';
+import SimpleRange from '../Range/SimpleRange';
+import TwoThumbRange from '../Range/TwoThumbRange';
 import cloneDeep from 'lodash/cloneDeep';
 
 const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, totalCount, onSort, onFilter, onHighlight}) => {
@@ -11,6 +12,10 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
   const [optionState, setOptionState] = useState(''); 
   const [minEvidence, setMinEvidence] = useState(1); 
   const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: minEvidence});
+  const dateRangeMin = 1840;
+  const dateRangeMax = 2022;
+  const [dateRange, setDateRange] = useState([dateRangeMin, dateRangeMax]);
+  const [dateRangeObject, setDateRangeObject] = useState({tag:'date', value: dateRange});
   const humanSpeciesObject = {tag:'hum', value: ''};
   const mouseSpeciesObject = {tag:'mou', value: ''};
   const fdaObject = {tag:'fda', value: ''};
@@ -62,11 +67,21 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
   const handleEvidenceActive = () => {
     onFilter(evidenceObject);
   }
-  const handleEvidenceRangeChange = (e) => {
+  const handleEvidenceRangeChange = (value) => {
     let newEviObj  = structuredClone(evidenceObject);
-    newEviObj.value = e.target.value;
+    newEviObj.value = value;
     setEvidenceObject(newEviObj);
     onFilter(newEviObj);
+  }
+
+  const handleDateRangeActive = () => {
+    onFilter(dateRangeObject);
+  }
+  const handleDateRangeChange = (value) => {
+    let newDateObj  = structuredClone(dateRangeObject);
+    newDateObj.value = value;
+    setDateRangeObject(newDateObj);
+    onFilter(newDateObj);
   }
 
   const handleHighlight = () => {
@@ -132,7 +147,25 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
                   checked={activeFilters.some(e => e.tag === evidenceObject.tag)}>
                     Minimum Number of Evidence
                 </Checkbox>
-                <Range label="Minimum Number of Evidence" hideLabel min="1" max="99" onChange={e => handleEvidenceRangeChange(e)}/>
+                <SimpleRange 
+                  label="Minimum Number of Evidence" 
+                  hideLabel 
+                  min="1" 
+                  max="99" 
+                  onChange={e => handleEvidenceRangeChange(e)}
+                  initialValue={1} />
+              <p className="sub-two"></p>
+                <Checkbox handleClick={handleDateRangeActive} 
+                  checked={activeFilters.some(e => e.tag === dateRangeObject.tag)}>
+                    Date Range
+                </Checkbox>
+                <TwoThumbRange 
+                  label="Date Range" 
+                  hideLabel 
+                  min={dateRangeMin} 
+                  max={dateRangeMax} 
+                  onChange={e => handleDateRangeChange(e)}
+                  initialValues={dateRange} />
               <p className="sub-two">Species</p>
                 <Checkbox handleClick={() => onFilter(humanSpeciesObject)} 
                   checked={activeFilters.some(e => e.tag === humanSpeciesObject.tag)}>

@@ -721,7 +721,7 @@ label.checkbox {
   left: 0;
   transition: opacity .25s ease;
   background-color: rgba(96, 99, 104, .5);
-  z-index: 20;
+  z-index: 100;
   &.false {
     opacity: 0;
     visibility: hidden;
@@ -1517,46 +1517,47 @@ label.checkbox {
   justify-content: center;
   padding-bottom: $m;
   width: 100%;
-  // removing default styles from input
-  input[type=range] {
-    -webkit-appearance: none; 
-    width: calc(100% - 3px); 
-    background: transparent; 
-    margin: 0 auto;
-    &::-webkit-slider-thumb {
+  .range-track {
+    background-color: $purpleOne;
+    height: 3px;
+    width: 80%;
+    z-index: 20;
+  }
+  .thumb-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    .thumb {
+      width: 16px;
+      height: 16px;
+      background: $purpleOne;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
       -webkit-appearance: none;
     }
-    &:focus {
-      outline: none;
-    }
-    &::-ms-track {
-      width: 100%;
-      cursor: pointer;
-      background: transparent; 
-      border-color: transparent;
-      color: transparent;
-    }
-  }
-  &.no-label {
-    label {
-      display: flex;
-      height: 0;
-      width: 0;
+    .value {
+      position: absolute;
+      top: 16px;
+      color: $purpleOne;
+      font-weight: bold;
+      font-size: 10px;
       padding: 0;
-      margin: 0;
-      visibility: hidden;
+      border-radius: 4px;
     }
   }
-  span {
-    line-height: 1;
-  }
+
   .min,.max,.value {
     font-size: $overlineSize;
     font-weight: 800;
   }
   .min {
-    margin-right: $xxs;
+    margin-right: 5px;
+    padding-right: $xs;
     position: relative;
+    z-index: 0;
+
     &:after {
       position: absolute;
       content: '';
@@ -1564,14 +1565,17 @@ label.checkbox {
       width: $xs;
       background-color: $purpleOne;
       border-radius: 50%;
-      top: -50%;
-      transform: translateY(50%);
+      top: 50%;
+      transform: translateY(-50%);
       left: 10px;
     }
   }
   .max {
     margin-left: $xxs;
+    padding-left: $xs;
     position: relative;
+    z-index: 0;
+
     &:before {
       position: absolute;
       content: '';
@@ -1579,74 +1583,17 @@ label.checkbox {
       width: $xs;
       background-color: $darkGrey;
       border-radius: 50%;
-      top: -50%;
-      transform: translateY(50%);
-      left: -13.5px;
+      top: 50%;
+      transform: translateY(-50%);
+      left: -5px;
     }
   }
-  .bar-container {
-    position: relative;
-    display: inline-flex;
-    width: 80%;
-    input[type=range] {
-      padding: 0;
-      &::-webkit-slider-thumb {
-        margin-top: -8px;
-        width: 16px;
-        height: 16px;
-        background: $purpleOne;
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        -webkit-appearance: none;
-        z-index: 20;
-        position: relative;
+  &.two-thumb {
+    .min {
+      &::after {
+        left: 24px; 
+        background-color: $darkGrey;
       }
-      &::-moz-range-thumb, 
-      &::-ms-thumb {
-        margin-top: -8px;
-        width: 16px;
-        height: 16px;
-        background: $purpleOne;
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        -webkit-appearance: none;
-        z-index: 20;
-        position: relative;
-      }
-      &::-webkit-slider-runnable-track {
-        background: $darkGrey;
-        border: none;
-        width: 100%;
-        height: 1.5px;
-        cursor: pointer;
-      }
-      &::-moz-range-track,
-      &::-ms-track {
-        background: $darkGrey;
-        border: none;
-        width: 100%;
-        height: 1.5px;
-        cursor: pointer;
-      }
-      &::-ms-fill-lower {
-        background: #2a6495;
-        border: 0.2px solid #010101;
-        border-radius: 2.6px;
-      }
-      &::-ms-fill-upper {
-        background: #3071a9;
-        border: 0.2px solid #010101;
-        border-radius: 2.6px;
-      }
-    }
-    .fill {
-      background-color: $purpleOne;
-      height: 3px;
-    }
-    .value {
-      pointer-events: none;
     }
   }
 }

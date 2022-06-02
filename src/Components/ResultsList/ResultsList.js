@@ -12,6 +12,7 @@ import ReactPaginate from 'react-paginate';
 import isEqual from 'lodash/isEqual';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
+import { getLastPubYear } from "../../Utilities/utilities";
 
 
 const ResultsList = ({loading}) => {
@@ -257,6 +258,9 @@ const ResultsList = ({loading}) => {
     case "fda":
       filterDisplay = <div><span>FDA Approved</span></div>;
       break;
+    case "date":
+      filterDisplay = <div>Date of Evidence: <span>{element.value[0]}-{element.value[1]}</span></div>;
+      break;
     default:
       break;
     }
@@ -348,6 +352,12 @@ const ResultsList = ({loading}) => {
           // Minimum evidence filter
           case 'evi':
             if(element.edge.evidence.length < filter.value)
+              addElement = false;
+            break;
+          // Date Range filter
+          case 'date':
+            let lastPubYear = getLastPubYear(element.edge.last_publication_date);
+            if(lastPubYear < filter.value[0] || lastPubYear > filter.value[1])
               addElement = false;
             break;
           default:
