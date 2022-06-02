@@ -68,10 +68,12 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
     onFilter(evidenceObject);
   }
   const handleEvidenceRangeChange = (value) => {
-    let newEviObj  = structuredClone(evidenceObject);
-    newEviObj.value = value;
-    setEvidenceObject(newEviObj);
-    onFilter(newEviObj);
+    if(evidenceObject.value !== value) {
+      let newEviObj  = structuredClone(evidenceObject);
+      newEviObj.value = value;
+      setEvidenceObject(newEviObj);
+      onFilter(newEviObj);
+    }
   }
 
   const handleDateRangeActive = () => {
