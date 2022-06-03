@@ -4,6 +4,7 @@ let savedState = JSON.parse(localStorage.getItem('reduxState'))
 
 const state = 
   (localStorage.getItem('reduxState') 
+  && savedState.history != undefined
   && savedState.history.pastQueries != undefined)
     ? savedState.history.pastQueries
     : []
