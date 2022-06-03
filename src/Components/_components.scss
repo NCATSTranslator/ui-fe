@@ -1269,7 +1269,7 @@ label.checkbox {
         
         .result {
           display: grid;
-          grid-template-columns: min-content 6fr .75fr 1.75fr 2fr;
+          grid-template-columns: min-content 6fr .75fr 1.75fr 2fr 1fr;
           &:nth-child(even) {
             &.highlighted {
               background-color: $yellow20;
@@ -1359,6 +1359,30 @@ label.checkbox {
               span:last-of-type {
                 margin-right: 0;
               }
+            }
+          }
+          .accordion-button {
+            margin-bottom: 0;
+            background-color: transparent;
+            padding: 0;
+            svg {
+              transition: transform .25s ease;
+              margin-right: 0;
+            }
+            &:hover {
+              box-shadow: none;
+            }
+            &.open {
+              svg {
+                transform: rotate(-180deg);
+              }
+            }
+          }
+          .accordion-panel {
+            grid-column: 1/7;
+            .container {
+              width: auto;
+              padding: 20px;
             }
           }
         }
