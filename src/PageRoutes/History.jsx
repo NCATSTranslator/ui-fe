@@ -26,6 +26,13 @@ const History = () => {
     return Math.round(Math.abs((utc2 - utc1) / _MS_PER_DAY));
   }
 
+  const handleRemoveHistoryItem = (i) => {
+    let temp = structuredClone(queryHistoryState);
+    temp.splice(i, 1);
+    setQueryHistoryState(temp);
+    dispatch(removeItemAtIndex(i)); 
+  }
+
   const getQueryHistoryOutput = (queryHistory) => {
     let previousTimeName;
     return queryHistory.map((query, i)=> {
@@ -67,8 +74,7 @@ const History = () => {
             <button 
               className="remove-item"
               onClick={(e)=> {
-                console.log("Removing at " + i);
-                dispatch(removeItemAtIndex(i)); 
+                handleRemoveHistoryItem(i)
               }}>
               <Close/>
             </button>
