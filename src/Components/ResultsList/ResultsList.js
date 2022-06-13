@@ -92,7 +92,7 @@ const ResultsList = ({loading}) => {
     setPageCount(Math.ceil(formattedResults.length / itemsPerPage));
     if(displayedResults.length > 0)
       console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
-  }, [itemOffset, itemsPerPage, formattedResults]);
+  }, [itemOffset, itemsPerPage, formattedResults, displayedResults]);
 
   // Handles direct page click
   const handlePageClick = (event) => {
@@ -224,7 +224,7 @@ const ResultsList = ({loading}) => {
       // if the values also match, it's a real match
       if (activeFilters[index].value === filter.value) {
         newFilters = activeFilters.reduce((result, value, i) => {
-          if(i!=index) {
+          if(i !== index) {
             result.push(value);
           }
           return result;
@@ -326,8 +326,6 @@ const ResultsList = ({loading}) => {
 
   // Filter the results whenever the activated filters change 
   useEffect(() => {
-    console.log(activeFilters);
-    console.log(sortedResults);
     // If there are no active filters, get the full result set
     if(activeFilters.length <= 0) {
       setFormattedResults(sortedResults);

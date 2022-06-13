@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useState} from "react";
 import { pastQueryState, clearHistory, removeItemAtIndex } from "../Redux/historySlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
@@ -14,7 +14,7 @@ const History = () => {
   // query history stored from oldest -> newest, so we must reverse it to display the most recent first
   const [queryHistoryState, setQueryHistoryState] = useState(structuredClone(tempQueryHistory).reverse());
   const [modalOpen, setModalOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const currentDate = new Date();
 
   const getDifferenceInDays = (date2, date1) => {
     const _MS_PER_DAY = 1000 * 60 * 60 * 24;
