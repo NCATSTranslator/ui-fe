@@ -1,19 +1,15 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState, useEffect, useRef, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { cannedQueries } from "../../Data/cannedqueries";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import isEqual from 'lodash/isEqual';
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import Button from "../FormFields/Button";
 import QueryTemplate from "../QueryComponents/QueryTemplate";
 import QueryItemButton from "../QueryComponents/QueryItemButton";
-import QueryItem from "../QueryComponents/QueryItem";
+import QueryBar from "../QueryComponents/QueryBar";
 import { incrementHistory } from "../../Redux/historySlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
-import { currentQueryResultsID, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
-import { store } from "../../Redux/store";
+import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import cloneDeep from "lodash/cloneDeep";
-
 
 const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
@@ -21,12 +17,15 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const [queryParams, setQueryParams] = useSearchParams();
+  const navigatingFromHistory = (queryParams.get('results') !== null) ? true : false;
+
   loading = (loading) ? true : false;
 
   // Bool, pro mode toggle
-  const [proMode, setProMode] = useState(false);
+  const proMode = false;
   // Bool, are we on the templated queries page
-  const [isTemplate, setIsTemplate] = useState(template);
+  const isTemplate = template;
   // Bool, are we on the results page
   const [isResults, setIsResults] = useState(results);
   // Bool, are results active
@@ -35,15 +34,8 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   const [isLoading, setIsLoading] = useState(loading);
   // Bool, is the submitted query valid, determined by validateSubmission 
   const [isValidSubmission, setIsValidSubmission] = useState(false);
-  // Bool, controls whether nodes or predicates are active on BYO query 
-  const [NodesActive, setNodesActive] = useState(true);
   // Int, active mock ARS ID
   const [activeMockID, setActiveMockID] = useState(-1);
-
-  // 
-  let startingResultsID = useSelector(currentQueryResultsID);
-  startingResultsID = (startingResultsID === undefined) ? '' : startingResultsID; 
-  const [currentResultsID, setCurrentResultsID] = useState(startingResultsID);
 
   // Get the current query from the application state
   let storedQuery = useSelector(currentQuery);
@@ -76,6 +68,21 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
       setIsValidSubmission(true);
     }
   }
+  
+  /* 
+    Loop through the canned queries list for a match in order to assign the proper mock ID
+    Note: the proper mock id is already assigned when the query items are updated by clicking a template query 
+  */
+  const checkCannedQueries = useCallback( 
+    () => {
+      cannedQueries.forEach(element => {
+        if(isEqual(element.query, storedQuery) && activeMockID !== element.id) {
+          setActiveMockID(element.id);
+        }
+      });
+    },
+    [activeMockID, storedQuery]
+  );
 
   /* 
     When the query items change, update the current query in the app state 
@@ -89,20 +96,13 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
     prevQueryItems.current = cloneDeep(queryItems);
 
-    // Control whether predicates or nodes are active after query items are changed
-    if(queryItems.length === 0) {
-      setNodesActive(true);
-      return;
-    }
-    let areNodesActive = (queryItems[queryItems.length - 1].type !== 'node') ? true : false;
-    setNodesActive(areNodesActive);
-
     // if the current query items and the stored query match, return 
     if(isEqual(queryItems, storedQuery)) 
       return;
+
     // otherwise, update the stored query in the app state
     dispatch(setCurrentQuery(queryItems));
-  }, [queryItems]);
+  }, [queryItems, storedQuery, dispatch]);
 
   /* 
     When the stored query is changed (on page reload or when undo/redo is invoked), loop through the canned 
@@ -110,15 +110,11 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     Note: the proper mock id is already assigned when the query items are updated by clicking a template query
   */
   useEffect(() => {
-    cannedQueries.forEach(element => {
-      if(isEqual(element.query, storedQuery) && activeMockID !== element.id) {
-        setActiveMockID(element.id);
-      }
-    });
-  }, [storedQuery, activeMockID]);
+    checkCannedQueries();
+  }, [storedQuery, checkCannedQueries]);
 
 
-  // When isValidSubmission changes
+  // Handle change to isValidSubmission
   useEffect(() => {
     // If the submission is valid
     if(isValidSubmission) {
@@ -135,7 +131,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
       let testJson = '';
       
       // If the activeMockID has been set, prep the json to be sent to /query
-      if(activeMockID != -1) {
+      if(activeMockID !== -1) {
         let mockJson = { id: activeMockID} 
         testJson = JSON.stringify(mockJson);
       }
@@ -151,8 +147,6 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
         .then(data => {
           console.log(data)
           if(data.data && data.status === 'success') {
-            // Update the currentQueryResultsID 
-            setCurrentResultsID(data.data);
             // Update the currentQueryResultsID in the application state
             dispatch(setCurrentQueryResultsID(data.data.id));
             setResultsActive(true);
@@ -160,18 +154,30 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItems, activeMockID])
+  }, [isValidSubmission, dispatch, queryItems, activeMockID, storedQuery])
 
-  // Set isResults to true when resultsActive  
+  // Set isResults to true when resultsActive so we can navigate to the results page
   useEffect(() => {
     if(resultsActive) {
       setIsResults(true);
     }
   }, [resultsActive]);
 
-  // If isResults is true and we aren't already, send us to the results page and set loading to true
+  /* 
+    If the query has been populated by clicking on an item in the query history
+    check the canned queries for a match, then set the isValidSubmission to true 
+    to imitate manual submission of the query
+  */
   useEffect(() => {
-    if(isResults && !window.location.href.includes("results")) {
+    if(navigatingFromHistory) {
+      checkCannedQueries();
+      setIsValidSubmission(true)
+    }
+  }, [navigatingFromHistory, checkCannedQueries]);
+
+  // If isResults is true send us to the results page and set loading to true via query param
+  useEffect(() => {
+    if(isResults) {
       navigate('/results?loading=true');
     }
   }, [isResults, navigate]);
@@ -218,12 +224,12 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   const disease = {name: 'Disease', type: 'node', category: 'disease', value: '', selected: false};
   const concept = {name: 'Concept', type: 'node', category: 'concept', value: '', selected: false};
 
-  const regulates = {name: 'Regulates', type: 'action', category: 'regulation'};
-  const downregulates = {name: 'Downregulates', type: 'action', category: 'regulation'};
-  const upregulates = {name: 'Upregulates', type: 'action', category: 'regulation'};
-  const treats = {name: 'Treats', type: 'action', category: 'treats'};
-  const associated = {name: 'Associated With', type: 'action', category: 'associated'};
-  const nodes = {name: 'Node(s)', type: 'action', category: 'nodes'};
+  const regulates = {name: 'Regulates', type: 'predicate', category: 'regulation'};
+  const downregulates = {name: 'Downregulates', type: 'predicate', category: 'regulation'};
+  const upregulates = {name: 'Upregulates', type: 'predicate', category: 'regulation'};
+  const treats = {name: 'Treats', type: 'predicate', category: 'treats'};
+  const associated = {name: 'Associated With', type: 'predicate', category: 'associated'};
+  const nodes = {name: 'Node(s)', type: 'predicate', category: 'nodes'};
 
   return (
     <>
@@ -232,45 +238,15 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
 
         </div>
         {!proMode &&  
-          <form onSubmit={handleSubmission}>
-            <DragDropContext onDragEnd={handleOnDragEnd}>
-              <Droppable droppableId="query-item" direction="horizontal">
-                {(provided) => (
-                  <ul className="query-box" {...provided.droppableProps} ref={provided.innerRef}>
-                    {storedQuery.map((item, index) => {
-                      let itemIsNode = (item.type === "node") ? true : false;
-                      return (
-                        <Draggable key={index} draggableId={index.toString()} index={index} >
-                          {(provided) => (
-                            <li 
-                              ref={provided.innerRef} 
-                              {...provided.draggableProps} 
-                              {...provided.dragHandleProps} 
-                              className="query-list-item">
-                              <QueryItem 
-                                item={item} 
-                                handleClose={()=>removeQueryItem(index)} 
-                                handleChange={handleQueryItemChange}
-                                hasInput={itemIsNode}
-                                name={item.name}
-                                inputKey={index}
-                                isSelected={item.selected}
-                                inputActive>
-                              </QueryItem>
-                            </li>
-                          )}
-                        </Draggable>
-                      )
-                    })}
-                    {provided.placeholder}
-                  </ul>
-                )}
-              </Droppable>
-            </DragDropContext>
-            <Button type="submit" size="s" disabled={isLoading}>
-              <span>Submit Query</span>
-            </Button>
-          </form>
+
+          <QueryBar
+            handleSubmission={handleSubmission}
+            handleOnDragEnd={handleOnDragEnd}
+            handleRemoveQueryItem={removeQueryItem}
+            handleQueryItemChange={handleQueryItemChange}
+            isLoading={isLoading}
+            storedQuery={storedQuery}
+          />
           
         }
         <div className="query-items">
@@ -281,27 +257,22 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
                 <h6>Nodes</h6>
                 <div className="panel subjects nodes">
                   <QueryItemButton 
-                    disabled={!NodesActive}
                     item={gene}
                     handleClick={() => addQueryItem(gene)}
                     >Gene</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!NodesActive}
                     item={phenotype}
                     handleClick={() => addQueryItem(phenotype)}
                     >Phenotype</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!NodesActive}
                     item={chemical}
                     handleClick={() => addQueryItem(chemical)}
                     >Chemical</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!NodesActive}
                     item={disease}
                     handleClick={() => addQueryItem(disease)}
                     >Disease</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!NodesActive}
                     item={concept}
                     handleClick={() => addQueryItem(concept)}
                     >Concept</QueryItemButton>
@@ -309,32 +280,26 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
                 <h6>Actions</h6>
                 <div className="panel actions">
                   <QueryItemButton 
-                  disabled={NodesActive}
                   item={regulates}
                   handleClick={() => addQueryItem(regulates)}
                   >Regulate</QueryItemButton>
                   <QueryItemButton 
-                    disabled={NodesActive}
                     item={downregulates}
                     handleClick={() => addQueryItem(downregulates)}
                     >Downregulate</QueryItemButton>
                   <QueryItemButton 
-                    disabled={NodesActive}
                     item={upregulates}
                     handleClick={() => addQueryItem(upregulates)}
                     >Upregulate</QueryItemButton>
                   <QueryItemButton 
-                    disabled={NodesActive}
                     item={treats}
                     handleClick={() => addQueryItem(treats)}
                     >Treats</QueryItemButton>
                   <QueryItemButton 
-                    disabled={NodesActive}
                     item={associated}
                     handleClick={() => addQueryItem(associated)}
                     >Associated With</QueryItemButton>
                   <QueryItemButton 
-                    disabled={NodesActive}
                     item={nodes}
                     handleClick={() => addQueryItem(nodes)}
                     >Node(s)</QueryItemButton>
