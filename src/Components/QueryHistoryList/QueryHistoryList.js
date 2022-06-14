@@ -55,13 +55,13 @@ const QueryHistoryList = () => {
           }
           
           return (
-            <li key={i} className="history-item" onClick={() => handleClick(query)}>
+            <li key={i} className="history-item" >
               {
                 showNewTimeName &&
                 <div className="time-name">{timeName}</div>            
               }
               <div className="item-container">
-                <span className="query">
+                <span className="query" onClick={() => handleClick(query)}>
                   {query.items.map((item, j) => {
                     let output = (item.value) ? item.value : item.name;
                     return (
