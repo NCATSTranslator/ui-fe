@@ -1,13 +1,18 @@
 import { getDifferenceInDays } from "../../Utilities/utilities";
 import React, {useState} from "react";
 import { pastQueryState, removeItemAtIndex } from "../../Redux/historySlice";
+import { setCurrentQuery } from "../../Redux/querySlice";
 import { useSelector, useDispatch } from 'react-redux'
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
+import { useNavigate } from "react-router-dom";
 
 const QueryHistoryList = () => {
 
   let previousTimeName;
+
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   let tempQueryHistory = useSelector(pastQueryState);
   // query history stored from oldest -> newest, so we must reverse it to display the most recent first
   const [queryHistoryState, setQueryHistoryState] = useState(structuredClone(tempQueryHistory).reverse());
@@ -21,7 +26,8 @@ const QueryHistoryList = () => {
   }
 
   const handleClick = (query) => {
-    console.log(query);
+    dispatch(setCurrentQuery(query.items));
+    navigate('/build?results');
   }
   
   return (

@@ -90,9 +90,9 @@ const ResultsList = ({loading}) => {
     setDisplayedResults(formattedResults.slice(itemOffset, endOffset));
     setEndResultIndex(endOffset);
     setPageCount(Math.ceil(formattedResults.length / itemsPerPage));
-    if(displayedResults.length > 0)
+    if(endOffset !== 0)
       console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
-  }, [itemOffset, itemsPerPage, formattedResults, displayedResults]);
+  }, [itemOffset, itemsPerPage, formattedResults]);
 
   // Handles direct page click
   const handlePageClick = (event) => {
