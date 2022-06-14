@@ -105,7 +105,6 @@ const ResultsList = ({loading}) => {
 
   // React Query call for results
   const resultsData = useQuery('resultsData', async () => {
-    console.log(isLoading)
     console.log(currentQueryID);
 
     if(!currentQueryID || !isLoading)

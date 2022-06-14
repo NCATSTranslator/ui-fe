@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState, useEffect, useRef, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { cannedQueries } from "../../Data/cannedqueries";
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -9,7 +9,6 @@ import QueryBar from "../QueryComponents/QueryBar";
 import { incrementHistory } from "../../Redux/historySlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
-// import { store } from "../../Redux/store";
 import cloneDeep from "lodash/cloneDeep";
 
 const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
@@ -35,8 +34,6 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   const [isLoading, setIsLoading] = useState(loading);
   // Bool, is the submitted query valid, determined by validateSubmission 
   const [isValidSubmission, setIsValidSubmission] = useState(false);
-  // Bool, controls whether nodes or predicates are active on BYO query 
-  const [NodesActive, setNodesActive] = useState(true);
   // Int, active mock ARS ID
   const [activeMockID, setActiveMockID] = useState(-1);
 
@@ -71,19 +68,21 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
       setIsValidSubmission(true);
     }
   }
+  
   /* 
     Loop through the canned queries list for a match in order to assign the proper mock ID
     Note: the proper mock id is already assigned when the query items are updated by clicking a template query 
   */
-
-  const checkCannedQueries = () => {
-    cannedQueries.forEach(element => {
-      if(isEqual(element.query, storedQuery) && activeMockID !== element.id) {
-        console.log("set");
-        setActiveMockID(element.id);
-      }
-    });
-  }
+  const checkCannedQueries = useCallback( 
+    () => {
+      cannedQueries.forEach(element => {
+        if(isEqual(element.query, storedQuery) && activeMockID !== element.id) {
+          setActiveMockID(element.id);
+        }
+      });
+    },
+    [activeMockID, storedQuery]
+  );
 
   /* 
     When the query items change, update the current query in the app state 
@@ -100,7 +99,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     // if the current query items and the stored query match, return 
     if(isEqual(queryItems, storedQuery)) 
       return;
-      
+
     // otherwise, update the stored query in the app state
     dispatch(setCurrentQuery(queryItems));
   }, [queryItems, storedQuery, dispatch]);
@@ -112,10 +111,10 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   */
   useEffect(() => {
     checkCannedQueries();
-  }, [storedQuery]);
+  }, [storedQuery, checkCannedQueries]);
 
 
-  // When isValidSubmission changes
+  // Handle change to isValidSubmission
   useEffect(() => {
     // If the submission is valid
     if(isValidSubmission) {
@@ -174,7 +173,7 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
       checkCannedQueries();
       setIsValidSubmission(true)
     }
-  }, [navigatingFromHistory]);
+  }, [navigatingFromHistory, checkCannedQueries]);
 
   // If isResults is true send us to the results page and set loading to true via query param
   useEffect(() => {
@@ -225,12 +224,12 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   const disease = {name: 'Disease', type: 'node', category: 'disease', value: '', selected: false};
   const concept = {name: 'Concept', type: 'node', category: 'concept', value: '', selected: false};
 
-  const regulates = {name: 'Regulates', type: 'action', category: 'regulation'};
-  const downregulates = {name: 'Downregulates', type: 'action', category: 'regulation'};
-  const upregulates = {name: 'Upregulates', type: 'action', category: 'regulation'};
-  const treats = {name: 'Treats', type: 'action', category: 'treats'};
-  const associated = {name: 'Associated With', type: 'action', category: 'associated'};
-  const nodes = {name: 'Node(s)', type: 'action', category: 'nodes'};
+  const regulates = {name: 'Regulates', type: 'predicate', category: 'regulation'};
+  const downregulates = {name: 'Downregulates', type: 'predicate', category: 'regulation'};
+  const upregulates = {name: 'Upregulates', type: 'predicate', category: 'regulation'};
+  const treats = {name: 'Treats', type: 'predicate', category: 'treats'};
+  const associated = {name: 'Associated With', type: 'predicate', category: 'associated'};
+  const nodes = {name: 'Node(s)', type: 'predicate', category: 'nodes'};
 
   return (
     <>
@@ -258,27 +257,22 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
                 <h6>Nodes</h6>
                 <div className="panel subjects nodes">
                   <QueryItemButton 
-                    disabled={!NodesActive}
                     item={gene}
                     handleClick={() => addQueryItem(gene)}
                     >Gene</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!NodesActive}
                     item={phenotype}
                     handleClick={() => addQueryItem(phenotype)}
                     >Phenotype</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!NodesActive}
                     item={chemical}
                     handleClick={() => addQueryItem(chemical)}
                     >Chemical</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!NodesActive}
                     item={disease}
                     handleClick={() => addQueryItem(disease)}
                     >Disease</QueryItemButton>
                   <QueryItemButton 
-                    disabled={!NodesActive}
                     item={concept}
                     handleClick={() => addQueryItem(concept)}
                     >Concept</QueryItemButton>
@@ -286,32 +280,26 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
                 <h6>Actions</h6>
                 <div className="panel actions">
                   <QueryItemButton 
-                  disabled={NodesActive}
                   item={regulates}
                   handleClick={() => addQueryItem(regulates)}
                   >Regulate</QueryItemButton>
                   <QueryItemButton 
-                    disabled={NodesActive}
                     item={downregulates}
                     handleClick={() => addQueryItem(downregulates)}
                     >Downregulate</QueryItemButton>
                   <QueryItemButton 
-                    disabled={NodesActive}
                     item={upregulates}
                     handleClick={() => addQueryItem(upregulates)}
                     >Upregulate</QueryItemButton>
                   <QueryItemButton 
-                    disabled={NodesActive}
                     item={treats}
                     handleClick={() => addQueryItem(treats)}
                     >Treats</QueryItemButton>
                   <QueryItemButton 
-                    disabled={NodesActive}
                     item={associated}
                     handleClick={() => addQueryItem(associated)}
                     >Associated With</QueryItemButton>
                   <QueryItemButton 
-                    disabled={NodesActive}
                     item={nodes}
                     handleClick={() => addQueryItem(nodes)}
                     >Node(s)</QueryItemButton>
