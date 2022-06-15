@@ -1,4 +1,4 @@
-import React, {useState, useEffect, createRef} from "react";
+import React, {useState, useEffect} from "react";
 import { Range, getTrackBackground } from 'react-range';
 
 const TwoThumbRange = ({min, max, step, initialValues, label, hideLabel, onChange, style, children}) => {

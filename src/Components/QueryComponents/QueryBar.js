@@ -1,9 +1,8 @@
 
+import React from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Button from "../FormFields/Button";
 import QueryItem from "../QueryComponents/QueryItem";
-
-
 
 const QueryBar = ({handleSubmission, handleOnDragEnd, handleQueryItemChange, 
   handleRemoveQueryItem, isLoading, storedQuery}) => {

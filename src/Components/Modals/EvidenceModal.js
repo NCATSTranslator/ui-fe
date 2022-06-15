@@ -1,9 +1,5 @@
 import React, {useState} from "react";
 import Modal from "./Modal";
-import Button from '../FormFields/Button';
-import TextInput from "../FormFields/TextInput";
-import Checkbox from "../FormFields/Checkbox";
-import Select from "../FormFields/Select";
 
 const EvidenceModal = ({children, isOpen, onClose, currentEvidence, results}) => {
 

@@ -1,3 +1,4 @@
+import React from "react";
 import Query2 from "../Components/Query/Query2";
 
 const Templates = () => {

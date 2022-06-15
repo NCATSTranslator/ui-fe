@@ -1,5 +1,5 @@
+import React, { useState } from "react";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; 
-import { useState } from "react";
 import { Carousel } from 'react-responsive-carousel';
 import {ReactComponent as Left} from '../../Icons/Directional/Left.svg';
 import {ReactComponent as Right} from '../../Icons/Directional/Right.svg';
@@ -8,7 +8,7 @@ import {ReactComponent as Right} from '../../Icons/Directional/Right.svg';
 const CustomCarousel = ({numberOfSlides, children}) => {
 
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [numSlides, setNumSlides] = useState(numberOfSlides);
+  const numSlides = numberOfSlides;
   var dots = [];
   for (let i = 0; i < numSlides; i++) {
     dots.push(<li>dot</li>);
