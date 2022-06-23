@@ -1,9 +1,17 @@
 .graphView {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 200px;
+  border: 1.5px solid #606368;
+}
+
+.container {
   position: relative;
-  height: 500px;
-  border: 1px solid black;
 }
 
 .edgeLabel {
-  fill: black !important;
+  fill: #000 !important;
 }

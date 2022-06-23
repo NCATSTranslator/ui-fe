@@ -1,15 +1,18 @@
 import styles from './GraphView.module.css';
 import React, {useState} from "react";
 import { Canvas, Node, Edge, Label, useSelection } from 'reaflow';
+import { getIcon } from '../../Utilities/utilities';
 
 const GraphView = ({graph, staticNode}) => {
   
   const staticNodeName = staticNode.names[0];
 
+  let subjectIcon = getIcon('chemical');
+
   const [nodes, setNodes] = useState([
     {
       id: '1',
-      text: graph.subject.name
+      text: graph.subject.name,
     },
     {
       id: '2',
@@ -60,7 +63,7 @@ const GraphView = ({graph, staticNode}) => {
     setSelections(newSelections);
   }
   return(
-    <div className="container">
+    <div className={`${styles.container} container`}>
       <div className={styles.graphView}>
         <Canvas
           nodes={nodes}
@@ -79,6 +82,9 @@ const GraphView = ({graph, staticNode}) => {
                 label={<Label style={{ fill: 'black' }} />}
                 onEnter={(event, node)=> {
                   console.log('Entered Node: ', event, node);
+                }}
+                onLeave={(event, node)=> {
+                  console.log('Left Node: ', event, node);
                 }}
                 onClick={(event, node) => {
                   console.log('Selecting Node', event, node);
