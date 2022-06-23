@@ -2,74 +2,28 @@ import styles from './GraphView.module.css';
 import React, {useState} from "react";
 import { Canvas, Node, Edge, Label, useSelection } from 'reaflow';
 
-const GraphView = () => {
+const GraphView = ({graph, staticNode}) => {
+  
+  const staticNodeName = staticNode.names[0];
 
   const [nodes, setNodes] = useState([
     {
       id: '1',
-      text: 'Serotonin'
+      text: graph.subject.name
     },
     {
       id: '2',
-      text: 'Agonists'
-    },
-    {
-      id: '3',
-      text: 'Ondansetron'
-    },
-    {
-      id: '4',
-      text: 'Dexamethasone'
-    },
-    {
-      id: '5',
-      text: 'Nausea'
+      text: staticNodeName
     }
   ]);
   
   const [edges, setEdges] = useState([
     {
-      id: '1-4',
-      from: '1',
-      to: '4',
-      text: 'Regulates'
-    },
-    {
-      id: '1-3',
-      from: '1',
-      to: '3',
-      text: 'Regulates'
-    },
-    {
       id: '1-2',
       from: '1',
       to: '2',
-      text: 'Regulates'
+      text: graph.edge.predicate.replace("biolink:", '')
     },
-    {
-      id: '1-5',
-      from: '1',
-      to: '5',
-      text: "Treats"
-    },
-    {
-      id: '2-5',
-      from: '2',
-      to: '5',
-      text: 'Treats'
-    },
-    {
-      id: '3-5',
-      from: '3',
-      to: '5',
-      text: 'Treats'
-    },
-    {
-      id: '4-5',
-      from: '4',
-      to: '5',
-      text: 'Treats'
-    }
   ]);
 
 

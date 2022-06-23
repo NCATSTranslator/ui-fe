@@ -94,7 +94,7 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
           <p>Nam ex justo, tincidunt ut metus quis, egestas posuere risus. Maecenas rhoncus purus ac porttitor mollis. Morbi vehicula lorem id lorem commodo consectetur. Phasellus lobortis nibh id massa mollis, condimentum feugiat quam tempor. Etiam condimentum iaculis lorem, eget faucibus nibh ultrices ac. Sed scelerisque sagittis augue, et iaculis velit sagittis sit amet. Sed molestie leo risus, eget lobortis libero tempus sit amet. Vivamus eu egestas quam, non interdum eros. Morbi non vehicula nibh. Curabitur facilisis sit amet sapien quis molestie. Quisque commodo suscipit nunc eu iaculis. </p>
         </div>
 
-        <GraphView />
+        <GraphView graph={item} staticNode={staticNode}/>
       </AnimateHeight>
 
     </div>
