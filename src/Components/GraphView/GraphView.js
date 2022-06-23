@@ -1,81 +1,8 @@
 import styles from './GraphView.module.css';
-import React, {useRef, useEffect, useState} from "react";
-// import {GraphCanvas, GraphCanvasRef, useSelection} from 'reagraph';
-// import { ForceGraph2D } from 'react-force-graph';
-import { Canvas, Node, Edge, Label, useSelection, Arrow  } from 'reaflow';
+import React, {useState} from "react";
+import { Canvas, Node, Edge, Label, useSelection } from 'reaflow';
 
 const GraphView = () => {
-
-  // let nodes = [
-  //   {
-  //     id: "n-1",
-  //     label: "1",
-  //     // icon: "Test"
-  //   },
-  //   {
-  //     id: "n-2",
-  //     label: "2"
-  //   },
-  //   {
-  //     id: "n-3",
-  //     label: "3"
-  //   },
-  //   {
-  //     id: "n-4",
-  //     label: "4"
-  //   },
-  //   {
-  //     id: "n-5",
-  //     label: "5"
-  //   },
-  //   {
-  //     id: "n-6",
-  //     label: "6"
-  //   },
-  //   // {
-  //   //   id: "n-7",
-  //   //   label: "7"
-  //   // }
-  // ];
-
-  // let edges = [
-  //   {
-  //     id: "1->2",
-  //     source: "n-1",
-  //     target: "n-2",
-  //     label: "Edge 1-2"
-  //   },
-  //   {
-  //     id: "1->3",
-  //     source: "n-1",
-  //     target: "n-3",
-  //     label: "Edge 1-3"
-  //   },
-  //   {
-  //     id: "1->4",
-  //     source: "n-1",
-  //     target: "n-4",
-  //     label: "Edge 1-4"
-  //   },
-  //   {
-  //     id: "2->5",
-  //     source: "n-2",
-  //     target: "n-5",
-  //     label: "Edge 2-5"
-  //   },
-  //   {
-  //     id: "3->5",
-  //     source: "n-3",
-  //     target: "n-5",
-  //     label: "Edge 3-5"
-  //   },
-  //   {
-  //     id: "5->6",
-  //     source: "n-5",
-  //     target: "n-6",
-  //     label: "Edge 5-6"
-  //   }
-  // ];
 
   const [nodes, setNodes] = useState([
     {
@@ -102,9 +29,9 @@ const GraphView = () => {
   
   const [edges, setEdges] = useState([
     {
-      id: '1-2',
+      id: '1-4',
       from: '1',
-      to: '2',
+      to: '4',
       text: 'Regulates'
     },
     {
@@ -114,9 +41,9 @@ const GraphView = () => {
       text: 'Regulates'
     },
     {
-      id: '1-4',
+      id: '1-2',
       from: '1',
-      to: '4',
+      to: '2',
       text: 'Regulates'
     },
     {
@@ -146,7 +73,6 @@ const GraphView = () => {
   ]);
 
 
-  const fgRef = useRef();
   const { selections, onCanvasClick, onClick, onKeyDown, clearSelections, setSelections } = useSelection({
         nodes,
         edges,
@@ -191,19 +117,28 @@ const GraphView = () => {
             onCanvasClick();
           }}
           node={
-            <Node
-              style={{ stroke: '#1a192b', fill: 'white', strokeWidth: 1 }}
-              label={<Label style={{ fill: 'black' }} />}
-              onClick={(event, node) => {
-                console.log('Selecting Node', event, node);
-                // onClick(event, node);
-                getConnections(node);
-              }}
-            />
+              <Node
+                className='node'
+                draggable={false}
+                linkable={false}
+                style={{ fill: 'white', strokeWidth: 1 }}
+                label={<Label style={{ fill: 'black' }} />}
+                onEnter={(event, node)=> {
+                  console.log('Entered Node: ', event, node);
+                }}
+                onClick={(event, node) => {
+                  console.log('Selecting Node', event, node);
+                  // onClick(event, node);
+                  getConnections(node);
+                }}
+              />
           }
           edge={
             <Edge
-              label={<Label className={styles.edgeLabel} />}
+              label={
+                <Label className={styles.edgeLabel} style={{color: 'blue'}} />
+              }
+              // style={{ fill: 'white', strokeWidth: 1 }}
               onClick={(event, edge) => {
                 console.log('Selecting Edge', event, edge);
                 getConnections(edge, true);

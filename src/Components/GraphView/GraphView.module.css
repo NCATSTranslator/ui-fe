@@ -5,5 +5,5 @@
 }
 
 .edgeLabel {
-  color: black;
+  fill: black !important;
 }
