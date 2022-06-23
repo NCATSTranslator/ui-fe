@@ -1,4 +1,4 @@
-import React, {useState, useEffect, createRef} from "react";
+import React, {useState, useEffect} from "react";
 import { Range, getTrackBackground } from 'react-range';
 
 const SimpleRange = ({min, max, step, initialValue, label, hideLabel, onChange, style, children}) => {

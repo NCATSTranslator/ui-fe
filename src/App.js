@@ -1,4 +1,5 @@
 import './App.scss';
+import React from 'react';
 import Footer from './Components/Footer/Footer';
 import Header from './Components/Header/Header';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';

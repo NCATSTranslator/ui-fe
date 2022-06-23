@@ -1,8 +1,4 @@
 import React, {useState} from "react";
-import Button from '../FormFields/Button';
-import TextInput from "../FormFields/TextInput";
-import Checkbox from "../FormFields/Checkbox";
-import Select from "../FormFields/Select";
 import UndoRedo from "../UndoRedo/UndoRedo";
 import Toggle from '../Toggle/Toggle';
 import ReportIssueModal from "../Modals/SendFeedbackModal";

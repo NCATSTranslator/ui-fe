@@ -15,11 +15,11 @@ const QueryHistoryList = () => {
 
   let tempQueryHistory = useSelector(pastQueryState);
   // query history stored from oldest -> newest, so we must reverse it to display the most recent first
-  const [queryHistoryState, setQueryHistoryState] = useState(structuredClone(tempQueryHistory).reverse());
+  const [queryHistoryState, setQueryHistoryState] = useState(global.structuredClone(tempQueryHistory).reverse());
   const currentDate = new Date();
 
   const handleRemoveHistoryItem = (i) => {
-    let temp = structuredClone(queryHistoryState);
+    let temp = global.structuredClone(queryHistoryState);
     temp.splice(i, 1);
     setQueryHistoryState(temp);
     dispatch(removeItemAtIndex(i)); 

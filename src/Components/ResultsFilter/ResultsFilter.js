@@ -69,7 +69,7 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
   }
   const handleEvidenceRangeChange = (value) => {
     if(evidenceObject.value !== value) {
-      let newEviObj  = structuredClone(evidenceObject);
+      let newEviObj  = global.structuredClone(evidenceObject);
       newEviObj.value = value;
       setEvidenceObject(newEviObj);
       onFilter(newEviObj);
@@ -80,7 +80,7 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
     onFilter(dateRangeObject);
   }
   const handleDateRangeChange = (value) => {
-    let newDateObj  = structuredClone(dateRangeObject);
+    let newDateObj  = global.structuredClone(dateRangeObject);
     newDateObj.value = value;
     setDateRangeObject(newDateObj);
     onFilter(newDateObj);

@@ -1,3 +1,4 @@
+import React from "react";
 import { getIcon } from "../../Utilities/utilities";
 
 const QueryTemplate = ({handleClick, items}) => {

@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from "react";
 import AnimateHeight from "react-animate-height";
-import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 
 const Select = ({label, subtitle, value, name, size, error, errorText, handleChange, noanimate, children}) => {
 
