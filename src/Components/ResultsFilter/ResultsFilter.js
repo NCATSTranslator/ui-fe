@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import Select from '../FormFields/Select';
 import Checkbox from '../FormFields/Checkbox';
 import Radio from '../FormFields/Radio';
@@ -14,7 +14,7 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
   const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: minEvidence});
   const dateRangeMin = 1840;
   const dateRangeMax = 2022;
-  const [dateRange, setDateRange] = useState([dateRangeMin, dateRangeMax]);
+  const dateRange = [dateRangeMin, dateRangeMax];
   const [dateRangeObject, setDateRangeObject] = useState({tag:'date', value: dateRange});
   const humanSpeciesObject = {tag:'hum', value: ''};
   const mouseSpeciesObject = {tag:'mou', value: ''};

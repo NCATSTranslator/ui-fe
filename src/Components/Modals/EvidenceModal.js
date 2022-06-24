@@ -1,7 +1,7 @@
-import React, {useState} from "react";
+import React from "react";
 import Modal from "./Modal";
 
-const EvidenceModal = ({children, isOpen, onClose, currentEvidence, results}) => {
+const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;

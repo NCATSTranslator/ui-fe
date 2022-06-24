@@ -6,7 +6,7 @@ import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import isEqual from 'lodash/isEqual';
@@ -19,9 +19,6 @@ const ResultsList = ({loading}) => {
 
   // URL search params
   const loadingParam = new URLSearchParams(window.location.search).get("loading")
-  
-  // Initialize dispatch in order to send updates to the application state
-  const dispatch = useDispatch();
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;

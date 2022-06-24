@@ -1,13 +1,10 @@
 import styles from './GraphView.module.css';
 import React, {useState} from "react";
 import { Canvas, Node, Edge, Label, useSelection } from 'reaflow';
-import { getIcon } from '../../Utilities/utilities';
 
 const GraphView = ({graph, staticNode}) => {
   
   const staticNodeName = staticNode.names[0];
-
-  let subjectIcon = getIcon('chemical');
 
   const [nodes, setNodes] = useState([
     {
@@ -30,7 +27,7 @@ const GraphView = ({graph, staticNode}) => {
   ]);
 
 
-  const { selections, onCanvasClick, onClick, onKeyDown, clearSelections, setSelections } = useSelection({
+  const { selections, onCanvasClick, setSelections } = useSelection({
         nodes,
         edges,
         onDataChange: (n, e) => {
