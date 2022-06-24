@@ -63,7 +63,7 @@ const GraphView = ({graph, staticNode}) => {
     setSelections(newSelections);
   }
   return(
-    <div className={`${styles.container} container`}>
+    <div className={`${styles.container}`}>
       <div className={styles.graphView}>
         <Canvas
           nodes={nodes}
@@ -99,6 +99,12 @@ const GraphView = ({graph, staticNode}) => {
                 <Label className={styles.edgeLabel} style={{color: 'blue'}} />
               }
               // style={{ fill: 'white', strokeWidth: 1 }}
+              onEnter={(event, Edge)=> {
+                console.log('Entered Edge: ', event, Edge);
+              }}
+              onLeave={(event, Edge)=> {
+                console.log('Left Edge: ', event, Edge);
+              }}
               onClick={(event, edge) => {
                 console.log('Selecting Edge', event, edge);
                 getConnections(edge, true);
