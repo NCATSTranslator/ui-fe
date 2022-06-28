@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import DisclaimerModal from "../Modals/DisclaimerModal";
 
 const Page = (props) => {
   useEffect(() => {
@@ -10,6 +11,7 @@ const Page = (props) => {
         {props.title}
       </h1>
       {props.children}
+      <DisclaimerModal></DisclaimerModal>
     </>
   )
 };
