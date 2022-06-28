@@ -733,18 +733,6 @@ label.checkbox {
     visibility: visible;
     height: auto;
   }
-  .modal-container {
-    background-color: $white;
-    width: 824px;
-    padding: $m;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-height: 80%;
-    overflow-y: auto;
-    z-index: 100;
-  }  
   .close-container {
     position: absolute;
     top: $m;
@@ -761,6 +749,18 @@ label.checkbox {
     }
   }
 }
+.modal-container {
+  background-color: $white;
+  width: 824px;
+  padding: $m;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 80%;
+  overflow-y: auto;
+  z-index: 100;
+}  
 
 // Evidence Modal
 .evidence-modal {
