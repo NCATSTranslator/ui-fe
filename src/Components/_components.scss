@@ -1427,6 +1427,7 @@ label.checkbox {
 
 // Results Filter
 .results-filter {
+
   .top,.bottom,.left {
     display: flex;
     justify-content: space-between;
@@ -1448,6 +1449,11 @@ label.checkbox {
   .filter-sort {
     width: 100%;
     .accordion-panel {
+      &.closed {
+        .thumb-container {
+          opacity: 0;
+        }
+      }
       &>div {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
