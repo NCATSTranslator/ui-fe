@@ -37,7 +37,6 @@ const DisclaimerModal = ({children, onClose }) => {
               </div>
               <button onClick={handleClick}>Accept</button>
             </div>
-            {/* <div className="close-container"><button className="close-button" onClick={onClose}><Close/></button></div> */}
           </div>
         </div>
       }
