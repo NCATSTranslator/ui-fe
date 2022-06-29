@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import styles from './ResultsList.module.scss'
 import Checkbox from "../FormFields/Checkbox";
 import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
@@ -72,8 +73,6 @@ const ResultsList = ({loading}) => {
   const [resultsProgress, setResultsProgress] = useState(1);
   // Bool, alternates opacity of progress bar while loading
   const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
-  // Str, class for results progress bar opacity
-  var resultsBarOpacityClass = (resultsBarOpacity) ? 'dark': 'light';
   // Initialize queryClient for React Query to fetch results
   const queryClient = new QueryClient();
   // Int, how many items per page
@@ -415,20 +414,24 @@ const ResultsList = ({loading}) => {
         currentEvidence={currentEvidence}
         results={results}
       />
-      <div className="results-list">
+      <div className={styles.resultsList}>
         <Query2 results loading/>
-        <div className="results-container">
+        <div className={styles.resultsContainer}>
           {
             isLoading &&
-            <div className="loading-bar">
-              <div className="bar-outer">
-                <div className={`bar-inner ${resultsBarOpacityClass}`} style={{width: `${resultsProgress}%`}}></div>
+            <div className={styles.loadingBar}>
+              <div className={styles.barOuter}>
+                <div 
+                  className={`${styles.barInner} ${resultsBarOpacity ? styles.dark: styles.light}`} 
+                  style={{width: `${resultsProgress}%`}}
+                  >  
+                </div>
               </div>
             </div>
           }
           {
             !isLoading &&
-            <div className="table-container">
+            <div className={styles.tableContainer}>
               <ResultsFilter 
                 startIndex={itemOffset+1} 
                 endIndex={endResultIndex} 
@@ -437,32 +440,49 @@ const ResultsList = ({loading}) => {
                 onSort={handleSort} 
                 onFilter={handleFilter}
                 onHighlight={handleResultHighlight}
-                activeFilters={activeFilters} />
+                activeFilters={activeFilters} 
+              />
               {
                 activeFilters.length > 0 &&
-                <div className="active-filters">
+                <div className={styles.activeFilters}>
                   {
                     activeFilters.map((element, i)=> {
                       return(
-                        <span key={i} className={`filter-tag ${element.tag}`}>
+                        <span key={i} className={`${styles.filterTag} ${element.tag}`}>
                           { getSelectedFilterDisplay(element) }
-                          <span className="close" onClick={()=>{handleFilter(element)}}><CloseIcon/></span>
+                          <span className={styles.close} onClick={()=>{handleFilter(element)}}><CloseIcon/></span>
                         </span>
                       )
                     })
                   }
                 </div>
               }
-              <div className="results-table">
-                <div className="table-body">
-                  <div className="table-head result">
-                    <div className="checkbox-container checkbox-head">
+              <div className={styles.resultsTable}>
+                <div className={styles.tableBody}>
+                  <div className={`${styles.tableHead} ${styles.result}`}>
+                    <div className={`${styles.heckboxContainer} ${styles.head}`}>
                       <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
                     </div>
-                    <div className={`name-head head ${isSortedByName}`} onClick={()=>{handleSort((isSortedByName)?'nameHighLow': 'nameLowHigh')}}>Name</div>
-                    <div className="fda-head head">FDA</div>
-                    <div className={`evidence-head head ${isSortedByEvidence}`} onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}>Evidence</div>
-                    <div className="tags-head head">Tags</div>
+                    <div 
+                      className={`
+                        ${styles.head} 
+                        ${styles.nameHead} 
+                        ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`} 
+                      onClick={()=>{handleSort((isSortedByName)?'nameHighLow': 'nameLowHigh')}}
+                      >
+                      Name
+                    </div>
+                    <div className={`${styles.head} ${styles.fdaHead}`}>FDA</div>
+                    <div 
+                      className={`
+                        ${styles.head} 
+                        ${styles.evidenceHead} 
+                        ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
+                      onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}
+                      >
+                      Evidence
+                    </div>
+                    <div className={`${styles.head} ${styles.tagsHead}`}>Tags</div>
                   </div>
                   {
                     isError &&
@@ -493,7 +513,7 @@ const ResultsList = ({loading}) => {
               </div>
               {
                 formattedResults.length > 0 && 
-                <div className="pagination">
+                <div className={styles.pagination}>
                   <ReactPaginate
                     breakLabel="..."
                     nextLabel="Next"
@@ -503,11 +523,11 @@ const ResultsList = ({loading}) => {
                     marginPagesDisplayed={1}
                     pageCount={pageCount}
                     renderOnZeroPageCount={null}
-                    className="page-nums"
-                    pageClassName="page-num"
-                    activeClassName="current"
-                    previousLinkClassName="prev button"
-                    nextLinkClassName="next button"
+                    className={styles.pageNums}
+                    pageClassName={styles.pageNum}
+                    activeClassName={styles.current}
+                    previousLinkClassName={`${styles.prev} ${styles.button}`}
+                    nextLinkClassName={`${styles.prev} ${styles.button}`}
                   />
                 </div>
               }
