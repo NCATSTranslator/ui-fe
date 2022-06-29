@@ -1,0 +1,25 @@
+@import "../variables";
+
+.loadingBar {
+  .barOuter {
+    position: relative;
+    border-radius: 5px;
+    border: 1px solid $midGrey;
+    max-height: 40px;
+    line-height: 1;
+    padding: 4px;
+    .barInner {
+      height: 32px;
+      width: 25%;
+      background-color: $purpleTwo;
+      border-radius: 2px;
+      transition: width .5s ease, opacity 2.5s ease;
+      &.dark {
+        opacity: 1;
+      }
+      &.light {
+        opacity: .2;
+      }
+    }
+  }
+}
