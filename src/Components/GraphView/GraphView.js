@@ -22,7 +22,7 @@ const GraphView = ({graph, staticNode}) => {
       id: '1-2',
       from: '1',
       to: '2',
-      text: graph.edge.predicate.replace("biolink:", '')
+      text: graph.edge.predicate
     },
   ]);
 
