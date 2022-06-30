@@ -23,23 +23,21 @@
     justify-content: flex-end;
   }
 
-  .filterLeft,.filterRight {
-    padding: $m;
-    .subOne {
-      color: $darkGrey;
-    }
-    .subTwo {
-      margin-top: 20px;
-      font-weight: 700;
-      font-size: 12px;
-      color: $darkGrey;
-    }
-    .checkbox,.radio {
-      padding-left: $xs;
-    }
-    label:last-of-type {
-      margin: 0;
-    }
 
+  .subOne {
+    color: $darkGrey;
   }
+  .subTwo {
+    margin-top: 20px;
+    font-weight: 700;
+    font-size: 12px;
+    color: $darkGrey;
+  }
+  .checkbox,.radio {
+    padding-left: $xs;
+  }
+  label:last-of-type {
+    margin: 0;
+  }
+
 }
