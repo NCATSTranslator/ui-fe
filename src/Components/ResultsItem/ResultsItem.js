@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeFirstLetter, getLastPubYear } from '../../Utilities/utilities';
 import Checkbox from "../FormFields/Checkbox";
 import GraphView from '../GraphView/GraphView';
@@ -31,7 +32,6 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
     : '';
   
   checked = (allSelected || checked) ? true : false;
-  let highlightedClass = (highlighted) ? 'highlighted' : false;
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
@@ -50,46 +50,34 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
   }, [isExpanded])
 
   return (
-    <div key={key} className={`result ${highlightedClass}`}>
-      <div className="checkbox-container result-sub">
+    <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''}`}>
+      <div className={`${styles.checkboxContainer} ${styles.resultSub}`}>
         <Checkbox checked={checked} handleClick={()=>handleSelected(item)}/>
       </div>
-      <div className="name-container result-sub">
-        <span className="icon">{icon}</span>
-        <span className="name">{item.subject.name.toUpperCase()}</span>
-        <span className="effect">{capitalizeFirstLetter(predicate)}</span>
+      <div className={`${styles.nameContainer} ${styles.resultSub}`}>
+        <span className={styles.icon}>{icon}</span>
+        <span className={styles.name}>{item.subject.name.toUpperCase()}</span>
+        <span className={styles.effect}>{capitalizeFirstLetter(predicate)}</span>
       </div>
-      <div className="fda-container result-sub">
+      <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
         {fdaLevel !== 'N/A' &&
-          <span className="fda-icon"><CheckIcon /></span>
+          <span className={styles.fdaIcon}><CheckIcon /></span>
         }
-        <span className="fda">{fdaLevel}</span>
+        <span className={styles.fda}>{fdaLevel}</span>
       </div>
-      <div className="evidence-container result-sub">
-        <span className="evidence-link" onClick={()=>{activateEvidence(item.edge.evidence)}}>
-          <span className="view-all">View All</span> ({evidenceCount})
+      <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
+        <span className={styles.evidenceLink} onClick={()=>{activateEvidence(item.edge.evidence)}}>
+          <span className={styles.viewAll}>View All</span> ({evidenceCount})
         </span>
       </div>
-      <div className="tags-container result-sub">
-        <span className="tags">
-          {
-            // item.subject.toxicity_info.level &&
-            // <span className={`tag toxicity`}>{item.subject.toxicity_info.level}</span>  
-          }
-          {
-            lastPubYear &&
-            <span className={`tag year`}>{lastPubYear}</span>  
-          }
-        </span>
-      </div>
-      <button className={`accordion-button ${expandedClass}`} onClick={handleToggle}>
+      <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>
       </button>
-      <AnimateHeight className={`accordion-panel ${expandedClass}`}
+      <AnimateHeight className={`${styles.accordionPanel} ${isExpanded ? styles.open : styles.closed }`}
           duration={250}
           height={height}
         > 
-        <div className='container'>
+        <div className={styles.container}>
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce non sem vel libero tincidunt consectetur et et turpis. Vestibulum venenatis sagittis libero, eu dapibus nibh consequat id. Fusce pharetra nisi eget velit facilisis molestie. Ut orci neque, pellentesque eu mauris sed, efficitur lacinia libero. Etiam et dolor eget diam mattis tristique sed ut felis. Nunc blandit consequat aliquam. Donec hendrerit faucibus nisi, at molestie nunc pretium lobortis. Sed dapibus tristique ipsum, et vulputate quam tristique ut. Nullam fermentum enim nunc, sed vestibulum ipsum volutpat eget. Proin arcu turpis, mollis in consequat in, congue sed lacus. Aliquam gravida eu leo eu mattis. Ut vehicula felis vel enim sollicitudin dictum. Duis suscipit purus et neque efficitur congue. Donec euismod vulputate arcu, sed venenatis lacus ullamcorper nec.</p>
           <p>Nam ex justo, tincidunt ut metus quis, egestas posuere risus. Maecenas rhoncus purus ac porttitor mollis. Morbi vehicula lorem id lorem commodo consectetur. Phasellus lobortis nibh id massa mollis, condimentum feugiat quam tempor. Etiam condimentum iaculis lorem, eget faucibus nibh ultrices ac. Sed scelerisque sagittis augue, et iaculis velit sagittis sit amet. Sed molestie leo risus, eget lobortis libero tempus sit amet. Vivamus eu egestas quam, non interdum eros. Morbi non vehicula nibh. Curabitur facilisis sit amet sapien quis molestie. Quisque commodo suscipit nunc eu iaculis. </p>
         </div>

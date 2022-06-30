@@ -1,0 +1,45 @@
+@import "../variables";
+
+.resultsFilter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  .heading {
+    font-size: $m;
+    font-weight: 700;
+    color: $purpleTwo;
+  }
+  .top,.left {
+    display: flex;
+    justify-content: space-between;
+    height: fit-content;
+    .select {
+      height: min-content;
+      width: 115px;
+    }
+  }
+  .bottom {
+    position: relative;
+    justify-content: flex-end;
+  }
+
+  .filterLeft,.filterRight {
+    padding: $m;
+    .subOne {
+      color: $darkGrey;
+    }
+    .subTwo {
+      margin-top: 20px;
+      font-weight: 700;
+      font-size: 12px;
+      color: $darkGrey;
+    }
+    .checkbox,.radio {
+      padding-left: $xs;
+    }
+    label:last-of-type {
+      margin: 0;
+    }
+
+  }
+}

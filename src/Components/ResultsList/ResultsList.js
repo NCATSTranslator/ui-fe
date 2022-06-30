@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import styles from './ResultsList.module.scss'
+import styles from './ResultsList.module.scss';
 import Checkbox from "../FormFields/Checkbox";
 import Query2 from "../Query/Query2";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
+import ResultsSorting from "../ResultsSorting/ResultsSorting";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
@@ -14,6 +15,7 @@ import isEqual from 'lodash/isEqual';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
 import { getLastPubYear } from "../../Utilities/utilities";
+import LoadingBar from "../LoadingBar/LoadingBar";
 
 
 const ResultsList = ({loading}) => {
@@ -69,10 +71,6 @@ const ResultsList = ({loading}) => {
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
 
-  // Int, represents results progress bar
-  const [resultsProgress, setResultsProgress] = useState(1);
-  // Bool, alternates opacity of progress bar while loading
-  const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
   // Initialize queryClient for React Query to fetch results
   const queryClient = new QueryClient();
   // Int, how many items per page
@@ -376,35 +374,6 @@ const ResultsList = ({loading}) => {
     console.log(selectedItems)
   }, [selectedItems]);
 
-  // Spoofs progress bar
-  useEffect(() => {
-    if(resultsProgress >= 100 || !isLoading) 
-      return;
-
-    let randomTimeout = Math.random() * (3000 - 500) + 500;
-    const timer = setTimeout(() => {
-      let newProgress = resultsProgress + 10;
-      if(newProgress < 100) {
-        setResultsProgress(newProgress);
-      } else {
-        setResultsProgress(100);
-      }
-    }, randomTimeout);
-    return () => clearTimeout(timer);
-  }, [resultsProgress, isLoading]);
-
-  // Alternates progress bar opacity class on set timeout
-  useEffect(() => {
-    if(!isLoading) 
-      return;
-
-    let timeout = 1500;
-    const timer = setTimeout(() => {
-      setResultsBarOpacity(!resultsBarOpacity);
-    }, timeout);
-    return () => clearTimeout(timer);
-  }, [resultsBarOpacity, isLoading]);
-
   return (
     <QueryClientProvider client={queryClient}>
       <EvidenceModal 
@@ -419,98 +388,94 @@ const ResultsList = ({loading}) => {
         <div className={styles.resultsContainer}>
           {
             isLoading &&
-            <div className={styles.loadingBar}>
-              <div className={styles.barOuter}>
-                <div 
-                  className={`${styles.barInner} ${resultsBarOpacity ? styles.dark: styles.light}`} 
-                  style={{width: `${resultsProgress}%`}}
-                  >  
-                </div>
-              </div>
-            </div>
+            <LoadingBar 
+              loading={isLoading}
+            />
           }
           {
             !isLoading &&
-            <div className={styles.tableContainer}>
+            <>
               <ResultsFilter 
                 startIndex={itemOffset+1} 
                 endIndex={endResultIndex} 
                 formattedCount={formattedResults.length}
                 totalCount={sortedResults.length}
-                onSort={handleSort} 
                 onFilter={handleFilter}
                 onHighlight={handleResultHighlight}
                 activeFilters={activeFilters} 
               />
-              {
-                activeFilters.length > 0 &&
-                <div className={styles.activeFilters}>
-                  {
-                    activeFilters.map((element, i)=> {
-                      return(
-                        <span key={i} className={`${styles.filterTag} ${element.tag}`}>
-                          { getSelectedFilterDisplay(element) }
-                          <span className={styles.close} onClick={()=>{handleFilter(element)}}><CloseIcon/></span>
-                        </span>
-                      )
-                    })
-                  }
+              <div className={styles.resultsHeader}>
+                <div className={styles.top}>
+                  <h5>Results</h5>
+                  <ResultsSorting 
+                    onSort={handleSort} 
+                  />
                 </div>
-              }
-              <div className={styles.resultsTable}>
-                <div className={styles.tableBody}>
-                  <div className={`${styles.tableHead} ${styles.result}`}>
-                    <div className={`${styles.heckboxContainer} ${styles.head}`}>
-                      <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
-                    </div>
-                    <div 
-                      className={`
-                        ${styles.head} 
-                        ${styles.nameHead} 
-                        ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`} 
-                      onClick={()=>{handleSort((isSortedByName)?'nameHighLow': 'nameLowHigh')}}
-                      >
-                      Name
-                    </div>
-                    <div className={`${styles.head} ${styles.fdaHead}`}>FDA</div>
-                    <div 
-                      className={`
-                        ${styles.head} 
-                        ${styles.evidenceHead} 
-                        ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
-                      onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}
-                      >
-                      Evidence
-                    </div>
-                    <div className={`${styles.head} ${styles.tagsHead}`}>Tags</div>
+                {
+                  activeFilters.length > 0 &&
+                  <div className={styles.activeFilters}>
+                    {
+                      activeFilters.map((element, i)=> {
+                        return(
+                          <span key={i} className={`${styles.filterTag} ${element.tag}`}>
+                            { getSelectedFilterDisplay(element) }
+                            <span className={styles.close} onClick={()=>{handleFilter(element)}}><CloseIcon/></span>
+                          </span>
+                        )
+                      })
+                    }
                   </div>
-                  {
-                    isError &&
-                    <h5>There was an error when processing your query. Please try again.</h5>
-                  }
-                  {
-                    !isLoading &&
-                    !isError &&
-                    displayedResults.length > 0 && 
-                    displayedResults.map((item, i) => {
-                      let checked = (selectedItems.length > 0 && selectedItems.includes(item)) ? true : false;
-                      let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
-                      return(
-                        <ResultsItem 
-                          key={i} 
-                          checked={checked}
-                          highlighted={highlighted}
-                          item={item} 
-                          staticNode={results.static_node} 
-                          allSelected={allSelected}
-                          handleSelected={()=>handleSelected(item)}
-                          activateEvidence={()=>activateEvidence(item.edge.evidence)} 
-                        />
-                      )
-                    })
-                  }
-                </div>
+                }
               </div>
+              <div className={styles.resultsTableContainer}>
+                <div className={styles.resultsTable}>
+                  <div className={styles.tableBody}>
+                    <div className={`${styles.tableHead} ${styles.result}`}>
+                      <div className={`${styles.checkboxContainer} ${styles.head}`}>
+                        <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
+                      </div>
+                      <div 
+                        className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`} 
+                        onClick={()=>{handleSort((isSortedByName)?'nameHighLow': 'nameLowHigh')}}
+                        >
+                        Name
+                      </div>
+                      <div className={`${styles.head} ${styles.fdaHead}`}>FDA</div>
+                      <div 
+                        className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
+                        onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}
+                        >
+                        Evidence
+                      </div>
+                    </div>
+                    {
+                      isError &&
+                      <h5>There was an error when processing your query. Please try again.</h5>
+                    }
+                    {
+                      !isLoading &&
+                      !isError &&
+                      displayedResults.length > 0 && 
+                      displayedResults.map((item, i) => {
+                        let checked = (selectedItems.length > 0 && selectedItems.includes(item)) ? true : false;
+                        let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
+                        return(
+                          <ResultsItem 
+                            key={i} 
+                            checked={checked}
+                            highlighted={highlighted}
+                            item={item} 
+                            staticNode={results.static_node} 
+                            allSelected={allSelected}
+                            handleSelected={()=>handleSelected(item)}
+                            activateEvidence={()=>activateEvidence(item.edge.evidence)} 
+                          />
+                        )
+                      })
+                    }
+                  </div>
+                </div>
+              </div>  
               {
                 formattedResults.length > 0 && 
                 <div className={styles.pagination}>
@@ -531,7 +496,7 @@ const ResultsList = ({loading}) => {
                   />
                 </div>
               }
-            </div>
+            </>
           }
         </div>
       </div>

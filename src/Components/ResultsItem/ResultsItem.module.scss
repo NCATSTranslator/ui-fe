@@ -1,0 +1,83 @@
+@import "../variables";
+
+.result {
+  display: grid;
+  grid-template-columns: 50px 1fr 50px 150px 50px;
+
+  &:nth-child(even) {
+    &.highlighted {
+      background-color: $yellow20;
+    }
+  }
+  &:nth-child(odd) {
+    &.highlighted {
+      background-color: $yellow50;
+    }
+  }
+  .resultSub {
+    padding: $xs 0;
+    display: flex;
+    align-items: center;
+  }
+  .nameContainer {
+    display: grid;
+    grid-template-columns: min-content auto;
+    justify-content: flex-start;
+    grid-column-gap: 13.5px;
+    .icon {
+      grid-row: 1/3;
+      display: grid;
+      align-content: center;
+    }
+    .name {
+      display: block;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .effect {
+      grid-column: 2/3;
+      font-size: $captionSize;
+      color: $darkGrey
+    }
+  }
+  .fdaContainer, .evidenceContainer {
+    text-align: center;
+    padding-left: $s;
+    padding-right: $s;
+    justify-content: center;
+  }
+  .fdaIcon {
+    height: 24px;
+    margin-right: $xxs;
+  }
+  .evidenceLink {
+    font-size: $bodyTwoSize;
+    cursor: pointer;
+      .viewAll {
+      font-size: $bodyTwoSize;
+      font-weight: 700;
+    }
+  }
+  .accordionButton {
+    background-color: transparent;
+    margin: 0;
+    transition: transform .25s ease;
+    &:hover {
+      box-shadow: none;
+    }
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+  .accordionPanel {
+    grid-column: 1/7;
+    padding: 0 0 20px;
+    .container {
+      width: auto;
+      padding: 20px;
+    }
+  }
+}
