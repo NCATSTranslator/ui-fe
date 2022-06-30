@@ -46,21 +46,6 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
 
   return (
     <div className={styles.resultsFilter}>
-      <div className={styles.top}>
-        <p className={styles.resultsCount}>
-          Showing <span className={styles.range}>
-            <span className={styles.start}>{startIndex}</span>
-            -
-            <span>{endIndex}</span>
-          </span> of 
-          <span className={styles.count}> {formattedCount} </span>
-          {
-            (formattedCount !== totalCount) &&
-            <span className={styles.total}>({totalCount}) </span>
-          }
-          <span> Results</span>
-        </p>
-      </div>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
         <p className={styles.subTwo}>Evidence</p>

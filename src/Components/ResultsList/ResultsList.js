@@ -406,7 +406,22 @@ const ResultsList = ({loading}) => {
               />
               <div className={styles.resultsHeader}>
                 <div className={styles.top}>
-                  <h5>Results</h5>
+                  <div>
+                    <h5>Results</h5>
+                    <p className={styles.resultsCount}>
+                      Showing <span className={styles.range}>
+                        <span className={styles.start}>{itemOffset + 1}</span>
+                        -
+                        <span>{endResultIndex}</span>
+                      </span> of 
+                      <span className={styles.count}> {formattedResults.length} </span>
+                      {
+                        (formattedResults.length !== sortedResults.length) &&
+                        <span className={styles.total}>({sortedResults.length}) </span>
+                      }
+                      <span> Results</span>
+                    </p>
+                  </div>
                   <ResultsSorting 
                     onSort={handleSort} 
                   />
