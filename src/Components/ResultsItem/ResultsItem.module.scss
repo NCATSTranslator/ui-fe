@@ -3,6 +3,7 @@
 .result {
   display: grid;
   grid-template-columns: 50px 1fr 50px 150px 50px;
+  padding: 12px;
 
   &:nth-child(even) {
     &.highlighted {
@@ -20,26 +21,27 @@
     align-items: center;
   }
   .nameContainer {
-    display: grid;
-    grid-template-columns: min-content auto;
-    justify-content: flex-start;
-    grid-column-gap: 13.5px;
+    display: block;
+    overflow: hidden;
+    span {
+      line-height: 1.25;
+    }
     .icon {
-      grid-row: 1/3;
-      display: grid;
-      align-content: center;
+      display: none;
     }
     .name {
       display: block;
+      color: $purpleOne;
+      font-size: 20px;
       font-weight: 700;
-      text-transform: uppercase;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
+      text-transform: none;
     }
     .effect {
       grid-column: 2/3;
-      font-size: $captionSize;
+      font-size: $s;
       color: $darkGrey
     }
   }
@@ -51,7 +53,6 @@
   }
   .fdaIcon {
     height: 24px;
-    margin-right: $xxs;
   }
   .evidenceLink {
     font-size: $bodyTwoSize;
@@ -74,7 +75,9 @@
   }
   .accordionPanel {
     grid-column: 1/7;
-    padding: 0 0 20px;
+    &.open {
+      padding: 0 0 20px;
+    }
     .container {
       width: auto;
       padding: 20px;

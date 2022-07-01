@@ -445,7 +445,7 @@ const ResultsList = ({loading}) => {
               <div className={styles.resultsTableContainer}>
                 <div className={styles.resultsTable}>
                   <div className={styles.tableBody}>
-                    <div className={`${styles.tableHead} ${styles.result}`}>
+                    <div className={`${styles.tableHead}`}>
                       <div className={`${styles.checkboxContainer} ${styles.head}`}>
                         <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
                       </div>
@@ -474,18 +474,23 @@ const ResultsList = ({loading}) => {
                       displayedResults.map((item, i) => {
                         let checked = (selectedItems.length > 0 && selectedItems.includes(item)) ? true : false;
                         let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
-                        return(
-                          <ResultsItem 
-                            key={i} 
-                            checked={checked}
-                            highlighted={highlighted}
-                            item={item} 
-                            staticNode={results.static_node} 
-                            allSelected={allSelected}
-                            handleSelected={()=>handleSelected(item)}
-                            activateEvidence={()=>activateEvidence(item.edge.evidence)} 
-                          />
-                        )
+                        let hasName = (item.subject.name && item.subject.name.length > 0);
+                        if(hasName) {
+                          return(
+                            <ResultsItem 
+                              key={i} 
+                              checked={checked}
+                              highlighted={highlighted}
+                              item={item} 
+                              staticNode={results.static_node} 
+                              allSelected={allSelected}
+                              handleSelected={()=>handleSelected(item)}
+                              activateEvidence={()=>activateEvidence(item.edge.evidence)} 
+                            />
+                          )
+                        } else {
+                          return '';
+                        }
                       })
                     }
                   </div>
@@ -508,6 +513,7 @@ const ResultsList = ({loading}) => {
                     activeClassName={styles.current}
                     previousLinkClassName={`${styles.prev} ${styles.button}`}
                     nextLinkClassName={`${styles.prev} ${styles.button}`}
+                    disabledLinkClassName={styles.disabled}
                   />
                 </div>
               }

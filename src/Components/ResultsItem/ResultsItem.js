@@ -7,7 +7,6 @@ import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1=Down.svg"
 import AnimateHeight from "react-animate-height";
 
-
 const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activateEvidence, checked, highlighted}) => {
 
   // let icon = getIcon(item.type);
@@ -25,7 +24,7 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
     ? item.subject.fda_info.max_level 
     : 'N/A';
     
-  let lastPubYear = getLastPubYear(item.edge.last_publication_date);
+  // let lastPubYear = getLastPubYear(item.edge.last_publication_date);
 
   let predicate = (item.edge.predicate)
     ? item.edge.predicate.replace("biolink:", '') + ' ' + staticNode.names[0]
@@ -35,8 +34,6 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
-
-  let expandedClass = (isExpanded) ? 'open' : 'closed';
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
@@ -56,14 +53,13 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
       </div>
       <div className={`${styles.nameContainer} ${styles.resultSub}`}>
         <span className={styles.icon}>{icon}</span>
-        <span className={styles.name}>{item.subject.name.toUpperCase()}</span>
+        <span className={styles.name}>{capitalizeFirstLetter(item.subject.name)}</span>
         <span className={styles.effect}>{capitalizeFirstLetter(predicate)}</span>
       </div>
       <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
-        {fdaLevel !== 'N/A' &&
+        { fdaLevel !== 'N/A' &&
           <span className={styles.fdaIcon}><CheckIcon /></span>
         }
-        <span className={styles.fda}>{fdaLevel}</span>
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span className={styles.evidenceLink} onClick={()=>{activateEvidence(item.edge.evidence)}}>

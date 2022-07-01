@@ -14,29 +14,34 @@
     }
     .resultsTable {
       box-shadow: $dropShadow;
-      padding: $m;
       font-size: $bodyTwoSize;
-      span {
-        font-size: $bodyTwoSize;
-
-      }
+      border-radius: $defaultBorderRadius;
       .tableHead {
         border-bottom: 1px solid $midGrey;
         display: grid;
         grid-template-columns: 50px 1fr 50px 150px 50px;
+        padding: 12px;
+        background-color: $purpleTwo;
+        border-radius: 5px 5px 0 0;
         .head {
+          display: flex;
+          align-items: center;
           text-align: center;
           font-size: 10px;
           font-weight: 700;
           line-height: 1.25;
           text-transform: uppercase;
-          color: $darkGrey;
+          color: $white;
+          width: min-content;
+        }
+        .checkboxContainer label {
+          margin: 0;
         }
         .nameHead {
           text-align: left;
         }
-        .fdaHead {
-          text-align: center;
+        .fdaHead, .evidenceHead {
+          justify-self: center;
         }
         .nameHead, .evidenceHead {
           &:hover {
@@ -50,10 +55,11 @@
               height: 0;
               position: absolute;
               top: 2px;
+              right: -15px;
               margin-left: 3px;
               border-top: 0px solid transparent;        
               border-right: 5px solid transparent;
-              border-bottom: 5px solid #000;
+              border-bottom: 5px solid $white;
               border-left: 5px solid transparent;
             }
           }
@@ -82,6 +88,17 @@
     .button {
       margin-bottom: 0;
       background-color: $purpleOne;
+      padding: 10px 25px;
+      border-radius: $defaultBorderRadius;
+      color: $white;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .disabled {
+      background-color: transparent;
+      color: $midGrey;
+      pointer-events: none;
+      cursor: default;
     }
     .pageNum {
       a {
@@ -128,7 +145,7 @@
     border-radius: $defaultBorderRadius;
     span {
       font-weight: 700;
-      color: $purpleOne;
+      color: $black;
     }
     .close {
       display: flex;
