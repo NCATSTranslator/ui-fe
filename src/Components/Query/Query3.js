@@ -11,6 +11,7 @@ import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import cloneDeep from "lodash/cloneDeep";
 import styles from './Query3.module.scss';
+import Button from "../FormFields/Button";
 
 const Query3 = ({template, results, handleAdd, handleRemove, loading}) => {
 
@@ -169,26 +170,38 @@ const Query3 = ({template, results, handleAdd, handleRemove, loading}) => {
     if(needsChange)
       setQueryItems(newItems);
   } 
-  
-
 
   return (
     <>
       <div className={`${styles.queryThree}`} >
-        <div className="container">
+        <div className={`${styles.container} container`}>
+          {!isResults &&
+            <h4 className={styles.heading}>Biomedical Data Translator</h4>
+          }
           <SimpleQueryBar
             handleSubmission={handleSubmission}
             isLoading={isLoading}
             storedQuery={storedQuery}
           />
-          <div className="query-items">
-              {isResults && 
-              isLoading &&
-                <div className="loading-results">
-                </div>
-              }
-          </div>
+          {!isResults &&
+            <div className={styles.examples}>
+              <p className={styles.subTwo}>Example Diseases:</p>
+              <div className={styles.exampleList}>
+                <button className={styles.button}>Abnormal Blood Glucose</button>
+                <button className={styles.button}>Neurofibromatosis Type I</button>
+                <button className={styles.button}>Alzheimer's</button>
+                <button className={styles.button}>Noonan Syndrome</button>
+              </div>
+            </div>
+          }
         </div>
+      </div>
+      <div className={styles.panels}>
+          {isResults && 
+          isLoading &&
+            <div className="loading-results">
+            </div>
+          }
       </div>
     </>
   );

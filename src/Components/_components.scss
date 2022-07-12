@@ -871,27 +871,6 @@ label.checkbox {
 
       }
     }
-    .query-items {
-      display: grid;
-      grid-template-columns: 3fr 1fr;
-      grid-column-gap: $s;
-      .panel {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-column-gap: $s;
-        align-items: flex-start;
-      }
-      .build {
-        .panel {
-          display: block;
-        }
-      }
-      .how-to {
-        background-color: $lightGrey;
-        box-shadow: $dropShadow;
-        padding: $m;
-      }
-    }
   }
 }
 .results .query-window {
