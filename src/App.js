@@ -15,7 +15,7 @@ const App = () => {
     <div className={`app ${pathnameClass}`}>
       <Header>
       </Header>
-      <div className='container body'>
+      <div className='body'>
         <Outlet />
       </div>
       <Footer>

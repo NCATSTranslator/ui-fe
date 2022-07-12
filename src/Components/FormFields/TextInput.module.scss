@@ -1,0 +1,61 @@
+@import "../variables";
+
+.textInput {
+  display: inline-grid;
+  grid-template-columns: minmax(0,1fr);
+  margin: 0 2% $s 0;
+  position: relative; 
+  &.s {
+    width: 23%;
+  }
+  &.m {
+    width: 48%;
+  }
+  &.l {
+    width: 98%;
+  }
+  .errorText {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    color: $red;
+    margin-top: 8px;
+    font-size: $captionSize;
+    &:before {
+      content: url('../../Icons/Alerts/Info.svg');
+      margin-right: 4px;
+    }
+  }
+  .label {
+    font-size: $subTwoSize;
+    margin-bottom: $xs;
+    font-weight: 700;
+    color: $darkGrey;
+  }
+  .subtitle {
+    font-size: $bodyTwoSize;
+    margin-bottom: $xxs;
+  }
+  input, textarea {
+    border: 1px solid $black;
+    font-size: $bodyOneSize;
+    border-radius: $defaultBorderRadius;
+    padding: 10px 8px 10px 30px;
+    resize: none;
+    line-height: 20px;
+  }
+  .iconContainer {
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    img, svg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+  }
+}

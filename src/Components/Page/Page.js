@@ -7,9 +7,6 @@ const Page = (props) => {
   }, [props.title]);
   return (
     <>
-      <h1 className='page-title h5'>
-        {props.title}
-      </h1>
       {props.children}
       <DisclaimerModal></DisclaimerModal>
     </>

@@ -8,6 +8,8 @@ import {ReactComponent as Bookmark} from '../../Icons/Navigation/Bookmark.svg';
 import {ReactComponent as History} from '../../Icons/Navigation/History.svg';
 import {ReactComponent as Export} from '../../Icons/Buttons/Export.svg';
 import {ReactComponent as Warning} from '../../Icons/Alerts/Warning.svg';
+import {ReactComponent as Logo} from '../../Assets/Logo.svg';
+import styles from './Header.module.scss';
 
 
 const Header = ({children}) => {
@@ -18,23 +20,21 @@ const Header = ({children}) => {
   }
   
   return (
-    <header className="header">
-      <div className="top-bar">
-        <div className="container">
-          <div className='left'>
-            <h5>Biomedical Data Translator</h5>
+    <header className={styles.header}>
+      <div className={styles.topBar}>
+        <div className={styles.container}>
+          <div className={styles.left}>
+            <Link to="/" className={styles.logo}><Logo/></Link>
           </div>
-          <div className='right'>
-            <Link to="/"><Home/>Dashboard</Link>
-            <Link to="/history"><History/>History</Link>
-            <button><Bookmark/>Bookmarks</button>
-            <button><Export />Share</button>
-            <button onClick={()=>setModalOpen(true)}><Warning/>Send Feedback</button>
+          <div className={styles.right}>
+            <Link to="/history">Search History</Link>
+            <button onClick={()=>setModalOpen(true)}>Send Feedback</button>
+            <button>Help</button>
           </div>
         </div>
         <ReportIssueModal isOpen={modalOpen} onClose={()=>handleModalClose()} />
       </div>
-      <div className="toolbar">
+      {/* <div className="toolbar">
         <div className="container">
           <div className='left'>
             <UndoRedo />
@@ -55,7 +55,7 @@ const Header = ({children}) => {
             >Results</NavLink>
           </div>
         </div>
-      </div>
+      </div> */}
         {children}
     </header>
   );

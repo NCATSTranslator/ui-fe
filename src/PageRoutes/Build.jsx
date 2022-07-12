@@ -1,10 +1,10 @@
 import React from "react";
-import Query2 from "../Components/Query/Query2";
+import Query3 from "../Components/Query/Query3";
 
 const Build = () => {
   return (
     <div>
-      <Query2 />
+      <Query3 />
     </div>
   );
 }

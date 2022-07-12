@@ -1,0 +1,29 @@
+@import "../variables";
+
+
+.form {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  label {
+    width: 100%;
+    margin: 0;
+  }
+  button {
+    margin: 0 0 0 $m;
+    padding: 10px 20px;
+    line-height: 20px;
+  }
+}
+
+.prefix {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  color: $darkGrey;
+  font-size: $subOneSize;
+  font-weight: 700;
+  margin-right: $xs;
+}
+
+
