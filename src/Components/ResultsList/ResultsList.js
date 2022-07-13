@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from './ResultsList.module.scss';
 import Checkbox from "../FormFields/Checkbox";
-import Query2 from "../Query/Query2";
+import Query3 from "../Query/Query3";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsSorting from "../ResultsSorting/ResultsSorting";
 import ResultsItem from "../ResultsItem/ResultsItem";
@@ -384,8 +384,8 @@ const ResultsList = ({loading}) => {
         results={results}
       />
       <div className={styles.resultsList}>
-        <Query2 results loading/>
-        <div className={styles.resultsContainer}>
+        <Query3 results loading/>
+        <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
             <LoadingBar 

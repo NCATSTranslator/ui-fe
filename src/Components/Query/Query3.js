@@ -1,19 +1,15 @@
 import React, {useState, useEffect, useRef, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
-import { cannedQueries } from "../../Data/cannedqueries";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import isEqual from 'lodash/isEqual';
-import QueryTemplate from "../QueryComponents/QueryTemplate";
-import QueryItemButton from "../QueryComponents/QueryItemButton";
 import SimpleQueryBar from "../QueryComponents/SimpleQueryBar";
 import { incrementHistory } from "../../Redux/historySlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import cloneDeep from "lodash/cloneDeep";
 import styles from './Query3.module.scss';
-import Button from "../FormFields/Button";
 
-const Query3 = ({template, results, handleAdd, handleRemove, loading}) => {
+const Query3 = ({results, handleAdd, handleRemove, loading}) => {
 
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
@@ -54,19 +50,7 @@ const Query3 = ({template, results, handleAdd, handleRemove, loading}) => {
     }
   }
  
-  // Event handler for form submission
-  const handleSubmission = (e) => {
-    e.preventDefault();
-    validateSubmission(e);
-  }
 
-  // Validation function for submission
-  const validateSubmission = (e) => {
-    if(queryItems.length > 0) {
-      setIsValidSubmission(true);
-    }
-  }
-  
   /* 
     When the query items change, update the current query in the app state 
     and alternate active query item type (nodes/predicates)
@@ -87,7 +71,36 @@ const Query3 = ({template, results, handleAdd, handleRemove, loading}) => {
     dispatch(setCurrentQuery(queryItems));
   }, [queryItems, storedQuery, dispatch]);
 
+  // Event handler for form submission
+  const handleSubmission = (e) => {
+    e.preventDefault();
+    // Test purposes
+    setQueryItems([
+      {
+        "name": "What Drug",
+        "type": "subject",
+        "category": "chemical",
+        "value": ""
+      },
+      {
+        "name": "Treats",
+        "type": "action",
+        "category": "treats"
+      },
+      {
+        "name": "Type 1 Diabetes Mellitus",
+        "type": "subject",
+        "category": "disease",
+        "value": ""
+      }
+    ]);
+    validateSubmission(e);
+  }
 
+  // Validation function for submission
+  const validateSubmission = (e) => {
+    setIsValidSubmission(true);
+  }
 
   // Handle change to isValidSubmission
   useEffect(() => {
@@ -107,7 +120,7 @@ const Query3 = ({template, results, handleAdd, handleRemove, loading}) => {
       
       // If the activeMockID has been set, prep the json to be sent to /query
       if(activeMockID !== -1) {
-        let mockJson = { id: activeMockID} 
+        let mockJson = {id: activeMockID} 
         testJson = JSON.stringify(mockJson);
       }
 
@@ -124,12 +137,22 @@ const Query3 = ({template, results, handleAdd, handleRemove, loading}) => {
           if(data.data && data.status === 'success') {
             // Update the currentQueryResultsID in the application state
             dispatch(setCurrentQueryResultsID(data.data.id));
-            setResultsActive(true);
           }
+          setResultsActive(true);
+        })
+        .catch((error) => {
+          console.log(error)
         });
     }
 
   }, [isValidSubmission, dispatch, queryItems, activeMockID, storedQuery])
+
+  // Set isResults to true when resultsActive so we can navigate to the results page
+  useEffect(() => {
+    if(resultsActive) {
+      setIsResults(true);
+    }
+  }, [resultsActive]);
 
   /* 
     If the query has been populated by clicking on an item in the query history
