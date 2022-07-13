@@ -1,5 +1,45 @@
 @import "../../Assets/Styles/variables";
 
 .homePageContent {
-
+  .container {
+    padding-top: 0;
+  }
+  .heading {
+    text-align: center;
+    margin-bottom: $m;
+  }
+  .section {
+    padding: $xxl 0;
+  }
+  .section:nth-of-type(even){
+    background-color: #F2F4F7;
+  }
+  .threeCol {
+    display: grid;
+    grid-template-columns: 282px 347px 462px;
+    grid-column-gap: 30px;
+  }
+  .twoCol {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    grid-column-gap: 30px;
+  }
+  .colTwo {
+    ul li {
+      font-weight: 700;
+    }
+  }
+  .collaborators {
+    text-align: center;
+  }
+  .logos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    padding-top: $xs;
+    img {
+      height: 100%;
+      margin-bottom: $m;
+    }
+  }
 }
