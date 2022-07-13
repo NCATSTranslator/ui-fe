@@ -1,5 +1,5 @@
 import React from "react";
-import Query3 from "../Components/Query/Query3";
+import Query3 from "../../Components/Query/Query3";
 
 const Build = () => {
   return (

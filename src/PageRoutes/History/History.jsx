@@ -1,11 +1,11 @@
 import React, {useState} from "react";
-import { pastQueryState, clearHistory } from "../Redux/historySlice";
+import { pastQueryState, clearHistory } from "../../Redux/historySlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
-import Modal from "../Components/Modals/Modal";
-import Button from "../Components/FormFields/Button";
-import {ReactComponent as Warning} from '../Icons/Alerts/Warning.svg'
-import QueryHistoryList from "../Components/QueryHistoryList/QueryHistoryList";
+import Modal from "../../Components/Modals/Modal";
+import Button from "../../Components/FormFields/Button";
+import {ReactComponent as Warning} from '../../Icons/Alerts/Warning.svg'
+import QueryHistoryList from "../../Components/QueryHistoryList/QueryHistoryList";
 
 const History = () => {
 
