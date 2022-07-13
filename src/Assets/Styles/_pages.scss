@@ -1,0 +1,150 @@
+@import "./variables";
+
+
+.pane {
+  &.actions {
+    a,button {
+      background-color: transparent;
+      display: flex;
+      align-items: center;
+      color: $black;
+      svg {
+        margin-right: $xs;
+      }
+      svg, svg path {
+        stroke: unset;
+        fill: unset;
+      }
+      &:hover {
+        box-shadow: none;
+      }
+    }
+  }
+}
+
+// History Page
+.history {
+  .page-title {
+    display: none;
+  }
+  .body {
+    display: grid;
+    .history-inner {
+      display: grid;
+      grid-template-rows: max-content;
+    }
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .button {
+        color: $black;
+        background-color: transparent;
+        padding: $s 0;
+        margin: 0;
+        width: auto;
+        &:hover {
+          box-shadow: none;
+        }
+      }
+    }
+    .history-list {
+      list-style: none;
+      .history-item {
+        &:first-of-type {
+          .time-name {
+            margin: 0 0 $m;
+          }
+        }
+        .time-name {
+          font-size: 20px;
+          line-height: 1.25;
+          font-weight: 700;
+          color: $darkGrey;
+          margin: $xl 0 $m;
+
+        }
+        .query {
+          cursor: pointer;
+        }
+        .item-container {
+          padding: $m;
+          margin-bottom: $m;
+          box-shadow: $dropShadow;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-radius: $defaultBorderRadius;
+          transition: $defaultBoxShadowAnim;
+          &:hover {
+            box-shadow: $dropShadowHover;
+          }
+          .subject,.action {
+            color: $purpleOne;
+            font-weight: 700;
+          }
+          .remove-item {
+            background-color: transparent;
+            padding: $s;
+            margin: 0;
+            &:hover {
+              box-shadow: none;
+            }
+            svg {
+              margin: 0;
+            }
+          }
+        }  
+      }
+    }
+  }
+  .modal-window .modal-container {
+    text-align: center;
+    width: 300px;
+    .button-container {
+      display: grid;
+      justify-content: center;
+      .button {
+        width: auto;
+        white-space: nowrap;
+        &.primary {
+          background-color: transparent;
+          color: $black;
+          &:hover {
+            text-decoration: underline;
+            box-shadow: none;
+          }
+        }
+      }
+    }
+    .close-container {
+      display: none;
+    }
+  }
+  .no-history {
+    display: grid;
+    grid-template-rows: min-content;
+    justify-content: center;
+    align-content: center;
+    text-align: center;
+    h6 {
+      margin-bottom: $m;
+      color: $darkGrey;
+    }
+  }
+  .button-container {
+    display: flex;
+    .button {
+      white-space: nowrap;
+    }
+  }
+}
+
+.home {
+  .page-title {
+    height: 0;
+    padding: 0;
+    margin: 0;
+    visibility: hidden;
+  }
+}

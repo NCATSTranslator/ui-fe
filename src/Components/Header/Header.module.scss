@@ -1,4 +1,4 @@
-@import "../variables";
+@import "../../Assets/Styles/variables";
 
 .header {
   box-shadow: $dropShadow;
@@ -37,6 +37,7 @@
           line-height: 1;
           padding: 10px 8px;
           width: fit-content;
+          box-shadow: none;
           svg {
             margin-right: 8px;
           }

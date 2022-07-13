@@ -1,4 +1,4 @@
-import styles from './GraphView.module.css';
+import styles from './GraphView.module.scss';
 import React, {useState} from "react";
 import { Canvas, Node, Edge, Label, useSelection } from 'reaflow';
 

@@ -8,7 +8,7 @@ import {ReactComponent as Bookmark} from '../../Icons/Navigation/Bookmark.svg';
 import {ReactComponent as History} from '../../Icons/Navigation/History.svg';
 import {ReactComponent as Export} from '../../Icons/Buttons/Export.svg';
 import {ReactComponent as Warning} from '../../Icons/Alerts/Warning.svg';
-import {ReactComponent as Logo} from '../../Assets/Logo.svg';
+import {ReactComponent as Logo} from '../../Assets/Images/Logo.svg';
 import styles from './Header.module.scss';
 
 
