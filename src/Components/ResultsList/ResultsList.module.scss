@@ -16,12 +16,19 @@
       box-shadow: $dropShadow;
       font-size: $bodyTwoSize;
       border-radius: $defaultBorderRadius;
+      .tableBody {
+        &>div:nth-child(odd){
+          background-color: $lightGrey;
+        }
+        &>div:first-child {
+          background-color: $purpleTwo;  
+        }
+      }
       .tableHead {
         border-bottom: 1px solid $midGrey;
         display: grid;
         grid-template-columns: 50px 1fr 50px 150px 50px;
         padding: 12px;
-        background-color: $purpleTwo;
         border-radius: 5px 5px 0 0;
         .head {
           display: flex;
@@ -85,6 +92,7 @@
     list-style-type: none;
     padding-left: 0;
     width: 700px;
+    margin: 0 0 0 auto;
     .button {
       margin-bottom: 0;
       background-color: $purpleOne;
@@ -93,6 +101,7 @@
       color: $white;
       font-size: 16px;
       font-weight: 700;
+      cursor: pointer;
     }
     .disabled {
       background-color: transparent;
@@ -109,13 +118,18 @@
         transition: all .25s ease;
         border: 1px solid transparent;
         border-radius: 5px;
+        color: $darkGrey;
+        font-size: $bodyOneSize;
+        font-weight: 700;
         &:hover {
-          border-color: $darkGrey;
+          background-color: $purpleTwo20;
+          color: $purpleOne;
         }
       }
       &.current {
         a {
-          border-color: $darkGrey;
+          background-color: $purpleTwo20;
+          color: $purpleOne;
         } 
       }
     }
