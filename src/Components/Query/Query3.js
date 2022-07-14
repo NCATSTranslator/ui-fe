@@ -8,6 +8,7 @@ import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import cloneDeep from "lodash/cloneDeep";
 import styles from './Query3.module.scss';
+import { update } from "lodash";
 
 const Query3 = ({results, handleAdd, handleRemove, loading}) => {
 
@@ -38,18 +39,31 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   const [queryItems, setQueryItems] = useState(storedQuery);
   // Array, for use in useEffect hooks with queryItems as a dependency
   var prevQueryItems = useRef(storedQuery);
+  const [inputText, setInputText] = useState(prevQueryItems[prevQueryItems.length - 1]);
 
-  // Event handler called when a node's input is updated by the user 
+  // Event handler called when search bar is updated by user, either by typing or selecting a template
   const handleQueryItemChange = (e) => {
-    let updatedValue = e.target.value;
-    let itemKey = e.target.dataset.inputkey;
-    if(queryItems[itemKey].type === 'node') {
-      let items = JSON.parse(JSON.stringify(queryItems));
-      items[itemKey].value = updatedValue;
-      setQueryItems(items);
-    }
+    setInputText(e);
+    setQueryItems([
+      {
+        "name": "What Drug",
+        "type": "subject",
+        "category": "chemical",
+        "value": ""
+      },
+      {
+        "name": "Treats",
+        "type": "action",
+        "category": "treats"
+      },
+      {
+        "name": e,
+        "type": "subject",
+        "category": "disease",
+        "value": ""
+      }
+    ]);
   }
- 
 
   /* 
     When the query items change, update the current query in the app state 
@@ -75,25 +89,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   const handleSubmission = (e) => {
     e.preventDefault();
     // Test purposes
-    setQueryItems([
-      {
-        "name": "What Drug",
-        "type": "subject",
-        "category": "chemical",
-        "value": ""
-      },
-      {
-        "name": "Treats",
-        "type": "action",
-        "category": "treats"
-      },
-      {
-        "name": "Type 1 Diabetes Mellitus",
-        "type": "subject",
-        "category": "disease",
-        "value": ""
-      }
-    ]);
+
     validateSubmission(e);
   }
 
@@ -203,17 +199,18 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
           }
           <SimpleQueryBar
             handleSubmission={handleSubmission}
+            handleChange={handleQueryItemChange}
             isLoading={isLoading}
-            storedQuery={storedQuery}
+            value={inputText}
           />
           {!isResults &&
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>
               <div className={styles.exampleList}>
-                <button className={styles.button}>Abnormal Blood Glucose</button>
-                <button className={styles.button}>Neurofibromatosis Type I</button>
-                <button className={styles.button}>Alzheimer's</button>
-                <button className={styles.button}>Noonan Syndrome</button>
+                <button className={styles.button} onClick={()=>handleQueryItemChange('Abnormal Blood Glucose')}>Abnormal Blood Glucose</button>
+                <button className={styles.button} onClick={()=>handleQueryItemChange('Neurofibromatosis Type I')}>Neurofibromatosis Type I</button>
+                <button className={styles.button} onClick={()=>handleQueryItemChange('Alzheimer\'s')}>Alzheimer's</button>
+                <button className={styles.button} onClick={()=>handleQueryItemChange('Noonan Syndrome')}>Noonan Syndrome</button>
               </div>
             </div>
           }
