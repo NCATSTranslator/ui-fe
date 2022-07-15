@@ -30,7 +30,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   // Bool, is the submitted query valid, determined by validateSubmission 
   const [isValidSubmission, setIsValidSubmission] = useState(false);
   // Int, active mock ARS ID. For testing purposes
-  const [activeMockID, setActiveMockID] = useState(3);
+  const [activeMockID, setActiveMockID] = useState('e01');
 
   // Get the current query from the application state
   let storedQuery = useSelector(currentQuery);
@@ -39,7 +39,12 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   const [queryItems, setQueryItems] = useState(storedQuery);
   // Array, for use in useEffect hooks with queryItems as a dependency
   var prevQueryItems = useRef(storedQuery);
-  const [inputText, setInputText] = useState(prevQueryItems[prevQueryItems.length - 1]);
+  let presetInputText = 
+    (prevQueryItems.current[prevQueryItems.current.length - 1] !== undefined
+      && isResults) 
+    ? prevQueryItems.current[prevQueryItems.current.length - 1].name 
+    : '';
+  const [inputText, setInputText] = useState(presetInputText);
 
   // Event handler called when search bar is updated by user, either by typing or selecting a template
   const handleQueryItemChange = (e) => {
