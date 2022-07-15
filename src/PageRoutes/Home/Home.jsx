@@ -1,7 +1,7 @@
 import React from "react";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; 
 import Query3 from "../../Components/Query/Query3";
-import {ReactComponent as Infographic } from "../../Assets/Images/translator-infographic.svg";
+import translatorInfographic from "../../Assets/Images/translator-infographic.jpg";
 import berkeley from "../../Assets/Images/Logos/berkeley.png";
 import bma from "../../Assets/Images/Logos/bma.png";
 import broad from "../../Assets/Images/Logos/broad.png";
@@ -33,7 +33,7 @@ const Home = () => {
         <div className={styles.section}>
           <div className={`${styles.container} container`}>
             <h5 className={styles.heading}>How it Works</h5>
-            <Infographic />
+            <img src={translatorInfographic} alt="" />
             <div className={styles.threeCol}>
               <div className={styles.colOne}>
                 <p>A researcher will be able to use NCATS Biomedical Data Translator to help answer difficult biomedical questions like, "predict treatments for disease Y." </p>

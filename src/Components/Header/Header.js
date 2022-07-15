@@ -3,11 +3,6 @@ import UndoRedo from "../UndoRedo/UndoRedo";
 import Toggle from '../Toggle/Toggle';
 import ReportIssueModal from "../Modals/SendFeedbackModal";
 import { NavLink, Link } from 'react-router-dom';
-import {ReactComponent as Home} from '../../Icons/Navigation/Home.svg';
-import {ReactComponent as Bookmark} from '../../Icons/Navigation/Bookmark.svg';
-import {ReactComponent as History} from '../../Icons/Navigation/History.svg';
-import {ReactComponent as Export} from '../../Icons/Buttons/Export.svg';
-import {ReactComponent as Warning} from '../../Icons/Alerts/Warning.svg';
 import {ReactComponent as Logo} from '../../Assets/Images/Logo.svg';
 import styles from './Header.module.scss';
 
