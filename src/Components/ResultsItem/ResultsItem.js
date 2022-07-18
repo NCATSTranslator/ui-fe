@@ -47,7 +47,7 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
   }, [isExpanded])
 
   return (
-    <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''}`}>
+    <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''} result`}>
       <div className={`${styles.checkboxContainer} ${styles.resultSub}`}>
         <Checkbox checked={checked} handleClick={()=>handleSelected(item)}/>
       </div>

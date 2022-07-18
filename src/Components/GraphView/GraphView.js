@@ -2,6 +2,7 @@ import styles from './GraphView.module.scss';
 import React, {useState} from "react";
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
+import {ReactComponent as Chemical} from '../../Icons/Queries/Chemical.svg';
 
 const GraphView = ({graph, staticNode}) => {
 
@@ -95,10 +96,13 @@ const GraphView = ({graph, staticNode}) => {
                 element.path.map((path, j) => {
                   return (
                     <> 
-                      <span className={styles.name}>{path.name}</span>
+                      <span className={styles.name}>
+                        <Chemical/>
+                        {path.name}
+                      </span>
                       <span className={styles.pathContainer}>
                         <Connector />
-                        <span className={styles.path}>{path.path}</span>
+                        <span className={`${styles.path} path`}>{path.path}</span>
                       </span>
                       {path.target && <span className={styles.target}><Disease/>{path.target}</span>}
                     </>

@@ -148,3 +148,11 @@
     visibility: hidden;
   }
 }
+
+.results {
+  .result:nth-child(odd) {
+    .path {
+      background-color: $lightGrey;
+    }
+  }
+}
