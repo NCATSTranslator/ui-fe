@@ -23,6 +23,7 @@ import ucamc from "../../Assets/Images/Logos/ucamc.png";
 import ucd from "../../Assets/Images/Logos/ucd.png";
 import ucsf from "../../Assets/Images/Logos/ucsf.png";
 import styles from "./Home.module.scss";
+import GraphView from "../../Components/GraphView/GraphView";
 
 const Home = () => {
 

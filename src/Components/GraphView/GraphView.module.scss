@@ -1,18 +1,85 @@
 @import "../../Assets/Styles/variables";
 
 .graphView {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  border: 1.5px solid #606368;
+  padding: $m 0;
+  .tableHead, .tableItem {
+    display: flex;
+    justify-content: flex-end;
+    span {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 130px;
+      text-align: center;
+      margin-right: 4px;
+    }
+    .name, .target {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .path {
+      font-size: 12px;
+      font-weight: 400;
+    }
+  }
+  .tableHead {
+    margin-bottom: $m;
+    span {
+      text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 12.5px;
+    }
+  }
+  .tableItem {
+    margin-bottom: $m;
+    .pathContainer, .name, .target {
+      line-height: 17.5px;
+      border-radius: $defaultBorderRadius;
+      padding: 7px 0;
+      &:first-child {
+        background-color: $yellow;
+        padding: 7px 0;
+      }
+    }
+    .pathContainer {
+      position: relative;
+      svg {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        transform: translateY(-50%);
+      }
+    }
+    .path {
+      box-shadow: none;
+      width: auto;
+      padding: 0 2px;
+      max-width: 86px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      background-color: white;
+      z-index: 10;
+      color: $darkGrey;
+    }
+    .name, .target {
+      box-shadow: $dropShadow;
+    }
+    .target {
+      background-color: $blueTwo;
+      color: $white;
+      svg {
+        margin-right: 8px;
+      }
+    }
+  }
 }
 
-.container {
-  position: relative;
-  height: 200px;
-}
+
 
 .edgeLabel {
   fill: #000 !important;
