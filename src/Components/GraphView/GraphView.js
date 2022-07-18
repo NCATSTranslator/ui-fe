@@ -82,35 +82,33 @@ const GraphView = ({graph, staticNode}) => {
  }
 
   return(
-    <div className={`${styles.container}`}>
-      <div className={styles.graphView}>
-        <div className={styles.tableHead}>
-          {displayHeadings(graphWidth)}
-        </div>
-        {
-          graph.map((element, i) => {
-            console.log(element);
-            return (
-              <div className={styles.tableItem}> 
-                {
-                  element.path.map((path, j) => {
-                    return (
-                      <> 
-                        <span className={styles.name}>{path.name}</span>
-                        <span className={styles.pathContainer}>
-                          <Connector />
-                          <span className={styles.path}>{path.path}</span>
-                        </span>
-                        {path.target && <span className={styles.target}><Disease/>{path.target}</span>}
-                      </>
-                    ) 
-                  }) 
-                }
-              </div>
-            )
-          })
-        }
+    <div className={styles.graphView}>
+      <div className={styles.tableHead}>
+        {displayHeadings(graphWidth)}
       </div>
+      {
+        graph.map((element, i) => {
+          console.log(element);
+          return (
+            <div className={styles.tableItem}> 
+              {
+                element.path.map((path, j) => {
+                  return (
+                    <> 
+                      <span className={styles.name}>{path.name}</span>
+                      <span className={styles.pathContainer}>
+                        <Connector />
+                        <span className={styles.path}>{path.path}</span>
+                      </span>
+                      {path.target && <span className={styles.target}><Disease/>{path.target}</span>}
+                    </>
+                  ) 
+                }) 
+              }
+            </div>
+          )
+        })
+      }
     </div>
   )
 }

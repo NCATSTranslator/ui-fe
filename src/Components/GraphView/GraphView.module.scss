@@ -55,10 +55,12 @@
       }
     }
     .path {
+      display: block;
+      justify-content: flex-start;
       box-shadow: none;
       width: auto;
       padding: 0 2px;
-      max-width: 86px;
+      max-width: 87px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

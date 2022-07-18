@@ -9,6 +9,8 @@
     grid-column-gap: $m;
     align-items: flex-start;
     position: relative;
+    max-width: 1400px;
+    width: auto;
     .resultsTableContainer {
       grid-column: 2/3;
     }
