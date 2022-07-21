@@ -1,106 +1,109 @@
 import styles from './GraphView.module.scss';
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
+import Tooltip from '../Tooltip/Tooltip';
 import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
 import {ReactComponent as Chemical} from '../../Icons/Queries/Chemical.svg';
+import GraphPath from '../GraphPath/GraphPath';
 
 const GraphView = ({graph, staticNode}) => {
 
-  const entityHeading = <span>Entity</span>;
-  const relationshipHeading = <span>Relationship</span>;
-  const targetHeading = <span>Target</span>;
+  graph = [
+    {
+      path: [
+        {
+          name: 'Glucose',
+          type: 'chemical',
+          path: 'treats',
+          target: 'Diabetes'
+        }
+      ],
+      id: '1234'
+    },
+    {
+      path: [
+        {
+          name: 'Glucose',
+          type: 'chemical',
+          path: 'reduces expression of',
+        },
+        {
+          name: 'Gene A',
+          type: 'gene',
+          path: 'causes',
+          target: 'Diabetes'
+        }
+      ],
+      id: '43525'
+    },
+    {
+      path: [
+        {
+          name: 'Glucose',
+          type: 'chemical',
+          path: 'treats',
+        },
+        {
+          name: 'Phenotype B',
+          type: 'phenotype',
+          path: 'associated with',
+          target: 'Diabetes'
+        }
+      ],
+      id: '3456'
+    },
+    {
+      path: [
+        {
+          name: 'Glucose',
+          type: 'chemical',
+          path: 'treats',
+        },
+        {
+          name: 'Disease C',
+          type: 'disease',
+          path: 'causes',
+        },
+        {
+          name: 'Phenotype D',
+          type: 'phenotype',
+          path: 'associated with',
+          target: 'Diabetes'
+        }
+      ],
+      id: '6134'
+    }
+  ]
 
- graph = [
-  {
-    path: [
-      {
-        name: 'Glucose',
-        type: 'chemical',
-        path: 'treats',
-        target: 'Diabetes'
-      }
-    ]
-  },
-  {
-    path: [
-      {
-        name: 'Glucose',
-        type: 'chemical',
-        path: 'reduces expression of',
-      },
-      {
-        name: 'Gene A',
-        type: 'gene',
-        path: 'causes',
-        target: 'Diabetes'
-      }
-    ]
-  },
-  {
-    path: [
-      {
-        name: 'Glucose',
-        type: 'chemical',
-        path: 'treats',
-      },
-      {
-        name: 'Phenotype B',
-        type: 'phenotype',
-        path: 'associated with',
-        target: 'Diabetes'
-      }
-    ]
-  },
-  {
-    path: [
-      {
-        name: 'Glucose',
-        type: 'chemical',
-        path: 'treats',
-      },
-      {
-        name: 'Disease C',
-        type: 'disease',
-        path: 'causes',
-      },
-      {
-        name: 'Phenotype D',
-        type: 'phenotype',
-        path: 'associated with',
-        target: 'Diabetes'
-      }
-    ]
-  }
- ]
-
- let graphWidth = 0;
- for (let index = 0; index < graph.length; index++) {
-   if(graph[index].path.length > graphWidth)
+  let graphWidth = 0;
+  for (let index = 0; index < graph.length; index++) {
+    if(graph[index].path.length > graphWidth)
     graphWidth = graph[index].path.length; 
- }
-
- const displayHeadings = (count) => {
-  let headingMarkup = [];
-  for (let index = 0; index < count; index++) {
-    headingMarkup.push(entityHeading);
-    headingMarkup.push(relationshipHeading);
   }
-  headingMarkup.push(targetHeading);
-  return headingMarkup;
- }
 
- const handleNameClick = (name) => {
-  console.log("handle name click");
- }
+  const displayHeadings = (count) => {
+    let headingMarkup = [];
+    for (let index = 0; index < count; index++) {
+      headingMarkup.push(<span key={`${index}_e`}>Entity</span>);
+      headingMarkup.push(<span key={`${index}_r`}>Relationship</span>);
+    }
+    headingMarkup.push(<span key='i'>Target</span>);
+    return headingMarkup;
+  }
 
- const handlePathClick = (path) => {
-  console.log("handle path click");
- }
+  const handleNameClick = (name) => {
+    console.log("handle name click");
+  }
 
- const handleTargetClick = (target) => {
-   console.log("handle target click");
- }
+  const handlePathClick = (path) => {
+    console.log("handle path click");
+  }
+
+  const handleTargetClick = (target) => {
+    console.log("handle target click");
+  }
+
 
   return(
     <div className={styles.graphView}>
@@ -109,27 +112,23 @@ const GraphView = ({graph, staticNode}) => {
       </div>
       {
         graph.map((element, i) => {
-          console.log(element);
+          console.log(i);
           return (
-            <div className={styles.tableItem}> 
+            <div className={styles.tableItem} key={i}> 
               {
                 element.path.map((path, j) => {
+                  let key = `${i}_${j}`;
+                  console.log(key);
                   return (
-                    <> 
-                      <span className={styles.name} onClick={()=>handleNameClick(path.name)}>
-                        {getIcon(path.type)}
-                        {path.name}
-                      </span>
-                      <span className={styles.pathContainer} onClick={()=>handlePathClick(path.path)}>
-                        <Connector />
-                        <span className={`${styles.path} path`}>{path.path}</span>
-                      </span>
-                      {path.target && 
-                      <span className={styles.target} onClick={()=>handleTargetClick(path.target)} >
-                        <Disease/>
-                        {path.target}
-                      </span>}
-                    </>
+                    <GraphPath 
+                      path={path} 
+                      key={key}
+                      handleNameClick={handleNameClick}
+                      handlePathClick={handlePathClick}
+                      handleTargetClick={handleTargetClick}
+                      >
+                      
+                    </GraphPath>
                   ) 
                 }) 
               }

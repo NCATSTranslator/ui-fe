@@ -5,15 +5,6 @@
   .tableHead, .tableItem {
     display: flex;
     justify-content: flex-end;
-    span {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 130px;
-      text-align: center;
-      margin-right: 4px;
-      cursor: pointer;
-    }
     .name, .target {
       font-size: 14px;
       font-weight: 700;
@@ -25,15 +16,24 @@
   }
   .tableHead {
     margin-bottom: $m;
+
     span {
       text-transform: uppercase;
       font-size: 10px;
       font-weight: 800;
       line-height: 12.5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 130px;
+      text-align: center;
+      margin-right: 4px;
+      cursor: pointer;
     }
   }
   .tableItem {
     margin-bottom: $m;
+    position: relative;
     .pathContainer, .name, .target {
       line-height: 17.5px;
       border-radius: $defaultBorderRadius;
@@ -95,6 +95,7 @@
       }
     }
   }
+
 }
 
 

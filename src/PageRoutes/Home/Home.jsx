@@ -29,7 +29,6 @@ const Home = () => {
 
   return (
     <div>
-      <GraphView />
       <Query3 />
       <div className={styles.homePageContent}>
         <div className={styles.section}>

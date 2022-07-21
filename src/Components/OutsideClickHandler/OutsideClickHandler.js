@@ -10,6 +10,7 @@ const OutsideClickHandler = ({children, onOutsideClick, className}) => {
       !wrapperRef.current.contains(e.target)
     ) {
       onOutsideClick();
+    } else {
     }
   }, [onOutsideClick])
   useEffect(() => {

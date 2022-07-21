@@ -1,0 +1,97 @@
+@import "../../Assets/Styles/variables";
+
+
+.name,.pathContainer,.target {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 130px;
+  text-align: center;
+  margin-right: 4px;
+  cursor: pointer;
+}
+.name, .target {
+  font-size: 14px;
+  font-weight: 700;
+}
+.path {
+  font-size: 12px;
+  font-weight: 400;
+}
+.pathContainer, .name, .target {
+  line-height: 17.5px;
+  border-radius: $defaultBorderRadius;
+  padding: 7px 0;
+}
+.nameContainer {
+  position: relative;
+  &:first-child {
+    .name {
+      background-color: $yellow;
+      padding: 7px 0;
+    }
+  }
+  svg {
+    margin-right: 5px;
+    path {
+      fill: $black;
+    }
+  }
+}
+.pathContainer {
+  position: relative;
+  >svg {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transform: translateY(-50%);
+  }
+}
+span.path {
+  display: block;
+  justify-content: flex-start;
+  box-shadow: none;
+  width: auto;
+  padding: 0 2px;
+  max-width: 87px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-color: white;
+  z-index: 10;
+  color: $darkGrey;
+  margin-right: 0;
+  transition: all .25s ease;
+  path {
+    transition: all .25s ease;
+  }
+  &:hover {
+    color: $black;
+    path {
+      fill: $black;
+    }  
+  }
+}
+.name, .target {
+  box-shadow: $dropShadow;
+  transition: all .25s ease;
+  &:hover {
+    box-shadow: $dropShadowHover;
+  }
+}
+.target {
+  background-color: $blueTwo;
+  color: $white;
+  svg {
+    margin-right: 8px;
+  }
+}
+
+
+
+.edgeLabel {
+  fill: #000 !important;
+}
