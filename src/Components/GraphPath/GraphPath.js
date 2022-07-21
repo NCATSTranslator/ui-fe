@@ -14,10 +14,6 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
   const [pathTooltipActive, setPathTooltipActive] = useState(false);
   const [targetTooltipActive, setTargetTooltipActive] = useState(false);
 
-  const openHandler = () => {
-
-  }
-
   const tooltipOpen = (type) => {
     switch (type) {
       case 'name':

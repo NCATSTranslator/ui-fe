@@ -1,10 +1,5 @@
 import styles from './GraphView.module.scss';
 import React, {useState, useEffect} from "react";
-import Tooltip from '../Tooltip/Tooltip';
-import { getIcon } from '../../Utilities/utilities';
-import {ReactComponent as Disease} from '../../Icons/disease2.svg';
-import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
-import {ReactComponent as Chemical} from '../../Icons/Queries/Chemical.svg';
 import GraphPath from '../GraphPath/GraphPath';
 
 const GraphView = ({graph, staticNode}) => {
@@ -19,7 +14,6 @@ const GraphView = ({graph, staticNode}) => {
           target: 'Diabetes'
         }
       ],
-      id: '1234'
     },
     {
       path: [
@@ -35,7 +29,6 @@ const GraphView = ({graph, staticNode}) => {
           target: 'Diabetes'
         }
       ],
-      id: '43525'
     },
     {
       path: [
@@ -51,7 +44,6 @@ const GraphView = ({graph, staticNode}) => {
           target: 'Diabetes'
         }
       ],
-      id: '3456'
     },
     {
       path: [
@@ -72,7 +64,6 @@ const GraphView = ({graph, staticNode}) => {
           target: 'Diabetes'
         }
       ],
-      id: '6134'
     }
   ]
 
@@ -112,13 +103,11 @@ const GraphView = ({graph, staticNode}) => {
       </div>
       {
         graph.map((element, i) => {
-          console.log(i);
           return (
             <div className={styles.tableItem} key={i}> 
               {
                 element.path.map((path, j) => {
                   let key = `${i}_${j}`;
-                  console.log(key);
                   return (
                     <GraphPath 
                       path={path} 
@@ -126,9 +115,7 @@ const GraphView = ({graph, staticNode}) => {
                       handleNameClick={handleNameClick}
                       handlePathClick={handlePathClick}
                       handleTargetClick={handleTargetClick}
-                      >
-                      
-                    </GraphPath>
+                    />
                   ) 
                 }) 
               }
