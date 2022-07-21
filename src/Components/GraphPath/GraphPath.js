@@ -1,10 +1,9 @@
 import styles from './GraphPath.module.scss';
-import React, {useState, useEffect} from "react";
+import React, {useState} from "react";
 import Tooltip from '../Tooltip/Tooltip';
 import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
-import {ReactComponent as Chemical} from '../../Icons/Queries/Chemical.svg';
 import OutsideClickHandler from '../OutsideClickHandler/OutsideClickHandler';
 
 
