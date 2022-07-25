@@ -60,7 +60,7 @@
           font-size: 20px;
           line-height: 1.25;
           font-weight: 700;
-          color: $darkGrey;
+          color: $darkGray;
           margin: $xl 0 $m;
 
         }
@@ -129,7 +129,7 @@
     text-align: center;
     h6 {
       margin-bottom: $m;
-      color: $darkGrey;
+      color: $darkGray;
     }
   }
   .button-container {
@@ -152,7 +152,7 @@
 .results {
   .result:nth-child(odd) {
     .path {
-      background-color: $lightGrey;
+      background-color: $lightGray;
     }
   }
 }

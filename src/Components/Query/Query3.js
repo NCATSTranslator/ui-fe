@@ -1,14 +1,15 @@
-import React, {useState, useEffect, useRef, useCallback} from "react";
+import React, {useState, useEffect, useRef, useMemo} from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import isEqual from 'lodash/isEqual';
 import SimpleQueryBar from "../QueryComponents/SimpleQueryBar";
 import { incrementHistory } from "../../Redux/historySlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import cloneDeep from "lodash/cloneDeep";
+import isEqual from 'lodash/isEqual';
+import _ from "lodash";
+import { getAutocompleteTerms, updateAutocompleteItems } from "../../Utilities/autocompleteFunctions";
 import styles from './Query3.module.scss';
-import { update } from "lodash";
 
 const Query3 = ({results, handleAdd, handleRemove, loading}) => {
 
@@ -46,8 +47,39 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
     : '';
   const [inputText, setInputText] = useState(presetInputText);
 
+  const [autocompleteItems, setAutoCompleteItems] = useState([]);
+  const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
+  const delayedQuery = useMemo(() => _.debounce((i, u, sl, sa) => getAutocompleteTerms(i, u, sl, sa), 750), []);
+
   // Event handler called when search bar is updated by user, either by typing or selecting a template
   const handleQueryItemChange = (e) => {
+    delayedQuery(e, updateAutocompleteItems, setLoadingAutocomplete, setAutoCompleteItems);
+    setInputText(e);
+    setQueryItems([
+      {
+        "name": "What Drug",
+        "type": "subject",
+        "category": "chemical",
+        "value": ""
+      },
+      {
+        "name": "Treats",
+        "type": "action",
+        "category": "treats"
+      },
+      {
+        "name": e,
+        "type": "subject",
+        "category": "disease",
+        "value": ""
+      }
+    ]);
+
+  }
+
+
+
+  const handleQueryTemplateSelection = (e) => {
     setInputText(e);
     setQueryItems([
       {
@@ -93,8 +125,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   // Event handler for form submission
   const handleSubmission = (e) => {
     e.preventDefault();
-    // Test purposes
-
     validateSubmission(e);
   }
 
@@ -172,29 +202,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
     }
   }, [isResults, navigate]);
 
-  // Click handler for query items 
-  const addQueryItem = (item) => {
-    const items = Array.from(queryItems);
-    items.push(item);
-    setQueryItems(items);
-  }
-
-  // Click handler to remove a query item from the list
-  const removeQueryItem = (indexToRemove) => {
-    let needsChange = false;
-    let newItems = Array.from(queryItems);
-    queryItems.map(({name}, index) => {
-      if(index === indexToRemove) {
-        newItems.splice(index, 1);
-        needsChange = true;
-      }
-      return name;
-    });
-
-    if(needsChange)
-      setQueryItems(newItems);
-  } 
-
   return (
     <>
       <div className={`${styles.queryThree}`} >
@@ -207,15 +214,17 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
             handleChange={handleQueryItemChange}
             isLoading={isLoading}
             value={inputText}
+            autocompleteItems={autocompleteItems}
+            autocompleteLoading={loadingAutocomplete}
           />
           {!isResults &&
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>
               <div className={styles.exampleList}>
-                <button className={styles.button} onClick={()=>handleQueryItemChange('Abnormal Blood Glucose')}>Abnormal Blood Glucose</button>
-                <button className={styles.button} onClick={()=>handleQueryItemChange('Neurofibromatosis Type I')}>Neurofibromatosis Type I</button>
-                <button className={styles.button} onClick={()=>handleQueryItemChange('Alzheimer\'s')}>Alzheimer's</button>
-                <button className={styles.button} onClick={()=>handleQueryItemChange('Noonan Syndrome')}>Noonan Syndrome</button>
+                <button className={styles.button} onClick={()=>handleQueryTemplateSelection('Abnormal Blood Glucose')}>Abnormal Blood Glucose</button>
+                <button className={styles.button} onClick={()=>handleQueryTemplateSelection('Neurofibromatosis Type I')}>Neurofibromatosis Type I</button>
+                <button className={styles.button} onClick={()=>handleQueryTemplateSelection('Alzheimer\'s')}>Alzheimer's</button>
+                <button className={styles.button} onClick={()=>handleQueryTemplateSelection('Noonan Syndrome')}>Noonan Syndrome</button>
               </div>
             </div>
           }

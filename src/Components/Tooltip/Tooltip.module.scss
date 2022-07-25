@@ -5,7 +5,7 @@
   z-index: 20;
   top: calc(100% + 12px);
   right: 4px;
-  background-color: $darkGrey; 
+  background-color: $darkGray; 
   color: $white;
   border-radius: $defaultBorderRadius;
   padding: $xs;
@@ -58,10 +58,10 @@
     clip-path: polygon(0% 0%, 100% 100%, 0% 100%);
     transform: rotate(135deg);
     border-radius: 0 0 0 0.25em;
-    background-color: $darkGrey;
+    background-color: $darkGray;
     // border-style: solid;
     // border-width: 0 8px 8px 8px;
-    // border-color: transparent transparent $darkGrey transparent;
+    // border-color: transparent transparent $darkGray transparent;
     position:absolute;
     top: -7px;
     right: $m;

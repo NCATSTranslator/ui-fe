@@ -20,14 +20,14 @@
       border-radius: $defaultBorderRadius;
       .tableBody {
         &>div:nth-child(odd){
-          background-color: $lightGrey;
+          background-color: $lightGray;
         }
         &>div:first-child {
           background-color: $purpleTwo;  
         }
       }
       .tableHead {
-        border-bottom: 1px solid $midGrey;
+        border-bottom: 1px solid $midGray;
         display: grid;
         grid-template-columns: 50px 1fr 50px 150px 50px;
         padding: 12px;
@@ -107,7 +107,7 @@
     }
     .disabled {
       background-color: transparent;
-      color: $midGrey;
+      color: $midGray;
       pointer-events: none;
       cursor: default;
     }
@@ -120,7 +120,7 @@
         transition: all .25s ease;
         border: 1px solid transparent;
         border-radius: 5px;
-        color: $darkGrey;
+        color: $darkGray;
         font-size: $bodyOneSize;
         font-weight: 700;
         &:hover {

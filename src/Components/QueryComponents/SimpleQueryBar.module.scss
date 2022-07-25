@@ -5,6 +5,7 @@
   display: flex;
   justify-content: space-between;
   align-items: stretch;
+  position: relative;
   label {
     width: 100%;
     margin: 0;
@@ -20,10 +21,52 @@
   display: flex;
   align-items: center;
   white-space: nowrap;
-  color: $darkGrey;
+  color: $darkGray;
   font-size: $subOneSize;
   font-weight: 700;
   margin-right: $xs;
 }
 
+.autocompleteContainer {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 145px;
+  right: 119px;
+  background-color: $white;
+  box-shadow: $dropShadowHover;
+  border-radius: $defaultBorderRadius;
+  height: 300px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+  &.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .item {
+    font-size: 14px;
+    font-weight: 700;
+    color: $black;
+    margin-bottom: 0;
+    padding: 4px 12px;
+    cursor: pointer;
+    &:first-child {
+      padding: 8px 12px 4px;
+    }
+    &:hover {
+      color: $purpleOne;
+      background-color: $lightGray;
+    }
+  }
+  .sep {
+    margin: 0 4px;
+    border-bottom: 1px solid $midGray;
+  }
+}
 

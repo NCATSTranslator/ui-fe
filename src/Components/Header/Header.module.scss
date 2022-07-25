@@ -25,7 +25,7 @@
       }
       .right {
         button, a {
-          color: $darkGrey;
+          color: $darkGray;
           font-size: 16px;
           background-color: transparent;
           text-decoration: none;
@@ -53,7 +53,7 @@
     }
   }
   .toolbar {
-    background-color: $lightGrey;
+    background-color: $lightGray;
     .container {
       display: flex;
       justify-content: space-between;
@@ -68,7 +68,7 @@
     .right {
       a {
         font-size: $bodyOneSize;
-        color: $darkGrey;
+        color: $darkGray;
         text-decoration: none;
         margin-right: $m;
         margin-bottom: 0;

@@ -48,7 +48,7 @@
     }
     &.internal {
       .one {
-        color: $midGrey;
+        color: $midGray;
       }
       .two {
         color: $white;
@@ -56,7 +56,7 @@
     }
     &.external {
       .one {
-        color: $darkGrey;
+        color: $darkGray;
       }
       .two {
         color: $black;
@@ -72,7 +72,7 @@
         color: $white;
       }
       .two {
-        color: $midGrey;
+        color: $midGray;
       }
     }
     &.external {
@@ -80,7 +80,7 @@
         color: $black;
       }
       .two {
-        color: $darkGrey;
+        color: $darkGray;
       }
     }
   }
@@ -93,7 +93,7 @@
     align-items: center;
     cursor: pointer;
     background-color: $white;
-    border: 1px solid $darkGrey;
+    border: 1px solid $darkGray;
     -webkit-transition: .4s;
     transition: .4s;
     position: relative;
@@ -187,7 +187,7 @@ label.radio, label.checkbox {
     transition: .5s transform ease-in-out;
     box-shadow: inset 1em 1em var(--form-control-color);
     background-color: $white;
-    border: 1px solid $darkGrey;
+    border: 1px solid $darkGray;
     transition: $defaultBoxShadowAnim;
 
     &:before {
@@ -301,9 +301,9 @@ label.checkbox {
     box-shadow: $dropShadowPressed;
   }
   &:disabled, &[disabled] {
-    color: $midGrey;
+    color: $midGray;
     background-color: white;
-    border-color: $midGrey;
+    border-color: $midGray;
     box-shadow: none;
     cursor: default;
   }
@@ -325,7 +325,7 @@ label.checkbox {
     font-size: $subTwoSize;
     margin-bottom: $xs;
     font-weight: 700;
-    color: $darkGrey;
+    color: $darkGray;
   }
   .subtitle {
     font-size: $bodyTwoSize;
@@ -335,7 +335,7 @@ label.checkbox {
     padding: 7px $xs;
     border-radius: $defaultBorderRadius;
     border: 1px solid $black;
-    color: $darkGrey;
+    color: $darkGray;
     font-size: $bodyOneSize;
     display: grid;
     grid-template-columns: minmax(0,1fr);
@@ -491,7 +491,7 @@ label.checkbox {
           width: 40px;
           height: 40px;
           path {
-            stroke: $darkGrey;
+            stroke: $darkGray;
             transition: all .25s ease;
           }
         }
@@ -882,7 +882,7 @@ label.checkbox {
           padding: 115px 94px;
           text-align: left;
           p, ol {
-            color: $darkGrey;
+            color: $darkGray;
           }
           .sub-one {
             color: $black;
@@ -944,7 +944,7 @@ label.checkbox {
       &.true {
         background-color: transparent;
         svg path {
-          stroke: $midGrey;
+          stroke: $midGray;
         }
       }
     }
@@ -968,7 +968,7 @@ label.checkbox {
 }
 
 .footer {
-  background-color: $lightGrey;
+  background-color: $lightGray;
   .container {
     max-width: $maxwidth;
     margin: 0 auto;
@@ -1056,7 +1056,7 @@ label.checkbox {
       content: '';
       height: $xs;
       width: $xs;
-      background-color: $darkGrey;
+      background-color: $darkGray;
       border-radius: 50%;
       top: 50%;
       transform: translateY(-50%);
@@ -1067,7 +1067,7 @@ label.checkbox {
     .min {
       &::after {
         left: 24px; 
-        background-color: $darkGrey;
+        background-color: $darkGray;
       }
     }
   }
