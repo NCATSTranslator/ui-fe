@@ -8,7 +8,7 @@ import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/results
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from 'lodash/isEqual';
 import _ from "lodash";
-import { getAutocompleteTerms, updateAutocompleteItems } from "../../Utilities/autocompleteFunctions";
+import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import styles from './Query3.module.scss';
 
 const Query3 = ({results, handleAdd, handleRemove, loading}) => {
@@ -49,11 +49,11 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
 
   const [autocompleteItems, setAutoCompleteItems] = useState([]);
   const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
-  const delayedQuery = useMemo(() => _.debounce((i, u, sl, sa) => getAutocompleteTerms(i, u, sl, sa), 750), []);
+  const delayedQuery = useMemo(() => _.debounce((i, sl, sa) => getAutocompleteTerms(i, sl, sa), 750), []);
 
   // Event handler called when search bar is updated by user, either by typing or selecting a template
   const handleQueryItemChange = (e) => {
-    delayedQuery(e, updateAutocompleteItems, setLoadingAutocomplete, setAutoCompleteItems);
+    delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems);
     setInputText(e);
     setQueryItems([
       {
