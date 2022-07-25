@@ -1,4 +1,5 @@
 
+// Returns array of terms based on user input
 export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems) => {
   if(inputText) {
     console.log(`fetching '${inputText}'`);
@@ -7,11 +8,12 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     };
-
+    // Fetch list of curies based on userInput string from Name Resolver
     fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=20`, nameResolverRequestOptions)
       .then(response => response.json())
       .then(data => {
         let curies = {
+          // Convert data returned from Name Resolver into a list of curies
           curies: getCuriesFromNameResolver(data),
           conflate: true
         }
@@ -20,10 +22,12 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(curies)
         };
+        // Fetch list of normalized nodes based on list of curies from Name Resolver
         return fetch('https://nodenormalization-sri.renci.org/1.2/get_normalized_nodes', nodeNormalizerRequestOptions)
       })
       .then(response => response.json())
       .then(data => {
+        // get list of names from the data returned from Node Normalizer
         let autoCompleteItems = getFormattedNamesFromNormalizer(data);
         setAutoCompleteItems(autoCompleteItems);
         setLoadingAutocomplete(false);

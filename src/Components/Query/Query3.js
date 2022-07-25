@@ -47,11 +47,14 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
     : '';
   const [inputText, setInputText] = useState(presetInputText);
 
+  // Array, List of items to display in the autocomplete window
   const [autocompleteItems, setAutoCompleteItems] = useState([]);
+  // Bool, are autocomplete items loading
   const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
+  // Function, delay query for fetching autocomplete items by 750ms each time the user types, so we only send a request once they're done
   const delayedQuery = useMemo(() => _.debounce((i, sl, sa) => getAutocompleteTerms(i, sl, sa), 750), []);
 
-  // Event handler called when search bar is updated by user, either by typing or selecting a template
+  // Event handler called when search bar is updated by user
   const handleQueryItemChange = (e) => {
     delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems);
     setInputText(e);
