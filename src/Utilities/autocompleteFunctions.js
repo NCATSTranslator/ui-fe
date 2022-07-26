@@ -1,3 +1,4 @@
+import { capitalizeAllWords } from "./utilities";
 
 // Returns array of terms based on user input
 export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems) => {
@@ -50,6 +51,8 @@ const getFormattedNamesFromNormalizer = (data) => {
       // filter to new array with only items of type => disease
       .filter((item) => item.type && item.type.includes("biolink:Disease") )
       // map those values into a new array that only has the label, aka 'common name'
-      .map((item) => {return item.id.label})
+      .map((item) => {
+        return {id: item.id.identifier, label: capitalizeAllWords(item.id.label)}
+      })
   )
 }

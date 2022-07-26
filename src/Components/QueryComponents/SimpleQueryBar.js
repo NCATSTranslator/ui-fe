@@ -7,7 +7,7 @@ import loadingIcon from '../../Assets/Images/Loading/loading.png';
 
 import styles from './SimpleQueryBar.module.scss';
 
-const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value, autocompleteItems, autocompleteLoading}) => {
+const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value, autocompleteItems, autocompleteLoading, handleItemClick}) => {
 
   value = (value !== undefined && value !== null) ? value : '';
 
@@ -17,7 +17,7 @@ const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value, autoc
         {
           autocompleteItems && !autocompleteLoading &&
           autocompleteItems.map((item, i) => {
-            return <p key={i} className={styles.item}>{item}</p>
+            return <p key={i} className={styles.item} onClick={()=>handleItemClick(item.label)}>{item.label}</p>
           })
         }
         {

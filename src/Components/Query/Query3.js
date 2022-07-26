@@ -46,6 +46,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
     ? prevQueryItems.current[prevQueryItems.current.length - 1].name 
     : '';
   const [inputText, setInputText] = useState(presetInputText);
+  const [selectedDisease, setSelectedDisease] = useState('');
 
   // Array, List of items to display in the autocomplete window
   const [autocompleteItems, setAutoCompleteItems] = useState([]);
@@ -77,13 +78,16 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
         "value": ""
       }
     ]);
-
   }
 
-
+  const handleDiseaseSelection = (disease) => {
+    setInputText(disease);
+    setSelectedDisease(disease);
+  }
 
   const handleQueryTemplateSelection = (e) => {
     setInputText(e);
+    setSelectedDisease(e);
     setQueryItems([
       {
         "name": "What Drug",
@@ -107,7 +111,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
 
   /* 
     When the query items change, update the current query in the app state 
-    and alternate active query item type (nodes/predicates)
   */
   useEffect(() => {
     // since useEffect dependency update checks don't work on objects (thanks to shallow equals)
@@ -133,7 +136,9 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
 
   // Validation function for submission
   const validateSubmission = (e) => {
-    setIsValidSubmission(true);
+    if(selectedDisease !== '') {
+      setIsValidSubmission(true);
+    }
   }
 
   // Handle change to isValidSubmission
@@ -219,6 +224,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
             value={inputText}
             autocompleteItems={autocompleteItems}
             autocompleteLoading={loadingAutocomplete}
+            handleItemClick={handleDiseaseSelection}
           />
           {!isResults &&
             <div className={styles.examples}>
