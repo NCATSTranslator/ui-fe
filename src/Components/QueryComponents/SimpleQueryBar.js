@@ -17,7 +17,7 @@ const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value, autoc
         {
           autocompleteItems && !autocompleteLoading &&
           autocompleteItems.map((item, i) => {
-            return <p key={i} className={styles.item} onClick={()=>handleItemClick(item.label)}>{item.label}</p>
+            return <p key={i} className={styles.item} onClick={()=>handleItemClick(item)}>{item.label}</p>
           })
         }
         {

@@ -46,7 +46,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
     ? prevQueryItems.current[prevQueryItems.current.length - 1].name 
     : '';
   const [inputText, setInputText] = useState(presetInputText);
-  const [selectedDisease, setSelectedDisease] = useState('');
+  const [selectedDisease, setSelectedDisease] = useState(null);
 
   // Array, List of items to display in the autocomplete window
   const [autocompleteItems, setAutoCompleteItems] = useState([]);
@@ -81,12 +81,12 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   }
 
   const handleDiseaseSelection = (disease) => {
-    setInputText(disease);
+    setInputText(disease.label);
     setSelectedDisease(disease);
   }
 
   const handleQueryTemplateSelection = (e) => {
-    setInputText(e);
+    setInputText(e.label);
     setSelectedDisease(e);
     setQueryItems([
       {
@@ -101,7 +101,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
         "category": "treats"
       },
       {
-        "name": e,
+        "name": e.label,
         "type": "subject",
         "category": "disease",
         "value": ""
@@ -230,10 +230,10 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>
               <div className={styles.exampleList}>
-                <button className={styles.button} onClick={()=>handleQueryTemplateSelection('Abnormal Blood Glucose')}>Abnormal Blood Glucose</button>
-                <button className={styles.button} onClick={()=>handleQueryTemplateSelection('Neurofibromatosis Type I')}>Neurofibromatosis Type I</button>
-                <button className={styles.button} onClick={()=>handleQueryTemplateSelection('Alzheimer\'s')}>Alzheimer's</button>
-                <button className={styles.button} onClick={()=>handleQueryTemplateSelection('Noonan Syndrome')}>Noonan Syndrome</button>
+                <button className={styles.button} onClick={()=>handleQueryTemplateSelection({ id: '', label:'Abnormal Blood Glucose'})}>Abnormal Blood Glucose</button>
+                <button className={styles.button} onClick={()=>handleQueryTemplateSelection({ id: '', label:'Neurofibromatosis Type I'})}>Neurofibromatosis Type I</button>
+                <button className={styles.button} onClick={()=>handleQueryTemplateSelection({ id: '', label:'Alzheimer\'s'})}>Alzheimer's</button>
+                <button className={styles.button} onClick={()=>handleQueryTemplateSelection({ id: '', label:'Noonan Syndrome'})}>Noonan Syndrome</button>
               </div>
             </div>
           }

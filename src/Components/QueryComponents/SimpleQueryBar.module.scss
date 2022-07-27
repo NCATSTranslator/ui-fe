@@ -56,6 +56,11 @@
     cursor: pointer;
     &:first-child {
       padding: 8px 12px 4px;
+      border-radius: $defaultBorderRadius $defaultBorderRadius 0 0;
+    }
+    &:last-child {
+      padding: 8px 12px 4px;
+      border-radius: 0 0 $defaultBorderRadius $defaultBorderRadius;
     }
     &:hover {
       color: $purpleOne;

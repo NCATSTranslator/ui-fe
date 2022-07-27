@@ -45,7 +45,8 @@ const getCuriesFromNameResolver = (data) => {
 }
 
 const getFormattedNamesFromNormalizer = (data) => {
-  return (
+
+  let autocompleteObjects = 
     // get array of values from object
     Object.values(data)
       // filter to new array with only items of type => disease
@@ -53,6 +54,6 @@ const getFormattedNamesFromNormalizer = (data) => {
       // map those values into a new array that only has the label, aka 'common name'
       .map((item) => {
         return {id: item.id.identifier, label: capitalizeAllWords(item.id.label)}
-      })
-  )
+      });
+  return autocompleteObjects;
 }
