@@ -30,6 +30,10 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   const [isLoading, setIsLoading] = useState(loading);
   // Bool, is the submitted query valid, determined by validateSubmission 
   const [isValidSubmission, setIsValidSubmission] = useState(false);
+  // Bool, is there an error in the submission
+  const [isError, setIsError] = useState(false);
+  // String, error text
+  const [errorText, setErrorText] = useState('');
   // Int, active mock ARS ID. For testing purposes
   const [activeMockID, setActiveMockID] = useState('e01');
 
@@ -59,35 +63,15 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   const handleQueryItemChange = (e) => {
     delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems);
     setInputText(e);
-    setQueryItems([
-      {
-        "name": "What Drug",
-        "type": "subject",
-        "category": "chemical",
-        "value": ""
-      },
-      {
-        "name": "Treats",
-        "type": "action",
-        "category": "treats"
-      },
-      {
-        "name": e,
-        "type": "subject",
-        "category": "disease",
-        "value": ""
-      }
-    ]);
   }
 
+  // Handler for disease selection (template click or autocomplete item click)
   const handleDiseaseSelection = (disease) => {
-    setInputText(disease.label);
+    setIsError(false);
     setSelectedDisease(disease);
   }
 
-  const handleQueryTemplateSelection = (e) => {
-    setInputText(e.label);
-    setSelectedDisease(e);
+  const updateQueryItems = (label) => {
     setQueryItems([
       {
         "name": "What Drug",
@@ -101,13 +85,20 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
         "category": "treats"
       },
       {
-        "name": e.label,
+        "name": label,
         "type": "subject",
         "category": "disease",
         "value": ""
       }
     ]);
   }
+
+  useEffect(() => {
+    if(selectedDisease !== null) {
+      setInputText(selectedDisease.label);
+      updateQueryItems(selectedDisease.label);
+    }
+  }, [selectedDisease]);
 
   /* 
     When the query items change, update the current query in the app state 
@@ -136,9 +127,13 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
 
   // Validation function for submission
   const validateSubmission = (e) => {
-    if(selectedDisease !== '') {
-      setIsValidSubmission(true);
+    if(selectedDisease === null) {
+      setIsError(true);
+      setErrorText("No disease selected, please select a valid disease.");
+      return;
     }
+
+    setIsValidSubmission(true);
   }
 
   // Handle change to isValidSubmission
@@ -155,21 +150,15 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
       // Set isLoading to true
       setIsLoading(true);
 
-      let testJson = '';
+      let queryJson = JSON.stringify({disease: selectedDisease.id});
       
-      // If the activeMockID has been set, prep the json to be sent to /query
-      if(activeMockID !== -1) {
-        let mockJson = {id: activeMockID} 
-        testJson = JSON.stringify(mockJson);
-      }
-
       // submit query to /query
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: testJson
+        body: queryJson
       };
-      fetch('/query', requestOptions)
+      fetch('/creative_query', requestOptions)
         .then(response => response.json())
         .then(data => {
           console.log(data)
@@ -184,7 +173,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItems, activeMockID, storedQuery])
+  }, [isValidSubmission, dispatch, queryItems, activeMockID, storedQuery, selectedDisease])
 
   // Set isResults to true when resultsActive so we can navigate to the results page
   useEffect(() => {
@@ -217,6 +206,10 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
           {!isResults &&
             <h4 className={styles.heading}>Biomedical Data Translator</h4>
           }
+          {
+            isError &&
+            <p className={styles.error}>{errorText}</p>
+          }
           <SimpleQueryBar
             handleSubmission={handleSubmission}
             handleChange={handleQueryItemChange}
@@ -230,10 +223,10 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>
               <div className={styles.exampleList}>
-                <button className={styles.button} onClick={()=>handleQueryTemplateSelection({ id: '', label:'Abnormal Blood Glucose'})}>Abnormal Blood Glucose</button>
-                <button className={styles.button} onClick={()=>handleQueryTemplateSelection({ id: '', label:'Neurofibromatosis Type I'})}>Neurofibromatosis Type I</button>
-                <button className={styles.button} onClick={()=>handleQueryTemplateSelection({ id: '', label:'Alzheimer\'s'})}>Alzheimer's</button>
-                <button className={styles.button} onClick={()=>handleQueryTemplateSelection({ id: '', label:'Noonan Syndrome'})}>Noonan Syndrome</button>
+                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: '', label:'Abnormal Blood Glucose'})}>Abnormal Blood Glucose</button>
+                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: '', label:'Neurofibromatosis Type I'})}>Neurofibromatosis Type I</button>
+                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: '', label:'Alzheimer\'s'})}>Alzheimer's</button>
+                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: '', label:'Noonan Syndrome'})}>Noonan Syndrome</button>
               </div>
             </div>
           }

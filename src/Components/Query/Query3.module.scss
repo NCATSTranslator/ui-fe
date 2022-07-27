@@ -11,6 +11,10 @@
     text-align: center;
     margin-bottom: $xl;
   }
+  .error {
+    color: $red;
+    text-align: center;
+  }
   .queryItems {
     display: grid;
     grid-template-columns: 3fr 1fr;
