@@ -74,13 +74,13 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   const updateQueryItems = (label) => {
     setQueryItems([
       {
-        "name": "What Drug",
+        "name": "What Drugs",
         "type": "subject",
         "category": "chemical",
         "value": ""
       },
       {
-        "name": "Treats",
+        "name": "Treat",
         "type": "action",
         "category": "treats"
       },

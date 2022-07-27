@@ -56,7 +56,14 @@ const getFormattedNamesFromNormalizer = (data) => {
       .map((item) => {
         return {id: item.id.identifier, label: capitalizeAllWords(item.id.label)}
       });
+      console.log(Array.from(new Set(autocompleteObjects.map(a => a.id))));
+      console.log(Array.from(new Set(autocompleteObjects.map(a => a.id)))
+      .map(id => {
+        return autocompleteObjects.find(a => a.id === id)
+      }))
+  // remove duplicates by converting array to set of ids (sets don't tolerate duplicates)
   return Array.from(new Set(autocompleteObjects.map(a => a.id)))
+    // then return a new array of objects by finding each object by their id 
     .map(id => {
       return autocompleteObjects.find(a => a.id === id)
     });
