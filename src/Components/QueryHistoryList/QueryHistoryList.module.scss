@@ -1,0 +1,52 @@
+@import "../../Assets/Styles/variables";
+
+.historyList {
+  list-style: none;
+  .historyItem {
+    &:first-of-type {
+      .time-name {
+        margin: 0 0 $m;
+      }
+    }
+    .timeName {
+      font-size: 20px;
+      line-height: 1.25;
+      font-weight: 700;
+      color: $darkGray;
+      margin: $xl 0 $m;
+
+    }
+    .query {
+      cursor: pointer;
+    }
+    .itemContainer {
+      padding: $m;
+      margin-bottom: $m;
+      box-shadow: $dropShadow;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: $defaultBorderRadius;
+      transition: $defaultBoxShadowAnim;
+      &:hover {
+        box-shadow: $dropShadowHover;
+      }
+      .subject,.action {
+        color: $purpleOne;
+        font-weight: 700;
+      }
+      .removeItem {
+        background-color: transparent;
+        padding: $s;
+        margin: 0;
+        box-shadow: none;
+        &:hover {
+          box-shadow: none;
+        }
+        svg {
+          margin: 0;
+        }
+      }
+    }  
+  }
+}

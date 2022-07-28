@@ -1,10 +1,11 @@
+import styles from './History.module.scss';
 import React, {useState} from "react";
 import { pastQueryState, clearHistory } from "../../Redux/historySlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
 import Modal from "../../Components/Modals/Modal";
 import Button from "../../Components/FormFields/Button";
-import {ReactComponent as Warning} from '../../Icons/Alerts/Warning.svg'
+import {ReactComponent as Warning} from '../../Icons/warning.svg'
 import QueryHistoryList from "../../Components/QueryHistoryList/QueryHistoryList";
 
 const History = () => {
@@ -14,26 +15,46 @@ const History = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div className="history-inner">
-      <div className="head">
-        <h2>History</h2>
-        <Button handleClick={()=>setModalOpen(true)}>Clear All</Button>
+    <div className={styles.historyInner}>
+      <div className={styles.head}>
+        <div className={styles.left}>
+          <h2>Search History</h2>
+          <p>The results of the questions you have asked are stored locally in your browser's history for 30 days.<br/>
+          Click the export icon to generate a shareable link to a result set.</p>
+        </div>
+        <button 
+          onClick={()=>setModalOpen(true)}
+          className={styles.button}
+          >
+          Clear All
+        </button>
       </div>
-      <Modal isOpen={modalOpen} onClose={()=>setModalOpen(false)}>
-        <h6><Warning/>Warning!</h6>
-        <p>This action cannot be undone.</p>
-        <div className="button-container">
-          <Button 
-          isSecondary
-            handleClick={()=>{
+      <Modal 
+        isOpen={modalOpen} 
+        onClose={()=>setModalOpen(false)} 
+        className={styles.modal} 
+        containerClass={styles.modalContainer}
+        hideCloseButton
+        >
+
+        <h6 className={styles.modalHeading}><Warning/>Warning!</h6>
+        <p className={styles.warning}>This action cannot be undone.</p>
+        <div className={styles.buttonContainer}>
+          <button 
+            className={styles.buttonOne}
+            onClick={()=>{
               dispatch(clearHistory()); 
               setModalOpen(false);
-            }}>
+            }}
+            >
             Clear History
-          </Button>
-          <Button handleClick={()=>setModalOpen(false)}>
+          </button>
+          <button 
+            className={styles.buttonTwo}
+            onClick={()=>setModalOpen(false)}
+            >
             Go Back
-          </Button>
+          </button>
         </div>
       </Modal>
         {
@@ -42,9 +63,9 @@ const History = () => {
         }
         {
           queryHistoryState.length <= 0 && 
-          <div className="no-history">
+          <div className={styles.noHistory}>
             <h6>No query history to show!</h6>
-            <div className="button-container">
+            <div className={styles.buttonContainer}>
               <Link to="/templates" className="primary button">Templated Queries</Link>
               <Link to="/build" className="primary button">Build Your Own</Link>
             </div>

@@ -1,0 +1,86 @@
+@import "../../Assets/Styles/variables";
+
+.historyInner {
+  display: grid;
+  grid-template-rows: max-content;
+  max-width: 1150px;
+  padding-top: 72px;
+  margin: 0 auto;
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    h2 {
+      font-size: 24px;
+      color: $purpleTwo;
+    }
+    .button {
+      color: $purpleOne;
+      background-color: transparent;
+      padding: $s 0;
+      margin: 0;
+      width: auto;
+      box-shadow: none;
+      &:hover {
+        box-shadow: none;
+      }
+    }
+  }
+}
+
+.modal {
+  .modalContainer {
+    max-width: 685px;
+  }
+  .warning {
+    text-align: center;
+    font-size: 14px;
+  } 
+  .modalHeading {
+    font-size: 16px; 
+    color: $yellow;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    svg {
+      background: $yellow;
+      border-radius: 61%;
+      padding: 5px;
+      margin-right: 8px;
+    }
+  }
+  .buttonContainer {
+    button {
+      display: block;
+      font-weight: 700;
+      text-align: center;
+      width: 100%;
+      margin-bottom: 0;
+    }
+    .buttonOne {
+      color: $white;
+      background-color: $yellow;
+      font-size: 16px;
+    }
+    .buttonTwo {
+      font-size: 12px;
+      color: $darkGray;
+      background-color: transparent;
+      box-shadow: none;
+    }
+  }
+  .close-container {
+    display: none;
+  }
+}
+.no-history {
+  display: grid;
+  grid-template-rows: min-content;
+  justify-content: center;
+  align-content: center;
+  text-align: center;
+  h6 {
+    margin-bottom: $m;
+    color: $darkGray;
+  }
+}

@@ -1,4 +1,5 @@
 import { getDifferenceInDays } from "../../Utilities/utilities";
+import styles from "./QueryHistoryList.module.scss";
 import React, {useState} from "react";
 import { pastQueryState, removeItemAtIndex } from "../../Redux/historySlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
@@ -31,7 +32,7 @@ const QueryHistoryList = () => {
   }
   
   return (
-    <ul className="history-list"> 
+    <ul className={styles.historyList}> 
       {
         queryHistoryState.map((query, i)=> {
           let itemTimestamp = new Date(query.time);
@@ -55,13 +56,13 @@ const QueryHistoryList = () => {
           }
           
           return (
-            <li key={i} className="history-item" >
+            <li key={i} className={styles.historyItem} >
               {
                 showNewTimeName &&
-                <div className="time-name">{timeName}</div>            
+                <div className={styles.timeName}>{timeName}</div>            
               }
-              <div className="item-container">
-                <span className="query" onClick={() => handleClick(query)}>
+              <div className={styles.itemContainer}>
+                <span className={styles.query} onClick={() => handleClick(query)}>
                   {query.items.map((item, j) => {
                     let output = (item.value) ? item.value : item.name;
                     return (
@@ -70,7 +71,7 @@ const QueryHistoryList = () => {
                   }
                 </span>
                 <button 
-                  className="remove-item"
+                  className={styles.removeItem}
                   onClick={(e)=> {
                     handleRemoveHistoryItem(i)
                   }}>
