@@ -1,7 +1,31 @@
 @import "../../Assets/Styles/variables";
 
+
+.historyListContainer {
+  .searchBarContainer {
+    .form {
+      display: flex;
+      justify-content: space-between;
+      padding: 24px;
+      background-color: $purpleTwo20;
+      label {
+        display: flex;
+        width: 100%;
+        margin: 0;
+        input {
+          width: -webkit-fill-available;
+        }
+      }
+      button {
+        margin: 0 0 0 $xs;
+        padding: 10px 20px;
+      }
+    }
+  }
+}
 .historyList {
   list-style: none;
+  padding-left: 0;
   .historyItem {
     &:first-of-type {
       .time-name {
