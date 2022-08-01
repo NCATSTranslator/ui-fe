@@ -5,6 +5,20 @@ const TextInput = ({label, subtitle, value, placeholder, size, rows, error, erro
   
   size = (size === undefined) ? 's' : size;
 
+  
+  switch (size) {
+    case 'm':
+      size = styles.m;
+      break;
+    case 'l':
+      size = styles.l;
+      break;
+
+    default:
+      size = styles.s;
+      break;
+  }
+
   handleChange = (handleChange) ? handleChange : () => {};
   errorText = (errorText) ? errorText : "Error Message";
 
