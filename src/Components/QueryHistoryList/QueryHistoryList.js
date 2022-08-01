@@ -108,7 +108,7 @@ const QueryHistoryList = () => {
                 <div className={styles.itemContainer}>
                   <span className={styles.query} onClick={() => handleClick(query)}>
                     <div className={styles.left}>
-                      <button className={styles.exportButton}><Export/></button>
+                      <button className={styles.exportButton} onClick={(e)=>{e.stopPropagation(); console.log('export'); }}><Export/></button>
                     </div>
                     <div className={styles.right}>
                       <div className={styles.top}>
