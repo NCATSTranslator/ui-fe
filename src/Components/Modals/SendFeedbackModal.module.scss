@@ -1,5 +1,9 @@
 @import "../../Assets/Styles/variables";
 
 .feedbackModal {
-  
+ .disclaimer {
+   padding: 10px 12px;
+   background-color: $purpleTwo20;
+   border-radius: $defaultBorderRadius;
+ } 
 }

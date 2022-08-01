@@ -35,6 +35,9 @@
       }
     }
   }
+  label input, label textarea {
+    padding: 10px 8px;
+  }
 }
 .modalContainer {
   background-color: $white;

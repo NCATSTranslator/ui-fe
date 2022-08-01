@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import styles from "./DisclaimerModal.module.scss";
+import styles from "./SendFeedbackModal.module.scss";
 import Modal from "./Modal";
 import Button from '../FormFields/Button';
 import TextInput from "../FormFields/TextInput";
@@ -30,7 +30,7 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
     <Modal isOpen={modalIsOpen} onClose={onClose} className={styles.feedbackModal}>
       <h5>Send Feedback</h5>
       <p>Enjoying Translator? Having an issue? Either way, we want to know - use this form to let us know your comments and we'll get back to you as soon as possible.</p>
-      <p className="disclaimer">In the mean time, please check out our Help page for Translator tips, tricks, and tutorials.</p>
+      <p className={styles.disclaimer}>In the mean time, please check out our Help page for Translator tips, tricks, and tutorials.</p>
       <form onSubmit={(e)=>handleSubmission(e)}>
         <TextInput 
           label="Name" 
@@ -48,6 +48,7 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
         />
         <Select 
           label="Category" 
+          name="Select One"
           size="m" 
           handleChange={(value)=>{
             setCurrentIssue(value);
@@ -58,12 +59,11 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
           value={currentIssue}
           noanimate
         >
-          <option value="" key="0"  >Select One</option>
-          <option value="General" key="1">General Question or Comment</option>
-          <option value="Disease Selection" key="2">Disease Selection</option>
-          <option value="Results" key="3">Results</option>
-          <option value="Evidence" key="4">Evidence</option>
-          <option value="Search History" key="5">Search History</option>
+          <option value="General" key="0">General Question or Comment</option>
+          <option value="Disease Selection" key="1">Disease Selection</option>
+          <option value="Results" key="2">Results</option>
+          <option value="Evidence" key="3">Evidence</option>
+          <option value="Search History" key="4">Search History</option>
         </Select>
         <TextInput 
           label="Subject" 
@@ -85,7 +85,7 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
           // handleChange={}
           value={currentComments}
         />
-        <Button type="submit" size="l">Submit</Button>
+        <Button type="submit" size="l">Send</Button>
       </form>
     </Modal>
   );
