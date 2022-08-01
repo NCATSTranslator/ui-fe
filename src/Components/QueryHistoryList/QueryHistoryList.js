@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import TextInput from "../FormFields/TextInput";
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
+import {ReactComponent as Export} from '../../Icons/export.svg';
 import { useNavigate } from "react-router-dom";
 
 const QueryHistoryList = () => {
@@ -47,7 +48,7 @@ const QueryHistoryList = () => {
           include = true;
         }
       })
-      if(item.time.toLowerCase().includes(value.toLowerCase()))
+      if(item.date.toLowerCase().includes(value.toLowerCase()))
         include = true;
       return include;
     }))
@@ -78,7 +79,7 @@ const QueryHistoryList = () => {
       <ul className={styles.historyList}> 
         {
           filteredQueryHistoryState.map((query, i)=> {
-            let itemTimestamp = new Date(query.time);
+            let itemTimestamp = new Date(query.date);
             let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
             let timeName = "";
             let showNewTimeName = false;
@@ -106,12 +107,26 @@ const QueryHistoryList = () => {
                 }
                 <div className={styles.itemContainer}>
                   <span className={styles.query} onClick={() => handleClick(query)}>
-                    {query.items.map((item, j) => {
-                      let output = (item.value) ? item.value : item.name;
-                      return (
-                        <span key={j} className={item.type}>{output} </span>)
-                      })
-                    }
+                    <div className={styles.left}>
+                      <button className={styles.exportButton}><Export/></button>
+                    </div>
+                    <div className={styles.right}>
+                      <div className={styles.top}>
+                        {
+                          query.items.map((item, j) => {
+                            let output = (item.value) ? item.value : item.name;
+                            return (
+                              <span key={j} className={item.type}>{output} </span>)
+                            })
+                        }
+                      </div>
+                      <div className={styles.bottom}>
+                        {
+                          query.time &&
+                          <span>{query.time}</span>
+                        }
+                      </div>
+                    </div>
                   </span>
                   <button 
                     className={styles.removeItem}

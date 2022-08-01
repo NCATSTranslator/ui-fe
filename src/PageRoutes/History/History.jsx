@@ -4,7 +4,6 @@ import { pastQueryState, clearHistory } from "../../Redux/historySlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
 import Modal from "../../Components/Modals/Modal";
-import Button from "../../Components/FormFields/Button";
 import {ReactComponent as Warning} from '../../Icons/warning.svg'
 import QueryHistoryList from "../../Components/QueryHistoryList/QueryHistoryList";
 
@@ -36,7 +35,6 @@ const History = () => {
         containerClass={styles.modalContainer}
         hideCloseButton
         >
-
         <h6 className={styles.modalHeading}><Warning/>Warning!</h6>
         <p className={styles.warning}>This action cannot be undone.</p>
         <div className={styles.buttonContainer}>

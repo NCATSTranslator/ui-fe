@@ -142,7 +142,15 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
     if(isValidSubmission) {
       let timestamp = new Date();
       // Update the query history in the application state
-      dispatch(incrementHistory({ items: storedQuery, time: timestamp.toDateString()}));
+      dispatch(
+        incrementHistory(
+          { 
+            items: storedQuery, 
+            date: timestamp.toDateString(), 
+            time: timestamp.toLocaleTimeString([], {hour12: true, hour: 'numeric', minute:'2-digit'})
+          }
+        )
+      );
       // Reset the current results in the application state
       dispatch(setCurrentResults({}));
       // Reset isValidSubmission

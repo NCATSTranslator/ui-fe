@@ -38,10 +38,28 @@
       font-weight: 700;
       color: $darkGray;
       margin: $xl 0 $m;
-
+    }
+    .exportButton {
+      padding: 12.5px 14.5px;
+      border-radius: 50%;
+      margin: 0;
+      svg {
+        margin: 0;
+      }
     }
     .query {
       cursor: pointer;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-column-gap: $s;
+      align-items: center;
+      .top {
+        margin: 0 0 $xxs;
+      }
+      .bottom {
+        color: $darkGray;
+        font-size: 12px;
+      }
     }
     .itemContainer {
       padding: $m;
