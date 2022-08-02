@@ -62,10 +62,10 @@ const History = () => {
         {
           queryHistoryState.length <= 0 && 
           <div className={styles.noHistory}>
-            <h6>No query history to show!</h6>
+            <h6>No Search History Found!</h6>
+            <p>The results of the questions you have asked are stored locally in your browser's history.</p>
             <div className={styles.buttonContainer}>
-              <Link to="/templates" className="primary button">Templated Queries</Link>
-              <Link to="/build" className="primary button">Build Your Own</Link>
+              <Link to="/" className="primary button">Ask a Question</Link>
             </div>
           </div>
         }
