@@ -28,6 +28,10 @@
       background-color: transparent;
       margin: 0;
       padding: 0;
+      box-shadow: none;
+      &:hover {
+        box-shadow: none;
+      }
       svg {
         margin: 0;
         height: $m;

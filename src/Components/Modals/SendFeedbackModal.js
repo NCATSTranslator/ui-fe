@@ -5,6 +5,8 @@ import Button from '../FormFields/Button';
 import TextInput from "../FormFields/TextInput";
 import Checkbox from "../FormFields/Checkbox";
 import Select from "../FormFields/Select";
+import { validateEmail } from "../../Utilities/utilities";
+import {ReactComponent as Warning} from '../../Icons/information.svg'
 
 const ReportIssueModal = ({children, isOpen, onClose}) => {
 
@@ -15,35 +17,73 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
   const [currentIssue, setCurrentIssue] = useState('');
   const [currentSubject, setCurrentSubject] = useState('');
   const [currentEmail, setCurrentEmail] = useState('');
+  const [emailError, setEmailError] = useState(false);
+  const emailErrorText = "Please enter a valid email";
   const [currentComments, setCurrentComments] = useState('');
+
+  const [errorActive, setErrorActive] = useState(false);
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
 
+  const handleError = (error) => {
+    switch (error) {
+      case 'name':
+        setNameError(true);
+        break;
+      case 'email':
+        setEmailError(true);
+        break;
+    
+      default:
+        break;
+    }
+    setErrorActive(true);
+  }
+
   const handleSubmission = (e) => {
     e.preventDefault();
     console.log(e);
+    if(!currentName) {
+      handleError('name');
+      return;
+    }
+    if(!currentEmail || !validateEmail(currentEmail)) {
+      handleError('email');
+      return;
+    }
     onClose();
   }
 
   return (
-    <Modal isOpen={modalIsOpen} onClose={onClose} className={styles.feedbackModal}>
+    <Modal 
+      isOpen={modalIsOpen} 
+      onClose={onClose} 
+      className={styles.feedbackModal}
+      containerClass={styles.feedbackContainer}
+      >
       <h5>Send Feedback</h5>
       <p>Enjoying Translator? Having an issue? Either way, we want to know - use this form to let us know your comments and we'll get back to you as soon as possible.</p>
-      <p className={styles.disclaimer}>In the mean time, please check out our Help page for Translator tips, tricks, and tutorials.</p>
+      <p className={styles.disclaimer}><Warning/>In the mean time, please check out our Help page for Translator tips, tricks, and tutorials.</p>
       <form onSubmit={(e)=>handleSubmission(e)}>
         <TextInput 
           label="Name" 
           size="m" 
-          // handleChange={}
+          handleChange={(e) => {
+            setCurrentName(e); 
+            setErrorActive(false);
+          }}
+          value={currentName}
           error={nameError}
           errorText={nameErrorText}
-          value={currentName}
         />
         <TextInput 
           label="University or Organization Affiliation" 
           size="m" 
-          // handleChange={}
+          handleChange={(e) => {
+            setCurrentOrganization(e); 
+            setErrorActive(false);
+          }}
           value={currentOrganization}
         />
         <Select 
@@ -52,10 +92,8 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
           size="m" 
           handleChange={(value)=>{
             setCurrentIssue(value);
-            console.log(value);
+            setErrorActive(false);
           }}
-          error={nameError}
-          errorText={nameErrorText}
           value={currentIssue}
           noanimate
         >
@@ -68,24 +106,35 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
         <TextInput 
           label="Subject" 
           size="m" 
-          // handleChange={}
+          handleChange={(e) => {
+            setCurrentSubject(e); 
+            setErrorActive(false);
+          }}
           value={currentSubject}
         />
         <TextInput 
           label="Email Address" 
           size="l" 
-          // handleChange={}
+          handleChange={(value)=>{
+            setCurrentEmail(value);
+            setErrorActive(false);
+          }}
           value={currentEmail}
+          error={emailError}
+          errorText={emailErrorText}
         />
         <Checkbox>Check this box to request a follow-up email</Checkbox> 
         <TextInput 
           label="Comments" 
           size="l" 
           rows={8}
-          // handleChange={}
+          handleChange={(value)=>{
+            setCurrentComments(value);
+            setErrorActive(false);
+          }}
           value={currentComments}
         />
-        <Button type="submit" size="l">Send</Button>
+        <Button type="submit" size="l" disabled={errorActive}>Send</Button>
       </form>
     </Modal>
   );
