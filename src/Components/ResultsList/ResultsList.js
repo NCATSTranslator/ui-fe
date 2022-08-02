@@ -111,7 +111,7 @@ const ResultsList = ({loading}) => {
       headers: { 'Content-Type': 'application/json' },
       body: queryIDJson
     };
-    const response = await fetch('/result', requestOptions)
+    const response = await fetch('/creative_result', requestOptions)
       .then(response => response.json())
       .then(data => {
         console.log(data);

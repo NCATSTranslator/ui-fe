@@ -172,7 +172,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
           console.log(data)
           if(data.data && data.status === 'success') {
             // Update the currentQueryResultsID in the application state
-            dispatch(setCurrentQueryResultsID(data.data.id));
+            dispatch(setCurrentQueryResultsID(data.data));
           }
           setResultsActive(true);
         })
@@ -231,10 +231,10 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>
               <div className={styles.exampleList}>
-                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: '', label:'Abnormal Blood Glucose'})}>Abnormal Blood Glucose</button>
-                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: '', label:'Neurofibromatosis Type I'})}>Neurofibromatosis Type I</button>
-                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: '', label:'Alzheimer\'s'})}>Alzheimer's</button>
-                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: '', label:'Noonan Syndrome'})}>Noonan Syndrome</button>
+                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'UMLS:C0580546', label:'Abnormal Blood Glucose'})}>Abnormal Blood Glucose</button>
+                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0018975', label:'Neurofibromatosis Type I'})}>Neurofibromatosis Type I</button>
+                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0004975', label:'Alzheimer\'s'})}>Alzheimer's</button>
+                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0018997', label:'Noonan Syndrome'})}>Noonan Syndrome</button>
               </div>
             </div>
           }
