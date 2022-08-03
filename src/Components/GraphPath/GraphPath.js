@@ -56,48 +56,56 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
 
   return (
     <>
-      <span className={styles.nameContainer} >
-        <span className={styles.name} onClick={() => tooltipOpen('name')}>
-          {getIcon(path.type)}
-          {path.name}
+      {
+        path.category === 'object' &&
+        <span className={styles.nameContainer} >
+          <span className={styles.name} onClick={() => tooltipOpen('name')}>
+            {getIcon(path.type)}
+            {path.name}
+          </span>
+          <OutsideClickHandler onOutsideClick={() => tooltipClose('name')}>
+            <Tooltip 
+              active={nameTooltipActive} 
+              onClose={() => tooltipClose('name')}
+              heading={path.name}
+              text={path.description}
+              >
+            </Tooltip>
+          </OutsideClickHandler>
         </span>
-        <OutsideClickHandler onOutsideClick={() => tooltipClose('name')}>
-          <Tooltip 
-            active={nameTooltipActive} 
-            onClose={() => tooltipClose('name')}
-            heading={path.name}
-            text=''
-            >
-          </Tooltip>
-        </OutsideClickHandler>
-      </span>
-      <span className={styles.pathContainer} onClick={()=> tooltipOpen('path')}>
-        <Connector />
-        <span className={`${styles.path} path`}>{path.path}</span>
-        <OutsideClickHandler onOutsideClick={() => tooltipClose('path')}>
-          <Tooltip 
-            active={pathTooltipActive} 
-            onClose={() => tooltipClose('path')}
-            heading={path.path}
-            text=''
-            >
-          </Tooltip>
-        </OutsideClickHandler>
-      </span>
-      {path.target && 
-      <span className={styles.target} onClick={()=> tooltipOpen('target')} >
-        <Disease/>
-        {path.target}
-        <OutsideClickHandler onOutsideClick={() => tooltipClose('target')}>
-          <Tooltip 
-            active={targetTooltipActive} 
-            onClose={() => tooltipClose('target')}
-            heading={path.target}
-            text='A metabolic disorder characterized by abnormally high blood sugar levels due to diminished production of insulin or insulin resistance/desensitization. '
-            >
-          </Tooltip>
-        </OutsideClickHandler>
-      </span>}    
+      }
+      {
+        path.category === 'predicate' &&
+        <span className={styles.pathContainer} onClick={()=> tooltipOpen('path')}>
+          <Connector />
+          <span className={`${styles.path} path`}>{path.predicate}</span>
+          <OutsideClickHandler onOutsideClick={() => tooltipClose('path')}>
+            <Tooltip 
+              active={pathTooltipActive} 
+              onClose={() => tooltipClose('path')}
+              heading={path.predicate}
+              text=''
+              >
+            </Tooltip>
+          </OutsideClickHandler>
+        </span>
+      }
+      {
+        path.category === 'target' && 
+        <span className={styles.target} onClick={()=> tooltipOpen('target')} >
+          <Disease/>
+          {path.name}
+          <OutsideClickHandler onOutsideClick={() => tooltipClose('target')}>
+            <Tooltip 
+              active={targetTooltipActive} 
+              onClose={() => tooltipClose('target')}
+              heading={path.name}
+              text={path.description}
+              >
+            </Tooltip>
+          </OutsideClickHandler>
+        </span>
+      }    
     </>
   )
 }

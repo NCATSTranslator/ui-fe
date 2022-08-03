@@ -2,76 +2,47 @@ import styles from './GraphView.module.scss';
 import React, {useState, useEffect} from "react";
 import GraphPath from '../GraphPath/GraphPath';
 
-const GraphView = ({graph, staticNode}) => {
+const GraphView = ({paths}) => {
 
-  graph = [
-    {
-      path: [
-        {
-          name: 'Glucose',
-          type: 'chemical',
-          path: 'treats',
-          target: 'Diabetes'
-        }
-      ],
-    },
-    {
-      path: [
-        {
-          name: 'Glucose',
-          type: 'chemical',
-          path: 'reduces expression of',
-        },
-        {
-          name: 'Gene A',
-          type: 'gene',
-          path: 'causes',
-          target: 'Diabetes'
-        }
-      ],
-    },
-    {
-      path: [
-        {
-          name: 'Glucose',
-          type: 'chemical',
-          path: 'treats',
-        },
-        {
-          name: 'Phenotype B',
-          type: 'phenotype',
-          path: 'associated with',
-          target: 'Diabetes'
-        }
-      ],
-    },
-    {
-      path: [
-        {
-          name: 'Glucose',
-          type: 'chemical',
-          path: 'treats',
-        },
-        {
-          name: 'Disease C',
-          type: 'disease',
-          path: 'causes',
-        },
-        {
-          name: 'Phenotype D',
-          type: 'phenotype',
-          path: 'associated with',
-          target: 'Diabetes'
-        }
-      ],
-    }
-  ]
+  let graph = []
 
-  let graphWidth = 0;
-  for (let index = 0; index < graph.length; index++) {
-    if(graph[index].path.length > graphWidth)
-    graphWidth = graph[index].path.length; 
+  const formatPredicate = (predicate) => {
+    return predicate.replace('biolink:', '').replaceAll('_', ' '); 
   }
+
+  paths.forEach((path) => {
+    let pathToAdd = []
+    console.log(path);
+    path.subgraph.forEach((item, i)=> {
+      if(i % 2 === 0) {
+        let name = (item.names) ? item.names[0]: '';
+        let type = (item.types) ? item.types[0]: '';
+        let desc = (item.description) ? item.description[0]: '';
+        let category = (i === path.subgraph.length - 1) ? 'target' : 'object';
+        pathToAdd[i] = {
+          category: category,
+          name: name,
+          type: type,
+          description: desc,
+        }
+      } else {
+        let pred = (item.predicates) ? formatPredicate(item.predicates[0]) : '';
+        pathToAdd[i] = {
+          category: 'predicate',
+          predicate: pred,
+        }
+      }
+    })
+    graph.push(pathToAdd);
+  }) 
+  console.log(graph);
+
+  // number of  hops
+  let graphWidth = 3;
+  // for (let index = 0; index < graph.length; index++) {
+  //   if(graph[index].length > graphWidth)
+  //   graphWidth = Math.floor(graph[index].length / 2); 
+  // }
 
   const displayHeadings = (count) => {
     let headingMarkup = [];
@@ -106,7 +77,7 @@ const GraphView = ({graph, staticNode}) => {
           return (
             <div className={styles.tableItem} key={i}> 
               {
-                element.path.map((path, j) => {
+                element.map((path, j) => {
                   let key = `${i}_${j}`;
                   return (
                     <GraphPath 

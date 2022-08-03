@@ -18,7 +18,7 @@ export const getIcon = (category) => {
     case 'phenotype':
       icon = <Phenotype/>;
       break;
-    case 'disease':
+    case 'biolink:Disease':
       icon = <Disease/>;
       break;
     case 'regulation':

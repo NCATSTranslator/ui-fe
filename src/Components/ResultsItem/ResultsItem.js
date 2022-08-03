@@ -7,7 +7,7 @@ import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1=Down.svg"
 import AnimateHeight from "react-animate-height";
 
-const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activateEvidence, checked, highlighted}) => {
+const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, checked, highlighted}) => {
 
   // let icon = getIcon(item.type);
   let icon = getIcon('chemical');
@@ -20,15 +20,16 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
     ? item.edge.evidence.length
     : 0;
     
-  let fdaLevel = (item.subject.fda_info ) 
-    ? item.subject.fda_info.max_level 
-    : 'N/A';
-    
+  // let fdaLevel = (item.subject.fda_info ) 
+  //   ? item.subject.fda_info.max_level 
+  //   : 'N/A';
+    let fdaLevel =  'N/A';
   // let lastPubYear = getLastPubYear(item.edge.last_publication_date);
 
-  let predicate = (item.edge.predicate)
-    ? item.edge.predicate.replace("biolink:", '') + ' ' + staticNode.names[0]
-    : '';
+  // let predicate = (item.edge.predicate)
+  //   ? item.edge.predicate.replace("biolink:", '') + ' ' + staticNode.names[0]
+  //   : '';
+    let predicate = '';
   
   checked = (allSelected || checked) ? true : false;
 
@@ -53,8 +54,8 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
       </div>
       <div className={`${styles.nameContainer} ${styles.resultSub}`}>
         <span className={styles.icon}>{icon}</span>
-        <span className={styles.name}>{capitalizeFirstLetter(item.subject.name)}</span>
-        <span className={styles.effect}>{capitalizeFirstLetter(predicate)}</span>
+        <span className={styles.name}>{capitalizeFirstLetter(item.name)}</span>
+        <span className={styles.effect}>{item.paths.length} Paths that treat {item.object}</span>
       </div>
       <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
         { fdaLevel !== 'N/A' &&
@@ -74,11 +75,10 @@ const ResultsItem = ({key, item, staticNode, allSelected, handleSelected, activa
           height={height}
         > 
         <div className={styles.container}>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce non sem vel libero tincidunt consectetur et et turpis. Vestibulum venenatis sagittis libero, eu dapibus nibh consequat id. Fusce pharetra nisi eget velit facilisis molestie. Ut orci neque, pellentesque eu mauris sed, efficitur lacinia libero. Etiam et dolor eget diam mattis tristique sed ut felis. Nunc blandit consequat aliquam. Donec hendrerit faucibus nisi, at molestie nunc pretium lobortis. Sed dapibus tristique ipsum, et vulputate quam tristique ut. Nullam fermentum enim nunc, sed vestibulum ipsum volutpat eget. Proin arcu turpis, mollis in consequat in, congue sed lacus. Aliquam gravida eu leo eu mattis. Ut vehicula felis vel enim sollicitudin dictum. Duis suscipit purus et neque efficitur congue. Donec euismod vulputate arcu, sed venenatis lacus ullamcorper nec.</p>
-          <p>Nam ex justo, tincidunt ut metus quis, egestas posuere risus. Maecenas rhoncus purus ac porttitor mollis. Morbi vehicula lorem id lorem commodo consectetur. Phasellus lobortis nibh id massa mollis, condimentum feugiat quam tempor. Etiam condimentum iaculis lorem, eget faucibus nibh ultrices ac. Sed scelerisque sagittis augue, et iaculis velit sagittis sit amet. Sed molestie leo risus, eget lobortis libero tempus sit amet. Vivamus eu egestas quam, non interdum eros. Morbi non vehicula nibh. Curabitur facilisis sit amet sapien quis molestie. Quisque commodo suscipit nunc eu iaculis. </p>
+          <p>{item.description}</p>
         </div>
 
-        <GraphView />
+        <GraphView paths={item.paths} />
       </AnimateHeight>
 
     </div>

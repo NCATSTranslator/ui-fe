@@ -98,7 +98,37 @@ const ResultsList = ({loading}) => {
   };
 
   // React Query call for results
-  const resultsData = useQuery('resultsData', async () => {
+  // const resultsData = useQuery('resultsData', async () => {
+  //   console.log(currentQueryID);
+
+  //   if(!currentQueryID || !isLoading)
+  //     return;
+
+  //   let queryIDJson = JSON.stringify({qid: currentQueryID});
+
+  //   const requestOptions = {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: queryIDJson
+  //   };
+  //   const response = await fetch('/creative_result', requestOptions)
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       console.log(data);
+  //       setResults(data);
+  //       setIsError((data.status === 'error'));
+  //     })
+  //     .catch((error) => {
+  //       console.log(error)
+  //     });
+  // }, { 
+  //   refetchInterval: 7000,
+  //   enabled: isLoading,
+  //   refetchOnWindowFocus: false
+  // });
+
+  // React Query call for results
+  const testResultsData = useQuery('testResultsData', async () => {
     console.log(currentQueryID);
 
     if(!currentQueryID || !isLoading)
@@ -108,16 +138,23 @@ const ResultsList = ({loading}) => {
 
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: queryIDJson
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     };
-    const response = await fetch('/creative_result', requestOptions)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        setResults(data);
-        setIsError((data.status === 'error'));
-      });
+
+    let data = require('../../Testing/something.json');
+    console.log(data);
+    setResults(data.data);
+    setIsError((data.status === 'error'));
+    // const response = await fetch('something.json', requestOptions)
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     console.log(data);
+    //     // setResults(data);
+    //     // setIsError((data.status === 'error'));
+    //   })
+    //   .catch((error) => {
+    //     console.log(error)
+    //   });
   }, { 
     refetchInterval: 7000,
     enabled: isLoading,
@@ -140,12 +177,12 @@ const ResultsList = ({loading}) => {
     if(results.status !== 'running')
       setIsLoading(false);
     
-    // if the status is 'done', handle setting the results
-    if(results.status === 'done') {
+    // if the status is not error, handle setting the results
+    if(results.status !== 'error') {
       let newResults = getSummarizedResults(results);
       // set formatted results
       setFormattedResults(newResults);
-      // set formatted results
+      // set sorted results
       setSortedResults(newResults);
       // update app state for raw results
       // dispatch(setCurrentResults(results));
@@ -157,8 +194,46 @@ const ResultsList = ({loading}) => {
   const getSummarizedResults = (results) => {
     if (results === null)
       return [];
-  
-    return results.summary;
+    console.log(results);
+    let newSummarizedResults = [];
+    results.results.forEach((item) => {
+      let objectNodeName = getNodeByCurie(item.object, results).names[0]; 
+      let subjectNode = getNodeByCurie(item.subject, results);
+      let description = (subjectNode.description) ? subjectNode.description[0] : '';
+      let formattedPaths = getFormattedPaths(item.paths, results.paths, results);
+      let formattedItem = {
+        name: item.drug_name,
+        paths: formattedPaths,
+        object: objectNodeName,
+        description: description
+      }
+      newSummarizedResults.push(formattedItem);
+    })
+    console.log(newSummarizedResults);
+    return newSummarizedResults;
+  }
+
+  const getNodeByCurie = (curie, results) => {
+    return results.nodes[Object.keys(results.nodes).find(key => key === curie)]
+  }
+  const getEdgeByID = (id, results) => {
+    return results.edges[Object.keys(results.edges).find(key => key === id)]
+  }
+
+  const getFormattedPaths = (rawPathIds, paths, results) => {
+    let formattedPaths = [];
+    rawPathIds.forEach(id => {
+      let formattedPath = paths[Object.keys(paths).find(key => key === id)];
+      formattedPath.subgraph.forEach((item, i)=> {
+        if(i % 2 === 0) {
+          formattedPath.subgraph[i] = getNodeByCurie(item, results);
+        } else {
+          formattedPath.subgraph[i] = getEdgeByID(item, results);
+        }
+      })
+      formattedPaths.push(formattedPath);
+    });
+    return formattedPaths;
   }
 
   // Click handler for item select checkboxes 
@@ -474,15 +549,15 @@ const ResultsList = ({loading}) => {
                       displayedResults.map((item, i) => {
                         let checked = (selectedItems.length > 0 && selectedItems.includes(item)) ? true : false;
                         let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
-                        let hasName = (item.subject.name && item.subject.name.length > 0);
+                        let hasName = (item.name !== null && item.name !== undefined);
                         if(hasName) {
+                          console.log(item);
                           return(
                             <ResultsItem 
                               key={i} 
                               checked={checked}
                               highlighted={highlighted}
                               item={item} 
-                              staticNode={results.static_node} 
                               allSelected={allSelected}
                               handleSelected={()=>handleSelected(item)}
                               activateEvidence={()=>activateEvidence(item.edge.evidence)} 
