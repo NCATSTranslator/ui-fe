@@ -4,38 +4,43 @@ import GraphPath from '../GraphPath/GraphPath';
 
 const GraphView = ({paths}) => {
 
-  let graph = []
-
+  
   const formatPredicate = (predicate) => {
     return predicate.replace('biolink:', '').replaceAll('_', ' '); 
   }
+  
+  const [graph, setGraph] = useState([])
 
-  paths.forEach((path) => {
-    let pathToAdd = []
-    console.log(path);
-    path.subgraph.forEach((item, i)=> {
-      if(i % 2 === 0) {
-        let name = (item.names) ? item.names[0]: '';
-        let type = (item.types) ? item.types[0]: '';
-        let desc = (item.description) ? item.description[0]: '';
-        let category = (i === path.subgraph.length - 1) ? 'target' : 'object';
-        pathToAdd[i] = {
-          category: category,
-          name: name,
-          type: type,
-          description: desc,
+  useEffect(() => {
+    let newGraph = [];
+    paths.forEach((path) => {
+      let pathToAdd = []
+      console.log(path);
+      path.subgraph.forEach((item, i)=> {
+        if(i % 2 === 0) {
+          let name = (item.names) ? item.names[0]: '';
+          let type = (item.types) ? item.types[0]: '';
+          let desc = (item.description) ? item.description[0]: '';
+          let category = (i === path.subgraph.length - 1) ? 'target' : 'object';
+          pathToAdd[i] = {
+            category: category,
+            name: name,
+            type: type,
+            description: desc,
+          }
+        } else {
+          let pred = (item.predicates) ? formatPredicate(item.predicates[0]) : '';
+          pathToAdd[i] = {
+            category: 'predicate',
+            predicate: pred,
+          }
         }
-      } else {
-        let pred = (item.predicates) ? formatPredicate(item.predicates[0]) : '';
-        pathToAdd[i] = {
-          category: 'predicate',
-          predicate: pred,
-        }
-      }
-    })
-    graph.push(pathToAdd);
-  }) 
-  console.log(graph);
+      })
+      newGraph.push(pathToAdd);
+    }) 
+    setGraph(newGraph);
+  }, [paths]);
+
 
   // number of  hops
   let graphWidth = 3;

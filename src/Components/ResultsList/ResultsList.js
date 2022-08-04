@@ -14,7 +14,7 @@ import ReactPaginate from 'react-paginate';
 import isEqual from 'lodash/isEqual';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
-import { getLastPubYear } from "../../Utilities/utilities";
+import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter } from "../../Utilities/utilities";
 import LoadingBar from "../LoadingBar/LoadingBar";
 
 
@@ -173,10 +173,9 @@ const ResultsList = ({loading}) => {
     // if results are new, set prevResults for future comparison
     prevResults.current = results;
 
-    // if the status is no longer 'running', set loading to false
-    if(results.status !== 'running')
-      setIsLoading(false);
-    
+    const handleResultSummarization = () => {
+
+    }
     // if the status is not error, handle setting the results
     if(results.status !== 'error') {
       let newResults = getSummarizedResults(results);
@@ -189,50 +188,67 @@ const ResultsList = ({loading}) => {
     }
     // setIsError((results.status === 'error'));
   }, [results]);
+  
+  useEffect(() => {
+    // if the status is no longer 'running', set loading to false
+    if (results !== null && results.status !== 'running') 
+      setIsLoading(false);
+  }, [formattedResults]);
 
-  // Return summarized results
+  // Take raw results and return properly summarized results
   const getSummarizedResults = (results) => {
     if (results === null)
       return [];
+
     console.log(results);
     let newSummarizedResults = [];
-    results.results.forEach((item) => {
+    
+    // for each individual result item 
+    for(const item of results.results) {
+      // Get the object node's name
       let objectNodeName = getNodeByCurie(item.object, results).names[0]; 
+      // Get the subject node's name
       let subjectNode = getNodeByCurie(item.subject, results);
+      // Get the subject node's description
       let description = (subjectNode.description) ? subjectNode.description[0] : '';
-      let formattedPaths = getFormattedPaths(item.paths, results.paths, results);
+      // Get a list of properly formatted paths (turn the path ids into their actual path objects)
+      let formattedPaths = [];
+      formattedPaths = getFormattedPaths(item.paths, results);
       let formattedItem = {
-        name: item.drug_name,
+        name: capitalizeFirstLetter(item.drug_name),
         paths: formattedPaths,
-        object: objectNodeName,
+        object: capitalizeAllWords(objectNodeName),
         description: description
       }
       newSummarizedResults.push(formattedItem);
-    })
-    console.log(newSummarizedResults);
+    }
     return newSummarizedResults;
   }
 
+  // search the list of nodes for a particular curie, then return that node object if found
   const getNodeByCurie = (curie, results) => {
-    return results.nodes[Object.keys(results.nodes).find(key => key === curie)]
+    return results.nodes[curie]
   }
+  // search the list of edges for a particular id, then return that edge object if found
   const getEdgeByID = (id, results) => {
-    return results.edges[Object.keys(results.edges).find(key => key === id)]
+    return results.edges[id]
   }
 
-  const getFormattedPaths = (rawPathIds, paths, results) => {
+  const getFormattedPaths = (rawPathIds, results) => {
     let formattedPaths = [];
-    rawPathIds.forEach(id => {
-      let formattedPath = paths[Object.keys(paths).find(key => key === id)];
-      formattedPath.subgraph.forEach((item, i)=> {
-        if(i % 2 === 0) {
-          formattedPath.subgraph[i] = getNodeByCurie(item, results);
-        } else {
-          formattedPath.subgraph[i] = getEdgeByID(item, results);
+    for(const id of rawPathIds) {
+      let formattedPath = results.paths[id];
+      if(formattedPath) {
+        for(let i = 0; i < formattedPath.subgraph.length; i++) {
+          if(i % 2 === 0) {
+            formattedPath.subgraph[i] = getNodeByCurie(formattedPath.subgraph[i], results);
+          } else {
+            formattedPath.subgraph[i] = getEdgeByID(formattedPath.subgraph[i], results);
+          }
         }
-      })
-      formattedPaths.push(formattedPath);
-    });
+        formattedPaths.push(formattedPath);
+      }
+    }
     return formattedPaths;
   }
 
@@ -550,8 +566,7 @@ const ResultsList = ({loading}) => {
                         let checked = (selectedItems.length > 0 && selectedItems.includes(item)) ? true : false;
                         let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
                         let hasName = (item.name !== null && item.name !== undefined);
-                        if(hasName) {
-                          console.log(item);
+                        // if(hasName) {
                           return(
                             <ResultsItem 
                               key={i} 
@@ -563,9 +578,9 @@ const ResultsList = ({loading}) => {
                               activateEvidence={()=>activateEvidence(item.edge.evidence)} 
                             />
                           )
-                        } else {
-                          return '';
-                        }
+                        // } else {
+                        //   return '';
+                        // }
                       })
                     }
                   </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, capitalizeFirstLetter, getLastPubYear } from '../../Utilities/utilities';
+import { getIcon, capitalizeFirstLetter, getLastPubYear, capitalizeAllWords } from '../../Utilities/utilities';
 import Checkbox from "../FormFields/Checkbox";
 import GraphView from '../GraphView/GraphView';
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
@@ -33,6 +33,10 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
   
   checked = (allSelected || checked) ? true : false;
 
+  let pathString = (item.paths.length > 1) ? 'Paths that treat' : 'Path that treats';
+  let nameString = (item.name !== null) ? item.name : '';
+  let objectString = (item.object !== null) ? capitalizeAllWords(item.object.toLowerCase()) : '';
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
 
@@ -54,8 +58,8 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
       </div>
       <div className={`${styles.nameContainer} ${styles.resultSub}`}>
         <span className={styles.icon}>{icon}</span>
-        <span className={styles.name}>{capitalizeFirstLetter(item.name)}</span>
-        <span className={styles.effect}>{item.paths.length} Paths that treat {item.object}</span>
+        <span className={styles.name}>{nameString}</span>
+        <span className={styles.effect}>{item.paths.length} {pathString} {objectString}</span>
       </div>
       <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
         { fdaLevel !== 'N/A' &&
@@ -78,7 +82,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
           <p>{item.description}</p>
         </div>
 
-        <GraphView paths={item.paths} />
+        <GraphView paths={item.paths} active={isExpanded} />
       </AnimateHeight>
 
     </div>

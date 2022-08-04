@@ -42,11 +42,19 @@ export const getIcon = (category) => {
   return icon;
 }
 export const capitalizeFirstLetter = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+  if(string === null)
+    return ''; 
+
+  let newString = string.toLowerCase();
+  return newString.charAt(0).toUpperCase() + newString.slice(1);
 }
 
 export const capitalizeAllWords = (string) => {
-  return string.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+  if(string === null)
+    return ''; 
+
+  let newString = string.toLowerCase();
+  return newString.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
 }
 
 export const getLastPubYear = (pubDate) => {
