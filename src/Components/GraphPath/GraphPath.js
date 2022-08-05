@@ -19,7 +19,7 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
       return '';
     if(string.toUpperCase() === string)
       return string;
-      
+
     return capitalizeAllWords(string);
   }
 
@@ -27,7 +27,7 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
   if(path.category != 'predicate') {
     nameString = calculatePathName(path.name);
   }
-
+  
   const tooltipOpen = (type) => {
     switch (type) {
       case 'name':
