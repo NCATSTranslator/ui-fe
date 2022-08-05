@@ -5,6 +5,7 @@ import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
 import OutsideClickHandler from '../OutsideClickHandler/OutsideClickHandler';
+import { capitalizeAllWords } from '../../Utilities/utilities';
 
 
 const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) => {
@@ -61,13 +62,15 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
         <span className={styles.nameContainer} >
           <span className={styles.name} onClick={() => tooltipOpen('name')}>
             {getIcon(path.type)}
-            {path.name}
+            <span className={styles.text}>
+              {capitalizeAllWords(path.name)}
+            </span>
           </span>
           <OutsideClickHandler onOutsideClick={() => tooltipClose('name')}>
             <Tooltip 
               active={nameTooltipActive} 
               onClose={() => tooltipClose('name')}
-              heading={path.name}
+              heading={capitalizeAllWords(path.name)}
               text={path.description}
               >
             </Tooltip>
@@ -94,12 +97,14 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
         path.category === 'target' && 
         <span className={styles.target} onClick={()=> tooltipOpen('target')} >
           <Disease/>
-          {path.name}
+          <span className={styles.text}>
+            {capitalizeAllWords(path.name)}
+          </span>
           <OutsideClickHandler onOutsideClick={() => tooltipClose('target')}>
             <Tooltip 
               active={targetTooltipActive} 
               onClose={() => tooltipClose('target')}
-              heading={path.name}
+              heading={capitalizeAllWords(path.name)}
               text={path.description}
               >
             </Tooltip>

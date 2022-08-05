@@ -42,7 +42,7 @@ export const getIcon = (category) => {
   return icon;
 }
 export const capitalizeFirstLetter = (string) => {
-  if(string === null)
+  if(!string)
     return ''; 
 
   let newString = string.toLowerCase();
@@ -50,7 +50,7 @@ export const capitalizeFirstLetter = (string) => {
 }
 
 export const capitalizeAllWords = (string) => {
-  if(string === null)
+  if(!string)
     return ''; 
 
   let newString = string.toLowerCase();

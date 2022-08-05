@@ -21,7 +21,11 @@
 .pathContainer, .name, .target {
   line-height: 17.5px;
   border-radius: $defaultBorderRadius;
-  padding: 7px 0;
+}
+.text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .nameContainer {
   position: relative;
@@ -38,7 +42,12 @@
     }
   }
 }
+svg {
+  min-width: 18px;
+
+}
 .pathContainer {
+  padding: 7px 0;
   position: relative;
   >svg {
     position: absolute;
@@ -78,6 +87,7 @@ span.path {
 .name, .target {
   box-shadow: $dropShadow;
   transition: all .25s ease;
+  padding: 7px;
   &:hover {
     box-shadow: $dropShadowHover;
   }
