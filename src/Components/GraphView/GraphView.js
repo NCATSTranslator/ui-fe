@@ -10,12 +10,13 @@ const GraphView = ({paths}) => {
   }
   
   const [graph, setGraph] = useState([])
+  let initialNumberToShow = (paths.length < 6) ? paths.length : 6;
+  const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
 
   useEffect(() => {
     let newGraph = [];
     paths.forEach((path) => {
       let pathToAdd = []
-      console.log(path);
       path.subgraph.forEach((item, i)=> {
         if(i % 2 === 0) {
           let name = (item.names) ? item.names[0]: '';
@@ -71,6 +72,23 @@ const GraphView = ({paths}) => {
     console.log("handle target click");
   }
 
+  const handleShowMore = () => {
+    let newAmount = (numberToShow + 6 > paths.length) ? paths.length : numberToShow + 6;
+    setNumberToShow(newAmount);
+  }
+
+  const handleShowLess = () => {
+    let newAmount = (numberToShow - 6 <= 6) ? paths.length - (numberToShow - 6) : numberToShow - 6;
+    setNumberToShow(newAmount);
+  }
+
+
+
+  useEffect(() => {
+    initialNumberToShow = (paths.length < 6) ? paths.length : 6;
+    setNumberToShow(initialNumberToShow);
+  }, [paths]);
+
 
   return(
     <div className={styles.graphView}>
@@ -79,25 +97,35 @@ const GraphView = ({paths}) => {
       </div>
       {
         graph.map((element, i) => {
-          return (
-            <div className={styles.tableItem} key={i}> 
-              {
-                element.map((path, j) => {
-                  let key = `${i}_${j}`;
-                  return (
-                    <GraphPath 
-                      path={path} 
-                      key={key}
-                      handleNameClick={handleNameClick}
-                      handlePathClick={handlePathClick}
-                      handleTargetClick={handleTargetClick}
-                    />
-                  ) 
-                }) 
-              }
-            </div>
-          )
+          if(i < numberToShow) {
+            return (
+              <div className={styles.tableItem} key={i}> 
+                {
+                  element.map((path, j) => {
+                    let key = `${i}_${j}`;
+                    return (
+                      <GraphPath 
+                        path={path} 
+                        key={key}
+                        handleNameClick={handleNameClick}
+                        handlePathClick={handlePathClick}
+                        handleTargetClick={handleTargetClick}
+                      />
+                    ) 
+                  }) 
+                }
+              </div>
+            )
+          }
         })
+      }
+      {
+        (numberToShow < graph.length) &&
+        <button onClick={handleShowMore}>Show More</button>
+      }
+      {
+        (numberToShow === graph.length && numberToShow > 6) &&
+        <button onClick={handleShowLess}>Show Less</button>
       }
     </div>
   )

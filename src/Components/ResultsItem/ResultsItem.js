@@ -51,6 +51,10 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
       setHeight('auto');
   }, [isExpanded])
 
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [item]);
+
   return (
     <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''} result`}>
       <div className={`${styles.checkboxContainer} ${styles.resultSub}`}>
