@@ -17,7 +17,6 @@
     "react-range": "^1.8.12",
     "react-responsive-carousel": "^3.2.22",
     "react-router-dom": "^6.2.1",
-    "reaflow": "^5.0.6",
     "redux": "^4.1.2",
     "redux-undo": "^1.0.1",
     "sass": "^1.52.3",

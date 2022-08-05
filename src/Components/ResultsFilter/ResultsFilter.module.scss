@@ -1,0 +1,43 @@
+@import "../../Assets/Styles/variables";
+
+.resultsFilter {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  .heading {
+    font-size: $m;
+    font-weight: 700;
+    color: $purpleTwo;
+  }
+  .top,.left {
+    display: flex;
+    justify-content: space-between;
+    height: fit-content;
+    .select {
+      height: min-content;
+      width: 115px;
+    }
+  }
+  .bottom {
+    position: relative;
+    justify-content: flex-end;
+  }
+
+
+  .subOne {
+    color: $darkGray;
+  }
+  .subTwo {
+    margin-top: 20px;
+    font-weight: 700;
+    font-size: 12px;
+    color: $darkGray;
+  }
+  .checkbox,.radio {
+    padding-left: $xs;
+  }
+  label:last-of-type {
+    margin: 0;
+  }
+
+}

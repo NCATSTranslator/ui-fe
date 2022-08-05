@@ -1,0 +1,180 @@
+@import "../../Assets/Styles/variables";
+
+.resultsList {
+  margin-bottom: $s;
+  padding: 0 0 $s;
+  .resultsContainer {
+    display: grid;
+    grid-template-columns: 330px 1fr;
+    grid-column-gap: $m;
+    align-items: flex-start;
+    position: relative;
+    max-width: 1400px;
+    width: auto;
+    .resultsTableContainer {
+      grid-column: 2/3;
+    }
+    .resultsTable {
+      box-shadow: $dropShadow;
+      font-size: $bodyTwoSize;
+      border-radius: $defaultBorderRadius;
+      .tableBody {
+        &>div:nth-child(odd){
+          background-color: $lightGray;
+        }
+        &>div:first-child {
+          background-color: $purpleTwo;  
+        }
+      }
+      .tableHead {
+        border-bottom: 1px solid $midGray;
+        display: grid;
+        grid-template-columns: 50px 1fr 50px 150px 50px;
+        padding: 12px;
+        border-radius: 5px 5px 0 0;
+        .head {
+          display: flex;
+          align-items: center;
+          text-align: center;
+          font-size: 10px;
+          font-weight: 700;
+          line-height: 1.25;
+          text-transform: uppercase;
+          color: $white;
+          width: min-content;
+        }
+        .checkboxContainer label {
+          margin: 0;
+        }
+        .nameHead {
+          text-align: left;
+        }
+        .fdaHead, .evidenceHead {
+          justify-self: center;
+        }
+        .nameHead, .evidenceHead {
+          &:hover {
+            cursor: pointer;
+          }
+          &.true, &.false {
+            position: relative;
+            &:after {
+              content: '';
+              width: 0;
+              height: 0;
+              position: absolute;
+              top: 2px;
+              right: -15px;
+              margin-left: 3px;
+              border-top: 0px solid transparent;        
+              border-right: 5px solid transparent;
+              border-bottom: 5px solid $white;
+              border-left: 5px solid transparent;
+            }
+          }
+          &.false {
+            &:after {
+              top: 4px;
+              transform: rotate(180deg);
+            }   
+          }
+        }
+      }
+    }
+  }
+}
+
+.pagination {
+  margin-top: $m;
+  grid-column: 2/3;
+  .pageNums {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style-type: none;
+    padding-left: 0;
+    width: 700px;
+    margin: 0 0 0 auto;
+    .button {
+      margin-bottom: 0;
+      background-color: $purpleOne;
+      padding: 10px 25px;
+      border-radius: $defaultBorderRadius;
+      color: $white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .disabled {
+      background-color: transparent;
+      color: $midGray;
+      pointer-events: none;
+      cursor: default;
+    }
+    .pageNum {
+      a {
+        cursor: pointer;
+        padding: 10px 15px;
+        line-height: 1;
+        margin: 8px;
+        transition: all .25s ease;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        color: $darkGray;
+        font-size: $bodyOneSize;
+        font-weight: 700;
+        &:hover {
+          background-color: $purpleTwo20;
+          color: $purpleOne;
+        }
+      }
+      &.current {
+        a {
+          background-color: $purpleTwo20;
+          color: $purpleOne;
+        } 
+      }
+    }
+  }
+}
+
+.resultsHeader {
+  grid-column: 2/3;
+  .top {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+.activeFilters {
+  margin: 0 0 30px;
+  .filterTag {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: $s;
+    padding: 7px 4px 7px 12px;
+    font-size: 14px;
+    line-height: 1;
+    box-shadow: $dropShadow;
+    transition: $defaultBoxShadowAnim;
+    border-radius: $defaultBorderRadius;
+    span {
+      font-weight: 700;
+      color: $black;
+    }
+    .close {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      
+      &:hover {
+        cursor: pointer;
+      }
+    }
+    &:hover {
+      box-shadow: $dropShadowHover;
+      cursor:default;
+    }
+  }
+}

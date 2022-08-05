@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import styles from './ResultsList.module.scss';
 import Checkbox from "../FormFields/Checkbox";
-import Query2 from "../Query/Query2";
+import Query3 from "../Query/Query3";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
+import ResultsSorting from "../ResultsSorting/ResultsSorting";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
@@ -12,7 +14,8 @@ import ReactPaginate from 'react-paginate';
 import isEqual from 'lodash/isEqual';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
-import { getLastPubYear } from "../../Utilities/utilities";
+import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter } from "../../Utilities/utilities";
+import LoadingBar from "../LoadingBar/LoadingBar";
 
 
 const ResultsList = ({loading}) => {
@@ -68,12 +71,6 @@ const ResultsList = ({loading}) => {
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
 
-  // Int, represents results progress bar
-  const [resultsProgress, setResultsProgress] = useState(1);
-  // Bool, alternates opacity of progress bar while loading
-  const [resultsBarOpacity, setResultsBarOpacity] = useState(false);
-  // Str, class for results progress bar opacity
-  var resultsBarOpacityClass = (resultsBarOpacity) ? 'dark': 'light';
   // Initialize queryClient for React Query to fetch results
   const queryClient = new QueryClient();
   // Int, how many items per page
@@ -101,7 +98,37 @@ const ResultsList = ({loading}) => {
   };
 
   // React Query call for results
-  const resultsData = useQuery('resultsData', async () => {
+  // const resultsData = useQuery('resultsData', async () => {
+  //   console.log(currentQueryID);
+
+  //   if(!currentQueryID || !isLoading)
+  //     return;
+
+  //   let queryIDJson = JSON.stringify({qid: currentQueryID});
+
+  //   const requestOptions = {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: queryIDJson
+  //   };
+  //   const response = await fetch('/creative_result', requestOptions)
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       console.log(data);
+  //       setResults(data);
+  //       setIsError((data.status === 'error'));
+  //     })
+  //     .catch((error) => {
+  //       console.log(error)
+  //     });
+  // }, { 
+  //   refetchInterval: 7000,
+  //   enabled: isLoading,
+  //   refetchOnWindowFocus: false
+  // });
+
+  // React Query call for results
+  const testResultsData = useQuery('testResultsData', async () => {
     console.log(currentQueryID);
 
     if(!currentQueryID || !isLoading)
@@ -111,16 +138,23 @@ const ResultsList = ({loading}) => {
 
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: queryIDJson
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     };
-    const response = await fetch('/result', requestOptions)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        setResults(data);
-        setIsError((data.status === 'error'));
-      });
+
+    let data = require('../../Testing/something.json');
+    console.log(data);
+    setResults(data.data);
+    setIsError((data.status === 'error'));
+    // const response = await fetch('something.json', requestOptions)
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     console.log(data);
+    //     // setResults(data);
+    //     // setIsError((data.status === 'error'));
+    //   })
+    //   .catch((error) => {
+    //     console.log(error)
+    //   });
   }, { 
     refetchInterval: 7000,
     enabled: isLoading,
@@ -139,29 +173,83 @@ const ResultsList = ({loading}) => {
     // if results are new, set prevResults for future comparison
     prevResults.current = results;
 
-    // if the status is no longer 'running', set loading to false
-    if(results.status !== 'running')
-      setIsLoading(false);
-    
-    // if the status is 'done', handle setting the results
-    if(results.status === 'done') {
+    const handleResultSummarization = () => {
+
+    }
+    // if the status is not error, handle setting the results
+    if(results.status !== 'error') {
       let newResults = getSummarizedResults(results);
       // set formatted results
       setFormattedResults(newResults);
-      // set formatted results
+      // set sorted results
       setSortedResults(newResults);
       // update app state for raw results
       // dispatch(setCurrentResults(results));
     }
     // setIsError((results.status === 'error'));
   }, [results]);
+  
+  useEffect(() => {
+    // if the status is no longer 'running', set loading to false
+    if (results !== null && results.status !== 'running') 
+      setIsLoading(false);
+  }, [formattedResults]);
 
-  // Return summarized results
+  // Take raw results and return properly summarized results
   const getSummarizedResults = (results) => {
     if (results === null)
       return [];
-  
-    return results.summary;
+
+    console.log(results);
+    let newSummarizedResults = [];
+    
+    // for each individual result item 
+    for(const item of results.results) {
+      // Get the object node's name
+      let objectNodeName = getNodeByCurie(item.object, results).names[0]; 
+      // Get the subject node's name
+      let subjectNode = getNodeByCurie(item.subject, results);
+      // Get the subject node's description
+      let description = (subjectNode.description) ? subjectNode.description[0] : '';
+      // Get a list of properly formatted paths (turn the path ids into their actual path objects)
+      let formattedPaths = [];
+      formattedPaths = getFormattedPaths(item.paths, results);
+      let formattedItem = {
+        name: capitalizeFirstLetter(item.drug_name),
+        paths: formattedPaths,
+        object: capitalizeAllWords(objectNodeName),
+        description: description
+      }
+      newSummarizedResults.push(formattedItem);
+    }
+    return newSummarizedResults;
+  }
+
+  // search the list of nodes for a particular curie, then return that node object if found
+  const getNodeByCurie = (curie, results) => {
+    return results.nodes[curie]
+  }
+  // search the list of edges for a particular id, then return that edge object if found
+  const getEdgeByID = (id, results) => {
+    return results.edges[id]
+  }
+
+  const getFormattedPaths = (rawPathIds, results) => {
+    let formattedPaths = [];
+    for(const id of rawPathIds) {
+      let formattedPath = results.paths[id];
+      if(formattedPath) {
+        for(let i = 0; i < formattedPath.subgraph.length; i++) {
+          if(i % 2 === 0) {
+            formattedPath.subgraph[i] = getNodeByCurie(formattedPath.subgraph[i], results);
+          } else {
+            formattedPath.subgraph[i] = getEdgeByID(formattedPath.subgraph[i], results);
+          }
+        }
+        formattedPaths.push(formattedPath);
+      }
+    }
+    return formattedPaths;
   }
 
   // Click handler for item select checkboxes 
@@ -377,35 +465,6 @@ const ResultsList = ({loading}) => {
     console.log(selectedItems)
   }, [selectedItems]);
 
-  // Spoofs progress bar
-  useEffect(() => {
-    if(resultsProgress >= 100 || !isLoading) 
-      return;
-
-    let randomTimeout = Math.random() * (3000 - 500) + 500;
-    const timer = setTimeout(() => {
-      let newProgress = resultsProgress + 10;
-      if(newProgress < 100) {
-        setResultsProgress(newProgress);
-      } else {
-        setResultsProgress(100);
-      }
-    }, randomTimeout);
-    return () => clearTimeout(timer);
-  }, [resultsProgress, isLoading]);
-
-  // Alternates progress bar opacity class on set timeout
-  useEffect(() => {
-    if(!isLoading) 
-      return;
-
-    let timeout = 1500;
-    const timer = setTimeout(() => {
-      setResultsBarOpacity(!resultsBarOpacity);
-    }, timeout);
-    return () => clearTimeout(timer);
-  }, [resultsBarOpacity, isLoading]);
-
   return (
     <QueryClientProvider client={queryClient}>
       <EvidenceModal 
@@ -415,85 +474,121 @@ const ResultsList = ({loading}) => {
         currentEvidence={currentEvidence}
         results={results}
       />
-      <div className="results-list">
-        <Query2 results loading/>
-        <div className="results-container">
+      <div className={styles.resultsList}>
+        <Query3 results loading/>
+        <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
-            <div className="loading-bar">
-              <div className="bar-outer">
-                <div className={`bar-inner ${resultsBarOpacityClass}`} style={{width: `${resultsProgress}%`}}></div>
-              </div>
-            </div>
+            <LoadingBar 
+              loading={isLoading}
+            />
           }
           {
             !isLoading &&
-            <div className="table-container">
+            <>
               <ResultsFilter 
                 startIndex={itemOffset+1} 
                 endIndex={endResultIndex} 
                 formattedCount={formattedResults.length}
                 totalCount={sortedResults.length}
-                onSort={handleSort} 
                 onFilter={handleFilter}
                 onHighlight={handleResultHighlight}
-                activeFilters={activeFilters} />
-              {
-                activeFilters.length > 0 &&
-                <div className="active-filters">
-                  {
-                    activeFilters.map((element, i)=> {
-                      return(
-                        <span key={i} className={`filter-tag ${element.tag}`}>
-                          { getSelectedFilterDisplay(element) }
-                          <span className="close" onClick={()=>{handleFilter(element)}}><CloseIcon/></span>
-                        </span>
-                      )
-                    })
-                  }
-                </div>
-              }
-              <div className="results-table">
-                <div className="table-body">
-                  <div className="table-head result">
-                    <div className="checkbox-container checkbox-head">
-                      <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
-                    </div>
-                    <div className={`name-head head ${isSortedByName}`} onClick={()=>{handleSort((isSortedByName)?'nameHighLow': 'nameLowHigh')}}>Name</div>
-                    <div className="fda-head head">FDA</div>
-                    <div className={`evidence-head head ${isSortedByEvidence}`} onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}>Evidence</div>
-                    <div className="tags-head head">Tags</div>
+                activeFilters={activeFilters} 
+              />
+              <div className={styles.resultsHeader}>
+                <div className={styles.top}>
+                  <div>
+                    <h5>Results</h5>
+                    <p className={styles.resultsCount}>
+                      Showing <span className={styles.range}>
+                        <span className={styles.start}>{itemOffset + 1}</span>
+                        -
+                        <span>{endResultIndex}</span>
+                      </span> of 
+                      <span className={styles.count}> {formattedResults.length} </span>
+                      {
+                        (formattedResults.length !== sortedResults.length) &&
+                        <span className={styles.total}>({sortedResults.length}) </span>
+                      }
+                      <span> Results</span>
+                    </p>
                   </div>
-                  {
-                    isError &&
-                    <h5>There was an error when processing your query. Please try again.</h5>
-                  }
-                  {
-                    !isLoading &&
-                    !isError &&
-                    displayedResults.length > 0 && 
-                    displayedResults.map((item, i) => {
-                      let checked = (selectedItems.length > 0 && selectedItems.includes(item)) ? true : false;
-                      let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
-                      return(
-                        <ResultsItem 
-                          key={i} 
-                          checked={checked}
-                          highlighted={highlighted}
-                          item={item} 
-                          staticNode={results.static_node} 
-                          allSelected={allSelected}
-                          handleSelected={()=>handleSelected(item)}
-                          activateEvidence={()=>activateEvidence(item.edge.evidence)} 
-                        />
-                      )
-                    })
-                  }
+                  <ResultsSorting 
+                    onSort={handleSort} 
+                  />
                 </div>
+                {
+                  activeFilters.length > 0 &&
+                  <div className={styles.activeFilters}>
+                    {
+                      activeFilters.map((element, i)=> {
+                        return(
+                          <span key={i} className={`${styles.filterTag} ${element.tag}`}>
+                            { getSelectedFilterDisplay(element) }
+                            <span className={styles.close} onClick={()=>{handleFilter(element)}}><CloseIcon/></span>
+                          </span>
+                        )
+                      })
+                    }
+                  </div>
+                }
               </div>
+              <div className={styles.resultsTableContainer}>
+                <div className={styles.resultsTable}>
+                  <div className={styles.tableBody}>
+                    <div className={`${styles.tableHead}`}>
+                      <div className={`${styles.checkboxContainer} ${styles.head}`}>
+                        <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
+                      </div>
+                      <div 
+                        className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`} 
+                        onClick={()=>{handleSort((isSortedByName)?'nameHighLow': 'nameLowHigh')}}
+                        >
+                        Name
+                      </div>
+                      <div className={`${styles.head} ${styles.fdaHead}`}>FDA</div>
+                      <div 
+                        className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
+                        onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}
+                        >
+                        Evidence
+                      </div>
+                    </div>
+                    {
+                      isError &&
+                      <h5>There was an error when processing your query. Please try again.</h5>
+                    }
+                    {
+                      !isLoading &&
+                      !isError &&
+                      displayedResults.length > 0 && 
+                      displayedResults.map((item, i) => {
+                        let checked = (selectedItems.length > 0 && selectedItems.includes(item)) ? true : false;
+                        let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
+                        let hasName = (item.name !== null && item.name !== undefined);
+                        // if(hasName) {
+                          return(
+                            <ResultsItem 
+                              key={i} 
+                              checked={checked}
+                              highlighted={highlighted}
+                              item={item} 
+                              allSelected={allSelected}
+                              handleSelected={()=>handleSelected(item)}
+                              activateEvidence={()=>activateEvidence(item.edge.evidence)} 
+                            />
+                          )
+                        // } else {
+                        //   return '';
+                        // }
+                      })
+                    }
+                  </div>
+                </div>
+              </div>  
               {
                 formattedResults.length > 0 && 
-                <div className="pagination">
+                <div className={styles.pagination}>
                   <ReactPaginate
                     breakLabel="..."
                     nextLabel="Next"
@@ -503,15 +598,16 @@ const ResultsList = ({loading}) => {
                     marginPagesDisplayed={1}
                     pageCount={pageCount}
                     renderOnZeroPageCount={null}
-                    className="page-nums"
-                    pageClassName="page-num"
-                    activeClassName="current"
-                    previousLinkClassName="prev button"
-                    nextLinkClassName="next button"
+                    className={styles.pageNums}
+                    pageClassName={styles.pageNum}
+                    activeClassName={styles.current}
+                    previousLinkClassName={`${styles.prev} ${styles.button}`}
+                    nextLinkClassName={`${styles.prev} ${styles.button}`}
+                    disabledLinkClassName={styles.disabled}
                   />
                 </div>
               }
-            </div>
+            </>
           }
         </div>
       </div>

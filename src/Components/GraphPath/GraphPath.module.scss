@@ -1,0 +1,102 @@
+@import "../../Assets/Styles/variables";
+
+
+.nameContainer,.pathContainer,.targetContainer {
+  width: 140px;
+  border-radius: $defaultBorderRadius;
+  margin-right: 4px;
+}
+.name,.pathContainer,.target {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+}
+.path {
+  font-size: 12px;
+  font-weight: 400;
+}
+.text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nameContainer {
+  position: relative;
+  &:first-child {
+    background-color: $yellow;
+  }
+  svg {
+    margin-right: 5px;
+    path {
+      fill: $black;
+    }
+  }
+}
+svg {
+  min-width: 24px;
+}
+.pathContainer {
+  padding: 7px 0;
+  position: relative;
+  >svg {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transform: translateY(-50%);
+  }
+}
+span.path {
+  display: block;
+  justify-content: flex-start;
+  box-shadow: none;
+  width: auto;
+  padding: 0 2px;
+  max-width: 87px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-color: white;
+  z-index: 10;
+  color: $darkGray;
+  margin-right: 0;
+  transition: all .25s ease;
+  path {
+    transition: all .25s ease;
+  }
+  &:hover {
+    color: $black;
+    path {
+      fill: $black;
+    }  
+  }
+}
+.name, .target {
+  padding: 7px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.nameContainer, .targetContainer {
+  box-shadow: $dropShadow;
+  transition: all .25s ease;
+  &:hover {
+    box-shadow: $dropShadowHover;
+  }
+}
+.targetContainer {
+  background-color: $blueTwo;
+  color: $white;
+  svg {
+    margin-right: 8px;
+  }
+}
+
+
+
+.edgeLabel {
+  fill: #000 !important;
+}

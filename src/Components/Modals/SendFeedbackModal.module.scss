@@ -1,0 +1,21 @@
+@import "../../Assets/Styles/variables";
+
+.feedbackModal {
+  .feedbackContainer {
+    width: calc(685px - ($xl * 2));
+    padding: $xl;
+  }
+  .disclaimer {
+    position: relative;
+    padding: 10px 12px;
+    background-color: $purpleTwo20;
+    border-radius: $defaultBorderRadius;
+    padding-left: 42px;
+    svg {
+      position: absolute;
+      top: 50%;
+      left: 13px;
+      transform: translateY(-50%);
+    }
+  } 
+}

@@ -1,0 +1,70 @@
+@import "../../Assets/Styles/variables";
+
+.tooltip {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 12px);
+  right: 4px;
+  background-color: $darkGray; 
+  color: $white;
+  border-radius: $defaultBorderRadius;
+  padding: $xs;
+  width: 330px;
+  text-align: left;
+  box-shadow: $dropShadowHover;
+  transition: all .3s ease;
+  p {
+    margin-bottom: 2px;
+  }
+  .heading {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 17.5px;
+  }
+  .text {
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: 400;
+  }
+  .children p {
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: 400;
+  }
+  .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 100;
+    svg {
+      margin-right: 0 !important;
+      path {
+        stroke: $white;
+      }
+    }
+  }
+  &.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  &.closed {
+    opacity: 0;
+    pointer-events: none;
+  }
+  &:after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    clip-path: polygon(0% 0%, 100% 100%, 0% 100%);
+    transform: rotate(135deg);
+    border-radius: 0 0 0 0.25em;
+    background-color: $darkGray;
+    // border-style: solid;
+    // border-width: 0 8px 8px 8px;
+    // border-color: transparent transparent $darkGray transparent;
+    position:absolute;
+    top: -7px;
+    right: $m;
+    z-index: -1;
+  }
+}

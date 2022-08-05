@@ -1,0 +1,94 @@
+@import "../../Assets/Styles/variables";
+
+
+.historyListContainer {
+  .searchBarContainer {
+    .form {
+      display: flex;
+      justify-content: space-between;
+      padding: 24px;
+      background-color: $purpleTwo20;
+      label {
+        display: flex;
+        width: 100%;
+        margin: 0;
+        input {
+          width: -webkit-fill-available;
+        }
+      }
+      button {
+        margin: 0 0 0 $xs;
+        padding: 10px 20px;
+      }
+    }
+  }
+}
+.historyList {
+  list-style: none;
+  padding-left: 0;
+  .historyItem {
+    &:first-of-type {
+      .time-name {
+        margin: 0 0 $m;
+      }
+    }
+    .timeName {
+      font-size: 20px;
+      line-height: 1.25;
+      font-weight: 700;
+      color: $darkGray;
+      margin: $xl 0 $m;
+    }
+    .exportButton {
+      padding: 12.5px 14.5px;
+      border-radius: 50%;
+      margin: 0;
+      svg {
+        margin: 0;
+      }
+    }
+    .query {
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-column-gap: $s;
+      align-items: center;
+      .top {
+        margin: 0 0 $xxs;
+      }
+      .bottom {
+        color: $darkGray;
+        font-size: 12px;
+      }
+    }
+    .itemContainer {
+      padding: $m;
+      margin-bottom: $m;
+      box-shadow: $dropShadow;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: $defaultBorderRadius;
+      transition: $defaultBoxShadowAnim;
+      &:hover {
+        box-shadow: $dropShadowHover;
+      }
+      .subject,.action {
+        color: $purpleOne;
+        font-weight: 700;
+      }
+      .removeItem {
+        background-color: transparent;
+        padding: $s;
+        margin: 0;
+        box-shadow: none;
+        &:hover {
+          box-shadow: none;
+        }
+        svg {
+          margin: 0;
+        }
+      }
+    }  
+  }
+}
