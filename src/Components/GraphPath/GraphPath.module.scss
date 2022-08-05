@@ -1,26 +1,21 @@
 @import "../../Assets/Styles/variables";
 
 
+.nameContainer,.pathContainer,.targetContainer {
+  width: 130px;
+  border-radius: $defaultBorderRadius;
+  margin-right: 4px;
+}
 .name,.pathContainer,.target {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 130px;
   text-align: center;
-  margin-right: 4px;
   cursor: pointer;
-}
-.name, .target {
-  font-size: 14px;
-  font-weight: 700;
 }
 .path {
   font-size: 12px;
   font-weight: 400;
-}
-.pathContainer, .name, .target {
-  line-height: 17.5px;
-  border-radius: $defaultBorderRadius;
 }
 .text {
   white-space: nowrap;
@@ -30,10 +25,7 @@
 .nameContainer {
   position: relative;
   &:first-child {
-    .name {
-      background-color: $yellow;
-      padding: 7px 0;
-    }
+    background-color: $yellow;
   }
   svg {
     margin-right: 5px;
@@ -44,7 +36,6 @@
 }
 svg {
   min-width: 18px;
-
 }
 .pathContainer {
   padding: 7px 0;
@@ -85,14 +76,18 @@ span.path {
   }
 }
 .name, .target {
+  padding: 7px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.nameContainer, .targetContainer {
   box-shadow: $dropShadow;
   transition: all .25s ease;
-  padding: 7px;
   &:hover {
     box-shadow: $dropShadowHover;
   }
 }
-.target {
+.targetContainer {
   background-color: $blueTwo;
   color: $white;
   svg {

@@ -121,11 +121,11 @@ const GraphView = ({paths}) => {
       }
       {
         (numberToShow < graph.length) &&
-        <button onClick={handleShowMore}>Show More</button>
+        <button onClick={handleShowMore} className={styles.show}>Show More</button>
       }
       {
         (numberToShow === graph.length && numberToShow > 6) &&
-        <button onClick={handleShowLess}>Show Less</button>
+        <button onClick={handleShowLess} className={styles.show}>Show Less</button>
       }
     </div>
   )

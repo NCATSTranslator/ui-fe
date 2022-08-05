@@ -95,7 +95,16 @@
       }
     }
   }
-
+  .show {
+    margin: 0 auto;
+    display: block;
+    color: $darkGray;
+    background-color: transparent;
+    box-shadow: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 

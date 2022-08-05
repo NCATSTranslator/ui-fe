@@ -95,10 +95,12 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
       }
       {
         path.category === 'target' && 
-        <span className={styles.target} onClick={()=> tooltipOpen('target')} >
-          <Disease/>
-          <span className={styles.text}>
-            {capitalizeAllWords(path.name)}
+        <span className={styles.targetContainer} >
+          <span className={styles.target} onClick={() => tooltipOpen('target')}>
+            <Disease/>
+            <span className={styles.text}>
+              {capitalizeAllWords(path.name)}
+            </span>
           </span>
           <OutsideClickHandler onOutsideClick={() => tooltipClose('target')}>
             <Tooltip 
