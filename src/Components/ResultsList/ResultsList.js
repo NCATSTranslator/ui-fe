@@ -353,46 +353,46 @@ const ResultsList = ({loading}) => {
 
   // Handle the sorting 
   const handleSort = (sortName) => {
-    let newSortedResults = [...sortedResults]
-    switch (sortName) {
-      case 'nameLowHigh':
-        newSortedResults = sortNameLowHigh(newSortedResults);
-        setIsSortedByName(true);
-        setIsSortedByEvidence(null);
-        break;
-      case 'nameHighLow':
-        newSortedResults = sortNameHighLow(newSortedResults);
-        setIsSortedByName(false);
-        setIsSortedByEvidence(null);
-        break;
-      case 'evidenceLowHigh':
-        newSortedResults = sortEvidenceLowHigh(newSortedResults);
-        setIsSortedByEvidence(true);
-        setIsSortedByName(null);
-        break;
-      case 'evidenceHighLow':
-        newSortedResults = sortEvidenceHighLow(newSortedResults);
-        setIsSortedByEvidence(false);
-        setIsSortedByName(null);
-        break;
-      case 'dateLowHigh':
-        newSortedResults = sortDateLowHigh(newSortedResults);
-        setIsSortedByEvidence(null);
-        setIsSortedByName(null);
-        break;
-      case 'dateHighLow':
-        newSortedResults = sortDateHighLow(newSortedResults);
-        setIsSortedByEvidence(null);
-        setIsSortedByName(null);
-        break;
-      default:
-        break;
-    }
-    if(selectedItems.length > 0) {
-      newSortedResults = sortByHighlighted(newSortedResults, selectedItems);
-    }
-    setSortedResults(newSortedResults);
-    setFormattedResults(newSortedResults);
+    // let newSortedResults = [...sortedResults]
+    // switch (sortName) {
+    //   case 'nameLowHigh':
+    //     newSortedResults = sortNameLowHigh(newSortedResults);
+    //     setIsSortedByName(true);
+    //     setIsSortedByEvidence(null);
+    //     break;
+    //   case 'nameHighLow':
+    //     newSortedResults = sortNameHighLow(newSortedResults);
+    //     setIsSortedByName(false);
+    //     setIsSortedByEvidence(null);
+    //     break;
+    //   case 'evidenceLowHigh':
+    //     newSortedResults = sortEvidenceLowHigh(newSortedResults);
+    //     setIsSortedByEvidence(true);
+    //     setIsSortedByName(null);
+    //     break;
+    //   case 'evidenceHighLow':
+    //     newSortedResults = sortEvidenceHighLow(newSortedResults);
+    //     setIsSortedByEvidence(false);
+    //     setIsSortedByName(null);
+    //     break;
+    //   case 'dateLowHigh':
+    //     newSortedResults = sortDateLowHigh(newSortedResults);
+    //     setIsSortedByEvidence(null);
+    //     setIsSortedByName(null);
+    //     break;
+    //   case 'dateHighLow':
+    //     newSortedResults = sortDateHighLow(newSortedResults);
+    //     setIsSortedByEvidence(null);
+    //     setIsSortedByName(null);
+    //     break;
+    //   default:
+    //     break;
+    // }
+    // if(selectedItems.length > 0) {
+    //   newSortedResults = sortByHighlighted(newSortedResults, selectedItems);
+    // }
+    // setSortedResults(newSortedResults);
+    // setFormattedResults(newSortedResults);
   }
 
   // Handle highlighting of results
@@ -410,48 +410,48 @@ const ResultsList = ({loading}) => {
 
   // Filter the results whenever the activated filters change 
   useEffect(() => {
-    // If there are no active filters, get the full result set
-    if(activeFilters.length <= 0) {
-      setFormattedResults(sortedResults);
-      return;
-    }
+    // // If there are no active filters, get the full result set
+    // if(activeFilters.length <= 0) {
+    //   setFormattedResults(sortedResults);
+    //   return;
+    // }
 
-    let filteredResults = [];
-    let originalResults = [...sortedResults];
-    /* 
-      For each result, check against each filter. If a filter is triggered, 
-      set addElement to false and don't add the element to the filtered results
-    */  
-    originalResults.forEach((element) => {
-      let addElement = true;
-      activeFilters.forEach((filter) => {
-        switch (filter.tag) {
-          // FDA approved filter 
-          case 'fda':
-            if(element.subject.fda_info === null)
-              addElement = false;
-            break;
-          // Minimum evidence filter
-          case 'evi':
-            if(element.edge.evidence.length < filter.value)
-              addElement = false;
-            break;
-          // Date Range filter
-          case 'date':
-            let lastPubYear = getLastPubYear(element.edge.last_publication_date);
-            if(lastPubYear < filter.value[0] || lastPubYear > filter.value[1])
-              addElement = false;
-            break;
-          default:
-            break;
-        }
-      })
-      if(addElement) {
-        filteredResults.push(element);
-      }
-    })
-    // Set the formatted results to the newly filtered results
-    setFormattedResults(filteredResults);
+    // let filteredResults = [];
+    // let originalResults = [...sortedResults];
+    // /* 
+    //   For each result, check against each filter. If a filter is triggered, 
+    //   set addElement to false and don't add the element to the filtered results
+    // */  
+    // originalResults.forEach((element) => {
+    //   let addElement = true;
+    //   activeFilters.forEach((filter) => {
+    //     switch (filter.tag) {
+    //       // FDA approved filter 
+    //       case 'fda':
+    //         if(element.subject.fda_info === null)
+    //           addElement = false;
+    //         break;
+    //       // Minimum evidence filter
+    //       case 'evi':
+    //         if(element.edge.evidence.length < filter.value)
+    //           addElement = false;
+    //         break;
+    //       // Date Range filter
+    //       case 'date':
+    //         let lastPubYear = getLastPubYear(element.edge.last_publication_date);
+    //         if(lastPubYear < filter.value[0] || lastPubYear > filter.value[1])
+    //           addElement = false;
+    //         break;
+    //       default:
+    //         break;
+    //     }
+    //   })
+    //   if(addElement) {
+    //     filteredResults.push(element);
+    //   }
+    // })
+    // // Set the formatted results to the newly filtered results
+    // setFormattedResults(filteredResults);
 
     /*
       triggers on filter change and on sorting change in order to allow user to change 

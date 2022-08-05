@@ -23,11 +23,19 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
     return capitalizeAllWords(string);
   }
 
+  const calculatePathType = (string) => {
+    // remove 'biolink:' from the type, then add spaces before each capital letter, then trim the leading space
+    return(string.replace('biolink:', '').replace(/([A-Z])/g, ' $1').trim());
+  }
+
   let nameString;
+  let typeString;
   if(path.category != 'predicate') {
     nameString = calculatePathName(path.name);
+    typeString = calculatePathType(path.type)
   }
-  
+
+  console.log(path);
   const tooltipOpen = (type) => {
     switch (type) {
       case 'name':
@@ -84,7 +92,7 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
             <Tooltip 
               active={nameTooltipActive} 
               onClose={() => tooltipClose('name')}
-              heading={nameString}
+              heading={<span><strong>{nameString}</strong> ({typeString})</span>}
               text={path.description}
               >
             </Tooltip>
@@ -120,7 +128,7 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
             <Tooltip 
               active={targetTooltipActive} 
               onClose={() => tooltipClose('target')}
-              heading={nameString}
+              heading={<span><strong>{nameString}</strong> ({typeString})</span>}
               text={path.description}
               >
             </Tooltip>
