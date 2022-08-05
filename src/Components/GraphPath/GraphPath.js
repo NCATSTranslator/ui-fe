@@ -14,6 +14,20 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
   const [pathTooltipActive, setPathTooltipActive] = useState(false);
   const [targetTooltipActive, setTargetTooltipActive] = useState(false);
 
+  const calculatePathName = (string) => {
+    if(!string)
+      return '';
+    if(string.toUpperCase() === string)
+      return string;
+      
+    return capitalizeAllWords(string);
+  }
+
+  let nameString;
+  if(path.category != 'predicate') {
+    nameString = calculatePathName(path.name);
+  }
+
   const tooltipOpen = (type) => {
     switch (type) {
       case 'name':
@@ -63,14 +77,14 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
           <span className={styles.name} onClick={() => tooltipOpen('name')}>
             {getIcon(path.type)}
             <span className={styles.text}>
-              {capitalizeAllWords(path.name)}
+              {nameString}
             </span>
           </span>
           <OutsideClickHandler onOutsideClick={() => tooltipClose('name')}>
             <Tooltip 
               active={nameTooltipActive} 
               onClose={() => tooltipClose('name')}
-              heading={capitalizeAllWords(path.name)}
+              heading={nameString}
               text={path.description}
               >
             </Tooltip>
@@ -99,14 +113,14 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
           <span className={styles.target} onClick={() => tooltipOpen('target')}>
             <Disease/>
             <span className={styles.text}>
-              {capitalizeAllWords(path.name)}
+              {nameString}
             </span>
           </span>
           <OutsideClickHandler onOutsideClick={() => tooltipClose('target')}>
             <Tooltip 
               active={targetTooltipActive} 
               onClose={() => tooltipClose('target')}
-              heading={capitalizeAllWords(path.name)}
+              heading={nameString}
               text={path.description}
               >
             </Tooltip>
