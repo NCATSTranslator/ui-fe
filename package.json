@@ -20,8 +20,7 @@
     "redux": "^4.1.2",
     "redux-undo": "^1.0.1",
     "sass": "^1.52.3",
-    "source-map-explorer": "^2.5.2",
-    "web-vitals": "^2.1.2"
+    "source-map-explorer": "^2.5.2"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
@@ -54,6 +53,7 @@
   "devDependencies": {
     "dotenv-cli": "^5.1.0",
     "react-query": "^3.34.19",
-    "react-scripts": "^5.0.1"
+    "react-scripts": "^5.0.1",
+    "web-vitals": "^2.1.4"
   }
 }
