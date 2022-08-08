@@ -1,0 +1,110 @@
+@import "../../Assets/Styles/variables";
+
+.evidenceModal {
+  .evidenceContainer {
+    width: 1130px;
+  }
+  .tableHead {
+    border-bottom: 1px solid $midGray;
+    border-radius: 5px 5px 0 0;
+    .head {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+  }
+  .tableBody {
+    box-shadow: $dropShadow;
+    font-size: $bodyTwoSize;
+    border-radius: $defaultBorderRadius;
+    &>div {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr 2fr 2.5fr 1.25fr 1fr;
+      .cell {
+        padding: 12px;
+        height: 98px;
+        .bold {
+          font-weight: 700;
+        }
+      }
+      .cell, .cell span {
+        font-size: 12px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+    }
+    &>div:nth-child(odd){
+      background-color: $lightGray;
+    }
+    &>div:first-child {
+      background-color: $purpleTwo;  
+      padding: 12px;
+    }
+    .url {
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: $darkGray;
+      margin-left: 4px;
+    }
+  }
+}
+
+.pagination {
+  margin-top: $m;
+  grid-column: 2/3;
+  .pageNums {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style-type: none;
+    padding-left: 0;
+    width: 700px;
+    margin: 0 0 0 auto;
+    .button {
+      margin-bottom: 0;
+      background-color: $purpleOne;
+      padding: 10px 25px;
+      border-radius: $defaultBorderRadius;
+      color: $white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .disabled {
+      background-color: transparent;
+      color: $midGray;
+      pointer-events: none;
+      cursor: default;
+    }
+    .pageNum {
+      a {
+        cursor: pointer;
+        padding: 10px 15px;
+        line-height: 1;
+        margin: 8px;
+        transition: all .25s ease;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        color: $darkGray;
+        font-size: $bodyOneSize;
+        font-weight: 700;
+        &:hover {
+          background-color: $purpleTwo20;
+          color: $purpleOne;
+        }
+      }
+      &.current {
+        a {
+          background-color: $purpleTwo20;
+          color: $purpleOne;
+        } 
+      }
+    }
+  }
+}

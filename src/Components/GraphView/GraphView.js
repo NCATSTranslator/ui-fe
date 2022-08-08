@@ -1,14 +1,10 @@
 import styles from './GraphView.module.scss';
 import React, {useState, useEffect} from "react";
 import GraphPath from '../GraphPath/GraphPath';
+import { formatBiolinkPredicate } from '../../Utilities/utilities';
 
 const GraphView = ({paths}) => {
 
-  
-  const formatPredicate = (predicate) => {
-    return predicate.replace('biolink:', '').replaceAll('_', ' '); 
-  }
-  
   const [graph, setGraph] = useState([])
   let initialNumberToShow = (paths.length < 6) ? paths.length : 6;
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
@@ -32,7 +28,7 @@ const GraphView = ({paths}) => {
             description: desc,
           }
         } else {
-          let pred = (item.predicates) ? formatPredicate(item.predicates[0]) : '';
+          let pred = (item.predicates) ? formatBiolinkPredicate(item.predicates[0]) : '';
           pathToAdd[i] = {
             category: 'predicate',
             predicate: pred,

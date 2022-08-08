@@ -14,7 +14,7 @@ import ReactPaginate from 'react-paginate';
 import isEqual from 'lodash/isEqual';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
-import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter } from "../../Utilities/utilities";
+import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter, formatBiolinkPredicate } from "../../Utilities/utilities";
 import LoadingBar from "../LoadingBar/LoadingBar";
 
 
@@ -33,6 +33,12 @@ const ResultsList = ({loading}) => {
   const [isError, setIsError] = useState(false);
   // Bool, are the results still loading
   const [isLoading, setIsLoading] = useState(loading);
+  // Bool, should results be fetched
+  const [isFetchingARAStatus, setIsFetchingARAStatus] = useState(loading);
+  // Bool, should results be fetched
+  const [isFetchingResults, setIsFetchingResults] = useState(false);
+  // Bool, should results be fetched
+  const [shouldRetrieveFreshResults, setShouldRetrieveFreshResults] = useState(true);
   // Bool, are the results currently sorted by name
   const [isSortedByName, setIsSortedByName] = useState(null);
   // Bool, are the results currently sorted by evidence count
@@ -50,12 +56,12 @@ const ResultsList = ({loading}) => {
   // Array, all highlighted items
   const [highlightedItems, setHighlightedItems] = useState([]);
   // Obj, original raw results from the BE
-  const [results, setResults] = useState(resultsState);
+  const [rawResults, setRawResults] = useState(resultsState);
   /* 
     Ref, used to track changes in results for useEffect with 'results' obj as dependency
     b/c react doesn't deep compare objects in useEffect hook
   */
-  const prevResults = useRef(results);
+  const prevRawResults = useRef(rawResults);
   // Array, full result set sorted by any active sorting, but NOT filtered
   const [sortedResults, setSortedResults] = useState([]);
   // Array, results formatted by any active filters, sorted by any active sorting
@@ -70,6 +76,8 @@ const ResultsList = ({loading}) => {
   const [itemOffset, setItemOffset] = useState(0);
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
+
+  const [returnedARAs, setReturnedARAs] = useState([]);
 
   // Initialize queryClient for React Query to fetch results
   const queryClient = new QueryClient();
@@ -97,8 +105,78 @@ const ResultsList = ({loading}) => {
     setItemOffset(newOffset);
   };
 
+  // React Query call for status of results
+  const resultsStatus = useQuery('resultsStatus', async () => {
+    console.log("Fetching current ARA status...");
+
+    if(!currentQueryID)
+      return;
+
+    let queryIDJson = JSON.stringify({qid: currentQueryID});
+
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: queryIDJson
+    };
+    const response = await fetch('/creative_status', requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        if(data.data.aras.length > returnedARAs.length) {
+          console.log("New ARA returned, fetching new results...");
+          console.log(`Old ARAs: ${returnedARAs}, New ARAs: ${data.data.aras}`);
+          setReturnedARAs(data.data.aras);
+          setIsFetchingResults(true);
+        } else {
+          console.log(`No new ARAs returned data. Current status is: '${data.status}'`);
+        }
+        // setIsError((data.status === 'error'));
+      })
+      .catch((error) => {
+        console.log(error)
+      });
+  }, { 
+    refetchInterval: 7000,
+    enabled: isFetchingARAStatus,
+    refetchOnWindowFocus: false
+  });
+
   // React Query call for results
-  // const resultsData = useQuery('resultsData', async () => {
+  const resultsData = useQuery('resultsData', async () => {
+    console.log("Fetching new results...");
+
+    if(!currentQueryID)
+      return;
+
+    let queryIDJson = JSON.stringify({qid: currentQueryID});
+
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: queryIDJson
+    };
+    const response = await fetch('/creative_result', requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        if(data.data.results && data.data.results.length > 0) {
+          setRawResults(data);
+          setIsFetchingResults(false);
+        }
+        // setIsError((data.status === 'error'));
+      })
+      .catch((error) => {
+        console.log(error)
+      });
+  }, { 
+    refetchInterval: 7000,
+    enabled: isFetchingResults,
+    refetchOnWindowFocus: false
+  });
+
+  // TEST React Query call for results from static file
+  // const testResultsData = useQuery('testResultsData', async () => {
   //   console.log(currentQueryID);
 
   //   if(!currentQueryID || !isLoading)
@@ -108,58 +186,28 @@ const ResultsList = ({loading}) => {
 
   //   const requestOptions = {
   //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: queryIDJson
+  //     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
   //   };
-  //   const response = await fetch('/creative_result', requestOptions)
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       console.log(data);
-  //       setResults(data);
-  //       setIsError((data.status === 'error'));
-  //     })
-  //     .catch((error) => {
-  //       console.log(error)
-  //     });
+
+  //   let data = require('../../Testing/something.json');
+  //   console.log(data);
+  //   setResults(data.data);
+  //   setIsError((data.status === 'error'));
+  //   // const response = await fetch('something.json', requestOptions)
+  //   //   .then(response => response.json())
+  //   //   .then(data => {
+  //   //     console.log(data);
+  //   //     // setResults(data);
+  //   //     // setIsError((data.status === 'error'));
+  //   //   })
+  //   //   .catch((error) => {
+  //   //     console.log(error)
+  //   //   });
   // }, { 
   //   refetchInterval: 7000,
   //   enabled: isLoading,
   //   refetchOnWindowFocus: false
   // });
-
-  // React Query call for results
-  const testResultsData = useQuery('testResultsData', async () => {
-    console.log(currentQueryID);
-
-    if(!currentQueryID || !isLoading)
-      return;
-
-    let queryIDJson = JSON.stringify({qid: currentQueryID});
-
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    };
-
-    let data = require('../../Testing/something.json');
-    console.log(data);
-    setResults(data.data);
-    setIsError((data.status === 'error'));
-    // const response = await fetch('something.json', requestOptions)
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     console.log(data);
-    //     // setResults(data);
-    //     // setIsError((data.status === 'error'));
-    //   })
-    //   .catch((error) => {
-    //     console.log(error)
-    //   });
-  }, { 
-    refetchInterval: 7000,
-    enabled: isLoading,
-    refetchOnWindowFocus: false
-  });
 
   /*
     When the results change, which occurs when the React Query returns, handle the returned data
@@ -167,18 +215,15 @@ const ResultsList = ({loading}) => {
   */ 
   useEffect(() => {
     // if we have no results, or the results aren't actually new, return
-    if(results == null || isEqual(results, prevResults.current))
+    if(rawResults == null || isEqual(rawResults, prevRawResults.current))
       return;
 
     // if results are new, set prevResults for future comparison
-    prevResults.current = results;
+    prevRawResults.current = rawResults;
 
-    const handleResultSummarization = () => {
-
-    }
     // if the status is not error, handle setting the results
-    if(results.status !== 'error') {
-      let newResults = getSummarizedResults(results);
+    if(rawResults.status !== 'error') {
+      let newResults = getSummarizedResults(rawResults.data);
       // set formatted results
       setFormattedResults(newResults);
       // set sorted results
@@ -187,23 +232,23 @@ const ResultsList = ({loading}) => {
       // dispatch(setCurrentResults(results));
     }
     // setIsError((results.status === 'error'));
-  }, [results]);
+  }, [rawResults]);
   
   useEffect(() => {
-    // if the status is no longer 'running', set loading to false
-    if (results !== null && results.status !== 'running') 
+    // we have results to show, set isLoading to false
+    if (formattedResults.length > 0 && rawResults.status !== 'error') {
       setIsLoading(false);
+    }
   }, [formattedResults]);
 
   // Take raw results and return properly summarized results
   const getSummarizedResults = (results) => {
-    if (results === null)
+    if (results === null || results === undefined)
       return [];
 
-    console.log(results);
     let newSummarizedResults = [];
     
-    // for each individual result item 
+    // // for each individual result item 
     for(const item of results.results) {
       // Get the object node's name
       let objectNodeName = getNodeByCurie(item.object, results).names[0]; 
@@ -211,14 +256,20 @@ const ResultsList = ({loading}) => {
       let subjectNode = getNodeByCurie(item.subject, results);
       // Get the subject node's description
       let description = (subjectNode.description) ? subjectNode.description[0] : '';
+
+      let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
+      console.log(subjectNode)
       // Get a list of properly formatted paths (turn the path ids into their actual path objects)
       let formattedPaths = [];
       formattedPaths = getFormattedPaths(item.paths, results);
+      let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
       let formattedItem = {
-        name: capitalizeFirstLetter(item.drug_name),
+        name: itemName,
         paths: formattedPaths,
         object: capitalizeAllWords(objectNodeName),
-        description: description
+        description: description,
+        evidence: getFormattedEvidence(formattedPaths, results),
+        fdaInfo: fdaInfo
       }
       newSummarizedResults.push(formattedItem);
     }
@@ -227,13 +278,25 @@ const ResultsList = ({loading}) => {
 
   // search the list of nodes for a particular curie, then return that node object if found
   const getNodeByCurie = (curie, results) => {
-    return results.nodes[curie]
+    if(results.nodes[curie] === undefined)
+      return {};
+      
+    return results.nodes[curie];
   }
   // search the list of edges for a particular id, then return that edge object if found
   const getEdgeByID = (id, results) => {
-    return results.edges[id]
-  }
+    if(results.edges[id] === undefined)
+      return {};
 
+    return results.edges[id];
+  }
+  // search the list of publications for a particular id, then return that publication object if found
+  const getPubByID = (id, results) => {
+    if(results.publications[id] === undefined)
+      return {};
+    
+    return results.publications[id];
+  }
   const getFormattedPaths = (rawPathIds, results) => {
     let formattedPaths = [];
     for(const id of rawPathIds) {
@@ -250,6 +313,29 @@ const ResultsList = ({loading}) => {
       }
     }
     return formattedPaths;
+  }
+  const getFormattedEvidence = (paths, results) => {
+    let formattedEvidence = [];
+    for(const path of paths) {
+      for(const subgraph of path.subgraph) {
+        if(subgraph.publications && subgraph.publications.length > 0)
+          for(const pubID of subgraph.publications) {
+            let publication = getPubByID(pubID, results);
+            let object = getNodeByCurie(subgraph.object, results);
+            let subject = getNodeByCurie(subgraph.subject, results);
+            let predicate = formatBiolinkPredicate(subgraph.predicates[0]);
+            publication.edge = {
+              subject: capitalizeAllWords(subject.names[0]),
+              predicate: predicate,
+              object: capitalizeAllWords(object.names[0])
+            };
+            formattedEvidence.push(publication);
+          }
+      }
+    }
+    // console.log(formattedEvidence);
+
+    return formattedEvidence;
   }
 
   // Click handler for item select checkboxes 
@@ -472,7 +558,7 @@ const ResultsList = ({loading}) => {
         onClose={()=>handleModalClose()}
         className="evidence-modal"
         currentEvidence={currentEvidence}
-        results={results}
+        results={rawResults}
       />
       <div className={styles.resultsList}>
         <Query3 results loading/>
@@ -575,7 +661,7 @@ const ResultsList = ({loading}) => {
                               item={item} 
                               allSelected={allSelected}
                               handleSelected={()=>handleSelected(item)}
-                              activateEvidence={()=>activateEvidence(item.edge.evidence)} 
+                              activateEvidence={()=>activateEvidence(item.evidence)} 
                             />
                           )
                         // } else {

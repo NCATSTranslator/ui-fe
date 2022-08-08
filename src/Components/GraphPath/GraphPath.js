@@ -5,7 +5,7 @@ import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
 import OutsideClickHandler from '../OutsideClickHandler/OutsideClickHandler';
-import { capitalizeAllWords } from '../../Utilities/utilities';
+import { capitalizeAllWords, formatBiolinkPredicate } from '../../Utilities/utilities';
 
 
 const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) => {
@@ -14,28 +14,13 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
   const [pathTooltipActive, setPathTooltipActive] = useState(false);
   const [targetTooltipActive, setTargetTooltipActive] = useState(false);
 
-  const calculatePathName = (string) => {
-    if(!string)
-      return '';
-    if(string.toUpperCase() === string)
-      return string;
-
-    return capitalizeAllWords(string);
-  }
-
-  const calculatePathType = (string) => {
-    // remove 'biolink:' from the type, then add spaces before each capital letter, then trim the leading space
-    return(string.replace('biolink:', '').replace(/([A-Z])/g, ' $1').trim());
-  }
-
   let nameString;
   let typeString;
-  if(path.category != 'predicate') {
-    nameString = calculatePathName(path.name);
-    typeString = calculatePathType(path.type)
+  if(path.category !== 'predicate') {
+    nameString = capitalizeAllWords(path.name);
+    typeString = formatBiolinkPredicate(path.type)
   }
 
-  console.log(path);
   const tooltipOpen = (type) => {
     switch (type) {
       case 'name':
