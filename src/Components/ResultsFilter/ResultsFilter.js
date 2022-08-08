@@ -54,7 +54,7 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
               Minimum Number of Evidence
           </Checkbox>
           <SimpleRange 
-            label="Minimum Number of Evidence" 
+            label="Evidence Associated" 
             hideLabel 
             min="1" 
             max="99" 
@@ -67,7 +67,7 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
               Date Range
           </Checkbox>
           <TwoThumbRange 
-            label="Date Range" 
+            label="Date Published Range" 
             hideLabel 
             min={dateRangeMin} 
             max={dateRangeMax} 
