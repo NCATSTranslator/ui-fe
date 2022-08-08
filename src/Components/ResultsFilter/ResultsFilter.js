@@ -1,12 +1,9 @@
 import React, {useState} from 'react';
 import styles from './ResultsFilter.module.scss';
-import Select from '../FormFields/Select';
 import Checkbox from '../FormFields/Checkbox';
 import Radio from '../FormFields/Radio';
-import Accordion from '../Accordion/Accordion';
 import SimpleRange from '../Range/SimpleRange';
 import TwoThumbRange from '../Range/TwoThumbRange';
-import cloneDeep from 'lodash/cloneDeep';
 
 const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, totalCount, onFilter, onHighlight}) => {
 
@@ -16,8 +13,6 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
   const dateRangeMax = 2022;
   const dateRange = [dateRangeMin, dateRangeMax];
   const [dateRangeObject, setDateRangeObject] = useState({tag:'date', value: dateRange});
-  const humanSpeciesObject = {tag:'hum', value: ''};
-  const mouseSpeciesObject = {tag:'mou', value: ''};
   const fdaObject = {tag:'fda', value: ''};
 
   onHighlight = (!onHighlight) ? () => console.log("No highlight function specified in ResultsFilter.") : onHighlight; 

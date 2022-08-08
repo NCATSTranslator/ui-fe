@@ -52,6 +52,9 @@ export const capitalizeFirstLetter = (string) => {
 export const capitalizeAllWords = (string) => {
   if(!string)
     return ''; 
+    
+  if(string.toUpperCase() === string)
+    return string;
 
   let newString = string.toLowerCase();
   return newString.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
@@ -92,3 +95,9 @@ export const validateEmail = (email) => {
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     );
 };
+
+export const formatBiolinkPredicate = (string) => {
+  // remove 'biolink:' from the type, then add spaces before each capital letter
+  // then trim the leading space and replace any underlines with spaces
+  return(string.replace('biolink:', '').replace(/([A-Z])/g, ' $1').trim()).replaceAll('_', ' ');
+}

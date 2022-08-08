@@ -14,7 +14,7 @@ import ReactPaginate from 'react-paginate';
 import isEqual from 'lodash/isEqual';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
-import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter } from "../../Utilities/utilities";
+import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter, formatBiolinkPredicate } from "../../Utilities/utilities";
 import LoadingBar from "../LoadingBar/LoadingBar";
 
 
@@ -218,7 +218,8 @@ const ResultsList = ({loading}) => {
         name: capitalizeFirstLetter(item.drug_name),
         paths: formattedPaths,
         object: capitalizeAllWords(objectNodeName),
-        description: description
+        description: description,
+        evidence: getFormattedEvidence(formattedPaths, results)
       }
       newSummarizedResults.push(formattedItem);
     }
@@ -227,13 +228,25 @@ const ResultsList = ({loading}) => {
 
   // search the list of nodes for a particular curie, then return that node object if found
   const getNodeByCurie = (curie, results) => {
-    return results.nodes[curie]
+    if(results.nodes[curie] === undefined)
+      return {};
+      
+    return results.nodes[curie];
   }
   // search the list of edges for a particular id, then return that edge object if found
   const getEdgeByID = (id, results) => {
-    return results.edges[id]
-  }
+    if(results.edges[id] === undefined)
+      return {};
 
+    return results.edges[id];
+  }
+  // search the list of publications for a particular id, then return that publication object if found
+  const getPubByID = (id, results) => {
+    if(results.publications[id] === undefined)
+      return {};
+    
+    return results.publications[id];
+  }
   const getFormattedPaths = (rawPathIds, results) => {
     let formattedPaths = [];
     for(const id of rawPathIds) {
@@ -250,6 +263,29 @@ const ResultsList = ({loading}) => {
       }
     }
     return formattedPaths;
+  }
+  const getFormattedEvidence = (paths, results) => {
+    let formattedEvidence = [];
+    for(const path of paths) {
+      for(const subgraph of path.subgraph) {
+        if(subgraph.publications && subgraph.publications.length > 0)
+          for(const pubID of subgraph.publications) {
+            let publication = getPubByID(pubID, results);
+            let object = getNodeByCurie(subgraph.object, results);
+            let subject = getNodeByCurie(subgraph.subject, results);
+            let predicate = formatBiolinkPredicate(subgraph.predicates[0]);
+            publication.edge = {
+              subject: capitalizeAllWords(subject.names[0]),
+              predicate: predicate,
+              object: capitalizeAllWords(object.names[0])
+            };
+            formattedEvidence.push(publication);
+          }
+      }
+    }
+    // console.log(formattedEvidence);
+
+    return formattedEvidence;
   }
 
   // Click handler for item select checkboxes 
@@ -575,7 +611,7 @@ const ResultsList = ({loading}) => {
                               item={item} 
                               allSelected={allSelected}
                               handleSelected={()=>handleSelected(item)}
-                              activateEvidence={()=>activateEvidence(item.edge.evidence)} 
+                              activateEvidence={()=>activateEvidence(item.evidence)} 
                             />
                           )
                         // } else {
