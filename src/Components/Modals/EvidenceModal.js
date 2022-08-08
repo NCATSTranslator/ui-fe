@@ -28,10 +28,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
       console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
   }, [itemOffset, itemsPerPage, currentEvidence]);
 
-  useEffect(() => {
-    console.log(displayedEvidence);
-  }, [displayedEvidence]); 
-
   // Handles direct page click
   const handlePageClick = (event) => {
     const newOffset = (event.selected * itemsPerPage) % currentEvidence.length;
@@ -57,7 +53,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
         {
           displayedEvidence.length > 0 &&
           displayedEvidence.map((item, i)=> {
-            console.log(item);
             return (
               <div className={styles.evidenceItem} key={i}>
                 <span className={`${styles.cell} pubdate`}>

@@ -16,7 +16,7 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
 
   let nameString;
   let typeString;
-  if(path.category != 'predicate') {
+  if(path.category !== 'predicate') {
     nameString = capitalizeAllWords(path.name);
     typeString = formatBiolinkPredicate(path.type)
   }
