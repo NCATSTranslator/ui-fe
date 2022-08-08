@@ -66,12 +66,16 @@
     box-shadow: none;
     background-color: transparent;
     margin: 0;
-    transition: transform .25s ease;
+    svg {
+      transition: transform .25s ease;
+    }
     &:hover {
       box-shadow: none;
     }
     &.open {
-      transform: rotate(180deg);
+      svg {
+        transform: rotate(180deg);
+      }
     }
   }
   .accordionPanel {
