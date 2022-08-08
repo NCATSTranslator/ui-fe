@@ -13,9 +13,9 @@ const LoadingBar = ({loading}) => {
     if(progress >= 100 || !loading) 
       return;
 
-    let randomTimeout = Math.random() * (3000 - 500) + 500;
+    let randomTimeout = Math.random() * (5000 - 500) + 500;
     const timer = setTimeout(() => {
-      let newProgress = progress + 10;
+      let newProgress = progress + 5;
       if(newProgress < 100) {
         setProgress(newProgress);
       } else {

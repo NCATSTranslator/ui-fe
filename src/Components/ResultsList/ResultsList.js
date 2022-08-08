@@ -77,7 +77,7 @@ const ResultsList = ({loading}) => {
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
 
-  const [returnedARAs, setReturnedARAs] = useState([]);
+  const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
 
   // Initialize queryClient for React Query to fetch results
   const queryClient = new QueryClient();
@@ -123,15 +123,18 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        if(data.data.aras.length > returnedARAs.length) {
+        if(data.data.aras.length > returnedARAs.aras.length) {
           console.log("New ARA returned, fetching new results...");
-          console.log(`Old ARAs: ${returnedARAs}, New ARAs: ${data.data.aras}`);
-          setReturnedARAs(data.data.aras);
+          console.log(`Old ARAs: ${returnedARAs.aras}, New ARAs: ${data.data.aras}`);
+          setReturnedARAs(data.data);
           setIsFetchingResults(true);
         } else {
           console.log(`No new ARAs returned data. Current status is: '${data.status}'`);
         }
-        // setIsError((data.status === 'error'));
+        if(data.status === 'success') {
+          setIsFetchingARAStatus(false);
+          setIsLoading(false);
+        }
       })
       .catch((error) => {
         console.log(error)
@@ -160,17 +163,15 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        if(data.data.results && data.data.results.length > 0) {
-          setRawResults(data);
-          setIsFetchingResults(false);
-        }
+        setRawResults(data);
+        setIsFetchingResults(false);
         // setIsError((data.status === 'error'));
       })
       .catch((error) => {
         console.log(error)
       });
   }, { 
-    refetchInterval: 7000,
+    // refetchInterval: 7000,
     enabled: isFetchingResults,
     refetchOnWindowFocus: false
   });
@@ -221,17 +222,20 @@ const ResultsList = ({loading}) => {
     // if results are new, set prevResults for future comparison
     prevRawResults.current = rawResults;
 
+    let newResults = [];
+
     // if the status is not error, handle setting the results
-    if(rawResults.status !== 'error') {
-      let newResults = getSummarizedResults(rawResults.data);
+    if(rawResults.status !== 'error' && rawResults.data.length > 0) 
+      newResults = getSummarizedResults(rawResults.data);
+    
       // set formatted results
       setFormattedResults(newResults);
       // set sorted results
       setSortedResults(newResults);
+
       // update app state for raw results
       // dispatch(setCurrentResults(results));
-    }
-    // setIsError((results.status === 'error'));
+
   }, [rawResults]);
   
   useEffect(() => {
@@ -643,6 +647,12 @@ const ResultsList = ({loading}) => {
                     {
                       isError &&
                       <h5>There was an error when processing your query. Please try again.</h5>
+                    }
+                    {
+                      !isLoading &&
+                      !isError &&
+                      displayedResults.length === 0 && 
+                      <h5>No results could be found when processing your query. Please try again.</h5>
                     }
                     {
                       !isLoading &&
