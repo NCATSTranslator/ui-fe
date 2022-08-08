@@ -18,6 +18,8 @@ const GraphView = ({paths}) => {
     paths.forEach((path) => {
       let pathToAdd = []
       path.subgraph.forEach((item, i)=> {
+        if(!item)
+          return;
         if(i % 2 === 0) {
           let name = (item.names) ? item.names[0]: '';
           let type = (item.types) ? item.types[0]: '';
