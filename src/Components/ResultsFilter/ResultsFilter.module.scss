@@ -23,8 +23,6 @@
     position: relative;
     justify-content: flex-end;
   }
-
-
   .subOne {
     color: $darkGray;
   }
@@ -40,5 +38,13 @@
   label:last-of-type {
     margin: 0;
   }
-
+  .clearAll {
+    display: block;
+    font-size: 12px;
+    color: $purpleOne;
+    background-color: transparent;
+    margin: 20px auto 16px;
+    padding: 0;
+    box-shadow: none;
+  }
 }

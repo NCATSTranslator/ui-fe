@@ -5,7 +5,7 @@ import Radio from '../FormFields/Radio';
 import SimpleRange from '../Range/SimpleRange';
 import TwoThumbRange from '../Range/TwoThumbRange';
 
-const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, totalCount, onFilter, onHighlight}) => {
+const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, totalCount, onFilter, onHighlight, onClearAll}) => {
 
   const [minEvidence, setMinEvidence] = useState(1); 
   const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: minEvidence});
@@ -16,6 +16,7 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
   const fdaObject = {tag:'fda', value: ''};
 
   onHighlight = (!onHighlight) ? () => console.log("No highlight function specified in ResultsFilter.") : onHighlight; 
+  onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 
 
   const handleEvidenceActive = () => {
     onFilter(evidenceObject);
@@ -74,6 +75,8 @@ const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, tot
             checked={activeFilters.some(e => e.tag === fdaObject.tag)}>
               Approved
           </Checkbox>
+
+        <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
       </div>
     </div>
   );
