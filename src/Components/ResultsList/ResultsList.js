@@ -16,6 +16,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighte
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
 import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter, formatBiolinkPredicate } from "../../Utilities/utilities";
 import LoadingBar from "../LoadingBar/LoadingBar";
+import { cloneDeep } from "lodash";
 
 
 const ResultsList = ({loading}) => {
@@ -57,6 +58,8 @@ const ResultsList = ({loading}) => {
   const [highlightedItems, setHighlightedItems] = useState([]);
   // Obj, original raw results from the BE
   const [rawResults, setRawResults] = useState(resultsState);
+  // Obj, original raw results from the BE
+  const [freshRawResults, setFreshRawResults] = useState(null);
   /* 
     Ref, used to track changes in results for useEffect with 'results' obj as dependency
     b/c react doesn't deep compare objects in useEffect hook
@@ -163,7 +166,12 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        setRawResults(data);
+        // if we've already gotten results before, set newRawResults instead to prevent original results from being overwritten
+        if(formattedResults.length > 0) {
+          setFreshRawResults(data);
+        } else {
+          setRawResults(data);
+        }
         setIsFetchingResults(false);
         // setIsError((data.status === 'error'));
       })
@@ -260,9 +268,8 @@ const ResultsList = ({loading}) => {
       let subjectNode = getNodeByCurie(item.subject, results);
       // Get the subject node's description
       let description = (subjectNode.description) ? subjectNode.description[0] : '';
-
+      // Get the subject node's fda approval status 
       let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
-      console.log(subjectNode)
       // Get a list of properly formatted paths (turn the path ids into their actual path objects)
       let formattedPaths = [];
       formattedPaths = getFormattedPaths(item.paths, results);
@@ -447,7 +454,8 @@ const ResultsList = ({loading}) => {
 
   // Handle the sorting 
   const handleSort = (sortName) => {
-    // let newSortedResults = [...sortedResults]
+    let newSortedResults = cloneDeep(sortedResults);
+    console.log(newSortedResults);
     // switch (sortName) {
     //   case 'nameLowHigh':
     //     newSortedResults = sortNameLowHigh(newSortedResults);
@@ -500,6 +508,13 @@ const ResultsList = ({loading}) => {
     setHighlightedItems(selectedItems);
     setSortedResults(newSortedResults);
     setFormattedResults(newSortedResults);
+  }
+
+  const handleResultsRefresh = () => {
+    // Update rawResults with the fresh data
+    setRawResults(freshRawResults);
+    // Set freshRawResults back to null
+    setFreshRawResults(null)
   }
 
   // Filter the results whenever the activated filters change 
@@ -594,6 +609,10 @@ const ResultsList = ({loading}) => {
                 <div className={styles.top}>
                   <div>
                     <h5>Results</h5>
+                    {
+                      freshRawResults !== null && 
+                      <button onClick={()=>{handleResultsRefresh()}}>New Results Availible, click to Refresh</button>
+                    }
                     <p className={styles.resultsCount}>
                       Showing <span className={styles.range}>
                         <span className={styles.start}>{itemOffset + 1}</span>
