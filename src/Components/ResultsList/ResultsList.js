@@ -129,7 +129,7 @@ const ResultsList = ({loading}) => {
           setReturnedARAs(data.data);
           setIsFetchingResults(true);
         } else {
-          console.log(`No new ARAs returned data. Current status is: '${data.status}'`);
+          console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
         }
         if(data.status === 'success') {
           setIsFetchingARAStatus(false);
@@ -441,6 +441,10 @@ const ResultsList = ({loading}) => {
     return filterDisplay;
   }
 
+  const handleClearAllFilters = () => {
+    setActiveFilters([]);
+  }
+
   // Handle the sorting 
   const handleSort = (sortName) => {
     // let newSortedResults = [...sortedResults]
@@ -583,6 +587,7 @@ const ResultsList = ({loading}) => {
                 totalCount={sortedResults.length}
                 onFilter={handleFilter}
                 onHighlight={handleResultHighlight}
+                onClearAll={handleClearAllFilters}
                 activeFilters={activeFilters} 
               />
               <div className={styles.resultsHeader}>
@@ -646,13 +651,13 @@ const ResultsList = ({loading}) => {
                     </div>
                     {
                       isError &&
-                      <h5>There was an error when processing your query. Please try again.</h5>
+                      <h5 className={styles.errorText}>There was an error when processing your query. Please try again.</h5>
                     }
                     {
                       !isLoading &&
                       !isError &&
                       displayedResults.length === 0 && 
-                      <h5>No results could be found when processing your query. Please try again.</h5>
+                      <h5 className={styles.errorText}>No results could be found when processing your query. Please try again.</h5>
                     }
                     {
                       !isLoading &&
