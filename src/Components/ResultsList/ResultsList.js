@@ -225,7 +225,7 @@ const ResultsList = ({loading}) => {
     let newResults = [];
 
     // if the status is not error, handle setting the results
-    if(rawResults.status !== 'error' && rawResults.data.length > 0) 
+    if(rawResults.status !== 'error' && rawResults.data.results.length > 0) 
       newResults = getSummarizedResults(rawResults.data);
     
       // set formatted results
