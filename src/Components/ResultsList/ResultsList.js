@@ -590,6 +590,7 @@ const ResultsList = ({loading}) => {
             isLoading &&
             <LoadingBar 
               loading={isLoading}
+              useIcon
             />
           }
           {

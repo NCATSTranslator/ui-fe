@@ -2,6 +2,7 @@
 
 .loadingBar {
   grid-column: 1/3;
+  text-align: center;
   .barOuter {
     position: relative;
     border-radius: 5px;
@@ -22,5 +23,8 @@
         opacity: .2;
       }
     }
+  }
+  .loadingIcon {
+    width: 48px;
   }
 }
