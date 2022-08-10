@@ -54,7 +54,7 @@ const LoadingBar = ({loading, useIcon}) => {
       }
       <h6 className={styles.heading}>Loading...</h6>
       <p className={styles.text}>We will start showing you results as soon as we have them. You'll be prompted to refresh the page as we load more results.</p>
-      <p className={styles.text}>Navigating away from thie page will cancel your search.</p>
+      <p className={styles.text}>Navigating away from this page will cancel your search.</p>
     </div>
   )
 }
