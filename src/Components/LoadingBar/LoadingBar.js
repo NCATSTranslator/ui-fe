@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import loadingIcon from '../../Assets/Images/Loading/loading-icon.gif';
+import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './LoadingBar.module.scss';
 
 const LoadingBar = ({loading, useIcon}) => {

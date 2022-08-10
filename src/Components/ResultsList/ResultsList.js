@@ -17,6 +17,10 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighte
 import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter, formatBiolinkPredicate } from "../../Utilities/utilities";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import { cloneDeep } from "lodash";
+import loadingButtonIcon from '../../Assets/Images/Loading/loading-white.png';
+import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
+import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
+import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
 
 
 const ResultsList = ({loading}) => {
@@ -610,10 +614,6 @@ const ResultsList = ({loading}) => {
                 <div className={styles.top}>
                   <div>
                     <h5>Results</h5>
-                    {
-                      freshRawResults !== null && 
-                      <button onClick={()=>{handleResultsRefresh()}}>New Results Availible, click to Refresh</button>
-                    }
                     <p className={styles.resultsCount}>
                       Showing <span className={styles.range}>
                         <span className={styles.start}>{itemOffset + 1}</span>
@@ -628,9 +628,16 @@ const ResultsList = ({loading}) => {
                       <span> Results</span>
                     </p>
                   </div>
-                  <ResultsSorting 
-                    onSort={handleSort} 
-                  />
+                  <div className={styles.right}>
+                    {
+                      isFetchingARAStatus && 
+                      <img src={loadingIcon} className={styles.loadingIcon} alt="more results loading icon"/>
+                    }
+                    {
+                      !isFetchingARAStatus && 
+                      <CompleteIcon/>
+                    }
+                  </div>
                 </div>
                 {
                   activeFilters.length > 0 &&
@@ -726,6 +733,24 @@ const ResultsList = ({loading}) => {
                     nextLinkClassName={`${styles.prev} ${styles.button}`}
                     disabledLinkClassName={styles.disabled}
                   />
+                </div>
+              }
+              {
+                freshRawResults === null && isFetchingARAStatus &&
+                <div className={styles.loadingButtonContainer}>
+                  <button className={`${styles.loadingButton} ${styles.inactive}`}>
+                    <img src={loadingButtonIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
+                    Loading
+                  </button>
+                </div>
+              }
+              {
+                freshRawResults !== null && 
+                <div className={styles.loadingButtonContainer}>
+                  <button onClick={()=>{handleResultsRefresh()}} className={`${styles.loadingButton} ${styles.active}`}>
+                    < ResultsAvailableIcon/>
+                    Load New Results
+                  </button>
                 </div>
               }
             </>
