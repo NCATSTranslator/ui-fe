@@ -456,45 +456,45 @@ const ResultsList = ({loading}) => {
   const handleSort = (sortName) => {
     let newSortedResults = cloneDeep(sortedResults);
     console.log(newSortedResults);
-    // switch (sortName) {
-    //   case 'nameLowHigh':
-    //     newSortedResults = sortNameLowHigh(newSortedResults);
-    //     setIsSortedByName(true);
-    //     setIsSortedByEvidence(null);
-    //     break;
-    //   case 'nameHighLow':
-    //     newSortedResults = sortNameHighLow(newSortedResults);
-    //     setIsSortedByName(false);
-    //     setIsSortedByEvidence(null);
-    //     break;
-    //   case 'evidenceLowHigh':
-    //     newSortedResults = sortEvidenceLowHigh(newSortedResults);
-    //     setIsSortedByEvidence(true);
-    //     setIsSortedByName(null);
-    //     break;
-    //   case 'evidenceHighLow':
-    //     newSortedResults = sortEvidenceHighLow(newSortedResults);
-    //     setIsSortedByEvidence(false);
-    //     setIsSortedByName(null);
-    //     break;
-    //   case 'dateLowHigh':
-    //     newSortedResults = sortDateLowHigh(newSortedResults);
-    //     setIsSortedByEvidence(null);
-    //     setIsSortedByName(null);
-    //     break;
-    //   case 'dateHighLow':
-    //     newSortedResults = sortDateHighLow(newSortedResults);
-    //     setIsSortedByEvidence(null);
-    //     setIsSortedByName(null);
-    //     break;
-    //   default:
-    //     break;
-    // }
+    switch (sortName) {
+      case 'nameLowHigh':
+        newSortedResults = sortNameLowHigh(newSortedResults);
+        setIsSortedByName(true);
+        setIsSortedByEvidence(null);
+        break;
+      case 'nameHighLow':
+        newSortedResults = sortNameHighLow(newSortedResults);
+        setIsSortedByName(false);
+        setIsSortedByEvidence(null);
+        break;
+      case 'evidenceLowHigh':
+        newSortedResults = sortEvidenceLowHigh(newSortedResults);
+        setIsSortedByEvidence(false);
+        setIsSortedByName(null);
+        break;
+      case 'evidenceHighLow':
+        newSortedResults = sortEvidenceHighLow(newSortedResults);
+        setIsSortedByEvidence(true);
+        setIsSortedByName(null);
+        break;
+      // case 'dateLowHigh':
+      //   newSortedResults = sortDateLowHigh(newSortedResults);
+      //   setIsSortedByEvidence(null);
+      //   setIsSortedByName(null);
+      //   break;
+      // case 'dateHighLow':
+      //   newSortedResults = sortDateHighLow(newSortedResults);
+      //   setIsSortedByEvidence(null);
+      //   setIsSortedByName(null);
+      //   break;
+      default:
+        break;
+    }
     // if(selectedItems.length > 0) {
     //   newSortedResults = sortByHighlighted(newSortedResults, selectedItems);
     // }
-    // setSortedResults(newSortedResults);
-    // setFormattedResults(newSortedResults);
+    setSortedResults(newSortedResults);
+    setFormattedResults(newSortedResults);
   }
 
   // Handle highlighting of results
@@ -664,7 +664,7 @@ const ResultsList = ({loading}) => {
                       <div className={`${styles.head} ${styles.fdaHead}`}>FDA</div>
                       <div 
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
-                        onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}
+                        onClick={()=>{handleSort((isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow')}}
                         >
                         Evidence
                       </div>

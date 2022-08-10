@@ -1,19 +1,21 @@
 import { getLastPubYear } from "./utilities";
 
+// alphabetical order
 export const sortNameLowHigh = (items) => {
-  return items.sort((a, b) => a.subject.name.localeCompare(b.subject.name));
+  return items.sort((a, b) => !a.name - !b.name || a.name.localeCompare(b.name));
 }
 
+// reverse alphabetical order
 export const sortNameHighLow = (items) => {
-  return items.sort((a, b) => -a.subject.name.localeCompare(b.subject.name));
+  return items.sort((a, b) => -a.name.localeCompare(b.name));
 }
 
 export const sortEvidenceLowHigh = (items) => {
-  return items.sort((a, b) => a.edge.evidence.length - b.edge.evidence.length);
+  return items.sort((a, b) => a.evidence.length - b.evidence.length);
 }
 
 export const sortEvidenceHighLow = (items) => {
-  return items.sort((a, b) => b.edge.evidence.length - a.edge.evidence.length);
+  return items.sort((a, b) => b.evidence.length - a.evidence.length);
 }
 
 
