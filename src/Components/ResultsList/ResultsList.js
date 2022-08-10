@@ -16,6 +16,11 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighte
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
 import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter, formatBiolinkPredicate } from "../../Utilities/utilities";
 import LoadingBar from "../LoadingBar/LoadingBar";
+import { cloneDeep } from "lodash";
+import loadingButtonIcon from '../../Assets/Images/Loading/loading-white.png';
+import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
+import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
+import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
 
 
 const ResultsList = ({loading}) => {
@@ -57,6 +62,8 @@ const ResultsList = ({loading}) => {
   const [highlightedItems, setHighlightedItems] = useState([]);
   // Obj, original raw results from the BE
   const [rawResults, setRawResults] = useState(resultsState);
+  // Obj, original raw results from the BE
+  const [freshRawResults, setFreshRawResults] = useState(null);
   /* 
     Ref, used to track changes in results for useEffect with 'results' obj as dependency
     b/c react doesn't deep compare objects in useEffect hook
@@ -163,7 +170,12 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        setRawResults(data);
+        // if we've already gotten results before, set newRawResults instead to prevent original results from being overwritten
+        if(formattedResults.length > 0) {
+          setFreshRawResults(data);
+        } else {
+          setRawResults(data);
+        }
         setIsFetchingResults(false);
         // setIsError((data.status === 'error'));
       })
@@ -260,9 +272,8 @@ const ResultsList = ({loading}) => {
       let subjectNode = getNodeByCurie(item.subject, results);
       // Get the subject node's description
       let description = (subjectNode.description) ? subjectNode.description[0] : '';
-
+      // Get the subject node's fda approval status 
       let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
-      console.log(subjectNode)
       // Get a list of properly formatted paths (turn the path ids into their actual path objects)
       let formattedPaths = [];
       formattedPaths = getFormattedPaths(item.paths, results);
@@ -447,46 +458,47 @@ const ResultsList = ({loading}) => {
 
   // Handle the sorting 
   const handleSort = (sortName) => {
-    // let newSortedResults = [...sortedResults]
-    // switch (sortName) {
-    //   case 'nameLowHigh':
-    //     newSortedResults = sortNameLowHigh(newSortedResults);
-    //     setIsSortedByName(true);
-    //     setIsSortedByEvidence(null);
-    //     break;
-    //   case 'nameHighLow':
-    //     newSortedResults = sortNameHighLow(newSortedResults);
-    //     setIsSortedByName(false);
-    //     setIsSortedByEvidence(null);
-    //     break;
-    //   case 'evidenceLowHigh':
-    //     newSortedResults = sortEvidenceLowHigh(newSortedResults);
-    //     setIsSortedByEvidence(true);
-    //     setIsSortedByName(null);
-    //     break;
-    //   case 'evidenceHighLow':
-    //     newSortedResults = sortEvidenceHighLow(newSortedResults);
-    //     setIsSortedByEvidence(false);
-    //     setIsSortedByName(null);
-    //     break;
-    //   case 'dateLowHigh':
-    //     newSortedResults = sortDateLowHigh(newSortedResults);
-    //     setIsSortedByEvidence(null);
-    //     setIsSortedByName(null);
-    //     break;
-    //   case 'dateHighLow':
-    //     newSortedResults = sortDateHighLow(newSortedResults);
-    //     setIsSortedByEvidence(null);
-    //     setIsSortedByName(null);
-    //     break;
-    //   default:
-    //     break;
-    // }
+    let newSortedResults = cloneDeep(sortedResults);
+    console.log(newSortedResults);
+    switch (sortName) {
+      case 'nameLowHigh':
+        newSortedResults = sortNameLowHigh(newSortedResults);
+        setIsSortedByName(true);
+        setIsSortedByEvidence(null);
+        break;
+      case 'nameHighLow':
+        newSortedResults = sortNameHighLow(newSortedResults);
+        setIsSortedByName(false);
+        setIsSortedByEvidence(null);
+        break;
+      case 'evidenceLowHigh':
+        newSortedResults = sortEvidenceLowHigh(newSortedResults);
+        setIsSortedByEvidence(false);
+        setIsSortedByName(null);
+        break;
+      case 'evidenceHighLow':
+        newSortedResults = sortEvidenceHighLow(newSortedResults);
+        setIsSortedByEvidence(true);
+        setIsSortedByName(null);
+        break;
+      // case 'dateLowHigh':
+      //   newSortedResults = sortDateLowHigh(newSortedResults);
+      //   setIsSortedByEvidence(null);
+      //   setIsSortedByName(null);
+      //   break;
+      // case 'dateHighLow':
+      //   newSortedResults = sortDateHighLow(newSortedResults);
+      //   setIsSortedByEvidence(null);
+      //   setIsSortedByName(null);
+      //   break;
+      default:
+        break;
+    }
     // if(selectedItems.length > 0) {
     //   newSortedResults = sortByHighlighted(newSortedResults, selectedItems);
     // }
-    // setSortedResults(newSortedResults);
-    // setFormattedResults(newSortedResults);
+    setSortedResults(newSortedResults);
+    setFormattedResults(newSortedResults);
   }
 
   // Handle highlighting of results
@@ -500,6 +512,13 @@ const ResultsList = ({loading}) => {
     setHighlightedItems(selectedItems);
     setSortedResults(newSortedResults);
     setFormattedResults(newSortedResults);
+  }
+
+  const handleResultsRefresh = () => {
+    // Update rawResults with the fresh data
+    setRawResults(freshRawResults);
+    // Set freshRawResults back to null
+    setFreshRawResults(null)
   }
 
   // Filter the results whenever the activated filters change 
@@ -575,6 +594,7 @@ const ResultsList = ({loading}) => {
             isLoading &&
             <LoadingBar 
               loading={isLoading}
+              useIcon
             />
           }
           {
@@ -608,9 +628,16 @@ const ResultsList = ({loading}) => {
                       <span> Results</span>
                     </p>
                   </div>
-                  <ResultsSorting 
-                    onSort={handleSort} 
-                  />
+                  <div className={styles.right}>
+                    {
+                      isFetchingARAStatus && 
+                      <img src={loadingIcon} className={styles.loadingIcon} alt="more results loading icon"/>
+                    }
+                    {
+                      !isFetchingARAStatus && 
+                      <CompleteIcon/>
+                    }
+                  </div>
                 </div>
                 {
                   activeFilters.length > 0 &&
@@ -644,7 +671,7 @@ const ResultsList = ({loading}) => {
                       <div className={`${styles.head} ${styles.fdaHead}`}>FDA</div>
                       <div 
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
-                        onClick={()=>{handleSort((isSortedByEvidence)?'evidenceHighLow': 'evidenceLowHigh')}}
+                        onClick={()=>{handleSort((isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow')}}
                         >
                         Evidence
                       </div>
@@ -706,6 +733,24 @@ const ResultsList = ({loading}) => {
                     nextLinkClassName={`${styles.prev} ${styles.button}`}
                     disabledLinkClassName={styles.disabled}
                   />
+                </div>
+              }
+              {
+                freshRawResults === null && isFetchingARAStatus &&
+                <div className={styles.loadingButtonContainer}>
+                  <button className={`${styles.loadingButton} ${styles.inactive}`}>
+                    <img src={loadingButtonIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
+                    Loading
+                  </button>
+                </div>
+              }
+              {
+                freshRawResults !== null && 
+                <div className={styles.loadingButtonContainer}>
+                  <button onClick={()=>{handleResultsRefresh()}} className={`${styles.loadingButton} ${styles.active}`}>
+                    < ResultsAvailableIcon/>
+                    Load New Results
+                  </button>
                 </div>
               }
             </>

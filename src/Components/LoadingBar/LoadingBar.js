@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from "react";
+import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './LoadingBar.module.scss';
 
-const LoadingBar = ({loading}) => {
+const LoadingBar = ({loading, useIcon}) => {
 
   // Int, represents results progress bar
   const [progress, setProgress] = useState(1);
@@ -10,7 +11,7 @@ const LoadingBar = ({loading}) => {
 
   // Spoofs progress bar
   useEffect(() => {
-    if(progress >= 100 || !loading) 
+    if(progress >= 100 || !loading || useIcon) 
       return;
 
     let randomTimeout = Math.random() * (5000 - 500) + 500;
@@ -27,7 +28,7 @@ const LoadingBar = ({loading}) => {
 
   // Alternates progress bar opacity class on set timeout
   useEffect(() => {
-    if(!loading) 
+    if(!loading || useIcon) 
       return;
 
     let timeout = 1500;
@@ -38,14 +39,19 @@ const LoadingBar = ({loading}) => {
   }, [opacity, loading]);
 
   return (
-    <div className={styles.loadingBar}>
-      <div className={styles.barOuter}>
-        <div 
-          className={`${styles.barInner} ${opacity ? styles.dark: styles.light}`} 
-          style={{width: `${progress}%`}}
-          >  
+    <div className={styles.loadingBar}> 
+      { useIcon && 
+        <img src={loadingIcon} alt="loading icon" className={styles.loadingIcon}/>
+      }
+      { !useIcon &&
+        <div className={styles.barOuter}>
+          <div 
+            className={`${styles.barInner} ${opacity ? styles.dark: styles.light}`} 
+            style={{width: `${progress}%`}}
+            >  
+          </div>
         </div>
-      </div>
+      }
     </div>
   )
 }
