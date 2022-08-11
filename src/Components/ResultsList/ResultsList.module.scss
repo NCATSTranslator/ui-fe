@@ -105,6 +105,23 @@
       pointer-events: all;
     }
   }
+  .shareButton {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    position: relative;
+    margin: 0 0 0 20px;
+    svg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin-right: 0;
+      path {
+        fill: $white;
+      }
+    }
+  }
 }
 
 @-moz-keyframes spin { 
@@ -189,6 +206,10 @@
     display: flex;
     width: 100%;
     justify-content: space-between;
+    align-items: center;
+  }
+  .right {
+    display: flex;
     align-items: center;
   }
 }

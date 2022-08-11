@@ -11,7 +11,7 @@ import _ from "lodash";
 import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import styles from './Query3.module.scss';
 
-const Query3 = ({results, handleAdd, handleRemove, loading}) => {
+const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
 
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
@@ -44,6 +44,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   const [queryItems, setQueryItems] = useState(storedQuery);
   // Array, for use in useEffect hooks with queryItems as a dependency
   var prevQueryItems = useRef(storedQuery);
+
   let presetInputText = 
     (prevQueryItems.current[prevQueryItems.current.length - 1] !== undefined
       && isResults) 
@@ -94,11 +95,17 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
   }
 
   useEffect(() => {
-    if(selectedDisease !== null) {
+    if(selectedDisease) {
       setInputText(selectedDisease.label);
       updateQueryItems(selectedDisease.label);
     }
   }, [selectedDisease]);
+
+  useEffect(() => {
+    if(presetDisease) {
+      setSelectedDisease(presetDisease);
+    }
+  }, [presetDisease]);
 
   /* 
     When the query items change, update the current query in the app state 
@@ -202,7 +209,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading}) => {
 
   // If isResults is true send us to the results page and set loading to true via query param
   useEffect(() => {
-    if(isResults) {
+    if(isResults && !window.location.href.includes('results')) {
       navigate('/results?loading=true');
     }
   }, [isResults, navigate]);

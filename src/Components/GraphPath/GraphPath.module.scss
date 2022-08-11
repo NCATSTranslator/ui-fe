@@ -5,6 +5,9 @@
   width: 140px;
   border-radius: $defaultBorderRadius;
   margin-right: 4px;
+  svg {
+    min-width: 24px;
+  }
 }
 .name,.pathContainer,.target {
   display: flex;
@@ -34,9 +37,7 @@
     }
   }
 }
-svg {
-  min-width: 24px;
-}
+
 .pathContainer {
   padding: 7px 0;
   position: relative;
