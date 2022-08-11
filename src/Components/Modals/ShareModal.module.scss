@@ -1,0 +1,21 @@
+@import "../../Assets/Styles/variables";
+
+.copyContainer {
+  display: flex;
+  justify-content: space-between;
+  .url {
+    width: 100%;
+    border: 1px solid $midGray;
+    padding: 10px 8px;
+    font-weight: 700;
+    color: $purpleOne; 
+    margin-right: $xxs;
+    border-radius: $defaultBorderRadius;
+    margin: 0;
+  }
+  button {
+    white-space: nowrap;
+    padding: 10px 8px;
+    margin: 0;
+  }
+}

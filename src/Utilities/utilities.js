@@ -8,6 +8,9 @@ import {ReactComponent as Treats} from '../Icons/Queries/Treats.svg';
 import {ReactComponent as Nodes} from '../Icons/Queries/Nodes.svg';
 import {ReactComponent as Associated} from '../Icons/Queries/Associated With.svg';
 import {ReactComponent as Concept} from '../Icons/Navigation/Question.svg';
+import {ReactComponent as Protein} from '../Icons/protein.svg';
+import {ReactComponent as Drug} from '../Icons/drug.svg';
+import {ReactComponent as SmallMolecule} from '../Icons/small-molecule.svg';
 
 export const getIcon = (category) => {
   var icon = <Chemical/>;
@@ -18,8 +21,17 @@ export const getIcon = (category) => {
     case 'phenotype':
       icon = <Phenotype/>;
       break;
+    case 'biolink:Protein':
+      icon = <Protein/>;
+      break;
+    case 'biolink:Drug':
+      icon = <Drug/>;
+      break;
     case 'biolink:Disease':
       icon = <Disease/>;
+      break;
+    case 'biolink:SmallMolecule':
+      icon = <SmallMolecule/>;
       break;
     case 'regulation':
       icon = <Regulation/>;
@@ -52,7 +64,7 @@ export const capitalizeFirstLetter = (string) => {
 export const capitalizeAllWords = (string) => {
   if(!string)
     return ''; 
-    
+
   if(string.toUpperCase() === string)
     return string;
 

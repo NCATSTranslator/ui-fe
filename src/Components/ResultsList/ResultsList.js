@@ -6,6 +6,7 @@ import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsSorting from "../ResultsSorting/ResultsSorting";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
+import ShareModal from "../Modals/ShareModal";
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux';
@@ -21,12 +22,14 @@ import loadingButtonIcon from '../../Assets/Images/Loading/loading-white.png';
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
+import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
 
 
 const ResultsList = ({loading}) => {
 
   // URL search params
   const loadingParam = new URLSearchParams(window.location.search).get("loading")
+  const queryIDParam = new URLSearchParams(window.location.search).get("q")
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
@@ -36,22 +39,23 @@ const ResultsList = ({loading}) => {
 
   // Bool, did the results return an error
   const [isError, setIsError] = useState(false);
+  // Int, current query id from state
+  const currentQueryResultsIDFromState = useSelector(currentQueryResultsID);
+  // Int, current query id based on whether url param exists
+  const currentQueryID = (queryIDParam) ? queryIDParam : currentQueryResultsIDFromState;
   // Bool, are the results still loading
-  const [isLoading, setIsLoading] = useState(loading);
-  // Bool, should results be fetched
-  const [isFetchingARAStatus, setIsFetchingARAStatus] = useState(loading);
+  const presetIsLoading = (queryIDParam) ? true : loading;
+  const [isLoading, setIsLoading] = useState(presetIsLoading);
+  // Bool, should ara status be fetched
+  const [isFetchingARAStatus, setIsFetchingARAStatus] = useState(presetIsLoading);
   // Bool, should results be fetched
   const [isFetchingResults, setIsFetchingResults] = useState(false);
-  // Bool, should results be fetched
-  const [shouldRetrieveFreshResults, setShouldRetrieveFreshResults] = useState(true);
   // Bool, are the results currently sorted by name
   const [isSortedByName, setIsSortedByName] = useState(null);
   // Bool, are the results currently sorted by evidence count
   const [isSortedByEvidence, setIsSortedByEvidence] = useState(null);
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
-  // Int, current query id
-  const currentQueryID = useSelector(currentQueryResultsID);
   // Array, evidence relating to the item last clicked
   const [currentEvidence, setCurrentEvidence] = useState([]);
   // Bool, is the select all checkbox checked
@@ -83,8 +87,19 @@ const ResultsList = ({loading}) => {
   const [itemOffset, setItemOffset] = useState(0);
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
-
+  // Array, aras that have returned data
   const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
+
+  /*
+    Obj, {label: ''}, used to set input text, determined by results object
+  */ 
+  const [presetDisease, setPresetDisease] = useState(null);
+
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+
+  const handleShareModalClose = () => {
+    setShareModalOpen(false);
+  }
 
   // Initialize queryClient for React Query to fetch results
   const queryClient = new QueryClient();
@@ -138,7 +153,7 @@ const ResultsList = ({loading}) => {
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
         }
-        if(data.status === 'success') {
+        if(data.status === 'success' && formattedResults.length > 0) {
           setIsFetchingARAStatus(false);
           setIsLoading(false);
         }
@@ -267,7 +282,7 @@ const ResultsList = ({loading}) => {
     // // for each individual result item 
     for(const item of results.results) {
       // Get the object node's name
-      let objectNodeName = getNodeByCurie(item.object, results).names[0]; 
+      let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]); 
       // Get the subject node's name
       let subjectNode = getNodeByCurie(item.subject, results);
       // Get the subject node's description
@@ -281,12 +296,15 @@ const ResultsList = ({loading}) => {
       let formattedItem = {
         name: itemName,
         paths: formattedPaths,
-        object: capitalizeAllWords(objectNodeName),
+        object: objectNodeName,
         description: description,
         evidence: getFormattedEvidence(formattedPaths, results),
         fdaInfo: fdaInfo
       }
       newSummarizedResults.push(formattedItem);
+      if(presetDisease === null) {
+        setPresetDisease({label: objectNodeName});
+      }
     }
     return newSummarizedResults;
   }
@@ -390,7 +408,7 @@ const ResultsList = ({loading}) => {
   }
 
   // Click handler for the modal close button
-  const handleModalClose = () => {
+  const handleEvidenceModalClose = () => {
     setEvidenceOpen(false);
   }
 
@@ -582,13 +600,13 @@ const ResultsList = ({loading}) => {
     <QueryClientProvider client={queryClient}>
       <EvidenceModal 
         isOpen={evidenceOpen} 
-        onClose={()=>handleModalClose()}
+        onClose={()=>handleEvidenceModalClose()}
         className="evidence-modal"
         currentEvidence={currentEvidence}
         results={rawResults}
       />
       <div className={styles.resultsList}>
-        <Query3 results loading/>
+        <Query3 results loading presetDisease={presetDisease}/>
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
@@ -637,6 +655,18 @@ const ResultsList = ({loading}) => {
                       !isFetchingARAStatus && 
                       <CompleteIcon/>
                     }
+                    <button 
+                      className={styles.shareButton} 
+                      onClick={()=>{setShareModalOpen(true)}}
+                      >
+                        <ShareIcon/>
+                    </button>
+                    <ShareModal 
+                      isOpen={shareModalOpen} 
+                      onClose={()=>handleShareModalClose()} 
+                      qid={currentQueryID}
+                    />
+
                   </div>
                 </div>
                 {

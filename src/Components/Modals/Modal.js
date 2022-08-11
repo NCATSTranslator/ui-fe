@@ -8,17 +8,17 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
   var modalIsOpen = (startOpen) ? styles.true : styles.false ;
 
   return (
-      <div className={`${styles.modalWindow} ${modalIsOpen} ${className}`}>
-        <div className={`${styles.modalContainer} ${containerClass}`}>
-          <div className={styles.inner}>
-            {children}
-          </div>
-          {
-            !hideCloseButton && 
-            <div className={styles.closeContainer}><button className={styles.closeButton} onClick={onClose}><Close/></button></div>
-          }
+    <div className={`${styles.modalWindow} ${modalIsOpen} ${className}`}>
+      <div className={`${styles.modalContainer} ${containerClass}`}>
+        <div className={styles.inner}>
+          {children}
         </div>
+        {
+          !hideCloseButton && 
+          <div className={styles.closeContainer}><button className={styles.closeButton} onClick={onClose}><Close/></button></div>
+        }
       </div>
+    </div>
   );
 }
 
