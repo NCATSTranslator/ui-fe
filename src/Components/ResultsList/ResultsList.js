@@ -379,13 +379,12 @@ const ResultsList = ({loading}) => {
     let match = false;
     let matchIndex = -1;
     let items = [...selectedItems];
-    items.map((element, i) => {         
+    for(const [element, i] of items.entries() ) {
       if(element.subject === item.subject && element.predicate === item.predicate) {
         match = true;
         matchIndex = i;
       }
-      return element;
-    });
+    }
     // if there's no match, add the item to the array of selected items
     if(!match) {
       items.push(item);
