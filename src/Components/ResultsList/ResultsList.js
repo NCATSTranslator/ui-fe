@@ -83,6 +83,8 @@ const ResultsList = ({loading}) => {
   const [endResultIndex, setEndResultIndex] = useState(9);
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
+  // Int, number of pages
+  const [currentPage, setCurrentPage] = useState(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
   // Array, currently active filters
@@ -124,6 +126,7 @@ const ResultsList = ({loading}) => {
     console.log(
       `User requested page number ${event.selected}, which is offset ${newOffset}`
     );
+    setCurrentPage(event.selected);
     setItemOffset(newOffset);
   };
 
@@ -515,8 +518,10 @@ const ResultsList = ({loading}) => {
     // if(selectedItems.length > 0) {
     //   newSortedResults = sortByHighlighted(newSortedResults, selectedItems);
     // }
+    
     setSortedResults(newSortedResults);
     setFormattedResults(newSortedResults);
+    handlePageClick({selected: 0});
   }
 
   // Handle highlighting of results
@@ -541,48 +546,48 @@ const ResultsList = ({loading}) => {
 
   // Filter the results whenever the activated filters change 
   useEffect(() => {
-    // // If there are no active filters, get the full result set
-    // if(activeFilters.length <= 0) {
-    //   setFormattedResults(sortedResults);
-    //   return;
-    // }
+    // If there are no active filters, get the full result set
+    if(activeFilters.length <= 0) {
+      setFormattedResults(sortedResults);
+      return;
+    }
 
-    // let filteredResults = [];
-    // let originalResults = [...sortedResults];
-    // /* 
-    //   For each result, check against each filter. If a filter is triggered, 
-    //   set addElement to false and don't add the element to the filtered results
-    // */  
-    // originalResults.forEach((element) => {
-    //   let addElement = true;
-    //   activeFilters.forEach((filter) => {
-    //     switch (filter.tag) {
-    //       // FDA approved filter 
-    //       case 'fda':
-    //         if(element.subject.fda_info === null)
-    //           addElement = false;
-    //         break;
-    //       // Minimum evidence filter
-    //       case 'evi':
-    //         if(element.edge.evidence.length < filter.value)
-    //           addElement = false;
-    //         break;
-    //       // Date Range filter
-    //       case 'date':
-    //         let lastPubYear = getLastPubYear(element.edge.last_publication_date);
-    //         if(lastPubYear < filter.value[0] || lastPubYear > filter.value[1])
-    //           addElement = false;
-    //         break;
-    //       default:
-    //         break;
-    //     }
-    //   })
-    //   if(addElement) {
-    //     filteredResults.push(element);
-    //   }
-    // })
-    // // Set the formatted results to the newly filtered results
-    // setFormattedResults(filteredResults);
+    let filteredResults = [];
+    let originalResults = [...sortedResults];
+    /* 
+      For each result, check against each filter. If a filter is triggered, 
+      set addElement to false and don't add the element to the filtered results
+    */  
+    for(const element of originalResults) {
+      let addElement = true;
+      for(const filter of activeFilters) {
+        switch (filter.tag) {
+          // FDA approved filter 
+          case 'fda':
+            if(!element.fdaInfo)
+              addElement = false;
+            break;
+          // Minimum evidence filter
+          case 'evi':
+            if(element.evidence.length < filter.value)
+              addElement = false;
+            break;
+          // Date Range filter
+          case 'date':
+            // let lastPubYear = getLastPubYear(element.edge.last_publication_date);
+            // if(lastPubYear < filter.value[0] || lastPubYear > filter.value[1])
+            //   addElement = false;
+            break;
+          default:
+            break;
+        }
+      }
+      if(addElement) {
+        filteredResults.push(element);
+      }
+    }
+    // Set the formatted results to the newly filtered results
+    setFormattedResults(filteredResults);
 
     /*
       triggers on filter change and on sorting change in order to allow user to change 
@@ -714,7 +719,7 @@ const ResultsList = ({loading}) => {
                       !isLoading &&
                       !isError &&
                       displayedResults.length === 0 && 
-                      <h5 className={styles.errorText}>No results could be found when processing your query. Please try again.</h5>
+                      <h5 className={styles.errorText}>No results available.</h5>
                     }
                     {
                       !isLoading &&
@@ -723,22 +728,17 @@ const ResultsList = ({loading}) => {
                       displayedResults.map((item, i) => {
                         let checked = (selectedItems.length > 0 && selectedItems.includes(item)) ? true : false;
                         let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
-                        let hasName = (item.name !== null && item.name !== undefined);
-                        // if(hasName) {
-                          return(
-                            <ResultsItem 
-                              key={i} 
-                              checked={checked}
-                              highlighted={highlighted}
-                              item={item} 
-                              allSelected={allSelected}
-                              handleSelected={()=>handleSelected(item)}
-                              activateEvidence={()=>activateEvidence(item.evidence)} 
-                            />
-                          )
-                        // } else {
-                        //   return '';
-                        // }
+                        return (
+                          <ResultsItem 
+                            key={i} 
+                            checked={checked}
+                            highlighted={highlighted}
+                            item={item} 
+                            allSelected={allSelected}
+                            handleSelected={()=>handleSelected(item)}
+                            activateEvidence={()=>activateEvidence(item.evidence)} 
+                          />
+                        )
                       })
                     }
                   </div>
@@ -762,6 +762,7 @@ const ResultsList = ({loading}) => {
                     previousLinkClassName={`${styles.prev} ${styles.button}`}
                     nextLinkClassName={`${styles.prev} ${styles.button}`}
                     disabledLinkClassName={styles.disabled}
+                    forcePage={currentPage}
                   />
                 </div>
               }
