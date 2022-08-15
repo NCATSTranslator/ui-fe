@@ -1,0 +1,17 @@
+@import "../../Assets/Styles/variables";
+
+// Checkbox 
+label.checkbox {
+  .circle {
+    border-radius: 2.5px;
+    &:before {
+      display: grid;
+      place-content: center;
+      content: '\2713';
+      color: $white;
+      width: 18px;
+      height: 18px;
+      border-radius: 2.5px;
+    }
+  }
+}

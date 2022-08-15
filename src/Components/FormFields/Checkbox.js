@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from "react";
+import styles from './Checkbox.module.scss';
 
 const Checkbox = ({name, value, checked, children, handleClick}) => {
 
   const [isChecked, setIsChecked] = useState(checked);
 
-  let isCheckedClass = (isChecked) ? 'checked' : 'unchecked';
+  let isCheckedClass = (isChecked) ? styles.checked : styles.unchecked;
 
   const handleChange = () => {
     setIsChecked(!isChecked);
@@ -17,8 +18,8 @@ const Checkbox = ({name, value, checked, children, handleClick}) => {
 
   return (
 
-    <label className={`checkbox ${isCheckedClass}`}>
-      <span className="circle" ></span>
+    <label className={`${styles.checkbox} ${isCheckedClass}`}>
+      <span className={styles.circle}></span>
       <input type="checkbox" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} />
       <span>{children}</span>
     </label>

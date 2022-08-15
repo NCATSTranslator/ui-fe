@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react";
 import AnimateHeight from "react-animate-height";
+import styles from './Select.module.scss';
 
 const Select = ({label, subtitle, value, name, size, error, errorText, handleChange, noanimate, children}) => {
 
@@ -7,8 +8,8 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
   const [selectedItem, setSelectedItem] = useState(value);
   const [selectOpen, setSelectOpen] = useState(false);
   const [height, setHeight] = useState(0);
-  let openClass = (selectOpen) ? 'open' : 'closed';
-  let animateClass = (noanimate) ? 'no-animate' : 'animate';
+  let openClass = (selectOpen) ? styles.open : styles.closed;
+  let animateClass = (noanimate) ? styles.noAnimate : styles.animate;
 
   size = (size) ? size : 's';
 
@@ -36,10 +37,10 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
 
   return (
     <>
-      <label className={`select ${size} ${animateClass}`} > 
-        {label && <span className="label">{label}</span>}
-        {subtitle && <span className="subtitle">{subtitle}</span>}
-        <div className={`select-container ${openClass}`}>
+      <label className={`${styles.select} ${size} ${animateClass}`} > 
+        {label && <span className={styles.label}>{label}</span>}
+        {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+        <div className={`${styles.selectContainer} ${openClass}`}>
           <select type="text" 
               name={name} 
               onMouseDown={handleSelectClick} 
@@ -53,12 +54,12 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
           <span className="icon" onMouseDown={handleSelectClick}></span>
           {
             noanimate && 
-            <div className={`select-list ${openClass}`}>
+            <div className={`${styles.selectList} ${openClass}`}>
               <div>
               {
               children.map((child, i) => {
                 return(
-                  <span onClick={handleOptionClick} key={i} className="option" data-value={child.props.value}>{child.props.children}</span>
+                  <span onClick={handleOptionClick} key={i} className={styles.option} data-value={child.props.value}>{child.props.children}</span>
                   );
                 })
               }
@@ -67,13 +68,20 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
           }
           {
             !noanimate &&
-            <AnimateHeight className={`select-list ${openClass}`}
+            <AnimateHeight className={`${styles.selectList} ${openClass}`}
               duration={250}
               height={height}
             > {
               children.map((child, i) => {
                 return(
-                  <span onClick={handleOptionClick} key={i} className="option" data-value={child.props.value}>{child.props.children}</span>
+                  <span 
+                    onClick={handleOptionClick} 
+                    key={i} 
+                    className={styles.option} 
+                    data-value={child.props.value}
+                    >
+                    {child.props.children}
+                  </span>
                   );
                 })
               }
@@ -81,7 +89,7 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
           }
 
         </div>
-        {error && <span className="error-text">{errorText}</span>}
+        {error && <span className={styles.errorText}>{errorText}</span>}
       </label>
     </>
   );

@@ -1,0 +1,139 @@
+@import "../../Assets/Styles/variables";
+
+// Alert
+@keyframes alert-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.alert {
+  .alertContainer {
+    width: 300px;
+    border-radius: $defaultBorderRadius;
+    border: 1px solid $black;
+    position: absolute;
+    z-index: 50;
+    background-color: $white;
+    box-shadow: $dropShadowHover;
+    &.fadeOut {
+      animation: alert-fade-out .5s ease 0s 1;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .container {
+      display: grid;
+      grid-column-gap: $s;
+      grid-template-columns: auto minmax(0,1fr);
+      align-items: center;
+      padding: 24px;
+      position: relative;
+      .close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: transparent;
+        margin: 0;
+        padding:0;
+        svg {
+          margin: 0;
+          width: 40px;
+          height: 40px;
+          path {
+            stroke: $darkGray;
+            transition: all .25s ease;
+          }
+        }
+        &:hover {
+          box-shadow: none;
+          svg path {
+            stroke: $black;
+          }
+        }
+      }
+    }
+    &.success {
+      border-color: $green;
+      svg, svg path {
+        fill: $green;
+        stroke: $white;
+      }
+      svg circle {
+        stroke: $green;
+      }
+      h1,h2,h3,h4,.h1,.h2,.h3,.h4 {
+        color: $green;
+      }
+    }
+    &.warning {
+      border-color: $yellow;
+      svg {
+        path {
+          fill: $white;
+          stroke: $white;
+          &:nth-of-type(2) {
+            fill: $yellow;
+          }
+        }
+        circle {
+          stroke: $yellow;
+          fill: $yellow;
+        }
+      }
+      h1,h2,h3,h4,.h1,.h2,.h3,.h4 {
+        color: $yellow;
+      }
+    }
+    &.info {
+      svg, svg path {
+        fill: $black;
+        stroke: $white;
+      }
+      svg circle {
+        stroke: $black;
+      }
+      h1,h2,h3,h4,.h1,.h2,.h3,.h4 {
+        color: $black;
+      }
+    }
+    &.error {
+      border-color: $red;
+      svg, svg path {
+        fill: $red;
+        stroke: $white;
+      }
+      svg circle {
+        stroke: $red;
+      }
+      h1,h2,h3,h4,.h1,.h2,.h3,.h4 {
+        color: $red;
+      }
+    }
+    &.middle {
+      left: 50%;
+      transform: translateX(-50%);
+      top: 45vh;  
+    }
+    &.top,&.bottom,&.middle {
+      &.left {
+        left: 5vh;
+        transform: none;
+      }
+      &.right {
+        left: unset;
+        right: 5vh;
+        transform: none;
+      }
+
+    }
+    &.top {
+      top: 5vh;
+    }
+    &.bottom {
+      bottom: 5vh;
+      top: unset;
+    }
+  }
+}

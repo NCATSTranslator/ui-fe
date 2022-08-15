@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from "react";
+import styles from './QueryItem.module.scss'
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 import { getIcon } from "../../Utilities/utilities";
@@ -6,6 +7,7 @@ import { getIcon } from "../../Utilities/utilities";
 const QueryItem = ({ handleClose, handleChange, item, inputKey, name, children, hasInput, isSelected}) => {
 
   const [inputActive, setInputActive] = useState(isSelected);
+  const inputActiveClass = (inputActive) ? styles.true : styles.false;
   const inputRef = useRef(null);
   const itemName = (item.value) ? item.value : name;
   
@@ -22,16 +24,16 @@ const QueryItem = ({ handleClose, handleChange, item, inputKey, name, children, 
   }, [inputActive])
 
   return (
-    <OutsideClickHandler onOutsideClick={()=>setInputActive(false) } className={`query-item ${inputActive}`}>
+    <OutsideClickHandler onOutsideClick={()=>setInputActive(false) } className={`${styles.queryItem} ${inputActiveClass}`}>
       {icon}
       <span onClick={handleClick} >
         {hasInput &&
-          <input type="text" className="input" ref={inputRef} onChange={handleChange} data-inputkey={inputKey} />
+          <input type="text" className={styles.input} ref={inputRef} onChange={handleChange} data-inputkey={inputKey} />
         }
-        <div className="query-item-container"><p>{itemName}</p></div>
+        <div className={styles.queryItemContainer}><p>{itemName}</p></div>
         {children}
       </span>
-      <div onClick={handleClose} className="remove"><Close/></div>
+      <div onClick={handleClose} className={styles.remove}><Close/></div>
     </OutsideClickHandler>
   );
 }

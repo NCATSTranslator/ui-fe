@@ -1,0 +1,59 @@
+@import "../../Assets/Styles/variables";
+
+// Query Item 
+.queryItem {
+  position: relative;
+  display: flex;
+  padding: $xxs $xs;
+  align-items: center;
+  border-radius: $defaultBorderRadius;
+  transition: box-shadow .25s ease, min-width .5s ease, padding .5s ease;
+  width: auto;
+  min-width: 0;
+  .queryItemContainer {
+    p {
+      margin: 0;
+    }
+  }
+  .remove {
+    transition: $defaultAnim;
+    opacity: 0;
+    visibility: hidden;
+    box-shadow: none;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
+  &:hover, &.true {
+    box-shadow: $dropShadowHover;
+    padding-right: $m;
+    .remove {
+      opacity: 1;
+      visibility: visible;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  .input {
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    right: 24px;
+    bottom: 0;
+    left: 32px;
+  }
+  &.true {
+    min-width: 220px;
+    .input {
+      visibility: visible;
+      pointer-events: all;
+      background-color: white;
+      border: none;
+    }
+  }
+}

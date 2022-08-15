@@ -1,0 +1,19 @@
+@import "../../Assets/Styles/variables";
+
+.footer {
+  background-color: $lightGray;
+  .container {
+    max-width: $maxwidth;
+    margin: 0 auto;
+    nav {
+      display: flex;
+      justify-content: space-evenly;
+      a {
+        color: $black;
+        text-decoration: none;
+        line-height: 1;
+        font-size: $bodyTwoSize;
+      }
+    }
+  }
+}
