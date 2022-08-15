@@ -17,7 +17,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighte
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
 import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter, formatBiolinkPredicate } from "../../Utilities/utilities";
 import LoadingBar from "../LoadingBar/LoadingBar";
-import { cloneDeep } from "lodash";
+import _, { cloneDeep } from "lodash";
 import loadingButtonIcon from '../../Assets/Images/Loading/loading-white.png';
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
@@ -297,6 +297,7 @@ const ResultsList = ({loading}) => {
       formattedPaths = getFormattedPaths(item.paths, results);
       let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
       let formattedItem = {
+        id: _.uniqueId(),
         name: itemName,
         paths: formattedPaths,
         object: objectNodeName,
@@ -369,39 +370,32 @@ const ResultsList = ({loading}) => {
           }
       }
     }
-    // console.log(formattedEvidence);
 
     return formattedEvidence;
   }
 
   // Click handler for item select checkboxes 
   const handleSelected = (item) => {
-    let match = false;
-    let matchIndex = -1;
     let items = [...selectedItems];
-    for(const [element, i] of items.entries() ) {
-      if(element.subject === item.subject && element.predicate === item.predicate) {
-        match = true;
-        matchIndex = i;
-      }
-    }
-    // if there's no match, add the item to the array of selected items
-    if(!match) {
-      items.push(item);
-      setSelectedItems(items);
-    // if there is a match, remove the item from the array of selected items
-    } else {
+    let matchIndex = items.indexOf(item.id);
+    if(matchIndex !== -1) {
       items.splice(matchIndex, 1);
       setSelectedItems(items);
       if(items.length <= 0)
         setAllSelected(false)
+    } else {
+      items.push(item.id);
+      setSelectedItems(items);
     }
   }
 
   // Click handler for select all checkbox 
-  const handleSelectAll = (items) => {
+  const handleSelectAll = () => {
+    let newSelectedItems = formattedResults.map((item)=>{
+      return item.id;
+    })
     if(!allSelected) {
-      setSelectedItems(items);
+      setSelectedItems(newSelectedItems);
       setAllSelected(true);
     } else {
       setSelectedItems([]);
@@ -594,12 +588,6 @@ const ResultsList = ({loading}) => {
     */
   }, [activeFilters, sortedResults]);
 
-  useEffect(() => {
-    if(selectedItems.length <= 0)
-      return;
-    console.log(selectedItems)
-  }, [selectedItems]);
-
   return (
     <QueryClientProvider client={queryClient}>
       <EvidenceModal 
@@ -694,7 +682,7 @@ const ResultsList = ({loading}) => {
                   <div className={styles.tableBody}>
                     <div className={`${styles.tableHead}`}>
                       <div className={`${styles.checkboxContainer} ${styles.head}`}>
-                        <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll(formattedResults);}}/>
+                        <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll()}}/>
                       </div>
                       <div 
                         className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`} 
@@ -725,7 +713,7 @@ const ResultsList = ({loading}) => {
                       !isError &&
                       displayedResults.length > 0 && 
                       displayedResults.map((item, i) => {
-                        let checked = (selectedItems.length > 0 && selectedItems.includes(item)) ? true : false;
+                        let checked = (selectedItems.length > 0 && selectedItems.includes(item.id)) ? true : false;
                         let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
                         return (
                           <ResultsItem 
