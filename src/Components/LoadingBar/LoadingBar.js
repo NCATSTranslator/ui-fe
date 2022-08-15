@@ -24,7 +24,7 @@ const LoadingBar = ({loading, useIcon}) => {
       }
     }, randomTimeout);
     return () => clearTimeout(timer);
-  }, [progress, loading]);
+  }, [progress, loading, useIcon]);
 
   // Alternates progress bar opacity class on set timeout
   useEffect(() => {
@@ -36,7 +36,7 @@ const LoadingBar = ({loading, useIcon}) => {
       setOpacity(!opacity);
     }, timeout);
     return () => clearTimeout(timer);
-  }, [opacity, loading]);
+  }, [opacity, loading, useIcon]);
 
   return (
     <div className={styles.loadingBar}> 

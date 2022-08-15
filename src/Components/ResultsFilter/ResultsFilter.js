@@ -1,12 +1,12 @@
 import React, {useState} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
-import Radio from '../FormFields/Radio';
 import SimpleRange from '../Range/SimpleRange';
 import TwoThumbRange from '../Range/TwoThumbRange';
 
-const ResultsFilter = ({startIndex, endIndex, activeFilters, formattedCount, totalCount, onFilter, onHighlight, onClearAll}) => {
-
+const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
+  
+  // eslint-disable-next-line
   const [minEvidence, setMinEvidence] = useState(1); 
   const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: minEvidence});
   const dateRangeMin = 1840;

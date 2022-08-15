@@ -7,11 +7,10 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
-
+  
+  // eslint-disable-next-line
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [displayedEvidence, setDisplayedEvidence] = useState([]);
-  // Int, last result item index
-  const [endResultIndex, setEndResultIndex] = useState(4);
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
@@ -22,11 +21,10 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
 
   useEffect(() => {
     setDisplayedEvidence(currentEvidence.slice(itemOffset, endOffset));
-    setEndResultIndex(endOffset);
     setPageCount(Math.ceil(currentEvidence.length / itemsPerPage));
     if(endOffset !== 0)
       console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
-  }, [itemOffset, itemsPerPage, currentEvidence]);
+  }, [itemOffset, itemsPerPage, currentEvidence, endOffset]);
 
   // Handles direct page click
   const handlePageClick = (event) => {

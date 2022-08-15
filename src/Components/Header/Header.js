@@ -1,8 +1,6 @@
 import React, {useState} from "react";
-import UndoRedo from "../UndoRedo/UndoRedo";
-import Toggle from '../Toggle/Toggle';
 import ReportIssueModal from "../Modals/SendFeedbackModal";
-import { NavLink, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {ReactComponent as Logo} from '../../Assets/Images/Logo.svg';
 import styles from './Header.module.scss';
 

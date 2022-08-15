@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from './ResultsList.module.scss';
 import Checkbox from "../FormFields/Checkbox";
 import Query3 from "../Query/Query3";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
-import ResultsSorting from "../ResultsSorting/ResultsSorting";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import ShareModal from "../Modals/ShareModal";
@@ -14,7 +13,9 @@ import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import isEqual from 'lodash/isEqual';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
+  // eslint-disable-next-line
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
+  // eslint-disable-next-line
 import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter, formatBiolinkPredicate } from "../../Utilities/utilities";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import _, { cloneDeep } from "lodash";
@@ -38,6 +39,7 @@ const ResultsList = ({loading}) => {
   loading = (resultsState && Object.keys(resultsState).length > 0) ? false : loading;
 
   // Bool, did the results return an error
+  // eslint-disable-next-line
   const [isError, setIsError] = useState(false);
   // Int, current query id from state
   const currentQueryResultsIDFromState = useSelector(currentQueryResultsID);
@@ -131,6 +133,7 @@ const ResultsList = ({loading}) => {
   };
 
   // React Query call for status of results
+  // eslint-disable-next-line
   const resultsStatus = useQuery('resultsStatus', async () => {
     console.log("Fetching current ARA status...");
 
@@ -144,6 +147,7 @@ const ResultsList = ({loading}) => {
       headers: { 'Content-Type': 'application/json' },
       body: queryIDJson
     };
+    // eslint-disable-next-line
     const response = await fetch('/creative_status', requestOptions)
       .then(response => response.json())
       .then(data => {
@@ -171,6 +175,7 @@ const ResultsList = ({loading}) => {
   });
 
   // React Query call for results
+  // eslint-disable-next-line
   const resultsData = useQuery('resultsData', async () => {
     console.log("Fetching new results...");
 
@@ -184,6 +189,7 @@ const ResultsList = ({loading}) => {
       headers: { 'Content-Type': 'application/json' },
       body: queryIDJson
     };
+    // eslint-disable-next-line
     const response = await fetch('/creative_result', requestOptions)
       .then(response => response.json())
       .then(data => {
@@ -240,6 +246,107 @@ const ResultsList = ({loading}) => {
   //   refetchOnWindowFocus: false
   // });
 
+  // search the list of nodes for a particular curie, then return that node object if found
+  const getNodeByCurie = (curie, results) => {
+    if(results.nodes[curie] === undefined)
+      return {};
+      
+    return results.nodes[curie];
+  }
+  // search the list of edges for a particular id, then return that edge object if found
+  const getEdgeByID = (id, results) => {
+    if(results.edges[id] === undefined)
+      return {};
+
+    return results.edges[id];
+  }
+  // search the list of publications for a particular id, then return that publication object if found
+  const getPubByID = (id, results) => {
+    if(results.publications[id] === undefined)
+      return {};
+    
+    return results.publications[id];
+  }
+  const getFormattedPaths = useCallback((rawPathIds, results) => {
+    let formattedPaths = [];
+    for(const id of rawPathIds) {
+      let formattedPath = results.paths[id];
+      if(formattedPath) {
+        for(let i = 0; i < formattedPath.subgraph.length; i++) {
+          if(i % 2 === 0) {
+            formattedPath.subgraph[i] = getNodeByCurie(formattedPath.subgraph[i], results);
+          } else {
+            formattedPath.subgraph[i] = getEdgeByID(formattedPath.subgraph[i], results);
+          }
+        }
+        formattedPaths.push(formattedPath);
+      }
+    }
+    return formattedPaths;
+  },[])
+
+  const getFormattedEvidence = useCallback((paths, results) => {
+    let formattedEvidence = [];
+    for(const path of paths) {
+      for(const subgraph of path.subgraph) {
+        if(subgraph.publications && subgraph.publications.length > 0)
+          for(const pubID of subgraph.publications) {
+            let publication = getPubByID(pubID, results);
+            let object = getNodeByCurie(subgraph.object, results);
+            let subject = getNodeByCurie(subgraph.subject, results);
+            let predicate = formatBiolinkPredicate(subgraph.predicates[0]);
+            publication.edge = {
+              subject: capitalizeAllWords(subject.names[0]),
+              predicate: predicate,
+              object: capitalizeAllWords(object.names[0])
+            };
+            formattedEvidence.push(publication);
+          }
+      }
+    }
+
+    return formattedEvidence;
+  },[])
+
+  // Take raw results and return properly summarized results
+  const getSummarizedResults = useCallback((results) => {
+    if (results === null || results === undefined)
+      return [];
+
+    let newSummarizedResults = [];
+    
+    // // for each individual result item 
+    for(const item of results.results) {
+      // Get the object node's name
+      let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]); 
+      // Get the subject node's name
+      let subjectNode = getNodeByCurie(item.subject, results);
+      // Get the subject node's description
+      let description = (subjectNode.description) ? subjectNode.description[0] : '';
+      // Get the subject node's fda approval status 
+      let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
+      // Get a list of properly formatted paths (turn the path ids into their actual path objects)
+      let formattedPaths = [];
+      formattedPaths = getFormattedPaths(item.paths, results);
+      let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
+      let formattedItem = {
+        id: _.uniqueId(),
+        type: 'biolink:Drug',
+        name: itemName,
+        paths: formattedPaths,
+        object: objectNodeName,
+        description: description,
+        evidence: getFormattedEvidence(formattedPaths, results),
+        fdaInfo: fdaInfo
+      }
+      newSummarizedResults.push(formattedItem);
+      if(presetDisease === null) {
+        setPresetDisease({label: objectNodeName});
+      }
+    }
+    return newSummarizedResults;
+  }, [getFormattedEvidence, getFormattedPaths, presetDisease])
+
   /*
     When the results change, which occurs when the React Query returns, handle the returned data
     based on the returned data's status.
@@ -263,116 +370,15 @@ const ResultsList = ({loading}) => {
       // set sorted results
       setSortedResults(newResults);
 
-      // update app state for raw results
-      // dispatch(setCurrentResults(results));
-
-  }, [rawResults]);
+  }, [rawResults, getSummarizedResults]);
   
   useEffect(() => {
     // we have results to show, set isLoading to false
     if (formattedResults.length > 0 && rawResults.status !== 'error') {
       setIsLoading(false);
     }
-  }, [formattedResults]);
+  }, [formattedResults, rawResults]);
 
-  // Take raw results and return properly summarized results
-  const getSummarizedResults = (results) => {
-    if (results === null || results === undefined)
-      return [];
-
-    let newSummarizedResults = [];
-    
-    // // for each individual result item 
-    for(const item of results.results) {
-      // Get the object node's name
-      let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]); 
-      // Get the subject node's name
-      let subjectNode = getNodeByCurie(item.subject, results);
-      // Get the subject node's description
-      let description = (subjectNode.description) ? subjectNode.description[0] : '';
-      // Get the subject node's fda approval status 
-      let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
-      // Get a list of properly formatted paths (turn the path ids into their actual path objects)
-      let formattedPaths = [];
-      formattedPaths = getFormattedPaths(item.paths, results);
-      let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
-      let formattedItem = {
-        id: _.uniqueId(),
-        name: itemName,
-        paths: formattedPaths,
-        object: objectNodeName,
-        description: description,
-        evidence: getFormattedEvidence(formattedPaths, results),
-        fdaInfo: fdaInfo
-      }
-      newSummarizedResults.push(formattedItem);
-      if(presetDisease === null) {
-        setPresetDisease({label: objectNodeName});
-      }
-    }
-    return newSummarizedResults;
-  }
-
-  // search the list of nodes for a particular curie, then return that node object if found
-  const getNodeByCurie = (curie, results) => {
-    if(results.nodes[curie] === undefined)
-      return {};
-      
-    return results.nodes[curie];
-  }
-  // search the list of edges for a particular id, then return that edge object if found
-  const getEdgeByID = (id, results) => {
-    if(results.edges[id] === undefined)
-      return {};
-
-    return results.edges[id];
-  }
-  // search the list of publications for a particular id, then return that publication object if found
-  const getPubByID = (id, results) => {
-    if(results.publications[id] === undefined)
-      return {};
-    
-    return results.publications[id];
-  }
-  const getFormattedPaths = (rawPathIds, results) => {
-    let formattedPaths = [];
-    for(const id of rawPathIds) {
-      let formattedPath = results.paths[id];
-      if(formattedPath) {
-        for(let i = 0; i < formattedPath.subgraph.length; i++) {
-          if(i % 2 === 0) {
-            formattedPath.subgraph[i] = getNodeByCurie(formattedPath.subgraph[i], results);
-          } else {
-            formattedPath.subgraph[i] = getEdgeByID(formattedPath.subgraph[i], results);
-          }
-        }
-        formattedPaths.push(formattedPath);
-      }
-    }
-    return formattedPaths;
-  }
-  const getFormattedEvidence = (paths, results) => {
-    let formattedEvidence = [];
-    for(const path of paths) {
-      for(const subgraph of path.subgraph) {
-        if(subgraph.publications && subgraph.publications.length > 0)
-          for(const pubID of subgraph.publications) {
-            let publication = getPubByID(pubID, results);
-            let object = getNodeByCurie(subgraph.object, results);
-            let subject = getNodeByCurie(subgraph.subject, results);
-            let predicate = formatBiolinkPredicate(subgraph.predicates[0]);
-            publication.edge = {
-              subject: capitalizeAllWords(subject.names[0]),
-              predicate: predicate,
-              object: capitalizeAllWords(object.names[0])
-            };
-            formattedEvidence.push(publication);
-          }
-      }
-    }
-
-    return formattedEvidence;
-  }
 
   // Click handler for item select checkboxes 
   const handleSelected = (item) => {

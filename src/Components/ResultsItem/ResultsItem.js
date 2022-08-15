@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, capitalizeFirstLetter, getLastPubYear, capitalizeAllWords } from '../../Utilities/utilities';
+import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import Checkbox from "../FormFields/Checkbox";
 import GraphView from '../GraphView/GraphView';
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
@@ -8,14 +8,12 @@ import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1=Do
 import AnimateHeight from "react-animate-height";
 
 const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, checked, highlighted}) => {
-
-  // let icon = getIcon(item.type);
-  let icon = getIcon('chemical');
+  
+  let icon = getIcon(item.type);
 
   let evidenceCount = item.evidence.length;
     
   let fdaInfo = item.fdaInfo;
-  // let lastPubYear = getLastPubYear(item.edge.last_publication_date);
   
   checked = (allSelected || checked) ? true : false;
 
