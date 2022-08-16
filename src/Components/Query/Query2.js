@@ -1,7 +1,8 @@
 import React, {useState, useEffect, useRef, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { cannedQueries } from "../../Data/cannedqueries";
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+// import { useSearchParams } from 'react-router-dom';
 import isEqual from 'lodash/isEqual';
 import QueryTemplate from "../QueryComponents/QueryTemplate";
 import QueryItemButton from "../QueryComponents/QueryItemButton";
@@ -17,8 +18,8 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [queryParams, setQueryParams] = useSearchParams();
-  const navigatingFromHistory = (queryParams.get('results') !== null) ? true : false;
+  // const [queryParams, setQueryParams] = useSearchParams();
+  // const navigatingFromHistory = (queryParams.get('results') !== null) ? true : false;
 
   loading = (loading) ? true : false;
 
@@ -168,12 +169,12 @@ const Query2 = ({template, results, handleAdd, handleRemove, loading}) => {
     check the canned queries for a match, then set the isValidSubmission to true 
     to imitate manual submission of the query
   */
-  useEffect(() => {
-    if(navigatingFromHistory) {
-      checkCannedQueries();
-      setIsValidSubmission(true)
-    }
-  }, [navigatingFromHistory, checkCannedQueries]);
+  // useEffect(() => {
+  //   if(navigatingFromHistory) {
+  //     checkCannedQueries();
+  //     setIsValidSubmission(true)
+  //   }
+  // }, [navigatingFromHistory, checkCannedQueries]);
 
   // If isResults is true send us to the results page and set loading to true via query param
   useEffect(() => {

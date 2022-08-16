@@ -1,0 +1,52 @@
+@import "../../Assets/Styles/variables";
+
+// Button
+.button, button {
+  font-size: $buttonSize;
+  font-weight: bold;
+  line-height: 1;
+  padding: 10px $xs;
+  border-radius: $defaultBorderRadius;
+  border: none;
+  cursor: pointer;
+  transition: $defaultBoxShadowAnim;
+  color: $white;
+  background-color: $purpleOne;
+  text-decoration: none;
+  display: inline-flex;
+  width: fit-content;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: $s;
+  &:hover {
+    box-shadow: $dropShadowHover;
+  }
+  svg {
+    margin-right: 8px;
+  }
+
+  &.secondary {
+    color: $black;
+    background-color: $white;
+    border: 1px solid $black;
+
+  }
+  &.iconOnly {
+    border-radius: 50%;
+    padding: 8px;
+    svg {
+      margin-right: 0;
+    }
+  }
+  &.clicked {
+    box-shadow: $dropShadowPressed;
+  }
+  &:disabled, &[disabled] {
+    color: $midGray;
+    background-color: white;
+    border-color: $midGray;
+    box-shadow: none;
+    cursor: default;
+  }
+}
+

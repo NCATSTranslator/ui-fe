@@ -1,15 +1,16 @@
 import React from "react";
-import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg'
+import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
+import styles from './Search.module.scss';
 
 const Search = ({iconInternal, handleClick, size }) => {
 
-  const containerClass = (iconInternal) ? 'internal' : 'external';
+  const containerClass = (iconInternal) ? styles.internal : styles.external;
   size = (size === undefined) ? 's' : size;
   
   return (
-    <div className={`search-container ${containerClass} ${size}`}> 
-      <input type="text" placeholder="Search" className="search-input"/>
-      {!iconInternal && <button className="search-button" onClick={handleClick}><SearchIcon /></button>}
+    <div className={`${styles.searchContainer} ${containerClass} ${size}`}> 
+      <input type="text" placeholder="Search" className={styles.searchInput}/>
+      {!iconInternal && <button className={styles.searchButton} onClick={handleClick}><SearchIcon /></button>}
     </div>
   );
 }

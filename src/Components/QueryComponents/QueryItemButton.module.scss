@@ -1,0 +1,22 @@
+@import "../../Assets/Styles/variables";
+
+// Query Item Button
+.queryItemButton {
+  margin-right: $m;
+  background-color: transparent;
+  color: $blueOne;
+  font-size: $subOneSize;
+  box-shadow: $dropShadow;
+  // transition: $defaultBoxShadowAnim;
+  transition: $defaultAnim;
+  &:hover {
+    box-shadow: $dropShadowHover;
+  }
+  &.true {
+    pointer-events: none;
+    color: $purpleTwo20;
+    svg, svg path {
+      fill: $purpleTwo20;
+    }
+  }
+}

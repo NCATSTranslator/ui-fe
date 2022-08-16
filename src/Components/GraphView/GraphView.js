@@ -80,11 +80,8 @@ const GraphView = ({paths}) => {
     setNumberToShow(newAmount);
   }
 
-
-
   useEffect(() => {
-    initialNumberToShow = (paths.length < 6) ? paths.length : 6;
-    setNumberToShow(initialNumberToShow);
+    setNumberToShow((paths.length < 6) ? paths.length : 6);
   }, [paths]);
 
 
@@ -114,6 +111,8 @@ const GraphView = ({paths}) => {
                 }
               </div>
             )
+          } else {
+            return '';
           }
         })
       }

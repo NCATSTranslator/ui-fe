@@ -6,6 +6,7 @@ import {ReactComponent as Checkmark} from '../../Icons/Alerts/Checkmark.svg'
 import {ReactComponent as Cross} from '../../Icons/Alerts/Cancelled.svg'
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg'
 import { Fade } from "react-awesome-reveal";
+import styles from 'Alert.module.scss';
 
 const Alert = ({ active, type, toggle, verticalPosition, horizontalPosition, timeout, fade, buttonText, children }) => {
 
@@ -19,7 +20,7 @@ const Alert = ({ active, type, toggle, verticalPosition, horizontalPosition, tim
   const [isActive, setActive] = useState(active);
   const [isFading, setIsFading] = useState(false);
 
-  let fadeClass = (isFading) ? 'fade-out' : 'fade-in';
+  let fadeClass = (isFading) ? styles.fadeOut : styles.fadeIn;
   let containerClass = type + " " + verticalPosition + " " + horizontalPosition;
   let icon = <></>;
 
@@ -65,16 +66,16 @@ const Alert = ({ active, type, toggle, verticalPosition, horizontalPosition, tim
 
   return (
 
-    <div className="alert">
+    <div className={styles.alert}>
       {buttonText && 
         <Button handleClick={() => {setActive(true);}}>{buttonText}</Button>
       }
       {isActive && 
-        <Fade className={`alert-container ${containerClass} ${fadeClass}`} duration={fade}> 
-          <div className="container">
-            {isToggle && <button className="close" onClick={fadeOut}><Close/></button>}
-            <span className="icon">{icon}</span>
-            <div className="content">
+        <Fade className={`${styles.alertContainer} ${containerClass} ${fadeClass}`} duration={fade}> 
+          <div className={styles.container}>
+            {isToggle && <button className={styles.close} onClick={fadeOut}><Close/></button>}
+            <span className={styles.icon}>{icon}</span>
+            <div className={styles.content}>
               {children}
             </div>
           </div>

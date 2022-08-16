@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef, useMemo} from "react";
 import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import SimpleQueryBar from "../QueryComponents/SimpleQueryBar";
 import { incrementHistory } from "../../Redux/historySlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
@@ -17,8 +17,8 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [queryParams, setQueryParams] = useSearchParams();
-  const navigatingFromHistory = (queryParams.get('results') !== null) ? true : false;
+  // eslint-disable-next-line
+  const navigatingFromHistory = ( new URLSearchParams(window.location.search).get("results") !== null) ? true : false;
 
   loading = (loading) ? true : false;
 
@@ -35,7 +35,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   // String, error text
   const [errorText, setErrorText] = useState('');
   // Int, active mock ARS ID. For testing purposes
-  const [activeMockID, setActiveMockID] = useState('e01');
+  // const [activeMockID, setActiveMockID] = useState('e01');
 
   // Get the current query from the application state
   let storedQuery = useSelector(currentQuery);
@@ -188,7 +188,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItems, activeMockID, storedQuery, selectedDisease])
+  }, [isValidSubmission, dispatch, queryItems, storedQuery, selectedDisease])
 
   // Set isResults to true when resultsActive so we can navigate to the results page
   useEffect(() => {

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import styles from 'CustomCarousel.module.scss';
 import "react-responsive-carousel/lib/styles/carousel.min.css"; 
 import { Carousel } from 'react-responsive-carousel';
 import {ReactComponent as Left} from '../../Icons/Directional/Left.svg';
@@ -29,20 +30,19 @@ const CustomCarousel = ({numberOfSlides, children}) => {
   }
 
   return (
-    <div className="carousel-container">
-      <div className="controls">
-        <button onClick={prevSlide} className={`${(currentSlide + numSlides === numSlides)} prev`}><Left /></button>
-        <div className="carousel">
-          <ul className="control-dots">
+    <div className={styles.carouselContainer}>
+      <div className={styles.controls}>
+        <button onClick={prevSlide} className={`${(currentSlide + numSlides === numSlides)} ${styles.prev}`}><Left /></button>
+        <div className={styles.carousel}>
+          <ul className={styles.controlDots}>
             {
               dots.map((item, index) => {
-                let dotClass = (index === currentSlide) ? 'dot selected' : 'dot';
+                let dotClass = (index === currentSlide) ? styles.selected : '';
                 return(
                   <li
-                    // style={indicatorStyles}
                     onClick={()=>{updateCurrentSlide(index)}}
                     // onKeyDown={onClickHandler}
-                    className={dotClass}
+                    className={`${styles.dot} ${dotClass}`}
                     value={index}
                     key={index}
                     role="button"
@@ -56,7 +56,12 @@ const CustomCarousel = ({numberOfSlides, children}) => {
             }
           </ul>
         </div>
-        <button onClick={nextSlide} className={`${(numSlides - currentSlide === 1)} next`}><Right /></button>
+        <button 
+          onClick={nextSlide} 
+          className={`${(numSlides - currentSlide === 1) ? styles.true: ''} ${styles.next}`}
+          >
+          <Right />
+        </button>
       </div>
       <Carousel
         selectedItem={currentSlide}
