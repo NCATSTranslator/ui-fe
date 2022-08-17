@@ -1,9 +1,6 @@
 @import "../../Assets/Styles/variables";
 
 .textInput {
-  display: inline-grid;
-  grid-template-columns: minmax(0,1fr);
-  margin: 0 2% $s 0;
   position: relative; 
   &.s {
     width: 23%;
@@ -37,7 +34,7 @@
     margin-bottom: $xxs;
   }
   input, textarea {
-    border: 1px solid $black;
+    border: 1px solid $midGray;
     font-size: $bodyOneSize;
     border-radius: $defaultBorderRadius;
     padding: 10px 8px 10px 30px;

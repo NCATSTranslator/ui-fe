@@ -21,7 +21,7 @@ const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, c
     <> 
       {href && 
         <a 
-          className={`${styles.button} ${buttonStyle} ${clicked && styles.clicked} ${size}`} 
+          className={`button ${styles.button} ${buttonStyle} ${clicked && styles.clicked} ${size}`} 
           onClick={handleClick} 
           href={href} 
           target={_blank && '_blank'}
@@ -31,7 +31,7 @@ const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, c
       }
       {!href && 
         <button 
-          className={`${styles.button} ${buttonStyle} ${clicked && styles.clicked} ${size}`} 
+          className={`button ${styles.button} ${buttonStyle} ${clicked && styles.clicked} ${size}`} 
           type={type} 
           onClick={handleClick}
           disabled={disabled}

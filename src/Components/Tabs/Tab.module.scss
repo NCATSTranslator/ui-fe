@@ -1,0 +1,14 @@
+@import "../../Assets/Styles/variables";
+
+.tabListItem {
+  padding: 0.5rem 0.75rem;
+  margin: 0 $s -1px $s;
+  display: inline-block;
+  cursor: pointer;
+  transition: all .2s ease;
+  border-bottom: 3px solid $purpleOne50;
+  
+  &.active {
+    border-bottom: 3px solid $purpleOne;
+  }
+}

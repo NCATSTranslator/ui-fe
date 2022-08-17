@@ -4,8 +4,8 @@ const Toggle = ({labelOne, labelTwo, labelInternal, checked, onClick}) => {
 
   const [isChecked, setIsChecked] = useState((checked) ? true : false);
 
-  let classList = (labelOne && labelTwo ) ? 'toggle has-label': 'toggle no-label';
-  classList += (labelInternal) ? ' internal': ' external';
+  let classList = (labelOne && labelTwo ) ? `${styles.toggle} ${styles.hasLabel}`: `${styles.toggle} ${styles.noLabel}`;
+  classList += (labelInternal) ? ` ${styles.internal}`: ` ${styles.external}`;
 
 
   const handleChange = () => {
@@ -15,14 +15,18 @@ const Toggle = ({labelOne, labelTwo, labelInternal, checked, onClick}) => {
 
   return (
 
-    <label className={classList + " " + isChecked}>
-      {(labelOne && labelTwo && !labelInternal && <span className="label one">{labelOne}</span>)}
+    <label className={`${classList} ${isChecked ? styles.true : styles.false}`}>
+      {(labelOne && labelTwo && !labelInternal && 
+        <span className={`${styles.label} ${styles.one}`}>{labelOne}</span>)}
       <input type="checkbox" onChange={handleChange} defaultChecked={checked}/>
-      <span className="slider round">
-        {(labelOne && labelTwo && labelInternal && <span className="label one">{labelOne}</span>)}
-        {(labelOne && labelTwo && labelInternal && <span className="label two">{labelTwo}</span>)}
+      <span className={`${styles.slider} ${styles.round}`}>
+        {(labelOne && labelTwo && labelInternal && 
+          <span className={`${styles.label} ${styles.one}`}>{labelOne}</span>)}
+        {(labelOne && labelTwo && labelInternal && 
+          <span className={`${styles.label} ${styles.two}`}>{labelTwo}</span>)}
       </span>
-      {(labelOne && labelTwo && !labelInternal && <span className="label two">{labelTwo}</span>)}
+      {(labelOne && labelTwo && !labelInternal && 
+        <span className={`${styles.label} ${styles.two}`}>{labelTwo}</span>)}
     </label>
 
   );
