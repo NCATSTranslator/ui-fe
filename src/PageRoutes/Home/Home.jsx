@@ -77,7 +77,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-        <div className={`${styles.section} ${styles.collaborators}`}>
+        {/* <div className={`${styles.section} ${styles.collaborators}`}>
           <div className="container">
             <h5>Collaborators</h5>
             <p>Translator is made possible through collaboration with scientific experts and developers from the following institutions:</p>
@@ -104,7 +104,7 @@ const Home = () => {
               <img src={ucsf} alt="" />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

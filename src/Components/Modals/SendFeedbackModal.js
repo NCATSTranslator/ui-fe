@@ -12,13 +12,11 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
 
   const [currentOrganization, setCurrentOrganization] = useState('');
   const [currentName, setCurrentName] = useState('');
-  const [nameError, setNameError] = useState(false);
-  const nameErrorText = "Please enter a name";
-  const [currentIssue, setCurrentIssue] = useState('');
-  const [currentSubject, setCurrentSubject] = useState('');
-  const [currentEmail, setCurrentEmail] = useState('');
-  const [emailError, setEmailError] = useState(false);
-  const emailErrorText = "Please enter a valid email";
+  const [currentCategory, setCurrentCategory] = useState('');
+  const [categoryError, setCategoryError] = useState(false);
+  const categoryErrorText = "Please select a category";
+  const [commentsError, setCommentsError] = useState(false);
+  const commentsErrorText = "Please provide a comment";
   const [currentComments, setCurrentComments] = useState('');
 
   const [errorActive, setErrorActive] = useState(false);
@@ -28,11 +26,8 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
 
   const handleError = (error) => {
     switch (error) {
-      case 'name':
-        setNameError(true);
-        break;
-      case 'email':
-        setEmailError(true);
+      case 'category':
+        setCategoryError(true);
         break;
     
       default:
@@ -44,12 +39,8 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
   const handleSubmission = (e) => {
     e.preventDefault();
     console.log(e);
-    if(!currentName) {
-      handleError('name');
-      return;
-    }
-    if(!currentEmail || !validateEmail(currentEmail)) {
-      handleError('email');
+    if(!currentCategory) {
+      handleError('category');
       return;
     }
     onClose();
@@ -66,6 +57,13 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
       <p>Enjoying Translator? Having an issue? Either way, we want to know - use this form to let us know your comments and we'll get back to you as soon as possible. All fields marked with * are required.</p>
       <p className={styles.disclaimer}><Warning/>In the mean time, please check out our Help page for Translator tips, tricks, and tutorials.</p>
       <form onSubmit={(e)=>handleSubmission(e)}>
+        {
+          errorActive &&
+          <p className={styles.errorText}>
+            {categoryError && categoryErrorText}
+            {commentsError && commentsErrorText}
+          </p>
+        }
         {/* <TextInput 
           label="Name" 
           size="m" 
@@ -82,10 +80,10 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
           name="Select One"
           size="l" 
           handleChange={(value)=>{
-            setCurrentIssue(value);
+            setCurrentCategory(value);
             setErrorActive(false);
           }}
-          value={currentIssue}
+          value={currentCategory}
           noanimate
         >
           <option value="General" key="0">General Question or Comment</option>
@@ -104,7 +102,6 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
           }}
           value={currentComments}
         />
-
         <FileInput
           buttonLabel="Browse Files"
           size="l"
