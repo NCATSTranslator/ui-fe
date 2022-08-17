@@ -6,18 +6,18 @@ const TextInput = ({label, subtitle, value, placeholder, size, rows, error, erro
   size = (size === undefined) ? 's' : size;
 
   
-  switch (size) {
-    case 'm':
-      size = styles.m;
-      break;
-    case 'l':
-      size = styles.l;
-      break;
+  // switch (size) {
+  //   case 'm':
+  //     size = styles.m;
+  //     break;
+  //   case 'l':
+  //     size = styles.l;
+  //     break;
 
-    default:
-      size = styles.s;
-      break;
-  }
+  //   default:
+  //     size = styles.s;
+  //     break;
+  // }
 
   handleChange = (handleChange) ? handleChange : () => {};
   errorText = (errorText) ? errorText : "Error Message";
@@ -26,7 +26,7 @@ const TextInput = ({label, subtitle, value, placeholder, size, rows, error, erro
     <> 
     {
       rows > 1 &&
-      <label className={`${styles.textInput} ${size} ${className}`}> 
+      <label className={`text-input ${styles.textInput} ${size} ${className}`}> 
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         {icon && <div className={styles.iconContainer}>{icon}</div>}
@@ -36,7 +36,7 @@ const TextInput = ({label, subtitle, value, placeholder, size, rows, error, erro
     }
     {
       (rows <= 1 || rows === undefined) &&
-      <label className={`${styles.textInput} ${size}`}> 
+      <label className={`text-input ${styles.textInput} ${size}`}> 
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         {icon && <div className={styles.iconContainer}>{icon}</div>}

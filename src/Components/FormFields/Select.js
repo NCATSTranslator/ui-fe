@@ -37,7 +37,7 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
 
   return (
     <>
-      <label className={`${styles.select} ${size} ${animateClass}`} > 
+      <label className={`select ${styles.select} ${size} ${animateClass}`} > 
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         <div className={`${styles.selectContainer} ${openClass}`}>

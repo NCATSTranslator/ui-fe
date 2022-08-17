@@ -3,7 +3,7 @@ import styles from "./SendFeedbackModal.module.scss";
 import Modal from "./Modal";
 import Button from '../FormFields/Button';
 import TextInput from "../FormFields/TextInput";
-import Checkbox from "../FormFields/Checkbox";
+import FileInput from "../FormFields/FileInput";
 import Select from "../FormFields/Select";
 import { validateEmail } from "../../Utilities/utilities";
 import {ReactComponent as Warning} from '../../Icons/information.svg'
@@ -63,10 +63,10 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
       containerClass={styles.feedbackContainer}
       >
       <h5>Send Feedback</h5>
-      <p>Enjoying Translator? Having an issue? Either way, we want to know - use this form to let us know your comments and we'll get back to you as soon as possible.</p>
+      <p>Enjoying Translator? Having an issue? Either way, we want to know - use this form to let us know your comments and we'll get back to you as soon as possible. All fields marked with * are required.</p>
       <p className={styles.disclaimer}><Warning/>In the mean time, please check out our Help page for Translator tips, tricks, and tutorials.</p>
       <form onSubmit={(e)=>handleSubmission(e)}>
-        <TextInput 
+        {/* <TextInput 
           label="Name" 
           size="m" 
           handleChange={(e) => {
@@ -76,20 +76,11 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
           value={currentName}
           error={nameError}
           errorText={nameErrorText}
-        />
-        <TextInput 
-          label="University or Organization Affiliation" 
-          size="m" 
-          handleChange={(e) => {
-            setCurrentOrganization(e); 
-            setErrorActive(false);
-          }}
-          value={currentOrganization}
-        />
+        /> */}
         <Select 
-          label="Category" 
+          label="Category *" 
           name="Select One"
-          size="m" 
+          size="l" 
           handleChange={(value)=>{
             setCurrentIssue(value);
             setErrorActive(false);
@@ -104,28 +95,7 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
           <option value="Search History" key="4">Search History</option>
         </Select>
         <TextInput 
-          label="Subject" 
-          size="m" 
-          handleChange={(e) => {
-            setCurrentSubject(e); 
-            setErrorActive(false);
-          }}
-          value={currentSubject}
-        />
-        <TextInput 
-          label="Email Address" 
-          size="l" 
-          handleChange={(value)=>{
-            setCurrentEmail(value);
-            setErrorActive(false);
-          }}
-          value={currentEmail}
-          error={emailError}
-          errorText={emailErrorText}
-        />
-        <Checkbox>Check this box to request a follow-up email</Checkbox> 
-        <TextInput 
-          label="Comments" 
+          label="Comments *" 
           size="l" 
           rows={8}
           handleChange={(value)=>{
@@ -133,6 +103,11 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
             setErrorActive(false);
           }}
           value={currentComments}
+        />
+
+        <FileInput
+          buttonLabel="Browse Files"
+          size="l"
         />
         <Button type="submit" size="l" disabled={errorActive}>Send</Button>
       </form>

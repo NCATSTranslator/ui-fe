@@ -1,0 +1,34 @@
+@import "../../Assets/Styles/variables";
+
+.fileInput {
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  grid-template-columns: auto auto;
+  justify-content: space-between;
+  align-items: center;
+  input[type="file"] {
+    position: absolute; 
+    left: -99999rem;
+  }
+  .buttonLabel {
+    border-radius: $defaultBorderRadius;
+    box-shadow: $dropShadow;
+    background-color: $midGray;
+    color: $darkGray;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 10px $xs;
+    margin: $xs;
+    transition: all .25s ease;
+    &:hover {
+      cursor: pointer;
+      box-shadow: $dropShadowHover;
+    }
+  }
+  .fileList {
+    margin-left: $xs;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
