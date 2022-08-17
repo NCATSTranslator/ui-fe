@@ -18,4 +18,11 @@
       transform: translateY(-50%);
     }
   } 
+  .errorText {
+    color: $red;
+    font-weight: bold;
+  }
+  button:disabled, button[disabled] {
+    background-color: $lightGray;
+  }
 }
