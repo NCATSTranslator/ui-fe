@@ -1,5 +1,4 @@
 import React from "react";
-import "react-responsive-carousel/lib/styles/carousel.min.css"; 
 import Query3 from "../../Components/Query/Query3";
 import translatorInfographic from "../../Assets/Images/translator-infographic.jpg";
 import berkeley from "../../Assets/Images/Logos/berkeley.png";

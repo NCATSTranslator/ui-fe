@@ -1,5 +1,6 @@
-import React, {useState, useEffect} from "react";
+import React, { useState } from "react";
 import { Range, getTrackBackground } from 'react-range';
+import styles from './Range.module.scss';
 
 const SimpleRange = ({min, max, step, initialValue, label, hideLabel, onChange, style, children}) => {
 
@@ -9,19 +10,16 @@ const SimpleRange = ({min, max, step, initialValue, label, hideLabel, onChange, 
 
   onChange = (onChange) ? onChange : ()=>{};
 
-  let labelClass = (hideLabel) ? 'no-label': 'label';
+  let labelClass = (hideLabel) ? styles.noLabel: styles.label;
 
   const handleChange = (values) => {
     setValues(values)
     onChange(values[0]);
   }
 
-  useEffect(() => {
-  }, [])
-
   return (
-    <div className={`range-container ${labelClass}`}>
-      <span className="min">{min}</span>
+    <div className={`${styles.rangeContainer} ${labelClass}`}>
+      <span className={styles.min}>{min}</span>
 
       <Range
         step={step}
@@ -30,37 +28,36 @@ const SimpleRange = ({min, max, step, initialValue, label, hideLabel, onChange, 
         values={values}
         onChange={(values) => handleChange(values)}
         renderTrack={({ props, children }) => (
-
-            <div
-            onMouseDown={props.onMouseDown}
-            onTouchStart={props.onTouchStart}
-              ref={props.ref}
-              style={{
-                cursor: 'pointer',
-                background: getTrackBackground({
-                  values,
-                  colors: ['#662E6B', '#606368'],
-                  min: min,
-                  max: max,
-                  rtl
-                }),
-                alignSelf: 'center'
-              }}
-              className="range-track"
-            >
-              {children}
-            </div>
+          <div
+          onMouseDown={props.onMouseDown}
+          onTouchStart={props.onTouchStart}
+            ref={props.ref}
+            style={{
+              cursor: 'pointer',
+              background: getTrackBackground({
+                values,
+                colors: ['#662E6B', '#606368'],
+                min: min,
+                max: max,
+                rtl
+              }),
+              alignSelf: 'center'
+            }}
+            className={styles.rangeTrack}
+          >
+            {children}
+          </div>
         )}
         renderThumb={({ props, isDragged }) => (
-          <div {...props} className="thumb-container" >
-            <div className="value" >
+          <div {...props} className={styles.thumbContainer}>
+            <div className={styles.value}>
               {values[0]}
             </div>
-            <div className="thumb"  />
+            <div className={styles.thumb} />
           </div>
         )}
       />
-      <span className="max">{max}</span>
+      <span className={styles.max}>{max}</span>
     </div>
   );
 }

@@ -1,11 +1,12 @@
 import React from "react";
+import styles from './Tab.module.scss';
 
 const Tab = ({heading, onClick, activeTab}) => {
 
-  let className = 'tab-list-item';
+  let className = `${styles.tabListItem}`;
 
   if (activeTab === heading) {
-    className += ' tab-list-item active';
+    className += ` ${styles.active}`;
   }
 
   return (

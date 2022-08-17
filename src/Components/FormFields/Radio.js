@@ -1,10 +1,11 @@
 import React, {useState,useEffect} from "react";
+import styles from './Radio.module.scss';
 
 const Radio = ({name, value, checked, children, handleClick}) => {
 
   const [isChecked, setIsChecked] = useState(checked);
 
-  let isCheckedClass = (isChecked) ? 'checked' : 'unchecked';
+  let isCheckedClass = (isChecked) ? styles.checked : styles.unchecked;
   
   const handleChange = () => {
     setIsChecked(!isChecked);
@@ -18,9 +19,16 @@ const Radio = ({name, value, checked, children, handleClick}) => {
 
   return (
 
-    <label className={`radio ${isCheckedClass}`}>
-      <span className="circle"></span>
-      <input type="radio" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} onClick={handleClick}/>
+    <label className={`${styles.radio} ${isCheckedClass}`}>
+      <span className={styles.circle}></span>
+      <input 
+        type="radio" 
+        defaultChecked={isChecked} 
+        name={name} 
+        value={value} 
+        onChange={handleChange} 
+        onClick={handleClick}
+      />
       <span>{children}</span>
     </label>
 
