@@ -1,4 +1,4 @@
-import React, {useState,useEffect} from "react";
+import React, {useState} from "react";
 import styles from "./SendFeedbackModal.module.scss";
 import Modal from "./Modal";
 import Button from '../FormFields/Button';
@@ -59,7 +59,7 @@ const ReportIssueModal = ({isOpen, onClose}) => {
     setCurrentCategory('');
     setCurrentComments('');
   }
-  
+
   return (
     <Modal 
       isOpen={modalIsOpen} 
@@ -115,7 +115,7 @@ const ReportIssueModal = ({isOpen, onClose}) => {
         <TextInput 
           label="Comments *" 
           size="l" 
-          rows={8}
+          rows={5}
           handleChange={(value)=>{
             setCurrentComments(value);
             setCommentsError(false);

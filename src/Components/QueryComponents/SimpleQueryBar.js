@@ -1,16 +1,21 @@
 
-import React from "react";
+import React, {useState, useEffect} from "react";
 import Button from "../FormFields/Button";
 import TextInput from "../FormFields/TextInput";
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading.png';
-
 import styles from './SimpleQueryBar.module.scss';
 
 const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value, 
   autocompleteItems, autocompleteLoading, handleItemClick}) => {
 
+  const [submissionDisabled, setSubmissionDisabled] = useState(false);
+    
   value = (value !== undefined && value !== null) ? value : '';
+
+  useEffect(() => {
+    setSubmissionDisabled(isLoading);
+  }, [isLoading]);
 
   return (
     <form onSubmit={handleSubmission} className={styles.form}>
@@ -36,7 +41,7 @@ const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value,
         icon={<SearchIcon/>}
         value={value}
       />
-      <Button type="submit" size="" disabled={isLoading}>
+      <Button type="submit" size="" disabled={submissionDisabled}>
         <span>Search</span>
       </Button>
     </form>

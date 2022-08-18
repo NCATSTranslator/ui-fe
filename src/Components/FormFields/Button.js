@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import styles from './Button.module.scss';
 
 const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, children, disabled}) => {
@@ -10,12 +10,17 @@ const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, c
   type = (type) ? type : '';
 
   const [clicked, setClicked] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(disabled);
   
   if(handleClick === undefined) {
     handleClick = (e) => {
       setClicked(true);
     }
   }
+
+  useEffect(() => {
+    setIsDisabled(disabled);
+  }, [disabled]);
   
   return ( 
     <> 
@@ -34,7 +39,7 @@ const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, c
           className={`button ${styles.button} ${buttonStyle} ${clicked && styles.clicked} ${size}`} 
           type={type} 
           onClick={handleClick}
-          disabled={disabled}
+          disabled={isDisabled}
         >
           {children}
         </button>

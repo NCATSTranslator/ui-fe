@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from './ResultsList.module.scss';
 import Checkbox from "../FormFields/Checkbox";
 import Query3 from "../Query/Query3";
@@ -11,14 +11,13 @@ import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
-import isEqual from 'lodash/isEqual';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   // eslint-disable-next-line
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
   // eslint-disable-next-line
-import { getLastPubYear, capitalizeAllWords, capitalizeFirstLetter, formatBiolinkPredicate } from "../../Utilities/utilities";
+import { getSummarizedResults } from "../../Utilities/resultsFunctions";
 import LoadingBar from "../LoadingBar/LoadingBar";
-import _, { cloneDeep } from "lodash";
+import { cloneDeep, isEqual } from "lodash";
 import loadingButtonIcon from '../../Assets/Images/Loading/loading-white.png';
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
@@ -246,106 +245,10 @@ const ResultsList = ({loading}) => {
   //   refetchOnWindowFocus: false
   // });
 
-  // search the list of nodes for a particular curie, then return that node object if found
-  const getNodeByCurie = (curie, results) => {
-    if(results.nodes[curie] === undefined)
-      return {};
-      
-    return results.nodes[curie];
-  }
-  // search the list of edges for a particular id, then return that edge object if found
-  const getEdgeByID = (id, results) => {
-    if(results.edges[id] === undefined)
-      return {};
 
-    return results.edges[id];
-  }
-  // search the list of publications for a particular id, then return that publication object if found
-  const getPubByID = (id, results) => {
-    if(results.publications[id] === undefined)
-      return {};
-    
-    return results.publications[id];
-  }
-  const getFormattedPaths = useCallback((rawPathIds, results) => {
-    let formattedPaths = [];
-    for(const id of rawPathIds) {
-      let formattedPath = results.paths[id];
-      if(formattedPath) {
-        for(let i = 0; i < formattedPath.subgraph.length; i++) {
-          if(i % 2 === 0) {
-            formattedPath.subgraph[i] = getNodeByCurie(formattedPath.subgraph[i], results);
-          } else {
-            formattedPath.subgraph[i] = getEdgeByID(formattedPath.subgraph[i], results);
-          }
-        }
-        formattedPaths.push(formattedPath);
-      }
-    }
-    return formattedPaths;
-  },[])
 
-  const getFormattedEvidence = useCallback((paths, results) => {
-    let formattedEvidence = [];
-    for(const path of paths) {
-      for(const subgraph of path.subgraph) {
-        if(subgraph.publications && subgraph.publications.length > 0)
-          for(const pubID of subgraph.publications) {
-            let publication = getPubByID(pubID, results);
-            let object = getNodeByCurie(subgraph.object, results);
-            let subject = getNodeByCurie(subgraph.subject, results);
-            let predicate = formatBiolinkPredicate(subgraph.predicates[0]);
-            publication.edge = {
-              subject: capitalizeAllWords(subject.names[0]),
-              predicate: predicate,
-              object: capitalizeAllWords(object.names[0])
-            };
-            formattedEvidence.push(publication);
-          }
-      }
-    }
 
-    return formattedEvidence;
-  },[])
-
-  // Take raw results and return properly summarized results
-  const getSummarizedResults = useCallback((results) => {
-    if (results === null || results === undefined)
-      return [];
-
-    let newSummarizedResults = [];
-    
-    // // for each individual result item 
-    for(const item of results.results) {
-      // Get the object node's name
-      let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]); 
-      // Get the subject node's name
-      let subjectNode = getNodeByCurie(item.subject, results);
-      // Get the subject node's description
-      let description = (subjectNode.description) ? subjectNode.description[0] : '';
-      // Get the subject node's fda approval status 
-      let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
-      // Get a list of properly formatted paths (turn the path ids into their actual path objects)
-      let formattedPaths = [];
-      formattedPaths = getFormattedPaths(item.paths, results);
-      let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
-      let formattedItem = {
-        id: _.uniqueId(),
-        type: 'biolink:Drug',
-        name: itemName,
-        paths: formattedPaths,
-        object: objectNodeName,
-        description: description,
-        evidence: getFormattedEvidence(formattedPaths, results),
-        fdaInfo: fdaInfo
-      }
-      newSummarizedResults.push(formattedItem);
-      if(presetDisease === null) {
-        setPresetDisease({label: objectNodeName});
-      }
-    }
-    return newSummarizedResults;
-  }, [getFormattedEvidence, getFormattedPaths, presetDisease])
+  
 
   /*
     When the results change, which occurs when the React Query returns, handle the returned data
@@ -363,14 +266,14 @@ const ResultsList = ({loading}) => {
 
     // if the status is not error, handle setting the results
     if(rawResults.status !== 'error' && rawResults.data.results !== undefined) 
-      newResults = getSummarizedResults(rawResults.data);
+      newResults = getSummarizedResults(rawResults.data, presetDisease, setPresetDisease);
     
       // set formatted results
       setFormattedResults(newResults);
       // set sorted results
       setSortedResults(newResults);
 
-  }, [rawResults, getSummarizedResults]);
+  }, [rawResults, presetDisease]);
   
   useEffect(() => {
     // we have results to show, set isLoading to false
@@ -604,7 +507,7 @@ const ResultsList = ({loading}) => {
         results={rawResults}
       />
       <div className={styles.resultsList}>
-        <Query3 results loading presetDisease={presetDisease}/>
+        <Query3 results loading={isLoading} presetDisease={presetDisease}/>
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
