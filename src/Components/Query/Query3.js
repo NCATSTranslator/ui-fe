@@ -95,6 +95,10 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   }
 
   useEffect(() => {
+    setIsLoading(loading);
+  }, [loading]);
+
+  useEffect(() => {
     if(selectedDisease) {
       setInputText(selectedDisease.label);
       updateQueryItems(selectedDisease.label);

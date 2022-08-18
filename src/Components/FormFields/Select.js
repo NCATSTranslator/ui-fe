@@ -35,6 +35,10 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
       setHeight('auto');
   }, [selectOpen])
 
+  useEffect(() => {
+    setSelectedItem(value);
+  }, [value])
+
   return (
     <>
       <label className={`select ${styles.select} ${size} ${animateClass}`} > 

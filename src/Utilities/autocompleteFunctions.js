@@ -24,7 +24,7 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
           body: JSON.stringify(curies)
         };
         // Fetch list of normalized nodes based on list of curies from Name Resolver
-        return fetch('https://nodenormalization-sri.renci.org/1.2/get_normalized_nodes', nodeNormalizerRequestOptions)
+        return fetch('https://nodenormalization-sri.renci.org/1.3/get_normalized_nodes', nodeNormalizerRequestOptions)
       })
       .then(response => response.json())
       .then(data => {

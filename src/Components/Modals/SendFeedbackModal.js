@@ -5,13 +5,11 @@ import Button from '../FormFields/Button';
 import TextInput from "../FormFields/TextInput";
 import FileInput from "../FormFields/FileInput";
 import Select from "../FormFields/Select";
-import { validateEmail } from "../../Utilities/utilities";
+// import { validateEmail } from "../../Utilities/utilities";
 import {ReactComponent as Warning} from '../../Icons/information.svg'
 
-const ReportIssueModal = ({children, isOpen, onClose}) => {
+const ReportIssueModal = ({isOpen, onClose}) => {
 
-  const [currentOrganization, setCurrentOrganization] = useState('');
-  const [currentName, setCurrentName] = useState('');
   const [currentCategory, setCurrentCategory] = useState('');
   const [categoryError, setCategoryError] = useState(false);
   const categoryErrorText = "Please select a category";
@@ -29,6 +27,10 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
       case 'category':
         setCategoryError(true);
         break;
+      
+      case 'comments':
+        setCommentsError(true);
+        break;
     
       default:
         break;
@@ -38,12 +40,24 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
 
   const handleSubmission = (e) => {
     e.preventDefault();
-    console.log(e);
     if(!currentCategory) {
       handleError('category');
       return;
     }
+    if(!currentComments) {
+      handleError('comments');
+      return;
+    }
+    /*
+      Hit endpoint here, once we've received information from SRI
+    */
+    resetFormFields();
     onClose();
+  }
+
+  const resetFormFields = () => {
+    setCurrentCategory('');
+    setCurrentComments('');
   }
 
   return (
@@ -58,10 +72,15 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
       <p className={styles.disclaimer}><Warning/>In the mean time, please check out our Help page for Translator tips, tricks, and tutorials.</p>
       <form onSubmit={(e)=>handleSubmission(e)}>
         {
-          errorActive &&
+          errorActive && categoryError &&
           <p className={styles.errorText}>
-            {categoryError && categoryErrorText}
-            {commentsError && commentsErrorText}
+            { categoryErrorText }
+          </p>
+        }
+        {
+          errorActive && commentsError &&
+          <p className={styles.errorText}>
+            { commentsErrorText }
           </p>
         }
         {/* <TextInput 
@@ -81,6 +100,7 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
           size="l" 
           handleChange={(value)=>{
             setCurrentCategory(value);
+            setCategoryError(false);
             setErrorActive(false);
           }}
           value={currentCategory}
@@ -95,9 +115,10 @@ const ReportIssueModal = ({children, isOpen, onClose}) => {
         <TextInput 
           label="Comments *" 
           size="l" 
-          rows={8}
+          rows={5}
           handleChange={(value)=>{
             setCurrentComments(value);
+            setCommentsError(false);
             setErrorActive(false);
           }}
           value={currentComments}
