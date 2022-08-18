@@ -37,6 +37,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity .25s ease;
+  z-index: 100;
   &.open {
     opacity: 1;
     pointer-events: all;

@@ -59,9 +59,7 @@ const ReportIssueModal = ({isOpen, onClose}) => {
     setCurrentCategory('');
     setCurrentComments('');
   }
-useEffect(() => {
-  console.log(currentCategory)
-}, [currentCategory]);
+  
   return (
     <Modal 
       isOpen={modalIsOpen} 
