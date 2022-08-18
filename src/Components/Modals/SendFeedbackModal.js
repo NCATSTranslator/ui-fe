@@ -1,11 +1,11 @@
-import React, {useState} from "react";
+import React, {useState,useEffect} from "react";
 import styles from "./SendFeedbackModal.module.scss";
 import Modal from "./Modal";
 import Button from '../FormFields/Button';
 import TextInput from "../FormFields/TextInput";
 import FileInput from "../FormFields/FileInput";
 import Select from "../FormFields/Select";
-import { validateEmail } from "../../Utilities/utilities";
+// import { validateEmail } from "../../Utilities/utilities";
 import {ReactComponent as Warning} from '../../Icons/information.svg'
 
 const ReportIssueModal = ({isOpen, onClose}) => {
@@ -48,9 +48,20 @@ const ReportIssueModal = ({isOpen, onClose}) => {
       handleError('comments');
       return;
     }
+    /*
+      Hit endpoint here, once we've received information from SRI
+    */
+    resetFormFields();
     onClose();
   }
 
+  const resetFormFields = () => {
+    setCurrentCategory('');
+    setCurrentComments('');
+  }
+useEffect(() => {
+  console.log(currentCategory)
+}, [currentCategory]);
   return (
     <Modal 
       isOpen={modalIsOpen} 
