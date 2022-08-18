@@ -106,11 +106,9 @@ const ReportIssueModal = ({isOpen, onClose}) => {
           value={currentCategory}
           noanimate
         >
-          <option value="General" key="0">General Question or Comment</option>
-          <option value="Disease Selection" key="1">Disease Selection</option>
-          <option value="Results" key="2">Results</option>
-          <option value="Evidence" key="3">Evidence</option>
-          <option value="Search History" key="4">Search History</option>
+          <option value="Suggestion" key="0">Suggestion</option>
+          <option value="Bug Report" key="1">Bug Report</option>
+          <option value="Other Comment" key="2">Other Comment</option>
         </Select>
         <TextInput 
           label="Comments *" 
