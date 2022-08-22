@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import styles from './FileInput.module.scss';
 
-const FileInput = ({buttonLabel, size}) => {
+const FileInput = ({buttonLabel, size, fileTypes}) => {
   
   const [files, setFiles] = useState(null);
   size = (size) ? size : 's';
@@ -25,7 +25,7 @@ const FileInput = ({buttonLabel, size}) => {
       </span>
       <input 
         type="file" 
-        accept=".jpg,.png,.jpeg,.gif" 
+        accept={fileTypes}
         id="file-upload" 
         onChange={(e)=> handleChange(e)}
         multiple
