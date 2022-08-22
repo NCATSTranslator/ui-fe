@@ -124,7 +124,7 @@ const ReportIssueModal = ({isOpen, onClose}) => {
         <FileInput
           buttonLabel="Browse Files"
           size="l"
-          fileTypes=".jpg,.png,.jpeg,.gif"
+          fileTypes=".jpg,.jpeg"
         />
         <Button type="submit" size="l" disabled={errorActive}>Send</Button>
       </form>
