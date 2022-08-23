@@ -30,6 +30,7 @@ const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, c
           onClick={handleClick} 
           href={href} 
           target={_blank && '_blank'}
+          rel={_blank && 'noopener noreferrer'}
         >
           {children}
         </a>
