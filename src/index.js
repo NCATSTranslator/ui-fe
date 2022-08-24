@@ -12,7 +12,6 @@ import Templates from './PageRoutes/Templates/Templates';
 import Build from './PageRoutes/Build/Build';
 import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
-import GraphTest from './PageRoutes/GraphTest/GraphTest';
 import reportWebVitals from './reportWebVitals';
 import {Provider} from 'react-redux';
 import {store} from './Redux/store';
@@ -28,14 +27,6 @@ root.render(
             element={
               <Page title="Home">
                 <Home />
-              </Page>
-            }
-          />
-          <Route  
-            path="graph"
-            element={
-              <Page title="Graph Test">
-                <GraphTest />
               </Page>
             }
           />

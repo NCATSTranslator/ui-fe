@@ -3,6 +3,10 @@
 .homePageContent {
   .container {
     padding-top: 0;
+    max-width: 1160px;
+  }
+  .noMargin {
+    margin: 0;
   }
   .heading {
     text-align: center;
@@ -16,17 +20,27 @@
   }
   .threeCol {
     display: grid;
-    grid-template-columns: 282px 347px 462px;
-    grid-column-gap: 30px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-column-gap: $m;
+    &.images {
+      margin-bottom: $m;
+    }
   }
   .twoCol {
     display: grid;
     grid-template-columns: 7fr 5fr;
-    grid-column-gap: 30px;
+    grid-column-gap: $m;
   }
   .colTwo {
     ul li {
       font-weight: 700;
+      a {
+        text-decoration: none;
+        color: $black;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
   }
   .collaborators {
