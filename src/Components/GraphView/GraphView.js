@@ -2,10 +2,13 @@ import styles from './GraphView.module.scss';
 import React, {useState, useEffect} from "react";
 import GraphPath from '../GraphPath/GraphPath';
 import { formatBiolinkPredicate } from '../../Utilities/utilities';
+import { cloneDeep } from 'lodash';
 
 const GraphView = ({paths}) => {
 
-  const [graph, setGraph] = useState([])
+  const [rawGraph, setRawGraph] = useState([])
+  const [compressedGraph, setCompressedGraph] = useState([])
+  const [numberOfCompressedElements, setNumberOfCompressedElements] = useState(0); 
   let initialNumberToShow = (paths.length < 6) ? paths.length : 6;
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
 
@@ -31,13 +34,15 @@ const GraphView = ({paths}) => {
           let pred = (item.predicates) ? formatBiolinkPredicate(item.predicates[0]) : '';
           pathToAdd[i] = {
             category: 'predicate',
-            predicate: pred,
+            predicates: [pred],
           }
         }
       })
       newGraph.push(pathToAdd);
     }) 
-    setGraph(newGraph);
+    setRawGraph(newGraph);
+    setCompressedGraph(generateCompressedGraph(newGraph));
+    setNumberToShow((paths.length < 6) ? paths.length : 6);
   }, [paths]);
 
 
@@ -76,13 +81,88 @@ const GraphView = ({paths}) => {
   }
 
   const handleShowLess = () => {
-    let newAmount = (numberToShow - 6 <= 6) ? paths.length - (numberToShow - 6) : numberToShow - 6;
+    let newAmount = (numberToShow - 6 <= 6) ? numberToShow - (numberToShow - 6) : numberToShow - 6;
     setNumberToShow(newAmount);
   }
 
+  const checkForNodeUniformity = (pathOne, pathTwo) => {
+    // if the lengths of the paths are different, they cannot have the same nodes
+    if(pathOne.length !== pathTwo.length) 
+      return false;
+      
+    let nodesMatch = true;
+
+    for(const [i, path] of pathOne.entries()) {
+      // if we're at an odd index, it's a predicate, so skip it
+      if(i % 2 !== 0) 
+        continue;
+
+      // if the names of the nodes don't match, set nodesMatch to false 
+      if(path.name !== pathTwo[i].name) 
+        nodesMatch = false;
+    }
+    return nodesMatch;
+  }
+
+  const generateCompressedGraph = (graph) => {
+    let newCompressedGraph = [];
+    let pathToDisplay = null
+    let numCompressedElements = 0;
+    for(const [i, path] of graph.entries()) {
+      if(pathToDisplay === null)
+        pathToDisplay = cloneDeep(path);
+      let displayPath = false;
+      let nextPath = (graph[i+1] !== undefined) ? graph[i+1] : null;
+      let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay, nextPath) : false;
+      // if all nodes are equal
+      // compare predicates, combine them where different
+      // display final 'version' of path
+      
+      // if theres another path after the current one, and the nodes of each are equal
+      if(nextPath && nodesEqual) {
+        // loop through the current path's items
+        for(const [i, item] of path.entries()) {
+          if(displayPath) {
+            break;
+          }
+          // if we're at an even index, it's a node, so skip it
+          if(i % 2 === 0) 
+            continue;
+
+          if(!nextPath[i]) 
+            continue;
+          
+          // loop through nextPath's item's predicates
+          for(const predicate of nextPath[i].predicates) {
+            // if the next path item to be displayed doesn't have the predicate, 
+            if(!pathToDisplay[i].predicates.includes(predicate)) {
+              // add it and increment the number of compressed elements 
+              pathToDisplay[i].predicates.push(predicate);
+              numCompressedElements++;
+            }
+          }
+        }
+      }
+      // if there's no nextPath or the nodes are different, display the path 
+      if(!nextPath || !nodesEqual) {
+        displayPath = true;
+      } 
+      
+      if(displayPath) {
+        newCompressedGraph.push(pathToDisplay);
+        pathToDisplay = null;
+      } 
+    }
+
+    setNumberOfCompressedElements(numCompressedElements);
+
+    return newCompressedGraph;
+  }
+
+
   useEffect(() => {
-    setNumberToShow((paths.length < 6) ? paths.length : 6);
-  }, [paths]);
+    console.log(compressedGraph);
+  }, [compressedGraph]);
 
 
   return(
@@ -91,39 +171,37 @@ const GraphView = ({paths}) => {
         {displayHeadings(graphWidth)}
       </div>
       {
-        graph.map((element, i) => {
-          if(i < numberToShow) {
-            return (
-              <div className={styles.tableItem} key={i}> 
-                {
-                  element.map((path, j) => {
-                    let key = `${i}_${j}`;
-                    return (
-                      <GraphPath 
-                        path={path} 
-                        key={key}
-                        handleNameClick={handleNameClick}
-                        handlePathClick={handlePathClick}
-                        handleTargetClick={handleTargetClick}
-                      />
+        compressedGraph.slice(0, numberToShow).map((pathToDisplay, i)=> {
+          return (
+            <div className={styles.tableItem} key={i}> 
+              {
+                pathToDisplay.map((pathItem, j) => {
+                  let key = `${i}_${j}`;
+                  return (
+                    <GraphPath 
+                    path={pathItem} 
+                    key={key}
+                    handleNameClick={handleNameClick}
+                    handlePathClick={handlePathClick}
+                    handleTargetClick={handleTargetClick}
+                    />
                     ) 
                   }) 
                 }
-              </div>
-            )
-          } else {
-            return '';
-          }
+            </div>
+          )
         })
       }
-      {
-        (numberToShow < graph.length) &&
-        <button onClick={handleShowMore} className={styles.show}>Show More</button>
-      }
-      {
-        (numberToShow === graph.length && numberToShow > 6) &&
-        <button onClick={handleShowLess} className={styles.show}>Show Less</button>
-      }
+      <div className={styles.buttons}>
+        {
+          (numberToShow < rawGraph.length - numberOfCompressedElements) &&
+          <button onClick={handleShowMore} className={styles.show}>Show More</button>
+        }
+        {
+          (numberToShow <= rawGraph.length - numberOfCompressedElements && numberToShow > 6) &&
+          <button onClick={handleShowLess} className={styles.show}>Show Less</button>
+        }
+      </div>
     </div>
   )
 }

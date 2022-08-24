@@ -88,12 +88,16 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
         path.category === 'predicate' &&
         <span className={styles.pathContainer} onClick={()=> tooltipOpen('path')}>
           <Connector />
-          <span className={`${styles.path} path`}>{path.predicate}</span>
+          <span className={`${styles.path} path`}>
+            {path.predicates[0]}
+            {path.predicates.length > 1 && 
+            <span className={styles.more}>+ {path.predicates.length - 1} More</span>}
+          </span>
           <OutsideClickHandler onOutsideClick={() => tooltipClose('path')}>
             <Tooltip 
               active={pathTooltipActive} 
               onClose={() => tooltipClose('path')}
-              heading={path.predicate}
+              heading={path.predicates.join(', ')}
               text=''
               >
             </Tooltip>

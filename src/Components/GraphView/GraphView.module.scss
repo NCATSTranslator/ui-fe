@@ -2,6 +2,7 @@
 
 .graphView {
   padding: $m 0;
+
   .tableHead, .tableItem {
     display: flex;
     justify-content: flex-end;
@@ -96,13 +97,23 @@
     }
   }
   .show {
-    margin: 0 auto;
+    margin: 0;
     display: block;
     color: $darkGray;
     background-color: transparent;
     box-shadow: none;
     &:hover {
       text-decoration: underline;
+    }
+  }
+  .buttons {
+    display: flex;
+    justify-content: center;
+    button:last-child {
+      margin-left: $s;
+    }
+    button:first-child {
+      margin-left: 0;
     }
   }
 }

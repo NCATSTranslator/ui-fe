@@ -1,6 +1,7 @@
 import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkPredicate } from './utilities';
 import _ from "lodash";
 
+// Given an array of paths and results, return an array of publications for those paths
 export const getFormattedEvidence = (paths, results) => {
   let formattedEvidence = [];
   for(const path of paths) {
@@ -46,7 +47,6 @@ export const getEdgeByID = (id, results) => {
 
   return results.edges[id];
 }
-
 
 export const getFormattedPaths = (rawPathIds, results) => {
   let formattedPaths = [];
