@@ -159,12 +159,6 @@ const GraphView = ({paths}) => {
     return newCompressedGraph;
   }
 
-
-  useEffect(() => {
-    console.log(compressedGraph);
-  }, [compressedGraph]);
-
-
   return(
     <div className={styles.graphView}>
       <div className={styles.tableHead}>
