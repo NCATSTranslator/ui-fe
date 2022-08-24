@@ -1,33 +1,36 @@
 import React, {useState, useEffect} from "react";
 import styles from './FileInput.module.scss';
 
-const FileInput = ({buttonLabel, size}) => {
+const FileInput = ({buttonLabel, size, fileTypes, handleChange}) => {
   
-  const [files, setFiles] = useState(null);
+  const [fileNames, setFileNames] = useState(null);
   size = (size) ? size : 's';
+  handleChange = (handleChange) ? handleChange : ()=>{ console.log('No handleChange function prop provided to FileInput component.')};
 
-  const handleChange = (e) => {
-    console.log(e.target.files);
+  const handleUpdate = (e) => {
     let fileNameArray = Array.from(e.target.files).map((item)=>{
       return item.name;
     })
-    console.log(fileNameArray);
-    setFiles(fileNameArray);
+    setFileNames(fileNameArray);
+    let fileArray = Array.from(e.target.files).map((item)=>{
+      return item;
+    })
+    handleChange(fileArray);
   }
 
   return (
 
     <label htmlFor={`file-upload`} className={`file-input ${styles.fileInput} ${size}`}>
       <span className={styles.fileList}>
-        {(files) ?
-          files.join(', ') :
+        {(fileNames) ?
+          fileNames.join(', ') :
           'No Files Selected'}
       </span>
       <input 
         type="file" 
-        accept=".jpg,.png,.jpeg,.gif" 
+        accept={fileTypes}
         id="file-upload" 
-        onChange={(e)=> handleChange(e)}
+        onChange={(e)=> handleUpdate(e)}
         multiple
       />
       <span className={styles.buttonLabel}>{buttonLabel}</span>

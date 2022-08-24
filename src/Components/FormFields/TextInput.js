@@ -1,9 +1,13 @@
 import React from "react";
 import styles from "./TextInput.module.scss";
 
-const TextInput = ({label, subtitle, value, placeholder, size, rows, error, errorText, handleChange, className, icon}) => {
+const TextInput = (
+  {label, subtitle, value, placeholder, size, rows,
+    error, errorText, handleChange, className, icon, maxLength}) => {
   
   size = (size === undefined) ? 's' : size;
+
+  maxLength = (maxLength) ? maxLength : -1;
 
   
   // switch (size) {
@@ -30,7 +34,14 @@ const TextInput = ({label, subtitle, value, placeholder, size, rows, error, erro
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         {icon && <div className={styles.iconContainer}>{icon}</div>}
-        <textarea type="text" placeholder={placeholder} rows={rows} onChange={(e) => {handleChange(e.target.value)}} value={value}/>
+        <textarea 
+          type="text" 
+          placeholder={placeholder} 
+          rows={rows} 
+          onChange={(e) => {handleChange(e.target.value)}} 
+          maxLength={maxLength} 
+          value={value}
+        />
         {error && <span className={styles.errorText}>{errorText}</span>}
       </label>
     }
@@ -40,7 +51,13 @@ const TextInput = ({label, subtitle, value, placeholder, size, rows, error, erro
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         {icon && <div className={styles.iconContainer}>{icon}</div>}
-        <input type="text" placeholder={placeholder} size="1" onChange={(e) => {handleChange(e.target.value)}} value={value}/>
+        <input 
+          type="text" 
+          placeholder={placeholder} 
+          size="1" 
+          onChange={(e) => {handleChange(e.target.value)}} 
+          maxLength={maxLength} 
+          value={value}/>
         {error && <span className={styles.errorText}>{errorText}</span>}
       </label>
     }
