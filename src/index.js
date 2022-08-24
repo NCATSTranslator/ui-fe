@@ -12,7 +12,8 @@ import Templates from './PageRoutes/Templates/Templates';
 import Build from './PageRoutes/Build/Build';
 import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
-import GraphTest from './PageRoutes/GraphTest/GraphTest';
+import Terms from './PageRoutes/Terms/Terms';
+import Contact from './PageRoutes/Contact/Contact';
 import reportWebVitals from './reportWebVitals';
 import {Provider} from 'react-redux';
 import {store} from './Redux/store';
@@ -32,18 +33,26 @@ root.render(
             }
           />
           <Route  
-            path="graph"
-            element={
-              <Page title="Graph Test">
-                <GraphTest />
-              </Page>
-            }
-          />
-          <Route  
             path="about"
             element={
               <Page title="About Biomedical Data Translator">
                 <About />
+              </Page>
+            }
+          />
+          <Route  
+            path="terms-of-use"
+            element={
+              <Page title="Terms of Use">
+                <Terms />
+              </Page>
+            }
+          />
+          <Route  
+            path="contact-us"
+            element={
+              <Page title="Contact Us">
+                <Contact />
               </Page>
             }
           />

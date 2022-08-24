@@ -1,7 +1,7 @@
 @import "../../Assets/Styles/variables";
 
 .footer {
-  background-color: $lightGray;
+  background-color: $purpleTwo20;
   .container {
     max-width: $maxwidth;
     margin: 0 auto;
@@ -9,10 +9,13 @@
       display: flex;
       justify-content: space-evenly;
       a {
-        color: $black;
+        font-size: 14px;
+        font-weight: 700;
+        color: $darkGray;
         text-decoration: none;
-        line-height: 1;
-        font-size: $bodyTwoSize;
+        &:hover {
+          text-decoration: underline;
+        }
       }
     }
   }

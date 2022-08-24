@@ -15,7 +15,7 @@ import {ReactComponent as SmallMolecule} from '../Icons/small-molecule.svg';
 export const getIcon = (category) => {
   var icon = <Chemical/>;
   switch(category) {
-    case 'gene':
+    case 'biolink:Gene':
       icon = <Gene/>;
       break;
     case 'phenotype':

@@ -22,16 +22,16 @@ const App = () => {
         <nav>
           <NavLink to="/about" 
             className={({isActive}) => {return (isActive) ? 'active' : '' }}
-          >About Translator</NavLink>
-          <NavLink to="/privacy-policy" 
-            className={({isActive}) => {return (isActive) ? 'active' : '' }}
-          >Privacy Policy</NavLink>
+          >About NCATS</NavLink>
           <NavLink to="/contact-us" 
             className={({isActive}) => {return (isActive) ? 'active' : '' }}
           >Contact Us</NavLink>
-          <NavLink to="/help" 
+          <NavLink to="/terms-of-use" 
             className={({isActive}) => {return (isActive) ? 'active' : '' }}
-          >Help</NavLink>
+          >Terms of Use</NavLink>
+          <NavLink to="/privacy-policy" 
+            className={({isActive}) => {return (isActive) ? 'active' : '' }}
+          >Privacy Policy</NavLink>
         </nav>
       </Footer>
     </div>

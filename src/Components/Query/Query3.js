@@ -152,16 +152,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
     // If the submission is valid
     if(isValidSubmission) {
       let timestamp = new Date();
-      // Update the query history in the application state
-      dispatch(
-        incrementHistory(
-          { 
-            items: storedQuery, 
-            date: timestamp.toDateString(), 
-            time: timestamp.toLocaleTimeString([], {hour12: true, hour: 'numeric', minute:'2-digit'})
-          }
-        )
-      );
+
       // Reset the current results in the application state
       dispatch(setCurrentResults({}));
       // Reset isValidSubmission
@@ -184,6 +175,17 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
           if(data.data && data.status === 'success') {
             // Update the currentQueryResultsID in the application state
             dispatch(setCurrentQueryResultsID(data.data));
+            // Update the query history in the application state
+            dispatch(
+              incrementHistory(
+                { 
+                  items: storedQuery, 
+                  date: timestamp.toDateString(), 
+                  time: timestamp.toLocaleTimeString([], {hour12: true, hour: 'numeric', minute:'2-digit'}),
+                  id: data.data
+                }
+              )
+            );
           }
           setResultsActive(true);
         })

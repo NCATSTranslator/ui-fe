@@ -1,9 +1,10 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import styles from "./QueryHistoryList.module.scss";
 import { getDifferenceInDays } from "../../Utilities/utilities";
 import { pastQueryState, removeItemAtIndex } from "../../Redux/historySlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
 import { useSelector, useDispatch } from 'react-redux';
+import ShareModal from '../../Components/Modals/ShareModal';
 import TextInput from "../FormFields/TextInput";
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
@@ -23,6 +24,9 @@ const QueryHistoryList = () => {
   const [filteredQueryHistoryState, setFilteredQueryHistoryState] = useState(global.structuredClone(queryHistoryState))
   const currentDate = new Date();
 
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [exportQueryID, setExportQueryID] = useState(null);
+
   const handleRemoveHistoryItem = (i) => {
     let temp = global.structuredClone(queryHistoryState);
     temp.splice(i, 1);
@@ -32,7 +36,7 @@ const QueryHistoryList = () => {
 
   const handleClick = (query) => {
     dispatch(setCurrentQuery(query.items));
-    navigate('/build?results');
+    navigate(`/results?q=${query.id}`);
   }
 
   const handleSearch = (value) => {
@@ -53,14 +57,39 @@ const QueryHistoryList = () => {
       return include;
     }))
   }
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     handleSearch(e.target[0].value);
   }
+
+  const handleExportClick = (e, query) => {
+    e.stopPropagation();
+    setExportQueryID(query.id);
+  }
+    
+  const handleShareModalClose = () => {
+    setExportQueryID(null)
+    setShareModalOpen(false);
+  }
+
+  useEffect(() => {
+    if(exportQueryID === null)
+      return
+    
+    setShareModalOpen(true);
+    
+  }, [exportQueryID]);
   
   return (
     <div className={styles.historyListContainer}>
+      <ShareModal 
+        isOpen={shareModalOpen} 
+        onClose={()=>{
+          handleShareModalClose();
+        }} 
+        qid={exportQueryID}
+      />
       <div className={styles.searchBarContainer}>
         <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form}>
           <TextInput 
@@ -108,7 +137,7 @@ const QueryHistoryList = () => {
                 <div className={styles.itemContainer}>
                   <span className={styles.query} onClick={() => handleClick(query)}>
                     <div className={styles.left}>
-                      <button className={styles.exportButton} onClick={(e)=>{e.stopPropagation(); console.log('export'); }}><Export/></button>
+                      <button className={styles.exportButton} onClick={(e)=>{handleExportClick(e, query)}}><Export/></button>
                     </div>
                     <div className={styles.right}>
                       <div className={styles.top}>
