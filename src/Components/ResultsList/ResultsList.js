@@ -193,7 +193,8 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        // if we've already gotten results before, set newRawResults instead to prevent original results from being overwritten
+        // if we've already gotten results before, set newRawResults instead to 
+        // prevent original results from being overwritten
         if(formattedResults.length > 0) {
           setFreshRawResults(data);
         } else {
@@ -210,45 +211,6 @@ const ResultsList = ({loading}) => {
     enabled: isFetchingResults,
     refetchOnWindowFocus: false
   });
-
-  // TEST React Query call for results from static file
-  // const testResultsData = useQuery('testResultsData', async () => {
-  //   console.log(currentQueryID);
-
-  //   if(!currentQueryID || !isLoading)
-  //     return;
-
-  //   let queryIDJson = JSON.stringify({qid: currentQueryID});
-
-  //   const requestOptions = {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-  //   };
-
-  //   let data = require('../../Testing/something.json');
-  //   console.log(data);
-  //   setResults(data.data);
-  //   setIsError((data.status === 'error'));
-  //   // const response = await fetch('something.json', requestOptions)
-  //   //   .then(response => response.json())
-  //   //   .then(data => {
-  //   //     console.log(data);
-  //   //     // setResults(data);
-  //   //     // setIsError((data.status === 'error'));
-  //   //   })
-  //   //   .catch((error) => {
-  //   //     console.log(error)
-  //   //   });
-  // }, { 
-  //   refetchInterval: 7000,
-  //   enabled: isLoading,
-  //   refetchOnWindowFocus: false
-  // });
-
-
-
-
-  
 
   /*
     When the results change, which occurs when the React Query returns, handle the returned data

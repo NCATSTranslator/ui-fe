@@ -19,6 +19,7 @@
 .path {
   font-size: 12px;
   font-weight: 400;
+
 }
 .text {
   white-space: nowrap;
@@ -41,6 +42,12 @@
 .pathContainer {
   padding: 7px 0;
   position: relative;
+  .more {
+    display: block;
+    font-weight: 700;
+    font-size: 12px;
+    color: $darkGray;
+  }
   >svg {
     position: absolute;
     top: 50%;
@@ -84,6 +91,7 @@ span.path {
 .nameContainer, .targetContainer {
   box-shadow: $dropShadow;
   transition: all .25s ease;
+  max-height: 38px;
   &:hover {
     box-shadow: $dropShadowHover;
   }
