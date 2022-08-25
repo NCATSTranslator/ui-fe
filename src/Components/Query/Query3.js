@@ -23,9 +23,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   loading = (loading) ? true : false;
 
   // Bool, are we on the results page
-  const [isResults, setIsResults] = useState(results);
-  // Bool, are results active
-  const [resultsActive, setResultsActive] = useState(false);
+  const isResults = results;
   // Bool, are the results loading
   const [isLoading, setIsLoading] = useState(loading);
   // Bool, is the submitted query valid, determined by validateSubmission 
@@ -34,8 +32,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   const [isError, setIsError] = useState(false);
   // String, error text
   const [errorText, setErrorText] = useState('');
-  // Int, active mock ARS ID. For testing purposes
-  // const [activeMockID, setActiveMockID] = useState('e01');
 
   // Get the current query from the application state
   let storedQuery = useSelector(currentQuery);
@@ -197,21 +193,20 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
               )
             );
           }
-          setResultsActive(true);
+          if(window.location.href.includes('results')) {
+            // If we're submitting from the results page, reload the query with the newly returned queryID
+            window.location.reload();
+          } else {
+            // Otherwise, navigate to the results page and set loading to true
+            navigate('/results?loading=true')
+          }
         })
         .catch((error) => {
           console.log(error)
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItems, storedQuery, selectedDisease])
-
-  // Set isResults to true when resultsActive so we can navigate to the results page
-  useEffect(() => {
-    if(resultsActive) {
-      setIsResults(true);
-    }
-  }, [resultsActive]);
+  }, [isValidSubmission, dispatch, queryItems, storedQuery, selectedDisease, navigate])
 
   /* 
     If the query has been populated by clicking on an item in the query history
@@ -222,13 +217,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
       setIsValidSubmission(true)
     }
   }, [navigatingFromHistory]);
-
-  // If isResults is true send us to the results page and set loading to true via query param
-  useEffect(() => {
-    if(isResults && !window.location.href.includes('results')) {
-      navigate('/results?loading=true');
-    }
-  }, [isResults, navigate]);
 
   return (
     <>
