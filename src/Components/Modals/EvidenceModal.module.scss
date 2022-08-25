@@ -31,6 +31,23 @@
         .bold {
           font-weight: 700;
         }
+        &.title {
+          text-align: center;
+          a {
+            font-weight: 700;
+            color: $black;
+            text-decoration: none;
+            font-size: 12px;
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
+        &.abstract span {
+          display: -webkit-box;
+          -webkit-line-clamp: 5;
+          -webkit-box-orient: vertical;
+        }
       }
       .cell, .cell span {
         font-size: 12px;

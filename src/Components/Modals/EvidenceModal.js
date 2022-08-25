@@ -53,21 +53,24 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
           displayedEvidence.map((item, i)=> {
             return (
               <div className={styles.evidenceItem} key={i}>
-                <span className={`${styles.cell} pubdate`}>
+                <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
                   {item.pubdate && item.pubdate }          
                 </span>
-                <span className={`${styles.cell} source`}>
+                <span className={`${styles.cell} ${styles.source} source`}>
                   {item.source && item.source }          
                 </span>
-                <span className={`${styles.cell} title`}>
+                <span className={`${styles.cell} ${styles.title} title`}>
                   {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
+                  {item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
                 </span>
-                <span className={`${styles.cell} abstract`}>
-                  {!item.snippet && "No abstract available."}
-                  {item.snippet && item.snippet}
-                  {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More</a>}          
+                <span className={`${styles.cell} ${styles.abstract} abstract`}>
+                  <span>
+                    {!item.snippet && "No abstract available."}
+                    {item.snippet && item.snippet}
+                  </span>
+                    {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More</a>}          
                 </span>
-                <span className={`${styles.cell} relationship`}>
+                <span className={`${styles.cell} ${styles.relationship} relationship`}>
                   {
                     item.edge && 
                     <span>
