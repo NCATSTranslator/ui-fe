@@ -18,7 +18,13 @@ const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value,
   }, [isLoading]);
 
   return (
-    <form onSubmit={handleSubmission} className={styles.form}>
+    <form 
+      onSubmit={(e)=>{
+        e.preventDefault(); 
+        handleSubmission()
+      }} 
+      className={styles.form}
+      >
       <div className={`${styles.autocompleteContainer} ${(autocompleteItems.length > 0 || autocompleteLoading) ? styles.open : ''}`}>
         {
           autocompleteItems && !autocompleteLoading &&
@@ -28,7 +34,7 @@ const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value,
         }
         {
           autocompleteLoading &&
-          <img src={loadingIcon} alt="loading icon" />
+          <img src={loadingIcon} className={styles.loadingIcon} alt="loading icon" />
         }
         <div className={styles.sep}></div>
       </div>

@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useMemo} from "react";
+import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
 import SimpleQueryBar from "../QueryComponents/SimpleQueryBar";
@@ -60,6 +60,11 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   // Function, delay query for fetching autocomplete items by 750ms each time the user types, so we only send a request once they're done
   const delayedQuery = useMemo(() => _.debounce((i, sl, sa) => getAutocompleteTerms(i, sl, sa), 750), []);
 
+  // Bool, since the query will be submitted whenever a query item is selected, use this to distinguish between
+  // when a user selected a query item, or if the query item is manually updated when /creative_results returns
+  // the final name for the submitted disease
+  const [readyForSubmission, setReadyForSubmission] = useState(false);
+
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = (e) => {
     delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems);
@@ -70,7 +75,24 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   const handleDiseaseSelection = (disease) => {
     setIsError(false);
     setSelectedDisease(disease);
+    setReadyForSubmission(true);
   }
+
+  // Validation function for submission
+  const validateSubmission = useCallback(() => {
+    if(selectedDisease === null) {
+      setIsError(true);
+      setErrorText("No disease selected, please select a valid disease.");
+      return;
+    }
+
+    setIsValidSubmission(true);
+  },[selectedDisease])
+
+  // Event handler for form submission
+  const handleSubmission = useCallback(() => {
+    validateSubmission();
+  },[validateSubmission])
 
   const updateQueryItems = (label) => {
     setQueryItems([
@@ -99,11 +121,16 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   }, [loading]);
 
   useEffect(() => {
-    if(selectedDisease) {
+    if(selectedDisease !== null) {
       setInputText(selectedDisease.label);
       updateQueryItems(selectedDisease.label);
+      if(readyForSubmission) {
+        setReadyForSubmission(false);
+        handleSubmission();
+      }
     }
-  }, [selectedDisease]);
+    
+  }, [selectedDisease, readyForSubmission, handleSubmission]);
 
   useEffect(() => {
     if(presetDisease) {
@@ -129,23 +156,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
     // otherwise, update the stored query in the app state
     dispatch(setCurrentQuery(queryItems));
   }, [queryItems, storedQuery, dispatch]);
-
-  // Event handler for form submission
-  const handleSubmission = (e) => {
-    e.preventDefault();
-    validateSubmission(e);
-  }
-
-  // Validation function for submission
-  const validateSubmission = (e) => {
-    if(selectedDisease === null) {
-      setIsError(true);
-      setErrorText("No disease selected, please select a valid disease.");
-      return;
-    }
-
-    setIsValidSubmission(true);
-  }
 
   // Handle change to isValidSubmission
   useEffect(() => {
