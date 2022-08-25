@@ -55,7 +55,7 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
             <option value="" disabled hidden>{name}</option>
             {children}
           </select>
-          <span className="icon" onMouseDown={handleSelectClick}></span>
+          <span className={styles.icon} onMouseDown={handleSelectClick}></span>
           {
             noanimate && 
             <div className={`${styles.selectList} ${openClass}`}>
