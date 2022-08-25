@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useMemo} from "react";
+import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
 import SimpleQueryBar from "../QueryComponents/SimpleQueryBar";
@@ -23,9 +23,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   loading = (loading) ? true : false;
 
   // Bool, are we on the results page
-  const [isResults, setIsResults] = useState(results);
-  // Bool, are results active
-  const [resultsActive, setResultsActive] = useState(false);
+  const isResults = results;
   // Bool, are the results loading
   const [isLoading, setIsLoading] = useState(loading);
   // Bool, is the submitted query valid, determined by validateSubmission 
@@ -34,8 +32,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   const [isError, setIsError] = useState(false);
   // String, error text
   const [errorText, setErrorText] = useState('');
-  // Int, active mock ARS ID. For testing purposes
-  // const [activeMockID, setActiveMockID] = useState('e01');
 
   // Get the current query from the application state
   let storedQuery = useSelector(currentQuery);
@@ -60,6 +56,11 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   // Function, delay query for fetching autocomplete items by 750ms each time the user types, so we only send a request once they're done
   const delayedQuery = useMemo(() => _.debounce((i, sl, sa) => getAutocompleteTerms(i, sl, sa), 750), []);
 
+  // Bool, since the query will be submitted whenever a query item is selected, use this to distinguish between
+  // when a user selected a query item, or if the query item is manually updated when /creative_results returns
+  // the final name for the submitted disease
+  const [readyForSubmission, setReadyForSubmission] = useState(false);
+
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = (e) => {
     delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems);
@@ -70,7 +71,24 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   const handleDiseaseSelection = (disease) => {
     setIsError(false);
     setSelectedDisease(disease);
+    setReadyForSubmission(true);
   }
+
+  // Validation function for submission
+  const validateSubmission = useCallback(() => {
+    if(selectedDisease === null) {
+      setIsError(true);
+      setErrorText("No disease selected, please select a valid disease.");
+      return;
+    }
+
+    setIsValidSubmission(true);
+  },[selectedDisease])
+
+  // Event handler for form submission
+  const handleSubmission = useCallback(() => {
+    validateSubmission();
+  },[validateSubmission])
 
   const updateQueryItems = (label) => {
     setQueryItems([
@@ -99,11 +117,16 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   }, [loading]);
 
   useEffect(() => {
-    if(selectedDisease) {
+    if(selectedDisease !== null) {
       setInputText(selectedDisease.label);
       updateQueryItems(selectedDisease.label);
+      if(readyForSubmission) {
+        setReadyForSubmission(false);
+        handleSubmission();
+      }
     }
-  }, [selectedDisease]);
+    
+  }, [selectedDisease, readyForSubmission, handleSubmission]);
 
   useEffect(() => {
     if(presetDisease) {
@@ -129,23 +152,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
     // otherwise, update the stored query in the app state
     dispatch(setCurrentQuery(queryItems));
   }, [queryItems, storedQuery, dispatch]);
-
-  // Event handler for form submission
-  const handleSubmission = (e) => {
-    e.preventDefault();
-    validateSubmission(e);
-  }
-
-  // Validation function for submission
-  const validateSubmission = (e) => {
-    if(selectedDisease === null) {
-      setIsError(true);
-      setErrorText("No disease selected, please select a valid disease.");
-      return;
-    }
-
-    setIsValidSubmission(true);
-  }
 
   // Handle change to isValidSubmission
   useEffect(() => {
@@ -187,21 +193,20 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
               )
             );
           }
-          setResultsActive(true);
+          if(window.location.href.includes('results')) {
+            // If we're submitting from the results page, reload the query with the newly returned queryID
+            window.location.reload();
+          } else {
+            // Otherwise, navigate to the results page and set loading to true
+            navigate('/results?loading=true')
+          }
         })
         .catch((error) => {
           console.log(error)
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItems, storedQuery, selectedDisease])
-
-  // Set isResults to true when resultsActive so we can navigate to the results page
-  useEffect(() => {
-    if(resultsActive) {
-      setIsResults(true);
-    }
-  }, [resultsActive]);
+  }, [isValidSubmission, dispatch, queryItems, storedQuery, selectedDisease, navigate])
 
   /* 
     If the query has been populated by clicking on an item in the query history
@@ -212,13 +217,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
       setIsValidSubmission(true)
     }
   }, [navigatingFromHistory]);
-
-  // If isResults is true send us to the results page and set loading to true via query param
-  useEffect(() => {
-    if(isResults && !window.location.href.includes('results')) {
-      navigate('/results?loading=true');
-    }
-  }, [isResults, navigate]);
 
   return (
     <>

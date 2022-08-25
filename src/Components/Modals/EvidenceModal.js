@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react";
 import Modal from "./Modal";
+import Select from "../FormFields/Select";
 import styles from './EvidenceModal.module.scss';
 import ReactPaginate from "react-paginate";
 
@@ -8,8 +9,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
   
-  // eslint-disable-next-line
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [newItemsPerPage, setNewItemsPerPage] = useState(null);
   const [displayedEvidence, setDisplayedEvidence] = useState([]);
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
@@ -34,6 +35,13 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
     );
     setItemOffset(newOffset);
   };
+
+  useEffect(() => {
+    if(newItemsPerPage !== null) {
+      setItemsPerPage(newItemsPerPage);
+      setNewItemsPerPage(null);
+    }
+  }, [newItemsPerPage]);
   
   return (
     <Modal isOpen={modalIsOpen} onClose={onClose} className={styles.evidenceModal} containerClass={styles.evidenceContainer}>
@@ -53,21 +61,24 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
           displayedEvidence.map((item, i)=> {
             return (
               <div className={styles.evidenceItem} key={i}>
-                <span className={`${styles.cell} pubdate`}>
+                <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
                   {item.pubdate && item.pubdate }          
                 </span>
-                <span className={`${styles.cell} source`}>
+                <span className={`${styles.cell} ${styles.source} source`}>
                   {item.source && item.source }          
                 </span>
-                <span className={`${styles.cell} title`}>
+                <span className={`${styles.cell} ${styles.title} title`}>
                   {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
+                  {item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
                 </span>
-                <span className={`${styles.cell} abstract`}>
-                  {!item.snippet && "No abstract available."}
-                  {item.snippet && item.snippet}
-                  {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More</a>}          
+                <span className={`${styles.cell} ${styles.abstract} abstract`}>
+                  <span>
+                    {!item.snippet && "No abstract available."}
+                    {item.snippet && item.snippet}
+                  </span>
+                    {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More</a>}          
                 </span>
-                <span className={`${styles.cell} relationship`}>
+                <span className={`${styles.cell} ${styles.relationship} relationship`}>
                   {
                     item.edge && 
                     <span>
@@ -88,25 +99,43 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
         }
       </div>
       { 
-      currentEvidence.length > itemsPerPage && 
-      <div className={styles.pagination}>
-        <ReactPaginate
-          breakLabel="..."
-          nextLabel="Next"
-          previousLabel="Previous"
-          onPageChange={handlePageClick}
-          pageRangeDisplayed={5}
-          marginPagesDisplayed={1}
-          pageCount={pageCount}
-          renderOnZeroPageCount={null}
-          className={styles.pageNums}
-          pageClassName={styles.pageNum}
-          activeClassName={styles.current}
-          previousLinkClassName={`${styles.prev} ${styles.button}`}
-          nextLinkClassName={`${styles.prev} ${styles.button}`}
-          disabledLinkClassName={styles.disabled}
-        />
-      </div>
+        currentEvidence.length > itemsPerPage && 
+        <div className={styles.bottom}>
+          <div className={styles.perPage}>
+            <Select 
+              label="" 
+              name="Results Per Page"
+              size="m" 
+              handleChange={(value)=>{
+                setNewItemsPerPage(value);
+              }}
+              value={newItemsPerPage}
+              >
+              <option value="5" key="0">5</option>
+              <option value="10" key="1">10</option>
+              <option value="20" key="2">20</option>
+            </Select>
+          </div>
+          <div className={styles.pagination}>
+            <ReactPaginate
+              breakLabel="..."
+              nextLabel="Next"
+              previousLabel="Previous"
+              onPageChange={handlePageClick}
+              pageRangeDisplayed={5}
+              marginPagesDisplayed={1}
+              pageCount={pageCount}
+              renderOnZeroPageCount={null}
+              className={styles.pageNums}
+              pageClassName={styles.pageNum}
+              activeClassName={styles.current}
+              previousLinkClassName={`${styles.prev} ${styles.button}`}
+              nextLinkClassName={`${styles.prev} ${styles.button}`}
+              disabledLinkClassName={styles.disabled}
+            />
+          </div>
+        </div>
+
       }
     </Modal>
   );

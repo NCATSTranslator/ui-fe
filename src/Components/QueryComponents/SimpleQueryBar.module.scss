@@ -42,8 +42,9 @@
     opacity: 1;
     pointer-events: all;
   }
-  img {
+  .loadingIcon {
     display: block;
+    width: auto;
     margin: 0 auto;
     padding: 30px;
   }
