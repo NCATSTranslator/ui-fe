@@ -84,7 +84,7 @@ const ResultsList = ({loading}) => {
   const [endResultIndex, setEndResultIndex] = useState(9);
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
-  // Int, number of pages
+  // Int, current page
   const [currentPage, setCurrentPage] = useState(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);

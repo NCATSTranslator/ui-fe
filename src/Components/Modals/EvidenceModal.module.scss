@@ -16,6 +16,7 @@
       font-weight: 700;
       line-height: 1.25;
       text-transform: uppercase;
+      padding: 12px;
     }
   }
   .tableBody {
@@ -30,6 +31,9 @@
         height: 98px;
         .bold {
           font-weight: 700;
+        }
+        &.source, &.pubdate {
+          text-align: center;
         }
         &.title {
           text-align: center;
@@ -60,7 +64,6 @@
     }
     &>div:first-child {
       background-color: $purpleTwo;  
-      padding: 12px;
     }
     .url {
       font-size: 12px;
@@ -90,7 +93,6 @@
       align-items: center;
       list-style-type: none;
       padding-left: 0;
-      width: 700px;
       margin: 0 0 0 auto;
       .button {
         margin-bottom: 0;
