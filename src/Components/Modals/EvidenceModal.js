@@ -16,6 +16,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
   const [pageCount, setPageCount] = useState(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
+  // Int, current page
+  const [currentPage, setCurrentPage] = useState(0);
   const endOffset = (itemOffset + itemsPerPage > currentEvidence.length)
   ? currentEvidence.length
   : itemOffset + itemsPerPage;
@@ -33,6 +35,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
     console.log(
       `User requested page number ${event.selected}, which is offset ${newOffset}`
     );
+    setCurrentPage(event.selected);
     setItemOffset(newOffset);
   };
 
@@ -40,6 +43,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
     if(newItemsPerPage !== null) {
       setItemsPerPage(newItemsPerPage);
       setNewItemsPerPage(null);
+      handlePageClick({selected: 0});
     }
   }, [newItemsPerPage]);
   
@@ -107,7 +111,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
               name="Results Per Page"
               size="m" 
               handleChange={(value)=>{
-                setNewItemsPerPage(value);
+                setNewItemsPerPage(parseInt(value));
               }}
               value={newItemsPerPage}
               >
@@ -122,8 +126,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
               nextLabel="Next"
               previousLabel="Previous"
               onPageChange={handlePageClick}
-              pageRangeDisplayed={5}
-              marginPagesDisplayed={1}
+              pageRangeDisplayed={2}
+              marginPagesDisplayed={2}
               pageCount={pageCount}
               renderOnZeroPageCount={null}
               className={styles.pageNums}
@@ -132,6 +136,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
               previousLinkClassName={`${styles.prev} ${styles.button}`}
               nextLinkClassName={`${styles.prev} ${styles.button}`}
               disabledLinkClassName={styles.disabled}
+              forcePage={currentPage}
             />
           </div>
         </div>
