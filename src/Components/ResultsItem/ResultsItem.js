@@ -62,9 +62,10 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>
       </button>
-      <AnimateHeight className={`${styles.accordionPanel} ${isExpanded ? styles.open : styles.closed }`}
-          duration={250}
-          height={height}
+      <AnimateHeight 
+        className={`${styles.accordionPanel} ${isExpanded ? styles.open : styles.closed } ${item.description ? styles.hasDescription : styles.noDescription }`}
+        duration={250}
+        height={height}
         > 
         <div className={styles.container}>
           <p>{item.description}</p>
