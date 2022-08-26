@@ -57,7 +57,7 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
             onChange={e => handleEvidenceRangeChange(e)}
             initialValue={1}
           />
-        <p className={styles.subTwo}></p>
+        {/* <p className={styles.subTwo}></p>
           <Checkbox handleClick={handleDateRangeActive} 
             checked={activeFilters.some(e => e.tag === dateRangeObject.tag)}>
               Date Range
@@ -69,7 +69,7 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
             max={dateRangeMax} 
             onChange={e => handleDateRangeChange(e)}
             initialValues={dateRange} 
-          />
+          /> */}
         <p className={styles.subTwo}>FDA Status</p>
           <Checkbox handleClick={() => onFilter(fdaObject)} 
             checked={activeFilters.some(e => e.tag === fdaObject.tag)}>
