@@ -2,11 +2,15 @@
 
 
 .nameContainer,.pathContainer,.targetContainer {
-  width: 100%;
+  width: 14.3%;
   border-radius: $defaultBorderRadius;
   svg {
     min-width: 24px;
   }
+}
+.nameContainer,.pathContainer {
+  width: calc(14.3% - 4px);
+  margin-right: 4px;
 }
 .name,.pathContainer,.target {
   display: flex;
