@@ -24,15 +24,12 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
   const tooltipOpen = (type) => {
     switch (type) {
       case 'name':
-        handleNameClick();
         setNameTooltipActive(true);
         break;
       case 'path':
-        handlePathClick();
         setPathTooltipActive(true);
         break;   
       case 'target':
-        handleTargetClick();
         setTargetTooltipActive(true);
         break; 
       default:
@@ -66,14 +63,17 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
     <>
       {
         path.category === 'object' &&
-        <span className={styles.nameContainer} >
-          <span className={styles.name} onClick={(e) => {e.stopPropagation(); tooltipOpen('name')}}>
+        <span className={styles.nameContainer} 
+          onMouseEnter={()=>tooltipOpen('name')}
+          onMouseLeave={()=>tooltipClose('name')}
+          onClick={(e)=> {e.stopPropagation(); handleNameClick();}}
+          >
+          <span className={styles.name} >
             {getIcon(path.type)}
             <span className={styles.text}>
               {nameString}
             </span>
           </span>
-          <OutsideClickHandler onOutsideClick={(e) => { tooltipClose('name')}}>
             <Tooltip 
               active={nameTooltipActive} 
               onClose={() => tooltipClose('name')}
@@ -81,47 +81,66 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
               text={path.description}
               >
             </Tooltip>
-          </OutsideClickHandler>
         </span>
       }
       {
         path.category === 'predicate' &&
-        <span className={styles.pathContainer} onClick={(e)=> {e.stopPropagation(); tooltipOpen('path')}}>
+        <span 
+          className={styles.pathContainer} 
+          onMouseEnter={()=>tooltipOpen('path')}
+          onMouseLeave={()=>tooltipClose('path')}
+          onClick={(e)=> {e.stopPropagation(); handlePathClick();}}
+          >
           <Connector />
           <span className={`${styles.path} path`}>
             {path.predicates[0]}
             {path.predicates.length > 1 && 
             <span className={styles.more}>+ {path.predicates.length - 1} More</span>}
           </span>
-          <OutsideClickHandler onOutsideClick={(e) => { tooltipClose('path')}}>
-            <Tooltip 
-              active={pathTooltipActive} 
-              onClose={() => tooltipClose('path')}
-              heading={path.predicates.join(', ')}
-              text=''
-              >
-            </Tooltip>
-          </OutsideClickHandler>
+          <Tooltip 
+            active={pathTooltipActive} 
+            onClose={() => tooltipClose('path')}
+            text=''
+            >
+              {
+                path.predicates.map((predicate, i)=> {
+                  return (
+                    <p 
+                      key={i} 
+                      className={styles.predicate} 
+                      // Predicate click to get specific evidence will go here 
+                      onClick={(e)=> {e.stopPropagation();}}
+                      >
+                      {predicate}
+                    </p>
+                  )
+                })
+              }
+          </Tooltip>
         </span>
       }
       {
         path.category === 'target' && 
-        <span className={styles.targetContainer} >
+        <span 
+          className={styles.targetContainer} 
+          onMouseEnter={()=>tooltipOpen('target')}
+          onMouseLeave={()=>tooltipClose('target')}
+          onClick={(e)=> {e.stopPropagation(); handleTargetClick();}}
+          >
           <span className={styles.target} onClick={(e) => {e.stopPropagation(); tooltipOpen('target')}}>
             <Disease/>
             <span className={styles.text}>
               {nameString}
             </span>
           </span>
-          <OutsideClickHandler onOutsideClick={(e) => {tooltipClose('target')}}>
-            <Tooltip 
-              active={targetTooltipActive} 
-              onClose={() => tooltipClose('target')}
-              heading={<span><strong>{nameString}</strong> ({typeString})</span>}
-              text={path.description}
-              >
-            </Tooltip>
-          </OutsideClickHandler>
+          <Tooltip 
+            active={targetTooltipActive} 
+            onClose={() => tooltipClose('target')}
+            onClick={(e)=> e.stopPropagation()}
+            heading={<span><strong>{nameString}</strong> ({typeString})</span>}
+            text={path.description}
+            >
+          </Tooltip>
         </span>
       }    
     </>

@@ -19,18 +19,20 @@ const Tooltip = ({children, active, onClose, heading, text}) => {
 
   return(
     <div className={`${styles.tooltip} ${statusClass}`}>
-      {heading && 
-        <p className={styles.heading}>{heading}</p>
-      }
-      {text && 
-        <p className={styles.text}>{text}</p>
-      }
-      {children &&      
-        <div className={styles.children}>
-          {children}
-        </div>
-      }
-      <div className={styles.close}><Close onClick={(e)=>handleClose(e)}/></div>
+      <div className={styles.tooltipContainer}>
+        {heading && 
+          <p className={styles.heading}>{heading}</p>
+        }
+        {text && 
+          <p className={styles.text}>{text}</p>
+        }
+        {children &&      
+          <div className={styles.children}>
+            {children}
+          </div>
+        }
+        <div className={styles.close}><Close onClick={(e)=>handleClose(e)}/></div>
+      </div>
     </div>
   )
 }
