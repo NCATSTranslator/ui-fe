@@ -2,9 +2,9 @@
 
 
 .nameContainer,.pathContainer,.targetContainer {
-  width: 140px;
+  width: 100%;
   border-radius: $defaultBorderRadius;
-  margin-right: 4px;
+  overflow: hidden;
   svg {
     min-width: 24px;
   }
