@@ -56,7 +56,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span className={styles.evidenceLink} onClick={(e)=>{e.stopPropagation(); activateEvidence(item.evidence)}}>
-          <span className={styles.viewAll}>View All</span> ({evidenceCount})
+          <span className={styles.viewAll}>View All Evidence</span> ({evidenceCount})
         </span>
       </div>
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>

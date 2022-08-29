@@ -4,10 +4,9 @@
   padding: $m 0;
 
   .tableHead, .tableItem {
-    display: grid;
+    display: flex;
     justify-content: flex-end;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    grid-column-gap: 5px;
+    align-items: center;
     .name, .target {
       font-size: 14px;
       font-weight: 700;
@@ -28,7 +27,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100%;
+      width: 14.3%;
       text-align: center;
       margin-right: 4px;
       cursor: pointer;
