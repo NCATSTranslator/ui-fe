@@ -2,9 +2,10 @@
 
 .result {
   display: grid;
-  grid-template-columns: 50px 1fr 50px 200px 50px;
+  grid-template-columns: 1fr 50px 200px 50px;
+  // Columns including checkbox
+  // grid-template-columns: 50px 1fr 50px 200px 50px;
   padding: 12px;
-
   &:nth-child(even) {
     &.highlighted {
       background-color: $yellow20;
@@ -19,6 +20,9 @@
     padding: $xs 0;
     display: flex;
     align-items: center;
+  }
+  .checkboxContainer {
+    display: none;
   }
   .nameContainer {
     display: block;
@@ -93,8 +97,9 @@
       }
     }
     .container {
-      max-width: 722px;
-      margin-left: 50px;
+      max-width: calc(100% - 300px);
+      // Only needed when checkboxes are present
+      // margin-left: 50px;
       padding: 0;
       p {
         font-size: 12px;
