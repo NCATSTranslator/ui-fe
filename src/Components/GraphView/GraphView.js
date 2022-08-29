@@ -189,11 +189,11 @@ const GraphView = ({paths}) => {
       <div className={styles.buttons}>
         {
           (numberToShow < rawGraph.length - numberOfCompressedElements) &&
-          <button onClick={handleShowMore} className={styles.show}>Show More</button>
+          <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
         }
         {
           (numberToShow <= rawGraph.length - numberOfCompressedElements && numberToShow > 6) &&
-          <button onClick={handleShowLess} className={styles.show}>Show Less</button>
+          <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
         }
       </div>
     </div>

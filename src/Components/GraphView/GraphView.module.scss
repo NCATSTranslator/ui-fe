@@ -4,8 +4,10 @@
   padding: $m 0;
 
   .tableHead, .tableItem {
-    display: flex;
+    display: grid;
     justify-content: flex-end;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-column-gap: 5px;
     .name, .target {
       font-size: 14px;
       font-weight: 700;
@@ -26,7 +28,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 140px;
+      width: 100%;
       text-align: center;
       margin-right: 4px;
       cursor: pointer;
@@ -84,6 +86,8 @@
     .name, .target {
       box-shadow: $dropShadow;
       transition: all .25s ease;
+      width: 100%;
+      overflow: hidden;
       &:hover {
         box-shadow: $dropShadowHover;
       }

@@ -56,7 +56,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
           <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
           <div className={`${styles.head} ${styles.source}`}>Source</div>
           <div className={`${styles.head} ${styles.title}`}>Title</div>
-          <div className={`${styles.head} ${styles.abstract}`}>Abstract</div>
+          <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
           <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
           <div className={`${styles.head} ${styles.format}`}>Format</div>
         </div>
@@ -77,7 +77,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
                 </span>
                 <span className={`${styles.cell} ${styles.abstract} abstract`}>
                   <span>
-                    {!item.snippet && "No abstract available."}
+                    {!item.snippet && "No snippet available."}
                     {item.snippet && item.snippet}
                   </span>
                     {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More</a>}          

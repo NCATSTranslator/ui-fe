@@ -640,6 +640,7 @@ const ResultsList = ({loading}) => {
                     < ResultsAvailableIcon/>
                     Load New Results
                   </button>
+                  <p className={styles.refreshDisclaimer}>Loading these results will refresh the page, causing you to lose your place in this list.<br/>Results you have already viewed may also be updated with new data.</p>
                 </div>
               }
             </>

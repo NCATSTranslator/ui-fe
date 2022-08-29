@@ -9,7 +9,7 @@
     grid-column-gap: $m;
     align-items: flex-start;
     position: relative;
-    max-width: 1400px;
+    max-width: 2300px;
     width: auto;
     .resultsTableContainer {
       grid-column: 2/3;
@@ -140,6 +140,12 @@
   margin-top: $m;
   grid-column: 2/3;
   text-align: center;
+  .refreshDisclaimer {
+    font-size: 12px;
+    margin-top: $xs;
+    color: $darkGray;
+    text-align: center;
+  }
 }
 .pagination {
   margin-top: $s;

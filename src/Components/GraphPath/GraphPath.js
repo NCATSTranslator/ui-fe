@@ -67,13 +67,13 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
       {
         path.category === 'object' &&
         <span className={styles.nameContainer} >
-          <span className={styles.name} onClick={() => tooltipOpen('name')}>
+          <span className={styles.name} onClick={(e) => {e.stopPropagation(); tooltipOpen('name')}}>
             {getIcon(path.type)}
             <span className={styles.text}>
               {nameString}
             </span>
           </span>
-          <OutsideClickHandler onOutsideClick={() => tooltipClose('name')}>
+          <OutsideClickHandler onOutsideClick={(e) => { tooltipClose('name')}}>
             <Tooltip 
               active={nameTooltipActive} 
               onClose={() => tooltipClose('name')}
@@ -86,14 +86,14 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
       }
       {
         path.category === 'predicate' &&
-        <span className={styles.pathContainer} onClick={()=> tooltipOpen('path')}>
+        <span className={styles.pathContainer} onClick={(e)=> {e.stopPropagation(); tooltipOpen('path')}}>
           <Connector />
           <span className={`${styles.path} path`}>
             {path.predicates[0]}
             {path.predicates.length > 1 && 
             <span className={styles.more}>+ {path.predicates.length - 1} More</span>}
           </span>
-          <OutsideClickHandler onOutsideClick={() => tooltipClose('path')}>
+          <OutsideClickHandler onOutsideClick={(e) => { tooltipClose('path')}}>
             <Tooltip 
               active={pathTooltipActive} 
               onClose={() => tooltipClose('path')}
@@ -107,13 +107,13 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
       {
         path.category === 'target' && 
         <span className={styles.targetContainer} >
-          <span className={styles.target} onClick={() => tooltipOpen('target')}>
+          <span className={styles.target} onClick={(e) => {e.stopPropagation(); tooltipOpen('target')}}>
             <Disease/>
             <span className={styles.text}>
               {nameString}
             </span>
           </span>
-          <OutsideClickHandler onOutsideClick={() => tooltipClose('target')}>
+          <OutsideClickHandler onOutsideClick={(e) => {tooltipClose('target')}}>
             <Tooltip 
               active={targetTooltipActive} 
               onClose={() => tooltipClose('target')}
