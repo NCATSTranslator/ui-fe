@@ -140,6 +140,12 @@
   margin-top: $m;
   grid-column: 2/3;
   text-align: center;
+  .refreshDisclaimer {
+    font-size: 12px;
+    margin-top: $xs;
+    color: $darkGray;
+    text-align: center;
+  }
 }
 .pagination {
   margin-top: $s;
