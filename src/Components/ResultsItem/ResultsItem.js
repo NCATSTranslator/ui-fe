@@ -40,9 +40,9 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
   }, [item]);
 
   return (
-    <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''} result`}>
+    <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''} result`} onClick={handleToggle}>
       <div className={`${styles.checkboxContainer} ${styles.resultSub}`}>
-        <Checkbox checked={checked} handleClick={()=>handleSelected(item)}/>
+        <Checkbox checked={checked} handleClick={(e)=>{e.stopPropagation(); handleSelected(item)}}/>
       </div>
       <div className={`${styles.nameContainer} ${styles.resultSub}`}>
         <span className={styles.icon}>{icon}</span>
@@ -55,7 +55,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
         }
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
-        <span className={styles.evidenceLink} onClick={()=>{activateEvidence(item.evidence)}}>
+        <span className={styles.evidenceLink} onClick={(e)=>{e.stopPropagation(); activateEvidence(item.evidence)}}>
           <span className={styles.viewAll}>View All</span> ({evidenceCount})
         </span>
       </div>
