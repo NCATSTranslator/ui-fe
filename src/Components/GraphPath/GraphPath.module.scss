@@ -60,11 +60,17 @@
     width: 100%;
     transform: translateY(-50%);
   }
+  .predicatesList {
+    margin: 0;
+  }
   .predicate {
     font-size: 16px !important;
     font-weight: 700 !important;
     margin-bottom: 0 !important;
     color: $white;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 span.path {

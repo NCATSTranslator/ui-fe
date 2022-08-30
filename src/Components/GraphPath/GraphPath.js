@@ -113,21 +113,41 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
             active={pathTooltipActive} 
             onClose={() => tooltipClose('path')}
             text=''
-            >
-              {
+            > 
+            {
+              path.predicates.length > 1 &&
+              <ul className={styles.predicatesList}>{
                 path.predicates.map((predicate, i)=> {
                   return (
-                    <p 
-                      key={i} 
-                      className={styles.predicate} 
-                      // Predicate click to get specific evidence will go here 
-                      onClick={(e)=> {e.stopPropagation();}}
-                      >
-                      {capitalizeAllWords(predicate)}
-                    </p>
+                    <li>
+                      <p 
+                        key={i} 
+                        className={styles.predicate} 
+                        // Predicate click to get specific evidence will go here 
+                        onClick={(e)=> {e.stopPropagation();}}
+                        >
+                        {capitalizeAllWords(predicate)}
+                      </p>
+                    </li>
                   )
-                })
-              }
+                })}
+              </ul>
+            }
+            {
+              path.predicates.length <= 1 &&
+              path.predicates.map((predicate, i)=> {
+                return (
+                  <p 
+                    key={i} 
+                    className={styles.predicate} 
+                    // Predicate click to get specific evidence will go here 
+                    onClick={(e)=> {e.stopPropagation();}}
+                    >
+                    {capitalizeAllWords(predicate)}
+                  </p>
+                )
+              })
+            }
           </Tooltip>
         </span>
       }
