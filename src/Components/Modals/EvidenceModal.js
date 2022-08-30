@@ -84,7 +84,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
         <div className={styles.tableHead}>
           <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
           <div className={`${styles.head} ${styles.source}`}>Source</div>
-          <div className={`${styles.head} ${styles.title}`}>Title</div>
+          {/* <div className={`${styles.head} ${styles.title}`}>Title</div> */}
           <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
           <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
           <div className={`${styles.head} ${styles.format}`}>Format</div>
@@ -100,10 +100,10 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                 <span className={`${styles.cell} ${styles.source} source`}>
                   {item.source && item.source }          
                 </span>
-                <span className={`${styles.cell} ${styles.title} title`}>
+                {/* <span className={`${styles.cell} ${styles.title} title`}>
                   {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
                   {item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
-                </span>
+                </span> */}
                 <span className={`${styles.cell} ${styles.abstract} abstract`}>
                   <span>
                     {!item.snippet && "No snippet available."}
