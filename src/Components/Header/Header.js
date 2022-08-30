@@ -14,6 +14,9 @@ const Header = ({children}) => {
   
   return (
     <header className={styles.header}>
+      <div className={styles.disclaimer}>
+        <p>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
+      </div>
       <div className={styles.topBar}>
         <div className={styles.container}>
           <div className={styles.left}>

@@ -4,6 +4,17 @@
   box-shadow: $dropShadow;
   position: relative;
   z-index: 10;
+  .disclaimer {
+    padding: $xs 0;
+    background-color: $purpleTwo;
+    p {
+      text-align: center;
+      margin: 0;
+      color: $white;
+      font-weight: 700;
+      font-size: 12px;
+    }
+  }
   .right, .left {
     display: flex;
     justify-content: space-between;
