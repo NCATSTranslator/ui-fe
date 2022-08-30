@@ -67,16 +67,19 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
   return (
     <Modal isOpen={modalIsOpen} onClose={handleClose} className={styles.evidenceModal} containerClass={styles.evidenceContainer}>
       <h5 className={styles.title}>{evidenceTitle}</h5>
-      {evidenceEdges && 
+      {
+        evidenceEdges && 
         evidenceEdges.map((edge, i) => {
           return (
             <h5 className={styles.subtitle} key={i}>{capitalizeAllWords(edge)}</h5>
           )
         })
       }
-      {itemOffset !== 0 && 
-        <p>Showing {itemOffset === 0 ? 0 : itemOffset + 1}-{endOffset} of {currentEvidence.length} Supporting Evidence</p>
+      {
+        currentEvidence.length > 0 &&
+        <p>Showing {itemOffset + 1}-{endOffset} of {currentEvidence.length} Supporting Evidence</p>
       }
+      
       <div className={styles.tableBody}>
         <div className={styles.tableHead}>
           <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
