@@ -22,7 +22,7 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
 
   const handleOnMouseEnter = debounce((type) => {
     setFdaTooltipActive(true)
-  }, 250)
+  }, 350)
 
   const handleOnMouseLeave = (type) => {
     setFdaTooltipActive(false)
