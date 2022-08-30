@@ -72,5 +72,8 @@
     margin: 0 4px;
     border-bottom: 1px solid $midGray;
   }
+  button {
+    grid-template-columns: auto;
+  }
 }
 
