@@ -6,7 +6,7 @@ import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
 import OutsideClickHandler from '../OutsideClickHandler/OutsideClickHandler';
 import { capitalizeAllWords, formatBiolinkPredicate } from '../../Utilities/utilities';
-import { debounce } from 'lodash';
+import { cloneDeep, debounce, filter } from 'lodash';
 
 
 const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) => {
@@ -69,7 +69,20 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
     }
   }
 
-  
+  // filter path by a provided predicate, then call handleEdgeClick with the filtered path object
+  const predicateSpecificEdgeClick = (path, predicate) => {
+
+    let filteredPath = cloneDeep(path);
+    for(const edge of path.edges) {
+      if(edge.predicate === predicate) {
+        // filter out the non-matching edges and predicates
+        filteredPath.edges = filteredPath.edges.filter(edge => edge.predicate === predicate);
+        filteredPath.predicates = filteredPath.predicates.filter(pred => pred === predicate);
+      }
+    }
+    // call the edge click handler with the newly filtered path
+    handleEdgeClick(filteredPath);
+  }
 
   return (
     <>
@@ -118,13 +131,14 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
               path.predicates.length > 1 &&
               <ul className={styles.predicatesList}>{
                 path.predicates.map((predicate, i)=> {
+
                   return (
                     <li>
                       <p 
                         key={i} 
                         className={styles.predicate} 
                         // Predicate click to get specific evidence will go here 
-                        onClick={(e)=> {e.stopPropagation();}}
+                        onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(path, predicate)}}
                         >
                         {capitalizeAllWords(predicate)}
                       </p>
@@ -141,7 +155,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
                     key={i} 
                     className={styles.predicate} 
                     // Predicate click to get specific evidence will go here 
-                    onClick={(e)=> {e.stopPropagation();}}
+                    onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(path, predicate)}}
                     >
                     {capitalizeAllWords(predicate)}
                   </p>
