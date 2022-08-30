@@ -17,12 +17,10 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  cursor: pointer;
 }
 .path {
   font-size: 12px;
   font-weight: 400;
-
 }
 .text {
   white-space: nowrap;
@@ -45,6 +43,7 @@
 .pathContainer {
   padding: 7px 0;
   position: relative;
+  cursor: pointer;
   .more {
     display: block;
     font-weight: 700;
@@ -102,6 +101,7 @@ span.path {
   padding: 7px;
   font-size: 14px;
   font-weight: 700;
+  cursor: default;
 }
 .nameContainer, .targetContainer {
   box-shadow: $dropShadow;
