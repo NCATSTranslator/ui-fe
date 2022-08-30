@@ -57,6 +57,10 @@ const ResultsList = ({loading}) => {
   const [isSortedByEvidence, setIsSortedByEvidence] = useState(null);
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
+  // String, active title of evidence modal
+  const [evidenceTitle, setEvidenceTitle] = useState('All Evidence');
+  // Array, edges represented in current evidence
+  const [evidenceEdges, setEvidenceEdges] = useState([]);
   // Array, evidence relating to the item last clicked
   const [currentEvidence, setCurrentEvidence] = useState([]);
   // Bool, is the select all checkbox checked
@@ -280,7 +284,14 @@ const ResultsList = ({loading}) => {
   }
 
   // Click handler for opening the evidence modal and populating the evidence
-  const activateEvidence = (evidence) => {
+  const activateEvidence = (evidence, edgesRepresented) => {
+    if(edgesRepresented) {
+      setEvidenceTitle(`Showing results for:`)
+      setEvidenceEdges(edgesRepresented);
+    } else {
+      setEvidenceTitle('All Evidence');
+      setEvidenceEdges([]);
+    }
     setCurrentEvidence(evidence);
     setEvidenceOpen(true);
   }
@@ -467,6 +478,8 @@ const ResultsList = ({loading}) => {
         className="evidence-modal"
         currentEvidence={currentEvidence}
         results={rawResults}
+        title={evidenceTitle}
+        edges={evidenceEdges}
       />
       <div className={styles.resultsList}>
         <Query3 results loading={isLoading} presetDisease={presetDisease}/>
@@ -594,7 +607,7 @@ const ResultsList = ({loading}) => {
                             item={item} 
                             allSelected={allSelected}
                             handleSelected={()=>handleSelected(item)}
-                            activateEvidence={()=>activateEvidence(item.evidence)} 
+                            activateEvidence={(evidence, edgesRepresented)=>activateEvidence(evidence, edgesRepresented)} 
                           />
                         )
                       })

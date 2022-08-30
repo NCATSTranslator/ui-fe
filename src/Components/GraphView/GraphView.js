@@ -4,7 +4,7 @@ import GraphPath from '../GraphPath/GraphPath';
 import { formatBiolinkPredicate } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 
-const GraphView = ({paths}) => {
+const GraphView = ({paths, handleEdgeSpecificEvidence}) => {
 
   const [rawGraph, setRawGraph] = useState([])
   const [compressedGraph, setCompressedGraph] = useState([])
@@ -35,6 +35,7 @@ const GraphView = ({paths}) => {
           pathToAdd[i] = {
             category: 'predicate',
             predicates: [pred],
+            edges: [{object: item.object, predicate: pred, subject: item.subject}]
           }
         }
       })
@@ -67,8 +68,8 @@ const GraphView = ({paths}) => {
     console.log("handle name click");
   }
 
-  const handlePathClick = (path) => {
-    console.log("handle path click");
+  const handleEdgeClick = (edge) => {
+    console.log(edge);
   }
 
   const handleTargetClick = (target) => {
@@ -138,6 +139,8 @@ const GraphView = ({paths}) => {
             if(!pathToDisplay[i].predicates.includes(predicate)) {
               // add it and increment the number of compressed elements 
               pathToDisplay[i].predicates.push(predicate);
+              pathToDisplay[i].edges.push(nextPath[i].edges[0]);
+
               numCompressedElements++;
             }
           }
@@ -176,7 +179,7 @@ const GraphView = ({paths}) => {
                     path={pathItem} 
                     key={key}
                     handleNameClick={handleNameClick}
-                    handlePathClick={handlePathClick}
+                    handleEdgeClick={(edge)=>handleEdgeSpecificEvidence(edge)}
                     handleTargetClick={handleTargetClick}
                     />
                     ) 

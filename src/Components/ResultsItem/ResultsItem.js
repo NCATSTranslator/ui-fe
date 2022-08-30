@@ -28,6 +28,30 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
     setIsExpanded(!isExpanded);
   }
 
+  // Filter out any evidence that doesn't correspond with the provided edges
+  const handleEdgeSpecificEvidence = (edge) => {
+    let filteredEvidence = [];
+    let edgesRepresented = [];
+    for(const evidenceItem of item.evidence) {
+      for(const edgeItem of edge.edges) {
+        if(!edgesRepresented.includes(`${edgeItem.subject.names[0].toLowerCase()} ${edgeItem.predicate.toLowerCase()} ${edgeItem.object.names[0].toLowerCase()}`))
+          edgesRepresented.push(
+            `${edgeItem.subject.names[0].toLowerCase()} ${edgeItem.predicate.toLowerCase()} ${edgeItem.object.names[0].toLowerCase()}` 
+          );
+        if(
+            evidenceItem.edge.subject.toLowerCase() === edgeItem.subject.names[0].toLowerCase() && 
+            evidenceItem.edge.object.toLowerCase() === edgeItem.object.names[0].toLowerCase() && 
+            evidenceItem.edge.predicate.toLowerCase() === edgeItem.predicate.toLowerCase()
+          ) {
+            filteredEvidence.push(evidenceItem);
+          }
+      }
+    }
+    // call activateEvidence with the filtered evidence
+    activateEvidence(filteredEvidence, edgesRepresented);
+  }
+
+
   useEffect(() => {
     if(isExpanded === false)
       setHeight(0);
@@ -55,7 +79,13 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
         }
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
-        <span className={styles.evidenceLink} onClick={(e)=>{e.stopPropagation(); activateEvidence(item.evidence)}}>
+        <span 
+          className={styles.evidenceLink} 
+          onClick={(e)=>{
+            e.stopPropagation(); 
+            activateEvidence(item.evidence, false);
+          }}
+          >
           <span className={styles.viewAll}>View All Evidence</span> ({evidenceCount})
         </span>
       </div>
@@ -71,7 +101,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
           <p>{item.description}</p>
         </div>
 
-        <GraphView paths={item.paths} active={isExpanded} />
+        <GraphView paths={item.paths} active={isExpanded} handleEdgeSpecificEvidence={(edge)=> {handleEdgeSpecificEvidence(edge)}} />
       </AnimateHeight>
 
     </div>
