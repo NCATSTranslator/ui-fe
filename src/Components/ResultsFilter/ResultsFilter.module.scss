@@ -5,6 +5,17 @@
   padding: $s;
   background-color: $lightGray;
   border-radius: $defaultBorderRadius;
+  .fdaContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    p {
+      cursor: default;
+    }
+    svg {
+      margin-left: 4px;
+    }
+  }
   .heading {
     font-size: $m;
     font-weight: 700;
@@ -27,7 +38,8 @@
     color: $darkGray;
   }
   .subTwo {
-    margin-top: 20px;
+    margin: 0;
+    padding: 20px 0;
     font-weight: 700;
     font-size: 12px;
     color: $darkGray;
