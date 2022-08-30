@@ -3,7 +3,7 @@
 .fileInput {
   border: 1px solid $midGray;
   border-radius: $defaultBorderRadius;
-  grid-template-columns: auto auto;
+  grid-template-columns: auto auto !important;
   justify-content: space-between;
   align-items: center;
   input[type="file"] {
