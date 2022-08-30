@@ -18,7 +18,7 @@ export const getFormattedEvidence = (paths, results) => {
             object: capitalizeAllWords(object.names[0])
           };
           // Defaulting to PubMed for now
-          publication.source = 'PubMed';
+          publication.source = '';
           formattedEvidence.push(publication);
         }
     }
