@@ -8,7 +8,8 @@
   left: 0;
   width: 100%;
   position: absolute;
-  transition: all .3s ease;
+  transition: opacity .3s ease;
+  z-index: 20;
   .tooltipContainer {
     position: absolute;
     z-index: 20;
