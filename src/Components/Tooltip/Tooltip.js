@@ -31,7 +31,7 @@ const Tooltip = ({children, active, onClose, heading, text}) => {
             {children}
           </div>
         }
-        <div className={styles.close}><Close onClick={(e)=>handleClose(e)}/></div>
+        {/* <div className={styles.close}><Close onClick={(e)=>handleClose(e)}/></div> */}
       </div>
     </div>
   )
