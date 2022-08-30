@@ -6,6 +6,7 @@ import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
 import OutsideClickHandler from '../OutsideClickHandler/OutsideClickHandler';
 import { capitalizeAllWords, formatBiolinkPredicate } from '../../Utilities/utilities';
+import { cloneDeep, debounce, filter } from 'lodash';
 
 
 const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) => {
@@ -13,6 +14,15 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
   const [nameTooltipActive, setNameTooltipActive] = useState(false);
   const [pathTooltipActive, setPathTooltipActive] = useState(false);
   const [targetTooltipActive, setTargetTooltipActive] = useState(false);
+
+  const handleOnMouseEnter = debounce((type) => {
+    tooltipOpen(type)
+  }, 250)
+
+  const handleOnMouseLeave = (type) => {
+    tooltipClose(type)
+    handleOnMouseEnter.cancel()
+  }
 
   let nameString;
   let typeString;
@@ -59,13 +69,28 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
     }
   }
 
+  // filter path by a provided predicate, then call handleEdgeClick with the filtered path object
+  const predicateSpecificEdgeClick = (path, predicate) => {
+
+    let filteredPath = cloneDeep(path);
+    for(const edge of path.edges) {
+      if(edge.predicate === predicate) {
+        // filter out the non-matching edges and predicates
+        filteredPath.edges = filteredPath.edges.filter(edge => edge.predicate === predicate);
+        filteredPath.predicates = filteredPath.predicates.filter(pred => pred === predicate);
+      }
+    }
+    // call the edge click handler with the newly filtered path
+    handleEdgeClick(filteredPath);
+  }
+
   return (
     <>
       {
         path.category === 'object' &&
         <span className={styles.nameContainer} 
-          onMouseEnter={()=>tooltipOpen('name')}
-          onMouseLeave={()=>tooltipClose('name')}
+          onMouseEnter={()=>handleOnMouseEnter('name')}
+          onMouseLeave={()=>handleOnMouseLeave('name')}
           onClick={(e)=> {e.stopPropagation(); handleNameClick(path);}}
           >
           <span className={styles.name} >
@@ -87,8 +112,8 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
         path.category === 'predicate' &&
         <span 
           className={styles.pathContainer} 
-          onMouseEnter={()=>tooltipOpen('path')}
-          onMouseLeave={()=>tooltipClose('path')}
+          onMouseEnter={()=>handleOnMouseEnter('path')}
+          onMouseLeave={()=>handleOnMouseLeave('path')}
           onClick={(e)=> {e.stopPropagation(); handleEdgeClick(path);}}
           >
           <Connector />
@@ -101,21 +126,42 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
             active={pathTooltipActive} 
             onClose={() => tooltipClose('path')}
             text=''
-            >
-              {
+            > 
+            {
+              path.predicates.length > 1 &&
+              <ul className={styles.predicatesList}>{
                 path.predicates.map((predicate, i)=> {
+
                   return (
-                    <p 
-                      key={i} 
-                      className={styles.predicate} 
-                      // Predicate click to get specific evidence will go here 
-                      onClick={(e)=> {e.stopPropagation();}}
-                      >
-                      {capitalizeAllWords(predicate)}
-                    </p>
+                    <li>
+                      <p 
+                        key={i} 
+                        className={styles.predicate} 
+                        // Predicate click to get specific evidence will go here 
+                        onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(path, predicate)}}
+                        >
+                        {capitalizeAllWords(predicate)}
+                      </p>
+                    </li>
                   )
-                })
-              }
+                })}
+              </ul>
+            }
+            {
+              path.predicates.length <= 1 &&
+              path.predicates.map((predicate, i)=> {
+                return (
+                  <p 
+                    key={i} 
+                    className={styles.predicate} 
+                    // Predicate click to get specific evidence will go here 
+                    onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(path, predicate)}}
+                    >
+                    {capitalizeAllWords(predicate)}
+                  </p>
+                )
+              })
+            }
           </Tooltip>
         </span>
       }
@@ -123,8 +169,8 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
         path.category === 'target' && 
         <span 
           className={styles.targetContainer} 
-          onMouseEnter={()=>tooltipOpen('target')}
-          onMouseLeave={()=>tooltipClose('target')}
+          onMouseEnter={()=>handleOnMouseEnter('target')}
+          onMouseLeave={()=>handleOnMouseLeave('target')}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(path);}}
           >
           <span className={styles.target} onClick={(e) => {e.stopPropagation(); tooltipOpen('target')}}>

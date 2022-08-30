@@ -64,11 +64,11 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
   }, [item]);
 
   return (
-    <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''} result`} onClick={handleToggle}>
+    <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''} result`} >
       <div className={`${styles.checkboxContainer} ${styles.resultSub}`}>
         <Checkbox checked={checked} handleClick={(e)=>{e.stopPropagation(); handleSelected(item)}}/>
       </div>
-      <div className={`${styles.nameContainer} ${styles.resultSub}`}>
+      <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
         <span className={styles.name}>{nameString}</span>
         <span className={styles.effect}>{item.paths.length} {pathString} {objectString}</span>
