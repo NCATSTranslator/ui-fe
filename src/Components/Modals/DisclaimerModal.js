@@ -32,8 +32,7 @@ const DisclaimerModal = ({children, onClose }) => {
             <div className={`${styles.disclaimerInner} inner`}>
               <p className={`${styles.heading} h5`}>Disclaimer:</p>
               <div className={`${styles.body}`}>
-                <p>I understand that results returned from Translator are not in any way legitimate medical advice, etc. etc.</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec est tortor, convallis a molestie ut, mattis nec quam. Aliquam sagittis est nisi, vitae porta tortor dapibus vel. Vivamus mollis scelerisque justo, in posuere lectus iaculis eu. Cras rutrum dui porta, rhoncus mauris nec, cursus ligula. Etiam dictum maximus urna. Nunc posuere tempor justo, sit amet viverra massa mollis id. Pellentesque luctus velit enim, sit amet consectetur erat vulputate ut. </p>
+                <p>The Biomedical Data Translator is for research purposes and is not meant to be used by clinical service providers in the course of treating patients. Note that there is no expectation that results from queries you run will be retained for future use at this time. This system is in a beta testing stage, so bugs and errors will not be uncommon, and we ask that you provide feedback through the feedback form linked here.</p>
               </div>
               <button onClick={handleClick}>Accept</button>
             </div>
