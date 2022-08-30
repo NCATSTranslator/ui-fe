@@ -2,7 +2,7 @@ import styles from './Tooltip.module.scss';
 import { useEffect, useState } from 'react';
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
-const Tooltip = ({children, active, onClose, heading, text}) => {
+const Tooltip = ({children, active, onClose, heading, text, left, above}) => {
 
   const [status, setStatus] = useState(active);
 
@@ -18,7 +18,7 @@ const Tooltip = ({children, active, onClose, heading, text}) => {
   }, [active]);
 
   return(
-    <div className={`${styles.tooltip} ${statusClass}`}>
+    <div className={`${styles.tooltip} ${statusClass} ${left ? styles.left : ''} ${above ? styles.above : ''}`}>
       <div className={styles.tooltipContainer}>
         {heading && 
           <p className={styles.heading}>{heading}</p>

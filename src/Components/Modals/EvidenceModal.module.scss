@@ -26,7 +26,10 @@
     margin-top: $m;
     &>div {
       display: grid;
-      grid-template-columns: 1fr 1.25fr 2fr 2.5fr 1.25fr 1fr;
+      // Columns with no title 
+      grid-template-columns: 1fr 1.25fr 3.5fr 1.25fr 1fr;
+      // Columns with title included
+      // grid-template-columns: 1fr 1.25fr 2fr 2.5fr 1.25fr 1fr;
       .cell {
         padding: 12px;
         height: 98px;
@@ -50,7 +53,7 @@
         }
         &.abstract span {
           display: -webkit-box;
-          -webkit-line-clamp: 5;
+          -webkit-line-clamp: 4;
           -webkit-box-orient: vertical;
         }
       }
@@ -71,6 +74,12 @@
       font-weight: 700;
       text-decoration: none;
       color: $darkGray;
+      display: flex;
+      align-items: center;
+      svg {
+        margin-left: 4px;
+        width: $s;
+      }
     }
   }
   .noEvidence {

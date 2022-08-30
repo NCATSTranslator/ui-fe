@@ -3,6 +3,9 @@ import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
 import SimpleRange from '../Range/SimpleRange';
 import TwoThumbRange from '../Range/TwoThumbRange';
+import Tooltip from '../Tooltip/Tooltip';
+import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
+import { debounce } from 'lodash';
 
 const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
   
@@ -14,6 +17,17 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
   const dateRange = [dateRangeMin, dateRangeMax];
   const [dateRangeObject, setDateRangeObject] = useState({tag:'date', value: dateRange});
   const fdaObject = {tag:'fda', value: ''};
+
+  const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
+
+  const handleOnMouseEnter = debounce((type) => {
+    setFdaTooltipActive(true)
+  }, 250)
+
+  const handleOnMouseLeave = (type) => {
+    setFdaTooltipActive(false)
+    handleOnMouseEnter.cancel()
+  }
 
   onHighlight = (!onHighlight) ? () => console.log("No highlight function specified in ResultsFilter.") : onHighlight; 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 
@@ -70,11 +84,22 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
             onChange={e => handleDateRangeChange(e)}
             initialValues={dateRange} 
           /> */}
-        <p className={styles.subTwo}>FDA Status</p>
-          <Checkbox handleClick={() => onFilter(fdaObject)} 
-            checked={activeFilters.some(e => e.tag === fdaObject.tag)}>
-              Approved
-          </Checkbox>
+        <div className={styles.fdaContainer} onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave} >
+          <p className={styles.subTwo}>FDA Status</p>
+          <Alert/>
+          <Tooltip 
+            left
+            above
+            active={fdaTooltipActive} 
+            onClose={() => setFdaTooltipActive(false)}
+            text='Checkmarks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'
+            >
+          </Tooltip>
+        </div>
+        <Checkbox handleClick={() => onFilter(fdaObject)} 
+          checked={activeFilters.some(e => e.tag === fdaObject.tag)}>
+            Approved
+        </Checkbox>
 
         <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
       </div>

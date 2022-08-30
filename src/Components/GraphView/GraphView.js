@@ -164,6 +164,10 @@ const GraphView = ({paths, handleEdgeSpecificEvidence}) => {
 
   return(
     <div className={styles.graphView}>
+      <div className={styles.header}>
+        <p className={styles.subtitle}>Paths</p>
+        <p>Click on any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
+      </div>
       <div className={styles.tableHead}>
         {displayHeadings(graphWidth)}
       </div>

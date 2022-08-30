@@ -1,10 +1,9 @@
 @import "../../Assets/Styles/variables";
 
 .tooltip {
-  // height: 30px;
-  top: -12px;
+  top: -6px;
   right: 0;
-  bottom: -12px;
+  bottom: -6px;
   left: 0;
   width: 100%;
   position: absolute;
@@ -23,6 +22,46 @@
     text-align: left;
     box-shadow: $dropShadowHover;
   }
+  &:after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    clip-path: polygon(0% 0%, 100% 100%, 0% 100%);
+    transform: rotate(135deg);
+    border-radius: 0 0 0 0.25em;
+    background-color: $darkGray;
+    // border-style: solid;
+    // border-width: 0 8px 8px 8px;
+    // border-color: transparent transparent $darkGray transparent;
+    position:absolute;
+    top: calc(100% - 7px);
+    right: $m;
+    z-index: -1;
+  }
+  &.left {
+    .tooltipContainer {
+      right: auto;
+      left: 4px;
+    }
+    &:after {
+      right: auto;
+      left: $m;
+    }
+  }
+
+  &.above {
+    .tooltipContainer {
+      top: auto;
+      box-shadow: none;
+      bottom: 100%;
+      }
+    &:after {
+      top: auto;
+      bottom: calc(100% - 7px);
+      transform: rotate(-45deg);
+    }
+  }
+  
   p {
     margin-bottom: 2px;
   }
@@ -61,20 +100,5 @@
     opacity: 0;
     pointer-events: none;
   }
-  &:after {
-    content: '';
-    width: 16px;
-    height: 16px;
-    clip-path: polygon(0% 0%, 100% 100%, 0% 100%);
-    transform: rotate(135deg);
-    border-radius: 0 0 0 0.25em;
-    background-color: $darkGray;
-    // border-style: solid;
-    // border-width: 0 8px 8px 8px;
-    // border-color: transparent transparent $darkGray transparent;
-    position:absolute;
-    top: calc(100% - 7px);
-    right: $m;
-    z-index: -1;
-  }
+
 }

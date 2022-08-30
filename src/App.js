@@ -1,8 +1,8 @@
-import './App.scss';
 import React from 'react';
 import Footer from './Components/Footer/Footer';
 import Header from './Components/Header/Header';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import'./App.scss';
 
 
 const App = () => {
@@ -13,6 +13,9 @@ const App = () => {
   pathnameClass = (pathnameClass === "") ? "home" : pathnameClass;
   return (
     <div className={`app ${pathnameClass}`}>
+      <div className='header-disclaimer'>
+        <p>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
+      </div>
       <Header>
       </Header>
       <div className='body'>
