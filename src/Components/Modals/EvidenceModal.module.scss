@@ -23,6 +23,7 @@
     box-shadow: $dropShadow;
     font-size: $bodyTwoSize;
     border-radius: $defaultBorderRadius;
+    margin-top: $m;
     &>div {
       display: grid;
       grid-template-columns: 1fr 1.25fr 2fr 2.5fr 1.25fr 1fr;
@@ -71,6 +72,22 @@
       text-decoration: none;
       color: $darkGray;
     }
+  }
+  .noEvidence {
+    padding: 50px 0;
+    width: 100%;
+    text-align: center;
+  }
+  .subtitle {
+    font-size: 20px;
+    color: $darkGray;
+    margin-bottom: 0;
+    &:last-of-type {
+      margin-bottom: $m;
+    }
+  }
+  .title {
+    margin-bottom: 0;
   }
 }
 .bottom {

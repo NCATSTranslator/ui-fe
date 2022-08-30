@@ -8,7 +8,7 @@ import OutsideClickHandler from '../OutsideClickHandler/OutsideClickHandler';
 import { capitalizeAllWords, formatBiolinkPredicate } from '../../Utilities/utilities';
 
 
-const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) => {
+const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) => {
 
   const [nameTooltipActive, setNameTooltipActive] = useState(false);
   const [pathTooltipActive, setPathTooltipActive] = useState(false);
@@ -66,7 +66,7 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
         <span className={styles.nameContainer} 
           onMouseEnter={()=>tooltipOpen('name')}
           onMouseLeave={()=>tooltipClose('name')}
-          onClick={(e)=> {e.stopPropagation(); handleNameClick();}}
+          onClick={(e)=> {e.stopPropagation(); handleNameClick(path);}}
           >
           <span className={styles.name} >
             {getIcon(path.type)}
@@ -89,7 +89,7 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
           className={styles.pathContainer} 
           onMouseEnter={()=>tooltipOpen('path')}
           onMouseLeave={()=>tooltipClose('path')}
-          onClick={(e)=> {e.stopPropagation(); handlePathClick();}}
+          onClick={(e)=> {e.stopPropagation(); handleEdgeClick(path);}}
           >
           <Connector />
           <span className={`${styles.path} path`}>
@@ -111,7 +111,7 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
                       // Predicate click to get specific evidence will go here 
                       onClick={(e)=> {e.stopPropagation();}}
                       >
-                      {predicate}
+                      {capitalizeAllWords(predicate)}
                     </p>
                   )
                 })
@@ -125,7 +125,7 @@ const GraphPath = ({path, handleNameClick, handlePathClick, handleTargetClick}) 
           className={styles.targetContainer} 
           onMouseEnter={()=>tooltipOpen('target')}
           onMouseLeave={()=>tooltipClose('target')}
-          onClick={(e)=> {e.stopPropagation(); handleTargetClick();}}
+          onClick={(e)=> {e.stopPropagation(); handleTargetClick(path);}}
           >
           <span className={styles.target} onClick={(e) => {e.stopPropagation(); tooltipOpen('target')}}>
             <Disease/>

@@ -3,12 +3,15 @@ import Modal from "./Modal";
 import Select from "../FormFields/Select";
 import styles from './EvidenceModal.module.scss';
 import ReactPaginate from "react-paginate";
+import { capitalizeAllWords } from "../../Utilities/utilities";
 
-const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
+const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
-  
+
+  const [evidenceTitle, setEvidenceTitle] = useState(title ? title : 'All Evidence')
+  const [evidenceEdges, setEvidenceEdges] = useState(edges)
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [newItemsPerPage, setNewItemsPerPage] = useState(null);
   const [displayedEvidence, setDisplayedEvidence] = useState([]);
@@ -21,6 +24,12 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
   const endOffset = (itemOffset + itemsPerPage > currentEvidence.length)
   ? currentEvidence.length
   : itemOffset + itemsPerPage;
+
+  const handleClose = () => {
+    onClose();
+    setCurrentPage(0);
+    setItemOffset(0);
+  }
 
   useEffect(() => {
     setDisplayedEvidence(currentEvidence.slice(itemOffset, endOffset));
@@ -46,11 +55,28 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
       handlePageClick({selected: 0});
     }
   }, [newItemsPerPage]);
+
+  useEffect(()=> {
+    setEvidenceTitle(title)
+  }, [title]);
+
+  useEffect(()=> {
+    setEvidenceEdges(edges)
+  }, [edges]);
   
   return (
-    <Modal isOpen={modalIsOpen} onClose={onClose} className={styles.evidenceModal} containerClass={styles.evidenceContainer}>
-      <h5>All Evidence</h5>
-      <p>Showing {itemOffset + 1}-{endOffset} of {currentEvidence.length} Supporting Evidence</p>
+    <Modal isOpen={modalIsOpen} onClose={handleClose} className={styles.evidenceModal} containerClass={styles.evidenceContainer}>
+      <h5 className={styles.title}>{evidenceTitle}</h5>
+      {evidenceEdges && 
+        evidenceEdges.map((edge, i) => {
+          return (
+            <h5 className={styles.subtitle} key={i}>{capitalizeAllWords(edge)}</h5>
+          )
+        })
+      }
+      {itemOffset !== 0 && 
+        <p>Showing {itemOffset === 0 ? 0 : itemOffset + 1}-{endOffset} of {currentEvidence.length} Supporting Evidence</p>
+      }
       <div className={styles.tableBody}>
         <div className={styles.tableHead}>
           <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
@@ -99,7 +125,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results}) => {
         } 
         {
           currentEvidence.length <= 0 &&
-          <p>No evidence is currently available for this item.</p>
+          <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
         }
       </div>
       { 

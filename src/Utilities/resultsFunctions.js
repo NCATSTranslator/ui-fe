@@ -1,5 +1,5 @@
 import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkPredicate } from './utilities';
-import _ from "lodash";
+import _, { cloneDeep } from "lodash";
 
 // Given an array of paths and results, return an array of publications for those paths
 export const getFormattedEvidence = (paths, results) => {
@@ -9,8 +9,8 @@ export const getFormattedEvidence = (paths, results) => {
       if(subgraph.publications && subgraph.publications.length > 0)
         for(const pubID of subgraph.publications) {
           let publication = getPubByID(pubID, results);
-          let object = getNodeByCurie(subgraph.object, results);
-          let subject = getNodeByCurie(subgraph.subject, results);
+          let object = subgraph.object;
+          let subject = subgraph.subject;
           let predicate = formatBiolinkPredicate(subgraph.predicates[0]);
           publication.edge = {
             subject: capitalizeAllWords(subject.names[0]),
@@ -46,8 +46,12 @@ export const getNodeByCurie = (curie, results) => {
 export const getEdgeByID = (id, results) => {
   if(results.edges[id] === undefined)
     return {};
+  let newEdge = cloneDeep(results.edges[id]);
+  
+  newEdge.object = getNodeByCurie(newEdge.object, results);
+  newEdge.subject = getNodeByCurie(newEdge.subject, results);
 
-  return results.edges[id];
+  return newEdge;
 }
 
 export const getFormattedPaths = (rawPathIds, results) => {
