@@ -17,7 +17,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
 
   const handleOnMouseEnter = debounce((type) => {
     tooltipOpen(type)
-  }, 250)
+  }, 350)
 
   const handleOnMouseLeave = (type) => {
     tooltipClose(type)
