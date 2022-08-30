@@ -53,7 +53,7 @@
         }
         &.abstract span {
           display: -webkit-box;
-          -webkit-line-clamp: 5;
+          -webkit-line-clamp: 4;
           -webkit-box-orient: vertical;
         }
       }
@@ -74,6 +74,12 @@
       font-weight: 700;
       text-decoration: none;
       color: $darkGray;
+      display: flex;
+      align-items: center;
+      svg {
+        margin-left: 4px;
+        width: $s;
+      }
     }
   }
   .noEvidence {

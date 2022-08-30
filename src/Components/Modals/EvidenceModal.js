@@ -3,6 +3,7 @@ import Modal from "./Modal";
 import Select from "../FormFields/Select";
 import styles from './EvidenceModal.module.scss';
 import ReactPaginate from "react-paginate";
+import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { capitalizeAllWords } from "../../Utilities/utilities";
 
 const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}) => {
@@ -109,7 +110,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                     {!item.snippet && "No snippet available."}
                     {item.snippet && item.snippet}
                   </span>
-                    {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More</a>}          
+                    {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}          
                 </span>
                 <span className={`${styles.cell} ${styles.relationship} relationship`}>
                   {
