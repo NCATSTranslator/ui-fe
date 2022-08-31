@@ -3,7 +3,6 @@
 // Form Input Sizes
 .text-input, .select, .search-container, .button, .file-input {
   display: inline-grid;
-  grid-template-columns: minmax(0,1fr);
   margin: 0 2% $s 0;
   &.s {
     width: 23%;
