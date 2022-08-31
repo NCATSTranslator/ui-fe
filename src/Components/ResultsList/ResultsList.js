@@ -96,7 +96,7 @@ const ResultsList = ({loading}) => {
   const [activeFilters, setActiveFilters] = useState([]);
   // Array, aras that have returned data
   const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
-
+  
   /*
     Obj, {label: ''}, used to set input text, determined by results object
   */ 
@@ -163,9 +163,12 @@ const ResultsList = ({loading}) => {
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
         }
-        if(data.status === 'success' && formattedResults.length > 0) {
+        if(data.status === 'success' ) {
           setIsFetchingARAStatus(false);
           setIsLoading(false);
+          if(formattedResults.length <= 0) {
+            setNoResults(true);
+          }
         }
       })
       .catch((error) => {
