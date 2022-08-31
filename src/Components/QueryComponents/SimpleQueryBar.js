@@ -38,7 +38,7 @@ const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value,
         }
         <div className={styles.sep}></div>
       </div>
-      <span className={styles.prefix}>What drugs treat</span>
+      <span className={styles.prefix}>What drugs may treat</span>
       <TextInput 
         placeholder="Enter a Disease" 
         handleChange={(e)=>handleChange(e)} 
