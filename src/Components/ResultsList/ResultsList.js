@@ -660,7 +660,7 @@ const ResultsList = ({loading}) => {
                     }
                     Load New Results
                   </button>
-                  <p className={styles.refreshDisclaimer}>Loading these results will refresh the page, causing you to lose your place in this list.<br/>Results you have already viewed may also be updated with new data.</p>
+                  <p className={styles.refreshDisclaimer}>Please note that refreshing this page may cause the order of answers to change.<br/>Results you have already viewed may also be updated with new data.</p>
                 </div>
               }
             </>
