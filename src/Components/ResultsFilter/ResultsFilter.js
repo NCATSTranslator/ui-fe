@@ -20,14 +20,14 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
 
   const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
 
-  const handleOnMouseEnter = debounce((type) => {
-    setFdaTooltipActive(true)
-  }, 350)
+  // const handleOnMouseEnter = debounce((type) => {
+  //   setFdaTooltipActive(true)
+  // }, 350)
 
-  const handleOnMouseLeave = (type) => {
-    setFdaTooltipActive(false)
-    handleOnMouseEnter.cancel()
-  }
+  // const handleOnMouseLeave = (type) => {
+  //   setFdaTooltipActive(false)
+  //   handleOnMouseEnter.cancel()
+  // }
 
   onHighlight = (!onHighlight) ? () => console.log("No highlight function specified in ResultsFilter.") : onHighlight; 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 
@@ -84,12 +84,13 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
             onChange={e => handleDateRangeChange(e)}
             initialValues={dateRange} 
           /> */}
-        <div className={styles.fdaContainer} onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave} >
+        <div className={styles.fdaContainer} onMouseEnter={()=>{setFdaTooltipActive(true)}} onMouseLeave={()=>{setFdaTooltipActive(false)}} >
           <p className={styles.subTwo}>FDA Status</p>
           <Alert/>
           <Tooltip 
             left
             above
+            delay={350}
             active={fdaTooltipActive} 
             onClose={() => setFdaTooltipActive(false)}
             text='Checkmarks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'

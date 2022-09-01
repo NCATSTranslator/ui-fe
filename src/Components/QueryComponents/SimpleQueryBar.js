@@ -3,7 +3,7 @@ import React, {useState, useEffect} from "react";
 import Button from "../FormFields/Button";
 import TextInput from "../FormFields/TextInput";
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
-import loadingIcon from '../../Assets/Images/Loading/loading.png';
+import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './SimpleQueryBar.module.scss';
 
 const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value, 

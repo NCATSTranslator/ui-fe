@@ -1,5 +1,19 @@
 @import "../../Assets/Styles/variables";
 
+@-moz-keyframes spin { 
+  100% { -moz-transform: rotate(360deg); } 
+}
+@-webkit-keyframes spin { 
+  100% { -webkit-transform: rotate(360deg); } 
+}
+@keyframes spin { 
+  100% { 
+      -webkit-transform: rotate(360deg); 
+      transform:rotate(360deg); 
+  } 
+}
+
+
 .form {
   display: flex;
   justify-content: space-between;
@@ -29,7 +43,7 @@
 .autocompleteContainer {
   position: absolute;
   top: calc(100% + 8px);
-  left: 145px;
+  left: 185px;
   right: 119px;
   background-color: $white;
   box-shadow: $dropShadowHover;
@@ -47,6 +61,9 @@
     width: auto;
     margin: 0 auto;
     padding: 30px;
+    -webkit-animation:spin 1s linear infinite;
+    -moz-animation:spin 1s linear infinite;
+    animation:spin 1s linear infinite;
   }
   .item {
     font-size: 14px;

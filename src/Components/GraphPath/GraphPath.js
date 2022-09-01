@@ -6,7 +6,7 @@ import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
 import OutsideClickHandler from '../OutsideClickHandler/OutsideClickHandler';
 import { capitalizeAllWords, formatBiolinkPredicate } from '../../Utilities/utilities';
-import { cloneDeep, debounce, filter } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 
 const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) => {
@@ -14,15 +14,6 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
   const [nameTooltipActive, setNameTooltipActive] = useState(false);
   const [pathTooltipActive, setPathTooltipActive] = useState(false);
   const [targetTooltipActive, setTargetTooltipActive] = useState(false);
-
-  const handleOnMouseEnter = debounce((type) => {
-    tooltipOpen(type)
-  }, 350)
-
-  const handleOnMouseLeave = (type) => {
-    tooltipClose(type)
-    handleOnMouseEnter.cancel()
-  }
 
   let nameString;
   let typeString;
@@ -89,8 +80,8 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
       {
         path.category === 'object' &&
         <span className={styles.nameContainer} 
-          onMouseEnter={()=>handleOnMouseEnter('name')}
-          onMouseLeave={()=>handleOnMouseLeave('name')}
+          onMouseEnter={()=>tooltipOpen('name')}
+          onMouseLeave={()=>tooltipClose('name')}
           onClick={(e)=> {e.stopPropagation(); handleNameClick(path);}}
           >
           <span className={styles.name} >
@@ -100,6 +91,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
             </span>
           </span>
             <Tooltip 
+              delay={350}
               active={nameTooltipActive} 
               onClose={() => tooltipClose('name')}
               heading={<span><strong>{nameString}</strong> ({typeString})</span>}
@@ -112,8 +104,8 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
         path.category === 'predicate' &&
         <span 
           className={styles.pathContainer} 
-          onMouseEnter={()=>handleOnMouseEnter('path')}
-          onMouseLeave={()=>handleOnMouseLeave('path')}
+          onMouseEnter={()=>tooltipOpen('path')}
+          onMouseLeave={()=>tooltipClose('path')}
           onClick={(e)=> {e.stopPropagation(); handleEdgeClick(path);}}
           >
           <Connector />
@@ -123,6 +115,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
             <span className={styles.more}>+ {path.predicates.length - 1} More</span>}
           </span>
           <Tooltip 
+            delay={350}
             active={pathTooltipActive} 
             onClose={() => tooltipClose('path')}
             text=''
@@ -169,8 +162,8 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
         path.category === 'target' && 
         <span 
           className={styles.targetContainer} 
-          onMouseEnter={()=>handleOnMouseEnter('target')}
-          onMouseLeave={()=>handleOnMouseLeave('target')}
+          onMouseEnter={()=>tooltipOpen('target')}
+          onMouseLeave={()=>tooltipClose('target')}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(path);}}
           >
           <span className={styles.target} onClick={(e) => {e.stopPropagation(); tooltipOpen('target')}}>
@@ -180,6 +173,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
             </span>
           </span>
           <Tooltip 
+            delay={350}
             active={targetTooltipActive} 
             onClose={() => tooltipClose('target')}
             onClick={(e)=> e.stopPropagation()}
