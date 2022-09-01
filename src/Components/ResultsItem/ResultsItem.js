@@ -6,6 +6,7 @@ import GraphView from '../GraphView/GraphView';
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1=Down.svg"
 import AnimateHeight from "react-animate-height";
+import Tooltip from '../Tooltip/Tooltip';
 
 const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, checked, highlighted}) => {
   
@@ -23,6 +24,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
+  const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
@@ -75,7 +77,16 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
       </div>
       <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
         { fdaInfo &&
-          <span className={styles.fdaIcon}><CheckIcon /></span>
+          <span className={styles.fdaIcon} onMouseEnter={()=>setFdaTooltipActive(true)} onMouseLeave={()=>setFdaTooltipActive(false)}>
+            <CheckIcon />
+            <Tooltip 
+              delay={350}
+              active={fdaTooltipActive} 
+              onClose={() => setFdaTooltipActive(false)}
+              text='Checkmarks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'
+              >
+            </Tooltip>
+          </span>
         }
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>

@@ -1,7 +1,8 @@
 import styles from './Tooltip.module.scss';
-import { useEffect, useState } from 'react';
-import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
+import { useEffect, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
+
+
 
 const Tooltip = ({children, active, onClose, heading, text, left, above, hover, delay}) => {
 
@@ -10,20 +11,17 @@ const Tooltip = ({children, active, onClose, heading, text, left, above, hover, 
   let statusClass = (status) ? styles.open : styles.closed;
 
   delay = (delay) ? delay : 350;
+  onClose = (onClose) ? onClose : ()=>{};
 
-  const handleClose = (e) => {
-    e.stopPropagation();
-    onClose();
-  }
-
-  const handleActivate = debounce((type) => {
+  const handleActivate = useCallback(debounce(() => {
     setStatus(true);
-  }, 350)
+  }, 350), [setStatus])
 
-  const handleDeactivate = (type) => {
+  const handleDeactivate = useCallback(() => {
     setStatus(false)
+    onClose();
     handleActivate.cancel()
-  }
+  }, [handleActivate])
   
   useEffect(() => {
     if(active)
@@ -32,7 +30,7 @@ const Tooltip = ({children, active, onClose, heading, text, left, above, hover, 
     if(!active)
       handleDeactivate();
 
-  }, [active]);
+  }, [active, handleActivate, handleDeactivate]);
 
   return(
     <div className={`${styles.tooltip} ${statusClass} ${left ? styles.left : ''} ${above ? styles.above : ''}`}>
@@ -48,7 +46,6 @@ const Tooltip = ({children, active, onClose, heading, text, left, above, hover, 
             {children}
           </div>
         }
-        {/* <div className={styles.close}><Close onClick={(e)=>handleClose(e)}/></div> */}
       </div>
     </div>
   )
