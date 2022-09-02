@@ -2,6 +2,7 @@ import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
 import SimpleQueryBar from "../QueryComponents/SimpleQueryBar";
+import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
@@ -229,15 +230,17 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
             isError &&
             <p className={styles.error}>{errorText}</p>
           }
-          <SimpleQueryBar
-            handleSubmission={handleSubmission}
-            handleChange={handleQueryItemChange}
-            isLoading={isLoading}
-            value={inputText}
-            autocompleteItems={autocompleteItems}
-            autocompleteLoading={loadingAutocomplete}
-            handleItemClick={handleDiseaseSelection}
-          />
+          <OutsideClickHandler onOutsideClick={()=>{if(autocompleteItems) setAutoCompleteItems([])}}>
+            <SimpleQueryBar
+              handleSubmission={handleSubmission}
+              handleChange={handleQueryItemChange}
+              isLoading={isLoading}
+              value={inputText}
+              autocompleteItems={autocompleteItems}
+              autocompleteLoading={loadingAutocomplete}
+              handleItemClick={handleDiseaseSelection}
+            />
+          </OutsideClickHandler>
           {!isResults &&
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>

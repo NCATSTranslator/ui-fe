@@ -4,7 +4,6 @@ import Tooltip from '../Tooltip/Tooltip';
 import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
-import OutsideClickHandler from '../OutsideClickHandler/OutsideClickHandler';
 import { capitalizeAllWords, formatBiolinkPredicate } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 

@@ -1,8 +1,9 @@
-import React, {useRef, useEffect, useCallback} from "react";
+import React, {useRef, useState, useEffect, useCallback} from "react";
 
 const OutsideClickHandler = ({children, onOutsideClick, className}) => {
 
   const wrapperRef = useRef(null);
+  const [listenerAdded, setListenerAdded] = useState(false);
 
   const handleClickOutside = useCallback((e) => {
     if (
@@ -13,10 +14,13 @@ const OutsideClickHandler = ({children, onOutsideClick, className}) => {
     } else {
     }
   }, [onOutsideClick])
+
   useEffect(() => {
-    document
-      .addEventListener('mousedown', handleClickOutside);
-  }, [handleClickOutside])
+    if(!listenerAdded) {
+      document.addEventListener('click', handleClickOutside);
+      setListenerAdded(true);
+    } 
+  }, [handleClickOutside, listenerAdded])
 
   return(
     <div ref={wrapperRef} className={className}>
