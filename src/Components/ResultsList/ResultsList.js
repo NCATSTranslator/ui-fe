@@ -584,6 +584,7 @@ const ResultsList = ({loading}) => {
                         >
                         FDA
                         <Tooltip 
+                        above
                           delay={350}
                           active={fdaTooltipActive} 
                           onClose={() => setFdaTooltipActive(false)}
