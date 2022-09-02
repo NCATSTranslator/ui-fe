@@ -77,7 +77,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
       </div>
       <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
         { fdaInfo &&
-          <span className={styles.fdaIcon} onMouseEnter={()=>setFdaTooltipActive(true)} onMouseLeave={()=>setFdaTooltipActive(false)}>
+          <span className={`${styles.fdaIcon} fda-icon`} onMouseEnter={()=>setFdaTooltipActive(true)} onMouseLeave={()=>setFdaTooltipActive(false)}>
             <CheckIcon />
             <Tooltip 
               delay={350}

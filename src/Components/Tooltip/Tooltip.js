@@ -34,8 +34,8 @@ const Tooltip = ({children, active, onClose, heading, text, left, above, hover, 
   }, [active, handleActivate, handleDeactivate]);
 
   return(
-    <div className={`${styles.tooltip} ${statusClass} ${left ? styles.left : ''} ${above ? styles.above : ''}`}>
-      <div className={styles.tooltipContainer}>
+    <div className={`${styles.tooltip} ${statusClass} ${left ? styles.left : ''} ${above ? styles.above : ''} tooltip`}>
+      <div className={`${styles.tooltipContainer} tooltip-container`}>
         {heading && 
           <p className={styles.heading}>{heading}</p>
         }

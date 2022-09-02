@@ -13,7 +13,7 @@
     position: absolute;
     z-index: 20;
     top: 100%;
-    right: 4px;
+    right: -40px;
     background-color: $darkGray; 
     color: $white;
     border-radius: $defaultBorderRadius;
@@ -35,7 +35,7 @@
     // border-color: transparent transparent $darkGray transparent;
     position:absolute;
     top: calc(100% - 7px);
-    right: $m;
+    right: 80px;
     z-index: -1;
   }
   &.left {
@@ -73,11 +73,13 @@
     font-size: 12px;
     line-height: 15px;
     font-weight: 400;
+    text-transform: none;
   }
   .children {
     p {
       font-size: 12px;
       font-weight: 400;
+      text-transform: none;
     }
   } 
   .close {

@@ -33,6 +33,24 @@
 }
 
 .results {
+  .fda-head {
+    .tooltip-continer {
+      right: -40px;
+    }
+    .tooltip:after {
+      right: 0px;
+    }
+  }
+  .fda-icon {
+    .tooltip-container {
+      right: -40px;
+      top: calc(100% + 10px);
+    }
+    .tooltip:after {
+      top: calc(100% + 3px);
+      right: 5px;
+    }
+  }
   .result:nth-child(odd) {
     .path {
       background-color: $lightGray;
