@@ -11,6 +11,7 @@ import {ReactComponent as Concept} from '../Icons/Navigation/Question.svg';
 import {ReactComponent as Protein} from '../Icons/protein.svg';
 import {ReactComponent as Drug} from '../Icons/drug.svg';
 import {ReactComponent as SmallMolecule} from '../Icons/small-molecule.svg';
+import {ReactComponent as Taxon} from '../Icons/taxon.svg';
 
 export const getIcon = (category) => {
   var icon = <Chemical/>;
@@ -32,6 +33,9 @@ export const getIcon = (category) => {
       break;
     case 'biolink:SmallMolecule':
       icon = <SmallMolecule/>;
+      break;
+    case 'biolink:OrganismTaxon':
+      icon = <Taxon/>;
       break;
     case 'regulation':
       icon = <Regulation/>;
