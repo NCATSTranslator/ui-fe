@@ -186,13 +186,14 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
             dispatch(
               incrementHistory(
                 { 
-                  items: storedQuery, 
+                  items: queryItems, 
                   date: timestamp.toDateString(), 
                   time: timestamp.toLocaleTimeString([], {hour12: true, hour: 'numeric', minute:'2-digit'}),
                   id: data.data
                 }
               )
             );
+            setIsValidSubmission(false);
           }
           if(window.location.href.includes('results')) {
             // If we're submitting from the results page, reload the query with the newly returned queryID

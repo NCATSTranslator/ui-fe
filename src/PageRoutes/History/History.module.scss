@@ -4,7 +4,7 @@
   display: grid;
   grid-template-rows: max-content;
   max-width: 1150px;
-  padding-top: 72px;
+  padding: 72px 0;
   margin: 0 auto;
   .head {
     display: flex;
@@ -23,6 +23,36 @@
       box-shadow: none;
       &:hover {
         box-shadow: none;
+      }
+    }
+  }
+  .noHistory {
+    margin: 30px auto;
+    padding: 30px;
+    text-align: center;
+    // border: 1px solid $midGray;
+    box-shadow: $dropShadow;
+    border-radius: 10px;
+    a {
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 1;
+      padding: 10px 8px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: box-shadow 0.25s ease;
+      color: #ffffff;
+      background-color: #662E6B;
+      text-decoration: none;
+      display: inline-flex;
+      width: -moz-fit-content;
+      width: fit-content;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 16px;
+      &:hover {
+        box-shadow: $dropShadowHover;
       }
     }
   }

@@ -142,6 +142,7 @@ const QueryHistoryList = () => {
                     <div className={styles.right}>
                       <div className={styles.top}>
                         {
+                          query.items && 
                           query.items.map((item, j) => {
                             let output = (item.value) ? item.value : item.name;
                             return (
