@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import Page from './Components/Page/Page';
+import FAQPage from './Components/Page/FAQPage';
 import Home from './PageRoutes/Home/Home';
 import About from './PageRoutes/About/About';
 import Privacy from './PageRoutes/Privacy/Privacy';
@@ -14,6 +15,10 @@ import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
 import Contact from './PageRoutes/Contact/Contact';
+import { Help } from './PageRoutes/Articles/Help';
+import { WhatIs } from './PageRoutes/Articles/WhatIs';
+import { HowItWorks } from './PageRoutes/Articles/HowItWorks';
+import { Evidence } from './PageRoutes/Articles/Evidence';
 import reportWebVitals from './reportWebVitals';
 import {Provider} from 'react-redux';
 import {store} from './Redux/store';
@@ -30,6 +35,14 @@ root.render(
               <Page title="Home">
                 <Home />
               </Page>
+            }
+          />
+          <Route  
+            path="about-translator"
+            element={
+              <FAQPage title="About Biomedical Data Translator">
+                <About />
+              </FAQPage>
             }
           />
           <Route  
@@ -54,6 +67,38 @@ root.render(
               <Page title="Contact Us">
                 <Contact />
               </Page>
+            }
+          />
+          <Route  
+            path="help"
+            element={
+              <FAQPage title="Frequently Asked Questions">
+                <Help />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="what-is-translational-science"
+            element={
+              <FAQPage title="What is Translational Science">
+                <WhatIs />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="how-it-works"
+            element={
+              <FAQPage title="How It Works">
+                <HowItWorks />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="evidence"
+            element={
+              <FAQPage title="Evidence">
+                <Evidence />
+              </FAQPage>
             }
           />
           <Route  

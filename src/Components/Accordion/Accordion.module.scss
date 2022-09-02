@@ -1,0 +1,63 @@
+@import "../../Assets/Styles/variables";
+
+
+.accordion {
+  svg {
+    margin: 0;
+    height: 25px;
+    width: 25px;
+    transition: all .25s ease;
+    path {
+      stroke: $darkGray;
+    }
+  }
+  &.open {
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+  .accordionButton {
+    background-color: transparent;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .accordionPanel {
+
+  }
+  // .titleLink {
+  //   display: flex;
+  //   justify-content: space-between;
+  //   align-items: center;
+  //   margin: 0;
+  //   background-color: transparent;
+  //   text-decoration: none;
+  //   color: $black;
+  //   font-size: 14px;
+  //   font-weight: 700;
+  //   &.active {
+  //     background-color: $purpleTwo20;
+  //     color: $purpleOne;
+  //   }
+  //   a {
+  //     text-decoration: none;
+  //   }
+  // }
+  .navLink {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    background-color: transparent;
+    text-decoration: none;
+    color: $black;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 11px 8px;
+    &.active {
+      background-color: $purpleTwo20;
+      color: $purpleOne;
+    }
+  }
+}

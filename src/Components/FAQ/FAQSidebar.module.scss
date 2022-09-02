@@ -1,0 +1,35 @@
+@import "../../Assets/Styles/variables";
+
+.faqSidebarContainer {
+  background-color: $lightGray;
+  padding: $s;
+  .links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    li {
+      &.active >a, .links li.active {
+        background-color: $purpleTwo20;
+        color: $purpleOne;
+      }
+    }
+    .subLinks {
+      .navLink {
+        font-weight: 400;
+      }
+    }
+  }
+  .accordionPanel {
+    padding: 0 0 0 $s;
+  }
+  .navLink {
+    margin: 0;
+    background-color: transparent;
+    text-decoration: none;
+    color: $black;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 11px 8px;
+    display: block;
+  }
+}

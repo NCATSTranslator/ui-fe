@@ -13,15 +13,16 @@ const Tooltip = ({children, active, onClose, heading, text, left, above, hover, 
   delay = (delay) ? delay : 350;
   onClose = (onClose) ? onClose : ()=>{};
 
+  // eslint-disable-next-line 
   const handleActivate = useCallback(debounce(() => {
     setStatus(true);
-  }, 350), [setStatus])
+  }, 350), [])
 
   const handleDeactivate = useCallback(() => {
     setStatus(false)
     onClose();
     handleActivate.cancel()
-  }, [handleActivate])
+  }, [handleActivate, onClose])
   
   useEffect(() => {
     if(active)

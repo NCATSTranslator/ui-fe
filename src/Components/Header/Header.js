@@ -22,7 +22,7 @@ const Header = ({children}) => {
           <div className={styles.right}>
             <Link to="/history">Search History</Link>
             <button onClick={()=>setModalOpen(true)}>Send Feedback</button>
-            <button>Help</button>
+            <Link to="/help" className={styles.help}>Help</Link>
           </div>
         </div>
         <ReportIssueModal isOpen={modalOpen} onClose={()=>handleModalClose()} />

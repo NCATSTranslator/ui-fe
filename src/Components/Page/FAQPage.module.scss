@@ -1,0 +1,8 @@
+@import "../../Assets/Styles/variables";
+
+
+.faqContainer {
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  grid-column-gap: $m;
+}

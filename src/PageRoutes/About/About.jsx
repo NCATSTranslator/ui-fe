@@ -2,8 +2,7 @@ import React from "react";
 
 const About = () => {
   return (
-    <div className={`container`}>
-      <h1 className={`h5`}>About NCATS</h1>
+    <>
       <p>As a result of recent scientific advances, a tremendous amount of data is available from biomedical research and clinical interactions with patients, health records, clinical trials and adverse event reports that could be useful for understanding health and disease and for developing and identifying treatments for diseases. Ideally, these data would be mined collectively to provide insights into the relationship between molecular and cellular processes (the targets of rational drug design) and the signs and symptoms of diseases. Currently, these very rich yet different data sources are housed in various locations, often in forms that are not compatible or interoperable with each other. All of these factors limit the ability to get more treatments to more patients more quickly.</p>
 
       <p>To address these problems, NCATS launched the Biomedical Data Translator program, called “Translator” for short. This multiyear, iterative effort will culminate in the development of a comprehensive, relational, N-dimensional Biomedical Data Translator that integrates multiple types of existing data sources, including objective signs and symptoms of disease, drug effects, and intervening types of biological data relevant to understanding pathophysiology.</p>
@@ -28,7 +27,7 @@ const About = () => {
       <p>The Consortium will develop community standards for data re-use, build and disseminate common services for Translator, support the integration of existing medical and biological data sources, and produce tools that augment human reasoning and inference for understanding the pathophysiology of human disease.</p>
 
       <p>While the software is being developed, Translator teams will have programmatic access to network resources to allow the design, implementation and testing of their software. NCATS will host regular consortium-wide meetings, as well as periodic user-focused meetings and in-person development sprints on specific topics.</p>
-    </div>
+    </>
   );
 }
 
