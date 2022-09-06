@@ -30,7 +30,7 @@ export const getIcon = (category) => {
     case 'biolink:Disease':
       icon = <Disease/>;
       break;
-    case 'biolink:SmallMolecule': case 'biolink:MolecularEntity':
+    case 'biolink:SmallMolecule': case 'biolink:MolecularEntity': case 'biolink:MolecularActivity':
       icon = <SmallMolecule/>;
       break;
     case 'biolink:OrganismTaxon':
