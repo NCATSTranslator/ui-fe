@@ -9,8 +9,6 @@ import Home from './PageRoutes/Home/Home';
 import About from './PageRoutes/About/About';
 import Privacy from './PageRoutes/Privacy/Privacy';
 import Four from './PageRoutes/404/404';
-import Templates from './PageRoutes/Templates/Templates';
-import Build from './PageRoutes/Build/Build';
 import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
@@ -106,22 +104,6 @@ root.render(
             element={
               <Page title="Privacy Policy">
                 <Privacy />
-              </Page>
-            }
-          />
-          <Route  
-            path="templates"
-            element={
-              <Page title="Templated Queries">
-                <Templates />
-              </Page>
-            }
-          />
-          <Route  
-            path="build"
-            element={
-              <Page title="Build Your Own">
-                <Build />
               </Page>
             }
           />

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import FAQSidebar from "../FAQ/FAQSidebar";
+import FAQSidebar from "../FAQSidebar/FAQSidebar";
 import DisclaimerModal from "../Modals/DisclaimerModal";
 import styles from './FAQPage.module.scss';
 

@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
-import SimpleQueryBar from "../QueryComponents/SimpleQueryBar";
+import QueryBar from "../QueryBar/QueryBar";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
@@ -233,7 +233,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
             <p className={styles.error}>{errorText}</p>
           }
           <OutsideClickHandler onOutsideClick={()=>{if(autocompleteItems) setAutoCompleteItems([])}}>
-            <SimpleQueryBar
+            <QueryBar
               handleSubmission={handleSubmission}
               handleChange={handleQueryItemChange}
               isLoading={isLoading}
