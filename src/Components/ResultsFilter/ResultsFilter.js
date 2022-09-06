@@ -99,7 +99,7 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
         </div>
         <Checkbox handleClick={() => onFilter(fdaObject)} 
           checked={activeFilters.some(e => e.tag === fdaObject.tag)}>
-            Approved
+            Approved for Some Indication
         </Checkbox>
 
         <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>

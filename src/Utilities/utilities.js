@@ -3,15 +3,14 @@ import {ReactComponent as Chemical} from '../Icons/Queries/chemical.svg';
 import {ReactComponent as Disease} from '../Icons/disease2.svg';
 import {ReactComponent as Gene} from '../Icons/Queries/Gene.svg';
 import {ReactComponent as Phenotype} from '../Icons/Queries/Phenotype.svg';
-import {ReactComponent as Regulation} from '../Icons/Queries/Regulation.svg';
-import {ReactComponent as Treats} from '../Icons/Queries/Treats.svg';
-import {ReactComponent as Nodes} from '../Icons/Queries/Nodes.svg';
-import {ReactComponent as Associated} from '../Icons/Queries/Associated With.svg';
-import {ReactComponent as Concept} from '../Icons/Navigation/Question.svg';
 import {ReactComponent as Protein} from '../Icons/protein.svg';
 import {ReactComponent as Drug} from '../Icons/drug.svg';
 import {ReactComponent as SmallMolecule} from '../Icons/small-molecule.svg';
 import {ReactComponent as Taxon} from '../Icons/taxon.svg';
+import {ReactComponent as PathologicalProcess} from '../Icons/pathological-process.svg';
+import {ReactComponent as PhysiologicalProcess} from '../Icons/physiological-process.svg';
+import {ReactComponent as BiologicalEntity} from '../Icons/biological-entity.svg';
+import {ReactComponent as AnatomicalEntity} from '../Icons/anatomical-entity.svg';
 
 export const getIcon = (category) => {
   var icon = <Chemical/>;
@@ -25,6 +24,9 @@ export const getIcon = (category) => {
     case 'biolink:Protein':
       icon = <Protein/>;
       break;
+    case 'biolink:Polypeptide':
+      icon = <Protein/>;
+      break;
     case 'biolink:Drug':
       icon = <Drug/>;
       break;
@@ -34,23 +36,23 @@ export const getIcon = (category) => {
     case 'biolink:SmallMolecule':
       icon = <SmallMolecule/>;
       break;
+    case 'biolink:MolecularEntity':
+      icon = <SmallMolecule/>;
+      break;
     case 'biolink:OrganismTaxon':
       icon = <Taxon/>;
       break;
-    case 'regulation':
-      icon = <Regulation/>;
+    case 'biolink:PathologicalProcess':
+      icon = <PathologicalProcess/>;
       break;
-    case 'treats':
-      icon = <Treats/>;
+    case 'biolink:PhysiologicalProcess':
+      icon = <PhysiologicalProcess/>;
       break;
-    case 'nodes':
-      icon = <Nodes/>;
+    case 'biolink:BiologicalEntity':
+      icon = <BiologicalEntity/>;
       break;
-    case 'concept':
-      icon = <Concept/>;
-      break;
-    case 'associated':
-      icon = <Associated/>;
+    case 'biolink:AnatomicalEntity':
+      icon = <AnatomicalEntity/>;
       break;
     default:
       break;
