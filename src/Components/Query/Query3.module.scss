@@ -55,4 +55,21 @@
       }
     }
   }
+  .needHelp {
+    text-align: center;
+
+    margin: 12px 0 0 0;
+    a {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: $purpleOne;
+      text-decoration: none;
+      font-weight: 700; 
+      font-size: 14px;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 }
