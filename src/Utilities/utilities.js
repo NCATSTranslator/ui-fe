@@ -21,10 +21,7 @@ export const getIcon = (category) => {
     case 'phenotype':
       icon = <Phenotype/>;
       break;
-    case 'biolink:Protein':
-      icon = <Protein/>;
-      break;
-    case 'biolink:Polypeptide':
+    case 'biolink:Protein': case 'biolink:Polypeptide':
       icon = <Protein/>;
       break;
     case 'biolink:Drug':
@@ -33,10 +30,7 @@ export const getIcon = (category) => {
     case 'biolink:Disease':
       icon = <Disease/>;
       break;
-    case 'biolink:SmallMolecule':
-      icon = <SmallMolecule/>;
-      break;
-    case 'biolink:MolecularEntity':
+    case 'biolink:SmallMolecule': case 'biolink:MolecularEntity':
       icon = <SmallMolecule/>;
       break;
     case 'biolink:OrganismTaxon':
@@ -45,7 +39,7 @@ export const getIcon = (category) => {
     case 'biolink:PathologicalProcess':
       icon = <PathologicalProcess/>;
       break;
-    case 'biolink:PhysiologicalProcess':
+    case 'biolink:PhysiologicalProcess': case 'biolink:BiologicalProcess': case 'biolink:BiologicalProcessOrActivity':
       icon = <PhysiologicalProcess/>;
       break;
     case 'biolink:BiologicalEntity':
