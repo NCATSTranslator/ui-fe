@@ -1,16 +1,10 @@
 import React, {useState} from "react";
-import ReportIssueModal from "../Modals/SendFeedbackModal";
 import { Link } from 'react-router-dom';
 import {ReactComponent as Logo} from '../../Assets/Images/Logo.svg';
 import styles from './Header.module.scss';
 
 
-const Header = ({children}) => {
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const handleModalClose = () => {
-    setModalOpen(false);
-  }
+const Header = ({children, handleFeedbackModalOpen}) => {
   
   return (
     <header className={styles.header}>
@@ -21,11 +15,10 @@ const Header = ({children}) => {
           </div>
           <div className={styles.right}>
             <Link to="/history">Search History</Link>
-            <button onClick={()=>setModalOpen(true)}>Send Feedback</button>
+            <button onClick={()=>handleFeedbackModalOpen()}>Send Feedback</button>
             <Link to="/help" className={styles.help}>Help</Link>
           </div>
         </div>
-        <ReportIssueModal isOpen={modalOpen} onClose={()=>handleModalClose()} />
       </div>
       {/* <div className="toolbar">
         <div className="container">

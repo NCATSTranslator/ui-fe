@@ -2,7 +2,9 @@ import styles from './GraphView.module.scss';
 import React, {useState, useEffect} from "react";
 import GraphPath from '../GraphPath/GraphPath';
 import { formatBiolinkPredicate } from '../../Utilities/utilities';
+import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import { cloneDeep } from 'lodash';
+import { useOutletContext } from 'react-router-dom';
 
 const GraphView = ({paths, handleEdgeSpecificEvidence}) => {
 
@@ -11,6 +13,8 @@ const GraphView = ({paths, handleEdgeSpecificEvidence}) => {
   const [numberOfCompressedElements, setNumberOfCompressedElements] = useState(0); 
   let initialNumberToShow = (paths.length < 6) ? paths.length : 6;
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
+
+  const setFeedbackModalOpen = useOutletContext();
 
   useEffect(() => {
     let newGraph = [];
@@ -203,6 +207,11 @@ const GraphView = ({paths, handleEdgeSpecificEvidence}) => {
           <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
         }
       </div>
+      <p className={styles.needHelp}>
+        <Question/> 
+        Was this helpful?
+        <button onClick={()=>{setFeedbackModalOpen(true)}} rel="noreferrer " target="_blank">Send Feedback</button>
+      </p>
     </div>
   )
 }

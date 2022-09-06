@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
-import SimpleQueryBar from "../QueryComponents/SimpleQueryBar";
+import QueryBar from "../QueryBar/QueryBar";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
@@ -10,6 +10,7 @@ import cloneDeep from "lodash/cloneDeep";
 import isEqual from 'lodash/isEqual';
 import _ from "lodash";
 import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
+import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import styles from './Query3.module.scss';
 
 const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
@@ -232,7 +233,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
             <p className={styles.error}>{errorText}</p>
           }
           <OutsideClickHandler onOutsideClick={()=>{if(autocompleteItems) setAutoCompleteItems([])}}>
-            <SimpleQueryBar
+            <QueryBar
               handleSubmission={handleSubmission}
               handleChange={handleQueryItemChange}
               isLoading={isLoading}
@@ -242,6 +243,9 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
               handleItemClick={handleDiseaseSelection}
             />
           </OutsideClickHandler>
+          <p className={styles.needHelp}>
+            <a href="/help" rel="noreferrer " target="_blank"><Question/> Need Help?</a>
+          </p>
           {!isResults &&
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>

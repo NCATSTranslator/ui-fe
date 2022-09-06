@@ -2,10 +2,10 @@ import React, {useState} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
 import SimpleRange from '../Range/SimpleRange';
+  // eslint-disable-next-line
 import TwoThumbRange from '../Range/TwoThumbRange';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
-import { debounce } from 'lodash';
 
 const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
   
@@ -19,15 +19,6 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
   const fdaObject = {tag:'fda', value: ''};
 
   const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
-
-  // const handleOnMouseEnter = debounce((type) => {
-  //   setFdaTooltipActive(true)
-  // }, 350)
-
-  // const handleOnMouseLeave = (type) => {
-  //   setFdaTooltipActive(false)
-  //   handleOnMouseEnter.cancel()
-  // }
 
   onHighlight = (!onHighlight) ? () => console.log("No highlight function specified in ResultsFilter.") : onHighlight; 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 
@@ -44,9 +35,11 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
     }
   }
 
+  // eslint-disable-next-line
   const handleDateRangeActive = () => {
     onFilter(dateRangeObject);
   }
+  // eslint-disable-next-line
   const handleDateRangeChange = (value) => {
     let newDateObj  = global.structuredClone(dateRangeObject);
     newDateObj.value = value;

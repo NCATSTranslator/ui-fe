@@ -4,9 +4,9 @@ import Button from "../FormFields/Button";
 import TextInput from "../FormFields/TextInput";
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
-import styles from './SimpleQueryBar.module.scss';
+import styles from './QueryBar.module.scss';
 
-const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value, 
+const QueryBar = ({handleSubmission, handleChange, isLoading, value, 
   autocompleteItems, autocompleteLoading, handleItemClick}) => {
 
   const [submissionDisabled, setSubmissionDisabled] = useState(false);
@@ -54,4 +54,4 @@ const SimpleQueryBar = ({handleSubmission, handleChange, isLoading, value,
   )
 }
 
-export default SimpleQueryBar;
+export default QueryBar;

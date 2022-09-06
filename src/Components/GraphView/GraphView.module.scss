@@ -130,6 +130,32 @@
       margin-bottom: 0;
     }
   }
+  .needHelp {
+    font-size: 12px;
+    text-align: center;
+    margin: 12px 0 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: $purpleOne;
+    svg {
+      margin-right: 4px;
+    }
+    button {
+      padding: 0;
+      color: $purpleOne;
+      text-decoration: none;
+      font-weight: 700; 
+      font-size: 12px;
+      box-shadow: none;
+      margin: 0 0 0 4px;
+      background-color: transparent;
+      &:hover {
+        box-shadow: none;
+        text-decoration: underline;
+      }
+    }
+  }
 }
 
 
