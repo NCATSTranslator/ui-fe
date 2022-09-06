@@ -93,7 +93,7 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
             delay={350}
             active={fdaTooltipActive} 
             onClose={() => setFdaTooltipActive(false)}
-            text='Checkmarks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'
+            text='Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.'
             >
           </Tooltip>
         </div>

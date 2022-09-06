@@ -588,7 +588,7 @@ const ResultsList = ({loading}) => {
                           delay={350}
                           active={fdaTooltipActive} 
                           onClose={() => setFdaTooltipActive(false)}
-                          text='Checkmarks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'
+                          text='Check marks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'
                           >
                         </Tooltip>
                       </div>
