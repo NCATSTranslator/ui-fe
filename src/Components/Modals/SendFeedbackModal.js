@@ -9,7 +9,7 @@ import {ReactComponent as Warning} from '../../Icons/information.svg'
 import { currentQueryResultsID } from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux'
 
-const ReportIssueModal = ({isOpen, onClose}) => {
+const SendFeedbackModal = ({isOpen, onClose}) => {
 
   const categoryErrorText = "Please select a category.";
   const [categoryError, setCategoryError] = useState(false);
@@ -243,5 +243,5 @@ const ReportIssueModal = ({isOpen, onClose}) => {
 }
 
 
-export default ReportIssueModal;
+export default SendFeedbackModal;
 
