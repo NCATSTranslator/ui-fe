@@ -6,9 +6,7 @@ import { useLocation } from "react-router-dom";
 
 const FAQSidebar = ({articles}) => {
 
-
   const location = useLocation();
-  console.log(location.pathname);
   const [activeSlug, setActiveSlug] = useState(location.pathname.replace('/', ''));
 
   useEffect(() => {
@@ -23,39 +21,68 @@ const FAQSidebar = ({articles}) => {
           <ul className={styles.links}>
             {
               articles.map((article, i)=> {
-                console.log(article)
+                let isExtLink = (article.link) ? true : false;
+                let link = (article.link) ? article.link : `/${article.slug}`;
                 return (
                   <li key={i} className={(article.slug === activeSlug ? styles.active : '')}>
                     {
-                      !article.subArticles && 
+                      !article.subArticles && !isExtLink &&
                       <NavLink 
-                        to={`/${article.slug}`} 
+                        to={`${link}`} 
                         className={styles.navLink}
                         >
                         {article.title}
                       </NavLink>
                     }
                     {
+                      !article.subArticles && isExtLink &&
+                      <a 
+                        href={link} 
+                        className={styles.navLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        >
+                        {article.title}
+                      </a>
+                    }
+                    {
                       article.subArticles && 
                       <Accordion 
                         title={article.title} 
-                        titleLink={`/${article.slug}`}
-                        navLink
+                        titleLink={link}
+                        navLink={!isExtLink}
+                        extLink={isExtLink}
                         accordionClass={styles.accordion}
                         panelClass={styles.accordionPanel}
+                        expanded={article.subArticles.find(subArticle => subArticle.slug === activeSlug)}
                         >
                         <ul className={`${styles.links} ${styles.subLinks}`}>
                           {
                             article.subArticles.map((subArticle, j) => {
                               let key = `${i}_${j}`;
+                              let isExtLinkSub = (subArticle.link) ? true : false;
+                              let linkSub = (subArticle.link) ? subArticle.link : `/${subArticle.slug}`;
                               return (             
                                 <li key={key} className={(subArticle.slug === activeSlug ? styles.active : '')}>
-                                  <NavLink 
-                                    to={`/${subArticle.slug}`} 
-                                    className={styles.navLink}
-                                    >
-                                    {subArticle.title}
-                                  </NavLink>
+                                  {isExtLinkSub && 
+                                    <a 
+                                      href={linkSub} 
+                                      className={styles.navLink}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      >
+                                      {subArticle.title}
+                                    </a>
+                                  }
+                                  {
+                                    !isExtLinkSub &&
+                                    <NavLink 
+                                      to={linkSub} 
+                                      className={styles.navLink}
+                                      >
+                                      {subArticle.title}
+                                    </NavLink>
+                                  }
                                 </li>       
                               )                   
                             })

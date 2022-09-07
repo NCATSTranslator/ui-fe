@@ -107,11 +107,19 @@
     stroke: $white;
   }
   .loadingButton {
+    color: $purpleOne;
+    background-color: transparent;
     pointer-events: none;
+    box-shadow: none;
     cursor: default;
+    margin-bottom: 0;
     &.active {
       cursor: pointer;
       pointer-events: all;
+    }
+    &:hover {
+      text-decoration: underline;
+      box-shadow: none;
     }
   }
   .shareButton {
@@ -227,6 +235,12 @@
   .right {
     display: flex;
     align-items: center;
+    .loadingButtonContainer {
+      margin-top: 0;
+      .loadingButton {
+        margin-bottom: 0;
+      }
+    }
   }
 }
 .activeFilters {

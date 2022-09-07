@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom';
+import { NavigationType, useNavigate, useSearchParams } from 'react-router-dom';
 import QueryBar from "../QueryBar/QueryBar";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
@@ -18,6 +18,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // eslint-disable-next-line
   const navigatingFromHistory = ( new URLSearchParams(window.location.search).get("results") !== null) ? true : false;
@@ -63,6 +64,9 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   // the final name for the submitted disease
   const [readyForSubmission, setReadyForSubmission] = useState(false);
 
+  // String, used to set navigation url for example disease buttons
+  const [presetURL, setPresetURL] = useState(false);
+
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = (e) => {
     delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems);
@@ -101,7 +105,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
         "value": ""
       },
       {
-        "name": "Treat",
+        "name": "May Treat",
         "type": "action",
         "category": "treats"
       },
@@ -198,10 +202,11 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
           }
           if(window.location.href.includes('results')) {
             // If we're submitting from the results page, reload the query with the newly returned queryID
+            setSearchParams('?loading=true');
             window.location.reload();
           } else {
             // Otherwise, navigate to the results page and set loading to true
-            navigate('/results?loading=true')
+            navigate('/results?loading=true');
           }
         })
         .catch((error) => {
@@ -220,6 +225,17 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
       setIsValidSubmission(true)
     }
   }, [navigatingFromHistory]);
+
+  useEffect(() => {
+    if(presetURL) {
+      const timer = setTimeout(() => {
+        navigate(presetURL);
+      }, 100 );
+      return () => {
+        clearTimeout(timer);
+      }
+    }
+  }, [selectedDisease, presetURL]);
 
   return (
     <>
@@ -249,11 +265,50 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
           {!isResults &&
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>
-              <div className={styles.exampleList}>
+              {/* <div className={styles.exampleList}>
                 <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'UMLS:C0580546', label:'Abnormal Blood Glucose'})}>Abnormal Blood Glucose</button>
                 <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0018975', label:'Neurofibromatosis Type I'})}>Neurofibromatosis Type I</button>
                 <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0004975', label:'Alzheimer\'s'})}>Alzheimer's</button>
                 <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0018997', label:'Noonan Syndrome'})}>Noonan Syndrome</button>
+              </div> */}
+    
+              <div className={styles.exampleList}>
+                <button 
+                  className={styles.button} 
+                  onClick={(e)=>{ 
+                    setSelectedDisease({ id: '0000', label:'Abnormal Blood Glucose'}); 
+                    setPresetURL(e.target.dataset.url);
+                  }} 
+                  data-url="/results?q=9c06ecb7-867d-4a42-a207-3f2104b2e76c"
+                  >Abnormal Blood Glucose
+                </button>
+                <button 
+                  className={styles.button}
+                  onClick={(e)=>{ 
+                    setSelectedDisease({ id: '0000', label:'Neurofibromatosis Type I'}); 
+                    setPresetURL(e.target.dataset.url);
+                  }}
+                  data-url="/results?q=74f8fee4-8965-4019-8657-aa65ee7b2850"
+                  >Neurofibromatosis Type I
+                </button>
+                <button 
+                  className={styles.button}
+                  onClick={(e)=>{ 
+                    setSelectedDisease({ id: '0000', label:'Alzheimer\'s'}); 
+                    setPresetURL(e.target.dataset.url);
+                  }}
+                  data-url="/results?q=6752ab77-ff70-4805-8f7c-c55d078b0a50"
+                  >Alzheimer's
+                </button>
+                <button 
+                  className={styles.button}
+                  onClick={(e)=>{ 
+                    setSelectedDisease({ id: '0000', label:'Noonan Syndrome'}); 
+                    setPresetURL(e.target.dataset.url);
+                  }}
+                  data-url="/results?q=6c6b13ab-31de-4ec0-8400-7729427ba0ca"
+                  >Noonan Syndrome
+                </button>
               </div>
             </div>
           }

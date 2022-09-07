@@ -112,6 +112,19 @@ button {
   }
 }
 
+.link, a {
+  background-color: transparent;
+  box-shadow: none;
+  color: $purpleOne;
+  text-decoration: none;
+  font-weight: 700;
+  padding: 0;
+  &:hover {
+    text-decoration: underline;
+    box-shadow: none;
+  } 
+}
+
 .body {
   min-height: calc(100vh - 147px);
   .page-title {
@@ -128,3 +141,4 @@ button {
 img {
   width: 100%;
 }
+

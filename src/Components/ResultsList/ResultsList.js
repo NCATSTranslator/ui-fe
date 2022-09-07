@@ -19,7 +19,6 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighte
 import { getSummarizedResults } from "../../Utilities/resultsFunctions";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import { cloneDeep, isEqual } from "lodash";
-import loadingButtonIcon from '../../Assets/Images/Loading/loading-white.png';
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
@@ -158,18 +157,21 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
+        let fetchResults = false;
         if(data.data.aras.length > returnedARAs.aras.length) {
           console.log("New ARA returned, fetching new results...");
           console.log(`Old ARAs: ${returnedARAs.aras}, New ARAs: ${data.data.aras}`);
           setReturnedARAs(data.data);
-          setIsFetchingResults(true);
+          fetchResults = true;
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
         }
-        if(data.status === 'success' ) {
+        if(data.status === 'success') {
           setIsFetchingARAStatus(false);
-          setIsLoading(false);
+          fetchResults = true;
         }
+        if(fetchResults)
+          setIsFetchingResults(true);
       })
       .catch((error) => {
         console.log(error)
@@ -200,7 +202,7 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        // if we've already gotten results before, set newRawResults instead to 
+        // if we've already gotten results before, set freshRawResults instead to 
         // prevent original results from being overwritten
         if(formattedResults.length > 0) {
           setFreshRawResults(data);
@@ -208,7 +210,6 @@ const ResultsList = ({loading}) => {
           setRawResults(data);
         }
         setIsFetchingResults(false);
-        // setIsError((data.status === 'error'));
       })
       .catch((error) => {
         console.log(error)
@@ -473,6 +474,48 @@ const ResultsList = ({loading}) => {
     */
   }, [activeFilters, sortedResults]);
 
+  const displayLoadingButton = (
+    handleResultsRefresh, 
+    styles, 
+    isFetchingARAStatus, 
+    loadingIcon, 
+    ResultsAvailableIcon,
+    showDisclaimer) => {
+
+    if(freshRawResults === null && isFetchingARAStatus) {
+      return(
+        <div className={styles.loadingButtonContainer}>
+          <button className={`${styles.loadingButton} ${styles.inactive}`}>
+            <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
+            Loading
+          </button>
+        </div>
+      )
+    }
+  
+    if(freshRawResults !== null) {
+      return (
+        <div className={styles.loadingButtonContainer}>
+          <button onClick={()=>{handleResultsRefresh()}} className={`${styles.loadingButton} ${styles.active}`}>
+            {
+              isFetchingARAStatus && 
+              <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
+            }
+            {
+              !isFetchingARAStatus &&
+              ResultsAvailableIcon
+            }
+            Load New Results
+          </button>
+          {
+            showDisclaimer && 
+            <p className={styles.refreshDisclaimer}>Please note that refreshing this page may cause the order of answers to change.<br/>Results you have already viewed may also be updated with new data.</p>
+          }
+        </div>
+      )
+    }
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <EvidenceModal 
@@ -527,9 +570,12 @@ const ResultsList = ({loading}) => {
                   </div>
                   <div className={styles.right}>
                     {
+                      displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingIcon, <ResultsAvailableIcon/>, false)
+                    }
+                    {/* {
                       isFetchingARAStatus && 
                       <img src={loadingIcon} className={styles.loadingIcon} alt="more results loading icon"/>
-                    }
+                    } */}
                     {
                       !isFetchingARAStatus && 
                       <CompleteIcon/>
@@ -655,30 +701,7 @@ const ResultsList = ({loading}) => {
                 </div>
               }
               {
-                freshRawResults === null && isFetchingARAStatus &&
-                <div className={styles.loadingButtonContainer}>
-                  <button className={`${styles.loadingButton} ${styles.inactive}`}>
-                    <img src={loadingButtonIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-                    Loading
-                  </button>
-                </div>
-              }
-              {
-                freshRawResults !== null && 
-                <div className={styles.loadingButtonContainer}>
-                  <button onClick={()=>{handleResultsRefresh()}} className={`${styles.loadingButton} ${styles.active}`}>
-                    {
-                      isFetchingARAStatus && 
-                      <img src={loadingButtonIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-                    }
-                    {
-                      !isFetchingARAStatus &&
-                      <ResultsAvailableIcon/>
-                    }
-                    Load New Results
-                  </button>
-                  <p className={styles.refreshDisclaimer}>Please note that refreshing this page may cause the order of answers to change.<br/>Results you have already viewed may also be updated with new data.</p>
-                </div>
+                displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingIcon, <ResultsAvailableIcon/>, true)
               }
             </>
           }
