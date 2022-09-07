@@ -6,8 +6,6 @@ import App from './App';
 import Page from './Components/Page/Page';
 import FAQPage from './Components/Page/FAQPage';
 import Home from './PageRoutes/Home/Home';
-import About from './PageRoutes/About/About';
-import Privacy from './PageRoutes/Privacy/Privacy';
 import Four from './PageRoutes/404/404';
 import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
@@ -42,22 +40,6 @@ root.render(
             element={
               <Page title="Home">
                 <Home />
-              </Page>
-            }
-          />
-          <Route  
-            path="about-translator"
-            element={
-              <FAQPage title="About Biomedical Data Translator">
-                <About />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="about"
-            element={
-              <Page title="About Biomedical Data Translator">
-                <About />
               </Page>
             }
           />
@@ -187,14 +169,6 @@ root.render(
               <FAQPage title="Send Feedback">
                 <SendFeedbackArticle />
               </FAQPage>
-            }
-          />
-          <Route  
-            path="privacy-policy"
-            element={
-              <Page title="Privacy Policy">
-                <Privacy />
-              </Page>
             }
           />
           <Route  

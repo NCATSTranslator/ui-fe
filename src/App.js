@@ -31,18 +31,22 @@ const App = () => {
       </div>
       <Footer>
         <nav>
-          <NavLink to="/about" 
-            className={({isActive}) => {return (isActive) ? 'active' : '' }}
-          >About NCATS</NavLink>
+          <a 
+            href="https://ncats.nih.gov/translator/about"
+            rel="noreferrer"
+            target="_blank"
+          >About Translator</a>
           <NavLink to="/contact-us" 
             className={({isActive}) => {return (isActive) ? 'active' : '' }}
           >Contact Us</NavLink>
           <NavLink to="/terms-of-use" 
             className={({isActive}) => {return (isActive) ? 'active' : '' }}
           >Terms of Use</NavLink>
-          <NavLink to="/privacy-policy" 
-            className={({isActive}) => {return (isActive) ? 'active' : '' }}
-          >Privacy Policy</NavLink>
+          <a 
+            href="https://ncats.nih.gov/privacy"
+            rel="noreferrer"
+            target="_blank"
+          >Privacy Policy</a>
         </nav>
       </Footer>
     </div>

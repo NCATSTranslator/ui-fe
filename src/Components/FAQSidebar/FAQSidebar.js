@@ -6,9 +6,7 @@ import { useLocation } from "react-router-dom";
 
 const FAQSidebar = ({articles}) => {
 
-
   const location = useLocation();
-  console.log(location.pathname);
   const [activeSlug, setActiveSlug] = useState(location.pathname.replace('/', ''));
 
   useEffect(() => {
