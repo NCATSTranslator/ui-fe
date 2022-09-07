@@ -25,11 +25,11 @@ export const Evidence = () => {
         Database references are documents stored in multiple collections or databases. This evidence format provides a standardized language for identifying the relationships between documents and databases with a large ecosystem of frameworks and tools. Database references can include the name of the collection, database name, etc.</p>
       <h2 className="h6">Viewing Evidence</h2>
       <p>When using Translator, you can choose to view all evidence supporting a result or just the evidence that supports a single relationship. To view all supporting evidence, click “View All (#)” under the Evidence column to the right of each result row.</p>
-      <p style={{textAlign: 'center'}}><img src="https://lh5.googleusercontent.com/MyzHO9wK-jSdylOokRmsZ7-W82xUL03YnHe33CFFEqMf9iyQ6HatlIiREyB55ThChPU=w2400" alt="View Evidence"/></p>
+      <p style={{textAlign: 'center'}}><img referrerPolicy="no-referrer" src="https://lh5.googleusercontent.com/MyzHO9wK-jSdylOokRmsZ7-W82xUL03YnHe33CFFEqMf9iyQ6HatlIiREyB55ThChPU=w2400" alt="View Evidence"/></p>
       <p>To view all available evidence that supports a relationship, expand a result row to view all paths through which the result treats the selected disease. Click the arrow between two objects to view the evidence. Not all relationships may have associated evidence.</p>
-      <p style={{textAlign: 'center'}}><img src="https://lh6.googleusercontent.com/Y8CTwcUl14kltHuEBneTZsuIVFFZdBV40iRz1bnq1mqJ167e_XXKpoCWfHjygVJtlqc=w2400" alt="Relationship Evidence"/></p>
+      <p style={{textAlign: 'center'}}><img referrerPolicy="no-referrer" src="https://lh6.googleusercontent.com/Y8CTwcUl14kltHuEBneTZsuIVFFZdBV40iRz1bnq1mqJ167e_XXKpoCWfHjygVJtlqc=w2400" alt="Relationship Evidence"/></p>
       <p>Clicking “View All” or a relationship arrow will open the Evidence module. This popup window displays the date(s), source, title, abstract (if available), supported relationship or claim, and the format type for each piece of evidence.</p>
-      <p style={{textAlign: 'center'}}><img src="https://lh3.googleusercontent.com/06i2yz8BU63u_v1_e6IZBqr2lqJHkrFa8ANd0b2e7z4gydVpnJepyMe24b48X0W7n_M=w2400" alt="All Evidence"/></p>
+      <p style={{textAlign: 'center'}}><img referrerPolicy="no-referrer" src="https://lh3.googleusercontent.com/06i2yz8BU63u_v1_e6IZBqr2lqJHkrFa8ANd0b2e7z4gydVpnJepyMe24b48X0W7n_M=w2400" alt="All Evidence"/></p>
     </>
   )
 }

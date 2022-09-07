@@ -11,7 +11,7 @@ export const Help = () => {
       <p>Yes. The goal of this programmatic effort is to produce data, software, and tools that are publicly available for users. The Translator Github can be found <a href="https://github.com/NCATSTranslator" target="_blank" rel="noreferrer">here</a>.</p>
       <h2 className="h6">How can I share my results?</h2>
       <p>Click on the purple export icon to the top right of a result list to generate a shareable link to it. You can also generate this link by clicking the same icon next to a result set in your <a href="/history">search history</a>.</p>
-      <p style={{textAlign: 'center'}}><img src="https://lh3.googleusercontent.com/RHtDQafKIi6w03dp8ZLn8s6pFIfkdzo31pjJd1spbgb8Wk4jJ0ARyEL2ggdauGiajR8=w2400" alt="Search History"/></p>
+      <p style={{textAlign: 'center'}}><img referrerPolicy="no-referrer" src="https://lh3.googleusercontent.com/RHtDQafKIi6w03dp8ZLn8s6pFIfkdzo31pjJd1spbgb8Wk4jJ0ARyEL2ggdauGiajR8=w2400" alt="Search History"/></p>
       <h2 className="h6">How can I provide feedback?</h2>
       <p>To send feedback to the Translator team, please fill out <button className="link" onClick={()=>{setFeedbackModalOpen(true)}}>this form</button>.</p>
       <h2 className="h6">How is this tool different from a search engine?</h2>

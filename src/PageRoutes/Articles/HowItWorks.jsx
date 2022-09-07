@@ -8,7 +8,7 @@ export const HowItWorks = () => {
       <p><strong>Autonomous Relay Agents (ARAs)</strong> build upon the knowledge contributed by KPs by way of reasoning and inference across KPs.</p>
       <p><strong>Knowledge Providers (KPs)</strong> contribute domain-specific, high-value information abstracted from one or more underlying 'knowledge sources'.</p>
       <p>A <strong>Standards and Reference Implementation (SRI)</strong> component provides platform services and community-based collaboration guidance related to the development, adoption, and implementation of the standards needed to achieve the overall implementation goals of the Translator system.</p> 
-      <p style={{textAlign: 'center'}}><img src="https://lh5.googleusercontent.com/iSfNjM2IonMBeXzyo4z6kxehnQ_MpZIJbOVQLmJ84KddHkGyoFGvmGp5s3axwOq0mpw=w2400" alt="Translator Architecture"/></p>
+      <p style={{textAlign: 'center'}}><img referrerPolicy="no-referrer" src="https://lh5.googleusercontent.com/iSfNjM2IonMBeXzyo4z6kxehnQ_MpZIJbOVQLmJ84KddHkGyoFGvmGp5s3axwOq0mpw=w2400" alt="Translator Architecture"/></p>
     </>
   );
 }

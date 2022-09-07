@@ -60,14 +60,29 @@ const FAQSidebar = ({articles}) => {
                           {
                             article.subArticles.map((subArticle, j) => {
                               let key = `${i}_${j}`;
+                              let isExtLinkSub = (subArticle.link) ? true : false;
+                              let linkSub = (subArticle.link) ? subArticle.link : `/${subArticle.slug}`;
                               return (             
                                 <li key={key} className={(subArticle.slug === activeSlug ? styles.active : '')}>
-                                  <NavLink 
-                                    to={`/${subArticle.slug}`} 
-                                    className={styles.navLink}
-                                    >
-                                    {subArticle.title}
-                                  </NavLink>
+                                  {isExtLinkSub && 
+                                    <a 
+                                      href={linkSub} 
+                                      className={styles.navLink}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      >
+                                      {subArticle.title}
+                                    </a>
+                                  }
+                                  {
+                                    !isExtLinkSub &&
+                                    <NavLink 
+                                      to={linkSub} 
+                                      className={styles.navLink}
+                                      >
+                                      {subArticle.title}
+                                    </NavLink>
+                                  }
                                 </li>       
                               )                   
                             })
