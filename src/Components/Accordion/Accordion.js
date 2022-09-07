@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 import styles from './Accordion.module.scss';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1=Down.svg"
 
-const Accordion = ({title, titleLink, navLink, children, expanded, accordionClass, panelClass, icon}) => {
+const Accordion = ({title, titleLink, navLink, extLink, children, expanded, accordionClass, panelClass, icon}) => {
 
   expanded = (expanded) ? true : false;
   const [isExpanded, setIsExpanded] = useState(expanded);
@@ -44,7 +44,21 @@ const Accordion = ({title, titleLink, navLink, children, expanded, accordionClas
             </NavLink>
           }
           {
-            !navLink &&
+            extLink &&
+            <a 
+              href={titleLink} 
+              target="_blank" 
+              rel="noreferrer"
+              className={styles.extLink}
+              >
+              {title}
+              <button className={`${styles.accordionButton}`} onClick={(e)=>{e.preventDefault(); handleToggle();}}>
+                {icon}
+              </button>
+            </a>
+          }
+          {
+            !navLink && !extLink &&
             <a href={titleLink}>{title}
               <button className={`${styles.accordionButton}`} onClick={(e)=>{e.preventDefault(); handleToggle();}}>
                 {icon}

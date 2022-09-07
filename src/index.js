@@ -17,6 +17,16 @@ import { Help } from './PageRoutes/Articles/Help';
 import { WhatIs } from './PageRoutes/Articles/WhatIs';
 import { HowItWorks } from './PageRoutes/Articles/HowItWorks';
 import { Evidence } from './PageRoutes/Articles/Evidence';
+import { Affiliates } from './PageRoutes/Articles/Affiliates';
+import { Kps } from './PageRoutes/Articles/Kps';
+import { Aras } from './PageRoutes/Articles/Aras';
+import { Ars } from './PageRoutes/Articles/Ars';
+import { Kgs } from './PageRoutes/Articles/Kgs';
+import { SmartAPI } from './PageRoutes/Articles/SmartAPI';
+import { Question } from './PageRoutes/Articles/Question';
+import { ResultsArticle } from './PageRoutes/Articles/ResultsArticle';
+import { SearchHistoryArticle } from './PageRoutes/Articles/SearchHistoryArticle';
+import { SendFeedbackArticle } from './PageRoutes/Articles/SendFeedbackArticle';
 import reportWebVitals from './reportWebVitals';
 import {Provider} from 'react-redux';
 import {store} from './Redux/store';
@@ -84,6 +94,14 @@ root.render(
             }
           />
           <Route  
+            path="affiliates-or-funding"
+            element={
+              <FAQPage title="Affiliated Organizations OR Funding Information">
+                <Affiliates />
+              </FAQPage>
+            }
+          />
+          <Route  
             path="how-it-works"
             element={
               <FAQPage title="How It Works">
@@ -92,10 +110,82 @@ root.render(
             }
           />
           <Route  
+            path="knowledge-providers"
+            element={
+              <FAQPage title="Knowledge Providers">
+                <Kps />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="autonomous-relay-agents"
+            element={
+              <FAQPage title="Autonomous Relay Agents">
+                <Aras />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="autonomous-relay-system"
+            element={
+              <FAQPage title="Autonomous Relay System">
+                <Ars />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="knowledge-graphs"
+            element={
+              <FAQPage title="Knowledge Graphs">
+                <Kgs />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="smartapi"
+            element={
+              <FAQPage title="SmartAPI">
+                <SmartAPI />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="forming-a-question"
+            element={
+              <FAQPage title="Forming a Question">
+                <Question />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="article-results"
+            element={
+              <FAQPage title="Results">
+                <ResultsArticle />
+              </FAQPage>
+            }
+          />
+          <Route  
             path="evidence"
             element={
               <FAQPage title="Evidence">
                 <Evidence />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="search-history"
+            element={
+              <FAQPage title="Search History">
+                <SearchHistoryArticle />
+              </FAQPage>
+            }
+          />
+          <Route  
+            path="send-feedback"
+            element={
+              <FAQPage title="Send Feedback">
+                <SendFeedbackArticle />
               </FAQPage>
             }
           />

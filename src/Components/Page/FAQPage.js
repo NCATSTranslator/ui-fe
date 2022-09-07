@@ -12,19 +12,19 @@ const FAQPage = ({title, children}) => {
     },
     {
       title: 'About Translator', 
-      slug:'about-translator',
+      link:'https://ncats.nih.gov/translator/about',
       subArticles: [
         {
           title: 'What is Translational Science?', 
-          slug:'what-is-translational-science'
+          link: 'https://ncats.nih.gov/training-education/translational-science-principles',
         },
         {
           title: 'The National Center for Advancing Translational Sciences', 
-          slug:'national-center'
+          link: 'https://ncats.nih.gov/about'
         },
         {
           title: 'Affiliated Organizations OR Funding Information', 
-          slug:'affiliates-or-funding'
+          slug: 'affiliates-or-funding'
         },
       ]
     },
@@ -34,27 +34,49 @@ const FAQPage = ({title, children}) => {
       subArticles: [
         {
           title: 'Knowledge Providers', 
-          slug:'kps'
+          slug:'knowledge-providers'
         },
         {
           title: 'Autonomous Relay Agents', 
-          slug:'aras'
+          slug:'autonomous-relay-agents'
         },
         {
           title: 'Autonomous Relay System', 
-          slug:'ars'
+          slug:'autonomous-relay-system'
+        },
+        {
+          title: 'Knowledge Graphs', 
+          slug:'knowledge-graphs'
+        },
+        {
+          title: 'SmartAPI', 
+          slug:'smartapi'
         },
       ]
     },
     {
+      title: 'Forming a Question', 
+      slug: 'forming-a-question',
+    },
+    {
       title: 'Results', 
       slug:'article-results',
-      subArticles: [
-        {
-          title: 'Evidence', 
-          slug:'evidence'
-        },
-      ]
+    },
+    {
+      title: 'Evidence', 
+      slug:'evidence'
+    },
+    {
+      title: 'Search History', 
+      slug:'search-history'
+    },
+    {
+      title: 'Send Feedback', 
+      slug:'send-feedback'
+    },
+    {
+      title: 'Security and Privacy', 
+      link:'https://ncats.nih.gov/privacy'
     },
   ]
 
@@ -66,7 +88,7 @@ const FAQPage = ({title, children}) => {
 
   return (
     <>
-      <div className={`container ${styles.faqContainer}`}>
+      <div className={`container faq-container ${styles.faqContainer}`}>
         <FAQSidebar articles={articles} />
         <div className="right">
           <h1 className="h5">{title}</h1>

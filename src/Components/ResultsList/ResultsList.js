@@ -473,6 +473,44 @@ const ResultsList = ({loading}) => {
     */
   }, [activeFilters, sortedResults]);
 
+  const displayLoadingButton = (
+    handleResultsRefresh, 
+    styles, 
+    isFetchingARAStatus, 
+    loadingButtonIcon, 
+    ResultsAvailableIcon) => {
+
+    if(freshRawResults === null && isFetchingARAStatus) {
+      return(
+        <div className={styles.loadingButtonContainer}>
+          <button className={`${styles.loadingButton} ${styles.inactive}`}>
+            <img src={loadingButtonIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
+            Loading
+          </button>
+        </div>
+      )
+    }
+  
+    if(freshRawResults !== null) {
+      return (
+        <div className={styles.loadingButtonContainer}>
+          <button onClick={()=>{handleResultsRefresh()}} className={`${styles.loadingButton} ${styles.active}`}>
+            {
+              isFetchingARAStatus && 
+              <img src={loadingButtonIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
+            }
+            {
+              !isFetchingARAStatus &&
+              ResultsAvailableIcon
+            }
+            Load New Results
+          </button>
+          <p className={styles.refreshDisclaimer}>Please note that refreshing this page may cause the order of answers to change.<br/>Results you have already viewed may also be updated with new data.</p>
+        </div>
+      )
+    }
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <EvidenceModal 
@@ -526,6 +564,9 @@ const ResultsList = ({loading}) => {
                     </p>
                   </div>
                   <div className={styles.right}>
+                    {
+                      displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingButtonIcon, <ResultsAvailableIcon/>)
+                    }
                     {
                       isFetchingARAStatus && 
                       <img src={loadingIcon} className={styles.loadingIcon} alt="more results loading icon"/>
@@ -655,30 +696,7 @@ const ResultsList = ({loading}) => {
                 </div>
               }
               {
-                freshRawResults === null && isFetchingARAStatus &&
-                <div className={styles.loadingButtonContainer}>
-                  <button className={`${styles.loadingButton} ${styles.inactive}`}>
-                    <img src={loadingButtonIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-                    Loading
-                  </button>
-                </div>
-              }
-              {
-                freshRawResults !== null && 
-                <div className={styles.loadingButtonContainer}>
-                  <button onClick={()=>{handleResultsRefresh()}} className={`${styles.loadingButton} ${styles.active}`}>
-                    {
-                      isFetchingARAStatus && 
-                      <img src={loadingButtonIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-                    }
-                    {
-                      !isFetchingARAStatus &&
-                      <ResultsAvailableIcon/>
-                    }
-                    Load New Results
-                  </button>
-                  <p className={styles.refreshDisclaimer}>Please note that refreshing this page may cause the order of answers to change.<br/>Results you have already viewed may also be updated with new data.</p>
-                </div>
+                displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingButtonIcon, <ResultsAvailableIcon/>)
               }
             </>
           }

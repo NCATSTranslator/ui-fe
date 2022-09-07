@@ -23,26 +23,40 @@ const FAQSidebar = ({articles}) => {
           <ul className={styles.links}>
             {
               articles.map((article, i)=> {
-                console.log(article)
+                let isExtLink = (article.link) ? true : false;
+                let link = (article.link) ? article.link : `/${article.slug}`;
                 return (
                   <li key={i} className={(article.slug === activeSlug ? styles.active : '')}>
                     {
-                      !article.subArticles && 
+                      !article.subArticles && !isExtLink &&
                       <NavLink 
-                        to={`/${article.slug}`} 
+                        to={`${link}`} 
                         className={styles.navLink}
                         >
                         {article.title}
                       </NavLink>
                     }
                     {
+                      !article.subArticles && isExtLink &&
+                      <a 
+                        href={link} 
+                        className={styles.navLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        >
+                        {article.title}
+                      </a>
+                    }
+                    {
                       article.subArticles && 
                       <Accordion 
                         title={article.title} 
-                        titleLink={`/${article.slug}`}
-                        navLink
+                        titleLink={link}
+                        navLink={!isExtLink}
+                        extLink={isExtLink}
                         accordionClass={styles.accordion}
                         panelClass={styles.accordionPanel}
+                        expanded={article.subArticles.find(subArticle => subArticle.slug === activeSlug)}
                         >
                         <ul className={`${styles.links} ${styles.subLinks}`}>
                           {

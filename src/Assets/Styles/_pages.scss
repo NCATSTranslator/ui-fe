@@ -57,3 +57,14 @@
     }
   }
 }
+
+.faq-container {
+  .right {
+    h1.h5 {
+      margin: 0;
+    }
+    p.caption:first-of-type {
+      margin-bottom: $m;
+    }
+  } 
+}
