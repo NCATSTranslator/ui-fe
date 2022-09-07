@@ -10,7 +10,6 @@ import Four from './PageRoutes/404/404';
 import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
-import Contact from './PageRoutes/Contact/Contact';
 import { Help } from './PageRoutes/Articles/Help';
 import { WhatIs } from './PageRoutes/Articles/WhatIs';
 import { HowItWorks } from './PageRoutes/Articles/HowItWorks';
@@ -48,14 +47,6 @@ root.render(
             element={
               <Page title="Terms of Use">
                 <Terms />
-              </Page>
-            }
-          />
-          <Route  
-            path="contact-us"
-            element={
-              <Page title="Contact Us">
-                <Contact />
               </Page>
             }
           />

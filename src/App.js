@@ -36,9 +36,6 @@ const App = () => {
             rel="noreferrer"
             target="_blank"
           >About Translator</a>
-          <NavLink to="/contact-us" 
-            className={({isActive}) => {return (isActive) ? 'active' : '' }}
-          >Contact Us</NavLink>
           <NavLink to="/terms-of-use" 
             className={({isActive}) => {return (isActive) ? 'active' : '' }}
           >Terms of Use</NavLink>
