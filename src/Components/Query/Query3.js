@@ -249,11 +249,17 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
           {!isResults &&
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>
-              <div className={styles.exampleList}>
+              {/* <div className={styles.exampleList}>
                 <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'UMLS:C0580546', label:'Abnormal Blood Glucose'})}>Abnormal Blood Glucose</button>
                 <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0018975', label:'Neurofibromatosis Type I'})}>Neurofibromatosis Type I</button>
                 <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0004975', label:'Alzheimer\'s'})}>Alzheimer's</button>
                 <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0018997', label:'Noonan Syndrome'})}>Noonan Syndrome</button>
+              </div> */}
+              <div className={styles.exampleList}>
+                <a className={styles.button} href="/results?q=9c06ecb7-867d-4a42-a207-3f2104b2e76c">Abnormal Blood Glucose</a>
+                <a className={styles.button} href="/results?q=74f8fee4-8965-4019-8657-aa65ee7b2850">Neurofibromatosis Type I</a>
+                <a className={styles.button} href="/results?q=6752ab77-ff70-4805-8f7c-c55d078b0a50">Alzheimer's</a>
+                <a className={styles.button} href="/results?q=6c6b13ab-31de-4ec0-8400-7729427ba0ca">Noonan Syndrome</a>
               </div>
             </div>
           }

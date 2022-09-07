@@ -52,6 +52,23 @@
         background-color: $white;
         color: $purpleOne;
         margin: 0 $s 0 0;
+        align-items: center;
+        background-color: $white;
+        border-radius: 5px;
+        color: $purpleOne;
+        cursor: pointer;
+        display: inline-flex;
+        font-size: 16px;
+        font-weight: 700;
+        justify-content: center;
+        line-height: 1;
+        padding: 10px 8px;
+        text-decoration: none;
+        transition: box-shadow .25s ease;
+        box-shadow: $dropShadow;
+        &:hover {
+          box-shadow: $dropShadowHover;
+        }
       }
     }
   }
