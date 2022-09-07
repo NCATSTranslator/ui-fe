@@ -101,7 +101,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
         "value": ""
       },
       {
-        "name": "Treat",
+        "name": "May Treat",
         "type": "action",
         "category": "treats"
       },
