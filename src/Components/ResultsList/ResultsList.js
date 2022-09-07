@@ -157,18 +157,21 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
+        let fetchResults = false;
         if(data.data.aras.length > returnedARAs.aras.length) {
           console.log("New ARA returned, fetching new results...");
           console.log(`Old ARAs: ${returnedARAs.aras}, New ARAs: ${data.data.aras}`);
           setReturnedARAs(data.data);
-          setIsFetchingResults(true);
+          fetchResults = true;
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
         }
-        if(data.status === 'success' ) {
+        if(data.status === 'success') {
           setIsFetchingARAStatus(false);
-          setIsLoading(false);
+          fetchResults = true;
         }
+        if(fetchResults)
+          setIsFetchingResults(true);
       })
       .catch((error) => {
         console.log(error)
@@ -207,6 +210,7 @@ const ResultsList = ({loading}) => {
           setRawResults(data);
         }
         setIsFetchingResults(false);
+        setIsLoading(false);
         // setIsError((data.status === 'error'));
       })
       .catch((error) => {

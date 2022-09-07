@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom';
+import { NavigationType, useNavigate } from 'react-router-dom';
 import QueryBar from "../QueryBar/QueryBar";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
@@ -62,6 +62,9 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   // when a user selected a query item, or if the query item is manually updated when /creative_results returns
   // the final name for the submitted disease
   const [readyForSubmission, setReadyForSubmission] = useState(false);
+
+  // String, used to set navigation url for example disease buttons
+  const [presetURL, setPresetURL] = useState(false);
 
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = (e) => {
@@ -221,6 +224,19 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
     }
   }, [navigatingFromHistory]);
 
+  useEffect(() => {
+    console.log(selectedDisease)
+    console.log(presetURL)
+    if(presetURL) {
+      const timer = setTimeout(() => {
+        navigate(presetURL);
+      }, 100 );
+      return () => {
+        clearTimeout(timer);
+      }
+    }
+  }, [selectedDisease, presetURL]);
+
   return (
     <>
       <div className={`${styles.queryThree}`} >
@@ -255,11 +271,44 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
                 <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0004975', label:'Alzheimer\'s'})}>Alzheimer's</button>
                 <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0018997', label:'Noonan Syndrome'})}>Noonan Syndrome</button>
               </div> */}
+    
               <div className={styles.exampleList}>
-                <a className={styles.button} href="/results?q=9c06ecb7-867d-4a42-a207-3f2104b2e76c">Abnormal Blood Glucose</a>
-                <a className={styles.button} href="/results?q=74f8fee4-8965-4019-8657-aa65ee7b2850">Neurofibromatosis Type I</a>
-                <a className={styles.button} href="/results?q=6752ab77-ff70-4805-8f7c-c55d078b0a50">Alzheimer's</a>
-                <a className={styles.button} href="/results?q=6c6b13ab-31de-4ec0-8400-7729427ba0ca">Noonan Syndrome</a>
+                <button 
+                  className={styles.button} 
+                  onClick={(e)=>{ 
+                    setSelectedDisease({ id: '0000', label:'Abnormal Blood Glucose'}); 
+                    setPresetURL(e.target.dataset.url);
+                  }} 
+                  data-url="/results?q=9c06ecb7-867d-4a42-a207-3f2104b2e76c"
+                  >Abnormal Blood Glucose
+                </button>
+                <button 
+                  className={styles.button}
+                  onClick={(e)=>{ 
+                    setSelectedDisease({ id: '0000', label:'Neurofibromatosis Type I'}); 
+                    setPresetURL(e.target.dataset.url);
+                  }}
+                  data-url="/results?q=74f8fee4-8965-4019-8657-aa65ee7b2850"
+                  >Neurofibromatosis Type I
+                </button>
+                <button 
+                  className={styles.button}
+                  onClick={(e)=>{ 
+                    setSelectedDisease({ id: '0000', label:'Alzheimer\'s'}); 
+                    setPresetURL(e.target.dataset.url);
+                  }}
+                  data-url="/results?q=6752ab77-ff70-4805-8f7c-c55d078b0a50"
+                  >Alzheimer's
+                </button>
+                <button 
+                  className={styles.button}
+                  onClick={(e)=>{ 
+                    setSelectedDisease({ id: '0000', label:'Noonan Syndrome'}); 
+                    setPresetURL(e.target.dataset.url);
+                  }}
+                  data-url="/results?q=6c6b13ab-31de-4ec0-8400-7729427ba0ca"
+                  >Noonan Syndrome
+                </button>
               </div>
             </div>
           }
