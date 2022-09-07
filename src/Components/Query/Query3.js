@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
-import { NavigationType, useNavigate } from 'react-router-dom';
+import { NavigationType, useNavigate, useSearchParams } from 'react-router-dom';
 import QueryBar from "../QueryBar/QueryBar";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
@@ -18,6 +18,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // eslint-disable-next-line
   const navigatingFromHistory = ( new URLSearchParams(window.location.search).get("results") !== null) ? true : false;
@@ -201,10 +202,11 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
           }
           if(window.location.href.includes('results')) {
             // If we're submitting from the results page, reload the query with the newly returned queryID
+            setSearchParams('?loading=true');
             window.location.reload();
           } else {
             // Otherwise, navigate to the results page and set loading to true
-            navigate('/results?loading=true')
+            navigate('/results?loading=true');
           }
         })
         .catch((error) => {

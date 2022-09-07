@@ -202,7 +202,7 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        // if we've already gotten results before, set newRawResults instead to 
+        // if we've already gotten results before, set freshRawResults instead to 
         // prevent original results from being overwritten
         if(formattedResults.length > 0) {
           setFreshRawResults(data);
@@ -210,8 +210,6 @@ const ResultsList = ({loading}) => {
           setRawResults(data);
         }
         setIsFetchingResults(false);
-        setIsLoading(false);
-        // setIsError((data.status === 'error'));
       })
       .catch((error) => {
         console.log(error)
