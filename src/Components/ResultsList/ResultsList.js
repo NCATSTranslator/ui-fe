@@ -19,7 +19,6 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighte
 import { getSummarizedResults } from "../../Utilities/resultsFunctions";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import { cloneDeep, isEqual } from "lodash";
-import loadingButtonIcon from '../../Assets/Images/Loading/loading-white.png';
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
@@ -477,14 +476,15 @@ const ResultsList = ({loading}) => {
     handleResultsRefresh, 
     styles, 
     isFetchingARAStatus, 
-    loadingButtonIcon, 
-    ResultsAvailableIcon) => {
+    loadingIcon, 
+    ResultsAvailableIcon,
+    showDisclaimer) => {
 
     if(freshRawResults === null && isFetchingARAStatus) {
       return(
         <div className={styles.loadingButtonContainer}>
           <button className={`${styles.loadingButton} ${styles.inactive}`}>
-            <img src={loadingButtonIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
+            <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
             Loading
           </button>
         </div>
@@ -497,7 +497,7 @@ const ResultsList = ({loading}) => {
           <button onClick={()=>{handleResultsRefresh()}} className={`${styles.loadingButton} ${styles.active}`}>
             {
               isFetchingARAStatus && 
-              <img src={loadingButtonIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
+              <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
             }
             {
               !isFetchingARAStatus &&
@@ -505,7 +505,10 @@ const ResultsList = ({loading}) => {
             }
             Load New Results
           </button>
-          <p className={styles.refreshDisclaimer}>Please note that refreshing this page may cause the order of answers to change.<br/>Results you have already viewed may also be updated with new data.</p>
+          {
+            showDisclaimer && 
+            <p className={styles.refreshDisclaimer}>Please note that refreshing this page may cause the order of answers to change.<br/>Results you have already viewed may also be updated with new data.</p>
+          }
         </div>
       )
     }
@@ -565,12 +568,12 @@ const ResultsList = ({loading}) => {
                   </div>
                   <div className={styles.right}>
                     {
-                      displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingButtonIcon, <ResultsAvailableIcon/>)
+                      displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingIcon, <ResultsAvailableIcon/>, false)
                     }
-                    {
+                    {/* {
                       isFetchingARAStatus && 
                       <img src={loadingIcon} className={styles.loadingIcon} alt="more results loading icon"/>
-                    }
+                    } */}
                     {
                       !isFetchingARAStatus && 
                       <CompleteIcon/>
@@ -696,7 +699,7 @@ const ResultsList = ({loading}) => {
                 </div>
               }
               {
-                displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingButtonIcon, <ResultsAvailableIcon/>)
+                displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingIcon, <ResultsAvailableIcon/>, true)
               }
             </>
           }
