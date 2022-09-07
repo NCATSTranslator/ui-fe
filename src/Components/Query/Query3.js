@@ -225,8 +225,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   }, [navigatingFromHistory]);
 
   useEffect(() => {
-    console.log(selectedDisease)
-    console.log(presetURL)
     if(presetURL) {
       const timer = setTimeout(() => {
         navigate(presetURL);
