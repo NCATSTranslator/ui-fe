@@ -213,6 +213,9 @@ const ResultsList = ({loading}) => {
       })
       .catch((error) => {
         console.log(error)
+        if(!isFetchingARAStatus) {
+          setIsLoading(false);
+        }
       });
   }, { 
     // refetchInterval: 7000,
