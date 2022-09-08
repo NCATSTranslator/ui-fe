@@ -23,8 +23,8 @@ const FAQPage = ({title, children}) => {
           link: 'https://ncats.nih.gov/about'
         },
         {
-          title: 'Affiliated Organizations OR Funding Information', 
-          slug: 'affiliates-or-funding'
+          title: 'Funding Information', 
+          slug: 'funding-information'
         },
       ]
     },

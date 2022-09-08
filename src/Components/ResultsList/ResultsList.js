@@ -251,10 +251,14 @@ const ResultsList = ({loading}) => {
   
   useEffect(() => {
     // we have results to show, set isLoading to false
-    if (formattedResults.length > 0 && rawResults.status !== 'error') {
+    if (formattedResults.length > 0 && rawResults.status !== 'error') 
       setIsLoading(false);
-    }
-  }, [formattedResults, rawResults]);
+    
+    // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
+    if(rawResults && rawResults.data.results.length === 0 && !isFetchingARAStatus)
+      setIsLoading(false);
+
+  }, [formattedResults, rawResults, isFetchingARAStatus]);
 
   useEffect(()=>{
     if(isError) {
