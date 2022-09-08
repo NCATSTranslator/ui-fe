@@ -18,6 +18,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  // eslint-disable-next-line
   const [searchParams, setSearchParams] = useSearchParams();
 
   // eslint-disable-next-line
@@ -89,7 +90,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
     }
 
     setIsValidSubmission(true);
-  },[selectedDisease])
+  }, [selectedDisease])
 
   // Event handler for form submission
   const handleSubmission = useCallback(() => {
@@ -126,10 +127,11 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
     if(selectedDisease !== null) {
       setInputText(selectedDisease.label);
       updateQueryItems(selectedDisease.label);
-      if(readyForSubmission) {
-        setReadyForSubmission(false);
-        handleSubmission();
-      }
+      // Uncomment the below to re-enable click to run query
+      // if(readyForSubmission) {
+      //   setReadyForSubmission(false);
+      //   handleSubmission();
+      // }
     }
     
   }, [selectedDisease, readyForSubmission, handleSubmission]);
