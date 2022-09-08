@@ -6,7 +6,7 @@ import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './QueryBar.module.scss';
 
-const QueryBar = ({handleSubmission, handleChange, isLoading, value, 
+const QueryBar = ({handleSubmission, handleChange, isDisabled, value, 
   autocompleteItems, autocompleteLoading, handleItemClick}) => {
 
   const [submissionDisabled, setSubmissionDisabled] = useState(false);
@@ -14,8 +14,8 @@ const QueryBar = ({handleSubmission, handleChange, isLoading, value,
   value = (value !== undefined && value !== null) ? value : '';
 
   useEffect(() => {
-    setSubmissionDisabled(isLoading);
-  }, [isLoading]);
+    setSubmissionDisabled(isDisabled);
+  }, [isDisabled]);
 
   return (
     <form 
