@@ -93,7 +93,7 @@ const QueryHistoryList = () => {
       <div className={styles.searchBarContainer}>
         <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form}>
           <TextInput 
-            placeholder="Search by Date or Subject" 
+            placeholder="Search by Subject" 
             handleChange={(e)=>handleSearch(e)} 
             className={styles.input}
             size=""

@@ -67,9 +67,9 @@ root.render(
             }
           />
           <Route  
-            path="affiliates-or-funding"
+            path="funding-information"
             element={
-              <FAQPage title="Affiliated Organizations OR Funding Information">
+              <FAQPage title="Funding Information">
                 <Affiliates />
               </FAQPage>
             }

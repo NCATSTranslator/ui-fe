@@ -202,6 +202,10 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
+        if(data.status === 'error') {
+          setIsError(true);
+          setIsFetchingARAStatus(false);
+        }
         // if we've already gotten results before, set freshRawResults instead to 
         // prevent original results from being overwritten
         if(formattedResults.length > 0) {
@@ -247,10 +251,20 @@ const ResultsList = ({loading}) => {
   
   useEffect(() => {
     // we have results to show, set isLoading to false
-    if (formattedResults.length > 0 && rawResults.status !== 'error') {
+    if (formattedResults.length > 0 && rawResults.status !== 'error') 
+      setIsLoading(false);
+    
+    // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
+    if(rawResults && rawResults.data.results.length === 0 && !isFetchingARAStatus)
+      setIsLoading(false);
+
+  }, [formattedResults, rawResults, isFetchingARAStatus]);
+
+  useEffect(()=>{
+    if(isError) {
       setIsLoading(false);
     }
-  }, [formattedResults, rawResults]);
+  }, [isError]);
 
 
   // Click handler for item select checkboxes 
@@ -482,7 +496,7 @@ const ResultsList = ({loading}) => {
     ResultsAvailableIcon,
     showDisclaimer) => {
 
-    if(freshRawResults === null && isFetchingARAStatus) {
+    if(freshRawResults === null && (isFetchingARAStatus || isFetchingResults)) {
       return(
         <div className={styles.loadingButtonContainer}>
           <button className={`${styles.loadingButton} ${styles.inactive}`}>
@@ -498,7 +512,7 @@ const ResultsList = ({loading}) => {
         <div className={styles.loadingButtonContainer}>
           <button onClick={()=>{handleResultsRefresh()}} className={`${styles.loadingButton} ${styles.active}`}>
             {
-              isFetchingARAStatus && 
+              (isFetchingARAStatus) &&
               <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
             }
             {
@@ -572,12 +586,8 @@ const ResultsList = ({loading}) => {
                     {
                       displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingIcon, <ResultsAvailableIcon/>, false)
                     }
-                    {/* {
-                      isFetchingARAStatus && 
-                      <img src={loadingIcon} className={styles.loadingIcon} alt="more results loading icon"/>
-                    } */}
                     {
-                      !isFetchingARAStatus && 
+                      !isFetchingARAStatus && !isFetchingResults &&
                       <CompleteIcon/>
                     }
                     <button 

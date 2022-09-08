@@ -18,6 +18,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  // eslint-disable-next-line
   const [searchParams, setSearchParams] = useSearchParams();
 
   // eslint-disable-next-line
@@ -78,6 +79,8 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
     setIsError(false);
     setSelectedDisease(disease);
     setReadyForSubmission(true);
+    if(autocompleteItems) 
+      setAutoCompleteItems([]);
   }
 
   // Validation function for submission
@@ -89,7 +92,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
     }
 
     setIsValidSubmission(true);
-  },[selectedDisease])
+  }, [selectedDisease])
 
   // Event handler for form submission
   const handleSubmission = useCallback(() => {
@@ -126,10 +129,11 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
     if(selectedDisease !== null) {
       setInputText(selectedDisease.label);
       updateQueryItems(selectedDisease.label);
-      if(readyForSubmission) {
-        setReadyForSubmission(false);
-        handleSubmission();
-      }
+      // Uncomment the below to re-enable click to run query
+      // if(readyForSubmission) {
+      //   setReadyForSubmission(false);
+      //   handleSubmission();
+      // }
     }
     
   }, [selectedDisease, readyForSubmission, handleSubmission]);
@@ -252,7 +256,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
             <QueryBar
               handleSubmission={handleSubmission}
               handleChange={handleQueryItemChange}
-              isLoading={isLoading}
+              isDisabled={isLoading}
               value={inputText}
               autocompleteItems={autocompleteItems}
               autocompleteLoading={loadingAutocomplete}
@@ -276,20 +280,20 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
                 <button 
                   className={styles.button} 
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: '0000', label:'Abnormal Blood Glucose'}); 
+                    setSelectedDisease({ id: '0000', label:'Heart Disease'}); 
                     setPresetURL(e.target.dataset.url);
                   }} 
-                  data-url="/results?q=9c06ecb7-867d-4a42-a207-3f2104b2e76c"
-                  >Abnormal Blood Glucose
+                  data-url="/results?q=6d7ce863-e4d3-4cf8-8a38-3b7191d17964"
+                  >Heart Disease
                 </button>
                 <button 
                   className={styles.button}
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: '0000', label:'Neurofibromatosis Type I'}); 
+                    setSelectedDisease({ id: '0000', label:'Type 2 Diabetes'}); 
                     setPresetURL(e.target.dataset.url);
                   }}
-                  data-url="/results?q=74f8fee4-8965-4019-8657-aa65ee7b2850"
-                  >Neurofibromatosis Type I
+                  data-url="/results?q=26394fad-bfd9-4e32-bb90-ef9d5044f593"
+                  >Type 2 Diabetes
                 </button>
                 <button 
                   className={styles.button}
@@ -303,11 +307,20 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
                 <button 
                   className={styles.button}
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: '0000', label:'Noonan Syndrome'}); 
+                    setSelectedDisease({ id: '0000', label:'Multiple Sclerosis'}); 
                     setPresetURL(e.target.dataset.url);
                   }}
-                  data-url="/results?q=6c6b13ab-31de-4ec0-8400-7729427ba0ca"
-                  >Noonan Syndrome
+                  data-url="/results?q=5c255e94-16d0-4668-8957-45daa995566b"
+                  >Multiple Sclerosis
+                </button>
+                <button 
+                  className={styles.button}
+                  onClick={(e)=>{ 
+                    setSelectedDisease({ id: '0000', label:'NGLY1-Deficiency'}); 
+                    setPresetURL(e.target.dataset.url);
+                  }}
+                  data-url="/results?q=a333d77d-3f53-4b6c-a311-d3dc067b29a2"
+                  >NGLY1-Deficiency
                 </button>
               </div>
             </div>
