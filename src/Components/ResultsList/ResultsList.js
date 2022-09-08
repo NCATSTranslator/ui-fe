@@ -496,7 +496,7 @@ const ResultsList = ({loading}) => {
     ResultsAvailableIcon,
     showDisclaimer) => {
 
-    if(freshRawResults === null && isFetchingARAStatus) {
+    if(freshRawResults === null && (isFetchingARAStatus || isFetchingResults)) {
       return(
         <div className={styles.loadingButtonContainer}>
           <button className={`${styles.loadingButton} ${styles.inactive}`}>
@@ -512,7 +512,7 @@ const ResultsList = ({loading}) => {
         <div className={styles.loadingButtonContainer}>
           <button onClick={()=>{handleResultsRefresh()}} className={`${styles.loadingButton} ${styles.active}`}>
             {
-              isFetchingARAStatus && 
+              (isFetchingARAStatus) &&
               <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
             }
             {
@@ -586,12 +586,8 @@ const ResultsList = ({loading}) => {
                     {
                       displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingIcon, <ResultsAvailableIcon/>, false)
                     }
-                    {/* {
-                      isFetchingARAStatus && 
-                      <img src={loadingIcon} className={styles.loadingIcon} alt="more results loading icon"/>
-                    } */}
                     {
-                      !isFetchingARAStatus && 
+                      !isFetchingARAStatus && !isFetchingResults &&
                       <CompleteIcon/>
                     }
                     <button 
