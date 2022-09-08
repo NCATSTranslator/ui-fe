@@ -202,6 +202,10 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log(data);
+        if(data.status === 'error') {
+          setIsError(true);
+          setIsFetchingARAStatus(false);
+        }
         // if we've already gotten results before, set freshRawResults instead to 
         // prevent original results from being overwritten
         if(formattedResults.length > 0) {
@@ -213,9 +217,6 @@ const ResultsList = ({loading}) => {
       })
       .catch((error) => {
         console.log(error)
-        if(!isFetchingARAStatus) {
-          setIsLoading(false);
-        }
       });
   }, { 
     // refetchInterval: 7000,
@@ -254,6 +255,12 @@ const ResultsList = ({loading}) => {
       setIsLoading(false);
     }
   }, [formattedResults, rawResults]);
+
+  useEffect(()=>{
+    if(isError) {
+      setIsLoading(false);
+    }
+  }, [isError]);
 
 
   // Click handler for item select checkboxes 
