@@ -98,6 +98,8 @@ const ResultsList = ({loading}) => {
   const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
   // Bool, is fda tooltip currently active
   const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
+  // Bool, have the initial results been sorted yet
+  const [presorted, setPresorted] = useState(false);
 
   /*
     Obj, {label: ''}, used to set input text, determined by results object
@@ -248,6 +250,14 @@ const ResultsList = ({loading}) => {
       setSortedResults(newResults);
 
   }, [rawResults, presetDisease]);
+
+  useEffect(() => {
+    if(formattedResults.length && !presorted) {
+      console.log('Performing initial sorting by evidence High->Low...');
+      handleSort('evidenceHighLow');
+      setPresorted(true);
+    }
+  }, [formattedResults, presorted]);
   
   useEffect(() => {
     // we have results to show, set isLoading to false
@@ -373,7 +383,6 @@ const ResultsList = ({loading}) => {
   // Handle the sorting 
   const handleSort = (sortName) => {
     let newSortedResults = cloneDeep(sortedResults);
-    console.log(newSortedResults);
     switch (sortName) {
       case 'nameLowHigh':
         newSortedResults = sortNameLowHigh(newSortedResults);
