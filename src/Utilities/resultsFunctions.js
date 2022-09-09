@@ -105,7 +105,7 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     }
     newSummarizedResults.push(formattedItem);
     if(presetDisease === null) {
-      setPresetDisease({label: objectNodeName});
+      setPresetDisease({id: item.object, label: objectNodeName});
     }
   }
   return newSummarizedResults;
