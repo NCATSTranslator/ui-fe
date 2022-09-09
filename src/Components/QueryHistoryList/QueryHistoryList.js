@@ -40,15 +40,12 @@ const QueryHistoryList = () => {
   }
 
   const handleSearch = (value) => {
-    console.log(value);
     queryHistoryState.forEach(element => {
-      console.log(element)
     });
     setFilteredQueryHistoryState(queryHistoryState.filter((item) => {
       let include = false;
       item.items.forEach((element) => {
         if(element.name.toLowerCase().includes(value.toLowerCase())) {
-          console.log(`including ${element.name}`)
           include = true;
         }
       })

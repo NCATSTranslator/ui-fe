@@ -87,5 +87,34 @@
         text-decoration: underline;
       }
     }
+    svg {
+      circle {
+        stroke: $purpleOne; 
+      }
+      path {
+        fill: $purpleOne; 
+      }
+    }
+  }
+  .monarchLink {
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+    svg {
+      margin-left: 4px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+  .curieContainer {
+    margin-bottom: 4px;
+    .curieLabel {
+      margin: 0 4px 4px 0;
+    }
+    .curie {
+      margin-bottom: 0;
+      font-weight: 700;
+      font-size: 14px;
+    }
   }
 }

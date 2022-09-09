@@ -11,6 +11,7 @@ import isEqual from 'lodash/isEqual';
 import _ from "lodash";
 import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
+import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import styles from './Query3.module.scss';
 
 const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
@@ -78,6 +79,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   const handleDiseaseSelection = (disease) => {
     setIsError(false);
     setSelectedDisease(disease);
+    console.log(disease);
     setReadyForSubmission(true);
     if(autocompleteItems) 
       setAutoCompleteItems([]);
@@ -263,9 +265,22 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
               handleItemClick={handleDiseaseSelection}
             />
           </OutsideClickHandler>
+          {
+            isResults && selectedDisease && selectedDisease.id &&
+            <p className={styles.needHelp}>
+              <a 
+                href={`https://monarchinitiative.org/disease/${selectedDisease.id}`} 
+                target="_blank" 
+                rel="noreferrer" 
+                className={styles.monarchLink}
+                >View this disease on Monarch Initiative<ExternalLink/>
+              </a>
+            </p>
+          }
           <p className={styles.needHelp}>
             <a href="/help" rel="noreferrer " target="_blank"><Question/> Need Help?</a>
           </p>
+            
           {!isResults &&
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>
@@ -280,7 +295,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
                 <button 
                   className={styles.button} 
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: '0000', label:'Heart Disease'}); 
+                    setSelectedDisease({ id: 'MONDO:0005267', label:'Heart Disease'}); 
                     setPresetURL(e.target.dataset.url);
                   }} 
                   data-url="/results?q=6d7ce863-e4d3-4cf8-8a38-3b7191d17964"
@@ -289,7 +304,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
                 <button 
                   className={styles.button}
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: '0000', label:'Type 2 Diabetes'}); 
+                    setSelectedDisease({ id: 'MONDO:0005148', label:'Type 2 Diabetes'}); 
                     setPresetURL(e.target.dataset.url);
                   }}
                   data-url="/results?q=26394fad-bfd9-4e32-bb90-ef9d5044f593"
@@ -298,7 +313,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
                 <button 
                   className={styles.button}
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: '0000', label:'Alzheimer\'s'}); 
+                    setSelectedDisease({ id: 'MONDO:0004975', label:'Alzheimer\'s'}); 
                     setPresetURL(e.target.dataset.url);
                   }}
                   data-url="/results?q=6752ab77-ff70-4805-8f7c-c55d078b0a50"
@@ -307,7 +322,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
                 <button 
                   className={styles.button}
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: '0000', label:'Multiple Sclerosis'}); 
+                    setSelectedDisease({ id: 'MONDO:0005301', label:'Multiple Sclerosis'}); 
                     setPresetURL(e.target.dataset.url);
                   }}
                   data-url="/results?q=5c255e94-16d0-4668-8957-45daa995566b"
@@ -316,7 +331,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
                 <button 
                   className={styles.button}
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: '0000', label:'NGLY1-Deficiency'}); 
+                    setSelectedDisease({ id: 'MONDO:0014109', label:'NGLY1-Deficiency'}); 
                     setPresetURL(e.target.dataset.url);
                   }}
                   data-url="/results?q=a333d77d-3f53-4b6c-a311-d3dc067b29a2"
