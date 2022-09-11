@@ -231,7 +231,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
             <FileInput
               buttonLabel="Browse Files"
               size="l"
-              fileTypes=".jpg,.jpeg"
+              fileTypes=".png,.jpg,.jpeg"
               handleChange={(files)=>{setCurrentScreenshots(files);}}
             />
             <Button type="submit" size="l" disabled={errorActive}>Send</Button>
