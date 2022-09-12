@@ -45,6 +45,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
       // onload add the base64 string to the array of formatted screenshots...
       reader.onload = () => {
         baseString = reader.result.replace("data:image/jpeg;base64,", "");
+        baseString = reader.result.replace("data:image/png;base64,", "");
         setBase64Screenshots((state) => [...state, baseString]);
       };
       return baseString;
