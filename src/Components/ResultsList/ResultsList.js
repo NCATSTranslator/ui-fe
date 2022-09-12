@@ -314,7 +314,7 @@ const ResultsList = ({loading}) => {
   // Click handler for opening the evidence modal and populating the evidence
   const activateEvidence = (evidence, edgesRepresented) => {
     if(edgesRepresented) {
-      setEvidenceTitle(`Showing results for:`)
+      setEvidenceTitle(`Showing evidence for:`)
       setEvidenceEdges(edgesRepresented);
     } else {
       setEvidenceTitle('All Evidence');
