@@ -57,7 +57,7 @@ export const getEdgeByID = (id, results) => {
 export const getFormattedPaths = (rawPathIds, results) => {
   let formattedPaths = [];
   for(const id of rawPathIds) {
-    let formattedPath = results.paths[id];
+    let formattedPath = cloneDeep(results.paths[id]);
     if(formattedPath) {
       for(let i = 0; i < formattedPath.subgraph.length; i++) {
         if(i % 2 === 0) {
