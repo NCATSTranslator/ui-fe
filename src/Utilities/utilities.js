@@ -111,5 +111,10 @@ export const validateEmail = (email) => {
 export const formatBiolinkPredicate = (string) => {
   // remove 'biolink:' from the type, then add spaces before each capital letter
   // then trim the leading space and replace any underlines with spaces
-  return(string.replace('biolink:', '').replace(/([A-Z])/g, ' $1').trim()).replaceAll('_', ' ');
+  return(string.replace('biolink:', '')
+    .replace(/([A-Z])/g, ' $1').trim())
+    .replaceAll('_', ' ')
+    .replaceAll('entity', '')
+    .replaceAll('condition', '')
+    .replaceAll('gene', '');
 }
