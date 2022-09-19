@@ -7,6 +7,7 @@ import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import ShareModal from "../Modals/ShareModal";
 import Tooltip from "../Tooltip/Tooltip";
+import Select from "../FormFields/Select";
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux';
@@ -100,14 +101,12 @@ const ResultsList = ({loading}) => {
   const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
   // Bool, have the initial results been sorted yet
   const [presorted, setPresorted] = useState(false);
-
-  /*
-    Obj, {label: ''}, used to set input text, determined by results object
-  */ 
+  // Obj, {label: ''}, used to set input text, determined by results object
   const [presetDisease, setPresetDisease] = useState(null);
-
+  // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
+  // handler for closing share modal
   const handleShareModalClose = () => {
     setShareModalOpen(false);
   }
@@ -115,7 +114,8 @@ const ResultsList = ({loading}) => {
   // Initialize queryClient for React Query to fetch results
   const queryClient = new QueryClient();
   // Int, how many items per page
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [newItemsPerPage, setNewItemsPerPage] = useState(null);
   
   // Handle Page Offset
   useEffect(() => {    
@@ -497,6 +497,14 @@ const ResultsList = ({loading}) => {
     */
   }, [activeFilters, sortedResults]);
 
+  useEffect(() => {
+    if(newItemsPerPage !== null) {
+      setItemsPerPage(newItemsPerPage);
+      setNewItemsPerPage(null);
+      handlePageClick({selected: 0});
+    }
+  }, [newItemsPerPage]);
+
   const displayLoadingButton = (
     handleResultsRefresh, 
     styles, 
@@ -700,6 +708,22 @@ const ResultsList = ({loading}) => {
               {
                 formattedResults.length > 0 && 
                 <div className={styles.pagination}>
+                  <div className={styles.perPage}>
+                  <Select 
+                    label="" 
+                    name="Results Per Page"
+                    size="s" 
+                    handleChange={(value)=>{
+                      setNewItemsPerPage(parseInt(value));
+                    }}
+                    value={newItemsPerPage}
+                    noanimate
+                    >
+                    <option value="5" key="0">5</option>
+                    <option value="10" key="1">10</option>
+                    <option value="20" key="2">20</option>
+                  </Select>
+                  </div>
                   <ReactPaginate
                     breakLabel="..."
                     nextLabel="Next"

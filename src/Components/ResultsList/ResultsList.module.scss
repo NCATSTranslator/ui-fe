@@ -165,6 +165,8 @@
   }
 }
 .pagination {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   margin-top: $s;
   grid-column: 2/3;
   .pageNums {
@@ -173,7 +175,6 @@
     align-items: center;
     list-style-type: none;
     padding-left: 0;
-    width: 700px;
     margin: 0 0 0 auto;
     .button {
       margin-bottom: 0;

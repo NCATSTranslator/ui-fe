@@ -138,7 +138,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
           <div className={styles.perPage}>
             <Select 
               label="" 
-              name="Results Per Page"
+              name="Items Per Page"
               size="m" 
               handleChange={(value)=>{
                 setNewItemsPerPage(parseInt(value));
