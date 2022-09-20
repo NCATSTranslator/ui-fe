@@ -207,16 +207,16 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
             {
               currentCategory === 'Bug Report' &&
               <TextInput 
-              label="Steps to Reproduce *" 
-              size="l" 
-              rows={3}
-              maxLength={200}
-              handleChange={(value)=>{
-                setCurrentSteps(value);
-                resetErrors();
-              }}
-              value={currentSteps}
-            />
+                label="Steps to Reproduce *" 
+                size="l" 
+                rows={3}
+                maxLength={200}
+                handleChange={(value)=>{
+                  setCurrentSteps(value);
+                  resetErrors();
+                }}
+                value={currentSteps}
+              />
             }
             <TextInput 
               label="Comments *" 
