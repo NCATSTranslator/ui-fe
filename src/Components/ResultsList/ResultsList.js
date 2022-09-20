@@ -17,7 +17,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighte
   // eslint-disable-next-line
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
   // eslint-disable-next-line
-import { getSummarizedResults } from "../../Utilities/resultsFunctions";
+import { getSummarizedResults, findStringMatch } from "../../Utilities/resultsFunctions";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import { cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
@@ -370,6 +370,9 @@ const ResultsList = ({loading}) => {
     case "date":
       filterDisplay = <div>Date of Evidence: <span>{element.value[0]}-{element.value[1]}</span></div>;
       break;
+    case "str":
+      filterDisplay = <div>String: <span>{element.value}</span></div>;
+      break;
     default:
       break;
     }
@@ -472,6 +475,11 @@ const ResultsList = ({loading}) => {
           // Minimum evidence filter
           case 'evi':
             if(element.evidence.length < filter.value)
+              addElement = false;
+            break;
+          // search string filter
+          case 'str':
+            if(!findStringMatch(element, filter.value))
               addElement = false;
             break;
           // Date Range filter

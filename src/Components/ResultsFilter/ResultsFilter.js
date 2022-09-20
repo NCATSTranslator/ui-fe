@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
+import TextInput from '../FormFields/TextInput';
 import SimpleRange from '../Range/SimpleRange';
   // eslint-disable-next-line
 import TwoThumbRange from '../Range/TwoThumbRange';
@@ -17,6 +18,9 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
   const dateRange = [dateRangeMin, dateRangeMax];
   const [dateRangeObject, setDateRangeObject] = useState({tag:'date', value: dateRange});
   const fdaObject = {tag:'fda', value: ''};
+
+  const [searchString, setSearchString] = useState('');
+  const [searchStringObject, setSearchStringObject] = useState({tag:'str', value: searchString});
 
   const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
 
@@ -35,22 +39,43 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
     }
   }
 
-  // eslint-disable-next-line
-  const handleDateRangeActive = () => {
-    onFilter(dateRangeObject);
+  const handleStringSearchChange = (value) => {
+    if(searchStringObject.value !== value) {
+      let newStringObj  = global.structuredClone(searchStringObject);
+      newStringObj.value = value;
+      setSearchStringObject(newStringObj);
+      onFilter(newStringObj);
+    }
   }
-  // eslint-disable-next-line
-  const handleDateRangeChange = (value) => {
-    let newDateObj  = global.structuredClone(dateRangeObject);
-    newDateObj.value = value;
-    setDateRangeObject(newDateObj);
-    onFilter(newDateObj);
-  }
+
+  // // eslint-disable-next-line
+  // const handleDateRangeActive = () => {
+  //   onFilter(dateRangeObject);
+  // }
+  // // eslint-disable-next-line
+  // const handleDateRangeChange = (value) => {
+  //   let newDateObj  = global.structuredClone(dateRangeObject);
+  //   newDateObj.value = value;
+  //   setDateRangeObject(newDateObj);
+  //   onFilter(newDateObj);
+  // }
 
   return (
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
+        <p className={styles.subTwo}>Name and Description</p>
+        {/* <Checkbox handleClick={handleStringSearchActive} 
+          checked={activeFilters.some(e => e.tag === searchStringObject.tag)}>
+            Minimum Number of Evidence
+        </Checkbox> */}
+        <TextInput 
+          label="" 
+          rows={1}
+          maxLength={200}
+          handleChange={(value)=> handleStringSearchChange(value)}
+          className={styles.textInput}
+        />
         <p className={styles.subTwo}>Evidence</p>
           <Checkbox handleClick={handleEvidenceActive} 
             checked={activeFilters.some(e => e.tag === evidenceObject.tag)}>

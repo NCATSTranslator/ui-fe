@@ -110,3 +110,29 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
   }
   return newSummarizedResults;
 }
+
+// Function to search given element for string match, used in string filter
+export const findStringMatch = (element, value) => {
+  if(!value || !element) 
+    return true;
+  
+  let formattedValue = value.toLowerCase();
+  if (
+    element.name.toLowerCase().includes(formattedValue) ||
+    element.object.toLowerCase().includes(formattedValue) ||
+    (element.description && element.description.toLowerCase().includes(formattedValue))
+  )
+    return true;
+
+  for(const path of element.paths) {
+    for(const item of path.subgraph) {
+      if(
+        item.names && item.names[0].toLowerCase().includes(formattedValue) || 
+        item.predicates && item.predicates[0].toLowerCase().includes(formattedValue)
+      )
+        return true;
+    }
+  }
+
+  return false;
+}
