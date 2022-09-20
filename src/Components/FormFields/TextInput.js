@@ -25,12 +25,13 @@ const TextInput = (
 
   handleChange = (handleChange) ? handleChange : () => {};
   errorText = (errorText) ? errorText : "Error Message";
+  let hasIconClass = (icon) ? styles.hasIcon : styles.noIcon;
 
   return (
     <> 
     {
       rows > 1 &&
-      <label className={`text-input ${styles.textInput} ${size} ${className}`}> 
+      <label className={`text-input ${styles.textInput} ${size} ${hasIconClass} ${className}`}> 
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         {icon && <div className={styles.iconContainer}>{icon}</div>}
@@ -47,7 +48,7 @@ const TextInput = (
     }
     {
       (rows <= 1 || rows === undefined) &&
-      <label className={`text-input ${styles.textInput} ${size}`}> 
+      <label className={`text-input ${styles.textInput} ${size} ${hasIconClass} ${className}`}> 
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         {icon && <div className={styles.iconContainer}>{icon}</div>}
