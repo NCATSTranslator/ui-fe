@@ -1,14 +1,14 @@
 import React, {useState} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
-import TextInput from '../FormFields/TextInput';
 import SimpleRange from '../Range/SimpleRange';
   // eslint-disable-next-line
 import TwoThumbRange from '../Range/TwoThumbRange';
+import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
 
-const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
+const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClearTag}) => {
   
   // eslint-disable-next-line
   const [minEvidence, setMinEvidence] = useState(1); 
@@ -39,15 +39,6 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
     }
   }
 
-  const handleStringSearchChange = (value) => {
-    if(searchStringObject.value !== value) {
-      let newStringObj  = global.structuredClone(searchStringObject);
-      newStringObj.value = value;
-      setSearchStringObject(newStringObj);
-      onFilter(newStringObj);
-    }
-  }
-
   // // eslint-disable-next-line
   // const handleDateRangeActive = () => {
   //   onFilter(dateRangeObject);
@@ -64,17 +55,10 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
-        <p className={styles.subTwo}>Name and Description</p>
-        {/* <Checkbox handleClick={handleStringSearchActive} 
-          checked={activeFilters.some(e => e.tag === searchStringObject.tag)}>
-            Minimum Number of Evidence
-        </Checkbox> */}
-        <TextInput 
-          label="" 
-          rows={1}
-          maxLength={200}
-          handleChange={(value)=> handleStringSearchChange(value)}
-          className={styles.textInput}
+        <EntitySearch
+          activeFilters={activeFilters}
+          onFilter={onFilter}
+          handleDeactivate={()=>onClearTag('str')}
         />
         <p className={styles.subTwo}>Evidence</p>
           <Checkbox handleClick={handleEvidenceActive} 

@@ -383,6 +383,11 @@ const ResultsList = ({loading}) => {
     setActiveFilters([]);
   }
 
+  const handleClearFilterByTag = (tag) => {
+    let newFilters = cloneDeep(activeFilters).filter(e => e.tag !== tag);
+    setActiveFilters(newFilters);
+  }
+
   // Handle the sorting 
   const handleSort = (sortName) => {
     let newSortedResults = cloneDeep(sortedResults);
@@ -587,6 +592,7 @@ const ResultsList = ({loading}) => {
                 onFilter={handleFilter}
                 onHighlight={handleResultHighlight}
                 onClearAll={handleClearAllFilters}
+                onClearTag={handleClearFilterByTag}
                 activeFilters={activeFilters} 
               />
               <div className={styles.resultsHeader}>
