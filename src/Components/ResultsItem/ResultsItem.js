@@ -72,7 +72,14 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
       </div>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
-        <span className={styles.name}>{nameString}</span>
+        {
+          item.highlightedName && 
+          <span className={styles.name} dangerouslySetInnerHTML={{__html: item.highlightedName}} ></span>
+        }
+        {
+          !item.highlightedName && 
+          <span className={styles.name} >{nameString}</span>
+        }
         <span className={styles.effect}>{item.paths.length} {pathString} {objectString}</span>
       </div>
       <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
@@ -109,7 +116,14 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
         height={height}
         > 
         <div className={styles.container}>
+          {
+          item.highlightedDescription && 
+          <p dangerouslySetInnerHTML={{__html: item.highlightedDescription}} ></p>
+        }
+        {
+          !item.highlightedDescription && 
           <p>{item.description}</p>
+        }
         </div>
 
         <GraphView paths={item.paths} active={isExpanded} handleEdgeSpecificEvidence={(edge)=> {handleEdgeSpecificEvidence(edge)}} />

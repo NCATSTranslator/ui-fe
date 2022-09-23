@@ -112,23 +112,51 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
 }
 
 // Function to search given element for string match, used in string filter
+// Checks result name, result description, all node names and all predicates
+// Does NOT include node types (Protein, Biological Entity, etc.)
 export const findStringMatch = (element, value) => {
-  if(!value || !element) 
+  if(!value || !element) {
+    element.highlightedName = null;
     return true;
-  
+  }
+
   let formattedValue = value.toLowerCase();
+  let foundInName = (element.highlightedName) ?
+    element.highlightedName.toLowerCase().indexOf(formattedValue) : 
+    element.name.toLowerCase().indexOf(formattedValue); 
+  let foundInDescription = (element.highlightedDescription) ?
+    element.highlightedDescription.toLowerCase().indexOf(formattedValue) : 
+    (element.description) ? element.description.toLowerCase().indexOf(formattedValue) : -1; 
   if (
-    element.name.toLowerCase().includes(formattedValue) ||
-    element.object.toLowerCase().includes(formattedValue) ||
-    (element.description && element.description.toLowerCase().includes(formattedValue))
+    foundInName > -1
+  ){
+    if(element.highlightedName)
+      element.highlightedName = `${element.highlightedName.slice(0, foundInName)}<span class='highlight'>${element.highlightedName.slice(foundInName, foundInName + formattedValue.length)}</span>${element.highlightedName.slice(foundInName + formattedValue.length, element.highlightedName.length)}`; 
+    else
+      element.highlightedName = `${element.name.slice(0, foundInName)}<span class='highlight'>${element.name.slice(foundInName, foundInName + formattedValue.length)}</span>${element.name.slice(foundInName + formattedValue.length, element.name.length)}`; 
+    return true;
+  }
+
+  if (
+    foundInDescription > -1
+  ){
+    if(element.highlightedDescription)
+      element.highlightedDescription = `${element.highlightedDescription.slice(0, foundInDescription)}<span class='highlight'>${element.highlightedDescription.slice(foundInDescription, foundInDescription + formattedValue.length)}</span>${element.highlightedDescription.slice(foundInDescription + formattedValue.length, element.highlightedDescription.length)}`; 
+    else
+      element.highlightedDescription = `${element.description.slice(0, foundInDescription)}<span class='highlight'>${element.description.slice(foundInDescription, foundInDescription + formattedValue.length)}</span>${element.description.slice(foundInDescription + formattedValue.length, element.description.length)}`; 
+    return true;
+  } 
+
+  if (
+    element.object.toLowerCase().includes(formattedValue) 
   )
     return true;
 
   for(const path of element.paths) {
     for(const item of path.subgraph) {
       if(
-        item.names && item.names[0].toLowerCase().includes(formattedValue) || 
-        item.predicates && item.predicates[0].toLowerCase().includes(formattedValue)
+        (item.names && item.names[0].toLowerCase().includes(formattedValue) )|| 
+        (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))
         // || item.types && item.types[0].replace('biolink:', '').replaceAll(/([A-Z])/g, ' $1').trim().toLowerCase().includes(formattedValue)
       )
         return true;
@@ -136,4 +164,16 @@ export const findStringMatch = (element, value) => {
   }
 
   return false;
+}
+
+export const removeHighlights = (elements, value) => {
+  for(const element of elements) {
+    if(element.highlightedName && element.highlightedName.toLowerCase().includes(value.toLowerCase().trim())) {
+      element.highlightedName = null;
+    }
+    if(element.highlightedDescription && element.highlightedDescription.toLowerCase().includes(value.toLowerCase().trim())) {
+      element.highlightedDescription = null;
+    }
+  }
+  return elements;
 }

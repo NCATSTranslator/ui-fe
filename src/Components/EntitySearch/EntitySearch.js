@@ -4,7 +4,7 @@ import Checkbox from '../FormFields/Checkbox';
 import TextInput from '../FormFields/TextInput';
 
 
-const EntitySearch = ({activeFilters, onFilter, handleDeactivate}) => {
+const EntitySearch = ({activeFilters, onFilter}) => {
 
   const [searchString, setSearchString] = useState('');
   const [searchStringObject, setSearchStringObject] = useState({tag:'str', value: searchString});
@@ -14,11 +14,14 @@ const EntitySearch = ({activeFilters, onFilter, handleDeactivate}) => {
       let newStringObj  = global.structuredClone(searchStringObject);
       newStringObj.value = value;
       setSearchStringObject(newStringObj);
-      if(value !== '') {
-        onFilter(newStringObj);
-      } else {
-        console.log('deactivate');
-        handleDeactivate();
+    }
+  }
+
+  const handleKeyDown = (e) => {
+    if(e.key === 'Enter') {
+      if(searchStringObject.value !== '') {
+        onFilter(searchStringObject);
+        setSearchStringObject({tag:'str', value: ''})
       }
     }
   }
@@ -26,17 +29,20 @@ const EntitySearch = ({activeFilters, onFilter, handleDeactivate}) => {
   return (
     <div className={styles.entitySearch}>
       <p className={`${styles.subTwo} sub-two`}>Entity Search</p>
-      {/* <Checkbox handleClick={handleStringSearchActive} 
-        checked={activeFilters.some(e => e.tag === searchStringObject.tag)}>
-          Minimum Number of Evidence
-      </Checkbox> */}
       <TextInput 
         label="" 
         rows={1}
         maxLength={200}
         handleChange={(value)=> handleStringSearchChange(value)}
+        handleKeyDown={handleKeyDown}
         className={styles.textInput}
+        value={searchStringObject.value}
       />
+      {/* <Checkbox handleClick={handleStringSearchActive} 
+        checked={activeFilters.some(e => e.tag === searchStringObject.tag)}>
+          Minimum Number of Evidence
+      </Checkbox> */}
+
     </div>
   );
 }

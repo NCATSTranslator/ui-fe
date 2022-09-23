@@ -17,7 +17,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighte
   // eslint-disable-next-line
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
   // eslint-disable-next-line
-import { getSummarizedResults, findStringMatch } from "../../Utilities/resultsFunctions";
+import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import { cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
@@ -326,30 +326,57 @@ const ResultsList = ({loading}) => {
 
   // Handle the addition and removal of individual filters
   const handleFilter = (filter) => {
-    let index = activeFilters.findIndex(value => (value.tag === filter.tag));
-    let newFilters = [];
-    // Remove if we find a match
-    if(index > -1) {
-      // if the values also match, it's a real match
-      if (activeFilters[index].value === filter.value) {
-        newFilters = activeFilters.reduce((result, value, i) => {
-          if(i !== index) {
-            result.push(value);
-          }
-          return result;
-        }, []);
-        // otherwise just update the value
-      } else {
-        newFilters = activeFilters.map((value, i) => {
-          if(i === index)
-            value.value = filter.value;
 
-          return value;
-        });
-      }
-    // Otherwise add the new filter to the list
+    // REFACTOR TO FIND MATCH WHERE VALUES ARE THE SAME, THEN WHERE TAGS ARE THE SAME TO AVOID STRING SEARCH EARLY TAG MATCH BUG
+    let indexes = [];
+    for(const [i, value] of activeFilters.entries() ) {
+      if(value.tag === filter.tag)
+        indexes.push(i);
+    }
+    
+    let newFilters = [...activeFilters];
+    // If we don't find any matches, add the filter to the list 
+    if(indexes.length === 0) {
+      console.log('adding new filter: a ', filter);
+      newFilters.push(filter);
+    // If there are matches, loop through them to determin whether we need to add, remove, or update 
     } else {
-      newFilters = [...activeFilters, filter];
+      let addFilter = true;
+      for(const index of indexes) {
+        // if the values also match, it's a real match
+        if (activeFilters[index].value === filter.value) {
+          // set newFilters to a new array with any matches removed
+          newFilters = activeFilters.reduce((result, value, i) => {
+            if(i !== index) {
+              result.push(value);
+            // if we do find a match and its type is 'str', 
+            } else if(filter.tag === 'str') {
+              // remove the highlighted text
+              let originalResults = removeHighlights([...sortedResults], filter.value);
+              setFormattedResults(originalResults);
+            }
+            return result;
+          }, []);
+          addFilter = false;
+        // if the values don't match and it isn't a string search, just update the value
+        } else if(filter.tag !== 'str') {
+          newFilters = newFilters.map((value, i) => {
+            if(i === index)
+              value.value = filter.value;
+  
+            return value;
+          });
+          addFilter = false;
+        // if the values don't match, but it *is* a new string search filter, add it
+        } else if(activeFilters[index].value !== filter.value && filter.tag === 'str') { 
+          addFilter = true;
+        // 
+        } else {
+          addFilter = false;
+        }
+      }
+      if(addFilter)
+        newFilters.push(filter);
     }
     setActiveFilters(newFilters);
   }
@@ -383,8 +410,12 @@ const ResultsList = ({loading}) => {
     setActiveFilters([]);
   }
 
-  const handleClearFilterByTag = (tag) => {
-    let newFilters = cloneDeep(activeFilters).filter(e => e.tag !== tag);
+  const handleClearFilter = (filter) => {
+    let newFilters = cloneDeep(activeFilters.filter(e => e.tag !== filter.tag || e.value !== filter.value));
+    if(filter.tag === 'str') {
+      let originalResults = removeHighlights([...sortedResults], filter.value);
+      setFormattedResults(originalResults);
+    }
     setActiveFilters(newFilters);
   }
 
@@ -486,7 +517,6 @@ const ResultsList = ({loading}) => {
           case 'str':
             if(!findStringMatch(element, filter.value))
               addElement = false;
-            break;
           // Date Range filter
           case 'date':
             // let lastPubYear = getLastPubYear(element.edge.last_publication_date);
@@ -592,7 +622,6 @@ const ResultsList = ({loading}) => {
                 onFilter={handleFilter}
                 onHighlight={handleResultHighlight}
                 onClearAll={handleClearAllFilters}
-                onClearTag={handleClearFilterByTag}
                 activeFilters={activeFilters} 
               />
               <div className={styles.resultsHeader}>
@@ -643,7 +672,7 @@ const ResultsList = ({loading}) => {
                         return(
                           <span key={i} className={`${styles.filterTag} ${element.tag}`}>
                             { getSelectedFilterDisplay(element) }
-                            <span className={styles.close} onClick={()=>{handleFilter(element)}}><CloseIcon/></span>
+                            <span className={styles.close} onClick={()=>{handleClearFilter(element)}}><CloseIcon/></span>
                           </span>
                         )
                       })

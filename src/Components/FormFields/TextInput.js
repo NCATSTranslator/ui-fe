@@ -3,13 +3,14 @@ import styles from "./TextInput.module.scss";
 
 const TextInput = (
   {label, subtitle, value, placeholder, size, rows,
-    error, errorText, handleChange, className, icon, maxLength}) => {
+    error, errorText, handleChange, className, icon, maxLength, handleKeyDown}) => {
   
   size = (size === undefined) ? 's' : size;
 
   maxLength = (maxLength) ? maxLength : -1;
 
-  
+  handleKeyDown = (handleKeyDown) ? handleKeyDown : ()=>{};
+
   // switch (size) {
   //   case 'm':
   //     size = styles.m;
@@ -42,6 +43,7 @@ const TextInput = (
           onChange={(e) => {handleChange(e.target.value)}} 
           maxLength={maxLength} 
           value={value}
+          onKeyDown={handleKeyDown}
         />
         {error && <span className={styles.errorText}>{errorText}</span>}
       </label>
@@ -58,7 +60,9 @@ const TextInput = (
           size="1" 
           onChange={(e) => {handleChange(e.target.value)}} 
           maxLength={maxLength} 
-          value={value}/>
+          value={value}
+          onKeyDown={handleKeyDown}
+        />
         {error && <span className={styles.errorText}>{errorText}</span>}
       </label>
     }

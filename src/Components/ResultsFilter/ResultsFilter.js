@@ -19,9 +19,6 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClea
   const [dateRangeObject, setDateRangeObject] = useState({tag:'date', value: dateRange});
   const fdaObject = {tag:'fda', value: ''};
 
-  const [searchString, setSearchString] = useState('');
-  const [searchStringObject, setSearchStringObject] = useState({tag:'str', value: searchString});
-
   const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
 
   onHighlight = (!onHighlight) ? () => console.log("No highlight function specified in ResultsFilter.") : onHighlight; 
@@ -58,7 +55,6 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClea
         <EntitySearch
           activeFilters={activeFilters}
           onFilter={onFilter}
-          handleDeactivate={()=>onClearTag('str')}
         />
         <p className={styles.subTwo}>Evidence</p>
           <Checkbox handleClick={handleEvidenceActive} 

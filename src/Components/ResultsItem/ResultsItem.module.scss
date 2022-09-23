@@ -36,6 +36,8 @@
     }
     .name {
       display: block;
+    }
+    .name, .name span {
       color: $purpleOne;
       font-size: 20px;
       font-weight: 700;
@@ -103,7 +105,7 @@
       // Only needed when checkboxes are present
       // margin-left: 50px;
       padding: 0;
-      p {
+      p, p span {
         font-size: 12px;
       }
     }
