@@ -483,9 +483,10 @@ const ResultsList = ({loading}) => {
 
   // Filter the results whenever the activated filters change 
   useEffect(() => {
-    // If there are no active filters, get the full result set
+    // If there are no active filters, get the full result set and reset the activeStringFilters
     if(activeFilters.length <= 0) {
       setFormattedResults(sortedResults);
+      setActiveStringFilters([]);
       return;
     }
 
