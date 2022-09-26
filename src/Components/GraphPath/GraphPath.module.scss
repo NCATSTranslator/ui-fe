@@ -18,7 +18,7 @@
   align-items: center;
   text-align: center;
 }
-.path {
+.path, .path span, .path mark {
   font-size: 12px;
   font-weight: 400;
 }
@@ -99,6 +99,8 @@ span.path {
 }
 .name, .target {
   padding: 7px;
+}
+.name span, .name mark, .target span, .target mark {
   font-size: 14px;
   font-weight: 700;
   cursor: default;

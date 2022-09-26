@@ -115,9 +115,16 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
           >
           <Connector />
           <span className={`${styles.path} path`}>
-            {path.predicates[0]}
+            <Highlighter
+              highlightClassName="highlight"
+              searchWords={activeStringFilters}
+              autoEscape={true}
+              textToHighlight={path.predicates[0]}
+            />
             {path.predicates.length > 1 && 
-            <span className={styles.more}>+ {path.predicates.length - 1} More</span>}
+            <span className={styles.more}>
+              + {path.predicates.length - 1} More
+            </span>}
           </span>
           <Tooltip 
             delay={350}
@@ -138,7 +145,12 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
                         // Predicate click to get specific evidence will go here 
                         onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(path, predicate)}}
                         >
-                        {capitalizeAllWords(predicate)}
+                        <Highlighter
+                          highlightClassName="highlight"
+                          searchWords={activeStringFilters}
+                          autoEscape={true}
+                          textToHighlight={capitalizeAllWords(predicate)}
+                        />
                       </p>
                     </li>
                   )
