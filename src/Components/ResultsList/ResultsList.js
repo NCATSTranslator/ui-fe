@@ -95,6 +95,8 @@ const ResultsList = ({loading}) => {
   const [itemOffset, setItemOffset] = useState(0);
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
+  // Array, currently active string filters
+  const [activeStringFilters, setActiveStringFilters] = useState([]);
   // Array, aras that have returned data
   const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
   // Bool, is fda tooltip currently active
@@ -337,7 +339,6 @@ const ResultsList = ({loading}) => {
     let newFilters = [...activeFilters];
     // If we don't find any matches, add the filter to the list 
     if(indexes.length === 0) {
-      console.log('adding new filter: a ', filter);
       newFilters.push(filter);
     // If there are matches, loop through them to determin whether we need to add, remove, or update 
     } else {
@@ -349,16 +350,11 @@ const ResultsList = ({loading}) => {
           newFilters = activeFilters.reduce((result, value, i) => {
             if(i !== index) {
               result.push(value);
-            // if we do find a match and its type is 'str', 
-            } else if(filter.tag === 'str') {
-              // remove the highlighted text
-              let originalResults = removeHighlights([...sortedResults], filter.value);
-              setFormattedResults(originalResults);
             }
             return result;
           }, []);
           addFilter = false;
-        // if the values don't match and it isn't a string search, just update the value
+        // If the values don't match and it's not a string search, update the value
         } else if(filter.tag !== 'str') {
           newFilters = newFilters.map((value, i) => {
             if(i === index)
@@ -517,10 +513,16 @@ const ResultsList = ({loading}) => {
           case 'str':
             if(!findStringMatch(element, filter.value))
               addElement = false;
+            break;
           // Date Range filter
           case 'date':
             // let lastPubYear = getLastPubYear(element.edge.last_publication_date);
             // if(lastPubYear < filter.value[0] || lastPubYear > filter.value[1])
+            //   addElement = false;
+            break;
+          // Add new filter tags in this way:
+          case 'example':
+            // if(false)
             //   addElement = false;
             break;
           default:
@@ -533,6 +535,15 @@ const ResultsList = ({loading}) => {
     }
     // Set the formatted results to the newly filtered results
     setFormattedResults(filteredResults);
+
+    let newStringFilters = []; 
+    for(const filter of activeFilters) {
+      // String filters with identical values shouldn't be added to the activeFilters array, 
+      // so we don't have to check for duplicate values here, just for the str tag.
+      if(filter.tag === 'str')
+        newStringFilters.push(filter.value);
+    }
+    setActiveStringFilters(newStringFilters);
 
     /*
       triggers on filter change and on sorting change in order to allow user to change 
@@ -741,6 +752,7 @@ const ResultsList = ({loading}) => {
                             allSelected={allSelected}
                             handleSelected={()=>handleSelected(item)}
                             activateEvidence={(evidence, edgesRepresented)=>activateEvidence(evidence, edgesRepresented)} 
+                            activeStringFilters={activeStringFilters}
                           />
                         )
                       })

@@ -6,9 +6,10 @@ import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
 import { capitalizeAllWords, formatBiolinkPredicate } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
+import Highlighter from 'react-highlight-words';
 
 
-const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) => {
+const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters}) => {
 
   const [nameTooltipActive, setNameTooltipActive] = useState(false);
   const [pathTooltipActive, setPathTooltipActive] = useState(false);
@@ -86,7 +87,12 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
           <span className={styles.name} >
             {getIcon(path.type)}
             <span className={styles.text}>
-              {nameString}
+              <Highlighter
+                highlightClassName="highlight"
+                searchWords={activeStringFilters}
+                autoEscape={true}
+                textToHighlight={nameString}
+              />
             </span>
           </span>
             <Tooltip 
@@ -149,7 +155,12 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
                     // Predicate click to get specific evidence will go here 
                     onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(path, predicate)}}
                     >
-                    {capitalizeAllWords(predicate)}
+                    <Highlighter
+                      highlightClassName="highlight"
+                      searchWords={activeStringFilters}
+                      autoEscape={true}
+                      textToHighlight={capitalizeAllWords(predicate)}
+                    />
                   </p>
                 )
               })
@@ -168,7 +179,12 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick}) 
           <span className={styles.target} onClick={(e) => {e.stopPropagation(); tooltipOpen('target')}}>
             <Disease/>
             <span className={styles.text}>
-              {nameString}
+              <Highlighter
+                highlightClassName="highlight"
+                searchWords={activeStringFilters}
+                autoEscape={true}
+                textToHighlight={nameString}
+              />
             </span>
           </span>
           <Tooltip 
