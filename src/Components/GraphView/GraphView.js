@@ -73,7 +73,7 @@ const GraphView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => 
   }
 
   const handleEdgeClick = (edge) => {
-    console.log(edge);
+    handleEdgeSpecificEvidence(edge)
   }
 
   const handleTargetClick = (target) => {
@@ -187,7 +187,7 @@ const GraphView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => 
                     path={pathItem} 
                     key={key}
                     handleNameClick={handleNameClick}
-                    handleEdgeClick={(edge)=>handleEdgeSpecificEvidence(edge)}
+                    handleEdgeClick={(edge)=>handleEdgeClick(edge)}
                     handleTargetClick={handleTargetClick}
                     activeStringFilters={activeStringFilters}
                     />

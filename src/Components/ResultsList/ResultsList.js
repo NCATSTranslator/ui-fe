@@ -255,7 +255,6 @@ const ResultsList = ({loading}) => {
 
   useEffect(() => {
     if(formattedResults.length && !presorted) {
-      console.log('Performing initial sorting by evidence High->Low...');
       handleSort('evidenceHighLow');
       setPresorted(true);
     }
