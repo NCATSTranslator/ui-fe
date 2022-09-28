@@ -6,7 +6,7 @@ import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import { cloneDeep } from 'lodash';
 import { useOutletContext } from 'react-router-dom';
 
-const GraphView = ({paths, handleEdgeSpecificEvidence}) => {
+const GraphView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => {
 
   const [rawGraph, setRawGraph] = useState([])
   const [compressedGraph, setCompressedGraph] = useState([])
@@ -73,7 +73,7 @@ const GraphView = ({paths, handleEdgeSpecificEvidence}) => {
   }
 
   const handleEdgeClick = (edge) => {
-    console.log(edge);
+    handleEdgeSpecificEvidence(edge)
   }
 
   const handleTargetClick = (target) => {
@@ -187,8 +187,9 @@ const GraphView = ({paths, handleEdgeSpecificEvidence}) => {
                     path={pathItem} 
                     key={key}
                     handleNameClick={handleNameClick}
-                    handleEdgeClick={(edge)=>handleEdgeSpecificEvidence(edge)}
+                    handleEdgeClick={(edge)=>handleEdgeClick(edge)}
                     handleTargetClick={handleTargetClick}
+                    activeStringFilters={activeStringFilters}
                     />
                     ) 
                   }) 

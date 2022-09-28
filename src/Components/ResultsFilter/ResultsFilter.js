@@ -4,10 +4,11 @@ import Checkbox from '../FormFields/Checkbox';
 import SimpleRange from '../Range/SimpleRange';
   // eslint-disable-next-line
 import TwoThumbRange from '../Range/TwoThumbRange';
+import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
 
-const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
+const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClearTag}) => {
   
   // eslint-disable-next-line
   const [minEvidence, setMinEvidence] = useState(1); 
@@ -35,22 +36,26 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll}) => {
     }
   }
 
-  // eslint-disable-next-line
-  const handleDateRangeActive = () => {
-    onFilter(dateRangeObject);
-  }
-  // eslint-disable-next-line
-  const handleDateRangeChange = (value) => {
-    let newDateObj  = global.structuredClone(dateRangeObject);
-    newDateObj.value = value;
-    setDateRangeObject(newDateObj);
-    onFilter(newDateObj);
-  }
+  // // eslint-disable-next-line
+  // const handleDateRangeActive = () => {
+  //   onFilter(dateRangeObject);
+  // }
+  // // eslint-disable-next-line
+  // const handleDateRangeChange = (value) => {
+  //   let newDateObj  = global.structuredClone(dateRangeObject);
+  //   newDateObj.value = value;
+  //   setDateRangeObject(newDateObj);
+  //   onFilter(newDateObj);
+  // }
 
   return (
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
+        <EntitySearch
+          activeFilters={activeFilters}
+          onFilter={onFilter}
+        />
         <p className={styles.subTwo}>Evidence</p>
           <Checkbox handleClick={handleEvidenceActive} 
             checked={activeFilters.some(e => e.tag === evidenceObject.tag)}>

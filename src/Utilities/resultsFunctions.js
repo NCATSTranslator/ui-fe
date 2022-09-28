@@ -57,7 +57,7 @@ export const getEdgeByID = (id, results) => {
 export const getFormattedPaths = (rawPathIds, results) => {
   let formattedPaths = [];
   for(const id of rawPathIds) {
-    let formattedPath = results.paths[id];
+    let formattedPath = cloneDeep(results.paths[id]);
     if(formattedPath) {
       for(let i = 0; i < formattedPath.subgraph.length; i++) {
         if(i % 2 === 0) {
@@ -109,4 +109,47 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     }
   }
   return newSummarizedResults;
+}
+
+// Function to search given element for string match, used in string filter
+// Checks result name, result description, all node names and all predicates
+// Does NOT include node types (Protein, Biological Entity, etc.)
+export const findStringMatch = (element, value) => {
+  if(!value || !element) {
+    return true;
+  }
+
+  let formattedValue = value.toLowerCase();
+  let foundInName = element.name.toLowerCase().indexOf(formattedValue); 
+  let foundInDescription =  (element.description) ? element.description.toLowerCase().indexOf(formattedValue) : -1; 
+  if (
+    foundInName > -1 || foundInDescription > -1
+  ){
+    return true;
+  }
+
+  for(const path of element.paths) {
+    for(const item of path.subgraph) {
+      if(
+        (item.names && item.names[0].toLowerCase().includes(formattedValue) )|| 
+        (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))
+        // || item.types && item.types[0].replace('biolink:', '').replaceAll(/([A-Z])/g, ' $1').trim().toLowerCase().includes(formattedValue)
+      )
+        return true;
+    }
+  }
+
+  return false;
+}
+
+export const removeHighlights = (elements, value) => {
+  for(const element of elements) {
+    if(element.highlightedName && element.highlightedName.toLowerCase().includes(value.toLowerCase().trim())) {
+      element.highlightedName = null;
+    }
+    if(element.highlightedDescription && element.highlightedDescription.toLowerCase().includes(value.toLowerCase().trim())) {
+      element.highlightedDescription = null;
+    }
+  }
+  return elements;
 }

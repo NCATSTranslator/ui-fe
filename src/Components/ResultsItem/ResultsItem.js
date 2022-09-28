@@ -6,9 +6,10 @@ import GraphView from '../GraphView/GraphView';
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1=Down.svg"
 import AnimateHeight from "react-animate-height";
+import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';
 
-const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, checked, highlighted}) => {
+const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, checked, highlighted, activeStringFilters}) => {
   
   let icon = getIcon(item.type);
 
@@ -72,7 +73,21 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
       </div>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
-        <span className={styles.name}>{nameString}</span>
+        {
+          item.highlightedName && 
+          <span className={styles.name} dangerouslySetInnerHTML={{__html: item.highlightedName}} ></span>
+        }
+        {
+          !item.highlightedName && 
+          <span className={styles.name} >
+            <Highlighter
+              highlightClassName="highlight"
+              searchWords={activeStringFilters}
+              autoEscape={true}
+              textToHighlight={nameString}
+            />
+          </span>
+        }
         <span className={styles.effect}>{item.paths.length} {pathString} {objectString}</span>
       </div>
       <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
@@ -109,10 +124,25 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
         height={height}
         > 
         <div className={styles.container}>
-          <p>{item.description}</p>
+          {
+            item.description &&
+            <p>
+              <Highlighter
+                highlightClassName="highlight"
+                searchWords={activeStringFilters}
+                autoEscape={true}
+                textToHighlight={item.description}
+              />
+            </p>
+          }
         </div>
 
-        <GraphView paths={item.paths} active={isExpanded} handleEdgeSpecificEvidence={(edge)=> {handleEdgeSpecificEvidence(edge)}} />
+        <GraphView 
+          paths={item.paths} 
+          active={isExpanded} 
+          handleEdgeSpecificEvidence={(edge)=> {handleEdgeSpecificEvidence(edge)}} 
+          activeStringFilters={activeStringFilters}
+        />
       </AnimateHeight>
 
     </div>

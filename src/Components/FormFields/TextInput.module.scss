@@ -37,9 +37,14 @@
     border: 1px solid $midGray;
     font-size: $bodyOneSize;
     border-radius: $defaultBorderRadius;
-    padding: 10px 8px 10px 30px;
+    padding: 10px 8px;
     resize: none;
     line-height: 20px;
+  }
+  &.hasIcon {
+    input, textarea {
+      padding: 10px 8px 10px 30px;
+    }
   }
   .iconContainer {
     width: 25px;

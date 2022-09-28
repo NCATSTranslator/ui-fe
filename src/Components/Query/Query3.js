@@ -79,7 +79,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
   const handleDiseaseSelection = (disease) => {
     setIsError(false);
     setSelectedDisease(disease);
-    console.log(disease);
     setReadyForSubmission(true);
     if(autocompleteItems) 
       setAutoCompleteItems([]);

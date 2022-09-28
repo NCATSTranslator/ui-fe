@@ -7,6 +7,7 @@ import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import ShareModal from "../Modals/ShareModal";
 import Tooltip from "../Tooltip/Tooltip";
+import Select from "../FormFields/Select";
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux';
@@ -16,7 +17,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighte
   // eslint-disable-next-line
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
   // eslint-disable-next-line
-import { getSummarizedResults } from "../../Utilities/resultsFunctions";
+import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import { cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
@@ -94,20 +95,20 @@ const ResultsList = ({loading}) => {
   const [itemOffset, setItemOffset] = useState(0);
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
+  // Array, currently active string filters
+  const [activeStringFilters, setActiveStringFilters] = useState([]);
   // Array, aras that have returned data
   const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
   // Bool, is fda tooltip currently active
   const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
   // Bool, have the initial results been sorted yet
   const [presorted, setPresorted] = useState(false);
-
-  /*
-    Obj, {label: ''}, used to set input text, determined by results object
-  */ 
+  // Obj, {label: ''}, used to set input text, determined by results object
   const [presetDisease, setPresetDisease] = useState(null);
-
+  // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
+  // handler for closing share modal
   const handleShareModalClose = () => {
     setShareModalOpen(false);
   }
@@ -115,7 +116,8 @@ const ResultsList = ({loading}) => {
   // Initialize queryClient for React Query to fetch results
   const queryClient = new QueryClient();
   // Int, how many items per page
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [newItemsPerPage, setNewItemsPerPage] = useState(null);
   
   // Handle Page Offset
   useEffect(() => {    
@@ -253,7 +255,6 @@ const ResultsList = ({loading}) => {
 
   useEffect(() => {
     if(formattedResults.length && !presorted) {
-      console.log('Performing initial sorting by evidence High->Low...');
       handleSort('evidenceHighLow');
       setPresorted(true);
     }
@@ -326,30 +327,51 @@ const ResultsList = ({loading}) => {
 
   // Handle the addition and removal of individual filters
   const handleFilter = (filter) => {
-    let index = activeFilters.findIndex(value => (value.tag === filter.tag));
-    let newFilters = [];
-    // Remove if we find a match
-    if(index > -1) {
-      // if the values also match, it's a real match
-      if (activeFilters[index].value === filter.value) {
-        newFilters = activeFilters.reduce((result, value, i) => {
-          if(i !== index) {
-            result.push(value);
-          }
-          return result;
-        }, []);
-        // otherwise just update the value
-      } else {
-        newFilters = activeFilters.map((value, i) => {
-          if(i === index)
-            value.value = filter.value;
 
-          return value;
-        });
-      }
-    // Otherwise add the new filter to the list
+    // REFACTOR TO FIND MATCH WHERE VALUES ARE THE SAME, THEN WHERE TAGS ARE THE SAME TO AVOID STRING SEARCH EARLY TAG MATCH BUG
+    let indexes = [];
+    for(const [i, value] of activeFilters.entries() ) {
+      if(value.tag === filter.tag)
+        indexes.push(i);
+    }
+    
+    let newFilters = [...activeFilters];
+    // If we don't find any matches, add the filter to the list 
+    if(indexes.length === 0) {
+      newFilters.push(filter);
+    // If there are matches, loop through them to determin whether we need to add, remove, or update 
     } else {
-      newFilters = [...activeFilters, filter];
+      let addFilter = true;
+      for(const index of indexes) {
+        // if the values also match, it's a real match
+        if (activeFilters[index].value === filter.value) {
+          // set newFilters to a new array with any matches removed
+          newFilters = activeFilters.reduce((result, value, i) => {
+            if(i !== index) {
+              result.push(value);
+            }
+            return result;
+          }, []);
+          addFilter = false;
+        // If the values don't match and it's not a string search, update the value
+        } else if(filter.tag !== 'str') {
+          newFilters = newFilters.map((value, i) => {
+            if(i === index)
+              value.value = filter.value;
+  
+            return value;
+          });
+          addFilter = false;
+        // if the values don't match, but it *is* a new string search filter, add it
+        } else if(activeFilters[index].value !== filter.value && filter.tag === 'str') { 
+          addFilter = true;
+        // 
+        } else {
+          addFilter = false;
+        }
+      }
+      if(addFilter)
+        newFilters.push(filter);
     }
     setActiveFilters(newFilters);
   }
@@ -370,6 +392,9 @@ const ResultsList = ({loading}) => {
     case "date":
       filterDisplay = <div>Date of Evidence: <span>{element.value[0]}-{element.value[1]}</span></div>;
       break;
+    case "str":
+      filterDisplay = <div>String: <span>{element.value}</span></div>;
+      break;
     default:
       break;
     }
@@ -378,6 +403,15 @@ const ResultsList = ({loading}) => {
 
   const handleClearAllFilters = () => {
     setActiveFilters([]);
+  }
+
+  const handleClearFilter = (filter) => {
+    let newFilters = cloneDeep(activeFilters.filter(e => e.tag !== filter.tag || e.value !== filter.value));
+    if(filter.tag === 'str') {
+      let originalResults = removeHighlights([...sortedResults], filter.value);
+      setFormattedResults(originalResults);
+    }
+    setActiveFilters(newFilters);
   }
 
   // Handle the sorting 
@@ -448,9 +482,10 @@ const ResultsList = ({loading}) => {
 
   // Filter the results whenever the activated filters change 
   useEffect(() => {
-    // If there are no active filters, get the full result set
+    // If there are no active filters, get the full result set and reset the activeStringFilters
     if(activeFilters.length <= 0) {
       setFormattedResults(sortedResults);
+      setActiveStringFilters([]);
       return;
     }
 
@@ -474,10 +509,20 @@ const ResultsList = ({loading}) => {
             if(element.evidence.length < filter.value)
               addElement = false;
             break;
+          // search string filter
+          case 'str':
+            if(!findStringMatch(element, filter.value))
+              addElement = false;
+            break;
           // Date Range filter
           case 'date':
             // let lastPubYear = getLastPubYear(element.edge.last_publication_date);
             // if(lastPubYear < filter.value[0] || lastPubYear > filter.value[1])
+            //   addElement = false;
+            break;
+          // Add new filter tags in this way:
+          case 'example':
+            // if(false)
             //   addElement = false;
             break;
           default:
@@ -491,11 +536,28 @@ const ResultsList = ({loading}) => {
     // Set the formatted results to the newly filtered results
     setFormattedResults(filteredResults);
 
+    let newStringFilters = []; 
+    for(const filter of activeFilters) {
+      // String filters with identical values shouldn't be added to the activeFilters array, 
+      // so we don't have to check for duplicate values here, just for the str tag.
+      if(filter.tag === 'str')
+        newStringFilters.push(filter.value);
+    }
+    setActiveStringFilters(newStringFilters);
+
     /*
       triggers on filter change and on sorting change in order to allow user to change 
       the sorting on already filtered results
     */
   }, [activeFilters, sortedResults]);
+
+  useEffect(() => {
+    if(newItemsPerPage !== null) {
+      setItemsPerPage(newItemsPerPage);
+      setNewItemsPerPage(null);
+      handlePageClick({selected: 0});
+    }
+  }, [newItemsPerPage]);
 
   const displayLoadingButton = (
     handleResultsRefresh, 
@@ -621,7 +683,7 @@ const ResultsList = ({loading}) => {
                         return(
                           <span key={i} className={`${styles.filterTag} ${element.tag}`}>
                             { getSelectedFilterDisplay(element) }
-                            <span className={styles.close} onClick={()=>{handleFilter(element)}}><CloseIcon/></span>
+                            <span className={styles.close} onClick={()=>{handleClearFilter(element)}}><CloseIcon/></span>
                           </span>
                         )
                       })
@@ -690,6 +752,7 @@ const ResultsList = ({loading}) => {
                             allSelected={allSelected}
                             handleSelected={()=>handleSelected(item)}
                             activateEvidence={(evidence, edgesRepresented)=>activateEvidence(evidence, edgesRepresented)} 
+                            activeStringFilters={activeStringFilters}
                           />
                         )
                       })
@@ -700,6 +763,22 @@ const ResultsList = ({loading}) => {
               {
                 formattedResults.length > 0 && 
                 <div className={styles.pagination}>
+                  <div className={styles.perPage}>
+                  <Select 
+                    label="" 
+                    name="Results Per Page"
+                    size="s" 
+                    handleChange={(value)=>{
+                      setNewItemsPerPage(parseInt(value));
+                    }}
+                    value={newItemsPerPage}
+                    noanimate
+                    >
+                    <option value="5" key="0">5</option>
+                    <option value="10" key="1">10</option>
+                    <option value="20" key="2">20</option>
+                  </Select>
+                  </div>
                   <ReactPaginate
                     breakLabel="..."
                     nextLabel="Next"

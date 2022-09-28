@@ -74,6 +74,10 @@
     line-height: 15px;
     font-weight: 400;
     text-transform: none;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 12;
+    -webkit-box-orient: vertical;
   }
   .children {
     p {
