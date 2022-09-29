@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import SendFeedbackModal from '../Components/Modals/SendFeedbackModal';
 import {Provider} from 'react-redux';
 import {store} from '../Redux/store';
@@ -9,7 +9,7 @@ describe('Send Feedback Modal', () => {
     const user = userEvent.setup();
     render(
       <Provider store={store}>
-      <SendFeedbackModal />
+        <SendFeedbackModal />
       </Provider>
     );
 
