@@ -156,6 +156,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
       onClose={onClose} 
       className={styles.feedbackModal}
       containerClass={styles.feedbackContainer}
+      testId="send-feedback-modal"
       >
       {
         createdIssueURL &&
@@ -170,7 +171,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
           <h5>Send Feedback</h5>
           <p>Enjoying Translator? Having an issue? Either way, we want to know - use this form to let us know your comments and we'll get back to you as soon as possible. All fields marked with * are required.</p>
           <p className={styles.disclaimer}><Warning/>In the mean time, please check out our Help page for Translator tips, tricks, and tutorials.</p>
-          <form onSubmit={(e)=>handleSubmission(e)}>
+          <form onSubmit={(e)=>handleSubmission(e)} name="send feedback form">
             {
               errorActive && categoryError &&
               <p className={styles.errorText}>
@@ -199,6 +200,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
               }}
               value={currentCategory}
               noanimate
+              testId="category-select"
             >
               <option value="Suggestion" key="0">Suggestion</option>
               <option value="Bug Report" key="1">Bug Report</option>
@@ -216,6 +218,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
                   resetErrors();
                 }}
                 value={currentSteps}
+                testId="steps"
               />
             }
             <TextInput 
@@ -228,6 +231,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
                 resetErrors();
               }}
               value={currentComments}
+              testId="comments"
             />
             <FileInput
               buttonLabel="Browse Files"

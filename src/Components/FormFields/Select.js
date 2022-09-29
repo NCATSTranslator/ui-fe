@@ -2,7 +2,7 @@ import React, {useState, useEffect} from "react";
 import AnimateHeight from "react-animate-height";
 import styles from './Select.module.scss';
 
-const Select = ({label, subtitle, value, name, size, error, errorText, handleChange, noanimate, children}) => {
+const Select = ({label, subtitle, value, name, size, error, errorText, handleChange, noanimate, children, testId}) => {
 
   value = (value) ? value : "";
   const [selectedItem, setSelectedItem] = useState(value);
@@ -51,6 +51,7 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
               defaultValue={selectedItem} 
               // rand number key to re-render with correct default value on state change 
               key={`${Math.floor((Math.random() * 1000))}-min`}
+              data-testid={testId}
               >
             <option value="" disabled hidden>{name}</option>
             {children}
@@ -63,7 +64,15 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
               {
               children.map((child, i) => {
                 return(
-                  <span onClick={handleOptionClick} key={i} className={styles.option} data-value={child.props.value}>{child.props.children}</span>
+                  <span 
+                    onClick={handleOptionClick} 
+                    key={i} 
+                    className={styles.option} 
+                    data-value={child.props.value}
+                    data-testid={child.props.value}
+                    >
+                      {child.props.children}
+                  </span>
                   );
                 })
               }

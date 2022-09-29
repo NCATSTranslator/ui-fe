@@ -2,7 +2,7 @@ import React, {useEffect} from "react";
 import styles from './ModalGlobals.module.scss';
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
-const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseButton}) => {
+const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseButton, testId}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = (startOpen) ? styles.true : styles.false;
@@ -22,7 +22,7 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
   }, []);
 
   return (
-    <div className={`${styles.modalWindow} ${modalIsOpen} ${className}`}>
+    <div className={`${styles.modalWindow} ${modalIsOpen} ${className}`} data-testid={testId}>
       <div className={`${styles.modalContainer} ${containerClass}`}>
         <div className={styles.inner}>
           {children}
