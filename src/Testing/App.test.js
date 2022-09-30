@@ -4,7 +4,7 @@ import App from '../App';
 import {store} from '../Redux/store';
 import {Provider} from 'react-redux';
 
-describe('App Test',  ()=> {
+describe('App Test',  () => {
   test('Header disclaimer is present', () => {
     render(
       <Provider store={store}>
@@ -30,5 +30,5 @@ describe('App Test',  ()=> {
     );
     let feedbackModal = await screen.findByTestId('send-feedback-modal');
     expect(feedbackModal).not.toHaveClass('true');
-  })
+  });
 });

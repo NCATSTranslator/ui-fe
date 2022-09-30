@@ -4,7 +4,7 @@ import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import Checkbox from "../FormFields/Checkbox";
 import GraphView from '../GraphView/GraphView';
 import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
-import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1=Down.svg"
+import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';
