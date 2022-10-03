@@ -25,7 +25,10 @@ const QueryBar = ({handleSubmission, handleChange, isDisabled, value,
       }} 
       className={styles.form}
       >
-      <div className={`${styles.autocompleteContainer} ${(autocompleteItems.length > 0 || autocompleteLoading) ? styles.open : ''}`}>
+      <div 
+        className={`${styles.autocompleteContainer} ${(autocompleteItems.length > 0 || autocompleteLoading) ? styles.open : ''}`}
+        data-testid="autocomplete-list"
+        >
         {
           autocompleteItems && !autocompleteLoading &&
           autocompleteItems.map((item, i) => {
@@ -47,7 +50,7 @@ const QueryBar = ({handleSubmission, handleChange, isDisabled, value,
         icon={<SearchIcon/>}
         value={value}
       />
-      <Button type="submit" size="" disabled={submissionDisabled}>
+      <Button type="submit" size="" disabled={submissionDisabled} testId="query-submit">
         <span>Search</span>
       </Button>
     </form>
