@@ -32,7 +32,7 @@ export const getPubByID = (id, results) => {
   if(results.publications[id] === undefined)
     return {};
   
-  return results.publications[id];
+  return cloneDeep(results.publications[id]);
 }
 
 // search the list of nodes for a particular curie, then return that node object if found
@@ -40,7 +40,7 @@ export const getNodeByCurie = (curie, results) => {
   if(results.nodes[curie] === undefined)
     return {};
     
-  return results.nodes[curie];
+  return cloneDeep(results.nodes[curie]);
 }
 // search the list of edges for a particular id, then return that edge object if found
 export const getEdgeByID = (id, results) => {
