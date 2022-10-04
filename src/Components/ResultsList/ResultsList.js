@@ -181,7 +181,7 @@ const ResultsList = ({loading}) => {
         console.log(error)
       });
   }, { 
-    refetchInterval: 7000,
+    refetchInterval: 10000,
     enabled: isFetchingARAStatus,
     refetchOnWindowFocus: false
   });
@@ -223,7 +223,6 @@ const ResultsList = ({loading}) => {
         console.log(error)
       });
   }, { 
-    // refetchInterval: 7000,
     enabled: isFetchingResults,
     refetchOnWindowFocus: false
   });
