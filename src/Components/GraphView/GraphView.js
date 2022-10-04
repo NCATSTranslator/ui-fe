@@ -17,10 +17,6 @@ const GraphView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => 
 
   // number of  hops
   let graphWidth = 3;
-  // for (let index = 0; index < graph.length; index++) {
-  //   if(graph[index].length > graphWidth)
-  //   graphWidth = Math.floor(graph[index].length / 2); 
-  // }
 
   const displayHeadings = (count) => {
     let headingMarkup = [];

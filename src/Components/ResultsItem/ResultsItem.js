@@ -168,7 +168,6 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
       } 
     }
 
-
     return newCompressedPaths;
   }
 
