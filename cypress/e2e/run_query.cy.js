@@ -38,6 +38,6 @@ describe('run query', () => {
     cy.get('button[data-testid="query-submit"]').click();
 
     cy.intercept('POST' , '/creative_status').as('status'); 
-    cy.wait('@results').its('response.body').should('eq', 200);
+    cy.wait('@status').its('response.body').should('eq', 200);
   })
 })

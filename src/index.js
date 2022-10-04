@@ -24,7 +24,6 @@ import { Question } from './PageRoutes/Articles/Question';
 import { ResultsArticle } from './PageRoutes/Articles/ResultsArticle';
 import { SearchHistoryArticle } from './PageRoutes/Articles/SearchHistoryArticle';
 import { SendFeedbackArticle } from './PageRoutes/Articles/SendFeedbackArticle';
-import reportWebVitals from './reportWebVitals';
 import {Provider} from 'react-redux';
 import {store} from './Redux/store';
 
