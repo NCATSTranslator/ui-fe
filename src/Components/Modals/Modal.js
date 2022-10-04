@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import styles from './ModalGlobals.module.scss';
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
@@ -13,6 +13,11 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
     }
   }
 
+  const handleClickOutside = () => {
+    if(isOpen)
+      onClose();
+  }
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeypress);
 
@@ -22,15 +27,18 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
   }, []);
 
   return (
-    <div className={`${styles.modalWindow} ${modalIsOpen} ${className}`} data-testid={testId}>
-      <div className={`${styles.modalContainer} ${containerClass}`}>
-        <div className={styles.inner}>
-          {children}
-        </div>
-        {
-          !hideCloseButton && 
-          <div className={styles.closeContainer}><button className={styles.closeButton} onClick={onClose}><Close/></button></div>
-        }
+    <div className={`${styles.modalWindow} ${modalIsOpen} ${className}`} data-testid={testId} onClick={handleClickOutside}>
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className={`${styles.modalContainer} ${containerClass}`}
+        >
+          <div className={styles.inner} >
+            {children}
+          </div>
+          {
+            !hideCloseButton && 
+            <div className={styles.closeContainer}><button className={styles.closeButton} onClick={onClose}><Close/></button></div>
+          }
       </div>
     </div>
   );
