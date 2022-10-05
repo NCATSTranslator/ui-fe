@@ -703,7 +703,7 @@ const ResultsList = ({loading}) => {
                         >
                         Name
                       </div>
-                      <div 
+                      {/* <div 
                         className={`${styles.head} ${styles.fdaHead} fda-head`} 
                         onMouseEnter={()=>setFdaTooltipActive(true)} 
                         onMouseLeave={()=>setFdaTooltipActive(false)}
@@ -717,7 +717,7 @@ const ResultsList = ({loading}) => {
                           text='Check marks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'
                           >
                         </Tooltip>
-                      </div>
+                      </div> */}
                       <div 
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
                         onClick={()=>{handleSort((isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow')}}

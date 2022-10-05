@@ -195,7 +195,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
         }
         <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
       </div>
-      <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
+      {/* <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
         { fdaInfo &&
           <span className={`${styles.fdaIcon} fda-icon`} onMouseEnter={()=>setFdaTooltipActive(true)} onMouseLeave={()=>setFdaTooltipActive(false)}>
             <CheckIcon />
@@ -208,7 +208,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
             </Tooltip>
           </span>
         }
-      </div>
+      </div> */}
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span 
           className={styles.evidenceLink} 

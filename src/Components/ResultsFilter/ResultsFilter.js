@@ -57,7 +57,9 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClea
           onFilter={onFilter}
         />
         <p className={styles.subTwo}>Evidence</p>
-          <Checkbox handleClick={handleEvidenceActive} 
+          <Checkbox 
+            handleClick={handleEvidenceActive} 
+            className={styles.evidenceCheckbox}
             checked={activeFilters.some(e => e.tag === evidenceObject.tag)}>
               Minimum Number of Evidence
           </Checkbox>
@@ -82,7 +84,7 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClea
             onChange={e => handleDateRangeChange(e)}
             initialValues={dateRange} 
           /> */}
-        <div className={styles.fdaContainer} onMouseEnter={()=>{setFdaTooltipActive(true)}} onMouseLeave={()=>{setFdaTooltipActive(false)}} >
+        {/* <div className={styles.fdaContainer} onMouseEnter={()=>{setFdaTooltipActive(true)}} onMouseLeave={()=>{setFdaTooltipActive(false)}} >
           <p className={styles.subTwo}>FDA Status</p>
           <Alert/>
           <Tooltip 
@@ -98,7 +100,7 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClea
         <Checkbox handleClick={() => onFilter(fdaObject)} 
           checked={activeFilters.some(e => e.tag === fdaObject.tag)}>
             Approved for Some Indication
-        </Checkbox>
+        </Checkbox> */}
 
         <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
       </div>
