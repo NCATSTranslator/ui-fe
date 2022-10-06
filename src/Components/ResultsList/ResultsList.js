@@ -327,7 +327,6 @@ const ResultsList = ({loading}) => {
   // Handle the addition and removal of individual filters
   const handleFilter = (filter) => {
 
-    // REFACTOR TO FIND MATCH WHERE VALUES ARE THE SAME, THEN WHERE TAGS ARE THE SAME TO AVOID STRING SEARCH EARLY TAG MATCH BUG
     let indexes = [];
     for(const [i, value] of activeFilters.entries() ) {
       if(value.tag === filter.tag)
@@ -487,6 +486,8 @@ const ResultsList = ({loading}) => {
       setActiveStringFilters([]);
       return;
     }
+
+    handlePageClick({selected: 0});
 
     let filteredResults = [];
     let originalResults = [...sortedResults];
