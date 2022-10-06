@@ -18,6 +18,16 @@ export const sortEvidenceHighLow = (items) => {
   return items.sort((a, b) => b.evidence.length - a.evidence.length);
 }
 
+export const sortByEntityStrings = (items, strings) => {
+  return items.sort((a, b) => {
+    const nameA = a.name.toLowerCase();
+    for(const string of strings) {
+      if(nameA.includes(string.toLowerCase()))
+        return -1;
+    }
+    return 1;
+  });
+}
 
 export const sortDateLowHigh = (items) => {
 

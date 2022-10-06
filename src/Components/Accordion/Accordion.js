@@ -2,7 +2,7 @@ import React, {useState, useEffect} from "react";
 import AnimateHeight from "react-animate-height";
 import { NavLink } from "react-router-dom";
 import styles from './Accordion.module.scss';
-import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1=Down.svg"
+import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 
 const Accordion = ({title, titleLink, navLink, extLink, children, expanded, accordionClass, panelClass, icon}) => {
 

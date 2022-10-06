@@ -283,13 +283,6 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
           {!isResults &&
             <div className={styles.examples}>
               <p className={styles.subTwo}>Example Diseases:</p>
-              {/* <div className={styles.exampleList}>
-                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'UMLS:C0580546', label:'Abnormal Blood Glucose'})}>Abnormal Blood Glucose</button>
-                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0018975', label:'Neurofibromatosis Type I'})}>Neurofibromatosis Type I</button>
-                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0004975', label:'Alzheimer\'s'})}>Alzheimer's</button>
-                <button className={styles.button} onClick={()=>handleDiseaseSelection({ id: 'MONDO:0018997', label:'Noonan Syndrome'})}>Noonan Syndrome</button>
-              </div> */}
-    
               <div className={styles.exampleList}>
                 <button 
                   className={styles.button} 
@@ -297,6 +290,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
                     setSelectedDisease({ id: 'MONDO:0005267', label:'Heart Disease'}); 
                     setPresetURL(e.target.dataset.url);
                   }} 
+                  data-testid="heart-disease"
                   data-url="/results?q=6d7ce863-e4d3-4cf8-8a38-3b7191d17964"
                   >Heart Disease
                 </button>

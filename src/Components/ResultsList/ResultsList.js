@@ -15,7 +15,7 @@ import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   // eslint-disable-next-line
-  sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow } from "../../Utilities/sortingFunctions";
+  sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
   // eslint-disable-next-line
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import LoadingBar from "../LoadingBar/LoadingBar";
@@ -52,9 +52,9 @@ const ResultsList = ({loading}) => {
   const [isFetchingARAStatus, setIsFetchingARAStatus] = useState(presetIsLoading);
   // Bool, should results be fetched
   const [isFetchingResults, setIsFetchingResults] = useState(false);
-  // Bool, are the results currently sorted by name
+  // Bool, are the results currently sorted by name (true/false for asc/desc, null for not set)
   const [isSortedByName, setIsSortedByName] = useState(null);
-  // Bool, are the results currently sorted by evidence count
+  // Bool, are the results currently sorted by evidence count (true/false for asc/desc, null for not set)
   const [isSortedByEvidence, setIsSortedByEvidence] = useState(null);
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
@@ -181,7 +181,7 @@ const ResultsList = ({loading}) => {
         console.log(error)
       });
   }, { 
-    refetchInterval: 7000,
+    refetchInterval: 10000,
     enabled: isFetchingARAStatus,
     refetchOnWindowFocus: false
   });
@@ -223,7 +223,6 @@ const ResultsList = ({loading}) => {
         console.log(error)
       });
   }, { 
-    // refetchInterval: 7000,
     enabled: isFetchingResults,
     refetchOnWindowFocus: false
   });
@@ -328,7 +327,6 @@ const ResultsList = ({loading}) => {
   // Handle the addition and removal of individual filters
   const handleFilter = (filter) => {
 
-    // REFACTOR TO FIND MATCH WHERE VALUES ARE THE SAME, THEN WHERE TAGS ARE THE SAME TO AVOID STRING SEARCH EARLY TAG MATCH BUG
     let indexes = [];
     for(const [i, value] of activeFilters.entries() ) {
       if(value.tag === filter.tag)
@@ -438,6 +436,11 @@ const ResultsList = ({loading}) => {
         setIsSortedByEvidence(true);
         setIsSortedByName(null);
         break;
+      case 'entityString':
+        newSortedResults = sortByEntityStrings(newSortedResults, activeStringFilters);
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
+
       // case 'dateLowHigh':
       //   newSortedResults = sortDateLowHigh(newSortedResults);
       //   setIsSortedByEvidence(null);
@@ -489,6 +492,8 @@ const ResultsList = ({loading}) => {
       return;
     }
 
+    handlePageClick({selected: 0});
+
     let filteredResults = [];
     let originalResults = [...sortedResults];
     /* 
@@ -513,6 +518,7 @@ const ResultsList = ({loading}) => {
           case 'str':
             if(!findStringMatch(element, filter.value))
               addElement = false;
+            // handleSort('entityString');
             break;
           // Date Range filter
           case 'date':
@@ -533,9 +539,11 @@ const ResultsList = ({loading}) => {
         filteredResults.push(element);
       }
     }
+
     // Set the formatted results to the newly filtered results
     setFormattedResults(filteredResults);
 
+        
     let newStringFilters = []; 
     for(const filter of activeFilters) {
       // String filters with identical values shouldn't be added to the activeFilters array, 
@@ -543,13 +551,22 @@ const ResultsList = ({loading}) => {
       if(filter.tag === 'str')
         newStringFilters.push(filter.value);
     }
-    setActiveStringFilters(newStringFilters);
+
+    // if the new set of filters don't match the current ones, call setActiveStringFilters to update them
+    if(!(newStringFilters.length === activeStringFilters.length && newStringFilters.every((value, index) => value === activeStringFilters[index])))
+      setActiveStringFilters(newStringFilters);
 
     /*
       triggers on filter change and on sorting change in order to allow user to change 
       the sorting on already filtered results
     */
   }, [activeFilters, sortedResults]);
+
+  useEffect(() => {
+    if (activeFilters.some(f => f.tag === 'str')) {
+      handleSort('entityString');
+    }
+  }, [activeStringFilters]);
 
   useEffect(() => {
     if(newItemsPerPage !== null) {
@@ -704,7 +721,7 @@ const ResultsList = ({loading}) => {
                         >
                         Name
                       </div>
-                      <div 
+                      {/* <div 
                         className={`${styles.head} ${styles.fdaHead} fda-head`} 
                         onMouseEnter={()=>setFdaTooltipActive(true)} 
                         onMouseLeave={()=>setFdaTooltipActive(false)}
@@ -718,7 +735,7 @@ const ResultsList = ({loading}) => {
                           text='Check marks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'
                           >
                         </Tooltip>
-                      </div>
+                      </div> */}
                       <div 
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
                         onClick={()=>{handleSort((isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow')}}

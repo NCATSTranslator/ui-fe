@@ -47,8 +47,11 @@
   .checkbox,.radio {
     padding-left: $xs;
   }
-  label:last-of-type {
+  label {
     margin: 0;
+  }
+  .evidenceCheckbox {
+    margin-bottom: $s;
   }
   .clearAll {
     display: block;

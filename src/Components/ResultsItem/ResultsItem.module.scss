@@ -2,7 +2,8 @@
 
 .result {
   display: grid;
-  grid-template-columns: 1fr 50px 200px 50px;
+  grid-template-columns: 1fr 200px 50px;
+  // grid-template-columns: 1fr 50px 200px 50px;
   // Columns including checkbox
   // grid-template-columns: 50px 1fr 50px 200px 50px;
   padding: 12px;

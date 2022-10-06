@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import styles from './Button.module.scss';
 
-const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, children, disabled}) => {
+const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, children, disabled, testId}) => {
 
   let buttonStyle = (isSecondary) ? styles.secondary : styles.primary;
   buttonStyle += (iconOnly) ? styles.iconOnly : '';
@@ -31,6 +31,7 @@ const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, c
           href={href} 
           target={_blank && '_blank'}
           rel={_blank && 'noopener noreferrer'}
+          data-testid={testId}
         >
           {children}
         </a>
@@ -41,6 +42,7 @@ const Button = ({isSecondary, handleClick, href, iconOnly, _blank, type, size, c
           type={type} 
           onClick={handleClick}
           disabled={isDisabled}
+          data-testid={testId}
         >
           {children}
         </button>
