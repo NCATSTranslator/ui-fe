@@ -3,6 +3,12 @@
 .evidenceModal {
   .evidenceContainer {
     width: 1130px;
+    height: 85%;
+    &>div {
+      height: 100%;
+      display: grid;
+      align-content: space-between;
+    }
   }
   .tableHead {
     border-bottom: 1px solid $midGray;
