@@ -13,23 +13,27 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
     fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=20`, nameResolverRequestOptions)
       .then(response => response.json())
       .then(data => {
-        let curies = {
-          // Convert data returned from Name Resolver into a list of curies
-          curies: getCuriesFromNameResolver(data),
+        // Convert data returned from Name Resolver into a list of curies
+        let curies = getCuriesFromNameResolver(data);
+        console.log('Curies returned from Name resolver:', curies);
+        let body = {
+          curies: curies,
           conflate: true
         }
         let nodeNormalizerRequestOptions = {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(curies)
+          body: JSON.stringify(body)
         };
         // Fetch list of normalized nodes based on list of curies from Name Resolver
         return fetch('https://nodenorm.transltr.io/1.3/get_normalized_nodes', nodeNormalizerRequestOptions)
       })
       .then(response => response.json())
       .then(data => {
+        console.log('full data from node normalizer:', data);
         // get list of names from the data returned from Node Normalizer
         let autoCompleteItems = getFormattedNamesFromNormalizer(data);
+        console.log('formatted autocomplete items:', autoCompleteItems)
         setAutoCompleteItems(autoCompleteItems);
         setLoadingAutocomplete(false);
       })
