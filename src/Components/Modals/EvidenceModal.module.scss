@@ -44,10 +44,15 @@
       .cell {
         padding: 12px;
         height: 98px;
-        .bold {
+        strong {
           font-weight: 700;
+          font-size: 12px;
+          display: inline;
         }
-        &.source, &.pubdate {
+        &.link {
+          font-size: 12px;
+        }
+        &.source, &.pubdate, &.pValue, &.link, &.location, &.status {
           text-align: center;
         }
         &.title {
@@ -74,6 +79,9 @@
         overflow: hidden;
       }
     }
+    .clinicalTrials .cell {
+      
+    }
     &>div:nth-child(odd){
       background-color: $lightGray;
     }
@@ -91,6 +99,11 @@
         margin-left: 4px;
         width: $s;
       }
+    }
+  }
+  .pValueTable, .otherTable {
+    &>div {
+      grid-template-columns: 1fr 1fr 2fr;
     }
   }
   .noEvidence {

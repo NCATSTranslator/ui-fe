@@ -119,6 +119,15 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                     <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
                     <div className={`${styles.head} ${styles.cti}`}>CTI</div>
                   </div>
+                  <div className={styles.evidenceItem}>
+                    <div className={`${styles.cell} ${styles.pubdate} pubdate`}>Jan 33, 2222</div>
+                    <div className={`${styles.cell} ${styles.status}`}>Ongoing</div>
+                    <div className={`${styles.cell} ${styles.location}`}>Dublin</div>
+                    <div className={`${styles.cell} ${styles.title}`}>An Example CT</div>
+                    <div className={`${styles.cell} ${styles.summary}`}>Lorem ipsum dolor sit amet</div>
+                    <div className={`${styles.cell} ${styles.edge}`}><strong>Guinness</strong> treats <strong>sadness</strong></div>
+                    <div className={`${styles.cell} ${styles.cti}`}>What's a CTI, anyway?</div>
+                  </div>
                 </div>
               </div>
               <div heading="Publications">
@@ -156,7 +165,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                             {
                               item.edge && 
                               <span>
-                                <span className={styles.bold}>{item.edge.subject}</span> {item.edge.predicate} <span className={styles.bold}>{item.edge.object}</span>
+                                <strong>{item.edge.subject}</strong> {item.edge.predicate} <strong>{item.edge.object}</strong>
                               </span>
                             }          
                           </span>
@@ -169,20 +178,67 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                     <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
                   }
                 </div>
+                { 
+                  currentEvidence.length > itemsPerPage && !isLoading &&
+                  <div className={styles.bottom}>
+                    <div className={styles.perPage}>
+                      <Select 
+                        label="" 
+                        name="Items Per Page"
+                        size="m" 
+                        handleChange={(value)=>{
+                          setNewItemsPerPage(parseInt(value));
+                        }}
+                        value={newItemsPerPage}
+                        >
+                        <option value="5" key="0">5</option>
+                        <option value="10" key="1">10</option>
+                        <option value="20" key="2">20</option>
+                      </Select>
+                    </div>
+                    <div className={styles.pagination}>
+                      <ReactPaginate
+                        breakLabel="..."
+                        nextLabel="Next"
+                        previousLabel="Previous"
+                        onPageChange={handlePageClick}
+                        pageRangeDisplayed={2}
+                        marginPagesDisplayed={2}
+                        pageCount={pageCount}
+                        renderOnZeroPageCount={null}
+                        className={styles.pageNums}
+                        pageClassName={styles.pageNum}
+                        activeClassName={styles.current}
+                        previousLinkClassName={`${styles.prev} ${styles.button}`}
+                        nextLinkClassName={`${styles.prev} ${styles.button}`}
+                        disabledLinkClassName={styles.disabled}
+                        forcePage={currentPage}
+                      />
+                    </div>
+                  </div>
+                }
               </div>
               <div heading="P Value">
-                <div className={`${styles.tableBody} ${styles.pValue}`}>
+                <div className={`${styles.tableBody} ${styles.pValueTable}`}>
                   <div className={`${styles.tableHead}`}>
                     <div className={`${styles.head} ${styles.link}`}>P Value</div>
                     <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
                   </div>
+                  <div className={styles.evidenceItem}>
+                    <div className={`${styles.cell} ${styles.pValue} pvalue`}>1</div>
+                    <div className={`${styles.cell} ${styles.edge}`}><strong>Example node</strong> example edge <strong>example node</strong></div>
+                  </div>
                 </div>
               </div>
               <div heading="Other">
-                <div className={`${styles.tableBody} ${styles.other}`}>
+                <div className={`${styles.tableBody} ${styles.otherTable}`}>
                   <div className={`${styles.tableHead}`}>
                     <div className={`${styles.head} ${styles.link}`}>Link</div>
                     <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
+                  </div>
+                  <div className={styles.evidenceItem}>
+                    <div className={`${styles.cell} ${styles.link} link`}><a href="https://lincsproject.org/" target="_blank" rel="noreferrer">lincsproject.org</a></div>
+                    <div className={`${styles.cell} ${styles.edge}`}><strong>Example node</strong> example edge <strong>example node</strong></div>
                   </div>
                 </div>
               </div>
@@ -191,45 +247,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
         }
       </div>
 
-      { 
-        currentEvidence.length > itemsPerPage && !isLoading &&
-        <div className={styles.bottom}>
-          <div className={styles.perPage}>
-            <Select 
-              label="" 
-              name="Items Per Page"
-              size="m" 
-              handleChange={(value)=>{
-                setNewItemsPerPage(parseInt(value));
-              }}
-              value={newItemsPerPage}
-              >
-              <option value="5" key="0">5</option>
-              <option value="10" key="1">10</option>
-              <option value="20" key="2">20</option>
-            </Select>
-          </div>
-          <div className={styles.pagination}>
-            <ReactPaginate
-              breakLabel="..."
-              nextLabel="Next"
-              previousLabel="Previous"
-              onPageChange={handlePageClick}
-              pageRangeDisplayed={2}
-              marginPagesDisplayed={2}
-              pageCount={pageCount}
-              renderOnZeroPageCount={null}
-              className={styles.pageNums}
-              pageClassName={styles.pageNum}
-              activeClassName={styles.current}
-              previousLinkClassName={`${styles.prev} ${styles.button}`}
-              nextLinkClassName={`${styles.prev} ${styles.button}`}
-              disabledLinkClassName={styles.disabled}
-              forcePage={currentPage}
-            />
-          </div>
-        </div>
-      }
+      
     </Modal>
   );
 }
