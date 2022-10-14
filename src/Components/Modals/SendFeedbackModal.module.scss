@@ -28,4 +28,13 @@
   .issueCreatedContainer {
     text-align: center;
   }
+  button.newIssue, a.viewIssue {
+    display: block;
+    margin: 0 auto;
+    width: 200px;
+  }
+  a.viewIssue {
+    margin: 0 auto $s;
+    box-sizing: border-box;
+  }
 }
