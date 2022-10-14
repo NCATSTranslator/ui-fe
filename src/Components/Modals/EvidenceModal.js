@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useCallback} from "react";
 import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
 import Select from "../FormFields/Select";
@@ -45,14 +45,14 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
   }, [itemOffset, itemsPerPage, currentEvidence, endOffset]);
 
   // Handles direct page click
-  const handlePageClick = (event) => {
+  const handlePageClick = useCallback((event) => {
     const newOffset = (event.selected * itemsPerPage) % currentEvidence.length;
     console.log(
       `User requested page number ${event.selected}, which is offset ${newOffset}`
     );
     setCurrentPage(event.selected);
     setItemOffset(newOffset);
-  };
+  },[itemsPerPage, currentEvidence]);
 
   useEffect(() => {
     if(newItemsPerPage !== null) {
@@ -60,7 +60,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
       setNewItemsPerPage(null);
       handlePageClick({selected: 0});
     }
-  }, [newItemsPerPage]);
+  }, [newItemsPerPage, handlePageClick]);
 
   useEffect(() => {
     setEvidenceTitle(title)
