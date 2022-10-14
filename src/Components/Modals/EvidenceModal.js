@@ -122,10 +122,10 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                   <div className={styles.evidenceItem}>
                     <div className={`${styles.cell} ${styles.pubdate} pubdate`}>Jan 33, 2222</div>
                     <div className={`${styles.cell} ${styles.status}`}>Ongoing</div>
-                    <div className={`${styles.cell} ${styles.location}`}>Dublin</div>
+                    <div className={`${styles.cell} ${styles.location}`}>Lorem ipsum</div>
                     <div className={`${styles.cell} ${styles.title}`}>An Example CT</div>
                     <div className={`${styles.cell} ${styles.summary}`}>Lorem ipsum dolor sit amet</div>
-                    <div className={`${styles.cell} ${styles.edge}`}><strong>Guinness</strong> treats <strong>sadness</strong></div>
+                    <div className={`${styles.cell} ${styles.edge}`}><strong>Blank</strong> treats <strong>Blank</strong></div>
                     <div className={`${styles.cell} ${styles.cti}`}>What's a CTI, anyway?</div>
                   </div>
                 </div>

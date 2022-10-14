@@ -104,6 +104,10 @@
   .pValueTable, .otherTable {
     &>div {
       grid-template-columns: 1fr 1fr 2fr;
+      height: 60px;
+      .cell {
+        height: auto;
+      }
     }
   }
   .noEvidence {
