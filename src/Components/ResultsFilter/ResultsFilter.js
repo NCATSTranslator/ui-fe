@@ -2,24 +2,23 @@ import React, {useState} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
 import SimpleRange from '../Range/SimpleRange';
-  // eslint-disable-next-line
-import TwoThumbRange from '../Range/TwoThumbRange';
+// import TwoThumbRange from '../Range/TwoThumbRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
-import Tooltip from '../Tooltip/Tooltip';
-import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
+// import Tooltip from '../Tooltip/Tooltip';
+// import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
 
 const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClearTag}) => {
   
   // eslint-disable-next-line
   const [minEvidence, setMinEvidence] = useState(1); 
   const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: minEvidence});
-  const dateRangeMin = 1840;
-  const dateRangeMax = 2022;
-  const dateRange = [dateRangeMin, dateRangeMax];
-  const [dateRangeObject, setDateRangeObject] = useState({tag:'date', value: dateRange});
-  const fdaObject = {tag:'fda', value: ''};
+  // const dateRangeMin = 1840;
+  // const dateRangeMax = 2022;
+  // const dateRange = [dateRangeMin, dateRangeMax];
+  // const [dateRangeObject, setDateRangeObject] = useState({tag:'date', value: dateRange});
+  // const fdaObject = {tag:'fda', value: ''};
 
-  const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
+  // const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
 
   onHighlight = (!onHighlight) ? () => console.log("No highlight function specified in ResultsFilter.") : onHighlight; 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 

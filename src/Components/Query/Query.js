@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useSelector, useDispatch } from 'react-redux'
-import { NavigationType, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import QueryBar from "../QueryBar/QueryBar";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
@@ -12,9 +12,9 @@ import _ from "lodash";
 import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
-import styles from './Query3.module.scss';
+import styles from './Query.module.scss';
 
-const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
+const Query = ({results, loading, presetDisease}) => {
 
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
@@ -219,7 +219,7 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItems, storedQuery, selectedDisease, navigate])
+  }, [isValidSubmission, dispatch, queryItems, storedQuery, selectedDisease, navigate, setSearchParams])
 
   /* 
     If the query has been populated by clicking on an item in the query history
@@ -240,11 +240,11 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
         clearTimeout(timer);
       }
     }
-  }, [selectedDisease, presetURL]);
+  }, [selectedDisease, presetURL, navigate]);
 
   return (
     <>
-      <div className={`${styles.queryThree}`} >
+      <div className={`${styles.query}`} >
         <div className={`${styles.container} container`}>
           {!isResults &&
             <h4 className={styles.heading}>Biomedical Data Translator</h4>
@@ -347,4 +347,4 @@ const Query3 = ({results, handleAdd, handleRemove, loading, presetDisease}) => {
 }
 
 
-export default Query3;
+export default Query;

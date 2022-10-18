@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import Checkbox from "../FormFields/Checkbox";
 import GraphView from '../GraphView/GraphView';
-import {ReactComponent as CheckIcon } from "../../Icons/Buttons/Circle Checkmark.svg"
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
-import Tooltip from '../Tooltip/Tooltip';
 import { formatBiolinkPredicate } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 
@@ -17,14 +15,14 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
 
   let evidenceCount = item.evidence.length;
     
-  let fdaInfo = item.fdaInfo;
+  // let fdaInfo = item.fdaInfo;
   
   checked = (allSelected || checked) ? true : false;
 
   
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
-  const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
+  // const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
   const [formattedPaths, setFormattedPaths] = useState([]);
 
   let pathString = (formattedPaths.length > 1) ? 'Paths that treat' : 'Path that treats';
@@ -66,40 +64,6 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
       setHeight('auto');
   }, [isExpanded])
 
-  useEffect(() => {
-    setIsExpanded(false);
-    let newPaths = [];
-    item.paths.forEach((path) => {
-      let pathToAdd = []
-      path.subgraph.forEach((item, i)=> {
-        if(!item)
-          return;
-        if(i % 2 === 0) {
-          let name = (item.names) ? item.names[0]: '';
-          let type = (item.types) ? item.types[0]: '';
-          let desc = (item.description) ? item.description[0]: '';
-          let category = (i === path.subgraph.length - 1) ? 'target' : 'object';
-          pathToAdd[i] = {
-            category: category,
-            name: name,
-            type: type,
-            description: desc,
-          }
-        } else {
-          let pred = (item.predicates) ? formatBiolinkPredicate(item.predicates[0]) : '';
-          pathToAdd[i] = {
-            category: 'predicate',
-            predicates: [pred],
-            edges: [{object: item.object, predicate: pred, subject: item.subject}]
-          }
-        }
-      })
-      newPaths.push(pathToAdd);
-    }) 
-    // setFormattedPaths(newPaths);
-    setFormattedPaths(generateCompressedPaths(newPaths));
-  }, [item, generateCompressedPaths]);
-
   const checkForNodeUniformity = (pathOne, pathTwo) => {
     // if the lengths of the paths are different, they cannot have the same nodes
     if(pathOne.length !== pathTwo.length) 
@@ -119,7 +83,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
     return nodesMatch;
   }
 
-  const generateCompressedPaths = (graph) => {
+  const generateCompressedPaths = useCallback((graph) => {
     let newCompressedPaths = [];
     let pathToDisplay = null
     for(const [i, path] of graph.entries()) {
@@ -169,7 +133,41 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
     }
 
     return newCompressedPaths;
-  }
+  }, []);
+
+  useEffect(() => {
+    setIsExpanded(false);
+    let newPaths = [];
+    item.paths.forEach((path) => {
+      let pathToAdd = []
+      path.subgraph.forEach((item, i)=> {
+        if(!item)
+          return;
+        if(i % 2 === 0) {
+          let name = (item.names) ? item.names[0]: '';
+          let type = (item.types) ? item.types[0]: '';
+          let desc = (item.description) ? item.description[0]: '';
+          let category = (i === path.subgraph.length - 1) ? 'target' : 'object';
+          pathToAdd[i] = {
+            category: category,
+            name: name,
+            type: type,
+            description: desc,
+          }
+        } else {
+          let pred = (item.predicates) ? formatBiolinkPredicate(item.predicates[0]) : '';
+          pathToAdd[i] = {
+            category: 'predicate',
+            predicates: [pred],
+            edges: [{object: item.object, predicate: pred, subject: item.subject}]
+          }
+        }
+      })
+      newPaths.push(pathToAdd);
+    }) 
+    // setFormattedPaths(newPaths);
+    setFormattedPaths(generateCompressedPaths(newPaths));
+  }, [item, generateCompressedPaths]);
 
   return (
     <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''} result`} >

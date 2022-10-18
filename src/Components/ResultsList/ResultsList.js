@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from './ResultsList.module.scss';
 import Checkbox from "../FormFields/Checkbox";
-import Query3 from "../Query/Query3";
+import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import ShareModal from "../Modals/ShareModal";
-import Tooltip from "../Tooltip/Tooltip";
+// import Tooltip from "../Tooltip/Tooltip";
 import Select from "../FormFields/Select";
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
@@ -90,7 +90,8 @@ const ResultsList = ({loading}) => {
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
   // Int, current page
-  const [currentPage, setCurrentPage] = useState(0);
+  // const [currentPage, setCurrentPage] = useState(0);
+  const currentPage = useRef(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
   // Array, currently active filters
@@ -100,7 +101,7 @@ const ResultsList = ({loading}) => {
   // Array, aras that have returned data
   const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
   // Bool, is fda tooltip currently active
-  const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
+  // const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
   // Bool, have the initial results been sorted yet
   const [presorted, setPresorted] = useState(false);
   // Obj, {label: ''}, used to set input text, determined by results object
@@ -127,19 +128,17 @@ const ResultsList = ({loading}) => {
     setDisplayedResults(formattedResults.slice(itemOffset, endOffset));
     setEndResultIndex(endOffset);
     setPageCount(Math.ceil(formattedResults.length / itemsPerPage));
-    if(endOffset !== 0)
-      console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
   }, [itemOffset, itemsPerPage, formattedResults]);
 
   // Handles direct page click
-  const handlePageClick = (event) => {
+  const handlePageClick = useCallback((event) => {
     const newOffset = (event.selected * itemsPerPage) % formattedResults.length;
     console.log(
       `User requested page number ${event.selected}, which is offset ${newOffset}`
     );
-    setCurrentPage(event.selected);
+    currentPage.current = event.selected;
     setItemOffset(newOffset);
-  };
+  }, [formattedResults.length, itemsPerPage]);
 
   // React Query call for status of results
   // eslint-disable-next-line
@@ -160,10 +159,9 @@ const ResultsList = ({loading}) => {
     const response = await fetch('/creative_status', requestOptions)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        console.log("ARA status:",data);
         let fetchResults = false;
         if(data.data.aras.length > returnedARAs.aras.length) {
-          console.log("New ARA returned, fetching new results...");
           console.log(`Old ARAs: ${returnedARAs.aras}, New ARAs: ${data.data.aras}`);
           setReturnedARAs(data.data);
           fetchResults = true;
@@ -205,7 +203,7 @@ const ResultsList = ({loading}) => {
     const response = await fetch('/creative_result', requestOptions)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        console.log('New results:', data);
         if(data.status === 'error') {
           setIsError(true);
           setIsFetchingARAStatus(false);
@@ -226,6 +224,60 @@ const ResultsList = ({loading}) => {
     enabled: isFetchingResults,
     refetchOnWindowFocus: false
   });
+
+  // Handle the sorting 
+  const handleSort = useCallback((sortName) => {
+    let newSortedResults = cloneDeep(sortedResults);
+    switch (sortName) {
+      case 'nameLowHigh':
+        newSortedResults = sortNameLowHigh(newSortedResults);
+        setIsSortedByName(true);
+        setIsSortedByEvidence(null);
+        break;
+      case 'nameHighLow':
+        newSortedResults = sortNameHighLow(newSortedResults);
+        setIsSortedByName(false);
+        setIsSortedByEvidence(null);
+        break;
+      case 'evidenceLowHigh':
+        newSortedResults = sortEvidenceLowHigh(newSortedResults);
+        setIsSortedByEvidence(false);
+        setIsSortedByName(null);
+        break;
+      case 'evidenceHighLow':
+        newSortedResults = sortEvidenceHighLow(newSortedResults);
+        setIsSortedByEvidence(true);
+        setIsSortedByName(null);
+        break;
+      case 'entityString':
+        newSortedResults = sortByEntityStrings(newSortedResults, activeStringFilters);
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
+        break;
+      // case 'dateLowHigh':
+      //   newSortedResults = sortDateLowHigh(newSortedResults);
+      //   setIsSortedByEvidence(null);
+      //   setIsSortedByName(null);
+      //   break;
+      // case 'dateHighLow':
+      //   newSortedResults = sortDateHighLow(newSortedResults);
+      //   setIsSortedByEvidence(null);
+      //   setIsSortedByName(null);
+      //   break;
+      default:
+        break;
+    }
+    // if(selectedItems.length > 0) {
+    //   newSortedResults = sortByHighlighted(newSortedResults, selectedItems);
+    // }
+    
+    // assign the newly sorted results (no need to set formatted results, since they'll be filtered after being sorted, then set there)
+    setSortedResults(newSortedResults);
+
+    // if we're not already on page 1, reset to page one.
+    if(currentPage.current !== 0)
+      handlePageClick({selected: 0});
+  }, [activeStringFilters, handlePageClick, sortedResults]);
 
   /*
     When the results change, which occurs when the React Query returns, handle the returned data
@@ -257,7 +309,7 @@ const ResultsList = ({loading}) => {
       handleSort('evidenceHighLow');
       setPresorted(true);
     }
-  }, [formattedResults, presorted]);
+  }, [formattedResults, presorted, handleSort]);
   
   useEffect(() => {
     // we have results to show, set isLoading to false
@@ -412,57 +464,6 @@ const ResultsList = ({loading}) => {
     setActiveFilters(newFilters);
   }
 
-  // Handle the sorting 
-  const handleSort = (sortName) => {
-    let newSortedResults = cloneDeep(sortedResults);
-    switch (sortName) {
-      case 'nameLowHigh':
-        newSortedResults = sortNameLowHigh(newSortedResults);
-        setIsSortedByName(true);
-        setIsSortedByEvidence(null);
-        break;
-      case 'nameHighLow':
-        newSortedResults = sortNameHighLow(newSortedResults);
-        setIsSortedByName(false);
-        setIsSortedByEvidence(null);
-        break;
-      case 'evidenceLowHigh':
-        newSortedResults = sortEvidenceLowHigh(newSortedResults);
-        setIsSortedByEvidence(false);
-        setIsSortedByName(null);
-        break;
-      case 'evidenceHighLow':
-        newSortedResults = sortEvidenceHighLow(newSortedResults);
-        setIsSortedByEvidence(true);
-        setIsSortedByName(null);
-        break;
-      case 'entityString':
-        newSortedResults = sortByEntityStrings(newSortedResults, activeStringFilters);
-        setIsSortedByEvidence(null);
-        setIsSortedByName(null);
-
-      // case 'dateLowHigh':
-      //   newSortedResults = sortDateLowHigh(newSortedResults);
-      //   setIsSortedByEvidence(null);
-      //   setIsSortedByName(null);
-      //   break;
-      // case 'dateHighLow':
-      //   newSortedResults = sortDateHighLow(newSortedResults);
-      //   setIsSortedByEvidence(null);
-      //   setIsSortedByName(null);
-      //   break;
-      default:
-        break;
-    }
-    // if(selectedItems.length > 0) {
-    //   newSortedResults = sortByHighlighted(newSortedResults, selectedItems);
-    // }
-    
-    setSortedResults(newSortedResults);
-    setFormattedResults(newSortedResults);
-    handlePageClick({selected: 0});
-  }
-
   // Handle highlighting of results
   const handleResultHighlight = () => {
     if(selectedItems.length <= 0) {
@@ -486,13 +487,15 @@ const ResultsList = ({loading}) => {
   // Filter the results whenever the activated filters change 
   useEffect(() => {
     // If there are no active filters, get the full result set and reset the activeStringFilters
-    if(activeFilters.length <= 0) {
+    if(activeFilters.length === 0) {
       setFormattedResults(sortedResults);
       setActiveStringFilters([]);
       return;
     }
 
-    handlePageClick({selected: 0});
+    // if we're not already on page 1, reset to page one.
+    if(currentPage.current !== 0)
+      handlePageClick({selected: 0});
 
     let filteredResults = [];
     let originalResults = [...sortedResults];
@@ -543,7 +546,6 @@ const ResultsList = ({loading}) => {
     // Set the formatted results to the newly filtered results
     setFormattedResults(filteredResults);
 
-        
     let newStringFilters = []; 
     for(const filter of activeFilters) {
       // String filters with identical values shouldn't be added to the activeFilters array, 
@@ -560,13 +562,21 @@ const ResultsList = ({loading}) => {
       triggers on filter change and on sorting change in order to allow user to change 
       the sorting on already filtered results
     */
-  }, [activeFilters, sortedResults]);
+  }, [activeFilters, sortedResults, activeStringFilters, handlePageClick]);
 
   useEffect(() => {
-    if (activeFilters.some(f => f.tag === 'str')) {
+    if(activeFilters.some(f => f.tag === 'str')) {
       handleSort('entityString');
     }
-  }, [activeStringFilters]);
+  /*
+    Providing handleSort as dependency leads to infinite loop on entityString search due to handleSort
+    modifying one of its dependencies (sortedResults). Need to reimplement later so that I can supply 
+    handleSort as a dependency below and prevent future bugs in this useEffect hook. 
+    
+    Good for now though.
+  */
+  // eslint-disable-next-line
+  }, [activeFilters]);
 
   useEffect(() => {
     if(newItemsPerPage !== null) {
@@ -574,7 +584,7 @@ const ResultsList = ({loading}) => {
       setNewItemsPerPage(null);
       handlePageClick({selected: 0});
     }
-  }, [newItemsPerPage]);
+  }, [newItemsPerPage, handlePageClick]);
 
   const displayLoadingButton = (
     handleResultsRefresh, 
@@ -630,7 +640,7 @@ const ResultsList = ({loading}) => {
         edges={evidenceEdges}
       />
       <div className={styles.resultsList}>
-        <Query3 results loading={isLoading} presetDisease={presetDisease}/>
+        <Query results loading={isLoading} presetDisease={presetDisease}/>
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
@@ -815,7 +825,7 @@ const ResultsList = ({loading}) => {
                     previousLinkClassName={`${styles.prev} ${styles.button}`}
                     nextLinkClassName={`${styles.prev} ${styles.button}`}
                     disabledLinkClassName={styles.disabled}
-                    forcePage={currentPage}
+                    forcePage={currentPage.current}
                   />
                 </div>
               }
