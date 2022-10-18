@@ -55,7 +55,7 @@ const getFormattedNamesFromNormalizer = (data) => {
     // get array of values from object
     Object.values(data)
       // filter to new array with only items of type => disease
-      .filter((item) => item && item.type && item.type.includes("biolink:Disease") )
+      .filter((item) => item && item.type && item.type.includes("biolink:Disease") && item.id.label )
       // map those values into a new array that only has the label, aka 'common name'
       .map((item) => {
         return {id: item.id.identifier, label: capitalizeAllWords(item.id.label)}
