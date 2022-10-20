@@ -214,7 +214,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
                 label="Steps to Reproduce *" 
                 size="l" 
                 rows={3}
-                maxLength={200}
+                maxLength={1000}
                 handleChange={(value)=>{
                   setCurrentSteps(value);
                   resetErrors();
@@ -227,7 +227,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
               label="Comments *" 
               size="l" 
               rows={5}
-              maxLength={275}
+              maxLength={1000}
               handleChange={(value)=>{
                 setCurrentComments(value);
                 resetErrors();
