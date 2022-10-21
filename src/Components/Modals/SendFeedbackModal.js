@@ -5,6 +5,7 @@ import Button from '../FormFields/Button';
 import TextInput from "../FormFields/TextInput";
 import FileInput from "../FormFields/FileInput";
 import Select from "../FormFields/Select";
+import { Fade } from "react-awesome-reveal";
 import {ReactComponent as Warning} from '../../Icons/information.svg'
 import { currentQueryResultsID } from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux'
@@ -162,12 +163,13 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
         createdIssueURL &&
         <div className={styles.issueCreatedContainer}>
           <p>Your feedback has been submitted.<br/>Please click the link below to view the status of your issue:</p>
-          <Button href={createdIssueURL} _blank rel="noopener noreferrer">View Issue</Button>
+          <Button href={createdIssueURL} _blank rel="noopener noreferrer" className={styles.viewIssue}>View Issue</Button>
+          <Button isSecondary handleClick={() => setCreatedIssueURL(null) } className={styles.newIssue}>Submit More Feedback</Button>
         </div>
       }
       {
         !createdIssueURL && 
-        <>
+        <Fade>
           <h5>Send Feedback</h5>
           <p>Enjoying Translator? Having an issue? Either way, we want to know - use this form to let us know your comments and we'll get back to you as soon as possible. All fields marked with * are required.</p>
           <p className={styles.disclaimer}><Warning/>In the mean time, please check out our Help page for Translator tips, tricks, and tutorials.</p>
@@ -212,7 +214,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
                 label="Steps to Reproduce *" 
                 size="l" 
                 rows={3}
-                maxLength={200}
+                maxLength={1500}
                 handleChange={(value)=>{
                   setCurrentSteps(value);
                   resetErrors();
@@ -225,7 +227,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
               label="Comments *" 
               size="l" 
               rows={5}
-              maxLength={275}
+              maxLength={1500}
               handleChange={(value)=>{
                 setCurrentComments(value);
                 resetErrors();
@@ -241,7 +243,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
             />
             <Button type="submit" size="l" disabled={errorActive}>Send</Button>
           </form>
-        </>
+        </Fade>
       }
     </Modal>
   );

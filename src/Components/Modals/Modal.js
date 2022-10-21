@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useCallback} from "react";
 import styles from './ModalGlobals.module.scss';
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 
@@ -7,11 +7,11 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = (startOpen) ? styles.true : styles.false;
 
-  const handleKeypress = (e) => {
+  const handleKeypress = useCallback((e) => {
     if(e.key === 'Escape') {
       onClose();
     }
-  }
+  },[onClose]);
 
   const handleClickOutside = () => {
     if(isOpen)
@@ -24,7 +24,7 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
     return () => {
       window.removeEventListener("keydown", handleKeypress);
     };
-  }, []);
+  }, [handleKeypress]);
 
   return (
     <div className={`${styles.modalWindow} ${modalIsOpen} ${className}`} data-testid={testId} onClick={handleClickOutside}>

@@ -1,36 +1,36 @@
 import React from "react";
-import Query3 from "../../Components/Query/Query3";
+import Query from "../../Components/Query/Query";
 
 import homeOne from "../../Assets/Images/Home/home1.jpg";
 import homeTwo from "../../Assets/Images/Home/home2.jpg";
 import homeThree from "../../Assets/Images/Home/home3.jpg";
-import berkeley from "../../Assets/Images/Logos/berkeley.png";
-import bma from "../../Assets/Images/Logos/bma.png";
-import broad from "../../Assets/Images/Logos/broad.png";
-import columbia from "../../Assets/Images/Logos/columbia.png";
-import covar from "../../Assets/Images/Logos/covar.png";
-import dartmouth from "../../Assets/Images/Logos/dartmouth.png";
-import drexel from "../../Assets/Images/Logos/drexel.png";
-import harvard from "../../Assets/Images/Logos/harvard.png";
-import isb from "../../Assets/Images/Logos/isb.png";
-import maas from "../../Assets/Images/Logos/maas.png";
-import nih from "../../Assets/Images/Logos/nih.png";
-import osu from "../../Assets/Images/Logos/osu.png";
-import penn from "../../Assets/Images/Logos/penn.png";
-import renci from "../../Assets/Images/Logos/renci.png";
-import scripps from "../../Assets/Images/Logos/scripps.png";
-import tufts from "../../Assets/Images/Logos/tufts.png";
-import uab from "../../Assets/Images/Logos/uab.png";
-import ucamc from "../../Assets/Images/Logos/ucamc.png";
-import ucd from "../../Assets/Images/Logos/ucd.png";
-import ucsf from "../../Assets/Images/Logos/ucsf.png";
+// import berkeley from "../../Assets/Images/Logos/berkeley.png";
+// import bma from "../../Assets/Images/Logos/bma.png";
+// import broad from "../../Assets/Images/Logos/broad.png";
+// import columbia from "../../Assets/Images/Logos/columbia.png";
+// import covar from "../../Assets/Images/Logos/covar.png";
+// import dartmouth from "../../Assets/Images/Logos/dartmouth.png";
+// import drexel from "../../Assets/Images/Logos/drexel.png";
+// import harvard from "../../Assets/Images/Logos/harvard.png";
+// import isb from "../../Assets/Images/Logos/isb.png";
+// import maas from "../../Assets/Images/Logos/maas.png";
+// import nih from "../../Assets/Images/Logos/nih.png";
+// import osu from "../../Assets/Images/Logos/osu.png";
+// import penn from "../../Assets/Images/Logos/penn.png";
+// import renci from "../../Assets/Images/Logos/renci.png";
+// import scripps from "../../Assets/Images/Logos/scripps.png";
+// import tufts from "../../Assets/Images/Logos/tufts.png";
+// import uab from "../../Assets/Images/Logos/uab.png";
+// import ucamc from "../../Assets/Images/Logos/ucamc.png";
+// import ucd from "../../Assets/Images/Logos/ucd.png";
+// import ucsf from "../../Assets/Images/Logos/ucsf.png";
 import styles from "./Home.module.scss";
 
 const Home = () => {
 
   return (
     <div>
-      <Query3 />
+      <Query />
       <div className={styles.homePageContent}>
         <div className={styles.section}>
           <div className={`${styles.container} container`}>

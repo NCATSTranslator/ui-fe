@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './LoadingBar.module.scss';
 
-const LoadingBar = ({loading, useIcon}) => {
+const LoadingBar = ({loading, useIcon, disclaimerText}) => {
 
   // Int, represents results progress bar
   const [progress, setProgress] = useState(1);
@@ -53,8 +53,7 @@ const LoadingBar = ({loading, useIcon}) => {
         </div>
       }
       <h6 className={styles.heading}>Loading...</h6>
-      <p className={styles.text}>We will start showing you results as soon as we have them. You'll be prompted to refresh the page as we load more results. <strong>Please note that refreshing the results page may cause the order of answers to change.</strong></p>
-      <p className={styles.text}>Navigating away from this page will cancel your search.</p>
+      {disclaimerText && disclaimerText}
     </div>
   )
 }

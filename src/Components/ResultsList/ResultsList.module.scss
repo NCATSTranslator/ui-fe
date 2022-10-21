@@ -225,6 +225,13 @@
   padding: 20px 12px;
 }
 
+.loadingText {
+  max-width: 850px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .resultsHeader {
   grid-column: 2/3;
   padding-top: $s;

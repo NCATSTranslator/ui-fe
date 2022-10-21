@@ -1,13 +1,11 @@
 import React, {useState} from 'react';
 import styles from './EntitySearch.module.scss';
-import Checkbox from '../FormFields/Checkbox';
 import TextInput from '../FormFields/TextInput';
 
 
 const EntitySearch = ({activeFilters, onFilter}) => {
 
-  const [searchString, setSearchString] = useState('');
-  const [searchStringObject, setSearchStringObject] = useState({tag:'str', value: searchString});
+  const [searchStringObject, setSearchStringObject] = useState({tag:'str', value: ''});
 
   const handleStringSearchChange = (value) => {
     if(searchStringObject.value !== value) {

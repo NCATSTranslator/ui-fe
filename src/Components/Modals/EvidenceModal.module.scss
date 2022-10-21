@@ -3,6 +3,12 @@
 .evidenceModal {
   .evidenceContainer {
     width: 1130px;
+    height: 85%;
+    &>div {
+      height: 100%;
+      display: grid;
+      align-content: space-between;
+    }
   }
   .tableHead {
     border-bottom: 1px solid $midGray;
@@ -24,19 +30,29 @@
     font-size: $bodyTwoSize;
     border-radius: $defaultBorderRadius;
     margin-top: $m;
+    &.clinicalTrials {
+      &>div {
+        grid-template-columns: 1fr 1fr 1.25fr 2fr 2.5fr 1.25fr 1fr;
+      }
+    }
     &>div {
       display: grid;
       // Columns with no title 
-      // grid-template-columns: 1fr 1.25fr 3.5fr 1.25fr 1fr;
+      // grid-template-columns: 1fr 1.25fr 3.5fr 1.25fr;
       // Columns with title included
-      grid-template-columns: 1fr 1.25fr 2fr 2.5fr 1.25fr 1fr;
+      grid-template-columns: 1fr 1.25fr 2fr 2.5fr 1.25fr;
       .cell {
         padding: 12px;
         height: 98px;
-        .bold {
+        strong {
           font-weight: 700;
+          font-size: 12px;
+          display: inline;
         }
-        &.source, &.pubdate {
+        &.link {
+          font-size: 12px;
+        }
+        &.source, &.pubdate, &.pValue, &.link, &.location, &.status {
           text-align: center;
         }
         &.title {
@@ -63,6 +79,9 @@
         overflow: hidden;
       }
     }
+    .clinicalTrials .cell {
+      
+    }
     &>div:nth-child(odd){
       background-color: $lightGray;
     }
@@ -79,6 +98,15 @@
       svg {
         margin-left: 4px;
         width: $s;
+      }
+    }
+  }
+  .pValueTable, .otherTable {
+    &>div {
+      grid-template-columns: 1fr 1fr 2fr;
+      height: 60px;
+      .cell {
+        height: auto;
       }
     }
   }
