@@ -482,6 +482,8 @@ const ResultsList = ({loading}) => {
     setRawResults(freshRawResults);
     // Set freshRawResults back to null
     setFreshRawResults(null)
+    
+    setPresorted(false);
   }
 
   // Filter the results whenever the activated filters change 
