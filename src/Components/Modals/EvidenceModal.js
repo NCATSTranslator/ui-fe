@@ -108,28 +108,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
           !isLoading &&
           <Fade>
             <Tabs>
-              <div heading="Clinical Trials">
-                <div className={`${styles.tableBody} ${styles.clinicalTrials}`}>
-                  <div className={`${styles.tableHead}`}>
-                    <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
-                    <div className={`${styles.head} ${styles.status}`}>Status</div>
-                    <div className={`${styles.head} ${styles.location}`}>Location</div>
-                    <div className={`${styles.head} ${styles.title}`}>Title</div>
-                    <div className={`${styles.head} ${styles.summary}`}>Summary</div>
-                    <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
-                    <div className={`${styles.head} ${styles.cti}`}>CTI</div>
-                  </div>
-                  <div className={styles.evidenceItem}>
-                    <div className={`${styles.cell} ${styles.pubdate} pubdate`}>Jan 33, 2222</div>
-                    <div className={`${styles.cell} ${styles.status}`}>Ongoing</div>
-                    <div className={`${styles.cell} ${styles.location}`}>Lorem ipsum</div>
-                    <div className={`${styles.cell} ${styles.title}`}>An Example CT</div>
-                    <div className={`${styles.cell} ${styles.summary}`}>Lorem ipsum dolor sit amet</div>
-                    <div className={`${styles.cell} ${styles.edge}`}><strong>Blank</strong> treats <strong>Blank</strong></div>
-                    <div className={`${styles.cell} ${styles.cti}`}>What's a CTI, anyway?</div>
-                  </div>
-                </div>
-              </div>
               <div heading="Publications">
                 <div className={styles.tableBody}>
                   <div className={styles.tableHead}>
@@ -217,6 +195,28 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                     </div>
                   </div>
                 }
+              </div>
+              <div heading="Clinical Trials">
+                <div className={`${styles.tableBody} ${styles.clinicalTrials}`}>
+                  <div className={`${styles.tableHead}`}>
+                    <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
+                    <div className={`${styles.head} ${styles.status}`}>Status</div>
+                    <div className={`${styles.head} ${styles.location}`}>Location</div>
+                    <div className={`${styles.head} ${styles.title}`}>Title</div>
+                    <div className={`${styles.head} ${styles.summary}`}>Summary</div>
+                    <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
+                    <div className={`${styles.head} ${styles.cti}`}>CTI</div>
+                  </div>
+                  <div className={styles.evidenceItem}>
+                    <div className={`${styles.cell} ${styles.pubdate} pubdate`}>Jan 33, 2222</div>
+                    <div className={`${styles.cell} ${styles.status}`}>Ongoing</div>
+                    <div className={`${styles.cell} ${styles.location}`}>Lorem ipsum</div>
+                    <div className={`${styles.cell} ${styles.title}`}>An Example CT</div>
+                    <div className={`${styles.cell} ${styles.summary}`}>Lorem ipsum dolor sit amet</div>
+                    <div className={`${styles.cell} ${styles.edge}`}><strong>Blank</strong> treats <strong>Blank</strong></div>
+                    <div className={`${styles.cell} ${styles.cti}`}>What's a CTI, anyway?</div>
+                  </div>
+                </div>
               </div>
               <div heading="P Value">
                 <div className={`${styles.tableBody} ${styles.pValueTable}`}>
