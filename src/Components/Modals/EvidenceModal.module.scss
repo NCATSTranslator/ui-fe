@@ -29,7 +29,6 @@
     box-shadow: $dropShadow;
     font-size: $bodyTwoSize;
     border-radius: $defaultBorderRadius;
-    margin-top: $m;
     &.clinicalTrials {
       &>div {
         grid-template-columns: 2fr 1fr 2fr;
@@ -137,6 +136,9 @@
   }
   .title {
     margin-bottom: 0;
+  }
+  .evidenceCount {
+    margin-bottom: $m;
   }
 }
 .bottom {

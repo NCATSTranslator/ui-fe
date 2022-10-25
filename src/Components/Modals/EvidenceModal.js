@@ -102,10 +102,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
           })
         }
         {
-          pubmedEvidence.length > 0 &&
-          <p>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
-        }
-        {
           isLoading &&
           <LoadingBar 
             loading={isLoading}
@@ -147,6 +143,10 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                 </div>
               }
               <div heading="Publications">
+                {
+                  pubmedEvidence.length > 0 &&
+                  <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
+                }
                 <div className={styles.tableBody}>
                   <div className={styles.tableHead}>
                     <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
