@@ -11,8 +11,8 @@ import isEqual from 'lodash/isEqual';
 import _ from "lodash";
 import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
-import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import styles from './Query.module.scss';
+import { getEntityLink } from "../../Utilities/utilities";
 
 const Query = ({results, loading, presetDisease}) => {
 
@@ -267,13 +267,7 @@ const Query = ({results, loading, presetDisease}) => {
           {
             isResults && selectedDisease && selectedDisease.id &&
             <p className={styles.needHelp}>
-              <a 
-                href={`https://monarchinitiative.org/disease/${selectedDisease.id}`} 
-                target="_blank" 
-                rel="noreferrer" 
-                className={styles.monarchLink}
-                >View this disease on Monarch Initiative<ExternalLink/>
-              </a>
+              {getEntityLink(selectedDisease.id, styles.monarchLink)}
             </p>
           }
           <p className={styles.needHelp}>
