@@ -1,5 +1,5 @@
 import React from 'react';
-import {ReactComponent as Chemical} from '../Icons/Queries/chemical.svg';
+import {ReactComponent as Chemical} from '../Icons/Queries/Chemical.svg';
 import {ReactComponent as Disease} from '../Icons/disease2.svg';
 import {ReactComponent as Gene} from '../Icons/Queries/Gene.svg';
 import {ReactComponent as Phenotype} from '../Icons/Queries/Phenotype.svg';
