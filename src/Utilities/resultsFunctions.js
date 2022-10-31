@@ -78,6 +78,7 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     return [];
 
   let newSummarizedResults = [];
+  let presetDiseaseSet = (presetDisease) ? true : false;
   
   // // for each individual result item 
   for(const item of results.results) {
@@ -104,8 +105,10 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
       fdaInfo: fdaInfo
     }
     newSummarizedResults.push(formattedItem);
-    if(presetDisease === null) {
+    if(!presetDiseaseSet) {
       setPresetDisease({id: item.object, label: objectNodeName});
+      presetDiseaseSet = true;
+      console.log(item.object);
     }
   }
   return newSummarizedResults;

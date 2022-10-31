@@ -29,10 +29,9 @@
     box-shadow: $dropShadow;
     font-size: $bodyTwoSize;
     border-radius: $defaultBorderRadius;
-    margin-top: $m;
     &.clinicalTrials {
       &>div {
-        grid-template-columns: 1fr 1fr 1.25fr 2fr 2.5fr 1.25fr 1fr;
+        grid-template-columns: 2fr 1fr 2fr;
       }
     }
     &>div {
@@ -79,8 +78,20 @@
         overflow: hidden;
       }
     }
-    .clinicalTrials .cell {
-      
+    .clinicalTrials {
+      .relationship {
+        text-align: center;
+      }
+      .link {
+        a {
+          display: flex;
+          align-items: center;
+        }
+        svg {
+          margin-left: 4px;
+          width: $s;
+        }
+      }
     }
     &>div:nth-child(odd){
       background-color: $lightGray;
@@ -125,6 +136,9 @@
   }
   .title {
     margin-bottom: 0;
+  }
+  .evidenceCount {
+    margin-bottom: $m;
   }
 }
 .bottom {

@@ -4,13 +4,14 @@
 .tabs {
   width: 100%;
   padding-left: 0;
-  margin: 0 auto;
+  margin: 10px auto 20px;
   .tabList {
     display: grid;
     grid-template-columns: repeat( auto-fit, minmax(175px, 1fr));
     grid-gap: 30px 10px;
+    margin: 0 0 $m;
   }
   .tabContent {
-    padding: 20px;
+    padding: 0px;
   }
 }

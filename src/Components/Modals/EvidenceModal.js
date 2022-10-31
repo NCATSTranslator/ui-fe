@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from "react";
+import React, {useState, useEffect, useCallback, useRef} from "react";
 import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
 import Select from "../FormFields/Select";
@@ -8,26 +8,31 @@ import ReactPaginate from "react-paginate";
 import { Fade } from "react-awesome-reveal";
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { capitalizeAllWords } from "../../Utilities/utilities";
+import { cloneDeep } from "lodash";
 
 const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
 
+
+  const [pubmedEvidence, setPubmedEvidence] = useState([]);
+  const clinicalTrials = useRef([]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [evidenceTitle, setEvidenceTitle] = useState(title ? title : 'All Evidence')
   const [evidenceEdges, setEvidenceEdges] = useState(edges)
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [newItemsPerPage, setNewItemsPerPage] = useState(null);
-  const [displayedEvidence, setDisplayedEvidence] = useState([]);
+  const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
   // Int, current page
   const [currentPage, setCurrentPage] = useState(0);
-  const endOffset = (itemOffset + itemsPerPage > currentEvidence.length)
-  ? currentEvidence.length
+  const endOffset = (itemOffset + itemsPerPage > pubmedEvidence.length)
+  ? pubmedEvidence.length
   : itemOffset + itemsPerPage;
 
   const handleClose = () => {
@@ -38,21 +43,21 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
   }
 
   useEffect(() => {
-    setDisplayedEvidence(currentEvidence.slice(itemOffset, endOffset));
-    setPageCount(Math.ceil(currentEvidence.length / itemsPerPage));
-    if(endOffset !== 0)
-      console.log(`Loaded items from ${itemOffset} to ${endOffset}`);
-  }, [itemOffset, itemsPerPage, currentEvidence, endOffset]);
+    setDisplayedPubmedEvidence(pubmedEvidence.slice(itemOffset, endOffset));
+    setPageCount(Math.ceil(pubmedEvidence.length / itemsPerPage));
+  }, [itemOffset, itemsPerPage, pubmedEvidence, endOffset]);
+
+  useEffect(() => {
+    setPubmedEvidence(cloneDeep(currentEvidence).filter(item => item.type === 'PMID'));
+    clinicalTrials.current = cloneDeep(currentEvidence).filter(item => item.type === 'NCT');
+  }, [currentEvidence])
 
   // Handles direct page click
   const handlePageClick = useCallback((event) => {
-    const newOffset = (event.selected * itemsPerPage) % currentEvidence.length;
-    console.log(
-      `User requested page number ${event.selected}, which is offset ${newOffset}`
-    );
+    const newOffset = (event.selected * itemsPerPage) % pubmedEvidence.length;
     setCurrentPage(event.selected);
     setItemOffset(newOffset);
-  },[itemsPerPage, currentEvidence]);
+  },[itemsPerPage, pubmedEvidence]);
 
   useEffect(() => {
     if(newItemsPerPage !== null) {
@@ -74,7 +79,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
     if(!isLoading || !isOpen) 
       return;
 
-    let timeout = 2000;
+    let timeout = 1000;
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, timeout);
@@ -94,10 +99,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
           })
         }
         {
-          currentEvidence.length > 0 &&
-          <p>Showing {itemOffset + 1}-{endOffset} of {currentEvidence.length} Supporting Evidence</p>
-        }
-        {
           isLoading &&
           <LoadingBar 
             loading={isLoading}
@@ -108,7 +109,41 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
           !isLoading &&
           <Fade>
             <Tabs>
+              {
+                clinicalTrials.current.length > 0 &&
+                <div heading="Clinical Trials">
+                  <div className={`${styles.tableBody} ${styles.clinicalTrials}`}>
+                    <div className={`${styles.tableHead}`}>
+                      <div className={`${styles.head} ${styles.link}`}>Link</div>
+                      <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
+                    </div>
+                    {
+                      clinicalTrials.current.map((item, i)=> {
+                        return (
+                          <div className={styles.evidenceItem} key={i}>
+                            <div className={`${styles.cell} ${styles.link} link`}>
+                              {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
+                            </div>
+                            <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                              {
+                                item.edge && 
+                                <span>
+                                  <strong>{item.edge.subject}</strong> {item.edge.predicate} <strong>{item.edge.object}</strong>
+                                </span>
+                              }
+                            </span>
+                          </div>
+                        )
+                      })
+                    }
+                  </div>
+                </div>
+              }
               <div heading="Publications">
+                {
+                  pubmedEvidence.length > 0 &&
+                  <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
+                }
                 <div className={styles.tableBody}>
                   <div className={styles.tableHead}>
                     <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
@@ -118,8 +153,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                     <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
                   </div>
                   {
-                    displayedEvidence.length > 0 &&
-                    displayedEvidence.map((item, i)=> {
+                    displayedPubmedEvidence.length > 0 &&
+                    displayedPubmedEvidence.map((item, i)=> {
                       return (
                         <div className={styles.evidenceItem} key={i}>
                           <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
@@ -196,29 +231,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                   </div>
                 }
               </div>
-              <div heading="Clinical Trials">
-                <div className={`${styles.tableBody} ${styles.clinicalTrials}`}>
-                  <div className={`${styles.tableHead}`}>
-                    <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
-                    <div className={`${styles.head} ${styles.status}`}>Status</div>
-                    <div className={`${styles.head} ${styles.location}`}>Location</div>
-                    <div className={`${styles.head} ${styles.title}`}>Title</div>
-                    <div className={`${styles.head} ${styles.summary}`}>Summary</div>
-                    <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
-                    <div className={`${styles.head} ${styles.cti}`}>CTI</div>
-                  </div>
-                  <div className={styles.evidenceItem}>
-                    <div className={`${styles.cell} ${styles.pubdate} pubdate`}>Jan 33, 2222</div>
-                    <div className={`${styles.cell} ${styles.status}`}>Ongoing</div>
-                    <div className={`${styles.cell} ${styles.location}`}>Lorem ipsum</div>
-                    <div className={`${styles.cell} ${styles.title}`}>An Example CT</div>
-                    <div className={`${styles.cell} ${styles.summary}`}>Lorem ipsum dolor sit amet</div>
-                    <div className={`${styles.cell} ${styles.edge}`}><strong>Blank</strong> treats <strong>Blank</strong></div>
-                    <div className={`${styles.cell} ${styles.cti}`}>What's a CTI, anyway?</div>
-                  </div>
-                </div>
-              </div>
-              <div heading="P Value">
+              {/* <div heading="P Value">
                 <div className={`${styles.tableBody} ${styles.pValueTable}`}>
                   <div className={`${styles.tableHead}`}>
                     <div className={`${styles.head} ${styles.link}`}>P Value</div>
@@ -241,7 +254,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                     <div className={`${styles.cell} ${styles.edge}`}><strong>Example node</strong> example edge <strong>example node</strong></div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </Tabs>
           </Fade>
         }

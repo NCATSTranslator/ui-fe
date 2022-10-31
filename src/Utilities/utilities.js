@@ -11,6 +11,7 @@ import {ReactComponent as PathologicalProcess} from '../Icons/pathological-proce
 import {ReactComponent as PhysiologicalProcess} from '../Icons/physiological-process.svg';
 import {ReactComponent as BiologicalEntity} from '../Icons/biological-entity.svg';
 import {ReactComponent as AnatomicalEntity} from '../Icons/anatomical-entity.svg';
+import {ReactComponent as ExternalLink} from '../Icons/external-link.svg';
 
 export const getIcon = (category) => {
   var icon = <Chemical/>;
@@ -117,4 +118,45 @@ export const formatBiolinkPredicate = (string) => {
     .replaceAll('entity', '')
     .replaceAll('condition', '')
     .replaceAll('gene', '');
+}
+
+export const getEntityLink = (id, className) => {
+  let url = null;
+  let linkText = null;
+  let formattedID = id.toUpperCase();
+  if(formattedID.includes('MONDO')){
+    url = `https://monarchinitiative.org/disease/${id}`;
+    linkText = 'View this disease on Monarch Initiative';
+  } else if(formattedID.includes('HP')) {
+    url = `https://monarchinitiative.org/phenotype/${id}`;
+    linkText = 'View this disease on Monarch Initiative';
+  } else if(formattedID.includes('UMLS')) {
+    url = `https://uts.nlm.nih.gov/uts/umls/concept/${id.replace('UMLS:', '')}`;
+    linkText = 'View this disease on UMLS Terminology Services';
+  } else if(formattedID.includes('OMIM')) {
+    url = `https://bioportal.bioontology.org/search?q=${id.replace('OMIM:', '')}`;
+    linkText = 'View this disease on BioPortal';
+  } else if (formattedID.includes('SNOMED')) {
+    url = `https://browser.ihtsdotools.org/?perspective=full&conceptId1=${id.replace('SNOMEDCT:', '')}`
+    linkText = 'View this disease on the SNOMED CT Browser';
+  } else if(formattedID.includes('MEDDRA')) {
+    url = `https://bioportal.bioontology.org/ontologies/MEDDRA?p=classes&conceptid=${id.replace('MEDDRA:', '')}`
+    linkText = 'View this disease on BioPortal';
+  } else if(formattedID.includes('KEGG')) {
+    url = `https://www.kegg.jp/kegg-bin/search?q=${id.replace('KEGG.DISEASE:', '')}&display=disease&from=disease`
+    linkText = 'View this disease on Kyoto Encyclopedia of Genes and Genomes';
+  }
+
+  if(url && linkText)
+    return(
+      <a 
+        href={url} 
+        target="_blank" 
+        rel="noreferrer" 
+        className={className}
+        >{linkText}<ExternalLink/>
+      </a>
+    );
+
+  return null;
 }

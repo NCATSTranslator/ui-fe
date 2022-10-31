@@ -133,9 +133,6 @@ const ResultsList = ({loading}) => {
   // Handles direct page click
   const handlePageClick = useCallback((event) => {
     const newOffset = (event.selected * itemsPerPage) % formattedResults.length;
-    console.log(
-      `User requested page number ${event.selected}, which is offset ${newOffset}`
-    );
     currentPage.current = event.selected;
     setItemOffset(newOffset);
   }, [formattedResults.length, itemsPerPage]);
