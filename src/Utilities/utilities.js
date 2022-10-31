@@ -142,6 +142,9 @@ export const getEntityLink = (id, className) => {
   } else if(formattedID.includes('MEDDRA')) {
     url = `https://bioportal.bioontology.org/ontologies/MEDDRA?p=classes&conceptid=${id.replace('MEDDRA:', '')}`
     linkText = 'View this disease on BioPortal';
+  } else if(formattedID.includes('KEGG')) {
+    url = `https://www.kegg.jp/kegg-bin/search?q=${id.replace('KEGG.DISEASE:', '')}&display=disease&from=disease`
+    linkText = 'View this disease on Kyoto Encyclopedia of Genes and Genomes';
   }
 
   if(url && linkText)

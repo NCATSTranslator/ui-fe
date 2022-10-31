@@ -4,14 +4,13 @@ import { debounce } from 'lodash';
 
 
 
-const Tooltip = ({children, active, onClose, heading, text, left, above, hover, delay}) => {
+const Tooltip = ({children, active, onClose = ()=>{}, heading, text, left, above, hover, delay}) => {
 
   const [status, setStatus] = useState(active);
 
   let statusClass = (status) ? styles.open : styles.closed;
 
   delay = (delay) ? delay : 350;
-  onClose = (onClose) ? onClose : ()=>{};
 
   // eslint-disable-next-line 
   const handleActivate = useCallback(debounce(() => {

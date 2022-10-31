@@ -55,9 +55,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
   // Handles direct page click
   const handlePageClick = useCallback((event) => {
     const newOffset = (event.selected * itemsPerPage) % pubmedEvidence.length;
-    console.log(
-      `User requested page number ${event.selected}, which is offset ${newOffset}`
-    );
     setCurrentPage(event.selected);
     setItemOffset(newOffset);
   },[itemsPerPage, pubmedEvidence]);
