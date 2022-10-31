@@ -8,7 +8,6 @@ import { capitalizeAllWords, formatBiolinkPredicate } from '../../Utilities/util
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
 
-
 const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters}) => {
 
   const [nameTooltipActive, setNameTooltipActive] = useState(false);

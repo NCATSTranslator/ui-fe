@@ -2,8 +2,6 @@ import styles from './Tooltip.module.scss';
 import { useEffect, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 
-
-
 const Tooltip = ({children, active, onClose = ()=>{}, heading, text, left, above, hover, delay}) => {
 
   const [status, setStatus] = useState(active);
@@ -11,26 +9,23 @@ const Tooltip = ({children, active, onClose = ()=>{}, heading, text, left, above
   let statusClass = (status) ? styles.open : styles.closed;
 
   delay = (delay) ? delay : 350;
-
-  // eslint-disable-next-line 
+  
+  // eslint-disable-next-line
   const handleActivate = useCallback(debounce(() => {
     setStatus(true);
   }, 350), [])
 
-  const handleDeactivate = useCallback(() => {
-    setStatus(false)
-    onClose();
-    handleActivate.cancel()
-  }, [handleActivate, onClose])
-  
   useEffect(() => {
     if(active)
       handleActivate();
     
-    if(!active)
-      handleDeactivate();
-
-  }, [active, handleActivate, handleDeactivate]);
+    if(!active) {    
+      setStatus(false)
+      onClose();
+      handleActivate.cancel()
+    }
+  // eslint-disable-next-line
+  }, [active, handleActivate]);
 
   return(
     <div className={`${styles.tooltip} ${statusClass} ${left ? styles.left : ''} ${above ? styles.above : ''} tooltip`}>
