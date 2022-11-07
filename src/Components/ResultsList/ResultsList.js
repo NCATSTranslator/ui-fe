@@ -6,7 +6,6 @@ import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import ShareModal from "../Modals/ShareModal";
-// import Tooltip from "../Tooltip/Tooltip";
 import Select from "../FormFields/Select";
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
@@ -16,7 +15,6 @@ import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   // eslint-disable-next-line
   sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
-  // eslint-disable-next-line
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import { cloneDeep, isEqual } from "lodash";
@@ -108,7 +106,7 @@ const ResultsList = ({loading}) => {
   const [presetDisease, setPresetDisease] = useState(null);
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
-
+  // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
   const numberOfStatusChecks = useRef(0);
 
   // handler for closing share modal
@@ -158,6 +156,7 @@ const ResultsList = ({loading}) => {
     const response = await fetch('/creative_status', requestOptions)
       .then(response => response.json())
       .then(data => {
+        // increment the number of status checks
         numberOfStatusChecks.current++;
         console.log("ARA status:",data);
         let fetchResults = false;
@@ -169,7 +168,11 @@ const ResultsList = ({loading}) => {
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
         }
-        if(data.status === 'success' || numberOfStatusChecks.current >= 6) {
+        /* 
+        If status is success (meaning all ARAs have returned) or we've reached 120 status checks (meaning 20 min have elapsed)
+        stop fetching ARA status and move to fetching results.
+        */
+        if(data.status === 'success' || numberOfStatusChecks.current >= 120) {
           setIsFetchingARAStatus(false);
           fetchResults = true;
         }
