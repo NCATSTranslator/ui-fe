@@ -109,6 +109,8 @@ const ResultsList = ({loading}) => {
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
+  const numberOfStatusChecks = useRef(0);
+
   // handler for closing share modal
   const handleShareModalClose = () => {
     setShareModalOpen(false);
@@ -156,8 +158,10 @@ const ResultsList = ({loading}) => {
     const response = await fetch('/creative_status', requestOptions)
       .then(response => response.json())
       .then(data => {
+        numberOfStatusChecks.current++;
         console.log("ARA status:",data);
         let fetchResults = false;
+        
         if(data.data.aras.length > returnedARAs.aras.length) {
           console.log(`Old ARAs: ${returnedARAs.aras}, New ARAs: ${data.data.aras}`);
           setReturnedARAs(data.data);
@@ -165,7 +169,7 @@ const ResultsList = ({loading}) => {
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
         }
-        if(data.status === 'success') {
+        if(data.status === 'success' || numberOfStatusChecks.current >= 6) {
           setIsFetchingARAStatus(false);
           fetchResults = true;
         }
@@ -669,19 +673,22 @@ const ResultsList = ({loading}) => {
                 <div className={styles.top}>
                   <div>
                     <h5>Results</h5>
-                    <p className={styles.resultsCount}>
-                      Showing <span className={styles.range}>
-                        <span className={styles.start}>{itemOffset + 1}</span>
-                        -
-                        <span>{endResultIndex}</span>
-                      </span> of 
-                      <span className={styles.count}> {formattedResults.length} </span>
-                      {
-                        (formattedResults.length !== sortedResults.length) &&
-                        <span className={styles.total}>({sortedResults.length}) </span>
-                      }
-                      <span> Results</span>
-                    </p>
+                    {
+                      formattedResults.length !== 0 &&
+                      <p className={styles.resultsCount}>
+                        Showing <span className={styles.range}>
+                          <span className={styles.start}>{itemOffset + 1}</span>
+                          -
+                          <span>{endResultIndex}</span>
+                        </span> of 
+                        <span className={styles.count}> {formattedResults.length} </span>
+                        {
+                          (formattedResults.length !== sortedResults.length) &&
+                          <span className={styles.total}>({sortedResults.length}) </span>
+                        }
+                        <span> Results</span>
+                      </p>
+                    }
                   </div>
                   <div className={styles.right}>
                     {
