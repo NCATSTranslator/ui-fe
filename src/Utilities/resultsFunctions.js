@@ -8,18 +8,22 @@ export const getFormattedEvidence = (paths, results) => {
     for(const subgraph of path.subgraph) {
       if(subgraph.publications && subgraph.publications.length > 0)
         for(const pubID of subgraph.publications) {
-          let publication = getPubByID(pubID, results);
-          let object = subgraph.object;
-          let subject = subgraph.subject;
-          let predicate = formatBiolinkPredicate(subgraph.predicates[0]);
-          publication.edge = {
-            subject: capitalizeAllWords(subject.names[0]),
-            predicate: predicate,
-            object: capitalizeAllWords(object.names[0])
-          };
-          // Defaulting to PubMed for now
-          publication.source = '';
-          formattedEvidence.push(publication);
+          // if the publication has not already been added, set it up and add it
+          if(formattedEvidence.find(item => item.id === pubID) === undefined){
+            let publication = getPubByID(pubID, results);
+            publication.id = pubID;
+            let object = subgraph.object;
+            let subject = subgraph.subject;
+            let predicate = formatBiolinkPredicate(subgraph.predicates[0]);
+            publication.edge = {
+              subject: capitalizeAllWords(subject.names[0]),
+              predicate: predicate,
+              object: capitalizeAllWords(object.names[0])
+            };
+            publication.source = '';
+            publication.title = '';
+            formattedEvidence.push(publication);
+          }
         }
     }
   }
