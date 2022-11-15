@@ -9,20 +9,23 @@ import { Fade } from "react-awesome-reveal";
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { capitalizeAllWords } from "../../Utilities/utilities";
 import { cloneDeep } from "lodash";
+import { useQuery } from "react-query";
 
 const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
 
-
   const [pubmedEvidence, setPubmedEvidence] = useState([]);
   const clinicalTrials = useRef([]);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingPubmedData, setIsFetchingPubmedData] = useState(false);
+  const fetchedPubmedData = useRef(false);
   const [evidenceTitle, setEvidenceTitle] = useState(title ? title : 'All Evidence')
   const [evidenceEdges, setEvidenceEdges] = useState(edges)
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const itemCountClass = useRef(styles.five);
   const [newItemsPerPage, setNewItemsPerPage] = useState(null);
   const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
   // Int, number of pages
@@ -39,13 +42,35 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
     onClose();
     setCurrentPage(0);
     setItemOffset(0);
-    setIsLoading(true);
+    // setIsLoading(true);
   }
+
+  useEffect(() => {
+    setEvidenceTitle(title)
+  }, [title]);
+
+  useEffect(() => {
+    setEvidenceEdges(edges)
+  }, [edges]);
 
   useEffect(() => {
     setDisplayedPubmedEvidence(pubmedEvidence.slice(itemOffset, endOffset));
     setPageCount(Math.ceil(pubmedEvidence.length / itemsPerPage));
   }, [itemOffset, itemsPerPage, pubmedEvidence, endOffset]);
+
+  useEffect(() => {
+    if(!fetchedPubmedData.current && displayedPubmedEvidence.length > 0) {
+      for(const item of displayedPubmedEvidence) {
+        if(!item.updated) {
+          setIsFetchingPubmedData(true);
+          setIsLoading(true);
+          break;
+        } 
+      }
+    }
+    if(fetchedPubmedData.current && displayedPubmedEvidence.length > 0)
+      fetchedPubmedData.current = false;
+  }, [displayedPubmedEvidence]);
 
   useEffect(() => {
     setPubmedEvidence(cloneDeep(currentEvidence).filter(item => item.type === 'PMID'));
@@ -59,32 +84,100 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
     setItemOffset(newOffset);
   },[itemsPerPage, pubmedEvidence]);
 
+  const insertAdditionalPubmedData = useCallback((data) => {
+
+    let newPubmedEvidence = cloneDeep(pubmedEvidence)
+    for(const element of newPubmedEvidence) {
+      if(data[element.id] !== undefined) {
+        if(!element.source)
+          element.source = capitalizeAllWords(data[element.id].journal_name);
+        if(!element.title)
+          element.title = capitalizeAllWords(data[element.id].article_title);
+        if(!element.snippet)
+          element.snippet = data[element.id].abstract;
+        if(!element.pubdate) {
+          let year = (data[element.id].pub_year) ? data[element.id].pub_year: '';
+          let month = (data[element.id].pub_month !== '-') ? data[element.id].pub_month: '';
+          let day = (data[element.id].pub_day) ? data[element.id].pub_day: '';
+          element.pubdate = `${year} ${month} ${day}`;
+        }
+
+        element.updated = true;
+      }
+    }
+    return newPubmedEvidence;
+  }, [pubmedEvidence]);
+
   useEffect(() => {
     if(newItemsPerPage !== null) {
       setItemsPerPage(newItemsPerPage);
       setNewItemsPerPage(null);
+      switch(newItemsPerPage) {
+        case 20:
+          itemCountClass.current = styles.twenty;
+          break;
+        case 10:
+          itemCountClass.current = styles.ten;
+          break;
+        default:
+          itemCountClass.current = styles.five;
+          break;
+      }
       handlePageClick({selected: 0});
     }
   }, [newItemsPerPage, handlePageClick]);
 
-  useEffect(() => {
-    setEvidenceTitle(title)
-  }, [title]);
+  // useEffect(() => {
+  //   if(!isLoading || !isOpen) 
+  //     return;
 
-  useEffect(() => {
-    setEvidenceEdges(edges)
-  }, [edges]);
+  //   let timeout = 1000;
+  //   const timer = setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, timeout);
+  //   return () => clearTimeout(timer);
+  // }, [isLoading, isOpen])
 
-  useEffect(() => {
-    if(!isLoading || !isOpen) 
+  // useEffect(() => {
+  //   if(!isOpen || displayedPubmedEvidence.length === 0)
+  //     return;
+
+  //   setIsFetchingPubmedData(true);
+  // }, [isOpen, displayedPubmedEvidence]);
+
+  useEffect(()=> {
+    if(fetchedPubmedData.current)
+      setIsLoading(false);
+  }, [pubmedEvidence])
+
+  // eslint-disable-next-line
+  const pubMedMetadataQuery = useQuery('pubmedMetadata', async () => {
+
+    if(!pubmedEvidence)
       return;
 
-    let timeout = 1000;
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, timeout);
-    return () => clearTimeout(timer);
-  }, [isLoading, isOpen])
+    const PMIDs = displayedPubmedEvidence.map(item => item.id).join(',');
+    if(PMIDs.length <= 0)
+      return;
+    // console.log("Fetching new pubmed data...");
+    // console.log(`https://e2ewfsmmxz.us-east-1.awsapprunner.com/publications?pubids=${PMIDs}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`);
+    // eslint-disable-next-line
+    const response = await fetch(`https://e2ewfsmmxz.us-east-1.awsapprunner.com/publications?pubids=${PMIDs}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`)
+      .then(response => response.json())
+      .then(data => {
+        // console.log('New pubmed data:', data);
+        setIsFetchingPubmedData(false);
+        fetchedPubmedData.current = true;
+        // adjust this later to save additional evidence and prevent unnecessarily repetitious api calls 
+        setPubmedEvidence(insertAdditionalPubmedData(data.results));
+      })
+      .catch((error) => {
+        console.log(error)
+      });
+  }, { 
+    enabled: isFetchingPubmedData,
+    refetchOnWindowFocus: false
+  });
   
   return (
     <Modal isOpen={modalIsOpen} onClose={handleClose} className={styles.evidenceModal} containerClass={styles.evidenceContainer}>
@@ -98,16 +191,14 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
             )
           })
         }
-        {
+        {/* {
           isLoading &&
           <LoadingBar 
             loading={isLoading}
             useIcon
           />
-        }
+        } */}
         {
-          !isLoading &&
-          <Fade>
             <Tabs>
               {
                 clinicalTrials.current.length > 0 &&
@@ -144,55 +235,77 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                   pubmedEvidence.length > 0 &&
                   <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
                 }
-                <div className={styles.tableBody}>
-                  <div className={styles.tableHead}>
-                    <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
-                    <div className={`${styles.head} ${styles.source}`}>Source</div>
-                    <div className={`${styles.head} ${styles.title}`}>Title</div>
-                    <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
-                    <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
-                  </div>
-                  {
-                    displayedPubmedEvidence.length > 0 &&
-                    displayedPubmedEvidence.map((item, i)=> {
-                      return (
-                        <div className={styles.evidenceItem} key={i}>
-                          <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
-                            {item.pubdate && item.pubdate }          
-                          </span>
-                          <span className={`${styles.cell} ${styles.source} source`}>
-                            {item.source && item.source }          
-                          </span>
-                          <span className={`${styles.cell} ${styles.title} title`}>
-                            {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
-                            {item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
-                          </span>
-                          <span className={`${styles.cell} ${styles.abstract} abstract`}>
-                            <span>
-                              {!item.snippet && "No snippet available."}
-                              {item.snippet && item.snippet}
-                            </span>
-                              {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}          
-                          </span>
-                          <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                            {
-                              item.edge && 
-                              <span>
-                                <strong>{item.edge.subject}</strong> {item.edge.predicate} <strong>{item.edge.object}</strong>
-                              </span>
-                            }          
-                          </span>
-                        </div>
-                      )
-                    })
-                  } 
-                  {
-                    currentEvidence.length <= 0 &&
-                    <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
-                  }
-                </div>
+
+                {
+                  
+                    <div className={`${itemCountClass.current} ${styles.tableBody}`}>
+                      <div className={styles.tableHead}>
+                        <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
+                        <div className={`${styles.head} ${styles.source}`}>Source</div>
+                        <div className={`${styles.head} ${styles.title}`}>Title</div>
+                        <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
+                        <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
+                      </div>
+                      {
+                        isLoading &&
+                        <LoadingBar 
+                          loading={isLoading}
+                          useIcon
+                          className={styles.loadingBar}
+                        />
+                      }
+                      { 
+                        !isLoading &&
+                        <Fade className={styles.evidenceItems} duration={500}>
+                          <>
+                        {
+                          displayedPubmedEvidence.length > 0 &&
+                          displayedPubmedEvidence.map((item, i)=> {
+                            return (
+                              <div className={styles.evidenceItem} key={i}>
+                                <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
+                                  {item.pubdate && item.pubdate }          
+                                </span>
+                                <span className={`${styles.cell} ${styles.source} source`}>
+                                  <span>
+                                    {item.source && item.source }
+                                  </span>     
+                                </span>
+                                <span className={`${styles.cell} ${styles.title} title`}>
+                                  {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
+                                  {!item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
+                                </span>
+                                <span className={`${styles.cell} ${styles.abstract} abstract`}>
+                                  <span>
+                                    {!item.snippet && "No snippet available."}
+                                    {item.snippet && item.snippet}
+                                  </span>
+                                    {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}          
+                                </span>
+                                <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                                  {
+                                    item.edge && 
+                                    <span>
+                                      <strong>{item.edge.subject}</strong> {item.edge.predicate} <strong>{item.edge.object}</strong>
+                                    </span>
+                                  }          
+                                </span>
+                              </div>
+                            )
+                          })
+                        } 
+                        </>
+                        </Fade>
+                      } 
+                      {
+                        currentEvidence.length <= 0 &&
+                        <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
+                      }
+                    </div>
+                }
                 { 
-                  currentEvidence.length > itemsPerPage && !isLoading &&
+                  currentEvidence.length > itemsPerPage && 
+                  // currentEvidence.length > itemsPerPage && !isLoading &&
                   <div className={styles.bottom}>
                     <div className={styles.perPage}>
                       <Select 
@@ -256,7 +369,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                 </div>
               </div> */}
             </Tabs>
-          </Fade>
         }
       </div>
 
