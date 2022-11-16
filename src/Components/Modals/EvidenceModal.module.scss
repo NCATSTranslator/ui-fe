@@ -130,6 +130,11 @@
     &>div:first-child {
       background-color: $purpleTwo;  
     }
+    .evidenceItems {
+      &>div:nth-child(odd){
+        background-color: $lightGray;
+      }
+    }
     .url {
       font-size: 12px;
       font-weight: 700;
@@ -201,6 +206,11 @@
         font-size: 16px;
         font-weight: 700;
         cursor: pointer;
+        -moz-user-select: none; 
+        -webkit-user-select: none; 
+        -ms-user-select: none; 
+        user-select: none;
+        -o-user-select: none;
       }
       .disabled {
         background-color: transparent;
@@ -221,6 +231,11 @@
           color: $darkGray;
           font-size: $bodyOneSize;
           font-weight: 700;
+          -moz-user-select: none; 
+          -webkit-user-select: none; 
+          -ms-user-select: none; 
+          user-select: none;
+          -o-user-select: none;
           &:hover {
             background-color: $purpleTwo20;
             color: $purpleOne;

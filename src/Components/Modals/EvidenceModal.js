@@ -256,56 +256,55 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                       }
                       { 
                         !isLoading &&
-                        <Fade className={styles.evidenceItems} duration={500}>
+                        <Fade className={styles.evidenceItems} duration={500} triggerOnce >
                           <>
-                        {
-                          displayedPubmedEvidence.length > 0 &&
-                          displayedPubmedEvidence.map((item, i)=> {
-                            return (
-                              <div className={styles.evidenceItem} key={i}>
-                                <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
-                                  {item.pubdate && item.pubdate }          
-                                </span>
-                                <span className={`${styles.cell} ${styles.source} source`}>
-                                  <span>
-                                    {item.source && item.source }
-                                  </span>     
-                                </span>
-                                <span className={`${styles.cell} ${styles.title} title`}>
-                                  {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
-                                  {!item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
-                                </span>
-                                <span className={`${styles.cell} ${styles.abstract} abstract`}>
-                                  <span>
-                                    {!item.snippet && "No snippet available."}
-                                    {item.snippet && item.snippet}
-                                  </span>
-                                    {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}          
-                                </span>
-                                <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                                  {
-                                    item.edge && 
-                                    <span>
-                                      <strong>{item.edge.subject}</strong> {item.edge.predicate} <strong>{item.edge.object}</strong>
+                            {
+                              currentEvidence.length <= 0 &&
+                              <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
+                            }
+                            {
+                              displayedPubmedEvidence.length > 0 &&
+                              displayedPubmedEvidence.map((item, i)=> {
+                                return (
+                                  <div className={styles.evidenceItem} key={i}>
+                                    <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
+                                      {item.pubdate && item.pubdate }          
                                     </span>
-                                  }          
-                                </span>
-                              </div>
-                            )
-                          })
-                        } 
-                        </>
+                                    <span className={`${styles.cell} ${styles.source} source`}>
+                                      <span>
+                                        {item.source && item.source }
+                                      </span>     
+                                    </span>
+                                    <span className={`${styles.cell} ${styles.title} title`}>
+                                      {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
+                                      {!item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
+                                    </span>
+                                    <span className={`${styles.cell} ${styles.abstract} abstract`}>
+                                      <span>
+                                        {!item.snippet && "No snippet available."}
+                                        {item.snippet && item.snippet}
+                                      </span>
+                                        {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}          
+                                    </span>
+                                    <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                                      {
+                                        item.edge && 
+                                        <span>
+                                          <strong>{item.edge.subject}</strong> {item.edge.predicate} <strong>{item.edge.object}</strong>
+                                        </span>
+                                      }          
+                                    </span>
+                                  </div>
+                                )
+                              })
+                            } 
+                          </>
                         </Fade>
                       } 
-                      {
-                        currentEvidence.length <= 0 &&
-                        <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
-                      }
                     </div>
                 }
                 { 
                   currentEvidence.length > itemsPerPage && 
-                  // currentEvidence.length > itemsPerPage && !isLoading &&
                   <div className={styles.bottom}>
                     <div className={styles.perPage}>
                       <Select 
