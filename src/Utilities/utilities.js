@@ -145,6 +145,9 @@ export const getEntityLink = (id, className) => {
   } else if(formattedID.includes('KEGG')) {
     url = `https://www.kegg.jp/kegg-bin/search?q=${id.replace('KEGG.DISEASE:', '')}&display=disease&from=disease`
     linkText = 'View this disease on Kyoto Encyclopedia of Genes and Genomes';
+  } else if(formattedID.includes('NCIT')) {
+    url = `https://ncithesaurus.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&ns=ncit&code=${id.replace('NCIT:', '')}`
+    linkText = 'View this disease on NCI Thesaurus';
   }
 
   if(url && linkText)

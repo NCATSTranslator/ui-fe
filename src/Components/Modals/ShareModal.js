@@ -6,7 +6,7 @@ const ShareModal = ({children, isOpen, onClose, qid}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
-  const qidURL = `http://transltr-bma-ui-dev.ncats.io/results?q=${qid}`;
+  const qidURL = `${process.env.REACT_APP_BASE_URL}/results?q=${qid}`;
 
   return (
     <Modal 

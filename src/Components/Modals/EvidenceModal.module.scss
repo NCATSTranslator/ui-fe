@@ -4,10 +4,29 @@
   .evidenceContainer {
     width: 1130px;
     height: 85%;
-    &>div {
-      height: 100%;
-      display: grid;
-      align-content: space-between;
+  }
+  .loadingBar {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    padding: 0;
+    img, h6 {
+      display: none;
+    }
+  }
+  .twenty {
+    .loadingBar, .evidenceItems {
+      height: 2440px;
+    }
+  }
+  .ten {
+    .loadingBar, .evidenceItems {
+      height: 1220px;
+    }
+  }
+  .five {
+    .loadingBar, .evidenceItems {
+      height: 610px;
     }
   }
   .tableHead {
@@ -34,7 +53,7 @@
         grid-template-columns: 2fr 1fr 2fr;
       }
     }
-    &>div {
+    .tableHead, &>div .evidenceItem {
       display: grid;
       // Columns with no title 
       // grid-template-columns: 1fr 1.25fr 3.5fr 1.25fr;
@@ -54,6 +73,13 @@
         &.source, &.pubdate, &.pValue, &.link, &.location, &.status {
           text-align: center;
         }
+        &.source span {
+          -webkit-line-clamp: 4;
+          -webkit-box-orient: vertical;
+          display: -webkit-box;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
         &.title {
           text-align: center;
           a {
@@ -61,6 +87,11 @@
             color: $black;
             text-decoration: none;
             font-size: 12px;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            display: -webkit-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
             &:hover {
               text-decoration: underline;
             }
@@ -98,6 +129,11 @@
     }
     &>div:first-child {
       background-color: $purpleTwo;  
+    }
+    .evidenceItems {
+      &>div:nth-child(odd){
+        background-color: $lightGray;
+      }
     }
     .url {
       font-size: 12px;
@@ -170,6 +206,11 @@
         font-size: 16px;
         font-weight: 700;
         cursor: pointer;
+        -moz-user-select: none; 
+        -webkit-user-select: none; 
+        -ms-user-select: none; 
+        user-select: none;
+        -o-user-select: none;
       }
       .disabled {
         background-color: transparent;
@@ -190,6 +231,11 @@
           color: $darkGray;
           font-size: $bodyOneSize;
           font-weight: 700;
+          -moz-user-select: none; 
+          -webkit-user-select: none; 
+          -ms-user-select: none; 
+          user-select: none;
+          -o-user-select: none;
           &:hover {
             background-color: $purpleTwo20;
             color: $purpleOne;
