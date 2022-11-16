@@ -127,24 +127,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
     }
   }, [newItemsPerPage, handlePageClick]);
 
-  // useEffect(() => {
-  //   if(!isLoading || !isOpen) 
-  //     return;
-
-  //   let timeout = 1000;
-  //   const timer = setTimeout(() => {
-  //     setIsLoading(false);
-  //   }, timeout);
-  //   return () => clearTimeout(timer);
-  // }, [isLoading, isOpen])
-
-  // useEffect(() => {
-  //   if(!isOpen || displayedPubmedEvidence.length === 0)
-  //     return;
-
-  //   setIsFetchingPubmedData(true);
-  // }, [isOpen, displayedPubmedEvidence]);
-
   useEffect(()=> {
     if(fetchedPubmedData.current)
       setIsLoading(false);
