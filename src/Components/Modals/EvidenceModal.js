@@ -8,7 +8,7 @@ import ReactPaginate from "react-paginate";
 import { Fade } from "react-awesome-reveal";
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { capitalizeAllWords } from "../../Utilities/utilities";
-import { sortNameHighLow, sortNameLowHigh } from '../../Utilities/sortingFunctions';
+import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 
@@ -27,7 +27,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
   const itemCountClass = useRef(styles.five);
   const [newItemsPerPage, setNewItemsPerPage] = useState(null);
   const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
-  const [isSortedByTitle, setIsSortedByTitle] = useState(false);
+  const [isSortedByTitle, setIsSortedByTitle] = useState(null);
+  const [isSortedBySource, setIsSortedBySource] = useState(null);
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
@@ -52,6 +53,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
     setCurrentPage(0);
     setItemOffset(0);
     setIsLoading(true);
+    setIsSortedBySource(null);
+    setIsSortedByTitle(null);
     amountOfIDsProcessed.current = 0;
     evidenceToUpdate.current = null;
     fetchedPubmedData.current = false;
@@ -90,24 +93,32 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
       case 'titleLowHigh':
         sortedPubmedEvidence = sortNameLowHigh(sortedPubmedEvidence, true);
         setIsSortedByTitle(true);
+        setIsSortedBySource(null);
         break;
       case 'titleHighLow':
         sortedPubmedEvidence = sortNameHighLow(sortedPubmedEvidence, true);
         setIsSortedByTitle(false);
+        setIsSortedBySource(null);
+        break;
+      case 'sourceLowHigh':
+        sortedPubmedEvidence = sortSourceLowHigh(sortedPubmedEvidence);
+        setIsSortedBySource(true);
+        setIsSortedByTitle(null);
+        break;
+      case 'sourceHighLow':
+        sortedPubmedEvidence = sortSourceHighLow(sortedPubmedEvidence);
+        setIsSortedBySource(false);
+        setIsSortedByTitle(null);
         break;
       default:
         break;
     }
-    // if(selectedItems.length > 0) {
-    //   newSortedResults = sortByHighlighted(newSortedResults, selectedItems);
-    // }
     
     // assign the newly sorted results (no need to set formatted results, since they'll be filtered after being sorted, then set there)
     setPubmedEvidence(sortedPubmedEvidence);
 
-    // if we're not already on page 1, reset to page one.
-    if(currentPage !== 0)
-      handlePageClick({selected: 0});
+    // reset to page one.
+    handlePageClick({selected: 0});
   }, [pubmedEvidence]);
 
   const insertAdditionalPubmedData = useCallback((data) => {
@@ -163,7 +174,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
 
     if(pubmedEvidence.length <= 0) 
       return;
-
 
     if(fetchedPubmedData.current) {
       setIsLoading(false);
@@ -256,12 +266,21 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                   <div className={`${itemCountClass.current} ${styles.tableBody}`}>
                     <div className={styles.tableHead}>
                       <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
-                      <div className={`${styles.head} ${styles.source}`}>Source</div>
                       <div 
-                        className={`${styles.head} ${styles.title}`} 
+                        className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
+                        onClick={()=>{handleSort((isSortedBySource)?'sourceHighLow': 'sourceLowHigh')}}
+                        >
+                        <span className={styles.headSpan}>
+                          Source
+                        </span>
+                      </div>
+                      <div 
+                        className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`} 
                         onClick={()=>{handleSort((isSortedByTitle)?'titleHighLow': 'titleLowHigh')}}
                         >
-                        Title
+                        <span className={styles.headSpan}>
+                          Title
+                        </span>
                       </div>
                       <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
                       <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>

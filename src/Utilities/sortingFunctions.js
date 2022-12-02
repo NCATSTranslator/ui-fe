@@ -16,6 +16,16 @@ export const sortNameHighLow = (items, isEvidence) => {
     return items.sort((a, b) => -a.name.localeCompare(b.name));
 }
 
+// alphabetical order
+export const sortSourceLowHigh = (items) => {
+  return items.sort((a, b) => !a.source - !b.source || a.source.localeCompare(b.source));
+}
+
+// reverse alphabetical order
+export const sortSourceHighLow = (items) => {
+  return items.sort((a, b) => -a.source.localeCompare(b.source));
+}
+
 export const sortEvidenceLowHigh = (items) => {
   return items.sort((a, b) => a.evidence.length - b.evidence.length);
 }
