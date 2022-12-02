@@ -321,7 +321,7 @@ const ResultsList = ({loading}) => {
       setIsLoading(false);
     
     // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
-    if(rawResults && rawResults.data.results.length === 0 && !isFetchingARAStatus)
+    if(rawResults && rawResults.data.results && rawResults.data.results.length === 0 && !isFetchingARAStatus)
       setIsLoading(false);
 
   }, [formattedResults, rawResults, isFetchingARAStatus]);
