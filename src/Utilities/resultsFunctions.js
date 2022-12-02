@@ -112,7 +112,6 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     if(!presetDiseaseSet) {
       setPresetDisease({id: item.object, label: objectNodeName});
       presetDiseaseSet = true;
-      console.log(item.object);
     }
   }
   return newSummarizedResults;
