@@ -308,12 +308,24 @@ const ResultsList = ({loading}) => {
 
   }, [rawResults, presetDisease]);
 
+  // hook to run presorting by evidence
   useEffect(() => {
-    if(formattedResults.length && !presorted) {
+    if(presorted)
+      return;
+
+    if(formattedResults.length > 0) {
       handleSort('evidenceHighLow');
       setPresorted(true);
     }
-  }, [formattedResults, presorted, handleSort]);
+  /*
+    Providing handleSort as dependency leads to infinite loop due to handleSort
+    modifying formattedResults. Need to reimplement later so that I can supply 
+    handleSort as a dependency below and prevent future bugs in this useEffect hook. 
+    
+    Good for now though.
+  */
+  // eslint-disable-next-line
+  }, [formattedResults, presorted]);
   
   useEffect(() => {
     // we have results to show, set isLoading to false
