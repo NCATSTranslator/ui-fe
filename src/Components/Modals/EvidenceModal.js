@@ -119,7 +119,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
 
     // reset to page one.
     handlePageClick({selected: 0});
-  }, [pubmedEvidence]);
+  }, [pubmedEvidence, handlePageClick]);
 
   const insertAdditionalPubmedData = useCallback((data) => {
 
@@ -203,7 +203,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
       return response;
     })
     return Promise.all(metadata)
-  }, [processedEvidenceIDs]);
+  }, [processedEvidenceIDs, insertAdditionalPubmedData, pubmedEvidence.length]);
 
   // eslint-disable-next-line
   const pubMedMetadataQuery = useQuery({
