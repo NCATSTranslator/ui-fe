@@ -507,7 +507,8 @@ const ResultsList = ({loading}) => {
     // If there are no active filters, get the full result set and reset the activeStringFilters
     if(activeFilters.length === 0) {
       setFormattedResults(sortedResults);
-      setActiveStringFilters([]);
+      if(activeStringFilters.length > 0)
+        setActiveStringFilters([]);
       return;
     }
 
