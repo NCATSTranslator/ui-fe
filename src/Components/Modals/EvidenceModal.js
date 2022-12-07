@@ -246,7 +246,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                             {
                               item.edge && 
                               <span>
-                                <strong>{item.edge.subject}</strong> {item.edge.predicate} <strong>{item.edge.object}</strong>
+                                <strong>{item.edge.subject}</strong><span className={styles.predicate}>{item.edge.predicate}</span><strong>{item.edge.object}</strong>
                               </span>
                             }
                           </span>
@@ -329,7 +329,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
                                     {
                                       item.edge && 
                                       <span>
-                                        <strong>{item.edge.subject}</strong> {item.edge.predicate} <strong>{item.edge.object}</strong>
+                                        <strong>{item.edge.subject}</strong><span className={styles.predicate}>{item.edge.predicate}</span><strong>{item.edge.object}</strong>
                                       </span>
                                     }          
                                   </span>
