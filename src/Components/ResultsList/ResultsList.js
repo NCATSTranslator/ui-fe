@@ -101,7 +101,7 @@ const ResultsList = ({loading}) => {
   // Bool, is fda tooltip currently active
   // const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
   // Bool, have the initial results been sorted yet
-  const [presorted, setPresorted] = useState(false);
+  const presorted = useRef(false);
   // Obj, {label: ''}, used to set input text, determined by results object
   const [presetDisease, setPresetDisease] = useState(null);
   // Bool, is share modal open
@@ -230,8 +230,8 @@ const ResultsList = ({loading}) => {
   });
 
   // Handle the sorting 
-  const handleSort = useCallback((sortName) => {
-    let newSortedResults = cloneDeep(sortedResults);
+  const handleSort = useCallback((resultsToSort, sortName) => {
+    let newSortedResults = cloneDeep(resultsToSort);
     switch (sortName) {
       case 'nameLowHigh':
         newSortedResults = sortNameLowHigh(newSortedResults);
@@ -276,11 +276,14 @@ const ResultsList = ({loading}) => {
     // }
     
     // assign the newly sorted results (no need to set formatted results, since they'll be filtered after being sorted, then set there)
-    setSortedResults(newSortedResults);
+    // setSortedResults(newSortedResults);
 
+    
     // if we're not already on page 1, reset to page one.
     if(currentPage.current !== 0)
       handlePageClick({selected: 0});
+
+    return newSortedResults;
   }, [activeStringFilters, handlePageClick, sortedResults]);
 
   /*
@@ -300,32 +303,18 @@ const ResultsList = ({loading}) => {
     // if the status is not error, handle setting the results
     if(rawResults.status !== 'error' && rawResults.data.results !== undefined) 
       newResults = getSummarizedResults(rawResults.data, presetDisease, setPresetDisease);
-    
+      
       // set formatted results
-      setFormattedResults(newResults);
-      // set sorted results
+    setFormattedResults(newResults);
+
+    if(newResults.length > 0) {
+      setSortedResults(handleSort(newResults, 'evidenceHighLow'));
+      presorted.current = true;
+    } else {
       setSortedResults(newResults);
+    }
 
   }, [rawResults, presetDisease]);
-
-  // hook to run presorting by evidence
-  useEffect(() => {
-    if(presorted)
-      return;
-
-    if(formattedResults.length > 0) {
-      handleSort('evidenceHighLow');
-      setPresorted(true);
-    }
-  /*
-    Providing handleSort as dependency leads to infinite loop due to handleSort
-    modifying formattedResults. Need to reimplement later so that I can supply 
-    handleSort as a dependency below and prevent future bugs in this useEffect hook. 
-    
-    Good for now though.
-  */
-  // eslint-disable-next-line
-  }, [formattedResults, presorted]);
   
   useEffect(() => {
     // we have results to show, set isLoading to false
@@ -494,12 +483,11 @@ const ResultsList = ({loading}) => {
   }
 
   const handleResultsRefresh = () => {
+    presorted.current = false;
     // Update rawResults with the fresh data
     setRawResults(freshRawResults);
     // Set freshRawResults back to null
     setFreshRawResults(null)
-    
-    setPresorted(false);
   }
 
   // Filter the results whenever the activated filters change 
@@ -585,7 +573,7 @@ const ResultsList = ({loading}) => {
 
   useEffect(() => {
     if(activeFilters.some(f => f.tag === 'str')) {
-      handleSort('entityString');
+      // handleSort('entityString');
     }
   /*
     Providing handleSort as dependency leads to infinite loop on entityString search due to handleSort
@@ -753,7 +741,7 @@ const ResultsList = ({loading}) => {
                       </div>
                       <div 
                         className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`} 
-                        onClick={()=>{handleSort((isSortedByName)?'nameHighLow': 'nameLowHigh')}}
+                        onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByName)?'nameHighLow': 'nameLowHigh'))}}
                         >
                         Name
                       </div>
@@ -774,7 +762,7 @@ const ResultsList = ({loading}) => {
                       </div> */}
                       <div 
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
-                        onClick={()=>{handleSort((isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow')}}
+                        onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow'))}}
                         >
                         Evidence
                       </div>
