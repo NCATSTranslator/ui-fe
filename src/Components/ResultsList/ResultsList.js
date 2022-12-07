@@ -258,25 +258,9 @@ const ResultsList = ({loading}) => {
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         break;
-      // case 'dateLowHigh':
-      //   newSortedResults = sortDateLowHigh(newSortedResults);
-      //   setIsSortedByEvidence(null);
-      //   setIsSortedByName(null);
-      //   break;
-      // case 'dateHighLow':
-      //   newSortedResults = sortDateHighLow(newSortedResults);
-      //   setIsSortedByEvidence(null);
-      //   setIsSortedByName(null);
-      //   break;
       default:
         break;
     }
-    // if(selectedItems.length > 0) {
-    //   newSortedResults = sortByHighlighted(newSortedResults, selectedItems);
-    // }
-    
-    // assign the newly sorted results (no need to set formatted results, since they'll be filtered after being sorted, then set there)
-    // setSortedResults(newSortedResults);
 
     
     // if we're not already on page 1, reset to page one.
