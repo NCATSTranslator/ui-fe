@@ -117,7 +117,7 @@ export const formatBiolinkPredicate = (string) => {
     .replaceAll('_', ' ')
     .replaceAll('entity', '')
     .replaceAll('condition', '')
-    .replaceAll('gene', '');
+    .replaceAll('gene ', '');
 }
 
 export const getEntityLink = (id, className) => {
