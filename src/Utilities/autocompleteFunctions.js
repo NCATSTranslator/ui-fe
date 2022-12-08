@@ -14,7 +14,7 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
       .then(response => response.json())
       .then(data => {
         // Convert data returned from Name Resolver into a list of curies
-        let curies = getCuriesFromNameResolver(data);
+        let curies = getFormattedCuriesFromNameResolver(data);
         console.log('Curies returned from Name resolver:', curies);
         let body = {
           curies: curies,
@@ -44,7 +44,7 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
   }
 }
 
-const getCuriesFromNameResolver = (data) => {
+const getFormattedCuriesFromNameResolver = (data) => {
   // Return an array of the curies returned by the name resolver (they're stored as the keys of the initially returned obj)
   return Object.keys(data).map((key) => key);
 }
