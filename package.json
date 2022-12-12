@@ -28,6 +28,7 @@
     "build": "react-scripts build",
     "build:local": "env-cmd -f .env.local react-scripts build",
     "build:dev": "env-cmd -f .env.development react-scripts build",
+    "build:test": "env-cmd -f .env.test react-scripts build",
     "build:ci": "env-cmd -f .env.ci react-scripts build",
     "build:prod": "env-cmd -f .env.production react-scripts build",
     "test": "react-scripts test",
