@@ -281,48 +281,48 @@ const Query = ({results, loading, presetDisease}) => {
                 <button 
                   className={styles.button} 
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: 'MONDO:0005267', label:'Heart Disease'}); 
+                    setSelectedDisease({ id: process.env.REACT_APP_EX_DISEASE_ONE_ID, label: process.env.REACT_APP_EX_DISEASE_ONE_NAME}); 
                     setPresetURL(e.target.dataset.url);
                   }} 
                   data-testid="heart-disease"
-                  data-url="/results?q=6d7ce863-e4d3-4cf8-8a38-3b7191d17964"
-                  >Heart Disease
+                  data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_ONE_UUID}`}
+                  >{process.env.REACT_APP_EX_DISEASE_ONE_NAME}
                 </button>
                 <button 
                   className={styles.button}
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: 'MONDO:0005148', label:'Type 2 Diabetes'}); 
+                    setSelectedDisease({ id: process.env.REACT_APP_EX_DISEASE_TWO_ID, label: process.env.REACT_APP_EX_DISEASE_TWO_NAME}); 
                     setPresetURL(e.target.dataset.url);
                   }}
-                  data-url="/results?q=26394fad-bfd9-4e32-bb90-ef9d5044f593"
-                  >Type 2 Diabetes
+                  data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_TWO_UUID}`}
+                  >{process.env.REACT_APP_EX_DISEASE_TWO_NAME}
                 </button>
                 <button 
                   className={styles.button}
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: 'MONDO:0004975', label:'Alzheimer\'s'}); 
+                    setSelectedDisease({ id: process.env.REACT_APP_EX_DISEASE_THREE_ID, label: process.env.REACT_APP_EX_DISEASE_THREE_NAME}); 
                     setPresetURL(e.target.dataset.url);
                   }}
-                  data-url="/results?q=6752ab77-ff70-4805-8f7c-c55d078b0a50"
-                  >Alzheimer's
+                  data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_THREE_UUID}`}
+                  >{process.env.REACT_APP_EX_DISEASE_THREE_NAME}
                 </button>
                 <button 
                   className={styles.button}
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: 'MONDO:0005301', label:'Multiple Sclerosis'}); 
+                    setSelectedDisease({ id: process.env.REACT_APP_EX_DISEASE_FOUR_ID, label: process.env.REACT_APP_EX_DISEASE_FOUR_NAME}); 
                     setPresetURL(e.target.dataset.url);
                   }}
-                  data-url="/results?q=5c255e94-16d0-4668-8957-45daa995566b"
-                  >Multiple Sclerosis
+                  data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_FOUR_UUID}`}
+                  >{process.env.REACT_APP_EX_DISEASE_FOUR_NAME}
                 </button>
                 <button 
                   className={styles.button}
                   onClick={(e)=>{ 
-                    setSelectedDisease({ id: 'MONDO:0014109', label:'NGLY1-Deficiency'}); 
+                    setSelectedDisease({ id: process.env.REACT_APP_EX_DISEASE_FIVE_ID, label: process.env.REACT_APP_EX_DISEASE_FIVE_NAME}); 
                     setPresetURL(e.target.dataset.url);
                   }}
-                  data-url="/results?q=a333d77d-3f53-4b6c-a311-d3dc067b29a2"
-                  >NGLY1-Deficiency
+                  data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_FIVE_UUID}`}
+                  >{process.env.REACT_APP_EX_DISEASE_FIVE_NAME}
                 </button>
               </div>
             </div>
