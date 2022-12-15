@@ -2,6 +2,7 @@
 import React, {useState, useEffect} from "react";
 import Button from "../FormFields/Button";
 import TextInput from "../FormFields/TextInput";
+import Autocomplete from "../Autocomplete/Autocomplete";
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './QueryBar.module.scss';
@@ -25,22 +26,11 @@ const QueryBar = ({handleSubmission, handleChange, isDisabled, value,
       }} 
       className={styles.form}
       >
-      <div 
-        className={`${styles.autocompleteContainer} ${(autocompleteItems.length > 0 || autocompleteLoading) ? styles.open : ''}`}
-        data-testid="autocomplete-list"
-        >
-        {
-          autocompleteItems && !autocompleteLoading &&
-          autocompleteItems.map((item, i) => {
-            return <p key={i} className={styles.item} onClick={()=>handleItemClick(item)}>{item.label}</p>
-          })
-        }
-        {
-          autocompleteLoading &&
-          <img src={loadingIcon} className={styles.loadingIcon} alt="loading icon" />
-        }
-        <div className={styles.sep}></div>
-      </div>
+      <Autocomplete 
+        isLoading={autocompleteLoading}
+        items={autocompleteItems}
+        handleItemClick={handleItemClick}
+      />
       <span className={styles.prefix}>What drugs may treat</span>
       <TextInput 
         placeholder="Enter a Disease" 
