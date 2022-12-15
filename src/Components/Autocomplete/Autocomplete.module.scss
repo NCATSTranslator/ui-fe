@@ -1,5 +1,18 @@
 @import "../../Assets/Styles/variables";
 
+@-moz-keyframes spin { 
+  100% { -moz-transform: rotate(360deg); } 
+}
+@-webkit-keyframes spin { 
+  100% { -webkit-transform: rotate(360deg); } 
+}
+@keyframes spin { 
+  100% { 
+      -webkit-transform: rotate(360deg); 
+      transform:rotate(360deg); 
+  } 
+}
+
 .autocompleteContainer {
   position: absolute;
   top: calc(100% + 8px);
@@ -48,6 +61,46 @@
   .sep {
     margin: 0 4px;
     border-bottom: 1px solid $midGray;
+  }
+  .buttonsContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+    .button {
+      position: relative;
+      padding: 0 0 4px;
+      margin: 0;
+      background-color: transparent;
+      color: $midGray;
+      border-radius: 0;
+      box-shadow: none;
+      &:after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 12px;
+        right: 12px;
+        border-bottom: 1px solid $midGray;
+        transition: all .25s ease;
+      }
+      &:hover {
+        box-shadow: none;
+        &:after {
+          right: 10px;
+          left: 10px;
+        }
+      }
+      &.active {
+        color: $darkGray;
+        &:after {
+          border-bottom: 1px solid $darkGray;
+        }
+      }
+    }
+    button:first-of-type {
+      margin-right: $m;
+    }
   }
   button {
     grid-template-columns: auto;
