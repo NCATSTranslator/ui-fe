@@ -8,7 +8,7 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
   const pageLength = 10;
 
   const showMoreItems = useCallback((e) => {
-    e.stopPropagation();
+    e.preventDefault();
     if(numberVisibleItems + pageLength >= items.length)
       setNumberVisibleItems(items.length);
     else
@@ -17,7 +17,7 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
   }, [numberVisibleItems]);
 
   const showFewerItems = useCallback((e) => {
-    e.stopPropagation();
+    e.preventDefault();
     if(numberVisibleItems - pageLength <= pageLength)
       setNumberVisibleItems(pageLength);
     else
@@ -26,52 +26,56 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
   }, [numberVisibleItems]);
 
   useEffect(() => {
+    if(!items)
+      return;
     let initNumberVisibleItems = (items.length > pageLength) ? pageLength : items.length;
     setNumberVisibleItems(initNumberVisibleItems);
   }, [items]);
 
   return (
     <div 
-      className={`${styles.autocompleteContainer} ${(items.length > 0 || isLoading) ? styles.open : ''}`}
+      className={`${styles.autocompleteContainer} ${(items || isLoading) ? styles.open : ''}`}
       data-testid="autocomplete-list"
       >
-      {
-        items && !isLoading &&
-        items.slice(0, numberVisibleItems).map((item, i) => {
-          return <p key={i} className={styles.item} onClick={()=>handleItemClick(item)}>{item.label}</p>
-        })
-      }
       {
         isLoading &&
         <img src={loadingIcon} className={styles.loadingIcon} alt="loading icon" />
       }
-    {
-      !isLoading &&
-      <div>
-        <div className={styles.sep}></div>
-        <div className={styles.buttonsContainer}>
+      {
+        items && items.length === 0 && !isLoading && 
+        <p className={styles.noResults}>No matching diseases were found, please adjust your search term and try again.</p>
+      }
+      {
+        items && items.length > 0 && !isLoading &&
+        <div> 
           {
-            items.length > pageLength && !isLoading &&
-            <button 
-              onClick={(e)=>showMoreItems(e)} 
-              className={`${styles.button} ${(numberVisibleItems < items.length) ? styles.active : styles.inactive}`} 
-              >
-              Show More
-            </button>
+            items.slice(0, numberVisibleItems).map((item, i) => {
+              return <p key={i} className={styles.item} onClick={()=>handleItemClick(item)}>{item.label}</p>
+            })
           }
           {
-            items.length > pageLength && !isLoading &&
-            <button 
-              onClick={(e)=>showFewerItems(e)} 
-              className={`${styles.button} ${(numberVisibleItems > pageLength) ? styles.active : styles.inactive}`}
-              >
-              Show Less
-            </button>
-          }
+            items && items.length > pageLength && !isLoading &&
+            <>
+              <div className={styles.sep}></div>
+                <div className={styles.buttonsContainer}>
+                    <button 
+                      onClick={(e)=>showMoreItems(e)} 
+                      className={`${styles.button} ${(numberVisibleItems < items.length) ? styles.active : styles.inactive}`} 
+                      >
+                      Show More
+                    </button>
+                    <button 
+                      onClick={(e)=>showFewerItems(e)} 
+                      className={`${styles.button} ${styles.submitButton} ${(numberVisibleItems > pageLength) ? styles.active : styles.inactive}`}
+                      >
+                      Show Less
+                    </button>
+                </div>
+              </>
+            }
         </div>
-      </div>
-    }
-  </div>
+      }
+    </div>
   );
 }
 
