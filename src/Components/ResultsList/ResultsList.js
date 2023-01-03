@@ -268,7 +268,7 @@ const ResultsList = ({loading}) => {
       handlePageClick({selected: 0});
 
     return newSortedResults;
-  }, [activeStringFilters, handlePageClick, sortedResults]);
+  }, [activeStringFilters, handlePageClick]);
 
   /*
     When the results change, which occurs when the React Query returns, handle the returned data
@@ -298,7 +298,7 @@ const ResultsList = ({loading}) => {
       setSortedResults(newResults);
     }
 
-  }, [rawResults, presetDisease]);
+  }, [rawResults, presetDisease, handleSort]);
   
   useEffect(() => {
     // we have results to show, set isLoading to false

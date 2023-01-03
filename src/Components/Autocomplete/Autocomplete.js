@@ -8,13 +8,15 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
   const pageLength = 10;
 
   const showMoreItems = useCallback((e) => {
+    if(!items)
+      return;
     e.preventDefault();
     if(numberVisibleItems + pageLength >= items.length)
       setNumberVisibleItems(items.length);
     else
       setNumberVisibleItems((prev) => prev + pageLength);
 
-  }, [numberVisibleItems]);
+  }, [numberVisibleItems, items]);
 
   const showFewerItems = useCallback((e) => {
     e.preventDefault();
