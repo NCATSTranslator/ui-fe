@@ -4,7 +4,6 @@ import Button from "../FormFields/Button";
 import TextInput from "../FormFields/TextInput";
 import Autocomplete from "../Autocomplete/Autocomplete";
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
-import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './QueryBar.module.scss';
 
 const QueryBar = ({handleSubmission, handleChange, isDisabled, value, 

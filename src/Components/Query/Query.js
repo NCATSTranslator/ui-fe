@@ -55,7 +55,7 @@ const Query = ({results, loading, presetDisease}) => {
   const [selectedDisease, setSelectedDisease] = useState(null);
 
   // Array, List of items to display in the autocomplete window
-  const [autocompleteItems, setAutoCompleteItems] = useState([]);
+  const [autocompleteItems, setAutoCompleteItems] = useState(null);
   // Bool, are autocomplete items loading
   const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
   // Function, delay query for fetching autocomplete items by 750ms each time the user types, so we only send a request once they're done
@@ -81,7 +81,7 @@ const Query = ({results, loading, presetDisease}) => {
     setSelectedDisease(disease);
     setReadyForSubmission(true);
     if(autocompleteItems) 
-      setAutoCompleteItems([]);
+      setAutoCompleteItems(null);
   }
 
   // Validation function for submission
@@ -253,7 +253,7 @@ const Query = ({results, loading, presetDisease}) => {
             isError &&
             <p className={styles.error}>{errorText}</p>
           }
-          <OutsideClickHandler onOutsideClick={()=>{if(autocompleteItems) setAutoCompleteItems([])}}>
+          <OutsideClickHandler onOutsideClick={()=>{setAutoCompleteItems(null)}}>
             <QueryBar
               handleSubmission={handleSubmission}
               handleChange={handleQueryItemChange}
