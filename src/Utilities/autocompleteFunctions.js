@@ -10,7 +10,7 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
       headers: { 'Content-Type': 'application/json' },
     };
     // Fetch list of curies based on userInput string from Name Resolver
-    fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=40`, nameResolverRequestOptions)
+    fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=100`, nameResolverRequestOptions)
       .then(response => response.json())
       .then(data => {
         // Convert data returned from Name Resolver into a list of curies
@@ -33,6 +33,8 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
         console.log(Object.keys(data).length, 'full data from node normalizer:', data);
         // get list of names from the data returned from Node Normalizer
         let autoCompleteItems = getFormattedNamesFromNormalizer(data);
+        // truncate array in case of too many results
+        autoCompleteItems = autoCompleteItems.slice(0,40);
         console.log('formatted autocomplete items:', autoCompleteItems)
         setAutoCompleteItems(autoCompleteItems);
         setLoadingAutocomplete(false);
