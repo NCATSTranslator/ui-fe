@@ -22,6 +22,15 @@
     font-size: $bodyTwoSize;
     margin-bottom: $xxs;
   }
+  .icon {
+    content: url('../../Icons/Directional/Property 1 Down.svg');
+    order: 1;
+    transition: $defaultTransformAnim;
+    transform: rotate(360deg);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
   .selectContainer {
     padding: 7px $xs;
     border-radius: $defaultBorderRadius;
@@ -32,15 +41,7 @@
     grid-template-columns: minmax(0,1fr);
     align-items: center;
 
-    .icon {
-      content: url('../../Icons/Directional/Property 1 Down.svg');
-      order: 1;
-      transition: $defaultTransformAnim;
-      transform: rotate(360deg);
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-    }
+
     &.open {
       .icon {
         transform: rotate(180deg);
