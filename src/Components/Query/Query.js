@@ -43,6 +43,8 @@ const Query = ({results, loading, presetDisease}) => {
   storedQuery = (storedQuery === undefined) ? [] : storedQuery;
   // Array, currently selected query items
   const [queryItems, setQueryItems] = useState(storedQuery);
+  // String, type of query
+  const [queryType, setQueryType] = useState('');
   // Array, for use in useEffect hooks with queryItems as a dependency
   var prevQueryItems = useRef(storedQuery);
 
@@ -73,6 +75,10 @@ const Query = ({results, loading, presetDisease}) => {
   const handleQueryItemChange = (e) => {
     delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems);
     setInputText(e);
+  }
+
+  const handleQueryTypeChange = (value) => {
+    setQueryType(value);
   }
 
   // Handler for disease selection (template click or autocomplete item click)
@@ -242,6 +248,10 @@ const Query = ({results, loading, presetDisease}) => {
     }
   }, [selectedDisease, presetURL, navigate]);
 
+  useEffect(() => {
+    console.log(queryType)
+  }, [queryType]);
+
   return (
     <>
       <div className={`${styles.query}`} >
@@ -257,6 +267,7 @@ const Query = ({results, loading, presetDisease}) => {
             <QueryBar
               handleSubmission={handleSubmission}
               handleChange={handleQueryItemChange}
+              handleQueryTypeChange={handleQueryTypeChange}
               isDisabled={isLoading}
               value={inputText}
               autocompleteItems={autocompleteItems}
