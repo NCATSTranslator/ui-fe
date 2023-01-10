@@ -14,7 +14,7 @@ export const getFormattedEvidence = (paths, results) => {
             publication.id = pubID;
             let object = subgraph.object;
             let subject = subgraph.subject;
-            let predicate = formatBiolinkPredicate(subgraph.predicates[0]);
+            let predicate = formatBiolinkPredicate(subgraph.predicate);
             publication.edge = {
               subject: capitalizeAllWords(subject.names[0]),
               predicate: predicate,
@@ -91,7 +91,7 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     // Get the subject node's name
     let subjectNode = getNodeByCurie(item.subject, results);
     // Get the subject node's description
-    let description = (subjectNode.description) ? subjectNode.description[0] : '';
+    let description = (subjectNode.descriptions) ? subjectNode.descriptions[0] : '';
     // Get the subject node's fda approval status 
     let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
@@ -138,7 +138,7 @@ export const findStringMatch = (element, value) => {
     for(const item of path.subgraph) {
       if(
         (item.names && item.names[0].toLowerCase().includes(formattedValue) )|| 
-        (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))
+        (item.predicate && item.predicate.toLowerCase().includes(formattedValue))
         // || item.types && item.types[0].replace('biolink:', '').replaceAll(/([A-Z])/g, ' $1').trim().toLowerCase().includes(formattedValue)
       )
         return true;
