@@ -195,7 +195,7 @@ const Query = ({results, loading, presetDisease}) => {
       // Set isLoading to true
       setIsLoading(true);
 
-      let queryJson = JSON.stringify({disease: selectedDisease.id});
+      let queryJson = JSON.stringify({disease: selectedDisease.id, type: queryType.targetType, direction: null});
       
       // submit query to /query
       const requestOptions = {

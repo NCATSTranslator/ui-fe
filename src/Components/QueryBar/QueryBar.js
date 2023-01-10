@@ -19,30 +19,35 @@ const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisa
       id: 0,
       label: 'What drugs may treat',  
       placeholder: 'Enter a Disease',
+      targetType: 'drug',
       filterType: 'Disease'
     },
     {
       id: 1,
       label: 'What chemical upregulates',  
       placeholder: 'Enter a Gene',
+      targetType: 'chemical',
       filterType: 'Gene'
     },
     {
       id: 2,
       label: 'What chemical downregulates',  
       placeholder: 'Enter a Gene',
+      targetType: 'chemical',
       filterType: 'Gene'
     },
     {
       id: 3,
       label: 'What gene is upregulated by',  
       placeholder: 'Enter a Chemical',
+      targetType: 'gene',
       filterType: 'ChemicalEntity'
     },
     {
       id: 4,
       label: 'What gene is downregulated by',  
       placeholder: 'Enter a Chemical',
+      targetType: 'gene',
       filterType: 'ChemicalEntity'
     }
   ]
