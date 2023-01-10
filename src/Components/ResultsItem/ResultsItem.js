@@ -155,7 +155,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
             description: desc,
           }
         } else {
-          let pred = (item.predicates) ? formatBiolinkPredicate(item.predicates[0]) : '';
+          let pred = (item.predicate) ? formatBiolinkPredicate(item.predicate) : '';
           pathToAdd[i] = {
             category: 'predicate',
             predicates: [pred],

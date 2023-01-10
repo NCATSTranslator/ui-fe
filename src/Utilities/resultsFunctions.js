@@ -138,7 +138,7 @@ export const findStringMatch = (element, value) => {
     for(const item of path.subgraph) {
       if(
         (item.names && item.names[0].toLowerCase().includes(formattedValue) )|| 
-        (item.predicate && item.predicate.toLowerCase().includes(formattedValue))
+        (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))
         // || item.types && item.types[0].replace('biolink:', '').replaceAll(/([A-Z])/g, ' $1').trim().toLowerCase().includes(formattedValue)
       )
         return true;
