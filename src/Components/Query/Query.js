@@ -44,7 +44,9 @@ const Query = ({results, loading, presetDisease}) => {
   // Array, currently selected query items
   const [queryItems, setQueryItems] = useState(storedQuery);
   // String, type of query
-  const [queryType, setQueryType] = useState('');
+  const [queryType, setQueryType] = useState(null);
+  // String, type to send to autocomplete for result filtering
+  const autocompleteFilterTerm = useRef(null);
   // Array, for use in useEffect hooks with queryItems as a dependency
   var prevQueryItems = useRef(storedQuery);
 
@@ -61,7 +63,10 @@ const Query = ({results, loading, presetDisease}) => {
   // Bool, are autocomplete items loading
   const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
   // Function, delay query for fetching autocomplete items by 750ms each time the user types, so we only send a request once they're done
-  const delayedQuery = useMemo(() => _.debounce((i, sl, sa) => getAutocompleteTerms(i, sl, sa), 750), []);
+  const delayedQuery = useMemo(() => _.debounce(
+    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilterTerm) => 
+      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilterTerm), 750), []
+  );
 
   // Bool, since the query will be submitted whenever a query item is selected, use this to distinguish between
   // when a user selected a query item, or if the query item is manually updated when /creative_results returns
@@ -73,11 +78,18 @@ const Query = ({results, loading, presetDisease}) => {
 
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = (e) => {
-    delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems);
-    setInputText(e);
+    if(queryType) {
+      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilterTerm.current);
+      setInputText(e);
+    } else {
+      setIsError(true);
+      setErrorText("No query selected, please select a query from the dropdown.");
+    }
   }
 
   const handleQueryTypeChange = (value) => {
+    setIsError(false);
+    autocompleteFilterTerm.current = value.filterType;
     setQueryType(value);
   }
 
@@ -249,6 +261,8 @@ const Query = ({results, loading, presetDisease}) => {
   }, [selectedDisease, presetURL, navigate]);
 
   useEffect(() => {
+    if(!queryType)
+      return;
     console.log(queryType)
   }, [queryType]);
 
