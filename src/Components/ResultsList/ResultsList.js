@@ -159,6 +159,10 @@ const ResultsList = ({loading}) => {
         // increment the number of status checks
         numberOfStatusChecks.current++;
         console.log("ARA status:",data);
+        if(data.status === 'error') {
+          setIsError(true);
+          setIsFetchingARAStatus(false);
+        }
         let fetchResults = false;
         
         if(data.data.aras.length > returnedARAs.aras.length) {
@@ -180,6 +184,7 @@ const ResultsList = ({loading}) => {
           setIsFetchingResults(true);
       })
       .catch((error) => {
+        setIsError(true);
         console.log(error)
       });
   }, { 
