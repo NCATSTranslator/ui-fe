@@ -105,6 +105,11 @@ const QueryHistoryList = () => {
       <ul className={styles.historyList}> 
         {
           filteredQueryHistoryState.map((query, i)=> {
+            // early return to accommodate old formatting, remove later 
+            if(query.items !== undefined)
+              return;
+
+            console.log(query);
             let itemTimestamp = new Date(query.date);
             let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
             let timeName = "";
@@ -138,14 +143,16 @@ const QueryHistoryList = () => {
                     </div>
                     <div className={styles.right}>
                       <div className={styles.top}>
-                        {
+                        <span>{query.item.type.label} </span>
+                        <span className={styles.subject}>{query.item.node.label}</span>
+                        {/* {
                           query.items && 
                           query.items.map((item, j) => {
                             let output = (item.value) ? item.value : item.name;
                             return (
                               <span key={j} className={item.type}>{output} </span>)
                             })
-                        }
+                        } */}
                       </div>
                       <div className={styles.bottom}>
                         {

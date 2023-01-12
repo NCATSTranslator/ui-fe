@@ -42,7 +42,7 @@ const Query = ({results, loading, presetDisease}) => {
   let storedQuery = useSelector(currentQuery);
   storedQuery = (storedQuery === undefined) ? [] : storedQuery;
   // Array, currently selected query items
-  const [queryItems, setQueryItems] = useState(storedQuery);
+  const [queryItem, setQueryItem] = useState(storedQuery);
   // String, type of query
   const [queryType, setQueryType] = useState(null);
   // String, type to send to autocomplete for result filtering
@@ -53,10 +53,10 @@ const Query = ({results, loading, presetDisease}) => {
   let presetInputText =
     (prevQueryItems.current[prevQueryItems.current.length - 1] !== undefined
       && isResults)
-    ? prevQueryItems.current[prevQueryItems.current.length - 1].name
+    ? prevQueryItems.current[prevQueryItems.current.length - 1].item.label
     : '';
   const [inputText, setInputText] = useState(presetInputText);
-  const [selectedDisease, setSelectedDisease] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   // Array, List of items to display in the autocomplete window
   const [autocompleteItems, setAutoCompleteItems] = useState(null);
@@ -96,7 +96,7 @@ const Query = ({results, loading, presetDisease}) => {
   // Handler for disease selection (template click or autocomplete item click)
   const handleDiseaseSelection = (disease) => {
     setIsError(false);
-    setSelectedDisease(disease);
+    setSelectedItem(disease);
     setReadyForSubmission(true);
     if(autocompleteItems)
       setAutoCompleteItems(null);
@@ -104,50 +104,37 @@ const Query = ({results, loading, presetDisease}) => {
 
   // Validation function for submission
   const validateSubmission = useCallback(() => {
-    if(selectedDisease === null) {
+    if(selectedItem === null) {
       setIsError(true);
       setErrorText("No disease selected, please select a valid disease.");
       return;
     }
 
     setIsValidSubmission(true);
-  }, [selectedDisease])
+  }, [selectedItem])
 
   // Event handler for form submission
   const handleSubmission = useCallback(() => {
     validateSubmission();
   },[validateSubmission])
 
-  const updateQueryItems = (label) => {
-    setQueryItems([
+  const updateQueryItems = useCallback(() => {
+    setQueryItem(
       {
-        "name": "What Drugs",
-        "type": "subject",
-        "category": "chemical",
-        "value": ""
-      },
-      {
-        "name": "May Treat",
-        "type": "action",
-        "category": "treats"
-      },
-      {
-        "name": label,
-        "type": "subject",
-        "category": "disease",
-        "value": ""
+        type: queryType,
+        node: selectedItem
       }
-    ]);
-  }
+    )
+  }, [queryType, selectedItem])
 
   useEffect(() => {
     setIsLoading(loading);
   }, [loading]);
 
   useEffect(() => {
-    if(selectedDisease !== null) {
-      setInputText(selectedDisease.label);
-      updateQueryItems(selectedDisease.label);
+    if(selectedItem !== null) {
+      setInputText(selectedItem.label);
+      updateQueryItems();
       // Uncomment the below to re-enable click to run query
       // if(readyForSubmission) {
       //   setReadyForSubmission(false);
@@ -155,11 +142,11 @@ const Query = ({results, loading, presetDisease}) => {
       // }
     }
 
-  }, [selectedDisease, readyForSubmission, handleSubmission]);
+  }, [selectedItem, readyForSubmission, handleSubmission]);
 
   useEffect(() => {
     if(presetDisease) {
-      setSelectedDisease(presetDisease);
+      setSelectedItem(presetDisease);
     }
   }, [presetDisease]);
 
@@ -169,18 +156,18 @@ const Query = ({results, loading, presetDisease}) => {
   useEffect(() => {
     // since useEffect dependency update checks don't work on objects (thanks to shallow equals)
     // check to see if queryItems has actually been updated, if not return
-    if(isEqual(prevQueryItems.current, queryItems))
+    if(isEqual(prevQueryItems.current, queryItem))
       return;
 
-    prevQueryItems.current = cloneDeep(queryItems);
+    prevQueryItems.current = cloneDeep(queryItem);
 
     // if the current query items and the stored query match, return
-    if(isEqual(queryItems, storedQuery))
+    if(isEqual(queryItem, storedQuery))
       return;
 
     // otherwise, update the stored query in the app state
-    dispatch(setCurrentQuery(queryItems));
-  }, [queryItems, storedQuery, dispatch]);
+    dispatch(setCurrentQuery(queryItem));
+  }, [queryItem, storedQuery, dispatch]);
 
   // Handle change to isValidSubmission
   useEffect(() => {
@@ -195,7 +182,7 @@ const Query = ({results, loading, presetDisease}) => {
       // Set isLoading to true
       setIsLoading(true);
 
-      let queryJson = JSON.stringify({curie: selectedDisease.id, type: queryType.targetType, direction: queryType.direction});
+      let queryJson = JSON.stringify({curie: selectedItem.id, type: queryType.targetType, direction: queryType.direction});
 
       // submit query to /query
       const requestOptions = {
@@ -214,7 +201,7 @@ const Query = ({results, loading, presetDisease}) => {
             dispatch(
               incrementHistory(
                 {
-                  items: queryItems,
+                  item: queryItem,
                   date: timestamp.toDateString(),
                   time: timestamp.toLocaleTimeString([], {hour12: true, hour: 'numeric', minute:'2-digit'}),
                   id: data.data
@@ -237,7 +224,7 @@ const Query = ({results, loading, presetDisease}) => {
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItems, storedQuery, selectedDisease, navigate, setSearchParams])
+  }, [isValidSubmission, dispatch, queryItem, storedQuery, selectedItem, navigate, setSearchParams])
 
   /*
     If the query has been populated by clicking on an item in the query history
@@ -258,7 +245,7 @@ const Query = ({results, loading, presetDisease}) => {
         clearTimeout(timer);
       }
     }
-  }, [selectedDisease, presetURL, navigate]);
+  }, [selectedItem, presetURL, navigate]);
 
   useEffect(() => {
     if(!queryType)
@@ -290,9 +277,9 @@ const Query = ({results, loading, presetDisease}) => {
             />
           </OutsideClickHandler>
           {
-            isResults && selectedDisease && selectedDisease.id &&
+            isResults && selectedItem && selectedItem.id &&
             <p className={styles.needHelp}>
-              {getEntityLink(selectedDisease.id, styles.monarchLink)}
+              {getEntityLink(selectedItem.id, styles.monarchLink)}
             </p>
           }
           <p className={styles.needHelp}>
@@ -306,7 +293,7 @@ const Query = ({results, loading, presetDisease}) => {
                 <button
                   className={styles.button}
                   onClick={(e)=>{
-                    setSelectedDisease({ id: process.env.REACT_APP_EX_DISEASE_ONE_ID, label: process.env.REACT_APP_EX_DISEASE_ONE_NAME});
+                    setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_ONE_ID, label: process.env.REACT_APP_EX_DISEASE_ONE_NAME});
                     setPresetURL(e.target.dataset.url);
                   }}
                   data-testid="heart-disease"
@@ -316,7 +303,7 @@ const Query = ({results, loading, presetDisease}) => {
                 <button
                   className={styles.button}
                   onClick={(e)=>{
-                    setSelectedDisease({ id: process.env.REACT_APP_EX_DISEASE_TWO_ID, label: process.env.REACT_APP_EX_DISEASE_TWO_NAME});
+                    setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_TWO_ID, label: process.env.REACT_APP_EX_DISEASE_TWO_NAME});
                     setPresetURL(e.target.dataset.url);
                   }}
                   data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_TWO_UUID}`}
@@ -325,7 +312,7 @@ const Query = ({results, loading, presetDisease}) => {
                 <button
                   className={styles.button}
                   onClick={(e)=>{
-                    setSelectedDisease({ id: process.env.REACT_APP_EX_DISEASE_THREE_ID, label: process.env.REACT_APP_EX_DISEASE_THREE_NAME});
+                    setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_THREE_ID, label: process.env.REACT_APP_EX_DISEASE_THREE_NAME});
                     setPresetURL(e.target.dataset.url);
                   }}
                   data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_THREE_UUID}`}
@@ -334,7 +321,7 @@ const Query = ({results, loading, presetDisease}) => {
                 <button
                   className={styles.button}
                   onClick={(e)=>{
-                    setSelectedDisease({ id: process.env.REACT_APP_EX_DISEASE_FOUR_ID, label: process.env.REACT_APP_EX_DISEASE_FOUR_NAME});
+                    setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_FOUR_ID, label: process.env.REACT_APP_EX_DISEASE_FOUR_NAME});
                     setPresetURL(e.target.dataset.url);
                   }}
                   data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_FOUR_UUID}`}
@@ -343,7 +330,7 @@ const Query = ({results, loading, presetDisease}) => {
                 <button
                   className={styles.button}
                   onClick={(e)=>{
-                    setSelectedDisease({ id: process.env.REACT_APP_EX_DISEASE_FIVE_ID, label: process.env.REACT_APP_EX_DISEASE_FIVE_NAME});
+                    setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_FIVE_ID, label: process.env.REACT_APP_EX_DISEASE_FIVE_NAME});
                     setPresetURL(e.target.dataset.url);
                   }}
                   data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_FIVE_UUID}`}
