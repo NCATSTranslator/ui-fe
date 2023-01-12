@@ -152,6 +152,7 @@ const ResultsList = ({loading}) => {
       headers: { 'Content-Type': 'application/json' },
       body: queryIDJson
     };
+    let responseClone;
     // eslint-disable-next-line
     const response = await fetch('/creative_status', requestOptions)
       .then(response => response.json())
@@ -185,7 +186,7 @@ const ResultsList = ({loading}) => {
       })
       .catch((error) => {
         setIsError(true);
-        console.log(error)
+        console.error(error)
       });
   }, { 
     refetchInterval: 10000,
