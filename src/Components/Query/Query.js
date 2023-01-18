@@ -40,22 +40,27 @@ const Query = ({results, loading, presetDisease}) => {
 
   // Get the current query from the application state
   let storedQuery = useSelector(currentQuery);
-  storedQuery = (storedQuery === undefined) ? [] : storedQuery;
+  storedQuery = (storedQuery === undefined) ? {} : storedQuery;
   // Array, currently selected query items
   const [queryItem, setQueryItem] = useState(storedQuery);
   // String, type of query
-  const [queryType, setQueryType] = useState(null);
+  const [queryType, setQueryType] = useState(storedQuery);
   // String, type to send to autocomplete for result filtering
   const autocompleteFilterTerm = useRef(null);
   // Array, for use in useEffect hooks with queryItems as a dependency
-  var prevQueryItems = useRef(storedQuery);
+  var prevQueryItem = useRef(storedQuery);
 
   let presetInputText =
-    (prevQueryItems.current[prevQueryItems.current.length - 1] !== undefined
-      && isResults)
-    ? prevQueryItems.current[prevQueryItems.current.length - 1].item.label
+    (Object.keys(prevQueryItem.current).length && isResults)
+    ? prevQueryItem.current.node.label
     : '';
   const [inputText, setInputText] = useState(presetInputText);
+  
+  const presetTypeID = 
+    (Object.keys(prevQueryItem.current).length && isResults) 
+    ? prevQueryItem.current.type.id
+    : 0;
+
   const [selectedItem, setSelectedItem] = useState(null);
 
   // Array, List of items to display in the autocomplete window
@@ -156,10 +161,10 @@ const Query = ({results, loading, presetDisease}) => {
   useEffect(() => {
     // since useEffect dependency update checks don't work on objects (thanks to shallow equals)
     // check to see if queryItems has actually been updated, if not return
-    if(isEqual(prevQueryItems.current, queryItem))
+    if(isEqual(prevQueryItem.current, queryItem))
       return;
 
-    prevQueryItems.current = cloneDeep(queryItem);
+    prevQueryItem.current = cloneDeep(queryItem);
 
     // if the current query items and the stored query match, return
     if(isEqual(queryItem, storedQuery))
@@ -271,6 +276,7 @@ const Query = ({results, loading, presetDisease}) => {
               handleQueryTypeChange={handleQueryTypeChange}
               isDisabled={isLoading}
               value={inputText}
+              presetTypeID={presetTypeID}
               autocompleteItems={autocompleteItems}
               autocompleteLoading={loadingAutocomplete}
               handleItemClick={handleDiseaseSelection}

@@ -35,7 +35,7 @@ const QueryHistoryList = () => {
   }
 
   const handleClick = (query) => {
-    dispatch(setCurrentQuery(query.items));
+    dispatch(setCurrentQuery(query.item));
     navigate(`/results?q=${query.id}`);
   }
 
@@ -109,7 +109,6 @@ const QueryHistoryList = () => {
             if(query.items !== undefined)
               return;
 
-            console.log(query);
             let itemTimestamp = new Date(query.date);
             let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
             let timeName = "";

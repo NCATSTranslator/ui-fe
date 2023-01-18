@@ -9,7 +9,7 @@ import { queryTypes } from "../../Utilities/queryTypes";
 import styles from './QueryBar.module.scss';
 
 const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisabled, value, 
-  autocompleteItems, autocompleteLoading, handleItemClick}) => {
+  presetTypeID, autocompleteItems, autocompleteLoading, handleItemClick}) => {
 
   const [submissionDisabled, setSubmissionDisabled] = useState(false);
   const [queryType, setQueryType] = useState('');
@@ -29,6 +29,11 @@ const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisa
     // handle type change callback
     handleQueryTypeChange(newCurrentQueryType);
   }
+
+  useEffect(() => {
+    if(presetTypeID)
+      handleTypeChange(presetTypeID)
+  }, []);
 
   useEffect(() => {
     setSubmissionDisabled(isDisabled);
