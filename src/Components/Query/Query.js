@@ -252,12 +252,6 @@ const Query = ({results, loading, presetDisease}) => {
     }
   }, [selectedItem, presetURL, navigate]);
 
-  useEffect(() => {
-    if(!queryType)
-      return;
-    console.log(queryType)
-  }, [queryType]);
-
   return (
     <>
       <div className={`${styles.query}`} >
