@@ -17,7 +17,7 @@ const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisa
     
   value = (value !== undefined && value !== null) ? value : '';
 
-  const handleTypeChange = (value) =>{
+  const handleTypeChange = (value, resetInputText) =>{
     // get selected query from array by id
     const newCurrentQueryType = queryTypes.find(type => {
       return type.id === parseInt(value)
@@ -27,12 +27,12 @@ const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisa
     // update the current query type 
     setQueryType(newCurrentQueryType);
     // handle type change callback
-    handleQueryTypeChange(newCurrentQueryType);
+    handleQueryTypeChange(newCurrentQueryType, resetInputText);
   }
 
   useEffect(() => {
     if(presetTypeID)
-      handleTypeChange(presetTypeID)
+      handleTypeChange(presetTypeID, false)
   }, []);
 
   useEffect(() => {

@@ -40,7 +40,7 @@ const Query = ({results, loading, presetDisease}) => {
 
   // Get the current query from the application state
   let storedQuery = useSelector(currentQuery);
-  storedQuery = (storedQuery === undefined) ? {} : storedQuery;
+  storedQuery = (storedQuery !== undefined && isResults) ? storedQuery : {};
   // Array, currently selected query items
   const [queryItem, setQueryItem] = useState(storedQuery);
   // String, type of query
@@ -83,7 +83,7 @@ const Query = ({results, loading, presetDisease}) => {
 
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = (e) => {
-    if(queryType) {
+    if(Object.keys(queryType).length) {
       delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilterTerm.current);
       setInputText(e);
     } else {
@@ -92,10 +92,12 @@ const Query = ({results, loading, presetDisease}) => {
     }
   }
 
-  const handleQueryTypeChange = (value) => {
+  const handleQueryTypeChange = (value, resetInputText) => {
     setIsError(false);
     autocompleteFilterTerm.current = value.filterType;
     setQueryType(value);
+    if(resetInputText || resetInputText === undefined)
+      setInputText('');
   }
 
   // Handler for disease selection (template click or autocomplete item click)
