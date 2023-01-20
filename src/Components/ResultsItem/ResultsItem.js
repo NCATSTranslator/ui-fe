@@ -222,7 +222,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
         <span 
           className={styles.score} 
           >
-          <span className={styles.scoreNum}>1.0</span>
+          <span className={styles.scoreNum}>{item.score === null ? '0' : item.score }</span>
         </span>
       </div>
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>

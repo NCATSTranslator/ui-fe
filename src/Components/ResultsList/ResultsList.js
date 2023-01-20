@@ -314,7 +314,7 @@ const ResultsList = ({loading}) => {
     setFormattedResults(newResults);
 
     if(newResults.length > 0) {
-      setSortedResults(handleSort(newResults, 'evidenceHighLow'));
+      setSortedResults(handleSort(newResults, 'scoreHighLow'));
       presorted.current = true;
     } else {
       setSortedResults(newResults);

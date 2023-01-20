@@ -35,13 +35,11 @@ export const sortEvidenceHighLow = (items) => {
 }
 
 export const sortScoreLowHigh = (items) => {
-  // return items.sort((a, b) => a.score - b.score);
-  return items;
+  return items.sort((a, b) => a.score - b.score);
 }
 
 export const sortScoreHighLow = (items) => {
-  // return items.sort((a, b) => b.score - a.score);
-  return items;
+  return items.sort((a, b) => b.score - a.score);
 }
 
 
