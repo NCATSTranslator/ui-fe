@@ -13,8 +13,9 @@ import { useSelector } from 'react-redux';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
+  sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
   // eslint-disable-next-line
-  sortEvidenceHighLow, sortDateLowHigh, sortDateHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
+  sortDateLowHigh, sortDateHighLow  } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import { cloneDeep, isEqual } from "lodash";
@@ -54,6 +55,8 @@ const ResultsList = ({loading}) => {
   const [isSortedByName, setIsSortedByName] = useState(null);
   // Bool, are the results currently sorted by evidence count (true/false for asc/desc, null for not set)
   const [isSortedByEvidence, setIsSortedByEvidence] = useState(null);
+  // Bool, are the results currently sorted by score
+  const [isSortedByScore, setIsSortedByScore] = useState(null);
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   // String, active title of evidence modal
@@ -242,6 +245,7 @@ const ResultsList = ({loading}) => {
       case 'nameLowHigh':
         newSortedResults = sortNameLowHigh(newSortedResults);
         setIsSortedByName(true);
+        setIsSortedByScore(null)
         setIsSortedByEvidence(null);
         break;
       case 'nameHighLow':
@@ -257,6 +261,18 @@ const ResultsList = ({loading}) => {
       case 'evidenceHighLow':
         newSortedResults = sortEvidenceHighLow(newSortedResults);
         setIsSortedByEvidence(true);
+        setIsSortedByName(null);
+        break;
+      case 'scoreLowHigh':
+        newSortedResults = sortScoreLowHigh(newSortedResults);
+        setIsSortedByScore(false)
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
+        break;
+      case 'scoreHighLow':
+        newSortedResults = sortScoreHighLow(newSortedResults);
+        setIsSortedByScore(true)
+        setIsSortedByEvidence(null);
         setIsSortedByName(null);
         break;
       case 'entityString':
@@ -298,7 +314,7 @@ const ResultsList = ({loading}) => {
     setFormattedResults(newResults);
 
     if(newResults.length > 0) {
-      setSortedResults(handleSort(newResults, 'evidenceHighLow'));
+      setSortedResults(handleSort(newResults, 'scoreHighLow'));
       presorted.current = true;
     } else {
       setSortedResults(newResults);
@@ -755,6 +771,12 @@ const ResultsList = ({loading}) => {
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow'))}}
                         >
                         Evidence
+                      </div>
+                      <div 
+                        className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`} 
+                        onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByScore)?'scoreLowHigh': 'scoreHighLow'))}}
+                        >
+                        Score
                       </div>
                     </div>
                     {

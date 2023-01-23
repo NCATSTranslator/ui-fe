@@ -218,6 +218,13 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
           <span className={styles.viewAll}>View All Evidence</span> ({evidenceCount})
         </span>
       </div>
+      <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
+        <span 
+          className={styles.score} 
+          >
+          <span className={styles.scoreNum}>{item.score === null ? '0' : item.score }</span>
+        </span>
+      </div>
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>
       </button>

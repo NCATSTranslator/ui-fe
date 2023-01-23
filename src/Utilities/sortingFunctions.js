@@ -34,6 +34,15 @@ export const sortEvidenceHighLow = (items) => {
   return items.sort((a, b) => b.evidence.length - a.evidence.length);
 }
 
+export const sortScoreLowHigh = (items) => {
+  return items.sort((a, b) => a.score - b.score);
+}
+
+export const sortScoreHighLow = (items) => {
+  return items.sort((a, b) => b.score - a.score);
+}
+
+
 export const sortByEntityStrings = (items, strings) => {
   return items.sort((a, b) => {
     const nameA = a.name.toLowerCase();
