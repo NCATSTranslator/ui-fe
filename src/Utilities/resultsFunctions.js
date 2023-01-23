@@ -98,6 +98,7 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     let formattedPaths = [];
     formattedPaths = getFormattedPaths(item.paths, results);
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
+    let itemScore = (item.score !== null && item.score !== undefined) ? item.score.toFixed(1) : 0;
     let formattedItem = {
       id: _.uniqueId(),
       type: 'biolink:Drug',
@@ -106,7 +107,8 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
       object: objectNodeName,
       description: description,
       evidence: getFormattedEvidence(formattedPaths, results),
-      fdaInfo: fdaInfo
+      fdaInfo: fdaInfo,
+      score: itemScore
     }
     newSummarizedResults.push(formattedItem);
     if(!presetDiseaseSet) {
