@@ -113,7 +113,7 @@ const Query = ({results, loading, presetDisease}) => {
   const validateSubmission = useCallback(() => {
     if(selectedItem === null) {
       setIsError(true);
-      setErrorText("No disease selected, please select a valid disease.");
+      setErrorText("No term selected, please select a valid term.");
       return;
     }
 
