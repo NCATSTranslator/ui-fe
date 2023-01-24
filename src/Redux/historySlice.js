@@ -18,19 +18,19 @@ export const historySlice = createSlice({
     incrementHistory: (state, action) => {
       return {pastQueries: [...state.pastQueries, action.payload]};
     },
-    clearHistory: (state) => {
-      state.pastQueries = [];
-      return state;
-    },
     removeItemAtIndex: (state, action) => {
       let newState = state;
+      console.log(action.payload)
       newState.pastQueries.splice(action.payload, 1);
       return newState;
     },
+    setHistory: (state, action) => {
+      return {pastQueries: action.payload};
+    }
   }
 })
 
-export const { removeItemAtIndex, clearHistory, incrementHistory } = historySlice.actions
+export const { removeItemAtIndex, clearHistory, incrementHistory, setHistory } = historySlice.actions
 
 export const pastQueryCount = state => state.history.pastQueries.length;
 export const pastQueryState = state => state.history.pastQueries;

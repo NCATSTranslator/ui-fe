@@ -1,6 +1,6 @@
 import styles from './History.module.scss';
 import React, {useState} from "react";
-import { pastQueryState, clearHistory } from "../../Redux/historySlice";
+import { pastQueryState, setHistory } from "../../Redux/historySlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
 import Modal from "../../Components/Modals/Modal";
@@ -41,7 +41,7 @@ const History = () => {
           <button 
             className={styles.buttonOne}
             onClick={()=>{
-              dispatch(clearHistory()); 
+              dispatch(setHistory([])); 
               setModalOpen(false);
             }}
             >
