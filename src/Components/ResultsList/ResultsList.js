@@ -163,10 +163,7 @@ const ResultsList = ({loading}) => {
         // increment the number of status checks
         numberOfStatusChecks.current++;
         console.log("ARA status:",data);
-        if(data.status === 'error') {
-          setIsError(true);
-          setIsFetchingARAStatus(false);
-        }
+
         let fetchResults = false;
         
         if(data.data.aras.length > returnedARAs.aras.length) {
@@ -188,7 +185,13 @@ const ResultsList = ({loading}) => {
           setIsFetchingResults(true);
       })
       .catch((error) => {
-        setIsError(true);
+        if(formattedResults.length <= 0) {
+          setIsError(true);
+          setIsFetchingARAStatus(false);
+        }
+        if(formattedResults.length > 0) {
+          setIsFetchingARAStatus(false);
+        }
         console.error(error)
       });
   }, { 
@@ -217,10 +220,6 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log('New results:', data);
-        if(data.status === 'error') {
-          setIsError(true);
-          setIsFetchingARAStatus(false);
-        }
         // if we've already gotten results before, set freshRawResults instead to 
         // prevent original results from being overwritten
         if(formattedResults.length > 0) {
@@ -231,11 +230,18 @@ const ResultsList = ({loading}) => {
         setIsFetchingResults(false);
       })
       .catch((error) => {
-        console.log(error)
+        if(formattedResults.length <= 0) {
+          setIsError(true);
+          setIsFetchingARAStatus(false);
+        }
+        if(formattedResults.length > 0) {
+          setIsFetchingARAStatus(false);
+        }
+        console.log(error);
       });
   }, { 
     enabled: isFetchingResults,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 
   // Handle the sorting 
@@ -324,7 +330,7 @@ const ResultsList = ({loading}) => {
   
   useEffect(() => {
     // we have results to show, set isLoading to false
-    if (formattedResults.length > 0 && rawResults.status !== 'error') 
+    if (formattedResults.length > 0) 
       setIsLoading(false);
     
     // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
