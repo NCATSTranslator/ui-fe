@@ -40,11 +40,11 @@ const Query = ({results, loading, presetDisease}) => {
 
   // Get the current query from the application state
   let storedQuery = useSelector(currentQuery);
-  storedQuery = (storedQuery !== undefined && isResults) ? storedQuery : {};
+  storedQuery = (storedQuery !== undefined && isResults) ? storedQuery : {type:{}, node:{}};
   // Array, currently selected query items
   const [queryItem, setQueryItem] = useState(storedQuery);
   // String, type of query
-  const [queryType, setQueryType] = useState(storedQuery);
+  const [queryType, setQueryType] = useState(storedQuery.type);
   // String, type to send to autocomplete for result filtering
   const autocompleteFilterTerm = useRef(null);
   // Array, for use in useEffect hooks with queryItems as a dependency
@@ -59,7 +59,7 @@ const Query = ({results, loading, presetDisease}) => {
   const presetTypeID = 
     (Object.keys(prevQueryItem.current).length && isResults) 
     ? prevQueryItem.current.type.id
-    : 0;
+    : null;
 
   const [selectedItem, setSelectedItem] = useState(null);
 

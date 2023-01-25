@@ -5,7 +5,7 @@ import styles from './Select.module.scss';
 const Select = ({label, subtitle, value, name, size, error, 
   errorText, handleChange, noanimate, children, testId, className, iconClass}) => {
 
-  value = (value) ? value : "";
+  value = (value === null || isNaN(value)) ? "" : value;
   const [selectedItem, setSelectedItem] = useState(value);
   const [selectOpen, setSelectOpen] = useState(false);
   const [height, setHeight] = useState(0);

@@ -31,9 +31,11 @@ const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisa
   }
 
   useEffect(() => {
-    if(presetTypeID)
-      handleTypeChange(presetTypeID, false)
-  }, []);
+    if(presetTypeID === null) 
+      return;
+
+    handleTypeChange(presetTypeID, false)
+  }, [presetTypeID]);
 
   useEffect(() => {
     setSubmissionDisabled(isDisabled);
