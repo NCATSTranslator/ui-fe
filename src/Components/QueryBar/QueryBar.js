@@ -31,7 +31,8 @@ const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisa
   }
 
   useEffect(() => {
-    if(presetTypeID === null) 
+    console.log(presetTypeID)
+    if(presetTypeID === null || presetTypeID === undefined) 
       return;
 
     handleTypeChange(presetTypeID, false)
