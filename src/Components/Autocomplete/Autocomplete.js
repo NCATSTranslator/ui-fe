@@ -45,7 +45,7 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
       }
       {
         items && items.length === 0 && !isLoading && 
-        <p className={styles.noResults}>No matching diseases were found, please adjust your search term and try again.</p>
+        <p className={styles.noResults}>No matching terms were found, please adjust your search term and try again.</p>
       }
       {
         items && items.length > 0 && !isLoading &&
