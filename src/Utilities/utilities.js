@@ -124,7 +124,13 @@ export const getEntityLink = (id, className) => {
   let url = null;
   let linkText = null;
   let formattedID = id.toUpperCase();
-  if(formattedID.includes('MONDO')){
+  if(formattedID.includes('CHEBI')) {
+    url = `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
+    linkText = 'View this disease on Chemical Entities of Biological Interest';
+  } else if(formattedID.includes('CHEMBL')) {
+    url = `https://www.ebi.ac.uk/chembl/compound_report_card/${id.replace(':', '')}/`;
+    linkText = 'View this disease on ChEMBL';
+  } else if(formattedID.includes('MONDO')){
     url = `https://monarchinitiative.org/disease/${id}`;
     linkText = 'View this disease on Monarch Initiative';
   } else if(formattedID.includes('HP')) {
