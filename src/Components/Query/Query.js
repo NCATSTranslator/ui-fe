@@ -281,7 +281,7 @@ const Query = ({results, loading, presetDisease}) => {
           {
             isResults && selectedItem && selectedItem.id &&
             <p className={styles.needHelp}>
-              {getEntityLink(selectedItem.id, styles.monarchLink)}
+              {getEntityLink(selectedItem.id, styles.monarchLink, queryType)}
             </p>
           }
           <p className={styles.needHelp}>
