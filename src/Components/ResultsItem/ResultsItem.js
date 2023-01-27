@@ -9,7 +9,8 @@ import Highlighter from 'react-highlight-words';
 import { formatBiolinkPredicate } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 
-const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, checked, highlighted, activeStringFilters}) => {
+const ResultsItem = ({key, item, type, allSelected, handleSelected, activateEvidence,
+  checked, highlighted, activeStringFilters}) => {
   
   let icon = getIcon(item.type);
 
@@ -25,7 +26,8 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
   // const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
   const [formattedPaths, setFormattedPaths] = useState([]);
 
-  let pathString = (formattedPaths.length > 1) ? 'Paths that treat' : 'Path that treats';
+
+  let pathString = (formattedPaths.length > 1) ? `Paths that ${type.pathString}` : `Path that ${type.pathString}`;
   let nameString = (item.name !== null) ? item.name : '';
   let objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 

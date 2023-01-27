@@ -7,9 +7,10 @@ import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import ShareModal from "../Modals/ShareModal";
 import Select from "../FormFields/Select";
-import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
-import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
+import LoadingBar from "../LoadingBar/LoadingBar";
 import { useSelector } from 'react-redux';
+import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
+import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
@@ -17,19 +18,21 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighte
   // eslint-disable-next-line
   sortDateLowHigh, sortDateHighLow  } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
-import LoadingBar from "../LoadingBar/LoadingBar";
 import { cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
 import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
-
+import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 
 const ResultsList = ({loading}) => {
 
   // URL search params
   const loadingParam = new URLSearchParams(window.location.search).get("loading")
   const queryIDParam = new URLSearchParams(window.location.search).get("q")
+
+  let storedQuery = useSelector(currentQuery);
+  storedQuery = (storedQuery !== undefined) ? storedQuery : {type:{}, node:{}};
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
@@ -805,6 +808,7 @@ const ResultsList = ({loading}) => {
                         return (
                           <ResultsItem 
                             key={i} 
+                            type={storedQuery.type}
                             checked={checked}
                             highlighted={highlighted}
                             item={item} 

@@ -6,7 +6,8 @@ export const queryTypes = [
     placeholder: 'Enter a Disease',
     targetType: 'drug',
     direction: null,
-    filterType: 'Disease'
+    filterType: 'Disease',
+    pathString: 'may treat'
   },
   {
     id: 1,
@@ -14,7 +15,8 @@ export const queryTypes = [
     placeholder: 'Enter a Gene',
     targetType: 'chemical',
     direction: 'increased',
-    filterType: 'Gene'
+    filterType: 'Gene',
+    pathString: 'may upregulate'
   },
   {
     id: 2,
@@ -22,7 +24,8 @@ export const queryTypes = [
     placeholder: 'Enter a Gene',
     targetType: 'chemical',
     direction: 'decreased',
-    filterType: 'Gene'
+    filterType: 'Gene',
+    pathString: 'may downregulate'
   },
   {
     id: 3,
@@ -30,7 +33,8 @@ export const queryTypes = [
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'increased',
-    filterType: 'ChemicalEntity'
+    filterType: 'ChemicalEntity',
+    pathString: 'may be upregulated by'
   },
   {
     id: 4,
@@ -38,6 +42,7 @@ export const queryTypes = [
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'decreased',
-    filterType: 'ChemicalEntity'
+    filterType: 'ChemicalEntity',
+    pathString: 'may be downregulated by'
   }
 ]
