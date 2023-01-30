@@ -260,16 +260,19 @@ const ResultsList = ({loading}) => {
       case 'nameHighLow':
         newSortedResults = sortNameHighLow(newSortedResults);
         setIsSortedByName(false);
+        setIsSortedByScore(null)
         setIsSortedByEvidence(null);
         break;
       case 'evidenceLowHigh':
         newSortedResults = sortEvidenceLowHigh(newSortedResults);
         setIsSortedByEvidence(false);
+        setIsSortedByScore(null)
         setIsSortedByName(null);
         break;
       case 'evidenceHighLow':
         newSortedResults = sortEvidenceHighLow(newSortedResults);
-        setIsSortedByEvidence(true);
+        setIsSortedByEvidence(true); 
+        setIsSortedByScore(null)
         setIsSortedByName(null);
         break;
       case 'scoreLowHigh':
