@@ -7,20 +7,15 @@ import EntitySearch from '../EntitySearch/EntitySearch';
 // import Tooltip from '../Tooltip/Tooltip';
 // import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
 
-const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClearTag}) => {
+const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag}) => {
   
   // eslint-disable-next-line
   const [minEvidence, setMinEvidence] = useState(1); 
   const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: minEvidence});
-  // const dateRangeMin = 1840;
-  // const dateRangeMax = 2022;
-  // const dateRange = [dateRangeMin, dateRangeMax];
-  // const [dateRangeObject, setDateRangeObject] = useState({tag:'date', value: dateRange});
   // const fdaObject = {tag:'fda', value: ''};
 
   // const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
 
-  onHighlight = (!onHighlight) ? () => console.log("No highlight function specified in ResultsFilter.") : onHighlight; 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 
 
   const handleEvidenceActive = () => {
@@ -34,18 +29,6 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClea
       onFilter(newEviObj);
     }
   }
-
-  // // eslint-disable-next-line
-  // const handleDateRangeActive = () => {
-  //   onFilter(dateRangeObject);
-  // }
-  // // eslint-disable-next-line
-  // const handleDateRangeChange = (value) => {
-  //   let newDateObj  = global.structuredClone(dateRangeObject);
-  //   newDateObj.value = value;
-  //   setDateRangeObject(newDateObj);
-  //   onFilter(newDateObj);
-  // }
 
   return (
     <div className={styles.resultsFilter}>
@@ -70,19 +53,6 @@ const ResultsFilter = ({activeFilters, onFilter, onHighlight, onClearAll, onClea
             onChange={e => handleEvidenceRangeChange(e)}
             initialValue={1}
           />
-        {/* <p className={styles.subTwo}></p>
-          <Checkbox handleClick={handleDateRangeActive} 
-            checked={activeFilters.some(e => e.tag === dateRangeObject.tag)}>
-              Date Range
-          </Checkbox>
-          <TwoThumbRange 
-            label="Date Published Range" 
-            hideLabel 
-            min={dateRangeMin} 
-            max={dateRangeMax} 
-            onChange={e => handleDateRangeChange(e)}
-            initialValues={dateRange} 
-          /> */}
         {/* <div className={styles.fdaContainer} onMouseEnter={()=>{setFdaTooltipActive(true)}} onMouseLeave={()=>{setFdaTooltipActive(false)}} >
           <p className={styles.subTwo}>FDA Status</p>
           <Alert/>

@@ -110,9 +110,6 @@ const QueryHistoryList = () => {
       <ul className={styles.historyList}> 
         {
           filteredQueryHistoryState.map((query, i)=> {
-            // early return to accommodate old formatting, remove later 
-            if(query.items !== undefined)
-              return;
 
             let itemTimestamp = new Date(query.date);
             let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);

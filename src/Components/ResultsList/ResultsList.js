@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from './ResultsList.module.scss';
-import Checkbox from "../FormFields/Checkbox";
 import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
@@ -14,9 +13,7 @@ import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
-  sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
-  // eslint-disable-next-line
-  sortDateLowHigh, sortDateHighLow  } from "../../Utilities/sortingFunctions";
+  sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import { cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
@@ -68,12 +65,6 @@ const ResultsList = ({loading}) => {
   const [evidenceEdges, setEvidenceEdges] = useState([]);
   // Array, evidence relating to the item last clicked
   const [currentEvidence, setCurrentEvidence] = useState([]);
-  // Bool, is the select all checkbox checked
-  const [allSelected, setAllSelected] = useState(false);
-  // Array, all selected items
-  const [selectedItems, setSelectedItems] = useState([]);
-  // Array, all highlighted items
-  const [highlightedItems, setHighlightedItems] = useState([]);
   // Obj, original raw results from the BE
   const [rawResults, setRawResults] = useState(resultsState);
   // Obj, original raw results from the BE
@@ -94,7 +85,6 @@ const ResultsList = ({loading}) => {
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
   // Int, current page
-  // const [currentPage, setCurrentPage] = useState(0);
   const currentPage = useRef(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
@@ -351,36 +341,6 @@ const ResultsList = ({loading}) => {
     }
   }, [isError]);
 
-
-  // Click handler for item select checkboxes 
-  const handleSelected = (item) => {
-    let items = [...selectedItems];
-    let matchIndex = items.indexOf(item.id);
-    if(matchIndex !== -1) {
-      items.splice(matchIndex, 1);
-      setSelectedItems(items);
-      if(items.length <= 0)
-        setAllSelected(false)
-    } else {
-      items.push(item.id);
-      setSelectedItems(items);
-    }
-  }
-
-  // Click handler for select all checkbox 
-  const handleSelectAll = () => {
-    let newSelectedItems = formattedResults.map((item)=>{
-      return item.id;
-    })
-    if(!allSelected) {
-      setSelectedItems(newSelectedItems);
-      setAllSelected(true);
-    } else {
-      setSelectedItems([]);
-      setAllSelected(false);
-    }
-  }
-
   // Click handler for the modal close button
   const handleEvidenceModalClose = () => {
     setEvidenceOpen(false);
@@ -487,19 +447,6 @@ const ResultsList = ({loading}) => {
     setActiveFilters(newFilters);
   }
 
-  // Handle highlighting of results
-  const handleResultHighlight = () => {
-    if(selectedItems.length <= 0) {
-      console.log("No items selected, unable to highlight.")
-      return;
-    }
-    
-    let newSortedResults = (sortByHighlighted(sortedResults, selectedItems))
-    setHighlightedItems(selectedItems);
-    setSortedResults(newSortedResults);
-    setFormattedResults(newSortedResults);
-  }
-
   const handleResultsRefresh = () => {
     presorted.current = false;
     // Update rawResults with the fresh data
@@ -532,11 +479,6 @@ const ResultsList = ({loading}) => {
       let addElement = true;
       for(const filter of activeFilters) {
         switch (filter.tag) {
-          // FDA approved filter 
-          case 'fda':
-            if(!element.fdaInfo)
-              addElement = false;
-            break;
           // Minimum evidence filter
           case 'evi':
             if(element.evidence.length < filter.value)
@@ -547,12 +489,6 @@ const ResultsList = ({loading}) => {
             if(!findStringMatch(element, filter.value))
               addElement = false;
             // handleSort('entityString');
-            break;
-          // Date Range filter
-          case 'date':
-            // let lastPubYear = getLastPubYear(element.edge.last_publication_date);
-            // if(lastPubYear < filter.value[0] || lastPubYear > filter.value[1])
-            //   addElement = false;
             break;
           // Add new filter tags in this way:
           case 'example':
@@ -687,7 +623,6 @@ const ResultsList = ({loading}) => {
                 formattedCount={formattedResults.length}
                 totalCount={sortedResults.length}
                 onFilter={handleFilter}
-                onHighlight={handleResultHighlight}
                 onClearAll={handleClearAllFilters}
                 activeFilters={activeFilters} 
               />
@@ -754,30 +689,12 @@ const ResultsList = ({loading}) => {
                 <div className={styles.resultsTable}>
                   <div className={styles.tableBody}>
                     <div className={`${styles.tableHead}`}>
-                      <div className={`${styles.checkboxContainer} ${styles.head}`}>
-                        <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll()}}/>
-                      </div>
                       <div 
                         className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`} 
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByName)?'nameHighLow': 'nameLowHigh'))}}
                         >
                         Name
                       </div>
-                      {/* <div 
-                        className={`${styles.head} ${styles.fdaHead} fda-head`} 
-                        onMouseEnter={()=>setFdaTooltipActive(true)} 
-                        onMouseLeave={()=>setFdaTooltipActive(false)}
-                        >
-                        FDA
-                        <Tooltip 
-                        above
-                          delay={350}
-                          active={fdaTooltipActive} 
-                          onClose={() => setFdaTooltipActive(false)}
-                          text='Check marks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'
-                          >
-                        </Tooltip>
-                      </div> */}
                       <div 
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow'))}}
@@ -806,17 +723,11 @@ const ResultsList = ({loading}) => {
                       !isError &&
                       displayedResults.length > 0 && 
                       displayedResults.map((item, i) => {
-                        let checked = (selectedItems.length > 0 && selectedItems.includes(item.id)) ? true : false;
-                        let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
                         return (
                           <ResultsItem 
                             key={i} 
                             type={storedQuery.type}
-                            checked={checked}
-                            highlighted={highlighted}
                             item={item} 
-                            allSelected={allSelected}
-                            handleSelected={()=>handleSelected(item)}
                             activateEvidence={(evidence, edgesRepresented)=>activateEvidence(evidence, edgesRepresented)} 
                             activeStringFilters={activeStringFilters}
                           />
