@@ -10,6 +10,7 @@ import Four from './PageRoutes/404/404';
 import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
+import DesignSystem from './PageRoutes/DesignSystem/DesignSystem';
 import { Help } from './PageRoutes/Articles/Help';
 import { WhatIs } from './PageRoutes/Articles/WhatIs';
 import { HowItWorks } from './PageRoutes/Articles/HowItWorks';
@@ -41,6 +42,16 @@ root.render(
               </Page>
             }
           />
+
+          <Route  
+            path="design"
+            element={
+              <Page title="Design System">
+                <DesignSystem />
+              </Page>
+            }
+          />
+
           <Route  
             path="terms-of-use"
             element={
