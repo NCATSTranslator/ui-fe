@@ -128,6 +128,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
   }, []);
 
   useEffect(() => {
+    console.log(item);
     setIsExpanded(false);
     let newPaths = [];
     item.paths.forEach((path) => {
@@ -161,7 +162,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
   }, [item, generateCompressedPaths]);
 
   return (
-    <div key={key} className={`${styles.result} result`} >
+    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
         {
