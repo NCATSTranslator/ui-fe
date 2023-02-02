@@ -170,7 +170,7 @@ const ResultsItem = ({key, item, allSelected, handleSelected, activateEvidence, 
   }, [item, generateCompressedPaths]);
 
   return (
-    <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''} result`} >
+    <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))}>
       <div className={`${styles.checkboxContainer} ${styles.resultSub}`}>
         <Checkbox checked={checked} handleClick={(e)=>{e.stopPropagation(); handleSelected(item)}}/>
       </div>
