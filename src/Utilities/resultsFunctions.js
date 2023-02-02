@@ -101,6 +101,7 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     let itemScore = (item.score === null) ? 0 : item.score.toFixed(1);
     let formattedItem = {
       id: _.uniqueId(),
+      subjectNode: subjectNode,
       type: 'biolink:Drug',
       name: itemName,
       paths: formattedPaths,

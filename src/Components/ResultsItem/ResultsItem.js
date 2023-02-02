@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
-import Checkbox from "../FormFields/Checkbox";
 import GraphView from '../GraphView/GraphView';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 import AnimateHeight from "react-animate-height";
@@ -9,23 +8,14 @@ import Highlighter from 'react-highlight-words';
 import { formatBiolinkPredicate } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 
-const ResultsItem = ({key, item, type, allSelected, handleSelected, activateEvidence,
-  checked, highlighted, activeStringFilters}) => {
+const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) => {
   
   let icon = getIcon(item.type);
 
   let evidenceCount = item.evidence.length;
-    
-  // let fdaInfo = item.fdaInfo;
-  
-  checked = (allSelected || checked) ? true : false;
-
-  
-  const [isExpanded, setIsExpanded] = useState(false);
+      const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
-  // const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
   const [formattedPaths, setFormattedPaths] = useState([]);
-
 
   let pathString = (formattedPaths.length > 1) ? `Paths that ${type.pathString}` : `Path that ${type.pathString}`;
   let nameString = (item.name !== null) ? item.name : '';
@@ -138,6 +128,7 @@ const ResultsItem = ({key, item, type, allSelected, handleSelected, activateEvid
   }, []);
 
   useEffect(() => {
+    console.log(item);
     setIsExpanded(false);
     let newPaths = [];
     item.paths.forEach((path) => {
@@ -167,15 +158,11 @@ const ResultsItem = ({key, item, type, allSelected, handleSelected, activateEvid
       })
       newPaths.push(pathToAdd);
     }) 
-    // setFormattedPaths(newPaths);
     setFormattedPaths(generateCompressedPaths(newPaths));
   }, [item, generateCompressedPaths]);
 
   return (
-    <div key={key} className={`${styles.result} ${highlighted ? styles.highlighted : ''} result`} >
-      <div className={`${styles.checkboxContainer} ${styles.resultSub}`}>
-        <Checkbox checked={checked} handleClick={(e)=>{e.stopPropagation(); handleSelected(item)}}/>
-      </div>
+    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
         {
@@ -195,20 +182,6 @@ const ResultsItem = ({key, item, type, allSelected, handleSelected, activateEvid
         }
         <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
       </div>
-      {/* <div className={`${styles.fdaContainer} ${styles.resultSub}`}>
-        { fdaInfo &&
-          <span className={`${styles.fdaIcon} fda-icon`} onMouseEnter={()=>setFdaTooltipActive(true)} onMouseLeave={()=>setFdaTooltipActive(false)}>
-            <CheckIcon />
-            <Tooltip 
-              delay={350}
-              active={fdaTooltipActive} 
-              onClose={() => setFdaTooltipActive(false)}
-              text='Check marks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'
-              >
-            </Tooltip>
-          </span>
-        }
-      </div> */}
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span 
           className={styles.evidenceLink} 
@@ -221,9 +194,7 @@ const ResultsItem = ({key, item, type, allSelected, handleSelected, activateEvid
         </span>
       </div>
       <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-        <span 
-          className={styles.score} 
-          >
+        <span className={styles.score}>
           <span className={styles.scoreNum}>{item.score === null ? '0' : item.score }</span>
         </span>
       </div>
