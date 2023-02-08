@@ -105,7 +105,6 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease, t
     let tags = (item.tags !== null) ? Object.keys(item.tags) : {};
     for(const tag of tags) {
       if(countedTags.hasOwnProperty(tag)){
-        console.log('match found', countedTags[tag]);
         if(!countedTags[tag].count)
           countedTags[tag].count = 1;
         else
