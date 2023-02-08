@@ -415,7 +415,6 @@ const ResultsList = ({loading}) => {
       if(addFilter)
         newFilters.push(filter);
     }
-    console.log(newFilters);
     setActiveFilters(newFilters);
   }
 
