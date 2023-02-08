@@ -46,36 +46,41 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
 
   const AtcHeading = () => {
     return (
-      <div className={styles.fdaContainer} onMouseEnter={()=>{setAtcTooltipActive(true)}} onMouseLeave={()=>{setAtcTooltipActive(false)}} >
-        <p className={styles.subTwo}>ATC Classification</p>
-        <Alert/>
-        <Tooltip 
-          left
-          above
-          delay={350}
-          active={atcTooltipActive} 
-          onClose={() => setAtcTooltipActive(false)}
-          text={<span className={styles.atcSpan}>The Anatomical Therapeutic Classification (ATC, <a href="https://www.whocc.no/atc_ddd_index/" target="_blank" className={styles.atcLink}>https://www.whocc.no/atc_ddd_index/</a>) is a drug classification that categorizes active substances of drugs according to the organ or system where their therapeutic effect occurs.</span>}
-          >
-        </Tooltip>
+      <div className={styles.fdaContainer}  >
+        <div className={styles.labelContainer} onMouseEnter={()=>{setAtcTooltipActive(true)}} onMouseLeave={()=>{setAtcTooltipActive(false)}}>
+          <p className={styles.subTwo}>ATC Classification</p>
+          <Alert/>
+          <Tooltip 
+            left
+            above
+            delay={350}
+            active={atcTooltipActive} 
+            onClose={() => setAtcTooltipActive(false)}
+            text={<span className={styles.atcSpan}>The Anatomical Therapeutic Classification (ATC, <a href="https://www.whocc.no/atc_ddd_index/" target="_blank" className={styles.atcLink}>click to learn more</a>) is a drug classification that categorizes active substances of drugs according to the organ or system where their therapeutic effect occurs.</span>}
+            >
+          </Tooltip>
+        </div>
+        <p className={styles.caption}>Filter on organ or system where drug's theraputic effect occurs.</p>
       </div>
     )
   }
 
   const FdaHeading = () => {
     return(      
-      <div className={styles.fdaContainer} onMouseEnter={()=>{setFdaTooltipActive(true)}} onMouseLeave={()=>{setFdaTooltipActive(false)}} >
-        <p className={styles.subTwo}>FDA Status</p>
-        <Alert/>
-        <Tooltip 
-          left
-          above
-          delay={350}
-          active={fdaTooltipActive} 
-          onClose={() => setFdaTooltipActive(false)}
-          text='Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.'
-          >
-        </Tooltip>
+      <div className={styles.fdaContainer} >
+          <div className={styles.labelContainer} onMouseEnter={()=>{setFdaTooltipActive(true)}} onMouseLeave={()=>{setFdaTooltipActive(false)}}>
+            <p className={styles.subTwo}>FDA Status</p>
+            <Alert/>
+            <Tooltip 
+              left
+              above
+              delay={350}
+              active={fdaTooltipActive} 
+              onClose={() => setFdaTooltipActive(false)}
+              text='Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.'
+              >
+            </Tooltip>
+          </div>
       </div>
     )
   }
@@ -133,7 +138,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
                     handleClick={() => handleFacetChange(tag, tagObject, setTagObject, tagName)}
                     checked={activeFilters.some(e => e.tag === 'tag' && e.value === tag)}
                     >
-                    {tagName}
+                    {tagName} {(availableTags[tag].count) > 0 ? <span className={styles.facetCount}>({availableTags[tag].count})</span> : ''}
                   </Checkbox>
                 </div>
               )

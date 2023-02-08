@@ -317,7 +317,7 @@ const ResultsList = ({loading}) => {
 
     // if the status is not error, handle setting the results
     if(rawResults.status !== 'error' && rawResults.data.results !== undefined) 
-      newResults = getSummarizedResults(rawResults.data, presetDisease, setPresetDisease);
+      newResults = getSummarizedResults(rawResults.data, presetDisease, setPresetDisease, availableTags, setAvailableTags);
       
       // set formatted results
     setFormattedResults(newResults);
