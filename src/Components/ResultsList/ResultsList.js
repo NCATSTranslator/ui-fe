@@ -90,6 +90,8 @@ const ResultsList = ({loading}) => {
   const [itemOffset, setItemOffset] = useState(0);
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
+  // Array, currently active filters
+  const [availableTags, setAvailableTags] = useState([]);
   // Array, currently active string filters
   const [activeStringFilters, setActiveStringFilters] = useState([]);
   // Array, aras that have returned data
@@ -220,6 +222,11 @@ const ResultsList = ({loading}) => {
         } else {
           setRawResults(data);
         }
+
+        if(data.data.tags) {
+          setAvailableTags(data.data.tags);
+        }
+
         setIsFetchingResults(false);
       })
       .catch((error) => {
@@ -325,6 +332,7 @@ const ResultsList = ({loading}) => {
   }, [rawResults, presetDisease, handleSort]);
   
   useEffect(() => {
+
     // we have results to show, set isLoading to false
     if (formattedResults.length > 0) 
       setIsLoading(false);
@@ -364,7 +372,8 @@ const ResultsList = ({loading}) => {
 
     let indexes = [];
     for(const [i, value] of activeFilters.entries() ) {
-      if(value.tag === filter.tag)
+      if((value.tag === filter.tag && filter.tag !== 'tag')
+      || (filter.tag === 'tag' && filter.value === value.value))
         indexes.push(i);
     }
     
@@ -406,6 +415,7 @@ const ResultsList = ({loading}) => {
       if(addFilter)
         newFilters.push(filter);
     }
+    console.log(newFilters);
     setActiveFilters(newFilters);
   }
 
@@ -413,23 +423,29 @@ const ResultsList = ({loading}) => {
   const getSelectedFilterDisplay = (element) => {
     let filterDisplay;
     switch (element.tag) {
-    case "hum":
-      filterDisplay = <div>Species: <span>Human</span></div>;
-      break;
-    case "evi":
-      filterDisplay = <div>Minimum Evidence: <span>{element.value}</span></div>;
-      break;
-    case "fda":
-      filterDisplay = <div><span>FDA Approved</span></div>;
-      break;
-    case "date":
-      filterDisplay = <div>Date of Evidence: <span>{element.value[0]}-{element.value[1]}</span></div>;
-      break;
-    case "str":
-      filterDisplay = <div>String: <span>{element.value}</span></div>;
-      break;
-    default:
-      break;
+      case "hum":
+        filterDisplay = <div>Species: <span>Human</span></div>;
+        break;
+      case "evi":
+        filterDisplay = <div>Minimum Evidence: <span>{element.value}</span></div>;
+        break;
+      case "fda":
+        filterDisplay = <div><span>FDA Approved</span></div>;
+        break;
+      case "date":
+        filterDisplay = <div>Date of Evidence: <span>{element.value[0]}-{element.value[1]}</span></div>;
+        break;
+      case "str":
+        filterDisplay = <div>String: <span>{element.value}</span></div>;
+        break;
+      case "otc":
+        filterDisplay = <div><span>Available OTC</span></div>;
+        break;
+      case "tag":
+        filterDisplay = <div>Tag:<span> {element.label}</span></div>;
+        break;
+      default:
+        break;
     }
     return filterDisplay;
   }
@@ -489,6 +505,14 @@ const ResultsList = ({loading}) => {
             if(!findStringMatch(element, filter.value))
               addElement = false;
             // handleSort('entityString');
+            break;
+          case 'otc':
+            if(!element.tags.includes('otc'))
+              addElement = false;
+            break;
+          case 'tag':
+            if(!element.tags.includes(filter.value))
+              addElement = false;
             break;
           // Add new filter tags in this way:
           case 'example':
@@ -625,6 +649,7 @@ const ResultsList = ({loading}) => {
                 onFilter={handleFilter}
                 onClearAll={handleClearAllFilters}
                 activeFilters={activeFilters} 
+                availableTags={availableTags}
               />
               <div className={styles.resultsHeader}>
                 <div className={styles.top}>

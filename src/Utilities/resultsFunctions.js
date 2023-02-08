@@ -99,6 +99,7 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     formattedPaths = getFormattedPaths(item.paths, results);
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let itemScore = (item.score === null) ? 0 : item.score.toFixed(1);
+    let tags = (item.tags !== null) ? Object.keys(item.tags) : {};
     let formattedItem = {
       id: _.uniqueId(),
       subjectNode: subjectNode,
@@ -109,7 +110,8 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
       description: description,
       evidence: getFormattedEvidence(formattedPaths, results),
       fdaInfo: fdaInfo, 
-      score: itemScore
+      score: itemScore,
+      tags: tags
     }
     newSummarizedResults.push(formattedItem);
     if(!presetDiseaseSet) {

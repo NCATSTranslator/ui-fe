@@ -66,9 +66,6 @@ export const capitalizeAllWords = (string) => {
   if(!string)
     return '';
 
-  if(string.toUpperCase() === string)
-    return string;
-
   let newString = string.toLowerCase();
   return newString.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
 }
@@ -124,7 +121,7 @@ export const getEntityLink = (id, className, queryType) => {
   let url = null;
   let linkText = null;
   let formattedID = id.toUpperCase();
-  let linkType = queryType.filterType.toLowerCase();
+  let linkType = (queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
   if(formattedID.includes('CHEBI')) {
     url = `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
     linkText = `View this ${linkType} on Chemical Entities of Biological Interest`;

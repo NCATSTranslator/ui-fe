@@ -128,7 +128,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
   }, []);
 
   useEffect(() => {
-    console.log(item);
     setIsExpanded(false);
     let newPaths = [];
     item.paths.forEach((path) => {
