@@ -223,10 +223,6 @@ const ResultsList = ({loading}) => {
           setRawResults(data);
         }
 
-        // if(data.data.tags) {
-        //   setAvailableTags(data.data.tags);
-        // }
-
         setIsFetchingResults(false);
       })
       .catch((error) => {
