@@ -13,6 +13,7 @@ import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import styles from './Query.module.scss';
 import { getEntityLink } from "../../Utilities/utilities";
+import { queryTypes } from "../../Utilities/queryTypes";
 
 const Query = ({results, loading, presetDisease}) => {
 
@@ -55,11 +56,6 @@ const Query = ({results, loading, presetDisease}) => {
     ? prevQueryItem.current.node.label
     : '';
   const [inputText, setInputText] = useState(presetInputText);
-  
-  const presetTypeID = 
-    (Object.keys(prevQueryItem.current).length && isResults) 
-    ? prevQueryItem.current.type.id
-    : null;
 
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -164,6 +160,11 @@ const Query = ({results, loading, presetDisease}) => {
     // since useEffect dependency update checks don't work on objects (thanks to shallow equals)
     // check to see if queryItems has actually been updated, if not return
     if(isEqual(prevQueryItem.current, queryItem))
+      return;
+
+    // If the node ids match, but the new queryItem has no type, don't replace 
+    // (addresses strange behavior with) template queries and share urls
+    if(prevQueryItem.current.node.id === queryItem.node.id && Object.keys(queryItem.type).length === 0)
       return;
 
     prevQueryItem.current = cloneDeep(queryItem);
@@ -272,7 +273,7 @@ const Query = ({results, loading, presetDisease}) => {
               handleQueryTypeChange={handleQueryTypeChange}
               isDisabled={isLoading}
               value={inputText}
-              presetTypeID={presetTypeID}
+              presetTypeID={storedQuery.type.id}
               autocompleteItems={autocompleteItems}
               autocompleteLoading={loadingAutocomplete}
               handleItemClick={handleDiseaseSelection}
@@ -297,6 +298,7 @@ const Query = ({results, loading, presetDisease}) => {
                   onClick={(e)=>{
                     setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_ONE_ID, label: process.env.REACT_APP_EX_DISEASE_ONE_NAME});
                     setPresetURL(e.target.dataset.url);
+                    handleQueryTypeChange(queryTypes[0])
                   }}
                   data-testid="heart-disease"
                   data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_ONE_UUID}`}
@@ -307,6 +309,7 @@ const Query = ({results, loading, presetDisease}) => {
                   onClick={(e)=>{
                     setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_TWO_ID, label: process.env.REACT_APP_EX_DISEASE_TWO_NAME});
                     setPresetURL(e.target.dataset.url);
+                    handleQueryTypeChange(queryTypes[0])
                   }}
                   data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_TWO_UUID}`}
                   >{process.env.REACT_APP_EX_DISEASE_TWO_NAME}
@@ -316,6 +319,7 @@ const Query = ({results, loading, presetDisease}) => {
                   onClick={(e)=>{
                     setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_THREE_ID, label: process.env.REACT_APP_EX_DISEASE_THREE_NAME});
                     setPresetURL(e.target.dataset.url);
+                    handleQueryTypeChange(queryTypes[0])
                   }}
                   data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_THREE_UUID}`}
                   >{process.env.REACT_APP_EX_DISEASE_THREE_NAME}
@@ -325,6 +329,7 @@ const Query = ({results, loading, presetDisease}) => {
                   onClick={(e)=>{
                     setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_FOUR_ID, label: process.env.REACT_APP_EX_DISEASE_FOUR_NAME});
                     setPresetURL(e.target.dataset.url);
+                    handleQueryTypeChange(queryTypes[0])
                   }}
                   data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_FOUR_UUID}`}
                   >{process.env.REACT_APP_EX_DISEASE_FOUR_NAME}
@@ -334,6 +339,7 @@ const Query = ({results, loading, presetDisease}) => {
                   onClick={(e)=>{
                     setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_FIVE_ID, label: process.env.REACT_APP_EX_DISEASE_FIVE_NAME});
                     setPresetURL(e.target.dataset.url);
+                    handleQueryTypeChange(queryTypes[0])
                   }}
                   data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_FIVE_UUID}`}
                   >{process.env.REACT_APP_EX_DISEASE_FIVE_NAME}

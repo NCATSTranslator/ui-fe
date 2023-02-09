@@ -7,7 +7,7 @@ import EvidenceModal from "../Modals/EvidenceModal";
 import ShareModal from "../Modals/ShareModal";
 import Select from "../FormFields/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
 import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
@@ -15,7 +15,8 @@ import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
-import { cloneDeep, isEqual } from "lodash";
+import { queryTypes } from '../../Utilities/queryTypes';
+import { clone, cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
@@ -28,8 +29,10 @@ const ResultsList = ({loading}) => {
   const loadingParam = new URLSearchParams(window.location.search).get("loading")
   const queryIDParam = new URLSearchParams(window.location.search).get("q")
 
+  const dispatch = useDispatch();
+
   let storedQuery = useSelector(currentQuery);
-  storedQuery = (storedQuery !== undefined) ? storedQuery : {type:{}, node:{}};
+  storedQuery = (storedQuery !== undefined) ? storedQuery : {type:{}, node: {}};
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
@@ -332,7 +335,7 @@ const ResultsList = ({loading}) => {
     // we have results to show, set isLoading to false
     if (formattedResults.length > 0) 
       setIsLoading(false);
-
+    
     // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
     if(rawResults && rawResults.data.results && rawResults.data.results.length === 0 && !isFetchingARAStatus)
       setIsLoading(false);

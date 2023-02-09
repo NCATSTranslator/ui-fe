@@ -13,7 +13,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
   let icon = getIcon(item.type);
 
   let evidenceCount = item.evidence.length;
-      const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
   const [formattedPaths, setFormattedPaths] = useState([]);
 

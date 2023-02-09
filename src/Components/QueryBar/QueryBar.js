@@ -23,7 +23,7 @@ const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisa
       return type.id === parseInt(value)
     })
     // set placeholder text
-    placeholderText.current = newCurrentQueryType.placeholder;
+    placeholderText.current = (newCurrentQueryType !== undefined) ? newCurrentQueryType.placeholder : '';
     // update the current query type 
     setQueryType(newCurrentQueryType);
     // handle type change callback
