@@ -7,16 +7,15 @@ import EvidenceModal from "../Modals/EvidenceModal";
 import ShareModal from "../Modals/ShareModal";
 import Select from "../FormFields/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
-import { setCurrentQuery, currentQuery} from "../../Redux/querySlice";
+import { currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
-import { queryTypes } from '../../Utilities/queryTypes';
-import { clone, cloneDeep, isEqual } from "lodash";
+import { cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
@@ -28,8 +27,6 @@ const ResultsList = ({loading}) => {
   // URL search params
   const loadingParam = new URLSearchParams(window.location.search).get("loading")
   const queryIDParam = new URLSearchParams(window.location.search).get("q")
-
-  const dispatch = useDispatch();
 
   let storedQuery = useSelector(currentQuery);
   storedQuery = (storedQuery !== undefined) ? storedQuery : {type:{}, node: {}};

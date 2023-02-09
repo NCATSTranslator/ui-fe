@@ -57,6 +57,11 @@ const Query = ({results, loading, presetDisease}) => {
     : '';
   const [inputText, setInputText] = useState(presetInputText);
 
+  const presetTypeID = 
+    (Object.keys(prevQueryItem.current).length && isResults) 
+    ? prevQueryItem.current.type.id
+    : null;
+
   const [selectedItem, setSelectedItem] = useState(null);
 
   // Array, List of items to display in the autocomplete window
@@ -273,7 +278,7 @@ const Query = ({results, loading, presetDisease}) => {
               handleQueryTypeChange={handleQueryTypeChange}
               isDisabled={isLoading}
               value={inputText}
-              presetTypeID={storedQuery.type.id}
+              presetTypeID={presetTypeID}
               autocompleteItems={autocompleteItems}
               autocompleteLoading={loadingAutocomplete}
               handleItemClick={handleDiseaseSelection}
