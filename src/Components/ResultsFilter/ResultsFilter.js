@@ -46,8 +46,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
 
   const AtcHeading = () => {
     return (
-      <div className={styles.fdaContainer}  >
-        <div className={styles.labelContainer} onMouseEnter={()=>{setAtcTooltipActive(true)}} onMouseLeave={()=>{setAtcTooltipActive(false)}}>
+      <div className={styles.labelContainer} >
+        <div className={styles.label} onMouseEnter={()=>{setAtcTooltipActive(true)}} onMouseLeave={()=>{setAtcTooltipActive(false)}}>
           <p className={styles.subTwo}>ATC Classification</p>
           <Alert/>
           <Tooltip 
@@ -67,8 +67,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
 
   const FdaHeading = () => {
     return(      
-      <div className={styles.fdaContainer} >
-          <div className={styles.labelContainer} onMouseEnter={()=>{setFdaTooltipActive(true)}} onMouseLeave={()=>{setFdaTooltipActive(false)}}>
+      <div className={styles.labelContainer} >
+          <div className={styles.label} onMouseEnter={()=>{setFdaTooltipActive(true)}} onMouseLeave={()=>{setFdaTooltipActive(false)}}>
             <p className={styles.subTwo}>FDA Status</p>
             <Alert/>
             <Tooltip 
@@ -93,7 +93,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           activeFilters={activeFilters}
           onFilter={onFilter}
         />
-        <p className={styles.subTwo}>Evidence</p>
+        <div className={styles.labelContainer} >
+          <p className={styles.subTwo}>Evidence</p>
+        </div>
           <Checkbox 
             handleClick={handleEvidenceActive} 
             className={styles.evidenceCheckbox}
