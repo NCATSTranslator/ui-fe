@@ -77,15 +77,12 @@ export const getFormattedPaths = (rawPathIds, results) => {
 }
 
 // Take raw results and return properly summarized results
-export const getSummarizedResults = (results, presetDisease, setPresetDisease, tags, updateTags) => {
+export const getSummarizedResults = (results, presetDisease, setPresetDisease) => {
   if (results === null || results === undefined)
     return [];
 
   let newSummarizedResults = [];
   let presetDiseaseSet = (presetDisease) ? true : false;
-
-  let countedTags = global.structuredClone(tags);
-  console.log(countedTags);
   
   // // for each individual result item 
   for(const item of results.results) {
@@ -103,14 +100,6 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease, t
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let itemScore = (item.score === null) ? 0 : item.score.toFixed(1);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : {};
-    for(const tag of tags) {
-      if(countedTags.hasOwnProperty(tag)){
-        if(!countedTags[tag].count)
-          countedTags[tag].count = 1;
-        else
-          countedTags[tag].count++;
-      }
-    }
     let formattedItem = {
       id: _.uniqueId(),
       subjectNode: subjectNode,
@@ -131,7 +120,6 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease, t
     }
   }
 
-  updateTags(countedTags);
   return newSummarizedResults;
 }
 

@@ -223,9 +223,9 @@ const ResultsList = ({loading}) => {
           setRawResults(data);
         }
 
-        if(data.data.tags) {
-          setAvailableTags(data.data.tags);
-        }
+        // if(data.data.tags) {
+        //   setAvailableTags(data.data.tags);
+        // }
 
         setIsFetchingResults(false);
       })
@@ -336,18 +336,38 @@ const ResultsList = ({loading}) => {
     // we have results to show, set isLoading to false
     if (formattedResults.length > 0) 
       setIsLoading(false);
-    
+
     // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
     if(rawResults && rawResults.data.results && rawResults.data.results.length === 0 && !isFetchingARAStatus)
       setIsLoading(false);
 
   }, [formattedResults, rawResults, isFetchingARAStatus]);
 
+  useEffect(() => {
+    if(rawResults !== null)
+      calculateTagCounts(formattedResults, rawResults, activeFilters, setAvailableTags);
+  }, [formattedResults, rawResults, activeFilters]);
+
   useEffect(()=>{
     if(isError) {
       setIsLoading(false);
     }
   }, [isError]);
+
+  const calculateTagCounts = (formattedResults, rawResults, activeFilters, tagSetterMethod) => {
+    let countedTags = cloneDeep(rawResults.data.tags);
+    for(const result of formattedResults) {
+      for(const tag of result.tags) {
+        if(countedTags.hasOwnProperty(tag)){
+          if(!countedTags[tag].count)
+            countedTags[tag].count = 1;
+          else
+            countedTags[tag].count++;
+        }
+      }
+    }
+    tagSetterMethod(countedTags);
+  }
 
   // Click handler for the modal close button
   const handleEvidenceModalClose = () => {

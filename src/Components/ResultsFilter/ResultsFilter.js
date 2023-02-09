@@ -39,11 +39,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     onFilter(newObj);
   }
 
-  useEffect(() => {
-    console.log(availableTags)
-    console.log(Object.keys(availableTags))
-  }, [availableTags]);
-
   const AtcHeading = () => {
     return (
       <div className={styles.labelContainer} >
@@ -114,11 +109,13 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           {
             availableTags &&
             Object.keys(availableTags).sort().map((tag, i) => {
+
               let addFdaHeading = false;
               let addAtcHeading = false;
               let tagName = capitalizeAllWords(availableTags[tag].name);
               if(tag.includes('fda')) {
                 addFdaHeading = true;
+                tagName = 'FDA Approved';
               }
               if(tag.includes('ATC') 
                 && 
@@ -133,15 +130,20 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
                     <AtcHeading/>
                   }
                   {
-                    addFdaHeading && 
-                    <FdaHeading/>
+                    availableTags[tag].count &&
+                    <>
+                      {
+                        addFdaHeading && 
+                        <FdaHeading/>
+                      }
+                      <Checkbox 
+                        handleClick={() => handleFacetChange(tag, tagObject, setTagObject, tagName)}
+                        checked={activeFilters.some(e => e.tag === 'tag' && e.value === tag)}
+                        >
+                        {tagName} <span className={styles.facetCount}>({(availableTags[tag].count) ? availableTags[tag].count : 0})</span>
+                      </Checkbox>
+                    </>
                   }
-                  <Checkbox 
-                    handleClick={() => handleFacetChange(tag, tagObject, setTagObject, tagName)}
-                    checked={activeFilters.some(e => e.tag === 'tag' && e.value === tag)}
-                    >
-                    {tagName} {(availableTags[tag].count) > 0 ? <span className={styles.facetCount}>({availableTags[tag].count})</span> : ''}
-                  </Checkbox>
                 </div>
               )
             })

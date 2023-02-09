@@ -16,6 +16,9 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
       const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
   const [formattedPaths, setFormattedPaths] = useState([]);
+  
+  // let typeString = (type.pathString) ? type.pathString : ;
+  console.log(item);
 
   let pathString = (formattedPaths.length > 1) ? `Paths that ${type.pathString}` : `Path that ${type.pathString}`;
   let nameString = (item.name !== null) ? item.name : '';
