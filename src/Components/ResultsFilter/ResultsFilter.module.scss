@@ -5,10 +5,13 @@
   padding: $s;
   background-color: $lightGray;
   border-radius: $defaultBorderRadius;
-  .fdaContainer {
-    position: relative;
-    display: flex;
-    align-items: center;
+  .labelContainer {
+    padding: 20px 0;
+    .label {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
     p {
       cursor: default;
     }
@@ -39,10 +42,14 @@
   }
   .subTwo {
     margin: 0;
-    padding: 20px 0;
     font-weight: 700;
     font-size: 12px;
     color: $darkGray;
+  }
+  .caption {
+    font-size: $captionSize;
+    max-width: 80%;
+    margin: 0;
   }
   .checkbox,.radio {
     padding-left: $xs;
@@ -61,5 +68,33 @@
     margin: 20px auto 16px;
     padding: 0;
     box-shadow: none;
+  }
+  .facetContainer {
+    input + span {
+      position: relative;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background-color: $lightGray;
+      width: 100%;
+      padding-right: 38px;
+      // &:hover {
+      //   overflow: visible;
+      //   width: auto;
+      // }
+    }
+  }
+  .facetCount {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+  .atcSpan {
+    font-size: 12px; 
+  }
+  .atcLink {
+    font-size: 12px; 
+    color: $white;
   }
 }

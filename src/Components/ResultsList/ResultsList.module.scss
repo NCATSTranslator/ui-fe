@@ -6,6 +6,7 @@
   .resultsContainer {
     display: grid;
     grid-template-columns: 330px 1fr;
+    grid-template-rows: auto 1fr;
     grid-column-gap: $m;
     align-items: flex-start;
     position: relative;
