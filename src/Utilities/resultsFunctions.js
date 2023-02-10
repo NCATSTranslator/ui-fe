@@ -14,7 +14,7 @@ export const getFormattedEvidence = (paths, results) => {
             publication.id = pubID;
             let object = subgraph.object;
             let subject = subgraph.subject;
-            let predicate = formatBiolinkPredicate(subgraph.predicates[0]);
+            let predicate = formatBiolinkPredicate(subgraph.predicate);
             publication.edge = {
               subject: capitalizeAllWords(subject.names[0]),
               predicate: predicate,
@@ -91,14 +91,15 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     // Get the subject node's name
     let subjectNode = getNodeByCurie(item.subject, results);
     // Get the subject node's description
-    let description = (subjectNode.description) ? subjectNode.description[0] : '';
+    let description = (subjectNode.descriptions) ? subjectNode.descriptions[0] : '';
     // Get the subject node's fda approval status 
     let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
     let formattedPaths = [];
     formattedPaths = getFormattedPaths(item.paths, results);
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
-    let itemScore = (item.score !== null && item.score !== undefined) ? item.score.toFixed(1) : 0;
+    let itemScore = (item.score === null) ? 0 : item.score.toFixed(1);
+    let tags = (item.tags !== null) ? Object.keys(item.tags) : {};
     let formattedItem = {
       id: _.uniqueId(),
       subjectNode: subjectNode,
@@ -108,8 +109,9 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
       object: objectNodeName,
       description: description,
       evidence: getFormattedEvidence(formattedPaths, results),
-      fdaInfo: fdaInfo,
-      score: itemScore
+      fdaInfo: fdaInfo, 
+      score: itemScore,
+      tags: tags
     }
     newSummarizedResults.push(formattedItem);
     if(!presetDiseaseSet) {
@@ -117,6 +119,7 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
       presetDiseaseSet = true;
     }
   }
+
   return newSummarizedResults;
 }
 

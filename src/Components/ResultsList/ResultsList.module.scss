@@ -6,6 +6,7 @@
   .resultsContainer {
     display: grid;
     grid-template-columns: 330px 1fr;
+    grid-template-rows: auto 1fr;
     grid-column-gap: $m;
     align-items: flex-start;
     position: relative;
@@ -29,7 +30,7 @@
       .tableHead {
         border-bottom: 1px solid $midGray;
         display: grid;
-        grid-template-columns: 1fr 225px 80px 50px;
+        grid-template-columns: 1fr 225px 75px 50px;
         padding: 12px;
         border-radius: 5px 5px 0 0;
         user-select: none;

@@ -1,7 +1,7 @@
 import { capitalizeAllWords } from "./utilities";
 
 // Returns array of terms based on user input
-export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems) => {
+export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems, filterTerm) => {
   if(inputText) {
     console.log(`fetching '${inputText}'`);
     setLoadingAutocomplete(true);
@@ -10,7 +10,7 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
       headers: { 'Content-Type': 'application/json' },
     };
     // Fetch list of curies based on userInput string from Name Resolver
-    fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=40`, nameResolverRequestOptions)
+    fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=100`, nameResolverRequestOptions)
       .then(response => response.json())
       .then(data => {
         // Convert data returned from Name Resolver into a list of curies
@@ -32,7 +32,9 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
       .then(data => {
         console.log(Object.keys(data).length, 'full data from node normalizer:', data);
         // get list of names from the data returned from Node Normalizer
-        let autoCompleteItems = getFormattedNamesFromNormalizer(data);
+        let autoCompleteItems = getFormattedNamesFromNormalizer(data, filterTerm);
+        // truncate array in case of too many results
+        autoCompleteItems = autoCompleteItems.slice(0,40);
         console.log('formatted autocomplete items:', autoCompleteItems)
         setAutoCompleteItems(autoCompleteItems);
         setLoadingAutocomplete(false);
@@ -49,13 +51,13 @@ const getFormattedCuriesFromNameResolver = (data) => {
   return Object.keys(data).map((key) => key);
 }
 
-const getFormattedNamesFromNormalizer = (data) => {
+const getFormattedNamesFromNormalizer = (data, filterTerm) => {
 
   let autocompleteObjects = 
     // get array of values from object
     Object.values(data)
       // filter to new array with only items of type => disease
-      .filter((item) => item && item.type && item.type.includes("biolink:Disease") && item.id.label )
+      .filter((item) => item && item.type && item.type.includes(`biolink:${filterTerm}`) && item.id.label )
       // map those values into a new array that only has the label, aka 'common name'
       .map((item) => {
         return {id: item.id.identifier, label: capitalizeAllWords(item.id.label)}

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import styles from "./QueryHistoryList.module.scss";
 import { getDifferenceInDays } from "../../Utilities/utilities";
-import { pastQueryState, removeItemAtIndex } from "../../Redux/historySlice";
+import { pastQueryState, removeItemAtIndex, setHistory } from "../../Redux/historySlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
 import { useSelector, useDispatch } from 'react-redux';
 import ShareModal from '../../Components/Modals/ShareModal';
@@ -10,6 +10,7 @@ import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
 import {ReactComponent as Export} from '../../Icons/export.svg';
 import { useNavigate } from "react-router-dom";
+import { cloneDeep } from "lodash";
 
 const QueryHistoryList = () => {
 
@@ -20,36 +21,40 @@ const QueryHistoryList = () => {
 
   let tempQueryHistory = useSelector(pastQueryState);
   // query history stored from oldest -> newest, so we must reverse it to display the most recent first
-  const [queryHistoryState, setQueryHistoryState] = useState(global.structuredClone(tempQueryHistory).reverse());
-  const [filteredQueryHistoryState, setFilteredQueryHistoryState] = useState(global.structuredClone(queryHistoryState))
+  const [queryHistoryState, setQueryHistoryState] = useState(cloneDeep(tempQueryHistory).reverse());
+  const [filteredQueryHistoryState, setFilteredQueryHistoryState] = useState(cloneDeep(queryHistoryState))
   const currentDate = new Date();
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [exportQueryID, setExportQueryID] = useState(null);
 
   const handleRemoveHistoryItem = (i) => {
-    let temp = global.structuredClone(queryHistoryState);
-    temp.splice(i, 1);
+    let temp = cloneDeep(queryHistoryState);
+    temp = temp.filter((element, index) => index !== i);
     setQueryHistoryState(temp);
-    dispatch(removeItemAtIndex(i)); 
+    dispatch(setHistory(temp.slice().reverse()));
   }
 
+  useEffect(() => {
+    setFilteredQueryHistoryState(queryHistoryState)
+  }, [queryHistoryState]);
+
   const handleClick = (query) => {
-    dispatch(setCurrentQuery(query.items));
+    dispatch(setCurrentQuery(query.item));
     navigate(`/results?q=${query.id}`);
   }
 
   const handleSearch = (value) => {
-    queryHistoryState.forEach(element => {
-    });
     setFilteredQueryHistoryState(queryHistoryState.filter((item) => {
+      let tempValue = value.toLowerCase();
       let include = false;
-      item.items.forEach((element) => {
-        if(element.name.toLowerCase().includes(value.toLowerCase())) {
-          include = true;
-        }
-      })
-      if(item.date.toLowerCase().includes(value.toLowerCase()))
+      if(item.item.node.id.toLowerCase().includes(tempValue) 
+        || item.item.node.label.toLowerCase().includes(tempValue) 
+        || item.item.type.label.toLowerCase().includes(tempValue)
+      )
+        include = true;
+
+      if(item.date.toLowerCase().includes(tempValue))
         include = true;
       return include;
     }))
@@ -105,6 +110,7 @@ const QueryHistoryList = () => {
       <ul className={styles.historyList}> 
         {
           filteredQueryHistoryState.map((query, i)=> {
+
             let itemTimestamp = new Date(query.date);
             let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
             let timeName = "";
@@ -124,7 +130,6 @@ const QueryHistoryList = () => {
               previousTimeName = timeName;
               showNewTimeName = true;
             }
-            
             return (
               <li key={i} className={styles.historyItem} >
                 {
@@ -138,14 +143,16 @@ const QueryHistoryList = () => {
                     </div>
                     <div className={styles.right}>
                       <div className={styles.top}>
-                        {
+                        <span>{query.item.type.label} </span>
+                        <span className={styles.subject}>{query.item.node.label}</span>
+                        {/* {
                           query.items && 
                           query.items.map((item, j) => {
                             let output = (item.value) ? item.value : item.name;
                             return (
                               <span key={j} className={item.type}>{output} </span>)
                             })
-                        }
+                        } */}
                       </div>
                       <div className={styles.bottom}>
                         {

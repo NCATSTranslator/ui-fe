@@ -6,7 +6,7 @@
   align-items: stretch;
   position: relative;
   label {
-    width: 100% !important;
+    width: 100%;
     margin: 0;
   }
   button {
@@ -20,8 +20,27 @@
   display: flex;
   align-items: center;
   white-space: nowrap;
-  color: $darkGray;
-  font-size: $subOneSize;
-  font-weight: 700;
-  margin-right: $xs;
+  width: auto !important;
+  .prefixIcon {
+    width: 30px;
+    height: 30px;
+    margin-right: 0;
+  }
+  span {
+    color: $darkGray;
+    font-size: $subOneSize;
+    font-weight: 700;
+    margin-right: $xs;
+  }
+  div {
+    border: none !important;  
+  }
+  select {
+    background-color: transparent;
+    color: $darkGray;
+    font-size: $subOneSize;
+    font-weight: 700;
+    margin-right: $xs;
+    text-align: right;
+  }
 }

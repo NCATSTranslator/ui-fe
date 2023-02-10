@@ -2,9 +2,10 @@ import React, {useState, useEffect} from "react";
 import AnimateHeight from "react-animate-height";
 import styles from './Select.module.scss';
 
-const Select = ({label, subtitle, value, name, size, error, errorText, handleChange, noanimate, children, testId}) => {
+const Select = ({label, subtitle, value, name, size, error, 
+  errorText, handleChange, noanimate, children, testId, className, iconClass}) => {
 
-  value = (value) ? value : "";
+  value = (value === null || isNaN(value)) ? "" : value;
   const [selectedItem, setSelectedItem] = useState(value);
   const [selectOpen, setSelectOpen] = useState(false);
   const [height, setHeight] = useState(0);
@@ -41,7 +42,7 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
 
   return (
     <>
-      <label className={`select ${styles.select} ${size} ${animateClass}`} > 
+      <label className={`select ${styles.select} ${size} ${animateClass} ${className}`} > 
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         <div className={`${styles.selectContainer} ${openClass}`}>
@@ -56,7 +57,7 @@ const Select = ({label, subtitle, value, name, size, error, errorText, handleCha
             <option value="" disabled hidden>{name}</option>
             {children}
           </select>
-          <span className={styles.icon} onMouseDown={handleSelectClick}></span>
+          <span className={`${styles.icon} ${iconClass}`} onMouseDown={handleSelectClick}></span>
           {
             noanimate && 
             <div className={`${styles.selectList} ${openClass}`}>

@@ -1,35 +1,35 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from './ResultsList.module.scss';
-import Checkbox from "../FormFields/Checkbox";
 import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import ShareModal from "../Modals/ShareModal";
 import Select from "../FormFields/Select";
-import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
-import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
+import LoadingBar from "../LoadingBar/LoadingBar";
 import { useSelector } from 'react-redux';
+import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
+import { currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
-  sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
-  // eslint-disable-next-line
-  sortDateLowHigh, sortDateHighLow  } from "../../Utilities/sortingFunctions";
+  sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
-import LoadingBar from "../LoadingBar/LoadingBar";
 import { cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
 import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
-
+import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 
 const ResultsList = ({loading}) => {
 
   // URL search params
   const loadingParam = new URLSearchParams(window.location.search).get("loading")
   const queryIDParam = new URLSearchParams(window.location.search).get("q")
+
+  let storedQuery = useSelector(currentQuery);
+  storedQuery = (storedQuery !== undefined) ? storedQuery : {type:{}, node: {}};
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
@@ -65,12 +65,6 @@ const ResultsList = ({loading}) => {
   const [evidenceEdges, setEvidenceEdges] = useState([]);
   // Array, evidence relating to the item last clicked
   const [currentEvidence, setCurrentEvidence] = useState([]);
-  // Bool, is the select all checkbox checked
-  const [allSelected, setAllSelected] = useState(false);
-  // Array, all selected items
-  const [selectedItems, setSelectedItems] = useState([]);
-  // Array, all highlighted items
-  const [highlightedItems, setHighlightedItems] = useState([]);
   // Obj, original raw results from the BE
   const [rawResults, setRawResults] = useState(resultsState);
   // Obj, original raw results from the BE
@@ -91,12 +85,13 @@ const ResultsList = ({loading}) => {
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
   // Int, current page
-  // const [currentPage, setCurrentPage] = useState(0);
   const currentPage = useRef(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
+  // Array, currently active filters
+  const [availableTags, setAvailableTags] = useState([]);
   // Array, currently active string filters
   const [activeStringFilters, setActiveStringFilters] = useState([]);
   // Array, aras that have returned data
@@ -155,6 +150,7 @@ const ResultsList = ({loading}) => {
       headers: { 'Content-Type': 'application/json' },
       body: queryIDJson
     };
+    let responseClone;
     // eslint-disable-next-line
     const response = await fetch('/creative_status', requestOptions)
       .then(response => response.json())
@@ -162,6 +158,7 @@ const ResultsList = ({loading}) => {
         // increment the number of status checks
         numberOfStatusChecks.current++;
         console.log("ARA status:",data);
+
         let fetchResults = false;
         
         if(data.data.aras.length > returnedARAs.aras.length) {
@@ -183,7 +180,14 @@ const ResultsList = ({loading}) => {
           setIsFetchingResults(true);
       })
       .catch((error) => {
-        console.log(error)
+        if(formattedResults.length <= 0) {
+          setIsError(true);
+          setIsFetchingARAStatus(false);
+        }
+        if(formattedResults.length > 0) {
+          setIsFetchingARAStatus(false);
+        }
+        console.error(error)
       });
   }, { 
     refetchInterval: 10000,
@@ -211,10 +215,6 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log('New results:', data);
-        if(data.status === 'error') {
-          setIsError(true);
-          setIsFetchingARAStatus(false);
-        }
         // if we've already gotten results before, set freshRawResults instead to 
         // prevent original results from being overwritten
         if(formattedResults.length > 0) {
@@ -222,14 +222,22 @@ const ResultsList = ({loading}) => {
         } else {
           setRawResults(data);
         }
+
         setIsFetchingResults(false);
       })
       .catch((error) => {
-        console.log(error)
+        if(formattedResults.length <= 0) {
+          setIsError(true);
+          setIsFetchingARAStatus(false);
+        }
+        if(formattedResults.length > 0) {
+          setIsFetchingARAStatus(false);
+        }
+        console.log(error);
       });
   }, { 
     enabled: isFetchingResults,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 
   // Handle the sorting 
@@ -256,7 +264,7 @@ const ResultsList = ({loading}) => {
         break;
       case 'evidenceHighLow':
         newSortedResults = sortEvidenceHighLow(newSortedResults);
-        setIsSortedByEvidence(true);
+        setIsSortedByEvidence(true); 
         setIsSortedByScore(null)
         setIsSortedByName(null);
         break;
@@ -305,7 +313,7 @@ const ResultsList = ({loading}) => {
 
     // if the status is not error, handle setting the results
     if(rawResults.status !== 'error' && rawResults.data.results !== undefined) 
-      newResults = getSummarizedResults(rawResults.data, presetDisease, setPresetDisease);
+      newResults = getSummarizedResults(rawResults.data, presetDisease, setPresetDisease, availableTags, setAvailableTags);
       
       // set formatted results
     setFormattedResults(newResults);
@@ -320,8 +328,9 @@ const ResultsList = ({loading}) => {
   }, [rawResults, presetDisease, handleSort]);
   
   useEffect(() => {
+
     // we have results to show, set isLoading to false
-    if (formattedResults.length > 0 && rawResults.status !== 'error') 
+    if (formattedResults.length > 0) 
       setIsLoading(false);
     
     // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
@@ -330,40 +339,30 @@ const ResultsList = ({loading}) => {
 
   }, [formattedResults, rawResults, isFetchingARAStatus]);
 
+  useEffect(() => {
+    if(rawResults !== null)
+      calculateTagCounts(formattedResults, rawResults, activeFilters, setAvailableTags);
+  }, [formattedResults, rawResults, activeFilters]);
+
   useEffect(()=>{
     if(isError) {
       setIsLoading(false);
     }
   }, [isError]);
 
-
-  // Click handler for item select checkboxes 
-  const handleSelected = (item) => {
-    let items = [...selectedItems];
-    let matchIndex = items.indexOf(item.id);
-    if(matchIndex !== -1) {
-      items.splice(matchIndex, 1);
-      setSelectedItems(items);
-      if(items.length <= 0)
-        setAllSelected(false)
-    } else {
-      items.push(item.id);
-      setSelectedItems(items);
+  const calculateTagCounts = (formattedResults, rawResults, activeFilters, tagSetterMethod) => {
+    let countedTags = cloneDeep(rawResults.data.tags);
+    for(const result of formattedResults) {
+      for(const tag of result.tags) {
+        if(countedTags.hasOwnProperty(tag)){
+          if(!countedTags[tag].count)
+            countedTags[tag].count = 1;
+          else
+            countedTags[tag].count++;
+        }
+      }
     }
-  }
-
-  // Click handler for select all checkbox 
-  const handleSelectAll = () => {
-    let newSelectedItems = formattedResults.map((item)=>{
-      return item.id;
-    })
-    if(!allSelected) {
-      setSelectedItems(newSelectedItems);
-      setAllSelected(true);
-    } else {
-      setSelectedItems([]);
-      setAllSelected(false);
-    }
+    tagSetterMethod(countedTags);
   }
 
   // Click handler for the modal close button
@@ -389,7 +388,8 @@ const ResultsList = ({loading}) => {
 
     let indexes = [];
     for(const [i, value] of activeFilters.entries() ) {
-      if(value.tag === filter.tag)
+      if((value.tag === filter.tag && filter.tag !== 'tag')
+      || (filter.tag === 'tag' && filter.value === value.value))
         indexes.push(i);
     }
     
@@ -438,23 +438,29 @@ const ResultsList = ({loading}) => {
   const getSelectedFilterDisplay = (element) => {
     let filterDisplay;
     switch (element.tag) {
-    case "hum":
-      filterDisplay = <div>Species: <span>Human</span></div>;
-      break;
-    case "evi":
-      filterDisplay = <div>Minimum Evidence: <span>{element.value}</span></div>;
-      break;
-    case "fda":
-      filterDisplay = <div><span>FDA Approved</span></div>;
-      break;
-    case "date":
-      filterDisplay = <div>Date of Evidence: <span>{element.value[0]}-{element.value[1]}</span></div>;
-      break;
-    case "str":
-      filterDisplay = <div>String: <span>{element.value}</span></div>;
-      break;
-    default:
-      break;
+      case "hum":
+        filterDisplay = <div>Species: <span>Human</span></div>;
+        break;
+      case "evi":
+        filterDisplay = <div>Minimum Evidence: <span>{element.value}</span></div>;
+        break;
+      case "fda":
+        filterDisplay = <div><span>FDA Approved</span></div>;
+        break;
+      case "date":
+        filterDisplay = <div>Date of Evidence: <span>{element.value[0]}-{element.value[1]}</span></div>;
+        break;
+      case "str":
+        filterDisplay = <div>String: <span>{element.value}</span></div>;
+        break;
+      case "otc":
+        filterDisplay = <div><span>Available OTC</span></div>;
+        break;
+      case "tag":
+        filterDisplay = <div>Tag:<span> {element.label}</span></div>;
+        break;
+      default:
+        break;
     }
     return filterDisplay;
   }
@@ -470,19 +476,6 @@ const ResultsList = ({loading}) => {
       setFormattedResults(originalResults);
     }
     setActiveFilters(newFilters);
-  }
-
-  // Handle highlighting of results
-  const handleResultHighlight = () => {
-    if(selectedItems.length <= 0) {
-      console.log("No items selected, unable to highlight.")
-      return;
-    }
-    
-    let newSortedResults = (sortByHighlighted(sortedResults, selectedItems))
-    setHighlightedItems(selectedItems);
-    setSortedResults(newSortedResults);
-    setFormattedResults(newSortedResults);
   }
 
   const handleResultsRefresh = () => {
@@ -517,11 +510,6 @@ const ResultsList = ({loading}) => {
       let addElement = true;
       for(const filter of activeFilters) {
         switch (filter.tag) {
-          // FDA approved filter 
-          case 'fda':
-            if(!element.fdaInfo)
-              addElement = false;
-            break;
           // Minimum evidence filter
           case 'evi':
             if(element.evidence.length < filter.value)
@@ -533,11 +521,13 @@ const ResultsList = ({loading}) => {
               addElement = false;
             // handleSort('entityString');
             break;
-          // Date Range filter
-          case 'date':
-            // let lastPubYear = getLastPubYear(element.edge.last_publication_date);
-            // if(lastPubYear < filter.value[0] || lastPubYear > filter.value[1])
-            //   addElement = false;
+          case 'otc':
+            if(!element.tags.includes('otc'))
+              addElement = false;
+            break;
+          case 'tag':
+            if(!element.tags.includes(filter.value))
+              addElement = false;
             break;
           // Add new filter tags in this way:
           case 'example':
@@ -672,9 +662,9 @@ const ResultsList = ({loading}) => {
                 formattedCount={formattedResults.length}
                 totalCount={sortedResults.length}
                 onFilter={handleFilter}
-                onHighlight={handleResultHighlight}
                 onClearAll={handleClearAllFilters}
                 activeFilters={activeFilters} 
+                availableTags={availableTags}
               />
               <div className={styles.resultsHeader}>
                 <div className={styles.top}>
@@ -739,30 +729,12 @@ const ResultsList = ({loading}) => {
                 <div className={styles.resultsTable}>
                   <div className={styles.tableBody}>
                     <div className={`${styles.tableHead}`}>
-                      <div className={`${styles.checkboxContainer} ${styles.head}`}>
-                        <Checkbox checked={allSelected} handleClick={()=>{handleSelectAll()}}/>
-                      </div>
                       <div 
                         className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`} 
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByName)?'nameHighLow': 'nameLowHigh'))}}
                         >
                         Name
                       </div>
-                      {/* <div 
-                        className={`${styles.head} ${styles.fdaHead} fda-head`} 
-                        onMouseEnter={()=>setFdaTooltipActive(true)} 
-                        onMouseLeave={()=>setFdaTooltipActive(false)}
-                        >
-                        FDA
-                        <Tooltip 
-                        above
-                          delay={350}
-                          active={fdaTooltipActive} 
-                          onClose={() => setFdaTooltipActive(false)}
-                          text='Check marks in this column indicate drugs that have been approved by the FDA for the use of treating a specific disease or condition. This does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search.'
-                          >
-                        </Tooltip>
-                      </div> */}
                       <div 
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow'))}}
@@ -791,16 +763,11 @@ const ResultsList = ({loading}) => {
                       !isError &&
                       displayedResults.length > 0 && 
                       displayedResults.map((item, i) => {
-                        let checked = (selectedItems.length > 0 && selectedItems.includes(item.id)) ? true : false;
-                        let highlighted = (highlightedItems.length > 0 && highlightedItems.includes(item)) ? true : false;
                         return (
                           <ResultsItem 
                             key={i} 
-                            checked={checked}
-                            highlighted={highlighted}
+                            type={storedQuery.type}
                             item={item} 
-                            allSelected={allSelected}
-                            handleSelected={()=>handleSelected(item)}
                             activateEvidence={(evidence, edgesRepresented)=>activateEvidence(evidence, edgesRepresented)} 
                             activeStringFilters={activeStringFilters}
                           />

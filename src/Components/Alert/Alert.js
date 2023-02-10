@@ -6,7 +6,7 @@ import {ReactComponent as Checkmark} from '../../Icons/Alerts/Checkmark.svg'
 import {ReactComponent as Cross} from '../../Icons/Alerts/Cancelled.svg'
 import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg'
 import { Fade } from "react-awesome-reveal";
-import styles from 'Alert.module.scss';
+import styles from './Alert.module.scss';
 
 const Alert = ({ active, type, toggle, verticalPosition, horizontalPosition, timeout, fade, buttonText, children }) => {
 
