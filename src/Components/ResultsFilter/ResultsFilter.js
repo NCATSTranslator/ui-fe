@@ -2,7 +2,6 @@ import React, {useState, useEffect, useRef} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
 import SimpleRange from '../Range/SimpleRange';
-// import TwoThumbRange from '../Range/TwoThumbRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
@@ -13,15 +12,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   // eslint-disable-next-line
   const [minEvidence, setMinEvidence] = useState(1); 
   const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: minEvidence});
-  const [activeTag, setActiveTag] = useState(''); 
   const [tagObject, setTagObject] = useState({tag:'tag', value: ''});
-  const ATCHeadingAdded = useRef(false);
   
-  const [formattedTags, setFormattedTags] = useState({tag:'tag', value: ''});
-
-  const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
-  const [atcTooltipActive, setAtcTooltipActive] = useState(false);
-
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 
 
   const handleEvidenceActive = () => {
@@ -42,17 +34,14 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   const AtcHeading = () => {
     return (
       <div className={styles.labelContainer} >
-        <div className={styles.label} onMouseEnter={()=>{setAtcTooltipActive(true)}} onMouseLeave={()=>{setAtcTooltipActive(false)}}>
+        <div className={styles.label} data-tooltip-id="atc-tooltip" >
           <p className={styles.subTwo}>ATC Classification</p>
           <Alert/>
           <Tooltip 
-            left
-            above
-            delay={350}
-            active={atcTooltipActive} 
-            onClose={() => setAtcTooltipActive(false)}
-            text={<span className={styles.atcSpan}>The Anatomical Therapeutic Classification (ATC, <a href="https://www.whocc.no/atc_ddd_index/" target="_blank" className={styles.atcLink}>click to learn more</a>) is a drug classification that categorizes active substances of drugs according to the organ or system where their therapeutic effect occurs.</span>}
+            id="atc-tooltip"
+            className={styles.atcTooltip}
             >
+              <span className={styles.atcSpan}>The Anatomical Therapeutic Classification (ATC, <a href="https://www.whocc.no/atc_ddd_index/" target="_blank" className={styles.atcLink}>click to learn more</a>) is a drug classification that categorizes active substances of drugs according to the organ or system where their therapeutic effect occurs.</span>
           </Tooltip>
         </div>
         <p className={styles.caption}>Filter on organ or system where drug's theraputic effect occurs.</p>
@@ -63,17 +52,14 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   const FdaHeading = () => {
     return(      
       <div className={styles.labelContainer} >
-          <div className={styles.label} onMouseEnter={()=>{setFdaTooltipActive(true)}} onMouseLeave={()=>{setFdaTooltipActive(false)}}>
+          <div className={styles.label} data-tooltip-id="fda-tooltip" >
             <p className={styles.subTwo}>FDA Status</p>
             <Alert/>
             <Tooltip 
-              left
-              above
-              delay={350}
-              active={fdaTooltipActive} 
-              onClose={() => setFdaTooltipActive(false)}
-              text='Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.'
+              id="fda-tooltip"
+              className={styles.fdaTooltip}
               >
+                <span className={styles.fdaSpan}>Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.</span>
             </Tooltip>
           </div>
       </div>

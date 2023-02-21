@@ -8,7 +8,7 @@
   .labelContainer {
     padding: 20px 0;
     .label {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       position: relative;
     }
@@ -78,10 +78,6 @@
       background-color: $lightGray;
       width: 100%;
       padding-right: 38px;
-      // &:hover {
-      //   overflow: visible;
-      //   width: auto;
-      // }
     }
   }
   .facetCount {
@@ -90,7 +86,7 @@
     top: 0;
     bottom: 0;
   }
-  .atcSpan {
+  .atcSpan, .fdaSpan {
     font-size: 12px; 
   }
   .atcLink {
