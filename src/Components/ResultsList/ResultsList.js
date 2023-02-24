@@ -21,12 +21,15 @@ import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
 import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
+import {queryTypes} from '../../Utilities/queryTypes';
 
 const ResultsList = ({loading}) => {
 
   // URL search params
   const loadingParam = new URLSearchParams(window.location.search).get("loading")
   const queryIDParam = new URLSearchParams(window.location.search).get("q")
+  const presetDiseaseLabelParam = new URLSearchParams(window.location.search).get("l")
+  const presetQueryTypeIDParam = new URLSearchParams(window.location.search).get("t")
 
   let storedQuery = useSelector(currentQuery);
   storedQuery = (storedQuery !== undefined) ? storedQuery : {type:{}, node: {}};
@@ -100,8 +103,11 @@ const ResultsList = ({loading}) => {
   // const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
   // Bool, have the initial results been sorted yet
   const presorted = useRef(false);
+  const initPresetDisease = (presetDiseaseLabelParam) ? {id: '', label: presetDiseaseLabelParam} : null;
+  const initPresetQueryTypeID = (presetQueryTypeIDParam) ? presetQueryTypeIDParam : null;
   // Obj, {label: ''}, used to set input text, determined by results object
-  const [presetDisease, setPresetDisease] = useState(null);
+  const [presetDisease, setPresetDisease] = useState(initPresetDisease);
+  const [presetQueryTypeID, setPresetQueryTypeID] = useState(initPresetQueryTypeID);
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
@@ -640,7 +646,7 @@ const ResultsList = ({loading}) => {
         edges={evidenceEdges}
       />
       <div className={styles.resultsList}>
-        <Query results loading={isLoading} presetDisease={presetDisease}/>
+        <Query results loading={isLoading} presetDisease={presetDisease} presetTypeID={presetQueryTypeID}/>
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&

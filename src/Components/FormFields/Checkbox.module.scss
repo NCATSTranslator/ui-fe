@@ -5,9 +5,6 @@ label.checkbox {
   display: flex;
   align-items: center;
   margin-bottom: $s;
-  .circle {
-
-  }
   &:hover, &:focus {
     cursor: pointer;
     .circle {

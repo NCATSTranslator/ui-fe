@@ -10,53 +10,11 @@ import Highlighter from 'react-highlight-words';
 
 const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters}) => {
 
-  const [nameTooltipActive, setNameTooltipActive] = useState(false);
-  const [pathTooltipActive, setPathTooltipActive] = useState(false);
-  const [targetTooltipActive, setTargetTooltipActive] = useState(false);
-
   let nameString;
   let typeString;
   if(path.category !== 'predicate') {
     nameString = capitalizeAllWords(path.name);
     typeString = formatBiolinkPredicate(path.type)
-  }
-
-  const tooltipOpen = (type) => {
-    switch (type) {
-      case 'name':
-        setNameTooltipActive(true);
-        break;
-      case 'path':
-        setPathTooltipActive(true);
-        break;   
-      case 'target':
-        setTargetTooltipActive(true);
-        break; 
-      default:
-        break;
-    }
-  }
-
-  const tooltipClose = (type = 'all') => {
-    switch (type) {
-      case 'name':
-        if(nameTooltipActive)
-          setNameTooltipActive(false)
-        break;
-      case 'path':
-        if(pathTooltipActive)
-          setPathTooltipActive(false)
-        break;   
-      case 'target':
-        if(targetTooltipActive)
-          setTargetTooltipActive(false)
-        break; 
-      default:
-        setPathTooltipActive(false)
-        setNameTooltipActive(false)
-        setTargetTooltipActive(false)
-        break;
-    }
   }
 
   // filter path by a provided predicate, then call handleEdgeClick with the filtered path object
@@ -79,9 +37,8 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
       {
         path.category === 'object' &&
         <span className={styles.nameContainer} 
-          onMouseEnter={()=>tooltipOpen('name')}
-          onMouseLeave={()=>tooltipClose('name')}
           onClick={(e)=> {e.stopPropagation(); handleNameClick(path);}}
+          data-tooltip-id={nameString}
           >
           <span className={styles.name} >
             {getIcon(path.type)}
@@ -94,13 +51,9 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
               />
             </span>
           </span>
-            <Tooltip 
-              delay={350}
-              active={nameTooltipActive} 
-              onClose={() => tooltipClose('name')}
-              heading={<span><strong>{nameString}</strong> ({typeString})</span>}
-              text={path.description}
-              >
+            <Tooltip id={nameString}>
+              <span><strong>{nameString}</strong> ({typeString})</span>
+              {path.description}
             </Tooltip>
         </span>
       }
@@ -108,8 +61,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
         path.category === 'predicate' &&
         <span 
           className={styles.pathContainer} 
-          onMouseEnter={()=>tooltipOpen('path')}
-          onMouseLeave={()=>tooltipClose('path')}
+          data-tooltip-id={path.predicates[0]}
           onClick={(e)=> {e.stopPropagation(); handleEdgeClick(path);}}
           >
           <Connector />
@@ -126,10 +78,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
             </span>}
           </span>
           <Tooltip 
-            delay={350}
-            active={pathTooltipActive} 
-            onClose={() => tooltipClose('path')}
-            text=''
+            id={path.predicates[0]}
             > 
             {
               path.predicates.length > 1 &&
@@ -183,11 +132,10 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
         path.category === 'target' && 
         <span 
           className={styles.targetContainer} 
-          onMouseEnter={()=>tooltipOpen('target')}
-          onMouseLeave={()=>tooltipClose('target')}
+          data-tooltip-id={nameString}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(path);}}
           >
-          <span className={styles.target} onClick={(e) => {e.stopPropagation(); tooltipOpen('target')}}>
+          <span className={styles.target} >
             <Disease/>
             <span className={styles.text}>
               <Highlighter
@@ -198,14 +146,9 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
               />
             </span>
           </span>
-          <Tooltip 
-            delay={350}
-            active={targetTooltipActive} 
-            onClose={() => tooltipClose('target')}
-            onClick={(e)=> e.stopPropagation()}
-            heading={<span><strong>{nameString}</strong> ({typeString})</span>}
-            text={path.description}
-            >
+          <Tooltip id={nameString}>
+            <span><strong>{nameString}</strong> ({typeString})</span>
+            {path.description}
           </Tooltip>
         </span>
       }    

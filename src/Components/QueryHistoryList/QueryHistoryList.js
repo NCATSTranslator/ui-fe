@@ -40,8 +40,9 @@ const QueryHistoryList = () => {
   }, [queryHistoryState]);
 
   const handleClick = (query) => {
-    dispatch(setCurrentQuery(query.item));
-    navigate(`/results?q=${query.id}`);
+    console.log(query);
+    // dispatch(setCurrentQuery(query.item));
+    navigate(`/results?l=${encodeURIComponent(query.item.node.label)}&t=${query.item.type.id}&q=${query.id}`);
   }
 
   const handleSearch = (value) => {

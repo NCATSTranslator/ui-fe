@@ -15,13 +15,16 @@ import styles from './Query.module.scss';
 import { getEntityLink } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 
-const Query = ({results, loading, presetDisease}) => {
+const Query = ({results, loading, presetDisease, presetType}) => {
 
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
   const dispatch = useDispatch();
   // eslint-disable-next-line
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const presetQueryTypeIDParam = new URLSearchParams(window.location.search).get("t")
+  
 
   // eslint-disable-next-line
   const navigatingFromHistory = ( new URLSearchParams(window.location.search).get("results") !== null) ? true : false;
@@ -57,10 +60,11 @@ const Query = ({results, loading, presetDisease}) => {
     : '';
   const [inputText, setInputText] = useState(presetInputText);
 
-  const presetTypeID = 
-    (Object.keys(prevQueryItem.current).length && isResults) 
-    ? prevQueryItem.current.type.id
-    : null;
+  const initPresetTypeID = (presetQueryTypeIDParam) 
+    ? presetQueryTypeIDParam
+    : (Object.keys(prevQueryItem.current).length && isResults) ? prevQueryItem.current.type.id : null;
+
+  const [presetTypeID, setPresetTypeID] = useState(initPresetTypeID);
 
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -158,6 +162,12 @@ const Query = ({results, loading, presetDisease}) => {
     }
   }, [presetDisease]);
 
+  useEffect(() => {
+    if(presetType) {
+      console.log(presetType)
+      setPresetTypeID(presetType);
+    }
+  }, [presetType]);
   /*
     When the query items change, update the current query in the app state
   */
@@ -301,52 +311,42 @@ const Query = ({results, loading, presetDisease}) => {
                 <button
                   className={styles.button}
                   onClick={(e)=>{
-                    setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_ONE_ID, label: process.env.REACT_APP_EX_DISEASE_ONE_NAME});
                     setPresetURL(e.target.dataset.url);
-                    handleQueryTypeChange(queryTypes[0])
                   }}
                   data-testid="heart-disease"
-                  data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_ONE_UUID}`}
+                  data-url={`/results?l=${encodeURIComponent(process.env.REACT_APP_EX_DISEASE_ONE_NAME)}&t=0&q=${process.env.REACT_APP_EX_DISEASE_ONE_UUID}`}
                   >{process.env.REACT_APP_EX_DISEASE_ONE_NAME}
                 </button>
                 <button
                   className={styles.button}
                   onClick={(e)=>{
-                    setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_TWO_ID, label: process.env.REACT_APP_EX_DISEASE_TWO_NAME});
                     setPresetURL(e.target.dataset.url);
-                    handleQueryTypeChange(queryTypes[0])
                   }}
-                  data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_TWO_UUID}`}
+                  data-url={`/results?l=${encodeURIComponent(process.env.REACT_APP_EX_DISEASE_TWO_NAME)}&t=0&q=${process.env.REACT_APP_EX_DISEASE_TWO_UUID}`}
                   >{process.env.REACT_APP_EX_DISEASE_TWO_NAME}
                 </button>
                 <button
                   className={styles.button}
                   onClick={(e)=>{
-                    setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_THREE_ID, label: process.env.REACT_APP_EX_DISEASE_THREE_NAME});
                     setPresetURL(e.target.dataset.url);
-                    handleQueryTypeChange(queryTypes[0])
                   }}
-                  data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_THREE_UUID}`}
+                  data-url={`/results?l=${encodeURIComponent(process.env.REACT_APP_EX_DISEASE_THREE_NAME)}&t=0&q=${process.env.REACT_APP_EX_DISEASE_THREE_UUID}`}
                   >{process.env.REACT_APP_EX_DISEASE_THREE_NAME}
                 </button>
                 <button
                   className={styles.button}
                   onClick={(e)=>{
-                    setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_FOUR_ID, label: process.env.REACT_APP_EX_DISEASE_FOUR_NAME});
                     setPresetURL(e.target.dataset.url);
-                    handleQueryTypeChange(queryTypes[0])
                   }}
-                  data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_FOUR_UUID}`}
+                  data-url={`/results?l=${encodeURIComponent(process.env.REACT_APP_EX_DISEASE_FOUR_NAME)}&t=0&q=${process.env.REACT_APP_EX_DISEASE_FOUR_UUID}`}
                   >{process.env.REACT_APP_EX_DISEASE_FOUR_NAME}
                 </button>
                 <button
                   className={styles.button}
                   onClick={(e)=>{
-                    setSelectedItem({ id: process.env.REACT_APP_EX_DISEASE_FIVE_ID, label: process.env.REACT_APP_EX_DISEASE_FIVE_NAME});
                     setPresetURL(e.target.dataset.url);
-                    handleQueryTypeChange(queryTypes[0])
                   }}
-                  data-url={`/results?q=${process.env.REACT_APP_EX_DISEASE_FIVE_UUID}`}
+                  data-url={`/results?l=${encodeURIComponent(process.env.REACT_APP_EX_DISEASE_FIVE_NAME)}&t=0&q=${process.env.REACT_APP_EX_DISEASE_FIVE_UUID}`}
                   >{process.env.REACT_APP_EX_DISEASE_FIVE_NAME}
                 </button>
               </div>
