@@ -114,10 +114,10 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
       tags: tags
     }
     newSummarizedResults.push(formattedItem);
-    if(!presetDiseaseSet) {
-      setPresetDisease({id: item.object, label: objectNodeName});
-      presetDiseaseSet = true;
-    }
+    // if(!presetDiseaseSet) {
+    //   setPresetDisease({id: item.object, label: objectNodeName});
+    //   presetDiseaseSet = true;
+    // }
   }
 
   return newSummarizedResults;

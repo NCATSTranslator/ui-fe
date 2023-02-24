@@ -1,12 +1,18 @@
-import React from "react";
+import React, {useEffect} from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
+import { currentQuery} from "../../Redux/querySlice";
+import { useSelector } from 'react-redux';
 
 const ShareModal = ({children, isOpen, onClose, qid}) => {
 
+  let storedQuery = useSelector(currentQuery);
+  const queryLabel = (storedQuery) ? encodeURIComponent(storedQuery.node.label) : '';
+  const queryTypeID = (storedQuery) ? storedQuery.type.id : '';
+
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
-  const qidURL = `${window.location.origin}/results?q=${qid}`;
+  const qidURL = `${window.location.origin}/results?l=${queryLabel}&t=${queryTypeID}&q=${qid}`;
 
   return (
     <Modal 
