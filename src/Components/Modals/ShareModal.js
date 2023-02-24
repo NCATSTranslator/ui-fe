@@ -7,8 +7,8 @@ import { useSelector } from 'react-redux';
 const ShareModal = ({children, isOpen, onClose, qid}) => {
 
   let storedQuery = useSelector(currentQuery);
-  const queryLabel = (storedQuery) ? encodeURIComponent(storedQuery.node.label) : '';
-  const queryTypeID = (storedQuery) ? storedQuery.type.id : '';
+  const queryLabel = (storedQuery && storedQuery.node !== undefined) ? encodeURIComponent(storedQuery.node.label) : '';
+  const queryTypeID = (storedQuery && storedQuery.type !== undefined) ? storedQuery.type.id : '';
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
