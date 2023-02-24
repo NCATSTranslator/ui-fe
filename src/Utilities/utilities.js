@@ -121,7 +121,7 @@ export const getEntityLink = (id, className, queryType) => {
   let url = null;
   let linkText = null;
   let formattedID = id.toUpperCase();
-  let linkType = (queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
+  let linkType = (queryType !== undefined && queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
   if(formattedID.includes('CHEBI')) {
     url = `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
     linkText = `View this ${linkType} on Chemical Entities of Biological Interest`;

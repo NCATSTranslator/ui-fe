@@ -17,7 +17,9 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
   const [height, setHeight] = useState(0);
   const [formattedPaths, setFormattedPaths] = useState([]);
 
-  let pathString = (formattedPaths.length > 1) ? `Paths that ${type.pathString}` : `Path that ${type.pathString}`;
+  const initPathString = (type !== undefined && type.pathString) ? type.pathString : 'may affect';
+
+  let pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString}` : `Path that ${initPathString}`;
   let nameString = (item.name !== null) ? item.name : '';
   let objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
