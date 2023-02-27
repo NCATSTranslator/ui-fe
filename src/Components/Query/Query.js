@@ -174,7 +174,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
   useEffect(() => {
     // since useEffect dependency update checks don't work on objects (thanks to shallow equals)
     // check to see if queryItems has actually been updated, if not return
-    if(isEqual(prevQueryItem.current, queryItem))
+    if(prevQueryItem.current.node === undefined || isEqual(prevQueryItem.current, queryItem))
       return;
 
     // If the node ids match, but the new queryItem has no type, don't replace 
