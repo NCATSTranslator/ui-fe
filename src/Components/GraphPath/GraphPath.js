@@ -4,7 +4,7 @@ import Tooltip from '../Tooltip/Tooltip';
 import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
-import { capitalizeAllWords, formatBiolinkPredicate } from '../../Utilities/utilities';
+import { capitalizeAllWords, formatBiolinkPredicate, getRandomIntInclusive } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
 
@@ -16,6 +16,8 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
     nameString = capitalizeAllWords(path.name);
     typeString = formatBiolinkPredicate(path.type)
   }
+
+  const randomIntForTooltip = getRandomIntInclusive(1,10000);
 
   // filter path by a provided predicate, then call handleEdgeClick with the filtered path object
   const predicateSpecificEdgeClick = (path, predicate) => {
@@ -32,13 +34,15 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
     handleEdgeClick(filteredPath);
   }
 
+  console.log(path);
+
   return (
     <>
       {
         path.category === 'object' &&
         <span className={styles.nameContainer} 
           onClick={(e)=> {e.stopPropagation(); handleNameClick(path);}}
-          data-tooltip-id={nameString}
+          data-tooltip-id={`${nameString}${randomIntForTooltip}`}
           >
           <span className={styles.name} >
             {getIcon(path.type)}
@@ -51,7 +55,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
               />
             </span>
           </span>
-            <Tooltip id={nameString}>
+            <Tooltip id={`${nameString}${randomIntForTooltip}`}>
               <span><strong>{nameString}</strong> ({typeString})</span>
               {path.description}
             </Tooltip>
@@ -61,16 +65,16 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
         path.category === 'predicate' &&
         <span 
           className={styles.pathContainer} 
-          data-tooltip-id={path.predicates[0]}
+          data-tooltip-id={`${path.predicates[0]}${randomIntForTooltip}`}
           onClick={(e)=> {e.stopPropagation(); handleEdgeClick(path);}}
           >
           <Connector />
-          <span className={`${styles.path} path`}>
+          <span className={`${styles.path} path ${(path.predicates.length > 1) ? styles.hasMore : ''}`}>
             <Highlighter
               highlightClassName="highlight"
               searchWords={activeStringFilters}
               autoEscape={true}
-              textToHighlight={path.predicates[0]}
+              textToHighlight={capitalizeAllWords(path.predicates[0])}
             />
             {path.predicates.length > 1 && 
             <span className={styles.more}>
@@ -78,32 +82,30 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
             </span>}
           </span>
           <Tooltip 
-            id={path.predicates[0]}
+            id={`${path.predicates[0]}${randomIntForTooltip}`}
             > 
             {
               path.predicates.length > 1 &&
-              <ul className={styles.predicatesList}>{
+              <div className={styles.predicatesList}>{
                 path.predicates.map((predicate, i)=> {
 
                   return (
-                    <li>
-                      <p 
-                        key={i} 
-                        className={styles.predicate} 
-                        // Predicate click to get specific evidence will go here 
-                        onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(path, predicate)}}
-                        >
-                        <Highlighter
-                          highlightClassName="highlight"
-                          searchWords={activeStringFilters}
-                          autoEscape={true}
-                          textToHighlight={capitalizeAllWords(predicate)}
-                        />
-                      </p>
-                    </li>
+                    <p 
+                      key={i} 
+                      className={styles.predicate} 
+                      // Predicate click to get specific evidence will go here 
+                      onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(path, predicate)}}
+                      >
+                      <Highlighter
+                        highlightClassName="highlight"
+                        searchWords={activeStringFilters}
+                        autoEscape={true}
+                        textToHighlight={capitalizeAllWords(predicate)}
+                      />
+                    </p>
                   )
                 })}
-              </ul>
+              </div>
             }
             {
               path.predicates.length <= 1 &&
@@ -132,7 +134,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
         path.category === 'target' && 
         <span 
           className={styles.targetContainer} 
-          data-tooltip-id={nameString}
+          data-tooltip-id={`${nameString}${randomIntForTooltip}`}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(path);}}
           >
           <span className={styles.target} >
@@ -146,7 +148,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
               />
             </span>
           </span>
-          <Tooltip id={nameString}>
+          <Tooltip id={`${nameString}${randomIntForTooltip}`}>
             <span><strong>{nameString}</strong> ({typeString})</span>
             {path.description}
           </Tooltip>

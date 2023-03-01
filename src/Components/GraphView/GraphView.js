@@ -18,16 +18,6 @@ const GraphView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => 
   // number of  hops
   let graphWidth = 3;
 
-  const displayHeadings = (count) => {
-    let headingMarkup = [];
-    for (let index = 0; index < count; index++) {
-      headingMarkup.push(<span key={`${index}_e`}>Entity</span>);
-      headingMarkup.push(<span key={`${index}_r`}>Relationship</span>);
-    }
-    headingMarkup.push(<span key='i'>Target</span>);
-    return headingMarkup;
-  }
-
   const handleNameClick = (name) => {
     console.log("handle name click");
   }
@@ -55,9 +45,6 @@ const GraphView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => 
       <div className={styles.header}>
         <p className={styles.subtitle}>Paths</p>
         <p>Click on any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
-      </div>
-      <div className={styles.tableHead}>
-        {displayHeadings(graphWidth)}
       </div>
       {
         paths.slice(0, numberToShow).map((pathToDisplay, i)=> {
