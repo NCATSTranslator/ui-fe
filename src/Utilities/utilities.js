@@ -167,3 +167,17 @@ export const getEntityLink = (id, className, queryType) => {
 
   return null;
 }
+
+export const handleFetchErrors = (response, onErrorCallback = () => console.log('No error callback function specified.')) => {
+  if(!response.ok) {
+    onErrorCallback();
+    throw Error(response.statusText);
+  }
+  return response
+}
+
+export const getRandomIntInclusive = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
