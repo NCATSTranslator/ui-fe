@@ -156,6 +156,9 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
             edges: [{object: item.object, predicate: pred, subject: item.subject}]
           }
         }
+        if(item.provenance !== undefined) {
+          pathToAdd[i].provenance = item.provenance;
+        }
       })
       newPaths.push(pathToAdd);
     }) 

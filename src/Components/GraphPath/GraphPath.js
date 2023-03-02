@@ -3,6 +3,7 @@ import React, {useState} from "react";
 import Tooltip from '../Tooltip/Tooltip';
 import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
+import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
 import { capitalizeAllWords, formatBiolinkPredicate, getRandomIntInclusive } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
@@ -56,6 +57,10 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
             <Tooltip id={`${nameString}${randomIntForTooltip}`}>
               <span><strong>{nameString}</strong> ({typeString})</span>
               {path.description}
+              {
+                path.provenance && 
+                <a href={path.provenance} target="_blank" rel='noreferrer' className={styles.provenance}><ExternalLink/>{path.provenance}</a>
+              }
             </Tooltip>
         </span>
       }
@@ -149,6 +154,10 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
           <Tooltip id={`${nameString}${randomIntForTooltip}`}>
             <span><strong>{nameString}</strong> ({typeString})</span>
             {path.description}
+            {
+              path.provenance && 
+              <a href={path.provenance} target="_blank" rel='noreferrer' className={styles.provenance}><ExternalLink/>{path.provenance}</a>
+            }
           </Tooltip>
         </span>
       }    

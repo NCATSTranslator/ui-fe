@@ -15,13 +15,13 @@ import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
   sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
+import { handleFetchErrors } from "../../Utilities/utilities";
 import { cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
 import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
-import {queryTypes} from '../../Utilities/queryTypes';
 
 const ResultsList = ({loading}) => {
 
@@ -159,6 +159,7 @@ const ResultsList = ({loading}) => {
     let responseClone;
     // eslint-disable-next-line
     const response = await fetch('/creative_status', requestOptions)
+      .then(response => handleFetchErrors(response))
       .then(response => response.json())
       .then(data => {
         // increment the number of status checks
