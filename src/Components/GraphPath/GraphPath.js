@@ -34,8 +34,6 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
     handleEdgeClick(filteredPath);
   }
 
-  console.log(path);
-
   return (
     <>
       {
