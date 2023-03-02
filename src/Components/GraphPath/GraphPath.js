@@ -59,7 +59,10 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
               {path.description}
               {
                 path.provenance && 
-                <a href={path.provenance} target="_blank" rel='noreferrer' className={styles.provenance}><ExternalLink/>{path.provenance}</a>
+                <a href={path.provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
+                  <ExternalLink/>
+                  <span>{path.provenance}</span>
+                </a>
               }
             </Tooltip>
         </span>
@@ -156,7 +159,10 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
             {path.description}
             {
               path.provenance && 
-              <a href={path.provenance} target="_blank" rel='noreferrer' className={styles.provenance}><ExternalLink/>{path.provenance}</a>
+              <a href={path.provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
+                <ExternalLink/>
+                <span>{path.provenance}</span>
+              </a>
             }
           </Tooltip>
         </span>

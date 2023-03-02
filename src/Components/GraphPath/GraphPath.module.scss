@@ -141,15 +141,20 @@ span.path {
 
 .provenance {
   display: flex;
-  color: $white;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 12px;
-  text-decoration: underline;
   align-items: center;
   margin-top: $xs;
+  span {
+    font-size: 12px;
+    text-decoration: underline;
+    color: $white;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline;
+  }
   svg {
+    display: inline;
     margin: 0 3px 0 0;
+    min-width: 18px;
     path {
       fill: $white;
     }
