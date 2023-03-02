@@ -116,8 +116,6 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     newSummarizedResults.push(formattedItem);
   }
 
-  console.log(newSummarizedResults)
-
   return newSummarizedResults;
 }
 
