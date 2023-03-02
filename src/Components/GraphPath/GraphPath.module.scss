@@ -138,3 +138,20 @@ span.path {
 .edgeLabel {
   fill: #000 !important;
 }
+
+.provenance {
+  display: flex;
+  color: $white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  text-decoration: underline;
+  align-items: center;
+  margin-top: $xs;
+  svg {
+    margin: 0 3px 0 0;
+    path {
+      fill: $white;
+    }
+  }
+}
