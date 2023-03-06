@@ -5,20 +5,20 @@ import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
-import { capitalizeAllWords, formatBiolinkPredicate, getRandomIntInclusive } from '../../Utilities/utilities';
+import { capitalizeAllWords, formatBiolinkEntity, getRandomIntInclusive } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
 
 const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters}) => {
 
-  let nameString;
-  let typeString;
+  let nameString = '';
+  let typeString = '';
   if(path.category !== 'predicate') {
     nameString = capitalizeAllWords(path.name);
-    typeString = formatBiolinkPredicate(path.type)
+    typeString = formatBiolinkEntity(path.type)
   }
 
-  const randomIntForTooltip = getRandomIntInclusive(1,10000);
+  const randomIntForTooltip = getRandomIntInclusive(1,100000);
 
   // filter path by a provided predicate, then call handleEdgeClick with the filtered path object
   const predicateSpecificEdgeClick = (path, predicate) => {

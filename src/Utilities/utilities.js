@@ -106,7 +106,7 @@ export const validateEmail = (email) => {
     );
 };
 
-export const formatBiolinkPredicate = (string) => {
+export const formatBiolinkEntity = (string) => {
   // remove 'biolink:' from the type, then add spaces before each capital letter
   // then trim the leading space and replace any underlines with spaces
   return(string.replace('biolink:', '')
