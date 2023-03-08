@@ -348,8 +348,8 @@ const ResultsList = ({loading}) => {
 
   useEffect(() => {
     if(rawResults !== null)
-      calculateTagCounts(formattedResults, rawResults, activeFilters, setAvailableTags);
-  }, [formattedResults, rawResults, activeFilters]);
+      calculateTagCounts(formattedResults, rawResults, setAvailableTags);
+  }, [formattedResults, rawResults]);
 
   useEffect(()=>{
     if(isError) {
@@ -357,7 +357,7 @@ const ResultsList = ({loading}) => {
     }
   }, [isError]);
 
-  const calculateTagCounts = (formattedResults, rawResults, activeFilters, tagSetterMethod) => {
+  const calculateTagCounts = (formattedResults, rawResults, tagSetterMethod) => {
     // create a list of tags from the list provided by the backend
     let countedTags = cloneDeep(rawResults.data.tags);
     for(const result of formattedResults) {

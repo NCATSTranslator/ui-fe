@@ -19,6 +19,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 
 
   useEffect(() => {
+
+    console.log(availableTags);
     // when availableTags prop changes, group  the tags according to their type
     let newGroupedTags = groupAvailableTags(availableTags)
     setGroupedTags(newGroupedTags);
@@ -31,10 +33,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     setCountsToShow(newCountsToShow);
     
   }, [availableTags]);
-
-  useEffect(() => {
-    console.log(countsToShow);
-  }, [countsToShow]);
 
   const handleEvidenceActive = () => {
     onFilter(evidenceObject);
