@@ -6,22 +6,35 @@ import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
-import { cloneDeep } from 'lodash';
 
 const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
   
-  // eslint-disable-next-line
-  const [minEvidence, setMinEvidence] = useState(1); 
-  const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: minEvidence});
+  const facetShowMoreIncrement = 5;
+
+  const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: 1});
   const [tagObject, setTagObject] = useState({tag:'tag', value: ''});
   const [groupedTags, setGroupedTags] = useState({});
+  const [countsToShow, setCountsToShow] = useState(null);
   
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 
 
   useEffect(() => {
     // when availableTags prop changes, group  the tags according to their type
-    setGroupedTags(groupAvailableTags(availableTags));
+    let newGroupedTags = groupAvailableTags(availableTags)
+    setGroupedTags(newGroupedTags);
+
+    let newCountsToShow = {};
+    Object.keys(newGroupedTags).forEach((key) => {
+      newCountsToShow[key] = facetShowMoreIncrement;
+    })
+
+    setCountsToShow(newCountsToShow);
+    
   }, [availableTags]);
+
+  useEffect(() => {
+    console.log(countsToShow);
+  }, [countsToShow]);
 
   const handleEvidenceActive = () => {
     onFilter(evidenceObject);
@@ -38,9 +51,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     onFilter(newObj);
   }
   
-  // returns a new groups each tag by its type 
+  // returns a new object with each tag grouped by its type 
   const groupAvailableTags = (tags) => {
-    let clonedTags = cloneDeep(tags);
+    let clonedTags = global.structuredClone(tags);
     let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ATC')));
     let biolinkTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('biolink')));
     let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda')));
@@ -113,6 +126,66 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     return headingToReturn;
   }
 
+  const showMoreFacets = (type) => {
+    let newCount = countsToShow[type];
+    if(Object.keys(groupedTags[type]).length > countsToShow[type]) {
+      newCount = (countsToShow[type] + facetShowMoreIncrement > Object.keys(groupedTags[type]).length)
+        ? Object.keys(groupedTags[type]).length
+        : countsToShow[type] + facetShowMoreIncrement;
+    }
+
+    let newCountsToShow = global.structuredClone(countsToShow);
+    newCountsToShow[type] = newCount;
+    setCountsToShow(newCountsToShow);
+  }
+  const showFewerFacets = (type) => {
+    let newCount = countsToShow[type];
+    if(countsToShow[type] - facetShowMoreIncrement < facetShowMoreIncrement) 
+      newCount = facetShowMoreIncrement;
+    else 
+      newCount = countsToShow[type] - facetShowMoreIncrement;
+
+    let newCountsToShow = global.structuredClone(countsToShow);
+    newCountsToShow[type] = newCount;
+    setCountsToShow(newCountsToShow);
+  }
+
+  const displayFacets = (type) => {
+    return (
+      <div className={styles.section}>
+        { // Sort each set of tags, then map them to return each facet
+          Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
+            let tagKey = tag[0];
+            let object = tag[1];
+            let tagName = (type === 'biolink')? tagName = formatBiolinkEntity(object.name) : capitalizeAllWords(object.name);
+            return (
+              availableTags[tagKey] && availableTags[tagKey].count && 
+              <div className={styles.facetContainer} key={j}>
+                <Checkbox 
+                  handleClick={() => handleFacetChange(tagKey, tagObject, setTagObject, tagName)}
+                  checked={activeFilters.some(e => e.tag === 'tag' && e.value === tagKey)}
+                  className={styles.checkbox}
+                  >
+                  {tagName} <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
+                </Checkbox>
+              </div>
+            )
+          })
+        }
+        <div className={styles.showButtonsContainer}>
+          {
+            Object.keys(groupedTags[type]).length > countsToShow[type] && 
+            <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
+          }
+          {
+            countsToShow[type] > facetShowMoreIncrement && 
+            <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
+          }
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
@@ -151,78 +224,13 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
                     typeHeadingMarkup
                   }
                   {
-                    // Sort each set of tags, then map them to return each facet
-                    Object.entries(groupedTags[tagType]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).map((tag, j) => {
-                      let tagKey = tag[0];
-                      let object = tag[1];
-                      let tagName = (tagType === 'biolink')? tagName = formatBiolinkEntity(object.name) : capitalizeAllWords(object.name);
-                      return (
-                        <div className={styles.facetContainer} key={j}>
-                          {
-                            availableTags[tagKey] && availableTags[tagKey].count && 
-                            <>
-                              <Checkbox 
-                                handleClick={() => handleFacetChange(tagKey, tagObject, setTagObject, tagName)}
-                                checked={activeFilters.some(e => e.tag === 'tag' && e.value === tagKey)}
-                                >
-                                {tagName} <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
-                              </Checkbox>
-                            </>
-                          }
-                        </div>
-                      )
-                    })
+                    displayFacets(tagType)
                   }
                 </>
               )
             })
           }
-          {/* {
-            availableTags &&
-            Object.keys(availableTags).sort().map((tag, i) => {
-
-              let addFdaHeading = false;
-              let addAtcHeading = false;
-              let addBiolinkHeading = false;
-              let tagName = capitalizeAllWords(availableTags[tag].name);
-
-              if(tag.includes('biolink')) {
-                if(Object.keys(availableTags).sort()[i-1] === undefined || !Object.keys(availableTags).sort()[i-1].includes('biolink'))
-                  addBiolinkHeading = true;
-                
-                tagName = formatBiolinkEntity(availableTags[tag].name);
-              }
-
-              if(tag.includes('fda')) {
-                addFdaHeading = true;
-                tagName = 'FDA Approved';
-              }
-              if(tag.includes('ATC') 
-                && 
-                (Object.keys(availableTags).sort()[i-1] === undefined || !Object.keys(availableTags).sort()[i-1].includes('ATC'))) {
-                addAtcHeading = true;
-              }
-
-              return(
-                <div className={styles.facetContainer}>
-                  {
-                    availableTags[tag].count &&
-                    <>
- 
-                      <Checkbox 
-                        handleClick={() => handleFacetChange(tag, tagObject, setTagObject, tagName)}
-                        checked={activeFilters.some(e => e.tag === 'tag' && e.value === tag)}
-                        >
-                        {tagName} <span className={styles.facetCount}>({(availableTags[tag].count) ? availableTags[tag].count : 0})</span>
-                      </Checkbox>
-                    </>
-                  }
-                </div>
-              )
-            })
-          } */}
         </div>
-
         <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
       </div>
     </div>

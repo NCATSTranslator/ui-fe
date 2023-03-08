@@ -5,6 +5,9 @@
   padding: $s;
   background-color: $lightGray;
   border-radius: $defaultBorderRadius;
+  .section {
+
+  }
   .labelContainer {
     padding: 15px 0;
     .label {
@@ -23,6 +26,7 @@
     font-size: $m;
     font-weight: 700;
     color: $purpleTwo;
+    margin: 0;
   }
   .top,.left {
     display: flex;
@@ -61,14 +65,15 @@
   }
   .clearAll {
     display: block;
-    font-size: 12px;
+    font-size: 14px;
     color: $purpleOne;
     background-color: transparent;
-    margin: 20px auto 16px;
+    margin: 15px auto 10px;
     padding: 0;
     box-shadow: none;
   }
   .facetContainer {
+    padding-bottom: 16px;
     input + span {
       position: relative;
       white-space: nowrap;
@@ -91,5 +96,22 @@
   .tooltipLink {
     font-size: 12px; 
     color: $white;
+  }
+  .checkbox {
+    margin-bottom: 0;
+  }
+  .showButtonsContainer {
+    display: flex;
+    justify-content: center;
+  }
+  .showButton {
+    color: #606368;
+    font-size: 12px;
+    font-weight: 700;
+    background-color: transparent;
+    box-shadow: none;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
