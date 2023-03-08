@@ -75,7 +75,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}
 
   useEffect(() => {
     if(isOpen) {
-      setPubmedEvidence(cloneDeep(currentEvidence).filter(item => item.type === 'PMID'));
+      setPubmedEvidence(cloneDeep(currentEvidence).filter(item => item.type === 'PMID' || item.type === 'PMC'));
       clinicalTrials.current = cloneDeep(currentEvidence).filter(item => item.type === 'NCT');
     }
   }, [currentEvidence, isOpen])
