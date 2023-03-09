@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useRef, useEffect} from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
 import { currentQuery} from "../../Redux/querySlice";
@@ -10,9 +10,19 @@ const ShareModal = ({isOpen, onClose, qid}) => {
   const queryLabel = (storedQuery && storedQuery.node !== undefined) ? encodeURIComponent(storedQuery.node.label) : '';
   const queryTypeID = (storedQuery && storedQuery.type !== undefined) ? storedQuery.type.id : '';
 
+  const isResultsUrlSet = useRef(false);
+
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
-  const qidURL = `${window.location.origin}/results?l=${queryLabel}&t=${queryTypeID}&q=${qid}`;
+  const qidPath = `/results?l=${queryLabel}&t=${queryTypeID}&q=${qid}`
+  const qidURL = `${window.location.origin}${qidPath}`;
+  
+  useEffect(() => {
+    if(window.location.pathname.includes("results") && !isResultsUrlSet.current && qidURL) {
+      isResultsUrlSet.current = true;
+      window.history.replaceState(null, "Results", qidPath);
+    }
+  }, []);
 
   return (
     <Modal 
