@@ -4,7 +4,7 @@ import Modal from "./Modal";
 import { currentQuery} from "../../Redux/querySlice";
 import { useSelector } from 'react-redux';
 
-const ShareModal = ({children, isOpen, onClose, qid}) => {
+const ShareModal = ({isOpen, onClose, qid}) => {
 
   let storedQuery = useSelector(currentQuery);
   const queryLabel = (storedQuery && storedQuery.node !== undefined) ? encodeURIComponent(storedQuery.node.label) : '';
