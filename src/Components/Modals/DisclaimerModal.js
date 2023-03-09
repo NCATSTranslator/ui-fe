@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import styles from './DisclaimerModal.module.scss'
 
-const DisclaimerModal = ({children, onClose }) => {
+const DisclaimerModal = ({onClose }) => {
 
   const [isDisclaimerApproved, setIsDisclaimerApproved] = useState(JSON.parse(localStorage.getItem('disclaimerApproved')));
   var modalIsOpen = !isDisclaimerApproved;

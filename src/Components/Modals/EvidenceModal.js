@@ -12,7 +12,7 @@ import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh 
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 
-const EvidenceModal = ({isOpen, onClose, currentEvidence, results, title, edges}) => {
+const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
