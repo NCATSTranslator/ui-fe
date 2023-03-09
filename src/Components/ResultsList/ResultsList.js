@@ -375,6 +375,12 @@ const ResultsList = ({loading}) => {
         }
       }
     }
+
+    Object.entries(countedTags).forEach((tag)=> {
+      if(tag[1].count === undefined || tag[1].count <= 0)
+        delete countedTags[tag[0]];
+    })
+    
     tagSetterMethod(countedTags);
   }
 
