@@ -348,8 +348,8 @@ const ResultsList = ({loading}) => {
 
   useEffect(() => {
     if(rawResults !== null)
-      calculateTagCounts(formattedResults, rawResults, activeFilters, setAvailableTags);
-  }, [formattedResults, rawResults, activeFilters]);
+      calculateTagCounts(formattedResults, rawResults, setAvailableTags);
+  }, [formattedResults, rawResults]);
 
   useEffect(()=>{
     if(isError) {
@@ -357,18 +357,30 @@ const ResultsList = ({loading}) => {
     }
   }, [isError]);
 
-  const calculateTagCounts = (formattedResults, rawResults, activeFilters, tagSetterMethod) => {
+  const calculateTagCounts = (formattedResults, rawResults, tagSetterMethod) => {
+    // create a list of tags from the list provided by the backend
     let countedTags = cloneDeep(rawResults.data.tags);
     for(const result of formattedResults) {
+      // for each result's list of tags
       for(const tag of result.tags) {
+        // if the tag exists on the list, either increment it or initialize its count
         if(countedTags.hasOwnProperty(tag)){
           if(!countedTags[tag].count)
             countedTags[tag].count = 1;
           else
             countedTags[tag].count++;
+        // if it doesn't exist on the current list of tags, add it and initialize its count
+        } else {
+          countedTags[tag] = {name: tag, value: '', count: 1}
         }
       }
     }
+
+    Object.entries(countedTags).forEach((tag)=> {
+      if(tag[1].count === undefined || tag[1].count <= 0)
+        delete countedTags[tag[0]];
+    })
+    
     tagSetterMethod(countedTags);
   }
 

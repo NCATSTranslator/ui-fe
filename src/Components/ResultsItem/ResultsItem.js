@@ -5,7 +5,7 @@ import GraphView from '../GraphView/GraphView';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
-import { formatBiolinkPredicate } from '../../Utilities/utilities';
+import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) => {
@@ -149,7 +149,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
             description: desc,
           }
         } else {
-          let pred = (item.predicate) ? formatBiolinkPredicate(item.predicate) : '';
+          let pred = (item.predicate) ? formatBiolinkEntity(item.predicate) : '';
           pathToAdd[i] = {
             category: 'predicate',
             predicates: [pred],

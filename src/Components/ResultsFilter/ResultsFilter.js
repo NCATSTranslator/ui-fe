@@ -1,47 +1,74 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
 import SimpleRange from '../Range/SimpleRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
-import { capitalizeAllWords } from '../../Utilities/utilities';
+import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
 
 const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
   
-  // eslint-disable-next-line
-  const [minEvidence, setMinEvidence] = useState(1); 
-  const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: minEvidence});
+  const facetShowMoreIncrement = 5;
+
+  const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: 1});
   const [tagObject, setTagObject] = useState({tag:'tag', value: ''});
+  const [groupedTags, setGroupedTags] = useState({});
+  const [countsToShow, setCountsToShow] = useState(null);
   
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 
+
+  useEffect(() => {
+    // when availableTags prop changes, group the tags according to their type
+    let newGroupedTags = groupAvailableTags(availableTags)
+    setGroupedTags(newGroupedTags);
+
+    let newCountsToShow = {};
+    Object.keys(newGroupedTags).forEach((key) => {
+      newCountsToShow[key] = facetShowMoreIncrement;
+    })
+
+    setCountsToShow(newCountsToShow);
+    
+  }, [availableTags]);
 
   const handleEvidenceActive = () => {
     onFilter(evidenceObject);
   }
 
-  const handleFacetChange = (value, objectToUpdate, setterFunction, label = '') => {
-    if(objectToUpdate.value === value)
+  const handleFacetChange = (facetID, objectToUpdate, setterFunction, label = '') => {
+    if(objectToUpdate.value === facetID)
       return;
-    
+
     let newObj = global.structuredClone(objectToUpdate);
-    newObj.value = value;
+    newObj.value = facetID;
     newObj.label = label;
     setterFunction(objectToUpdate);
     onFilter(newObj);
   }
+  
+  // returns a new object with each tag grouped by its type 
+  const groupAvailableTags = (tags) => {
+    let clonedTags = global.structuredClone(tags);
+    let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ATC')));
+    let biolinkTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('biolink')));
+    let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda')));
+    const newGroupedTags = {
+      fda: fdaTags,
+      biolink: biolinkTags,
+      atc: atcTags
+    }
+    return newGroupedTags;
+  }
 
-  const AtcHeading = () => {
+  const getAtcHeading = () => {
     return (
       <div className={styles.labelContainer} >
         <div className={styles.label} data-tooltip-id="atc-tooltip" >
           <p className={styles.subTwo}>ATC Classification</p>
           <Alert/>
-          <Tooltip 
-            id="atc-tooltip"
-            className={styles.atcTooltip}
-            >
-              <span className={styles.atcSpan}>The Anatomical Therapeutic Classification (ATC, <a href="https://www.whocc.no/atc_ddd_index/" target="_blank" className={styles.atcLink}>click to learn more</a>) is a drug classification that categorizes active substances of drugs according to the organ or system where their therapeutic effect occurs.</span>
+          <Tooltip id="atc-tooltip">
+              <span className={styles.atcSpan}>The Anatomical Therapeutic Classification (ATC, <a href="https://www.whocc.no/atc_ddd_index/" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a drug classification that categorizes active substances of drugs according to the organ or system where their therapeutic effect occurs.</span>
           </Tooltip>
         </div>
         <p className={styles.caption}>Filter on organ or system where drug's theraputic effect occurs.</p>
@@ -49,19 +76,108 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const FdaHeading = () => {
+  const getFdaHeading = () => {
     return(      
       <div className={styles.labelContainer} >
           <div className={styles.label} data-tooltip-id="fda-tooltip" >
             <p className={styles.subTwo}>FDA Status</p>
             <Alert/>
-            <Tooltip 
-              id="fda-tooltip"
-              className={styles.fdaTooltip}
-              >
+            <Tooltip id="fda-tooltip">
                 <span className={styles.fdaSpan}>Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.</span>
             </Tooltip>
           </div>
+      </div>
+    )
+  }
+
+  const getBiolinkHeading = () => {
+    return(      
+      <div className={styles.labelContainer} >
+          <div className={styles.label} data-tooltip-id="biolink-tooltip" >
+            <p className={styles.subTwo}>Result Type</p>
+            <Alert/>
+            <Tooltip id="biolink-tooltip">
+                <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
+            </Tooltip>
+          </div>
+          <p className={styles.caption}>Show only results that begin with a particular Biolink type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+      </div>
+    )
+  }
+  const getTagHeadingMarkup = (tagType) => {
+    let headingToReturn;
+    switch(tagType) {
+      case 'fda':
+        headingToReturn = getFdaHeading();
+        break;
+      case 'biolink':
+        headingToReturn = getBiolinkHeading();
+        break;
+      case 'atc':
+        headingToReturn = getAtcHeading();
+        break;
+      default: 
+        headingToReturn = '';
+    }
+    return headingToReturn;
+  }
+
+  const showMoreFacets = (type) => {
+    let newCount = countsToShow[type];
+    if(Object.keys(groupedTags[type]).length > countsToShow[type]) {
+      newCount = (countsToShow[type] + facetShowMoreIncrement > Object.keys(groupedTags[type]).length)
+        ? Object.keys(groupedTags[type]).length
+        : countsToShow[type] + facetShowMoreIncrement;
+    }
+
+    let newCountsToShow = global.structuredClone(countsToShow);
+    newCountsToShow[type] = newCount;
+    setCountsToShow(newCountsToShow);
+  }
+  const showFewerFacets = (type) => {
+    let newCount = countsToShow[type];
+    if(countsToShow[type] - facetShowMoreIncrement < facetShowMoreIncrement) 
+      newCount = facetShowMoreIncrement;
+    else 
+      newCount = countsToShow[type] - facetShowMoreIncrement;
+
+    let newCountsToShow = global.structuredClone(countsToShow);
+    newCountsToShow[type] = newCount;
+    setCountsToShow(newCountsToShow);
+  }
+
+  const displayFacets = (type) => {
+    return (
+      <div className={styles.section}>
+        { // Sort each set of tags, then map them to return each facet
+          Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
+            let tagKey = tag[0];
+            let object = tag[1];
+            let tagName = (type === 'biolink')? tagName = formatBiolinkEntity(object.name) : capitalizeAllWords(object.name);
+            return (
+              availableTags[tagKey] && availableTags[tagKey].count && 
+              <div className={styles.facetContainer} key={j}>
+                <Checkbox 
+                  handleClick={() => handleFacetChange(tagKey, tagObject, setTagObject, tagName)}
+                  checked={activeFilters.some(e => e.tag === 'tag' && e.value === tagKey)}
+                  className={styles.checkbox}
+                  >
+                  {tagName} <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
+                </Checkbox>
+              </div>
+            )
+          })
+        }
+        <div className={styles.showButtonsContainer}>
+          {
+            Object.keys(groupedTags[type]).length > countsToShow[type] && 
+            <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
+          }
+          {
+            countsToShow[type] > facetShowMoreIncrement && 
+            <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
+          }
+        </div>
       </div>
     )
   }
@@ -93,49 +209,24 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           />
         <div className={styles.tagsContainer}>
           {
-            availableTags &&
-            Object.keys(availableTags).sort().map((tag, i) => {
-
-              let addFdaHeading = false;
-              let addAtcHeading = false;
-              let tagName = capitalizeAllWords(availableTags[tag].name);
-              if(tag.includes('fda')) {
-                addFdaHeading = true;
-                tagName = 'FDA Approved';
-              }
-              if(tag.includes('ATC') 
-                && 
-                (Object.keys(availableTags).sort()[i-1] === undefined || !Object.keys(availableTags).sort()[i-1].includes('ATC'))) {
-                addAtcHeading = true;
-              }
-
-              return(
-                <div className={styles.facetContainer}>
+            groupedTags &&
+            Object.keys(groupedTags).map((tagType, i) => {
+              let typeHeadingMarkup = getTagHeadingMarkup(tagType);
+              return (
+                <>
                   {
-                    addAtcHeading &&
-                    <AtcHeading/>
+                    // if there are tags within this group, display the heading
+                    Object.keys(groupedTags[tagType]).length > 0 && 
+                    typeHeadingMarkup
                   }
                   {
-                    availableTags[tag].count &&
-                    <>
-                      {
-                        addFdaHeading && 
-                        <FdaHeading/>
-                      }
-                      <Checkbox 
-                        handleClick={() => handleFacetChange(tag, tagObject, setTagObject, tagName)}
-                        checked={activeFilters.some(e => e.tag === 'tag' && e.value === tag)}
-                        >
-                        {tagName} <span className={styles.facetCount}>({(availableTags[tag].count) ? availableTags[tag].count : 0})</span>
-                      </Checkbox>
-                    </>
+                    displayFacets(tagType)
                   }
-                </div>
+                </>
               )
             })
           }
         </div>
-
         <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
       </div>
     </div>
