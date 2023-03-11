@@ -9,24 +9,31 @@ export const getFormattedEvidence = (paths, results) => {
       if(subgraph.publications && subgraph.publications.length > 0)
         for(const pubID of subgraph.publications) {
           // if the publication has not already been added, set it up and add it
-          if(formattedEvidence.find(item => item.id === pubID) === undefined){
+          const pub = formattedEvidence.find(item => item.id === pubID);
+          let predicate = formatBiolinkEntity(subgraph.predicate);
+          if(pub === undefined){
             let publication = getPubByID(pubID, results);
             publication.id = pubID;
             let object = subgraph.object;
             let subject = subgraph.subject;
-            let predicate = formatBiolinkEntity(subgraph.predicate);
             publication.edge = {
               subject: capitalizeAllWords(subject.names[0]),
-              predicate: predicate,
+              predicates: [predicate],
               object: capitalizeAllWords(object.names[0])
             };
             publication.source = '';
             publication.title = '';
             formattedEvidence.push(publication);
+          } else {
+            pub.edge.predicates.push(predicate);
           }
         }
     }
   }
+
+  formattedEvidence.forEach((pub) => {
+    pub.edge.predicates = [...new Set(pub.edge.predicates)];
+  });
 
   return formattedEvidence;
 }

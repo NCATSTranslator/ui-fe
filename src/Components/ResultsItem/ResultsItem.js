@@ -11,6 +11,7 @@ import { cloneDeep } from 'lodash';
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) => {
 
   let icon = getIcon(item.type);
+  console.log(`GDP itemev: ${JSON.stringify(item.evidence)}`);
 
   let evidenceCount = item.evidence.length;
   const [isExpanded, setIsExpanded] = useState(false);
@@ -27,29 +28,27 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
     setIsExpanded(!isExpanded);
   }
 
-  // Filter out any evidence that doesn't correspond with the provided edges
-  const handleEdgeSpecificEvidence = (edge) => {
-    let filteredEvidence = [];
-    let edgesRepresented = [];
+  const handleEdgeSpecificEvidence = (edgeGroup) => {
+    const filteredEvidence = [];
     for(const evidenceItem of item.evidence) {
-      for(const edgeItem of edge.edges) {
-        if(!edgesRepresented.includes(`${edgeItem.subject.names[0].toLowerCase()} ${edgeItem.predicate.toLowerCase()} ${edgeItem.object.names[0].toLowerCase()}`))
-          edgesRepresented.push(
-            `${edgeItem.subject.names[0].toLowerCase()} ${edgeItem.predicate.toLowerCase()} ${edgeItem.object.names[0].toLowerCase()}`
-          );
-        if(
-            evidenceItem.edge.subject.toLowerCase() === edgeItem.subject.names[0].toLowerCase() &&
-            evidenceItem.edge.object.toLowerCase() === edgeItem.object.names[0].toLowerCase() &&
-            evidenceItem.edge.predicate.toLowerCase() === edgeItem.predicate.toLowerCase()
-          ) {
-            filteredEvidence.push(evidenceItem);
-          }
+      for(const clickedPredicate of edgeGroup.predicates) {
+        if (evidenceItem.edge.predicates.map((p) => p.toLowerCase()).includes(clickedPredicate.toLowerCase())) {
+          const newEvidenceItem = cloneDeep(evidenceItem);
+          newEvidenceItem.edge.predicates = [clickedPredicate];
+          filteredEvidence.push(newEvidenceItem);
+          break;
+        }
       }
     }
+
+    const re = edgeGroup.edges[0];
+    const edgesRepresented = edgeGroup.predicates.map((p) => {
+      return `${re.subject.names[0].toLowerCase()} ${p.toLowerCase()} ${re.object.names[0].toLowerCase()}`;
+    });
+
     // call activateEvidence with the filtered evidence
     activateEvidence(filteredEvidence, edgesRepresented);
   }
-
 
   useEffect(() => {
     if(isExpanded === false)
