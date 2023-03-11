@@ -35,7 +35,7 @@ export const getFormattedEvidence = (paths, results) => {
 export const getPubByID = (id, results) => {
   if(results.publications[id] === undefined)
     return {};
-  
+
   return cloneDeep(results.publications[id]);
 }
 
@@ -43,7 +43,7 @@ export const getPubByID = (id, results) => {
 export const getNodeByCurie = (curie, results) => {
   if(results.nodes[curie] === undefined)
     return {};
-    
+
   return cloneDeep(results.nodes[curie]);
 }
 // search the list of edges for a particular id, then return that edge object if found
@@ -51,7 +51,7 @@ export const getEdgeByID = (id, results) => {
   if(results.edges[id] === undefined)
     return {};
   let newEdge = cloneDeep(results.edges[id]);
-  
+
   newEdge.object = getNodeByCurie(newEdge.object, results);
   newEdge.subject = getNodeByCurie(newEdge.subject, results);
 
@@ -83,16 +83,16 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
 
   let newSummarizedResults = [];
   let presetDiseaseSet = (presetDisease) ? true : false;
-  
-  // // for each individual result item 
+
+  // // for each individual result item
   for(const item of results.results) {
     // Get the object node's name
-    let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]); 
+    let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]);
     // Get the subject node's name
     let subjectNode = getNodeByCurie(item.subject, results);
     // Get the subject node's description
     let description = (subjectNode.descriptions) ? subjectNode.descriptions[0] : '';
-    // Get the subject node's fda approval status 
+    // Get the subject node's fda approval status
     let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
     let formattedPaths = [];
@@ -111,7 +111,7 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
       object: objectNodeName,
       description: description,
       evidence: getFormattedEvidence(formattedPaths, results),
-      fdaInfo: fdaInfo, 
+      fdaInfo: fdaInfo,
       score: itemScore,
       tags: tags
     }
@@ -130,8 +130,8 @@ export const findStringMatch = (element, value) => {
   }
 
   let formattedValue = value.toLowerCase();
-  let foundInName = element.name.toLowerCase().indexOf(formattedValue); 
-  let foundInDescription =  (element.description) ? element.description.toLowerCase().indexOf(formattedValue) : -1; 
+  let foundInName = element.name.toLowerCase().indexOf(formattedValue);
+  let foundInDescription =  (element.description) ? element.description.toLowerCase().indexOf(formattedValue) : -1;
   if (
     foundInName > -1 || foundInDescription > -1
   ){
@@ -141,7 +141,7 @@ export const findStringMatch = (element, value) => {
   for(const path of element.paths) {
     for(const item of path.subgraph) {
       if(
-        (item.names && item.names[0].toLowerCase().includes(formattedValue) )|| 
+        (item.names && item.names[0].toLowerCase().includes(formattedValue) )||
         (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))
         // || item.types && item.types[0].replace('biolink:', '').replaceAll(/([A-Z])/g, ' $1').trim().toLowerCase().includes(formattedValue)
       )

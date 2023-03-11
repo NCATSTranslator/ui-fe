@@ -9,7 +9,7 @@ import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) => {
-  
+
   let icon = getIcon(item.type);
 
   let evidenceCount = item.evidence.length;
@@ -35,11 +35,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
       for(const edgeItem of edge.edges) {
         if(!edgesRepresented.includes(`${edgeItem.subject.names[0].toLowerCase()} ${edgeItem.predicate.toLowerCase()} ${edgeItem.object.names[0].toLowerCase()}`))
           edgesRepresented.push(
-            `${edgeItem.subject.names[0].toLowerCase()} ${edgeItem.predicate.toLowerCase()} ${edgeItem.object.names[0].toLowerCase()}` 
+            `${edgeItem.subject.names[0].toLowerCase()} ${edgeItem.predicate.toLowerCase()} ${edgeItem.object.names[0].toLowerCase()}`
           );
         if(
-            evidenceItem.edge.subject.toLowerCase() === edgeItem.subject.names[0].toLowerCase() && 
-            evidenceItem.edge.object.toLowerCase() === edgeItem.object.names[0].toLowerCase() && 
+            evidenceItem.edge.subject.toLowerCase() === edgeItem.subject.names[0].toLowerCase() &&
+            evidenceItem.edge.object.toLowerCase() === edgeItem.object.names[0].toLowerCase() &&
             evidenceItem.edge.predicate.toLowerCase() === edgeItem.predicate.toLowerCase()
           ) {
             filteredEvidence.push(evidenceItem);
@@ -60,18 +60,18 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
 
   const checkForNodeUniformity = (pathOne, pathTwo) => {
     // if the lengths of the paths are different, they cannot have the same nodes
-    if(pathOne.length !== pathTwo.length) 
+    if(pathOne.length !== pathTwo.length)
       return false;
-      
+
     let nodesMatch = true;
 
     for(const [i, path] of pathOne.entries()) {
       // if we're at an odd index, it's a predicate, so skip it
-      if(i % 2 !== 0) 
+      if(i % 2 !== 0)
         continue;
 
-      // if the names of the nodes don't match, set nodesMatch to false 
-      if(path.name !== pathTwo[i].name) 
+      // if the names of the nodes don't match, set nodesMatch to false
+      if(path.name !== pathTwo[i].name)
         nodesMatch = false;
     }
     return nodesMatch;
@@ -89,7 +89,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
       // if all nodes are equal
       // compare predicates, combine them where different
       // display final 'version' of path
-      
+
       // if theres another path after the current one, and the nodes of each are equal
       if(nextPath && nodesEqual) {
         // loop through the current path's items
@@ -98,32 +98,32 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
             break;
           }
           // if we're at an even index, it's a node, so skip it
-          if(i % 2 === 0) 
+          if(i % 2 === 0)
             continue;
 
-          if(!nextPath[i]) 
+          if(!nextPath[i])
             continue;
-          
+
           // loop through nextPath's item's predicates
           for(const predicate of nextPath[i].predicates) {
-            // if the next path item to be displayed doesn't have the predicate, 
+            // if the next path item to be displayed doesn't have the predicate,
             if(!pathToDisplay[i].predicates.includes(predicate)) {
-              // add it 
+              // add it
               pathToDisplay[i].predicates.push(predicate);
               pathToDisplay[i].edges.push(nextPath[i].edges[0]);
             }
           }
         }
       }
-      // if there's no nextPath or the nodes are different, display the path 
+      // if there's no nextPath or the nodes are different, display the path
       if(!nextPath || !nodesEqual) {
         displayPath = true;
-      } 
-      
+      }
+
       if(displayPath) {
         newCompressedPaths.push(pathToDisplay);
         pathToDisplay = null;
-      } 
+      }
     }
 
     return newCompressedPaths;
@@ -161,7 +161,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
         }
       })
       newPaths.push(pathToAdd);
-    }) 
+    })
     setFormattedPaths(generateCompressedPaths(newPaths));
   }, [item, generateCompressedPaths]);
 
@@ -170,11 +170,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
         {
-          item.highlightedName && 
+          item.highlightedName &&
           <span className={styles.name} dangerouslySetInnerHTML={{__html: item.highlightedName}} ></span>
         }
         {
-          !item.highlightedName && 
+          !item.highlightedName &&
           <span className={styles.name} >
             <Highlighter
               highlightClassName="highlight"
@@ -187,10 +187,10 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
         <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
-        <span 
-          className={styles.evidenceLink} 
+        <span
+          className={styles.evidenceLink}
           onClick={(e)=>{
-            e.stopPropagation(); 
+            e.stopPropagation();
             activateEvidence(item.evidence, false);
           }}
           >
@@ -205,11 +205,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>
       </button>
-      <AnimateHeight 
+      <AnimateHeight
         className={`${styles.accordionPanel} ${isExpanded ? styles.open : styles.closed } ${item.description ? styles.hasDescription : styles.noDescription }`}
         duration={500}
         height={height}
-        > 
+        >
         <div className={styles.container}>
           {
             item.description &&
@@ -224,10 +224,10 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
           }
         </div>
 
-        <GraphView 
-          paths={formattedPaths} 
-          active={isExpanded} 
-          handleEdgeSpecificEvidence={(edge)=> {handleEdgeSpecificEvidence(edge)}} 
+        <GraphView
+          paths={formattedPaths}
+          active={isExpanded}
+          handleEdgeSpecificEvidence={(edge)=> {handleEdgeSpecificEvidence(edge)}}
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>
