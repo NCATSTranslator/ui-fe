@@ -11,7 +11,6 @@ import { cloneDeep } from 'lodash';
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) => {
 
   let icon = getIcon(item.type);
-  console.log(`GDP itemev: ${JSON.stringify(item.evidence)}`);
 
   let evidenceCount = item.evidence.length;
   const [isExpanded, setIsExpanded] = useState(false);
