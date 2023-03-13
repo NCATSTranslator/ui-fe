@@ -12,8 +12,7 @@ import _ from "lodash";
 import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import styles from './Query.module.scss';
-import { getEntityLink } from "../../Utilities/utilities";
-import { queryTypes } from "../../Utilities/queryTypes";
+import { getEntityLink, handleFetchErrors } from "../../Utilities/utilities";
 
 const Query = ({results, loading, presetDisease, presetType}) => {
 
@@ -24,7 +23,6 @@ const Query = ({results, loading, presetDisease, presetType}) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const presetQueryTypeIDParam = new URLSearchParams(window.location.search).get("t")
-  
 
   // eslint-disable-next-line
   const navigatingFromHistory = ( new URLSearchParams(window.location.search).get("results") !== null) ? true : false;
@@ -85,6 +83,24 @@ const Query = ({results, loading, presetDisease, presetType}) => {
 
   // String, used to set navigation url for example disease buttons
   const [presetURL, setPresetURL] = useState(false);
+
+  const [exampleDiseases, setExampleDiseases] = useState(null);
+
+  // Get example diseases from config endpoint on component mount 
+  useEffect(() => {
+    const requestOptions = {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    };
+    fetch('/config', requestOptions)
+    .then(response => handleFetchErrors(response))
+    .then(response => response.json())
+    .then(data => {
+      if(data)
+        setExampleDiseases(data);
+    });
+  }, []);
+
 
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = (e) => {
@@ -306,50 +322,30 @@ const Query = ({results, loading, presetDisease, presetType}) => {
 
           {!isResults &&
             <div className={styles.examples}>
-              <p className={styles.subTwo}>Example Diseases:</p>
-              <div className={styles.exampleList}>
-                <button
-                  className={styles.button}
-                  onClick={(e)=>{
-                    setPresetURL(e.target.dataset.url);
-                  }}
-                  data-testid="heart-disease"
-                  data-url={`/results?l=${encodeURIComponent(process.env.REACT_APP_EX_DISEASE_ONE_NAME)}&t=0&q=${process.env.REACT_APP_EX_DISEASE_ONE_UUID}`}
-                  >{process.env.REACT_APP_EX_DISEASE_ONE_NAME}
-                </button>
-                <button
-                  className={styles.button}
-                  onClick={(e)=>{
-                    setPresetURL(e.target.dataset.url);
-                  }}
-                  data-url={`/results?l=${encodeURIComponent(process.env.REACT_APP_EX_DISEASE_TWO_NAME)}&t=0&q=${process.env.REACT_APP_EX_DISEASE_TWO_UUID}`}
-                  >{process.env.REACT_APP_EX_DISEASE_TWO_NAME}
-                </button>
-                <button
-                  className={styles.button}
-                  onClick={(e)=>{
-                    setPresetURL(e.target.dataset.url);
-                  }}
-                  data-url={`/results?l=${encodeURIComponent(process.env.REACT_APP_EX_DISEASE_THREE_NAME)}&t=0&q=${process.env.REACT_APP_EX_DISEASE_THREE_UUID}`}
-                  >{process.env.REACT_APP_EX_DISEASE_THREE_NAME}
-                </button>
-                <button
-                  className={styles.button}
-                  onClick={(e)=>{
-                    setPresetURL(e.target.dataset.url);
-                  }}
-                  data-url={`/results?l=${encodeURIComponent(process.env.REACT_APP_EX_DISEASE_FOUR_NAME)}&t=0&q=${process.env.REACT_APP_EX_DISEASE_FOUR_UUID}`}
-                  >{process.env.REACT_APP_EX_DISEASE_FOUR_NAME}
-                </button>
-                <button
-                  className={styles.button}
-                  onClick={(e)=>{
-                    setPresetURL(e.target.dataset.url);
-                  }}
-                  data-url={`/results?l=${encodeURIComponent(process.env.REACT_APP_EX_DISEASE_FIVE_NAME)}&t=0&q=${process.env.REACT_APP_EX_DISEASE_FIVE_UUID}`}
-                  >{process.env.REACT_APP_EX_DISEASE_FIVE_NAME}
-                </button>
-              </div>
+              {
+                exampleDiseases && Array.isArray(exampleDiseases) && 
+                <>
+                  <p className={styles.subTwo}>Example Diseases:</p>
+                  <div className={styles.exampleList}>
+                    {
+                      exampleDiseases.map((item, i)=> {
+                        return(
+                          <button
+                            className={styles.button}
+                            onClick={(e)=>{
+                              setPresetURL(e.target.dataset.url);
+                            }}
+                            data-testid={item.name}
+                            data-url={`/results?l=${encodeURIComponent(item.name)}&t=0&q=${item.uuid}`}
+                            >
+                            {item.name}
+                        </button>
+                        )
+                      })
+                    }
+                  </div>
+                </>
+              }
             </div>
           }
         </div>
