@@ -113,7 +113,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
       default:
         break;
     }
-    
+
     // assign the newly sorted results (no need to set formatted results, since they'll be filtered after being sorted, then set there)
     setPubmedEvidence(sortedPubmedEvidence);
 
@@ -164,15 +164,15 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
   }, [newItemsPerPage, handlePageClick]);
 
   useEffect(()=> {
-    
+
     if(pubmedEvidence.length <= 0 && didMountRef.current) {
       setIsLoading(false);
       return;
-    } 
+    }
 
     didMountRef.current = true;
 
-    if(pubmedEvidence.length <= 0) 
+    if(pubmedEvidence.length <= 0)
       return;
 
     if(fetchedPubmedData.current) {
@@ -184,7 +184,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
     }
 
   }, [pubmedEvidence])
-  
+
   const fetchPubmedData = useCallback(async () => {
     const metadata = processedEvidenceIDs.map(async (ids, i) => {
       const response = await fetch(`https://3md2qwxrrk.us-east-1.awsapprunner.com/publications?pubids=${ids}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`)
@@ -218,7 +218,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
       <div className={styles.top}>
         <h5 className={styles.title}>{evidenceTitle}</h5>
         {
-          evidenceEdges && 
+          evidenceEdges &&
           evidenceEdges.map((edge, i) => {
             return (
               <h5 className={styles.subtitle} key={i}>{capitalizeAllWords(edge)}</h5>
@@ -244,9 +244,9 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
                           </div>
                           <span className={`${styles.cell} ${styles.relationship} relationship`}>
                             {
-                              item.edge && 
+                              item.edge &&
                               <span>
-                                <strong>{item.edge.subject}</strong><span className={styles.predicate}>{item.edge.predicate}</span><strong>{item.edge.object}</strong>
+                                <strong>{item.edge.subject}</strong><span className={styles.predicate}>{item.edge.predicates[0]}</span><strong>{item.edge.object}</strong>
                               </span>
                             }
                           </span>
@@ -266,7 +266,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
                   <div className={`${itemCountClass.current} ${styles.tableBody}`}>
                     <div className={styles.tableHead}>
                       <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
-                      <div 
+                      <div
                         className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
                         onClick={()=>{handleSort((isSortedBySource)?'sourceHighLow': 'sourceLowHigh')}}
                         >
@@ -274,8 +274,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
                           Source
                         </span>
                       </div>
-                      <div 
-                        className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`} 
+                      <div
+                        className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`}
                         onClick={()=>{handleSort((isSortedByTitle)?'titleHighLow': 'titleLowHigh')}}
                         >
                         <span className={styles.headSpan}>
@@ -287,13 +287,13 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
                     </div>
                     {
                       isLoading &&
-                      <LoadingBar 
+                      <LoadingBar
                         loading={isLoading}
                         useIcon
                         className={styles.loadingBar}
                       />
                     }
-                    { 
+                    {
                       !isLoading &&
                       <Fade className={styles.evidenceItems} duration={500} triggerOnce >
                         <>
@@ -307,12 +307,12 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
                               return (
                                 <div className={styles.evidenceItem} key={i}>
                                   <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
-                                    {item.pubdate && item.pubdate }          
+                                    {item.pubdate && item.pubdate }
                                   </span>
                                   <span className={`${styles.cell} ${styles.source} source`}>
                                     <span>
                                       {item.source && item.source }
-                                    </span>     
+                                    </span>
                                   </span>
                                   <span className={`${styles.cell} ${styles.title} title`} >
                                     {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
@@ -323,33 +323,33 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
                                       {!item.snippet && "No snippet available."}
                                       {item.snippet && item.snippet}
                                     </span>
-                                      {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}          
+                                      {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
                                   </span>
                                   <span className={`${styles.cell} ${styles.relationship} relationship`}>
                                     {
-                                      item.edge && 
+                                      item.edge &&
                                       <span>
-                                        <strong>{item.edge.subject}</strong><span className={styles.predicate}>{item.edge.predicate}</span><strong>{item.edge.object}</strong>
+                                        <strong>{item.edge.subject}</strong><span className={styles.predicate}>{item.edge.predicates[0]}</span><strong>{item.edge.object}</strong>
                                       </span>
-                                    }          
+                                    }
                                   </span>
                                 </div>
                               )
                             })
-                          } 
+                          }
                         </>
                       </Fade>
-                    } 
+                    }
                   </div>
               }
-              { 
-                currentEvidence.length > itemsPerPage && 
+              {
+                currentEvidence.length > itemsPerPage &&
                 <div className={styles.bottom}>
                   <div className={styles.perPage}>
-                    <Select 
-                      label="" 
+                    <Select
+                      label=""
                       name="Items Per Page"
-                      size="m" 
+                      size="m"
                       handleChange={(value)=>{
                         setNewItemsPerPage(parseInt(value));
                       }}
