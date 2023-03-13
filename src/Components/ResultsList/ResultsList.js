@@ -72,7 +72,7 @@ const ResultsList = ({loading}) => {
   const [rawResults, setRawResults] = useState(resultsState);
   // Obj, original raw results from the BE
   const [freshRawResults, setFreshRawResults] = useState(null);
-  /* 
+  /*
     Ref, used to track changes in results for useEffect with 'results' obj as dependency
     b/c react doesn't deep compare objects in useEffect hook
   */
@@ -123,9 +123,9 @@ const ResultsList = ({loading}) => {
   // Int, how many items per page
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [newItemsPerPage, setNewItemsPerPage] = useState(null);
-  
+
   // Handle Page Offset
-  useEffect(() => {    
+  useEffect(() => {
     const endOffset = (itemOffset + itemsPerPage > formattedResults.length)
       ? formattedResults.length
       : itemOffset + itemsPerPage;
@@ -167,7 +167,7 @@ const ResultsList = ({loading}) => {
         console.log("ARA status:",data);
 
         let fetchResults = false;
-        
+
         if(data.data.aras.length > returnedARAs.aras.length) {
           console.log(`Old ARAs: ${returnedARAs.aras}, New ARAs: ${data.data.aras}`);
           setReturnedARAs(data.data);
@@ -175,7 +175,7 @@ const ResultsList = ({loading}) => {
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
         }
-        /* 
+        /*
         If status is success (meaning all ARAs have returned) or we've reached 120 status checks (meaning 20 min have elapsed)
         stop fetching ARA status and move to fetching results.
         */
@@ -196,7 +196,7 @@ const ResultsList = ({loading}) => {
         }
         console.error(error)
       });
-  }, { 
+  }, {
     refetchInterval: 10000,
     enabled: isFetchingARAStatus,
     refetchOnWindowFocus: false
@@ -222,7 +222,7 @@ const ResultsList = ({loading}) => {
       .then(response => response.json())
       .then(data => {
         console.log('New results:', data);
-        // if we've already gotten results before, set freshRawResults instead to 
+        // if we've already gotten results before, set freshRawResults instead to
         // prevent original results from being overwritten
         if(formattedResults.length > 0) {
           setFreshRawResults(data);
@@ -242,12 +242,12 @@ const ResultsList = ({loading}) => {
         }
         console.log(error);
       });
-  }, { 
+  }, {
     enabled: isFetchingResults,
     refetchOnWindowFocus: false,
   });
 
-  // Handle the sorting 
+  // Handle the sorting
   const handleSort = useCallback((resultsToSort, sortName) => {
     let newSortedResults = cloneDeep(resultsToSort);
     switch (sortName) {
@@ -271,7 +271,7 @@ const ResultsList = ({loading}) => {
         break;
       case 'evidenceHighLow':
         newSortedResults = sortEvidenceHighLow(newSortedResults);
-        setIsSortedByEvidence(true); 
+        setIsSortedByEvidence(true);
         setIsSortedByScore(null)
         setIsSortedByName(null);
         break;
@@ -296,7 +296,7 @@ const ResultsList = ({loading}) => {
         break;
     }
 
-    
+
     // if we're not already on page 1, reset to page one.
     if(currentPage.current !== 0)
       handlePageClick({selected: 0});
@@ -307,7 +307,7 @@ const ResultsList = ({loading}) => {
   /*
     When the results change, which occurs when the React Query returns, handle the returned data
     based on the returned data's status.
-  */ 
+  */
   useEffect(() => {
     // if we have no results, or the results aren't actually new, return
     if(rawResults == null || isEqual(rawResults, prevRawResults.current))
@@ -319,9 +319,9 @@ const ResultsList = ({loading}) => {
     let newResults = [];
 
     // if the status is not error, handle setting the results
-    if(rawResults.status !== 'error' && rawResults.data.results !== undefined) 
+    if(rawResults.status !== 'error' && rawResults.data.results !== undefined)
       newResults = getSummarizedResults(rawResults.data, presetDisease, setPresetDisease, availableTags, setAvailableTags);
-      
+
       // set formatted results
     setFormattedResults(newResults);
 
@@ -333,13 +333,13 @@ const ResultsList = ({loading}) => {
     }
 
   }, [rawResults, presetDisease, handleSort]);
-  
+
   useEffect(() => {
 
     // we have results to show, set isLoading to false
-    if (formattedResults.length > 0) 
+    if (formattedResults.length > 0)
       setIsLoading(false);
-    
+
     // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
     if(rawResults && rawResults.data.results && rawResults.data.results.length === 0 && !isFetchingARAStatus)
       setIsLoading(false);
@@ -380,7 +380,7 @@ const ResultsList = ({loading}) => {
       if(tag[1].count === undefined || tag[1].count <= 0)
         delete countedTags[tag[0]];
     })
-    
+
     tagSetterMethod(countedTags);
   }
 
@@ -411,12 +411,12 @@ const ResultsList = ({loading}) => {
       || (filter.tag === 'tag' && filter.value === value.value))
         indexes.push(i);
     }
-    
+
     let newFilters = [...activeFilters];
-    // If we don't find any matches, add the filter to the list 
+    // If we don't find any matches, add the filter to the list
     if(indexes.length === 0) {
       newFilters.push(filter);
-    // If there are matches, loop through them to determin whether we need to add, remove, or update 
+    // If there are matches, loop through them to determin whether we need to add, remove, or update
     } else {
       let addFilter = true;
       for(const index of indexes) {
@@ -435,14 +435,14 @@ const ResultsList = ({loading}) => {
           newFilters = newFilters.map((value, i) => {
             if(i === index)
               value.value = filter.value;
-  
+
             return value;
           });
           addFilter = false;
         // if the values don't match, but it *is* a new string search filter, add it
-        } else if(activeFilters[index].value !== filter.value && filter.tag === 'str') { 
+        } else if(activeFilters[index].value !== filter.value && filter.tag === 'str') {
           addFilter = true;
-        // 
+        //
         } else {
           addFilter = false;
         }
@@ -505,7 +505,7 @@ const ResultsList = ({loading}) => {
     setFreshRawResults(null)
   }
 
-  // Filter the results whenever the activated filters change 
+  // Filter the results whenever the activated filters change
   useEffect(() => {
     // If there are no active filters, get the full result set and reset the activeStringFilters
     if(activeFilters.length === 0) {
@@ -521,10 +521,10 @@ const ResultsList = ({loading}) => {
 
     let filteredResults = [];
     let originalResults = [...sortedResults];
-    /* 
-      For each result, check against each filter. If a filter is triggered, 
+    /*
+      For each result, check against each filter. If a filter is triggered,
       set addElement to false and don't add the element to the filtered results
-    */  
+    */
     for(const element of originalResults) {
       let addElement = true;
       for(const filter of activeFilters) {
@@ -565,9 +565,9 @@ const ResultsList = ({loading}) => {
     // Set the formatted results to the newly filtered results
     setFormattedResults(filteredResults);
 
-    let newStringFilters = []; 
+    let newStringFilters = [];
     for(const filter of activeFilters) {
-      // String filters with identical values shouldn't be added to the activeFilters array, 
+      // String filters with identical values shouldn't be added to the activeFilters array,
       // so we don't have to check for duplicate values here, just for the str tag.
       if(filter.tag === 'str')
         newStringFilters.push(filter.value);
@@ -578,7 +578,7 @@ const ResultsList = ({loading}) => {
       setActiveStringFilters(newStringFilters);
 
     /*
-      triggers on filter change and on sorting change in order to allow user to change 
+      triggers on filter change and on sorting change in order to allow user to change
       the sorting on already filtered results
     */
   }, [activeFilters, sortedResults, activeStringFilters, handlePageClick]);
@@ -589,9 +589,9 @@ const ResultsList = ({loading}) => {
     }
   /*
     Providing handleSort as dependency leads to infinite loop on entityString search due to handleSort
-    modifying one of its dependencies (sortedResults). Need to reimplement later so that I can supply 
-    handleSort as a dependency below and prevent future bugs in this useEffect hook. 
-    
+    modifying one of its dependencies (sortedResults). Need to reimplement later so that I can supply
+    handleSort as a dependency below and prevent future bugs in this useEffect hook.
+
     Good for now though.
   */
   // eslint-disable-next-line
@@ -606,10 +606,10 @@ const ResultsList = ({loading}) => {
   }, [newItemsPerPage, handlePageClick]);
 
   const displayLoadingButton = (
-    handleResultsRefresh, 
-    styles, 
-    isFetchingARAStatus, 
-    loadingIcon, 
+    handleResultsRefresh,
+    styles,
+    isFetchingARAStatus,
+    loadingIcon,
     ResultsAvailableIcon,
     showDisclaimer) => {
 
@@ -623,7 +623,7 @@ const ResultsList = ({loading}) => {
         </div>
       )
     }
-  
+
     if(freshRawResults !== null) {
       return (
         <div className={styles.loadingButtonContainer}>
@@ -639,7 +639,7 @@ const ResultsList = ({loading}) => {
             Load New Results
           </button>
           {
-            showDisclaimer && 
+            showDisclaimer &&
             <p className={styles.refreshDisclaimer}>Please note that refreshing this page may cause the order of answers to change.<br/>Results you have already viewed may also be updated with new data.</p>
           }
         </div>
@@ -649,8 +649,8 @@ const ResultsList = ({loading}) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <EvidenceModal 
-        isOpen={evidenceOpen} 
+      <EvidenceModal
+        isOpen={evidenceOpen}
         onClose={()=>handleEvidenceModalClose()}
         className="evidence-modal"
         currentEvidence={currentEvidence}
@@ -663,7 +663,7 @@ const ResultsList = ({loading}) => {
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
-            <LoadingBar 
+            <LoadingBar
               loading={isLoading}
               useIcon
               disclaimerText={<>
@@ -675,14 +675,14 @@ const ResultsList = ({loading}) => {
           {
             !isLoading &&
             <>
-              <ResultsFilter 
-                startIndex={itemOffset+1} 
-                endIndex={endResultIndex} 
+              <ResultsFilter
+                startIndex={itemOffset+1}
+                endIndex={endResultIndex}
                 formattedCount={formattedResults.length}
                 totalCount={sortedResults.length}
                 onFilter={handleFilter}
                 onClearAll={handleClearAllFilters}
-                activeFilters={activeFilters} 
+                activeFilters={activeFilters}
                 availableTags={availableTags}
               />
               <div className={styles.resultsHeader}>
@@ -696,7 +696,7 @@ const ResultsList = ({loading}) => {
                           <span className={styles.start}>{itemOffset + 1}</span>
                           -
                           <span>{endResultIndex}</span>
-                        </span> of 
+                        </span> of
                         <span className={styles.count}> {formattedResults.length} </span>
                         {
                           (formattedResults.length !== sortedResults.length) &&
@@ -714,15 +714,15 @@ const ResultsList = ({loading}) => {
                       !isFetchingARAStatus && !isFetchingResults &&
                       <CompleteIcon/>
                     }
-                    <button 
-                      className={styles.shareButton} 
+                    <button
+                      className={styles.shareButton}
                       onClick={()=>{setShareModalOpen(true)}}
                       >
                         <ShareIcon/>
                     </button>
-                    <ShareModal 
-                      isOpen={shareModalOpen} 
-                      onClose={()=>handleShareModalClose()} 
+                    <ShareModal
+                      isOpen={shareModalOpen}
+                      onClose={()=>handleShareModalClose()}
                       qid={currentQueryID}
                     />
 
@@ -748,20 +748,20 @@ const ResultsList = ({loading}) => {
                 <div className={styles.resultsTable}>
                   <div className={styles.tableBody}>
                     <div className={`${styles.tableHead}`}>
-                      <div 
-                        className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`} 
+                      <div
+                        className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`}
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByName)?'nameHighLow': 'nameLowHigh'))}}
                         >
                         Name
                       </div>
-                      <div 
-                        className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`} 
+                      <div
+                        className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow'))}}
                         >
                         Evidence
                       </div>
-                      <div 
-                        className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`} 
+                      <div
+                        className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByScore)?'scoreLowHigh': 'scoreHighLow'))}}
                         >
                         Score
@@ -774,20 +774,20 @@ const ResultsList = ({loading}) => {
                     {
                       !isLoading &&
                       !isError &&
-                      displayedResults.length === 0 && 
+                      displayedResults.length === 0 &&
                       <h5 className={styles.errorText}>No results available.</h5>
                     }
                     {
                       !isLoading &&
                       !isError &&
-                      displayedResults.length > 0 && 
+                      displayedResults.length > 0 &&
                       displayedResults.map((item, i) => {
                         return (
-                          <ResultsItem 
-                            key={i} 
+                          <ResultsItem
+                            key={i}
                             type={storedQuery.type}
-                            item={item} 
-                            activateEvidence={(evidence, edgesRepresented)=>activateEvidence(evidence, edgesRepresented)} 
+                            item={item}
+                            activateEvidence={(evidence, edgesRepresented)=>activateEvidence(evidence, edgesRepresented)}
                             activeStringFilters={activeStringFilters}
                           />
                         )
@@ -795,15 +795,15 @@ const ResultsList = ({loading}) => {
                     }
                   </div>
                 </div>
-              </div>  
+              </div>
               {
-                formattedResults.length > 0 && 
+                formattedResults.length > 0 &&
                 <div className={styles.pagination}>
                   <div className={styles.perPage}>
-                  <Select 
-                    label="" 
+                  <Select
+                    label=""
                     name="Results Per Page"
-                    size="s" 
+                    size="s"
                     handleChange={(value)=>{
                       setNewItemsPerPage(parseInt(value));
                     }}
