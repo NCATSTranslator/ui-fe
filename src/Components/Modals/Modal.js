@@ -6,6 +6,7 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = (startOpen) ? styles.true : styles.false;
+  onClose = (onClose) ? onClose : ()=>{console.log('no onClose method specified for Modal component.')};
 
   const handleKeypress = useCallback((e) => {
     if(e.key === 'Escape') {

@@ -8,6 +8,7 @@ import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
 import { capitalizeAllWords, formatBiolinkEntity, getRandomIntInclusive } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
+import Modal from '../Modals/Modal';
 
 const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters}) => {
 
@@ -18,6 +19,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
     typeString = formatBiolinkEntity(path.type)
   }
 
+  const [sourceModalOpen, setSourceModalOpen] = useState(false);
   const randomIntForTooltip = getRandomIntInclusive(1,100000);
 
   // filter path by a provided predicate, then call handleEdgeClick with the filtered path object
@@ -133,6 +135,13 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
                 )
               })
             }
+            {
+              path.provenance.length > 0 && 
+              <button onClick={(e)=>{ e.stopPropagation(); setSourceModalOpen(true);}} target="_blank" rel='noreferrer' className={styles.provenance}>
+                <ExternalLink/>
+                Source(s)
+              </button>
+            }
           </Tooltip>
         </span>
       }
@@ -166,7 +175,51 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
             }
           </Tooltip>
         </span>
-      }    
+      }
+      {
+        // Add sources modal for predicates
+        path.category === 'predicate' && path.provenance.length > 0 && 
+        <Modal isOpen={sourceModalOpen} onClose={()=> setSourceModalOpen(false)}>
+          <div>
+            <h5 className={styles.sourceHeading}>Sources:</h5>
+            <div className='tableBody'>
+              <div className='tableHead'>
+                <div className='head'>Relationship</div>
+                <div className='head'>Source</div>
+              </div>
+              <div className='tableItems'>
+                {
+                  path.edges.map((item, i) => { 
+                    let subjectName = capitalizeAllWords(item.subject.names[0]);
+                    let predicateName = capitalizeAllWords(item.predicate);
+                    let objectName = capitalizeAllWords(item.object.names[0]);
+                    return(
+                      <div className='tableItem'>
+                        <div className="tableCell">
+                          <div className={styles.sourceEdgeContainer}>
+                            <span className={styles.sourceEdge} key={i}>{subjectName}<strong>{predicateName}</strong>{objectName}</span>
+                          </div>
+                        </div>
+                        <div className='tableCell'>
+                          {
+                            item.provenance.map((provenance, j) => { 
+                              return(
+                                <a key={j} href={provenance} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
+                                  {provenance}
+                                </a>
+                              )
+                            })
+                          }
+                        </div>
+                      </div>
+                    )
+                  })
+                }
+              </div>
+            </div>
+          </div>
+        </Modal>
+      }
     </>
   )
 }

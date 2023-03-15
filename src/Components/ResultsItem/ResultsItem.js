@@ -151,7 +151,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
           pathToAdd[i] = {
             category: 'predicate',
             predicates: [pred],
-            edges: [{object: item.object, predicate: pred, subject: item.subject}]
+            edges: [{object: item.object, predicate: pred, subject: item.subject, provenance: item.provenance}]
           }
         }
         if(item.provenance !== undefined) {
