@@ -5,6 +5,7 @@ import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
+import {ReactComponent as Info} from '../../Icons/Alerts/Info.svg';
 import { capitalizeAllWords, formatBiolinkEntity, getRandomIntInclusive } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
@@ -138,7 +139,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
             {
               path.provenance.length > 0 && 
               <button onClick={(e)=>{ e.stopPropagation(); setSourceModalOpen(true);}} target="_blank" rel='noreferrer' className={styles.provenance}>
-                <ExternalLink/>
+                <Info/>
                 Source(s)
               </button>
             }
