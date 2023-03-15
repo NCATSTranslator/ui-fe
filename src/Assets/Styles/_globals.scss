@@ -145,3 +145,50 @@ img {
 .highlight {
   background-color: rgb(251, 247, 25);
 }
+
+.tableHead {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid $midGray;
+  border-radius: 5px 5px 0 0;
+  background-color: $purpleOne;
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $white;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 12px;
+  }
+}
+
+.tableBody {
+  box-shadow: $dropShadow;
+  font-size: $bodyTwoSize;
+  border-radius: $defaultBorderRadius;
+
+}
+.tableItems {
+  &>div:nth-child(odd){
+    background-color: $lightGray;
+  }
+}
+.tableItem {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.tableCell {
+  padding: 12px;
+}
+
+.tableCell, .tableCell span, .tableCell a {
+  font-size: 12px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  text-align: center;
+  word-break: break-word;
+}
+

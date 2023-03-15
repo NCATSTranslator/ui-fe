@@ -142,7 +142,15 @@ span.path {
 .provenance {
   display: flex;
   align-items: center;
-  margin-top: $xs;
+  margin: $xs 0 0 0;
+  color: $white;
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
+  font-size: 14px;
+  &:hover {
+    text-decoration: underline;
+  }
   span {
     font-size: 12px;
     text-decoration: underline;
@@ -159,4 +167,28 @@ span.path {
       fill: $white;
     }
   }
+}
+
+.sourceEdgeContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.sourceEdge {
+  color: $black;
+  font-size: 12px;
+  margin-bottom: 0;
+  display: grid;
+  strong {
+    color: $black;
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.edgeProvenanceLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: underline;
 }
