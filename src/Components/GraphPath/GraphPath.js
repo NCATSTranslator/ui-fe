@@ -20,12 +20,10 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
     typeString = formatBiolinkEntity(path.type)
   }
 
-  const [sourceModalOpen, setSourceModalOpen] = useState(false);
   const randomIntForTooltip = getRandomIntInclusive(1,100000);
 
   // filter path by a provided predicate, then call handleEdgeClick with the filtered path object
   const predicateSpecificEdgeClick = (path, predicate) => {
-
     let filteredPath = cloneDeep(path);
     for(const edge of path.edges) {
       if(edge.predicate === predicate) {
@@ -136,13 +134,6 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
                 )
               })
             }
-            {
-              path.provenance.length > 0 && 
-              <button onClick={(e)=>{ e.stopPropagation(); setSourceModalOpen(true);}} target="_blank" rel='noreferrer' className={styles.provenance}>
-                <Info/>
-                Source(s)
-              </button>
-            }
           </Tooltip>
         </span>
       }
@@ -176,58 +167,6 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
             }
           </Tooltip>
         </span>
-      }
-      {
-        // Add sources modal for predicates
-        path.category === 'predicate' && path.provenance.length > 0 && 
-        <Modal isOpen={sourceModalOpen} onClose={()=> setSourceModalOpen(false)}>
-          <div>
-            <h5 className={styles.sourceHeading}>Sources:</h5>
-            <div className='tableBody'>
-              <div className='tableHead'>
-                <div className='head'>Relationship</div>
-                <div className='head'>Source</div>
-                <div className='head'>Link</div>
-              </div>
-              <div className='tableItems'>
-                {
-                  path.edges.map((item, i) => { 
-                    let subjectName = capitalizeAllWords(item.subject.names[0]);
-                    let predicateName = capitalizeAllWords(item.predicate);
-                    let objectName = capitalizeAllWords(item.object.names[0]);
-                    return(
-                      <div className='tableItem'>
-                        <div className="tableCell">
-                          <div className={styles.sourceEdgeContainer}>
-                            <span className={styles.sourceEdge} key={i}>{subjectName}<strong>{predicateName}</strong>{objectName}</span>
-                          </div>
-                        </div>
-                          {
-                            item.provenance.map((provenance, j) => { 
-                              let name = (!Array.isArray(provenance) && typeof provenance === 'object') ? provenance.name: '';
-                              let url = (!Array.isArray(provenance) && typeof provenance === 'object') ? provenance.url: provenance;
-                              return(
-                                <>
-                                  <div className='tableCell'>
-                                    <span className={styles.sourceEdge} key={i}>{name}</span>
-                                  </div>
-                                  <div className='tableCell'>
-                                    <a key={j} href={url} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
-                                      {url}
-                                    </a>
-                                  </div>
-                                </>
-                              )
-                            })
-                          }
-                      </div>
-                    )
-                  })
-                }
-              </div>
-            </div>
-          </div>
-        </Modal>
       }
     </>
   )
