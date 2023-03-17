@@ -187,6 +187,7 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
               <div className='tableHead'>
                 <div className='head'>Relationship</div>
                 <div className='head'>Source</div>
+                <div className='head'>Link</div>
               </div>
               <div className='tableItems'>
                 {
@@ -201,17 +202,24 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
                             <span className={styles.sourceEdge} key={i}>{subjectName}<strong>{predicateName}</strong>{objectName}</span>
                           </div>
                         </div>
-                        <div className='tableCell'>
                           {
                             item.provenance.map((provenance, j) => { 
+                              let name = (!Array.isArray(provenance) && typeof provenance === 'object') ? provenance.name: '';
+                              let url = (!Array.isArray(provenance) && typeof provenance === 'object') ? provenance.url: provenance;
                               return(
-                                <a key={j} href={provenance} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
-                                  {provenance}
-                                </a>
+                                <>
+                                  <div className='tableCell'>
+                                    <span className={styles.sourceEdge} key={i}>{name}</span>
+                                  </div>
+                                  <div className='tableCell'>
+                                    <a key={j} href={url} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
+                                      {url}
+                                    </a>
+                                  </div>
+                                </>
                               )
                             })
                           }
-                        </div>
                       </div>
                     )
                   })
