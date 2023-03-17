@@ -40,13 +40,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
       }
     }
 
-    const re = edgeGroup.edges[0];
-    const edgesRepresented = edgeGroup.predicates.map((p) => {
-      return `${re.subject.names[0].toLowerCase()} ${p.toLowerCase()} ${re.object.names[0].toLowerCase()}`;
-    });
-
     // call activateEvidence with the filtered evidence
-    activateEvidence(filteredEvidence, edgesRepresented);
+    activateEvidence(filteredEvidence, edgeGroup);
   }
 
   useEffect(() => {

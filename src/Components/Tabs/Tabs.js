@@ -1,17 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Tab from "./Tab";
 import { Fade } from 'react-awesome-reveal';
 import styles from './Tabs.module.scss';
 
-const Tabs = ({children}) => {
+const Tabs = ({children, tabReset}) => {
 
-  // discard any elements that don't evaluate to 'true'
   const firstElement = children.find(e => e)
   const [activeTab, setActiveTab] = useState(firstElement.props.heading);
 
   const handleTabClick = (event) => {
     setActiveTab(event.target.dataset.heading);
   }
+
+  useEffect(() => {
+    setActiveTab(firstElement.props.heading);
+  }, [tabReset]);
 
   return (
 

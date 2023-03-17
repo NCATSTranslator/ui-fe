@@ -390,10 +390,10 @@ const ResultsList = ({loading}) => {
   }
 
   // Click handler for opening the evidence modal and populating the evidence
-  const activateEvidence = (evidence, edgesRepresented) => {
-    if(edgesRepresented) {
+  const activateEvidence = (evidence, rawEdges) => {
+    if(rawEdges) {
       setEvidenceTitle(`Showing evidence for:`)
-      setEvidenceEdges(edgesRepresented);
+      setEvidenceEdges(rawEdges);
     } else {
       setEvidenceTitle('All Evidence');
       setEvidenceEdges([]);
@@ -787,7 +787,7 @@ const ResultsList = ({loading}) => {
                             key={i}
                             type={storedQuery.type}
                             item={item}
-                            activateEvidence={(evidence, edgesRepresented)=>activateEvidence(evidence, edgesRepresented)}
+                            activateEvidence={(evidence, rawEdges)=>activateEvidence(evidence, rawEdges)}
                             activeStringFilters={activeStringFilters}
                           />
                         )
