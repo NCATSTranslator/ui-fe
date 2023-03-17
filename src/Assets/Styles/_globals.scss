@@ -146,9 +146,12 @@ img {
   background-color: rgb(251, 247, 25);
 }
 
-.tableHead {
+.tableHead,.tableItem {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
+} 
+.tableHead {
+
   border-bottom: 1px solid $midGray;
   border-radius: 5px 5px 0 0;
   background-color: $purpleOne;
@@ -174,10 +177,6 @@ img {
   &>div:nth-child(odd){
     background-color: $lightGray;
   }
-}
-.tableItem {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
 }
 
 .tableCell {
