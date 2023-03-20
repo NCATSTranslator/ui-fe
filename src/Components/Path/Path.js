@@ -1,17 +1,15 @@
-import styles from './GraphPath.module.scss';
-import React, {useState} from "react";
+import styles from './Path.module.scss';
+import React from "react";
 import Tooltip from '../Tooltip/Tooltip';
 import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
-import {ReactComponent as Info} from '../../Icons/Alerts/Info.svg';
 import { capitalizeAllWords, formatBiolinkEntity, getRandomIntInclusive } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
-import Modal from '../Modals/Modal';
 
-const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters}) => {
+const Path = ({path, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters}) => {
 
   let nameString = '';
   let typeString = '';
@@ -172,4 +170,4 @@ const GraphPath = ({path, handleNameClick, handleEdgeClick, handleTargetClick, a
   )
 }
 
-export default GraphPath;
+export default Path;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
-import GraphView from '../GraphView/GraphView';
+import PathView from '../PathView/PathView';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
@@ -217,7 +217,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
           }
         </div>
 
-        <GraphView
+        <PathView
           paths={formattedPaths}
           active={isExpanded}
           handleEdgeSpecificEvidence={(edge)=> {handleEdgeSpecificEvidence(edge)}}
