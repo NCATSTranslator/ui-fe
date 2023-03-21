@@ -424,6 +424,15 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
                                   let url = (!Array.isArray(provenance) && typeof provenance === 'object') ? provenance.url: provenance;
                                   return(
                                     <>
+                                      { j > 0 &&
+                                        <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                                          <span className={styles.sourceEdge} key={i}>
+                                            <span>{subjectName}</span>
+                                            <strong>{predicateName}</strong>
+                                            <span>{objectName}</span>
+                                          </span>
+                                        </span>
+                                      }
                                       <span className={`${styles.cell} ${styles.source}`}>
                                         <span className={styles.sourceEdge} key={i}>{name}</span>
                                       </span>
