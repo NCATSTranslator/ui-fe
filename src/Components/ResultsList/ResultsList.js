@@ -784,6 +784,7 @@ const ResultsList = ({loading}) => {
                       displayedResults.map((item, i) => {
                         return (
                           <ResultsItem
+                            rawResults={rawResults}
                             key={i}
                             type={storedQuery.type}
                             item={item}

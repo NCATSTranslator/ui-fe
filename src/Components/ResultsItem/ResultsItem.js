@@ -7,8 +7,9 @@ import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
+import GraphView from '../GraphView/GraphView';
 
-const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) => {
+const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults}) => {
 
   let icon = getIcon(item.type);
 
@@ -126,34 +127,36 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
     setIsExpanded(false);
     let newPaths = [];
     item.paths.forEach((path) => {
-      let pathToAdd = []
-      path.subgraph.forEach((item, i)=> {
-        if(!item)
-          return;
-        if(i % 2 === 0) {
-          let name = (item.names) ? item.names[0]: '';
-          let type = (item.types) ? item.types[0]: '';
-          let desc = (item.description) ? item.description[0]: '';
-          let category = (i === path.subgraph.length - 1) ? 'target' : 'object';
-          pathToAdd[i] = {
-            category: category,
-            name: name,
-            type: type,
-            description: desc,
+      let pathToAdd = [];
+      if(path.subgraph) {
+        path.subgraph.forEach((item, i)=> {
+          if(!item)
+            return;
+          if(i % 2 === 0) {
+            let name = (item.names) ? item.names[0]: '';
+            let type = (item.types) ? item.types[0]: '';
+            let desc = (item.description) ? item.description[0]: '';
+            let category = (i === path.subgraph.length - 1) ? 'target' : 'object';
+            pathToAdd[i] = {
+              category: category,
+              name: name,
+              type: type,
+              description: desc,
+            }
+          } else {
+            let pred = (item.predicate) ? formatBiolinkEntity(item.predicate) : '';
+            pathToAdd[i] = {
+              category: 'predicate',
+              predicates: [pred],
+              edges: [{object: item.object, predicate: pred, subject: item.subject, provenance: item.provenance}]
+            }
           }
-        } else {
-          let pred = (item.predicate) ? formatBiolinkEntity(item.predicate) : '';
-          pathToAdd[i] = {
-            category: 'predicate',
-            predicates: [pred],
-            edges: [{object: item.object, predicate: pred, subject: item.subject, provenance: item.provenance}]
+          if(item.provenance !== undefined) {
+            pathToAdd[i].provenance = item.provenance;
           }
-        }
-        if(item.provenance !== undefined) {
-          pathToAdd[i].provenance = item.provenance;
-        }
-      })
-      newPaths.push(pathToAdd);
+        })
+        newPaths.push(pathToAdd);
+      }
     })
     setFormattedPaths(generateCompressedPaths(newPaths));
   }, [item, generateCompressedPaths]);
@@ -216,7 +219,10 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters}) =
             </p>
           }
         </div>
-
+        <GraphView
+          result={item}
+          rawResults={rawResults}
+        />
         <PathView
           paths={formattedPaths}
           active={isExpanded}

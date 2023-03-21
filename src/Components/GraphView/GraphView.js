@@ -1,91 +1,63 @@
 import styles from './GraphView.module.scss';
-import React, {useState, useEffect} from "react";
-import GraphPath from '../GraphPath/GraphPath';
-import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
-import { useOutletContext } from 'react-router-dom';
+import React, {useRef, useState, useEffect} from 'react';
+import {Graph} from 'cytoscape-react';
+import exampleOutput from '../../Data/exampleOutput.json';
+import { resultToCytoscape } from '../../Utilities/graphFunctions';
 
-const GraphView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => {
+const GraphView = ({result, rawResults}) => {
 
-  let initialNumberToShow = (paths.length < 6) ? paths.length : 6;
-  const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
+  const [currentLayout, setCurrentLayout] = useState('breadthfirst');
+  const [cyParams, setCyParams] = useState({});
 
-  const setFeedbackModalOpen = useOutletContext();
+  const cyRef = useRef(null);
+
 
   useEffect(() => {
-    setNumberToShow((paths.length < 6) ? paths.length : 6);
-  }, [paths]);
+    console.log(result);
+    console.log(exampleOutput.results[0])
+    // let newResultData = resultToCytoscape(result, rawResults.data);
 
-  // number of  hops
-  let graphWidth = 3;
+    // setCyParams({
+    //   elements: newResultData,
+    //   style: graphStyles
+    // })
+  }, [result, rawResults]);
 
-  const handleNameClick = (name) => {
-    console.log("handle name click");
-  }
+  const graphStyles = [
+    {
+      selector: 'node',
+      style: {
+        label: 'data(label)',
+        'background-color': '#ccc',
+      },
+    },
+    {
+      selector: 'edge',
+      style: {
+        width: 3,
+        'line-color': '#777',
+        'target-arrow-color': '#777',
+        'target-arrow-shape': 'triangle',
+        'curve-style': 'bezier',
+      },
+    },
+  ];
 
-  const handleEdgeClick = (edge) => {
-    handleEdgeSpecificEvidence(edge)
-  }
-
-  const handleTargetClick = (target) => {
-    console.log("handle target click");
-  }
-
-  const handleShowMore = () => {
-    let newAmount = (numberToShow + 6 > paths.length) ? paths.length : numberToShow + 6;
-    setNumberToShow(newAmount);
-  }
-
-  const handleShowLess = () => {
-    let newAmount = (numberToShow - 6 <= 6) ? numberToShow - (numberToShow - 6) : numberToShow - 6;
-    setNumberToShow(newAmount);
-  }
-
-  return(
-    <div className={styles.graphView}>
-      <div className={styles.header}>
-        <p className={styles.subtitle}>Paths</p>
-        <p>Click on any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
+  return (
+    <div className={styles.GraphView}>
+      <div className="sidebar" style={{padding: '20px'}}>
+        <button onClick={()=>setCurrentLayout('breadthfirst')}>Breadthfirst</button>
+        <button onClick={()=>setCurrentLayout('random')}>Random</button>
+        <button onClick={()=>setCurrentLayout('circle')}>Circle</button>
+        <button onClick={()=>setCurrentLayout('concentric')}>Concentric</button>
+        <button onClick={()=>setCurrentLayout('cose')}>Cose</button>
       </div>
-      {
-        paths.slice(0, numberToShow).map((pathToDisplay, i)=> {
-          return (
-            <div className={styles.tableItem} key={i}> 
-              {
-                pathToDisplay.map((pathItem, j) => {
-                  let key = `${i}_${j}`;
-                  return (
-                    <GraphPath 
-                    path={pathItem} 
-                    key={key}
-                    handleNameClick={handleNameClick}
-                    handleEdgeClick={(edge)=>handleEdgeClick(edge)}
-                    handleTargetClick={handleTargetClick}
-                    activeStringFilters={activeStringFilters}
-                    />
-                    ) 
-                  }) 
-                }
-            </div>
-          )
-        })
-      }
-      <div className={styles.buttons}>
-        {
-          (numberToShow < paths.length) &&
-          <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
-        }
-        {
-          (numberToShow <= paths.length && numberToShow > 6) &&
-          <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
-        }
+      <h3>Current Type: <strong>{currentLayout}</strong></h3>
+      <div style={{width: '1200px', height:'600px', margin: '0 auto', border: '1px solid black'}}>
+        <Graph layoutParams={{ name: currentLayout, fit: true, spacingFactor: 5 }} cyParams={cyParams}></Graph>
       </div>
-      <p className={styles.needHelp}>
-        <Question/> 
-        Was this helpful?
-        <button onClick={()=>{setFeedbackModalOpen(true)}} rel="noreferrer " target="_blank">Send Feedback</button>
-      </p>
     </div>
-  )
+  );
 }
 
 export default GraphView;

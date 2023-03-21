@@ -120,7 +120,8 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
       evidence: getFormattedEvidence(formattedPaths, results),
       fdaInfo: fdaInfo,
       score: itemScore,
-      tags: tags
+      tags: tags,
+      // paths: item.paths
     }
     newSummarizedResults.push(formattedItem);
   }
