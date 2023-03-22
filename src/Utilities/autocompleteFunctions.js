@@ -9,11 +9,13 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     };
+    let resolverData = null;
     // Fetch list of curies based on userInput string from Name Resolver
     fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=100`, nameResolverRequestOptions)
       .then(response => response.json())
       .then(data => {
         // Convert data returned from Name Resolver into a list of curies
+        resolverData = data;
         let curies = getFormattedCuriesFromNameResolver(data);
         console.log('Curies returned from Name resolver:', curies);
         let body = {
@@ -35,6 +37,17 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
         let autoCompleteItems = getFormattedNamesFromNormalizer(data, filterTerm);
         // truncate array in case of too many results
         autoCompleteItems = autoCompleteItems.slice(0,40);
+        // find the first text match from the name resolver given the input text
+        const inputMatch = inputText.toLowerCase();
+        autoCompleteItems.forEach((item) => {
+          for (let name of resolverData[item.id]) {
+            if (name.toLowerCase().includes(inputMatch)) {
+              item.match = capitalizeAllWords(name);
+              break;
+            }
+          }
+        });
+
         console.log('formatted autocomplete items:', autoCompleteItems)
         setAutoCompleteItems(autoCompleteItems);
         setLoadingAutocomplete(false);
