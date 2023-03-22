@@ -53,7 +53,7 @@ const getFormattedCuriesFromNameResolver = (data) => {
 
 const getFormattedNamesFromNormalizer = (data, filterTerm) => {
 
-  let autocompleteObjects = 
+  let autocompleteObjects =
     // get array of values from object
     Object.values(data)
       // filter to new array with only items of type => disease
@@ -64,7 +64,7 @@ const getFormattedNamesFromNormalizer = (data, filterTerm) => {
       });
   // remove duplicates by converting array to set of ids (sets don't tolerate duplicates)
   return Array.from(new Set(autocompleteObjects.map(a => a.id)))
-    // then return a new array of objects by finding each object by its id 
+    // then return a new array of objects by finding each object by its id
     .map(id => {
       return autocompleteObjects.find(a => a.id === id)
     });

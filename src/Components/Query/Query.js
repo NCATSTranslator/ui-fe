@@ -58,7 +58,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     : '';
   const [inputText, setInputText] = useState(presetInputText);
 
-  const initPresetTypeID = (presetQueryTypeIDParam) 
+  const initPresetTypeID = (presetQueryTypeIDParam)
     ? presetQueryTypeIDParam
     : (Object.keys(prevQueryItem.current).length && isResults) ? prevQueryItem.current.type.id : null;
 
@@ -86,7 +86,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
 
   const [exampleDiseases, setExampleDiseases] = useState(null);
 
-  // Get example diseases from config endpoint on component mount 
+  // Get example diseases from config endpoint on component mount
   useEffect(() => {
     const requestOptions = {
       method: 'GET',
@@ -193,7 +193,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     if(prevQueryItem.current.node === undefined || isEqual(prevQueryItem.current, queryItem))
       return;
 
-    // If the node ids match, but the new queryItem has no type, don't replace 
+    // If the node ids match, but the new queryItem has no type, don't replace
     // (addresses strange behavior with) template queries and share urls
     if(prevQueryItem.current.node.id === queryItem.node.id && Object.keys(queryItem.type).length === 0)
       return;
@@ -323,7 +323,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
           {!isResults &&
             <div className={styles.examples}>
               {
-                exampleDiseases && Array.isArray(exampleDiseases) && 
+                exampleDiseases && Array.isArray(exampleDiseases) &&
                 <>
                   <p className={styles.subTwo}>Example Diseases:</p>
                   <div className={styles.exampleList}>

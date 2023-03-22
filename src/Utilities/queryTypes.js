@@ -2,7 +2,7 @@
 export const queryTypes = [
   {
     id: 0,
-    label: 'What drugs may treat',  
+    label: 'What drugs may treat',
     placeholder: 'Enter a Disease',
     targetType: 'drug',
     direction: null,
@@ -11,7 +11,7 @@ export const queryTypes = [
   },
   {
     id: 1,
-    label: 'What chemical upregulates',  
+    label: 'What chemical upregulates',
     placeholder: 'Enter a Gene',
     targetType: 'chemical',
     direction: 'increased',
@@ -20,7 +20,7 @@ export const queryTypes = [
   },
   {
     id: 2,
-    label: 'What chemical downregulates',  
+    label: 'What chemical downregulates',
     placeholder: 'Enter a Gene',
     targetType: 'chemical',
     direction: 'decreased',
@@ -29,7 +29,7 @@ export const queryTypes = [
   },
   {
     id: 3,
-    label: 'What gene is upregulated by',  
+    label: 'What gene is upregulated by',
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'increased',
@@ -38,7 +38,7 @@ export const queryTypes = [
   },
   {
     id: 4,
-    label: 'What gene is downregulated by',  
+    label: 'What gene is downregulated by',
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'decreased',
