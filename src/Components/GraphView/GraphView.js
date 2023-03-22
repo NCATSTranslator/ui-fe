@@ -2,6 +2,7 @@ import styles from './GraphView.module.scss';
 import {useState, useEffect, memo} from 'react';
 import {Graph} from 'cytoscape-react';
 import { resultToCytoscape } from '../../Utilities/graphFunctions';
+import { isEqual } from 'lodash';
 
 const GraphView = ({result, rawResults}) => {
 
