@@ -1,7 +1,7 @@
 import { capitalizeAllWords } from "./utilities";
 
 // Returns array of terms based on user input
-export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems, filterTerm) => {
+export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems, autoFilter) => {
   if(inputText) {
     console.log(`fetching '${inputText}'`);
     setLoadingAutocomplete(true);
@@ -32,7 +32,7 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
       .then(data => {
         console.log(Object.keys(data).length, 'full data from node normalizer:', data);
         // get list of names from the data returned from Node Normalizer
-        let autoCompleteItems = getFormattedNamesFromNormalizer(data, filterTerm);
+        let autoCompleteItems = getFormattedNamesFromNormalizer(data, autoFilter);
         // truncate array in case of too many results
         autoCompleteItems = autoCompleteItems.slice(0,40);
         console.log('formatted autocomplete items:', autoCompleteItems)
@@ -51,13 +51,13 @@ const getFormattedCuriesFromNameResolver = (data) => {
   return Object.keys(data).map((key) => key);
 }
 
-const getFormattedNamesFromNormalizer = (data, filterTerm) => {
+const getFormattedNamesFromNormalizer = (data, autoFilter) => {
 
   let autocompleteObjects =
     // get array of values from object
     Object.values(data)
       // filter to new array with only items of type => disease
-      .filter((item) => item && item.type && item.type.includes(`biolink:${filterTerm}`) && item.id.label )
+      .filter(autoFilter)
       // map those values into a new array that only has the label, aka 'common name'
       .map((item) => {
         return {id: item.id.identifier, label: capitalizeAllWords(item.id.label)}

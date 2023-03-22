@@ -1,3 +1,8 @@
+const standardQueryFilterFactory = (type) => {
+  return (item) => {
+    return item && item.type && item.type.includes(`biolink:${type}`) && item.id.label;
+  };
+}
 
 export const queryTypes = [
   {
@@ -7,6 +12,7 @@ export const queryTypes = [
     targetType: 'drug',
     direction: null,
     filterType: 'Disease',
+    filter: standardQueryFilterFactory('Disease'),
     pathString: 'may treat'
   },
   {
@@ -16,6 +22,7 @@ export const queryTypes = [
     targetType: 'chemical',
     direction: 'increased',
     filterType: 'Gene',
+    filter: standardQueryFilterFactory('Gene'),
     pathString: 'may upregulate'
   },
   {
@@ -25,6 +32,7 @@ export const queryTypes = [
     targetType: 'chemical',
     direction: 'decreased',
     filterType: 'Gene',
+    filter: standardQueryFilterFactory('Gene'),
     pathString: 'may downregulate'
   },
   {
@@ -34,6 +42,7 @@ export const queryTypes = [
     targetType: 'gene',
     direction: 'increased',
     filterType: 'ChemicalEntity',
+    filter: standardQueryFilterFactory('ChemicalEntity'),
     pathString: 'may be upregulated by'
   },
   {
@@ -43,6 +52,7 @@ export const queryTypes = [
     targetType: 'gene',
     direction: 'decreased',
     filterType: 'ChemicalEntity',
+    filter: standardQueryFilterFactory('ChemicalEntity'),
     pathString: 'may be downregulated by'
   }
 ]
