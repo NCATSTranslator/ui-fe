@@ -1,3 +1,4 @@
+import { closest as closestStrMatch } from 'fastest-levenshtein';
 import { capitalizeAllWords } from "./utilities";
 
 // Returns array of terms based on user input
@@ -40,12 +41,7 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
         // find the first text match from the name resolver given the input text
         const inputMatch = inputText.toLowerCase();
         autoCompleteItems.forEach((item) => {
-          for (let name of resolverData[item.id]) {
-            if (name.toLowerCase().includes(inputMatch)) {
-              item.match = capitalizeAllWords(name);
-              break;
-            }
-          }
+          item.match = capitalizeAllWords(closestStrMatch(item, resolverData[item.id]));
         });
 
         console.log('formatted autocomplete items:', autoCompleteItems)
