@@ -35,7 +35,7 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
   }, [items]);
 
   return (
-    <div 
+    <div
       className={`${styles.autocompleteContainer} ${(items || isLoading) ? styles.open : ''}`}
       data-testid="autocomplete-list"
       >
@@ -44,12 +44,12 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
         <img src={loadingIcon} className={styles.loadingIcon} alt="loading icon" />
       }
       {
-        items && items.length === 0 && !isLoading && 
+        items && items.length === 0 && !isLoading &&
         <p className={styles.noResults}>No matching terms were found, please adjust your search term and try again.</p>
       }
       {
         items && items.length > 0 && !isLoading &&
-        <div> 
+        <div>
           {
             items.slice(0, numberVisibleItems).map((item, i) => {
               return <p key={i} className={styles.item} onClick={()=>handleItemClick(item)}>{item.label}</p>
@@ -60,14 +60,14 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
             <>
               <div className={styles.sep}></div>
                 <div className={styles.buttonsContainer}>
-                    <button 
-                      onClick={(e)=>showMoreItems(e)} 
-                      className={`${styles.button} ${(numberVisibleItems < items.length) ? styles.active : styles.inactive}`} 
+                    <button
+                      onClick={(e)=>showMoreItems(e)}
+                      className={`${styles.button} ${(numberVisibleItems < items.length) ? styles.active : styles.inactive}`}
                       >
                       Show More
                     </button>
-                    <button 
-                      onClick={(e)=>showFewerItems(e)} 
+                    <button
+                      onClick={(e)=>showFewerItems(e)}
                       className={`${styles.button} ${styles.submitButton} ${(numberVisibleItems > pageLength) ? styles.active : styles.inactive}`}
                       >
                       Show Less
