@@ -57,6 +57,5 @@ export const resultToCytoscape = (result, summary) => {
     edges: makeEdges(es, summary.edges)
   };
 
-  console.log(c);
   return c;
 }

@@ -1,27 +1,9 @@
 import styles from './GraphView.module.scss';
-import React, {useRef, useState, useEffect} from 'react';
+import {useState, useEffect, memo} from 'react';
 import {Graph} from 'cytoscape-react';
-import exampleOutput from '../../Data/exampleOutput.json';
 import { resultToCytoscape } from '../../Utilities/graphFunctions';
 
 const GraphView = ({result, rawResults}) => {
-
-  const [currentLayout, setCurrentLayout] = useState('breadthfirst');
-  const [cyParams, setCyParams] = useState({});
-
-  const cyRef = useRef(null);
-
-
-  useEffect(() => {
-    console.log(result);
-    console.log(exampleOutput.results[0])
-    // let newResultData = resultToCytoscape(result, rawResults.data);
-
-    // setCyParams({
-    //   elements: newResultData,
-    //   style: graphStyles
-    // })
-  }, [result, rawResults]);
 
   const graphStyles = [
     {
@@ -43,6 +25,18 @@ const GraphView = ({result, rawResults}) => {
     },
   ];
 
+  
+  const [currentLayout, setCurrentLayout] = useState('breadthfirst');
+  let initElements = resultToCytoscape(result.rawResult, rawResults.data);
+  const [cyParams, setCyParams] = useState({elements: initElements, style: graphStyles});
+
+  useEffect(() => {
+    let newElements = resultToCytoscape(result.rawResult, rawResults.data);
+    console.log(isEqual(cyParams.elements, newElements));
+    if(!isEqual(cyParams.elements, newElements))
+      setCyParams({newElements, graphStyles});
+  }, [result, rawResults]);
+
   return (
     <div className={styles.GraphView}>
       <div className="sidebar" style={{padding: '20px'}}>
@@ -60,4 +54,4 @@ const GraphView = ({result, rawResults}) => {
   );
 }
 
-export default GraphView;
+export default memo(GraphView);

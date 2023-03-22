@@ -121,7 +121,7 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
       fdaInfo: fdaInfo,
       score: itemScore,
       tags: tags,
-      // paths: item.paths
+      rawResult: item
     }
     newSummarizedResults.push(formattedItem);
   }
