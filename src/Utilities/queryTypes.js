@@ -7,9 +7,59 @@ const standardQueryFilterFactory = (type) => {
 }
 
 const standardQueryAnnotatorFactory = () => {
-  return async (normalizedCuries) => {
-    return Promise.resolve(normalizedCuries);
+  return async (normalizedNodes) => {
+    console.log(normalizedNodes);
+    return Promise.resolve(normalizedNodes);
   };
+}
+
+const geneQueryAnnotator = async (normalizedNodes) => {
+  const genes = {};
+  normalizedNodes.forEach((node) => {
+    const curie = node.id.identifier;
+    const [prefix, id] = curie.split(':');
+    if (prefix === 'NCBIGene') {
+      genes[id] = { curie: curie };
+    }
+  });
+
+  const body = {
+    ids: Object.keys(genes),
+    fields: [ 'symbol', 'taxid' ]
+  };
+
+  const geneInfoRequestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  };
+
+  try {
+    const response = await fetch('https://mygene.info/v3/gene', geneInfoRequestOptions);
+    const geneAnnotations = await response.json();
+    //console.log(`Gene annotations: ${geneAnnotations}`);
+    const validTaxon = { 9606: 'Human', 10090: 'Mouse', 10116: 'Rat' };
+    const validGenes = [];
+    geneAnnotations.forEach((annotation) => {
+      const species = validTaxon[annotation.taxid];
+      if (species !== undefined) {
+        const gene = genes[annotation._id];
+        gene.symbol = annotation.symbol;
+        gene.species = species;
+        validGenes.push(gene);
+      }
+    });
+
+    return Promise.resolve(validGenes);
+  } catch (err) {
+    return Promise.reject(err);
+  }
+}
+
+const geneQueryFormatter = async (genes) => {
+  return Promise.resolve(genes.map((gene) => {
+    return { id: gene.curie, label: gene.symbol, match: gene.species };
+  }));
 }
 
 const standardQueryFormatterFactory = () => {
@@ -51,8 +101,8 @@ export const queryTypes = [
     filterType: 'Gene',
     functions: {
       filter: standardQueryFilterFactory('Gene'),
-      annotate: standardQueryAnnotatorFactory(),
-      format: standardQueryFormatterFactory()
+      annotate: geneQueryAnnotator,
+      format: geneQueryFormatter
     },
     pathString: 'may upregulate'
   },
@@ -65,8 +115,8 @@ export const queryTypes = [
     filterType: 'Gene',
     functions: {
       filter: standardQueryFilterFactory('Gene'),
-      annotate: standardQueryAnnotatorFactory(),
-      format: standardQueryFormatterFactory()
+      annotate: geneQueryAnnotator,
+      format: geneQueryFormatter
     },
     pathString: 'may downregulate'
   },
