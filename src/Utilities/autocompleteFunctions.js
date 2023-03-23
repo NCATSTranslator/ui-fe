@@ -1,42 +1,20 @@
-import { capitalizeAllWords } from "./utilities";
-
 // Returns array of terms based on user input
-export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilter) => {
+export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions) => {
   if(inputText) {
     console.log(`fetching '${inputText}'`);
     setLoadingAutocomplete(true);
-    let nameResolverRequestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    // Fetch list of curies based on userInput string from Name Resolver
-    fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=100`, nameResolverRequestOptions)
+    fetchNodesFromInputText(inputText)
       .then(response => response.json())
-      .then(data => {
-        // Convert data returned from Name Resolver into a list of curies
-        let curies = getFormattedCuriesFromNameResolver(data);
-        console.log('Curies returned from Name resolver:', curies);
-        let body = {
-          curies: curies,
-          conflate: true
-        }
-        let nodeNormalizerRequestOptions = {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        };
-        // Fetch list of normalized nodes based on list of curies from Name Resolver
-        return fetch('https://nodenorm.transltr.io/1.3/get_normalized_nodes', nodeNormalizerRequestOptions)
-      })
+      .then(nodes => fetchNormalizedCuriesFromNodes(nodes))
       .then(response => response.json())
-      .then(data => {
-        console.log(Object.keys(data).length, 'full data from node normalizer:', data);
-        // get list of names from the data returned from Node Normalizer
-        let autoCompleteItems = getFormattedNamesFromNormalizer(data, autocompleteFilter);
+      .then(normalizedCuries => filterNormalizedCuries(normalizedCuries, autocompleteFunctions.filter))
+      .then(normalizedCuries => autocompleteFunctions.annotate(normalizedCuries))
+      .then(annotatedCuries => autocompleteFunctions.format(annotatedCuries))
+      .then(autocompleteItems => {
         // truncate array in case of too many results
-        autoCompleteItems = autoCompleteItems.slice(0,40);
-        console.log('formatted autocomplete items:', autoCompleteItems)
-        setAutoCompleteItems(autoCompleteItems);
+        autocompleteItems = autocompleteItems.slice(0,40);
+        console.log('formatted autocomplete items:', autocompleteItems)
+        setAutoCompleteItems(autocompleteItems);
         setLoadingAutocomplete(false);
       })
       .catch((error) => {
@@ -45,27 +23,42 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
       });
   }
 }
+const fetchNodesFromInputText = async (inputText) => {
+  const nameResolverRequestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  };
+  // Fetch list of curies based on userInput string from Name Resolver
+  return fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=100`, nameResolverRequestOptions)
+}
 
-const getFormattedCuriesFromNameResolver = (data) => {
+const fetchNormalizedCuriesFromNodes = async (nodes) => {
+  // Convert data returned from Name Resolver into a list of curies
+  const curies = nodesToCuries(nodes);
+  console.log('Curies returned from Name resolver:', curies);
+  const body = {
+    curies: curies,
+    conflate: true
+  }
+  const nodeNormalizerRequestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  };
+  // Fetch list of normalized nodes based on list of curies from Name Resolver
+  return fetch('https://nodenorm.transltr.io/1.3/get_normalized_nodes', nodeNormalizerRequestOptions)
+}
+
+const filterNormalizedCuries = async (normalizedCuries, autocompleteFilter) => {
+  console.log(Object.keys(normalizedCuries).length, 'full data from node normalizer:', normalizedCuries);
+  // get array of values from object
+  return Promise.resolve(Object.values(normalizedCuries)
+    // filter to new array with only items specificed by the filter
+    .filter(autocompleteFilter));
+}
+
+const nodesToCuries = (nodes) => {
   // Return an array of the curies returned by the name resolver (they're stored as the keys of the initially returned obj)
-  return Object.keys(data).map((key) => key);
+  return Object.keys(nodes);
 }
 
-const getFormattedNamesFromNormalizer = (data, autocompleteFilter) => {
-
-  let autocompleteObjects =
-    // get array of values from object
-    Object.values(data)
-      // filter to new array with only items of type => disease
-      .filter(autocompleteFilter)
-      // map those values into a new array that only has the label, aka 'common name'
-      .map((item) => {
-        return {id: item.id.identifier, label: capitalizeAllWords(item.id.label)}
-      });
-  // remove duplicates by converting array to set of ids (sets don't tolerate duplicates)
-  return Array.from(new Set(autocompleteObjects.map(a => a.id)))
-    // then return a new array of objects by finding each object by its id
-    .map(id => {
-      return autocompleteObjects.find(a => a.id === id)
-    });
-}

@@ -1,7 +1,30 @@
+import { capitalizeAllWords } from "./utilities";
+
 const standardQueryFilterFactory = (type) => {
   return (item) => {
     return item && item.type && item.type.includes(`biolink:${type}`) && item.id.label;
   };
+}
+
+const standardQueryAnnotatorFactory = () => {
+  return async (normalizedCuries) => {
+    return Promise.resolve(normalizedCuries);
+  };
+}
+
+const standardQueryFormatterFactory = () => {
+  return async (items) => {
+    const autocompleteObjects = items.map((item) => {
+      return {id: item.id.identifier, label: capitalizeAllWords(item.id.label)};
+    });
+
+    // remove duplicates by converting array to set of ids (sets don't tolerate duplicates)
+    return Promise.resolve(Array.from(new Set(autocompleteObjects.map(a => a.id)))
+    // then return a new array of objects by finding each object by its id
+      .map(id => {
+        return autocompleteObjects.find(a => a.id === id)
+      }));
+  }
 }
 
 export const queryTypes = [
@@ -12,7 +35,11 @@ export const queryTypes = [
     targetType: 'drug',
     direction: null,
     filterType: 'Disease',
-    filter: standardQueryFilterFactory('Disease'),
+    functions: {
+      filter: standardQueryFilterFactory('Disease'),
+      annotate: standardQueryAnnotatorFactory(),
+      format: standardQueryFormatterFactory()
+    },
     pathString: 'may treat'
   },
   {
@@ -22,7 +49,11 @@ export const queryTypes = [
     targetType: 'chemical',
     direction: 'increased',
     filterType: 'Gene',
-    filter: standardQueryFilterFactory('Gene'),
+    functions: {
+      filter: standardQueryFilterFactory('Gene'),
+      annotator: standardQueryAnnotatorFactory(),
+      formatter: standardQueryFormatterFactory()
+    },
     pathString: 'may upregulate'
   },
   {
@@ -32,7 +63,11 @@ export const queryTypes = [
     targetType: 'chemical',
     direction: 'decreased',
     filterType: 'Gene',
-    filter: standardQueryFilterFactory('Gene'),
+    functions: {
+      filter: standardQueryFilterFactory('Gene'),
+      annotator: standardQueryAnnotatorFactory(),
+      formatter: standardQueryFormatterFactory()
+    },
     pathString: 'may downregulate'
   },
   {
@@ -42,7 +77,11 @@ export const queryTypes = [
     targetType: 'gene',
     direction: 'increased',
     filterType: 'ChemicalEntity',
-    filter: standardQueryFilterFactory('ChemicalEntity'),
+    functions: {
+      filter: standardQueryFilterFactory('ChemicalEntity'),
+      annotator: standardQueryAnnotatorFactory(),
+      formatter: standardQueryFormatterFactory()
+    },
     pathString: 'may be upregulated by'
   },
   {
@@ -52,7 +91,11 @@ export const queryTypes = [
     targetType: 'gene',
     direction: 'decreased',
     filterType: 'ChemicalEntity',
-    filter: standardQueryFilterFactory('ChemicalEntity'),
+    functions: {
+      filter: standardQueryFilterFactory('ChemicalEntity'),
+      annotator: standardQueryAnnotatorFactory(),
+      formatter: standardQueryFormatterFactory()
+    },
     pathString: 'may be downregulated by'
   }
 ]

@@ -48,7 +48,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
   // String, type of query
   const [queryType, setQueryType] = useState(storedQuery.type);
   // Function, type to send to autocomplete for result filtering
-  const autocompleteFilter = useRef(null);
+  const autocompleteFunctions = useRef(null);
   // Array, for use in useEffect hooks with queryItems as a dependency
   var prevQueryItem = useRef(storedQuery);
 
@@ -72,8 +72,8 @@ const Query = ({results, loading, presetDisease, presetType}) => {
   const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
   // Function, delay query for fetching autocomplete items by 750ms each time the user types, so we only send a request once they're done
   const delayedQuery = useMemo(() => _.debounce(
-    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilter) =>
-      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilter), 750), []
+    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions) =>
+      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions), 750), []
   );
 
   // Bool, since the query will be submitted whenever a query item is selected, use this to distinguish between
@@ -105,7 +105,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = (e) => {
     if(Object.keys(queryType).length) {
-      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilter.current);
+      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions.current);
       setInputText(e);
     } else {
       setIsError(true);
@@ -115,7 +115,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
 
   const handleQueryTypeChange = (value, resetInputText) => {
     setIsError(false);
-    autocompleteFilter.current = value.filter;
+    autocompleteFunctions.current = value.functions;
     setQueryType(value);
     if(resetInputText || resetInputText === undefined)
       setInputText('');
