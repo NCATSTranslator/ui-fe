@@ -51,8 +51,8 @@ export const queryTypes = [
     filterType: 'Gene',
     functions: {
       filter: standardQueryFilterFactory('Gene'),
-      annotator: standardQueryAnnotatorFactory(),
-      formatter: standardQueryFormatterFactory()
+      annotate: standardQueryAnnotatorFactory(),
+      format: standardQueryFormatterFactory()
     },
     pathString: 'may upregulate'
   },
@@ -65,8 +65,8 @@ export const queryTypes = [
     filterType: 'Gene',
     functions: {
       filter: standardQueryFilterFactory('Gene'),
-      annotator: standardQueryAnnotatorFactory(),
-      formatter: standardQueryFormatterFactory()
+      annotate: standardQueryAnnotatorFactory(),
+      format: standardQueryFormatterFactory()
     },
     pathString: 'may downregulate'
   },
@@ -79,8 +79,8 @@ export const queryTypes = [
     filterType: 'ChemicalEntity',
     functions: {
       filter: standardQueryFilterFactory('ChemicalEntity'),
-      annotator: standardQueryAnnotatorFactory(),
-      formatter: standardQueryFormatterFactory()
+      annotate: standardQueryAnnotatorFactory(),
+      format: standardQueryFormatterFactory()
     },
     pathString: 'may be upregulated by'
   },
@@ -93,8 +93,8 @@ export const queryTypes = [
     filterType: 'ChemicalEntity',
     functions: {
       filter: standardQueryFilterFactory('ChemicalEntity'),
-      annotator: standardQueryAnnotatorFactory(),
-      formatter: standardQueryFormatterFactory()
+      annotate: standardQueryAnnotatorFactory(),
+      format: standardQueryFormatterFactory()
     },
     pathString: 'may be downregulated by'
   }
