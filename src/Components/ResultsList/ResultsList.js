@@ -12,8 +12,8 @@ import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
 import { currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
-  sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
+  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import { handleFetchErrors } from "../../Utilities/utilities";
 import { cloneDeep, isEqual } from "lodash";
@@ -107,7 +107,7 @@ const ResultsList = ({loading}) => {
   const initPresetQueryTypeID = (presetQueryTypeIDParam) ? presetQueryTypeIDParam : null;
   // Obj, {label: ''}, used to set input text, determined by results object
   const [presetDisease, setPresetDisease] = useState(initPresetDisease);
-  const [presetQueryTypeID, setPresetQueryTypeID] = useState(initPresetQueryTypeID);
+  const [presetQueryTypeID] = useState(initPresetQueryTypeID);
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
@@ -156,7 +156,6 @@ const ResultsList = ({loading}) => {
       headers: { 'Content-Type': 'application/json' },
       body: queryIDJson
     };
-    let responseClone;
     // eslint-disable-next-line
     const response = await fetch('/creative_status', requestOptions)
       .then(response => handleFetchErrors(response))
@@ -425,7 +424,7 @@ const ResultsList = ({loading}) => {
 
     // if the status is not error, handle setting the results
     if(rawResults.status !== 'error' && rawResults.data.results !== undefined)
-      newResults = getSummarizedResults(rawResults.data, presetDisease, setPresetDisease, availableTags, setAvailableTags);
+      newResults = getSummarizedResults(rawResults.data);
 
       // set formatted results
     setFormattedResults(newResults);

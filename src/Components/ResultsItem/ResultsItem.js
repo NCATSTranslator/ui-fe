@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
@@ -6,7 +6,7 @@ import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Do
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 import GraphView from '../GraphView/GraphView';
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults}) => {

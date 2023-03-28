@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from "react";
 import styles from "./QueryHistoryList.module.scss";
 import { getDifferenceInDays } from "../../Utilities/utilities";
-import { pastQueryState, removeItemAtIndex, setHistory } from "../../Redux/historySlice";
-import { setCurrentQuery } from "../../Redux/querySlice";
+import { pastQueryState, setHistory } from "../../Redux/historySlice";
 import { useSelector, useDispatch } from 'react-redux';
 import ShareModal from '../../Components/Modals/ShareModal';
 import TextInput from "../FormFields/TextInput";
@@ -101,7 +100,6 @@ const QueryHistoryList = () => {
             className={styles.input}
             size=""
             icon={<SearchIcon/>}
-            // value={value}
           />
           <button type="submit" size="" >
             <span>Search</span>
@@ -146,14 +144,6 @@ const QueryHistoryList = () => {
                       <div className={styles.top}>
                         <span>{query.item.type.label} </span>
                         <span className={styles.subject}>{query.item.node.label}</span>
-                        {/* {
-                          query.items && 
-                          query.items.map((item, j) => {
-                            let output = (item.value) ? item.value : item.name;
-                            return (
-                              <span key={j} className={item.type}>{output} </span>)
-                            })
-                        } */}
                       </div>
                       <div className={styles.bottom}>
                         {

@@ -22,7 +22,7 @@ const ShareModal = ({isOpen, onClose, qid}) => {
       isResultsUrlSet.current = true;
       window.history.replaceState(null, "Results", qidPath);
     }
-  }, []);
+  }, [qidPath, qidURL]);
 
   return (
     <Modal 
