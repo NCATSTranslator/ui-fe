@@ -1,16 +1,67 @@
 import styles from './GraphView.module.scss';
 import {useState, useEffect, memo, useRef} from 'react';
-import {Graph} from 'cytoscape-react';
 import { resultToCytoscape } from '../../Utilities/graphFunctions';
-import { isEqual } from 'lodash';
 import cytoscape from 'cytoscape';
 import { v4 as uuidv4 } from 'uuid';
+import klay from 'cytoscape-klay';
+import dagre from 'cytoscape-dagre';
+import avsdf from 'cytoscape-avsdf';
 
 const GraphView = ({result, rawResults}) => {
 
   let graphRef = useRef(null);
   let cy = null;
   const [currentLayout, setCurrentLayout] = useState({name:'breadthfirst', spacingFactor: 1.5});
+
+  // initialize 3rd party layouts
+  cytoscape.use(klay);
+  cytoscape.use(avsdf);
+  cytoscape.use(dagre);
+
+  const addClassToConnections = (highlightClass, hideClass, eventType, summary, cy) => {
+    cy.unbind(eventType);
+    cy.bind(eventType, 'node', (ev) => {
+      // ev.cy.elements().removeClass([highlightClass, hideClass]);
+      const paths = summary.paths;
+      const edges = new Set();
+      const nodes = new Set();
+      summary.results[ev.cy.data().result].paths.forEach((p) => {
+        if (paths[p].subgraph.includes(ev.target.id())) {
+          paths[p].subgraph.forEach((o, i) => {
+            if (i%2 === 0) {
+              nodes.add(o);
+            } else {
+              edges.add(o);
+            }
+          });
+        };
+      })
+    
+      ev.cy.elements().forEach((ele) => {
+        // if its a node and has the class AND has the id, hide it. This means we're clicking on an already selected node
+        if(ele.isNode() && ele.hasClass(highlightClass) && nodes.has(ele.id())) {
+          ele.addClass(hideClass);
+          ele.removeClass(highlightClass);
+        // if its an edge and has the class AND has the id, hide it. This means we're clicking on an already selected edge
+        } else if(ele.isEdge() && ele.hasClass(highlightClass) && edges.has(ele.id())) {
+          ele.addClass(hideClass);
+          ele.removeClass(highlightClass);
+        // If its a node and it either has the class or the id, we're clicking on it for the first time. highlight it.
+        } else if (ele.isNode() && (ele.hasClass(highlightClass) || nodes.has(ele.id()))) {
+          ele.addClass(highlightClass);
+          ele.removeClass(hideClass);
+        // If its an edge and it either has the class or the id, we're clicking on it for the first time. highlight it.
+        } else if (ele.isEdge() && (ele.hasClass(highlightClass) || edges.has(ele.id()))) {
+          ele.addClass(highlightClass);
+          ele.removeClass(hideClass);
+        // Otherwise hide it
+        } else {
+          ele.addClass(hideClass);
+          ele.removeClass(highlightClass)
+        }
+      });
+    });
+  }
 
   const initCytoscapeInstance = (result, summary, graphRef, layout) => {
     cy = cytoscape({
@@ -34,11 +85,16 @@ const GraphView = ({result, rawResults}) => {
           })
         .selector('edge')
           .css({
-            'line-color': 'black'
+            'line-color': '#CED0D0'
           })
-        .selector('.highlight')
+        .selector('edge.highlight')
           .css({
-            'line-color': 'red'
+            'line-color': '#000',
+            'opacity': '1.0'
+          })
+        .selector('.hover-highlight')
+          .css({
+            'line-color': '#606368'
           })
         .selector('.hide')
           .css({
@@ -48,41 +104,20 @@ const GraphView = ({result, rawResults}) => {
         result: 0
       }
     });
-    
-    cy.unbind('mouseover');
-    cy.bind('mouseover', 'node', (ev) => {
-      ev.cy.elements().removeClass(['highlight', 'hide']);
-      const paths = summary.paths;
-      const edges = new Set();
-      const nodes = new Set();
-      summary.results[ev.cy.data().result].paths.forEach((p) => {
-        if (paths[p].subgraph.includes(ev.target.id())) {
-          paths[p].subgraph.forEach((o, i) => {
-            if (i%2 === 0) {
-              nodes.add(o);
-            } else {
-              edges.add(o);
-            }
-          });
-        };
-      })
-    
-      ev.cy.elements().forEach((ele) => {
-        if (ele.isEdge() && edges.has(ele.id())) {
-          ele.addClass('highlight');
-        } else if (ele.isNode() && nodes.has(ele.id())) {
-          ele.addClass('highlight');
-        } else {
-          ele.addClass('hide');
-        }
-      });
-    });
+
+
+    addClassToConnections('highlight', 'hide', 'tapstart', summary, cy);
+    // addClassToConnections('hover-highlight', 'hide', 'mouseover', summary, cy);
 
     // when background is clicked, remove highlight and hide classes from all elements
-    cy.bind('mouseout', 'node', (ev) => {
-      ev.cy.elements().removeClass(['highlight', 'hide']);
-    });
-    
+    cy.bind('click', (ev) => {
+      if(ev.target === cy)
+        ev.cy.elements().removeClass(['highlight', 'hide']);
+    });    
+    // cy.bind('mouseover', (ev) => {
+    //   if(ev.target === cy)
+    //     ev.cy.elements().removeClass(['highlight', 'hide']);
+    // });    
   }
   
 
@@ -95,7 +130,10 @@ const GraphView = ({result, rawResults}) => {
     <div className={styles.GraphView}>
       <div className="sidebar" style={{padding: '20px'}}>
         <button onClick={()=>setCurrentLayout({name:'breadthfirst', spacingFactor: 1.5})}>Breadthfirst</button>
+        <button onClick={()=>setCurrentLayout({name:'dagre', spacingFactor: 1.5})}>dagre</button>
+        <button onClick={()=>setCurrentLayout({name:'klay'})}>Klay</button>
         <button onClick={()=>setCurrentLayout({name:'random'})}>Random</button>
+        <button onClick={()=>setCurrentLayout({name:'avsdf'})}>avsdf</button>
         <button onClick={()=>setCurrentLayout({name:'circle'})}>Circle</button>
         <button onClick={()=>setCurrentLayout({name:'concentric'})}>Concentric</button>
         <button onClick={()=>setCurrentLayout({name:'cose'})}>Cose</button>
