@@ -14,11 +14,26 @@ export const defaultQueryFormatter = async (items) => {
 export const diseaseQueryFormatter = async (diseases, formatData) => {
   const autocompleteObjects = diseases.map((disease) => {
     const id = disease.id.identifier
-    const closestMatch = closestStrMatch(formatData.input, formatData.resolved[id]);
+    const input = formatData.input
+    const matches = formatData.resolved[id];
+    // Attempt to find an exact text match
+    let bestMatch = false;
+    for (const match of matches) {
+      if (match.includes(input)) {
+        bestMatch = match;
+        break;
+      }
+    }
+
+    // If we can't find an exact one, use minimum edit distance to find some match
+    if (!bestMatch) {
+      bestMatch = closestStrMatch(formatData.input, formatData.resolved[id]);
+    }
+
     return {
       id: id,
       label: capitalizeAllWords(disease.id.label),
-      match: `matched on ${capitalizeAllWords(closestMatch)}`
+      match: `matched on ${capitalizeAllWords(bestMatch)}`
     };
   });
 

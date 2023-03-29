@@ -3,7 +3,7 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
   if(inputText) {
     console.log(`fetching '${inputText}'`);
     setLoadingAutocomplete(true);
-    const formatData = { input: inputText };
+    const formatData = { input: inputText.toLowerCase() };
     fetchNodesFromInputText(inputText)
       .then(response => response.json())
       .then(nodes => {
