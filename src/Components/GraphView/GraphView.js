@@ -1,5 +1,5 @@
 import styles from './GraphView.module.scss';
-import {useState, useEffect, memo, useRef} from 'react';
+import {useState, useEffect, memo, useRef, useCallback} from 'react';
 import { resultToCytoscape } from '../../Utilities/graphFunctions';
 import cytoscape from 'cytoscape';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,7 +11,35 @@ const GraphView = ({result, rawResults}) => {
 
   let graphRef = useRef(null);
   let cy = null;
-  const [currentLayout, setCurrentLayout] = useState({name:'breadthfirst', spacingFactor: 1.5});
+  const layoutList = {
+    breadthfirst: {
+      name: 'breadthfirst', spacingFactor: 1.5
+    },
+    dagre: {
+      name: 'dagre', spacingFactor: 1.5
+    },
+    klay: {
+      name: 'klay'
+    },
+    random: {
+      name: 'random'
+    },
+    avsdf: {
+      name: 'avsdf'
+    },
+    circle: {
+      name: 'circle'
+    },
+    concentric: {
+      name: 'concentric'
+    },
+    cose: {
+      name: 'cose'
+    }
+  }
+  const [currentLayout, setCurrentLayout] = useState(layoutList.breadthfirst)
+
+  
 
   // initialize 3rd party layouts
   cytoscape.use(klay);
@@ -63,7 +91,8 @@ const GraphView = ({result, rawResults}) => {
     });
   }
 
-  const initCytoscapeInstance = (result, summary, graphRef, layout) => {
+  const initCytoscapeInstance = useCallback((result, summary, graphRef, layout, cy) => {
+
     cy = cytoscape({
       container: graphRef.current,
       elements: resultToCytoscape(result, summary),
@@ -114,29 +143,36 @@ const GraphView = ({result, rawResults}) => {
       if(ev.target === cy)
         ev.cy.elements().removeClass(['highlight', 'hide']);
     });    
-    // cy.bind('mouseover', (ev) => {
-    //   if(ev.target === cy)
-    //     ev.cy.elements().removeClass(['highlight', 'hide']);
-    // });    
-  }
   
-
+  },[]);
+  
   useEffect(() => {
-    if(graphRef.current)
-      initCytoscapeInstance(result.rawResult, rawResults.data, graphRef, currentLayout);
-  }, [result, rawResults, currentLayout]);
+    if(graphRef.current) {
+      initCytoscapeInstance(result.rawResult, rawResults.data, graphRef, currentLayout, cy);
+      // isCytoscapeInitialized.current = true;
+    }
+  }, [result, rawResults, currentLayout, initCytoscapeInstance, cy]);
+
+  // useEffect(() => {
+  //   console.log(currentLayout);
+  //   console.log(cy);
+  //   if(cy !== null) {
+  //     console.log('updating layout')
+  //     handleSetLayout(currentLayout, cy);
+  //   }
+  // }, [currentLayout, cy, handleSetLayout]);
 
   return (
     <div className={styles.GraphView}>
       <div className="sidebar" style={{padding: '20px'}}>
-        <button onClick={()=>setCurrentLayout({name:'breadthfirst', spacingFactor: 1.5})}>Breadthfirst</button>
-        <button onClick={()=>setCurrentLayout({name:'dagre', spacingFactor: 1.5})}>dagre</button>
-        <button onClick={()=>setCurrentLayout({name:'klay'})}>Klay</button>
-        <button onClick={()=>setCurrentLayout({name:'random'})}>Random</button>
-        <button onClick={()=>setCurrentLayout({name:'avsdf'})}>avsdf</button>
-        <button onClick={()=>setCurrentLayout({name:'circle'})}>Circle</button>
-        <button onClick={()=>setCurrentLayout({name:'concentric'})}>Concentric</button>
-        <button onClick={()=>setCurrentLayout({name:'cose'})}>Cose</button>
+        <button onClick={()=>setCurrentLayout(layoutList.breadthfirst)}>Breadthfirst</button>
+        <button onClick={()=>setCurrentLayout(layoutList.dagre)}>dagre</button>
+        <button onClick={()=>setCurrentLayout(layoutList.klay)}>Klay</button>
+        <button onClick={()=>setCurrentLayout(layoutList.random)}>Random</button>
+        <button onClick={()=>setCurrentLayout(layoutList.avsdf)}>avsdf</button>
+        <button onClick={()=>setCurrentLayout(layoutList.circle)}>Circle</button>
+        <button onClick={()=>setCurrentLayout(layoutList.concentric)}>Concentric</button>
+        <button onClick={()=>setCurrentLayout(layoutList.cose)}>Cose</button>
       </div>
       <h3>Current Type: <strong>{currentLayout.name}</strong></h3>
       <div className={styles.graphContainer} style={{width: '1200px', height:'600px', margin: '0 auto', border: '1px solid black'}}>

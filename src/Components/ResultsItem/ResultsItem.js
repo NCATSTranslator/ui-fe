@@ -1,13 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
+import LoadingBar from '../LoadingBar/LoadingBar';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
-import GraphView from '../GraphView/GraphView';
+// import GraphView from '../GraphView/GraphView';
+
+const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults}) => {
 
@@ -219,10 +222,12 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             </p>
           }
         </div>
-        <GraphView
-          result={item}
-          rawResults={rawResults}
-        />
+        <Suspense fallback={<LoadingBar loading useIcon reducedPadding />}>
+          <GraphView
+            result={item}
+            rawResults={rawResults}
+          />
+        </Suspense>
         <PathView
           paths={formattedPaths}
           active={isExpanded}

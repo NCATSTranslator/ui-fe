@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './LoadingBar.module.scss';
 
-const LoadingBar = ({loading, useIcon, disclaimerText, className}) => {
+const LoadingBar = ({loading, useIcon, disclaimerText, className, reducedPadding}) => {
 
   // Int, represents results progress bar
   const [progress, setProgress] = useState(1);
@@ -39,7 +39,7 @@ const LoadingBar = ({loading, useIcon, disclaimerText, className}) => {
   }, [opacity, loading, useIcon]);
 
   return (
-    <div className={`${styles.loadingBar} ${className}`}> 
+    <div className={`${styles.loadingBar} ${className} ${(reducedPadding) ? styles.reducedPadding : ''}`}> 
       { useIcon && 
         <img src={loadingIcon} alt="loading icon" className={styles.loadingIcon}/>
       }
