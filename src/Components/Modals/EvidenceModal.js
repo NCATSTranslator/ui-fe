@@ -406,7 +406,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
                   <div className={styles.evidenceItems}>
                     {
                       rawEvidenceEdges.edges.map((item, i) => { 
-                        console.log(item);
                         let subjectName = capitalizeAllWords(item.subject.names[0]);
                         let predicateName = capitalizeAllWords(item.predicate);
                         let objectName = capitalizeAllWords(item.object.names[0]);

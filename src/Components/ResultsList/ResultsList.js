@@ -106,7 +106,7 @@ const ResultsList = ({loading}) => {
   const initPresetDisease = (presetDiseaseLabelParam) ? {id: '', label: presetDiseaseLabelParam} : null;
   const initPresetQueryTypeID = (presetQueryTypeIDParam) ? presetQueryTypeIDParam : null;
   // Obj, {label: ''}, used to set input text, determined by results object
-  const [presetDisease, setPresetDisease] = useState(initPresetDisease);
+  const [presetDisease] = useState(initPresetDisease);
   const [presetQueryTypeID] = useState(initPresetQueryTypeID);
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -304,7 +304,7 @@ const ResultsList = ({loading}) => {
       }
       getResults();
     }
-  }, [isFetchingResults]);
+  }, [isFetchingResults, currentQueryID, formattedResults.length]);
 
   // React Query call for results
   // eslint-disable-next-line
