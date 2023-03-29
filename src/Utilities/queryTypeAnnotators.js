@@ -30,7 +30,12 @@ export const geneQueryAnnotator = async (normalizedNodes) => {
   try {
     const response = await fetch('https://mygene.info/v3/gene', geneInfoRequestOptions);
     const geneAnnotations = await response.json();
-    const validTaxon = { 9606: 'Human', 10090: 'Mouse', 10116: 'Rat' };
+    const validTaxon = {
+      7955: 'Zebrafish',
+      9606: 'Human',
+      10090: 'Mouse',
+      10116: 'Rat'
+    };
     const validGenes = [];
     // The only valid gene autocomplete items should be those that match one of
     // the valid taxon IDs above.
