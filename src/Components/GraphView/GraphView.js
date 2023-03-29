@@ -39,8 +39,6 @@ const GraphView = ({result, rawResults}) => {
   }
   const [currentLayout, setCurrentLayout] = useState(layoutList.breadthfirst)
 
-  
-
   // initialize 3rd party layouts
   cytoscape.use(klay);
   cytoscape.use(avsdf);
@@ -164,18 +162,18 @@ const GraphView = ({result, rawResults}) => {
 
   return (
     <div className={styles.GraphView}>
-      <div className="sidebar" style={{padding: '20px'}}>
-        <button onClick={()=>setCurrentLayout(layoutList.breadthfirst)}>Breadthfirst</button>
-        <button onClick={()=>setCurrentLayout(layoutList.dagre)}>dagre</button>
-        <button onClick={()=>setCurrentLayout(layoutList.klay)}>Klay</button>
-        <button onClick={()=>setCurrentLayout(layoutList.random)}>Random</button>
-        <button onClick={()=>setCurrentLayout(layoutList.avsdf)}>avsdf</button>
-        <button onClick={()=>setCurrentLayout(layoutList.circle)}>Circle</button>
-        <button onClick={()=>setCurrentLayout(layoutList.concentric)}>Concentric</button>
-        <button onClick={()=>setCurrentLayout(layoutList.cose)}>Cose</button>
+      <div className={styles.sidebar}>
+        <h4 className={styles.layoutHeader}>Layout Type:</h4>
+        <button className={`${styles.layoutButton} ${(currentLayout.name === 'breadthfirst')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.breadthfirst)}>Breadthfirst</button>
+        <button className={`${styles.layoutButton} ${(currentLayout.name === 'dagre')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.dagre)}>dagre</button>
+        <button className={`${styles.layoutButton} ${(currentLayout.name === 'klay')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.klay)}>Klay</button>
+        <button className={`${styles.layoutButton} ${(currentLayout.name === 'random')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.random)}>Random</button>
+        <button className={`${styles.layoutButton} ${(currentLayout.name === 'avsdf')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.avsdf)}>avsdf</button>
+        <button className={`${styles.layoutButton} ${(currentLayout.name === 'circle')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.circle)}>Circle</button>
+        <button className={`${styles.layoutButton} ${(currentLayout.name === 'concentric')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.concentric)}>Concentric</button>
+        <button className={`${styles.layoutButton} ${(currentLayout.name === 'cose')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.cose)}>Cose</button>
       </div>
-      <h3>Current Type: <strong>{currentLayout.name}</strong></h3>
-      <div className={styles.graphContainer} style={{width: '1200px', height:'600px', margin: '0 auto', border: '1px solid black'}}>
+      <div className={styles.graphContainer} >
         <div id={`cy-${uuidv4()}`}ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}></div>
       </div>
     </div>
