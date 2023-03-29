@@ -520,12 +520,13 @@ const ResultsList = ({loading}) => {
       handlePageClick({selected: 0});
 
     let filteredResults = [];
+    let sortedPaths = [];
     let originalResults = [...sortedResults];
     /*
       For each result, check against each filter. If a filter is triggered,
       set addElement to false and don't add the element to the filtered results
     */
-    for(const element of originalResults) {
+    for(let element of originalResults) {
       let addElement = true;
       for(const filter of activeFilters) {
         switch (filter.tag) {
@@ -536,8 +537,11 @@ const ResultsList = ({loading}) => {
             break;
           // search string filter
           case 'str':
-            if(!findStringMatch(element, filter.value))
-              addElement = false;
+            [addElement, sortedPaths] = findStringMatch(element, filter.value);
+            if (addElement) {
+              element = cloneDeep(element);
+              element.paths = cloneDeep(sortedPaths);
+            }
             // handleSort('entityString');
             break;
           case 'otc':
@@ -557,7 +561,8 @@ const ResultsList = ({loading}) => {
             break;
         }
       }
-      if(addElement) {
+
+      if (addElement) {
         filteredResults.push(element);
       }
     }

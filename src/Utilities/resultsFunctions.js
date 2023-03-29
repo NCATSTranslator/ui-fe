@@ -132,31 +132,30 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
 // Checks result name, result description, all node names and all predicates
 // Does NOT include node types (Protein, Biological Entity, etc.)
 export const findStringMatch = (element, value) => {
-  if(!value || !element) {
-    return true;
-  }
+  const formattedValue = value.toLowerCase();
+  const foundMatch = !value ||
+                     !element ||
+                     element.name.toLowerCase().includes(formattedValue) ||
+                     element.description && element.description.toLowerCase().includes(formattedValue);
+  const matchingPaths = [];
+  const unmatchingPaths = [];
+  for (const path of element.paths) {
+    let pathMatch = false;
+    for (const item of path.subgraph) {
+      if ((item.names && item.names[0].toLowerCase().includes(formattedValue)) ||
+          (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))) {
+        matchingPaths.push(path);
+        pathMatch = true;
+        break;
+      }
+    }
 
-  let formattedValue = value.toLowerCase();
-  let foundInName = element.name.toLowerCase().indexOf(formattedValue);
-  let foundInDescription =  (element.description) ? element.description.toLowerCase().indexOf(formattedValue) : -1;
-  if (
-    foundInName > -1 || foundInDescription > -1
-  ){
-    return true;
-  }
-
-  for(const path of element.paths) {
-    for(const item of path.subgraph) {
-      if(
-        (item.names && item.names[0].toLowerCase().includes(formattedValue) )||
-        (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))
-        // || item.types && item.types[0].replace('biolink:', '').replaceAll(/([A-Z])/g, ' $1').trim().toLowerCase().includes(formattedValue)
-      )
-        return true;
+    if (!pathMatch) {
+      unmatchingPaths.push(path);
     }
   }
 
-  return false;
+  return [foundMatch || matchingPaths.length > 0, [...matchingPaths, ...unmatchingPaths]];
 }
 
 export const removeHighlights = (elements, value) => {
