@@ -7,6 +7,10 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
     fetchNodesFromInputText(inputText)
       .then(response => response.json())
       .then(nodes => {
+        Object.keys(nodes).forEach((k) => {
+          nodes[k] = nodes[k].map((str) => { return str.toLowerCase(); });
+        });
+
         formatData.resolved = nodes;
         return fetchNormalizedNodesFromNodes(nodes)
       })

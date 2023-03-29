@@ -182,8 +182,17 @@ export const getRandomIntInclusive = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// Remove duplicate objects from an array and keep the relative ordering
 export const removeDuplicateObjects = (arr, getKey) => {
-  const distinctElements = {};
-  arr.forEach((obj) => { distinctElements[getKey(obj)] = obj; });
-  return Object.values(distinctElements);
+  const set = {};
+  const distinctElements = [];
+  arr.forEach((obj) => {
+    const key = getKey(obj);
+    if (set[key] === undefined) {
+      set[key] = true;
+      distinctElements.push(obj);
+    }
+  });
+
+  return distinctElements;
 }
