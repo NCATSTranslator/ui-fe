@@ -136,7 +136,7 @@ export const findStringMatch = (element, value) => {
   const foundMatch = !value ||
                      !element ||
                      element.name.toLowerCase().includes(formattedValue) ||
-                     element.description && element.description.toLowerCase().includes(formattedValue);
+                     (element.description && element.description.toLowerCase().includes(formattedValue));
   const matchingPaths = [];
   const unmatchingPaths = [];
   for (const path of element.paths) {

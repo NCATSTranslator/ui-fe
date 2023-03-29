@@ -1,4 +1,3 @@
-import { capitalizeAllWords } from './utilities';
 import { defaultQueryFilterFactory } from './queryTypeFilters';
 import { defaultQueryAnnotator, geneQueryAnnotator } from './queryTypeAnnotators';
 import { defaultQueryFormatter, geneQueryFormatter, diseaseQueryFormatter } from './queryTypeFormatters';
