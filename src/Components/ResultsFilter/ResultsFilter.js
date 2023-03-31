@@ -153,7 +153,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
             let tagKey = tag[0];
             let object = tag[1];
-            let tagName = (type === 'biolink')? tagName = formatBiolinkEntity(object.name) : capitalizeAllWords(object.name);
+            let tagName = (type === 'biolink')? tagName = formatBiolinkEntity(object.name) : object.name;
             return (
               availableTags[tagKey] && availableTags[tagKey].count &&
               <div className={styles.facetContainer} key={j}>
