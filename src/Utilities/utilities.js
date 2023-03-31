@@ -170,7 +170,7 @@ export const getEntityLink = (id, className, queryType) => {
 
 export const handleFetchErrors = (response, onErrorCallback = () => console.log('No error callback function specified.')) => {
   if(!response.ok) {
-    onErrorCallback();
+    onErrorCallback(response);
     throw Error(response.statusText);
   }
   return response

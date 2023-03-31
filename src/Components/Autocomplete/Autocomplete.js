@@ -44,11 +44,15 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
         <img src={loadingIcon} className={styles.loadingIcon} alt="loading icon" />
       }
       {
+        items && items.length === 1 && items[0] === 'node_norm_error' &&
+        <p className={styles.nodeNormError}>Unable to retrieve search terms due to an outage with the Node Normalizer. Click <a href="https://smart-api.info/registry/translator?q=node%20normalizer&tags=translator" rel="noreferrer" target="_blank">here</a> for more details, or try again later.</p>
+      }
+      {
         items && items.length === 0 && !isLoading &&
         <p className={styles.noResults}>No matching terms were found, please adjust your search term and try again.</p>
       }
       {
-        items && items.length > 0 && !isLoading &&
+        items && items.length > 0 && !isLoading && items[0] !== 'node_norm_error' && 
         <div>
           {
             items.slice(0, numberVisibleItems).map((item, i) => {

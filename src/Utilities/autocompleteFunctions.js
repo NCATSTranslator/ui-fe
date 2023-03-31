@@ -1,3 +1,13 @@
+import { handleFetchErrors } from "./utilities";
+
+
+const handleNodeNormError = (response, setterFunction) => {
+  if(response.status === 502) 
+    setterFunction(['node_norm_error']);
+  else 
+    setterFunction([]);
+}
+
 // Returns array of terms based on user input
 export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions) => {
   if(inputText) {
@@ -14,6 +24,7 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
         formatData.resolved = nodes;
         return fetchNormalizedNodesFromNodes(nodes)
       })
+      .then(response => handleFetchErrors(response, handleNodeNormError(response, setAutoCompleteItems)))
       .then(response => response.json())
       .then(normalizedNodes => filterNormalizedNodes(normalizedNodes, autocompleteFunctions.filter))
       .then(normalizedNodes => autocompleteFunctions.annotate(normalizedNodes))
