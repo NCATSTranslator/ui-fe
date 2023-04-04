@@ -156,7 +156,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             let tagName = '';
             if (type === 'resultType') {
               tagName = formatBiolinkEntity(object.name);
-            } else
+            } else {
               tagName = object.name;
             }
 
