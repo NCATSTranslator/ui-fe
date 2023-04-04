@@ -51,11 +51,11 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   const groupAvailableTags = (tags) => {
     let clonedTags = global.structuredClone(tags);
     let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ATC')));
-    let biolinkTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('biolink')));
+    let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
     let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda')));
     const newGroupedTags = {
       fda: fdaTags,
-      biolink: biolinkTags,
+      resultType: resultTypeTags,
       atc: atcTags
     }
     return newGroupedTags;
@@ -90,7 +90,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getBiolinkHeading = () => {
+  const getResultTypeHeading = () => {
     return(
       <div className={styles.labelContainer} >
           <div className={styles.label} data-tooltip-id="biolink-tooltip" >
@@ -110,8 +110,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       case 'fda':
         headingToReturn = getFdaHeading();
         break;
-      case 'biolink':
-        headingToReturn = getBiolinkHeading();
+      case 'resultType':
+        headingToReturn = getResultTypeHeading();
         break;
       case 'atc':
         headingToReturn = getAtcHeading();
@@ -153,7 +153,13 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
             let tagKey = tag[0];
             let object = tag[1];
-            let tagName = (type === 'biolink')? tagName = formatBiolinkEntity(object.name) : capitalizeAllWords(object.name);
+            let tagName = '';
+            if (type === 'resultType') {
+              tagName = formatBiolinkEntity(object.name);
+            } else {
+              tagName = capitalizeAllWords(object.name);
+            }
+
             return (
               availableTags[tagKey] && availableTags[tagKey].count &&
               <div className={styles.facetContainer} key={j}>
