@@ -29,11 +29,6 @@
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build:local": "react-scripts build",
-    "build:dev": "react-scripts build",
-    "build:test": "react-scripts build",
-    "build:ci": "react-scripts build",
-    "build:production": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
