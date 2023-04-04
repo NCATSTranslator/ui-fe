@@ -43,6 +43,9 @@ const GraphView = ({result, rawResults}) => {
   const highlightClass = 'highlight';
   const hideClass = 'hide';
 
+  const subjectID = result.rawResult.subject;
+  const objectID = result.rawResult.object;
+
   // initialize 3rd party layouts
   cytoscape.use(klay);
   cytoscape.use(avsdf);
@@ -83,65 +86,106 @@ const GraphView = ({result, rawResults}) => {
     }
   }, [])
 
-  const addClassToConnections = useCallback((eventType, cy) => {
-    cy.unbind(eventType);
-    cy.bind(eventType, 'node', (ev) => {
-      const target = ev.target;
-      let hideTarget = false;
+  const checkEdgesForHighlight = (edges) => {
+    let foundHighlight = false;
+    edges.forEach((el)=>{
+      if(el.hasClass('highlight')) 
+        foundHighlight = true;
+    })
+    return foundHighlight;
+  }
 
-      // If we're clicking on a previously deselected node, remove it from the list 
-      if(deselectedNodes.current.has(target.id()))
-        deselectedNodes.current.delete(target.id());
+  const handleNodeClick = useCallback((ev) => {
+    const target = ev.target;
+    const object = ev.cy.getElementById(objectID);
+    const subject = ev.cy.getElementById(subjectID);
+    let hideTarget = false;
+    
+    // If we're clicking on a previously deselected node, remove it from the list of deselected nodes
+    if(deselectedNodes.current.has(target.id()))
+      deselectedNodes.current.delete(target.id());
 
-      /* 
-        if the node was highlighted previously, but it isn't the selected node, then the user 
-        has selected an intermediate node in a path that's already highlighted. So we should
-        hide such a node
-      */
-      if(!selectedNodes.current.has(target.id()) && target.hasClass(highlightClass)) {
-        hideTarget = true;
-        deselectedNodes.current.add(target.id());
-      }
+    /* 
+      if the node was highlighted previously, but it isn't the selected node, then the user 
+      has selected an intermediate node in a path that's already highlighted. So we should
+      hide such a node
+    */
+    if(!selectedNodes.current.has(target.id()) && target.hasClass(highlightClass)) {
+      hideTarget = true;
+      deselectedNodes.current.add(target.id());
+    }
 
-      // initialize graph by hiding all elements
-      hideElement(ev.cy.elements());
+    // initialize graph by hiding all elements
+    hideElement(ev.cy.elements());
 
-      // If we're clicking a node we've already selected, remove it 
-      if(selectedNodes.current.size && selectedNodes.current.has(target.id()) ) {
-        selectedNodes.current.delete(target.id())
-      } else if(!hideTarget) {
-        // otherwise if it's not one we want to hide, add it 
-        selectedNodes.current.add(target.id())
-      } 
-        
-      // for each selected node
-      selectedNodes.current.forEach((nodeId)=> {
-        let node = ev.cy.getElementById(nodeId);
-        // for each of the selected node's successors
+    // If we're clicking a node we've already selected, remove it from selectedNodes
+    if(selectedNodes.current.size && selectedNodes.current.has(target.id()) ) {
+      selectedNodes.current.delete(target.id())
+    } else if(!hideTarget) {
+      // otherwise if it's not one we want to hide, add it to selectedNodes
+      selectedNodes.current.add(target.id())
+    } 
+    
+    // for each selected node
+    selectedNodes.current.forEach((nodeId)=> {
+      let node = ev.cy.getElementById(nodeId);
+      // for each of the selected node's successors
+      if(node.successors().has(object)) {
         node.successors().forEach((e)=> {
           handleApplyHighlight(e);
         })
+      }
+      // for each of the selected node's predecessors
+      if(node.predecessors().has(subject)) {
         node.predecessors().forEach((e)=> {
           handleApplyHighlight(e);
         })
-      })
-
-      if(hideTarget) {
-        hideElement(target);
-        if(target.predecessors().size() <= 1) {
-          hideElement(target.predecessors());
-        } else {
-          hideElement(target.connectedEdges());
-        }
-        if(target.successors().size() <= 1) {
-          hideElement(target.successors());
-        } else {
-          hideElement(target.connectedEdges());
-        }
       }
+    })
 
-    });
-  },[handleApplyHighlight]);
+    // if the target needs to be hidden
+    if(hideTarget) {
+      // hide it
+      hideElement(target);
+      // then loop through the selectedNodes again
+      selectedNodes.current.forEach((nodeId) => {
+        let node = ev.cy.getElementById(nodeId);
+        let incomers = node.incomers();
+        let outgoers = node.outgoers();
+        // check incoming edges for at least one highlighted edge 
+        let incomersHaveHighlight = checkEdgesForHighlight(incomers);
+        // check outgoing edges for at least one highlighted edge 
+        let outgoersHaveHighlight = checkEdgesForHighlight(outgoers);
+
+        // if either side has no highlighted edge, the path has been broken. Hide all of the connected elements
+        if(!incomersHaveHighlight || !outgoersHaveHighlight){
+          selectedNodes.current.delete(nodeId);
+          hideElement(node);
+          hideElement(node.predecessors());
+          hideElement(node.successors());
+          // check the predecessors and successors for presence in deselected nodes
+          // if present, remove that id from deselected nodes (in case the user needs to select that node later)
+          node.predecessors().forEach(el=> {
+            if(deselectedNodes.current.has(el.id()))
+              deselectedNodes.current.delete(el.id());
+          })
+          node.successors().forEach(el=> {
+            if(deselectedNodes.current.has(el.id()))
+              deselectedNodes.current.delete(el.id());
+          })
+
+          // check subject and object for highlighted edges from other paths, then 
+          // rehighlight them if they have other highlighted edges (since we hid all 
+          // predecessors and successors of the selected node earlier)
+          if(checkEdgesForHighlight(subject.outgoers()))
+            highlightElement(subject);
+
+          if(checkEdgesForHighlight(object.incomers()))
+            highlightElement(object);
+        }
+      })
+    }
+  }, [subjectID, objectID, handleApplyHighlight])
 
   const initCytoscapeInstance = useCallback((result, summary, graphRef, layout, cy) => {
 
@@ -186,8 +230,8 @@ const GraphView = ({result, rawResults}) => {
       }
     });
 
-
-    addClassToConnections('tapstart', cy);
+    cy.unbind('tapstart');
+    cy.bind('tapstart', 'node', handleNodeClick);
     // addClassToConnections('hover-highlight', 'hide', 'mouseover', summary, cy);
 
     // when background is clicked, remove highlight and hide classes from all elements
@@ -199,7 +243,7 @@ const GraphView = ({result, rawResults}) => {
       }
     });    
   
-  },[selectedNodes, addClassToConnections]);
+  },[selectedNodes, handleNodeClick]);
   
   useEffect(() => {
     if(graphRef.current) {
