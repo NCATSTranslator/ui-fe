@@ -156,8 +156,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             let tagName = '';
             if (type === 'resultType') {
               tagName = formatBiolinkEntity(object.name);
-            } else {
-              tagName = capitalizeAllWords(object.name);
+            } else
+              tagName = object.name;
             }
 
             return (
