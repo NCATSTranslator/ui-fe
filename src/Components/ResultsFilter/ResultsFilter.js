@@ -52,10 +52,12 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let clonedTags = global.structuredClone(tags);
     let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ATC')));
     let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
+    let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
     let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda')));
     const newGroupedTags = {
       fda: fdaTags,
       resultType: resultTypeTags,
+      nodeType: nodeTypeTags,
       atc: atcTags
     }
     return newGroupedTags;
@@ -100,10 +102,26 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
                 <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
             </Tooltip>
           </div>
-          <p className={styles.caption}>Show only results that begin with a particular Biolink type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+          <p className={styles.caption}>Show only results that begin with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
       </div>
     )
   }
+
+  const getNodeTypeHeading = () => {
+    return(
+      <div className={styles.labelContainer} >
+        <div className={styles.label} data-tooltip-id="biolink-tooltip" >
+          <p className={styles.subTwo}>Node Type</p>
+          <Alert/>
+          <Tooltip id="biolink-tooltip">
+                <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
+            </Tooltip>
+          </div>
+          <p className={styles.caption}>Show only results that include a node with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+      </div>
+    )
+  }
+
   const getTagHeadingMarkup = (tagType) => {
     let headingToReturn;
     switch(tagType) {
@@ -112,6 +130,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
         break;
       case 'resultType':
         headingToReturn = getResultTypeHeading();
+        break;
+      case 'nodeType':
+        headingToReturn = getNodeTypeHeading();
         break;
       case 'atc':
         headingToReturn = getAtcHeading();
@@ -154,7 +175,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             let tagKey = tag[0];
             let object = tag[1];
             let tagName = '';
-            if (type === 'resultType') {
+            if (type === 'resultType' || type == 'nodeType') {
               tagName = formatBiolinkEntity(object.name);
             } else {
               tagName = object.name;
