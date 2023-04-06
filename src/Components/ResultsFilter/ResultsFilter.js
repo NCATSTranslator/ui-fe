@@ -51,11 +51,13 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   const groupAvailableTags = (tags) => {
     let clonedTags = global.structuredClone(tags);
     let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ATC')));
-    let biolinkTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('biolink')));
+    let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
+    let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
     let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda')));
     const newGroupedTags = {
       fda: fdaTags,
-      biolink: biolinkTags,
+      resultType: resultTypeTags,
+      nodeType: nodeTypeTags,
       atc: atcTags
     }
     return newGroupedTags;
@@ -90,7 +92,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getBiolinkHeading = () => {
+  const getResultTypeHeading = () => {
     return(
       <div className={styles.labelContainer} >
           <div className={styles.label} data-tooltip-id="biolink-tooltip" >
@@ -100,18 +102,37 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
                 <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
             </Tooltip>
           </div>
-          <p className={styles.caption}>Show only results that begin with a particular Biolink type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+          <p className={styles.caption}>Show only results that begin with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
       </div>
     )
   }
+
+  const getNodeTypeHeading = () => {
+    return(
+      <div className={styles.labelContainer} >
+        <div className={styles.label} data-tooltip-id="biolink-tooltip" >
+          <p className={styles.subTwo}>Node Type</p>
+          <Alert/>
+          <Tooltip id="biolink-tooltip">
+                <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
+            </Tooltip>
+          </div>
+          <p className={styles.caption}>Show only results that include a node with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+      </div>
+    )
+  }
+
   const getTagHeadingMarkup = (tagType) => {
     let headingToReturn;
     switch(tagType) {
       case 'fda':
         headingToReturn = getFdaHeading();
         break;
-      case 'biolink':
-        headingToReturn = getBiolinkHeading();
+      case 'resultType':
+        headingToReturn = getResultTypeHeading();
+        break;
+      case 'nodeType':
+        headingToReturn = getNodeTypeHeading();
         break;
       case 'atc':
         headingToReturn = getAtcHeading();
@@ -153,7 +174,13 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
             let tagKey = tag[0];
             let object = tag[1];
-            let tagName = (type === 'biolink')? tagName = formatBiolinkEntity(object.name) : object.name;
+            let tagName = '';
+            if (type === 'resultType' || type == 'nodeType') {
+              tagName = formatBiolinkEntity(object.name);
+            } else {
+              tagName = object.name;
+            }
+
             return (
               availableTags[tagKey] && availableTags[tagKey].count &&
               <div className={styles.facetContainer} key={j}>

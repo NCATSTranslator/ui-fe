@@ -107,8 +107,6 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let itemScore = (item.score === null) ? 0 : item.score.toFixed(1);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
-    if(subjectNode !== undefined)
-      tags.push(subjectNode.types[0]);
     let formattedItem = {
       id: _.uniqueId(),
       subjectNode: subjectNode,
