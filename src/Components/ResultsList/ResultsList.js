@@ -22,8 +22,12 @@ import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
 import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
+import { unstable_useBlocker as useBlocker } from "react-router";
+import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
 
 const ResultsList = ({loading}) => {
+
+  let blocker = useBlocker(true);
 
   // URL search params
   const loadingParam = new URLSearchParams(window.location.search).get("loading")
@@ -156,7 +160,6 @@ const ResultsList = ({loading}) => {
       headers: { 'Content-Type': 'application/json' },
       body: queryIDJson
     };
-    let responseClone;
     // eslint-disable-next-line
     const response = await fetch('/creative_status', requestOptions)
       .then(response => handleFetchErrors(response))
@@ -846,6 +849,7 @@ const ResultsList = ({loading}) => {
           }
         </div>
       </div>
+      {blocker ? <NavConfirmationPromptModal blocker={blocker} /> : null}
     </QueryClientProvider>
   );
 }

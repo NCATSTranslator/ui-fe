@@ -26,10 +26,8 @@
   }
 
   &.secondary {
-    color: $black;
+    color: $purpleOne;
     background-color: $white;
-    border: 1px solid $black;
-
   }
   &.iconOnly {
     border-radius: 50%;
@@ -49,4 +47,3 @@
     cursor: default;
   }
 }
-
