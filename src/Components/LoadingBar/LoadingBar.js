@@ -52,7 +52,7 @@ const LoadingBar = ({loading, useIcon, disclaimerText, className}) => {
           </div>
         </div>
       }
-      <h6 className={styles.heading}>Loading...</h6>
+      <h6 className={styles.heading}>Calculating...</h6>
       {disclaimerText && disclaimerText}
     </div>
   )
