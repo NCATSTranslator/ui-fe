@@ -547,10 +547,6 @@ const ResultsList = ({loading}) => {
             }
             // handleSort('entityString');
             break;
-          case 'otc':
-            if(!element.tags.includes('otc'))
-              addElement = false;
-            break;
           case 'tag':
             if(!element.tags.includes(filter.value))
               addElement = false;
