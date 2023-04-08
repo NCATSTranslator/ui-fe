@@ -86,3 +86,19 @@ export const sortByHighlighted = (totalItems, highlightedItems) => {
   ];
   return sortedItems;
 }
+
+// Given a result and a tag, return the paths in the result ordered by if the path is tagged with
+// the given tag. The sort is stable.
+export const sortPathsByTag = (result, tag) => {
+  const sorted = [];
+  const unsorted = [];
+  result.paths.forEach((path) => {
+    if (path.tags[tag] !== undefined) {
+      sorted.push(path);
+    } else {
+      unsorted.push(path);
+    }
+  });
+
+  return [...sorted, ...unsorted];
+}
