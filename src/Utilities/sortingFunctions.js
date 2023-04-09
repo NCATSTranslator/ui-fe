@@ -87,18 +87,12 @@ export const sortByHighlighted = (totalItems, highlightedItems) => {
   return sortedItems;
 }
 
-// Given a result and a tag, return the paths in the result ordered by if the path is tagged with
-// the given tag. The sort is stable.
-export const sortPathsByTag = (result, tag) => {
-  const sorted = [];
-  const unsorted = [];
-  result.paths.forEach((path) => {
+// Given a result, a tag, and a ranking of paths, update the rank of a path to be lower if the
+// tag appears in the path.
+export const updatePathRankByTag = (result, tag, pathRanks) => {
+  result.paths.forEach((path, i) => {
     if (path.tags[tag] !== undefined) {
-      sorted.push(path);
-    } else {
-      unsorted.push(path);
+      pathRanks[i].rank -= 1;
     }
   });
-
-  return [...sorted, ...unsorted];
 }

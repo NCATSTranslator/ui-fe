@@ -129,31 +129,28 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
 // Function to search given element for string match, used in string filter
 // Checks result name, result description, all node names and all predicates
 // Does NOT include node types (Protein, Biological Entity, etc.)
-export const findStringMatch = (element, value) => {
+export const findStringMatch = (element, value, pathRanks) => {
   const formattedValue = value.toLowerCase();
-  const foundMatch = !value ||
-                     !element ||
-                     element.name.toLowerCase().includes(formattedValue) ||
-                     (element.description && element.description.toLowerCase().includes(formattedValue));
-  const matchingPaths = [];
-  const unmatchingPaths = [];
-  for (const path of element.paths) {
-    let pathMatch = false;
-    for (const item of path.subgraph) {
+  let foundMatch = !value ||
+                   !element ||
+                   element.name.toLowerCase().includes(formattedValue) ||
+                   (element.description && element.description.toLowerCase().includes(formattedValue));
+  //console.log(formattedValue);
+  for (let i = 0; i < element.paths.length; ++i) {
+    const path = element.paths[i];
+    for (let item of path.subgraph) {
+      //console.log(item.names[0].toLowerCase());
       if ((item.names && item.names[0].toLowerCase().includes(formattedValue)) ||
           (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))) {
-        matchingPaths.push(path);
-        pathMatch = true;
+        // Its confusing to update the pathRanks here, but it is more efficient
+        pathRanks[i].rank -= 1;
+        foundMatch = true;
         break;
       }
     }
-
-    if (!pathMatch) {
-      unmatchingPaths.push(path);
-    }
   }
 
-  return [foundMatch || matchingPaths.length > 0, [...matchingPaths, ...unmatchingPaths]];
+  return foundMatch;
 }
 
 export const removeHighlights = (elements, value) => {
