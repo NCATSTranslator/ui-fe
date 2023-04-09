@@ -135,11 +135,9 @@ export const findStringMatch = (element, value, pathRanks) => {
                    !element ||
                    element.name.toLowerCase().includes(formattedValue) ||
                    (element.description && element.description.toLowerCase().includes(formattedValue));
-  //console.log(formattedValue);
   for (let i = 0; i < element.paths.length; ++i) {
     const path = element.paths[i];
     for (let item of path.subgraph) {
-      //console.log(item.names[0].toLowerCase());
       if ((item.names && item.names[0].toLowerCase().includes(formattedValue)) ||
           (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))) {
         // Its confusing to update the pathRanks here, but it is more efficient
