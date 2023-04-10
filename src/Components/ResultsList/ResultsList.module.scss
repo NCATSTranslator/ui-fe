@@ -24,7 +24,7 @@
           background-color: $lightGray;
         }
         &>div:first-child {
-          background-color: $purpleTwo;  
+          background-color: $purpleTwo;
         }
       }
       .tableHead {
@@ -60,6 +60,24 @@
         }
         .fdaHead, .evidenceHead, .scoreHead {
           justify-self: center;
+          svg {
+            margin-left: 2px;
+            width: 18px;
+            height: 18px;
+            circle {
+              stroke: $white;
+            }
+            circle:last-child {
+              fill: $white;
+            }
+            path {
+              fill: $white;
+            }
+          }
+        }
+        .scoreSpan {
+          font-size: 12px;
+          text-transform: none;
         }
         .nameHead, .evidenceHead, .scoreHead {
           &:hover {
@@ -75,7 +93,7 @@
               top: 2px;
               right: -15px;
               margin-left: 3px;
-              border-top: 0px solid transparent;        
+              border-top: 0px solid transparent;
               border-right: 5px solid transparent;
               border-bottom: 5px solid $white;
               border-left: 5px solid transparent;
@@ -85,7 +103,7 @@
             &:after {
               top: 4px;
               transform: rotate(180deg);
-            }   
+            }
           }
         }
       }
@@ -141,17 +159,17 @@
   }
 }
 
-@-moz-keyframes spin { 
-  100% { -moz-transform: rotate(360deg); } 
+@-moz-keyframes spin {
+  100% { -moz-transform: rotate(360deg); }
 }
-@-webkit-keyframes spin { 
-  100% { -webkit-transform: rotate(360deg); } 
+@-webkit-keyframes spin {
+  100% { -webkit-transform: rotate(360deg); }
 }
-@keyframes spin { 
-  100% { 
-      -webkit-transform: rotate(360deg); 
-      transform:rotate(360deg); 
-  } 
+@keyframes spin {
+  100% {
+      -webkit-transform: rotate(360deg);
+      transform:rotate(360deg);
+  }
 }
 .loadingButtonContainer {
   margin-top: $m;
@@ -214,7 +232,7 @@
         a {
           background-color: $purpleTwo20;
           color: $purpleOne;
-        } 
+        }
       }
     }
   }
@@ -251,6 +269,7 @@
     }
   }
 }
+
 .activeFilters {
   margin: 0 0 30px;
   .filterTag {
@@ -272,7 +291,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      
+
       &:hover {
         cursor: pointer;
       }
