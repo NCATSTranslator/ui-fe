@@ -13,7 +13,7 @@ import { currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
-  sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings } from "../../Utilities/sortingFunctions";
+  sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import { handleFetchErrors } from "../../Utilities/utilities";
 import { cloneDeep, isEqual } from "lodash";
@@ -525,37 +525,30 @@ const ResultsList = ({loading}) => {
       handlePageClick({selected: 0});
 
     let filteredResults = [];
-    let sortedPaths = [];
     let originalResults = [...sortedResults];
     /*
       For each result, check against each filter. If a filter is triggered,
       set addElement to false and don't add the element to the filtered results
     */
     for(let element of originalResults) {
-      let addElement = true;
+      let addElement = false;
+      const pathRanks = element.paths.map((p) => { return { rank: 0, path: p }; });
       for(const filter of activeFilters) {
         switch (filter.tag) {
           // Minimum evidence filter
           case 'evi':
-            if(element.evidence.length < filter.value)
-              addElement = false;
+            addElement = (filter.value < element.evidence.length);
             break;
-          // search string filter
+          // Search string filter
           case 'str':
-            [addElement, sortedPaths] = findStringMatch(element, filter.value);
-            if (addElement) {
-              element = cloneDeep(element);
-              element.paths = cloneDeep(sortedPaths);
-            }
-            // handleSort('entityString');
+            addElement = findStringMatch(element, filter.value, pathRanks);
             break;
-          case 'otc':
-            if(!element.tags.includes('otc'))
-              addElement = false;
-            break;
+          // Filter for tagged data
           case 'tag':
-            if(!element.tags.includes(filter.value))
-              addElement = false;
+            if(element.tags.includes(filter.value)) {
+              addElement = true
+              updatePathRankByTag(element, filter.value, pathRanks);
+            }
             break;
           // Add new filter tags in this way:
           case 'example':
@@ -568,6 +561,9 @@ const ResultsList = ({loading}) => {
       }
 
       if (addElement) {
+        pathRanks.sort((a, b) => { return a.rank - b.rank; });
+        element = cloneDeep(element);
+        element.paths = pathRanks.map((pr) => { return pr.path; });
         filteredResults.push(element);
       }
     }
@@ -628,7 +624,7 @@ const ResultsList = ({loading}) => {
         <div className={styles.loadingButtonContainer}>
           <button className={`${styles.loadingButton} ${styles.inactive}`}>
             <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-            Loading
+            Calculating
           </button>
         </div>
       )
