@@ -60,6 +60,21 @@
         }
         .fdaHead, .evidenceHead, .scoreHead {
           justify-self: center;
+          svg {
+            circle {
+              stroke: $white;
+            }
+            circle:last-child {
+              fill: $white;
+            }
+            path {
+              fill: $white;
+            }
+          }
+        }
+        .scoreSpan {
+          font-size: 12px;
+          text-transform: none;
         }
         .nameHead, .evidenceHead, .scoreHead {
           &:hover {
@@ -251,6 +266,7 @@
     }
   }
 }
+
 .activeFilters {
   margin: 0 0 30px;
   .filterTag {

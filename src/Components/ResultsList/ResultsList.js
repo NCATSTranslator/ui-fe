@@ -18,6 +18,8 @@ import { getSummarizedResults, findStringMatch, removeHighlights } from "../../U
 import { handleFetchErrors } from "../../Utilities/utilities";
 import { cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
+import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
+import Tooltip from '../Tooltip/Tooltip';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
 import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
@@ -759,20 +761,25 @@ const ResultsList = ({loading}) => {
                       <div
                         className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`}
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByName)?'nameHighLow': 'nameLowHigh'))}}
-                        >
+                      >
                         Name
                       </div>
                       <div
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow'))}}
-                        >
+                      >
                         Evidence
                       </div>
                       <div
                         className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
                         onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByScore)?'scoreLowHigh': 'scoreHighLow'))}}
-                        >
+                        data-tooltip-id="score-tooltip"
+                      >
                         Score
+                        <Alert/>
+                        <Tooltip id="score-tooltip">
+                          <span className={styles.scoreSpan}>Multimodal calculation considering the strength and amount of evidence supporting the result. It is presented as a percentile and may change as new results are added.</span>
+                        </Tooltip>
                       </div>
                     </div>
                     {
