@@ -622,7 +622,7 @@ const ResultsList = ({loading}) => {
         <div className={styles.loadingButtonContainer}>
           <button className={`${styles.loadingButton} ${styles.inactive}`}>
             <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-            Loading
+            Calculating
           </button>
         </div>
       )
