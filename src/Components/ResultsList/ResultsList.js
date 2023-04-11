@@ -459,29 +459,20 @@ const ResultsList = ({loading}) => {
   }
 
   // Output jsx for selected filters
-  const getSelectedFilterDisplay = (element) => {
+  const getSelectedFilterDisplay = (filter) => {
     let filterDisplay;
-    switch (element.type) {
-      case "hum":
-        filterDisplay = <div>Species: <span>Human</span></div>;
-        break;
+    switch (filter.type) {
       case "evi":
-        filterDisplay = <div>Minimum Evidence: <span>{element.value}</span></div>;
+        filterDisplay = <div>Minimum Evidence: <span>{filter.value}</span></div>;
         break;
       case "fda":
         filterDisplay = <div><span>FDA Approved</span></div>;
         break;
-      case "date":
-        filterDisplay = <div>Date of Evidence: <span>{element.value[0]}-{element.value[1]}</span></div>;
-        break;
       case "str":
-        filterDisplay = <div>String: <span>{element.value}</span></div>;
-        break;
-      case "otc":
-        filterDisplay = <div><span>Available OTC</span></div>;
+        filterDisplay = <div>String: <span>{filter.value}</span></div>;
         break;
       case "tag":
-        filterDisplay = <div>Tag:<span> {element.label}</span></div>;
+        filterDisplay = <div>Tag:<span> {filter.label}</span></div>;
         break;
       default:
         break;
@@ -531,43 +522,43 @@ const ResultsList = ({loading}) => {
     let originalResults = [...sortedResults];
     /*
       For each result, check against each filter. If a filter is triggered,
-      set addElement to false and don't add the element to the filtered results
+      set addResult to true and add the result to the filtered results
     */
-    for(let element of originalResults) {
-      let addElement = false;
-      const pathRanks = element.paths.map((p) => { return { rank: 0, path: p }; });
+    for(let result of originalResults) {
+      let addResult = false;
+      const pathRanks = result.paths.map((p) => { return { rank: 0, path: p }; });
       for(const filter of activeFilters) {
         switch (filter.type) {
           // Minimum evidence filter
           case 'evi':
-            addElement = (filter.value < element.evidence.length);
+            addResult = (filter.value < result.evidence.length);
             break;
           // Search string filter
           case 'str':
-            addElement = findStringMatch(element, filter.value, pathRanks);
+            addResult = findStringMatch(result, filter.value, pathRanks);
             break;
           // Filter for tagged data
           case 'tag':
-            if(element.tags.includes(filter.value)) {
-              addElement = true
-              updatePathRankByTag(element, filter.value, pathRanks);
+            if(result.tags.includes(filter.value)) {
+              addResult = true
+              updatePathRankByTag(result, filter.value, pathRanks);
             }
             break;
           // Add new filter tags in this way:
           case 'example':
             // if(false)
-            //   addElement = false;
+            //   addResult = false;
             break;
           default:
             break;
         }
       }
 
-      if (addElement) {
+      if (addResult) {
         pathRanks.sort((a, b) => { return a.rank - b.rank; });
-        element = cloneDeep(element);
-        element.paths = pathRanks.map((pr) => { return pr.path; });
-        filteredResults.push(element);
+        result = cloneDeep(result);
+        result.paths = pathRanks.map((pr) => { return pr.path; });
+        filteredResults.push(result);
       }
     }
 
