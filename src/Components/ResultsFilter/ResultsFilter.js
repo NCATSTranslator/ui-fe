@@ -95,10 +95,10 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   const getResultTypeHeading = () => {
     return(
       <div className={styles.labelContainer} >
-          <div className={styles.label} data-tooltip-id="biolink-tooltip" >
+          <div className={styles.label} data-tooltip-id="biolink-tooltip-1" >
             <p className={styles.subTwo}>Result Type</p>
             <Alert/>
-            <Tooltip id="biolink-tooltip">
+            <Tooltip id="biolink-tooltip-1">
                 <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
             </Tooltip>
           </div>
@@ -110,10 +110,10 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   const getNodeTypeHeading = () => {
     return(
       <div className={styles.labelContainer} >
-        <div className={styles.label} data-tooltip-id="biolink-tooltip" >
+        <div className={styles.label} data-tooltip-id="biolink-tooltip-2" >
           <p className={styles.subTwo}>Node Type</p>
           <Alert/>
-          <Tooltip id="biolink-tooltip">
+          <Tooltip id="biolink-tooltip-2">
                 <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
             </Tooltip>
           </div>
