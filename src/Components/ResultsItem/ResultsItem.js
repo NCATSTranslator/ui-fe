@@ -20,6 +20,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
   const [formattedPaths, setFormattedPaths] = useState([]);
+  const [highlightedPaths, setHighlightedPaths] = useState([]);
 
   const initPathString = (type !== undefined && type.pathString) ? type.pathString : 'may affect';
 
@@ -164,6 +165,12 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     setFormattedPaths(generateCompressedPaths(newPaths));
   }, [item, generateCompressedPaths]);
 
+  const handleNodeClick = useCallback((paths) => {
+
+    // console.log(paths)
+
+  }, [highlightedPaths, formattedPaths])
+
   return (
     <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
@@ -226,6 +233,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           <GraphView
             result={item}
             rawResults={rawResults}
+            onNodeClick={handleNodeClick}
           />
         </Suspense>
         <PathView
