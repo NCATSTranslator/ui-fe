@@ -50,10 +50,10 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   // returns a new object with each tag grouped by its type
   const groupAvailableTags = (tags) => {
     let clonedTags = global.structuredClone(tags);
-    let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ATC')));
+    let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('atc:')));
     let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
     let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
-    let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda')));
+    let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda:')));
     const newGroupedTags = {
       fda: fdaTags,
       resultType: resultTypeTags,
