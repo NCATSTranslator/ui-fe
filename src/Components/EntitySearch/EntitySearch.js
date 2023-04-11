@@ -27,8 +27,8 @@ const EntitySearch = ({activeFilters, onFilter}) => {
   return (
     <div className={styles.entitySearch}>
       <p className={`${styles.subTwo} sub-two`}>Entity Search</p>
-      <TextInput 
-        label="" 
+      <TextInput
+        label=""
         rows={1}
         maxLength={200}
         handleChange={(value)=> handleStringSearchChange(value)}
@@ -36,7 +36,7 @@ const EntitySearch = ({activeFilters, onFilter}) => {
         className={styles.textInput}
         value={searchStringObject.value}
       />
-      {/* <Checkbox handleClick={handleStringSearchActive} 
+      {/* <Checkbox handleClick={handleStringSearchActive}
         checked={activeFilters.some(e => e.tag === searchStringObject.tag)}>
           Minimum Number of Evidence
       </Checkbox> */}
