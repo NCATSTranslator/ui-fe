@@ -11,8 +11,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
 
   const facetShowMoreIncrement = 5;
 
-  const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: 1});
-  const [tagObject, setTagObject] = useState({tag:'tag', value: ''});
+  const [evidenceObject, setEvidenceObject] = useState({type:'evi', value: 1});
+  const [tagObject, setTagObject] = useState({type:'tag', value: ''});
   const [groupedTags, setGroupedTags] = useState({});
   const [countsToShow, setCountsToShow] = useState(null);
 
@@ -186,7 +186,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
               <div className={styles.facetContainer} key={j}>
                 <Checkbox
                   handleClick={() => handleFacetChange(tagKey, tagObject, setTagObject, tagName)}
-                  checked={activeFilters.some(e => e.tag === 'tag' && e.value === tagKey)}
+                  checked={activeFilters.some(filter => filter.type === 'tag' && filter.value === tagKey)}
                   className={styles.checkbox}
                   >
                   {tagName} <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
@@ -223,7 +223,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           <Checkbox
             handleClick={handleEvidenceActive}
             className={styles.evidenceCheckbox}
-            checked={activeFilters.some(e => e.tag === evidenceObject.tag)}>
+            checked={activeFilters.some(filter => filter.type === evidenceObject.type)}>
               Minimum Number of Evidence
           </Checkbox>
           <SimpleRange

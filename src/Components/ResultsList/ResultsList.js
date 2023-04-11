@@ -409,9 +409,9 @@ const ResultsList = ({loading}) => {
   const handleFilter = (filter) => {
 
     let indexes = [];
-    for(const [i, value] of activeFilters.entries() ) {
-      if((value.tag === filter.tag && filter.tag !== 'tag')
-      || (filter.tag === 'tag' && filter.value === value.value))
+    for(const [i, activeFilter] of activeFilters.entries() ) {
+      if((activeFilter.type === filter.type && filter.type !== 'tag')
+      || (filter.type === 'tag' && filter.value === activeFilter.value))
         indexes.push(i);
     }
 
@@ -434,7 +434,7 @@ const ResultsList = ({loading}) => {
           }, []);
           addFilter = false;
         // If the values don't match and it's not a string search, update the value
-        } else if(filter.tag !== 'str') {
+        } else if(filter.type !== 'str') {
           newFilters = newFilters.map((value, i) => {
             if(i === index)
               value.value = filter.value;
@@ -443,7 +443,7 @@ const ResultsList = ({loading}) => {
           });
           addFilter = false;
         // if the values don't match, but it *is* a new string search filter, add it
-        } else if(activeFilters[index].value !== filter.value && filter.tag === 'str') {
+        } else if(activeFilters[index].value !== filter.value && filter.type === 'str') {
           addFilter = true;
         //
         } else {
@@ -459,7 +459,7 @@ const ResultsList = ({loading}) => {
   // Output jsx for selected filters
   const getSelectedFilterDisplay = (element) => {
     let filterDisplay;
-    switch (element.tag) {
+    switch (element.type) {
       case "hum":
         filterDisplay = <div>Species: <span>Human</span></div>;
         break;
@@ -492,8 +492,11 @@ const ResultsList = ({loading}) => {
   }
 
   const handleClearFilter = (filter) => {
-    let newFilters = cloneDeep(activeFilters.filter(e => e.tag !== filter.tag || e.value !== filter.value));
-    if(filter.tag === 'str') {
+    const newFilters = cloneDeep(activeFilters.filter((activeFilter) => {
+      return activeFilter.type !== filter.type || activeFilter.value !== filter.value;
+    }));
+
+    if(filter.type === 'str') {
       let originalResults = removeHighlights([...sortedResults], filter.value);
       setFormattedResults(originalResults);
     }
@@ -532,7 +535,7 @@ const ResultsList = ({loading}) => {
     for(let element of originalResults) {
       let addElement = true;
       for(const filter of activeFilters) {
-        switch (filter.tag) {
+        switch (filter.type) {
           // Minimum evidence filter
           case 'evi':
             if(element.evidence.length < filter.value)
@@ -577,7 +580,7 @@ const ResultsList = ({loading}) => {
     for(const filter of activeFilters) {
       // String filters with identical values shouldn't be added to the activeFilters array,
       // so we don't have to check for duplicate values here, just for the str tag.
-      if(filter.tag === 'str')
+      if(filter.type === 'str')
         newStringFilters.push(filter.value);
     }
 
@@ -592,7 +595,7 @@ const ResultsList = ({loading}) => {
   }, [activeFilters, sortedResults, activeStringFilters, handlePageClick]);
 
   useEffect(() => {
-    if(activeFilters.some(f => f.tag === 'str')) {
+    if(activeFilters.some(activeFilter => activeFilter.type === 'str')) {
       // handleSort('entityString');
     }
   /*
@@ -742,7 +745,7 @@ const ResultsList = ({loading}) => {
                     {
                       activeFilters.map((element, i)=> {
                         return(
-                          <span key={i} className={`${styles.filterTag} ${element.tag}`}>
+                          <span key={i} className={`${styles.filterTag} ${element.type}`}>
                             { getSelectedFilterDisplay(element) }
                             <span className={styles.close} onClick={()=>{handleClearFilter(element)}}><CloseIcon/></span>
                           </span>

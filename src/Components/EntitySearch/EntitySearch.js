@@ -5,7 +5,7 @@ import TextInput from '../FormFields/TextInput';
 
 const EntitySearch = ({activeFilters, onFilter}) => {
 
-  const [searchStringObject, setSearchStringObject] = useState({tag:'str', value: ''});
+  const [searchStringObject, setSearchStringObject] = useState({type:'str', value: ''});
 
   const handleStringSearchChange = (value) => {
     if(searchStringObject.value !== value) {
@@ -19,7 +19,7 @@ const EntitySearch = ({activeFilters, onFilter}) => {
     if(e.key === 'Enter') {
       if(searchStringObject.value !== '') {
         onFilter(searchStringObject);
-        setSearchStringObject({tag:'str', value: ''})
+        setSearchStringObject({type:'str', value: ''})
       }
     }
   }
@@ -37,7 +37,7 @@ const EntitySearch = ({activeFilters, onFilter}) => {
         value={searchStringObject.value}
       />
       {/* <Checkbox handleClick={handleStringSearchActive}
-        checked={activeFilters.some(e => e.tag === searchStringObject.tag)}>
+        checked={activeFilters.some(e => e.type === searchStringObject.type)}>
           Minimum Number of Evidence
       </Checkbox> */}
 
