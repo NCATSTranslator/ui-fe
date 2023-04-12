@@ -408,7 +408,8 @@ const ResultsList = ({loading}) => {
     setEvidenceOpen(true);
   }
 
-  // Handle the addition and removal of individual filters
+  // Handle the addition and removal of individual filters. Keep the invariant that
+  // filters of the same type are grouped together.
   const handleFilter = (filter) => {
 
     let indexes = [];
@@ -460,7 +461,8 @@ const ResultsList = ({loading}) => {
     }
 
     if(addFilter) {
-      newActiveFilters.push(filter);
+      // Insert the filter at the head of filters of the same type
+      newActiveFilters.splice(indexes[0], 0, filter);
     }
 
     setActiveFilters(newActiveFilters);
