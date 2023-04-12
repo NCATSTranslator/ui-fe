@@ -26,6 +26,7 @@ import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { unstable_useBlocker as useBlocker } from "react-router";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
+import { isFacetFilter, isEvidenceFilter, isTextFilter, isFdaFilter } from '../../Utilities/filterFunctions';
 
 const ResultsList = ({loading}) => {
 
@@ -411,72 +412,73 @@ const ResultsList = ({loading}) => {
   const handleFilter = (filter) => {
 
     let indexes = [];
-    for(const [i, activeFilter] of activeFilters.entries() ) {
-      if((activeFilter.type === filter.type && filter.type !== 'tag')
-      || (filter.type === 'tag' && filter.value === activeFilter.value))
+    for(const [i, activeFilter] of activeFilters.entries()) {
+      if (activeFilter.type === filter.type) {
         indexes.push(i);
-    }
-
-    let newFilters = [...activeFilters];
-    // If we don't find any matches, add the filter to the list
-    if(indexes.length === 0) {
-      newFilters.push(filter);
-    // If there are matches, loop through them to determin whether we need to add, remove, or update
-    } else {
-      let addFilter = true;
-      for(const index of indexes) {
-        // if the values also match, it's a real match
-        if (activeFilters[index].value === filter.value) {
-          // set newFilters to a new array with any matches removed
-          newFilters = activeFilters.reduce((result, value, i) => {
-            if(i !== index) {
-              result.push(value);
-            }
-            return result;
-          }, []);
-          addFilter = false;
-        // If the values don't match and it's not a string search, update the value
-        } else if(filter.type !== 'str') {
-          newFilters = newFilters.map((value, i) => {
-            if(i === index)
-              value.value = filter.value;
-
-            return value;
-          });
-          addFilter = false;
-        // if the values don't match, but it *is* a new string search filter, add it
-        } else if(activeFilters[index].value !== filter.value && filter.type === 'str') {
-          addFilter = true;
-        //
-        } else {
-          addFilter = false;
-        }
       }
-      if(addFilter)
-        newFilters.push(filter);
     }
-    setActiveFilters(newFilters);
+
+    let newActiveFilters = [...activeFilters];
+    // If we don't find any matches, add the filter to the list and we're done
+    if(indexes.length === 0) {
+      newActiveFilters.push(filter);
+      setActiveFilters(newActiveFilters);
+      return;
+    }
+
+    let addFilter = true;
+    for(const index of indexes) {
+      // if the values also match, it's a real match
+      if (activeFilters[index].value === filter.value) {
+        // set newFilters to a new array with any matches removed
+        newActiveFilters = activeFilters.reduce((newFilters, oldFilter, i) => {
+          if(i !== index) {
+            newFilters.push(oldFilter);
+          }
+
+          return newFilters;
+        }, []);
+
+        addFilter = false;
+      // If the values don't match and it's not a string search, update the value
+      } else if (!isTextFilter(filter)) {
+        newActiveFilters = newActiveFilters.map((activeFilter, i) => {
+          if(i === index) {
+            activeFilter.value = filter.value;
+          }
+
+          return activeFilter;
+        });
+
+        addFilter = false;
+      // if the values don't match, but it *is* a new string search filter, add it
+      } else if(isTextFilter(filter)) {
+        addFilter = true;
+      } else {
+        addFilter = false;
+      }
+    }
+
+    if(addFilter) {
+      newActiveFilters.push(filter);
+    }
+
+    setActiveFilters(newActiveFilters);
   }
 
   // Output jsx for selected filters
   const getSelectedFilterDisplay = (filter) => {
     let filterDisplay;
-    switch (filter.type) {
-      case "evi":
-        filterDisplay = <div>Minimum Evidence: <span>{filter.value}</span></div>;
-        break;
-      case "fda":
-        filterDisplay = <div><span>FDA Approved</span></div>;
-        break;
-      case "str":
-        filterDisplay = <div>String: <span>{filter.value}</span></div>;
-        break;
-      case "tag":
-        filterDisplay = <div>Tag:<span> {filter.label}</span></div>;
-        break;
-      default:
-        break;
+    if (isEvidenceFilter(filter)) {
+      filterDisplay = <div>Minimum Evidence: <span>{filter.value}</span></div>;
+    } else if (isTextFilter(filter)) {
+      filterDisplay = <div>String: <span>{filter.value}</span></div>;
+    } else if (isFdaFilter(filter)) {
+      filterDisplay = <div><span>FDA Approved</span></div>;
+    } else if (isFacetFilter(filter)) {
+      filterDisplay = <div>Tag:<span> {filter.value}</span></div>;
     }
+
     return filterDisplay;
   }
 
@@ -489,10 +491,11 @@ const ResultsList = ({loading}) => {
       return activeFilter.type !== filter.type || activeFilter.value !== filter.value;
     }));
 
-    if(filter.type === 'str') {
+    if(isTextFilter(filter)) {
       let originalResults = removeHighlights([...sortedResults], filter.value);
       setFormattedResults(originalResults);
     }
+
     setActiveFilters(newFilters);
   }
 
@@ -528,29 +531,13 @@ const ResultsList = ({loading}) => {
       let addResult = false;
       const pathRanks = result.paths.map((p) => { return { rank: 0, path: p }; });
       for(const filter of activeFilters) {
-        switch (filter.type) {
-          // Minimum evidence filter
-          case 'evi':
-            addResult = (filter.value < result.evidence.length);
-            break;
-          // Search string filter
-          case 'str':
-            addResult = findStringMatch(result, filter.value, pathRanks);
-            break;
-          // Filter for tagged data
-          case 'tag':
-            if(result.tags.includes(filter.value)) {
-              addResult = true
-              updatePathRankByTag(result, filter.value, pathRanks);
-            }
-            break;
-          // Add new filter tags in this way:
-          case 'example':
-            // if(false)
-            //   addResult = false;
-            break;
-          default:
-            break;
+        if (isEvidenceFilter(filter)) {
+          addResult = (filter.value < result.evidence.length);
+        } else if (isTextFilter(filter)) {
+          addResult = findStringMatch(result, filter.value, pathRanks);
+        } else if (isFacetFilter(filter) && result.tags.includes(filter.type)) {
+          addResult = true
+          updatePathRankByTag(result, filter.type, pathRanks);
         }
       }
 
@@ -569,8 +556,9 @@ const ResultsList = ({loading}) => {
     for(const filter of activeFilters) {
       // String filters with identical values shouldn't be added to the activeFilters array,
       // so we don't have to check for duplicate values here, just for the str tag.
-      if(filter.type === 'str')
+      if(isTextFilter(filter)) {
         newStringFilters.push(filter.value);
+      }
     }
 
     // if the new set of filters don't match the current ones, call setActiveStringFilters to update them
@@ -584,7 +572,7 @@ const ResultsList = ({loading}) => {
   }, [activeFilters, sortedResults, activeStringFilters, handlePageClick]);
 
   useEffect(() => {
-    if(activeFilters.some(activeFilter => activeFilter.type === 'str')) {
+    if(activeFilters.some(activeFilter => isTextFilter(activeFilter))) {
       // handleSort('entityString');
     }
   /*
@@ -732,11 +720,11 @@ const ResultsList = ({loading}) => {
                   activeFilters.length > 0 &&
                   <div className={styles.activeFilters}>
                     {
-                      activeFilters.map((element, i)=> {
+                      activeFilters.map((activeFilter, i)=> {
                         return(
-                          <span key={i} className={`${styles.filterTag} ${element.type}`}>
-                            { getSelectedFilterDisplay(element) }
-                            <span className={styles.close} onClick={()=>{handleClearFilter(element)}}><CloseIcon/></span>
+                          <span key={i} className={`${styles.filterTag} ${activeFilter.type}`}>
+                            { getSelectedFilterDisplay(activeFilter) }
+                            <span className={styles.close} onClick={()=>{handleClearFilter(activeFilter)}}><CloseIcon/></span>
                           </span>
                         )
                       })

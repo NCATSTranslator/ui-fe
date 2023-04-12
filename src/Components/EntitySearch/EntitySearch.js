@@ -5,7 +5,7 @@ import TextInput from '../FormFields/TextInput';
 
 const EntitySearch = ({activeFilters, onFilter}) => {
 
-  const [searchStringObject, setSearchStringObject] = useState({type:'str', value: ''});
+  const [searchStringObject, setSearchStringObject] = useState({type:'str:', value: ''});
 
   const handleStringSearchChange = (value) => {
     if(searchStringObject.value !== value) {
@@ -19,7 +19,7 @@ const EntitySearch = ({activeFilters, onFilter}) => {
     if(e.key === 'Enter') {
       if(searchStringObject.value !== '') {
         onFilter(searchStringObject);
-        setSearchStringObject({type:'str', value: ''})
+        setSearchStringObject({type:'str:', value: ''})
       }
     }
   }
