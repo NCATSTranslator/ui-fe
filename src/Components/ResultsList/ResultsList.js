@@ -494,7 +494,7 @@ const ResultsList = ({loading}) => {
     }));
 
     if(isTextFilter(filter)) {
-      let originalResults = removeHighlights([...sortedResults], filter.value);
+      const originalResults = removeHighlights([...sortedResults], filter.value);
       setFormattedResults(originalResults);
     }
 
@@ -514,31 +514,52 @@ const ResultsList = ({loading}) => {
     // If there are no active filters, get the full result set and reset the activeStringFilters
     if(activeFilters.length === 0) {
       setFormattedResults(sortedResults);
-      if(activeStringFilters.length > 0)
+      if(activeStringFilters.length > 0) {
         setActiveStringFilters([]);
+      }
+
       return;
     }
 
     // if we're not already on page 1, reset to page one.
-    if(currentPage.current !== 0)
+    if(currentPage.current !== 0) {
       handlePageClick({selected: 0});
+    }
 
-    let filteredResults = [];
-    let originalResults = [...sortedResults];
+    const filteredResults = [];
+    const originalResults = [...sortedResults];
+    const intersect = (a, b) => { return a &&= b; };
+    const union = (a, b) => { return a ||= b; };
     /*
       For each result, check against each filter. If a filter is triggered,
       set addResult to true and add the result to the filtered results
     */
     for(let result of originalResults) {
-      let addResult = false;
+      let addResult = true;
+      let isInter = null;
+      let combine = null;
+      let lastFilterType = null;
       const pathRanks = result.paths.map((p) => { return { rank: 0, path: p }; });
       for(const filter of activeFilters) {
+        isInter = (lastFilterType !== filter.type);
+        if (isInter) {
+          // We went through an entire filter group with no match
+          if (!addResult) {
+            break;
+          }
+
+          lastFilterType = filter.type;
+          combine = intersect;
+        } else {
+          combine = union;
+        }
+
         if (isEvidenceFilter(filter)) {
-          addResult = (filter.value < result.evidence.length);
+          addResult = combine(addResult, (filter.value < result.evidence.length));
         } else if (isTextFilter(filter)) {
-          addResult = findStringMatch(result, filter.value, pathRanks);
-        } else if (isFacetFilter(filter) && result.tags.includes(filter.type)) {
-          addResult = true
+          addResult = combine(addResult, findStringMatch(result, filter.value, pathRanks));
+        } else if (isFacetFilter(filter)) {
+          addResult = combine(addResult, result.tags.includes(filter.type));
           updatePathRankByTag(result, filter.type, pathRanks);
         }
       }
