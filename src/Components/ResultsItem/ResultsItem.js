@@ -19,12 +19,12 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   let evidenceCount = item.evidence.length;
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
-  const [formattedPaths, setFormattedPaths] = useState([]);
-  const [highlightedPaths, setHighlightedPaths] = useState([]);
+  const [formattedPaths, setFormattedPaths] = useState(new Set());
+  const [selectedPaths, setSelectedPaths] = useState(new Set());
 
   const initPathString = (type !== undefined && type.pathString) ? type.pathString : 'may affect';
 
-  let pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString}` : `Path that ${initPathString}`;
+  let pathString = (formattedPaths.size > 1) ? `Paths that ${initPathString}` : `Path that ${initPathString}`;
   let nameString = (item.name !== null) ? item.name : '';
   let objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
@@ -76,7 +76,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   }
 
   const generateCompressedPaths = useCallback((graph) => {
-    let newCompressedPaths = [];
+    let newCompressedPaths = new Set();
     let pathToDisplay = null
     for(const [i, path] of graph.entries()) {
       if(pathToDisplay === null)
@@ -119,7 +119,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       }
 
       if(displayPath) {
-        newCompressedPaths.push(pathToDisplay);
+        newCompressedPaths.add(pathToDisplay);
         pathToDisplay = null;
       }
     }
@@ -129,7 +129,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   useEffect(() => {
     setIsExpanded(false);
-    let newPaths = [];
+    let newPaths = new Set();
     item.paths.forEach((path) => {
       let pathToAdd = [];
       if(path.subgraph) {
@@ -146,6 +146,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
               name: name,
               type: type,
               description: desc,
+              curies: item.curies
             }
           } else {
             let pred = (item.predicate) ? formatBiolinkEntity(item.predicate) : '';
@@ -159,17 +160,54 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             pathToAdd[i].provenance = item.provenance;
           }
         })
-        newPaths.push(pathToAdd);
+        newPaths.add(pathToAdd);
       }
     })
     setFormattedPaths(generateCompressedPaths(newPaths));
   }, [item, generateCompressedPaths]);
 
-  const handleNodeClick = useCallback((paths) => {
+  const handleClearSelectedPaths = useCallback(() => {
+    setSelectedPaths(new Set())
+  },[]);
 
-    // console.log(paths)
+  const handleNodeClick = useCallback((selectedPaths) => {
+    if(!selectedPaths) 
+      return;
 
-  }, [highlightedPaths, formattedPaths])
+    let newSelectedPaths = new Set();
+
+    for(const path of formattedPaths) {
+      if(path.length === 3) {
+        newSelectedPaths.add(path);
+      }
+    }
+
+    for(const selPath of selectedPaths) {
+      console.log(selPath);
+
+      for(const path of formattedPaths) {
+        let currentNodeIndex = 0;
+        let numMatches = 0;
+        for(const [i, el] of path.entries()) {
+          if(i % 2 !== 0)
+            continue;
+
+          if(selPath[currentNodeIndex] && el.curies.includes(selPath[currentNodeIndex])) {
+            numMatches++;
+          }
+          currentNodeIndex++;
+        }
+        if(numMatches === selPath.length) {
+          console.log('potential match', selPath, path);
+          newSelectedPaths.add(path);
+          break;
+        }
+      }
+    }
+
+    setSelectedPaths(newSelectedPaths)
+
+  },[formattedPaths]);
 
   return (
     <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))}>
@@ -190,7 +228,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             />
           </span>
         }
-        <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
+        <span className={styles.effect}>{formattedPaths.size} {pathString} {objectString}</span>
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span
@@ -234,10 +272,12 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             result={item}
             rawResults={rawResults}
             onNodeClick={handleNodeClick}
+            clearSelectedPaths={handleClearSelectedPaths}
           />
         </Suspense>
         <PathView
           paths={formattedPaths}
+          selectedPaths={selectedPaths}
           active={isExpanded}
           handleEdgeSpecificEvidence={(edge)=> {handleEdgeSpecificEvidence(edge)}}
           activeStringFilters={activeStringFilters}

@@ -7,11 +7,10 @@ import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
 
-const GraphView = ({result, rawResults, onNodeClick}) => {
+const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths}) => {
 
   let graphRef = useRef(null);
-  let cy = null;
-  const [currentLayout, setCurrentLayout] = useState(layoutList.breadthfirst)
+  const [currentLayout, setCurrentLayout] = useState(layoutList.klay)
   const [graph, setGraph] = useState({})
   const selectedNodes = useRef(new Set());
   const excludedNodes = useRef(new Set());
@@ -19,8 +18,8 @@ const GraphView = ({result, rawResults, onNodeClick}) => {
   const hideClass = 'hide';
   const excludedClass = 'excluded';
 
-  const subjectID = result.rawResult.subject;
-  const objectID = result.rawResult.object;
+  const subjectID = useRef(result.rawResult.subject);
+  const objectID = useRef(result.rawResult.object);
 
   // initialize 3rd party layouts
   cytoscape.use(klay);
@@ -41,7 +40,7 @@ const GraphView = ({result, rawResults, onNodeClick}) => {
     element.addClass(hideClass);
   }
 
-  const handleNodeClick = useCallback((ev) => {
+  const handleNodeClick = useCallback((ev, formattedPaths) => {
     const targetId = ev.target.id();
 
     if(selectedNodes.current.has(targetId)) {
@@ -50,8 +49,10 @@ const GraphView = ({result, rawResults, onNodeClick}) => {
     } else if(excludedNodes.current.has(targetId)) {
       selectedNodes.current.add(targetId);
       excludedNodes.current.delete(targetId);
-    } else if(ev.target.hasClass(highlightClass) || ev.target.hasClass(hideClass)) {
+    } else if(ev.target.hasClass(highlightClass)) {
       excludedNodes.current.add(targetId);
+    } else if (ev.target.hasClass(hideClass)){
+      selectedNodes.current.add(targetId);
     } else {
       selectedNodes.current.add(targetId);
     } 
@@ -60,53 +61,47 @@ const GraphView = ({result, rawResults, onNodeClick}) => {
     ev.cy.elements().removeClass(excludedClass)
     hideElement(ev.cy.elements());
 
-    const paths = findPaths(subjectID, objectID, graph);
+    const paths = findPaths(subjectID.current, objectID.current, graph);
     
     // Handle excluded nodes and a lack of selected nodes in a path
-    paths.forEach((path) =>{
+    paths.forEach((path) => {
       let hasSelectedNode = false;
       let hasExcludedNode = false;
-      selectedNodes.current.forEach((nodeID) => {
-        if(path.includes(nodeID))
+      for(const nodeId of selectedNodes.current) {
+        if(path.includes(nodeId))
           hasSelectedNode = true;
-      })
-      excludedNodes.current.forEach((nodeID) => {
-        if(path.includes(nodeID))
+      }
+      for(const nodeId of excludedNodes.current) {
+        if(path.includes(nodeId))
           hasExcludedNode = true;
-      })
+      }
       // If a path has no selected nodes, or has an excluded node, remove it from the list 
       if(!hasSelectedNode || hasExcludedNode) 
         paths.delete(path);
     })
 
     paths.forEach((path) => {
-      path.forEach((nodeId) => {
-        // if(nodeId !== subjectID && nodeId !== objectID)
-        //   selectedNodes.current.add(nodeId);
-
+      for(const nodeId of path) {
         let node = ev.cy.getElementById(nodeId)
         highlightElement(node)
-        node.connectedEdges().forEach(edge=>{
+        for(const edge of node.connectedEdges()) {
           if(path.includes(edge.source().id()) && path.includes(edge.target().id()))
             highlightElement(edge)
-        })
-      })
+        }
+      }
     })
 
-    excludedNodes.current.forEach((nodeId) => {
+    for(const nodeId of excludedNodes.current) {
       ev.cy.getElementById(nodeId).addClass('excluded');
-    })
+    }
 
-    console.log(selectedNodes.current)
-    console.log(excludedNodes.current)
+    onNodeClick(paths, formattedPaths);
 
-    onNodeClick(paths);
+  }, [onNodeClick, graph])
 
-  }, [subjectID, objectID, onNodeClick, graph])
+  const initCytoscapeInstance = useCallback((result, summary, graphRef, layout) => {
 
-  const initCytoscapeInstance = useCallback((result, summary, graphRef, layout, cy) => {
-
-    cy = cytoscape({
+    let cy = cytoscape({
       container: graphRef.current,
       elements: resultToCytoscape(result, summary),
       layout: layout,
@@ -153,7 +148,6 @@ const GraphView = ({result, rawResults, onNodeClick}) => {
 
     cy.unbind('vclick');
     cy.bind('vclick', 'node', handleNodeClick);
-    // addClassToConnections('hover-highlight', 'hide', 'mouseover', summary, cy);
 
     // when background is clicked, remove highlight and hide classes from all elements
     cy.bind('click', (ev) => {
@@ -161,24 +155,25 @@ const GraphView = ({result, rawResults, onNodeClick}) => {
         ev.cy.elements().removeClass([highlightClass, hideClass, excludedClass]);
         selectedNodes.current.clear();
         excludedNodes.current.clear();
+        clearSelectedPaths();
       }
     });    
-  
-  },[selectedNodes, handleNodeClick, graph]);
+  // eslint-disable-next-line
+  },[selectedNodes, handleNodeClick, graph, clearSelectedPaths]);
   
   useEffect(() => {
     if(graphRef.current) {
-      initCytoscapeInstance(result.rawResult, rawResults.data, graphRef, currentLayout, cy);
+      initCytoscapeInstance(result.rawResult, rawResults.data, graphRef, currentLayout);
     }
-  }, [result, rawResults, currentLayout, initCytoscapeInstance, cy]);
+  }, [result, rawResults, initCytoscapeInstance, currentLayout]);
 
   return (
     <div className={styles.GraphView}>
       <div className={styles.sidebar}>
         <h4 className={styles.layoutHeader}>Layout Type:</h4>
+        <button className={`${styles.layoutButton} ${(currentLayout.name === 'klay')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.klay)}>Klay</button>
         <button className={`${styles.layoutButton} ${(currentLayout.name === 'breadthfirst')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.breadthfirst)}>Breadthfirst</button>
         <button className={`${styles.layoutButton} ${(currentLayout.name === 'dagre')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.dagre)}>dagre</button>
-        <button className={`${styles.layoutButton} ${(currentLayout.name === 'klay')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.klay)}>Klay</button>
         <button className={`${styles.layoutButton} ${(currentLayout.name === 'random')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.random)}>Random</button>
         <button className={`${styles.layoutButton} ${(currentLayout.name === 'avsdf')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.avsdf)}>avsdf</button>
         <button className={`${styles.layoutButton} ${(currentLayout.name === 'circle')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.circle)}>Circle</button>

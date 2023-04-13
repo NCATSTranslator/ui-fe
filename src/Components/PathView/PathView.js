@@ -1,18 +1,37 @@
 import styles from './PathView.module.scss';
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useMemo} from "react";
 import Path from '../Path/Path';
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import { useOutletContext } from 'react-router-dom';
+import { cloneDeep } from 'lodash';
 
-const PathView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => {
+const getFilteredUnhighlightedPaths = (paths, selectedPaths) => {
+  if(selectedPaths.size > 0) {
+    let newUnhighlightedPaths = cloneDeep(paths);
+    for(const path of newUnhighlightedPaths) {
+      for(const selPath of selectedPaths) {
+        if(JSON.stringify(selPath) === JSON.stringify(path)) {
+          newUnhighlightedPaths.delete(path);
+          break;
+        }
+      }
+    }
+    return newUnhighlightedPaths;
+  } else {
+    return paths;
+  }
+}
 
-  let initialNumberToShow = (paths.length < 6) ? paths.length : 6;
+const PathView = ({paths, selectedPaths, handleEdgeSpecificEvidence, activeStringFilters}) => {
+
+  let initialNumberToShow = (paths.size < 6) ? paths.size : 6;
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
+  const unhighlightedPaths = useMemo(() => getFilteredUnhighlightedPaths(paths, selectedPaths), [paths, selectedPaths]);
 
   const setFeedbackModalOpen = useOutletContext();
 
   useEffect(() => {
-    setNumberToShow((paths.length < 6) ? paths.length : 6);
+    setNumberToShow((paths.size < 6) ? paths.size : 6);
   }, [paths]);
 
   const handleNameClick = (name) => {
@@ -28,7 +47,7 @@ const PathView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => {
   }
 
   const handleShowMore = () => {
-    let newAmount = (numberToShow + 6 > paths.length) ? paths.length : numberToShow + 6;
+    let newAmount = (numberToShow + 6 > paths.size) ? paths.size : numberToShow + 6;
     setNumberToShow(newAmount);
   }
 
@@ -44,9 +63,33 @@ const PathView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => {
         <p>Click on any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
       </div>
       {
-        paths.slice(0, numberToShow).map((pathToDisplay, i)=> {
+        selectedPaths &&
+        Array.from(selectedPaths).slice(0, numberToShow).map((pathToDisplay, i)=> {
           return (
-            <div className={styles.tableItem} key={i}> 
+            <div className={`${styles.tableItem}`} key={i}> 
+              {
+                pathToDisplay.map((pathItem, j) => {
+                  let key = `${i}_${j}`;
+                  return (
+                    <Path 
+                    path={pathItem} 
+                    key={key}
+                    handleNameClick={handleNameClick}
+                    handleEdgeClick={(edge)=>handleEdgeClick(edge)}
+                    handleTargetClick={handleTargetClick}
+                    activeStringFilters={activeStringFilters}
+                    />
+                    ) 
+                  }) 
+                }
+            </div>
+          )
+        })
+      }
+      {
+        Array.from(unhighlightedPaths).slice(0, numberToShow).map((pathToDisplay, i)=> {
+          return (
+            <div className={`${styles.tableItem} ${selectedPaths.size > 0 ? styles.unhighlighted : ''}`} key={i}> 
               {
                 pathToDisplay.map((pathItem, j) => {
                   let key = `${i}_${j}`;
@@ -68,11 +111,11 @@ const PathView = ({paths, handleEdgeSpecificEvidence, activeStringFilters}) => {
       }
       <div className={styles.buttons}>
         {
-          (numberToShow < paths.length) &&
+          (numberToShow < paths.size) &&
           <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
         }
         {
-          (numberToShow <= paths.length && numberToShow > 6) &&
+          (numberToShow <= paths.size && numberToShow > 6) &&
           <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
         }
       </div>
