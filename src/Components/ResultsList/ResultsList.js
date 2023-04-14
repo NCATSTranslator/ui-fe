@@ -201,66 +201,6 @@ const ResultsList = ({loading}) => {
     refetchOnWindowFocus: false
   });
 
-  // useEffect(() => {
-  //   if(isFetchingARAStatus) {
-  //     const getARAStatus = async () => {
-
-  //       console.log("Fetching current ARA status...");
-  
-  //       if(!currentQueryID)
-  //         return;
-    
-  //       let queryIDJson = JSON.stringify({qid: currentQueryID});
-    
-  //       const requestOptions = {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: queryIDJson
-  //       };
-  //       // eslint-disable-next-line
-  //       await fetch('/creative_status', requestOptions)
-  //         .then(response => handleFetchErrors(response))
-  //         .then(response => response.json())
-  //         .then(data => {
-  //           // increment the number of status checks
-  //           numberOfStatusChecks.current++;
-  //           console.log("ARA status:",data);
-    
-  //           let fetchResults = false;
-    
-  //           if(data.data.aras.length > returnedARAs.aras.length) {
-  //             console.log(`Old ARAs: ${returnedARAs.aras}, New ARAs: ${data.data.aras}`);
-  //             setReturnedARAs(data.data);
-  //             fetchResults = true;
-  //           } else {
-  //             console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
-  //           }
-  //           /*
-  //           If status is success (meaning all ARAs have returned) or we've reached 120 status checks (meaning 20 min have elapsed)
-  //           stop fetching ARA status and move to fetching results.
-  //           */
-  //           if(data.status === 'success' || numberOfStatusChecks.current >= 120) {
-  //             setIsFetchingARAStatus(false);
-  //             fetchResults = true;
-  //           }
-  //           if(fetchResults)
-  //             setIsFetchingResults(true);
-  //         })
-  //         .catch((error) => {
-  //           if(formattedResults.length <= 0) {
-  //             setIsError(true);
-  //             setIsFetchingARAStatus(false);
-  //           }
-  //           if(formattedResults.length > 0) {
-  //             setIsFetchingARAStatus(false);
-  //           }
-  //           console.error(error)
-  //         });
-  //     }
-  //     getARAStatus();
-  //   }
-  // }, [isFetchingARAStatus]);
-
   useEffect(() => {
     if(isFetchingResults) {
       const getResults = async () => {
@@ -305,51 +245,6 @@ const ResultsList = ({loading}) => {
       getResults();
     }
   }, [isFetchingResults, currentQueryID, formattedResults.length]);
-
-  // React Query call for results
-  // eslint-disable-next-line
-  // const resultsData = useQuery('resultsData', async () => {
-  //   console.log("Fetching new results...");
-
-  //   if(!currentQueryID)
-  //     return;
-
-  //   let queryIDJson = JSON.stringify({qid: currentQueryID});
-
-  //   const requestOptions = {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: queryIDJson
-  //   };
-  //   // eslint-disable-next-line
-  //   const response = await fetch('/creative_result', requestOptions)
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       console.log('New results:', data);
-  //       // if we've already gotten results before, set freshRawResults instead to
-  //       // prevent original results from being overwritten
-  //       if(formattedResults.length > 0) {
-  //         setFreshRawResults(data);
-  //       } else {
-  //         setRawResults(data);
-  //       }
-
-  //       setIsFetchingResults(false);
-  //     })
-  //     .catch((error) => {
-  //       if(formattedResults.length <= 0) {
-  //         setIsError(true);
-  //         setIsFetchingARAStatus(false);
-  //       }
-  //       if(formattedResults.length > 0) {
-  //         setIsFetchingARAStatus(false);
-  //       }
-  //       console.log(error);
-  //     });
-  // }, {
-  //   enabled: isFetchingResults,
-  //   refetchOnWindowFocus: false,
-  // });
 
   // Handle the sorting
   const handleSort = useCallback((resultsToSort, sortName) => {
