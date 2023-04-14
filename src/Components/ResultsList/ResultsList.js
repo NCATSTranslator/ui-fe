@@ -784,7 +784,7 @@ const ResultsList = ({loading}) => {
                         return (
                           <ResultsItem
                             rawResults={rawResults}
-                            key={i}
+                            key={item.id}
                             type={storedQuery.type}
                             item={item}
                             activateEvidence={(evidence, rawEdges)=>activateEvidence(evidence, rawEdges)}
