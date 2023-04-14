@@ -87,6 +87,10 @@ export const sortByHighlighted = (totalItems, highlightedItems) => {
   return sortedItems;
 }
 
+export const filterCompare = (filter1, filter2) => {
+  return filter1.type < filter2.type;
+}
+
 // Given a result, a tag, and a ranking of paths, update the rank of a path to be lower if the
 // tag appears in the path.
 export const updatePathRankByTag = (result, tag, pathRanks) => {

@@ -13,7 +13,8 @@ import { currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
-  sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag } from "../../Utilities/sortingFunctions";
+         sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
+         updatePathRankByTag, filterCompare } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import { handleFetchErrors } from "../../Utilities/utilities";
 import { cloneDeep, isEqual } from "lodash";
@@ -26,7 +27,8 @@ import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { unstable_useBlocker as useBlocker } from "react-router";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
-import { isFacetFilter, isEvidenceFilter, isTextFilter, isFdaFilter } from '../../Utilities/filterFunctions';
+import { isFacetFilter, isEvidenceFilter, isTextFilter, isFdaFilter,
+         facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
 
 const ResultsList = ({loading}) => {
 
@@ -354,7 +356,7 @@ const ResultsList = ({loading}) => {
 
   useEffect(() => {
     if(rawResults !== null)
-      calculateTagCounts(formattedResults, rawResults, setAvailableTags);
+      calculateTagCounts(sortedResults, rawResults, activeFilters, setAvailableTags);
   }, [formattedResults, rawResults]);
 
   useEffect(()=>{
@@ -363,21 +365,34 @@ const ResultsList = ({loading}) => {
     }
   }, [isError]);
 
-  const calculateTagCounts = (formattedResults, rawResults, tagSetterMethod) => {
+  const calculateTagCounts = (sortedResults, rawResults, activeFilters, tagSetterMethod) => {
     // create a list of tags from the list provided by the backend
-    let countedTags = cloneDeep(rawResults.data.tags);
-    for(const result of formattedResults) {
-      // for each result's list of tags
-      for(const tag of result.tags) {
-        // if the tag exists on the list, either increment it or initialize its count
-        if(countedTags.hasOwnProperty(tag)){
-          if(!countedTags[tag].count)
-            countedTags[tag].count = 1;
-          else
+    const countedTags = cloneDeep(rawResults.data.tags);
+    const activeFamilies = new Set(activeFilters.map(f => facetFamily(f.type)));
+    for(const result of sortedResults) {
+      // determine the distance between a result's facets and the facet selection
+      const resultFamilies = new Set();
+      for (const filter of activeFilters) {
+        if (result.tags.includes(filter.type)) {
+          resultFamilies.add(facetFamily(filter.type));
+        }
+      }
+
+      // if the result has a distance of 1 or less (a single facet selection away)
+      // then add the tags for that result
+      if (activeFamilies.size - resultFamilies.size <= 1) {
+        for(const tag of result.tags) {
+          // if the tag exists on the list, either increment it or initialize its count
+          if(countedTags.hasOwnProperty(tag)){
+            if(!countedTags[tag].count) {
+              countedTags[tag].count = 0;
+            }
+
             countedTags[tag].count++;
-        // if it doesn't exist on the current list of tags, add it and initialize its count
-        } else {
-          countedTags[tag] = {name: tag, value: '', count: 1}
+          // if it doesn't exist on the current list of tags, add it and initialize its count
+          } else {
+            countedTags[tag] = {name: tag, value: '', count: 1}
+          }
         }
       }
     }
@@ -411,7 +426,6 @@ const ResultsList = ({loading}) => {
   // Handle the addition and removal of individual filters. Keep the invariant that
   // filters of the same type are grouped together.
   const handleFilter = (filter) => {
-
     let indexes = [];
     for(const [i, activeFilter] of activeFilters.entries()) {
       if (activeFilter.type === filter.type) {
@@ -420,9 +434,10 @@ const ResultsList = ({loading}) => {
     }
 
     let newActiveFilters = [...activeFilters];
-    // If we don't find any matches, add the filter to the list and we're done
+    // If we don't find any matches, push the filter and sort by filter family
     if(indexes.length === 0) {
       newActiveFilters.push(filter);
+      newActiveFilters.sort(filterCompare);
       setActiveFilters(newActiveFilters);
       return;
     }
@@ -461,8 +476,8 @@ const ResultsList = ({loading}) => {
     }
 
     if(addFilter) {
-      // Insert the filter at the head of filters of the same type
-      newActiveFilters.splice(indexes[0], 0, filter);
+      newActiveFilters.push(filter);
+      newActiveFilters.sort(filterCompare);
     }
 
     setActiveFilters(newActiveFilters);
@@ -538,10 +553,10 @@ const ResultsList = ({loading}) => {
       let addResult = true;
       let isInter = null;
       let combine = null;
-      let lastFilterType = null;
+      let lastFilterType = '';
       const pathRanks = result.paths.map((p) => { return { rank: 0, path: p }; });
       for(const filter of activeFilters) {
-        isInter = (lastFilterType !== filter.type);
+        isInter = (!hasSameFacetFamily(lastFilterType, filter.type));
         if (isInter) {
           // We went through an entire filter group with no match
           if (!addResult) {

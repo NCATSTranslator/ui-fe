@@ -15,8 +15,16 @@ export const isTextFilter = (filter) => {
   return filter.type === 'str:';
 }
 
+export const hasSameFacetFamily = (facetA, facetB) => {
+  return facetFamily(facetA) === facetFamily(facetB);
+}
+
+export const facetFamily = (facet) => {
+  return facet.split(':')[0];
+}
+
 const filterFamily = (filter) => {
-  return filter.type.split(':')[0];
+  return facetFamily(filter.type);
 }
 
 // TODO: Make this a configuration
