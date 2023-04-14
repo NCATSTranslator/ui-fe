@@ -1,53 +1,14 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useMemo} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
 import SimpleRange from '../Range/SimpleRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
-import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
+import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacetFilter, isEvidenceFilter, isTextFilter } from '../../Utilities/filterFunctions';
 
 const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
-
-  const facetShowMoreIncrement = 5;
-
-  const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1});
-  const [tagObject, setTagObject] = useState({type:'', value: ''});
-  const [groupedTags, setGroupedTags] = useState({});
-  const [countsToShow, setCountsToShow] = useState(null);
-
-  onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
-
-  useEffect(() => {
-    // when availableTags prop changes, group the tags according to their type
-    let newGroupedTags = groupAvailableTags(availableTags)
-    setGroupedTags(newGroupedTags);
-
-    let newCountsToShow = {};
-    Object.keys(newGroupedTags).forEach((key) => {
-      newCountsToShow[key] = facetShowMoreIncrement;
-    })
-
-    setCountsToShow(newCountsToShow);
-
-  }, [availableTags]);
-
-  const handleEvidenceActive = () => {
-    onFilter(evidenceObject);
-  }
-
-  const handleFacetChange = (facetID, objectToUpdate, setterFunction, label = '') => {
-    if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
-      return;
-    }
-
-    let newObj = global.structuredClone(objectToUpdate);
-    newObj.type = facetID;
-    newObj.value = label;
-    setterFunction(objectToUpdate);
-    onFilter(newObj);
-  }
 
   // returns a new object with each tag grouped by its type
   const groupAvailableTags = (tags) => {
@@ -63,6 +24,40 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       atc: atcTags
     }
     return newGroupedTags;
+  }
+
+  const initCountsToShow = (groupedTags) => {
+    let newCountsToShow = {};
+    Object.keys(groupedTags).forEach((key) => {
+      newCountsToShow[key] = facetShowMoreIncrement;
+    })
+    return newCountsToShow;
+  }
+  
+  const facetShowMoreIncrement = 5;
+
+  const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1});
+  const [tagObject, setTagObject] = useState({type:'', value: ''});
+  const groupedTags = useMemo(()=>groupAvailableTags(availableTags), [availableTags]);
+  const initialCountsToShow = initCountsToShow(groupedTags);
+  const [countsToShow, setCountsToShow] = useState(initialCountsToShow);
+
+  onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
+
+  const handleEvidenceActive = () => {
+    onFilter(evidenceObject);
+  }
+
+  const handleFacetChange = (facetID, objectToUpdate, setterFunction, label = '') => {
+    if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
+      return;
+    }
+
+    let newObj = global.structuredClone(objectToUpdate);
+    newObj.type = facetID;
+    newObj.value = label;
+    setterFunction(objectToUpdate);
+    onFilter(newObj);
   }
 
   const getAtcHeading = () => {
@@ -177,7 +172,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             let tagKey = tag[0];
             let object = tag[1];
             let tagName = '';
-            if (type === 'resultType' || type == 'nodeType') {
+            if (type === 'resultType' || type === 'nodeType') {
               tagName = formatBiolinkEntity(object.name);
             } else {
               tagName = object.name;
