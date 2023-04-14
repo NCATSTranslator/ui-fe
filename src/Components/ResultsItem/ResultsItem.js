@@ -160,7 +160,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             pathToAdd[i].provenance = item.provenance;
           }
         })
-        newPaths.add(pathToAdd);
+        newPaths.add({highlighted: false, path: pathToAdd});
       }
     })
     setFormattedPaths(generateCompressedPaths(newPaths));
@@ -177,18 +177,16 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     let newSelectedPaths = new Set();
 
     for(const path of formattedPaths) {
-      if(path.length === 3) {
+      if(path.path.length === 3) {
         newSelectedPaths.add(path);
       }
     }
 
     for(const selPath of selectedPaths) {
-      console.log(selPath);
-
       for(const path of formattedPaths) {
         let currentNodeIndex = 0;
         let numMatches = 0;
-        for(const [i, el] of path.entries()) {
+        for(const [i, el] of path.path.entries()) {
           if(i % 2 !== 0)
             continue;
 
@@ -198,7 +196,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           currentNodeIndex++;
         }
         if(numMatches === selPath.length) {
-          console.log('potential match', selPath, path);
+          // console.log('potential match', selPath, path);
           newSelectedPaths.add(path);
           break;
         }

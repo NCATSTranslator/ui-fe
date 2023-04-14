@@ -7,16 +7,16 @@ import { cloneDeep } from 'lodash';
 
 const getFilteredUnhighlightedPaths = (paths, selectedPaths) => {
   if(selectedPaths.size > 0) {
-    let newUnhighlightedPaths = cloneDeep(paths);
-    for(const path of newUnhighlightedPaths) {
+    let newPaths = cloneDeep(paths);
+    for(const path of newPaths) {
       for(const selPath of selectedPaths) {
         if(JSON.stringify(selPath) === JSON.stringify(path)) {
-          newUnhighlightedPaths.delete(path);
+          path.highlighted = true;
           break;
         }
       }
     }
-    return newUnhighlightedPaths;
+    return newPaths;
   } else {
     return paths;
   }
@@ -63,35 +63,11 @@ const PathView = ({paths, selectedPaths, handleEdgeSpecificEvidence, activeStrin
         <p>Click on any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
       </div>
       {
-        selectedPaths &&
-        Array.from(selectedPaths).slice(0, numberToShow).map((pathToDisplay, i)=> {
+        Array.from(unhighlightedPaths).sort((a, b) => b.highlighted - a.highlighted).slice(0, numberToShow).map((pathToDisplay, i)=> {
           return (
-            <div className={`${styles.tableItem}`} key={i}> 
+            <div className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} key={i}> 
               {
-                pathToDisplay.map((pathItem, j) => {
-                  let key = `${i}_${j}`;
-                  return (
-                    <Path 
-                    path={pathItem} 
-                    key={key}
-                    handleNameClick={handleNameClick}
-                    handleEdgeClick={(edge)=>handleEdgeClick(edge)}
-                    handleTargetClick={handleTargetClick}
-                    activeStringFilters={activeStringFilters}
-                    />
-                    ) 
-                  }) 
-                }
-            </div>
-          )
-        })
-      }
-      {
-        Array.from(unhighlightedPaths).slice(0, numberToShow).map((pathToDisplay, i)=> {
-          return (
-            <div className={`${styles.tableItem} ${selectedPaths.size > 0 ? styles.unhighlighted : ''}`} key={i}> 
-              {
-                pathToDisplay.map((pathItem, j) => {
+                pathToDisplay.path.map((pathItem, j) => {
                   let key = `${i}_${j}`;
                   return (
                     <Path 
