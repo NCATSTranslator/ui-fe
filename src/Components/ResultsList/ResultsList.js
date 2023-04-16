@@ -227,6 +227,13 @@ const ResultsList = ({loading}) => {
     };
     // eslint-disable-next-line
     const response = await fetch('/creative_result', requestOptions)
+      .then(response => handleFetchErrors(response, () => {
+        setIsFetchingARAStatus(false);
+        setIsFetchingResults(false);
+        if(formattedResults.length <= 0) {
+          setIsError(true);
+        }
+      }))
       .then(response => response.json())
       .then(data => {
         console.log('New results:', data);
@@ -241,13 +248,6 @@ const ResultsList = ({loading}) => {
         setIsFetchingResults(false);
       })
       .catch((error) => {
-        if(formattedResults.length <= 0) {
-          setIsError(true);
-          setIsFetchingARAStatus(false);
-        }
-        if(formattedResults.length > 0) {
-          setIsFetchingARAStatus(false);
-        }
         console.log(error);
       });
   }, {
