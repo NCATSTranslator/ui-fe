@@ -366,6 +366,25 @@ const ResultsList = ({loading}) => {
   }, [isError]);
 
   const calculateTagCounts = (sortedResults, rawResults, activeFilters, tagSetterMethod) => {
+    // Function that adds the tag counts when a certain condition (predicate) is met
+    const addTagCountsWhen = (countedTags, result, predicate) => {
+      for(const tag of result.tags) {
+        // if the tag exists on the list, either increment it or initialize its count
+        if (predicate(tag)) {
+          if (countedTags.hasOwnProperty(tag)){
+            if (!countedTags[tag].count) {
+              countedTags[tag].count = 0;
+            }
+
+            countedTags[tag].count++;
+          // if it doesn't exist on the current list of tags, add it and initialize its count
+          } else {
+            countedTags[tag] = {name: tag, value: '', count: 1};
+          }
+        }
+      }
+    }
+
     // create a list of tags from the list provided by the backend
     const countedTags = cloneDeep(rawResults.data.tags);
     const activeFamilies = new Set(activeFilters.map(f => facetFamily(f.type)));
@@ -378,23 +397,22 @@ const ResultsList = ({loading}) => {
         }
       }
 
-      // if the result has a distance of 1 or less (a single facet selection away)
-      // then add the tags for that result
-      if (activeFamilies.size - resultFamilies.size <= 1) {
-        for(const tag of result.tags) {
-          // if the tag exists on the list, either increment it or initialize its count
-          if(countedTags.hasOwnProperty(tag)){
-            if(!countedTags[tag].count) {
-              countedTags[tag].count = 0;
-            }
+      const missingFamiliesCount = activeFamilies.size - resultFamilies.size;
+      // When the family counts are equal, add all the result's tags
+      if (missingFamiliesCount === 0) {
+        addTagCountsWhen(countedTags, result, (tag) => { return true; });
+      // When the result is missing a single family, add all tags from only the missing family
+      } else if (missingFamiliesCount === 1) {
+        // Find the missing family
+        const missingFamily = [...activeFamilies].filter((family) => {
+          return !resultFamilies.has(family);
+        })[0];
 
-            countedTags[tag].count++;
-          // if it doesn't exist on the current list of tags, add it and initialize its count
-          } else {
-            countedTags[tag] = {name: tag, value: '', count: 1}
-          }
-        }
+        addTagCountsWhen(countedTags, result, (tag) => {
+          return facetFamily(tag) === missingFamily;
+        });
       }
+      // Otherwise skip this result
     }
 
     Object.entries(countedTags).forEach((tag)=> {
