@@ -11,7 +11,7 @@ const LoadingBar = ({loading, useIcon, disclaimerText, className, reducedPadding
 
   // Spoofs progress bar
   useEffect(() => {
-    if(progress >= 100 || !loading || useIcon) 
+    if(progress >= 100 || !loading || useIcon)
       return;
 
     let randomTimeout = Math.random() * (5000 - 500) + 500;
@@ -28,7 +28,7 @@ const LoadingBar = ({loading, useIcon, disclaimerText, className, reducedPadding
 
   // Alternates progress bar opacity class on set timeout
   useEffect(() => {
-    if(!loading || useIcon) 
+    if(!loading || useIcon)
       return;
 
     let timeout = 1500;
@@ -45,14 +45,14 @@ const LoadingBar = ({loading, useIcon, disclaimerText, className, reducedPadding
       }
       { !useIcon &&
         <div className={styles.barOuter}>
-          <div 
-            className={`${styles.barInner} ${opacity ? styles.dark: styles.light}`} 
+          <div
+            className={`${styles.barInner} ${opacity ? styles.dark: styles.light}`}
             style={{width: `${progress}%`}}
-            >  
+            >
           </div>
         </div>
       }
-      <h6 className={styles.heading}>Loading...</h6>
+      <h6 className={styles.heading}>Calculating...</h6>
       {disclaimerText && disclaimerText}
     </div>
   )

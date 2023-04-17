@@ -7,8 +7,18 @@ import { useSelector } from 'react-redux';
 const ShareModal = ({isOpen, onClose, qid}) => {
 
   let storedQuery = useSelector(currentQuery);
-  const queryLabel = (storedQuery && storedQuery.node !== undefined) ? encodeURIComponent(storedQuery.node.label) : '';
-  const queryTypeID = (storedQuery && storedQuery.type !== undefined) ? storedQuery.type.id : '';
+  const sharedQueryLabel = new URLSearchParams(window.location.search).get("l")
+  const sharedQueryType = new URLSearchParams(window.location.search).get("t")
+  const queryLabel = (sharedQueryLabel) 
+    ? sharedQueryLabel 
+    : (storedQuery && storedQuery.node !== undefined) 
+      ? encodeURIComponent(storedQuery.node.label) 
+      : '';
+  const queryTypeID = (sharedQueryType) 
+    ? sharedQueryType 
+    : (storedQuery && storedQuery.type !== undefined) 
+      ? storedQuery.type.id 
+      : '';
 
   const isResultsUrlSet = useRef(false);
 

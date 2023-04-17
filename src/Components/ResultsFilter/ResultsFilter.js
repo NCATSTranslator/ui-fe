@@ -8,15 +8,15 @@ import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
 
 const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
-  
+
   const facetShowMoreIncrement = 5;
 
   const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: 1});
   const [tagObject, setTagObject] = useState({tag:'tag', value: ''});
   const [groupedTags, setGroupedTags] = useState({});
   const [countsToShow, setCountsToShow] = useState(null);
-  
-  onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll; 
+
+  onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
 
   useEffect(() => {
     // when availableTags prop changes, group the tags according to their type
@@ -29,7 +29,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     })
 
     setCountsToShow(newCountsToShow);
-    
+
   }, [availableTags]);
 
   const handleEvidenceActive = () => {
@@ -46,16 +46,18 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     setterFunction(objectToUpdate);
     onFilter(newObj);
   }
-  
-  // returns a new object with each tag grouped by its type 
+
+  // returns a new object with each tag grouped by its type
   const groupAvailableTags = (tags) => {
     let clonedTags = global.structuredClone(tags);
     let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ATC')));
-    let biolinkTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('biolink')));
+    let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
+    let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
     let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda')));
     const newGroupedTags = {
       fda: fdaTags,
-      biolink: biolinkTags,
+      resultType: resultTypeTags,
+      nodeType: nodeTypeTags,
       atc: atcTags
     }
     return newGroupedTags;
@@ -77,7 +79,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   }
 
   const getFdaHeading = () => {
-    return(      
+    return(
       <div className={styles.labelContainer} >
           <div className={styles.label} data-tooltip-id="fda-tooltip" >
             <p className={styles.subTwo}>FDA Status</p>
@@ -90,33 +92,52 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getBiolinkHeading = () => {
-    return(      
+  const getResultTypeHeading = () => {
+    return(
       <div className={styles.labelContainer} >
-          <div className={styles.label} data-tooltip-id="biolink-tooltip" >
+          <div className={styles.label} data-tooltip-id="biolink-tooltip-1" >
             <p className={styles.subTwo}>Result Type</p>
             <Alert/>
-            <Tooltip id="biolink-tooltip">
+            <Tooltip id="biolink-tooltip-1">
                 <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
             </Tooltip>
           </div>
-          <p className={styles.caption}>Show only results that begin with a particular Biolink type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+          <p className={styles.caption}>Show only results that begin with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
       </div>
     )
   }
+
+  const getNodeTypeHeading = () => {
+    return(
+      <div className={styles.labelContainer} >
+        <div className={styles.label} data-tooltip-id="biolink-tooltip-2" >
+          <p className={styles.subTwo}>Node Type</p>
+          <Alert/>
+          <Tooltip id="biolink-tooltip-2">
+                <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
+            </Tooltip>
+          </div>
+          <p className={styles.caption}>Show only results that include a node with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+      </div>
+    )
+  }
+
   const getTagHeadingMarkup = (tagType) => {
     let headingToReturn;
     switch(tagType) {
       case 'fda':
         headingToReturn = getFdaHeading();
         break;
-      case 'biolink':
-        headingToReturn = getBiolinkHeading();
+      case 'resultType':
+        headingToReturn = getResultTypeHeading();
+        break;
+      case 'nodeType':
+        headingToReturn = getNodeTypeHeading();
         break;
       case 'atc':
         headingToReturn = getAtcHeading();
         break;
-      default: 
+      default:
         headingToReturn = '';
     }
     return headingToReturn;
@@ -136,9 +157,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   }
   const showFewerFacets = (type) => {
     let newCount = countsToShow[type];
-    if(countsToShow[type] - facetShowMoreIncrement < facetShowMoreIncrement) 
+    if(countsToShow[type] - facetShowMoreIncrement < facetShowMoreIncrement)
       newCount = facetShowMoreIncrement;
-    else 
+    else
       newCount = countsToShow[type] - facetShowMoreIncrement;
 
     let newCountsToShow = global.structuredClone(countsToShow);
@@ -153,11 +174,17 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
             let tagKey = tag[0];
             let object = tag[1];
-            let tagName = (type === 'biolink') ? formatBiolinkEntity(object.name) : capitalizeAllWords(object.name);
+            let tagName = '';
+            if (type === 'resultType' || type == 'nodeType') {
+              tagName = formatBiolinkEntity(object.name);
+            } else {
+              tagName = object.name;
+            }
+
             return (
-              availableTags[tagKey] && availableTags[tagKey].count && 
+              availableTags[tagKey] && availableTags[tagKey].count &&
               <div className={styles.facetContainer} key={j}>
-                <Checkbox 
+                <Checkbox
                   handleClick={() => handleFacetChange(tagKey, tagObject, setTagObject, tagName)}
                   checked={activeFilters.some(e => e.tag === 'tag' && e.value === tagKey)}
                   className={styles.checkbox}
@@ -170,11 +197,11 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
         }
         <div className={styles.showButtonsContainer}>
           {
-            Object.keys(groupedTags[type]).length > countsToShow[type] && 
+            Object.keys(groupedTags[type]).length > countsToShow[type] &&
             <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
           }
           {
-            countsToShow[type] > facetShowMoreIncrement && 
+            countsToShow[type] > facetShowMoreIncrement &&
             <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
           }
         </div>
@@ -193,17 +220,17 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
         <div className={styles.labelContainer} >
           <p className={styles.subTwo}>Evidence</p>
         </div>
-          <Checkbox 
-            handleClick={handleEvidenceActive} 
+          <Checkbox
+            handleClick={handleEvidenceActive}
             className={styles.evidenceCheckbox}
             checked={activeFilters.some(e => e.tag === evidenceObject.tag)}>
               Minimum Number of Evidence
           </Checkbox>
-          <SimpleRange 
-            label="Evidence Associated" 
-            hideLabel 
-            min="1" 
-            max="99" 
+          <SimpleRange
+            label="Evidence Associated"
+            hideLabel
+            min="1"
+            max="99"
             onChange={e => handleFacetChange(e, evidenceObject, setEvidenceObject)}
             initialValue={1}
           />
@@ -216,7 +243,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
                 <>
                   {
                     // if there are tags within this group, display the heading
-                    Object.keys(groupedTags[tagType]).length > 0 && 
+                    Object.keys(groupedTags[tagType]).length > 0 &&
                     typeHeadingMarkup
                   }
                   {

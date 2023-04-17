@@ -1,6 +1,6 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import Page from './Components/Page/Page';
@@ -30,176 +30,98 @@ import {store} from './Redux/store';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App/>,
+    children: [
+      {
+        path: "/",
+        element: <Page title="Home"><Home /></Page>
+      },
+      {
+        path: "design",
+        element: <Page title="Design System"><DesignSystem /></Page>
+      },
+      {
+        path: "terms-of-use",
+        element: <Page title="Terms of Use"><Terms /></Page>
+      },
+      {
+        path: "help",
+        element: <FAQPage title="Frequently Asked Questions"><Help /></FAQPage>
+      },
+      {
+        path: "what-is-translational-science",
+        element: <FAQPage title="What is Translational Science"><WhatIs /></FAQPage>
+      },
+      {
+        path: "funding-information",
+        element: <FAQPage title="Funding Information"><Affiliates /></FAQPage>
+      },
+      {
+        path: "how-it-works",
+        element:<FAQPage title="How It Works"><HowItWorks /></FAQPage>
+      },
+      {
+        path: "knowledge-providers",
+        element: <FAQPage title="Knowledge Providers"><Kps /></FAQPage>
+      },
+      {
+        path: "autonomous-relay-agents",
+        element: <FAQPage title="Autonomous Relay Agents"><Aras /></FAQPage>
+      },
+      {
+        path: "autonomous-relay-system",
+        element: <FAQPage title="Autonomous Relay System"><Ars /></FAQPage>
+      },
+      {
+        path: "knowledge-graphs",
+        element: <FAQPage title="Knowledge Graphs"><Kgs /></FAQPage>
+      },
+      {
+        path: "smartapi",
+        element: <FAQPage title="SmartAPI"><SmartAPI /></FAQPage>
+      },
+      {
+        path: "forming-a-question",
+        element: <FAQPage title="Forming a Question"><Question /></FAQPage>
+      },
+      {
+        path: "article-results",
+        element: <FAQPage title="Results"><ResultsArticle /></FAQPage>
+      },
+      {
+        path: "evidence",
+        element: <FAQPage title="Evidence"><Evidence /></FAQPage>
+      },
+      {
+        path: "search-history",
+        element: <FAQPage title="Search History"><SearchHistoryArticle /></FAQPage>
+      },
+      {
+        path: "send-feedback",
+        element: <FAQPage title="Send Feedback"><SendFeedbackArticle /></FAQPage>
+      },
+      {
+        path: "results",
+        element: <Page title="Results"><Results /></Page>
+      },
+      {
+        path: "history",
+        element: <Page title="History"><History /></Page>
+      }
+    ],
+  },
+]);
+
 root.render(
   <Provider store={store}>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App/>} >
-          <Route index 
-            element={
-              <Page title="Home">
-                <Home />
-              </Page>
-            }
-          />
-
-          <Route  
-            path="design"
-            element={
-              <Page title="Design System">
-                <DesignSystem />
-              </Page>
-            }
-          />
-
-          <Route  
-            path="terms-of-use"
-            element={
-              <Page title="Terms of Use">
-                <Terms />
-              </Page>
-            }
-          />
-          <Route  
-            path="help"
-            element={
-              <FAQPage title="Frequently Asked Questions">
-                <Help />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="what-is-translational-science"
-            element={
-              <FAQPage title="What is Translational Science">
-                <WhatIs />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="funding-information"
-            element={
-              <FAQPage title="Funding Information">
-                <Affiliates />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="how-it-works"
-            element={
-              <FAQPage title="How It Works">
-                <HowItWorks />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="knowledge-providers"
-            element={
-              <FAQPage title="Knowledge Providers">
-                <Kps />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="autonomous-relay-agents"
-            element={
-              <FAQPage title="Autonomous Relay Agents">
-                <Aras />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="autonomous-relay-system"
-            element={
-              <FAQPage title="Autonomous Relay System">
-                <Ars />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="knowledge-graphs"
-            element={
-              <FAQPage title="Knowledge Graphs">
-                <Kgs />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="smartapi"
-            element={
-              <FAQPage title="SmartAPI">
-                <SmartAPI />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="forming-a-question"
-            element={
-              <FAQPage title="Forming a Question">
-                <Question />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="article-results"
-            element={
-              <FAQPage title="Results">
-                <ResultsArticle />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="evidence"
-            element={
-              <FAQPage title="Evidence">
-                <Evidence />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="search-history"
-            element={
-              <FAQPage title="Search History">
-                <SearchHistoryArticle />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="send-feedback"
-            element={
-              <FAQPage title="Send Feedback">
-                <SendFeedbackArticle />
-              </FAQPage>
-            }
-          />
-          <Route  
-            path="results"
-            element={
-              <Page title="Results">
-                <Results />
-              </Page>
-            }
-          />
-          <Route  
-            path="history"
-            element={
-              <Page title="History">
-                <History />
-              </Page>
-            }
-          />
-          <Route  
-            path="*"
-            element={
-              <Page title="404 - Page Not Found">
-                <Four />
-              </Page>
-            }
-          />
-          <Route path="*" element={<Four/>} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <RouterProvider
+      router={router}
+      fallbackElement={<Page title="404 - Page Not Found"><Four /></Page>}
+    />
   </Provider>
 );
 

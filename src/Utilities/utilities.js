@@ -170,7 +170,7 @@ export const getEntityLink = (id, className, queryType) => {
 
 export const handleFetchErrors = (response, onErrorCallback = () => console.log('No error callback function specified.')) => {
   if(!response.ok) {
-    onErrorCallback();
+    onErrorCallback(response);
     throw Error(response.statusText);
   }
   return response
@@ -180,4 +180,19 @@ export const getRandomIntInclusive = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Remove duplicate objects from an array and keep the relative ordering
+export const removeDuplicateObjects = (arr, getKey) => {
+  const set = {};
+  const distinctElements = [];
+  arr.forEach((obj) => {
+    const key = getKey(obj);
+    if (set[key] === undefined) {
+      set[key] = true;
+      distinctElements.push(obj);
+    }
+  });
+
+  return distinctElements;
 }

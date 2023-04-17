@@ -47,8 +47,8 @@ const Query = ({results, loading, presetDisease, presetType}) => {
   const [queryItem, setQueryItem] = useState(storedQuery);
   // String, type of query
   const [queryType, setQueryType] = useState(storedQuery.type);
-  // String, type to send to autocomplete for result filtering
-  const autocompleteFilterTerm = useRef(null);
+  // Function, type to send to autocomplete for result filtering
+  const autocompleteFunctions = useRef(null);
   // Array, for use in useEffect hooks with queryItems as a dependency
   var prevQueryItem = useRef(storedQuery);
 
@@ -58,7 +58,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     : '';
   const [inputText, setInputText] = useState(presetInputText);
 
-  const initPresetTypeID = (presetQueryTypeIDParam) 
+  const initPresetTypeID = (presetQueryTypeIDParam)
     ? presetQueryTypeIDParam
     : (Object.keys(prevQueryItem.current).length && isResults) ? prevQueryItem.current.type.id : null;
 
@@ -72,8 +72,8 @@ const Query = ({results, loading, presetDisease, presetType}) => {
   const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
   // Function, delay query for fetching autocomplete items by 750ms each time the user types, so we only send a request once they're done
   const delayedQuery = useMemo(() => _.debounce(
-    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilterTerm) =>
-      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilterTerm), 750), []
+    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions) =>
+      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions), 750), []
   );
 
   // Bool, since the query will be submitted whenever a query item is selected, use this to distinguish between
@@ -86,7 +86,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
 
   const [exampleDiseases, setExampleDiseases] = useState(null);
 
-  // Get example diseases from config endpoint on component mount 
+  // Get example diseases from config endpoint on component mount
   useEffect(() => {
     const requestOptions = {
       method: 'GET',
@@ -105,7 +105,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = (e) => {
     if(Object.keys(queryType).length) {
-      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFilterTerm.current);
+      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions.current);
       setInputText(e);
     } else {
       setIsError(true);
@@ -115,8 +115,9 @@ const Query = ({results, loading, presetDisease, presetType}) => {
 
   const handleQueryTypeChange = useCallback((value, resetInputText) => {
     setIsError(false);
-    autocompleteFilterTerm.current = value.filterType;
+    autocompleteFunctions.current = value.functions;
     setQueryType(value);
+    setPresetTypeID(value.id);
     if(resetInputText || resetInputText === undefined)
       setInputText('');
   },[]);
@@ -180,7 +181,6 @@ const Query = ({results, loading, presetDisease, presetType}) => {
 
   useEffect(() => {
     if(presetType) {
-      console.log(presetType)
       setPresetTypeID(presetType);
     }
   }, [presetType]);
@@ -193,7 +193,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     if(prevQueryItem.current.node === undefined || isEqual(prevQueryItem.current, queryItem))
       return;
 
-    // If the node ids match, but the new queryItem has no type, don't replace 
+    // If the node ids match, but the new queryItem has no type, don't replace
     // (addresses strange behavior with) template queries and share urls
     if(prevQueryItem.current.node.id === queryItem.node.id && Object.keys(queryItem.type).length === 0)
       return;
@@ -249,10 +249,24 @@ const Query = ({results, loading, presetDisease, presetType}) => {
             );
             setIsValidSubmission(false);
           }
+          // If we're submitting from the results page
           if(window.location.href.includes('results')) {
-            // If we're submitting from the results page, reload the query with the newly returned queryID
-            setSearchParams('?loading=true');
-            window.location.reload();
+            
+            // reset the query bar back to the values for the current query
+            let prevTypeID = new URLSearchParams(window.location.search).get("t");
+            let prevLabel = new URLSearchParams(window.location.search).get("l");
+
+            if(prevLabel)
+              setInputText(prevLabel);
+            if(prevTypeID !== undefined)
+              setPresetTypeID(prevTypeID);
+            
+            // set isLoading to false so we can submit another query if we want to
+            setIsLoading(false);
+
+            // Then open the new query in a new tab 
+            window.open( 
+              `results?l=${queryItem.node.label}&t=${queryItem.type.id}&q=${data.data}`, "_blank", "noopener");
           } else {
             // Otherwise, navigate to the results page and set loading to true
             navigate('/results?loading=true');
@@ -324,7 +338,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
           {!isResults &&
             <div className={styles.examples}>
               {
-                exampleDiseases && Array.isArray(exampleDiseases) && 
+                exampleDiseases && Array.isArray(exampleDiseases) &&
                 <>
                   <p className={styles.subTwo}>Example Diseases:</p>
                   <div className={styles.exampleList}>

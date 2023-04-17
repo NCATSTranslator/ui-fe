@@ -106,8 +106,6 @@ export const getSummarizedResults = (results) => {
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let itemScore = (item.score === null) ? 0 : item.score.toFixed(1);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
-    if(subjectNode !== undefined)
-      tags.push(subjectNode.types[0]);
     let formattedItem = {
       id: _.uniqueId(),
       subjectNode: subjectNode,
@@ -131,32 +129,26 @@ export const getSummarizedResults = (results) => {
 // Function to search given element for string match, used in string filter
 // Checks result name, result description, all node names and all predicates
 // Does NOT include node types (Protein, Biological Entity, etc.)
-export const findStringMatch = (element, value) => {
-  if(!value || !element) {
-    return true;
-  }
-
-  let formattedValue = value.toLowerCase();
-  let foundInName = element.name.toLowerCase().indexOf(formattedValue);
-  let foundInDescription =  (element.description) ? element.description.toLowerCase().indexOf(formattedValue) : -1;
-  if (
-    foundInName > -1 || foundInDescription > -1
-  ){
-    return true;
-  }
-
-  for(const path of element.paths) {
-    for(const item of path.subgraph) {
-      if(
-        (item.names && item.names[0].toLowerCase().includes(formattedValue) )||
-        (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))
-        // || item.types && item.types[0].replace('biolink:', '').replaceAll(/([A-Z])/g, ' $1').trim().toLowerCase().includes(formattedValue)
-      )
-        return true;
+export const findStringMatch = (element, value, pathRanks) => {
+  const formattedValue = value.toLowerCase();
+  let foundMatch = !value ||
+                   !element ||
+                   element.name.toLowerCase().includes(formattedValue) ||
+                   (element.description && element.description.toLowerCase().includes(formattedValue));
+  for (let i = 0; i < element.paths.length; ++i) {
+    const path = element.paths[i];
+    for (let item of path.subgraph) {
+      if ((item.names && item.names[0].toLowerCase().includes(formattedValue)) ||
+          (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))) {
+        // Its confusing to update the pathRanks here, but it is more efficient
+        pathRanks[i].rank -= 1;
+        foundMatch = true;
+        break;
+      }
     }
   }
 
-  return false;
+  return foundMatch;
 }
 
 export const removeHighlights = (elements, value) => {
