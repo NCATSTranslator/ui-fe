@@ -7,6 +7,7 @@ import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacetFilter, isEvidenceFilter, isTextFilter } from '../../Utilities/filterFunctions';
+import { formatBiolinkEntity } from '../../Utilities/utilities';
 
 const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
 
@@ -177,7 +178,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             let tagKey = tag[0];
             let object = tag[1];
             let tagName = '';
-            if (type === 'resultType' || type == 'nodeType') {
+            if (type === 'resultType' || type === 'nodeType') {
               tagName = formatBiolinkEntity(object.name);
             } else {
               tagName = object.name;

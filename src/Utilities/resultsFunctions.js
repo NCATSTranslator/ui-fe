@@ -84,12 +84,11 @@ export const getFormattedPaths = (rawPathIds, results) => {
 }
 
 // Take raw results and return properly summarized results
-export const getSummarizedResults = (results, presetDisease, setPresetDisease) => {
+export const getSummarizedResults = (results) => {
   if (results === null || results === undefined)
     return [];
 
   let newSummarizedResults = [];
-  let presetDiseaseSet = (presetDisease) ? true : false;
 
   // // for each individual result item
   for(const item of results.results) {
@@ -118,7 +117,8 @@ export const getSummarizedResults = (results, presetDisease, setPresetDisease) =
       evidence: getFormattedEvidence(formattedPaths, results),
       fdaInfo: fdaInfo,
       score: itemScore,
-      tags: tags
+      tags: tags,
+      rawResult: item
     }
     newSummarizedResults.push(formattedItem);
   }

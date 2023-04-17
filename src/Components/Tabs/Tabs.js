@@ -13,8 +13,9 @@ const Tabs = ({children, tabReset}) => {
   }
 
   useEffect(() => {
-    setActiveTab(firstElement.props.heading);
-  }, [tabReset]);
+    if(tabReset)
+      setActiveTab(firstElement.props.heading);
+  }, [tabReset, firstElement.props.heading]);
 
   return (
 
