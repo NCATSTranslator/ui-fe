@@ -194,7 +194,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           currentNodeIndex++;
         }
         if(numMatches === selPath.length) {
-          // console.log('potential match', selPath, path);
           newSelectedPaths.add(path);
           break;
         }
@@ -279,7 +278,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>
-
     </div>
   );
 }

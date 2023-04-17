@@ -28,7 +28,7 @@ import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { unstable_useBlocker as useBlocker } from "react-router";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
 import { isFacetFilter, isEvidenceFilter, isTextFilter, isFdaFilter,
-         facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
+  facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
 
 const ResultsList = ({loading}) => {
 
@@ -50,7 +50,6 @@ const ResultsList = ({loading}) => {
   loading = (resultsState && Object.keys(resultsState).length > 0) ? false : loading;
 
   // Bool, did the results return an error
-  // eslint-disable-next-line
   const [isError, setIsError] = useState(false);
   // Int, current query id from state
   const currentQueryResultsIDFromState = useSelector(currentQueryResultsID);
@@ -627,28 +626,6 @@ const ResultsList = ({loading}) => {
     */
   }, [activeFilters, sortedResults, activeStringFilters, handlePageClick]);
 
-  useEffect(() => {
-    if(activeFilters.some(activeFilter => isTextFilter(activeFilter))) {
-      // handleSort('entityString');
-    }
-  /*
-    Providing handleSort as dependency leads to infinite loop on entityString search due to handleSort
-    modifying one of its dependencies (sortedResults). Need to reimplement later so that I can supply
-    handleSort as a dependency below and prevent future bugs in this useEffect hook.
-
-    Good for now though.
-  */
-  // eslint-disable-next-line
-  }, [activeFilters]);
-
-  useEffect(() => {
-    if(newItemsPerPage !== null) {
-      setItemsPerPage(newItemsPerPage);
-      setNewItemsPerPage(null);
-      handlePageClick({selected: 0});
-    }
-  }, [newItemsPerPage, handlePageClick]);
-
   const displayLoadingButton = (
     handleResultsRefresh,
     styles,
@@ -855,9 +832,9 @@ const ResultsList = ({loading}) => {
                     name="Results Per Page"
                     size="s"
                     handleChange={(value)=>{
-                      setNewItemsPerPage(parseInt(value));
+                      setItemsPerPage(parseInt(value));
+                      handlePageClick({selected: 0});
                     }}
-                    value={newItemsPerPage}
                     noanimate
                     >
                     <option value="5" key="0">5</option>
