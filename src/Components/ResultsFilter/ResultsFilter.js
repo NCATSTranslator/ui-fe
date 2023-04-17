@@ -7,7 +7,6 @@ import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacetFilter, isEvidenceFilter, isTextFilter } from '../../Utilities/filterFunctions';
-import { formatBiolinkEntity } from '../../Utilities/utilities';
 
 const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
 
