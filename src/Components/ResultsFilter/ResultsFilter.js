@@ -5,14 +5,16 @@ import SimpleRange from '../Range/SimpleRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
+import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
+import { isFacetFilter, isEvidenceFilter, isTextFilter } from '../../Utilities/filterFunctions';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 
 const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
 
   const facetShowMoreIncrement = 5;
 
-  const [evidenceObject, setEvidenceObject] = useState({tag:'evi', value: 1});
-  const [tagObject, setTagObject] = useState({tag:'tag', value: ''});
+  const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1});
+  const [tagObject, setTagObject] = useState({type:'', value: ''});
   const [groupedTags, setGroupedTags] = useState({});
   const [countsToShow, setCountsToShow] = useState(null);
 
@@ -37,12 +39,13 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   }
 
   const handleFacetChange = (facetID, objectToUpdate, setterFunction, label = '') => {
-    if(objectToUpdate.value === facetID)
+    if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
       return;
+    }
 
     let newObj = global.structuredClone(objectToUpdate);
-    newObj.value = facetID;
-    newObj.label = label;
+    newObj.type = facetID;
+    newObj.value = label;
     setterFunction(objectToUpdate);
     onFilter(newObj);
   }
@@ -50,10 +53,10 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   // returns a new object with each tag grouped by its type
   const groupAvailableTags = (tags) => {
     let clonedTags = global.structuredClone(tags);
-    let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ATC')));
+    let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('atc:')));
     let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
     let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
-    let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda')));
+    let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda:')));
     const newGroupedTags = {
       fda: fdaTags,
       resultType: resultTypeTags,
@@ -186,7 +189,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
               <div className={styles.facetContainer} key={j}>
                 <Checkbox
                   handleClick={() => handleFacetChange(tagKey, tagObject, setTagObject, tagName)}
-                  checked={activeFilters.some(e => e.tag === 'tag' && e.value === tagKey)}
+                  checked={activeFilters.some(filter => isFacetFilter(filter) && filter.type === tagKey)}
                   className={styles.checkbox}
                   >
                   {tagName} <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
@@ -223,7 +226,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           <Checkbox
             handleClick={handleEvidenceActive}
             className={styles.evidenceCheckbox}
-            checked={activeFilters.some(e => e.tag === evidenceObject.tag)}>
+            checked={activeFilters.some(filter => isEvidenceFilter(filter))}>
               Minimum Number of Evidence
           </Checkbox>
           <SimpleRange
@@ -231,7 +234,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             hideLabel
             min="1"
             max="99"
-            onChange={e => handleFacetChange(e, evidenceObject, setEvidenceObject)}
+            onChange={e => handleFacetChange('evi:', evidenceObject, setEvidenceObject, e)}
             initialValue={1}
           />
         <div className={styles.tagsContainer}>

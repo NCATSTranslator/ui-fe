@@ -13,7 +13,8 @@ import { currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
-  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag } from "../../Utilities/sortingFunctions";
+  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag, 
+  filterCompare } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import { handleFetchErrors } from "../../Utilities/utilities";
 import { cloneDeep, isEqual } from "lodash";
@@ -26,6 +27,8 @@ import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { unstable_useBlocker as useBlocker } from "react-router";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
+import { isFacetFilter, isEvidenceFilter, isTextFilter, isFdaFilter,
+         facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
 
 const ResultsList = ({loading}) => {
 
@@ -353,7 +356,7 @@ const ResultsList = ({loading}) => {
 
   useEffect(() => {
     if(rawResults !== null)
-      calculateTagCounts(formattedResults, rawResults, setAvailableTags);
+      calculateTagCounts(sortedResults, rawResults, activeFilters, setAvailableTags);
   }, [formattedResults, rawResults]);
 
   useEffect(()=>{
@@ -362,23 +365,54 @@ const ResultsList = ({loading}) => {
     }
   }, [isError]);
 
-  const calculateTagCounts = (formattedResults, rawResults, tagSetterMethod) => {
-    // create a list of tags from the list provided by the backend
-    let countedTags = cloneDeep(rawResults.data.tags);
-    for(const result of formattedResults) {
-      // for each result's list of tags
+  const calculateTagCounts = (sortedResults, rawResults, activeFilters, tagSetterMethod) => {
+    // Function that adds the tag counts when a certain condition (predicate) is met
+    const addTagCountsWhen = (countedTags, result, predicate) => {
       for(const tag of result.tags) {
         // if the tag exists on the list, either increment it or initialize its count
-        if(countedTags.hasOwnProperty(tag)){
-          if(!countedTags[tag].count)
-            countedTags[tag].count = 1;
-          else
+        if (predicate(tag)) {
+          if (countedTags.hasOwnProperty(tag)){
+            if (!countedTags[tag].count) {
+              countedTags[tag].count = 0;
+            }
+
             countedTags[tag].count++;
-        // if it doesn't exist on the current list of tags, add it and initialize its count
-        } else {
-          countedTags[tag] = {name: tag, value: '', count: 1}
+          // if it doesn't exist on the current list of tags, add it and initialize its count
+          } else {
+            countedTags[tag] = {name: tag, value: '', count: 1};
+          }
         }
       }
+    }
+
+    // create a list of tags from the list provided by the backend
+    const countedTags = cloneDeep(rawResults.data.tags);
+    const activeFamilies = new Set(activeFilters.map(f => facetFamily(f.type)));
+    for(const result of sortedResults) {
+      // determine the distance between a result's facets and the facet selection
+      const resultFamilies = new Set();
+      for (const filter of activeFilters) {
+        if (result.tags.includes(filter.type)) {
+          resultFamilies.add(facetFamily(filter.type));
+        }
+      }
+
+      const missingFamiliesCount = activeFamilies.size - resultFamilies.size;
+      // When the family counts are equal, add all the result's tags
+      if (missingFamiliesCount === 0) {
+        addTagCountsWhen(countedTags, result, (tag) => { return true; });
+      // When the result is missing a single family, add all tags from only the missing family
+      } else if (missingFamiliesCount === 1) {
+        // Find the missing family
+        const missingFamily = [...activeFamilies].filter((family) => {
+          return !resultFamilies.has(family);
+        })[0];
+
+        addTagCountsWhen(countedTags, result, (tag) => {
+          return facetFamily(tag) === missingFamily;
+        });
+      }
+      // Otherwise skip this result
     }
 
     Object.entries(countedTags).forEach((tag)=> {
@@ -407,85 +441,79 @@ const ResultsList = ({loading}) => {
     setEvidenceOpen(true);
   }
 
-  // Handle the addition and removal of individual filters
+  // Handle the addition and removal of individual filters. Keep the invariant that
+  // filters of the same type are grouped together.
   const handleFilter = (filter) => {
-
     let indexes = [];
-    for(const [i, value] of activeFilters.entries() ) {
-      if((value.tag === filter.tag && filter.tag !== 'tag')
-      || (filter.tag === 'tag' && filter.value === value.value))
+    for(const [i, activeFilter] of activeFilters.entries()) {
+      if (activeFilter.type === filter.type) {
         indexes.push(i);
-    }
-
-    let newFilters = [...activeFilters];
-    // If we don't find any matches, add the filter to the list
-    if(indexes.length === 0) {
-      newFilters.push(filter);
-    // If there are matches, loop through them to determin whether we need to add, remove, or update
-    } else {
-      let addFilter = true;
-      for(const index of indexes) {
-        // if the values also match, it's a real match
-        if (activeFilters[index].value === filter.value) {
-          // set newFilters to a new array with any matches removed
-          newFilters = activeFilters.reduce((result, value, i) => {
-            if(i !== index) {
-              result.push(value);
-            }
-            return result;
-          }, []);
-          addFilter = false;
-        // If the values don't match and it's not a string search, update the value
-        } else if(filter.tag !== 'str') {
-          newFilters = newFilters.map((value, i) => {
-            if(i === index)
-              value.value = filter.value;
-
-            return value;
-          });
-          addFilter = false;
-        // if the values don't match, but it *is* a new string search filter, add it
-        } else if(activeFilters[index].value !== filter.value && filter.tag === 'str') {
-          addFilter = true;
-        //
-        } else {
-          addFilter = false;
-        }
       }
-      if(addFilter)
-        newFilters.push(filter);
     }
-    setActiveFilters(newFilters);
+
+    let newActiveFilters = [...activeFilters];
+    // If we don't find any matches, push the filter and sort by filter family
+    if(indexes.length === 0) {
+      newActiveFilters.push(filter);
+      newActiveFilters.sort(filterCompare);
+      setActiveFilters(newActiveFilters);
+      return;
+    }
+
+    let addFilter = true;
+    for(const index of indexes) {
+      // if the values also match, it's a real match
+      if (activeFilters[index].value === filter.value) {
+        // set newFilters to a new array with any matches removed
+        newActiveFilters = activeFilters.reduce((newFilters, oldFilter, i) => {
+          if(i !== index) {
+            newFilters.push(oldFilter);
+          }
+
+          return newFilters;
+        }, []);
+
+        addFilter = false;
+      // If the values don't match and it's not a string search, update the value
+      } else if (!isTextFilter(filter)) {
+        newActiveFilters = newActiveFilters.map((activeFilter, i) => {
+          if(i === index) {
+            activeFilter.value = filter.value;
+          }
+
+          return activeFilter;
+        });
+
+        addFilter = false;
+      // if the values don't match, but it *is* a new string search filter, add it
+      } else if(isTextFilter(filter)) {
+        addFilter = true;
+      } else {
+        addFilter = false;
+      }
+    }
+
+    if(addFilter) {
+      newActiveFilters.push(filter);
+      newActiveFilters.sort(filterCompare);
+    }
+
+    setActiveFilters(newActiveFilters);
   }
 
   // Output jsx for selected filters
-  const getSelectedFilterDisplay = (element) => {
+  const getSelectedFilterDisplay = (filter) => {
     let filterDisplay;
-    switch (element.tag) {
-      case "hum":
-        filterDisplay = <div>Species: <span>Human</span></div>;
-        break;
-      case "evi":
-        filterDisplay = <div>Minimum Evidence: <span>{element.value}</span></div>;
-        break;
-      case "fda":
-        filterDisplay = <div><span>FDA Approved</span></div>;
-        break;
-      case "date":
-        filterDisplay = <div>Date of Evidence: <span>{element.value[0]}-{element.value[1]}</span></div>;
-        break;
-      case "str":
-        filterDisplay = <div>String: <span>{element.value}</span></div>;
-        break;
-      case "otc":
-        filterDisplay = <div><span>Available OTC</span></div>;
-        break;
-      case "tag":
-        filterDisplay = <div>Tag:<span> {element.label}</span></div>;
-        break;
-      default:
-        break;
+    if (isEvidenceFilter(filter)) {
+      filterDisplay = <div>Minimum Evidence: <span>{filter.value}</span></div>;
+    } else if (isTextFilter(filter)) {
+      filterDisplay = <div>String: <span>{filter.value}</span></div>;
+    } else if (isFdaFilter(filter)) {
+      filterDisplay = <div><span>FDA Approved</span></div>;
+    } else if (isFacetFilter(filter)) {
+      filterDisplay = <div>Tag:<span> {filter.value}</span></div>;
     }
+
     return filterDisplay;
   }
 
@@ -494,11 +522,15 @@ const ResultsList = ({loading}) => {
   }
 
   const handleClearFilter = (filter) => {
-    let newFilters = cloneDeep(activeFilters.filter(e => e.tag !== filter.tag || e.value !== filter.value));
-    if(filter.tag === 'str') {
-      let originalResults = removeHighlights([...sortedResults], filter.value);
+    const newFilters = cloneDeep(activeFilters.filter((activeFilter) => {
+      return activeFilter.type !== filter.type || activeFilter.value !== filter.value;
+    }));
+
+    if(isTextFilter(filter)) {
+      const originalResults = removeHighlights([...sortedResults], filter.value);
       setFormattedResults(originalResults);
     }
+
     setActiveFilters(newFilters);
   }
 
@@ -515,56 +547,61 @@ const ResultsList = ({loading}) => {
     // If there are no active filters, get the full result set and reset the activeStringFilters
     if(activeFilters.length === 0) {
       setFormattedResults(sortedResults);
-      if(activeStringFilters.length > 0)
+      if(activeStringFilters.length > 0) {
         setActiveStringFilters([]);
+      }
+
       return;
     }
 
     // if we're not already on page 1, reset to page one.
-    if(currentPage.current !== 0)
+    if(currentPage.current !== 0) {
       handlePageClick({selected: 0});
+    }
 
-    let filteredResults = [];
-    let originalResults = [...sortedResults];
+    const filteredResults = [];
+    const originalResults = [...sortedResults];
+    const intersect = (a, b) => { return a &&= b; };
+    const union = (a, b) => { return a ||= b; };
     /*
       For each result, check against each filter. If a filter is triggered,
-      set addElement to false and don't add the element to the filtered results
+      set addResult to true and add the result to the filtered results
     */
-    for(let element of originalResults) {
-      let addElement = false;
-      const pathRanks = element.paths.map((p) => { return { rank: 0, path: p }; });
+    for(let result of originalResults) {
+      let addResult = true;
+      let isInter = null;
+      let combine = null;
+      let lastFilterType = '';
+      const pathRanks = result.paths.map((p) => { return { rank: 0, path: p }; });
       for(const filter of activeFilters) {
-        switch (filter.tag) {
-          // Minimum evidence filter
-          case 'evi':
-            addElement = (filter.value < element.evidence.length);
+        isInter = (!hasSameFacetFamily(lastFilterType, filter.type));
+        if (isInter) {
+          // We went through an entire filter group with no match
+          if (!addResult) {
             break;
-          // Search string filter
-          case 'str':
-            addElement = findStringMatch(element, filter.value, pathRanks);
-            break;
-          // Filter for tagged data
-          case 'tag':
-            if(element.tags.includes(filter.value)) {
-              addElement = true
-              updatePathRankByTag(element, filter.value, pathRanks);
-            }
-            break;
-          // Add new filter tags in this way:
-          case 'example':
-            // if(false)
-            //   addElement = false;
-            break;
-          default:
-            break;
+          }
+
+          lastFilterType = filter.type;
+          combine = intersect;
+        } else {
+          combine = union;
+        }
+
+        if (isEvidenceFilter(filter)) {
+          addResult = combine(addResult, (filter.value < result.evidence.length));
+        } else if (isTextFilter(filter)) {
+          addResult = combine(addResult, findStringMatch(result, filter.value, pathRanks));
+        } else if (isFacetFilter(filter)) {
+          addResult = combine(addResult, result.tags.includes(filter.type));
+          updatePathRankByTag(result, filter.type, pathRanks);
         }
       }
 
-      if (addElement) {
+      if (addResult) {
         pathRanks.sort((a, b) => { return a.rank - b.rank; });
-        element = cloneDeep(element);
-        element.paths = pathRanks.map((pr) => { return pr.path; });
-        filteredResults.push(element);
+        result = cloneDeep(result);
+        result.paths = pathRanks.map((pr) => { return pr.path; });
+        filteredResults.push(result);
       }
     }
 
@@ -575,8 +612,9 @@ const ResultsList = ({loading}) => {
     for(const filter of activeFilters) {
       // String filters with identical values shouldn't be added to the activeFilters array,
       // so we don't have to check for duplicate values here, just for the str tag.
-      if(filter.tag === 'str')
+      if(isTextFilter(filter)) {
         newStringFilters.push(filter.value);
+      }
     }
 
     // if the new set of filters don't match the current ones, call setActiveStringFilters to update them
@@ -590,7 +628,7 @@ const ResultsList = ({loading}) => {
   }, [activeFilters, sortedResults, activeStringFilters, handlePageClick]);
 
   useEffect(() => {
-    if(activeFilters.some(f => f.tag === 'str')) {
+    if(activeFilters.some(activeFilter => isTextFilter(activeFilter))) {
       // handleSort('entityString');
     }
   /*
@@ -738,11 +776,11 @@ const ResultsList = ({loading}) => {
                   activeFilters.length > 0 &&
                   <div className={styles.activeFilters}>
                     {
-                      activeFilters.map((element, i)=> {
+                      activeFilters.map((activeFilter, i)=> {
                         return(
-                          <span key={i} className={`${styles.filterTag} ${element.tag}`}>
-                            { getSelectedFilterDisplay(element) }
-                            <span className={styles.close} onClick={()=>{handleClearFilter(element)}}><CloseIcon/></span>
+                          <span key={i} className={`${styles.filterTag} ${activeFilter.type}`}>
+                            { getSelectedFilterDisplay(activeFilter) }
+                            <span className={styles.close} onClick={()=>{handleClearFilter(activeFilter)}}><CloseIcon/></span>
                           </span>
                         )
                       })
