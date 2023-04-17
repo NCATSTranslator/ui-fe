@@ -12,8 +12,8 @@ import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
 import { currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import ReactPaginate from 'react-paginate';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortByHighlighted,
-  sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag } from "../../Utilities/sortingFunctions";
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
+  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
 import { handleFetchErrors } from "../../Utilities/utilities";
 import { cloneDeep, isEqual } from "lodash";
