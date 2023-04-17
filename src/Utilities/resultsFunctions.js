@@ -132,9 +132,9 @@ export const getSummarizedResults = (results) => {
 export const findStringMatch = (element, value, pathRanks) => {
   const formattedValue = value.toLowerCase();
   let foundMatch = !value ||
-                   !element ||
-                   element.name.toLowerCase().includes(formattedValue) ||
-                   (element.description && element.description.toLowerCase().includes(formattedValue));
+    !element ||
+    element.name.toLowerCase().includes(formattedValue) ||
+    (element.description && element.description.toLowerCase().includes(formattedValue));
   for (let i = 0; i < element.paths.length; ++i) {
     const path = element.paths[i];
     for (let item of path.subgraph) {
