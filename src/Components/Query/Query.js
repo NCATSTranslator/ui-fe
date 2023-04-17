@@ -113,14 +113,14 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     }
   }
 
-  const handleQueryTypeChange = (value, resetInputText) => {
+  const handleQueryTypeChange = useCallback((value, resetInputText) => {
     setIsError(false);
     autocompleteFunctions.current = value.functions;
     setQueryType(value);
     setPresetTypeID(value.id);
     if(resetInputText || resetInputText === undefined)
       setInputText('');
-  }
+  },[]);
 
   // Handler for disease selection (template click or autocomplete item click)
   const handleDiseaseSelection = (disease) => {
@@ -171,7 +171,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
       // }
     }
 
-  }, [selectedItem, readyForSubmission, handleSubmission]);
+  }, [selectedItem, readyForSubmission, handleSubmission, updateQueryItems]);
 
   useEffect(() => {
     if(presetDisease) {
@@ -277,7 +277,8 @@ const Query = ({results, loading, presetDisease, presetType}) => {
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItem, storedQuery, selectedItem, navigate, setSearchParams])
+  }, [isValidSubmission, dispatch, queryItem, queryType.direction, queryType.targetType,
+     storedQuery, selectedItem, navigate, setSearchParams])
 
   /*
     If the query has been populated by clicking on an item in the query history

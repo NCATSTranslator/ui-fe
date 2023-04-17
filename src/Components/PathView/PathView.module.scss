@@ -1,0 +1,168 @@
+@import "../../Assets/Styles/variables";
+
+.pathView {
+  padding: $m 0;
+
+  .tableHead, .tableItem {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    .name, .target {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .path {
+      font-size: 12px;
+      font-weight: 400;
+    }
+  }
+  .tableHead {
+    margin-bottom: $m;
+
+    span {
+      text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 12.5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 14.3%;
+      text-align: center;
+      margin-right: 4px;
+      cursor: pointer;
+    }
+  }
+  .tableItem {
+    margin-bottom: $m;
+    position: relative;
+    .pathContainer, .name, .target {
+      line-height: 17.5px;
+      border-radius: $defaultBorderRadius;
+      padding: 7px 0;
+      &:first-child {
+        background-color: $yellow;
+        padding: 7px 0;
+      }
+    }
+    .pathContainer {
+      position: relative;
+      svg {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        transform: translateY(-50%);
+      }
+    }
+    .path {
+      display: block;
+      justify-content: flex-start;
+      box-shadow: none;
+      width: auto;
+      padding: 0 2px;
+      max-width: 87px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      background-color: white;
+      z-index: 10;
+      color: $darkGray;
+      margin-right: 0;
+      transition: all .25s ease;
+      path {
+        transition: all .25s ease;
+      }
+      &:hover {
+        color: $black;
+        path {
+          fill: $black;
+        }  
+      }
+    }
+    .name, .target {
+      box-shadow: $dropShadow;
+      transition: all .25s ease;
+      width: 100%;
+      overflow: hidden;
+      &:hover {
+        box-shadow: $dropShadowHover;
+      }
+    }
+    .target {
+      background-color: $blueTwo;
+      color: $white;
+      svg {
+        margin-right: 8px;
+      }
+    }
+  }
+  .show {
+    margin: 0;
+    display: block;
+    color: $darkGray;
+    background-color: transparent;
+    box-shadow: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .buttons {
+    display: flex;
+    justify-content: center;
+    button:last-child {
+      margin-left: $s;
+    }
+    button:first-child {
+      margin-left: 0;
+    }
+  }
+  .header {
+    margin-bottom: $l;
+    p {
+      font-size: 12px;
+    }
+    .subtitle {
+      font-size: 16px;
+      font-weight: 700;
+      color: $black;
+      margin-bottom: 0;
+    }
+  }
+  .needHelp {
+    font-size: 12px;
+    text-align: center;
+    margin: 12px 0 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: $purpleOne;
+    svg {
+      margin-right: 4px;
+    }
+    button {
+      padding: 0;
+      color: $purpleOne;
+      text-decoration: none;
+      font-weight: 700; 
+      font-size: 12px;
+      box-shadow: none;
+      margin: 0 0 0 4px;
+      background-color: transparent;
+      &:hover {
+        box-shadow: none;
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.unhighlighted {
+  opacity: .5;
+}
+
+.edgeLabel {
+  fill: #000 !important;
+}
