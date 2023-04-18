@@ -131,10 +131,18 @@ const ResultsList = ({loading}) => {
     setEndResultIndex(endOffset);
   }, [formattedResults.length, itemsPerPage]);
 
-  const handleUpdateResults = (aFilters, asFilters, rr, justSort = false, sortType, fr = []) => {
+  const handleUpdateResults = (aFilters, asFilters, rr, or = [], justSort = false, sortType, fr = []) => {
+
+    let newFormattedResults = [];
+    let newOriginalResults = [];
     
-    let newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data);
-    let newOriginalResults = cloneDeep(newFormattedResults);
+    if(or.length === 0) {
+      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data);
+      newOriginalResults = cloneDeep(newFormattedResults);
+    } else {
+      newFormattedResults = (justSort) ? fr : or;
+      newOriginalResults = or;
+    }
 
     // filter
     if(!justSort)
@@ -147,6 +155,7 @@ const ResultsList = ({loading}) => {
     setFormattedResults(newFormattedResults);
     if(!justSort)
       setOriginalResults(newOriginalResults);
+    
     setRawResults(rr);
 
     return newFormattedResults;
@@ -166,7 +175,7 @@ const ResultsList = ({loading}) => {
     // if rawResults are new, set prevRawResults for future comparison
     prevRawResults.current = rr;
 
-    const newFormattedResults = handleUpdateResults(activeFilters, activeStringFilters, rr, false, currentSortString.current);
+    const newFormattedResults = handleUpdateResults(activeFilters, activeStringFilters, rr, [], false, currentSortString.current);
 
     // we have results to show, set isLoading to false
     if (newFormattedResults.length > 0)
@@ -289,7 +298,7 @@ const ResultsList = ({loading}) => {
 
   // Handle the sorting
   const getSortedResults = useCallback((resultsToSort, sortName) => {
-    let newSortedResults = cloneDeep(resultsToSort);
+    let newSortedResults = resultsToSort;
     switch (sortName) {
       case 'nameLowHigh':
         newSortedResults = sortNameLowHigh(newSortedResults);
@@ -436,14 +445,13 @@ const ResultsList = ({loading}) => {
     }
 
     const filteredResults = [];
-    const originalResults = [...oResults];
     const intersect = (a, b) => { return a &&= b; };
     const union = (a, b) => { return a ||= b; };
     /*
       For each result, check against each filter. If a filter is triggered,
       set addResult to true and add the result to the filtered results
     */
-    for(let result of originalResults) {
+    for(let result of oResults) {
       let addResult = true;
       let isInter = null;
       let combine = null;
@@ -515,7 +523,7 @@ const ResultsList = ({loading}) => {
       newActiveFilters.push(filter);
       newActiveFilters.sort(filterCompare);
       setActiveFilters(newActiveFilters);
-      handleUpdateResults(newActiveFilters, activeStringFilters, rawResults, false, currentSortString.current)
+      handleUpdateResults(newActiveFilters, activeStringFilters, rawResults, originalResults, false, currentSortString.current)
       return;
     }
 
@@ -558,7 +566,7 @@ const ResultsList = ({loading}) => {
     }
 
     setActiveFilters(newActiveFilters);
-    handleUpdateResults(newActiveFilters, activeStringFilters, rawResults, false, currentSortString.current);
+    handleUpdateResults(newActiveFilters, activeStringFilters, rawResults, originalResults, false, currentSortString.current);
   };
 
   // Output jsx for selected filters
@@ -577,9 +585,9 @@ const ResultsList = ({loading}) => {
     return filterDisplay;
   }
 
-  const handleClearAllFilters = (asFilters, rResults) => {
+  const handleClearAllFilters = (asFilters, rResults, oResults) => {
     setActiveFilters([]);
-    handleUpdateResults([], asFilters, rResults, false, currentSortString.current);
+    handleUpdateResults([], asFilters, rResults, oResults, false, currentSortString.current);
   }
 
   const handleResultsRefresh = () => {
@@ -737,7 +745,7 @@ const ResultsList = ({loading}) => {
                         onClick={()=>{
                           let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
                           currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, true, sortString, formattedResults);
+                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, originalResults, true, sortString, formattedResults);
                         }}
                       >
                         Name
@@ -747,7 +755,7 @@ const ResultsList = ({loading}) => {
                         onClick={()=>{
                           let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
                           currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, true, sortString, formattedResults);
+                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, originalResults, true, sortString, formattedResults);
                         }}
                       >
                         Evidence
@@ -757,7 +765,7 @@ const ResultsList = ({loading}) => {
                         onClick={()=>{
                           let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
                           currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, true, sortString, formattedResults);
+                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, originalResults, true, sortString, formattedResults);
                         }}
                         data-tooltip-id="score-tooltip"
                       >

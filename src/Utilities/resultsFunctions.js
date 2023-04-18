@@ -1,5 +1,5 @@
 import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity } from './utilities';
-import _, { cloneDeep } from "lodash";
+import { cloneDeep } from "lodash";
 
 // Given an array of paths and results, return an array of publications for those paths
 export const getFormattedEvidence = (paths, results) => {
@@ -91,7 +91,7 @@ export const getSummarizedResults = (results) => {
   let newSummarizedResults = [];
 
   // // for each individual result item
-  for(const item of results.results) {
+  for(const [i, item] of results.results.entries()) {
     // Get the object node's name
     let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]);
     // Get the subject node's name
@@ -107,7 +107,7 @@ export const getSummarizedResults = (results) => {
     let itemScore = (item.score === null) ? 0 : item.score.toFixed(1);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
     let formattedItem = {
-      id: _.uniqueId(),
+      id: `${item.subject}${item.object}-${i}`,
       subjectNode: subjectNode,
       type: 'biolink:Drug',
       name: itemName,
