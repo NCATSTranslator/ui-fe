@@ -268,6 +268,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             rawResults={rawResults}
             onNodeClick={handleNodeClick}
             clearSelectedPaths={handleClearSelectedPaths}
+            active={isExpanded}
           />
         </Suspense>
         <PathView
