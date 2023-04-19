@@ -84,10 +84,10 @@ const ResultsList = ({loading}) => {
   // Int, last result item index
   const [endResultIndex, setEndResultIndex] = useState(itemsPerPage);
   // Obj, original raw results from the BE
-  const [rawResults, setRawResults] = useState(resultsState);
-  // Obj, original raw results from the BE
-  const [originalResults, setOriginalResults] = useState([]);
-  // Obj, original raw results from the BE
+  const rawResults = useRef(resultsState);
+  // Obj, original, unfiltered results from the BE
+  const originalResults = useRef([]);
+  // Obj, fresh results from the BE to replace existing rawResults
   const [freshRawResults, setFreshRawResults] = useState(null);
   /*
     Ref, used to track changes in results
@@ -138,6 +138,7 @@ const ResultsList = ({loading}) => {
     
     if(or.length === 0) {
       newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data);
+      console.log('setting original results')
       newOriginalResults = cloneDeep(newFormattedResults);
     } else {
       newFormattedResults = (justSort) ? fr : or;
@@ -153,10 +154,13 @@ const ResultsList = ({loading}) => {
 
     // set results
     setFormattedResults(newFormattedResults);
+    console.log('formattedResults set');
     if(!justSort)
-      setOriginalResults(newOriginalResults);
+      originalResults.current = newOriginalResults;
+      // setOriginalResults(newOriginalResults);
     
-    setRawResults(rr);
+      rawResults.current = rr;
+      // setRawResults(rr);
 
     return newFormattedResults;
   }
@@ -174,7 +178,6 @@ const ResultsList = ({loading}) => {
 
     // if rawResults are new, set prevRawResults for future comparison
     prevRawResults.current = rr;
-
     const newFormattedResults = handleUpdateResults(activeFilters, activeStringFilters, rr, [], false, currentSortString.current);
 
     // we have results to show, set isLoading to false
@@ -483,9 +486,9 @@ const ResultsList = ({loading}) => {
 
       if (addResult) {
         pathRanks.sort((a, b) => { return a.rank - b.rank; });
-        result = cloneDeep(result);
-        result.paths = pathRanks.map((pr) => { return pr.path; });
-        filteredResults.push(result);
+        let newResult = cloneDeep(result);
+        newResult.paths = pathRanks.map((pr) => { return pr.path; });
+        filteredResults.push(newResult);
       }
     }
 
@@ -523,7 +526,7 @@ const ResultsList = ({loading}) => {
       newActiveFilters.push(filter);
       newActiveFilters.sort(filterCompare);
       setActiveFilters(newActiveFilters);
-      handleUpdateResults(newActiveFilters, activeStringFilters, rawResults, originalResults, false, currentSortString.current)
+      handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current)
       return;
     }
 
@@ -566,8 +569,8 @@ const ResultsList = ({loading}) => {
     }
 
     setActiveFilters(newActiveFilters);
-    handleUpdateResults(newActiveFilters, activeStringFilters, rawResults, originalResults, false, currentSortString.current);
-  };
+    handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current)
+  }
 
   // Output jsx for selected filters
   const getSelectedFilterDisplay = (filter) => {
@@ -646,7 +649,7 @@ const ResultsList = ({loading}) => {
         onClose={()=>handleEvidenceModalClose()}
         className="evidence-modal"
         currentEvidence={currentEvidence}
-        results={rawResults}
+        results={rawResults.current}
         title={evidenceTitle}
         edges={evidenceEdges}
       />
@@ -671,9 +674,9 @@ const ResultsList = ({loading}) => {
                 startIndex={itemOffset+1}
                 endIndex={endResultIndex}
                 formattedCount={formattedResults.length}
-                totalCount={originalResults.length}
+                totalCount={originalResults.current.length}
                 onFilter={handleFilter}
-                onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults)}
+                onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults.current, originalResults.current)}
                 activeFilters={activeFilters}
                 availableTags={availableTags}
               />
@@ -691,8 +694,8 @@ const ResultsList = ({loading}) => {
                         </span> of
                         <span className={styles.count}> {formattedResults.length} </span>
                         {
-                          (formattedResults.length !== originalResults.length) &&
-                          <span className={styles.total}>({originalResults.length}) </span>
+                          (formattedResults.length !== originalResults.current.length) &&
+                          <span className={styles.total}>({originalResults.current.length}) </span>
                         }
                         <span> Results</span>
                       </p>
@@ -745,7 +748,7 @@ const ResultsList = ({loading}) => {
                         onClick={()=>{
                           let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
                           currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, originalResults, true, sortString, formattedResults);
+                          handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                         }}
                       >
                         Name
@@ -755,7 +758,7 @@ const ResultsList = ({loading}) => {
                         onClick={()=>{
                           let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
                           currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, originalResults, true, sortString, formattedResults);
+                          handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                         }}
                       >
                         Evidence
@@ -765,7 +768,7 @@ const ResultsList = ({loading}) => {
                         onClick={()=>{
                           let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
                           currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, originalResults, true, sortString, formattedResults);
+                          handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                         }}
                         data-tooltip-id="score-tooltip"
                       >
@@ -793,7 +796,7 @@ const ResultsList = ({loading}) => {
                       displayedResults.map((item) => {
                         return (
                           <ResultsItem
-                            rawResults={rawResults}
+                            rawResults={rawResults.current}
                             key={item.id}
                             type={storedQuery.type}
                             item={item}
