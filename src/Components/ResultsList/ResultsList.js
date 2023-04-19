@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import styles from './ResultsList.module.scss';
 import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
@@ -15,7 +15,7 @@ import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
   sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag, 
   filterCompare } from "../../Utilities/sortingFunctions";
-import { getSummarizedResults, findStringMatch, removeHighlights } from "../../Utilities/resultsFunctions";
+import { getSummarizedResults, findStringMatch } from "../../Utilities/resultsFunctions";
 import { handleFetchErrors } from "../../Utilities/utilities";
 import { cloneDeep, isEqual } from "lodash";
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
@@ -28,7 +28,7 @@ import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { unstable_useBlocker as useBlocker } from "react-router";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
 import { isFacetFilter, isEvidenceFilter, isTextFilter, isFdaFilter,
-         facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
+  facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
 
 const ResultsList = ({loading}) => {
 
@@ -47,10 +47,8 @@ const ResultsList = ({loading}) => {
   loading = (loadingParam === 'true') ? true : loading;
   let resultsState = useSelector(currentResults);
   resultsState = (resultsState !== undefined && Object.keys(resultsState).length === 0) ? null : resultsState;
-  loading = (resultsState && Object.keys(resultsState).length > 0) ? false : loading;
 
   // Bool, did the results return an error
-  // eslint-disable-next-line
   const [isError, setIsError] = useState(false);
   // Int, current query id from state
   const currentQueryResultsIDFromState = useSelector(currentQueryResultsID);
@@ -68,7 +66,7 @@ const ResultsList = ({loading}) => {
   // Bool, are the results currently sorted by evidence count (true/false for asc/desc, null for not set)
   const [isSortedByEvidence, setIsSortedByEvidence] = useState(null);
   // Bool, are the results currently sorted by score
-  const [isSortedByScore, setIsSortedByScore] = useState(null);
+  const [isSortedByScore, setIsSortedByScore] = useState(false);
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   // String, active title of evidence modal
@@ -77,29 +75,31 @@ const ResultsList = ({loading}) => {
   const [evidenceEdges, setEvidenceEdges] = useState([]);
   // Array, evidence relating to the item last clicked
   const [currentEvidence, setCurrentEvidence] = useState([]);
-  // Obj, original raw results from the BE
-  const [rawResults, setRawResults] = useState(resultsState);
-  // Obj, original raw results from the BE
-  const [freshRawResults, setFreshRawResults] = useState(null);
-  /*
-    Ref, used to track changes in results for useEffect with 'results' obj as dependency
-    b/c react doesn't deep compare objects in useEffect hook
-  */
-  const prevRawResults = useRef(rawResults);
-  // Array, full result set sorted by any active sorting, but NOT filtered
-  const [sortedResults, setSortedResults] = useState([]);
-  // Array, results formatted by any active filters, sorted by any active sorting
-  const [formattedResults, setFormattedResults] = useState([]);
-  // Array, results meant to display based on the pagination
-  const [displayedResults, setDisplayedResults] = useState([]);
-  // Int, last result item index
-  const [endResultIndex, setEndResultIndex] = useState(9);
-  // Int, number of pages
-  const [pageCount, setPageCount] = useState(0);
   // Int, current page
   const currentPage = useRef(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
+  // Int, how many items per page
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  // Int, last result item index
+  const [endResultIndex, setEndResultIndex] = useState(itemsPerPage);
+  // Obj, original raw results from the BE
+  const [rawResults, setRawResults] = useState(resultsState);
+  // Obj, original raw results from the BE
+  const [originalResults, setOriginalResults] = useState([]);
+  // Obj, original raw results from the BE
+  const [freshRawResults, setFreshRawResults] = useState(null);
+  /*
+    Ref, used to track changes in results
+  */
+  const prevRawResults = useRef(rawResults);
+  // Array, results formatted by any active filters, sorted by any active sorting
+  const [formattedResults, setFormattedResults] = useState([]);
+  // Array, results meant to display based on the pagination
+  const displayedResults = formattedResults.slice(itemOffset, endResultIndex);
+  const currentSortString = useRef('scoreHighLow');
+  // Int, number of pages
+  const pageCount = Math.ceil(formattedResults.length / itemsPerPage);
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState([]);
   // Array, currently active filters
@@ -108,10 +108,6 @@ const ResultsList = ({loading}) => {
   const [activeStringFilters, setActiveStringFilters] = useState([]);
   // Array, aras that have returned data
   const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
-  // Bool, is fda tooltip currently active
-  // const [fdaTooltipActive, setFdaTooltipActive] = useState(false);
-  // Bool, have the initial results been sorted yet
-  const presorted = useRef(false);
   const initPresetDisease = (presetDiseaseLabelParam) ? {id: '', label: presetDiseaseLabelParam} : null;
   const initPresetQueryTypeID = (presetQueryTypeIDParam) ? presetQueryTypeIDParam : null;
   // Obj, {label: ''}, used to set input text, determined by results object
@@ -121,34 +117,79 @@ const ResultsList = ({loading}) => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
   const numberOfStatusChecks = useRef(0);
-
-  // handler for closing share modal
-  const handleShareModalClose = () => {
-    setShareModalOpen(false);
-  }
-
   // Initialize queryClient for React Query to fetch results
   const queryClient = new QueryClient();
-  // Int, how many items per page
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [newItemsPerPage, setNewItemsPerPage] = useState(null);
-
-  // Handle Page Offset
-  useEffect(() => {
-    const endOffset = (itemOffset + itemsPerPage > formattedResults.length)
-      ? formattedResults.length
-      : itemOffset + itemsPerPage;
-    setDisplayedResults(formattedResults.slice(itemOffset, endOffset));
-    setEndResultIndex(endOffset);
-    setPageCount(Math.ceil(formattedResults.length / itemsPerPage));
-  }, [itemOffset, itemsPerPage, formattedResults]);
 
   // Handles direct page click
   const handlePageClick = useCallback((event) => {
-    const newOffset = (event.selected * itemsPerPage) % formattedResults.length;
     currentPage.current = event.selected;
+    const newOffset = (event.selected * itemsPerPage) % formattedResults.length;
+    const endOffset = (newOffset + itemsPerPage > formattedResults.length)
+      ? formattedResults.length
+      : newOffset + itemsPerPage;
     setItemOffset(newOffset);
+    setEndResultIndex(endOffset);
   }, [formattedResults.length, itemsPerPage]);
+
+  const handleUpdateResults = (aFilters, asFilters, rr, or = [], justSort = false, sortType, fr = []) => {
+
+    let newFormattedResults = [];
+    let newOriginalResults = [];
+    
+    if(or.length === 0) {
+      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data);
+      newOriginalResults = cloneDeep(newFormattedResults);
+    } else {
+      newFormattedResults = (justSort) ? fr : or;
+      newOriginalResults = or;
+    }
+
+    // filter
+    if(!justSort)
+      newFormattedResults = getFilteredResults(aFilters, asFilters, newFormattedResults, newOriginalResults, rr);
+
+    // sort
+    newFormattedResults = getSortedResults(newFormattedResults, sortType);
+
+    // set results
+    setFormattedResults(newFormattedResults);
+    if(!justSort)
+      setOriginalResults(newOriginalResults);
+    
+    setRawResults(rr);
+
+    return newFormattedResults;
+  }
+
+  const handleNewResults = (data) => {
+    let rr = data;
+    // if we have no results, or the results aren't actually new, return
+    if(rr == null || isEqual(rr, prevRawResults.current))
+      return;
+
+    // if the results status is error, or there is no results property in the data obj, return
+    if(rr.status === 'error' || rr.data.results === undefined)  
+      return;
+
+
+    // if rawResults are new, set prevRawResults for future comparison
+    prevRawResults.current = rr;
+
+    const newFormattedResults = handleUpdateResults(activeFilters, activeStringFilters, rr, [], false, currentSortString.current);
+
+    // we have results to show, set isLoading to false
+    if (newFormattedResults.length > 0)
+      setIsLoading(false);
+
+    // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
+    if(rr && rr.data.results && rr.data.results.length === 0 && !isFetchingARAStatus)
+      setIsLoading(false);
+  }
+
+  const handleResultsError = (errorExists = true) => {
+    setIsError(errorExists);
+    setIsLoading(false);
+  }
 
   // React Query call for status of results
   // eslint-disable-next-line
@@ -196,7 +237,7 @@ const ResultsList = ({loading}) => {
       })
       .catch((error) => {
         if(formattedResults.length <= 0) {
-          setIsError(true);
+          handleResultsError(true);
           setIsFetchingARAStatus(false);
         }
         if(formattedResults.length > 0) {
@@ -231,7 +272,7 @@ const ResultsList = ({loading}) => {
         setIsFetchingARAStatus(false);
         setIsFetchingResults(false);
         if(formattedResults.length <= 0) {
-          setIsError(true);
+          handleResultsError(true);
         }
       }))
       .then(response => response.json())
@@ -242,7 +283,7 @@ const ResultsList = ({loading}) => {
         if(formattedResults.length > 0) {
           setFreshRawResults(data);
         } else {
-          setRawResults(data);
+          handleNewResults(data);
         }
 
         setIsFetchingResults(false);
@@ -256,8 +297,8 @@ const ResultsList = ({loading}) => {
   });
 
   // Handle the sorting
-  const handleSort = useCallback((resultsToSort, sortName) => {
-    let newSortedResults = cloneDeep(resultsToSort);
+  const getSortedResults = useCallback((resultsToSort, sortName) => {
+    let newSortedResults = resultsToSort;
     switch (sortName) {
       case 'nameLowHigh':
         newSortedResults = sortNameLowHigh(newSortedResults);
@@ -273,25 +314,25 @@ const ResultsList = ({loading}) => {
         break;
       case 'evidenceLowHigh':
         newSortedResults = sortEvidenceLowHigh(newSortedResults);
-        setIsSortedByEvidence(false);
+        setIsSortedByEvidence(true);
         setIsSortedByScore(null)
         setIsSortedByName(null);
         break;
       case 'evidenceHighLow':
         newSortedResults = sortEvidenceHighLow(newSortedResults);
-        setIsSortedByEvidence(true);
+        setIsSortedByEvidence(false);
         setIsSortedByScore(null)
         setIsSortedByName(null);
         break;
       case 'scoreLowHigh':
         newSortedResults = sortScoreLowHigh(newSortedResults);
-        setIsSortedByScore(false)
+        setIsSortedByScore(true)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         break;
       case 'scoreHighLow':
         newSortedResults = sortScoreHighLow(newSortedResults);
-        setIsSortedByScore(true)
+        setIsSortedByScore(false)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         break;
@@ -312,60 +353,7 @@ const ResultsList = ({loading}) => {
     return newSortedResults;
   }, [activeStringFilters, handlePageClick]);
 
-  /*
-    When the results change, which occurs when the React Query returns, handle the returned data
-    based on the returned data's status.
-  */
-  useEffect(() => {
-    // if we have no results, or the results aren't actually new, return
-    if(rawResults == null || isEqual(rawResults, prevRawResults.current))
-      return;
-
-    // if results are new, set prevResults for future comparison
-    prevRawResults.current = rawResults;
-
-    let newResults = [];
-
-    // if the status is not error, handle setting the results
-    if(rawResults.status !== 'error' && rawResults.data.results !== undefined)
-      newResults = getSummarizedResults(rawResults.data);
-
-      // set formatted results
-    setFormattedResults(newResults);
-
-    if(newResults.length > 0) {
-      setSortedResults(handleSort(newResults, 'scoreHighLow'));
-      presorted.current = true;
-    } else {
-      setSortedResults(newResults);
-    }
-
-  }, [rawResults, presetDisease, handleSort]);
-
-  useEffect(() => {
-
-    // we have results to show, set isLoading to false
-    if (formattedResults.length > 0)
-      setIsLoading(false);
-
-    // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
-    if(rawResults && rawResults.data.results && rawResults.data.results.length === 0 && !isFetchingARAStatus)
-      setIsLoading(false);
-
-  }, [formattedResults, rawResults, isFetchingARAStatus]);
-
-  useEffect(() => {
-    if(rawResults !== null)
-      calculateTagCounts(sortedResults, rawResults, activeFilters, setAvailableTags);
-  }, [formattedResults, rawResults]);
-
-  useEffect(()=>{
-    if(isError) {
-      setIsLoading(false);
-    }
-  }, [isError]);
-
-  const calculateTagCounts = (sortedResults, rawResults, activeFilters, tagSetterMethod) => {
+  const calculateTagCounts = (results, rawResults, activeFilters, tagSetterMethod) => {
     // Function that adds the tag counts when a certain condition (predicate) is met
     const addTagCountsWhen = (countedTags, result, predicate) => {
       for(const tag of result.tags) {
@@ -388,7 +376,7 @@ const ResultsList = ({loading}) => {
     // create a list of tags from the list provided by the backend
     const countedTags = cloneDeep(rawResults.data.tags);
     const activeFamilies = new Set(activeFilters.map(f => facetFamily(f.type)));
-    for(const result of sortedResults) {
+    for(const result of results) {
       // determine the distance between a result's facets and the facet selection
       const resultFamilies = new Set();
       for (const filter of activeFilters) {
@@ -441,6 +429,84 @@ const ResultsList = ({loading}) => {
     setEvidenceOpen(true);
   }
 
+  const getFilteredResults = (filters, stringFilters, fResults, oResults, rResults) => {
+    // If there are no active filters, get the full result set and reset the activeStringFilters
+    if(filters.length === 0) {
+      if(stringFilters.length > 0) {
+        setActiveStringFilters([]);
+      }
+      calculateTagCounts(fResults, rResults, filters, setAvailableTags);
+      return fResults;
+    }
+
+    // if we're not already on page 1, reset to page one.
+    if(currentPage.current !== 0) {
+      handlePageClick({selected: 0});
+    }
+
+    const filteredResults = [];
+    const intersect = (a, b) => { return a &&= b; };
+    const union = (a, b) => { return a ||= b; };
+    /*
+      For each result, check against each filter. If a filter is triggered,
+      set addResult to true and add the result to the filtered results
+    */
+    for(let result of oResults) {
+      let addResult = true;
+      let isInter = null;
+      let combine = null;
+      let lastFilterType = '';
+      const pathRanks = result.paths.map((p) => { return { rank: 0, path: p }; });
+      for(const filter of filters) {
+        isInter = (!hasSameFacetFamily(lastFilterType, filter.type));
+        if (isInter) {
+          // We went through an entire filter group with no match
+          if (!addResult) {
+            break;
+          }
+
+          lastFilterType = filter.type;
+          combine = intersect;
+        } else {
+          combine = union;
+        }
+
+        if (isEvidenceFilter(filter)) {
+          addResult = combine(addResult, (filter.value < result.evidence.length));
+        } else if (isTextFilter(filter)) {
+          addResult = combine(addResult, findStringMatch(result, filter.value, pathRanks));
+        } else if (isFacetFilter(filter)) {
+          addResult = combine(addResult, result.tags.includes(filter.type));
+          updatePathRankByTag(result, filter.type, pathRanks);
+        }
+      }
+
+      if (addResult) {
+        pathRanks.sort((a, b) => { return a.rank - b.rank; });
+        result = cloneDeep(result);
+        result.paths = pathRanks.map((pr) => { return pr.path; });
+        filteredResults.push(result);
+      }
+    }
+
+    let newStringFilters = [];
+    for(const filter of filters) {
+      // String filters with identical values shouldn't be added to the activeFilters array,
+      // so we don't have to check for duplicate values here, just for the str tag.
+      if(isTextFilter(filter)) {
+        newStringFilters.push(filter.value);
+      }
+    }
+
+    // if the new set of filters don't match the current ones, call setActiveStringFilters to update them
+    if(!(newStringFilters.length === stringFilters.length && newStringFilters.every((value, index) => value === stringFilters[index])))
+      setActiveStringFilters(newStringFilters);
+
+    calculateTagCounts(filteredResults, rResults, filters, setAvailableTags);
+    // Set the formatted results to the newly filtered results
+    return filteredResults;
+  }
+
   // Handle the addition and removal of individual filters. Keep the invariant that
   // filters of the same type are grouped together.
   const handleFilter = (filter) => {
@@ -451,12 +517,13 @@ const ResultsList = ({loading}) => {
       }
     }
 
-    let newActiveFilters = [...activeFilters];
+    let newActiveFilters = cloneDeep(activeFilters);
     // If we don't find any matches, push the filter and sort by filter family
     if(indexes.length === 0) {
       newActiveFilters.push(filter);
       newActiveFilters.sort(filterCompare);
       setActiveFilters(newActiveFilters);
+      handleUpdateResults(newActiveFilters, activeStringFilters, rawResults, originalResults, false, currentSortString.current)
       return;
     }
 
@@ -499,7 +566,8 @@ const ResultsList = ({loading}) => {
     }
 
     setActiveFilters(newActiveFilters);
-  }
+    handleUpdateResults(newActiveFilters, activeStringFilters, rawResults, originalResults, false, currentSortString.current);
+  };
 
   // Output jsx for selected filters
   const getSelectedFilterDisplay = (filter) => {
@@ -517,137 +585,17 @@ const ResultsList = ({loading}) => {
     return filterDisplay;
   }
 
-  const handleClearAllFilters = () => {
+  const handleClearAllFilters = (asFilters, rResults, oResults) => {
     setActiveFilters([]);
-  }
-
-  const handleClearFilter = (filter) => {
-    const newFilters = cloneDeep(activeFilters.filter((activeFilter) => {
-      return activeFilter.type !== filter.type || activeFilter.value !== filter.value;
-    }));
-
-    if(isTextFilter(filter)) {
-      const originalResults = removeHighlights([...sortedResults], filter.value);
-      setFormattedResults(originalResults);
-    }
-
-    setActiveFilters(newFilters);
+    handleUpdateResults([], asFilters, rResults, oResults, false, currentSortString.current);
   }
 
   const handleResultsRefresh = () => {
-    presorted.current = false;
     // Update rawResults with the fresh data
-    setRawResults(freshRawResults);
+    handleNewResults(freshRawResults);
     // Set freshRawResults back to null
     setFreshRawResults(null)
   }
-
-  // Filter the results whenever the activated filters change
-  useEffect(() => {
-    // If there are no active filters, get the full result set and reset the activeStringFilters
-    if(activeFilters.length === 0) {
-      setFormattedResults(sortedResults);
-      if(activeStringFilters.length > 0) {
-        setActiveStringFilters([]);
-      }
-
-      return;
-    }
-
-    // if we're not already on page 1, reset to page one.
-    if(currentPage.current !== 0) {
-      handlePageClick({selected: 0});
-    }
-
-    const filteredResults = [];
-    const originalResults = [...sortedResults];
-    const intersect = (a, b) => { return a &&= b; };
-    const union = (a, b) => { return a ||= b; };
-    /*
-      For each result, check against each filter. If a filter is triggered,
-      set addResult to true and add the result to the filtered results
-    */
-    for(let result of originalResults) {
-      let addResult = true;
-      let isInter = null;
-      let combine = null;
-      let lastFilterType = '';
-      const pathRanks = result.paths.map((p) => { return { rank: 0, path: p }; });
-      for(const filter of activeFilters) {
-        isInter = (!hasSameFacetFamily(lastFilterType, filter.type));
-        if (isInter) {
-          // We went through an entire filter group with no match
-          if (!addResult) {
-            break;
-          }
-
-          lastFilterType = filter.type;
-          combine = intersect;
-        } else {
-          combine = union;
-        }
-
-        if (isEvidenceFilter(filter)) {
-          addResult = combine(addResult, (filter.value < result.evidence.length));
-        } else if (isTextFilter(filter)) {
-          addResult = combine(addResult, findStringMatch(result, filter.value, pathRanks));
-        } else if (isFacetFilter(filter)) {
-          addResult = combine(addResult, result.tags.includes(filter.type));
-          updatePathRankByTag(result, filter.type, pathRanks);
-        }
-      }
-
-      if (addResult) {
-        pathRanks.sort((a, b) => { return a.rank - b.rank; });
-        result = cloneDeep(result);
-        result.paths = pathRanks.map((pr) => { return pr.path; });
-        filteredResults.push(result);
-      }
-    }
-
-    // Set the formatted results to the newly filtered results
-    setFormattedResults(filteredResults);
-
-    let newStringFilters = [];
-    for(const filter of activeFilters) {
-      // String filters with identical values shouldn't be added to the activeFilters array,
-      // so we don't have to check for duplicate values here, just for the str tag.
-      if(isTextFilter(filter)) {
-        newStringFilters.push(filter.value);
-      }
-    }
-
-    // if the new set of filters don't match the current ones, call setActiveStringFilters to update them
-    if(!(newStringFilters.length === activeStringFilters.length && newStringFilters.every((value, index) => value === activeStringFilters[index])))
-      setActiveStringFilters(newStringFilters);
-
-    /*
-      triggers on filter change and on sorting change in order to allow user to change
-      the sorting on already filtered results
-    */
-  }, [activeFilters, sortedResults, activeStringFilters, handlePageClick]);
-
-  useEffect(() => {
-    if(activeFilters.some(activeFilter => isTextFilter(activeFilter))) {
-      // handleSort('entityString');
-    }
-  /*
-    Providing handleSort as dependency leads to infinite loop on entityString search due to handleSort
-    modifying one of its dependencies (sortedResults). Need to reimplement later so that I can supply
-    handleSort as a dependency below and prevent future bugs in this useEffect hook.
-
-    Good for now though.
-  */
-  // eslint-disable-next-line
-  }, [activeFilters]);
-
-  useEffect(() => {
-    if(newItemsPerPage !== null) {
-      setItemsPerPage(newItemsPerPage);
-      setNewItemsPerPage(null);
-      handlePageClick({selected: 0});
-    }
-  }, [newItemsPerPage, handlePageClick]);
 
   const displayLoadingButton = (
     handleResultsRefresh,
@@ -723,9 +671,9 @@ const ResultsList = ({loading}) => {
                 startIndex={itemOffset+1}
                 endIndex={endResultIndex}
                 formattedCount={formattedResults.length}
-                totalCount={sortedResults.length}
+                totalCount={originalResults.length}
                 onFilter={handleFilter}
-                onClearAll={handleClearAllFilters}
+                onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults)}
                 activeFilters={activeFilters}
                 availableTags={availableTags}
               />
@@ -743,8 +691,8 @@ const ResultsList = ({loading}) => {
                         </span> of
                         <span className={styles.count}> {formattedResults.length} </span>
                         {
-                          (formattedResults.length !== sortedResults.length) &&
-                          <span className={styles.total}>({sortedResults.length}) </span>
+                          (formattedResults.length !== originalResults.length) &&
+                          <span className={styles.total}>({originalResults.length}) </span>
                         }
                         <span> Results</span>
                       </p>
@@ -766,7 +714,7 @@ const ResultsList = ({loading}) => {
                     </button>
                     <ShareModal
                       isOpen={shareModalOpen}
-                      onClose={()=>handleShareModalClose()}
+                      onClose={()=>setShareModalOpen(false)}
                       qid={currentQueryID}
                     />
 
@@ -780,7 +728,7 @@ const ResultsList = ({loading}) => {
                         return(
                           <span key={i} className={`${styles.filterTag} ${activeFilter.type}`}>
                             { getSelectedFilterDisplay(activeFilter) }
-                            <span className={styles.close} onClick={()=>{handleClearFilter(activeFilter)}}><CloseIcon/></span>
+                            <span className={styles.close} onClick={()=>{handleFilter(activeFilter)}}><CloseIcon/></span>
                           </span>
                         )
                       })
@@ -794,19 +742,31 @@ const ResultsList = ({loading}) => {
                     <div className={`${styles.tableHead}`}>
                       <div
                         className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`}
-                        onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByName)?'nameHighLow': 'nameLowHigh'))}}
+                        onClick={()=>{
+                          let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
+                          currentSortString.current = sortString;
+                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, originalResults, true, sortString, formattedResults);
+                        }}
                       >
                         Name
                       </div>
                       <div
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
-                        onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByEvidence)?'evidenceLowHigh': 'evidenceHighLow'))}}
+                        onClick={()=>{
+                          let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
+                          currentSortString.current = sortString;
+                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, originalResults, true, sortString, formattedResults);
+                        }}
                       >
                         Evidence
                       </div>
                       <div
                         className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
-                        onClick={()=>{setSortedResults(handleSort(sortedResults, (isSortedByScore)?'scoreLowHigh': 'scoreHighLow'))}}
+                        onClick={()=>{
+                          let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
+                          currentSortString.current = sortString;
+                          handleUpdateResults(activeFilters, activeStringFilters, rawResults, originalResults, true, sortString, formattedResults);
+                        }}
                         data-tooltip-id="score-tooltip"
                       >
                         Score
@@ -830,7 +790,7 @@ const ResultsList = ({loading}) => {
                       !isLoading &&
                       !isError &&
                       displayedResults.length > 0 &&
-                      displayedResults.map((item, i) => {
+                      displayedResults.map((item) => {
                         return (
                           <ResultsItem
                             rawResults={rawResults}
@@ -855,9 +815,9 @@ const ResultsList = ({loading}) => {
                     name="Results Per Page"
                     size="s"
                     handleChange={(value)=>{
-                      setNewItemsPerPage(parseInt(value));
+                      setItemsPerPage(parseInt(value));
+                      handlePageClick({selected: 0});
                     }}
-                    value={newItemsPerPage}
                     noanimate
                     >
                     <option value="5" key="0">5</option>

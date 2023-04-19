@@ -51,7 +51,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     return newPaths;
   }
 
-  const generateCompressedPaths = (graph) => {
+  const generateCompressedPaths = useCallback((graph) => {
     let newCompressedPaths = new Set();
     let pathToDisplay = null
     for(const [i, path] of graph.entries()) {
@@ -101,14 +101,14 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     }
 
     return newCompressedPaths;
-  }
+  }, [])
 
   let icon = getIcon(item.type);
 
   let evidenceCount = item.evidence.length;
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
-  const formattedPaths = useMemo(()=>generateCompressedPaths(generateInitialFormattedPaths(item)), [item]);
+  const formattedPaths = useMemo(()=>generateCompressedPaths(generateInitialFormattedPaths(item)), [item, generateCompressedPaths]);
   const [selectedPaths, setSelectedPaths] = useState(new Set());
 
   const initPathString = (type !== undefined && type.pathString) ? type.pathString : 'may affect';
@@ -194,7 +194,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           currentNodeIndex++;
         }
         if(numMatches === selPath.length) {
-          // console.log('potential match', selPath, path);
           newSelectedPaths.add(path);
           break;
         }
@@ -269,6 +268,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             rawResults={rawResults}
             onNodeClick={handleNodeClick}
             clearSelectedPaths={handleClearSelectedPaths}
+            active={isExpanded}
           />
         </Suspense>
         <PathView
@@ -279,7 +279,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>
-
     </div>
   );
 }
