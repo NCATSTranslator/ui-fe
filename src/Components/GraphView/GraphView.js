@@ -7,6 +7,13 @@ import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
 
+/**
+* Initializes a Cytoscape instance with the specified data and options.
+* @param {Object} result - An object representing the result to be displayed in the graph.
+* @param {Object} summary - An object containing the raw results information from the BE.
+* @param {Object} dataObj - An object containing various options and data used to configure and interact with the Cytoscape instance.
+* @returns {void}
+*/
 const initCytoscapeInstance = (result, summary, dataObj) => {
   let cy = cytoscape({
     container: dataObj.graphRef.current,
@@ -87,16 +94,31 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
   cytoscape.use(avsdf);
   cytoscape.use(dagre);
 
-  
+  /**
+  * Highlights the given element by adding the highlightClass and removing the hideClass.
+  * @param {object} element - The cytoscape element to be highlighted.
+  */
   const highlightElement = (element) => {
     element.addClass(highlightClass);
     element.removeClass(hideClass);
   }
+
+  /**
+  * Hides the given element by removing the highlightClass and adding the hideClass.
+  * @param {object} element - The cytoscape element to be hidden.
+  */
   const hideElement = (element) => {
     element.removeClass(highlightClass);
     element.addClass(hideClass);
   }
 
+  /**
+  * Handles a node click event and calls the onNodeClick callback function with an array of paths and formatted paths.
+  * @param {Object} ev - The event object.
+  * @param {Array} formattedPaths - An array of formatted paths.
+  * @param {Object} graph - The graph object.
+  * @returns {void}
+  */
   const handleNodeClick = useCallback((ev, formattedPaths, graph) => {
     const targetId = ev.target.id();
 
