@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
+import { useEffect } from 'react';
 
 /**
 * Initializes a Cytoscape instance with the specified data and options.
@@ -71,14 +72,20 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
       dataObj.excludedNodes.current.clear();
       dataObj.clearSelectedPaths();
     }
-  });    
+  });
+  return cy;
 }
 
 const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}) => {
 
   let graphRef = useRef(null);
   const [currentLayout, setCurrentLayout] = useState(layoutList.klay)
-  const graph = useMemo(()=>resultToCytoscape(result.rawResult, rawResults.data),[result, rawResults])
+  const graph = useMemo(()=>{
+    if(!active)
+      return null;
+
+    return resultToCytoscape(result.rawResult, rawResults.data)
+  },[result, rawResults, active])
   
   const selectedNodes = useRef(new Set());
   const excludedNodes = useRef(new Set());
@@ -178,24 +185,31 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
 
   }, [onNodeClick])
 
-  useMemo(()=>{
-    if(active && graphRef.current) {
-      console.log('init cytoscape instance')
-      let cytoReqDataObject = {
-        graphRef: graphRef, 
-        graph: graph, 
-        layout: currentLayout, 
-        selectedNodes: selectedNodes, 
-        excludedNodes: excludedNodes,
-        handleNodeClick: handleNodeClick, 
-        clearSelectedPaths: clearSelectedPaths,
-        highlightClass: highlightClass, 
-        hideClass: hideClass, 
-        excludedClass: excludedClass
-      }
-      initCytoscapeInstance(result.rawResult, rawResults.data, cytoReqDataObject)
+  const cy = useMemo(()=>{
+    if(!active || !graphRef.current || graph === null)
+      return null;
+
+    let cytoReqDataObject = {
+      graphRef: graphRef, 
+      graph: graph, 
+      layout: currentLayout, 
+      selectedNodes: selectedNodes, 
+      excludedNodes: excludedNodes,
+      handleNodeClick: handleNodeClick, 
+      clearSelectedPaths: clearSelectedPaths,
+      highlightClass: highlightClass, 
+      hideClass: hideClass, 
+      excludedClass: excludedClass
     }
+    return initCytoscapeInstance(result.rawResult, rawResults.data, cytoReqDataObject)
   }, [result, rawResults, graphRef, graph, currentLayout, active, clearSelectedPaths, handleNodeClick]);
+
+  useEffect(() => {
+    return () => {
+      if(cy !== null)
+        cy.destroy();
+    };
+  });
 
   return (
     <div className={styles.GraphView}>

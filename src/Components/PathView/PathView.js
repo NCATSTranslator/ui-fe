@@ -1,32 +1,32 @@
 import styles from './PathView.module.scss';
 import React, {useState, useEffect, useMemo} from "react";
-import Path from '../Path/Path';
+import PathObject from '../Path/PathObject';
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import { useOutletContext } from 'react-router-dom';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 
-const getFilteredUnhighlightedPaths = (paths, selectedPaths) => {
+const getPathsWithSelectionsSet = (paths, selectedPaths) => {
   if(selectedPaths.size > 0) {
     let newPaths = cloneDeep(paths);
     for(const path of newPaths) {
       for(const selPath of selectedPaths) {
-        if(JSON.stringify(selPath) === JSON.stringify(path)) {
+        if(isEqual(selPath, path)) {
           path.highlighted = true;
           break;
         }
       }
     }
-    return newPaths;
+    return Array.from(newPaths).sort((a, b) => b.highlighted - a.highlighted);
   } else {
-    return paths;
+    return Array.from(paths);
   }
 }
 
-const PathView = ({paths, selectedPaths, handleEdgeSpecificEvidence, activeStringFilters}) => {
+const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, activeStringFilters}) => {
 
   let initialNumberToShow = (paths.size < 6) ? paths.size : 6;
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
-  const unhighlightedPaths = useMemo(() => getFilteredUnhighlightedPaths(paths, selectedPaths), [paths, selectedPaths]);
+  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
 
   const setFeedbackModalOpen = useOutletContext();
 
@@ -57,50 +57,56 @@ const PathView = ({paths, selectedPaths, handleEdgeSpecificEvidence, activeStrin
   }
 
   return(
-    <div className={styles.pathView}>
-      <div className={styles.header}>
-        <p className={styles.subtitle}>Paths</p>
-        <p>Click on any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
-      </div>
-      {
-        Array.from(unhighlightedPaths).sort((a, b) => b.highlighted - a.highlighted).slice(0, numberToShow).map((pathToDisplay, i)=> {
-          return (
-            <div className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} key={i}> 
-              {
-                pathToDisplay.path.map((pathItem, j) => {
-                  let key = `${i}_${j}`;
-                  return (
-                    <Path 
-                    path={pathItem} 
-                    key={key}
-                    handleNameClick={handleNameClick}
-                    handleEdgeClick={(edge)=>handleEdgeClick(edge)}
-                    handleTargetClick={handleTargetClick}
-                    activeStringFilters={activeStringFilters}
-                    />
-                    ) 
-                  }) 
-                }
-            </div>
-          )
-        })
-      }
-      <div className={styles.buttons}>
-        {
-          (numberToShow < paths.size) &&
-          <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
-        }
-        {
-          (numberToShow <= paths.size && numberToShow > 6) &&
-          <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
-        }
-      </div>
-      <p className={styles.needHelp}>
-        <Question/> 
-        Was this helpful?
-        <button onClick={()=>{setFeedbackModalOpen(true)}} rel="noreferrer " target="_blank">Send Feedback</button>
-      </p>
-    </div>
+    <>
+    {
+      (!active) 
+      ? <></>
+      : <div className={styles.pathView}>
+          <div className={styles.header}>
+            <p className={styles.subtitle}>Paths</p>
+            <p>Click on any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
+          </div>
+          {
+            formattedPaths.slice(0, numberToShow).map((pathToDisplay, i)=> {
+              return (
+                <div className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} key={i}> 
+                  {
+                    pathToDisplay.path.subgraph.map((pathItem, j) => {
+                      let key = `${i}_${j}`;
+                      return (
+                        <PathObject 
+                          pathObject={pathItem} 
+                          key={key}
+                          handleNameClick={handleNameClick}
+                          handleEdgeClick={(edge)=>handleEdgeClick(edge)}
+                          handleTargetClick={handleTargetClick}
+                          activeStringFilters={activeStringFilters}
+                        />
+                        ) 
+                      }) 
+                    }
+                </div>
+              )
+            })
+          }
+          <div className={styles.buttons}>
+            {
+              (numberToShow < paths.size) &&
+              <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
+            }
+            {
+              (numberToShow <= paths.size && numberToShow > 6) &&
+              <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
+            }
+          </div>
+          <p className={styles.needHelp}>
+            <Question/> 
+            Was this helpful?
+            <button onClick={()=>{setFeedbackModalOpen(true)}} rel="noreferrer " target="_blank">Send Feedback</button>
+          </p>
+        </div>
+    }
+    </>
   )
 }
 
