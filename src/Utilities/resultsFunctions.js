@@ -5,7 +5,7 @@ import { cloneDeep } from "lodash";
 export const getFormattedEvidence = (paths, results) => {
   let formattedEvidence = [];
   for(const path of paths) {
-    for(const subgraph of path.subgraph) {
+    for(const subgraph of path.path.subgraph) {
       if(subgraph.publications && subgraph.publications.length > 0)
         for(const pubID of subgraph.publications) {
           // if the publication has not already been added, set it up and add it
@@ -70,14 +70,37 @@ export const getFormattedPaths = (rawPathIds, results) => {
   for(const id of rawPathIds) {
     let formattedPath = cloneDeep(results.paths[id]);
     if(formattedPath) {
-      for(let i = 0; i < formattedPath.subgraph.length; i++) {
+      for(const [i] of formattedPath.subgraph.entries()) {
         if(i % 2 === 0) {
-          formattedPath.subgraph[i] = getNodeByCurie(formattedPath.subgraph[i], results);
+          let node = getNodeByCurie(formattedPath.subgraph[i], results);
+          let name = (node.names) ? node.names[0]: '';
+          let type = (node.types) ? node.types[0]: '';
+          let desc = (node.description) ? node.description[0]: '';
+          let category = (i === formattedPath.subgraph.length - 1) ? 'target' : 'object';
+          formattedPath.subgraph[i] = {
+            category: category,
+            name: name,
+            type: type,
+            description: desc,
+            curies: node.curies
+          };
+          if(node.provenance !== undefined) {
+            formattedPath.subgraph[i].provenance = node.provenance;
+          }
         } else {
-          formattedPath.subgraph[i] = getEdgeByID(formattedPath.subgraph[i], results);
+          let edge = getEdgeByID(formattedPath.subgraph[i], results);
+          let pred = (edge.predicate) ? formatBiolinkEntity(edge.predicate) : '';
+          formattedPath.subgraph[i] = {
+            category: 'predicate',
+            predicates: [pred],
+            edges: [{object: edge.object, predicate: pred, subject: edge.subject, provenance: edge.provenance}]
+          };
+          if(edge.provenance !== undefined) {
+            formattedPath.subgraph[i].provenance = edge.provenance;
+          }
         }
       }
-      formattedPaths.push(formattedPath);
+      formattedPaths.push({highlighted: false, path: formattedPath});
     }
   }
   return formattedPaths;

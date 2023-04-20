@@ -6,109 +6,90 @@ import LoadingBar from '../LoadingBar/LoadingBar';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
-import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
-const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults}) => {
+const checkForNodeUniformity = (pathOne, pathTwo) => {
+  // if the lengths of the paths are different, they cannot have the same nodes
+  if(pathOne.length !== pathTwo.length)
+    return false;
 
-  const generateInitialFormattedPaths = (item) => {
-    let newPaths = new Set();
-    item.paths.forEach((path) => {
-      let pathToAdd = [];
-      if(path.subgraph) {
-        path.subgraph.forEach((item, i)=> {
-          if(!item)
-            return;
-          if(i % 2 === 0) {
-            let name = (item.names) ? item.names[0]: '';
-            let type = (item.types) ? item.types[0]: '';
-            let desc = (item.description) ? item.description[0]: '';
-            let category = (i === path.subgraph.length - 1) ? 'target' : 'object';
-            pathToAdd[i] = {
-              category: category,
-              name: name,
-              type: type,
-              description: desc,
-              curies: item.curies
-            }
-          } else {
-            let pred = (item.predicate) ? formatBiolinkEntity(item.predicate) : '';
-            pathToAdd[i] = {
-              category: 'predicate',
-              predicates: [pred],
-              edges: [{object: item.object, predicate: pred, subject: item.subject, provenance: item.provenance}]
-            }
-          }
-          if(item.provenance !== undefined) {
-            pathToAdd[i].provenance = item.provenance;
-          }
-        })
-        newPaths.add({highlighted: false, path: pathToAdd});
-      }
-    })
-    return newPaths;
+  let nodesMatch = true;
+
+  for(const [i, path] of pathOne.entries()) {
+    // if we're at an odd index, it's a predicate, so skip it
+    if(i % 2 !== 0)
+      continue;
+
+    // if the names of the nodes don't match, set nodesMatch to false
+    if(path.name !== pathTwo[i].name)
+      nodesMatch = false;
   }
+  return nodesMatch;
+}
 
-  const generateCompressedPaths = useCallback((graph) => {
-    let newCompressedPaths = new Set();
-    let pathToDisplay = null
-    for(const [i, path] of graph.entries()) {
-      if(pathToDisplay === null)
-        pathToDisplay = cloneDeep(path);
-      let displayPath = false;
-      let nextPath = (graph[i+1] !== undefined) ? graph[i+1] : null;
-      let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay, nextPath) : false;
-      // if all nodes are equal
-      // compare predicates, combine them where different
-      // display final 'version' of path
+const generateCompressedPaths = (graph) => {
+  let newCompressedPaths = new Set();
+  let pathToDisplay = null
+  for(const [i, pathObj] of graph.entries()) {
+    if(pathToDisplay === null)
+      pathToDisplay = cloneDeep(pathObj);
+    let displayPath = false;
+    let nextPath = (graph[i+1] !== undefined) ? graph[i+1] : null;
+    // if all nodes are equal
+    let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path.subgraph, nextPath.path.subgraph) : false;
 
-      // if theres another path after the current one, and the nodes of each are equal
-      if(nextPath && nodesEqual) {
-        // loop through the current path's items
-        for(const [i] of path.entries()) {
-          if(displayPath) {
-            break;
-          }
-          // if we're at an even index, it's a node, so skip it
-          if(i % 2 === 0)
-            continue;
+    // if theres another path after the current one, and the nodes of each are equal
+    if(nextPath && nodesEqual) {
 
-          if(!nextPath[i])
-            continue;
+      // loop through the current path's items
+      for(const [i] of pathObj.path.subgraph.entries()) {
+        if(displayPath) {
+          break;
+        }
+        // if we're at an even index, it's a node, so skip it
+        if(i % 2 === 0)
+          continue;
 
-          // loop through nextPath's item's predicates
-          for(const predicate of nextPath[i].predicates) {
-            // if the next path item to be displayed doesn't have the predicate,
-            if(!pathToDisplay[i].predicates.includes(predicate)) {
-              // add it
-              pathToDisplay[i].predicates.push(predicate);
-              pathToDisplay[i].edges.push(nextPath[i].edges[0]);
-            }
+        if(!nextPath.path.subgraph[i])
+          continue;
+
+        // loop through nextPath's item's predicates
+        for(const predicate of nextPath.path.subgraph[i].predicates) {
+          // if the next path item to be displayed doesn't have the predicate,
+          if(!pathToDisplay.path.subgraph[i].predicates.includes(predicate)) {
+            // add it
+            pathToDisplay.path.subgraph[i].predicates.push(predicate);
+            pathToDisplay.path.subgraph[i].edges.push(nextPath.path.subgraph[i].edges[0]);
           }
         }
       }
-      // if there's no nextPath or the nodes are different, display the path
-      if(!nextPath || !nodesEqual) {
-        displayPath = true;
-      }
-
-      if(displayPath) {
-        newCompressedPaths.add(pathToDisplay);
-        pathToDisplay = null;
-      }
+    }
+    // if there's no nextPath or the nodes are different, display the path
+    if(!nextPath || !nodesEqual) {
+      displayPath = true;
     }
 
-    return newCompressedPaths;
-  }, [])
+    if(displayPath) {
+      newCompressedPaths.add(pathToDisplay);
+      pathToDisplay = null;
+    }
+  }
+
+  return newCompressedPaths;
+}
+
+const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults}) => {
 
   let icon = getIcon(item.type);
 
   let evidenceCount = item.evidence.length;
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
-  const formattedPaths = useMemo(()=>generateCompressedPaths(generateInitialFormattedPaths(item)), [item, generateCompressedPaths]);
+  // const formattedPaths = useMemo(()=>generateCompressedPaths(generateInitialFormattedPaths(item)), [item]);
+  // const formattedPaths = useMemo(()=>generateCompressedPaths(generateInitialFormattedPaths(item)), [item]);
+  const formattedPaths = useMemo(()=>generateCompressedPaths(item.paths), [item]);
   const [selectedPaths, setSelectedPaths] = useState(new Set());
 
   const initPathString = (type !== undefined && type.pathString) ? type.pathString : 'may affect';
@@ -144,25 +125,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     else
       setHeight('auto');
   }, [isExpanded])
-
-  const checkForNodeUniformity = (pathOne, pathTwo) => {
-    // if the lengths of the paths are different, they cannot have the same nodes
-    if(pathOne.length !== pathTwo.length)
-      return false;
-
-    let nodesMatch = true;
-
-    for(const [i, path] of pathOne.entries()) {
-      // if we're at an odd index, it's a predicate, so skip it
-      if(i % 2 !== 0)
-        continue;
-
-      // if the names of the nodes don't match, set nodesMatch to false
-      if(path.name !== pathTwo[i].name)
-        nodesMatch = false;
-    }
-    return nodesMatch;
-  }
 
   const handleClearSelectedPaths = useCallback(() => {
     setSelectedPaths(new Set())

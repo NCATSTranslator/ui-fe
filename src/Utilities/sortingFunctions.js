@@ -95,7 +95,7 @@ export const filterCompare = (filter1, filter2) => {
 // tag appears in the path.
 export const updatePathRankByTag = (result, tag, pathRanks) => {
   result.paths.forEach((path, i) => {
-    if (path.tags[tag] !== undefined) {
+    if (path.path.tags[tag] !== undefined) {
       pathRanks[i].rank -= 1;
     }
   });

@@ -67,7 +67,7 @@ const PathView = ({paths, selectedPaths, handleEdgeSpecificEvidence, activeStrin
           return (
             <div className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} key={i}> 
               {
-                pathToDisplay.path.map((pathItem, j) => {
+                pathToDisplay.path.subgraph.map((pathItem, j) => {
                   let key = `${i}_${j}`;
                   return (
                     <Path 
