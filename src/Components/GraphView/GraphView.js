@@ -189,7 +189,6 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
     if(!active || !graphRef.current || graph === null)
       return null;
 
-    console.log('init cytoscape instance')
     let cytoReqDataObject = {
       graphRef: graphRef, 
       graph: graph, 
