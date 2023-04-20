@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
@@ -10,76 +10,6 @@ import { cloneDeep } from 'lodash';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
-const checkForNodeUniformity = (pathOne, pathTwo) => {
-  // if the lengths of the paths are different, they cannot have the same nodes
-  if(pathOne.length !== pathTwo.length)
-    return false;
-
-  let nodesMatch = true;
-
-  for(const [i, path] of pathOne.entries()) {
-    // if we're at an odd index, it's a predicate, so skip it
-    if(i % 2 !== 0)
-      continue;
-
-    // if the names of the nodes don't match, set nodesMatch to false
-    if(path.name !== pathTwo[i].name)
-      nodesMatch = false;
-  }
-  return nodesMatch;
-}
-
-const generateCompressedPaths = (graph) => {
-  let newCompressedPaths = new Set();
-  let pathToDisplay = null
-  for(const [i, pathObj] of graph.entries()) {
-    if(pathToDisplay === null)
-      pathToDisplay = cloneDeep(pathObj);
-    let displayPath = false;
-    let nextPath = (graph[i+1] !== undefined) ? graph[i+1] : null;
-    // if all nodes are equal
-    let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path.subgraph, nextPath.path.subgraph) : false;
-
-    // if theres another path after the current one, and the nodes of each are equal
-    if(nextPath && nodesEqual) {
-
-      // loop through the current path's items
-      for(const [i] of pathObj.path.subgraph.entries()) {
-        if(displayPath) {
-          break;
-        }
-        // if we're at an even index, it's a node, so skip it
-        if(i % 2 === 0)
-          continue;
-
-        if(!nextPath.path.subgraph[i])
-          continue;
-
-        // loop through nextPath's item's predicates
-        for(const predicate of nextPath.path.subgraph[i].predicates) {
-          // if the next path item to be displayed doesn't have the predicate,
-          if(!pathToDisplay.path.subgraph[i].predicates.includes(predicate)) {
-            // add it
-            pathToDisplay.path.subgraph[i].predicates.push(predicate);
-            pathToDisplay.path.subgraph[i].edges.push(nextPath.path.subgraph[i].edges[0]);
-          }
-        }
-      }
-    }
-    // if there's no nextPath or the nodes are different, display the path
-    if(!nextPath || !nodesEqual) {
-      displayPath = true;
-    }
-
-    if(displayPath) {
-      newCompressedPaths.add(pathToDisplay);
-      pathToDisplay = null;
-    }
-  }
-
-  return newCompressedPaths;
-}
-
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults}) => {
 
   let icon = getIcon(item.type);
@@ -87,9 +17,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   let evidenceCount = item.evidence.length;
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
-  // const formattedPaths = useMemo(()=>generateCompressedPaths(generateInitialFormattedPaths(item)), [item]);
-  // const formattedPaths = useMemo(()=>generateCompressedPaths(generateInitialFormattedPaths(item)), [item]);
-  const formattedPaths = useMemo(()=>generateCompressedPaths(item.paths), [item]);
+  const formattedPaths = item.compressedPaths;
   const [selectedPaths, setSelectedPaths] = useState(new Set());
 
   const initPathString = (type !== undefined && type.pathString) ? type.pathString : 'may affect';
@@ -137,7 +65,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     let newSelectedPaths = new Set();
 
     for(const path of formattedPaths) {
-      if(path.path.length === 3) {
+      if(path.path.subgraph.length === 3) {
         newSelectedPaths.add(path);
       }
     }
@@ -146,7 +74,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       for(const path of formattedPaths) {
         let currentNodeIndex = 0;
         let numMatches = 0;
-        for(const [i, el] of path.path.entries()) {
+        for(const [i, el] of path.path.subgraph.entries()) {
           if(i % 2 !== 0)
             continue;
 

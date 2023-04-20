@@ -138,7 +138,6 @@ const ResultsList = ({loading}) => {
     
     if(or.length === 0) {
       newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data);
-      console.log('setting original results')
       newOriginalResults = cloneDeep(newFormattedResults);
     } else {
       newFormattedResults = (justSort) ? fr : or;
@@ -154,13 +153,11 @@ const ResultsList = ({loading}) => {
 
     // set results
     setFormattedResults(newFormattedResults);
-    console.log('formattedResults set');
+
     if(!justSort)
       originalResults.current = newOriginalResults;
-      // setOriginalResults(newOriginalResults);
     
-      rawResults.current = rr;
-      // setRawResults(rr);
+    rawResults.current = rr;
 
     return newFormattedResults;
   }

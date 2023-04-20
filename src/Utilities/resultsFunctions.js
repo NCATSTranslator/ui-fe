@@ -65,6 +65,25 @@ export const getEdgeByID = (id, results) => {
   return newEdge;
 }
 
+const checkForNodeUniformity = (pathOne, pathTwo) => {
+  // if the lengths of the paths are different, they cannot have the same nodes
+  if(pathOne.length !== pathTwo.length)
+    return false;
+
+  let nodesMatch = true;
+
+  for(const [i, path] of pathOne.entries()) {
+    // if we're at an odd index, it's a predicate, so skip it
+    if(i % 2 !== 0)
+      continue;
+
+    // if the names of the nodes don't match, set nodesMatch to false
+    if(path.name !== pathTwo[i].name)
+      nodesMatch = false;
+  }
+  return nodesMatch;
+}
+
 export const getFormattedPaths = (rawPathIds, results) => {
   let formattedPaths = [];
   for(const id of rawPathIds) {
@@ -106,6 +125,57 @@ export const getFormattedPaths = (rawPathIds, results) => {
   return formattedPaths;
 }
 
+const getCompressedPaths = (graph) => {
+  let newCompressedPaths = new Set();
+  let pathToDisplay = null
+  for(const [i, pathObj] of graph.entries()) {
+    if(pathToDisplay === null)
+      pathToDisplay = cloneDeep(pathObj);
+    let displayPath = false;
+    let nextPath = (graph[i+1] !== undefined) ? graph[i+1] : null;
+    // if all nodes are equal
+    let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path.subgraph, nextPath.path.subgraph) : false;
+
+    // if theres another path after the current one, and the nodes of each are equal
+    if(nextPath && nodesEqual) {
+
+      // loop through the current path's items
+      for(const [i] of pathObj.path.subgraph.entries()) {
+        if(displayPath) {
+          break;
+        }
+        // if we're at an even index, it's a node, so skip it
+        if(i % 2 === 0)
+          continue;
+
+        if(!nextPath.path.subgraph[i])
+          continue;
+
+        // loop through nextPath's item's predicates
+        for(const predicate of nextPath.path.subgraph[i].predicates) {
+          // if the next path item to be displayed doesn't have the predicate,
+          if(!pathToDisplay.path.subgraph[i].predicates.includes(predicate)) {
+            // add it
+            pathToDisplay.path.subgraph[i].predicates.push(predicate);
+            pathToDisplay.path.subgraph[i].edges.push(nextPath.path.subgraph[i].edges[0]);
+          }
+        }
+      }
+    }
+    // if there's no nextPath or the nodes are different, display the path
+    if(!nextPath || !nodesEqual) {
+      displayPath = true;
+    }
+
+    if(displayPath) {
+      newCompressedPaths.add(pathToDisplay);
+      pathToDisplay = null;
+    }
+  }
+
+  return newCompressedPaths;
+}
+
 // Take raw results and return properly summarized results
 export const getSummarizedResults = (results) => {
   if (results === null || results === undefined)
@@ -124,8 +194,8 @@ export const getSummarizedResults = (results) => {
     // Get the subject node's fda approval status
     let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
-    let formattedPaths = [];
-    formattedPaths = getFormattedPaths(item.paths, results);
+    let formattedPaths = getFormattedPaths(item.paths, results);
+    let compressedPaths = getCompressedPaths(formattedPaths);
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let itemScore = (item.score === null) ? 0 : item.score.toFixed(1);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
@@ -135,6 +205,7 @@ export const getSummarizedResults = (results) => {
       type: 'biolink:Drug',
       name: itemName,
       paths: formattedPaths,
+      compressedPaths: compressedPaths,
       object: objectNodeName,
       description: description,
       evidence: getFormattedEvidence(formattedPaths, results),
