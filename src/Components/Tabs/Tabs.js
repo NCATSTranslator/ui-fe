@@ -6,16 +6,16 @@ import styles from './Tabs.module.scss';
 const Tabs = ({children, tabReset}) => {
 
   const firstElement = children.find(e => e)
-  const [activeTab, setActiveTab] = useState(firstElement.props.heading);
+  const [activeTab, setActiveTab] = useState(firstElement?.props.heading);
 
   const handleTabClick = (event) => {
     setActiveTab(event.target.dataset.heading);
   }
 
   useEffect(() => {
-    if(tabReset)
-      setActiveTab(firstElement.props.heading);
-  }, [tabReset, firstElement.props.heading]);
+    // if(tabReset)
+      setActiveTab(firstElement?.props.heading);
+  }, [tabReset, firstElement]);
 
   return (
 

@@ -269,129 +269,127 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
                 </div>
               </div>
             }
-            <div heading="Publications">
-              {
-                pubmedEvidence.length > 0 &&
-                <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
-              }
-              {
-                  <div className={`${itemCountClass.current} ${styles.tableBody}`}>
-                    <div className={styles.tableHead}>
-                      <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
-                      <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
-                      <div
-                        className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
-                        onClick={()=>{handleSort((isSortedBySource)?'sourceHighLow': 'sourceLowHigh')}}
-                        >
-                        <span className={styles.headSpan}>
-                          Source
-                        </span>
+            {
+              displayedPubmedEvidence.length > 0 &&
+              <div heading="Publications">
+                {
+                  pubmedEvidence.length > 0 &&
+                  <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
+                }
+                {
+                    <div className={`${itemCountClass.current} ${styles.tableBody}`}>
+                      <div className={styles.tableHead}>
+                        <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
+                        <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
+                        <div
+                          className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
+                          onClick={()=>{handleSort((isSortedBySource)?'sourceHighLow': 'sourceLowHigh')}}
+                          >
+                          <span className={styles.headSpan}>
+                            Source
+                          </span>
+                        </div>
+                        <div
+                          className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`}
+                          onClick={()=>{handleSort((isSortedByTitle)?'titleHighLow': 'titleLowHigh')}}
+                          >
+                          <span className={styles.headSpan}>
+                            Title
+                          </span>
+                        </div>
+                        <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
                       </div>
-                      <div
-                        className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`}
-                        onClick={()=>{handleSort((isSortedByTitle)?'titleHighLow': 'titleLowHigh')}}
-                        >
-                        <span className={styles.headSpan}>
-                          Title
-                        </span>
-                      </div>
-                      <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
-                    </div>
-                    {
-                      isLoading &&
-                      <LoadingBar
-                        loading={isLoading}
-                        useIcon
-                        className={styles.loadingBar}
-                      />
-                    }
-                    {
-                      !isLoading &&
-                      <div className={styles.evidenceItems} >
-                        {
-                          currentEvidence.length <= 0 &&
-                          <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
-                        }
-                        {
-                          displayedPubmedEvidence.length > 0 &&
-                          displayedPubmedEvidence.map((item, i)=> {
-                            return (
-                              <div className={styles.evidenceItem} key={i}>
-                                <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                                  {
-                                    item.edge &&
+                      {
+                        isLoading &&
+                        <LoadingBar
+                          loading={isLoading}
+                          useIcon
+                          className={styles.loadingBar}
+                        />
+                      }
+                      {
+                        !isLoading &&
+                        <div className={styles.evidenceItems} >
+                          {
+                            displayedPubmedEvidence.map((item, i)=> {
+                              return (
+                                <div className={styles.evidenceItem} key={i}>
+                                  <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                                    {
+                                      item.edge &&
+                                      <span>
+                                        <span>{item.edge.subject}</span><strong>{item.edge.predicates[0]}</strong><span>{item.edge.object}</span>
+                                      </span>
+                                    }
+                                  </span>
+                                  <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
+                                    {item.pubdate && item.pubdate }
+                                  </span>
+                                  <span className={`${styles.cell} ${styles.source} source`}>
                                     <span>
-                                      <span>{item.edge.subject}</span><strong>{item.edge.predicates[0]}</strong><span>{item.edge.object}</span>
+                                      {item.source && item.source }
                                     </span>
-                                  }
-                                </span>
-                                <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
-                                  {item.pubdate && item.pubdate }
-                                </span>
-                                <span className={`${styles.cell} ${styles.source} source`}>
-                                  <span>
-                                    {item.source && item.source }
                                   </span>
-                                </span>
-                                <span className={`${styles.cell} ${styles.title} title`} >
-                                  {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
-                                  {!item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
-                                </span>
-                                <span className={`${styles.cell} ${styles.abstract} abstract`}>
-                                  <span>
-                                    {!item.snippet && "No snippet available."}
-                                    {item.snippet && item.snippet}
+                                  <span className={`${styles.cell} ${styles.title} title`} >
+                                    {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
+                                    {!item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
                                   </span>
-                                    {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
-                                </span>
-                              </div>
-                            )
-                          })
-                        }
-                      </div>
-                    }
+                                  <span className={`${styles.cell} ${styles.abstract} abstract`}>
+                                    <span>
+                                      {!item.snippet && "No snippet available."}
+                                      {item.snippet && item.snippet}
+                                    </span>
+                                      {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
+                                  </span>
+                                </div>
+                              )
+                            })
+                          }
+                        </div>
+                      }
+                    </div>
+                }
+                {
+                  pubmedEvidence.length > itemsPerPage &&
+                  <div className={styles.bottom}>
+                    <div className={styles.perPage}>
+                      <Select
+                        label=""
+                        name="Items Per Page"
+                        size="m"
+                        handleChange={(value)=>{
+                          setNewItemsPerPage(parseInt(value));
+                        }}
+                        value={newItemsPerPage}
+                        >
+                        <option value="5" key="0">5</option>
+                        <option value="10" key="1">10</option>
+                        <option value="20" key="2">20</option>
+                      </Select>
+                    </div>
+                    <div className={styles.pagination}>
+                      <ReactPaginate
+                        breakLabel="..."
+                        nextLabel="Next"
+                        previousLabel="Previous"
+                        onPageChange={handlePageClick}
+                        pageRangeDisplayed={2}
+                        marginPagesDisplayed={2}
+                        pageCount={pageCount}
+                        renderOnZeroPageCount={null}
+                        className={styles.pageNums}
+                        pageClassName={styles.pageNum}
+                        activeClassName={styles.current}
+                        previousLinkClassName={`${styles.prev} ${styles.button}`}
+                        nextLinkClassName={`${styles.prev} ${styles.button}`}
+                        disabledLinkClassName={styles.disabled}
+                        forcePage={currentPage}
+                      />
+                    </div>
                   </div>
-              }
-              {
-                currentEvidence.length > itemsPerPage &&
-                <div className={styles.bottom}>
-                  <div className={styles.perPage}>
-                    <Select
-                      label=""
-                      name="Items Per Page"
-                      size="m"
-                      handleChange={(value)=>{
-                        setNewItemsPerPage(parseInt(value));
-                      }}
-                      value={newItemsPerPage}
-                      >
-                      <option value="5" key="0">5</option>
-                      <option value="10" key="1">10</option>
-                      <option value="20" key="2">20</option>
-                    </Select>
-                  </div>
-                  <div className={styles.pagination}>
-                    <ReactPaginate
-                      breakLabel="..."
-                      nextLabel="Next"
-                      previousLabel="Previous"
-                      onPageChange={handlePageClick}
-                      pageRangeDisplayed={2}
-                      marginPagesDisplayed={2}
-                      pageCount={pageCount}
-                      renderOnZeroPageCount={null}
-                      className={styles.pageNums}
-                      pageClassName={styles.pageNum}
-                      activeClassName={styles.current}
-                      previousLinkClassName={`${styles.prev} ${styles.button}`}
-                      nextLinkClassName={`${styles.prev} ${styles.button}`}
-                      disabledLinkClassName={styles.disabled}
-                      forcePage={currentPage}
-                    />
-                  </div>
-                </div>
-              }
-            </div>
+                }
+              </div>
+            }
             {
               // Add sources modal for predicates
               rawEvidenceEdges &&
@@ -451,6 +449,13 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
                     }
                   </div>
                 </div>
+              </div>
+            }
+            {
+              currentEvidence.length <= 0 &&
+              (!rawEvidenceEdges || rawEvidenceEdges.provenance.length === 0) &&
+              <div heading="No Evidence Available">
+                <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
               </div>
             }
           </Tabs>
