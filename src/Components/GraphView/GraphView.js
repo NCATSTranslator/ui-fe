@@ -34,6 +34,8 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
           'color': '#fff',
           'background-color': '#2d5492',
           'border-width': '0px',
+          'text-wrap': 'wrap',
+          'text-max-width': '100%',
         })
       .selector('edge')
         .css({
