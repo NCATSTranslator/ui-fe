@@ -5,29 +5,29 @@ import { cloneDeep } from "lodash";
 export const getFormattedEvidence = (paths, results) => {
   let formattedEvidence = [];
   for(const path of paths) {
-    for(const subgraph of path.path.subgraph) {
-      if(subgraph.publications && subgraph.publications.length > 0)
-        for(const pubID of subgraph.publications) {
+    for(const item of path.path.subgraph) {
+      if(item.category === 'predicate') {
+        for(const pubID of item.publications) {
           // if the publication has not already been added, set it up and add it
           const pub = formattedEvidence.find(item => item.id === pubID);
-          let predicate = formatBiolinkEntity(subgraph.predicate);
-          if(pub === undefined){
+          if(pub === undefined) {
             let publication = getPubByID(pubID, results);
             publication.id = pubID;
-            let object = subgraph.object;
-            let subject = subgraph.subject;
+            let object = item.edges[0].object;
+            let subject = item.edges[0].subject;
             publication.edge = {
               subject: capitalizeAllWords(subject.names[0]),
-              predicates: [predicate],
+              predicates: item.predicates,
               object: capitalizeAllWords(object.names[0])
             };
             publication.source = '';
             publication.title = '';
             formattedEvidence.push(publication);
           } else {
-            pub.edge.predicates.push(predicate);
+            pub.edge.predicates.push(...item.predicates);
           }
         }
+      }
     }
   }
 
@@ -101,7 +101,7 @@ export const getFormattedPaths = (rawPathIds, results) => {
             name: name,
             type: type,
             description: desc,
-            curies: node.curies
+            curies: node.curies,
           };
           if(node.provenance !== undefined) {
             formattedPath.subgraph[i].provenance = node.provenance;
@@ -112,7 +112,8 @@ export const getFormattedPaths = (rawPathIds, results) => {
           formattedPath.subgraph[i] = {
             category: 'predicate',
             predicates: [pred],
-            edges: [{object: edge.object, predicate: pred, subject: edge.subject, provenance: edge.provenance}]
+            edges: [{object: edge.object, predicate: pred, subject: edge.subject, provenance: edge.provenance}],
+            publications: edge.publications
           };
           if(edge.provenance !== undefined) {
             formattedPath.subgraph[i].provenance = edge.provenance;
