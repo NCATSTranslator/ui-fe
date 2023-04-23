@@ -44,7 +44,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     }
 
     // call activateEvidence with the filtered evidence
-    activateEvidence(filteredEvidence, edgeGroup);
+    activateEvidence(filteredEvidence, edgeGroup, false);
   }
 
   useEffect(() => {
@@ -120,7 +120,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           className={styles.evidenceLink}
           onClick={(e)=>{
             e.stopPropagation();
-            activateEvidence(item.evidence, false);
+            activateEvidence(item.evidence, [], true);
           }}
           >
           <span className={styles.viewAll}>View All Evidence</span> ({evidenceCount})

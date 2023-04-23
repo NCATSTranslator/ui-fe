@@ -11,7 +11,7 @@ import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh 
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 
-const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
+const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edges}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
@@ -21,7 +21,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTabToggle, setSelectedTabToggle] = useState(true);
-  const [evidenceTitle, setEvidenceTitle] = useState(title ? title : 'All Evidence')
+  const [isAllEvidence, setIsAllEvidence] = useState(isAll);
   const [formattedEvidenceEdges, setFormattedEvidenceEdges] = useState(null)
   const [rawEvidenceEdges, setRawEvidenceEdges] = useState(null)
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -63,8 +63,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
   }
 
   useEffect(() => {
-    setEvidenceTitle(title)
-  }, [title]);
+    setIsAllEvidence(isAll);
+  }, [isAll]);
 
   useEffect(() => {
     if(!Array.isArray(edges) && typeof edges === 'object') {
@@ -228,8 +228,9 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
   return (
     <Modal isOpen={modalIsOpen} onClose={handleClose} className={styles.evidenceModal} containerClass={styles.evidenceContainer}>
       <div className={styles.top}>
-        <h5 className={styles.title}>{evidenceTitle}</h5>
+        <h5 className={styles.title}>{isAllEvidence ? 'All Evidence' : 'Showing Evidence for:'}</h5>
         {
+          !isAllEvidence &&
           formattedEvidenceEdges &&
           formattedEvidenceEdges.map((edge, i) => {
             return (
