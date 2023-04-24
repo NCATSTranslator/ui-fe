@@ -8,7 +8,7 @@ import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
 
-// const GraphView = lazy(() => import("../GraphView/GraphView"));
+const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults}) => {
 
