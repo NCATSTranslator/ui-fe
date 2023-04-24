@@ -125,7 +125,6 @@ const ResultsList = ({loading}) => {
     let perPageNum = (newItemsPerPage) ? newItemsPerPage : currentNumItemsPerPage;
     currentPage.current = event.selected;
     const newOffset = (event.selected * perPageNum) % resultsLength;
-    console.log(newOffset + perPageNum, resultsLength);
     const endOffset = (parseInt(newOffset + perPageNum) > resultsLength)
       ? resultsLength
       : parseInt(newOffset + perPageNum);
@@ -351,7 +350,7 @@ const ResultsList = ({loading}) => {
     }
 
     return newSortedResults;
-  }, [activeStringFilters, handlePageClick]);
+  }, [activeStringFilters]);
 
   const calculateTagCounts = (results, rawResults, activeFilters, tagSetterMethod) => {
     // Function that adds the tag counts when a certain condition (predicate) is met
