@@ -8,7 +8,7 @@ import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
 
-const GraphView = lazy(() => import("../GraphView/GraphView"));
+// const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults}) => {
 
@@ -153,13 +153,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           }
         </div>
         <Suspense fallback={<LoadingBar loading useIcon reducedPadding />}>
-          <GraphView
+          {/* <GraphView
             result={item}
             rawResults={rawResults}
             onNodeClick={handleNodeClick}
             clearSelectedPaths={handleClearSelectedPaths}
             active={isExpanded}
-          />
+          /> */}
         </Suspense>
         <PathView
           paths={formattedPaths}

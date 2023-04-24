@@ -810,20 +810,20 @@ const ResultsList = ({loading}) => {
                 formattedResults.length > 0 &&
                 <div className={styles.pagination}>
                   <div className={styles.perPage}>
-                  <Select
-                    label=""
-                    name="Results Per Page"
-                    size="s"
-                    handleChange={(value)=>{
-                      setItemsPerPage(parseInt(value));
-                      handlePageClick({selected: 0});
-                    }}
-                    noanimate
-                    >
-                    <option value="5" key="0">5</option>
-                    <option value="10" key="1">10</option>
-                    <option value="20" key="2">20</option>
-                  </Select>
+                    {/* <Select
+                      label=""
+                      name="Results Per Page"
+                      size="s"
+                      handleChange={(value)=>{
+                        setItemsPerPage(parseInt(value));
+                        handlePageClick({selected: 0});
+                      }}
+                      noanimate
+                      >
+                      <option value="5" key="0">5</option>
+                      <option value="10" key="1">10</option>
+                      <option value="20" key="2">20</option>
+                    </Select> */}
                   </div>
                   <ReactPaginate
                     breakLabel="..."
