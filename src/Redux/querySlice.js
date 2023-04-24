@@ -4,8 +4,8 @@ let savedState = JSON.parse(localStorage.getItem('reduxState'))
 
 const persistedQuery = (savedState 
   && savedState.query !== undefined && savedState.query !== null 
-  && savedState.query.present !== undefined && savedState.query.present !== null)
-  ? savedState.query.present.currentQuery
+  && savedState.query !== undefined && savedState.query !== null)
+  ? savedState.query.currentQuery
   : []
 
 export const querySlice = createSlice({
@@ -23,6 +23,6 @@ export const querySlice = createSlice({
 
 export const { setCurrentQuery } = querySlice.actions
 
-export const currentQuery = state => state.query.present.currentQuery;
+export const currentQuery = state => state.query.currentQuery;
 
 export default querySlice.reducer

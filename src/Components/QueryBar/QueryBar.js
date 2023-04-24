@@ -7,6 +7,7 @@ import Select from "../FormFields/Select";
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
 import { queryTypes } from "../../Utilities/queryTypes";
 import styles from './QueryBar.module.scss';
+import { useCallback } from "react";
 
 const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisabled, value, 
   presetTypeID, autocompleteItems, autocompleteLoading, handleItemClick}) => {
@@ -17,7 +18,7 @@ const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisa
     
   value = (value !== undefined && value !== null) ? value : '';
 
-  const handleTypeChange = (value, resetInputText) =>{
+  const handleTypeChange = useCallback((value, resetInputText) =>{
     // get selected query from array by id
     const newCurrentQueryType = queryTypes.find(type => {
       return type.id === parseInt(value)
@@ -28,14 +29,14 @@ const QueryBar = ({handleSubmission, handleChange, handleQueryTypeChange, isDisa
     setQueryType(newCurrentQueryType);
     // handle type change callback
     handleQueryTypeChange(newCurrentQueryType, resetInputText);
-  }
+  },[handleQueryTypeChange]);
 
   useEffect(() => {
     if(presetTypeID === null || presetTypeID === undefined) 
       return;
 
     handleTypeChange(presetTypeID, false)
-  }, [presetTypeID]);
+  }, [presetTypeID, handleTypeChange]);
 
   useEffect(() => {
     setSubmissionDisabled(isDisabled);

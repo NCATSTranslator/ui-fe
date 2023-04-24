@@ -87,13 +87,13 @@
       .tableHead, .evidenceItem {
         display: grid;
         grid-template-columns: 1fr 1fr 3fr;
-      }      
+      }
       .source, .link {
         text-align: center;
       }
-      .relationship span {
-        display: block;
-      }
+    }
+    .relationship span {
+      display: block;
     }
     .tableHead, &>div .evidenceItem {
       display: grid;

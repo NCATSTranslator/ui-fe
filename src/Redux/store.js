@@ -1,5 +1,4 @@
 import { configureStore } from '@reduxjs/toolkit'
-import undoable from 'redux-undo';
 import historyReducer from './historySlice';
 import queryReducer from './querySlice';
 import resultsReducer from './resultsSlice';
@@ -7,7 +6,7 @@ import resultsReducer from './resultsSlice';
 export const store = configureStore({
   reducer: {
     history: historyReducer,
-    query: undoable(queryReducer),
+    query: queryReducer,
     results: resultsReducer
   },
 })
@@ -17,7 +16,7 @@ function getHistory(state) {
   return state.history.pastQueries;
 }
 function getCurrentQuery(state) {
-  return state.query.present.currentQuery;
+  return state.query.currentQuery;
 }
 
 let currentHistoryValue;

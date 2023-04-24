@@ -113,13 +113,14 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     }
   }
 
-  const handleQueryTypeChange = (value, resetInputText) => {
+  const handleQueryTypeChange = useCallback((value, resetInputText) => {
     setIsError(false);
     autocompleteFunctions.current = value.functions;
     setQueryType(value);
+    setPresetTypeID(value.id);
     if(resetInputText || resetInputText === undefined)
       setInputText('');
-  }
+  },[]);
 
   // Handler for disease selection (template click or autocomplete item click)
   const handleDiseaseSelection = (disease) => {
@@ -170,7 +171,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
       // }
     }
 
-  }, [selectedItem, readyForSubmission, handleSubmission]);
+  }, [selectedItem, readyForSubmission, handleSubmission, updateQueryItems]);
 
   useEffect(() => {
     if(presetDisease) {
@@ -180,7 +181,6 @@ const Query = ({results, loading, presetDisease, presetType}) => {
 
   useEffect(() => {
     if(presetType) {
-      console.log(presetType)
       setPresetTypeID(presetType);
     }
   }, [presetType]);
@@ -249,10 +249,24 @@ const Query = ({results, loading, presetDisease, presetType}) => {
             );
             setIsValidSubmission(false);
           }
+          // If we're submitting from the results page
           if(window.location.href.includes('results')) {
-            // If we're submitting from the results page, reload the query with the newly returned queryID
-            setSearchParams('?loading=true');
-            window.location.reload();
+            
+            // reset the query bar back to the values for the current query
+            let prevTypeID = new URLSearchParams(window.location.search).get("t");
+            let prevLabel = new URLSearchParams(window.location.search).get("l");
+
+            if(prevLabel)
+              setInputText(prevLabel);
+            if(prevTypeID !== undefined)
+              setPresetTypeID(prevTypeID);
+            
+            // set isLoading to false so we can submit another query if we want to
+            setIsLoading(false);
+
+            // Then open the new query in a new tab 
+            window.open( 
+              `results?l=${queryItem.node.label}&t=${queryItem.type.id}&q=${data.data}`, "_blank", "noopener");
           } else {
             // Otherwise, navigate to the results page and set loading to true
             navigate('/results?loading=true');
@@ -263,7 +277,8 @@ const Query = ({results, loading, presetDisease, presetType}) => {
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItem, storedQuery, selectedItem, navigate, setSearchParams])
+  }, [isValidSubmission, dispatch, queryItem, queryType.direction, queryType.targetType,
+     storedQuery, selectedItem, navigate, setSearchParams])
 
   /*
     If the query has been populated by clicking on an item in the query history

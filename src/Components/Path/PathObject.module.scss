@@ -1,0 +1,199 @@
+@import "../../Assets/Styles/variables";
+
+
+.nameContainer,.pathContainer,.targetContainer {
+  width: 14.3%;
+  border-radius: $defaultBorderRadius;
+  svg {
+    min-width: 24px;
+  }
+}
+.nameContainer,.pathContainer {
+  width: calc(14.3% - 4px);
+  margin-right: 4px;
+}
+.name,.pathContainer,.target {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nameContainer {
+  position: relative;
+  &:first-child {
+    background-color: $yellow;
+  }
+  svg {
+    margin-right: 5px;
+    path {
+      fill: $black;
+    }
+  }
+}
+
+.pathContainer {
+  padding: 0;
+  position: relative;
+  cursor: pointer;
+  .more {
+    display: block;
+    font-weight: 700;
+    font-size: 12px;
+    color: $darkGray;
+  }
+  >svg {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transform: translateY(-50%);
+  }
+  .predicatesList {
+    margin: 0;
+    list-style-type: none;
+  }
+  .predicate {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    margin-bottom: 0 !important;
+    color: $white;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+span.path {
+  display: block;
+  justify-content: flex-start;
+  width: auto;
+  padding: 9px;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-color: white;
+  z-index: 10;
+  color: $darkGray;
+  margin-right: 0;
+  transition: all .25s ease;
+  border-radius: $defaultBorderRadius;
+  box-shadow: $dropShadow;
+  cursor: pointer;
+  &.hasMore {
+    padding: .5px 7px;
+    span {
+      font-size: 12px;
+    }
+  }
+  span {
+    cursor: pointer; 
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  path {
+    transition: all .25s ease;
+  }
+  &:hover {
+    color: $black;
+    box-shadow: $dropShadowHover;
+    text-decoration: underline;
+    path {
+      fill: $black;
+    }  
+  }
+}
+.name, .target {
+  padding: 8px;
+}
+.name span, .name mark, .target span, .target mark, .path span {
+  font-size: 14px;
+  font-weight: 700;
+  cursor: default;
+}
+.nameContainer, .targetContainer {
+  box-shadow: $dropShadow;
+  transition: all .25s ease;
+  max-height: 40px;
+  &:hover {
+    box-shadow: $dropShadowHover;
+  }
+}
+.targetContainer {
+  background-color: $blueTwo;
+  color: $white;
+  position: relative;
+  svg {
+    margin-right: 8px;
+  }
+}
+
+.edgeLabel {
+  fill: #000 !important;
+}
+
+.provenance {
+  display: flex;
+  align-items: center;
+  margin: $xs 0 0 0;
+  color: $white;
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
+  font-size: 14px;
+  text-decoration: underline;
+  span {
+    font-size: 12px;
+    text-decoration: underline;
+    color: $white;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline;
+  }
+  svg {
+    display: inline;
+    margin: 0 3px 0 0;
+    min-width: 18px;
+    circle:first-child {
+      stroke: $white;
+      fill: transparent;
+    }
+    circle {
+      fill: $white;
+    }
+    path {
+      fill: $white;
+    }
+  }
+}
+
+.sourceEdgeContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.sourceEdge {
+  color: $black;
+  font-size: 12px;
+  margin-bottom: 0;
+  display: grid;
+  strong {
+    color: $black;
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.edgeProvenanceLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: underline;
+}

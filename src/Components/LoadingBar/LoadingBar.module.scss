@@ -4,6 +4,9 @@
   padding: 0 0 200px;
   grid-column: 1/3;
   text-align: center;
+  &.reducedPadding {
+    padding: 20px 0;
+  }
   .barOuter {
     position: relative;
     border-radius: 5px;
