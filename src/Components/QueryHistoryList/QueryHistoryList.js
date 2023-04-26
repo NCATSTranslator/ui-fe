@@ -39,18 +39,16 @@ const QueryHistoryList = () => {
   }, [queryHistoryState]);
 
   const handleClick = (query) => {
-    console.log(query);
-    // dispatch(setCurrentQuery(query.item));
-    navigate(`/results?l=${encodeURIComponent(query.item.node.label)}&t=${query.item.type.id}&q=${query.id}`);
+    navigate(`/results?l=${encodeURIComponent(query.item?.node?.label)}&t=${query.item?.type?.id}&q=${query.id}`);
   }
 
   const handleSearch = (value) => {
     setFilteredQueryHistoryState(queryHistoryState.filter((item) => {
       let tempValue = value.toLowerCase();
       let include = false;
-      if(item.item.node.id.toLowerCase().includes(tempValue) 
-        || item.item.node.label.toLowerCase().includes(tempValue) 
-        || item.item.type.label.toLowerCase().includes(tempValue)
+      if(item.item?.node?.id.toLowerCase().includes(tempValue) 
+        || item.item?.node?.label.toLowerCase().includes(tempValue) 
+        || item.item?.type?.label.toLowerCase().includes(tempValue)
       )
         include = true;
 
@@ -109,6 +107,9 @@ const QueryHistoryList = () => {
       <ul className={styles.historyList}> 
         {
           filteredQueryHistoryState.map((query, i)=> {
+            // hide past queries with old formatting
+            if(!query.item.node || !query.item.type)
+              return null;
 
             let itemTimestamp = new Date(query.date);
             let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
@@ -142,8 +143,14 @@ const QueryHistoryList = () => {
                     </div>
                     <div className={styles.right}>
                       <div className={styles.top}>
-                        <span>{query.item.type.label} </span>
-                        <span className={styles.subject}>{query.item.node.label}</span>
+                        {
+                          query.item?.type?.label &&
+                          <span>{query.item.type.label} </span>
+                        }
+                        {
+                          query.item?.node?.label &&
+                          <span className={styles.subject}>{query.item.node.label}</span>
+                        }
                       </div>
                       <div className={styles.bottom}>
                         {

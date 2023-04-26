@@ -121,12 +121,13 @@ const ResultsList = ({loading}) => {
   const queryClient = new QueryClient();
 
   // Handles direct page click
-  const handlePageClick = useCallback((event) => {
+  const handlePageClick = useCallback((event, newItemsPerPage = false, resultsLength = formattedResults.length, currentNumItemsPerPage = itemsPerPage ) => {
+    let perPageNum = (newItemsPerPage) ? newItemsPerPage : currentNumItemsPerPage;
     currentPage.current = event.selected;
-    const newOffset = (event.selected * itemsPerPage) % formattedResults.length;
-    const endOffset = (newOffset + itemsPerPage > formattedResults.length)
-      ? formattedResults.length
-      : newOffset + itemsPerPage;
+    const newOffset = (event.selected * perPageNum) % resultsLength;
+    const endOffset = (parseInt(newOffset + perPageNum) > resultsLength)
+      ? resultsLength
+      : parseInt(newOffset + perPageNum);
     setItemOffset(newOffset);
     setEndResultIndex(endOffset);
   }, [formattedResults.length, itemsPerPage]);
@@ -153,6 +154,9 @@ const ResultsList = ({loading}) => {
 
     // set results
     setFormattedResults(newFormattedResults);
+
+    if(newFormattedResults.length > 0)
+      handlePageClick({selected: 0}, false, newFormattedResults.length);
 
     if(!justSort)
       originalResults.current = newOriginalResults;
@@ -345,13 +349,8 @@ const ResultsList = ({loading}) => {
         break;
     }
 
-
-    // if we're not already on page 1, reset to page one.
-    if(currentPage.current !== 0)
-      handlePageClick({selected: 0});
-
     return newSortedResults;
-  }, [activeStringFilters, handlePageClick]);
+  }, [activeStringFilters]);
 
   const calculateTagCounts = (results, rawResults, activeFilters, tagSetterMethod) => {
     // Function that adds the tag counts when a certain condition (predicate) is met
@@ -434,10 +433,6 @@ const ResultsList = ({loading}) => {
       return fResults;
     }
 
-    // if we're not already on page 1, reset to page one.
-    if(currentPage.current !== 0) {
-      handlePageClick({selected: 0});
-    }
 
     const filteredResults = [];
     const intersect = (a, b) => { return a &&= b; };
@@ -498,6 +493,7 @@ const ResultsList = ({loading}) => {
       setActiveStringFilters(newStringFilters);
 
     calculateTagCounts(filteredResults, rResults, filters, setAvailableTags);
+
     // Set the formatted results to the newly filtered results
     return filteredResults;
   }
@@ -805,20 +801,20 @@ const ResultsList = ({loading}) => {
                 formattedResults.length > 0 &&
                 <div className={styles.pagination}>
                   <div className={styles.perPage}>
-                  <Select
-                    label=""
-                    name="Results Per Page"
-                    size="s"
-                    handleChange={(value)=>{
-                      setItemsPerPage(parseInt(value));
-                      handlePageClick({selected: 0});
-                    }}
-                    noanimate
-                    >
-                    <option value="5" key="0">5</option>
-                    <option value="10" key="1">10</option>
-                    <option value="20" key="2">20</option>
-                  </Select>
+                    <Select
+                      label=""
+                      name="Results Per Page"
+                      size="s"
+                      handleChange={(value)=>{
+                        setItemsPerPage(parseInt(value));
+                        handlePageClick({selected: 0}, value);
+                      }}
+                      noanimate
+                      >
+                      <option value="5" key="0">5</option>
+                      <option value="10" key="1">10</option>
+                      <option value="20" key="2">20</option>
+                    </Select>
                   </div>
                   <ReactPaginate
                     breakLabel="..."
