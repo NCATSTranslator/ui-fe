@@ -3,39 +3,64 @@ import { cloneDeep } from "lodash";
 
 // Given an array of paths and results, return an array of publications for those paths
 export const getFormattedEvidence = (paths, results) => {
-  let formattedEvidence = [];
+  const formatEvidenceObjs = (objs, getId, item, constructor, container) => {
+    for (const obj of objs) {
+      const id = getId(obj);
+      let evidenceObj = container[id];
+      if (evidenceObj === undefined) {
+        evidenceObj = constructor(obj);
+        let object = item.edges[0].object;
+        let subject = item.edges[0].subject;
+        evidenceObj.edge = {
+          subject: capitalizeAllWords(subject.names[0]),
+          predicates: item.predicates,
+          object: capitalizeAllWords(object.names[0])
+        };
+        container[id] = evidenceObj;
+      } else {
+        evidenceObj.edge.predicates.push(...item.predicates);
+      }
+    }
+  };
+
+  const formatPublications = (publications, item, container) => {
+    formatEvidenceObjs(
+      publications,
+      (id) => { return id; },
+      item,
+      (id) => {
+        const publication = getPubByID(id, results);
+        publication.id = id;
+        publication.source = '';
+        publication.title = '';
+        return publication;
+      },
+      container);
+  };
+
+  const formatSources = (sources, item, container) => {
+    formatEvidenceObjs(sources, (src) => { return src.name; }, item, (src) => { return src; }, container);
+  };
+
+  const formattedPublications = {};
+  const formattedSources = {};
   for(const path of paths) {
     for(const item of path.path.subgraph) {
       if(item.category === 'predicate') {
-        for(const pubID of item.publications) {
-          // if the publication has not already been added, set it up and add it
-          const pub = formattedEvidence.find(item => item.id === pubID);
-          if(pub === undefined) {
-            let publication = getPubByID(pubID, results);
-            publication.id = pubID;
-            let object = item.edges[0].object;
-            let subject = item.edges[0].subject;
-            publication.edge = {
-              subject: capitalizeAllWords(subject.names[0]),
-              predicates: item.predicates,
-              object: capitalizeAllWords(object.names[0])
-            };
-            publication.source = '';
-            publication.title = '';
-            formattedEvidence.push(publication);
-          } else {
-            pub.edge.predicates.push(...item.predicates);
-          }
-        }
+        formatPublications(item.publications, item, formattedPublications);
+        formatSources(item.provenance, item, formattedSources);
       }
     }
   }
 
-  formattedEvidence.forEach((pub) => {
-    pub.edge.predicates = [...new Set(pub.edge.predicates)];
-  });
+  const publications = Object.values(formattedPublications);
+  const sources = Object.values(formattedSources);
 
-  return formattedEvidence;
+  return {
+    publications: publications,
+    sources: sources,
+    length: sources.length + publications.length
+  };
 }
 
 // search the list of publications for a particular id, then return that publication object if found
@@ -107,7 +132,8 @@ export const getFormattedPaths = (rawPathIds, results) => {
             formattedPath.subgraph[i].provenance = node.provenance;
           }
         } else {
-          let edge = getEdgeByID(formattedPath.subgraph[i], results);
+          let eid = formattedPath.subgraph[i];
+          let edge = getEdgeByID(eid, results);
           let pred = (edge.predicate) ? formatBiolinkEntity(edge.predicate) : '';
           formattedPath.subgraph[i] = {
             category: 'predicate',
