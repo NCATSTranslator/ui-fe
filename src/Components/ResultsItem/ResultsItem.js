@@ -31,16 +31,27 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   }
 
   const handleEdgeSpecificEvidence = (edgeGroup) => {
-    const filteredEvidence = [];
-    for(const evidenceItem of item.evidence) {
-      for(const clickedPredicate of edgeGroup.predicates) {
-        if (evidenceItem.edge.predicates.map((p) => p.toLowerCase()).includes(clickedPredicate.toLowerCase())) {
-          const newEvidenceItem = cloneDeep(evidenceItem);
-          newEvidenceItem.edge.predicates = [clickedPredicate];
-          filteredEvidence.push(newEvidenceItem);
+    const filterEvidenceObjs = (objs, clickedPredicate, container) => {
+      for (const obj of objs) {
+        if (obj.edge.predicates.map((p) => p.toLowerCase()).includes(clickedPredicate.toLowerCase())) {
+          const includedObj = cloneDeep(obj);
+          includedObj.edge.predicates = [clickedPredicate];
+          container.push(includedObj);
           break;
         }
       }
+    }
+
+    const filteredEvidence = {
+      publications: [],
+      sources: [] 
+    };
+
+    const filteredPublications = filteredEvidence.publications;
+    const filteredSources = filteredEvidence.sources;
+    for (const clickedPredicate of edgeGroup.predicates) {
+      filterEvidenceObjs(item.evidence.publications, clickedPredicate, filteredPublications);
+      filterEvidenceObjs(item.evidence.sources, clickedPredicate, filteredSources);
     }
 
     // call activateEvidence with the filtered evidence
@@ -165,7 +176,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           paths={formattedPaths}
           selectedPaths={selectedPaths}
           active={isExpanded}
-          handleEdgeSpecificEvidence={(edge)=> {handleEdgeSpecificEvidence(edge)}}
+          handleEdgeSpecificEvidence={(edgeGroup)=> {handleEdgeSpecificEvidence(edgeGroup)}}
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>

@@ -38,8 +38,8 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
     console.log("handle name click");
   }
 
-  const handleEdgeClick = (edge) => {
-    handleEdgeSpecificEvidence(edge)
+  const handleEdgeClick = (edgeGroup) => {
+    handleEdgeSpecificEvidence(edgeGroup)
   }
 
   const handleTargetClick = (target) => {

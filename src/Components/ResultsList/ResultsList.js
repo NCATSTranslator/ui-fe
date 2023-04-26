@@ -72,7 +72,7 @@ const ResultsList = ({loading}) => {
   // String, active title of evidence modal
   const [isAllEvidence, setIsAllEvidence] = useState(true);
   // Array, edges represented in current evidence
-  const [evidenceEdges, setEvidenceEdges] = useState([]);
+  const [selectedEdges, setSelectedEdges] = useState([]);
   // Array, evidence relating to the item last clicked
   const [currentEvidence, setCurrentEvidence] = useState([]);
   // Int, current page
@@ -419,7 +419,7 @@ const ResultsList = ({loading}) => {
   // Click handler for opening the evidence modal and populating the evidence
   const activateEvidence = (evidence, edgeGroup, isAll) => {
     setIsAllEvidence(isAll);
-    setEvidenceEdges(edgeGroup);
+    setSelectedEdges(edgeGroup);
     setCurrentEvidence(evidence);
     setEvidenceOpen(true);
   }
@@ -643,7 +643,7 @@ const ResultsList = ({loading}) => {
         currentEvidence={currentEvidence}
         results={rawResults.current}
         isAll={isAllEvidence}
-        edges={evidenceEdges}
+        edgeGroup={selectedEdges}
       />
       <div className={styles.resultsList}>
         <Query results loading={isLoading} presetDisease={presetDisease} presetTypeID={presetQueryTypeID}/>
