@@ -37,7 +37,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           const includedObj = cloneDeep(obj);
           includedObj.edge.predicates = [clickedPredicate];
           container.push(includedObj);
-          break;
         }
       }
     }
