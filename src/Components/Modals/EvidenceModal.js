@@ -21,7 +21,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
   const clinicalTrials = useRef([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedTabToggle, setSelectedTabToggle] = useState(true);
   const [isAllEvidence, setIsAllEvidence] = useState(isAll);
   const [formattedEdges, setFormattedEdges] = useState(null)
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -56,7 +55,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
     setIsLoading(true);
     setIsSortedBySource(null);
     setIsSortedByTitle(null);
-    setSelectedTabToggle(prev=>!prev);
     amountOfIDsProcessed.current = 0;
     evidenceToUpdate.current = null;
     fetchedPubmedData.current = false;
@@ -238,7 +236,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
           })
         }
         {
-          <Tabs tabReset={selectedTabToggle}>
+          <Tabs isOpen={modalIsOpen}>
             {
               clinicalTrials.current.length > 0 &&
               <div heading="Clinical Trials">
@@ -270,7 +268,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
               </div>
             }
             {
-              displayedPubmedEvidence.length > 0 &&
+              pubmedEvidence.length > 0 &&
               <div heading="Publications">
                 {
                   pubmedEvidence.length > 0 &&
