@@ -106,9 +106,6 @@ span.path {
     color: $black;
     box-shadow: $dropShadowHover;
     text-decoration: underline;
-    path {
-      fill: $black;
-    }  
   }
 }
 .name, .target {

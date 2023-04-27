@@ -4,8 +4,8 @@ import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
-// import {ReactComponent as ResearchSingle} from '../../Icons/research-single.svg';
-// import {ReactComponent as ResearchMultiple} from '../../Icons/research-multiple.svg';
+import {ReactComponent as ResearchSingle} from '../../Icons/research-single.svg';
+import {ReactComponent as ResearchMultiple} from '../../Icons/research-multiple.svg';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
@@ -80,13 +80,13 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
           >
           <Connector />
           <span className={`${styles.path} path ${(pathObject.predicates.length > 1) ? styles.hasMore : ''}`}>
-            {/* {
+            {
               pathObject.publications?.length > 1
               ? <ResearchMultiple />
               : (pathObject.publications?.length > 0 || pathObject.provenance?.length > 0) 
                 ? <ResearchSingle /> 
                 : '' 
-            } */}
+            }
             <span>
               <Highlighter
                 highlightClassName="highlight"
