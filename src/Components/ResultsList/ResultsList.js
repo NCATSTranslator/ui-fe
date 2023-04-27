@@ -432,7 +432,7 @@ const ResultsList = ({loading}) => {
         skip that result.
       */
       for(let result of oResults) {
-        const pathRanks = result.paths.map((p) => { return { rank: 0, path: p }; });
+        const pathRanks = result.compressedPaths.map((p) => { return { rank: 0, path: p }; });
         let addResult = true;
         for(const filter of filters) {
           if ((isEvidenceFilter(filter) && !(filter.value < result.evidence.length)) ||
@@ -440,8 +440,6 @@ const ResultsList = ({loading}) => {
             addResult = false;
             break;
           }
-
-          updatePathRankByTag(result, filter.type, pathRanks);
         }
 
         if (addResult) {
@@ -499,7 +497,7 @@ const ResultsList = ({loading}) => {
           const newResult = cloneDeep(result);
           const pathRanks = resultPathRanks[resultIndex];
           pathRanks.sort((a, b) => { return a.rank - b.rank; });
-          newResult.paths = pathRanks.map((pr) => { return pr.path; });
+          newResult.compressedPaths = pathRanks.map((pr) => { return pr.path; });
           facetedResults.push(newResult);
         }
 

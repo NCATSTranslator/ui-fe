@@ -153,7 +153,7 @@ export const getFormattedPaths = (rawPathIds, results) => {
 }
 
 const getCompressedPaths = (graph) => {
-  let newCompressedPaths = new Set();
+  let newCompressedPaths = [];
   let pathToDisplay = null
   for(const [i, pathObj] of graph.entries()) {
     if(pathToDisplay === null)
@@ -195,7 +195,7 @@ const getCompressedPaths = (graph) => {
     }
 
     if(displayPath) {
-      newCompressedPaths.add(pathToDisplay);
+      newCompressedPaths.push(pathToDisplay);
       pathToDisplay = null;
     }
   }
@@ -256,8 +256,8 @@ export const findStringMatch = (element, value, pathRanks) => {
     !element ||
     element.name.toLowerCase().includes(formattedValue) ||
     (element.description && element.description.toLowerCase().includes(formattedValue));
-  for (let i = 0; i < element.paths.length; ++i) {
-    const path = element.paths[i];
+  for (let i = 0; i < element.compressedPaths.length; ++i) {
+    const path = element.compressedPaths[i];
     for (let item of path.path.subgraph) {
       if ((item.name && item.name.toLowerCase().includes(formattedValue)) ||
           (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))) {
