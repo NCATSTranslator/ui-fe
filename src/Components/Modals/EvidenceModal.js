@@ -431,7 +431,9 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
               </div>
             }
             {
-              currentEvidence.length <= 0 &&
+              clinicalTrials.current.length <= 0 &&
+              pubmedEvidence.length <= 0 &&
+              sources.length <= 0 &&
               <div heading="No Evidence Available">
                 <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
               </div>
