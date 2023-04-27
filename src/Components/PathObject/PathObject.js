@@ -36,9 +36,6 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
     handleEdgeClick(filteredPath);
   }
 
-  if(pathObject.category === 'predicate')
-    console.log(pathObject);
-
   return (
     <>
       {
