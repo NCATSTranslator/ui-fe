@@ -31,26 +31,37 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   }
 
   const handleEdgeSpecificEvidence = (edgeGroup) => {
-    const filterEvidenceObjs = (objs, clickedPredicate, container) => {
+    const filterEvidenceObjs = (objs, selectedEdge, container) => {
       for (const obj of objs) {
-        if (obj.edge.predicates.map((p) => p.toLowerCase()).includes(clickedPredicate.toLowerCase())) {
+        let include = true;
+        // check for subject match
+        if(obj.edge.subject.toLowerCase() !== selectedEdge.subject.names[0].toLowerCase())
+          include = false;
+        // check for predicate match
+        if(!obj.edge.predicates.map((p) => p.toLowerCase()).includes(selectedEdge.predicate.toLowerCase()))
+          include = false;
+        // check for object match
+        if(obj.edge.object.toLowerCase() !== selectedEdge.object.names[0].toLowerCase())
+          include = false;
+
+        if(include) {
           const includedObj = cloneDeep(obj);
-          includedObj.edge.predicates = [clickedPredicate];
+          includedObj.edge.predicates = [selectedEdge.predicate];
           container.push(includedObj);
         }
       }
     }
 
-    const filteredEvidence = {
+    let filteredEvidence = {
       publications: [],
-      sources: [] 
+      sources: []
     };
 
-    const filteredPublications = filteredEvidence.publications;
-    const filteredSources = filteredEvidence.sources;
-    for (const clickedPredicate of edgeGroup.predicates) {
-      filterEvidenceObjs(item.evidence.publications, clickedPredicate, filteredPublications);
-      filterEvidenceObjs(item.evidence.sources, clickedPredicate, filteredSources);
+    let filteredPublications = filteredEvidence.publications;
+    let filteredSources = filteredEvidence.sources;
+    for (const edge of edgeGroup.edges) {
+      filterEvidenceObjs(item.evidence.publications, edge, filteredPublications);
+      filterEvidenceObjs(item.evidence.sources, edge, filteredSources);
     }
 
     // call activateEvidence with the filtered evidence
