@@ -33,12 +33,22 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const handleEdgeSpecificEvidence = (edgeGroup) => {
     const filteredEvidence = [];
     for(const evidenceItem of item.evidence) {
-      for(const clickedPredicate of edgeGroup.predicates) {
-        if (evidenceItem.edge.predicates.map((p) => p.toLowerCase()).includes(clickedPredicate.toLowerCase())) {
+      for(const selectedEdge of edgeGroup.edges) {
+        let include = true;
+        // check for subject match
+        if(evidenceItem.edge.subject.toLowerCase() !== selectedEdge.subject.names[0].toLowerCase())
+          include = false;
+        // check for predicate match
+        if(!evidenceItem.edge.predicates.map((p) => p.toLowerCase()).includes(selectedEdge.predicate.toLowerCase()))
+          include = false;
+        // check for object match
+        if(evidenceItem.edge.object.toLowerCase() !== selectedEdge.object.names[0].toLowerCase())
+          include = false;
+
+        if(include) {
           const newEvidenceItem = cloneDeep(evidenceItem);
-          newEvidenceItem.edge.predicates = [clickedPredicate];
+          newEvidenceItem.edge.predicates = [selectedEdge.predicate];
           filteredEvidence.push(newEvidenceItem);
-          break;
         }
       }
     }
