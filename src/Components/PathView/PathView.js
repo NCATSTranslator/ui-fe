@@ -1,6 +1,6 @@
 import styles from './PathView.module.scss';
 import React, {useState, useEffect, useMemo} from "react";
-import PathObject from '../Path/PathObject';
+import PathObject from '../PathObject/PathObject';
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import { useOutletContext } from 'react-router-dom';
 import { cloneDeep, isEqual } from 'lodash';

@@ -4,6 +4,8 @@ import { getIcon } from '../../Utilities/utilities';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
+// import {ReactComponent as ResearchSingle} from '../../Icons/research-single.svg';
+// import {ReactComponent as ResearchMultiple} from '../../Icons/research-multiple.svg';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
@@ -33,6 +35,9 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
     // call the edge click handler with the newly filtered path
     handleEdgeClick(filteredPath);
   }
+
+  if(pathObject.category === 'predicate')
+    console.log(pathObject);
 
   return (
     <>
@@ -75,16 +80,27 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
           >
           <Connector />
           <span className={`${styles.path} path ${(pathObject.predicates.length > 1) ? styles.hasMore : ''}`}>
-            <Highlighter
-              highlightClassName="highlight"
-              searchWords={activeStringFilters}
-              autoEscape={true}
-              textToHighlight={capitalizeAllWords(pathObject.predicates[0])}
-            />
-            {pathObject.predicates.length > 1 && 
-            <span className={styles.more}>
-              + {pathObject.predicates.length - 1} More
-            </span>}
+            {/* {
+              pathObject.publications?.length > 1
+              ? <ResearchMultiple />
+              : (pathObject.publications?.length > 0 || pathObject.provenance?.length > 0) 
+                ? <ResearchSingle /> 
+                : '' 
+            } */}
+            <span>
+              <Highlighter
+                highlightClassName="highlight"
+                searchWords={activeStringFilters}
+                autoEscape={true}
+                textToHighlight={capitalizeAllWords(pathObject.predicates[0])}
+              />
+              {
+                pathObject.predicates.length > 1 && 
+                <span className={styles.more}>
+                  + {pathObject.predicates.length - 1} More
+                </span>
+              }
+            </span>
           </span>
           <Tooltip 
             id={`${pathObject.predicates[0]}${uuid}`}
