@@ -108,7 +108,7 @@ const QueryHistoryList = () => {
         {
           filteredQueryHistoryState.map((query, i)=> {
             // hide past queries with old formatting
-            if(!query.item.node || !query.item.type)
+            if(!query?.item?.node || !query?.item?.type)
               return null;
 
             let itemTimestamp = new Date(query.date);
