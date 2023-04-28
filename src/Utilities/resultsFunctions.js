@@ -39,7 +39,9 @@ export const getFormattedEvidence = (paths, results) => {
   };
 
   const formatSources = (sources, item, container) => {
-    formatEvidenceObjs(sources, (src) => { return src.name; }, item, (src) => { return src; }, container);
+    formatEvidenceObjs(sources, 
+      (src) => { return `${item.edges[0].subject.names[0]}${src.name}${item.edges[0].object.names[0]}`; }, 
+      item, (src) => { return src; }, container);
   };
 
   const formattedPublications = {};
