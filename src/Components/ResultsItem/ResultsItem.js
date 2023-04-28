@@ -15,6 +15,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   let icon = getIcon(item.type);
 
   let evidenceCount = item.evidence.length;
+  let publicationCount = item.evidence.publications.length;
+  let sourcesCount = item.evidence.sources.length;
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
   const formattedPaths = item.compressedPaths;
@@ -144,7 +146,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             activateEvidence(item.evidence, [], true);
           }}
           >
-          <span className={styles.viewAll}>View All Evidence</span> ({evidenceCount})
+          <div>
+            <span className={styles.viewAll}>View All Evidence</span>
+          </div>
+          <div>
+            <span className={styles.info}>Publications ({publicationCount})</span>
+            <span className={styles.info}>Sources ({sourcesCount})</span>
+          </div>
         </span>
       </div>
       <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
