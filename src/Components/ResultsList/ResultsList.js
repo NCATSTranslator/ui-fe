@@ -796,45 +796,45 @@ const ResultsList = ({loading}) => {
                     }
                   </div>
                 </div>
-              </div>
-              {
-                formattedResults.length > 0 &&
-                <div className={styles.pagination}>
-                  <div className={styles.perPage}>
-                    <Select
-                      label=""
-                      name="Results Per Page"
-                      size="s"
-                      handleChange={(value)=>{
-                        setItemsPerPage(parseInt(value));
-                        handlePageClick({selected: 0}, value);
-                      }}
-                      noanimate
-                      >
-                      <option value="5" key="0">5</option>
-                      <option value="10" key="1">10</option>
-                      <option value="20" key="2">20</option>
-                    </Select>
+                {
+                  formattedResults.length > 0 &&
+                  <div className={styles.pagination}>
+                    <div className={styles.perPage}>
+                      <Select
+                        label=""
+                        name="Results Per Page"
+                        size="s"
+                        handleChange={(value)=>{
+                          setItemsPerPage(parseInt(value));
+                          handlePageClick({selected: 0}, value);
+                        }}
+                        noanimate
+                        >
+                        <option value="5" key="0">5</option>
+                        <option value="10" key="1">10</option>
+                        <option value="20" key="2">20</option>
+                      </Select>
+                    </div>
+                    <ReactPaginate
+                      breakLabel="..."
+                      nextLabel="Next"
+                      previousLabel="Previous"
+                      onPageChange={handlePageClick}
+                      pageRangeDisplayed={5}
+                      marginPagesDisplayed={1}
+                      pageCount={pageCount}
+                      renderOnZeroPageCount={null}
+                      className={styles.pageNums}
+                      pageClassName={styles.pageNum}
+                      activeClassName={styles.current}
+                      previousLinkClassName={`${styles.prev} ${styles.button}`}
+                      nextLinkClassName={`${styles.prev} ${styles.button}`}
+                      disabledLinkClassName={styles.disabled}
+                      forcePage={currentPage.current}
+                    />
                   </div>
-                  <ReactPaginate
-                    breakLabel="..."
-                    nextLabel="Next"
-                    previousLabel="Previous"
-                    onPageChange={handlePageClick}
-                    pageRangeDisplayed={5}
-                    marginPagesDisplayed={1}
-                    pageCount={pageCount}
-                    renderOnZeroPageCount={null}
-                    className={styles.pageNums}
-                    pageClassName={styles.pageNum}
-                    activeClassName={styles.current}
-                    previousLinkClassName={`${styles.prev} ${styles.button}`}
-                    nextLinkClassName={`${styles.prev} ${styles.button}`}
-                    disabledLinkClassName={styles.disabled}
-                    forcePage={currentPage.current}
-                  />
-                </div>
-              }
+                }
+              </div>
               {
                 displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingIcon, <ResultsAvailableIcon/>, true)
               }
