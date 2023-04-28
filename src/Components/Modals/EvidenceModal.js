@@ -386,7 +386,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
                   <div className={styles.evidenceItems}>
                     {
                       sources.map((src, i) => { 
-                        console.log(src);
                         let subjectName = capitalizeAllWords(src.edge.subject);
                         let predicateName = capitalizeAllWords(src.edge.predicates[0]);
                         let objectName = capitalizeAllWords(src.edge.object);
