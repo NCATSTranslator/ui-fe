@@ -3,28 +3,12 @@
 .evidenceModal {
   .evidenceContainer {
     width: 1130px;
-    height: 85%;
   }
   .loadingBar {
     display: grid;
     justify-items: center;
     align-content: center;
     padding: 0;
-  }
-  .twenty {
-    .loadingBar, .evidenceItems {
-      height: 2440px;
-    }
-  }
-  .ten {
-    .loadingBar, .evidenceItems {
-      height: 1220px;
-    }
-  }
-  .five {
-    .loadingBar, .evidenceItems {
-      height: 610px;
-    }
   }
   .tableHead {
     border-bottom: 1px solid $midGray;

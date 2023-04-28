@@ -24,7 +24,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
   const [isAllEvidence, setIsAllEvidence] = useState(isAll);
   const [formattedEdges, setFormattedEdges] = useState(null)
   const [itemsPerPage, setItemsPerPage] = useState(5);
-  const itemCountClass = useRef(styles.five);
   const [newItemsPerPage, setNewItemsPerPage] = useState(null);
   const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
   const [isSortedByTitle, setIsSortedByTitle] = useState(null);
@@ -157,17 +156,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
     if(newItemsPerPage !== null) {
       setItemsPerPage(newItemsPerPage);
       setNewItemsPerPage(null);
-      switch(newItemsPerPage) {
-        case 20:
-          itemCountClass.current = styles.twenty;
-          break;
-        case 10:
-          itemCountClass.current = styles.ten;
-          break;
-        default:
-          itemCountClass.current = styles.five;
-          break;
-      }
       handlePageClick({selected: 0});
     }
   }, [newItemsPerPage, handlePageClick]);
@@ -272,7 +260,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
               <div heading="Publications">
                 <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
                 {
-                  <div className={`${itemCountClass.current} ${styles.tableBody}`}>
+                  <div className={`${styles.tableBody}`}>
                     <div className={styles.tableHead}>
                       <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
                       <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
