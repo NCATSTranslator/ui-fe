@@ -84,7 +84,10 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
     if(isOpen) {
       setPubmedEvidence(cloneDeep(currentEvidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
       clinicalTrials.current = cloneDeep(currentEvidence.publications.filter(item => item.type === 'NCT'));
-      setSources(currentEvidence.sources);
+      if(isAll)
+        setSources(currentEvidence.sources.filter((v,i,a)=>a.findIndex(v2=>(v2.id===v.id))===i));
+      else
+        setSources(currentEvidence.sources);
     }
   }, [currentEvidence, isOpen])
 
