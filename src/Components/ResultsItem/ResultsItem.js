@@ -22,7 +22,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   const initPathString = (type !== undefined && type.pathString) ? type.pathString : 'may affect';
 
-  let pathString = (formattedPaths.size > 1) ? `Paths that ${initPathString}` : `Path that ${initPathString}`;
+  let pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString}` : `Path that ${initPathString}`;
   let nameString = (item.name !== null) ? item.name : '';
   let objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
@@ -134,7 +134,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             />
           </span>
         }
-        <span className={styles.effect}>{formattedPaths.size} {pathString} {objectString}</span>
+        <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span
