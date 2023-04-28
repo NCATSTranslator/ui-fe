@@ -84,10 +84,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
     if(isOpen) {
       setPubmedEvidence(cloneDeep(currentEvidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
       clinicalTrials.current = cloneDeep(currentEvidence.publications.filter(item => item.type === 'NCT'));
-      if(isAll)
-        setSources(currentEvidence.sources.filter((v,i,a)=>a.findIndex(v2=>(v2.id===v.id))===i));
-      else
-        setSources(currentEvidence.sources);
+      setSources(currentEvidence.sources);
     }
   }, [currentEvidence, isOpen])
 
@@ -389,6 +386,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
                   <div className={styles.evidenceItems}>
                     {
                       sources.map((src, i) => { 
+                        console.log(src);
                         let subjectName = capitalizeAllWords(src.edge.subject);
                         let predicateName = capitalizeAllWords(src.edge.predicates[0]);
                         let objectName = capitalizeAllWords(src.edge.object);
