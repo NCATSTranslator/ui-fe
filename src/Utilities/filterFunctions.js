@@ -1,4 +1,4 @@
-export const isFacetFilter = (filter) => {
+export const isFacet = (filter) => {
   const family = filterFamily(filter);
   return validFacetFamilies.has(family);
 }

@@ -94,7 +94,7 @@ export const filterCompare = (filter1, filter2) => {
 // Given a result, a tag, and a ranking of paths, update the rank of a path to be lower if the
 // tag appears in the path.
 export const updatePathRankByTag = (result, tag, pathRanks) => {
-  result.paths.forEach((path, i) => {
+  result.compressedPaths.forEach((path, i) => {
     if (path.path.tags[tag] !== undefined) {
       pathRanks[i].rank -= 1;
     }
