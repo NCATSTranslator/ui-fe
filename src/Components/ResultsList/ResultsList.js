@@ -71,6 +71,8 @@ const ResultsList = ({loading}) => {
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   // String, active title of evidence modal
   const [isAllEvidence, setIsAllEvidence] = useState(true);
+  // Object, the currently selected item
+  const [selectedItem, setSelectedItem] = useState({});
   // Array, edges represented in current evidence
   const [selectedEdges, setSelectedEdges] = useState([]);
   // Array, evidence relating to the item last clicked
@@ -417,8 +419,9 @@ const ResultsList = ({loading}) => {
   }
 
   // Click handler for opening the evidence modal and populating the evidence
-  const activateEvidence = (evidence, edgeGroup, isAll) => {
+  const activateEvidence = (evidence, item, edgeGroup, isAll) => {
     setIsAllEvidence(isAll);
+    setSelectedItem(item);
     setSelectedEdges(edgeGroup);
     setCurrentEvidence(evidence);
     setEvidenceOpen(true);
@@ -662,6 +665,7 @@ const ResultsList = ({loading}) => {
         onClose={()=>handleEvidenceModalClose()}
         className="evidence-modal"
         currentEvidence={currentEvidence}
+        item={selectedItem}
         results={rawResults.current}
         isAll={isAllEvidence}
         edgeGroup={selectedEdges}
@@ -813,7 +817,7 @@ const ResultsList = ({loading}) => {
                             key={item.id}
                             type={storedQuery.type}
                             item={item}
-                            activateEvidence={(evidence, edgeGroup, isAll)=>activateEvidence(evidence, edgeGroup, isAll)}
+                            activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
                             activeStringFilters={activeStringFilters}
                           />
                         )

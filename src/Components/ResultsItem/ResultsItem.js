@@ -14,9 +14,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   let icon = getIcon(item.type);
 
-  let evidenceCount = item.evidence.length;
   let publicationCount = item.evidence.publications.length;
-  let sourcesCount = item.evidence.sources.length;
+  let sourcesCount = item.evidence.distinctSources.length;
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
   const formattedPaths = item.compressedPaths;
@@ -67,7 +66,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     }
 
     // call activateEvidence with the filtered evidence
-    activateEvidence(filteredEvidence, edgeGroup, false);
+    activateEvidence(filteredEvidence, item, edgeGroup, false);
   }
 
   useEffect(() => {
@@ -143,7 +142,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           className={styles.evidenceLink}
           onClick={(e)=>{
             e.stopPropagation();
-            activateEvidence(item.evidence, [], true);
+            activateEvidence(item.evidence, item, [], true);
           }}
           >
           <div>
