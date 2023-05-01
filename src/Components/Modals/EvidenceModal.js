@@ -21,7 +21,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
   const clinicalTrials = useRef([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const isAllEvidence = isAll;
   const [selectedItem, setSelectedItem] = useState({});
   const [formattedEdges, setFormattedEdges] = useState(null)
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -86,7 +85,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
       setPubmedEvidence(cloneDeep(currentEvidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
       clinicalTrials.current = cloneDeep(currentEvidence.publications.filter(item => item.type === 'NCT'));
       let displayedSources = currentEvidence.sources; 
-      if (isAllEvidence) {
+      if (isAll) {
         displayedSources = currentEvidence.distinctSources;
       }
 
@@ -221,7 +220,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
       <div className={styles.top}>
         <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
         {
-          !isAllEvidence &&
+          !isAll &&
           formattedEdges &&
           formattedEdges.map((edge, i) => {
             return (
