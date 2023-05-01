@@ -27,11 +27,11 @@ export const sortSourceHighLow = (items) => {
 }
 
 export const sortEvidenceLowHigh = (items) => {
-  return items.sort((a, b) => a.evidence.length - b.evidence.length);
+  return items.sort((a, b) => a.evidence.publications.length - b.evidence.publications.length);
 }
 
 export const sortEvidenceHighLow = (items) => {
-  return items.sort((a, b) => b.evidence.length - a.evidence.length);
+  return items.sort((a, b) => b.evidence.publications.length - a.evidence.publications.length);
 }
 
 export const sortScoreLowHigh = (items) => {
