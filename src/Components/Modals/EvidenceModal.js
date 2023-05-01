@@ -21,7 +21,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
   const clinicalTrials = useRef([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isAllEvidence, setIsAllEvidence] = useState(isAll);
+  const isAllEvidence = isAll;
   const [selectedItem, setSelectedItem] = useState({});
   const [formattedEdges, setFormattedEdges] = useState(null)
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -61,12 +61,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
   }
 
   useEffect(() => {
-    setIsAllEvidence(isAll);
-  }, [isAll]);
-
-  useEffect(() => {
     setSelectedItem(item);
-    console.log(item);
   }, [item])
 
   useEffect(() => {
@@ -91,7 +86,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
       setPubmedEvidence(cloneDeep(currentEvidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
       clinicalTrials.current = cloneDeep(currentEvidence.publications.filter(item => item.type === 'NCT'));
       let displayedSources = currentEvidence.sources; 
-      if (isAll) {
+      if (isAllEvidence) {
         displayedSources = currentEvidence.distinctSources;
       }
 
