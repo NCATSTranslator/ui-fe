@@ -68,9 +68,17 @@
   .evidenceLink {
     font-size: $bodyTwoSize;
     cursor: pointer;
-      .viewAll {
+    .viewAll {
       font-size: $bodyTwoSize;
       font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .info {
+      display: block;
+      font-size: $bodyTwoSize;
+      font-weight: 400;
+      line-height: 1;
+      color: $darkGray
     }
   }
   .accordionButton {

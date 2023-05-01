@@ -8,13 +8,14 @@ import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
 
-// const GraphView = lazy(() => import("../GraphView/GraphView"));
+const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults}) => {
 
   let icon = getIcon(item.type);
 
-  let evidenceCount = item.evidence.length;
+  let publicationCount = item.evidence.publications.length;
+  let sourcesCount = item.evidence.distinctSources.length;
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
   const formattedPaths = item.compressedPaths;
@@ -22,7 +23,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   const initPathString = (type !== undefined && type.pathString) ? type.pathString : 'may affect';
 
-  let pathString = (formattedPaths.size > 1) ? `Paths that ${initPathString}` : `Path that ${initPathString}`;
+  let pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString}` : `Path that ${initPathString}`;
   let nameString = (item.name !== null) ? item.name : '';
   let objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
@@ -31,30 +32,41 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   }
 
   const handleEdgeSpecificEvidence = (edgeGroup) => {
-    const filteredEvidence = [];
-    for(const evidenceItem of item.evidence) {
-      for(const selectedEdge of edgeGroup.edges) {
+    const filterEvidenceObjs = (objs, selectedEdge, container) => {
+      for (const obj of objs) {
         let include = true;
         // check for subject match
-        if(evidenceItem.edge.subject.toLowerCase() !== selectedEdge.subject.names[0].toLowerCase())
+        if(obj.edge.subject.toLowerCase() !== selectedEdge.subject.names[0].toLowerCase())
           include = false;
         // check for predicate match
-        if(!evidenceItem.edge.predicates.map((p) => p.toLowerCase()).includes(selectedEdge.predicate.toLowerCase()))
+        if(!obj.edge.predicates.map((p) => p.toLowerCase()).includes(selectedEdge.predicate.toLowerCase()))
           include = false;
         // check for object match
-        if(evidenceItem.edge.object.toLowerCase() !== selectedEdge.object.names[0].toLowerCase())
+        if(obj.edge.object.toLowerCase() !== selectedEdge.object.names[0].toLowerCase())
           include = false;
 
         if(include) {
-          const newEvidenceItem = cloneDeep(evidenceItem);
-          newEvidenceItem.edge.predicates = [selectedEdge.predicate];
-          filteredEvidence.push(newEvidenceItem);
+          const includedObj = cloneDeep(obj);
+          includedObj.edge.predicates = [selectedEdge.predicate];
+          container.push(includedObj);
         }
       }
     }
 
+    let filteredEvidence = {
+      publications: [],
+      sources: []
+    };
+
+    let filteredPublications = filteredEvidence.publications;
+    let filteredSources = filteredEvidence.sources;
+    for (const edge of edgeGroup.edges) {
+      filterEvidenceObjs(item.evidence.publications, edge, filteredPublications);
+      filterEvidenceObjs(item.evidence.sources, edge, filteredSources);
+    }
+
     // call activateEvidence with the filtered evidence
-    activateEvidence(filteredEvidence, edgeGroup);
+    activateEvidence(filteredEvidence, item, edgeGroup, false);
   }
 
   useEffect(() => {
@@ -123,17 +135,23 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             />
           </span>
         }
-        <span className={styles.effect}>{formattedPaths.size} {pathString} {objectString}</span>
+        <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span
           className={styles.evidenceLink}
           onClick={(e)=>{
             e.stopPropagation();
-            activateEvidence(item.evidence, false);
+            activateEvidence(item.evidence, item, [], true);
           }}
           >
-          <span className={styles.viewAll}>View All Evidence</span> ({evidenceCount})
+          <div>
+            <span className={styles.viewAll}>View All Evidence</span>
+          </div>
+          <div>
+            <span className={styles.info}>Publications ({publicationCount})</span>
+            <span className={styles.info}>Sources ({sourcesCount})</span>
+          </div>
         </span>
       </div>
       <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
@@ -175,7 +193,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           paths={formattedPaths}
           selectedPaths={selectedPaths}
           active={isExpanded}
-          handleEdgeSpecificEvidence={(edge)=> {handleEdgeSpecificEvidence(edge)}}
+          handleEdgeSpecificEvidence={(edgeGroup)=> {handleEdgeSpecificEvidence(edgeGroup)}}
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>

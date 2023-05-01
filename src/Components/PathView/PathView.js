@@ -24,22 +24,22 @@ const getPathsWithSelectionsSet = (paths, selectedPaths) => {
 
 const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, activeStringFilters}) => {
 
-  let initialNumberToShow = (paths.size < 6) ? paths.size : 6;
+  let initialNumberToShow = (paths.length < 6) ? paths.length : 6;
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
 
   const setFeedbackModalOpen = useOutletContext();
 
   useEffect(() => {
-    setNumberToShow((paths.size < 6) ? paths.size : 6);
+    setNumberToShow((paths.length < 6) ? paths.length : 6);
   }, [paths]);
 
   const handleNameClick = (name) => {
     console.log("handle name click");
   }
 
-  const handleEdgeClick = (edge) => {
-    handleEdgeSpecificEvidence(edge)
+  const handleEdgeClick = (edgeGroup) => {
+    handleEdgeSpecificEvidence(edgeGroup)
   }
 
   const handleTargetClick = (target) => {
@@ -47,7 +47,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
   }
 
   const handleShowMore = () => {
-    let newAmount = (numberToShow + 6 > paths.size) ? paths.size : numberToShow + 6;
+    let newAmount = (numberToShow + 6 > paths.length) ? paths.length : numberToShow + 6;
     setNumberToShow(newAmount);
   }
 
@@ -91,11 +91,11 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
           }
           <div className={styles.buttons}>
             {
-              (numberToShow < paths.size) &&
+              (numberToShow < paths.length) &&
               <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
             }
             {
-              (numberToShow <= paths.size && numberToShow > 6) &&
+              (numberToShow <= paths.length && numberToShow > 6) &&
               <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
             }
           </div>

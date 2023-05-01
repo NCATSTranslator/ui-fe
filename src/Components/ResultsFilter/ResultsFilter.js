@@ -6,7 +6,7 @@ import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
-import { isFacetFilter, isEvidenceFilter } from '../../Utilities/filterFunctions';
+import { isFacet, isEvidenceFilter } from '../../Utilities/filterFunctions';
 
 const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
 
@@ -183,7 +183,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
               <div className={styles.facetContainer} key={tagKey}>
                 <Checkbox
                   handleClick={() => handleFacetChange(tagKey, tagObject, setTagObject, tagName)}
-                  checked={activeFilters.some(filter => isFacetFilter(filter) && filter.type === tagKey)}
+                  checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
                   className={styles.checkbox}
                   >
                   {tagName} <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>

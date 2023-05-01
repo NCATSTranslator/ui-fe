@@ -11,20 +11,19 @@ import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh 
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 
-const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
+const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
 
   const [pubmedEvidence, setPubmedEvidence] = useState([]);
+  const [sources, setSources] = useState([]);
   const clinicalTrials = useRef([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [evidenceTitle, setEvidenceTitle] = useState(title ? title : 'All Evidence')
-  const [formattedEvidenceEdges, setFormattedEvidenceEdges] = useState(null)
-  const [rawEvidenceEdges, setRawEvidenceEdges] = useState(null)
+  const [selectedItem, setSelectedItem] = useState({});
+  const [formattedEdges, setFormattedEdges] = useState(null)
   const [itemsPerPage, setItemsPerPage] = useState(5);
-  const itemCountClass = useRef(styles.five);
   const [newItemsPerPage, setNewItemsPerPage] = useState(null);
   const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
   const [isSortedByTitle, setIsSortedByTitle] = useState(null);
@@ -61,22 +60,20 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
   }
 
   useEffect(() => {
-    setEvidenceTitle(title)
-  }, [title]);
+    setSelectedItem(item);
+  }, [item])
 
   useEffect(() => {
-    if(!Array.isArray(edges) && typeof edges === 'object') {
-      const re = edges.edges[0];
-      const formattedEdges = edges.predicates.map((p) => {
+    if(!Array.isArray(edgeGroup) && typeof edgeGroup === 'object') {
+      const re = edgeGroup.edges[0];
+      const formatted = edgeGroup.predicates.map((p) => {
         return `${re.subject.names[0].toLowerCase()} ${p.toLowerCase()} ${re.object.names[0].toLowerCase()}`;
       });
-      setFormattedEvidenceEdges(formattedEdges);
-      setRawEvidenceEdges(edges);
+      setFormattedEdges(formatted);
     } else {
-      setFormattedEvidenceEdges(null);
-      setRawEvidenceEdges(null);
+      setFormattedEdges(null);
     }
-  }, [edges]);
+  }, [edgeGroup]);
 
   useEffect(() => {
     setDisplayedPubmedEvidence(pubmedEvidence.slice(itemOffset, endOffset));
@@ -85,8 +82,14 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
 
   useEffect(() => {
     if(isOpen) {
-      setPubmedEvidence(cloneDeep(currentEvidence).filter(item => item.type === 'PMID' || item.type === 'PMC'));
-      clinicalTrials.current = cloneDeep(currentEvidence).filter(item => item.type === 'NCT');
+      setPubmedEvidence(cloneDeep(currentEvidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
+      clinicalTrials.current = cloneDeep(currentEvidence.publications.filter(item => item.type === 'NCT'));
+      let displayedSources = currentEvidence.sources; 
+      if (isAll) {
+        displayedSources = currentEvidence.distinctSources;
+      }
+
+      setSources(displayedSources);
     }
   }, [currentEvidence, isOpen])
 
@@ -158,17 +161,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
     if(newItemsPerPage !== null) {
       setItemsPerPage(newItemsPerPage);
       setNewItemsPerPage(null);
-      switch(newItemsPerPage) {
-        case 20:
-          itemCountClass.current = styles.twenty;
-          break;
-        case 10:
-          itemCountClass.current = styles.ten;
-          break;
-        default:
-          itemCountClass.current = styles.five;
-          break;
-      }
       handlePageClick({selected: 0});
     }
   }, [newItemsPerPage, handlePageClick]);
@@ -226,10 +218,11 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
   return (
     <Modal isOpen={modalIsOpen} onClose={handleClose} className={styles.evidenceModal} containerClass={styles.evidenceContainer}>
       <div className={styles.top}>
-        <h5 className={styles.title}>{evidenceTitle}</h5>
+        <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
         {
-          formattedEvidenceEdges &&
-          formattedEvidenceEdges.map((edge, i) => {
+          !isAll &&
+          formattedEdges &&
+          formattedEdges.map((edge, i) => {
             return (
               <h5 className={styles.subtitle} key={i}>{capitalizeAllWords(edge)}</h5>
             )
@@ -270,82 +263,79 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
             {
               pubmedEvidence.length > 0 &&
               <div heading="Publications">
+                <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
                 {
-                  pubmedEvidence.length > 0 &&
-                  <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
-                }
-                {
-                    <div className={`${itemCountClass.current} ${styles.tableBody}`}>
-                      <div className={styles.tableHead}>
-                        <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
-                        <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
-                        <div
-                          className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
-                          onClick={()=>{handleSort((isSortedBySource)?'sourceHighLow': 'sourceLowHigh')}}
-                          >
-                          <span className={styles.headSpan}>
-                            Source
-                          </span>
-                        </div>
-                        <div
-                          className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`}
-                          onClick={()=>{handleSort((isSortedByTitle)?'titleHighLow': 'titleLowHigh')}}
-                          >
-                          <span className={styles.headSpan}>
-                            Title
-                          </span>
-                        </div>
-                        <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
+                  <div className={`${styles.tableBody}`}>
+                    <div className={styles.tableHead}>
+                      <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
+                      <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
+                      <div
+                        className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
+                        onClick={()=>{handleSort((isSortedBySource)?'sourceHighLow': 'sourceLowHigh')}}
+                        >
+                        <span className={styles.headSpan}>
+                          Source
+                        </span>
                       </div>
-                      {
-                        isLoading &&
-                        <LoadingBar
-                          loading={isLoading}
-                          useIcon
-                          className={styles.loadingBar}
-                        />
-                      }
-                      {
-                        !isLoading &&
-                        <div className={styles.evidenceItems} >
-                          {
-                            displayedPubmedEvidence.map((item, i)=> {
-                              return (
-                                <div className={styles.evidenceItem} key={i}>
-                                  <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                                    {
-                                      item.edge &&
-                                      <span>
-                                        <span>{item.edge.subject}</span><strong>{item.edge.predicates[0]}</strong><span>{item.edge.object}</span>
-                                      </span>
-                                    }
-                                  </span>
-                                  <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
-                                    {item.pubdate && item.pubdate }
-                                  </span>
-                                  <span className={`${styles.cell} ${styles.source} source`}>
-                                    <span>
-                                      {item.source && item.source }
-                                    </span>
-                                  </span>
-                                  <span className={`${styles.cell} ${styles.title} title`} >
-                                    {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
-                                    {!item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
-                                  </span>
-                                  <span className={`${styles.cell} ${styles.abstract} abstract`}>
-                                    <span>
-                                      {!item.snippet && "No snippet available."}
-                                      {item.snippet && item.snippet}
-                                    </span>
-                                      {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
-                                  </span>
-                                </div>
-                              )
-                            })
-                          }
-                        </div>
-                      }
+                      <div
+                        className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`}
+                        onClick={()=>{handleSort((isSortedByTitle)?'titleHighLow': 'titleLowHigh')}}
+                        >
+                        <span className={styles.headSpan}>
+                          Title
+                        </span>
+                      </div>
+                      <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
                     </div>
+                    {
+                      isLoading &&
+                      <LoadingBar
+                        loading={isLoading}
+                        useIcon
+                        className={styles.loadingBar}
+                      />
+                    }
+                    {
+                      !isLoading &&
+                      <div className={styles.evidenceItems} >
+                        {
+                          displayedPubmedEvidence.map((item, i)=> {
+                            return (
+                              <div className={styles.evidenceItem} key={i}>
+                                <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                                  {
+                                    item.edge &&
+                                    <span>
+                                      <span>{item.edge.subject}</span><strong>{item.edge.predicates[0]}</strong><span>{item.edge.object}</span>
+                                    </span>
+                                  }
+                                </span>
+                                <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
+                                  {item.pubdate && item.pubdate }
+                                </span>
+                                <span className={`${styles.cell} ${styles.source} source`}>
+                                  <span>
+                                    {item.source && item.source }
+                                  </span>
+                                </span>
+                                <span className={`${styles.cell} ${styles.title} title`} >
+                                  {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
+                                  {!item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
+                                </span>
+                                <span className={`${styles.cell} ${styles.abstract} abstract`}>
+                                  <span>
+                                    {!item.snippet && "No snippet available."}
+                                    {item.snippet && item.snippet}
+                                  </span>
+                                    {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
+                                </span>
+                              </div>
+                            )
+                          })
+                        }
+                      </div>
+                    }
+                  </div>
                 }
                 {
                   pubmedEvidence.length > itemsPerPage &&
@@ -390,57 +380,41 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
             }
             {
               // Add sources modal for predicates
-              rawEvidenceEdges &&
-              rawEvidenceEdges.provenance.length > 0 &&
+              sources.length > 0 &&
               <div heading="Sources">
-                <div className={`${styles.tableBody} ${styles.sources}`}>
+                <div className={`${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
                   <div className={`${styles.tableHead}`}>
-                    <div className={`${styles.head}`}>Relationship</div>
+                    { !isAll && <div className={`${styles.head}`}>Relationship</div> }
                     <div className={`${styles.head}`}>Source</div>
                     <div className={`${styles.head}`}>Link</div>
                   </div>
                   <div className={styles.evidenceItems}>
                     {
-                      rawEvidenceEdges.edges.map((item, i) => { 
-                        let subjectName = capitalizeAllWords(item.subject.names[0]);
-                        let predicateName = capitalizeAllWords(item.predicate);
-                        let objectName = capitalizeAllWords(item.object.names[0]);
+                      sources.map((src, i) => { 
+                        let subjectName = capitalizeAllWords(src.edge.subject);
+                        let predicateName = capitalizeAllWords(src.edge.predicates[0]);
+                        let objectName = capitalizeAllWords(src.edge.object);
+                        let name = (!Array.isArray(src) && typeof src === 'object') ? src.name: '';
+                        let url = (!Array.isArray(src) && typeof src === 'object') ? src.url: src;
                         return(
                           <div className={styles.evidenceItem}>
-                            <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                              <span className={styles.sourceEdge} key={i}>
-                                <span>{subjectName}</span>
-                                <strong>{predicateName}</strong>
-                                <span>{objectName}</span>
+                            { !isAll &&
+                              <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                                <span className={styles.sourceEdge} key={i}>
+                                  <span>{subjectName}</span>
+                                  <strong>{predicateName}</strong>
+                                  <span>{objectName}</span>
+                                </span>
                               </span>
+                            }
+                            <span className={`${styles.cell} ${styles.source} ${styles.sourceItem}`}>
+                              <span className={styles.sourceEdge} key={i}>{name}</span>
                             </span>
-                              {
-                                item.provenance.map((provenance, j) => { 
-                                  let name = (!Array.isArray(provenance) && typeof provenance === 'object') ? provenance.name: '';
-                                  let url = (!Array.isArray(provenance) && typeof provenance === 'object') ? provenance.url: provenance;
-                                  return(
-                                    <>
-                                      { j > 0 &&
-                                        <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                                          <span className={styles.sourceEdge} key={i}>
-                                            <span>{subjectName}</span>
-                                            <strong>{predicateName}</strong>
-                                            <span>{objectName}</span>
-                                          </span>
-                                        </span>
-                                      }
-                                      <span className={`${styles.cell} ${styles.source}`}>
-                                        <span className={styles.sourceEdge} key={i}>{name}</span>
-                                      </span>
-                                      <span className={`${styles.cell} ${styles.link}`}>
-                                        <a key={j} href={url} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
-                                          {url}
-                                        </a>
-                                      </span>
-                                    </>
-                                  )
-                                })
-                              }
+                            <span className={`${styles.cell} ${styles.link} ${styles.sourceItem}`}>
+                              <a key={i} href={url} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
+                                {url}
+                              </a>
+                            </span>
                           </div>
                         )
                       })
@@ -450,8 +424,9 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
               </div>
             }
             {
-              currentEvidence.length <= 0 &&
-              (!rawEvidenceEdges || rawEvidenceEdges.provenance.length === 0) &&
+              clinicalTrials.current.length <= 0 &&
+              pubmedEvidence.length <= 0 &&
+              sources.length <= 0 &&
               <div heading="No Evidence Available">
                 <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
               </div>
@@ -465,4 +440,3 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, title, edges}) => {
 
 
 export default EvidenceModal;
-
