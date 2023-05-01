@@ -21,7 +21,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
   const clinicalTrials = useRef([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isAllEvidence, setIsAllEvidence] = useState(isAll);
   const [selectedItem, setSelectedItem] = useState({});
   const [formattedEdges, setFormattedEdges] = useState(null)
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -61,12 +60,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
   }
 
   useEffect(() => {
-    setIsAllEvidence(isAll);
-  }, [isAll]);
-
-  useEffect(() => {
     setSelectedItem(item);
-    console.log(item);
   }, [item])
 
   useEffect(() => {
@@ -226,7 +220,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
       <div className={styles.top}>
         <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
         {
-          !isAllEvidence &&
+          !isAll &&
           formattedEdges &&
           formattedEdges.map((edge, i) => {
             return (
