@@ -83,6 +83,15 @@
         text-align: center;
       }
     }
+    &.distinctSources {
+      .tableHead, .evidenceItem {
+        display: grid;
+        grid-template-columns: 1.25fr 3.75fr;
+      }
+      .source, .link {
+        text-align: center;
+      }
+    }
     .relationship span {
       display: block;
     }
@@ -112,6 +121,9 @@
           display: -webkit-box;
           overflow: hidden;
           text-overflow: ellipsis;
+        }
+        &.sourceItem {
+          height: 20px;
         }
         &.title {
           text-align: center;

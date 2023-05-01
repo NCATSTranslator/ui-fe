@@ -39,9 +39,12 @@ export const getFormattedEvidence = (paths, results) => {
   };
 
   const formatSources = (sources, item, container) => {
-    formatEvidenceObjs(sources, 
+    formatEvidenceObjs(
+      sources, 
       (src) => { return `${item.edges[0].subject.names[0]}${src.name}${item.edges[0].object.names[0]}`; }, 
-      item, (src) => { return src; }, container);
+      item,
+      (src) => { return src; },
+      container);
   };
 
   const formattedPublications = {};
@@ -57,10 +60,15 @@ export const getFormattedEvidence = (paths, results) => {
 
   const publications = Object.values(formattedPublications);
   const sources = Object.values(formattedSources);
+  const distinctSources = {};
+  sources.forEach((src) => {
+    distinctSources[src.name] = src;
+  });
 
   return {
     publications: publications,
     sources: sources,
+    distinctSources: Object.values(distinctSources),
     length: sources.length + publications.length
   };
 }

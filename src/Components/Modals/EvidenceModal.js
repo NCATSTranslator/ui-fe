@@ -11,7 +11,7 @@ import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh 
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 
-const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => {
+const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
@@ -22,6 +22,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
 
   const [isLoading, setIsLoading] = useState(true);
   const [isAllEvidence, setIsAllEvidence] = useState(isAll);
+  const [selectedItem, setSelectedItem] = useState({});
   const [formattedEdges, setFormattedEdges] = useState(null)
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [newItemsPerPage, setNewItemsPerPage] = useState(null);
@@ -64,6 +65,11 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
   }, [isAll]);
 
   useEffect(() => {
+    setSelectedItem(item);
+    console.log(item);
+  }, [item])
+
+  useEffect(() => {
     if(!Array.isArray(edgeGroup) && typeof edgeGroup === 'object') {
       const re = edgeGroup.edges[0];
       const formatted = edgeGroup.predicates.map((p) => {
@@ -84,7 +90,12 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
     if(isOpen) {
       setPubmedEvidence(cloneDeep(currentEvidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
       clinicalTrials.current = cloneDeep(currentEvidence.publications.filter(item => item.type === 'NCT'));
-      setSources(currentEvidence.sources);
+      let displayedSources = currentEvidence.sources; 
+      if (isAll) {
+        displayedSources = currentEvidence.distinctSources;
+      }
+
+      setSources(displayedSources);
     }
   }, [currentEvidence, isOpen])
 
@@ -213,7 +224,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
   return (
     <Modal isOpen={modalIsOpen} onClose={handleClose} className={styles.evidenceModal} containerClass={styles.evidenceContainer}>
       <div className={styles.top}>
-        <h5 className={styles.title}>{isAllEvidence ? 'All Evidence' : 'Showing Evidence for:'}</h5>
+        <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
         {
           !isAllEvidence &&
           formattedEdges &&
@@ -377,7 +388,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
               // Add sources modal for predicates
               sources.length > 0 &&
               <div heading="Sources">
-                <div className={`${styles.tableBody} ${styles.sources}`}>
+                <div className={`${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
                   <div className={`${styles.tableHead}`}>
                     { !isAll && <div className={`${styles.head}`}>Relationship</div> }
                     <div className={`${styles.head}`}>Source</div>
@@ -402,10 +413,10 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, isAll, edgeGroup}) => 
                                 </span>
                               </span>
                             }
-                            <span className={`${styles.cell} ${styles.source}`}>
+                            <span className={`${styles.cell} ${styles.source} ${styles.sourceItem}`}>
                               <span className={styles.sourceEdge} key={i}>{name}</span>
                             </span>
-                            <span className={`${styles.cell} ${styles.link}`}>
+                            <span className={`${styles.cell} ${styles.link} ${styles.sourceItem}`}>
                               <a key={i} href={url} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
                                 {url}
                               </a>
