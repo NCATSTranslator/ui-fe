@@ -9,6 +9,32 @@ import avsdf from 'cytoscape-avsdf';
 import { useEffect } from 'react';
 
 /**
+* Resets the cytoscape viewport to the default view.
+* @param {Object} cy - A cytoscape instance.
+* @returns {void}
+*/
+const handleResetView = (cy) => {
+  if(!cy)
+    return;
+
+  return cy.fit(cy.elements(), 20);
+}
+
+/**
+* Clears both selected and excluded nodes to reset graph state
+* @param {Set} selNodes - A set containing the user's selected nodes.
+* @param {Set} excNodes - A set containing the user's excluded nodes.
+* @returns {void}
+*/
+const handleDeselectAllNodes = (cy, selNodes, excNodes, clearSelectedPaths, classes) => {
+  cy.elements().removeClass([classes.highlightClass, classes.hideClass, classes.excludedClass]);
+  selNodes.current.clear();
+  excNodes.current.clear();
+  clearSelectedPaths();
+}
+
+
+/**
 * Initializes a Cytoscape instance with the specified data and options.
 * @param {Object} result - An object representing the result to be displayed in the graph.
 * @param {Object} summary - An object containing the raw results information from the BE.
@@ -69,10 +95,13 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
   // when background is clicked, remove highlight and hide classes from all elements
   cy.bind('click', (ev) => {
     if(ev.target === cy) {
-      ev.cy.elements().removeClass([dataObj.highlightClass, dataObj.hideClass, dataObj.excludedClass]);
-      dataObj.selectedNodes.current.clear();
-      dataObj.excludedNodes.current.clear();
-      dataObj.clearSelectedPaths();
+      handleDeselectAllNodes(
+        ev.cy, 
+        dataObj.selectedNodes, 
+        dataObj.excludedNodes, 
+        dataObj.clearSelectedPaths, 
+        {highlightClass: dataObj.highlightClass, hideClass: dataObj.hideClass, excludedClass: dataObj.excludedClass}
+      );
     }
   });
   return cy;
@@ -82,7 +111,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
 
   let graphRef = useRef(null);
   const [currentLayout, setCurrentLayout] = useState(layoutList.klay)
-  const graph = useMemo(()=>{
+  const graph = useMemo(() => {
     if(!active)
       return null;
 
@@ -227,7 +256,24 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
         <button className={`${styles.layoutButton} ${(currentLayout.name === 'cose')? styles.active : ''}`} onClick={()=>setCurrentLayout(layoutList.cose)}>Cose</button>
       </div>
       <div className={styles.graphContainer} >
-        <div id={`cy-${uuidv4()}`}ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}></div>
+        <div className={styles.graphControls}>
+          <button className={`${styles.layoutButton} ${styles.active}`} onClick={()=>handleResetView(cy)}>Reset View</button>
+          <button 
+            className={`${styles.layoutButton} ${styles.active}`} 
+            onClick={() => {
+              handleDeselectAllNodes(
+                cy, 
+                selectedNodes, 
+                excludedNodes, 
+                clearSelectedPaths, 
+                {highlightClass: highlightClass, hideClass: hideClass, excludedClass: excludedClass})
+              }
+            }
+            >
+            Deselect All Nodes
+          </button>
+        </div>
+        <div id={`cy-${uuidv4()}`} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}></div>
       </div>
     </div>
   );
