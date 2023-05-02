@@ -277,7 +277,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItem, queryType.direction, queryType.targetType,
+  }, [isValidSubmission, dispatch, queryItem, queryType,
      storedQuery, selectedItem, navigate, setSearchParams])
 
   /*
