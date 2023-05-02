@@ -1,12 +1,18 @@
 export const layoutList = {
   breadthfirst: {
-    name: 'breadthfirst', spacingFactor: 1.1, avoidOverlap: true
+    name: 'breadthfirst', spacingFactor: 1.1, avoidOverlap: true, directed: true
   },
   dagre: {
     name: 'dagre', spacingFactor: 1.1
   },
   klay: {
-    name: 'klay'
+    name: 'klay', spacingFactor: 1.3, klay:{direction: 'RIGHT', edgeSpacingFactor: .1}, 
+    ready: (ev)=>{ 
+      if(ev.target?.options?.eles?.length < 10) { 
+        ev.cy.zoom({level:1.5}); 
+        ev.cy.center(); 
+      }
+    }
   },
   random: {
     name: 'random'
