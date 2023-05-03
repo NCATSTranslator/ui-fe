@@ -46,9 +46,10 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
     container: dataObj.graphRef.current,
     elements: resultToCytoscape(result, summary),
     layout: dataObj.layout,
-    style: cytoscape.stylesheet()
-      .selector('node')
-        .css({
+    style: [
+      {
+        selector: 'node',
+        style: {
           'id': 'data(id)',
           'content': 'data(label)',
           'shape': 'round-rectangle',
@@ -62,28 +63,40 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
           'border-width': '0px',
           'text-wrap': 'wrap',
           'text-max-width': '100%',
-        })
-      .selector('edge')
-        .css({
+        }
+      },
+      {
+        selector: 'edge',
+        style: {
           'line-color': '#CED0D0'
-        })
-      .selector('edge.highlight')
-        .css({
+        }
+      },
+      {
+        selector: 'edge.highlight',
+        style: {
           'line-color': '#000',
           'opacity': '1.0'
-        })
-      .selector('.hover-highlight')
-        .css({
+        }
+      },
+      {
+        selector: '.hover-highlight',
+        style: {
           'line-color': '#606368'
-        })
-      .selector('.hide')
-        .css({
+        }
+      },
+      {
+        selector: '.hide',
+        style: {
           'opacity': '0.3'
-        })
-      .selector('.excluded')
-      .css({
-        'background-color': 'red'
-      }),
+        }
+      },
+      {
+        selector: '.excluded',
+        style: {
+          'background-color': 'red'
+        }
+      },
+    ],
     data: {
       result: 0
     }
