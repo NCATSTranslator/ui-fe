@@ -118,15 +118,6 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
     }
   });
 
-  // calculate node height 
-  cy.nodes().forEach(function(node) {
-    console.log(node);
-    // const label = node.data('label');
-    // const lines = label.split('\n').length;
-    // const height = lines * 20; // 20 pixels per line
-    // node.data('height', height);
-  });
-
   cy.unbind('vclick');
   cy.bind('vclick', 'node', (ev, formattedResults)=>dataObj.handleNodeClick(ev, formattedResults, dataObj.graph));
 

@@ -69,9 +69,9 @@
     font-size: $bodyTwoSize;
     border-radius: $defaultBorderRadius;
     &.clinicalTrials {
-      &>div {
+      .tableHead, .evidenceItem {
         display: grid;
-        grid-template-columns: 2fr 1fr 2fr;
+        grid-template-columns: 1fr 1fr;
       }
     }
     &.sources {
@@ -92,8 +92,13 @@
         text-align: center;
       }
     }
-    .relationship span {
-      display: block;
+    .relationship {
+      &>span {
+        text-align: center;
+      }
+      span {
+        display: block;
+      }
     }
     .tableHead, &>div .evidenceItem {
       display: grid;
@@ -103,7 +108,6 @@
       grid-template-columns: 1.25fr 1fr 1.25fr 2fr 2.5fr;
       .cell {
         padding: 12px;
-        height: 98px;
         strong {
           font-weight: 700;
           font-size: 12px;
@@ -157,21 +161,6 @@
         display: block;
       }
     }
-    .clinicalTrials {
-      .relationship {
-        text-align: center;
-      }
-      .link {
-        a {
-          display: flex;
-          align-items: center;
-        }
-        svg {
-          margin-left: 4px;
-          width: $s;
-        }
-      }
-    }
     &>div:nth-child(odd){
       background-color: $lightGray;
     }
@@ -183,17 +172,23 @@
         background-color: $lightGray;
       }
     }
+    .link a {
+      justify-content: center;
+    }
+    .url, .link a {
+      display: flex;
+      align-items: flex-start;
+      svg {
+        margin-left: 4px;
+        width: $s;
+        height: $s;
+      }
+    }
     .url {
       font-size: 12px;
       font-weight: 700;
       text-decoration: none;
       color: $darkGray;
-      display: flex;
-      align-items: center;
-      svg {
-        margin-left: 4px;
-        width: $s;
-      }
     }
   }
   .pValueTable, .otherTable {
