@@ -91,7 +91,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
 
       setSources(displayedSources);
     }
-  }, [currentEvidence, isOpen])
+  }, [currentEvidence, isOpen, isAll])
 
   // Handles direct page click
   const handlePageClick = useCallback((event) => {
