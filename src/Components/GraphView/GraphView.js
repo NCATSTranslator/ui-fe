@@ -63,6 +63,7 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
           'border-width': '2px',
           'text-wrap': 'wrap',
           'text-max-width': '190px',
+          'font-weight': 'bold'
         }
       },
       {
@@ -77,7 +78,6 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
         selector: `[id = '${dataObj.subjectId}']`,
         style: {
           'background-color': '#fbaf00',
-          'color': '#fff',
           'border-width': '0px',
         }
       },
