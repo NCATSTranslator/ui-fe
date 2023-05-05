@@ -34,10 +34,12 @@ export const layoutList = {
 export const resultToCytoscape = (result, summary) => {
   const makeNode = (n, name) =>
   {
+    const height = (name.length) < 40 ? 40 : name.length + 20;
     return {
       data: {
         id: n,
-        label: name
+        label: name,
+        height: height
       }
     };
   }
