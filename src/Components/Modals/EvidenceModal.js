@@ -91,7 +91,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
 
       setSources(displayedSources);
     }
-  }, [currentEvidence, isOpen])
+  }, [currentEvidence, isOpen, isAll])
 
   // Handles direct page click
   const handlePageClick = useCallback((event) => {
@@ -235,28 +235,30 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
               <div heading="Clinical Trials">
                 <div className={`${styles.tableBody} ${styles.clinicalTrials}`}>
                   <div className={`${styles.tableHead}`}>
-                    <div className={`${styles.head} ${styles.link}`}>Link</div>
                     <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
+                    <div className={`${styles.head} ${styles.link}`}>Link</div>
                   </div>
-                  {
-                    clinicalTrials.current.map((item, i)=> {
-                      return (
-                        <div className={styles.evidenceItem} key={i}>
-                          <div className={`${styles.cell} ${styles.link} link`}>
-                            {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
+                  <div className={styles.evidenceItems}>
+                    {
+                      clinicalTrials.current.map((item, i)=> {
+                        return (
+                          <div className={styles.evidenceItem} key={i}>
+                            <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                              {
+                                item.edge &&
+                                <span>
+                                  <span>{item.edge.subject}</span><strong>{item.edge.predicates[0]}</strong><span>{item.edge.object}</span>
+                                </span>
+                              }
+                            </span>
+                            <div className={`${styles.cell} ${styles.link} link`}>
+                              {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
+                            </div>
                           </div>
-                          <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                            {
-                              item.edge &&
-                              <span>
-                                <span>{item.edge.subject}</span><strong>{item.edge.predicates[0]}</strong><span>{item.edge.object}</span>
-                              </span>
-                            }
-                          </span>
-                        </div>
-                      )
-                    })
-                  }
+                        )
+                      })
+                    }
+                  </div>
                 </div>
               </div>
             }
@@ -413,6 +415,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                             <span className={`${styles.cell} ${styles.link} ${styles.sourceItem}`}>
                               <a key={i} href={url} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
                                 {url}
+                                <ExternalLink/>
                               </a>
                             </span>
                           </div>

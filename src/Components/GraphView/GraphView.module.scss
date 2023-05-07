@@ -6,6 +6,18 @@
   margin: 0;
   border: 1px solid $midGray;
   border-radius: 5px;
+  position: relative;
+}
+
+.graphControls {
+  position: absolute;
+  top: $s;
+  right: $s;
+  z-index: 100;
+  border-radius: $defaultBorderRadius;
+  button {
+    margin: 0 0 0 $s;
+  }
 }
 
 .sidebar {
