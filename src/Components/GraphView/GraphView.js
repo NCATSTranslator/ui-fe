@@ -7,6 +7,7 @@ import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
 import { useEffect } from 'react';
+import { cloneDeep } from 'lodash';
 
 /**
 * Resets the cytoscape viewport to the default view.
@@ -67,7 +68,7 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
         }
       },
       {
-        selector: `[id = '${dataObj.objectId}']`,
+        selector: `[id = '${dataObj.objectId}'], .isNotSource`,
         style: {
           'background-color': '#2d5492',
           'color': '#fff',
@@ -120,6 +121,7 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
 
   cy.unbind('vclick');
   cy.bind('vclick', 'node', (ev, formattedResults)=>dataObj.handleNodeClick(ev, formattedResults, dataObj.graph));
+  cy.bind('vclick', 'edge', (ev)=>console.log(ev.target.data()));
 
   // when background is clicked, remove highlight and hide classes from all elements
   cy.bind('click', (ev) => {
@@ -134,10 +136,42 @@ const initCytoscapeInstance = (result, summary, dataObj) => {
     }
   });
 
+  // add class for nodes that are targets but aren't the main result's target 
+  for(const node of cy.elements('node')) {
+    if(node.data('isSourceCount') === 0) {
+      node.addClass('isNotSource')
+    }
+  }
+
   // Set bounds of zoom
   cy.maxZoom(4.5);
   cy.minZoom(.075);
   return cy;
+}
+
+/**
+* Given a graph object, returns a filtered graph object with only one edge per source/target relationship  
+* @param {Object} graph - An object with properties containing two arrays, nodes and edges.
+* @returns {Object} - A new graph object with only one edge per source/target relationship.
+*/
+const getGraphWithoutExtraneousPaths = (graph) => {
+  let newGraph = {nodes: cloneDeep(graph.nodes), edges:[]};
+
+  for(const edge of graph.edges) {
+    // console.log("og edge", edge);
+    let addEdge = true;
+    for(const newEdge of newGraph.edges) {
+      // console.log('new edge:', newEdge)
+      if(newEdge.data.source === edge.data.source && newEdge.data.target === edge.data.target) {
+        addEdge = false;
+      }
+    }
+    if(addEdge) {
+      // console.log('adding edge:', edge);
+      newGraph.edges.push(cloneDeep(edge));
+    }
+  }
+  return newGraph;
 }
 
 const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}) => {
@@ -211,7 +245,17 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
     ev.cy.elements().removeClass(excludedClass)
     hideElement(ev.cy.elements());
 
-    const paths = findPaths(subjectId.current, objectId.current, graph);
+    const objectIds = new Set();
+    for(const node of ev.cy.elements('node')) {
+      if(node.data('isSourceCount') === 0) {
+        objectIds.add(node.data('id'));
+      }
+    }
+
+    let newGraph = getGraphWithoutExtraneousPaths(graph);
+
+    // console.log(newGraph.edges)
+    const paths = findPaths(subjectId.current, objectIds, newGraph);
     
     // Handle excluded nodes and a lack of selected nodes in a path
     paths.forEach((path) => {
