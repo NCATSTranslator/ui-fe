@@ -158,16 +158,13 @@ const getGraphWithoutExtraneousPaths = (graph) => {
   let newGraph = {nodes: cloneDeep(graph.nodes), edges:[]};
 
   for(const edge of graph.edges) {
-    // console.log("og edge", edge);
     let addEdge = true;
     for(const newEdge of newGraph.edges) {
-      // console.log('new edge:', newEdge)
       if(newEdge.data.source === edge.data.source && newEdge.data.target === edge.data.target) {
         addEdge = false;
       }
     }
     if(addEdge) {
-      // console.log('adding edge:', edge);
       newGraph.edges.push(cloneDeep(edge));
     }
   }
@@ -254,8 +251,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
 
     let newGraph = getGraphWithoutExtraneousPaths(graph);
 
-    // console.log(newGraph.edges)
-    const paths = findPaths(subjectId.current, objectIds, newGraph);
+    let paths = findPaths(subjectId.current, objectIds, newGraph);
     
     // Handle excluded nodes and a lack of selected nodes in a path
     paths.forEach((path) => {
