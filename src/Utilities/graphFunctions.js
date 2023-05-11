@@ -2,12 +2,6 @@ import cytoscape from 'cytoscape';
 import { cloneDeep } from 'lodash';
 
 export const layoutList = {
-  breadthfirst: {
-    name: 'breadthfirst', spacingFactor: 1.1, avoidOverlap: true, directed: true
-  },
-  dagre: {
-    name: 'dagre', spacingFactor: 1.1
-  },
   klay: {
     name: 'klay', spacingFactor: 1.3, klay:{direction: 'RIGHT', edgeSpacingFactor: .1}, 
     ready: (ev)=>{ 
@@ -16,6 +10,12 @@ export const layoutList = {
         ev.cy.center(); 
       }
     }
+  },
+  breadthfirst: {
+    name: 'breadthfirst', spacingFactor: 1.1, avoidOverlap: true, directed: true
+  },
+  dagre: {
+    name: 'dagre', spacingFactor: 1.1
   },
   random: {
     name: 'random'
