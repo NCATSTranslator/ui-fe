@@ -36,6 +36,7 @@
   .tableItem {
     margin-bottom: $m;
     position: relative;
+    z-index: 10;
     .pathContainer, .name, .target {
       line-height: 17.5px;
       border-radius: $defaultBorderRadius;

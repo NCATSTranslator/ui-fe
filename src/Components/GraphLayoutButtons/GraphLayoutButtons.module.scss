@@ -1,0 +1,23 @@
+@import "../../Assets/Styles/variables";
+
+.layoutContainer {
+  padding-bottom: $s;
+}
+
+.layoutButton {
+  background-color: $white;
+  color: $darkGray;
+  transition: all .25s ease;
+  margin: 0 $xs $xs 0;
+  &.active {
+    background-color: $blueTwo;
+    color: $white;
+  }
+}
+
+.layoutHeader {
+  color: $black;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: $xs;
+}
