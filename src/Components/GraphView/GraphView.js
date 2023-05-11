@@ -8,7 +8,7 @@ import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
 import { useEffect } from 'react';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, uniqWith, isEqual } from 'lodash';
 import GraphLayoutButtons from '../GraphLayoutButtons/GraphLayoutButtons';
 
 const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}) => {
@@ -102,7 +102,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
     }
     
     // Handle excluded nodes and a lack of selected nodes in a path
-    paths.forEach((path) => {
+    for(const path of paths) {
       let hasSelectedNode = false;
       let hasExcludedNode = false;
       for(const nodeId of selectedNodes.current) {
@@ -113,12 +113,12 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
         if(path.includes(nodeId))
           hasExcludedNode = true;
       }
-      // If a path has no selected nodes, or has an excluded node, remove it from the list 
-      if(!hasSelectedNode || hasExcludedNode) 
+      // If a path has no selected nodes, or has an excluded node, 
+      // remove it from the list and move on to the next path
+      if(!hasSelectedNode || hasExcludedNode) {
         paths.delete(path);
-    })
-
-    paths.forEach((path) => {
+        continue;
+      }
       for(const nodeId of path) {
         let node = ev.cy.getElementById(nodeId)
         highlightElement(node)
@@ -127,7 +127,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
             highlightElement(edge)
         }
       }
-    })
+    }
 
     for(const nodeId of excludedNodes.current) {
       ev.cy.getElementById(nodeId).addClass('excluded');
