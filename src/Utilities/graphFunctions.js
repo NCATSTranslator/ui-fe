@@ -133,8 +133,6 @@ export const resultToCytoscape = (result, summary) => {
  */
 export const findPaths = (start, ends, graph) => {
 
-  console.log('findPaths')
-
   let paths = {};
   let stack = [[start, [start]]];
 
