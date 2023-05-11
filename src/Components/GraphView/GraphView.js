@@ -8,7 +8,7 @@ import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
 import { useEffect } from 'react';
-import { cloneDeep, uniqWith, isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 import GraphLayoutButtons from '../GraphLayoutButtons/GraphLayoutButtons';
 
 const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}) => {
@@ -156,7 +156,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
       objectId: objectId.current
     }
     return initCytoscapeInstance(cytoReqDataObject)
-  }, [result, rawResults, graphRef, graph, currentLayout, active, clearSelectedPaths, handleNodeClick]);
+  }, [graphRef, graph, currentLayout, active, clearSelectedPaths, handleNodeClick]);
 
   useEffect(() => {
     return () => {
