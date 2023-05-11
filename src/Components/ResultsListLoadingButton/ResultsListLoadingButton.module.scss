@@ -1,0 +1,53 @@
+@import "../../Assets/Styles/variables";
+
+.loadingButtonContainer {
+  grid-column: 2/3;
+  text-align: center;
+  .refreshDisclaimer {
+    font-size: 12px;
+    margin-top: $xs;
+    color: $darkGray;
+    text-align: center;
+  }
+}
+.loadingButtonIcon, .loadingIcon {
+  width: 24px;
+  height: 24px;
+  -webkit-animation:spin 2s linear infinite;
+  -moz-animation:spin 2s linear infinite;
+  animation:spin 2s linear infinite;
+  margin-right: 10px;
+}
+.loadingIcon {
+  width: 48px;
+  height: 48px;
+}
+.loadingButton {
+  color: $purpleOne;
+  background-color: transparent;
+  pointer-events: none;
+  box-shadow: none;
+  cursor: default;
+  margin-bottom: 0;
+  &.active {
+    cursor: pointer;
+    pointer-events: all;
+  }
+  &:hover {
+    text-decoration: underline;
+    box-shadow: none;
+  }
+}
+
+@-moz-keyframes spin {
+  100% { -moz-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+  100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+  100% {
+      -webkit-transform: rotate(360deg);
+      transform:rotate(360deg);
+  }
+}

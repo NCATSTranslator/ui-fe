@@ -4,7 +4,6 @@ import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
-import ShareModal from "../Modals/ShareModal";
 import Select from "../FormFields/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import { useSelector } from 'react-redux';
@@ -18,17 +17,13 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHigh
 import { getSummarizedResults, findStringMatch } from "../../Utilities/resultsFunctions";
 import { handleFetchErrors } from "../../Utilities/utilities";
 import { cloneDeep, isEqual } from "lodash";
-import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
 import Tooltip from '../Tooltip/Tooltip';
-import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
-import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
-import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
-import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
 import { unstable_useBlocker as useBlocker } from "react-router";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
-import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter,
-  facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
+import { isFacet, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
+import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
+import ResultsListHeader from "../ResultsListHeader/ResultsListHeader";
 
 const ResultsList = ({loading}) => {
 
@@ -588,22 +583,6 @@ const ResultsList = ({loading}) => {
     handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current)
   }
 
-  // Output jsx for selected filters
-  const getSelectedFilterDisplay = (filter) => {
-    let filterDisplay;
-    if (isEvidenceFilter(filter)) {
-      filterDisplay = <div>Minimum Evidence: <span>{filter.value}</span></div>;
-    } else if (isTextFilter(filter)) {
-      filterDisplay = <div>String: <span>{filter.value}</span></div>;
-    } else if (isFdaFilter(filter)) {
-      filterDisplay = <div><span>FDA Approved</span></div>;
-    } else if (isFacet(filter)) {
-      filterDisplay = <div>Tag:<span> {filter.value}</span></div>;
-    }
-
-    return filterDisplay;
-  }
-
   const handleClearAllFilters = (asFilters, rResults, oResults) => {
     setActiveFilters([]);
     handleUpdateResults([], asFilters, rResults, oResults, false, currentSortString.current);
@@ -614,48 +593,6 @@ const ResultsList = ({loading}) => {
     handleNewResults(freshRawResults);
     // Set freshRawResults back to null
     setFreshRawResults(null)
-  }
-
-  const displayLoadingButton = (
-    handleResultsRefresh,
-    styles,
-    isFetchingARAStatus,
-    loadingIcon,
-    ResultsAvailableIcon,
-    showDisclaimer) => {
-
-    if(freshRawResults === null && (isFetchingARAStatus || isFetchingResults)) {
-      return(
-        <div className={styles.loadingButtonContainer}>
-          <button className={`${styles.loadingButton} ${styles.inactive}`}>
-            <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-            Calculating
-          </button>
-        </div>
-      )
-    }
-
-    if(freshRawResults !== null) {
-      return (
-        <div className={styles.loadingButtonContainer}>
-          <button onClick={()=>{handleResultsRefresh()}} className={`${styles.loadingButton} ${styles.active}`}>
-            {
-              (isFetchingARAStatus) &&
-              <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-            }
-            {
-              !isFetchingARAStatus &&
-              ResultsAvailableIcon
-            }
-            Load New Results
-          </button>
-          {
-            showDisclaimer &&
-            <p className={styles.refreshDisclaimer}>Please note that refreshing this page may cause the order of answers to change.<br/>Results you have already viewed may also be updated with new data.</p>
-          }
-        </div>
-      )
-    }
   }
 
   return (
@@ -697,65 +634,29 @@ const ResultsList = ({loading}) => {
                 activeFilters={activeFilters}
                 availableTags={availableTags}
               />
-              <div className={styles.resultsHeader}>
-                <div className={styles.top}>
-                  <div>
-                    <h5>Results</h5>
-                    {
-                      formattedResults.length !== 0 &&
-                      <p className={styles.resultsCount}>
-                        Showing <span className={styles.range}>
-                          <span className={styles.start}>{itemOffset + 1}</span>
-                          -
-                          <span>{endResultIndex}</span>
-                        </span> of
-                        <span className={styles.count}> {formattedResults.length} </span>
-                        {
-                          (formattedResults.length !== originalResults.current.length) &&
-                          <span className={styles.total}>({originalResults.current.length}) </span>
-                        }
-                        <span> Results</span>
-                      </p>
-                    }
-                  </div>
-                  <div className={styles.right}>
-                    {
-                      displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingIcon, <ResultsAvailableIcon/>, false)
-                    }
-                    {
-                      !isFetchingARAStatus && !isFetchingResults &&
-                      <CompleteIcon/>
-                    }
-                    <button
-                      className={styles.shareButton}
-                      onClick={()=>{setShareModalOpen(true)}}
-                      >
-                        <ShareIcon/>
-                    </button>
-                    <ShareModal
-                      isOpen={shareModalOpen}
-                      onClose={()=>setShareModalOpen(false)}
-                      qid={currentQueryID}
-                    />
-
-                  </div>
-                </div>
-                {
-                  activeFilters.length > 0 &&
-                  <div className={styles.activeFilters}>
-                    {
-                      activeFilters.map((activeFilter, i)=> {
-                        return(
-                          <span key={i} className={`${styles.filterTag} ${activeFilter.type}`}>
-                            { getSelectedFilterDisplay(activeFilter) }
-                            <span className={styles.close} onClick={()=>{handleFilter(activeFilter)}}><CloseIcon/></span>
-                          </span>
-                        )
-                      })
-                    }
-                  </div>
-                }
-              </div>
+              <ResultsListHeader
+                data={{
+                  formattedResultsLength: formattedResults.length,
+                  originalResultsLength: originalResults.current.length,
+                  itemOffset: itemOffset,
+                  endResultIndex: endResultIndex,
+                  activeFilters: activeFilters,
+                  handleFilter: handleFilter,
+                  shareModalOpen: shareModalOpen,
+                  setShareModalOpen: setShareModalOpen,
+                  currentQueryID: currentQueryID
+                }}
+                loadingButtonData={{
+                  handleResultsRefresh: handleResultsRefresh,
+                  isFetchingARAStatus: isFetchingARAStatus,
+                  isFetchingResults: isFetchingResults,
+                  showDisclaimer: false,
+                  containerClassName: styles.loadingButtonContainer,
+                  buttonClassName: styles.loadingButton,
+                  hasFreshResults: (freshRawResults !== null)
+                }}
+              />
+              
               <div className={styles.resultsTableContainer}>
                 <div className={styles.resultsTable}>
                   <div className={styles.tableBody}>
@@ -863,10 +764,18 @@ const ResultsList = ({loading}) => {
                     />
                   </div>
                 }
+                <ResultsListLoadingButton
+                  data={{
+                    handleResultsRefresh: handleResultsRefresh,
+                    isFetchingARAStatus: isFetchingARAStatus,
+                    isFetchingResults: isFetchingResults,
+                    showDisclaimer: true,
+                    containerClassName: styles.loadingButtonContainer,
+                    buttonClassName: styles.loadingButton,
+                    hasFreshResults: (freshRawResults !== null)
+                  }}
+                />
               </div>
-              {
-                displayLoadingButton(handleResultsRefresh, styles, isFetchingARAStatus, loadingIcon, <ResultsAvailableIcon/>, true)
-              }
             </>
           }
         </div>

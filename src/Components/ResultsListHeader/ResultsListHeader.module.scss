@@ -1,0 +1,67 @@
+@import "../../Assets/Styles/variables";
+
+.resultsHeader {
+  grid-column: 2/3;
+  padding-top: $s;
+  .top {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .right {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.shareButton {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  position: relative;
+  margin: 0 0 0 20px;
+  svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-right: 0;
+    path {
+      fill: $white;
+    }
+  }
+}
+
+.activeFilters {
+  margin: 0 0 30px;
+  .filterTag {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: $s;
+    padding: 7px 4px 7px 12px;
+    font-size: 14px;
+    line-height: 1;
+    box-shadow: $dropShadow;
+    transition: $defaultBoxShadowAnim;
+    border-radius: $defaultBorderRadius;
+    span {
+      font-weight: 700;
+      color: $black;
+    }
+    .close {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+    &:hover {
+      box-shadow: $dropShadowHover;
+      cursor:default;
+    }
+  }
+}

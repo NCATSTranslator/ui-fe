@@ -109,79 +109,8 @@
       }
     }
   }
-  .loadingButtonIcon, .loadingIcon {
-    width: 24px;
-    height: 24px;
-    -webkit-animation:spin 2s linear infinite;
-    -moz-animation:spin 2s linear infinite;
-    animation:spin 2s linear infinite;
-    margin-right: 10px;
-  }
-  .loadingIcon {
-    width: 48px;
-    height: 48px;
-  }
-  .loadingButtonContainer circle, .loadingButtonContainer path {
-    stroke: $white;
-  }
-  .loadingButton {
-    color: $purpleOne;
-    background-color: transparent;
-    pointer-events: none;
-    box-shadow: none;
-    cursor: default;
-    margin-bottom: 0;
-    &.active {
-      cursor: pointer;
-      pointer-events: all;
-    }
-    &:hover {
-      text-decoration: underline;
-      box-shadow: none;
-    }
-  }
-  .shareButton {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    position: relative;
-    margin: 0 0 0 20px;
-    svg {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      margin-right: 0;
-      path {
-        fill: $white;
-      }
-    }
-  }
 }
 
-@-moz-keyframes spin {
-  100% { -moz-transform: rotate(360deg); }
-}
-@-webkit-keyframes spin {
-  100% { -webkit-transform: rotate(360deg); }
-}
-@keyframes spin {
-  100% {
-      -webkit-transform: rotate(360deg);
-      transform:rotate(360deg);
-  }
-}
-.loadingButtonContainer {
-  margin-top: $m;
-  grid-column: 2/3;
-  text-align: center;
-  .refreshDisclaimer {
-    font-size: 12px;
-    margin-top: $xs;
-    color: $darkGray;
-    text-align: center;
-  }
-}
 .pagination {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -249,56 +178,9 @@
   margin-right: auto;
 }
 
-.resultsHeader {
-  grid-column: 2/3;
-  padding-top: $s;
-  .top {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .right {
-    display: flex;
-    align-items: center;
-    .loadingButtonContainer {
-      margin-top: 0;
-      .loadingButton {
-        margin-bottom: 0;
-      }
-    }
-  }
-}
-
-.activeFilters {
-  margin: 0 0 30px;
-  .filterTag {
-    display: inline-flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-right: $s;
-    padding: 7px 4px 7px 12px;
-    font-size: 14px;
-    line-height: 1;
-    box-shadow: $dropShadow;
-    transition: $defaultBoxShadowAnim;
-    border-radius: $defaultBorderRadius;
-    span {
-      font-weight: 700;
-      color: $black;
-    }
-    .close {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      &:hover {
-        cursor: pointer;
-      }
-    }
-    &:hover {
-      box-shadow: $dropShadowHover;
-      cursor:default;
-    }
+.loadingButtonContainer {
+  margin-top: 0;
+  .loadingButton {
+    margin-bottom: 0;
   }
 }
