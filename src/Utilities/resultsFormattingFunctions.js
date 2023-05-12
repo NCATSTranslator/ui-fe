@@ -1,8 +1,13 @@
 import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity } from './utilities';
 import { cloneDeep } from "lodash";
 
-// Given an array of paths and results, return an array of publications for those paths
-export const getFormattedEvidence = (paths, results) => {
+/**
+ * Formats the evidence information for the provided paths by extracting and organizing publications and sources.
+ * @param {Array} paths - The paths for which evidence is being formatted.
+ * @param {Object} results - The results object containing publication and source information.
+ * @returns {Object} The formatted evidence object containing publications, sources, distinct sources, and length.
+*/
+const getFormattedEvidence = (paths, results) => {
   const formatEvidenceObjs = (objs, getId, item, constructor, container) => {
     for (const obj of objs) {
       const id = getId(obj);
@@ -73,23 +78,40 @@ export const getFormattedEvidence = (paths, results) => {
   };
 }
 
-// search the list of publications for a particular id, then return that publication object if found
-export const getPubByID = (id, results) => {
+/**
+ * Retrieves a publication from the results object based on its ID and returns a new publication object.
+ * @param {string} id - The ID of the publication to retrieve.
+ * @param {Object} results - The results object containing publication information.
+ * @returns {Object} The new publication object.
+*/
+const getPubByID = (id, results) => {
   if(results.publications[id] === undefined)
     return {};
 
   return cloneDeep(results.publications[id]);
 }
 
-// search the list of nodes for a particular curie, then return that node object if found
-export const getNodeByCurie = (curie, results) => {
+/**
+ * Retrieves a node from the results object based on its CURIE (Compact URI) and returns a new node object.
+ * @param {string} curie - The CURIE of the node to retrieve.
+ * @param {Object} results - The results object containing node information.
+ * @returns {Object} The new node object.
+*/
+const getNodeByCurie = (curie, results) => {
   if(results.nodes[curie] === undefined)
     return {};
 
   return cloneDeep(results.nodes[curie]);
 }
-// search the list of edges for a particular id, then return that edge object if found
-export const getEdgeByID = (id, results) => {
+
+/**
+ * Retrieves an edge from the results object based on its ID and returns a new edge object
+ * with additional information about the edge's object and subject nodes.
+ * @param {string} id - The ID of the edge to retrieve.
+ * @param {Object} results - The results object containing edge information.
+ * @returns {Object} The new edge object with object and subject nodes information.
+*/
+const getEdgeByID = (id, results) => {
   if(results.edges[id] === undefined)
     return {};
   let newEdge = cloneDeep(results.edges[id]);
@@ -100,6 +122,12 @@ export const getEdgeByID = (id, results) => {
   return newEdge;
 }
 
+/**
+ * Checks for node uniformity between two paths by comparing the names of nodes in each path.
+ * @param {Array} pathOne - The first path to compare.
+ * @param {Array} pathTwo - The second path to compare.
+ * @returns {boolean} True if the nodes match, false otherwise.
+*/
 const checkForNodeUniformity = (pathOne, pathTwo) => {
   // if the lengths of the paths are different, they cannot have the same nodes
   if(pathOne.length !== pathTwo.length)
@@ -119,7 +147,14 @@ const checkForNodeUniformity = (pathOne, pathTwo) => {
   return nodesMatch;
 }
 
-export const getFormattedPaths = (rawPathIds, results) => {
+/**
+ * Formats the raw path IDs into an array of formatted paths with node and edge information.
+ * The formatted paths are extracted from the provided results object.
+ * @param {Array} rawPathIds - The raw path IDs to be formatted.
+ * @param {Object} results - The results object containing paths and node/edge information.
+ * @returns {Array} The formatted paths array.
+*/
+const getFormattedPaths = (rawPathIds, results) => {
   let formattedPaths = [];
   for(const id of rawPathIds) {
     let formattedPath = cloneDeep(results.paths[id]);
@@ -162,6 +197,12 @@ export const getFormattedPaths = (rawPathIds, results) => {
   return formattedPaths;
 }
 
+/**
+ * Compresses paths in the graph by merging consecutive paths with identical nodes.
+ * The compressed paths are returned as a new array.
+ * @param {Array} graph - The graph containing paths to be compressed.
+ * @returns {Array} The compressed paths.
+*/
 const getCompressedPaths = (graph) => {
   let newCompressedPaths = [];
   let pathToDisplay = null
@@ -213,7 +254,13 @@ const getCompressedPaths = (graph) => {
   return newCompressedPaths;
 }
 
-// Take raw results and return properly summarized results
+/**
+ * Generates summarized results from the given results array. It processes each individual result item
+ * to extract relevant information such as node names, descriptions, FDA approval status, paths, evidence,
+ * scores, and tags. The summarized results are returned as an array.
+ * @param {Array} results - The results array to be summarized.
+ * @returns {Array} The summarized results array.
+*/
 export const getSummarizedResults = (results) => {
   if (results === null || results === undefined)
     return [];
@@ -255,41 +302,4 @@ export const getSummarizedResults = (results) => {
   }
 
   return newSummarizedResults;
-}
-
-// Function to search given element for string match, used in string filter
-// Checks result name, result description, all node names and all predicates
-// Does NOT include node types (Protein, Biological Entity, etc.)
-export const findStringMatch = (element, value, pathRanks) => {
-  const formattedValue = value.toLowerCase();
-  let foundMatch = !value ||
-    !element ||
-    element.name.toLowerCase().includes(formattedValue) ||
-    (element.description && element.description.toLowerCase().includes(formattedValue));
-  for (let i = 0; i < element.compressedPaths.length; ++i) {
-    const path = element.compressedPaths[i];
-    for (let item of path.path.subgraph) {
-      if ((item.name && item.name.toLowerCase().includes(formattedValue)) ||
-          (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))) {
-        // Its confusing to update the pathRanks here, but it is more efficient
-        pathRanks[i].rank -= 1;
-        foundMatch = true;
-        break;
-      }
-    }
-  }
-
-  return foundMatch;
-}
-
-export const removeHighlights = (elements, value) => {
-  for(const element of elements) {
-    if(element.highlightedName && element.highlightedName.toLowerCase().includes(value.toLowerCase().trim())) {
-      element.highlightedName = null;
-    }
-    if(element.highlightedDescription && element.highlightedDescription.toLowerCase().includes(value.toLowerCase().trim())) {
-      element.highlightedDescription = null;
-    }
-  }
-  return elements;
 }
