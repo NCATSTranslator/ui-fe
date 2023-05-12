@@ -178,9 +178,6 @@
   margin-right: auto;
 }
 
-.loadingButtonContainer {
-  margin-top: 0;
-  .loadingButton {
-    margin-bottom: 0;
-  }
+.bottomLoadingButtonContainer {
+  margin-top: $xl;
 }

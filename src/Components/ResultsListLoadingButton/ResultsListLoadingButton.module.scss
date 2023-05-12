@@ -1,26 +1,26 @@
 @import "../../Assets/Styles/variables";
 
 .loadingButtonContainer {
-  grid-column: 2/3;
   text-align: center;
   .refreshDisclaimer {
-    font-size: 12px;
+    font-size: $captionSize;
     margin-top: $xs;
     color: $darkGray;
     text-align: center;
   }
 }
-.loadingButtonIcon, .loadingIcon {
-  width: 24px;
-  height: 24px;
+.complete, .loadingButtonIcon {
+  height: $m;
+  width: $m;
+}
+.complete {
+  margin: 0 auto;
+}
+.loadingButtonIcon {
   -webkit-animation:spin 2s linear infinite;
   -moz-animation:spin 2s linear infinite;
   animation:spin 2s linear infinite;
   margin-right: 10px;
-}
-.loadingIcon {
-  width: 48px;
-  height: 48px;
 }
 .loadingButton {
   color: $purpleOne;

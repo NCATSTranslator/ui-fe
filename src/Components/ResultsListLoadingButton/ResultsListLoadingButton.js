@@ -12,7 +12,9 @@ const ResultsListLoadingButton = ({data}) => {
     <div className={`${containerClassName} ${styles.loadingButtonContainer}`}>
       {
         (!data.isFetchingARAStatus && !data.isFetchingResults) &&
-        <CompleteIcon/>
+        <div className={styles.complete}>
+          <CompleteIcon/>
+        </div>
       }
       {
         (!data.hasFreshRawResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&

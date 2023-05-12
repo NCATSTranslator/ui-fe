@@ -770,7 +770,7 @@ const ResultsList = ({loading}) => {
                     isFetchingARAStatus: isFetchingARAStatus,
                     isFetchingResults: isFetchingResults,
                     showDisclaimer: true,
-                    containerClassName: styles.loadingButtonContainer,
+                    containerClassName: styles.bottomLoadingButtonContainer,
                     buttonClassName: styles.loadingButton,
                     hasFreshResults: (freshRawResults !== null)
                   }}
