@@ -45,6 +45,17 @@
     margin-bottom: 0;
     padding: 4px 12px;
     cursor: pointer;
+    .link {
+      display: inline-flex;
+      align-items: center;
+      float: right;
+      font-size: 14px;
+      svg {
+        margin-left: 4px;
+        width: 18px;
+        height: 18px;
+      }
+    }
     &:first-child {
       padding: 8px 12px 4px;
       border-radius: $defaultBorderRadius $defaultBorderRadius 0 0;

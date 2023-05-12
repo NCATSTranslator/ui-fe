@@ -1,6 +1,7 @@
 import styles from './Autocomplete.module.scss';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import { useCallback, useState, useEffect } from 'react';
+import { getMoreInfoLink } from '../../Utilities/utilities';
 
 const Autocomplete = ({isLoading, items, handleItemClick}) => {
 
@@ -56,7 +57,13 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
         <div>
           {
             items.slice(0, numberVisibleItems).map((item, i) => {
-              return <p key={i} className={styles.item} onClick={()=>handleItemClick(item)}>{item.label}{item.match ? ` (${item.match})` : ''}</p>
+              return (
+                  <div key={i} className={styles.item}>
+                    <span onClick={()=>handleItemClick(item)}>
+                      {item.label}{item.match ? ` (${item.match})` : ''}
+                    </span>
+                    {getMoreInfoLink(item.id, styles.link)}
+                  </div>)
             })
           }
           {
