@@ -14,7 +14,9 @@ import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
   sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag, 
   filterCompare } from "../../Utilities/sortingFunctions";
-import { getSummarizedResults, findStringMatch } from "../../Utilities/resultsFunctions";
+import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
+import { findStringMatch, handleResultsError, handleEvidenceModalClose,
+  handleResultsRefresh, handleClearAllFilters } from "../../Utilities/resultsInteractionFunctions";
 import { handleFetchErrors } from "../../Utilities/utilities";
 import { cloneDeep, isEqual } from "lodash";
 import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
@@ -86,9 +88,7 @@ const ResultsList = ({loading}) => {
   const originalResults = useRef([]);
   // Obj, fresh results from the BE to replace existing rawResults
   const [freshRawResults, setFreshRawResults] = useState(null);
-  /*
-    Ref, used to track changes in results
-  */
+  // Ref, used to track changes in results
   const prevRawResults = useRef(rawResults);
   // Array, results formatted by any active filters, sorted by any active sorting
   const [formattedResults, setFormattedResults] = useState([]);
@@ -188,11 +188,6 @@ const ResultsList = ({loading}) => {
       setIsLoading(false);
   }
 
-  const handleResultsError = (errorExists = true) => {
-    setIsError(errorExists);
-    setIsLoading(false);
-  }
-
   // React Query call for status of results
   // eslint-disable-next-line
   const resultsStatus = useQuery('resultsStatus', async () => {
@@ -239,7 +234,7 @@ const ResultsList = ({loading}) => {
       })
       .catch((error) => {
         if(formattedResults.length <= 0) {
-          handleResultsError(true);
+          handleResultsError(true, setIsError, setIsLoading);
           setIsFetchingARAStatus(false);
         }
         if(formattedResults.length > 0) {
@@ -274,7 +269,7 @@ const ResultsList = ({loading}) => {
         setIsFetchingARAStatus(false);
         setIsFetchingResults(false);
         if(formattedResults.length <= 0) {
-          handleResultsError(true);
+          handleResultsError(true, setIsError, setIsLoading);
         }
       }))
       .then(response => response.json())
@@ -406,11 +401,6 @@ const ResultsList = ({loading}) => {
     })
 
     tagSetterMethod(countedTags);
-  }
-
-  // Click handler for the modal close button
-  const handleEvidenceModalClose = () => {
-    setEvidenceOpen(false);
   }
 
   // Click handler for opening the evidence modal and populating the evidence
@@ -583,23 +573,11 @@ const ResultsList = ({loading}) => {
     handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current)
   }
 
-  const handleClearAllFilters = (asFilters, rResults, oResults) => {
-    setActiveFilters([]);
-    handleUpdateResults([], asFilters, rResults, oResults, false, currentSortString.current);
-  }
-
-  const handleResultsRefresh = () => {
-    // Update rawResults with the fresh data
-    handleNewResults(freshRawResults);
-    // Set freshRawResults back to null
-    setFreshRawResults(null)
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <EvidenceModal
         isOpen={evidenceOpen}
-        onClose={()=>handleEvidenceModalClose()}
+        onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
         className="evidence-modal"
         currentEvidence={currentEvidence}
         item={selectedItem}
@@ -630,7 +608,7 @@ const ResultsList = ({loading}) => {
                 formattedCount={formattedResults.length}
                 totalCount={originalResults.current.length}
                 onFilter={handleFilter}
-                onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults.current, originalResults.current)}
+                onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults.current, originalResults.current, setActiveFilters, currentSortString.current, handleUpdateResults)}
                 activeFilters={activeFilters}
                 availableTags={availableTags}
               />
@@ -647,7 +625,7 @@ const ResultsList = ({loading}) => {
                   currentQueryID: currentQueryID
                 }}
                 loadingButtonData={{
-                  handleResultsRefresh: handleResultsRefresh,
+                  handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
                   isFetchingARAStatus: isFetchingARAStatus,
                   isFetchingResults: isFetchingResults,
                   showDisclaimer: false,
@@ -766,7 +744,7 @@ const ResultsList = ({loading}) => {
                 }
                 <ResultsListLoadingButton
                   data={{
-                    handleResultsRefresh: handleResultsRefresh,
+                    handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
                     isFetchingARAStatus: isFetchingARAStatus,
                     isFetchingResults: isFetchingResults,
                     showDisclaimer: true,
