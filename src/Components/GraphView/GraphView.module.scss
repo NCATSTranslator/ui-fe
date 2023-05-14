@@ -17,31 +17,13 @@
   border-radius: $defaultBorderRadius;
   button {
     margin: 0 0 0 $s;
+    color: $white;
+    background-color: $blueTwo;
+    transition: all .25s ease;
   }
-}
-
-.sidebar {
-  padding-bottom: $s;
 }
 
 .cytoscapeContainer {
   width: 100%;
   height: 100%;
-}
-.layoutButton {
-  background-color: $white;
-  color: $darkGray;
-  transition: all .25s ease;
-  margin: 0 $xs $xs 0;
-  &.active {
-    background-color: $blueTwo;
-    color: $white;
-  }
-}
-
-.layoutHeader {
-  color: $black;
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: $xs;
 }
