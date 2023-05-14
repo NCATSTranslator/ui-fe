@@ -7,7 +7,8 @@ import styles from './EvidenceModal.module.scss';
 import ReactPaginate from "react-paginate";
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { capitalizeAllWords } from "../../Utilities/utilities";
-import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh } from '../../Utilities/sortingFunctions';
+import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
+         compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 
@@ -89,6 +90,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
         displayedSources = currentEvidence.distinctSources;
       }
 
+      displayedSources.sort(compareByKeyLexographic('name'));
       setSources(displayedSources);
     }
   }, [currentEvidence, isOpen, isAll])

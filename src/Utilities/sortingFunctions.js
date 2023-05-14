@@ -100,3 +100,7 @@ export const updatePathRankByTag = (result, tag, pathRanks) => {
     }
   });
 }
+
+export const compareByKeyLexographic = (k) => {
+  return (a, b) => { return a[k].localeCompare(b[k]) };
+} 
