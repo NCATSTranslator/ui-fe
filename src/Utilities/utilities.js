@@ -79,13 +79,11 @@ export const getLastPubYear = (pubDate) => {
     date = (splitDate.length === 2)
       ? new Date('1/' + dateString)
       : new Date(splitDate[2], month, splitDate[0]);
+  } else {
+    date = new Date(dateString);
   }
 
-  let lastPubYear = (date !== null)
-    ? date.getFullYear()
-    : date;
-
-  return lastPubYear;
+  return date;
 }
 
 export const getDifferenceInDays = (date2, date1) => {

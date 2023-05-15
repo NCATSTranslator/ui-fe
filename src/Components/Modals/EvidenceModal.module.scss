@@ -26,32 +26,29 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
-      &.source span, &.title span {
-        cursor: pointer;
-      }
       .headSpan {
         padding: 0;
         font-size: 10px;
         font-weight: 700;
         text-transform: uppercase;
         line-height: 1.25;
+        cursor: pointer;
+        position: relative;
+
       }
       &.true, &.false {
-        .headSpan {
-          position: relative;
-          &:after {
-            content: '';
-            width: 0;
-            height: 0;
-            position: absolute;
-            top: 2px;
-            right: -15px;
-            margin-left: 3px;
-            border-top: 0px solid transparent;        
-            border-right: 5px solid transparent;
-            border-bottom: 5px solid $white;
-            border-left: 5px solid transparent;
-          }
+        .headSpan:after {
+          content: '';
+          width: 0;
+          height: 0;
+          position: absolute;
+          top: 2px;
+          right: -15px;
+          margin-left: 3px;
+          border-top: 0px solid transparent;        
+          border-right: 5px solid transparent;
+          border-bottom: 5px solid $white;
+          border-left: 5px solid transparent;
         }
       }
       &.false {
