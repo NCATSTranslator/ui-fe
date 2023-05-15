@@ -83,10 +83,6 @@ export const getLastPubYear = (pubDate) => {
     date = new Date(dateString);
   }
 
-  // let lastPubYear = (date !== null)
-  //   ? date.getFullYear()
-  //   : date;
-
   return date;
 }
 
