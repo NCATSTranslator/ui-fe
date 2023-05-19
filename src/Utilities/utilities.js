@@ -70,6 +70,20 @@ export const capitalizeAllWords = (string) => {
   return newString.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
 }
 
+export const getPubYear = (pubDate, failYear = 0) => {
+  const yearStr = pubDate.match(/[0-9]{4}/g);
+  let year = failYear;
+  if (yearStr !== null) {
+    year = parseInt(yearStr);
+  }
+
+  if (year === NaN) {
+    return failYear;
+  }
+
+  return year;
+}
+
 export const getLastPubYear = (pubDate) => {
   let dateString = pubDate;
   let date = null;

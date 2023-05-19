@@ -8,7 +8,7 @@ import ReactPaginate from "react-paginate";
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { capitalizeAllWords } from "../../Utilities/utilities";
 import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
-         compareByKeyLexographic, sortDateHighLow, sortDateLowHigh } from '../../Utilities/sortingFunctions';
+         compareByKeyLexographic, sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 
@@ -132,13 +132,13 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
         setIsSortedByDate(null);
         break;
       case 'dateLowHigh':
-        sortedPubmedEvidence = sortDateLowHigh(sortedPubmedEvidence);
+        sortedPubmedEvidence = sortDateYearLowHigh(sortedPubmedEvidence);
         setIsSortedByDate(false);
         setIsSortedBySource(null);
         setIsSortedByTitle(null);
         break;
       case 'dateHighLow':
-        sortedPubmedEvidence = sortDateHighLow(sortedPubmedEvidence);
+        sortedPubmedEvidence = sortDateYearHighLow(sortedPubmedEvidence);
         setIsSortedByDate(true);
         setIsSortedBySource(null);
         setIsSortedByTitle(null);
@@ -216,7 +216,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
         amountOfIDsProcessed.current = amountOfIDsProcessed.current + Object.keys(data.results).length;
         if(amountOfIDsProcessed.current >= pubmedEvidence.length) {
           console.log('metadata fetches complete, inserting additional evidence information')
-          setPubmedEvidence(insertAdditionalPubmedData(evidenceToUpdate.current));
+          setPubmedEvidence(sortDateYearHighLow(insertAdditionalPubmedData(evidenceToUpdate.current)));
+          setIsSortedByDate(true);
           fetchedPubmedData.current = true;
           isFetchingPubmedData.current = false;
         }
