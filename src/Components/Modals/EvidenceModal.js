@@ -166,10 +166,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
         if(!element.snippet)
           element.snippet = data[element.id].abstract;
         if(!element.pubdate) {
-          let year = (data[element.id].pub_year) ? data[element.id].pub_year: '';
-          let month = (data[element.id].pub_month !== '-') ? data[element.id].pub_month: '';
-          let day = (data[element.id].pub_day) ? data[element.id].pub_day: '';
-          element.pubdate = `${year} ${month} ${day}`;
+          let year = (data[element.id].pub_year) ? data[element.id].pub_year: 0;
+          element.pubdate = year;
         }
       }
       element.updated = true;
@@ -216,6 +214,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
         amountOfIDsProcessed.current = amountOfIDsProcessed.current + Object.keys(data.results).length;
         if(amountOfIDsProcessed.current >= pubmedEvidence.length) {
           console.log('metadata fetches complete, inserting additional evidence information')
+          // setPubmedEvidence(insertAdditionalPubmedData(evidenceToUpdate.current));
           setPubmedEvidence(sortDateYearHighLow(insertAdditionalPubmedData(evidenceToUpdate.current)));
           setIsSortedByDate(true);
           fetchedPubmedData.current = true;
@@ -341,7 +340,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                                   }
                                 </span>
                                 <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
-                                  {item.pubdate && item.pubdate }
+                                  {item.pubdate && (item.pubdate === 0 ) ? '' : item.pubdate }
                                 </span>
                                 <span className={`${styles.cell} ${styles.source} source`}>
                                   <span>

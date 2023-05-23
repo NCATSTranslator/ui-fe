@@ -1,5 +1,3 @@
-import { getLastPubYear, getPubYear } from "./utilities";
-
 // alphabetical order
 export const sortNameLowHigh = (items, isEvidence) => {
   if(isEvidence)
@@ -56,8 +54,8 @@ export const sortByEntityStrings = (items, strings) => {
 export const sortDateYearLowHigh = (items) => {
   const failYear = 3000; // Ensure all invalid dates are sent to the end
   return items.sort((a, b) => {
-    const aDate = getPubYear(a.pubdate, failYear);
-    const bDate = getPubYear(b.pubdate, failYear);
+    const aDate = (a.pubdate === null) ? failYear : a.pubdate;
+    const bDate = (b.pubdate === null) ? failYear : b.pubdate;
     return (aDate - bDate);
   });
 }
@@ -65,28 +63,10 @@ export const sortDateYearLowHigh = (items) => {
 export const sortDateYearHighLow = (items) => {
   const failYear = 0; // Ensure all invalid dates are sent to the end
   return items.sort((a, b) => {
-    const aDate = getPubYear(a.pubdate, failYear);
-    const bDate = getPubYear(b.pubdate, failYear);
+    const aDate = (a.pubdate === null) ? failYear : a.pubdate;
+    const bDate = (b.pubdate === null) ? failYear : b.pubdate;
     return (bDate - aDate);
   });
-}
-
-export const sortDateLowHigh = (items) => {
-  return items.sort((a, b) => {
-    let aDate = getLastPubYear(a.pubdate);
-    let bDate = getLastPubYear(b.pubdate);
-    return (aDate - bDate);
-    }
-  );
-}
-
-export const sortDateHighLow = (items) => {
-  return items.sort((a, b) => {
-      let aDate = getLastPubYear(a.pubdate);
-      let bDate = getLastPubYear(b.pubdate);
-      return ( bDate - aDate );
-    }
-  );
 }
 
 export const sortByHighlighted = (totalItems, highlightedItems) => {
