@@ -70,22 +70,6 @@ export const capitalizeAllWords = (string) => {
   return newString.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
 }
 
-export const getLastPubYear = (pubDate) => {
-  let dateString = pubDate;
-  let date = null;
-  if(dateString !== null && dateString.includes('/')) {
-    let splitDate = dateString.split('/');
-    let month = splitDate[1] - 1; //Javascript months are 0-11
-    date = (splitDate.length === 2)
-      ? new Date('1/' + dateString)
-      : new Date(splitDate[2], month, splitDate[0]);
-  } else {
-    date = new Date(dateString);
-  }
-
-  return date;
-}
-
 export const getDifferenceInDays = (date2, date1) => {
   const _MS_PER_DAY = 1000 * 60 * 60 * 24;
 
