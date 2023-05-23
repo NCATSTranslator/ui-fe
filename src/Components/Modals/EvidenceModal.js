@@ -214,7 +214,6 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
         amountOfIDsProcessed.current = amountOfIDsProcessed.current + Object.keys(data.results).length;
         if(amountOfIDsProcessed.current >= pubmedEvidence.length) {
           console.log('metadata fetches complete, inserting additional evidence information')
-          // setPubmedEvidence(insertAdditionalPubmedData(evidenceToUpdate.current));
           setPubmedEvidence(sortDateYearHighLow(insertAdditionalPubmedData(evidenceToUpdate.current)));
           setIsSortedByDate(true);
           fetchedPubmedData.current = true;
