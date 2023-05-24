@@ -181,13 +181,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           }
         </div>
         <Suspense fallback={<LoadingBar loading useIcon reducedPadding />}>
-          {/* <GraphView
+          <GraphView
             result={item}
             rawResults={rawResults}
             onNodeClick={handleNodeClick}
             clearSelectedPaths={handleClearSelectedPaths}
             active={isExpanded}
-          /> */}
+          />
         </Suspense>
         <PathView
           paths={formattedPaths}
