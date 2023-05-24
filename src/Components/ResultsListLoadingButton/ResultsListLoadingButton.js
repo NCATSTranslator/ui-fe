@@ -17,14 +17,14 @@ const ResultsListLoadingButton = ({data}) => {
         </div>
       }
       {
-        (!data.hasFreshRawResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&
+        (!data.hasFreshResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&
         <button className={`${buttonClassName} ${styles.loadingButton} ${styles.inactive}`}>
           <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
           Calculating
         </button>
       }
       {
-        (data.hasFreshRawResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&
+        (data.hasFreshResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&
         <>
           <button onClick={data.handleResultsRefresh} className={`${buttonClassName} ${styles.loadingButton} ${styles.active}`}>
             {
