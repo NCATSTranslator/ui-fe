@@ -27,6 +27,7 @@
   border-radius: $defaultBorderRadius;
   background-color: $lightGray;
   box-shadow: $dropShadow;
+  user-select: none;
 }
 
 .graphControls {

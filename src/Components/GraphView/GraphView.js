@@ -12,11 +12,11 @@ import GraphLayoutButtons from '../GraphLayoutButtons/GraphLayoutButtons';
 import navigator from 'cytoscape-navigator';
 import 'cytoscape-navigator/cytoscape.js-navigator.css';
 
-  // initialize 3rd party layouts
-  cytoscape.use(klay);
-  cytoscape.use(avsdf);
-  cytoscape.use(dagre);
-  cytoscape.use(navigator);
+// initialize 3rd party layouts
+cytoscape.use(klay);
+cytoscape.use(avsdf);
+cytoscape.use(dagre);
+cytoscape.use(navigator);
 
 const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}) => {
 
@@ -44,8 +44,6 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
   const graphIdString = `cy-${graphId.current}`;
   const graphNavigatorContainerId = `cy-nav-container-${graphId.current}`;
   
-
-
   /**
   * Highlights the given element by adding the highlightClass and removing the hideClass.
   * @param {object} element - The cytoscape element to be highlighted.
@@ -199,7 +197,14 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
           </button>
         </div>
         <div id={graphIdString} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}></div>
-        <div id={graphNavigatorContainerId} className={styles.graphNavigatorContainer}>
+        <div id={graphNavigatorContainerId} className={styles.graphNavigatorContainer} 
+          onMouseEnter={()=>{
+            document.body.style.overflow = 'hidden';
+          }}
+          onMouseLeave={()=>{
+            document.body.style.overflow = 'auto';
+          }}
+        >
         </div>
       </div>
     </div>
