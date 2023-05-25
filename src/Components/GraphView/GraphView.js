@@ -9,7 +9,6 @@ import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
 import { cloneDeep } from 'lodash';
 import GraphLayoutButtons from '../GraphLayoutButtons/GraphLayoutButtons';
-
 import navigator from 'cytoscape-navigator';
 import 'cytoscape-navigator/cytoscape.js-navigator.css';
 
