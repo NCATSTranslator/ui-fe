@@ -69,7 +69,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           <p className={styles.subTwo}>ATC Classification</p>
           <Alert/>
           <Tooltip id="atc-tooltip">
-              <span className={styles.atcSpan}>The Anatomical Therapeutic Classification (ATC, <a href="https://www.whocc.no/atc_ddd_index/" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a drug classification that categorizes active substances of drugs according to the organ or system where their therapeutic effect occurs.</span>
+            <span className={styles.atcSpan}>The Anatomical Therapeutic Classification (ATC, <a href="https://www.whocc.no/atc_ddd_index/" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a drug classification that categorizes active substances of drugs according to the organ or system where their therapeutic effect occurs.</span>
           </Tooltip>
         </div>
         <p className={styles.caption}>Filter on organ or system where drug's theraputic effect occurs.</p>
@@ -84,7 +84,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             <p className={styles.subTwo}>FDA Status</p>
             <Alert/>
             <Tooltip id="fda-tooltip">
-                <span className={styles.fdaSpan}>Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.</span>
+              <span className={styles.fdaSpan}>Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.</span>
             </Tooltip>
           </div>
       </div>
@@ -98,7 +98,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             <p className={styles.subTwo}>Result Type</p>
             <Alert/>
             <Tooltip id="biolink-tooltip-1">
-                <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
+              <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
             </Tooltip>
           </div>
           <p className={styles.caption}>Show only results that begin with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
@@ -113,8 +113,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           <p className={styles.subTwo}>Node Type</p>
           <Alert/>
           <Tooltip id="biolink-tooltip-2">
-                <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
-            </Tooltip>
+            <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
+          </Tooltip>
           </div>
           <p className={styles.caption}>Show only results that include a node with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
       </div>
@@ -127,6 +127,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           <div className={styles.label} >
             <p className={styles.subTwo}>Reasoning Agent</p>
           </div>
+          <p className={styles.caption}>Filter on specific reasoning agents used to calculate the results.</p>
       </div>
     )
   }
