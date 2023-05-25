@@ -35,6 +35,10 @@ const getFormattedEvidence = (paths, results) => {
       item,
       (id) => {
         const publication = getPubByID(id, results);
+        if(publication.pubdate !== null) {
+          let formattedDate = publication.pubdate.split(' ')
+          publication.pubdate = formattedDate[0];
+        }
         publication.id = id;
         publication.source = '';
         publication.title = '';

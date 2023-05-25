@@ -17,11 +17,13 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
     let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
     let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda:')));
+    let araTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ara:')));
     const newGroupedTags = {
       fda: fdaTags,
       resultType: resultTypeTags,
       nodeType: nodeTypeTags,
-      atc: atcTags
+      atc: atcTags,
+      ara: araTags
     }
     return newGroupedTags;
   }
@@ -119,6 +121,16 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
+  const getAraHeading = () => {
+    return(
+      <div className={styles.labelContainer} >
+          <div className={styles.label} >
+            <p className={styles.subTwo}>Reasoning Agent</p>
+          </div>
+      </div>
+    )
+  }
+
   const getTagHeadingMarkup = (tagType) => {
     let headingToReturn;
     switch(tagType) {
@@ -133,6 +145,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
         break;
       case 'atc':
         headingToReturn = getAtcHeading();
+        break;
+      case 'ara':
+        headingToReturn = getAraHeading();
         break;
       default:
         headingToReturn = '';

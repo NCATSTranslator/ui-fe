@@ -7,7 +7,8 @@ import styles from './EvidenceModal.module.scss';
 import ReactPaginate from "react-paginate";
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { capitalizeAllWords } from "../../Utilities/utilities";
-import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh } from '../../Utilities/sortingFunctions';
+import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
+         compareByKeyLexographic, sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 
@@ -28,6 +29,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
   const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
   const [isSortedByTitle, setIsSortedByTitle] = useState(null);
   const [isSortedBySource, setIsSortedBySource] = useState(null);
+  const [isSortedByDate, setIsSortedByDate] = useState(null);
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
@@ -54,6 +56,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
     setIsLoading(true);
     setIsSortedBySource(null);
     setIsSortedByTitle(null);
+    setIsSortedByDate(null);
     amountOfIDsProcessed.current = 0;
     evidenceToUpdate.current = null;
     fetchedPubmedData.current = false;
@@ -89,6 +92,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
         displayedSources = currentEvidence.distinctSources;
       }
 
+      displayedSources.sort(compareByKeyLexographic('name'));
       setSources(displayedSources);
     }
   }, [currentEvidence, isOpen, isAll])
@@ -107,20 +111,36 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
         sortedPubmedEvidence = sortNameLowHigh(sortedPubmedEvidence, true);
         setIsSortedByTitle(true);
         setIsSortedBySource(null);
+        setIsSortedByDate(null);
         break;
       case 'titleHighLow':
         sortedPubmedEvidence = sortNameHighLow(sortedPubmedEvidence, true);
         setIsSortedByTitle(false);
         setIsSortedBySource(null);
+        setIsSortedByDate(null);
         break;
       case 'sourceLowHigh':
         sortedPubmedEvidence = sortSourceLowHigh(sortedPubmedEvidence);
         setIsSortedBySource(true);
         setIsSortedByTitle(null);
+        setIsSortedByDate(null);
         break;
       case 'sourceHighLow':
         sortedPubmedEvidence = sortSourceHighLow(sortedPubmedEvidence);
         setIsSortedBySource(false);
+        setIsSortedByTitle(null);
+        setIsSortedByDate(null);
+        break;
+      case 'dateLowHigh':
+        sortedPubmedEvidence = sortDateYearLowHigh(sortedPubmedEvidence);
+        setIsSortedByDate(false);
+        setIsSortedBySource(null);
+        setIsSortedByTitle(null);
+        break;
+      case 'dateHighLow':
+        sortedPubmedEvidence = sortDateYearHighLow(sortedPubmedEvidence);
+        setIsSortedByDate(true);
+        setIsSortedBySource(null);
         setIsSortedByTitle(null);
         break;
       default:
@@ -146,10 +166,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
         if(!element.snippet)
           element.snippet = data[element.id].abstract;
         if(!element.pubdate) {
-          let year = (data[element.id].pub_year) ? data[element.id].pub_year: '';
-          let month = (data[element.id].pub_month !== '-') ? data[element.id].pub_month: '';
-          let day = (data[element.id].pub_day) ? data[element.id].pub_day: '';
-          element.pubdate = `${year} ${month} ${day}`;
+          let year = (data[element.id].pub_year) ? data[element.id].pub_year: 0;
+          element.pubdate = year;
         }
       }
       element.updated = true;
@@ -196,7 +214,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
         amountOfIDsProcessed.current = amountOfIDsProcessed.current + Object.keys(data.results).length;
         if(amountOfIDsProcessed.current >= pubmedEvidence.length) {
           console.log('metadata fetches complete, inserting additional evidence information')
-          setPubmedEvidence(insertAdditionalPubmedData(evidenceToUpdate.current));
+          setPubmedEvidence(sortDateYearHighLow(insertAdditionalPubmedData(evidenceToUpdate.current)));
+          setIsSortedByDate(true);
           fetchedPubmedData.current = true;
           isFetchingPubmedData.current = false;
         }
@@ -270,10 +289,17 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                   <div className={`${styles.tableBody}`}>
                     <div className={styles.tableHead}>
                       <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
-                      <div className={`${styles.head} ${styles.date}`}>Date(s)</div>
+                      <div 
+                        className={`${styles.head} ${styles.date} ${isSortedByDate ? styles.true : (isSortedByDate === null) ? '' : styles.false}`}
+                        onClick={()=>{handleSort((isSortedByDate) ? 'dateLowHigh': 'dateHighLow')}}
+                        >
+                        <span className={styles.headSpan}>
+                          Date(s)
+                        </span>
+                      </div>
                       <div
                         className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
-                        onClick={()=>{handleSort((isSortedBySource)?'sourceHighLow': 'sourceLowHigh')}}
+                        onClick={()=>{handleSort((isSortedBySource) ? 'sourceHighLow': 'sourceLowHigh')}}
                         >
                         <span className={styles.headSpan}>
                           Source
@@ -281,7 +307,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                       </div>
                       <div
                         className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`}
-                        onClick={()=>{handleSort((isSortedByTitle)?'titleHighLow': 'titleLowHigh')}}
+                        onClick={()=>{handleSort((isSortedByTitle) ? 'titleHighLow': 'titleLowHigh')}}
                         >
                         <span className={styles.headSpan}>
                           Title
@@ -313,7 +339,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                                   }
                                 </span>
                                 <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
-                                  {item.pubdate && item.pubdate }
+                                  {item.pubdate && (item.pubdate === 0 ) ? '' : item.pubdate }
                                 </span>
                                 <span className={`${styles.cell} ${styles.source} source`}>
                                   <span>

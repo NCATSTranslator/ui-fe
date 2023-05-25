@@ -1,5 +1,3 @@
-import { getLastPubYear } from "./utilities";
-
 // alphabetical order
 export const sortNameLowHigh = (items, isEvidence) => {
   if(isEvidence)
@@ -27,11 +25,11 @@ export const sortSourceHighLow = (items) => {
 }
 
 export const sortEvidenceLowHigh = (items) => {
-  return items.sort((a, b) => a.evidence.length - b.evidence.publications.length);
+  return items.sort((a, b) => a.evidence.publications.length - b.evidence.publications.length);
 }
 
 export const sortEvidenceHighLow = (items) => {
-  return items.sort((a, b) => b.evidence.length - a.evidence.publications.length);
+  return items.sort((a, b) => b.evidence.publications.length - a.evidence.publications.length);
 }
 
 export const sortScoreLowHigh = (items) => {
@@ -53,30 +51,22 @@ export const sortByEntityStrings = (items, strings) => {
   });
 }
 
-export const sortDateLowHigh = (items) => {
-
+export const sortDateYearLowHigh = (items) => {
+  const failYear = 3000; // Ensure all invalid dates are sent to the end
   return items.sort((a, b) => {
-    let val1 = getLastPubYear(a.edge.last_publication_date);
-    let val2 = getLastPubYear(b.edge.last_publication_date);
-
-    if(val1 === val2)
-      return 0;
-    if(val1 === null)
-      val1 = Infinity;
-    if(val2 === null)
-      val2 = Infinity;
-
-    return (val1 - val2);
-    }
-  );
+    const aDate = (a.pubdate === null) ? failYear : a.pubdate;
+    const bDate = (b.pubdate === null) ? failYear : b.pubdate;
+    return (aDate - bDate);
+  });
 }
 
-export const sortDateHighLow = (items) => {
-  return items.sort((a, b) =>
-    (b.edge.last_publication_date != null ? getLastPubYear(b.edge.last_publication_date) : 0)
-      -
-    (a.edge.last_publication_date != null ? getLastPubYear(a.edge.last_publication_date) : 0)
-  );
+export const sortDateYearHighLow = (items) => {
+  const failYear = 0; // Ensure all invalid dates are sent to the end
+  return items.sort((a, b) => {
+    const aDate = (a.pubdate === null) ? failYear : a.pubdate;
+    const bDate = (b.pubdate === null) ? failYear : b.pubdate;
+    return (bDate - aDate);
+  });
 }
 
 export const sortByHighlighted = (totalItems, highlightedItems) => {
@@ -100,3 +90,7 @@ export const updatePathRankByTag = (result, tag, pathRanks) => {
     }
   });
 }
+
+export const compareByKeyLexographic = (k) => {
+  return (a, b) => { return a[k].localeCompare(b[k]) };
+} 

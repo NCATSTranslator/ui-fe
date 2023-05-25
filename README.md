@@ -31,7 +31,7 @@ Redux/React Redux, React Router, Sass modules, Cytoscape, React Query, Cypress.
 
 ## Installation and Setup Instructions
 
-#### Node v17, React v18.2
+#### Node v18.10.0, React v18.2
 
 Clone down this repository. You will need `node` and `npm` installed globally on your machine.  
 
