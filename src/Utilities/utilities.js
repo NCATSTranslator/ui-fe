@@ -99,55 +99,54 @@ export const formatBiolinkEntity = (string) => {
     .replaceAll('gene ', '');
 }
 
-export const getEntityLink = (id, className, queryType) => {
+export const getUrlAndOrg = (id) => {
   let url = null;
-  let linkText = null;
-  let formattedID = id.toUpperCase();
-  let linkType = (queryType !== undefined && queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
+  let org = null;
+  const formattedID = id.toUpperCase();
   if(formattedID.includes('CHEBI')) {
     url = `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
-    linkText = `View this ${linkType} on Chemical Entities of Biological Interest`;
+    org = 'Chemical Entities of Biological Interest';
   } else if(formattedID.includes('CHEMBL')) {
     url = `https://www.ebi.ac.uk/chembl/compound_report_card/${id.replace(':', '')}/`;
-    linkText = `View this ${linkType} on ChEMBL`;
+    org = 'ChEMBL';
   } else if(formattedID.includes('MONDO')){
     url = `https://monarchinitiative.org/disease/${id}`;
-    linkText = `View this ${linkType} on Monarch Initiative`;
+    org = 'Monarch Initiative';
   } else if(formattedID.includes('HP')) {
     url = `https://monarchinitiative.org/phenotype/${id}`;
-    linkText = `View this ${linkType} on Monarch Initiative`;
+    org = 'Monarch Initiative';
   } else if(formattedID.includes('UMLS')) {
     url = `https://uts.nlm.nih.gov/uts/umls/concept/${id.replace('UMLS:', '')}`;
-    linkText = `View this ${linkType} on UMLS Terminology Services`;
+    org = 'UMLS Terminology Services';
   } else if(formattedID.includes('OMIM')) {
     url = `https://bioportal.bioontology.org/search?q=${id.replace('OMIM:', '')}`;
-    linkText = `View this ${linkType} on BioPortal`;
+    org = 'BioPortal';
   } else if (formattedID.includes('SNOMED')) {
     url = `https://browser.ihtsdotools.org/?perspective=full&conceptId1=${id.replace('SNOMEDCT:', '')}`;
-    linkText = `View this ${linkType} on the SNOMED CT Browser`;
+    org = 'the SNOMED CT Browser';
   } else if(formattedID.includes('MEDDRA')) {
     url = `https://bioportal.bioontology.org/ontologies/MEDDRA?p=classes&conceptid=${id.replace('MEDDRA:', '')}`
-    linkText = `View this ${linkType} on BioPortal`;
+    org = 'BioPortal';
   } else if(formattedID.includes('KEGG')) {
     url = `https://www.kegg.jp/kegg-bin/search?q=${id.replace('KEGG.DISEASE:', '')}&display=disease&from=disease`;
-    linkText = `View this ${linkType} on Kyoto Encyclopedia of Genes and Genomes`;
+    org = 'Kyoto Encyclopedia of Genes and Genomes';
   } else if(formattedID.includes('NCIT')) {
     url = `https://ncithesaurus.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&ns=ncit&code=${id.replace('NCIT:', '')}`;
-    linkText = `View this ${linkType} on NCI Thesaurus`;
+    org = 'NCI Thesaurus';
   }
 
-  if(url && linkText)
-    return(
-      <a
-        href={url}
-        target="_blank"
-        rel="noreferrer"
-        className={className}
-        >{linkText}<ExternalLink/>
-      </a>
-    );
+  return [url, org];
+}
 
-  return null;
+export const getEntityLink = (id, className, queryType) => {
+  return generateEntityLink(id, className, (org) => {
+    const linkType = (queryType !== undefined && queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
+    return `View this ${linkType} on ${org}`;
+  });
+}
+
+export const getMoreInfoLink = (id, className) => {
+  return generateEntityLink(id, className, (org) => { return ' '});
 }
 
 export const handleFetchErrors = (response, onErrorCallback = () => console.log('No error callback function specified.')) => {
@@ -177,4 +176,22 @@ export const removeDuplicateObjects = (arr, getKey) => {
   });
 
   return distinctElements;
+}
+
+const generateEntityLink = (id, className, linkTextGenerator) => {
+  const [url, org] = getUrlAndOrg(id);
+  const linkText = linkTextGenerator(org);
+
+  if(url && linkText)
+    return(
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className={className}
+        >{linkText}<ExternalLink/>
+      </a>
+    );
+
+  return null;
 }
