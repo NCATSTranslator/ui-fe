@@ -39,22 +39,25 @@
     animation:spin 1s linear infinite;
   }
   .item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-size: 14px;
     font-weight: 700;
     color: $black;
     margin-bottom: 0;
     padding: 4px 12px;
-    cursor: pointer;
     .link {
-      display: inline-flex;
-      align-items: center;
-      float: right;
       font-size: 14px;
+      cursor: pointer;
       svg {
         margin-left: 4px;
         width: 18px;
         height: 18px;
       }
+    }
+    .term {
+      cursor: pointer;
     }
     &:first-child {
       padding: 8px 12px 4px;

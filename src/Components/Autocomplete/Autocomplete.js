@@ -59,10 +59,12 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
             items.slice(0, numberVisibleItems).map((item, i) => {
               return (
                   <div key={i} className={styles.item}>
-                    <span onClick={()=>handleItemClick(item)}>
+                    <span className={styles.term} onClick={()=>handleItemClick(item)}>
                       {item.label}{item.match ? ` (${item.match})` : ''}
                     </span>
-                    {getMoreInfoLink(item.id, styles.link)}
+                    <span className={styles.link}>
+                      {getMoreInfoLink(item.id, styles.link)}
+                    </span>
                   </div>)
             })
           }
