@@ -39,6 +39,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
   const objectId = useRef(result.rawResult.object);
 
   const calculatedPaths = useRef(null);
+  const cyNav = useRef(null);
 
   const graphId = useRef(uuidv4());
   const graphIdString = `cy-${graphId.current}`;
@@ -160,9 +161,12 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
       hideClass: hideClass, 
       excludedClass: excludedClass,
       subjectId: subjectId.current,
-      objectId: objectId.current
+      objectId: objectId.current,
+      cyNav: cyNav.current
     }
-    return initCytoscapeInstance(cytoReqDataObject)
+    let cyInstanceAndNav = initCytoscapeInstance(cytoReqDataObject);
+    cyNav.current = cyInstanceAndNav.nav;
+    return cyInstanceAndNav.cy;
   }, [graphRef, graph, currentLayout, active, clearSelectedPaths, handleNodeClick]);
 
   useEffect(() => {
