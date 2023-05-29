@@ -13,7 +13,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   // returns a new object with each tag grouped by its type
   const groupAvailableTags = (tags) => {
     let clonedTags = global.structuredClone(tags);
-    let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('atc:')));
+    let roleTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('role:')));
     let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
     let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
     let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda:')));
@@ -22,7 +22,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       fda: fdaTags,
       resultType: resultTypeTags,
       nodeType: nodeTypeTags,
-      atc: atcTags,
+      role: roleTags,
       ara: araTags
     }
     return newGroupedTags;
@@ -62,17 +62,17 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     onFilter(newObj);
   }
 
-  const getAtcHeading = () => {
+  const getRoleHeading = () => {
     return (
       <div className={styles.labelContainer} >
-        <div className={styles.label} data-tooltip-id="atc-tooltip" >
-          <p className={styles.subTwo}>ATC Classification</p>
+        <div className={styles.label} data-tooltip-id="chebi-role-tooltip" >
+          <p className={styles.subTwo}>ChEBI Role Classification</p>
           <Alert/>
-          <Tooltip id="atc-tooltip">
-            <span className={styles.atcSpan}>The Anatomical Therapeutic Classification (ATC, <a href="https://www.whocc.no/atc_ddd_index/" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a drug classification that categorizes active substances of drugs according to the organ or system where their therapeutic effect occurs.</span>
+          <Tooltip id="chebi-role-tooltip">
+            <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
           </Tooltip>
         </div>
-        <p className={styles.caption}>Filter on organ or system where drug's theraputic effect occurs.</p>
+        <p className={styles.caption}>Show only results that match a particular chemical role.</p>
       </div>
     )
   }
@@ -144,8 +144,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       case 'nodeType':
         headingToReturn = getNodeTypeHeading();
         break;
-      case 'atc':
-        headingToReturn = getAtcHeading();
+      case 'role':
+        headingToReturn = getRoleHeading();
         break;
       case 'ara':
         headingToReturn = getAraHeading();
