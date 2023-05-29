@@ -7,6 +7,27 @@
   border: 1px solid $midGray;
   border-radius: 5px;
   position: relative;
+  img {
+    width: 95%;
+    height: 95%;
+    object-fit: contain;
+    left: 2.5% !important;
+    top: 2.5% !important;
+  }
+}
+
+.graphNavigatorContainer {
+  width: calc(14vw + 50px);
+  height: calc(16vh + 50px);
+  position: absolute;
+  bottom: $s;
+  right: $s;
+  z-index: 100;
+  overflow: hidden;
+  border-radius: $defaultBorderRadius;
+  background-color: $lightGray;
+  box-shadow: $dropShadow;
+  user-select: none;
 }
 
 .graphControls {

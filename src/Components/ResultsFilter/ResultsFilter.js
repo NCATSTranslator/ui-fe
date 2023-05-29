@@ -13,7 +13,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   // returns a new object with each tag grouped by its type
   const groupAvailableTags = (tags) => {
     let clonedTags = global.structuredClone(tags);
-    let atcTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('atc:')));
+    let roleTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('role:')));
     let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
     let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
     let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda:')));
@@ -22,7 +22,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       fda: fdaTags,
       resultType: resultTypeTags,
       nodeType: nodeTypeTags,
-      atc: atcTags,
+      role: roleTags,
       ara: araTags
     }
     return newGroupedTags;
@@ -62,17 +62,17 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     onFilter(newObj);
   }
 
-  const getAtcHeading = () => {
+  const getRoleHeading = () => {
     return (
       <div className={styles.labelContainer} >
-        <div className={styles.label} data-tooltip-id="atc-tooltip" >
-          <p className={styles.subTwo}>ATC Classification</p>
+        <div className={styles.label} data-tooltip-id="chebi-role-tooltip" >
+          <p className={styles.subTwo}>ChEBI Role Classification</p>
           <Alert/>
-          <Tooltip id="atc-tooltip">
-              <span className={styles.atcSpan}>The Anatomical Therapeutic Classification (ATC, <a href="https://www.whocc.no/atc_ddd_index/" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a drug classification that categorizes active substances of drugs according to the organ or system where their therapeutic effect occurs.</span>
+          <Tooltip id="chebi-role-tooltip">
+            <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
           </Tooltip>
         </div>
-        <p className={styles.caption}>Filter on organ or system where drug's theraputic effect occurs.</p>
+        <p className={styles.caption}>Show only results that match a particular chemical role.</p>
       </div>
     )
   }
@@ -84,7 +84,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             <p className={styles.subTwo}>FDA Status</p>
             <Alert/>
             <Tooltip id="fda-tooltip">
-                <span className={styles.fdaSpan}>Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.</span>
+              <span className={styles.fdaSpan}>Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.</span>
             </Tooltip>
           </div>
       </div>
@@ -98,7 +98,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             <p className={styles.subTwo}>Result Type</p>
             <Alert/>
             <Tooltip id="biolink-tooltip-1">
-                <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
+              <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
             </Tooltip>
           </div>
           <p className={styles.caption}>Show only results that begin with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
@@ -113,8 +113,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           <p className={styles.subTwo}>Node Type</p>
           <Alert/>
           <Tooltip id="biolink-tooltip-2">
-                <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
-            </Tooltip>
+            <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
+          </Tooltip>
           </div>
           <p className={styles.caption}>Show only results that include a node with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
       </div>
@@ -127,6 +127,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           <div className={styles.label} >
             <p className={styles.subTwo}>Reasoning Agent</p>
           </div>
+          <p className={styles.caption}>Filter on specific reasoning agents used to calculate the results.</p>
       </div>
     )
   }
@@ -143,8 +144,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       case 'nodeType':
         headingToReturn = getNodeTypeHeading();
         break;
-      case 'atc':
-        headingToReturn = getAtcHeading();
+      case 'role':
+        headingToReturn = getRoleHeading();
         break;
       case 'ara':
         headingToReturn = getAraHeading();

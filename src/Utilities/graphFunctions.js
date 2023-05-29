@@ -17,21 +17,12 @@ export const layoutList = {
   dagre: {
     name: 'dagre', spacingFactor: 1.1
   },
-  random: {
-    name: 'random'
-  },
-  avsdf: {
-    name: 'avsdf'
-  },
   circle: {
     name: 'circle'
   },
   concentric: {
     name: 'concentric'
   },
-  cose: {
-    name: 'cose'
-  }
 }
 
 export const resultToCytoscape = (result, summary) => {
@@ -291,9 +282,30 @@ export const initCytoscapeInstance = (dataObj) => {
   }
 
   // Set bounds of zoom
-  cy.maxZoom(4.5);
-  cy.minZoom(.075);
-  return cy;
+  cy.maxZoom(2.5);
+  cy.minZoom(.25);
+
+
+  if(dataObj.cyNav !== null) {
+    dataObj.cyNav.destroy();
+  }
+
+  var defaults = {
+    container: `#${dataObj.graphNavigatorContainerId}`, // string | false | undefined. Supported strings: an element id selector (like "#someId"), or a className selector (like ".someClassName"). Otherwise an element will be created by the library.
+    viewLiveFramerate: 0, // set false to update graph pan only on drag end; set 0 to do it instantly; set a number (frames per second) to update not more than N times per second
+    thumbnailEventFramerate: 30, // max thumbnail's updates per second triggered by graph updates
+    thumbnailLiveFramerate: false, // max thumbnail's updates per second. Set false to disable
+    dblClickDelay: 200, // milliseconds
+    removeCustomContainer: false, // destroy the container specified by user on plugin destroy
+    rerenderDelay: 100, // ms to throttle rerender updates to the panzoom for performance
+  };
+
+  let nav = cy.navigator( defaults ); // init navigator instance
+
+  return {
+    cy: cy,
+    nav: nav
+  };
 }
 
 /**

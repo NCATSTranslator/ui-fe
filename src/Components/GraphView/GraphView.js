@@ -1,5 +1,5 @@
 import styles from './GraphView.module.scss';
-import {useState, memo, useMemo, useRef, useCallback} from 'react';
+import {useState, memo, useMemo, useRef, useCallback, useEffect} from 'react';
 import { resultToCytoscape, findPaths, layoutList, handleResetView, 
   handleDeselectAllNodes, initCytoscapeInstance, getGraphWithoutExtraneousPaths } from '../../Utilities/graphFunctions';
 import cytoscape from 'cytoscape';
@@ -7,9 +7,16 @@ import { v4 as uuidv4 } from 'uuid';
 import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
-import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import GraphLayoutButtons from '../GraphLayoutButtons/GraphLayoutButtons';
+import navigator from 'cytoscape-navigator';
+import 'cytoscape-navigator/cytoscape.js-navigator.css';
+
+// initialize 3rd party layouts
+cytoscape.use(klay);
+cytoscape.use(avsdf);
+cytoscape.use(dagre);
+cytoscape.use(navigator);
 
 const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}) => {
 
@@ -32,12 +39,12 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
   const objectId = useRef(result.rawResult.object);
 
   const calculatedPaths = useRef(null);
-  
-  // initialize 3rd party layouts
-  cytoscape.use(klay);
-  cytoscape.use(avsdf);
-  cytoscape.use(dagre);
+  const cyNav = useRef(null);
 
+  const graphId = useRef(uuidv4());
+  const graphIdString = `cy-${graphId.current}`;
+  const graphNavigatorContainerId = `cy-nav-container-${graphId.current}`;
+  
   /**
   * Highlights the given element by adding the highlightClass and removing the hideClass.
   * @param {object} element - The cytoscape element to be highlighted.
@@ -143,6 +150,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
 
     let cytoReqDataObject = {
       graphRef: graphRef, 
+      graphNavigatorContainerId: graphNavigatorContainerId,
       graph: graph, 
       layout: currentLayout, 
       selectedNodes: selectedNodes, 
@@ -153,9 +161,12 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
       hideClass: hideClass, 
       excludedClass: excludedClass,
       subjectId: subjectId.current,
-      objectId: objectId.current
+      objectId: objectId.current,
+      cyNav: cyNav.current
     }
-    return initCytoscapeInstance(cytoReqDataObject)
+    let cyInstanceAndNav = initCytoscapeInstance(cytoReqDataObject);
+    cyNav.current = cyInstanceAndNav.nav;
+    return cyInstanceAndNav.cy;
   }, [graphRef, graph, currentLayout, active, clearSelectedPaths, handleNodeClick]);
 
   useEffect(() => {
@@ -189,7 +200,18 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
             Deselect All Nodes
           </button>
         </div>
-        <div id={`cy-${uuidv4()}`} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}></div>
+        <div id={graphIdString} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}></div>
+        <div id={graphNavigatorContainerId} className={styles.graphNavigatorContainer} 
+          onMouseEnter={()=>{
+            document.body.style.overflow = 'hidden';
+            document.body.style.paddingRight = '15px';
+          }}
+          onMouseLeave={()=>{
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '0';
+          }}
+        >
+        </div>
       </div>
     </div>
   );
