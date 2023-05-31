@@ -43,7 +43,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
 
   const graphId = useRef(uuidv4());
   const graphIdString = `cy-${graphId.current}`;
-  const graphNavigatorContainerId = `cy-nav-container-${graphId.current}`;
+  const graphNavigatorContainerId = useRef(`cy-nav-container-${graphId.current}`);
   
   /**
   * Highlights the given element by adding the highlightClass and removing the hideClass.
@@ -150,7 +150,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
 
     let cytoReqDataObject = {
       graphRef: graphRef, 
-      graphNavigatorContainerId: graphNavigatorContainerId,
+      graphNavigatorContainerId: graphNavigatorContainerId.current,
       graph: graph, 
       layout: currentLayout, 
       selectedNodes: selectedNodes, 
@@ -201,7 +201,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
           </button>
         </div>
         <div id={graphIdString} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}></div>
-        <div id={graphNavigatorContainerId} className={styles.graphNavigatorContainer} 
+        <div id={graphNavigatorContainerId.current} className={styles.graphNavigatorContainer} 
           onMouseEnter={()=>{
             document.body.style.overflow = 'hidden';
             document.body.style.paddingRight = '15px';
