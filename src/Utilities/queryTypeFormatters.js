@@ -30,10 +30,15 @@ export const diseaseQueryFormatter = async (diseases, formatData) => {
       bestMatch = closestStrMatch(formatData.input, formatData.resolved[id]);
     }
 
+    // only include 'matched on' text if the returned label doesn't contain the input string
+    const matchText = (disease.id.label.toLowerCase().includes(input.toLowerCase())) 
+      ? ''
+      : `matched on ${capitalizeAllWords(bestMatch)}`;
+
     return {
       id: id,
       label: capitalizeAllWords(disease.id.label),
-      match: `matched on ${capitalizeAllWords(bestMatch)}`
+      match: matchText
     };
   });
 
