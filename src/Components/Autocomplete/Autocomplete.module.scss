@@ -57,6 +57,8 @@
       }
     }
     .term {
+      display: flex;
+      align-items: center;
       cursor: pointer;
     }
     &:first-child {
@@ -70,6 +72,12 @@
     &:hover {
       color: $purpleOne;
       background-color: $lightGray;
+    }
+    .match {
+      color: $darkGray;
+      font-style: italic;
+      font-size: 12px;
+      margin-left: 8px;
     }
   }
   .sep {
