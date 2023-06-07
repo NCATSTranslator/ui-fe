@@ -9,14 +9,15 @@ This project is currently in development. Users can submit queries to the servic
 - What gene is upregulated by _____ (_chemical_)
 - What gene is downregulated by _____ (_chemical_)
 
-Results can be filtered and sorted according to several different critera, such as filtering by FDA Approval or sorting by evidence count. Each result consists of a list of paths, which are a discrete series of connected nodes and edges leading from the result item (e.g. a drug) to the object of the query (e.g. a disease). 
+Results can be filtered and sorted according to several different critera, such as filtering by FDA Approval or sorting by evidence count. Each result consists of a graph and a list of paths, which are a discrete series of connected nodes and edges leading from the result item (e.g. a drug) to the object of the query (e.g. a disease). Selecting a node in the graph view highlights in the path view all paths that pass through any selected node(s), while deemphasizing the rest. 
 
 ## Feature Roadmap
 
-- [ ] Graph View
 - [ ] Additional Filtering Facets
+- [ ] Query Submission Redesign
 - [ ] Migration to Vite from CRA
 - [ ] Results CSV Export
+- [x] Graph View
 - [x] Path View
 - [x] Search Term Autocomplete
 - [x] Search History
@@ -46,4 +47,4 @@ The last step will be running the following command in the root directory of the
 
 ![Home Page](/src/Assets/Images/screenshot1.png?raw=true "Home Page")
 
-![Example Results](/src/Assets/Images/screenshot2.png?raw=true "Example Results")
+![Example Results](/src/Assets/Images/screenshot3.png?raw=true "Example Results")
