@@ -1,4 +1,4 @@
-import { defaultQueryFilterFactory } from './queryTypeFilters';
+import { defaultQueryFilterFactory, drugTreatsQueryFilterFactory } from './queryTypeFilters';
 import { defaultQueryAnnotator, geneQueryAnnotator } from './queryTypeAnnotators';
 import { defaultQueryFormatter, geneQueryFormatter, diseaseQueryFormatter } from './queryTypeFormatters';
 
@@ -11,7 +11,7 @@ export const queryTypes = [
     direction: null,
     filterType: 'Disease',
     functions: {
-      filter: defaultQueryFilterFactory('Disease'),
+      filter: drugTreatsQueryFilterFactory('Disease'),
       annotate: defaultQueryAnnotator,
       format: diseaseQueryFormatter
     },
@@ -51,9 +51,9 @@ export const queryTypes = [
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'increased',
-    filterType: 'ChemicalEntity',
+    filterType: 'SmallMolecule',
     functions: {
-      filter: defaultQueryFilterFactory('ChemicalEntity'),
+      filter: defaultQueryFilterFactory('SmallMolecule'),
       annotate: defaultQueryAnnotator,
       format: defaultQueryFormatter,
     },
@@ -65,9 +65,9 @@ export const queryTypes = [
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'decreased',
-    filterType: 'ChemicalEntity',
+    filterType: 'SmallMolecule',
     functions: {
-      filter: defaultQueryFilterFactory('ChemicalEntity'),
+      filter: defaultQueryFilterFactory('SmallMolecule'),
       annotate: defaultQueryAnnotator,
       format: defaultQueryFormatter,
     },
