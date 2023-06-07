@@ -10,7 +10,6 @@ export const defaultQueryFilterFactory = (type) => {
 export const drugTreatsQueryFilterFactory = (type) => {
   // Ensure the autocomplete item matches the biolink type and has a label
   return (item) => {
-    console.log(item);
     return item && item?.type.includes(`biolink:${type}`) && item?.id?.identifier.includes('MONDO') && item.id.label;
   };
 }
