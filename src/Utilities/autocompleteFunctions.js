@@ -49,7 +49,7 @@ const fetchNodesFromInputText = async (inputText) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   };
-  return fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=100`, nameResolverRequestOptions)
+  return fetch(`https://name-resolution-sri.renci.org/lookup?string=${inputText}&offset=0&limit=200`, nameResolverRequestOptions)
 }
 
 // Normalize nodes to get the canonical CURIE associated with the node
