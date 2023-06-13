@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
@@ -21,11 +21,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const formattedPaths = item.compressedPaths;
   const [selectedPaths, setSelectedPaths] = useState(new Set());
 
-  const initPathString = (type !== undefined && type.pathString) ? type.pathString : 'may affect';
+  const initPathString = useRef((type !== undefined && type.pathString) ? type.pathString : 'may affect');
 
-  let pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString}` : `Path that ${initPathString}`;
-  let nameString = (item.name !== null) ? item.name : '';
-  let objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
+  const pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
+  const nameString = (item.name !== null) ? item.name : '';
+  const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
