@@ -64,7 +64,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
 
   const [presetTypeID, setPresetTypeID] = useState(initPresetTypeID);
 
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedNode, setSelectedNode] = useState(null);
 
   // Array, List of items to display in the autocomplete window
   const [autocompleteItems, setAutoCompleteItems] = useState(null);
@@ -113,19 +113,30 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     }
   }
 
+  const clearAutocompleteItems = () => {
+    setAutoCompleteItems(null);
+  }
+
+  const clearSelectedItem = () => {
+    setSelectedNode(null);
+    setInputText('');
+  }
+
   const handleQueryTypeChange = useCallback((value, resetInputText) => {
     setIsError(false);
     autocompleteFunctions.current = value.functions;
     setQueryType(value);
     setPresetTypeID(value.id);
+    clearAutocompleteItems();
     if(resetInputText || resetInputText === undefined)
-      setInputText('');
+      clearSelectedItem();
+    // setInputText('');
   },[]);
 
   // Handler for disease selection (template click or autocomplete item click)
   const handleDiseaseSelection = (disease) => {
     setIsError(false);
-    setSelectedItem(disease);
+    setSelectedNode(disease);
     setReadyForSubmission(true);
     if(autocompleteItems)
       setAutoCompleteItems(null);
@@ -133,14 +144,14 @@ const Query = ({results, loading, presetDisease, presetType}) => {
 
   // Validation function for submission
   const validateSubmission = useCallback(() => {
-    if(selectedItem === null || selectedItem.id === "") {
+    if(selectedNode === null || selectedNode.id === "") {
       setIsError(true);
       setErrorText("No term selected, please select a valid term.");
       return;
     }
 
     setIsValidSubmission(true);
-  }, [selectedItem])
+  }, [selectedNode])
 
   // Event handler for form submission
   const handleSubmission = useCallback(() => {
@@ -151,18 +162,18 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     setQueryItem(
       {
         type: queryType,
-        node: selectedItem
+        node: selectedNode
       }
     )
-  }, [queryType, selectedItem])
+  }, [queryType, selectedNode])
 
   useEffect(() => {
     setIsLoading(loading);
   }, [loading]);
 
   useEffect(() => {
-    if(selectedItem !== null) {
-      setInputText(selectedItem.label);
+    if(selectedNode !== null) {
+      setInputText(selectedNode.label);
       updateQueryItems();
       // Uncomment the below to re-enable click to run query
       // if(readyForSubmission) {
@@ -171,11 +182,11 @@ const Query = ({results, loading, presetDisease, presetType}) => {
       // }
     }
 
-  }, [selectedItem, readyForSubmission, handleSubmission, updateQueryItems]);
+  }, [selectedNode, readyForSubmission, handleSubmission, updateQueryItems]);
 
   useEffect(() => {
     if(presetDisease) {
-      setSelectedItem(presetDisease);
+      setSelectedNode(presetDisease);
     }
   }, [presetDisease]);
 
@@ -221,7 +232,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
       // Set isLoading to true
       setIsLoading(true);
 
-      let queryJson = JSON.stringify({curie: selectedItem.id, type: queryType.targetType, direction: queryType.direction});
+      let queryJson = JSON.stringify({curie: selectedNode.id, type: queryType.targetType, direction: queryType.direction});
 
       // submit query to /query
       const requestOptions = {
@@ -256,8 +267,10 @@ const Query = ({results, loading, presetDisease, presetType}) => {
             let prevTypeID = new URLSearchParams(window.location.search).get("t");
             let prevLabel = new URLSearchParams(window.location.search).get("l");
 
-            if(prevLabel)
+            if(prevLabel) {
               setInputText(prevLabel);
+              console.log(prevLabel);
+            }
             if(prevTypeID !== undefined)
               setPresetTypeID(prevTypeID);
             
@@ -278,7 +291,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     }
 
   }, [isValidSubmission, dispatch, queryItem, queryType,
-     storedQuery, selectedItem, navigate, setSearchParams])
+     storedQuery, selectedNode, navigate, setSearchParams])
 
   /*
     If the query has been populated by clicking on an item in the query history
@@ -299,7 +312,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
         clearTimeout(timer);
       }
     }
-  }, [selectedItem, presetURL, navigate]);
+  }, [selectedNode, presetURL, navigate]);
 
   return (
     <>
@@ -312,7 +325,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
             isError &&
             <p className={styles.error}>{errorText}</p>
           }
-          <OutsideClickHandler onOutsideClick={()=>{setAutoCompleteItems(null)}}>
+          <OutsideClickHandler onOutsideClick={()=>{clearAutocompleteItems();}}>
             <QueryBar
               handleSubmission={handleSubmission}
               handleChange={handleQueryItemChange}
@@ -326,9 +339,9 @@ const Query = ({results, loading, presetDisease, presetType}) => {
             />
           </OutsideClickHandler>
           {
-            isResults && selectedItem && selectedItem.id &&
+            isResults && selectedNode && selectedNode.id &&
             <p className={styles.needHelp}>
-              {getEntityLink(selectedItem.id, styles.monarchLink, queryType)}
+              {getEntityLink(selectedNode.id, styles.monarchLink, queryType)}
             </p>
           }
           <p className={styles.needHelp}>
