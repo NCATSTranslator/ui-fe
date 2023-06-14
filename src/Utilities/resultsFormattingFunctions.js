@@ -14,17 +14,16 @@ const getFormattedEvidence = (paths, results) => {
       let evidenceObj = container[id];
       if (evidenceObj === undefined) {
         evidenceObj = constructor(obj);
-        let object = item.edges[0].object;
-        let subject = item.edges[0].subject;
-        evidenceObj.edge = {
-          subject: capitalizeAllWords(subject.names[0]),
-          predicates: item.predicates,
-          object: capitalizeAllWords(object.names[0])
-        };
+        evidenceObj.edges = {};
         container[id] = evidenceObj;
-      } else {
-        evidenceObj.edge.predicates.push(...item.predicates);
       }
+
+      const eid = item.edges[0].id;
+      evidenceObj.edges[eid] = {
+        subject: item.edges[0].subject.names[0],
+        predicate: item.edges[0].predicate,
+        object: item.edges[0].object.names[0]
+      };
     }
   };
 
@@ -187,7 +186,7 @@ const getFormattedPaths = (rawPathIds, results) => {
           formattedPath.subgraph[i] = {
             category: 'predicate',
             predicates: [pred],
-            edges: [{object: edge.object, predicate: pred, subject: edge.subject, provenance: edge.provenance}],
+            edges: [{id: eid, object: edge.object, predicate: pred, subject: edge.subject, provenance: edge.provenance}],
             publications: edge.publications
           };
           if(edge.provenance !== undefined) {

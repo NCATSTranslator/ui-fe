@@ -260,13 +260,14 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                   <div className={styles.evidenceItems}>
                     {
                       clinicalTrials.current.map((item, i)=> {
+                        const edge = Object.values(item.edges)[0];
                         return (
                           <div className={styles.evidenceItem} key={i}>
                             <span className={`${styles.cell} ${styles.relationship} relationship`}>
                               {
-                                item.edge &&
+                                edge &&
                                 <span>
-                                  <span>{item.edge.subject}</span><strong>{item.edge.predicates[0]}</strong><span>{item.edge.object}</span>
+                                  <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
                                 </span>
                               }
                             </span>
@@ -328,13 +329,14 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                       <div className={styles.evidenceItems} >
                         {
                           displayedPubmedEvidence.map((item, i)=> {
+                            const edge = Object.values(item.edges)[0];
                             return (
                               <div className={styles.evidenceItem} key={i}>
                                 <span className={`${styles.cell} ${styles.relationship} relationship`}>
                                   {
-                                    item.edge &&
+                                    edge &&
                                     <span>
-                                      <span>{item.edge.subject}</span><strong>{item.edge.predicates[0]}</strong><span>{item.edge.object}</span>
+                                      <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
                                     </span>
                                   }
                                 </span>
@@ -419,11 +421,12 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                   <div className={styles.evidenceItems}>
                     {
                       sources.map((src, i) => { 
-                        let subjectName = capitalizeAllWords(src.edge.subject);
-                        let predicateName = capitalizeAllWords(src.edge.predicates[0]);
-                        let objectName = capitalizeAllWords(src.edge.object);
-                        let name = (!Array.isArray(src) && typeof src === 'object') ? src.name: '';
-                        let url = (!Array.isArray(src) && typeof src === 'object') ? src.url: src;
+                        const edge = Object.values(src.edges)[0];
+                        const subjectName = capitalizeAllWords(edge.subject);
+                        const predicateName = capitalizeAllWords(edge.predicate);
+                        const objectName = capitalizeAllWords(edge.object);
+                        const name = (!Array.isArray(src) && typeof src === 'object') ? src.name: '';
+                        const url = (!Array.isArray(src) && typeof src === 'object') ? src.url: src;
                         return(
                           <div className={styles.evidenceItem}>
                             { !isAll &&
