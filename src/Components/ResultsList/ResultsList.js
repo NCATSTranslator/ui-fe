@@ -34,8 +34,6 @@ const ResultsList = ({loading}) => {
   // URL search params
   const loadingParam = new URLSearchParams(window.location.search).get("loading")
   const queryIDParam = new URLSearchParams(window.location.search).get("q")
-  const presetDiseaseLabelParam = new URLSearchParams(window.location.search).get("l")
-  const presetQueryTypeIDParam = new URLSearchParams(window.location.search).get("t")
 
   let storedQuery = useSelector(currentQuery);
   storedQuery = (storedQuery !== undefined) ? storedQuery : {type:{}, node: {}};
@@ -105,11 +103,6 @@ const ResultsList = ({loading}) => {
   const [activeStringFilters, setActiveStringFilters] = useState([]);
   // Array, aras that have returned data
   const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
-  const initPresetDisease = (presetDiseaseLabelParam) ? {id: '', label: presetDiseaseLabelParam} : null;
-  const initPresetQueryTypeID = (presetQueryTypeIDParam) ? presetQueryTypeIDParam : null;
-  // Obj, {label: ''}, used to set input text, determined by results object
-  const [presetDisease] = useState(initPresetDisease);
-  const [presetQueryTypeID] = useState(initPresetQueryTypeID);
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
@@ -586,7 +579,7 @@ const ResultsList = ({loading}) => {
         edgeGroup={selectedEdges}
       />
       <div className={styles.resultsList}>
-        <Query results loading={isLoading} presetDisease={presetDisease} presetTypeID={presetQueryTypeID}/>
+        <Query results loading={isLoading} />
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&

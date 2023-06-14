@@ -10,22 +10,17 @@ import cloneDeep from "lodash/cloneDeep";
 import isEqual from 'lodash/isEqual';
 import _ from "lodash";
 import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
+import { queryTypes } from "../../Utilities/queryTypes";
+import { getEntityLink, handleFetchErrors } from "../../Utilities/utilities";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import styles from './Query.module.scss';
-import { getEntityLink, handleFetchErrors } from "../../Utilities/utilities";
 
-const Query = ({results, loading, presetDisease, presetType}) => {
+const Query = ({results, loading}) => {
 
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // eslint-disable-next-line
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const presetQueryTypeIDParam = new URLSearchParams(window.location.search).get("t")
-
-  // eslint-disable-next-line
-  const navigatingFromHistory = ( new URLSearchParams(window.location.search).get("results") !== null) ? true : false;
 
   loading = (loading) ? true : false;
 
@@ -40,13 +35,12 @@ const Query = ({results, loading, presetDisease, presetType}) => {
   // String, error text
   const [errorText, setErrorText] = useState('');
 
+  let blankQueryItem = {type:{}, node:{}};
   // Get the current query from the application state
   let storedQuery = useSelector(currentQuery);
-  storedQuery = (storedQuery !== undefined && isResults) ? storedQuery : {type:{}, node:{}};
+  storedQuery = (storedQuery !== undefined && isResults) ? storedQuery : blankQueryItem;
   // Array, currently selected query items
   const [queryItem, setQueryItem] = useState(storedQuery);
-  // String, type of query
-  const [queryType, setQueryType] = useState(storedQuery.type);
   // Function, type to send to autocomplete for result filtering
   const autocompleteFunctions = useRef(null);
   // Array, for use in useEffect hooks with queryItems as a dependency
@@ -58,13 +52,15 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     : '';
   const [inputText, setInputText] = useState(presetInputText);
 
+  const presetQueryTypeIDParam = searchParams.get('t');
   const initPresetTypeID = (presetQueryTypeIDParam)
     ? presetQueryTypeIDParam
     : (Object.keys(prevQueryItem.current).length && isResults) ? prevQueryItem.current.type.id : null;
-
   const [presetTypeID, setPresetTypeID] = useState(initPresetTypeID);
 
-  const [selectedNode, setSelectedNode] = useState(null);
+  const presetDiseaseLabelParam = searchParams.get("l")
+  const initSelectedNode = (presetDiseaseLabelParam) ? {id: '', label:presetDiseaseLabelParam}: null;
+  const [selectedNode, setSelectedNode] = useState(initSelectedNode);
 
   // Array, List of items to display in the autocomplete window
   const [autocompleteItems, setAutoCompleteItems] = useState(null);
@@ -101,45 +97,69 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     });
   }, []);
 
+  const updateQueryItem = useCallback((selectedNode = {id:'', label: ''}) => {
+    setQueryItem(
+      prev => {
+        return {
+          type: prev.type,
+          node: selectedNode
+        }
+      }
+    )
+  },[]);
+
+  const handleSetSelectedNode = useCallback((node) => {
+    setSelectedNode(node);
+    if(selectedNode !== null) {
+      setInputText(selectedNode.label);
+      updateQueryItem(selectedNode);
+      // Uncomment the below to re-enable click to run query
+      // if(readyForSubmission) {
+      //   setReadyForSubmission(false);
+      //   handleSubmission();
+      // }
+    }
+  },[updateQueryItem, selectedNode])
 
   // Event handler called when search bar is updated by user
-  const handleQueryItemChange = (e) => {
-    if(Object.keys(queryType).length) {
+  const handleQueryItemChange = useCallback((e) => {
+    if(Object.keys(queryItem.type).length) {
       delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions.current);
       setInputText(e);
     } else {
       setIsError(true);
       setErrorText("No query selected, please select a query from the dropdown.");
     }
-  }
+  },[setLoadingAutocomplete, setAutoCompleteItems, setInputText, setIsError, setErrorText, delayedQuery, queryItem.type]);
 
   const clearAutocompleteItems = () => {
     setAutoCompleteItems(null);
   }
 
-  const clearSelectedItem = () => {
-    setSelectedNode(null);
+  const clearSelectedItem = useCallback(() => {
+    handleSetSelectedNode(null);
     setInputText('');
-  }
+  }, [handleSetSelectedNode]);
 
   const handleQueryTypeChange = useCallback((value, resetInputText) => {
     setIsError(false);
     autocompleteFunctions.current = value.functions;
-    setQueryType(value);
+    setQueryItem((prev) => {return {...prev, type: value}});
     setPresetTypeID(value.id);
     clearAutocompleteItems();
     if(resetInputText || resetInputText === undefined)
       clearSelectedItem();
-    // setInputText('');
-  },[]);
+  },[clearSelectedItem]);
 
   // Handler for disease selection (template click or autocomplete item click)
   const handleDiseaseSelection = (disease) => {
     setIsError(false);
-    setSelectedNode(disease);
+    handleSetSelectedNode(disease);
     setReadyForSubmission(true);
-    if(autocompleteItems)
-      setAutoCompleteItems(null);
+
+    if(autocompleteItems) {
+      clearAutocompleteItems();
+    }
   }
 
   // Validation function for submission
@@ -158,15 +178,6 @@ const Query = ({results, loading, presetDisease, presetType}) => {
     validateSubmission();
   },[validateSubmission])
 
-  const updateQueryItems = useCallback(() => {
-    setQueryItem(
-      {
-        type: queryType,
-        node: selectedNode
-      }
-    )
-  }, [queryType, selectedNode])
-
   useEffect(() => {
     setIsLoading(loading);
   }, [loading]);
@@ -174,7 +185,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
   useEffect(() => {
     if(selectedNode !== null) {
       setInputText(selectedNode.label);
-      updateQueryItems();
+      updateQueryItem(selectedNode);
       // Uncomment the below to re-enable click to run query
       // if(readyForSubmission) {
       //   setReadyForSubmission(false);
@@ -182,19 +193,8 @@ const Query = ({results, loading, presetDisease, presetType}) => {
       // }
     }
 
-  }, [selectedNode, readyForSubmission, handleSubmission, updateQueryItems]);
+  }, [selectedNode, readyForSubmission, handleSubmission, updateQueryItem]);
 
-  useEffect(() => {
-    if(presetDisease) {
-      setSelectedNode(presetDisease);
-    }
-  }, [presetDisease]);
-
-  useEffect(() => {
-    if(presetType) {
-      setPresetTypeID(presetType);
-    }
-  }, [presetType]);
   /*
     When the query items change, update the current query in the app state
   */
@@ -232,7 +232,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
       // Set isLoading to true
       setIsLoading(true);
 
-      let queryJson = JSON.stringify({curie: selectedNode.id, type: queryType.targetType, direction: queryType.direction});
+      let queryJson = JSON.stringify({curie: selectedNode.id, type: queryItem.type.targetType, direction: queryItem.type.direction});
 
       // submit query to /query
       const requestOptions = {
@@ -264,15 +264,21 @@ const Query = ({results, loading, presetDisease, presetType}) => {
           if(window.location.href.includes('results')) {
             
             // reset the query bar back to the values for the current query
-            let prevTypeID = new URLSearchParams(window.location.search).get("t");
-            let prevLabel = new URLSearchParams(window.location.search).get("l");
+            let prevTypeID = searchParams.get("t");
+            let prevLabel = searchParams.get("l");
 
             if(prevLabel) {
               setInputText(prevLabel);
               console.log(prevLabel);
             }
-            if(prevTypeID !== undefined)
-              setPresetTypeID(prevTypeID);
+            if(prevTypeID !== undefined) {
+              let newType = queryTypes.find(type => {
+                return type.id === parseInt(prevTypeID)
+              })
+              let newQueryItem = {node:{id:'', label: prevLabel}, type: newType};
+              
+              setQueryItem(newQueryItem);
+            }
             
             // set isLoading to false so we can submit another query if we want to
             setIsLoading(false);
@@ -290,18 +296,8 @@ const Query = ({results, loading, presetDisease, presetType}) => {
         });
     }
 
-  }, [isValidSubmission, dispatch, queryItem, queryType,
-     storedQuery, selectedNode, navigate, setSearchParams])
-
-  /*
-    If the query has been populated by clicking on an item in the query history
-    set the isValidSubmission to true to imitate manual submission of the query
-  */
-  useEffect(() => {
-    if(navigatingFromHistory) {
-      setIsValidSubmission(true)
-    }
-  }, [navigatingFromHistory]);
+  }, [isValidSubmission, dispatch, queryItem, storedQuery, 
+    selectedNode, navigate, searchParams, setSearchParams])
 
   useEffect(() => {
     if(presetURL) {
@@ -341,7 +337,7 @@ const Query = ({results, loading, presetDisease, presetType}) => {
           {
             isResults && selectedNode && selectedNode.id &&
             <p className={styles.needHelp}>
-              {getEntityLink(selectedNode.id, styles.monarchLink, queryType)}
+              {getEntityLink(selectedNode.id, styles.monarchLink, queryItem.type)}
             </p>
           }
           <p className={styles.needHelp}>
