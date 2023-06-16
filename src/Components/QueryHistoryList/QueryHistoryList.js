@@ -10,6 +10,7 @@ import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
 import {ReactComponent as Export} from '../../Icons/export.svg';
 import { useNavigate } from "react-router-dom";
 import { cloneDeep } from "lodash";
+import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 
 const QueryHistoryList = () => {
 
@@ -39,7 +40,9 @@ const QueryHistoryList = () => {
   }, [queryHistoryState]);
 
   const handleClick = (query) => {
-    navigate(`/results?l=${encodeURIComponent(query.item?.node?.label)}&t=${query.item?.type?.id}&q=${query.id}`);
+    navigate(
+      getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, query.id)
+    );
   }
 
   const handleSearch = (value) => {
