@@ -195,3 +195,13 @@ const generateEntityLink = (id, className, linkTextGenerator) => {
 
   return null;
 }
+
+export const getLastItemInArray = (arr) => {
+  return arr.at(-1);
+} 
+
+export const getDataFromQueryVar = (varID) => {
+  const dataValue = new URLSearchParams(window.location.search).get(varID);
+  const valueToReturn = (dataValue) ? dataValue : null;
+  return valueToReturn;
+}

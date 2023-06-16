@@ -6,37 +6,40 @@ import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
 import Select from "../FormFields/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
+import Tooltip from '../Tooltip/Tooltip';
+import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
+import ResultsListHeader from "../ResultsListHeader/ResultsListHeader";
+import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
+import ReactPaginate from 'react-paginate';
+import { cloneDeep, isEqual } from "lodash";
+import { unstable_useBlocker as useBlocker } from "react-router";
 import { useSelector } from 'react-redux';
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
-import { currentQuery} from "../../Redux/querySlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
-import ReactPaginate from 'react-paginate';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
   sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag, 
   filterCompare } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters } from "../../Utilities/resultsInteractionFunctions";
-import { handleFetchErrors } from "../../Utilities/utilities";
-import { cloneDeep, isEqual } from "lodash";
-import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
-import Tooltip from '../Tooltip/Tooltip';
-import { unstable_useBlocker as useBlocker } from "react-router";
-import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
 import { isFacet, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
-import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
-import ResultsListHeader from "../ResultsListHeader/ResultsListHeader";
+import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
+import { queryTypes } from "../../Utilities/queryTypes";
+import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
 
 const ResultsList = ({loading}) => {
 
   let blocker = useBlocker(true);
 
   // URL search params
-  const loadingParam = new URLSearchParams(window.location.search).get("loading")
-  const queryIDParam = new URLSearchParams(window.location.search).get("q")
-
-  let storedQuery = useSelector(currentQuery);
-  storedQuery = (storedQuery !== undefined) ? storedQuery : {type:{}, node: {}};
+  const loadingParam = getDataFromQueryVar("loading");
+  const queryIDParam = getDataFromQueryVar("q");
+  const initPresetTypeID = getDataFromQueryVar("t");
+  const initPresetTypeObject = (initPresetTypeID) 
+    ? queryTypes.find(type => type.id === parseInt(initPresetTypeID))
+    : null;
+  const initNodeLabelParam = getDataFromQueryVar("l");
+  const initNodeIdParam = getDataFromQueryVar("i");
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
@@ -579,7 +582,14 @@ const ResultsList = ({loading}) => {
         edgeGroup={selectedEdges}
       />
       <div className={styles.resultsList}>
-        <Query results loading={isLoading} />
+        <Query 
+          results 
+          loading={isLoading} 
+          initPresetTypeID={initPresetTypeID}
+          initPresetTypeObject={initPresetTypeObject}
+          initNodeIdParam={initNodeIdParam}
+          initNodeLabelParam={initNodeLabelParam}
+        />
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
@@ -687,7 +697,7 @@ const ResultsList = ({loading}) => {
                           <ResultsItem
                             rawResults={rawResults.current}
                             key={item.id}
-                            type={storedQuery.type}
+                            type={initPresetTypeObject}
                             item={item}
                             activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
                             activeStringFilters={activeStringFilters}

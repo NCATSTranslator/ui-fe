@@ -68,3 +68,7 @@ export const handleClearAllFilters = (asFilters, rResults, oResults, setActiveFi
   setActiveFilters([]);
   handleUpdateResults([], asFilters, rResults, oResults, false, currentSortString);
 }
+
+export const getResultsShareURLPath = (label, nodeID, typeID, pk) => {
+  return `/results?l=${label}&i=${nodeID}&t=${typeID}&q=${pk}`
+}
