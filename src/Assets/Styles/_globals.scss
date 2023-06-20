@@ -102,7 +102,7 @@
   padding: 72px 20px;
   margin: 0 auto;
   max-width: $maxwidth;
-  width: 100%;
+  width: calc(100% - 40px);
 }
 
 button {

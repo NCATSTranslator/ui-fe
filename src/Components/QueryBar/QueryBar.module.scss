@@ -1,7 +1,8 @@
 @import "../../Assets/Styles/variables";
 
 .form {
-  display: flex;
+  display: grid;
+  grid-template-columns: 300px 1fr auto;
   justify-content: space-between;
   align-items: stretch;
   position: relative;
