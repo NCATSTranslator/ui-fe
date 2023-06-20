@@ -54,7 +54,7 @@
       display: grid;
       grid-template-columns: repeat(3, auto);
       grid-gap: 12px;
-      @media (min-width: 1250px) {
+      @media (min-width: $desktop) {
         display: block;
       }
       .button {
@@ -75,7 +75,7 @@
         transition: box-shadow .25s ease;
         box-shadow: $dropShadow;
         margin: 0 $m 0 0;
-        @media (min-width: 1250px) {
+        @media (min-width: $desktop) {
           margin: 0 $s 0 0;
         }
         &:hover {
