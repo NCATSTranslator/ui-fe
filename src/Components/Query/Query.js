@@ -255,7 +255,7 @@ const Query = ({results, loading, initPresetTypeID, initPresetTypeObject = null,
   return (
     <>
       <div className={`${styles.query}`} >
-        <div className={`${styles.container} container`}>
+        <div className={`${styles.container}`}>
           {!results &&
             <h4 className={styles.heading}>Biomedical Data Translator</h4>
           }

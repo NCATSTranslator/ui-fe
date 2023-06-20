@@ -5,6 +5,8 @@
   background-color: $purpleTwo20;
   .container {
     padding: 0 20px 0;
+    max-width: 1250px;
+    margin: 0 auto;
   }
   .heading {
     color: $purpleTwo;
@@ -42,16 +44,22 @@
     align-items: center;
     margin-top: 50px;
     .subTwo {
+      display: flex;
       font-size: 14px;
       font-weight: 700;
       color: $darkGray;
       margin: 0 $s 0 0;
     }
     .exampleList {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      grid-gap: 12px;
+      @media (min-width: 1250px) {
+        display: block;
+      }
       .button {
         background-color: $white;
         color: $purpleOne;
-        margin: 0 $s 0 0;
         align-items: center;
         background-color: $white;
         border-radius: 5px;
@@ -66,6 +74,10 @@
         text-decoration: none;
         transition: box-shadow .25s ease;
         box-shadow: $dropShadow;
+        margin: 0 $m 0 0;
+        @media (min-width: 1250px) {
+          margin: 0 $s 0 0;
+        }
         &:hover {
           box-shadow: $dropShadowHover;
         }
