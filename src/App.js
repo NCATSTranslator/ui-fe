@@ -1,14 +1,19 @@
 import React, {useState} from 'react';
 import Footer from './Components/Footer/Footer';
 import Header from './Components/Header/Header';
+import SmallScreenOverlay from './Components/SmallScreenOverlay/SmallScreenOverlay';
 import SendFeedbackModal from "./Components/Modals/SendFeedbackModal";
+import { useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import'./App.scss';
+import './App.scss';
 
 
 const App = () => {
 
   const location = useLocation();
+  const minScreenWidth = 1024;
+  const {width, height} = useWindowSize();
+
   let pathnameClass = location.pathname.replace('/', '');
   pathnameClass = (pathnameClass.includes('/')) ? pathnameClass.replace(/\//g, '-') : pathnameClass;
   pathnameClass = (pathnameClass === "") ? "home" : pathnameClass;
@@ -24,10 +29,13 @@ const App = () => {
       <div className='header-disclaimer'>
         <p>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
       </div>
-      <Header handleFeedbackModalOpen={()=>setFeedbackModalOpen(true)}>
-      </Header>
+      <Header handleFeedbackModalOpen={()=>setFeedbackModalOpen(true)} />
       <div className='body'>
-        <Outlet context={setFeedbackModalOpen}/>
+        {
+          (width < minScreenWidth)
+          ? <SmallScreenOverlay />
+          : <Outlet context={setFeedbackModalOpen}/>
+        }
       </div>
       <Footer>
         <nav>
