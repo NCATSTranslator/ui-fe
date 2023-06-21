@@ -102,7 +102,7 @@ const Query = ({results, loading, initPresetTypeID, initPresetTypeObject = null,
       headers: { 'Content-Type': 'application/json' },
       body: queryJson
     };
-    fetch('/creative_query', requestOptions)
+    fetch('/api/creative_query', requestOptions)
       .then(response => response.json())
       .then(data => {
         console.log(data)
