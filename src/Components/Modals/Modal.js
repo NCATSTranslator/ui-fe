@@ -5,7 +5,7 @@ import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
 const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseButton, testId}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
-  var modalIsOpen = (startOpen) ? styles.true : styles.false;
+  var modalIsOpenClass = (startOpen) ? styles.true : styles.false;
   onClose = (onClose) ? onClose : ()=>{console.log('no onClose method specified for Modal component.')};
 
   const handleKeypress = useCallback((e) => {
@@ -27,8 +27,15 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
     };
   }, [handleKeypress]);
 
+  useEffect(() => {
+    if(isOpen) 
+      document.body.style.overflow = 'hidden';
+    else 
+      document.body.style.overflow = 'auto';
+  });
+
   return (
-    <div className={`${styles.modalWindow} ${modalIsOpen} ${className}`} data-testid={testId} onClick={handleClickOutside}>
+    <div className={`${styles.modalWindow} ${modalIsOpenClass} ${className}`} data-testid={testId} onClick={handleClickOutside}>
       <div 
         onClick={(e) => e.stopPropagation()}
         className={`${styles.modalContainer} ${containerClass}`}
