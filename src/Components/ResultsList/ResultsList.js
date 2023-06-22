@@ -200,7 +200,7 @@ const ResultsList = ({loading}) => {
       body: queryIDJson
     };
     // eslint-disable-next-line
-    const response = await fetch('/creative_status', requestOptions)
+    const response = await fetch('/api/creative_status', requestOptions)
       .then(response => handleFetchErrors(response))
       .then(response => response.json())
       .then(data => {
@@ -260,7 +260,7 @@ const ResultsList = ({loading}) => {
       body: queryIDJson
     };
     // eslint-disable-next-line
-    const response = await fetch('/creative_result', requestOptions)
+    const response = await fetch('/api/creative_result', requestOptions)
       .then(response => handleFetchErrors(response, () => {
         setIsFetchingARAStatus(false);
         setIsFetchingResults(false);

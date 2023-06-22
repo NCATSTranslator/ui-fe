@@ -10,7 +10,7 @@ describe('run example query', () => {
     cy.get('button[data-testid="heart-disease"]').click();
 
     // wait for /creative_result to return success
-    cy.intercept('POST' , '/creative_result').as('results'); 
+    cy.intercept('POST' , '/api/creative_result').as('results'); 
     cy.wait('@results', {timeout: 20000}).its('response.body.status').should('eq', 'success');
   })
 })
