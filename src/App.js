@@ -12,7 +12,7 @@ const App = () => {
 
   const location = useLocation();
   const minScreenWidth = 1024;
-  const {width, height} = useWindowSize();
+  const {width} = useWindowSize();
 
   let pathnameClass = location.pathname.replace('/', '');
   pathnameClass = (pathnameClass.includes('/')) ? pathnameClass.replace(/\//g, '-') : pathnameClass;

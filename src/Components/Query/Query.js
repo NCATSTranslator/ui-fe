@@ -78,15 +78,16 @@ const Query = ({results, loading, initPresetTypeID, initPresetTypeObject = null,
     });
   }, []);
 
-  const handleRevertQueryItem = (item) => {
-    setInputText(item.node.label);
-    setPresetTypeID(item.type.id);
-    setSelectedNode(item.node);
-    setQueryItem(item);
-    dispatch(setCurrentQuery(item));
-  }
+  const submitQuery = useCallback(() => {
 
-  const submitQuery = () => {
+    const handleRevertQueryItem = (item) => {
+      setInputText(item.node.label);
+      setPresetTypeID(item.type.id);
+      setSelectedNode(item.node);
+      setQueryItem(item);
+      dispatch(setCurrentQuery(item));
+    }
+
     let timestamp = new Date();
 
     // Reset the current results in the application state
@@ -148,7 +149,7 @@ const Query = ({results, loading, initPresetTypeID, initPresetTypeObject = null,
       .catch((error) => {
         console.log(error)
       });
-  }
+  },[dispatch, navigate, queryItem, selectedNode]);
 
   const updateQueryItem = useCallback((selectedNode = {id:'', label: ''}) => {
     setQueryItem(
@@ -230,7 +231,7 @@ const Query = ({results, loading, initPresetTypeID, initPresetTypeObject = null,
     }
 
     submitQuery();
-  }, [selectedNode])
+  }, [selectedNode, submitQuery])
 
   // Event handler for form submission
   const handleSubmission = useCallback(() => {
