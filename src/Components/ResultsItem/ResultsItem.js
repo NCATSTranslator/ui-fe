@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
@@ -21,11 +21,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const formattedPaths = item.compressedPaths;
   const [selectedPaths, setSelectedPaths] = useState(new Set());
 
-  const initPathString = (type !== undefined && type.pathString) ? type.pathString : 'may affect';
+  const initPathString = useRef((type !== undefined && type.pathString) ? type.pathString : 'may affect');
 
-  let pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString}` : `Path that ${initPathString}`;
-  let nameString = (item.name !== null) ? item.name : '';
-  let objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
+  const pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
+  const nameString = (item.name !== null) ? item.name : '';
+  const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
@@ -34,20 +34,10 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const handleEdgeSpecificEvidence = (edgeGroup) => {
     const filterEvidenceObjs = (objs, selectedEdge, container) => {
       for (const obj of objs) {
-        let include = true;
-        // check for subject match
-        if(obj.edge.subject.toLowerCase() !== selectedEdge.subject.names[0].toLowerCase())
-          include = false;
-        // check for predicate match
-        if(!obj.edge.predicates.map((p) => p.toLowerCase()).includes(selectedEdge.predicate.toLowerCase()))
-          include = false;
-        // check for object match
-        if(obj.edge.object.toLowerCase() !== selectedEdge.object.names[0].toLowerCase())
-          include = false;
-
-        if(include) {
+        if (obj.edges[selectedEdge.id] !== undefined) {
           const includedObj = cloneDeep(obj);
-          includedObj.edge.predicates = [selectedEdge.predicate];
+          includedObj.edges = {};
+          includedObj.edges[selectedEdge.id] = obj.edges[selectedEdge.id];
           container.push(includedObj);
         }
       }
