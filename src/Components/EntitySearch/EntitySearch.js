@@ -36,11 +36,6 @@ const EntitySearch = ({activeFilters, onFilter}) => {
         className={styles.textInput}
         value={searchStringObject.value}
       />
-      {/* <Checkbox handleClick={handleStringSearchActive}
-        checked={activeFilters.some(e => e.type === searchStringObject.type)}>
-          Minimum Number of Evidence
-      </Checkbox> */}
-
     </div>
   );
 }
