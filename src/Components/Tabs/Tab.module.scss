@@ -1,16 +1,24 @@
 @import "../../Assets/Styles/variables";
 
 .tabListItem {
-  padding: 0.5rem 0.75rem;
-  margin: 0 $s -1px $s;
+  margin: 0 0 5px;
   display: inline-block;
   cursor: pointer;
-  transition: all .2s ease;
-  border-bottom: 3px solid $purpleOne50;
-  &:first-of-type {
-    margin: 0 $s -1px 0;
+  font-weight: 700;
+  .heading {
+    padding: $xs $l;
+  }
+  .underline {
+    margin-top: 8px;
+    height: 1px;
+    background-color: $purpleOne50;
+    transition: background-color .5s ease;
   }
   &.active {
-    border-bottom: 3px solid $purpleOne;
+    .underline {
+      margin-top: 6px;
+      background: $purpleOne;
+      height: 3px;
+    }
   }
 }
