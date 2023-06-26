@@ -236,236 +236,238 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
 
   return (
     <Modal isOpen={modalIsOpen} onClose={handleClose} className={styles.evidenceModal} containerClass={styles.evidenceContainer}>
-      <div className={styles.top}>
-        <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
-        {
-          !isAll &&
-          formattedEdges &&
-          formattedEdges.map((edge, i) => {
-            return (
-              <h5 className={styles.subtitle} key={i}>{capitalizeAllWords(edge)}</h5>
-            )
-          })
-        }
-        {
-          <Tabs isOpen={modalIsOpen}>
-            {
-              clinicalTrials.current.length > 0 &&
-              <div heading="Clinical Trials">
-                <div className={`${styles.tableBody} ${styles.clinicalTrials}`}>
-                  <div className={`${styles.tableHead}`}>
-                    <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
-                    <div className={`${styles.head} ${styles.link}`}>Link</div>
+      {selectedItem.name &&       
+        <div className={styles.top}>
+          <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
+          {
+            !isAll &&
+            formattedEdges &&
+            formattedEdges.map((edge, i) => {
+              return (
+                <h5 className={styles.subtitle} key={i}>{capitalizeAllWords(edge)}</h5>
+              )
+            })
+          }
+          {
+            <Tabs isOpen={modalIsOpen}>
+              {
+                clinicalTrials.current.length > 0 &&
+                <div heading="Clinical Trials">
+                  <div className={`${styles.tableBody} ${styles.clinicalTrials}`}>
+                    <div className={`${styles.tableHead}`}>
+                      <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
+                      <div className={`${styles.head} ${styles.link}`}>Link</div>
+                    </div>
+                    <div className={styles.evidenceItems}>
+                      {
+                        clinicalTrials.current.map((item, i)=> {
+                          const edge = Object.values(item.edges)[0];
+                          return (
+                            <div className={styles.evidenceItem} key={i}>
+                              <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                                {
+                                  edge &&
+                                  <span>
+                                    <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
+                                  </span>
+                                }
+                              </span>
+                              <div className={`${styles.cell} ${styles.link} link`}>
+                                {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
+                              </div>
+                            </div>
+                          )
+                        })
+                      }
+                    </div>
                   </div>
-                  <div className={styles.evidenceItems}>
-                    {
-                      clinicalTrials.current.map((item, i)=> {
-                        const edge = Object.values(item.edges)[0];
-                        return (
-                          <div className={styles.evidenceItem} key={i}>
-                            <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                              {
-                                edge &&
-                                <span>
-                                  <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
+                </div>
+              }
+              {
+                pubmedEvidence.length > 0 &&
+                <div heading="Publications">
+                  <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
+                  {
+                    <div className={`${styles.tableBody}`}>
+                      <div className={styles.tableHead}>
+                        <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
+                        <div 
+                          className={`${styles.head} ${styles.date} ${isSortedByDate ? styles.true : (isSortedByDate === null) ? '' : styles.false}`}
+                          onClick={()=>{handleSort((isSortedByDate) ? 'dateLowHigh': 'dateHighLow')}}
+                          >
+                          <span className={styles.headSpan}>
+                            Date(s)
+                          </span>
+                        </div>
+                        <div
+                          className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
+                          onClick={()=>{handleSort((isSortedBySource) ? 'sourceHighLow': 'sourceLowHigh')}}
+                          >
+                          <span className={styles.headSpan}>
+                            Source
+                          </span>
+                        </div>
+                        <div
+                          className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`}
+                          onClick={()=>{handleSort((isSortedByTitle) ? 'titleHighLow': 'titleLowHigh')}}
+                          >
+                          <span className={styles.headSpan}>
+                            Title
+                          </span>
+                        </div>
+                        <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
+                      </div>
+                      {
+                        isLoading &&
+                        <LoadingBar
+                          loading={isLoading}
+                          useIcon
+                          className={styles.loadingBar}
+                        />
+                      }
+                      {
+                        !isLoading &&
+                        <div className={styles.evidenceItems} >
+                          {
+                            displayedPubmedEvidence.map((item, i)=> {
+                              const edge = Object.values(item.edges)[0];
+                              return (
+                                <div className={styles.evidenceItem} key={i}>
+                                  <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                                    {
+                                      edge &&
+                                      <span>
+                                        <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
+                                      </span>
+                                    }
+                                  </span>
+                                  <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
+                                    {item.pubdate && (item.pubdate === 0 ) ? '' : item.pubdate }
+                                  </span>
+                                  <span className={`${styles.cell} ${styles.source} source`}>
+                                    <span>
+                                      {item.source && item.source }
+                                    </span>
+                                  </span>
+                                  <span className={`${styles.cell} ${styles.title} title`} >
+                                    {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
+                                    {!item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
+                                  </span>
+                                  <span className={`${styles.cell} ${styles.abstract} abstract`}>
+                                    <span>
+                                      {!item.snippet && "No snippet available."}
+                                      {item.snippet && item.snippet}
+                                    </span>
+                                      {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
+                                  </span>
+                                </div>
+                              )
+                            })
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                  {
+                    pubmedEvidence.length > itemsPerPage &&
+                    <div className={styles.bottom}>
+                      <div className={styles.perPage}>
+                        <Select
+                          label=""
+                          name="Items Per Page"
+                          size="m"
+                          handleChange={(value)=>{
+                            setNewItemsPerPage(parseInt(value));
+                          }}
+                          value={newItemsPerPage}
+                          >
+                          <option value="5" key="0">5</option>
+                          <option value="10" key="1">10</option>
+                          <option value="20" key="2">20</option>
+                        </Select>
+                      </div>
+                      <div className={styles.pagination}>
+                        <ReactPaginate
+                          breakLabel="..."
+                          nextLabel="Next"
+                          previousLabel="Previous"
+                          onPageChange={handlePageClick}
+                          pageRangeDisplayed={2}
+                          marginPagesDisplayed={2}
+                          pageCount={pageCount}
+                          renderOnZeroPageCount={null}
+                          className={styles.pageNums}
+                          pageClassName={styles.pageNum}
+                          activeClassName={styles.current}
+                          previousLinkClassName={`${styles.prev} ${styles.button}`}
+                          nextLinkClassName={`${styles.prev} ${styles.button}`}
+                          disabledLinkClassName={styles.disabled}
+                          forcePage={currentPage}
+                        />
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+              {
+                // Add sources modal for predicates
+                sources.length > 0 &&
+                <div heading="Sources">
+                  <div className={`${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
+                    <div className={`${styles.tableHead}`}>
+                      { !isAll && <div className={`${styles.head}`}>Relationship</div> }
+                      <div className={`${styles.head}`}>Source</div>
+                      <div className={`${styles.head}`}>Link</div>
+                    </div>
+                    <div className={styles.evidenceItems}>
+                      {
+                        sources.map((src, i) => { 
+                          const edge = Object.values(src.edges)[0];
+                          const subjectName = capitalizeAllWords(edge.subject);
+                          const predicateName = capitalizeAllWords(edge.predicate);
+                          const objectName = capitalizeAllWords(edge.object);
+                          const name = (!Array.isArray(src) && typeof src === 'object') ? src.name: '';
+                          const url = (!Array.isArray(src) && typeof src === 'object') ? src.url: src;
+                          return(
+                            <div className={styles.evidenceItem}>
+                              { !isAll &&
+                                <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                                  <span className={styles.sourceEdge} key={i}>
+                                    <span>{subjectName}</span>
+                                    <strong>{predicateName}</strong>
+                                    <span>{objectName}</span>
+                                  </span>
                                 </span>
                               }
-                            </span>
-                            <div className={`${styles.cell} ${styles.link} link`}>
-                              {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
-                            </div>
-                          </div>
-                        )
-                      })
-                    }
-                  </div>
-                </div>
-              </div>
-            }
-            {
-              pubmedEvidence.length > 0 &&
-              <div heading="Publications">
-                <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Supporting Evidence</p>
-                {
-                  <div className={`${styles.tableBody}`}>
-                    <div className={styles.tableHead}>
-                      <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
-                      <div 
-                        className={`${styles.head} ${styles.date} ${isSortedByDate ? styles.true : (isSortedByDate === null) ? '' : styles.false}`}
-                        onClick={()=>{handleSort((isSortedByDate) ? 'dateLowHigh': 'dateHighLow')}}
-                        >
-                        <span className={styles.headSpan}>
-                          Date(s)
-                        </span>
-                      </div>
-                      <div
-                        className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
-                        onClick={()=>{handleSort((isSortedBySource) ? 'sourceHighLow': 'sourceLowHigh')}}
-                        >
-                        <span className={styles.headSpan}>
-                          Source
-                        </span>
-                      </div>
-                      <div
-                        className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`}
-                        onClick={()=>{handleSort((isSortedByTitle) ? 'titleHighLow': 'titleLowHigh')}}
-                        >
-                        <span className={styles.headSpan}>
-                          Title
-                        </span>
-                      </div>
-                      <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
-                    </div>
-                    {
-                      isLoading &&
-                      <LoadingBar
-                        loading={isLoading}
-                        useIcon
-                        className={styles.loadingBar}
-                      />
-                    }
-                    {
-                      !isLoading &&
-                      <div className={styles.evidenceItems} >
-                        {
-                          displayedPubmedEvidence.map((item, i)=> {
-                            const edge = Object.values(item.edges)[0];
-                            return (
-                              <div className={styles.evidenceItem} key={i}>
-                                <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                                  {
-                                    edge &&
-                                    <span>
-                                      <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
-                                    </span>
-                                  }
-                                </span>
-                                <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
-                                  {item.pubdate && (item.pubdate === 0 ) ? '' : item.pubdate }
-                                </span>
-                                <span className={`${styles.cell} ${styles.source} source`}>
-                                  <span>
-                                    {item.source && item.source }
-                                  </span>
-                                </span>
-                                <span className={`${styles.cell} ${styles.title} title`} >
-                                  {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
-                                  {!item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
-                                </span>
-                                <span className={`${styles.cell} ${styles.abstract} abstract`}>
-                                  <span>
-                                    {!item.snippet && "No snippet available."}
-                                    {item.snippet && item.snippet}
-                                  </span>
-                                    {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
-                                </span>
-                              </div>
-                            )
-                          })
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-                {
-                  pubmedEvidence.length > itemsPerPage &&
-                  <div className={styles.bottom}>
-                    <div className={styles.perPage}>
-                      <Select
-                        label=""
-                        name="Items Per Page"
-                        size="m"
-                        handleChange={(value)=>{
-                          setNewItemsPerPage(parseInt(value));
-                        }}
-                        value={newItemsPerPage}
-                        >
-                        <option value="5" key="0">5</option>
-                        <option value="10" key="1">10</option>
-                        <option value="20" key="2">20</option>
-                      </Select>
-                    </div>
-                    <div className={styles.pagination}>
-                      <ReactPaginate
-                        breakLabel="..."
-                        nextLabel="Next"
-                        previousLabel="Previous"
-                        onPageChange={handlePageClick}
-                        pageRangeDisplayed={2}
-                        marginPagesDisplayed={2}
-                        pageCount={pageCount}
-                        renderOnZeroPageCount={null}
-                        className={styles.pageNums}
-                        pageClassName={styles.pageNum}
-                        activeClassName={styles.current}
-                        previousLinkClassName={`${styles.prev} ${styles.button}`}
-                        nextLinkClassName={`${styles.prev} ${styles.button}`}
-                        disabledLinkClassName={styles.disabled}
-                        forcePage={currentPage}
-                      />
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-            {
-              // Add sources modal for predicates
-              sources.length > 0 &&
-              <div heading="Sources">
-                <div className={`${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
-                  <div className={`${styles.tableHead}`}>
-                    { !isAll && <div className={`${styles.head}`}>Relationship</div> }
-                    <div className={`${styles.head}`}>Source</div>
-                    <div className={`${styles.head}`}>Link</div>
-                  </div>
-                  <div className={styles.evidenceItems}>
-                    {
-                      sources.map((src, i) => { 
-                        const edge = Object.values(src.edges)[0];
-                        const subjectName = capitalizeAllWords(edge.subject);
-                        const predicateName = capitalizeAllWords(edge.predicate);
-                        const objectName = capitalizeAllWords(edge.object);
-                        const name = (!Array.isArray(src) && typeof src === 'object') ? src.name: '';
-                        const url = (!Array.isArray(src) && typeof src === 'object') ? src.url: src;
-                        return(
-                          <div className={styles.evidenceItem}>
-                            { !isAll &&
-                              <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                                <span className={styles.sourceEdge} key={i}>
-                                  <span>{subjectName}</span>
-                                  <strong>{predicateName}</strong>
-                                  <span>{objectName}</span>
-                                </span>
+                              <span className={`${styles.cell} ${styles.source} ${styles.sourceItem}`}>
+                                <span className={styles.sourceEdge} key={i}>{name}</span>
                               </span>
-                            }
-                            <span className={`${styles.cell} ${styles.source} ${styles.sourceItem}`}>
-                              <span className={styles.sourceEdge} key={i}>{name}</span>
-                            </span>
-                            <span className={`${styles.cell} ${styles.link} ${styles.sourceItem}`}>
-                              <a key={i} href={url} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
-                                {url}
-                                <ExternalLink/>
-                              </a>
-                            </span>
-                          </div>
-                        )
-                      })
-                    }
+                              <span className={`${styles.cell} ${styles.link} ${styles.sourceItem}`}>
+                                <a key={i} href={url} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
+                                  {url}
+                                  <ExternalLink/>
+                                </a>
+                              </span>
+                            </div>
+                          )
+                        })
+                      }
+                    </div>
                   </div>
                 </div>
-              </div>
-            }
-            {
-              clinicalTrials.current.length <= 0 &&
-              pubmedEvidence.length <= 0 &&
-              sources.length <= 0 &&
-              <div heading="No Evidence Available">
-                <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
-              </div>
-            }
-          </Tabs>
-        }
-      </div>
+              }
+              {
+                clinicalTrials.current.length <= 0 &&
+                pubmedEvidence.length <= 0 &&
+                sources.length <= 0 &&
+                <div heading="No Evidence Available">
+                  <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
+                </div>
+              }
+            </Tabs>
+          }
+        </div>
+      }
     </Modal>
   );
 }
