@@ -18,14 +18,12 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
     let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda:')));
     let araTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ara:')));
-    let diTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('di:')));
     const newGroupedTags = {
       fda: fdaTags,
       resultType: resultTypeTags,
       nodeType: nodeTypeTags,
       role: roleTags,
       ara: araTags,
-      di: diTags
     }
     return newGroupedTags;
   }
@@ -134,17 +132,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getDrugIndicationsHeading = () => {
-    return(
-      <div className={styles.labelContainer} >
-          <div className={styles.label} >
-            <p className={styles.subTwo}>Drug Indications</p>
-          </div>
-          <p className={styles.caption}>Filter on specific drug indications.</p>
-      </div>
-    )
-  }
-
   const getTagHeadingMarkup = (tagType) => {
     let headingToReturn;
     switch(tagType) {
@@ -162,9 +149,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
         break;
       case 'ara':
         headingToReturn = getAraHeading();
-        break;
-      case 'di':
-        headingToReturn = getDrugIndicationsHeading();
         break;
       default:
         headingToReturn = '';

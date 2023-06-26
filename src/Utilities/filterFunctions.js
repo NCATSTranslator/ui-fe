@@ -28,4 +28,4 @@ const filterFamily = (filter) => {
 }
 
 // TODO: Make this a configuration
-const validFacetFamilies = new Set(['role', 'rc', 'pc', 'fda', 'ara', 'di']);
+const validFacetFamilies = new Set(['role', 'rc', 'pc', 'fda', 'ara']);
