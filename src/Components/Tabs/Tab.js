@@ -1,23 +1,18 @@
-import React from "react";
 import styles from './Tab.module.scss';
 
-const Tab = ({heading, onClick, activeTab}) => {
+const Tab = ({heading, onClick, activeTabHeading}) => {
 
   let className = `${styles.tabListItem}`;
 
-  if (activeTab === heading) {
+  if (activeTabHeading === heading) {
     className += ` ${styles.active}`;
   }
 
   return (
-
-    <div 
-      className={className}
-      onClick={onClick}
-      data-heading={heading} >
-        {heading}
+    <div className={className}>
+        <span className={styles.heading} onClick={onClick} data-heading={heading}>{heading}</span>
+        <div className={styles.underline}></div>
     </div>
-
   );
 }
 
