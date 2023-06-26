@@ -6,7 +6,7 @@ import styles from './Tabs.module.scss';
 const Tabs = ({children, isOpen}) => {
 
   const firstElement = children.find(e => e);
-  const [activeTab, setActiveTab] = useState(firstElement?.props.heading);
+  const [activeTabHeading, setActiveTab] = useState(firstElement?.props.heading);
   const tabClicked = useRef(false);
 
   const handleTabClick = (event) => {
@@ -34,7 +34,7 @@ const Tabs = ({children, isOpen}) => {
           const { heading } = child.props;
           return (
             <Tab
-              activeTab={activeTab}
+              activeTabHeading={activeTabHeading}
               key={i}
               heading={heading}
               onClick={handleTabClick}
@@ -45,8 +45,8 @@ const Tabs = ({children, isOpen}) => {
       {children.map((child, i) => {
         if(!child)
           return undefined;
-        if (activeTab !== child.props.heading) return undefined;
-        return <Fade key={i}><div className={`${styles.tabContent} ${activeTab}`}>{child.props.children}</div></Fade>; 
+        if (activeTabHeading !== child.props.heading) return undefined;
+        return <Fade key={i}><div className={`${styles.tabContent} ${activeTabHeading}`}>{child.props.children}</div></Fade>; 
       })}
     </div>
 
