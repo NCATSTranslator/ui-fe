@@ -19,13 +19,14 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda:')));
     let araTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ara:')));
     let diTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('di:')));
+    // The ordering of newGroupedTags determines the order of the facets in the UI
     const newGroupedTags = {
       fda: fdaTags,
       resultType: resultTypeTags,
       nodeType: nodeTypeTags,
       role: roleTags,
-      ara: araTags,
-      di: diTags
+      di: diTags,
+      ara: araTags
     }
     return newGroupedTags;
   }
@@ -140,7 +141,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           <div className={styles.label} >
             <p className={styles.subTwo}>Drug Indications</p>
           </div>
-          <p className={styles.caption}>Filter on specific drug indications.</p>
+          <p className={styles.caption}>Filter on if the drug is indicated for the given disease.</p>
       </div>
     )
   }
