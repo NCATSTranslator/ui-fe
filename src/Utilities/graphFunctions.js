@@ -167,7 +167,7 @@ export const handleResetView = (cy) => {
   if(!cy)
     return;
 
-  return cy.fit(cy.elements(), 20);
+  return cy.fit(cy.elements(), 75);
 }
 
 /**
@@ -197,14 +197,12 @@ const handleHideTooltip = (graphTooltipIdString) => {
   tooltip.classList.remove('visible');
 }
 
-const handleSetupAndUpdateGraphTooltip = debounce((ev, cy, graphTooltipIdString) => {
+const handleSetupAndUpdateGraphTooltip = debounce((ev, graphTooltipIdString) => {
   let elem = ev.target;
   let elemId = elem?.data()?.id;
   let type = elem?.data()?.type;
   let icon = getIcon(type);
   let url = elem?.data()?.provenance;
-
-  console.log(elem.data());
 
   let popper = elem.popper({
     content: () => {
@@ -264,7 +262,7 @@ export const initCytoscapeInstance = (dataObj) => {
           'color': '#000',
           'background-color': '#fff',
           'border-color': '#000',
-          'border-width': '2px',
+          'border-width': '1px',
           'text-wrap': 'ellipsis',
           'text-max-width': '190px',
           'font-weight': 'bold'
@@ -328,8 +326,12 @@ export const initCytoscapeInstance = (dataObj) => {
   cy.bind('vclick', 'node', (ev, formattedResults)=>dataObj.handleNodeClick(ev, formattedResults, dataObj.graph));
   cy.bind('vclick', 'edge', (ev)=>console.log(ev.target.data()));
 
-  cy.on('mouseover', 'node', (ev) => handleSetupAndUpdateGraphTooltip(ev, cy, dataObj.graphTooltipIdString));
-  cy.on('mousemove', (ev)=>{
+  cy.on('mouseover', 'node', (ev) => {
+    ev.target.style('border-width', '2px' );
+    handleSetupAndUpdateGraphTooltip(ev, dataObj.graphTooltipIdString);
+  });
+  cy.on('mouseout', 'node', (ev) => ev.target.style('border-width', '1px' ));
+  cy.on('mousemove', (ev) => {
     // if we're on the background, or not on a node, hide the tooltip 
     if(ev.target === cy || !ev.target.isNode()) 
       handleHideTooltip(dataObj.graphTooltipIdString)
@@ -344,13 +346,13 @@ export const initCytoscapeInstance = (dataObj) => {
     let sourceLabel = elem?.data()?.sourceLabel;
     let targetLabel = elem?.data()?.targetLabel;
 
-    elem.style({'line-color': '#7b7c7c'});
-    
+    elem.style('line-color', '#7b7c7c');
+
     let edgeInfoWindow = document.getElementById(dataObj.edgeInfoWindowIdString);
     let edgeInfoMarkup = <><span>{sourceLabel}</span> <span className='edge-label'>{elemLabel}</span> <span>{targetLabel}</span></>;
     ReactDOM.render(edgeInfoMarkup, edgeInfoWindow)
   });
-  cy.on('mouseout', 'edge', (ev) => ev.target.style({'line-color': '#CED0D0' }))
+  cy.on('mouseout', 'edge', (ev) => ev.target.style({'line-color': '#CED0D0' }));
 
   // when background is clicked, remove highlight and hide classes from all elements
   cy.bind('click', (ev) => {
@@ -374,8 +376,10 @@ export const initCytoscapeInstance = (dataObj) => {
 
   // Set bounds of zoom
   cy.maxZoom(2.5);
-  cy.minZoom(.1);
+  cy.minZoom(.075);
 
+  // init view
+  handleResetView(cy);
 
   if(dataObj.cyNav !== null) {
     dataObj.cyNav.destroy();

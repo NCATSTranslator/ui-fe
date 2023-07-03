@@ -232,9 +232,9 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
               </button>
             </div>
           </div>
-          <div id={graphTooltipIdString.current} className='graph-tooltip'>
-            <div id='tooltipText' className={`tooltip-text`}></div>
-          </div>
+        </div>
+        <div id={graphTooltipIdString.current} className='graph-tooltip'>
+          <div id='tooltipText' className={`tooltip-text`}></div>
         </div>
         <div 
           id={graphNavigatorContainerId.current} 
