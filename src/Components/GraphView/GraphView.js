@@ -1,7 +1,8 @@
 import styles from './GraphView.module.scss';
 import {useState, memo, useMemo, useRef, useCallback, useEffect} from 'react';
 import { resultToCytoscape, findPaths, layoutList, handleResetView, 
-  handleDeselectAllNodes, initCytoscapeInstance, getGraphWithoutExtraneousPaths } from '../../Utilities/graphFunctions';
+  handleDeselectAllNodes, initCytoscapeInstance, getGraphWithoutExtraneousPaths,
+  handleZoomByInterval } from '../../Utilities/graphFunctions';
 import cytoscape from 'cytoscape';
 import { v4 as uuidv4 } from 'uuid';
 import klay from 'cytoscape-klay';
@@ -10,6 +11,7 @@ import avsdf from 'cytoscape-avsdf';
 import { cloneDeep } from 'lodash';
 import GraphLayoutButtons from '../GraphLayoutButtons/GraphLayoutButtons';
 import navigator from 'cytoscape-navigator';
+import popper from 'cytoscape-popper';
 import 'cytoscape-navigator/cytoscape.js-navigator.css';
 
 // initialize 3rd party layouts
@@ -17,6 +19,7 @@ cytoscape.use(klay);
 cytoscape.use(avsdf);
 cytoscape.use(dagre);
 cytoscape.use(navigator);
+cytoscape.use(popper);
 
 const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}) => {
 
@@ -43,6 +46,8 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
 
   const graphId = useRef(uuidv4());
   const graphIdString = `cy-${graphId.current}`;
+  const edgeInfoWindowIdString = useRef(`edgeInfoWindow-${graphId.current}`);
+  const graphTooltipIdString = useRef(`graphTooltip-${graphId.current}`);
   const graphNavigatorContainerId = useRef(`cy-nav-container-${graphId.current}`);
   
   /**
@@ -151,6 +156,8 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
     let cytoReqDataObject = {
       graphRef: graphRef, 
       graphNavigatorContainerId: graphNavigatorContainerId.current,
+      graphTooltipIdString: graphTooltipIdString.current,
+      edgeInfoWindowIdString: edgeInfoWindowIdString.current,
       graph: graph, 
       layout: currentLayout, 
       selectedNodes: selectedNodes, 
@@ -180,28 +187,58 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
     <div className={styles.GraphView}>
       <GraphLayoutButtons setCurrentLayout={setCurrentLayout} currentLayout={currentLayout} />
       <div className={styles.graphContainer} >
-        <div className={styles.graphControls}>
-          <button 
-            onClick={()=>handleResetView(cy)}
-            >
-            Reset View
-          </button>
-          <button 
-            onClick={() => {
-              handleDeselectAllNodes(
-                cy, 
-                selectedNodes, 
-                excludedNodes, 
-                clearSelectedPaths, 
-                {highlightClass: highlightClass, hideClass: hideClass, excludedClass: excludedClass})
-              }
-            }
-            >
-            Deselect All Nodes
-          </button>
+        <div id={graphIdString} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}>
         </div>
-        <div id={graphIdString} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}></div>
-        <div id={graphNavigatorContainerId.current} className={styles.graphNavigatorContainer} 
+        <div className={styles.graphOverlayItems}>
+          <div className={styles.topBar}>
+            <div className={styles.edgeInfoWindow} >
+              <p>
+                <span className={styles.edgePrefix}>Edge Info: </span>
+                <span id={edgeInfoWindowIdString.current} className={styles.edgeInfo}></span>
+              </p>
+            </div>
+            <div className={styles.graphControls}>
+              <button 
+                onClick={()=>handleZoomByInterval(cy, 0.15, true)}
+                className={styles.graphControlButton}
+                >
+                Zoom In
+              </button>
+              <button 
+                onClick={()=>handleZoomByInterval(cy, 0.15, false)}
+                className={styles.graphControlButton}
+                >
+                Zoom Out
+              </button>
+              <button 
+                onClick={()=>handleResetView(cy)}
+                className={styles.graphControlButton}
+                >
+                Reset View
+              </button>
+              <button 
+                onClick={() => {
+                  handleDeselectAllNodes(
+                    cy, 
+                    selectedNodes, 
+                    excludedNodes, 
+                    clearSelectedPaths, 
+                    {highlightClass: highlightClass, hideClass: hideClass, excludedClass: excludedClass})
+                  }
+                }
+                className={styles.graphControlButton}
+                >
+                Deselect All Nodes
+              </button>
+            </div>
+          </div>
+          <div id={graphTooltipIdString.current} className='graph-tooltip'>
+            <div id='tooltipText' className={`tooltip-text`}></div>
+          </div>
+        </div>
+        <div 
+          id={graphNavigatorContainerId.current} 
+          className={styles.graphNavigatorContainer} 
           onMouseEnter={()=>{
             document.body.style.overflow = 'hidden';
             document.body.style.paddingRight = '15px';
@@ -210,7 +247,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
             document.body.style.overflow = 'auto';
             document.body.style.paddingRight = '0';
           }}
-        >
+          >
         </div>
       </div>
     </div>

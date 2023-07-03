@@ -26,3 +26,46 @@
     }
   }
 }
+
+.graph-tooltip {
+  transition: opacity .25s ease;
+  opacity: 0;
+  padding-bottom: $xs;
+  z-index: 0;
+  position: relative;
+  pointer-events: none;
+  .tooltip-text {
+    background-color: $white;
+    margin: $s;
+    padding: $s;
+    position: relative;
+    border-radius: $defaultBorderRadius;
+    box-shadow: $dropShadowHover;
+    text-align: center;
+    // &::after {
+    //   content: '';
+    //   position: absolute;
+    //   left: 50%;
+    //   transform: translateX(-50%);
+    //   bottom: -10px;
+    //   height: 0px;
+    //   width: 0px;
+    //   border-right: solid 10px transparent;
+    //   border-left: solid 10px transparent;
+    //   border-top: solid 10px $white;
+    // }
+    .label, .id {
+      font-weight: 700;
+      font-size: $s;
+      margin: 0;
+    }
+  }
+  &.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+}
+
+.edge-label {
+  font-weight: 700;
+}
