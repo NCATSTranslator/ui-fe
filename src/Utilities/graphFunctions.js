@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import cytoscape from 'cytoscape';
 import { debounce, cloneDeep } from 'lodash';
-import { getIcon } from './utilities';
+import { capitalizeFirstLetter } from './utilities';
 import {ReactComponent as ExternalLink} from '../Icons/external-link.svg';
 
 export const layoutList = {
@@ -199,9 +199,10 @@ const handleHideTooltip = (graphTooltipIdString) => {
 
 const handleSetupAndUpdateGraphTooltip = debounce((ev, graphTooltipIdString) => {
   let elem = ev.target;
-  let elemId = elem?.data()?.id;
-  let type = elem?.data()?.type;
-  let icon = getIcon(type);
+
+  console.log(elem.data());
+  let elemLabel = elem?.data()?.label;
+  let type = capitalizeFirstLetter(elem?.data()?.type.replace('biolink:', ''));
   let url = elem?.data()?.provenance;
 
   let popper = elem.popper({
@@ -209,9 +210,8 @@ const handleSetupAndUpdateGraphTooltip = debounce((ev, graphTooltipIdString) => 
       let tooltipElement = document.getElementById(graphTooltipIdString);
       let tooltipTextElement = tooltipElement.getElementsByClassName('tooltip-text')[0];
       const tooltipMarkup = 
-        <span>
-          {icon}
-          <p class='id'>{elemId} ({type})</p>
+        <span className='tooltip-markup'>
+          <p class='label'>{elemLabel} <span className='type'>({type})</span></p>
           {url && 
             <a href={url} target="_blank" rel='noreferrer' className='url'>
               <ExternalLink/>
@@ -299,9 +299,9 @@ export const initCytoscapeInstance = (dataObj) => {
         }
       },
       {
-        selector: '.hover-highlight',
+        selector: 'edge.hover-highlight',
         style: {
-          'line-color': '#606368'
+          'line-color': '#7b7c7c'
         }
       },
       {
@@ -322,9 +322,9 @@ export const initCytoscapeInstance = (dataObj) => {
     }
   });
 
-  cy.unbind('vclick');
-  cy.bind('vclick', 'node', (ev, formattedResults)=>dataObj.handleNodeClick(ev, formattedResults, dataObj.graph));
-  cy.bind('vclick', 'edge', (ev)=>console.log(ev.target.data()));
+  // cy.on('vclick');
+  cy.on('vclick', 'node', (ev, formattedResults)=>dataObj.handleNodeClick(ev, formattedResults, dataObj.graph));
+  cy.on('vclick', 'edge', (ev)=>console.log(ev.target.data()));
 
   cy.on('mouseover', 'node', (ev) => {
     ev.target.style('border-width', '2px' );
@@ -346,16 +346,16 @@ export const initCytoscapeInstance = (dataObj) => {
     let sourceLabel = elem?.data()?.sourceLabel;
     let targetLabel = elem?.data()?.targetLabel;
 
-    elem.style('line-color', '#7b7c7c');
+    elem.addClass('hover-highlight');
 
     let edgeInfoWindow = document.getElementById(dataObj.edgeInfoWindowIdString);
     let edgeInfoMarkup = <><span>{sourceLabel}</span> <span className='edge-label'>{elemLabel}</span> <span>{targetLabel}</span></>;
     ReactDOM.render(edgeInfoMarkup, edgeInfoWindow)
   });
-  cy.on('mouseout', 'edge', (ev) => ev.target.style({'line-color': '#CED0D0' }));
+  cy.on('mouseout', 'edge', (ev) => ev.target.removeClass('hover-highlight'));
 
   // when background is clicked, remove highlight and hide classes from all elements
-  cy.bind('click', (ev) => {
+  cy.on('click', (ev) => {
     if(ev.target === cy) {
       handleDeselectAllNodes(
         ev.cy, 

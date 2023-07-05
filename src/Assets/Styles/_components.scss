@@ -35,17 +35,40 @@
   position: relative;
   pointer-events: none;
   .tooltip-text {
-    background-color: $white;
-    margin: $s;
-    padding: $s;
+    background-color: #222;
+    margin: $xs;
+    padding: $xs;
     position: relative;
     border-radius: $defaultBorderRadius;
     box-shadow: $dropShadowHover;
     text-align: center;
-    .label, .id {
+    .label, a, a span, .type {
+      font-size: $bodyTwoSize;
+      color: $white;
+    }
+    a {
+      display: flex;
+      align-items: center;
+      text-decoration: underline;
+    }
+    .label {
       font-weight: 700;
-      font-size: $s;
       margin: 0;
+    }
+    .type {
+      font-weight: 400;
+    }
+  }
+  .tooltip-markup {
+    text-align: left;
+    svg {
+      display: inline;
+      margin: 0 3px 0 0;
+      min-width: 18px;
+      fill: $white;
+      path {
+        fill: $white;
+      }
     }
   }
   &.visible {

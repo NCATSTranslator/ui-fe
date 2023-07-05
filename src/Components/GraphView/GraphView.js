@@ -3,6 +3,8 @@ import {useState, memo, useMemo, useRef, useCallback, useEffect} from 'react';
 import { resultToCytoscape, findPaths, layoutList, handleResetView, 
   handleDeselectAllNodes, initCytoscapeInstance, getGraphWithoutExtraneousPaths,
   handleZoomByInterval } from '../../Utilities/graphFunctions';
+import {ReactComponent as Plus} from '../../Icons/Buttons/Add.svg';
+import {ReactComponent as Minus} from '../../Icons/Buttons/Subtract.svg';
 import cytoscape from 'cytoscape';
 import { v4 as uuidv4 } from 'uuid';
 import klay from 'cytoscape-klay';
@@ -202,13 +204,13 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
                 onClick={()=>handleZoomByInterval(cy, 0.15, true)}
                 className={styles.graphControlButton}
                 >
-                Zoom In
+                <Plus />
               </button>
               <button 
                 onClick={()=>handleZoomByInterval(cy, 0.15, false)}
                 className={styles.graphControlButton}
                 >
-                Zoom Out
+                <Minus />
               </button>
               <button 
                 onClick={()=>handleResetView(cy)}
