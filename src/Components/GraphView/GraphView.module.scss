@@ -55,11 +55,26 @@
     display: grid;
     grid-template-columns: 1fr max-content;
   }
+  .graphControls {
+    display: flex;
+    align-items: flex-start;
+  }
   .graphControlButton {
     margin: 0 0 0 $s;
     color: $white;
     background-color: $blueTwo;
     transition: all .25s ease;
+    &.withIcon {
+      padding:0;
+      svg {
+        width: 40px;
+        height: 40px;
+        margin: 0;
+        path {
+          stroke: $white;
+        }
+      }
+    }
   }
   .edgeInfoWindow {
     padding: $s;

@@ -202,13 +202,13 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
             <div className={styles.graphControls}>
               <button 
                 onClick={()=>handleZoomByInterval(cy, 0.15, true)}
-                className={styles.graphControlButton}
+                className={`${styles.graphControlButton} ${styles.withIcon}`}
                 >
                 <Plus />
               </button>
               <button 
                 onClick={()=>handleZoomByInterval(cy, 0.15, false)}
-                className={styles.graphControlButton}
+                className={`${styles.graphControlButton} ${styles.withIcon}`}
                 >
                 <Minus />
               </button>

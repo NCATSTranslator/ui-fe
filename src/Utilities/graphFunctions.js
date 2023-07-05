@@ -17,12 +17,6 @@ export const layoutList = {
   breadthfirst: {
     name: 'breadthfirst', spacingFactor: 1.1, avoidOverlap: true, directed: true
   },
-  dagre: {
-    name: 'dagre', spacingFactor: 1.1
-  },
-  circle: {
-    name: 'circle'
-  },
   concentric: {
     name: 'concentric'
   },
@@ -350,9 +344,14 @@ export const initCytoscapeInstance = (dataObj) => {
 
     let edgeInfoWindow = document.getElementById(dataObj.edgeInfoWindowIdString);
     let edgeInfoMarkup = <><span>{sourceLabel}</span> <span className='edge-label'>{elemLabel}</span> <span>{targetLabel}</span></>;
-    ReactDOM.render(edgeInfoMarkup, edgeInfoWindow)
+    ReactDOM.render(edgeInfoMarkup, edgeInfoWindow);
   });
-  cy.on('mouseout', 'edge', (ev) => ev.target.removeClass('hover-highlight'));
+  cy.on('mouseout', 'edge', (ev) => {
+    ev.target.removeClass('hover-highlight')
+    let edgeInfoWindow = document.getElementById(dataObj.edgeInfoWindowIdString);
+    let edgeInfoMarkup = <></>;
+    ReactDOM.render(edgeInfoMarkup, edgeInfoWindow);
+  });
 
   // when background is clicked, remove highlight and hide classes from all elements
   cy.on('click', (ev) => {
