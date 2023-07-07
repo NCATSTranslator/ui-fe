@@ -28,7 +28,6 @@ export const resultToCytoscape = (result, summary) => {
     const name = nodes[n].names[0];
     const type = nodes[n].types[0];
     const provenance = nodes[n].provenance[0];
-    console.log(n, nodes[n]);
     return {
       data: {
         id: n,
@@ -178,7 +177,6 @@ export const handleDeselectAllNodes = (cy, selNodes, excNodes, clearSelectedPath
 }
 
 export const handleZoomByInterval = (cy, interval = 0.25, direction = true) => {
-  console.log('current zoom level: ', cy.zoom());
   const currentZoomLevel = cy.zoom();
   if(direction)
     cy.zoom(currentZoomLevel + interval);
@@ -188,7 +186,8 @@ export const handleZoomByInterval = (cy, interval = 0.25, direction = true) => {
 
 const handleHideTooltip = (graphTooltipIdString) => {
   let tooltip = document.getElementById(graphTooltipIdString);
-  tooltip.classList.remove('visible');
+  if(tooltip !== null)
+    tooltip.classList.remove('visible');
 }
 
 const handleEdgeMouseOver = (ev, edgeInfoWindowIdString) => {
@@ -213,8 +212,6 @@ const handleEdgeMouseOut = (ev, edgeInfoWindowIdString) => {
 
 const handleSetupAndUpdateGraphTooltip = debounce((ev, graphTooltipIdString) => {
   let elem = ev.target;
-
-  console.log(elem.data());
   let elemLabel = elem?.data()?.label;
   let type = capitalizeFirstLetter(elem?.data()?.type.replace('biolink:', ''));
   let url = elem?.data()?.provenance;
@@ -336,7 +333,7 @@ export const initCytoscapeInstance = (dataObj) => {
     maxZoom: 2.5,
     boxSelectionEnabled: false,
     data: {
-      result: 0
+      layoutName: dataObj.layout.name
     }
   });
 

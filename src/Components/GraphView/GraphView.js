@@ -22,6 +22,7 @@ cytoscape.use(avsdf);
 cytoscape.use(dagre);
 cytoscape.use(navigator);
 cytoscape.use(popper);
+cytoscape.warnings(false);
 
 const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active, zoomKeyDown}) => {
 
@@ -181,6 +182,20 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
     }
     let cyInstanceAndNav = initCytoscapeInstance(cytoReqDataObject);
     cyNav.current = cyInstanceAndNav.nav;
+
+    if(cyInstanceAndNav.cy.data().layoutName === 'breadthfirst') {
+      var heightOffset = 200;
+      var objectNode = cyInstanceAndNav.cy.$(`[id = '${objectId.current}']`);
+
+      var maxY = cyInstanceAndNav.cy.nodes().max((node) => node.position('y')).value;
+      var minX = cyInstanceAndNav.cy.nodes().min((node) => node.position('x')).value;
+      var maxX = cyInstanceAndNav.cy.nodes().max((node) => node.position('x')).value;
+    
+      var centerX = (minX + maxX) / 2;
+    
+      objectNode.position({ x: centerX, y: maxY + heightOffset });
+      handleResetView(cyInstanceAndNav.cy);
+    }
     return cyInstanceAndNav.cy;
   }, [graphRef, graph, currentLayout, active, clearSelectedPaths, handleNodeClick]);
 
@@ -228,7 +243,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
           <div className={styles.topBar}>
             <div className={styles.edgeInfoWindow} >
               <p>
-                <span className={styles.edgePrefix}>Edge Info: </span>
+                <span className={styles.edgePrefix}>Edge: </span>
                 <span id={edgeInfoWindowIdString.current} className={styles.edgeInfo}></span>
               </p>
             </div>

@@ -6,11 +6,12 @@
 
 .graphContainer {
   width: 100%;
-  height: 550px;
+  height: 500px;
   margin: 0;
   border: 1px solid $midGray;
   border-radius: 5px;
   position: relative;
+  padding-top: 50px;
   img {
     width: 95%;
     height: 95%;
@@ -21,8 +22,8 @@
 }
 
 .graphNavigatorContainer {
-  width: calc(14vw + 50px);
-  height: calc(16vh + 50px);
+  width: calc(12vw + 50px);
+  height: calc(12vh + 50px);
   position: absolute;
   bottom: $s;
   right: $s;
