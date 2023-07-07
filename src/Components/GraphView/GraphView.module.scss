@@ -1,12 +1,17 @@
 @import "../../Assets/Styles/variables";
 
+.graphView {
+  overflow: hidden;
+}
+
 .graphContainer {
   width: 100%;
-  height: 550px;
+  height: 500px;
   margin: 0;
   border: 1px solid $midGray;
   border-radius: 5px;
   position: relative;
+  padding-top: 50px;
   img {
     width: 95%;
     height: 95%;
@@ -17,8 +22,8 @@
 }
 
 .graphNavigatorContainer {
-  width: calc(14vw + 50px);
-  height: calc(16vh + 50px);
+  width: calc(12vw + 50px);
+  height: calc(12vh + 50px);
   position: absolute;
   bottom: $s;
   right: $s;
@@ -30,21 +35,56 @@
   user-select: none;
 }
 
-.graphControls {
+.cytoscapeContainer {
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  position: relative;
+  overflow: hidden;
+}
+
+.graphOverlayItems {
   position: absolute;
   top: $s;
   right: $s;
+  left: $s;
   z-index: 100;
   border-radius: $defaultBorderRadius;
-  button {
+  .topBar {
+    display: grid;
+    grid-template-columns: 1fr max-content;
+  }
+  .graphControls {
+    display: flex;
+    align-items: flex-start;
+  }
+  .graphControlButton {
     margin: 0 0 0 $s;
     color: $white;
     background-color: $blueTwo;
     transition: all .25s ease;
+    &.withIcon {
+      padding:0;
+      svg {
+        width: 40px;
+        height: 40px;
+        margin: 0;
+        path {
+          stroke: $white;
+        }
+      }
+    }
   }
-}
-
-.cytoscapeContainer {
-  width: 100%;
-  height: 100%;
+  .edgeInfoWindow {
+    padding: $s;
+    background-color: $white;
+    border-radius: $defaultBorderRadius;
+    box-shadow: $dropShadow;
+    p {
+      margin: 0;
+    }
+    .edgePrefix {
+      font-weight: 700;
+    }
+  }
 }

@@ -26,3 +26,85 @@
     }
   }
 }
+
+.scroll-overlay {
+  opacity: 0;
+  transition: 1s opacity ease;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(96, 99, 104, .5);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+  p {
+    font-size: $m;
+    color: $white;
+    font-weight: 700;
+    max-width: 200px;
+    text-align: center;
+  }
+  &.active {
+    opacity: 1;
+    z-index: 10;
+  }
+}
+
+.graph-tooltip {
+  transition: opacity .25s ease;
+  opacity: 0;
+  padding-bottom: $xs;
+  z-index: 100;
+  position: relative;
+  pointer-events: none;
+  .tooltip-text {
+    background-color: #222;
+    margin: $xs;
+    padding: $xs;
+    position: relative;
+    border-radius: $defaultBorderRadius;
+    box-shadow: $dropShadowHover;
+    text-align: center;
+    .label, a, a span, .type {
+      font-size: $bodyTwoSize;
+      color: $white;
+    }
+    a {
+      display: flex;
+      align-items: center;
+      text-decoration: underline;
+    }
+    .label {
+      font-weight: 700;
+      margin: 0;
+    }
+    .type {
+      font-weight: 400;
+    }
+  }
+  .tooltip-markup {
+    text-align: left;
+    svg {
+      display: inline;
+      margin: 0 3px 0 0;
+      min-width: 18px;
+      fill: $white;
+      path {
+        fill: $white;
+      }
+    }
+  }
+  &.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+}
+
+.edge-label {
+  font-weight: 700;
+}
