@@ -205,3 +205,10 @@ export const getDataFromQueryVar = (varID) => {
   const valueToReturn = (dataValue) ? dataValue : null;
   return valueToReturn;
 }
+
+export const customDebounce = (method, delay) => {
+  clearTimeout(method._tId);
+  method._tId= setTimeout(function(){
+    method();
+  }, delay);
+}

@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
-const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults}) => {
+const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown}) => {
 
   let icon = getIcon(item.type);
 
@@ -177,6 +177,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             onNodeClick={handleNodeClick}
             clearSelectedPaths={handleClearSelectedPaths}
             active={isExpanded}
+            zoomKeyDown={zoomKeyDown}
           />
         </Suspense>
         <PathView

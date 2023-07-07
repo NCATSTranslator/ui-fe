@@ -191,6 +191,26 @@ const handleHideTooltip = (graphTooltipIdString) => {
   tooltip.classList.remove('visible');
 }
 
+const handleEdgeMouseOver = (ev, edgeInfoWindowIdString) => {
+  let elem = ev.target;
+  let elemLabel = elem?.data()?.label;
+  let sourceLabel = elem?.data()?.sourceLabel;
+  let targetLabel = elem?.data()?.targetLabel;
+
+  elem.addClass('hover-highlight');
+
+  let edgeInfoWindow = document.getElementById(edgeInfoWindowIdString);
+  let edgeInfoMarkup = <><span>{sourceLabel}</span> <span className='edge-label'>{elemLabel}</span> <span>{targetLabel}</span></>;
+  ReactDOM.render(edgeInfoMarkup, edgeInfoWindow);
+}
+
+const handleEdgeMouseOut = (ev, edgeInfoWindowIdString) => {
+  ev.target.removeClass('hover-highlight')
+  let edgeInfoWindow = document.getElementById(edgeInfoWindowIdString);
+  let edgeInfoMarkup = <></>;
+  ReactDOM.render(edgeInfoMarkup, edgeInfoWindow);
+} 
+
 const handleSetupAndUpdateGraphTooltip = debounce((ev, graphTooltipIdString) => {
   let elem = ev.target;
 
@@ -311,6 +331,10 @@ export const initCytoscapeInstance = (dataObj) => {
         }
       },
     ],
+    wheelSensitivity: .75,
+    minZoom: .075,
+    maxZoom: 2.5,
+    boxSelectionEnabled: false,
     data: {
       result: 0
     }
@@ -334,24 +358,8 @@ export const initCytoscapeInstance = (dataObj) => {
     handleHideTooltip(dataObj.graphTooltipIdString)
   });
 
-  cy.on('mouseover', 'edge', (ev) => {
-    let elem = ev.target;
-    let elemLabel = elem?.data()?.label;
-    let sourceLabel = elem?.data()?.sourceLabel;
-    let targetLabel = elem?.data()?.targetLabel;
-
-    elem.addClass('hover-highlight');
-
-    let edgeInfoWindow = document.getElementById(dataObj.edgeInfoWindowIdString);
-    let edgeInfoMarkup = <><span>{sourceLabel}</span> <span className='edge-label'>{elemLabel}</span> <span>{targetLabel}</span></>;
-    ReactDOM.render(edgeInfoMarkup, edgeInfoWindow);
-  });
-  cy.on('mouseout', 'edge', (ev) => {
-    ev.target.removeClass('hover-highlight')
-    let edgeInfoWindow = document.getElementById(dataObj.edgeInfoWindowIdString);
-    let edgeInfoMarkup = <></>;
-    ReactDOM.render(edgeInfoMarkup, edgeInfoWindow);
-  });
+  cy.on('mouseover', 'edge', (ev) => handleEdgeMouseOver(ev, dataObj.edgeInfoWindowIdString));
+  cy.on('mouseout', 'edge', (ev) => handleEdgeMouseOut(ev, dataObj.edgeInfoWindowIdString));
 
   // when background is clicked, remove highlight and hide classes from all elements
   cy.on('click', (ev) => {
@@ -372,10 +380,6 @@ export const initCytoscapeInstance = (dataObj) => {
       node.addClass('isNotSource')
     }
   }
-
-  // Set bounds of zoom
-  cy.maxZoom(2.5);
-  cy.minZoom(.075);
 
   // init view
   handleResetView(cy);

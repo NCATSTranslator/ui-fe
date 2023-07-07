@@ -23,9 +23,10 @@ cytoscape.use(dagre);
 cytoscape.use(navigator);
 cytoscape.use(popper);
 
-const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}) => {
+const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active, zoomKeyDown}) => {
 
   let graphRef = useRef(null);
+  let graphViewRef = useRef(null);
   const [currentLayout, setCurrentLayout] = useState(layoutList.klay);
   const graph = useMemo(() => {
     if(!active)
@@ -51,7 +52,11 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
   const edgeInfoWindowIdString = useRef(`edgeInfoWindow-${graphId.current}`);
   const graphTooltipIdString = useRef(`graphTooltip-${graphId.current}`);
   const graphNavigatorContainerId = useRef(`cy-nav-container-${graphId.current}`);
-  
+  const graphScrollOverlayId = useRef(`cy-scroll-overlay-${graphId.current}`);
+
+  const [scrollOverlayActive, setScrollOverlayActive] = useState(false);
+  const overlayTimeoutId = useRef(null);
+
   /**
   * Highlights the given element by adding the highlightClass and removing the hideClass.
   * @param {object} element - The cytoscape element to be highlighted.
@@ -160,6 +165,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
       graphNavigatorContainerId: graphNavigatorContainerId.current,
       graphTooltipIdString: graphTooltipIdString.current,
       edgeInfoWindowIdString: edgeInfoWindowIdString.current,
+      graphScrollOverlayId: graphScrollOverlayId.current, 
       graph: graph, 
       layout: currentLayout, 
       selectedNodes: selectedNodes, 
@@ -179,17 +185,44 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active}
   }, [graphRef, graph, currentLayout, active, clearSelectedPaths, handleNodeClick]);
 
   useEffect(() => {
-    return () => {
-      if(cy !== null)
-        cy.destroy();
-    };
-  });
+    if(cy) {
+      cy.userZoomingEnabled(zoomKeyDown);
+    }
 
+    const handleWheel = () => {
+      if (!zoomKeyDown) {
+        setScrollOverlayActive(true);
+
+        // Clear the previous timeout, if there is one
+        if (overlayTimeoutId.current !== null) {
+          clearTimeout(overlayTimeoutId.current);
+        }
+
+        overlayTimeoutId.current = setTimeout(() => {
+          setScrollOverlayActive(false);
+          overlayTimeoutId.current = null;
+        }, 1500);
+      }
+    };
+  
+    const retainedGraphViewRef = graphViewRef.current;
+    if (graphViewRef.current) 
+      graphViewRef.current.addEventListener('wheel', handleWheel);
+  
+    return () => {
+      if (retainedGraphViewRef) 
+        retainedGraphViewRef.removeEventListener('wheel', handleWheel);
+    };
+  }, [zoomKeyDown, graphViewRef, cy]);
+  
   return (
-    <div className={styles.GraphView}>
+    <div className={styles.GraphView} ref={graphViewRef}>
       <GraphLayoutButtons setCurrentLayout={setCurrentLayout} currentLayout={currentLayout} />
       <div className={styles.graphContainer} >
         <div id={graphIdString} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}>
+        </div>
+        <div id={graphScrollOverlayId.current} className={`${styles.scrollOverlay} ${scrollOverlayActive && 'active'} scroll-overlay`}>
+          <p>To zoom in/out, hold the Z key or use the +/- buttons above.</p>
         </div>
         <div className={styles.graphOverlayItems}>
           <div className={styles.topBar}>
