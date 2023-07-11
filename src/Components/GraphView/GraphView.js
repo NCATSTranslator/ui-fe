@@ -253,7 +253,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
         height={height}
         className={styles.animateHeightContainer}
         >
-        <div className={`${styles.graphView}`} ref={graphViewRef}>
+        <div ref={graphViewRef}>
           <GraphLayoutButtons setCurrentLayout={setCurrentLayout} currentLayout={currentLayout} />
           <div className={styles.graphContainer} >
             <div id={graphIdString} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}>
