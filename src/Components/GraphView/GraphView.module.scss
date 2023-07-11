@@ -1,7 +1,14 @@
 @import "../../Assets/Styles/variables";
 
-.graphView {
-  overflow: hidden;
+.animateHeightContainer > div {
+  display: block !important;
+}
+
+.toggleButton {
+  background-color: $blueTwo;
+  margin-right: auto;
+  margin-left: auto;
+  display: block;
 }
 
 .graphContainer {
