@@ -11,6 +11,7 @@ import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
 import { cloneDeep } from 'lodash';
+import AnimateHeight from "react-animate-height";
 import GraphLayoutButtons from '../GraphLayoutButtons/GraphLayoutButtons';
 import navigator from 'cytoscape-navigator';
 import popper from 'cytoscape-popper';
@@ -35,6 +36,10 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
 
     return resultToCytoscape(result.rawResult, rawResults.data)
   },[result, rawResults, active])
+
+  const initIsExpanded = (result?.compressedPaths && result.compressedPaths.length > 1) ? true : false;
+  const [isExpanded, setIsExpanded] = useState(initIsExpanded);
+  const [height, setHeight] = useState(0);
   
   const selectedNodes = useRef(new Set());
   const excludedNodes = useRef(new Set());
@@ -158,7 +163,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
   }, [onNodeClick])
 
   const cy = useMemo(()=>{
-    if(!active || !graphRef.current || graph === null)
+    if(!active || !graphRef.current || graph === null || height !== 'auto')
       return null;
 
     let cytoReqDataObject = {
@@ -196,8 +201,9 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
       objectNode.position({ x: centerX, y: maxY + heightOffset });
       handleResetView(cyInstanceAndNav.cy);
     }
+
     return cyInstanceAndNav.cy;
-  }, [graphRef, graph, currentLayout, active, clearSelectedPaths, handleNodeClick]);
+  }, [graphRef, graph, currentLayout, active, clearSelectedPaths, handleNodeClick, height]);
 
   useEffect(() => {
     if(cy) {
@@ -230,76 +236,94 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
     };
   }, [zoomKeyDown, graphViewRef, cy]);
   
+  useEffect(() => {
+    if(isExpanded === false)
+      setHeight(0);
+    else
+      setHeight('auto');
+  }, [isExpanded]);
+  
   return (
-    <div className={styles.GraphView} ref={graphViewRef}>
-      <GraphLayoutButtons setCurrentLayout={setCurrentLayout} currentLayout={currentLayout} />
-      <div className={styles.graphContainer} >
-        <div id={graphIdString} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}>
-        </div>
-        <div id={graphScrollOverlayId.current} className={`${styles.scrollOverlay} ${scrollOverlayActive && 'active'} scroll-overlay`}>
-          <p>To zoom in/out, hold the Z key or use the +/- buttons above.</p>
-        </div>
-        <div className={styles.graphOverlayItems}>
-          <div className={styles.topBar}>
-            <div className={styles.edgeInfoWindow} >
-              <p>
-                <span className={styles.edgePrefix}>Edge: </span>
-                <span id={edgeInfoWindowIdString.current} className={styles.edgeInfo}></span>
-              </p>
+    <div >
+      <button onClick={()=>setIsExpanded(prev=>!prev)} className={styles.toggleButton}>
+        {isExpanded ? 'Hide': 'Show'} Toggle Graph View
+      </button>
+      <AnimateHeight
+        duration={500}
+        height={height}
+        className={styles.animateHeightContainer}
+        >
+        <div ref={graphViewRef}>
+          <GraphLayoutButtons setCurrentLayout={setCurrentLayout} currentLayout={currentLayout} />
+          <div className={styles.graphContainer} >
+            <div id={graphIdString} ref={graphRef} className={`${styles.cytoscapeContainer} cytoscape-container`}>
             </div>
-            <div className={styles.graphControls}>
-              <button 
-                onClick={()=>handleZoomByInterval(cy, 0.15, true)}
-                className={`${styles.graphControlButton} ${styles.withIcon}`}
-                >
-                <Plus />
-              </button>
-              <button 
-                onClick={()=>handleZoomByInterval(cy, 0.15, false)}
-                className={`${styles.graphControlButton} ${styles.withIcon}`}
-                >
-                <Minus />
-              </button>
-              <button 
-                onClick={()=>handleResetView(cy)}
-                className={styles.graphControlButton}
-                >
-                Reset View
-              </button>
-              <button 
-                onClick={() => {
-                  handleDeselectAllNodes(
-                    cy, 
-                    selectedNodes, 
-                    excludedNodes, 
-                    clearSelectedPaths, 
-                    {highlightClass: highlightClass, hideClass: hideClass, excludedClass: excludedClass})
-                  }
-                }
-                className={styles.graphControlButton}
-                >
-                Deselect All Nodes
-              </button>
+            <div id={graphScrollOverlayId.current} className={`${styles.scrollOverlay} ${scrollOverlayActive && 'active'} scroll-overlay`}>
+              <p>To zoom in/out, hold the Z key or use the +/- buttons above.</p>
+            </div>
+            <div className={styles.graphOverlayItems}>
+              <div className={styles.topBar}>
+                <div className={styles.edgeInfoWindow} >
+                  <p>
+                    <span className={styles.edgePrefix}>Edge: </span>
+                    <span id={edgeInfoWindowIdString.current} className={styles.edgeInfo}></span>
+                  </p>
+                </div>
+                <div className={styles.graphControls}>
+                  <button 
+                    onClick={()=>handleZoomByInterval(cy, 0.15, true)}
+                    className={`${styles.graphControlButton} ${styles.withIcon}`}
+                    >
+                    <Plus />
+                  </button>
+                  <button 
+                    onClick={()=>handleZoomByInterval(cy, 0.15, false)}
+                    className={`${styles.graphControlButton} ${styles.withIcon}`}
+                    >
+                    <Minus />
+                  </button>
+                  <button 
+                    onClick={()=>handleResetView(cy)}
+                    className={styles.graphControlButton}
+                    >
+                    Reset View
+                  </button>
+                  <button 
+                    onClick={() => {
+                      handleDeselectAllNodes(
+                        cy, 
+                        selectedNodes, 
+                        excludedNodes, 
+                        clearSelectedPaths, 
+                        {highlightClass: highlightClass, hideClass: hideClass, excludedClass: excludedClass})
+                      }
+                    }
+                    className={styles.graphControlButton}
+                    >
+                    Deselect All Nodes
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id={graphTooltipIdString.current} className='graph-tooltip'>
+              <div id='tooltipText' className={`tooltip-text`}></div>
+            </div>
+            <div 
+              id={graphNavigatorContainerId.current} 
+              className={styles.graphNavigatorContainer} 
+              onMouseEnter={()=>{
+                document.body.style.overflow = 'hidden';
+                document.body.style.paddingRight = '15px';
+              }}
+              onMouseLeave={()=>{
+                document.body.style.overflow = 'auto';
+                document.body.style.paddingRight = '0';
+              }}
+              >
             </div>
           </div>
         </div>
-        <div id={graphTooltipIdString.current} className='graph-tooltip'>
-          <div id='tooltipText' className={`tooltip-text`}></div>
-        </div>
-        <div 
-          id={graphNavigatorContainerId.current} 
-          className={styles.graphNavigatorContainer} 
-          onMouseEnter={()=>{
-            document.body.style.overflow = 'hidden';
-            document.body.style.paddingRight = '15px';
-          }}
-          onMouseLeave={()=>{
-            document.body.style.overflow = 'auto';
-            document.body.style.paddingRight = '0';
-          }}
-          >
-        </div>
-      </div>
+      </AnimateHeight>
     </div>
   );
 }
