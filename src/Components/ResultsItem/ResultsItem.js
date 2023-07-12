@@ -4,9 +4,12 @@ import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
+import {ReactComponent as Export } from "../../Icons/Buttons/Export.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
+import { CSVLink } from 'react-csv';
+import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -16,10 +19,12 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   let publicationCount = item.evidence.publications.length;
   let sourcesCount = item.evidence.distinctSources.length;
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
   const formattedPaths = item.compressedPaths;
   const [selectedPaths, setSelectedPaths] = useState(new Set());
+  const [csvData, setCsvData] = useState([]);
 
   const initPathString = useRef((type !== undefined && type.pathString) ? type.pathString : 'may affect');
 
@@ -149,6 +154,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           <span className={styles.scoreNum}>{item.score === null ? '0' : item.score }</span>
         </span>
       </div>
+      <CSVLink
+        className={styles.downloadButton}
+        data={csvData}
+        filename={`${item.name.toLowerCase()}.csv`}
+        onClick={generateCsvFromItem(item, setCsvData)}>
+          <Export/>
+      </CSVLink>
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>
       </button>
