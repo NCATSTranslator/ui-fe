@@ -246,7 +246,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
   return (
     <div >
       <button onClick={()=>setIsExpanded(prev=>!prev)} className={styles.toggleButton}>
-        {isExpanded ? 'Hide': 'Show'} Toggle Graph View
+        {isExpanded ? 'Hide': 'Show'} Graph View
       </button>
       <AnimateHeight
         duration={500}
