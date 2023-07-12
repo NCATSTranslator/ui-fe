@@ -129,4 +129,31 @@
       font-size: 14px;
     }
   }
+  .upperButtons, .lowerButtons {
+    display: flex;
+    justify-content: space-evenly;
+    max-width: 80%;
+    margin: 0 auto $s;
+    button {
+      svg path {
+        fill: $white;
+      }
+    }
+  }
+  .upperButton, .lowerButton {
+    transition: all .25s ease;
+    &.selected {
+      box-shadow: $dropShadowPressed;
+    }
+  }
+  .upperButton {
+    background-color: $purpleTwo;
+    &.selected {
+      background-color: $purpleOne;
+    }
+  }
+  .lowerButton {
+    background-color: $white;
+    color: $purpleOne;
+  }
 }

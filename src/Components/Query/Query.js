@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
+import Button from "../FormFields/Button";
 import QueryBar from "../QueryBar/QueryBar";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
@@ -11,6 +12,9 @@ import _ from "lodash";
 import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import { getEntityLink, handleFetchErrors, getLastItemInArray } from "../../Utilities/utilities";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
+import {ReactComponent as Drug} from '../../Icons/drug.svg';
+import {ReactComponent as Chemical} from '../../Icons/Queries/Chemical.svg';
+import {ReactComponent as Gene} from '../../Icons/Queries/Gene.svg';
 import styles from './Query.module.scss';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 
@@ -62,6 +66,9 @@ const Query = ({results, loading, initPresetTypeID, initPresetTypeObject = null,
   const [presetURL, setPresetURL] = useState(false);
 
   const [exampleDiseases, setExampleDiseases] = useState(null);
+
+  const [selectedUpperButton, setSelectedUpperButton] = useState(null);
+  const [selectedLowerButton, setSelectedLowerButton] = useState(null);
 
   // Get example diseases from config endpoint on component mount
   useEffect(() => {
@@ -238,6 +245,11 @@ const Query = ({results, loading, initPresetTypeID, initPresetTypeObject = null,
     validateSubmission();
   },[validateSubmission])
 
+  const handleSelectUpperButton = (index) => {
+    setSelectedLowerButton(null);
+    setSelectedUpperButton(index);
+  }
+
   useEffect(() => {
     setIsLoading(loading);
   }, [loading]);
@@ -258,25 +270,54 @@ const Query = ({results, loading, initPresetTypeID, initPresetTypeObject = null,
       <div className={`${styles.query}`} >
         <div className={`${styles.container}`}>
           {!results &&
-            <h4 className={styles.heading}>Biomedical Data Translator</h4>
+            <h4 className={styles.heading}>What relationship would you like to explore?</h4>
           }
+          <div className={styles.upperButtons}>
+            <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)}>
+              <Drug />Drug/Disease
+            </button>
+            <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(1)}>
+              <Chemical />Chemical/Gene
+            </button>
+            <button className={`${styles.upperButton} ${selectedUpperButton === 2 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(2)}>
+              <Gene />Chemical/Gene
+            </button>
+          </div>
+          {
+            (selectedUpperButton && selectedUpperButton > 0)
+            ? 
+              <div className={`${styles.lowerButtons} visible`}>
+                <button className={`${styles.lowerButton} ${selectedLowerButton === 0 ? styles.selected : ''}`} onClick={()=>setSelectedLowerButton(0)}>
+                  Upregulators
+                </button>
+                <button className={`${styles.lowerButton} ${selectedLowerButton === 1 ? styles.selected : ''}`} onClick={()=>setSelectedLowerButton(1)}>
+                  Downregulators
+                </button>
+              </div>
+            :
+              <div className={`${styles.lowerButtons}`}></div>
+          }
+
           {
             isError &&
             <p className={styles.error}>{errorText}</p>
           }
-          <OutsideClickHandler onOutsideClick={()=>{clearAutocompleteItems();}}>
-            <QueryBar
-              handleSubmission={handleSubmission}
-              handleChange={handleQueryItemChange}
-              handleQueryTypeChange={handleQueryTypeChange}
-              isDisabled={isLoading}
-              value={inputText}
-              presetTypeID={presetTypeID}
-              autocompleteItems={autocompleteItems}
-              autocompleteLoading={loadingAutocomplete}
-              handleItemClick={handleDiseaseSelection}
-            />
-          </OutsideClickHandler>
+          {
+            (selectedLowerButton !== null || selectedUpperButton === 0) &&
+            <OutsideClickHandler onOutsideClick={()=>{clearAutocompleteItems();}}>
+              <QueryBar
+                handleSubmission={handleSubmission}
+                handleChange={handleQueryItemChange}
+                handleQueryTypeChange={handleQueryTypeChange}
+                isDisabled={isLoading}
+                value={inputText}
+                presetTypeID={presetTypeID}
+                autocompleteItems={autocompleteItems}
+                autocompleteLoading={loadingAutocomplete}
+                handleItemClick={handleDiseaseSelection}
+              />
+            </OutsideClickHandler>
+          }
           {
             results && selectedNode && selectedNode.id &&
             <p className={styles.needHelp}>
