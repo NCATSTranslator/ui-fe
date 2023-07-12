@@ -13,8 +13,6 @@ export const generateCsvFromItem = (item, csvSetter) => {
     const seen = new Set();
     item.paths.forEach((path) => {
       const subgraph = path.path.subgraph;
-      console.log(subgraph);
-      console.log(path);
       for (let i = 1; i < subgraph.length; i+=2) { // Only look at edges
         const edgeGroup = subgraph[i];
         const edge = edgeGroup.edges[0];
