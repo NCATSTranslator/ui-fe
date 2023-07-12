@@ -104,7 +104,9 @@ const getNodeByCurie = (curie, results) => {
   if(results.nodes[curie] === undefined)
     return {};
 
-  return cloneDeep(results.nodes[curie]);
+  const res = cloneDeep(results.nodes[curie]);
+  res.id = curie;
+  return res;
 }
 
 /**
