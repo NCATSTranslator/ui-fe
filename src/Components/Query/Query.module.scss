@@ -1,5 +1,9 @@
 @import "../../Assets/Styles/variables";
 
+.autoHeightContainer {
+  overflow: visible !important;
+}
+
 .query {
   padding: 72px 0;
   background-color: $purpleTwo20;

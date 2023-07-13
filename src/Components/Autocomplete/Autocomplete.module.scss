@@ -16,8 +16,8 @@
 .autocompleteContainer {
   position: absolute;
   top: calc(100% + 8px);
-  left: 300px;
-  right: 119px;
+  left: 0;
+  right: 0;
   background-color: $white;
   box-shadow: $dropShadowHover;
   border-radius: $defaultBorderRadius;
