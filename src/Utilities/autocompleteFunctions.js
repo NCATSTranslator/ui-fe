@@ -9,24 +9,23 @@ const handleNodeNormError = (response, setterFunction) => {
 }
 
 // Returns array of terms based on user input
-export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions) => {
+export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems, 
+  autocompleteFunctions, limitType = '', limitPrefixes = []) => {
   if(inputText) {
     console.log(`fetching '${inputText}'`);
     setLoadingAutocomplete(true);
     const formatData = { input: inputText.toLowerCase() };
-    fetchNodesFromInputText(inputText)
+
+    newFetchNodesFromInputText(inputText, limitType, limitPrefixes)
       .then(response => response.json())
       .then(nodes => {
-        Object.keys(nodes).forEach((k) => {
-          nodes[k] = nodes[k].map((str) => { return str.toLowerCase(); });
-        });
-
-        formatData.resolved = nodes;
-        return fetchNormalizedNodesFromNodes(nodes)
+        let newNodes = {};
+        for(const node of nodes) {
+          newNodes[node.curie] = node.synonyms;
+        }
+        formatData.resolved = newNodes;
+        return nodes;
       })
-      .then(response => handleFetchErrors(response, handleNodeNormError(response, setAutoCompleteItems)))
-      .then(response => response.json())
-      .then(normalizedNodes => filterNormalizedNodes(normalizedNodes, autocompleteFunctions.filter))
       .then(normalizedNodes => autocompleteFunctions.annotate(normalizedNodes))
       .then(annotatedNodes => autocompleteFunctions.format(annotatedNodes, formatData))
       .then(autocompleteItems => {
@@ -41,6 +40,21 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
         setLoadingAutocomplete(false);
       });
   }
+}
+
+// Do a node search based on user input text
+const newFetchNodesFromInputText = async (inputText, type, prefixes) => {
+  console.log(prefixes);
+  if(prefixes.length > 0)
+    prefixes = prefixes.join('|');
+  else
+    prefixes = "";
+
+  const nameResolverRequestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  };
+  return fetch(`http://name-resolution-sri-dev.apps.renci.org/lookup?string=${inputText}&offset=0&limit=40&biolink_type=${type}&only_prefixes=${prefixes}`, nameResolverRequestOptions)
 }
 
 // Do a node search based on user input text

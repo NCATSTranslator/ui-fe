@@ -7,8 +7,8 @@ const AutoHeight = ({ children, ...props }) => {
   const contentDiv = useRef(null);
 
   useEffect(() => {
-    if(resizeObserverSet || contentDiv.current === null)
-      return;
+    // if(resizeObserverSet || contentDiv.current === null)
+    //   return;
 
     const resizeObserver = new ResizeObserver(() => {
       setHeight(contentDiv.current.clientHeight);

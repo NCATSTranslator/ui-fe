@@ -10,6 +10,7 @@ export const queryTypes = [
     targetType: 'drug',
     direction: null,
     filterType: 'Disease',
+    limitPrefixes: ['MONDO'],
     functions: {
       filter: drugTreatsQueryFilterFactory('Disease'),
       annotate: defaultQueryAnnotator,
@@ -24,6 +25,7 @@ export const queryTypes = [
     targetType: 'chemical',
     direction: 'increased',
     filterType: 'Gene',
+    limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('Gene'),
       annotate: geneQueryAnnotator,
@@ -38,6 +40,7 @@ export const queryTypes = [
     targetType: 'chemical',
     direction: 'decreased',
     filterType: 'Gene',
+    limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('Gene'),
       annotate: geneQueryAnnotator,
@@ -52,6 +55,7 @@ export const queryTypes = [
     targetType: 'gene',
     direction: 'increased',
     filterType: 'SmallMolecule',
+    limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('SmallMolecule'),
       annotate: defaultQueryAnnotator,
@@ -66,6 +70,7 @@ export const queryTypes = [
     targetType: 'gene',
     direction: 'decreased',
     filterType: 'SmallMolecule',
+    limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('SmallMolecule'),
       annotate: defaultQueryAnnotator,

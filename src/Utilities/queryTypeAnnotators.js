@@ -9,7 +9,7 @@ export const geneQueryAnnotator = async (normalizedNodes) => {
   // Pull out the integer part of NCBIGene CURIEs. These are the only CURIE types
   // supported by mygene.info
   normalizedNodes.forEach((node) => {
-    const curie = node.id.identifier;
+    const curie = node.curie;
     const [prefix, id] = curie.split(':');
     if (prefix === 'NCBIGene') {
       genes[id] = { curie: curie };

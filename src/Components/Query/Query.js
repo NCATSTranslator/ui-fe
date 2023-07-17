@@ -49,14 +49,16 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
 
   // Function, type to send to autocomplete for result filtering
   const autocompleteFunctions = useRef(null);
+  const limitPrefixes = useRef(null);
+  const limitType = useRef(null);
   // Array, List of items to display in the autocomplete window
   const [autocompleteItems, setAutoCompleteItems] = useState(null);
   // Bool, are autocomplete items loading
   const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
   // Function, delay query for fetching autocomplete items by 750ms each time the user types, so we only send a request once they're done
   const delayedQuery = useMemo(() => _.debounce(
-    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions) =>
-      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions), 750), []
+    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions, limitType, limitPrefixes) =>
+      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions, limitType, limitPrefixes), 750), []
   );
 
   // String, used to set navigation url for example disease buttons
@@ -97,8 +99,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
 
   const initSelectedUpperButton = getInitSelectedUpperButton(initPresetTypeObject);
   const initSelectedLowerButton = getInitSelectedLowerButton(initPresetTypeObject);
-  console.log(initSelectedUpperButton);
-  console.log(initSelectedLowerButton);
   const [selectedUpperButton, setSelectedUpperButton] = useState(initSelectedUpperButton);
   const [selectedLowerButton, setSelectedLowerButton] = useState(initSelectedLowerButton);
 
@@ -212,7 +212,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = useCallback((e) => {
     if(Object.keys(queryItem.type).length) {
-      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions.current);
+      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions.current, limitType.current, limitPrefixes.current);
       setInputText(e);
     } else {
       setIsError(true);
@@ -234,6 +234,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
       return type.id === parseInt(value)
     })
     autocompleteFunctions.current = newQueryType.functions;
+    limitType.current = newQueryType.filterType;
+    limitPrefixes.current = newQueryType.limitPrefixes;
     clearAutocompleteItems();
     if(resetInputText || resetInputText === undefined) {
       setQueryItem({node: {}, type: newQueryType});
