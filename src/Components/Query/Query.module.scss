@@ -5,8 +5,9 @@
 }
 
 .query {
-  padding: 72px 0;
+  padding: 35px 0;
   background-color: $purpleTwo20;
+  position: relative;
   .container {
     padding: 0 20px 0;
     max-width: 1250px;
@@ -17,9 +18,104 @@
     text-align: center;
     margin-bottom: $xl;
   }
+  .showingResultsContainer {
+    padding: $s;
+    border-radius: $defaultBorderRadius;
+    background: $white;
+    box-shadow: $dropShadow;
+    display: grid;
+  }
+  .showingResultsText {
+    color: $purpleTwo;
+    font-size: $s;
+    margin-bottom: 0;
+  }
+  .subHeading, .searchedTerm {
+    font-weight: 400;
+    font-size: 30px;
+    margin: 0;
+    color: $purpleTwo;
+  }
+  .searchedTerm {
+    font-weight: 700;
+    text-decoration: underline;
+    margin-left: $xxs;
+    display: inline-block;
+  }
+  .nodeDescription, .nodeDescriptionHeading {
+    color: $darkGray;
+    margin: 0;
+  }
+  .nodeDescriptionHeading {
+    margin-top: 10px;
+    font-weight: 700;
+    font-size: $bodyOneSize;
+  }
+  .nodeDescription {
+    font-size: $bodyTwoSize;
+    font-style: italic;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
   .error {
     color: $red;
     text-align: center;
+  }
+  .nodeDescriptionContainer{
+    align-self: flex-end;
+  }
+  .resultsHeader {
+    width: fit-content;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .button {
+      padding: 4px 8px;
+      background-color: $white;
+      color: $blueTwo75;
+      transition: $defaultAnim;
+      border-radius: $defaultBorderRadius;
+      box-shadow: $dropShadow;
+      font-size: $captionSize;
+      margin-bottom: $s;
+      line-height: 1;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      border: none;
+      &:hover {
+        box-shadow: $dropShadowHover;
+      }
+      svg path {
+        stroke: $blueTwo75;
+      }
+      .svgFillWhite path {
+        fill: $blueTwo75;
+        stroke: none;
+      }
+    }
+    .buttonTwo {
+      background-color: $blueTwo75;
+      color: $white;
+      &:hover {
+        box-shadow: $dropShadowHover;
+        background-color: $blueTwo;
+      }
+      svg path {
+        stroke: $white;
+      }
+      .svgFillWhite path {
+        fill: $white;
+        stroke: none;
+      }
+    }
   }
   .queryItems {
     display: grid;

@@ -9,21 +9,25 @@ import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/results
 import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
 import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
-import { getEntityLink, handleFetchErrors, getLastItemInArray } from "../../Utilities/utilities";
+import { getEntityLink, generateEntityLink, handleFetchErrors, getLastItemInArray } from "../../Utilities/utilities";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import {ReactComponent as Drug} from '../../Icons/drug.svg';
 import {ReactComponent as Chemical} from '../../Icons/Queries/Chemical.svg';
 import {ReactComponent as Gene} from '../../Icons/Queries/Gene.svg';
+import {ReactComponent as Back} from '../../Icons/Directional/Undo.svg';
+import {ReactComponent as Search} from '../../Icons/Buttons/Search.svg';
 import styles from './Query.module.scss';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { queryTypes } from "../../Utilities/queryTypes";
 import AutoHeight from "../AutoHeight/AutoHeight";
+import { Link, useLocation } from "react-router-dom";
 
-const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam}) => {
+const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription}) => {
 
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { pathname } = useLocation();
 
   loading = (loading) ? true : false;
 
@@ -65,6 +69,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const [presetURL, setPresetURL] = useState(false);
 
   const [exampleDiseases, setExampleDiseases] = useState(null);
+  // const [nodeDescription, setNodeDescription] = useState(null);
 
   const getInitSelectedUpperButton = (presetTypeObject) => {
     if(!presetTypeObject)
@@ -216,9 +221,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
       setInputText(e);
     } else {
       setIsError(true);
-      // setErrorText("No query selected, please select a query from the dropdown.");
     }
-  },[setLoadingAutocomplete, setAutoCompleteItems, setInputText, setIsError, setErrorText, delayedQuery, queryItem.type]);
+  },[setLoadingAutocomplete, setAutoCompleteItems, setInputText, setIsError, delayedQuery, queryItem.type]);
 
   const clearAutocompleteItems = () => {
     setAutoCompleteItems(null);
@@ -228,7 +232,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     updateQueryItem();
   }
 
-  const handleQueryTypeChange = useCallback((value, resetInputText) => {
+  const handleQueryTypeChange = (value, resetInputText) => {
     setIsError(false);
     const newQueryType = queryTypes.find(type => {
       return type.id === parseInt(value)
@@ -243,7 +247,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     } else {
       setQueryItem((prev) => {return {...prev, type: newQueryType}});
     }
-  },[clearSelectedItem]);
+  }
 
   // Handler for disease selection (template click or autocomplete item click)
   const handleItemSelection = (disease) => {
@@ -323,92 +327,126 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     }
   }, [presetURL, navigate]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
     <>
       <div className={`${styles.query}`} >
         <AutoHeight className={styles.autoHeightContainer}>
           <div className={`${styles.container}`}>
-            {!results &&
-              <h4 className={styles.heading}>What relationship would you like to explore?</h4>
-            }
-            <div className={styles.upperButtons}>
-              <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)}>
-                <Drug />Drug/Disease
-              </button>
-              <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(1)}>
-                <Chemical />Chemical/Gene
-              </button>
-              <button className={`${styles.upperButton} ${selectedUpperButton === 2 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(2)}>
-                <Gene />Gene/Drug
-              </button>
-            </div>
-            {
-              (selectedUpperButton && selectedUpperButton > 0)
-              ? 
-                <div className={`${styles.lowerButtons} visible`}>
-                  <button className={`${styles.lowerButton} ${selectedLowerButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(0, selectedLowerButton)}>
-                    Upregulators
+            {results 
+              ?
+              <>
+                <div className={styles.resultsHeader}>
+                  <div className={styles.buttons}>
+                    <Link to="/" className={styles.button}><Back/>Return To Home Page</Link>
+                    <Link to="/" target="_blank" className={`${styles.button} ${styles.buttonTwo}`}><Search className={styles.svgFillWhite}/>Submit Another Query</Link>
+                  </div>
+                  <div className={styles.showingResultsContainer}>
+                    <div>
+                      <h4 className={styles.showingResultsText}>Showing results for:</h4>
+                      <h5 className={styles.subHeading}>{queryItem.type.label}: 
+                        {(queryItem?.node?.id &&
+                          generateEntityLink(queryItem.node.id, styles.searchedTerm, ()=>queryItem.node.label, false)) 
+                          ?
+                            generateEntityLink(queryItem.node.id, styles.searchedTerm, ()=>queryItem.node.label, false)
+                          :
+                            <span className={styles.searchedTerm}>{queryItem.node.label}</span>
+                        }
+                      </h5>
+                    </div>
+                    <div className={styles.nodeDescriptionContainer}>
+                      {
+                        nodeDescription && 
+                        <>
+                          <p className={styles.nodeDescriptionHeading}>Description:</p>
+                          <p className={styles.nodeDescription}>{nodeDescription}</p>
+                        </>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </>
+              :
+              <>
+                <h4 className={styles.heading}>What relationship would you like to explore?</h4>
+                <div className={styles.upperButtons}>
+                  <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)}>
+                    <Drug />Drug/Disease
                   </button>
-                  <button className={`${styles.lowerButton} ${selectedLowerButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(1, selectedLowerButton)}>
-                    Downregulators
+                  <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(1)}>
+                    <Chemical />Chemical/Gene
+                  </button>
+                  <button className={`${styles.upperButton} ${selectedUpperButton === 2 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(2)}>
+                    <Gene />Gene/Chemical
                   </button>
                 </div>
-              :
-                <div className={`${styles.lowerButtons}`}></div>
-            }
+                {(selectedUpperButton && selectedUpperButton > 0)
+                  ? 
+                    <div className={`${styles.lowerButtons} visible`}>
+                      <button className={`${styles.lowerButton} ${selectedLowerButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(0, selectedLowerButton)}>
+                        Upregulators
+                      </button>
+                      <button className={`${styles.lowerButton} ${selectedLowerButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(1, selectedLowerButton)}>
+                        Downregulators
+                      </button>
+                    </div>
+                  :
+                    <div className={`${styles.lowerButtons}`}></div>
+                }
+                {isError &&
+                  <p className={styles.error}>{errorText}</p>
+                }
+                {(selectedLowerButton !== null || selectedUpperButton === 0) &&
+                  <OutsideClickHandler onOutsideClick={()=>{clearAutocompleteItems();}}>
+                    <QueryBar
+                      handleSubmission={handleSubmission}
+                      handleChange={handleQueryItemChange}
+                      handleQueryTypeChange={handleQueryTypeChange}
+                      value={inputText}
+                      queryType={queryItem.type}
+                      autocompleteItems={autocompleteItems}
+                      autocompleteLoading={loadingAutocomplete}
+                      handleItemClick={handleItemSelection}
+                    />
+                  </OutsideClickHandler>
+                }
 
-            {
-              isError &&
-              <p className={styles.error}>{errorText}</p>
+                {selectedUpperButton === 0 &&
+                  <div className={styles.examples}>
+                    {exampleDiseases && Array.isArray(exampleDiseases) &&
+                      <>
+                        <p className={styles.subTwo}>Example Diseases:</p>
+                        <div className={styles.exampleList}>
+                          {
+                            exampleDiseases.map((item, i)=> {
+                              return(
+                                <button
+                                  className={styles.button}
+                                  onClick={(e)=>{
+                                    setPresetURL(e.target.dataset.url);
+                                  }}
+                                  data-testid={item.name}
+                                  data-url={getResultsShareURLPath(item.name, item.id, 0, item.uuid)}
+                                  >
+                                  {item.name}
+                              </button>
+                              )
+                            })
+                          }
+                        </div>
+                      </>
+                    }
+                  </div>
+                }
+              </>
             }
-            {
-              (selectedLowerButton !== null || selectedUpperButton === 0) &&
-              <OutsideClickHandler onOutsideClick={()=>{clearAutocompleteItems();}}>
-                <QueryBar
-                  handleSubmission={handleSubmission}
-                  handleChange={handleQueryItemChange}
-                  handleQueryTypeChange={handleQueryTypeChange}
-                  value={inputText}
-                  queryType={queryItem.type}
-                  autocompleteItems={autocompleteItems}
-                  autocompleteLoading={loadingAutocomplete}
-                  handleItemClick={handleItemSelection}
-                />
-              </OutsideClickHandler>
-            }
-            {
-              results && queryItem.node && queryItem.node.id &&
+            {queryItem?.node?.id &&
               <p className={styles.needHelp}>
                 {getEntityLink(queryItem.node.id, styles.monarchLink, queryItem.type)}
               </p>
-            }
-            {!results && selectedUpperButton === 0 &&
-              <div className={styles.examples}>
-                {
-                  exampleDiseases && Array.isArray(exampleDiseases) &&
-                  <>
-                    <p className={styles.subTwo}>Example Diseases:</p>
-                    <div className={styles.exampleList}>
-                      {
-                        exampleDiseases.map((item, i)=> {
-                          return(
-                            <button
-                              className={styles.button}
-                              onClick={(e)=>{
-                                setPresetURL(e.target.dataset.url);
-                              }}
-                              data-testid={item.name}
-                              data-url={getResultsShareURLPath(item.name, item.id, 0, item.uuid)}
-                              >
-                              {item.name}
-                          </button>
-                          )
-                        })
-                      }
-                    </div>
-                  </>
-                }
-              </div>
             }
             <p className={styles.needHelp}>
               <a href="/help" rel="noreferrer " target="_blank"><Question/> Need Help?</a>

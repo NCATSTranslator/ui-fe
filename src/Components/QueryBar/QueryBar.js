@@ -1,5 +1,4 @@
 
-import React, {useState, useEffect, useRef} from "react";
 import TextInput from "../FormFields/TextInput";
 import Autocomplete from "../Autocomplete/Autocomplete";
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
@@ -10,9 +9,6 @@ const QueryBar = ({handleSubmission, handleChange, queryType, value, autocomplet
   const placeholderText = (queryType) ? queryType.placeholder : '';
     
   value = (value !== undefined && value !== null) ? value : '';
-
-
-
   return (
     <form 
       onSubmit={(e)=>{

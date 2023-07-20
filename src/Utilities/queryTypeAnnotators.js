@@ -41,6 +41,7 @@ export const geneQueryAnnotator = async (normalizedNodes) => {
     // the valid taxon IDs above.
     geneAnnotations.forEach((annotation) => {
       const species = validTaxon[annotation.taxid];
+      console.log(species);
       if (species !== undefined) {
         const gene = genes[annotation._id];
         gene.symbol = annotation.symbol;
