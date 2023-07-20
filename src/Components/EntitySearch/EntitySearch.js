@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 import styles from './EntitySearch.module.scss';
 import TextInput from '../FormFields/TextInput';
-
+import Tooltip from '../Tooltip/Tooltip';
+import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
 
 const EntitySearch = ({activeFilters, onFilter}) => {
 
@@ -26,7 +27,12 @@ const EntitySearch = ({activeFilters, onFilter}) => {
 
   return (
     <div className={styles.entitySearch}>
-      <p className={`${styles.subTwo} sub-two`}>Entity Search</p>
+      <div className={styles.labelContainer}>
+        <p className={`${styles.subTwo} sub-two`} data-tooltip-id="text-tooltip">Text Filter <Alert/></p>
+        <Tooltip id="text-tooltip">
+          <span className={styles.tooltip}>Search all textual elements (result name, description, node names, edge names) for a given string.</span>
+        </Tooltip>
+      </div>
       <TextInput
         label=""
         rows={1}

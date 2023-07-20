@@ -178,7 +178,7 @@ export const removeDuplicateObjects = (arr, getKey) => {
   return distinctElements;
 }
 
-const generateEntityLink = (id, className, linkTextGenerator) => {
+export const generateEntityLink = (id, className, linkTextGenerator, useIcon = true) => {
   const [url, org] = getUrlAndOrg(id);
   const linkText = linkTextGenerator(org);
 
@@ -189,7 +189,7 @@ const generateEntityLink = (id, className, linkTextGenerator) => {
         target="_blank"
         rel="noreferrer"
         className={className}
-        >{linkText}<ExternalLink/>
+        >{linkText}{useIcon && <ExternalLink/>}
       </a>
     );
 

@@ -40,6 +40,7 @@ const ResultsList = ({loading}) => {
     : null;
   const initNodeLabelParam = getDataFromQueryVar("l");
   const initNodeIdParam = getDataFromQueryVar("i");
+  const [nodeDescription, setNodeDescription] = useState();
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
@@ -195,7 +196,6 @@ const ResultsList = ({loading}) => {
     // if the results status is error, or there is no results property in the data obj, return
     if(rr.status === 'error' || rr.data.results === undefined)  
       return;
-
 
     // if rawResults are new, set prevRawResults for future comparison
     prevRawResults.current = rr;
@@ -595,6 +595,15 @@ const ResultsList = ({loading}) => {
     handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current)
   }
 
+  useEffect(() => {
+    let node = rawResults.current?.data?.nodes[initNodeIdParam];
+    if(rawResults.current && node) {
+      if(node.descriptions.length > 0) {
+        setNodeDescription(node.descriptions[0].replaceAll('"', ''));
+      }
+    }
+  },[formattedResults, initNodeIdParam]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <EvidenceModal
@@ -615,6 +624,7 @@ const ResultsList = ({loading}) => {
           initPresetTypeObject={initPresetTypeObject}
           initNodeIdParam={initNodeIdParam}
           initNodeLabelParam={initNodeLabelParam}
+          nodeDescription={nodeDescription}
         />
         <div className={`${styles.resultsContainer} container`}>
           {
