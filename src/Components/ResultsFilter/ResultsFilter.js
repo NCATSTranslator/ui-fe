@@ -231,7 +231,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
           }
           {
-            countsToShow[type] > facetShowMoreIncrement &&
+            (Object.keys(groupedTags[type]).length > 0) && countsToShow[type] > facetShowMoreIncrement &&
             <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
           }
         </div>
