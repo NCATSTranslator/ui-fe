@@ -178,7 +178,7 @@ export const removeDuplicateObjects = (arr, getKey) => {
   return distinctElements;
 }
 
-const generateEntityLink = (id, className, linkTextGenerator) => {
+export const generateEntityLink = (id, className, linkTextGenerator, useIcon = true) => {
   const [url, org] = getUrlAndOrg(id);
   const linkText = linkTextGenerator(org);
 
@@ -189,7 +189,7 @@ const generateEntityLink = (id, className, linkTextGenerator) => {
         target="_blank"
         rel="noreferrer"
         className={className}
-        >{linkText}<ExternalLink/>
+        >{linkText}{useIcon && <ExternalLink/>}
       </a>
     );
 
@@ -204,4 +204,11 @@ export const getDataFromQueryVar = (varID) => {
   const dataValue = new URLSearchParams(window.location.search).get(varID);
   const valueToReturn = (dataValue) ? dataValue : null;
   return valueToReturn;
+}
+
+export const customDebounce = (method, delay) => {
+  clearTimeout(method._tId);
+  method._tId= setTimeout(function(){
+    method();
+  }, delay);
 }

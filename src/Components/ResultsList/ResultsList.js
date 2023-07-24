@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import styles from './ResultsList.module.scss';
 import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
@@ -40,6 +40,7 @@ const ResultsList = ({loading}) => {
     : null;
   const initNodeLabelParam = getDataFromQueryVar("l");
   const initNodeIdParam = getDataFromQueryVar("i");
+  const [nodeDescription, setNodeDescription] = useState();
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
@@ -108,6 +109,32 @@ const ResultsList = ({loading}) => {
   const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
+
+  // Bool, is the shift key being held down
+  const [zoomKeyDown, setZoomKeyDown] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (ev) => {
+      if (ev.keyCode === 90) {
+        setZoomKeyDown(true);
+      }
+    };
+  
+    const handleKeyUp = (ev) => {
+      if (ev.keyCode === 90) {
+        setZoomKeyDown(false);
+      }
+    };
+  
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
   const numberOfStatusChecks = useRef(0);
   // Initialize queryClient for React Query to fetch results
@@ -169,7 +196,6 @@ const ResultsList = ({loading}) => {
     // if the results status is error, or there is no results property in the data obj, return
     if(rr.status === 'error' || rr.data.results === undefined)  
       return;
-
 
     // if rawResults are new, set prevRawResults for future comparison
     prevRawResults.current = rr;
@@ -569,6 +595,15 @@ const ResultsList = ({loading}) => {
     handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current)
   }
 
+  useEffect(() => {
+    let node = rawResults.current?.data?.nodes[initNodeIdParam];
+    if(rawResults.current && node) {
+      if(node.descriptions.length > 0) {
+        setNodeDescription(node.descriptions[0].replaceAll('"', ''));
+      }
+    }
+  },[formattedResults, initNodeIdParam]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <EvidenceModal
@@ -589,6 +624,7 @@ const ResultsList = ({loading}) => {
           initPresetTypeObject={initPresetTypeObject}
           initNodeIdParam={initNodeIdParam}
           initNodeLabelParam={initNodeLabelParam}
+          nodeDescription={nodeDescription}
         />
         <div className={`${styles.resultsContainer} container`}>
           {
@@ -701,6 +737,7 @@ const ResultsList = ({loading}) => {
                             item={item}
                             activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
                             activeStringFilters={activeStringFilters}
+                            zoomKeyDown={zoomKeyDown}
                           />
                         )
                       })

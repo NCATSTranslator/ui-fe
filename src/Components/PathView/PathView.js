@@ -99,6 +99,10 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
               <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
             }
           </div>
+          {
+            (numberToShow < paths.length) &&
+            <button onClick={(e)=> {e.stopPropagation(); setNumberToShow(paths.length);}} className={`${styles.show} ${styles.showAll}`}>Show All</button>
+          }
           <p className={styles.needHelp}>
             <Question/> 
             Was this helpful?

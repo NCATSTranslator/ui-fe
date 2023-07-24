@@ -2,7 +2,7 @@
 
 .result {
   display: grid;
-  grid-template-columns: 1fr 225px 75px 50px;
+  grid-template-columns: 1fr 225px 75px 50px 50px;
   padding: 12px;
   &:nth-child(even) {
     &.highlighted {
@@ -79,6 +79,17 @@
       font-weight: 400;
       line-height: 1;
       color: $darkGray
+    }
+  }
+  .downloadButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    svg {
+      height: 32px;
+      width: 32px;
+      transform: rotate(180deg);
     }
   }
   .accordionButton {

@@ -231,7 +231,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
           }
           {
-            countsToShow[type] > facetShowMoreIncrement &&
+            (Object.keys(groupedTags[type]).length > 0) && countsToShow[type] > facetShowMoreIncrement &&
             <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
           }
         </div>
@@ -243,10 +243,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
-        <EntitySearch
-          activeFilters={activeFilters}
-          onFilter={onFilter}
-        />
         <div className={styles.labelContainer} >
           <p className={styles.subTwo}>Evidence</p>
         </div>
@@ -264,6 +260,10 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             onChange={e => handleFacetChange('evi:', evidenceObject, setEvidenceObject, e)}
             initialValue={1}
           />
+        <EntitySearch
+          activeFilters={activeFilters}
+          onFilter={onFilter}
+        />
         <div className={styles.tagsContainer}>
           {
             groupedTags &&

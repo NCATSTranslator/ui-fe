@@ -1,5 +1,8 @@
+import ReactDOM from 'react-dom';
 import cytoscape from 'cytoscape';
-import { cloneDeep } from 'lodash';
+import { debounce, cloneDeep } from 'lodash';
+import { capitalizeFirstLetter } from './utilities';
+import {ReactComponent as ExternalLink} from '../Icons/external-link.svg';
 
 export const layoutList = {
   klay: {
@@ -14,26 +17,23 @@ export const layoutList = {
   breadthfirst: {
     name: 'breadthfirst', spacingFactor: 1.1, avoidOverlap: true, directed: true
   },
-  dagre: {
-    name: 'dagre', spacingFactor: 1.1
-  },
-  circle: {
-    name: 'circle'
-  },
   concentric: {
     name: 'concentric'
   },
 }
 
 export const resultToCytoscape = (result, summary) => {
-  const makeNode = (n, name) =>
+  const makeNode = (n, nodes) =>
   {
-    const height = (name.length) < 40 ? 40 : name.length + 20;
+    const name = nodes[n].names[0];
+    const type = nodes[n].types[0];
+    const provenance = nodes[n].provenance[0];
     return {
       data: {
         id: n,
         label: name,
-        height: height,
+        type: type,
+        provenance: provenance,
         isTargetCount: 0,
         isSourceCount: 0,
         isTargetEdges: [],
@@ -44,26 +44,29 @@ export const resultToCytoscape = (result, summary) => {
 
   const makeNodes = (ns, nodes) => 
   {
-    return [...ns].map((n) => { return makeNode(n, nodes[n].names[0]); });
+    return [...ns].map((n) => { return makeNode(n, nodes); });
   }
 
-  const makeEdge = (eid, src, tgt, pred) =>
+  const makeEdge = (eid, src, srcLbl, tgt, tgtLbl, pred) =>
   {
     return {
       data: {
         id: eid,
         source: src,
+        sourceLabel: srcLbl,
         target: tgt,
+        targetLabel: tgtLbl,
         label: pred
       }
     };
   }
 
-  const makeEdges = (es, edges) =>
+  const makeEdges = (es, edges, nodes) =>
   {
     return [...es].map((e) =>
       {
-        return makeEdge(e, edges[e].subject, edges[e].object, edges[e].predicate);
+        return makeEdge(e, edges[e].subject, nodes[edges[e].subject].names[0], edges[e].object, 
+          nodes[edges[e].object].names[0], edges[e].predicate);
       });
   }
 
@@ -87,7 +90,7 @@ export const resultToCytoscape = (result, summary) => {
 
   const c = {
     nodes: makeNodes(ns, summary.nodes),
-    edges: makeEdges(es, summary.edges)
+    edges: makeEdges(es, summary.edges, summary.nodes)
   };
 
   for(const node of c.nodes) {
@@ -157,7 +160,7 @@ export const handleResetView = (cy) => {
   if(!cy)
     return;
 
-  return cy.fit(cy.elements(), 20);
+  return cy.fit(cy.elements(), 75);
 }
 
 /**
@@ -172,6 +175,78 @@ export const handleDeselectAllNodes = (cy, selNodes, excNodes, clearSelectedPath
   excNodes.current.clear();
   clearSelectedPaths();
 }
+
+export const handleZoomByInterval = (cy, interval = 0.25, direction = true) => {
+  const currentZoomLevel = cy.zoom();
+  if(direction)
+    cy.zoom(currentZoomLevel + interval);
+  else 
+    cy.zoom(currentZoomLevel - interval);
+}
+
+const handleHideTooltip = (graphTooltipIdString) => {
+  let tooltip = document.getElementById(graphTooltipIdString);
+  if(tooltip !== null)
+    tooltip.classList.remove('visible');
+}
+
+const handleEdgeMouseOver = (ev, edgeInfoWindowIdString) => {
+  let elem = ev.target;
+  let elemLabel = elem?.data()?.label;
+  let sourceLabel = elem?.data()?.sourceLabel;
+  let targetLabel = elem?.data()?.targetLabel;
+
+  elem.addClass('hover-highlight');
+
+  let edgeInfoWindow = document.getElementById(edgeInfoWindowIdString);
+  let edgeInfoMarkup = <><span>{sourceLabel}</span> <span className='edge-label'>{elemLabel}</span> <span>{targetLabel}</span></>;
+  ReactDOM.render(edgeInfoMarkup, edgeInfoWindow);
+}
+
+const handleEdgeMouseOut = (ev, edgeInfoWindowIdString) => {
+  ev.target.removeClass('hover-highlight')
+  let edgeInfoWindow = document.getElementById(edgeInfoWindowIdString);
+  let edgeInfoMarkup = <></>;
+  ReactDOM.render(edgeInfoMarkup, edgeInfoWindow);
+} 
+
+const handleSetupAndUpdateGraphTooltip = debounce((ev, graphTooltipIdString) => {
+  let elem = ev.target;
+  let elemLabel = elem?.data()?.label;
+  let type = capitalizeFirstLetter(elem?.data()?.type.replace('biolink:', ''));
+  let url = elem?.data()?.provenance;
+
+  let popper = elem.popper({
+    content: () => {
+      let tooltipElement = document.getElementById(graphTooltipIdString);
+      let tooltipTextElement = tooltipElement.getElementsByClassName('tooltip-text')[0];
+      const tooltipMarkup = 
+        <span className='tooltip-markup'>
+          <p class='label'>{elemLabel} <span className='type'>({type})</span></p>
+          {url && 
+            <a href={url} target="_blank" rel='noreferrer' className='url'>
+              <ExternalLink/>
+              <span>{url}</span>
+            </a>
+          }
+        </span>;
+
+      ReactDOM.render(tooltipMarkup, tooltipTextElement);
+
+      tooltipElement.classList.add('visible');
+  
+      return tooltipElement;
+    },
+    popper:{placement: 'top'}
+  });
+  
+  let update = () => {
+    popper.update();
+  };
+  
+  elem.on('position', update);
+  // cy.on('pan zoom resize', update);
+}, 300, []);
 
 /**
 * Initializes a Cytoscape instance with the specified data and options.
@@ -194,13 +269,12 @@ export const initCytoscapeInstance = (dataObj) => {
           'text-valign': 'center',
           'text-halign': 'center',
           'width': '206px',
-          'height': 'data(height)',
           'padding': '8px',
           'color': '#000',
           'background-color': '#fff',
           'border-color': '#000',
-          'border-width': '2px',
-          'text-wrap': 'wrap',
+          'border-width': '1px',
+          'text-wrap': 'ellipsis',
           'text-max-width': '190px',
           'font-weight': 'bold'
         }
@@ -223,7 +297,9 @@ export const initCytoscapeInstance = (dataObj) => {
       {
         selector: 'edge',
         style: {
-          'line-color': '#CED0D0'
+          'target-arrow-shape': 'triangle',
+          'target-arrow-color': '#000',
+          'line-color': '#CED0D0',
         }
       },
       {
@@ -234,9 +310,9 @@ export const initCytoscapeInstance = (dataObj) => {
         }
       },
       {
-        selector: '.hover-highlight',
+        selector: 'edge.hover-highlight',
         style: {
-          'line-color': '#606368'
+          'line-color': '#7b7c7c'
         }
       },
       {
@@ -252,17 +328,38 @@ export const initCytoscapeInstance = (dataObj) => {
         }
       },
     ],
+    wheelSensitivity: .75,
+    minZoom: .075,
+    maxZoom: 2.5,
+    boxSelectionEnabled: false,
     data: {
-      result: 0
+      layoutName: dataObj.layout.name
     }
   });
 
-  cy.unbind('vclick');
-  cy.bind('vclick', 'node', (ev, formattedResults)=>dataObj.handleNodeClick(ev, formattedResults, dataObj.graph));
-  cy.bind('vclick', 'edge', (ev)=>console.log(ev.target.data()));
+  // cy.on('vclick');
+  cy.on('vclick', 'node', (ev, formattedResults)=>dataObj.handleNodeClick(ev, formattedResults, dataObj.graph));
+  cy.on('vclick', 'edge', (ev)=>console.log(ev.target.data()));
+
+  cy.on('mouseover', 'node', (ev) => {
+    ev.target.style('border-width', '2px' );
+    handleSetupAndUpdateGraphTooltip(ev, dataObj.graphTooltipIdString);
+  });
+  cy.on('mouseout', 'node', (ev) => ev.target.style('border-width', '1px' ));
+  cy.on('mousemove', (ev) => {
+    // if we're on the background, or not on a node, hide the tooltip 
+    if(ev.target === cy || !ev.target.isNode()) 
+      handleHideTooltip(dataObj.graphTooltipIdString)
+  });
+  cy.on('pan zoom resize', ()=>{
+    handleHideTooltip(dataObj.graphTooltipIdString)
+  });
+
+  cy.on('mouseover', 'edge', (ev) => handleEdgeMouseOver(ev, dataObj.edgeInfoWindowIdString));
+  cy.on('mouseout', 'edge', (ev) => handleEdgeMouseOut(ev, dataObj.edgeInfoWindowIdString));
 
   // when background is clicked, remove highlight and hide classes from all elements
-  cy.bind('click', (ev) => {
+  cy.on('click', (ev) => {
     if(ev.target === cy) {
       handleDeselectAllNodes(
         ev.cy, 
@@ -281,10 +378,8 @@ export const initCytoscapeInstance = (dataObj) => {
     }
   }
 
-  // Set bounds of zoom
-  cy.maxZoom(2.5);
-  cy.minZoom(.25);
-
+  // init view
+  handleResetView(cy);
 
   if(dataObj.cyNav !== null) {
     dataObj.cyNav.destroy();

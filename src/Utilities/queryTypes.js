@@ -10,6 +10,7 @@ export const queryTypes = [
     targetType: 'drug',
     direction: null,
     filterType: 'Disease',
+    limitPrefixes: ['MONDO'],
     functions: {
       filter: drugTreatsQueryFilterFactory('Disease'),
       annotate: defaultQueryAnnotator,
@@ -19,11 +20,12 @@ export const queryTypes = [
   },
   {
     id: 1,
-    label: 'What chemical upregulates',
+    label: 'What chemicals may upregulate',
     placeholder: 'Enter a Gene',
     targetType: 'chemical',
     direction: 'increased',
     filterType: 'Gene',
+    limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('Gene'),
       annotate: geneQueryAnnotator,
@@ -33,11 +35,12 @@ export const queryTypes = [
   },
   {
     id: 2,
-    label: 'What chemical downregulates',
+    label: 'What chemicals may downregulate',
     placeholder: 'Enter a Gene',
     targetType: 'chemical',
     direction: 'decreased',
     filterType: 'Gene',
+    limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('Gene'),
       annotate: geneQueryAnnotator,
@@ -47,11 +50,12 @@ export const queryTypes = [
   },
   {
     id: 3,
-    label: 'What gene is upregulated by',
+    label: 'What genes may be upregulated by',
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'increased',
     filterType: 'SmallMolecule',
+    limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('SmallMolecule'),
       annotate: defaultQueryAnnotator,
@@ -61,11 +65,12 @@ export const queryTypes = [
   },
   {
     id: 4,
-    label: 'What gene is downregulated by',
+    label: 'What genes may be downregulated by',
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'decreased',
     filterType: 'SmallMolecule',
+    limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('SmallMolecule'),
       annotate: defaultQueryAnnotator,

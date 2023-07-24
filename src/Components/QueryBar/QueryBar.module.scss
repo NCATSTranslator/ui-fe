@@ -1,10 +1,8 @@
 @import "../../Assets/Styles/variables";
 
 .form {
-  display: grid;
-  grid-template-columns: 300px 1fr auto;
-  justify-content: space-between;
-  align-items: stretch;
+  max-width: 70%;
+  margin: 0 auto $s;
   position: relative;
   label {
     width: 100%;

@@ -14,9 +14,9 @@ Results can be filtered and sorted according to several different critera, such 
 ## Feature Roadmap
 
 - [ ] Additional Filtering Facets
-- [ ] Query Submission Redesign
 - [ ] Migration to Vite from CRA
 - [ ] Results CSV Export
+- [x] Query Submission Redesign
 - [x] Graph View
 - [x] Path View
 - [x] Search Term Autocomplete
