@@ -26,7 +26,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const [selectedPaths, setSelectedPaths] = useState(new Set());
   const [csvData, setCsvData] = useState([]);
 
-  const initPathString = useRef((type !== undefined && type.pathString) ? type.pathString : 'may affect');
+  const initPathString = useRef((type?.pathString) ? type.pathString : 'may affect');
 
   const pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const nameString = (item.name !== null) ? item.name : '';
