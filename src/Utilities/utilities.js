@@ -136,7 +136,13 @@ export const getUrlAndOrg = (id) => {
   } else if(formattedID.includes('NCBIGENE')) {
     url = `https://www.ncbi.nlm.nih.gov/gene/${id.replace('NCBIGene:', '')}`;
     org = 'NCBI Gene';
-  }
+  } else if(formattedID.includes('PUBCHEM')) {
+    url = `https://pubchem.ncbi.nlm.nih.gov/compound/${id.replace('PUBCHEM.COMPOUND:', '')}`;
+    org = 'PubChem';
+  } else if(formattedID.includes('HMDB')) {
+  url = `https://hmdb.ca/metabolites/${id.replace('HMDB:', '')}`;
+  org = 'HMDB';
+}
 
   return [url, org];
 }
