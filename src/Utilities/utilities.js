@@ -133,6 +133,9 @@ export const getUrlAndOrg = (id) => {
   } else if(formattedID.includes('NCIT')) {
     url = `https://ncithesaurus.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&ns=ncit&code=${id.replace('NCIT:', '')}`;
     org = 'NCI Thesaurus';
+  } else if(formattedID.includes('NCBIGENE')) {
+    url = `https://www.ncbi.nlm.nih.gov/gene/${id.replace('NCBIGene:', '')}`;
+    org = 'NCBI Gene';
   }
 
   return [url, org];
