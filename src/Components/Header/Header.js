@@ -15,7 +15,7 @@ const Header = ({children, handleFeedbackModalOpen}) => {
           <div className={styles.right}>
             <Link to="/history">Search History</Link>
             <button onClick={()=>handleFeedbackModalOpen()}>Send Feedback</button>
-            <Link to="/help" className={styles.help}>Help</Link>
+            <Link to="/help" className={styles.help} rel="noreferrer" target={'_blank'} >Help</Link>
           </div>
         </div>
       </div>
