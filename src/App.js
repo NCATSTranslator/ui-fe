@@ -8,7 +8,7 @@ import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import './App.scss';
 
 
-const App = () => {
+const App = ({children}) => {
 
   const location = useLocation();
   const minScreenWidth = 1024;
@@ -32,9 +32,13 @@ const App = () => {
       <Header handleFeedbackModalOpen={()=>setFeedbackModalOpen(true)} />
       <div className='body'>
         {
-          (width < minScreenWidth)
-          ? <SmallScreenOverlay />
-          : <Outlet context={setFeedbackModalOpen}/>
+          children 
+            ? 
+              children
+            :
+              (width < minScreenWidth)
+              ? <SmallScreenOverlay />
+              : <Outlet context={setFeedbackModalOpen}/>
         }
       </div>
       <Footer>

@@ -2,6 +2,7 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
+import Root from './Root';
 import App from './App';
 import Page from './Components/Page/Page';
 import FAQPage from './Components/Page/FAQPage';
@@ -32,10 +33,10 @@ const container = document.getElementById('root');
 const root = createRoot(container);
 
 const routes = [
-  // {
-  //   path: "/",
-  //   element: <Page title="Home"><Home /></Page>
-  // },
+  {
+    path: "",
+    element: <Page title="Home"><Home /></Page>
+  },
   {
     path: "design",
     element: <Page title="Design System"><DesignSystem /></Page>
@@ -110,21 +111,29 @@ const routes = [
   }
 ]
 
+const FourOhFour = ()=>{
+  return(<App><Page title="404 - Page Not Found"><Four /></Page></App>);
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App/>,
+    element: <Root/>,
     children: [ 
       {
         path: "demo",
-        element: <Page title="Home"><Home /></Page>,
+        element: <App/>,
         children: routes
       },
       {
         path: "main",
-        element: <Page title="Home"><Home /></Page>,
+        element: <App/>,
         children: routes
-      }
+      },
+      { 
+        path: "*", 
+        element: <FourOhFour/>
+      },
     ]
 
   },
