@@ -69,5 +69,5 @@ export const handleClearAllFilters = (asFilters, rResults, oResults, setActiveFi
 }
 
 export const getResultsShareURLPath = (label, nodeID, typeID, pk) => {
-  return `${window.location.pathname}/results?l=${label}&i=${nodeID}&t=${typeID}&q=${pk}`
+  return `results?l=${label}&i=${nodeID}&t=${typeID}&q=${pk}`;
 }

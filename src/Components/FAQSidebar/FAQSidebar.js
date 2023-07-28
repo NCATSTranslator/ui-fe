@@ -13,7 +13,7 @@ const FAQSidebar = ({articles}) => {
 
   useEffect(() => {
     setActiveSlug(location.pathname.replace(`/${rootPrefix}/`, ''));
-  }, [location]);
+  }, [location, rootPrefix]);
 
   return(
     <div className={styles.faqSidebar}>

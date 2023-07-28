@@ -1,9 +1,10 @@
 import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import QueryBar from "../QueryBar/QueryBar";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
+import { currentRoot } from "../../Redux/rootSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
 import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import cloneDeep from "lodash/cloneDeep";
@@ -28,6 +29,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { pathname } = useLocation();
+  const root = useSelector(currentRoot);
 
   loading = (loading) ? true : false;
 
@@ -342,8 +344,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               <>
                 <div className={styles.resultsHeader}>
                   <div className={styles.buttons}>
-                    <Link to={`${pathname.includes("main")? '/main' : '/demo' }`} className={styles.button}><Back/>Return To Home Page</Link>
-                    <Link to={`${pathname.includes("main")? '/main' : '/demo' }`} target="_blank" className={`${styles.button} ${styles.buttonTwo}`}><Search className={styles.svgFillWhite}/>Submit Another Query</Link>
+                    <Link to={`/${root}`} className={styles.button}><Back/>Return To Home Page</Link>
+                    <Link to={`/${root}`} target="_blank" className={`${styles.button} ${styles.buttonTwo}`}><Search className={styles.svgFillWhite}/>Submit Another Query</Link>
                   </div>
                   <div className={styles.showingResultsContainer}>
                     <div>
@@ -450,7 +452,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               </p>
             }
             <p className={styles.needHelp}>
-              <a href="/help" rel="noreferrer " target="_blank"><Question/> Need Help?</a>
+              <a href={`/${root}/help`} rel="noreferrer " target="_blank"><Question/> Need Help?</a>
             </p>
           </div>
         </AutoHeight>

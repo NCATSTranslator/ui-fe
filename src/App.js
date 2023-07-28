@@ -5,14 +5,20 @@ import SmallScreenOverlay from './Components/SmallScreenOverlay/SmallScreenOverl
 import SendFeedbackModal from "./Components/Modals/SendFeedbackModal";
 import { useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux'
 import './App.scss';
-
+import { useEffect } from 'react';
+import { setCurrentRoot } from './Redux/rootSlice';
 
 const App = ({children}) => {
 
   const location = useLocation();
   const minScreenWidth = 1024;
   const {width} = useWindowSize();
+
+  const dispatch = useDispatch();
+  const currentRoot = location.pathname.includes("main") ? "main" : "demo";
+  dispatch(setCurrentRoot(currentRoot))
 
   let pathnameClass = location.pathname.replace('/', '');
   pathnameClass = (pathnameClass.includes('/')) ? pathnameClass.replace(/\//g, '-') : pathnameClass;

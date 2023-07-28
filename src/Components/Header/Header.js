@@ -1,11 +1,13 @@
 import React from "react";
 import { Link } from 'react-router-dom';
+import { currentRoot } from "../../Redux/rootSlice";
+import { useSelector } from "react-redux";
 import {ReactComponent as Logo} from '../../Assets/Images/Logo.svg';
 import styles from './Header.module.scss';
 
 const Header = ({children, handleFeedbackModalOpen}) => {
   
-  let pathRoot = (window.location.pathname.includes("main")) ? 'main' : 'demo';
+  const pathRoot = useSelector(currentRoot);
 
   return (
     <header className={styles.header}>
