@@ -11,6 +11,16 @@
       stroke: $darkGray;
     }
   }
+  .extLinkIcon {
+    height: 20px;
+    min-width: 20px;
+    width: 20px;
+    margin-left: 4px;
+    transform: none !important;
+    path {
+      stroke: transparent;
+    }
+  }
   &.open {
     svg {
       transform: rotate(180deg);
@@ -23,9 +33,11 @@
     padding: 0;
   }
 
-  .accordionPanel {
 
-  }
+
+  // .accordionPanel {
+
+  // }
   // .titleLink {
   //   display: flex;
   //   justify-content: space-between;
@@ -55,9 +67,18 @@
     font-size: 14px;
     font-weight: 700;
     padding: 11px 8px;
+    span{
+      color: $black;
+      font-size: 14px;
+      font-weight: 700;
+    }
     &.active {
       background-color: $purpleTwo20;
       color: $purpleOne;
+    }
+    span {
+      display: flex;
+      align-items: center;
     }
   }
 }

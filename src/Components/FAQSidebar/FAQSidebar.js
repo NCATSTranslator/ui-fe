@@ -3,14 +3,16 @@ import styles from './FAQSidebar.module.scss';
 import { NavLink } from 'react-router-dom';
 import Accordion from '../Accordion/Accordion';
 import { useLocation } from "react-router-dom";
+import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 
 const FAQSidebar = ({articles}) => {
 
   const location = useLocation();
   const [activeSlug, setActiveSlug] = useState(location.pathname.replace('/', ''));
+  const rootPrefix = (location.pathname.includes("main")) ? "main" : "demo";
 
   useEffect(() => {
-    setActiveSlug(location.pathname.replace('/', ''));
+    setActiveSlug(location.pathname.replace(`/${rootPrefix}/`, ''));
   }, [location]);
 
   return(
@@ -22,13 +24,14 @@ const FAQSidebar = ({articles}) => {
             {
               articles.map((article, i)=> {
                 let isExtLink = (article.link) ? true : false;
-                let link = (article.link) ? article.link : `/${article.slug}`;
+                let link = (article.link) ? article.link : `/${rootPrefix}/${article.slug}`;
+                console.log(link);
                 return (
                   <li key={i} className={(article.slug === activeSlug ? styles.active : '')}>
                     {
                       !article.subArticles && !isExtLink &&
                       <NavLink 
-                        to={`${link}`} 
+                        to={link} 
                         className={styles.navLink}
                         >
                         {article.title}
@@ -43,6 +46,7 @@ const FAQSidebar = ({articles}) => {
                         rel="noreferrer"
                         >
                         {article.title}
+                        <ExternalLink />
                       </a>
                     }
                     {
@@ -61,7 +65,7 @@ const FAQSidebar = ({articles}) => {
                             article.subArticles.map((subArticle, j) => {
                               let key = `${i}_${j}`;
                               let isExtLinkSub = (subArticle.link) ? true : false;
-                              let linkSub = (subArticle.link) ? subArticle.link : `/${subArticle.slug}`;
+                              let linkSub = (subArticle.link) ? subArticle.link : `/${rootPrefix}/${subArticle.slug}`;
                               return (             
                                 <li key={key} className={(subArticle.slug === activeSlug ? styles.active : '')}>
                                   {isExtLinkSub && 
@@ -72,6 +76,7 @@ const FAQSidebar = ({articles}) => {
                                       rel="noreferrer"
                                       >
                                       {subArticle.title}
+                                      <ExternalLink />
                                     </a>
                                   }
                                   {

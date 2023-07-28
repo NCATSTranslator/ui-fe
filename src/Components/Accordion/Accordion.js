@@ -3,6 +3,7 @@ import AnimateHeight from "react-animate-height";
 import { NavLink } from "react-router-dom";
 import styles from './Accordion.module.scss';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
+import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 
 const Accordion = ({title, titleLink, navLink, extLink, children, expanded, accordionClass, panelClass, icon}) => {
 
@@ -51,7 +52,10 @@ const Accordion = ({title, titleLink, navLink, extLink, children, expanded, acco
               rel="noreferrer"
               className={styles.extLink}
               >
-              {title}
+              <span>
+                {title}
+                <ExternalLink className={styles.extLinkIcon}/>
+              </span>
               <button className={`${styles.accordionButton}`} onClick={(e)=>{e.preventDefault(); handleToggle();}}>
                 {icon}
               </button>

@@ -28,7 +28,6 @@ export const findStringMatch = (element, value, pathRanks) => {
   return foundMatch;
 }
 
-
 /**
  * Removes the highlights from the specified elements if the highlightedName or highlightedDescription
  * contains the given value (case-insensitive match).

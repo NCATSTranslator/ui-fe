@@ -319,7 +319,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   useEffect(() => {
     if(presetURL) {
       const timer = setTimeout(() => {
-        navigate(presetURL);
+        let cleanedURL = presetURL.replaceAll("//", "/");
+        navigate(cleanedURL);
       }, 100 );
       return () => {
         clearTimeout(timer);
@@ -341,8 +342,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               <>
                 <div className={styles.resultsHeader}>
                   <div className={styles.buttons}>
-                    <Link to="/" className={styles.button}><Back/>Return To Home Page</Link>
-                    <Link to="/" target="_blank" className={`${styles.button} ${styles.buttonTwo}`}><Search className={styles.svgFillWhite}/>Submit Another Query</Link>
+                    <Link to={`${pathname.includes("main")? '/main' : '/demo' }`} className={styles.button}><Back/>Return To Home Page</Link>
+                    <Link to={`${pathname.includes("main")? '/main' : '/demo' }`} target="_blank" className={`${styles.button} ${styles.buttonTwo}`}><Search className={styles.svgFillWhite}/>Submit Another Query</Link>
                   </div>
                   <div className={styles.showingResultsContainer}>
                     <div>
