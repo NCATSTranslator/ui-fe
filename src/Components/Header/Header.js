@@ -20,6 +20,7 @@ const Header = ({children, handleFeedbackModalOpen}) => {
             <Link to={`/${pathRoot}/history`}>Search History</Link>
             <button onClick={()=>handleFeedbackModalOpen()}>Send Feedback</button>
             <Link to={`/${pathRoot}/help`} className={styles.help} rel="noreferrer" target={'_blank'} >Help</Link>
+            <Link to={`/login`} className={styles.login} >Login</Link>
           </div>
         </div>
       </div>

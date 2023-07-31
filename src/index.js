@@ -12,6 +12,7 @@ import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
 import DesignSystem from './PageRoutes/DesignSystem/DesignSystem';
+import Login from './PageRoutes/Login/Login';
 import { Help } from './PageRoutes/Articles/Help';
 import { WhatIs } from './PageRoutes/Articles/WhatIs';
 import { HowItWorks } from './PageRoutes/Articles/HowItWorks';
@@ -128,6 +129,11 @@ const router = createBrowserRouter([
       {
         path: "main",
         element: <App/>,
+        children: routes
+      },
+      {
+        path: "login",
+        element: <App><Page title="Login"><Login /></Page></App>,
         children: routes
       },
       { 
