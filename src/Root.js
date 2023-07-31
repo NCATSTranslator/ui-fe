@@ -9,7 +9,7 @@ const Root = () => {
     if(window.location.pathname === "/") 
       navigate("/demo");
     
-  }, []);
+  }, [navigate]);
   
   return (
     <div className={`root`}>

@@ -13,6 +13,7 @@ import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
 import DesignSystem from './PageRoutes/DesignSystem/DesignSystem';
 import Login from './PageRoutes/Login/Login';
+import UserHome from './PageRoutes/UserHome/UserHome';
 import { Help } from './PageRoutes/Articles/Help';
 import { WhatIs } from './PageRoutes/Articles/WhatIs';
 import { HowItWorks } from './PageRoutes/Articles/HowItWorks';
@@ -109,6 +110,10 @@ const routes = [
   {
     path: "history",
     element: <Page title="History"><History /></Page>
+  },
+  {
+    path: "home",
+    element: <Page title="User Home"><UserHome /></Page>
   }
 ]
 
