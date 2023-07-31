@@ -402,7 +402,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 {isError &&
                   <p className={styles.error}>{errorText}</p>
                 }
-                {(selectedLowerButton !== null || selectedUpperButton === 0) &&
+                {(selectedLowerButton !== null || selectedUpperButton === 0) && root !== 'demo' &&
                   <OutsideClickHandler onOutsideClick={()=>{clearAutocompleteItems();}}>
                     <QueryBar
                       handleSubmission={handleSubmission}
