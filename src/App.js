@@ -1,18 +1,23 @@
-import React, {useState} from 'react';
+import { useState, useEffect } from 'react';
 import Footer from './Components/Footer/Footer';
 import Header from './Components/Header/Header';
 import SmallScreenOverlay from './Components/SmallScreenOverlay/SmallScreenOverlay';
 import SendFeedbackModal from "./Components/Modals/SendFeedbackModal";
 import { useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux'
 import './App.scss';
+import { setCurrentRoot } from './Redux/rootSlice';
 
-
-const App = () => {
+const App = ({children}) => {
 
   const location = useLocation();
   const minScreenWidth = 1024;
   const {width} = useWindowSize();
+
+  const dispatch = useDispatch();
+  const root = location.pathname.includes("main") ? "main" : "demo";
+  dispatch(setCurrentRoot(root))
 
   let pathnameClass = location.pathname.replace('/', '');
   pathnameClass = (pathnameClass.includes('/')) ? pathnameClass.replace(/\//g, '-') : pathnameClass;
@@ -23,6 +28,12 @@ const App = () => {
     setFeedbackModalOpen(false);
   }
   
+  useEffect(() => {
+    if(root === "main"){
+      console.log("Root is main");
+    }
+    
+  }, [root]);
   return (
     <div className={`app ${pathnameClass}`}>
       <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />
@@ -32,9 +43,13 @@ const App = () => {
       <Header handleFeedbackModalOpen={()=>setFeedbackModalOpen(true)} />
       <div className='body'>
         {
-          (width < minScreenWidth)
-          ? <SmallScreenOverlay />
-          : <Outlet context={setFeedbackModalOpen}/>
+          children 
+            ? 
+              children
+            :
+              (width < minScreenWidth)
+              ? <SmallScreenOverlay />
+              : <Outlet context={setFeedbackModalOpen}/>
         }
       </div>
       <Footer>

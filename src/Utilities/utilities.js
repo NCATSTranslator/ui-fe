@@ -89,6 +89,8 @@ export const validateEmail = (email) => {
 };
 
 export const formatBiolinkEntity = (string) => {
+  if(!string)
+    return "";
   // remove 'biolink:' from the type, then add spaces before each capital letter
   // then trim the leading space and replace any underlines with spaces
   return(string.replace('biolink:', '')

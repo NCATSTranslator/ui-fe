@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import styles from "./QueryHistoryList.module.scss";
 import { getDifferenceInDays } from "../../Utilities/utilities";
 import { pastQueryState, setHistory } from "../../Redux/historySlice";
+import { currentRoot } from "../../Redux/rootSlice";
 import { useSelector, useDispatch } from 'react-redux';
 import ShareModal from '../../Components/Modals/ShareModal';
 import TextInput from "../FormFields/TextInput";
@@ -19,6 +20,7 @@ const QueryHistoryList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const root = useSelector(currentRoot);
   let tempQueryHistory = useSelector(pastQueryState);
   // query history stored from oldest -> newest, so we must reverse it to display the most recent first
   const [queryHistoryState, setQueryHistoryState] = useState(cloneDeep(tempQueryHistory).reverse());
@@ -40,9 +42,8 @@ const QueryHistoryList = () => {
   }, [queryHistoryState]);
 
   const handleClick = (query) => {
-    navigate(
-      getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, query.id)
-    );
+    // navigate(getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, query.id));
+    navigate(`/${root}/${getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, query.id)}`);
   }
 
   const handleSearch = (value) => {

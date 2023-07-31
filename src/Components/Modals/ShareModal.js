@@ -1,6 +1,7 @@
 import React, {useRef, useEffect} from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
+import { currentRoot } from "../../Redux/rootSlice";
 import { currentQuery} from "../../Redux/querySlice";
 import { useSelector } from 'react-redux';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
@@ -8,6 +9,7 @@ import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFuncti
 const ShareModal = ({isOpen, onClose, qid}) => {
 
   let storedQuery = useSelector(currentQuery);
+  const root = useSelector(currentRoot);
   const sharedQueryLabel = new URLSearchParams(window.location.search).get("l")
   const sharedQueryType = new URLSearchParams(window.location.search).get("t")
   const sharedQueryItemID = new URLSearchParams(window.location.search).get("i")
