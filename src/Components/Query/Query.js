@@ -147,7 +147,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
       headers: { 'Content-Type': 'application/json' },
       body: queryJson
     };
-    fetch('/api/creative_query', requestOptions)
+    fetch(`/${root}/api/v1/pub/query`, requestOptions)
       .then(response => response.json())
       .then(data => {
         console.log(data)

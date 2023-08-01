@@ -15,6 +15,7 @@ import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
 import { useSelector } from 'react-redux';
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
+import { currentRoot }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
   sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag, 
@@ -29,6 +30,7 @@ import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
 
 const ResultsList = ({loading}) => {
 
+  const root = useSelector(currentRoot);
   let blocker = useBlocker(true);
 
   // URL search params
@@ -218,15 +220,14 @@ const ResultsList = ({loading}) => {
     if(!currentQueryID)
       return;
 
-    let queryIDJson = JSON.stringify({qid: currentQueryID});
+    // let queryIDJson = JSON.stringify({qid: currentQueryID});
 
     const requestOptions = {
-      method: 'POST',
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      body: queryIDJson
     };
     // eslint-disable-next-line
-    const response = await fetch('/api/creative_status', requestOptions)
+    const response = await fetch(`/${root}/api/v1/pub/query/${currentQueryID}/status`, requestOptions)
       .then(response => handleFetchErrors(response))
       .then(response => response.json())
       .then(data => {
@@ -278,16 +279,17 @@ const ResultsList = ({loading}) => {
     if(!currentQueryID)
       return;
 
-    let queryIDJson = JSON.stringify({qid: currentQueryID});
+    // let queryIDJson = JSON.stringify({qid: currentQueryID});
 
     const requestOptions = {
-      method: 'POST',
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      body: queryIDJson
+      // body: queryIDJson
     };
     // eslint-disable-next-line
-    const response = await fetch('/api/creative_result', requestOptions)
+    const response = await fetch(`/${root}/api/v1/pub/query/${currentQueryID}/result`, requestOptions)
       .then(response => handleFetchErrors(response, () => {
+        console.log(response.json());
         setIsFetchingARAStatus(false);
         setIsFetchingResults(false);
         if(formattedResults.length <= 0) {
