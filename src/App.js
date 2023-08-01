@@ -28,12 +28,6 @@ const App = ({children}) => {
     setFeedbackModalOpen(false);
   }
   
-  useEffect(() => {
-    if(root === "main"){
-      console.log("Root is main");
-    }
-    
-  }, [root]);
   return (
     <div className={`app ${pathnameClass}`}>
       <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />

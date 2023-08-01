@@ -34,7 +34,7 @@ const ShareModal = ({isOpen, onClose, qid}) => {
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
   const qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, qid);
-  const qidURL = `${window.location.origin}${qidPath}`;
+  const qidURL = `${window.location.origin}/${root}/${qidPath}`;
   
   useEffect(() => {
     if(window.location.pathname.includes("results") && !isResultsUrlSet.current && qidURL) {
