@@ -56,7 +56,10 @@ export const deleteUserSave = async (saveId,
 }                                    
 
 const userApiPath = '/main/api/v1/pvt/users/me';
-const fetchUserData = async (fetchMethod, httpErrorHandler, fetchErrorHandler) => {
+const fetchUserData = async (fetchMethod,
+                             httpErrorHandler,
+                             fetchErrorHandler,
+                             successHandler = (resp) => resp.json()) => {
   let resp = null;
   try {
     resp = await fetchMethod();
@@ -67,7 +70,7 @@ const fetchUserData = async (fetchMethod, httpErrorHandler, fetchErrorHandler) =
   if (!resp || !resp.ok) {
     httpErrorHandler(resp);
   } else {
-    return resp.json();
+    return successHandler(resp);
   }
 }
 
@@ -94,5 +97,5 @@ const putUserData = async (url, body, httpErrorHandler, fetchErrorHandler) => {
 }
 
 const deleteUserData = async (url, httpErrorHandler, fetchErrorHandler) => {
-  return await fetchUserData(async () => await remove(url), httpErrorHandler, fetchErrorHandler);
+  return await fetchUserData(async () => await remove(url), httpErrorHandler, fetchErrorHandler, () => true);
 }
