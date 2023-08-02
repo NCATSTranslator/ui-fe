@@ -7,7 +7,8 @@ import { useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import './App.scss';
-import { setCurrentRoot } from './Redux/rootSlice';
+import { setCurrentRoot, setCurrentUser } from './Redux/rootSlice';
+import { getUserProfile } from './Utilities/userApi';
 
 const App = ({children}) => {
 
@@ -27,7 +28,24 @@ const App = ({children}) => {
   const handleModalClose = () => {
     setFeedbackModalOpen(false);
   }
+
+  useEffect(()=>{
+    if(root !== "main")
+      return;
+
+    const fetchUser = async () => {
+      let currentUser = null;
+      try {
+        currentUser = await getUserProfile(); 
+      } catch (err) {
+        console.log(err);
+      }
+      dispatch(setCurrentUser(currentUser));
+    };
   
+    fetchUser();
+  },[dispatch]);
+
   return (
     <div className={`app ${pathnameClass}`}>
       <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />

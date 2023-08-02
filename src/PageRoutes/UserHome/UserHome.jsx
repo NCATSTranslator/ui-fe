@@ -1,8 +1,13 @@
+import UserPreferences from "../../Components/UserPreferences/UserPreferences";
+import UserHomePage from "../../Components/UserHomePage/UserHomePage";
+import UserSaves from "../../Components/UserSaves/UserSaves";
 
 const UserHome = () => {
   return (
     <div className={`container`}>
-      <h1>User Home</h1>
+      <UserHomePage/>
+      <UserSaves/>
+      <UserPreferences/>
     </div>
   );
 }

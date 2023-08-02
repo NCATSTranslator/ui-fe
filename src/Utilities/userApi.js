@@ -1,5 +1,57 @@
 import { get, post, put, remove } from './web';
 
+export const defaultPrefs = {
+  result_sort: {
+    pref_value: "scoreHighLow",
+    possible_values:["scoreHighLow", "scoreLowHigh", "nameLowHigh", "nameHighLow", "evidenceLowHigh", "evidenceHighLow"]
+  },
+  result_per_screen: {
+    pref_value: 10,
+    possible_values:[5, 10, 20, -1]
+  },
+  graph_visibility: {
+    pref_value: "sometimes",
+    possible_values:["always", "never", "sometimes"]
+  },
+  graph_layout: {
+    pref_value: "vertical",
+    possible_values:["vertical", "horizontal", "concentric"]
+  },
+  path_show_count: {
+    pref_value: 5,
+    possible_values:[5, -1]
+  },
+  evidence_sort: {
+    pref_value: "dateHighLow",
+    possible_values:["titleLowHigh", "titleHighLow", "sourceLowHigh", "sourceHighLow", "dateLowHigh", "dateHighLow"]
+  },
+  evidence_per_screen: {
+    pref_value: 5,
+    possible_values:[5, 10, 20, -1]
+  },
+}
+
+export const prefKeyToString = (prefKey) => {
+  switch (prefKey) {
+    case "result_sort":
+      return "Sort results by";
+    case "result_per_screen":
+      return "Results to show per page";
+    case "graph_visibility":
+      return "Graph visibility";
+    case "graph_layout":
+      return "Graph layout";
+    case "path_show_count":
+      return "Number of paths to show";
+    case "evidence_sort":
+      return "Sort evidence by";
+    case "evidence_per_screen":
+      return "Publications to show per page";
+    default: 
+      return `No label provided for ${prefKey}`;
+  }
+}
+
 export const getUserProfile = async (httpErrorHandler = defaultHttpErrorHandler,
                                      fetchErrorHandler = defaultFetchErrorHandler) => {
   return getUserData(`${userApiPath}`, httpErrorHandler, fetchErrorHandler);
@@ -29,7 +81,7 @@ export const updateUserPreferences = async (preferences,
                                             fetchErrorHandler = defaultFetchErrorHandler) => {
   const body = { preferences: {} };
   Object.keys(preferences).forEach((pref) => {
-    body.preferences[pref] = { pref_value: preferences[pref] };
+    body.preferences[pref] = { pref_value: preferences[pref].pref_value };
   });
 
   return postUserData(`${userApiPath}/preferences`, body, httpErrorHandler, fetchErrorHandler);
