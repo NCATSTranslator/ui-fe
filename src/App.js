@@ -7,8 +7,8 @@ import { useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import './App.scss';
-import { setCurrentRoot, setCurrentUser } from './Redux/rootSlice';
-import { getUserProfile } from './Utilities/userApi';
+import { setCurrentRoot, setCurrentUser, setCurrentPrefs, currentPrefs } from './Redux/rootSlice';
+import { getUserProfile, getUserPreferences, defaultPrefs } from './Utilities/userApi';
 
 const App = ({children}) => {
 
@@ -42,8 +42,19 @@ const App = ({children}) => {
       }
       dispatch(setCurrentUser(currentUser));
     };
+
+    const fetchPrefs = async () => {
+      let prefs = await getUserPreferences(()=>{console.warn("no prefs found for this user, setting to default prefs.")});
+      if(prefs === undefined)
+        prefs = defaultPrefs;
+
+      console.log(prefs);
+        
+      dispatch(setCurrentPrefs(prefs));
+    };
   
     fetchUser();
+    fetchPrefs();
   },[dispatch]);
 
   return (

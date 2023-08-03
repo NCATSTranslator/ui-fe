@@ -14,6 +14,7 @@ import Terms from './PageRoutes/Terms/Terms';
 import DesignSystem from './PageRoutes/DesignSystem/DesignSystem';
 import Login from './PageRoutes/Login/Login';
 import UserHome from './PageRoutes/UserHome/UserHome';
+import Saves from './PageRoutes/Saves/Saves';
 import { Help } from './PageRoutes/Articles/Help';
 import { WhatIs } from './PageRoutes/Articles/WhatIs';
 import { HowItWorks } from './PageRoutes/Articles/HowItWorks';
@@ -114,6 +115,10 @@ const routes = [
   {
     path: "home",
     element: <Page title="User Home"><UserHome /></Page>
+  },
+  {
+    path: "workspace",
+    element: <Page title="User Workspace"><Saves /></Page>
   }
 ]
 

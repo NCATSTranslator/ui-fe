@@ -2,11 +2,11 @@ import { get, post, put, remove } from './web';
 
 export const defaultPrefs = {
   result_sort: {
-    pref_value: "scoreHighLow",
+    pref_value: "nameLowHigh",
     possible_values:["scoreHighLow", "scoreLowHigh", "nameLowHigh", "nameHighLow", "evidenceLowHigh", "evidenceHighLow"]
   },
   result_per_screen: {
-    pref_value: 10,
+    pref_value: 20,
     possible_values:[5, 10, 20, -1]
   },
   graph_visibility: {

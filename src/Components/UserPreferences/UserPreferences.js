@@ -1,25 +1,28 @@
 import { useEffect, useState } from 'react';
 import { getUserPreferences, defaultPrefs, prefKeyToString, updateUserPreferences } from '../../Utilities/userApi';
+import { useDispatch, useSelector } from 'react-redux';
+import { currentPrefs, setCurrentPrefs } from '../../Redux/rootSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Button from '../FormFields/Button';
 import Select from 'react-select'
 import styles from './UserPreferences.module.scss';
+import { cloneDeep } from 'lodash';
 
 const UserPreferences = () => {
 
-  const [userPrefs, setUserPrefs] = useState(null);
+  const dispatch = useDispatch();
+  const initPrefs = useSelector(currentPrefs);
+  const [userPrefs, setUserPrefs] = useState(initPrefs);
   const prefsSavedToast = () => toast.success("Preferences saved!");
 
-  useEffect(() => {
-    getPrefs();
-  },[]);
-
-  const getPrefs = async ()=>{
+  const updatePrefs = async () => {
     let prefs = await getUserPreferences(()=>{console.warn("no prefs found for this user, setting to default prefs.")});
     if(prefs === undefined)
-    prefs = defaultPrefs;
+      prefs = defaultPrefs;
+
     setUserPrefs(prefs);
+    dispatch(setCurrentPrefs(prefs));
   }
 
   const handleSubmitUserPrefs = async (e) => {
@@ -27,6 +30,7 @@ const UserPreferences = () => {
     let response = await updateUserPreferences(userPrefs);
     console.log(response);
     prefsSavedToast();
+    updatePrefs();
   }
 
   return(
@@ -54,7 +58,7 @@ const UserPreferences = () => {
                   const prefOptions = userPrefs[pref].possible_values.map((val)=>{
                     return({value: val, label: val})
                   })
-                  const defaultVal = prefOptions.find(pref=> pref.value === prefValue)
+                  const defaultVal = prefOptions.find(pref => pref.value === prefValue)
                   return(
                     <label htmlFor={`#${pref}`} key={pref}>
                       {prefLabel}
@@ -66,7 +70,7 @@ const UserPreferences = () => {
                         onChange={(e)=>{
                           if(userPrefs[pref]) {
                             setUserPrefs(prev => {
-                              let newPrefs = {...prev};
+                              let newPrefs = cloneDeep(prev);
                               newPrefs[pref].pref_value = e.value;
                               return newPrefs;
                             })

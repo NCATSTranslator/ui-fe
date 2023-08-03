@@ -19,6 +19,10 @@ const Header = ({children, handleFeedbackModalOpen}) => {
             <Link to={`/${root}/`} className={styles.logo}><Logo/></Link>
           </div>
           <div className={styles.right}>
+            {
+              root === 'main' &&
+              <Link to={`/${root}/workspace`}>Workspace</Link>
+            }
             <Link to={`/${root}/history`}>Search History</Link>
             <button onClick={()=>handleFeedbackModalOpen()}>Send Feedback</button>
             <Link to={`/${root}/help`} className={styles.help} rel="noreferrer" target={'_blank'} >Help</Link>
