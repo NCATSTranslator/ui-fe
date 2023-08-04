@@ -4,6 +4,8 @@ import PathObject from '../PathObject/PathObject';
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import { useOutletContext } from 'react-router-dom';
 import { cloneDeep, isEqual } from 'lodash';
+import { useSelector } from 'react-redux';
+import { currentPrefs } from '../../Redux/rootSlice';
 
 const getPathsWithSelectionsSet = (paths, selectedPaths) => {
   if(selectedPaths.size > 0) {
@@ -24,15 +26,26 @@ const getPathsWithSelectionsSet = (paths, selectedPaths) => {
 
 const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, activeStringFilters}) => {
 
-  let initialNumberToShow = (paths.length < 6) ? paths.length : 6;
+  const prefs = useSelector(currentPrefs);
+
+  const initItemsPerPage = (prefs?.path_show_count?.pref_value) ? prefs.path_show_count.pref_value : 5;
+  let initialNumberToShow = (initItemsPerPage === -1 || paths.length < initItemsPerPage) ? paths.length : initItemsPerPage;
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
 
   const setFeedbackModalOpen = useOutletContext();
 
+  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
+  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
-    setNumberToShow((paths.length < 6) ? paths.length : 6);
-  }, [paths]);
+    const tempItemsPerPage = (prefs?.path_show_count?.pref_value) ? prefs.path_show_count.pref_value : 5;
+    const tempNumberToShow = (tempItemsPerPage === -1 || paths.length < tempItemsPerPage) ? paths.length : tempItemsPerPage;
+    setNumberToShow(tempNumberToShow);
+  }, [prefs, paths]);
+
+  useEffect(() => {
+    setNumberToShow((paths.length < initItemsPerPage) ? paths.length : initItemsPerPage);
+  }, [paths, initItemsPerPage]);
 
   const handleNameClick = (name) => {
     console.log("handle name click");
@@ -47,12 +60,12 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
   }
 
   const handleShowMore = () => {
-    let newAmount = (numberToShow + 6 > paths.length) ? paths.length : numberToShow + 6;
+    let newAmount = (numberToShow + initItemsPerPage > paths.length) ? paths.length : numberToShow + initItemsPerPage;
     setNumberToShow(newAmount);
   }
 
   const handleShowLess = () => {
-    let newAmount = (numberToShow - 6 <= 6) ? numberToShow - (numberToShow - 6) : numberToShow - 6;
+    let newAmount = (numberToShow - initItemsPerPage <= initItemsPerPage) ? numberToShow - (numberToShow - initItemsPerPage) : numberToShow - initItemsPerPage;
     setNumberToShow(newAmount);
   }
 
@@ -95,7 +108,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
               <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
             }
             {
-              (numberToShow <= paths.length && numberToShow > 6) &&
+              (numberToShow <= paths.length && numberToShow > initItemsPerPage) &&
               <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
             }
           </div>

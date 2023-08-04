@@ -7,7 +7,7 @@ import { useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import './App.scss';
-import { setCurrentRoot, setCurrentUser, setCurrentPrefs, currentPrefs } from './Redux/rootSlice';
+import { setCurrentRoot, setCurrentUser, setCurrentPrefs } from './Redux/rootSlice';
 import { getUserProfile, getUserPreferences, defaultPrefs } from './Utilities/userApi';
 
 const App = ({children}) => {
@@ -45,17 +45,16 @@ const App = ({children}) => {
 
     const fetchPrefs = async () => {
       let prefs = await getUserPreferences(()=>{console.warn("no prefs found for this user, setting to default prefs.")});
+      console.log("initial fetch of user prefs: ", prefs.preferences);
       if(prefs === undefined)
         prefs = defaultPrefs;
 
-      console.log(prefs);
-        
-      dispatch(setCurrentPrefs(prefs));
+      dispatch(setCurrentPrefs(prefs.preferences));
     };
   
     fetchUser();
     fetchPrefs();
-  },[dispatch]);
+  },[dispatch, root]);
 
   return (
     <div className={`app ${pathnameClass}`}>

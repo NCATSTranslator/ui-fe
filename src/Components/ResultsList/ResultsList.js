@@ -100,8 +100,7 @@ const ResultsList = ({loading}) => {
   const [formattedResults, setFormattedResults] = useState([]);
   // Array, results meant to display based on the pagination
   const displayedResults = formattedResults.slice(itemOffset, endResultIndex);
-  const initSortString = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'ScoreHighLow';
-  console.log("test", prefs, initSortString);
+  const initSortString = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
   const currentSortString = useRef(initSortString);
   // Int, number of pages
   const pageCount = Math.ceil(formattedResults.length / itemsPerPage);
@@ -118,6 +117,14 @@ const ResultsList = ({loading}) => {
 
   // Bool, is the shift key being held down
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
+
+  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
+  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
+  useEffect(() => {
+    currentSortString.current = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
+    const tempItemsPerPage = (prefs?.result_per_screen?.pref_value) ? prefs.result_per_screen.pref_value : 10;
+    setItemsPerPage(tempItemsPerPage);
+  }, [prefs]);
 
   useEffect(() => {
     const handleKeyDown = (ev) => {

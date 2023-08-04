@@ -13,6 +13,7 @@ const UserPreferences = () => {
 
   const dispatch = useDispatch();
   const initPrefs = useSelector(currentPrefs);
+  // const userPrefs = useRef(initPrefs);
   const [userPrefs, setUserPrefs] = useState(initPrefs);
   const prefsSavedToast = () => toast.success("Preferences saved!");
 
@@ -21,17 +22,21 @@ const UserPreferences = () => {
     if(prefs === undefined)
       prefs = defaultPrefs;
 
-    setUserPrefs(prefs);
-    dispatch(setCurrentPrefs(prefs));
+    setUserPrefs(prefs.preferences);
+    dispatch(setCurrentPrefs(prefs.preferences));
   }
 
   const handleSubmitUserPrefs = async (e) => {
     e.preventDefault();
+    
     let response = await updateUserPreferences(userPrefs);
-    console.log(response);
+    console.log('new prefs sent: ', userPrefs);
     prefsSavedToast();
-    updatePrefs();
   }
+
+  useEffect(() => {
+    setUserPrefs(initPrefs);
+  }, [initPrefs]);
 
   return(
     <div>
@@ -46,39 +51,52 @@ const UserPreferences = () => {
         hideProgressBar
       />
       {
-        userPrefs && 
+        initPrefs && 
         <>
           <h4 className={styles.heading}>Preferences:</h4>
           <form onSubmit={(e)=>handleSubmitUserPrefs(e)} name="user preferences form" className={styles.form}>
             <div className={styles.prefs}>
               {
-                Object.keys(userPrefs).map((pref, i)=>{
+                Object.keys(initPrefs).map((pref, i)=>{
                   const prefLabel = prefKeyToString(pref);
-                  const prefValue = userPrefs[pref].pref_value;
-                  const prefOptions = userPrefs[pref].possible_values.map((val)=>{
-                    return({value: val, label: val})
-                  })
-                  const defaultVal = prefOptions.find(pref => pref.value === prefValue)
-                  return(
-                    <label htmlFor={`#${pref}`} key={pref}>
-                      {prefLabel}
-                      <Select 
-                        id={pref}
-                        name={prefLabel}
-                        defaultValue={defaultVal}
-                        options={prefOptions}
-                        onChange={(e)=>{
-                          if(userPrefs[pref]) {
-                            setUserPrefs(prev => {
-                              let newPrefs = cloneDeep(prev);
-                              newPrefs[pref].pref_value = e.value;
-                              return newPrefs;
-                            })
-                          }
-                        }}
-                      />
-                    </label>
-                  ) 
+                  const prefValue = initPrefs[pref].pref_value;
+                  let prefOptions = null;
+                  if(initPrefs[pref]?.possible_values) {
+                    prefOptions = initPrefs[pref].possible_values.map((val)=>{
+                      const label = (val === -1) ? "All" : val;
+                      return({value: val, label: label})
+                    });
+                  } else {
+                    prefOptions = defaultPrefs[pref].possible_values.map((val)=>{
+                      const label = (val === -1) ? "All" : val;
+                      return({value: val, label: label})
+                    });
+                  }
+                  const defaultVal = prefOptions?.find(pref => pref.value.toString() === prefValue.toString());
+                  if(prefOptions === null) {
+                    return(<></>);
+                  } else {
+                    return(
+                      <label htmlFor={`#${pref}`} key={`${pref}-${defaultVal.value}`}>
+                        {prefLabel}
+                        <Select 
+                          id={pref}
+                          name={prefLabel}
+                          defaultValue={defaultVal}
+                          options={prefOptions}
+                          onChange={(e)=>{
+                            if(userPrefs[pref]) {
+                              setUserPrefs(prev => {
+                                let newPrefs = cloneDeep(prev);
+                                newPrefs[pref].pref_value = e.value;
+                                return newPrefs;
+                              })
+                            }
+                          }}
+                        />
+                      </label>
+                    ) 
+                  }
                 })
               }
             </div>

@@ -2,12 +2,12 @@ import { get, post, put, remove } from './web';
 
 export const defaultPrefs = {
   result_sort: {
-    pref_value: "nameLowHigh",
+    pref_value: "scoreHighLow",
     possible_values:["scoreHighLow", "scoreLowHigh", "nameLowHigh", "nameHighLow", "evidenceLowHigh", "evidenceHighLow"]
   },
   result_per_screen: {
-    pref_value: 20,
-    possible_values:[5, 10, 20, -1]
+    pref_value: 10,
+    possible_values:[5, 10, 20]
   },
   graph_visibility: {
     pref_value: "sometimes",
@@ -19,7 +19,7 @@ export const defaultPrefs = {
   },
   path_show_count: {
     pref_value: 5,
-    possible_values:[5, -1]
+    possible_values:[5, 10, 20, -1]
   },
   evidence_sort: {
     pref_value: "dateHighLow",
@@ -27,7 +27,7 @@ export const defaultPrefs = {
   },
   evidence_per_screen: {
     pref_value: 5,
-    possible_values:[5, 10, 20, -1]
+    possible_values:[5, 10, 20, 50]
   },
 }
 

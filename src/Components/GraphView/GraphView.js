@@ -16,6 +16,24 @@ import GraphLayoutButtons from '../GraphLayoutButtons/GraphLayoutButtons';
 import navigator from 'cytoscape-navigator';
 import popper from 'cytoscape-popper';
 import 'cytoscape-navigator/cytoscape.js-navigator.css';
+import { useSelector } from 'react-redux';
+import { currentPrefs } from '../../Redux/rootSlice';
+
+const getInitialGraphLayoutFromPrefs = (prefs, layoutList) => {
+  let graphLayoutPref = (prefs?.graph_layout?.pref_value) ? prefs.graph_layout.pref_value : "vertical";
+  switch (graphLayoutPref) {
+    case "horizontal":
+      graphLayoutPref = layoutList.breadthfirst;
+      break;
+    case "concentric":
+      graphLayoutPref = layoutList.concentric;
+      break;
+    default:
+      graphLayoutPref = layoutList.klay;
+      break;
+  }
+  return graphLayoutPref;
+}
 
 // initialize 3rd party layouts
 cytoscape.use(klay);
@@ -27,9 +45,12 @@ cytoscape.warnings(false);
 
 const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active, zoomKeyDown}) => {
 
+  const prefs = useSelector(currentPrefs);
+
   let graphRef = useRef(null);
   let graphViewRef = useRef(null);
-  const [currentLayout, setCurrentLayout] = useState(layoutList.klay);
+  let graphLayoutPref = getInitialGraphLayoutFromPrefs(prefs, layoutList);
+  const [currentLayout, setCurrentLayout] = useState(graphLayoutPref);
   const graph = useMemo(() => {
     if(!active)
       return null;
@@ -37,7 +58,19 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
     return resultToCytoscape(result.rawResult, rawResults.data)
   },[result, rawResults, active])
 
-  const initIsExpanded = (result?.compressedPaths && result.compressedPaths.length > 1) ? true : false;
+
+  const graphVisibilityPref = (prefs?.graph_visibility) ? prefs.graph_visibility.pref_value: 'sometimes';
+  let initIsExpanded = true; 
+  switch (graphVisibilityPref) {
+    case "sometimes":
+      initIsExpanded = (result?.compressedPaths && result.compressedPaths.length > 1) ? true : false;
+      break;
+    case "never":
+      initIsExpanded = false;
+      break;
+    default:
+      break;
+  }
   const [isExpanded, setIsExpanded] = useState(initIsExpanded);
   const [height, setHeight] = useState(0);
   

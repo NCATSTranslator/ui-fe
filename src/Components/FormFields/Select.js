@@ -1,6 +1,5 @@
 import React, {useState, useEffect, useRef} from "react";
 import AnimateHeight from "react-animate-height";
-import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import styles from './Select.module.scss';
 
 const Select = ({label, subtitle, value, name, size, error, 

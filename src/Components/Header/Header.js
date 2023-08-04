@@ -35,8 +35,8 @@ const Header = ({children, handleFeedbackModalOpen}) => {
                   <Link to={`/main/home`} className={styles.help} >
                     <div className={styles.imageContainer}>
                       {(user?.profile_pic_url)
-                        ? <img src={user.profile_pic_url} alt="user profile picture" className={styles.profilePic}/>
-                        : <img src={defaultPfp} alt="user profile picture" className={styles.profilePic}/>}
+                        ? <img src={user.profile_pic_url} alt="user profile" className={styles.profilePic}/>
+                        : <img src={defaultPfp} alt="user profile" className={styles.profilePic}/>}
                     </div>
                   </Link>
                   <Link to={`/demo`} className={styles.login} >Log Out</Link>
