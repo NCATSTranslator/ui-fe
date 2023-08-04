@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import AnimateHeight from "react-animate-height";
 import styles from './Select.module.scss';
 
@@ -11,6 +11,8 @@ const Select = ({label, subtitle, value, name, size, error,
   const [height, setHeight] = useState(0);
   let openClass = (selectOpen) ? styles.open : styles.closed;
   let animateClass = (noanimate) ? styles.noAnimate : styles.animate;
+
+  const wrapperRef = useRef(null);  
 
   size = (size) ? size : 's';
 
@@ -40,9 +42,26 @@ const Select = ({label, subtitle, value, name, size, error,
     setSelectedItem(value);
   }, [value])
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setSelectOpen(false);
+        setHeight(0);
+      }
+    };
+  
+    document.addEventListener("click", handleClickOutside);
+  
+    // Clean up the event listener on unmount
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);  // Empty array ensures this runs once on mount and unmount
+  
+
   return (
     <>
-      <label className={`select ${styles.select} ${size} ${animateClass} ${className}`} > 
+      <label className={`select ${styles.select} ${size} ${animateClass} ${className}`} ref={wrapperRef}> 
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         <div className={`${styles.selectContainer} ${openClass}`}>

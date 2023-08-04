@@ -15,6 +15,7 @@ import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
 import { useSelector } from 'react-redux';
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
+import { currentPrefs, currentRoot }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
   sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag, 
@@ -29,6 +30,8 @@ import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
 
 const ResultsList = ({loading}) => {
 
+  const root = useSelector(currentRoot);
+  const prefs = useSelector(currentPrefs);
   let blocker = useBlocker(true);
 
   // URL search params
@@ -81,7 +84,8 @@ const ResultsList = ({loading}) => {
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
   // Int, how many items per page
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const initItemsPerPage = (prefs?.result_per_screen?.pref_value) ? prefs.result_per_screen.pref_value : 10;
+  const [itemsPerPage, setItemsPerPage] = useState(initItemsPerPage);
   // Int, last result item index
   const [endResultIndex, setEndResultIndex] = useState(itemsPerPage);
   // Obj, original raw results from the BE
@@ -96,7 +100,8 @@ const ResultsList = ({loading}) => {
   const [formattedResults, setFormattedResults] = useState([]);
   // Array, results meant to display based on the pagination
   const displayedResults = formattedResults.slice(itemOffset, endResultIndex);
-  const currentSortString = useRef('scoreHighLow');
+  const initSortString = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
+  const currentSortString = useRef(initSortString);
   // Int, number of pages
   const pageCount = Math.ceil(formattedResults.length / itemsPerPage);
   // Array, currently active filters
@@ -112,6 +117,14 @@ const ResultsList = ({loading}) => {
 
   // Bool, is the shift key being held down
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
+
+  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
+  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
+  useEffect(() => {
+    currentSortString.current = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
+    const tempItemsPerPage = (prefs?.result_per_screen?.pref_value) ? prefs.result_per_screen.pref_value : 10;
+    setItemsPerPage(tempItemsPerPage);
+  }, [prefs]);
 
   useEffect(() => {
     const handleKeyDown = (ev) => {
@@ -218,15 +231,14 @@ const ResultsList = ({loading}) => {
     if(!currentQueryID)
       return;
 
-    let queryIDJson = JSON.stringify({qid: currentQueryID});
+    // let queryIDJson = JSON.stringify({qid: currentQueryID});
 
     const requestOptions = {
-      method: 'POST',
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      body: queryIDJson
     };
     // eslint-disable-next-line
-    const response = await fetch('/api/creative_status', requestOptions)
+    const response = await fetch(`/${root}/api/v1/pub/query/${currentQueryID}/status`, requestOptions)
       .then(response => handleFetchErrors(response))
       .then(response => response.json())
       .then(data => {
@@ -278,16 +290,17 @@ const ResultsList = ({loading}) => {
     if(!currentQueryID)
       return;
 
-    let queryIDJson = JSON.stringify({qid: currentQueryID});
+    // let queryIDJson = JSON.stringify({qid: currentQueryID});
 
     const requestOptions = {
-      method: 'POST',
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      body: queryIDJson
+      // body: queryIDJson
     };
     // eslint-disable-next-line
-    const response = await fetch('/api/creative_result', requestOptions)
+    const response = await fetch(`/${root}/api/v1/pub/query/${currentQueryID}/result`, requestOptions)
       .then(response => handleFetchErrors(response, () => {
+        console.log(response.json());
         setIsFetchingARAStatus(false);
         setIsFetchingResults(false);
         if(formattedResults.length <= 0) {

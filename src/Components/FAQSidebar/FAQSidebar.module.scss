@@ -30,6 +30,17 @@
     font-size: 14px;
     font-weight: 700;
     padding: 11px 8px;
-    display: block;
+    display: flex;
+    align-items: center;
+    svg {
+      transform: none !important;
+      margin-left: 4px;
+      min-width: 20px;
+      width: 20px;
+      height: 20px;
+      path {
+        stroke: transparent;
+      }
+    }
   }
 }

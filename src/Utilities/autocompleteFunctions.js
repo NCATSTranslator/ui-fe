@@ -56,7 +56,7 @@ const newFetchNodesFromInputText = async (inputText, type, prefixes) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   };
-  return fetch(`https://name-lookup-dev.apps.renci.org/lookup?string=${inputText}&offset=0&limit=40&biolink_type=${type}${prefixString}`, nameResolverRequestOptions)
+  return fetch(`https://name-lookup-dev.apps.renci.org/lookup?string=${inputText}&offset=0&limit=100&biolink_type=${type}${prefixString}`, nameResolverRequestOptions)
 }
 
 // Do a node search based on user input text
