@@ -21,7 +21,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
-    const tempItemsPerPage = (prefs?.evidence_per_screen?.pref_value) ? prefs.evidence_per_screen.pref_value : 10;
+    const tempItemsPerPage = (prefs?.evidence_per_screen?.pref_value) ? parseInt(prefs.evidence_per_screen.pref_value) : 10;
     setItemsPerPage(parseInt(tempItemsPerPage));
   }, [prefs]);
 
@@ -35,7 +35,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState({});
   const [formattedEdges, setFormattedEdges] = useState(null)
-  const initItemsPerPage = parseInt((prefs?.evidence_per_screen?.pref_value) ? prefs.evidence_per_screen.pref_value : 5);
+  const initItemsPerPage = parseInt((prefs?.evidence_per_screen?.pref_value) ? parseInt(prefs.evidence_per_screen.pref_value) : 5);
   const [itemsPerPage, setItemsPerPage] = useState(initItemsPerPage);
   const [newItemsPerPage, setNewItemsPerPage] = useState(null);
   const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
