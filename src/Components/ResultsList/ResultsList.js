@@ -84,7 +84,7 @@ const ResultsList = ({loading}) => {
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
   // Int, how many items per page
-  const initItemsPerPage = (prefs?.result_per_screen?.pref_value) ? prefs.result_per_screen.pref_value : 10;
+  const initItemsPerPage = (prefs?.result_per_screen?.pref_value) ? parseInt(prefs.result_per_screen.pref_value) : 10;
   const [itemsPerPage, setItemsPerPage] = useState(initItemsPerPage);
   // Int, last result item index
   const [endResultIndex, setEndResultIndex] = useState(itemsPerPage);
@@ -122,7 +122,7 @@ const ResultsList = ({loading}) => {
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
     currentSortString.current = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
-    const tempItemsPerPage = (prefs?.result_per_screen?.pref_value) ? prefs.result_per_screen.pref_value : 10;
+    const tempItemsPerPage = (prefs?.result_per_screen?.pref_value) ? parseInt(prefs.result_per_screen.pref_value) : 10;
     setItemsPerPage(tempItemsPerPage);
   }, [prefs]);
 
