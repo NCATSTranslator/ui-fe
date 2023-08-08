@@ -9,12 +9,22 @@
     text-align: center;
   }
 }
-.complete, .loadingButtonIcon {
+.loadingButtonIcon {
   height: $m;
   width: $m;
 }
 .complete {
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  cursor: default;
+  span {
+    font-size: 16px;
+    color: $purpleOne;
+    line-height: 1;
+    padding: 10px 8px;
+    font-weight: 700;
+  }
 }
 .loadingButtonIcon {
   -webkit-animation:spin 2s linear infinite;
@@ -36,6 +46,48 @@
   &:hover {
     text-decoration: underline;
     box-shadow: none;
+  }
+}
+
+.sticky {
+  font-weight: 700;
+  // transition: all .5s ease;
+  overflow: hidden;
+  span {
+    // transition: all .5s ease;
+    white-space: nowrap;
+  }
+  &.expanded {
+    width: auto;
+    padding-right: 10px;
+    // span {
+    //   opacity: 1;
+    // }
+  }
+  &.collapsed {
+    width: 0;
+    padding-right: 0;
+    // span {
+    //   opacity: 0;
+    // }
+  }
+  svg {
+    min-width: 24px;
+  }
+  .expandButton {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    border-radius: 50%;
+    padding: 0;
+    font-weight: 700;
+    cursor: pointer;
+    svg {
+      margin-right: 0;
+      path {
+        stroke: $white
+      }
+    }
   }
 }
 

@@ -27,6 +27,7 @@ import { isFacet, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamil
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
+import { ReactComponent as ShareIcon } from '../../Icons/share.svg';
 
 const ResultsList = ({loading}) => {
 
@@ -810,6 +811,31 @@ const ResultsList = ({loading}) => {
             </>
           }
         </div>
+        {
+          formattedResults.length > 0 &&
+          <div className={styles.sticky}>
+            <div className={styles.container}>
+              <ResultsListLoadingButton
+                data={{
+                  handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
+                  isFetchingARAStatus: isFetchingARAStatus,
+                  isFetchingResults: isFetchingResults,
+                  showDisclaimer: false,
+                  containerClassName: styles.shareLoadingButtonContainer,
+                  buttonClassName: styles.loadingButton,
+                  hasFreshResults: (freshRawResults !== null),
+                  isSticky: true
+                }}
+              />
+              <button
+                className={styles.shareButton}
+                onClick={()=>{setShareModalOpen(true)}}
+                >
+                  <ShareIcon/>
+              </button>
+            </div>
+          </div>
+        }
       </div>
       {blocker ? <NavConfirmationPromptModal blocker={blocker} /> : null}
     </QueryClientProvider>
