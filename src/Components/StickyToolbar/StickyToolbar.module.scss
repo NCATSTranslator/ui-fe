@@ -23,7 +23,6 @@
     justify-content: space-between;
     align-items: center;
     transition: all .5s ease;
-    overflow: hidden;
   }
   .container > div {
     opacity: 0;
@@ -33,7 +32,7 @@
   }
   &.expanded {
     .container {
-      width: 250px;
+      width: 240px;
     }
   }
   &.showText {
