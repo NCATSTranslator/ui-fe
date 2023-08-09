@@ -1,34 +1,17 @@
-import { useState } from 'react';
 import styles from './ResultsListLoadingButton.module.scss';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
-import {ReactComponent as Subtract} from '../../Icons/Buttons/Subtract.svg';
-import {ReactComponent as Add} from '../../Icons/Buttons/Add.svg';
 
 const ResultsListLoadingButton = ({ data = {} }) => {
 
   const containerClassName = (data.containerClassName) ? data.containerClassName : '';
   const buttonClassName = (data.buttonClassName) ? data.buttonClassName : '';
-  const isSticky = (data.isSticky !== undefined) ? data.isSticky : false;
-  const stickyClassName = isSticky ? styles.sticky : '';
 
-  const [isExpanded, setIsExpanded] = useState(true);
-  const expandedClassName = isExpanded ? styles.expanded : styles.collapsed;
-  
   return(
     <div 
-      className={`${containerClassName} ${styles.loadingButtonContainer} ${stickyClassName} ${expandedClassName}`}
+      className={`${containerClassName} ${styles.loadingButtonContainer}`}
       >
-      {
-        isSticky &&
-        <button 
-          className={styles.expandButton}
-          onClick={()=>{setIsExpanded(prev=>!prev)}} 
-          >
-          {isExpanded ? <Subtract/> : <Add/>}
-        </button>
-      }
       {
         (!data.isFetchingARAStatus && !data.isFetchingResults) &&
         <div className={styles.complete}>

@@ -110,50 +110,6 @@
       }
     }
   }
-  .sticky {
-    background-color: $white;
-    border-radius: 25px;
-    padding: $s;
-    position: sticky;
-    bottom: $s;
-    right: $s;
-    width: fit-content;
-    margin: 0 0 0 auto;
-    box-shadow: $dropShadowHover;
-    transition: $defaultBoxShadowAnim;
-    z-index: 100;
-    button {
-      margin-bottom: 0;
-    }
-    &:hover {
-      box-shadow: 0 5px 15px rgba(32,33,36,.4);
-    }
-    .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .shareButton {
-      margin: 0;
-    }
-  }
-  .shareButton {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    position: relative;
-    margin: 0 0 0 20px;
-    svg {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      margin-right: 0;
-      path {
-        fill: $white;
-      }
-    }
-  }
 }
 
 .pagination {

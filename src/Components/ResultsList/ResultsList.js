@@ -10,6 +10,7 @@ import Tooltip from '../Tooltip/Tooltip';
 import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
 import ResultsListHeader from "../ResultsListHeader/ResultsListHeader";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
+import StickyToolbar from "../StickyToolbar/StickyToolbar";
 import ReactPaginate from 'react-paginate';
 import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
@@ -27,7 +28,6 @@ import { isFacet, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamil
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
-import { ReactComponent as ShareIcon } from '../../Icons/share.svg';
 
 const ResultsList = ({loading}) => {
 
@@ -814,28 +814,19 @@ const ResultsList = ({loading}) => {
         </div>
         {
           formattedResults.length > 0 &&
-          <div className={styles.sticky}>
-            <div className={styles.container}>
-              <ResultsListLoadingButton
-                data={{
-                  handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
-                  isFetchingARAStatus: isFetchingARAStatus,
-                  isFetchingResults: isFetchingResults,
-                  showDisclaimer: false,
-                  containerClassName: styles.shareLoadingButtonContainer,
-                  buttonClassName: styles.loadingButton,
-                  hasFreshResults: (freshRawResults !== null),
-                  isSticky: true
-                }}
-              />
-              <button
-                className={styles.shareButton}
-                onClick={()=>{setShareModalOpen(true)}}
-                >
-                  <ShareIcon/>
-              </button>
-            </div>
-          </div>
+          <StickyToolbar
+            loadingButtonData={{
+              handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
+              isFetchingARAStatus: isFetchingARAStatus,
+              isFetchingResults: isFetchingResults,
+              showDisclaimer: false,
+              containerClassName: styles.shareLoadingButtonContainer,
+              buttonClassName: styles.loadingButton,
+              hasFreshResults: (freshRawResults !== null),
+              isSticky: true
+            }}
+            setShareModalFunction={setShareModalOpen}
+          />
         }
       </div>
       {blocker ? <NavConfirmationPromptModal blocker={blocker} /> : null}
