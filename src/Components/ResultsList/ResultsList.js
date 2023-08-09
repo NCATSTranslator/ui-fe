@@ -775,6 +775,7 @@ const ResultsList = ({loading}) => {
                         <option value="5" key="0">5</option>
                         <option value="10" key="1">10</option>
                         <option value="20" key="2">20</option>
+                        <option value="50" key="3">50</option>
                       </Select>
                     </div>
                     <ReactPaginate
