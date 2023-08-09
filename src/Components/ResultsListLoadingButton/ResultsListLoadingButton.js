@@ -3,24 +3,27 @@ import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
 
-const ResultsListLoadingButton = ({data}) => {
+const ResultsListLoadingButton = ({ data = {} }) => {
 
   const containerClassName = (data.containerClassName) ? data.containerClassName : '';
   const buttonClassName = (data.buttonClassName) ? data.buttonClassName : '';
 
   return(
-    <div className={`${containerClassName} ${styles.loadingButtonContainer}`}>
+    <div 
+      className={`${containerClassName} ${styles.loadingButtonContainer}`}
+      >
       {
         (!data.isFetchingARAStatus && !data.isFetchingResults) &&
         <div className={styles.complete}>
           <CompleteIcon/>
+          <span>Results Complete</span>
         </div>
       }
       {
         (!data.hasFreshResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&
         <button className={`${buttonClassName} ${styles.loadingButton} ${styles.inactive}`}>
           <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-          Calculating
+          <span>Calculating</span>
         </button>
       }
       {
@@ -35,7 +38,7 @@ const ResultsListLoadingButton = ({data}) => {
               !data.isFetchingARAStatus &&
               <ResultsAvailableIcon/>
             }
-            Load New Results
+            <span>Load New Results</span>
           </button>
           {
             data.showDisclaimer &&

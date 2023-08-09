@@ -196,6 +196,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   }
 
   const updateQueryItem = (selectedNode = {id:'', label: ''}) => {
+    // add in match text for genes, which should be the species
+    if(selectedNode.id.includes("NCBIGene") && selectedNode?.match)
+      selectedNode.label += ` (${selectedNode.match})`;
+
     setInputText(selectedNode.label);
     setQueryItem(
       prev => {
@@ -251,10 +255,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     }
   }
 
-  // Handler for disease selection (template click or autocomplete item click)
-  const handleItemSelection = (disease) => {
+  // Handler for item selection (template click or autocomplete item click)
+  const handleItemSelection = (item) => {
     setIsError(false);
-    updateQueryItem(disease);
+    updateQueryItem(item);
 
     if(autocompleteItems) {
       clearAutocompleteItems();
@@ -351,12 +355,12 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     <div>
                       <h4 className={styles.showingResultsText}>Showing results for:</h4>
                       <h5 className={styles.subHeading}>{queryItem.type.label}: 
-                        {(queryItem?.node?.id &&
+                        {(queryItem?.node?.id && 
                           generateEntityLink(queryItem.node.id, styles.searchedTerm, ()=>queryItem.node.label, false)) 
                           ?
                             generateEntityLink(queryItem.node.id, styles.searchedTerm, ()=>queryItem.node.label, false)
                           :
-                            <span className={styles.searchedTerm}>{queryItem.node.label}</span>
+                            <span className={styles.searchedTerm}>{queryItem.node && queryItem.node.label}</span>
                         }
                       </h5>
                     </div>

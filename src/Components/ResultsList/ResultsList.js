@@ -10,6 +10,7 @@ import Tooltip from '../Tooltip/Tooltip';
 import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
 import ResultsListHeader from "../ResultsListHeader/ResultsListHeader";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
+import StickyToolbar from "../StickyToolbar/StickyToolbar";
 import ReactPaginate from 'react-paginate';
 import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
@@ -774,6 +775,7 @@ const ResultsList = ({loading}) => {
                         <option value="5" key="0">5</option>
                         <option value="10" key="1">10</option>
                         <option value="20" key="2">20</option>
+                        <option value="50" key="3">50</option>
                       </Select>
                     </div>
                     <ReactPaginate
@@ -810,6 +812,22 @@ const ResultsList = ({loading}) => {
             </>
           }
         </div>
+        {
+          formattedResults.length > 0 &&
+          <StickyToolbar
+            loadingButtonData={{
+              handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
+              isFetchingARAStatus: isFetchingARAStatus,
+              isFetchingResults: isFetchingResults,
+              showDisclaimer: false,
+              containerClassName: styles.shareLoadingButtonContainer,
+              buttonClassName: styles.loadingButton,
+              hasFreshResults: (freshRawResults !== null),
+              isSticky: true
+            }}
+            setShareModalFunction={setShareModalOpen}
+          />
+        }
       </div>
       {blocker ? <NavConfirmationPromptModal blocker={blocker} /> : null}
     </QueryClientProvider>

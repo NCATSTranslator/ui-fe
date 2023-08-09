@@ -112,8 +112,9 @@ export const getUrlAndOrg = (id) => {
     url = `https://www.ebi.ac.uk/chembl/compound_report_card/${id.replace(':', '')}/`;
     org = 'ChEMBL';
   } else if(formattedID.includes('MONDO')){
-    url = `https://monarchinitiative.org/disease/${id}`;
-    org = 'Monarch Initiative';
+    id = id.replace(":", "_");
+    url = `http://purl.obolibrary.org/obo/${id}`;
+    org = 'OLS';
   } else if(formattedID.includes('HP')) {
     url = `https://monarchinitiative.org/phenotype/${id}`;
     org = 'Monarch Initiative';

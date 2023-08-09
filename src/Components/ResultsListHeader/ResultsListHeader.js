@@ -2,8 +2,8 @@ import styles from './ResultsListHeader.module.scss';
 import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
 import ShareModal from "../Modals/ShareModal"; 
 import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter } from '../../Utilities/filterFunctions';
-import {ReactComponent as ShareIcon} from '../../Icons/Buttons/Export.svg';
 import {ReactComponent as CloseIcon } from "../../Icons/Buttons/Close.svg"
+import { ReactComponent as ShareIcon } from '../../Icons/share.svg';
 
   // Output jsx for selected filters
 const getSelectedFilterDisplay = (filter) => {
