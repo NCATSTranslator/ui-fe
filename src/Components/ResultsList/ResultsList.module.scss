@@ -181,4 +181,6 @@
 
 .bottomLoadingButtonContainer {
   margin-top: $xl;
+  display: grid;
+  justify-content: center;
 }
