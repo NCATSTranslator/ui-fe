@@ -198,44 +198,57 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     setCountsToShow(newCountsToShow);
   }
 
+  const tagDisplay = (tag, type, tagObject, setTagObjectFunc, availableTags) => {
+    let tagKey = tag[0];
+    let object = tag[1];
+    let tagName = '';
+    if (type === 'resultType' || type === 'nodeType') {
+      tagName = formatBiolinkEntity(object.name);
+    } else {
+      tagName = object.name;
+    }
+
+    return (
+      availableTags[tagKey] && availableTags[tagKey].count &&
+      <div className={styles.facetContainer} key={tagKey}>
+        <Checkbox
+          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, tagName)}
+          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
+          className={styles.checkbox}
+          >
+          {tagName} <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
+        </Checkbox>
+      </div>
+    )
+  }
+
   const displayFacets = (type) => {
     return (
-      <div className={styles.section}>
+      <div className={`${styles.section} ${styles[type]}`}>
         { // Sort each set of tags, then map them to return each facet
-          Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
-            let tagKey = tag[0];
-            let object = tag[1];
-            let tagName = '';
-            if (type === 'resultType' || type === 'nodeType') {
-              tagName = formatBiolinkEntity(object.name);
-            } else {
-              tagName = object.name;
-            }
-
-            return (
-              availableTags[tagKey] && availableTags[tagKey].count &&
-              <div className={styles.facetContainer} key={tagKey}>
-                <Checkbox
-                  handleClick={() => handleFacetChange(tagKey, tagObject, setTagObject, tagName)}
-                  checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
-                  className={styles.checkbox}
-                  >
-                  {tagName} <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
-                </Checkbox>
-              </div>
-            )
-          })
+          (type === "role") 
+          ?
+            Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).map((tag, j) => {
+              return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
+            })
+          :
+            Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
+              return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
+            })
         }
-        <div className={styles.showButtonsContainer}>
-          {
-            Object.keys(groupedTags[type]).length > countsToShow[type] &&
-            <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
-          }
-          {
-            (Object.keys(groupedTags[type]).length > 0) && countsToShow[type] > facetShowMoreIncrement &&
-            <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
-          }
-        </div>
+        {
+          (type !== "role") &&
+          <div className={styles.showButtonsContainer}>
+            {
+              Object.keys(groupedTags[type]).length > countsToShow[type] &&
+              <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
+            }
+            {
+              (Object.keys(groupedTags[type]).length > 0) && countsToShow[type] > facetShowMoreIncrement &&
+              <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
+            }
+          </div>
+        }
       </div>
     )
   }
