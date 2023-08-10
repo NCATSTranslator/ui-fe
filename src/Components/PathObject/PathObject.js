@@ -57,7 +57,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
           </span>
             <Tooltip id={`${nameString}${uuid}`}>
               <span><strong>{nameString}</strong> ({typeString})</span>
-              {pathObject.description}
+              <span className={styles.description}>{pathObject.description}</span>
               {
                 pathObject.provenance && 
                 <a href={pathObject.provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
@@ -149,7 +149,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
           </span>
           <Tooltip id={`${nameString}${uuid}`}>
             <span><strong>{nameString}</strong> ({typeString})</span>
-            {pathObject.description}
+            <span className={styles.description}>{pathObject.description}</span>
             {
               pathObject.provenance && 
               <a href={pathObject.provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
