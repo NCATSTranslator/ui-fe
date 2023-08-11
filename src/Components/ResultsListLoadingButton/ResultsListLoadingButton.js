@@ -24,7 +24,7 @@ const ResultsListLoadingButton = ({ data = {} }) => {
         (!data.hasFreshResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&
         <button className={`${buttonClassName} ${styles.loadingButton} ${styles.inactive}`}>
           <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-          <TextCrossfade />
+          <TextCrossfade small />
         </button>
       }
       {

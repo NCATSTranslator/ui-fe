@@ -11,7 +11,7 @@ const defaultPhrases = [
   {phrase: "Formatting Results", verb:"Formatting"},
 ];
 
-const TextCrossfade = ({ phrases = defaultPhrases, full, interval = 5000 }) => {
+const TextCrossfade = ({ phrases = defaultPhrases, small, interval = 5000 }) => {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -25,10 +25,10 @@ const TextCrossfade = ({ phrases = defaultPhrases, full, interval = 5000 }) => {
   }, []);
 
   return(
-    <div className={`${styles.fadeText} ${(full) ? styles.full : ''}`}>
+    <div className={`${styles.fadeText} ${(small) ? styles.small : ''}`}>
       {
         phrases.map((item, i) => {
-          let phrase = (full) ? item.phrase : item.verb;
+          let phrase = item.phrase;
           let key = phrase.replaceAll(" ", "_");
           return(
             <span
