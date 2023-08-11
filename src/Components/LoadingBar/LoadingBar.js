@@ -9,7 +9,7 @@ const LoadingBar = ({loading, useIcon, disclaimerText, className, reducedPadding
       { useIcon && 
         <img src={loadingIcon} alt="loading icon" className={styles.loadingIcon}/>
       }
-      <TextCrossfade full/>
+      <TextCrossfade />
       {disclaimerText && disclaimerText}
     </div>
   )
