@@ -1,0 +1,36 @@
+@import "../../Assets/Styles/variables";
+
+.fadeText {
+  position: relative;
+  height: 18px;
+  min-width: 85px;
+  &.full {
+    height: 30px;
+    min-width: 120px;
+  }
+  & > span {
+    transition: opacity 1.5s ease;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    margin: 0;
+    font-size: 16px;
+    color: $purpleOne;
+    font-weight: 700;
+  }
+  &.full > span {
+    font-size: 20px;
+  }
+  .visible {
+    opacity: 1;
+  }
+  .hidden {
+    opacity: 0;
+  }
+  &.full {
+    margin: 0 0 $s;
+  }
+}
