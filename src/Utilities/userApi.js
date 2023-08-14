@@ -52,6 +52,34 @@ export const prefKeyToString = (prefKey) => {
   }
 }
 
+export const getFormattedBookmarkObject = (bookmarkType = "result", bookmarkName, notes = "", queryNodeID, queryNodeLabel = "",
+  queryNodeDescription = "", typeObject, saveItem, pk) => {
+
+  let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
+  return { 
+    save_type: "bookmark", 
+    label: bookmarkName, 
+    notes: notes, 
+    ars_pkey: pk, 
+    object_ref: saveItem.id, 
+    data: {
+      type: bookmarkType,
+      query: queryObject,
+      item: saveItem
+    }
+  }
+}
+
+export const getQueryObjectForSave = (nodeID = 0, nodeLabel = "", nodeDescription = "", typeObject, pk) => {
+  return {
+    type: typeObject, 
+    nodeId: nodeID,
+    nodeLabel: nodeLabel,
+    nodeDescription: nodeDescription,
+    pk: pk
+  }
+}
+
 export const getUserProfile = async (httpErrorHandler = defaultHttpErrorHandler,
                                      fetchErrorHandler = defaultFetchErrorHandler) => {
   return getUserData(`${userApiPath}`, httpErrorHandler, fetchErrorHandler);

@@ -5,15 +5,18 @@ import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 import {ReactComponent as Export } from "../../Icons/Buttons/Export.svg"
+import {ReactComponent as Bookmark } from "../../Icons/Navigation/Bookmark.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
+import { createUserSave, getFormattedBookmarkObject, getQueryObjectForSave } from '../../Utilities/userApi';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
-const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown}) => {
+const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, 
+  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription}) => {
 
   let icon = getIcon(item.type);
 
@@ -161,6 +164,17 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         onClick={generateCsvFromItem(item, setCsvData)}>
           <Export/>
       </CSVLink>
+      <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
+        <Bookmark
+          onClick={async()=>{
+            let bookmarkObject = getFormattedBookmarkObject("result", item.name, "Notes here", queryNodeID, 
+              queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
+
+            let bookmarkedItem = await createUserSave(bookmarkObject);
+            console.log('bookmarked: ', bookmarkedItem);
+          }}
+        />
+      </div>
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>
       </button>

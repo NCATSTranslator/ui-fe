@@ -752,6 +752,10 @@ const ResultsList = ({loading}) => {
                             activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
                             activeStringFilters={activeStringFilters}
                             zoomKeyDown={zoomKeyDown}
+                            currentQueryID={currentQueryID}
+                            queryNodeID={initNodeIdParam}
+                            queryNodeLabel={initNodeLabelParam}
+                            queryNodeDescription={nodeDescription}
                           />
                         )
                       })
