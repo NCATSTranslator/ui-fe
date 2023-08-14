@@ -2,6 +2,7 @@ import styles from './ResultsListLoadingButton.module.scss';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
+import TextCrossfade from '../TextCrossfade/TextCrossfade';
 
 const ResultsListLoadingButton = ({ data = {} }) => {
 
@@ -23,7 +24,7 @@ const ResultsListLoadingButton = ({ data = {} }) => {
         (!data.hasFreshResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&
         <button className={`${buttonClassName} ${styles.loadingButton} ${styles.inactive}`}>
           <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-          <span>Calculating</span>
+          <TextCrossfade small />
         </button>
       }
       {
