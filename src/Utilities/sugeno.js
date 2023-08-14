@@ -1,6 +1,13 @@
 import * as math from 'mathjs';
 
-export const computeSugeno = function(confidence, novelty, clinical,
+export const maxSugenoScore = function(scores, confidenceWeight, noveltyWeight, clinicalWeight) {
+  return math.max(...scores.map((s) => {
+    return computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
+        confidenceWeight, noveltyWeight, clinicalWeight);
+  }));
+}
+
+const computeSugeno = function(confidence, novelty, clinical,
     confidenceWeight, noveltyWeight, clinicalWeight) {
   const a = confidenceWeight;
   const b = noveltyWeight;
