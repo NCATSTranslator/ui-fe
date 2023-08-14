@@ -10,7 +10,7 @@ export const maxSugenoScore = function(scores, confidenceWeight, noveltyWeight, 
     };
   });
 
-  const maxScore = scorePairs[0];
+  let maxScore = scorePairs[0];
   for (let i = 1; i < maxScore.length; i++) {
     if (math.larger(scorePairs[i].sugeno, maxScore.sugeno) ||
         (math.equal(scorePairs[i].sugeno, maxScore.sugeno) &&
