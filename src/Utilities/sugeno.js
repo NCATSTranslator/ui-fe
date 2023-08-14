@@ -1,10 +1,25 @@
 import * as math from 'mathjs';
 
 export const maxSugenoScore = function(scores, confidenceWeight, noveltyWeight, clinicalWeight) {
-  return math.max(...scores.map((s) => {
-    return computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
-        confidenceWeight, noveltyWeight, clinicalWeight);
-  }));
+  const scorePairs = scores.map((s) => {
+    return {
+      sugeno: computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
+        confidenceWeight, noveltyWeight, clinicalWeight),
+      weightedMean: computeWeightedMean(s.confidence, s.novelty, s.clinical_evidence,
+        confidenceWeight, noveltyWeight, clinicalWeight)
+    };
+  });
+
+  const maxScore = scorePairs[0];
+  for (let i = 1; i < maxScore.length; i++) {
+    if (math.larger(scorePairs[i].sugeno, maxScore.sugeno) ||
+        (math.equal(scorePairs[i].sugeno, maxScore.sugeno) &&
+         math.larger(scorePairs[i].weightedMean, maxScore.weightedMean))) {
+      maxScore = scorePairs[i];
+    }
+  }
+
+  return maxScore;
 }
 
 const computeSugeno = function(confidence, novelty, clinical,
@@ -156,4 +171,9 @@ const swap = function(array, i, j) {
   const temp = array[i];
   array[i] = array[j];
   array[j] = temp;
+}
+
+const computeWeightedMean = function(confidence, novelty, clinical,
+    confidenceWeight, noveltyWeight, clinicalWeight) {
+  return (confidence * confidenceWeight) + (novelty * noveltyWeight) + (clinical * clinicalWeight);
 }
