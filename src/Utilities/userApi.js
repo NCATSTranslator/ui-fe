@@ -55,6 +55,13 @@ export const prefKeyToString = (prefKey) => {
 export const getFormattedBookmarkObject = (bookmarkType = "result", bookmarkName, notes = "", queryNodeID, queryNodeLabel = "",
   queryNodeDescription = "", typeObject, saveItem, pk) => {
 
+  for(const pub of saveItem.evidence.publications) {
+    delete pub.source;
+    delete pub.title;
+    delete pub.snippet;
+    delete pub.pubdate;
+  }
+
   let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
   return { 
     save_type: "bookmark", 

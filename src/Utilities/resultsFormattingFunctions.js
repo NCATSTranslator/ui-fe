@@ -20,9 +20,7 @@ const getFormattedEvidence = (paths, results) => {
 
       const eid = item.edges[0].id;
       evidenceObj.edges[eid] = {
-        subject: item.edges[0].subject.names[0],
-        predicate: item.edges[0].predicate,
-        object: item.edges[0].object.names[0]
+        label : `${item.edges[0].subject.name}|${item.edges[0].predicate}|${item.edges[0].object.name}`
       };
     }
   };
@@ -49,7 +47,7 @@ const getFormattedEvidence = (paths, results) => {
   const formatSources = (sources, item, container) => {
     formatEvidenceObjs(
       sources, 
-      (src) => { return `${item.edges[0].subject.names[0]}${src.name}${item.edges[0].object.names[0]}`; }, 
+      (src) => { return `${item.edges[0].subject.name}${src.name}${item.edges[0].object.name}`; }, 
       item,
       (src) => { return src; },
       container);
@@ -104,7 +102,18 @@ const getNodeByCurie = (curie, results) => {
   if(results.nodes[curie] === undefined)
     return {};
 
+  const maxCurieCount = 5;
+
   const res = cloneDeep(results.nodes[curie]);
+  if(res.curies.length > maxCurieCount)
+    res.curies = res.curies.slice(0, maxCurieCount);
+
+  if(res.synonyms && res.synonyms.length > 0)
+    res.synonyms = null;
+
+  if(res.sameAs && res.sameAs.length > 0)
+    res.sameAs = null;
+
   res.id = curie;
   return res;
 }
@@ -121,8 +130,19 @@ const getEdgeByID = (id, results) => {
     return {};
   let newEdge = cloneDeep(results.edges[id]);
 
-  newEdge.object = getNodeByCurie(newEdge.object, results);
-  newEdge.subject = getNodeByCurie(newEdge.subject, results);
+  let tempObj = getNodeByCurie(newEdge.object, results);
+  newEdge.object = {
+    name: tempObj.names[0],
+    id: tempObj.id,
+  };
+  let tempSub = getNodeByCurie(newEdge.subject, results);
+
+  newEdge.subject = {
+    name: tempSub.names[0],
+    id: tempSub.id
+  };
+  
+  console.log(newEdge);
 
   return newEdge;
 }

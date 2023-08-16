@@ -74,6 +74,8 @@ export const resultToCytoscape = (result, summary) => {
   }
 
   const ps = result.paths;
+  console.log(result);
+  console.log(ps);
   const ns = new Set();
   const es = new Set();
   ps.forEach((p) =>

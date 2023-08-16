@@ -35,6 +35,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const nameString = (item.name !== null) ? item.name : '';
   const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
+  const [itemGraph, setItemGraph] = useState(null);
+
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   }
@@ -167,9 +169,14 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
         <Bookmark
           onClick={async()=>{
+            console.log(itemGraph);
+            item.graph = itemGraph;
+            delete item.paths;
+            // item.paths = null;
             let bookmarkObject = getFormattedBookmarkObject("result", item.name, "Notes here", queryNodeID, 
               queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
 
+              console.log(bookmarkObject);
             let bookmarkedItem = await createUserSave(bookmarkObject);
             console.log('bookmarked: ', bookmarkedItem);
           }}
@@ -199,6 +206,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         <Suspense fallback={<LoadingBar loading useIcon reducedPadding />}>
           <GraphView
             result={item}
+            updateGraphFunction={setItemGraph}
+            prebuiltGraph={(item.graph)? item.graph: null}
             rawResults={rawResults}
             onNodeClick={handleNodeClick}
             clearSelectedPaths={handleClearSelectedPaths}

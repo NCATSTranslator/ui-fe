@@ -309,13 +309,17 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                       {
                         clinicalTrials.current.map((item, i)=> {
                           const edge = Object.values(item.edges)[0];
+                          const splitEdge = edge.label.split(" ");
+                          const subject = splitEdge[0];
+                          const predicate = splitEdge[1];
+                          const object = splitEdge[2];
                           return (
                             <div className={styles.evidenceItem} key={i}>
                               <span className={`${styles.cell} ${styles.relationship} relationship`}>
                                 {
                                   edge &&
                                   <span>
-                                    <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
+                                    <span>{subject}</span><strong>{predicate}</strong><span>{object}</span>
                                   </span>
                                 }
                               </span>
@@ -378,13 +382,17 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                           {
                             displayedPubmedEvidence.map((item, i)=> {
                               const edge = Object.values(item.edges)[0];
+                              const splitEdge = edge.label.split("|");
+                              const subject = splitEdge[0];
+                              const predicate = splitEdge[1];
+                              const object = splitEdge[2];
                               return (
                                 <div className={styles.evidenceItem} key={i}>
                                   <span className={`${styles.cell} ${styles.relationship} relationship`}>
                                     {
                                       edge &&
                                       <span>
-                                        <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
+                                        <span>{subject}</span><strong>{predicate}</strong><span>{object}</span>
                                       </span>
                                     }
                                   </span>
