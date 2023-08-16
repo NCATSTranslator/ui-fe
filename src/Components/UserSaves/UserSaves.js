@@ -98,7 +98,6 @@ const UserSaves = () => {
         <h4>Workspace</h4>
         {
           userSaves && Object.entries(userSaves).map((item) => {
-            console.log(item);
             let key = item[0];
             let queryObject = item[1];
             let typeString = queryObject.query.type.label;
@@ -116,7 +115,6 @@ const UserSaves = () => {
                 </div>
                 <div className={styles.resultsList}>
                   {queryObject.saves && Array.from(queryObject.saves).map((save) => {
-                    console.log(save);
                     let queryType = save.data.query.type;
                     let queryItem = save.data.item;
                     let arspk = save.data.query.pk;

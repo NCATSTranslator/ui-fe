@@ -54,7 +54,6 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
   const graph = useMemo(() => {
     // if(!active)
     //   return null;
-    console.log(prebuiltGraph);
     if(prebuiltGraph)
       return prebuiltGraph;
 

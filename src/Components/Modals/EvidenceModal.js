@@ -374,6 +374,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                           loading={isLoading}
                           useIcon
                           className={styles.loadingBar}
+                          loadingText="Retrieving Evidence"
                         />
                       }
                       {
