@@ -48,6 +48,14 @@ const UserSaves = () => {
 
   const queryClient = new QueryClient();
 
+  const activateEvidence = (evidence, item, edgeGroup, isAll) => {
+    setIsAllEvidence(isAll);
+    setSelectedItem(item);
+    setSelectedEdges(edgeGroup);
+    setCurrentEvidence(evidence);
+    setEvidenceOpen(true);
+  }
+
   useEffect(() => {
     getSaves(setUserSaves);
   },[]);
@@ -121,7 +129,7 @@ const UserSaves = () => {
                           rawResults={null}
                           type={queryType}
                           item={queryItem}
-                          // activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
+                          activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
                           activeStringFilters={[]}
                           zoomKeyDown={zoomKeyDown}
                           currentQueryID={arspk}
