@@ -82,7 +82,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
     if(!Array.isArray(edgeGroup) && typeof edgeGroup === 'object') {
       const re = edgeGroup.edges[0];
       const formatted = edgeGroup.predicates.map((p) => {
-        return `${re.subject.names[0].toLowerCase()} ${p.toLowerCase()} ${re.object.names[0].toLowerCase()}`;
+        return `${re.subject.name.toLowerCase()} ${p.toLowerCase()} ${re.object.name.toLowerCase()}`;
       });
       setFormattedEdges(formatted);
     } else {
