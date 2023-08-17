@@ -143,8 +143,6 @@ const getEdgeByID = (id, results) => {
     id: tempSub.id
   };
   
-  console.log(newEdge);
-
   return newEdge;
 }
 
@@ -281,13 +279,35 @@ const getCompressedPaths = (graph) => {
 }
 
 /**
+ * Checks if the given itemID exists in the bookmarks set and returns its ID if found.
+ *
+ * @param {string|number} itemID - The ID of the item to check.
+ * @param {Set<Object>} bookmarksSet - The set of bookmark objects to search in.
+ * @returns {string|number|boolean} Returns the ID of the matching item if found in bookmarksSet, otherwise returns false.
+ */
+const checkBookmarksForItem = (itemID, bookmarksSet) => {
+  if(bookmarksSet && bookmarksSet.size > 0) {
+    for(let val of bookmarksSet) {
+      if(val.object_ref === itemID) {
+        return val.id;
+      }
+    }
+  }
+  return false;
+}
+
+/**
  * Generates summarized results from the given results array. It processes each individual result item
  * to extract relevant information such as node names, descriptions, FDA approval status, paths, evidence,
  * scores, and tags. The summarized results are returned as an array.
  * @param {Array} results - The results array to be summarized.
+ * @param {Set} bookmarks - Set of bookmarked items for a given query
+ * @param {number} confidenceWeight - value representing a parameter for weighted scoring 
+ * @param {number} noveltyWeight - value representing a parameter for weighted scoring 
+ * @param {number} clinicalWeight - value representing a parameter for weighted scoring 
  * @returns {Array} The summarized results array.
 */
-export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, clinicalWeight) => {
+export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, clinicalWeight, bookmarks = null) => {
   if (results === null || results === undefined)
     return [];
 
@@ -308,8 +328,11 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     let compressedPaths = getCompressedPaths(formattedPaths);
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
+    let itemID = `${item.subject}${item.object}-${i}`;
+    let bookmarkID = (bookmarks === null) ? false : checkBookmarksForItem(itemID, bookmarks);
+    let bookmarked = (bookmarkID === false) ? false : true;
     let formattedItem = {
-      id: `${item.subject}${item.object}-${i}`,
+      id: itemID,
       subjectNode: subjectNode,
       type: 'biolink:Drug',
       name: itemName,
@@ -322,7 +345,9 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
       scores: item.scores,
       score: maxSugenoScore(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
       tags: tags,
-      rawResult: item
+      rawResult: item,
+      bookmarked: bookmarked, 
+      bookmarkID: bookmarkID
     }
     newSummarizedResults.push(formattedItem);
   }

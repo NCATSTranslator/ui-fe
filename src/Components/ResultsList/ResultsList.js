@@ -28,6 +28,7 @@ import { isFacet, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamil
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
+import { getSaves } from "../../Utilities/userApi";
 
 const ResultsList = ({loading}) => {
 
@@ -126,6 +127,8 @@ const ResultsList = ({loading}) => {
   // Float, weight for clinical score
   const [clinicalWeight, setClinicalWeight] = useState(1.0);
 
+  const [userSaves, setUserSaves] = useState(null);
+
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
@@ -135,6 +138,7 @@ const ResultsList = ({loading}) => {
   }, [prefs]);
 
   useEffect(() => {
+
     const handleKeyDown = (ev) => {
       if (ev.keyCode === 90) {
         setZoomKeyDown(true);
@@ -154,6 +158,15 @@ const ResultsList = ({loading}) => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
+  }, []);
+
+  useEffect(async () => {
+    let temp = await getSaves();
+    for(const queryID of Object.keys(temp)){
+      if(queryID == currentQueryID) {
+        setUserSaves(temp[queryID]);
+      }
+    }
   }, []);
 
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
@@ -177,9 +190,10 @@ const ResultsList = ({loading}) => {
 
     let newFormattedResults = [];
     let newOriginalResults = [];
+    let saves = (userSaves) ? userSaves.saves: null;
     
     if(or.length === 0) {
-      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight);
+      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
       newOriginalResults = cloneDeep(newFormattedResults);
     } else {
       newFormattedResults = (justSort) ? fr : or;
@@ -763,6 +777,8 @@ const ResultsList = ({loading}) => {
                             queryNodeID={initNodeIdParam}
                             queryNodeLabel={initNodeLabelParam}
                             queryNodeDescription={nodeDescription}
+                            bookmarked={item.bookmarked}
+                            bookmarkID={item.bookmarkID}
                           />
                         )
                       })

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { deleteUserSave, getAllUserSaves } from '../../Utilities/userApi';
+import { deleteUserSave, getAllUserSaves, getSaves } from '../../Utilities/userApi';
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import styles from './UserSaves.module.scss';
@@ -8,33 +8,6 @@ import EvidenceModal from '../Modals/EvidenceModal';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { getFormattedDate } from '../../Utilities/utilities';
-
-const getSaves = async (setUserSaves) => {
-  let saves = await getAllUserSaves();
-
-  saves = formatUserSaves(saves);
-  setUserSaves(saves);
-}
-
-const formatUserSaves = (saves) => { 
-  console.log(saves);
-  let newSaves = {};
-  for(const save of saves) {
-    if(!save?.data?.query)
-      continue;
-
-    if(!newSaves.hasOwnProperty(save.ars_pkey)) {
-      newSaves[save.ars_pkey] = {
-        saves: new Set([save]),
-        query: save.data.query
-      };
-    } else {
-      newSaves[save.ars_pkey].saves.add(save);
-    }
-  }
-  console.log(newSaves);
-  return newSaves;
-}
 
 const UserSaves = () => {
 

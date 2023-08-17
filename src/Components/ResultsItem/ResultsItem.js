@@ -118,8 +118,22 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   },[formattedPaths]);
 
-  const hideResult = () => {
+  const handleBookmarkClick = async () => {
+    if(isBookmarked) {
+      if(bookmarkID) {
+        deleteUserSave(bookmarkID);
+        setIsBookmarked(false);
+      }
+    } else {
+      item.graph = itemGraph;
+      delete item.paths;
+      let bookmarkObject = getFormattedBookmarkObject("result", item.name, "Notes here", queryNodeID, 
+        queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
 
+      let bookmarkedItem = await createUserSave(bookmarkObject);
+      console.log('bookmarked: ', bookmarkedItem);
+      setIsBookmarked(true);
+    }
   }
 
   return (
@@ -173,26 +187,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           <Export/>
       </CSVLink>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${isBookmarked ? styles.filled : ''}`}>
-        <Bookmark
-          onClick={async()=>{
-            if(isBookmarked) {
-              if(bookmarkID) {
-                deleteUserSave(bookmarkID);
-                setIsBookmarked(false);
-              }
-            } else {
-              item.graph = itemGraph;
-              delete item.paths;
-              // item.paths = null;
-              let bookmarkObject = getFormattedBookmarkObject("result", item.name, "Notes here", queryNodeID, 
-                queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
-  
-              let bookmarkedItem = await createUserSave(bookmarkObject);
-              console.log('bookmarked: ', bookmarkedItem);
-              setIsBookmarked(true);
-            }
-          }}
-        />
+        <Bookmark onClick={handleBookmarkClick} />
       </div>
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>

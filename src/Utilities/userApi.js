@@ -52,6 +52,34 @@ export const prefKeyToString = (prefKey) => {
   }
 }
 
+export const getSaves = async (setUserSaves = undefined) => {
+  let saves = await getAllUserSaves();
+  saves = formatUserSaves(saves);
+
+  if(setUserSaves != undefined)
+    setUserSaves(saves);
+  
+  return saves;
+}
+
+const formatUserSaves = (saves) => { 
+  let newSaves = {};
+  for(const save of saves) {
+    if(!save?.data?.query)
+      continue;
+
+    if(!newSaves.hasOwnProperty(save.ars_pkey)) {
+      newSaves[save.ars_pkey] = {
+        saves: new Set([save]),
+        query: save.data.query
+      };
+    } else {
+      newSaves[save.ars_pkey].saves.add(save);
+    }
+  }
+  return newSaves;
+}
+
 export const getFormattedBookmarkObject = (bookmarkType = "result", bookmarkName, notes = "", queryNodeID, queryNodeLabel = "",
   queryNodeDescription = "", typeObject, saveItem, pk) => {
 
