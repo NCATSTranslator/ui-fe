@@ -29,6 +29,9 @@ import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilitie
 import { queryTypes } from "../../Utilities/queryTypes";
 import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
 import { getSaves } from "../../Utilities/userApi";
+import { ToastContainer, toast, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { BookmarkAddedMarkup, BookmarkRemovedMarkup } from "../BookmarkToasts/BookmarkToasts";
 
 const ResultsList = ({loading}) => {
 
@@ -128,6 +131,8 @@ const ResultsList = ({loading}) => {
   const [clinicalWeight, setClinicalWeight] = useState(1.0);
 
   const [userSaves, setUserSaves] = useState(null);
+  const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
+  const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
@@ -641,6 +646,17 @@ const ResultsList = ({loading}) => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        theme="light"
+        transition={Slide}
+        pauseOnFocusLoss={false}
+        hideProgressBar
+        className="toastContainer"
+        closeOnClick={false}
+        closeButton={false}
+      />
       <EvidenceModal
         isOpen={evidenceOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
@@ -779,6 +795,8 @@ const ResultsList = ({loading}) => {
                             queryNodeDescription={nodeDescription}
                             bookmarked={item.bookmarked}
                             bookmarkID={item.bookmarkID}
+                            bookmarkAddedToast={bookmarkAddedToast}
+                            bookmarkRemovedToast={bookmarkRemovedToast}
                           />
                         )
                       })

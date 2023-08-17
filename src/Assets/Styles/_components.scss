@@ -108,3 +108,28 @@
 .edge-label {
   font-weight: 700;
 }
+
+.Toastify {
+  position: absolute;
+  .toastContainer {
+    width: auto;
+    .heading {
+      color: $purpleTwo;
+      margin-bottom: 0;
+      line-height: 1;
+    }
+    p {
+      margin-top: 16px;
+      margin-bottom: 0;
+    }
+    svg {
+      fill: $purpleOne50
+    }
+    .Toastify__close-button {
+      box-shadow: none;
+      &:hover {
+        box-shadow: none;
+      }
+    }
+  }
+}

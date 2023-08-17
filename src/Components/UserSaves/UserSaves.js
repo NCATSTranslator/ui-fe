@@ -8,6 +8,9 @@ import EvidenceModal from '../Modals/EvidenceModal';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { getFormattedDate } from '../../Utilities/utilities';
+import { ToastContainer, toast, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { BookmarkAddedMarkup, BookmarkRemovedMarkup } from '../BookmarkToasts/BookmarkToasts';
 
 const UserSaves = () => {
 
@@ -18,6 +21,9 @@ const UserSaves = () => {
   const [selectedEdges, setSelectedEdges] = useState([]);
   const [isAllEvidence, setIsAllEvidence] = useState(true);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
+
+  const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
+  const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
 
   const queryClient = new QueryClient();
 
@@ -70,6 +76,17 @@ const UserSaves = () => {
     <QueryClientProvider client={queryClient}>
       <div>
         <button onClick={resetUserSaves}>Reset</button>
+        <ToastContainer
+          position="top-center"
+          autoClose={3000}
+          theme="light"
+          transition={Slide}
+          pauseOnFocusLoss={false}
+          hideProgressBar
+          className="toastContainer"
+          closeOnClick={false}
+          closeButton={false}
+        />
         <EvidenceModal
           isOpen={evidenceOpen}
           onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
@@ -124,6 +141,8 @@ const UserSaves = () => {
                           queryNodeDescription={queryNodeDescription}
                           bookmarked
                           bookmarkID={save.id}
+                          bookmarkAddedToast={bookmarkAddedToast}
+                          bookmarkRemovedToast={bookmarkRemovedToast}
                         />
                       </div>
                     )

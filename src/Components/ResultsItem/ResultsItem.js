@@ -17,7 +17,8 @@ import { createUserSave, deleteUserSave, getFormattedBookmarkObject, getQueryObj
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, 
-  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null}) => {
+  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null,
+  bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}}) => {
 
   let icon = getIcon(item.type);
 
@@ -123,6 +124,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       if(bookmarkID) {
         deleteUserSave(bookmarkID);
         setIsBookmarked(false);
+        bookmarkRemovedToast();
       }
     } else {
       item.graph = itemGraph;
@@ -133,11 +135,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       let bookmarkedItem = await createUserSave(bookmarkObject);
       console.log('bookmarked: ', bookmarkedItem);
       setIsBookmarked(true);
+      bookmarkAddedToast();
     }
   }
 
   return (
     <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))}>
+
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
         {

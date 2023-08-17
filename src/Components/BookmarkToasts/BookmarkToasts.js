@@ -1,0 +1,13 @@
+import { Link } from 'react-router-dom';
+
+export const BookmarkAddedMarkup = () => (
+  <div>
+    <h5 className='heading'>Bookmark Added</h5>
+    <p>Click <Link to="/main/workspace" target='_blank' rel='noreferrer'>here</Link> to view this bookmark in your workspace.</p>
+  </div>
+);
+export const BookmarkRemovedMarkup = () => (
+  <div>
+    <h5 className='heading'>Bookmark Removed</h5>
+  </div>
+);
