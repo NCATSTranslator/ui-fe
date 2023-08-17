@@ -115,7 +115,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     };
-    fetch('/config', requestOptions)
+    fetch(`/${root}/api/v1/pub/config`, requestOptions)
     .then(response => handleFetchErrors(response))
     .then(response => response.json())
     .then(data => {

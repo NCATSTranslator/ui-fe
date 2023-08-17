@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAllUserSaves } from '../../Utilities/userApi';
+import { deleteUserSave, getAllUserSaves } from '../../Utilities/userApi';
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import styles from './UserSaves.module.scss';
@@ -60,6 +60,16 @@ const UserSaves = () => {
     getSaves(setUserSaves);
   },[]);
 
+  const resetUserSaves = () => {
+    for(const query of Object.values(userSaves)) {
+      console.log(query);
+      for(const save of Array.from(query.saves)) {
+        deleteUserSave(save.id);
+        setUserSaves(null);
+      }
+    }
+  }
+
 
   useEffect(() => {
     const handleKeyDown = (ev) => {
@@ -86,6 +96,7 @@ const UserSaves = () => {
   return(
     <QueryClientProvider client={queryClient}>
       <div>
+        <button onClick={resetUserSaves}>Reset</button>
         <EvidenceModal
           isOpen={evidenceOpen}
           onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
@@ -97,14 +108,18 @@ const UserSaves = () => {
         />
         <h4>Workspace</h4>
         {
-          userSaves && Object.entries(userSaves).map((item) => {
+          (userSaves == null || Object.entries(userSaves).length <= 0)
+          ? 
+          <p>No bookmarks to show</p>
+          :
+          Object.entries(userSaves).map((item) => {
             let key = item[0];
             let queryObject = item[1];
             let typeString = queryObject.query.type.label;
             let queryNodeString = queryObject.query.nodeLabel;
             let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryObject.query.type.id, key);
             // console.log(queryObject.saves.values().next());
-            let submittedDate = getFormattedDate(new Date(queryObject.saves.values().next().value.time_created));
+            let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
             // let submittedDate = new Date();
             return(
               <div key={key}>
@@ -134,6 +149,8 @@ const UserSaves = () => {
                           queryNodeID={queryNodeID}
                           queryNodeLabel={queryNodeLabel}
                           queryNodeDescription={queryNodeDescription}
+                          bookmarked
+                          bookmarkID={save.id}
                         />
                       </div>
                     )

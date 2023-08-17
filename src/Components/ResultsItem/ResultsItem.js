@@ -11,19 +11,20 @@ import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
-import { createUserSave, getFormattedBookmarkObject, getQueryObjectForSave } from '../../Utilities/userApi';
 import { round } from 'mathjs';
+import { createUserSave, deleteUserSave, getFormattedBookmarkObject, getQueryObjectForSave } from '../../Utilities/userApi';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, 
-  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription}) => {
+  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null}) => {
 
   let icon = getIcon(item.type);
 
   let publicationCount = item.evidence.publications.length;
   let sourcesCount = item.evidence.distinctSources.length;
 
+  const [isBookmarked, setIsBookmarked] = useState(bookmarked);
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
   const formattedPaths = item.compressedPaths;
@@ -117,6 +118,10 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   },[formattedPaths]);
 
+  const hideResult = () => {
+
+  }
+
   return (
     <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
@@ -167,19 +172,25 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         onClick={generateCsvFromItem(item, setCsvData)}>
           <Export/>
       </CSVLink>
-      <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
+      <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${isBookmarked ? styles.filled : ''}`}>
         <Bookmark
           onClick={async()=>{
-            console.log(itemGraph);
-            item.graph = itemGraph;
-            delete item.paths;
-            // item.paths = null;
-            let bookmarkObject = getFormattedBookmarkObject("result", item.name, "Notes here", queryNodeID, 
-              queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
-
-              console.log(bookmarkObject);
-            let bookmarkedItem = await createUserSave(bookmarkObject);
-            console.log('bookmarked: ', bookmarkedItem);
+            if(isBookmarked) {
+              if(bookmarkID) {
+                deleteUserSave(bookmarkID);
+                setIsBookmarked(false);
+              }
+            } else {
+              item.graph = itemGraph;
+              delete item.paths;
+              // item.paths = null;
+              let bookmarkObject = getFormattedBookmarkObject("result", item.name, "Notes here", queryNodeID, 
+                queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
+  
+              let bookmarkedItem = await createUserSave(bookmarkObject);
+              console.log('bookmarked: ', bookmarkedItem);
+              setIsBookmarked(true);
+            }
           }}
         />
       </div>

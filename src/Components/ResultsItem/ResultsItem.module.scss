@@ -20,6 +20,14 @@
     align-items: center;
   }
   .bookmarkContainer {
+    &.filled {
+      svg {
+        fill: $purpleOne;
+        &:hover {
+          fill: $purpleOne50;
+        }
+      }
+    }
     svg {
       width: 30px;
       height: 30px;
@@ -32,11 +40,9 @@
       }
       &:hover {
         fill: $purpleOne50;
-        // path {
-        //   stroke: $purpleOne50;
-        // }
       }
     }
+
   }
   .checkboxContainer {
     display: none;

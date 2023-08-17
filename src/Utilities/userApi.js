@@ -83,7 +83,8 @@ export const getQueryObjectForSave = (nodeID = 0, nodeLabel = "", nodeDescriptio
     nodeId: nodeID,
     nodeLabel: nodeLabel,
     nodeDescription: nodeDescription,
-    pk: pk
+    pk: pk, 
+    submitted_time: new Date() 
   }
 }
 
