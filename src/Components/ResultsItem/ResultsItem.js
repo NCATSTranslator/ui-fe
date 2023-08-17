@@ -11,11 +11,8 @@ import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
-<<<<<<< HEAD
 import { createUserSave, getFormattedBookmarkObject, getQueryObjectForSave } from '../../Utilities/userApi';
-=======
 import { round } from 'mathjs';
->>>>>>> develop
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
