@@ -11,7 +11,11 @@ import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
+<<<<<<< HEAD
 import { createUserSave, getFormattedBookmarkObject, getQueryObjectForSave } from '../../Utilities/userApi';
+=======
+import { round } from 'mathjs';
+>>>>>>> develop
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -156,7 +160,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       </div>
       <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
         <span className={styles.score}>
-          <span className={styles.scoreNum}>{item.score === null ? '0' : item.score }</span>
+          <span className={styles.scoreNum}>{item.score === null ? '0' : round(item.score.sugeno, 2) }</span>
         </span>
       </div>
       <CSVLink

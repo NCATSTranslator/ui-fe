@@ -119,6 +119,13 @@ const ResultsList = ({loading}) => {
   // Bool, is the shift key being held down
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
 
+  // Float, weight for confidence score
+  const [confidenceWeight, setConfidenceWeight] = useState(1.0);
+  // Float, weight for novelty score
+  const [noveltyWeight, setNoveltyWeight] = useState(0.1);
+  // Float, weight for clinical score
+  const [clinicalWeight, setClinicalWeight] = useState(1.0);
+
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
@@ -172,7 +179,7 @@ const ResultsList = ({loading}) => {
     let newOriginalResults = [];
     
     if(or.length === 0) {
-      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data);
+      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight);
       newOriginalResults = cloneDeep(newFormattedResults);
     } else {
       newFormattedResults = (justSort) ? fr : or;

@@ -1,5 +1,6 @@
 import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity } from './utilities';
 import { cloneDeep } from "lodash";
+import { maxSugenoScore } from "../Utilities/sugeno";
 
 /**
  * Formats the evidence information for the provided paths by extracting and organizing publications and sources.
@@ -286,7 +287,7 @@ const getCompressedPaths = (graph) => {
  * @param {Array} results - The results array to be summarized.
  * @returns {Array} The summarized results array.
 */
-export const getSummarizedResults = (results) => {
+export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, clinicalWeight) => {
   if (results === null || results === undefined)
     return [];
 
@@ -306,7 +307,6 @@ export const getSummarizedResults = (results) => {
     let formattedPaths = getFormattedPaths(item.paths, results);
     let compressedPaths = getCompressedPaths(formattedPaths);
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
-    let itemScore = (item.score === null) ? 0 : item.score.toFixed(1);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
     let formattedItem = {
       id: `${item.subject}${item.object}-${i}`,
@@ -319,7 +319,8 @@ export const getSummarizedResults = (results) => {
       description: description,
       evidence: getFormattedEvidence(formattedPaths, results),
       fdaInfo: fdaInfo,
-      score: itemScore,
+      scores: item.scores,
+      score: maxSugenoScore(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
       tags: tags,
       rawResult: item
     }
