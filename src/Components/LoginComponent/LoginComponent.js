@@ -14,10 +14,9 @@ const LoginComponent = () => {
         <p className={styles.blurb}>Sign in to access your Translator account.</p>
         <button className={styles.continueButton}>Continue</button>
         <ul>
-          <li><a href="foo">Login with Google fake</a></li>
-          <li><a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=993742507981-9f5sm5tctipak3c4v044gjfd7rmps8jt.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A8386%2Foauth2%2Fredir%2Fgoogle&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20openid&access_type=offline">
+          <li><a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=242366018153-v91c1h9phelludb713urn249eoqu7n90.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Ftransltr-bma-ui-dev.ncats.io%2Foauth2%2Fredir%2Fgoogle&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20openid&access_type=offline">
               Sign in with Google (real)</a></li>
-          <li><a href="https://www.facebook.com/v17.0/dialog/oauth?client_id=115637941549409&redirect_uri=http%3A%2F%2Flocalhost%3A8386%2Foauth2%2Fredir%2Ffacebook&state=whatevs&response_type=code%20granted_scopes&scope=email%20public_profile">Sign in with Facebook (real)</a></li>
+          <li><a href="https://www.facebook.com/v17.0/dialog/oauth?client_id=115637941549409&redirect_uri=http%3A%2F%2Flocalhost%3A8386%2Foauth2%2Fredir%2Ffacebook&state=whatevs&response_type=code%20granted_scopes&scope=email%20public_profile">Sign in with Facebook (NO LONGER REAL)</a></li>
         </ul>
       </div>
     </div>
