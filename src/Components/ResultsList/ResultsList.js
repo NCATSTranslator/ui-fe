@@ -32,6 +32,7 @@ import { getSaves } from "../../Utilities/userApi";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup } from "../BookmarkToasts/BookmarkToasts";
+import NotesModal from "../Modals/NotesModal";
 
 const ResultsList = ({loading}) => {
 
@@ -76,6 +77,9 @@ const ResultsList = ({loading}) => {
   const [isSortedByScore, setIsSortedByScore] = useState(false);
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const noteLabel = useRef("");
+  const currentBookmarkID = useRef(null);
   // String, active title of evidence modal
   const [isAllEvidence, setIsAllEvidence] = useState(true);
   // Object, the currently selected item
@@ -474,6 +478,15 @@ const ResultsList = ({loading}) => {
     setEvidenceOpen(true);
   }
 
+  const activateNotes = (label, bookmarkID) => {
+    noteLabel.current = label;
+    currentBookmarkID.current = bookmarkID;
+    console.log(label);
+    console.log(noteLabel.current);
+    
+    setNotesOpen(true);
+  }
+
   const filterAndFacet = (facetsAndFilters, stringFilters, fResults, oResults, rResults) => {
     const filterResults = (filters, stringFilters, oResults, resultPathRanks) => {
       const filteredResults = [];
@@ -657,6 +670,13 @@ const ResultsList = ({loading}) => {
         closeOnClick={false}
         closeButton={false}
       />
+      <NotesModal
+        isOpen={notesOpen}
+        onClose={()=>(setNotesOpen(false))}
+        className="notes-modal"
+        noteLabel={noteLabel.current}
+        bookmarkID={currentBookmarkID.current}
+      />
       <EvidenceModal
         isOpen={evidenceOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
@@ -787,6 +807,7 @@ const ResultsList = ({loading}) => {
                             type={initPresetTypeObject}
                             item={item}
                             activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
+                            activateNotes={activateNotes}
                             activeStringFilters={activeStringFilters}
                             zoomKeyDown={zoomKeyDown}
                             currentQueryID={currentQueryID}
@@ -795,6 +816,7 @@ const ResultsList = ({loading}) => {
                             queryNodeDescription={nodeDescription}
                             bookmarked={item.bookmarked}
                             bookmarkID={item.bookmarkID}
+                            hasNotes={item.hasNotes}
                             bookmarkAddedToast={bookmarkAddedToast}
                             bookmarkRemovedToast={bookmarkRemovedToast}
                           />

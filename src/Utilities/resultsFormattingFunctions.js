@@ -296,6 +296,17 @@ const checkBookmarksForItem = (itemID, bookmarksSet) => {
   return false;
 }
 
+const checkBookmarkForNotes = (bookmarkID, bookmarksSet) => {
+  if(bookmarksSet && bookmarksSet.size > 0) {
+    for(let val of bookmarksSet) {
+      if(val.id === bookmarkID) {
+        return (val.notes.length > 0) ? true : false;
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * Generates summarized results from the given results array. It processes each individual result item
  * to extract relevant information such as node names, descriptions, FDA approval status, paths, evidence,
@@ -313,7 +324,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
 
   let newSummarizedResults = [];
 
-  // // for each individual result item
+  // for each individual result item
   for(const [i, item] of results.results.entries()) {
     // Get the object node's name
     let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]);
@@ -330,7 +341,8 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
     let itemID = `${item.subject}${item.object}-${i}`;
     let bookmarkID = (bookmarks === null) ? false : checkBookmarksForItem(itemID, bookmarks);
-    let bookmarked = (bookmarkID === false) ? false : true;
+    let bookmarked = (!bookmarkID) ? false : true;
+    let hasNotes = checkBookmarkForNotes(bookmarkID, bookmarks);
     let formattedItem = {
       id: itemID,
       subjectNode: subjectNode,
@@ -347,7 +359,8 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
       tags: tags,
       rawResult: item,
       bookmarked: bookmarked, 
-      bookmarkID: bookmarkID
+      bookmarkID: bookmarkID,
+      hasNotes: hasNotes
     }
     newSummarizedResults.push(formattedItem);
   }

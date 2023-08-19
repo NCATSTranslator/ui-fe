@@ -6,6 +6,7 @@ import LoadingBar from '../LoadingBar/LoadingBar';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 import {ReactComponent as Export } from "../../Icons/Buttons/Export.svg"
 import {ReactComponent as Bookmark } from "../../Icons/Navigation/Bookmark.svg"
+import {ReactComponent as Notes } from "../../Icons/Navigation/Bookmark.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
@@ -18,7 +19,7 @@ const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, 
   currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null,
-  bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}}) => {
+  hasNotes, activateNotes, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}}) => {
 
   let icon = getIcon(item.type);
 
@@ -26,6 +27,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   let sourcesCount = item.evidence.distinctSources.length;
 
   const [isBookmarked, setIsBookmarked] = useState(bookmarked);
+  const [itemHasNotes, setItemHasNotes] = useState(hasNotes);
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
   const formattedPaths = item.compressedPaths;
@@ -129,7 +131,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     } else {
       item.graph = itemGraph;
       delete item.paths;
-      let bookmarkObject = getFormattedBookmarkObject("result", item.name, "Notes here", queryNodeID, 
+      let bookmarkObject = getFormattedBookmarkObject("result", item.name, "", queryNodeID, 
         queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
 
       let bookmarkedItem = await createUserSave(bookmarkObject);
@@ -139,9 +141,12 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     }
   }
 
+  const handleNotesClick = () => {
+    activateNotes(nameString, bookmarkID);
+  }
+
   return (
     <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))}>
-
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
         {
@@ -192,6 +197,9 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       </CSVLink>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${isBookmarked ? styles.filled : ''}`}>
         <Bookmark onClick={handleBookmarkClick} />
+      </div>
+      <div className={`${styles.notesContainer} ${styles.resultSub} ${itemHasNotes ? styles.filled : ''}`}>
+        <Notes onClick={handleNotesClick} />
       </div>
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>

@@ -1,0 +1,13 @@
+@import "../../Assets/Styles/variables";
+
+.notesModal {
+  .heading {
+    max-width: 95%;
+    word-break: break-all;
+    font-weight: 400;
+    .item {
+      font-weight: 700;
+      font-size: 24px;
+    }
+  }
+}
