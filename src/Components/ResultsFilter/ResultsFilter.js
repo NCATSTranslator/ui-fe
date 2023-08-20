@@ -5,6 +5,7 @@ import SimpleRange from '../Range/SimpleRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
+import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacet, isEvidenceFilter } from '../../Utilities/filterFunctions';
 import { cloneDeep } from 'lodash';
@@ -174,6 +175,11 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     return headingToReturn;
   }
 
+  const getRoleLinkout = (tagKey) => {
+    const id = tagKey.split(':').slice(1,).join('%3A');
+    return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
+  }
+
   const showMoreFacets = (type) => {
     let newCount = countsToShow[type];
     if(Object.keys(groupedTags[type]).length > countsToShow[type]) {
@@ -216,7 +222,14 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
           className={styles.checkbox}
           >
-          {tagName} <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
+          {tagName} 
+          {
+            (type === "role") &&
+              <a href={getRoleLinkout(tagKey)} rel="noreferrer" target="_blank">
+                <ExternalLink className={styles.extLinkIcon}/>
+              </a>
+          }
+          <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
         </Checkbox>
       </div>
     )
