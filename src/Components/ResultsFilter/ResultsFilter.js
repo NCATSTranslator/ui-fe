@@ -220,16 +220,18 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
         <Checkbox
           handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, tagName)}
           checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
-          className={styles.checkbox}
+          className={`${styles.checkbox}`}
           >
           {tagName} 
-          {
+          <span className={styles.facetCount}>
+            {
             (type === "role") &&
               <a href={getRoleLinkout(tagKey)} rel="noreferrer" target="_blank">
                 <ExternalLink className={styles.extLinkIcon}/>
               </a>
-          }
-          <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
+            }
+            ({(object.count) ? object.count : 0})
+          </span>
         </Checkbox>
       </div>
     )
