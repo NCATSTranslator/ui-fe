@@ -25,13 +25,15 @@ const StickyToolbar = ({ loadingButtonData, setShareModalFunction }) => {
   }, [isExpanded]);
 
   useEffect(() => {
-    if(!loadingButtonData.isFetchingARAStatus && !loadingButtonData.isFetchingResults) {
+    if(!loadingButtonData.hasFreshResults &&
+       !loadingButtonData.isFetchingARAStatus &&
+       !loadingButtonData.isFetchingResults) {
       const collapseTimeout = setTimeout(() => {
         setIsExpanded(false);
       }, resultsCompleteCollapseTime);
       return () => clearTimeout(collapseTimeout);
     }
-  }, [loadingButtonData.isFetchingARAStatus, loadingButtonData.isFetchingResults]);
+  }, [loadingButtonData.hasFreshResults, loadingButtonData.isFetchingARAStatus, loadingButtonData.isFetchingResults]);
 
   return(
     <div className={`${styles.sticky} ${expandedClassName} ${containedDivsClass}`}>
