@@ -169,13 +169,16 @@ const ResultsList = ({loading}) => {
     };
   }, []);
 
-  useEffect(async () => {
-    let temp = await getSaves();
-    for(const queryID of Object.keys(temp)){
-      if(queryID == currentQueryID) {
-        setUserSaves(temp[queryID]);
+  useEffect(() => {
+    const getUserSaves = async () => {
+      let temp = await getSaves();
+      for(const queryID of Object.keys(temp)){
+        if(queryID == currentQueryID) {
+          setUserSaves(temp[queryID]);
+        }
       }
     }
+    getUserSaves();
   }, []);
 
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
@@ -481,9 +484,6 @@ const ResultsList = ({loading}) => {
   const activateNotes = (label, bookmarkID) => {
     noteLabel.current = label;
     currentBookmarkID.current = bookmarkID;
-    console.log(label);
-    console.log(noteLabel.current);
-    
     setNotesOpen(true);
   }
 
@@ -659,7 +659,7 @@ const ResultsList = ({loading}) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastContainer
+      {/* <ToastContainer
         position="top-center"
         autoClose={3000}
         theme="light"
@@ -669,14 +669,14 @@ const ResultsList = ({loading}) => {
         className="toastContainer"
         closeOnClick={false}
         closeButton={false}
-      />
-      <NotesModal
+      /> */}
+      {/* <NotesModal
         isOpen={notesOpen}
         onClose={()=>(setNotesOpen(false))}
         className="notes-modal"
         noteLabel={noteLabel.current}
         bookmarkID={currentBookmarkID.current}
-      />
+      /> */}
       <EvidenceModal
         isOpen={evidenceOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
