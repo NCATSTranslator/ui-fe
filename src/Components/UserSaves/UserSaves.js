@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { deleteUserSave, getAllUserSaves, getSaves } from '../../Utilities/userApi';
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
@@ -11,6 +11,7 @@ import { getFormattedDate } from '../../Utilities/utilities';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup } from '../BookmarkToasts/BookmarkToasts';
+import NotesModal from '../Modals/NotesModal';
 
 const UserSaves = () => {
 
@@ -21,6 +22,9 @@ const UserSaves = () => {
   const [selectedEdges, setSelectedEdges] = useState([]);
   const [isAllEvidence, setIsAllEvidence] = useState(true);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const noteLabel = useRef("");
+  const currentBookmarkID = useRef(null);
 
   const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
@@ -33,6 +37,12 @@ const UserSaves = () => {
     setSelectedEdges(edgeGroup);
     setCurrentEvidence(evidence);
     setEvidenceOpen(true);
+  }
+
+  const activateNotes = (label, bookmarkID) => {
+    noteLabel.current = label;
+    currentBookmarkID.current = bookmarkID;
+    setNotesOpen(true);
   }
 
   useEffect(() => {
@@ -87,6 +97,13 @@ const UserSaves = () => {
           closeOnClick={false}
           closeButton={false}
         />
+        <NotesModal
+          isOpen={notesOpen}
+          onClose={()=>(setNotesOpen(false))}
+          className="notes-modal"
+          noteLabel={noteLabel.current}
+          bookmarkID={currentBookmarkID.current}
+        />
         <EvidenceModal
           isOpen={evidenceOpen}
           onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
@@ -126,6 +143,7 @@ const UserSaves = () => {
                     let queryNodeID = save.data.query.nodeId;
                     let queryNodeLabel = save.data.query.nodeLabel;
                     let queryNodeDescription = save.data.query.nodeDescription;
+                    console.log(queryItem);
                     return (
                       <div key={save.id}>
                         <ResultsItem
@@ -133,6 +151,7 @@ const UserSaves = () => {
                           type={queryType}
                           item={queryItem}
                           activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
+                          activateNotes={activateNotes}
                           activeStringFilters={[]}
                           zoomKeyDown={zoomKeyDown}
                           currentQueryID={arspk}
@@ -141,6 +160,7 @@ const UserSaves = () => {
                           queryNodeDescription={queryNodeDescription}
                           bookmarked
                           bookmarkID={save.id}
+                          hasNotes={queryItem.hasNotes}
                           bookmarkAddedToast={bookmarkAddedToast}
                           bookmarkRemovedToast={bookmarkRemovedToast}
                         />
