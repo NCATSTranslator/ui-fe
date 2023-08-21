@@ -659,7 +659,7 @@ const ResultsList = ({loading}) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* <ToastContainer
+      <ToastContainer
         position="top-center"
         autoClose={3000}
         theme="light"
@@ -669,14 +669,14 @@ const ResultsList = ({loading}) => {
         className="toastContainer"
         closeOnClick={false}
         closeButton={false}
-      /> */}
-      {/* <NotesModal
+      />
+      <NotesModal
         isOpen={notesOpen}
         onClose={()=>(setNotesOpen(false))}
         className="notes-modal"
         noteLabel={noteLabel.current}
         bookmarkID={currentBookmarkID.current}
-      /> */}
+      />
       <EvidenceModal
         isOpen={evidenceOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
