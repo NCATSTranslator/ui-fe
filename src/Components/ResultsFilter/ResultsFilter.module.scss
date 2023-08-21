@@ -78,7 +78,7 @@
       text-overflow: ellipsis;
       background-color: $lightGray;
       width: 100%;
-      padding-right: 38px;
+      padding-right: 45px;
     }
   }
   .facetCount {
@@ -86,6 +86,12 @@
     right: 0;
     top: 0;
     bottom: 0;
+    display: flex;
+    align-items: center;
+    a {
+      margin-right: 2px;
+      display: flex;
+    }
   }
   .roleSpan, .fdaSpan {
     font-size: 12px; 
@@ -116,5 +122,9 @@
       max-height: 250px;
       overflow-y: scroll;
     }
+  }
+  .extLinkIcon {
+    width: 20px;
+    height: 20px;
   }
 }
