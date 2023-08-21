@@ -14,7 +14,7 @@ const ResultsListLoadingButton = ({ data = {} }) => {
       className={`${containerClassName} ${styles.loadingButtonContainer}`}
       >
       {
-        (!data.isFetchingARAStatus && !data.isFetchingResults) &&
+        (!data.hasFreshResults && !data.isFetchingARAStatus && !data.isFetchingResults) &&
         <div className={styles.complete}>
           <CompleteIcon/>
           <span>Results Complete</span>
@@ -28,15 +28,15 @@ const ResultsListLoadingButton = ({ data = {} }) => {
         </button>
       }
       {
-        (data.hasFreshResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&
+        (data.hasFreshResults) &&
         <>
           <button onClick={data.handleResultsRefresh} className={`${buttonClassName} ${styles.loadingButton} ${styles.active}`}>
             {
-              (data.isFetchingARAStatus) &&
+              (data.isFetchingARAStatus || data.isFetchingResults) &&
               <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
             }
             {
-              !data.isFetchingARAStatus &&
+              !(data.isFetchingARAStatus || data.isFetchingResults) &&
               <ResultsAvailableIcon/>
             }
             <span>Load New Results</span>
