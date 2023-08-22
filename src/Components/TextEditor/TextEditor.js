@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useMemo } from "react";
 import { Theme } from "./Theme";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -24,16 +24,15 @@ import ListMaxIndentLevelPlugin from "./plugins/ListMaxIndentLevelPlugin";
 import CodeHighlightPlugin from "./plugins/CodeHighlightPlugin";
 import CustomAutoLinkPlugin from "./plugins/CustomAutoLinkPlugin";
 import OnChangePlugin from "./plugins/OnChangePlugin";
-import { getUserSave, updateUserSave } from "../../Utilities/userApi";
+import { getUserSave, updateUserSave, emptyEditor } from "../../Utilities/userApi";
 
 const Placeholder = () => {
   return <div className="editor-placeholder">...</div>;
 }
 
-const TextEditor = ({bookmarkID}) => {
+const TextEditor = ({bookmarkID, handleSave, shouldClearEditor, onClearEditorComplete}) => {
 
   const editorConfig = {
-    // editorState: initialEditorState,
     theme: Theme,
     onError(error) {
       throw error;
@@ -54,15 +53,13 @@ const TextEditor = ({bookmarkID}) => {
   };
 
   const updateNote = useMemo(() => _.debounce(async (editorStateJSON, bookmarkID) => {
-    console.log("Debounced editor state push", JSON.stringify(editorStateJSON));
-    console.log(bookmarkID);
     let newNotes = JSON.stringify(editorStateJSON);
-    if(newNotes.length <= 0)
+
+    if(newNotes === emptyEditor)
       return;
 
-    if(!bookmarkID) {
-      // create new bookmark with notes
-    } else {
+    if(bookmarkID) {
+      console.log("update bookmark of id:", bookmarkID);
       // update bookmark of given ID
       let newSave = await getUserSave(bookmarkID);
       if(newSave.notes === newNotes)
@@ -72,8 +69,10 @@ const TextEditor = ({bookmarkID}) => {
       console.log(newSave);
       newSave.notes = newNotes;
       updateUserSave(bookmarkID, newSave);
+      handleSave();
     }
-  }, 1000), []);
+
+  }, 750), []);
 
   const onChange = (editorStateJSON) => {
     if(bookmarkID === null) {
@@ -98,7 +97,7 @@ const TextEditor = ({bookmarkID}) => {
             placeholder={<Placeholder />}
             ErrorBoundary={LexicalErrorBoundary}
           />
-          <ClearEditorPlugin />
+          <ClearEditorPlugin  />
           <HistoryPlugin />
           <AutoFocusPlugin />
           <CodeHighlightPlugin />
@@ -107,7 +106,12 @@ const TextEditor = ({bookmarkID}) => {
           <CustomAutoLinkPlugin />
           <ListMaxIndentLevelPlugin maxDepth={7} />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-          <OnChangePlugin onChange={onChange} bookmarkID={bookmarkID}/>
+          <OnChangePlugin 
+            onChange={onChange} 
+            bookmarkID={bookmarkID} 
+            shouldClearEditor={shouldClearEditor} 
+            onClearEditorComplete={onClearEditorComplete}
+          />
         </div>
       </div>
     </LexicalComposer>

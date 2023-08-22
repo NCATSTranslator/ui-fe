@@ -3,39 +3,49 @@ import { $getRoot } from 'lexical';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import { getUserSave } from "../../../Utilities/userApi";
 import { CLEAR_EDITOR_COMMAND } from "lexical";
-const OnChangePlugin = ({ onChange, bookmarkID }) => {
+
+const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditorComplete }) => {
   // Access the editor through the LexicalComposerContext
   const [editor] = useLexicalComposerContext();
   const isFirstRender = useRef(true);
   const emptyEditorState = JSON.stringify({"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}});
 
+  const clearEditor = (editor) => {
+    editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
+  }
+
   useEffect(() => {
     const getNotesFromBookmark = async (bookmarkID) => {
       let shouldClearEditor = false;
       if(bookmarkID) {
-        let save = await getUserSave(bookmarkID);
+        let save = await getUserSave(bookmarkID, ()=>{ return false; });
         let initialNotes = false;
-        console.log(save);
-        console.log(save.notes);
-        console.log(save.notes.length);
-        if(save.notes.length > 0)
-          initialNotes = save.notes;
 
-        console.log(bookmarkID);
-        if(initialNotes !== false) {
-          console.log(initialNotes);
-          const editorStateJSON = initialNotes;
-          const initialEditorState = editor.parseEditorState(editorStateJSON);
-          editor.setEditorState(initialEditorState)
-        } else {
+        if(!save){
           shouldClearEditor = true;
+        } else {
+          console.log(save);
+          console.log(save.notes);
+          console.log(save.notes.length);
+          if(save.notes.length > 0)
+            initialNotes = save.notes;
+  
+          console.log(bookmarkID);
+          if(initialNotes !== false) {
+            console.log(initialNotes);
+            const editorStateJSON = initialNotes;
+            const initialEditorState = editor.parseEditorState(editorStateJSON);
+            editor.setEditorState(initialEditorState)
+          } else {
+            shouldClearEditor = true;
+          }
         }
       } else {
         shouldClearEditor = true;
       }
 
       if(shouldClearEditor) {
-        editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
+        clearEditor(editor);
         console.log("clearEditor");
       }
     }
@@ -51,6 +61,13 @@ const OnChangePlugin = ({ onChange, bookmarkID }) => {
       onChange(editorStateObject.toJSON());
     });
   }, [editor, onChange]);
+
+  useEffect(() => {
+    if (shouldClearEditor) {
+      clearEditor(editor);
+      onClearEditorComplete();
+    }
+  }, [shouldClearEditor, onClearEditorComplete, editor]);
 
 }
 

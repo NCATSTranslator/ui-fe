@@ -1,13 +1,42 @@
 @import "../../Assets/Styles/variables";
 
 .notesModal {
-  .heading {
-    max-width: 95%;
-    word-break: break-all;
-    font-weight: 400;
-    .item {
+  .top {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    justify-content: space-between;
+    align-items: center;
+    width: 95%;
+    gap: 5px 0;
+    .heading, .item, .button {
+      margin-bottom: 0;
+    }
+    .heading {
+      max-width: 95%;
+      word-break: break-all;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      .item {
+        font-weight: 700;
+        font-size: 24px;
+        margin-left: 6px;
+      }
+    }
+    .saved {
+      font-size: 14px;
       font-weight: 700;
-      font-size: 24px;
+      transition: all .5s ease;
+      font-style: italic;
+      color: $purpleOne75;
+      margin-left: -10px;
+      &.show {
+        opacity: 1;
+        margin-left: 30px;
+      }
+      &.hide {
+        opacity: 0;
+      }
     }
   }
 }

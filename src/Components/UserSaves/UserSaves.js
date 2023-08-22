@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { deleteUserSave, getAllUserSaves, getSaves } from '../../Utilities/userApi';
+import { deleteUserSave, getAllUserSaves, getSaves, emptyEditor } from '../../Utilities/userApi';
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import styles from './UserSaves.module.scss';
@@ -82,6 +82,10 @@ const UserSaves = () => {
     };
   }, []);
 
+  const handleClearNotesEditor = () => {
+    getSaves(setUserSaves);
+  }
+
   return(
     <QueryClientProvider client={queryClient}>
       <div>
@@ -100,6 +104,7 @@ const UserSaves = () => {
         <NotesModal
           isOpen={notesOpen}
           onClose={()=>(setNotesOpen(false))}
+          handleClearNotesEditor={handleClearNotesEditor}
           className="notes-modal"
           noteLabel={noteLabel.current}
           bookmarkID={currentBookmarkID.current}
@@ -119,7 +124,7 @@ const UserSaves = () => {
           ? 
           <p>No bookmarks to show</p>
           :
-          Object.entries(userSaves).map((item) => {
+          Object.entries(userSaves).reverse().map((item) => {
             let key = item[0];
             let queryObject = item[1];
             let typeString = queryObject.query.type.label;
@@ -136,14 +141,16 @@ const UserSaves = () => {
                   <a href={shareURL} target="_blank" rel="noreferrer"><ExternalLink/></a>
                 </div>
                 <div className={styles.resultsList}>
-                  {queryObject.saves && Array.from(queryObject.saves).map((save) => {
+                  {queryObject.saves && Array.from(queryObject.saves).sort((a, b) => a.label.localeCompare(b.label)).map((save) => {
                     let queryType = save.data.query.type;
                     let queryItem = save.data.item;
                     let arspk = save.data.query.pk;
                     let queryNodeID = save.data.query.nodeId;
                     let queryNodeLabel = save.data.query.nodeLabel;
                     let queryNodeDescription = save.data.query.nodeDescription;
-                    console.log(queryItem);
+                    queryItem.hasNotes = (save.notes.length === 0 || JSON.stringify(save.notes) === emptyEditor) ? false : true;
+                    console.log(save);
+                    console.log(queryItem.hasNotes, queryItem);
                     return (
                       <div key={save.id}>
                         <ResultsItem

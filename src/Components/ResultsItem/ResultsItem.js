@@ -9,7 +9,7 @@ import {ReactComponent as Bookmark } from "../../Icons/Navigation/Bookmark.svg"
 import {ReactComponent as Notes } from "../../Icons/Navigation/Bookmark.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, replace } from 'lodash';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 import { round } from 'mathjs';
@@ -27,6 +27,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   let sourcesCount = item.evidence.distinctSources.length;
 
   const [isBookmarked, setIsBookmarked] = useState(bookmarked);
+  const [itemBookmarkID, setItemBookmarkID] = useState(bookmarkID);
   const [itemHasNotes, setItemHasNotes] = useState(hasNotes);
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(0);
@@ -123,11 +124,14 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   const handleBookmarkClick = async () => {
     if(isBookmarked) {
-      if(bookmarkID) {
-        deleteUserSave(bookmarkID);
+      if(itemBookmarkID) {
+        deleteUserSave(itemBookmarkID);
         setIsBookmarked(false);
+        setItemHasNotes(false);
+        setItemBookmarkID(null);
         bookmarkRemovedToast();
       }
+      return false;
     } else {
       item.graph = itemGraph;
       delete item.paths;
@@ -137,13 +141,32 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       let bookmarkedItem = await createUserSave(bookmarkObject);
       console.log('bookmarked: ', bookmarkedItem);
       setIsBookmarked(true);
+      setItemBookmarkID(bookmarkedItem.id);
       bookmarkAddedToast();
+      return bookmarkedItem.id;
     }
   }
 
-  const handleNotesClick = () => {
-    activateNotes(nameString, bookmarkID);
+  const handleNotesClick = async () => {
+    let tempBookmarkID = itemBookmarkID;
+    if(!isBookmarked) {
+      console.log("no bookmark exists for this item, creating one...")
+      let replacementID = await handleBookmarkClick();
+      console.log("new id: ", replacementID);
+      tempBookmarkID = (replacementID) ? replacementID : tempBookmarkID;
+    }
+    activateNotes(nameString, tempBookmarkID, item);
+    setItemHasNotes(true);
   }
+
+  useEffect(() => {
+    setItemBookmarkID(bookmarkID);
+  }, [bookmarkID]);
+
+  useEffect(() => {
+    console.log("updating has notes to: ", hasNotes);
+    setItemHasNotes(hasNotes);
+  }, [item, hasNotes]);
 
   return (
     <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))}>

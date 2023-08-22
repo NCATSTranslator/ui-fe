@@ -169,15 +169,21 @@ const ResultsList = ({loading}) => {
     };
   }, []);
 
-  useEffect(() => {
-    const getUserSaves = async () => {
-      let temp = await getSaves();
-      for(const queryID of Object.keys(temp)){
-        if(queryID == currentQueryID) {
-          setUserSaves(temp[queryID]);
-        }
+  const getUserSaves = async () => {
+    let temp = await getSaves();
+    for(const queryID of Object.keys(temp)){
+      if(queryID == currentQueryID) {
+        setUserSaves(temp[queryID]);
       }
     }
+  }
+
+  const handleClearNotesEditor = async () => {
+    await getUserSaves();
+    handleUpdateResults(activeFilters, activeStringFilters, prevRawResults.current, [], false, currentSortString.current);
+  }
+
+  useEffect(() => {
     getUserSaves();
   }, []);
 
@@ -481,7 +487,7 @@ const ResultsList = ({loading}) => {
     setEvidenceOpen(true);
   }
 
-  const activateNotes = (label, bookmarkID) => {
+  const activateNotes = (label, bookmarkID, item) => {
     noteLabel.current = label;
     currentBookmarkID.current = bookmarkID;
     setNotesOpen(true);
@@ -657,6 +663,8 @@ const ResultsList = ({loading}) => {
     }
   },[formattedResults, initNodeIdParam]);
 
+
+
   return (
     <QueryClientProvider client={queryClient}>
       <ToastContainer
@@ -673,6 +681,7 @@ const ResultsList = ({loading}) => {
       <NotesModal
         isOpen={notesOpen}
         onClose={()=>(setNotesOpen(false))}
+        handleClearNotesEditor={handleClearNotesEditor}
         className="notes-modal"
         noteLabel={noteLabel.current}
         bookmarkID={currentBookmarkID.current}

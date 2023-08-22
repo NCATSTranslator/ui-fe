@@ -52,6 +52,8 @@ export const prefKeyToString = (prefKey) => {
   }
 }
 
+export const emptyEditor = '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
+
 export const getSaves = async (setUserSaves = undefined) => {
   let saves = await getAllUserSaves();
   saves = formatUserSaves(saves);

@@ -28,11 +28,11 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
   }, [handleKeypress]);
 
   useEffect(() => {
-    if(isOpen) 
+    if(startOpen) 
       document.body.style.overflow = 'hidden';
     else 
       document.body.style.overflow = 'auto';
-  });
+  }, [startOpen]);
 
   return (
     <div className={`${styles.modalWindow} ${modalIsOpenClass} ${className}`} data-testid={testId} onClick={handleClickOutside}>
