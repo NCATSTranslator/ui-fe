@@ -1,21 +1,26 @@
 import { useEffect, useState, useRef } from 'react';
-import { deleteUserSave, getAllUserSaves, getSaves, emptyEditor } from '../../Utilities/userApi';
-import { findStringMatch, handleResultsError, handleEvidenceModalClose,
-  handleResultsRefresh, handleClearAllFilters, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
+import { deleteUserSave, getSaves, emptyEditor } from '../../Utilities/userApi';
+import { handleEvidenceModalClose, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import styles from './UserSaves.module.scss';
 import ResultsItem from '../ResultsItem/ResultsItem';
 import EvidenceModal from '../Modals/EvidenceModal';
-import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { getFormattedDate } from '../../Utilities/utilities';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup } from '../BookmarkToasts/BookmarkToasts';
 import NotesModal from '../Modals/NotesModal';
+import TextInput from "../FormFields/TextInput";
+import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
+import { cloneDeep } from 'lodash';
+import Highlighter from 'react-highlight-words';
 
 const UserSaves = () => {
 
   const [userSaves, setUserSaves] = useState(null);
+  const [filteredUserSaves, setFilteredUserSaves] = useState(null)
+  const currentSearchString = useRef("");
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [currentEvidence, setCurrentEvidence] = useState([]);
   const [selectedItem, setSelectedItem] = useState({});
@@ -25,6 +30,7 @@ const UserSaves = () => {
   const [notesOpen, setNotesOpen] = useState(false);
   const noteLabel = useRef("");
   const currentBookmarkID = useRef(null);
+  const formRef = useRef(null);
 
   const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
@@ -46,7 +52,11 @@ const UserSaves = () => {
   }
 
   useEffect(() => {
-    getSaves(setUserSaves);
+    const initSaves = async () => {
+      let newSaves = await getSaves(setUserSaves);
+      setFilteredUserSaves(cloneDeep(newSaves));
+    }
+    initSaves();
   },[]);
 
   const resetUserSaves = () => {
@@ -59,6 +69,57 @@ const UserSaves = () => {
     }
   }
 
+  const handleSearch = (value = false) => {
+    if(!value) {
+      setFilteredUserSaves(cloneDeep(userSaves));
+      return;
+    }
+
+    setFilteredUserSaves(Object.values(userSaves).filter((item) => {
+      let include = false;
+      let tempValue = value.toLowerCase();
+      currentSearchString.current = value;
+      let submittedDate = (item?.query?.submitted_time) ? getFormattedDate(new Date(item.query.submitted_time)) : '';
+
+      // check for match in query info
+      if(
+        item.query.nodeLabel.toLowerCase().includes(tempValue) ||
+        item.query.nodeId.toLowerCase().includes(tempValue) || 
+        submittedDate.toLowerCase().includes(tempValue) || 
+        item.query.nodeDescription.toLowerCase().includes(tempValue) || 
+        item.query.type.label.toLowerCase().includes(tempValue) || 
+        item.query.type.filterType.toLowerCase().includes(tempValue) 
+      )
+        include = true;
+      
+        // check saves for match
+      for(const save of Array.from(item.saves)) {
+        if(
+          save.label.toLowerCase().includes(tempValue) ||
+          save.notes.toLowerCase().includes(tempValue) ||
+          save.object_ref.toLowerCase().includes(tempValue) ||
+          save.data.item.id.toLowerCase().includes(tempValue) ||
+          save.data.item.name.toLowerCase().includes(tempValue) ||
+          save.data.item.type.toLowerCase().includes(tempValue) ||
+          save.data.item.object.toLowerCase().includes(tempValue) 
+        )
+          include = true;
+      }
+
+      return include;
+    }))
+  }
+
+  const clearSearchBar = (e) => {
+    formRef.current.reset();
+    handleSearch();
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    formRef.current.reset();
+    clearSearchBar();
+  }
 
   useEffect(() => {
     const handleKeyDown = (ev) => {
@@ -83,7 +144,8 @@ const UserSaves = () => {
   }, []);
 
   const handleClearNotesEditor = () => {
-    getSaves(setUserSaves);
+    let newSaves = getSaves(setUserSaves);
+    setFilteredUserSaves(cloneDeep(newSaves));
   }
 
   return(
@@ -119,65 +181,113 @@ const UserSaves = () => {
           edgeGroup={selectedEdges}
         />
         <h4>Workspace</h4>
+        <div className={styles.searchBarContainer}>
+          <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form} ref={formRef}>
+            <TextInput 
+              placeholder="Search Saved Results" 
+              handleChange={(e)=>handleSearch(e)} 
+              className={styles.input}
+              size=""
+              icon={<SearchIcon/>}
+            />
+            <button type="submit" size="" >
+              <span>Clear</span>
+            </button>
+          </form>
+        </div>
         {
           (userSaves == null || Object.entries(userSaves).length <= 0)
           ? 
-          <p>No bookmarks to show</p>
-          :
-          Object.entries(userSaves).reverse().map((item) => {
-            let key = item[0];
-            let queryObject = item[1];
-            let typeString = queryObject.query.type.label;
-            let queryNodeString = queryObject.query.nodeLabel;
-            let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryObject.query.type.id, key);
-            // console.log(queryObject.saves.values().next());
-            let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
-            // let submittedDate = new Date();
-            return(
-              <div key={key}>
-                <div className={styles.topBar}>
-                  <h4>{typeString} <span>{queryNodeString}</span></h4>
-                  <p>{submittedDate.toString()}</p>
-                  <a href={shareURL} target="_blank" rel="noreferrer"><ExternalLink/></a>
+            <p>No bookmarks to show</p>
+          : <>
+              {
+                Object.entries(filteredUserSaves).length < Object.entries(userSaves).length &&
+                <div className={styles.showingContainer}>
+                  <p className={styles.showing}>Showing {Object.entries(filteredUserSaves).length} of {Object.entries(userSaves).length} total saved results.</p>
+                  <button onClick={clearSearchBar} className={styles.showingButton}>(Clear Search Bar)</button>
                 </div>
-                <div className={styles.resultsList}>
-                  {queryObject.saves && Array.from(queryObject.saves).sort((a, b) => a.label.localeCompare(b.label)).map((save) => {
-                    let queryType = save.data.query.type;
-                    let queryItem = save.data.item;
-                    let arspk = save.data.query.pk;
-                    let queryNodeID = save.data.query.nodeId;
-                    let queryNodeLabel = save.data.query.nodeLabel;
-                    let queryNodeDescription = save.data.query.nodeDescription;
-                    queryItem.hasNotes = (save.notes.length === 0 || JSON.stringify(save.notes) === emptyEditor) ? false : true;
-                    console.log(save);
-                    console.log(queryItem.hasNotes, queryItem);
-                    return (
-                      <div key={save.id}>
-                        <ResultsItem
-                          rawResults={null}
-                          type={queryType}
-                          item={queryItem}
-                          activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
-                          activateNotes={activateNotes}
-                          activeStringFilters={[]}
-                          zoomKeyDown={zoomKeyDown}
-                          currentQueryID={arspk}
-                          queryNodeID={queryNodeID}
-                          queryNodeLabel={queryNodeLabel}
-                          queryNodeDescription={queryNodeDescription}
-                          bookmarked
-                          bookmarkID={save.id}
-                          hasNotes={queryItem.hasNotes}
-                          bookmarkAddedToast={bookmarkAddedToast}
-                          bookmarkRemovedToast={bookmarkRemovedToast}
-                        />
+              }
+              <div className={styles.saves}>
+                {
+                  Object.entries(filteredUserSaves).reverse().map((item) => {
+                    let key = item[0];
+                    let queryObject = item[1];
+                    let typeString = queryObject.query.type.label;
+                    let queryNodeString = queryObject.query.nodeLabel;
+                    let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryObject.query.type.id, key);
+                    // console.log(queryObject.saves.values().next());
+                    let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
+                    // let submittedDate = new Date();
+                    return(
+                      <div key={key} className={styles.query}>
+                        <div className={styles.topBar}>
+                          <div className={styles.headingContainer}>
+                            <a href={shareURL} target="_blank" rel="noreferrer">
+                              <h4 className={styles.heading}>{typeString}: 
+                              <Highlighter
+                                highlightClassName="highlight"
+                                searchWords={[currentSearchString.current]}
+                                autoEscape={true}
+                                textToHighlight={queryNodeString}
+                              />
+                                {/* <span>{queryNodeString}</span> */}
+                              </h4>
+                            </a>
+                            <p className={styles.date}>
+                              <Highlighter
+                                highlightClassName="highlight"
+                                searchWords={[currentSearchString.current]}
+                                autoEscape={true}
+                                textToHighlight={submittedDate.toString()}
+                              />
+                            </p>
+                          </div>
+                          {
+                            queryObject.saves && Array.from(queryObject.saves).length > 0 &&
+                            <p className={styles.numSaves}>{Array.from(queryObject.saves).length} saved items</p>
+                          }
+                          <a href={shareURL} target="_blank" rel="noreferrer" className={styles.link}><ExternalLink/></a>
+                        </div>
+                        <div className={styles.separator}></div>
+                        <div className={styles.resultsList}>
+                          {queryObject.saves && Array.from(queryObject.saves).sort((a, b) => a.label.localeCompare(b.label)).map((save) => {
+                            let queryType = save.data.query.type;
+                            let queryItem = save.data.item;
+                            let arspk = save.data.query.pk;
+                            let queryNodeID = save.data.query.nodeId;
+                            let queryNodeLabel = save.data.query.nodeLabel;
+                            let queryNodeDescription = save.data.query.nodeDescription;
+                            queryItem.hasNotes = (save.notes.length === 0 || JSON.stringify(save.notes) === emptyEditor) ? false : true;
+                            return (
+                              <div key={save.id} className={styles.result}>
+                                <ResultsItem
+                                  rawResults={null}
+                                  type={queryType}
+                                  item={queryItem}
+                                  activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
+                                  activateNotes={activateNotes}
+                                  activeStringFilters={[currentSearchString.current]}
+                                  zoomKeyDown={zoomKeyDown}
+                                  currentQueryID={arspk}
+                                  queryNodeID={queryNodeID}
+                                  queryNodeLabel={queryNodeLabel}
+                                  queryNodeDescription={queryNodeDescription}
+                                  bookmarked
+                                  bookmarkID={save.id}
+                                  hasNotes={queryItem.hasNotes}
+                                  bookmarkAddedToast={bookmarkAddedToast}
+                                  bookmarkRemovedToast={bookmarkRemovedToast}
+                                />
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
-                    )
-                  })}
-                </div>
+                    );
+                  })
+                }
               </div>
-            );
-          })
+            </>
         }
       </div>
     </QueryClientProvider>

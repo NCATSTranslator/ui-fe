@@ -58,7 +58,7 @@ export const getSaves = async (setUserSaves = undefined) => {
   let saves = await getAllUserSaves();
   saves = formatUserSaves(saves);
 
-  if(setUserSaves != undefined)
+  if(setUserSaves !== undefined)
     setUserSaves(saves);
   
   return saves;

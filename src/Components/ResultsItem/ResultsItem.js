@@ -164,7 +164,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   }, [bookmarkID]);
 
   useEffect(() => {
-    console.log("updating has notes to: ", hasNotes);
     setItemHasNotes(hasNotes);
   }, [item, hasNotes]);
 

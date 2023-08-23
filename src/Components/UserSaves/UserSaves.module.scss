@@ -13,3 +13,103 @@
   margin: $m 0 0 0;
   background-color: $purpleTwo;
 }
+.saves {
+  margin: 24px 0 0;
+  border-radius: $defaultBorderRadius;
+  box-shadow: $dropShadow;
+}
+.showingContainer {
+  text-align: center;
+  .showing {
+    text-align: center;
+    margin: 8px;
+  }
+  .showingButton {
+    padding: 0;
+    background-color: transparent;
+    color: $purpleOne;
+    font-size: 16px;
+    font-weight: 400;
+    margin: 0;
+    text-decoration: underline;
+    box-shadow: none;
+    &:hover {
+      box-shadow: none;
+    }
+  }
+}
+.query {
+  padding: 30px 40px 15px;
+  background-color: $white;
+  &:nth-child(odd) {
+    background-color: $lightGray;
+  }
+  .topBar {
+    display: grid;
+    grid-template-columns: 1fr .5fr 25px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    .heading, .date, .link {
+      margin: 0;
+    }
+    .headingContainer {
+      display: grid;
+    }
+    .heading {
+      font-size: 30px;
+      font-weight: 700;
+      & > span {
+        margin-left: 5px;
+      } 
+      span, mark {
+        font-size: 30px;
+        font-weight: 400;
+      }
+    }
+    .date {
+      font-size: 14px;
+      font-weight: 400;
+      font-style: italic;
+      margin: 5px 0 0 20px;
+      color: $purpleOne;
+    }
+    .link {
+      svg path {
+        fill: $purpleOne;
+      }
+    }
+    .numSaves {
+      margin: 0;
+      text-align: center;
+    }
+  }
+}
+.result {
+  border-bottom: 1px solid $midGray;
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+.searchBarContainer {
+  margin: 0 0 24px;
+  .form {
+    display: flex;
+    justify-content: space-between;
+    padding: 24px;
+    background-color: $purpleTwo20;
+    border-radius: $defaultBorderRadius;
+    label {
+      display: flex;
+      width: 100%;
+      margin: 0;
+      input {
+        width: -webkit-fill-available;
+      }
+    }
+    button {
+      margin: 0 0 0 $s;
+      padding: 10px 20px;
+    }
+  }
+}

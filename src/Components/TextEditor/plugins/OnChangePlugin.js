@@ -8,7 +8,6 @@ const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditor
   // Access the editor through the LexicalComposerContext
   const [editor] = useLexicalComposerContext();
   const isFirstRender = useRef(true);
-  const emptyEditorState = JSON.stringify({"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}});
 
   const clearEditor = (editor) => {
     editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
@@ -24,15 +23,10 @@ const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditor
         if(!save){
           shouldClearEditor = true;
         } else {
-          console.log(save);
-          console.log(save.notes);
-          console.log(save.notes.length);
           if(save.notes.length > 0)
             initialNotes = save.notes;
   
-          console.log(bookmarkID);
           if(initialNotes !== false) {
-            console.log(initialNotes);
             const editorStateJSON = initialNotes;
             const initialEditorState = editor.parseEditorState(editorStateJSON);
             editor.setEditorState(initialEditorState)
@@ -46,7 +40,6 @@ const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditor
 
       if(shouldClearEditor) {
         clearEditor(editor);
-        console.log("clearEditor");
       }
     }
     

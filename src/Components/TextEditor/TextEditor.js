@@ -17,7 +17,6 @@ import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPl
 import { TRANSFORMERS } from "@lexical/markdown";
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
 import _ from "lodash";
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 
 import ToolbarPlugin from "./plugins/ToolbarPlugin";
 import ListMaxIndentLevelPlugin from "./plugins/ListMaxIndentLevelPlugin";
@@ -65,9 +64,8 @@ const TextEditor = ({bookmarkID, handleSave, shouldClearEditor, onClearEditorCom
       if(newSave.notes === newNotes)
         return;
         
-      console.log(newNotes);
-      console.log(newSave);
       newSave.notes = newNotes;
+      console.log(newSave);
       updateUserSave(bookmarkID, newSave);
       handleSave();
     }
@@ -75,16 +73,10 @@ const TextEditor = ({bookmarkID, handleSave, shouldClearEditor, onClearEditorCom
   }, 750), []);
 
   const onChange = (editorStateJSON) => {
-    if(bookmarkID === null) {
-      console.warn("no bookmark ID supplied, unable to save");
+    if(bookmarkID === null) 
       return;
-    }
-    console.log("change", editorStateJSON);
+    
     updateNote(editorStateJSON, bookmarkID);
-    // const editorStateJSON = editorState.toJSON();
-    // sanitize here, or wait til debounced ?
-
-    // setEditorState(JSON.stringify(editorStateJSON));
   }
 
   return (
