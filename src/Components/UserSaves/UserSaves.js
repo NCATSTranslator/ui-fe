@@ -59,15 +59,15 @@ const UserSaves = () => {
     initSaves();
   },[]);
 
-  const resetUserSaves = () => {
-    for(const query of Object.values(userSaves)) {
-      console.log(query);
-      for(const save of Array.from(query.saves)) {
-        deleteUserSave(save.id);
-        setUserSaves(null);
-      }
-    }
-  }
+  // const resetUserSaves = () => {
+  //   for(const query of Object.values(userSaves)) {
+  //     console.log(query);
+  //     for(const save of Array.from(query.saves)) {
+  //       deleteUserSave(save.id);
+  //       setUserSaves(null);
+  //     }
+  //   }
+  // }
 
   const handleSearch = (value = false) => {
     if(!value) {
@@ -151,7 +151,6 @@ const UserSaves = () => {
   return(
     <QueryClientProvider client={queryClient}>
       <div>
-        <button onClick={resetUserSaves}>Reset</button>
         <ToastContainer
           position="top-center"
           autoClose={3000}
@@ -180,7 +179,7 @@ const UserSaves = () => {
           isAll={isAllEvidence}
           edgeGroup={selectedEdges}
         />
-        <h4>Workspace</h4>
+        <h1 className={`h4 ${styles.pageHeading}`}>Saved Results</h1>
         <div className={styles.searchBarContainer}>
           <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form} ref={formRef}>
             <TextInput 
