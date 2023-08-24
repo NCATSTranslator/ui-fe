@@ -39,7 +39,7 @@ const Header = ({children, handleFeedbackModalOpen}) => {
                         : <img src={defaultPfp} alt="user profile" className={styles.profilePic}/>}
                     </div>
                   </Link>
-                  <Link to={`/demo`} className={styles.login} >Log Out</Link>
+                  <a href={`/main/logout`} className={styles.login} >Log Out</a>
                 </>
             }
           </div>
