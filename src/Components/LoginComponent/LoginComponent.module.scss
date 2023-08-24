@@ -37,6 +37,50 @@
     }
     .continueButton {
       margin: 0 auto;
+      font-size: $buttonSize;
+      font-weight: bold;
+      line-height: 1;
+      padding: 10px $xs;
+      border-radius: $defaultBorderRadius;
+      border: none;
+      cursor: pointer;
+      transition: $defaultBoxShadowAnim;
+      color: $white;
+      background-color: $purpleOne;
+      text-decoration: none;
+      display: inline-flex;
+      width: fit-content;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: $s;
+      &:hover {
+        box-shadow: $dropShadowHover;
+      }
+      svg {
+        margin-right: 8px;
+      }
+    
+      &.secondary {
+        color: $purpleOne;
+        background-color: $white;
+      }
+      &.iconOnly {
+        border-radius: 50%;
+        padding: 8px;
+        svg {
+          margin-right: 0;
+        }
+      }
+      &.clicked {
+        box-shadow: $dropShadowPressed;
+      }
+      &:disabled, &[disabled] {
+        color: $midGray;
+        background-color: white;
+        border-color: $midGray;
+        box-shadow: none;
+        cursor: default;
+      }
     }
   }
 }

@@ -2,6 +2,10 @@ import styles from './LoginComponent.module.scss'
 import tempImage from '../../Assets/Images/Home/home1.jpg';
 
 const LoginComponent = () => {
+
+
+  const loginURL = "https://a-ci.ncats.io/_api/auth/transltr/authorize?response_type=code&client_id=transltr-local&scope=openid%20profile%20email&redirect_uri=http%3A%2F%2Flocalhost%3A8386%2Foauth2%2Fredir%2Funa";
+  
   
   return(
     <div className={styles.loginContainer}>
@@ -12,7 +16,7 @@ const LoginComponent = () => {
       <div className={styles.right}>
         <h2 className={styles.heading}>Welcome!</h2>
         <p className={styles.blurb}>Sign in to access your Translator account.</p>
-        <button className={styles.continueButton}>Continue</button>
+        <a className={styles.continueButton} href={loginURL}>Continue</a>
         <ul>
         <li><a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=993742507981-9f5sm5tctipak3c4v044gjfd7rmps8jt.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A8386%2Foauth2%2Fredir%2Fgoogle&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20openid&access_type=offline">
               Sign in with Google (real)</a></li>
