@@ -6,14 +6,14 @@ import LoadingBar from '../LoadingBar/LoadingBar';
 import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
 import {ReactComponent as Export } from "../../Icons/Buttons/Export.svg"
 import {ReactComponent as Bookmark } from "../../Icons/Navigation/Bookmark.svg"
-import {ReactComponent as Notes } from "../../Icons/Navigation/Bookmark.svg"
+import {ReactComponent as Notes } from "../../Icons/note.svg"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
-import { cloneDeep, replace } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 import { round } from 'mathjs';
-import { createUserSave, deleteUserSave, getFormattedBookmarkObject, getQueryObjectForSave } from '../../Utilities/userApi';
+import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -188,6 +188,14 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         }
         <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
       </div>
+      <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
+        <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
+          <Bookmark onClick={handleBookmarkClick} />
+        </div>
+        <div className={`${styles.icon} ${styles.notesIcon} ${itemHasNotes ? styles.filled : ''}`}>
+          <Notes onClick={handleNotesClick} />
+        </div>
+      </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span
           className={styles.evidenceLink}
@@ -217,12 +225,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         onClick={generateCsvFromItem(item, setCsvData)}>
           <Export/>
       </CSVLink>
-      <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${isBookmarked ? styles.filled : ''}`}>
-        <Bookmark onClick={handleBookmarkClick} />
-      </div>
-      <div className={`${styles.notesContainer} ${styles.resultSub} ${itemHasNotes ? styles.filled : ''}`}>
-        <Notes onClick={handleNotesClick} />
-      </div>
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>
       </button>

@@ -768,6 +768,7 @@ const ResultsList = ({loading}) => {
                       >
                         Name
                       </div>
+                      <div></div>
                       <div
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
                         onClick={()=>{

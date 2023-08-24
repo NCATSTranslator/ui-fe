@@ -51,11 +51,11 @@ const UserSaves = () => {
     setNotesOpen(true);
   }
 
+  const initSaves = async () => {
+    let newSaves = await getSaves(setUserSaves);
+    setFilteredUserSaves(cloneDeep(newSaves));
+  }
   useEffect(() => {
-    const initSaves = async () => {
-      let newSaves = await getSaves(setUserSaves);
-      setFilteredUserSaves(cloneDeep(newSaves));
-    }
     initSaves();
   },[]);
 
@@ -110,7 +110,7 @@ const UserSaves = () => {
     }))
   }
 
-  const clearSearchBar = (e) => {
+  const clearSearchBar = () => {
     formRef.current.reset();
     handleSearch();
   }
@@ -144,8 +144,7 @@ const UserSaves = () => {
   }, []);
 
   const handleClearNotesEditor = () => {
-    let newSaves = getSaves(setUserSaves);
-    setFilteredUserSaves(cloneDeep(newSaves));
+    initSaves();
   }
 
   return(
