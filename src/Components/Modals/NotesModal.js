@@ -55,13 +55,13 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
             noteLabel 
             ? 
               <h5 className={styles.heading}>
-                Showing Notes for: 
+                <span className={styles.prefix}>Showing Notes for: </span>
                 <span className={styles.item}>{noteLabel}</span>
                 <span className={`${styles.saved} ${showSaved ? styles.show : styles.hide}`}>Note Saved</span>
               </h5>
             : 
               <h5 className={styles.heading}>
-                Notes:
+                <span className={styles.prefix}>Notes:</span>
                 <span className={`${styles.saved} ${showSaved ? styles.show : styles.hide}`}>Note Saved</span>
               </h5>
           }
