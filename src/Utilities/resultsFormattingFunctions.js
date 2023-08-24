@@ -297,11 +297,9 @@ const checkBookmarksForItem = (itemID, bookmarksSet) => {
 }
 
 const checkBookmarkForNotes = (bookmarkID, bookmarksSet) => {
-  console.log(bookmarkID);
   if(bookmarksSet && bookmarksSet.size > 0) {
     for(let val of bookmarksSet) {
       if(val.id === bookmarkID) {
-        console.log("match", val.notes, val.notes.length);
         return (val.notes.length > 0) ? true : false;
       }
     }

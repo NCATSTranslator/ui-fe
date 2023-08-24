@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
@@ -17,14 +17,81 @@ import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../.
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
+const getTypeFromPub = (publicationID) => { 
+  if(publicationID.toLowerCase().includes("pmid"))
+    return "PMID";
+  if(publicationID.toLowerCase().includes("pmc"))
+    return "PMC";
+  if(publicationID.toLowerCase().includes("clinicaltrials"))
+    return "NCT";
+  return "";
+}
+
+const getUrlByType = (publicationID, type) => {
+  let url = false;
+  switch (type) {
+    case "PMID":
+      url = `http://www.ncbi.nlm.nih.gov/pubmed/${publicationID.replace("PMID:", "")}`;
+      break;
+    case "PMC":
+      url = `https://www.ncbi.nlm.nih.gov/pmc/${publicationID}`;
+      break;
+    case "NCT":
+      url = `https://clinicaltrials.gov/ct2/show/${publicationID.replace("clinicaltrials:", "")}}`
+      break;
+    default:
+      break;
+  }
+  return url;
+}
+
+const getCurrentEvidence = (result) => {
+  let evidenceObject = {};
+  if(!result || !result.evidence)
+    return evidenceObject; 
+
+  evidenceObject.distinctSources = (result.evidence.distinctSources) ? result.evidence.distinctSources : [];
+  evidenceObject.sources = (result.evidence.sources) ? result.evidence.sources : [];
+  evidenceObject.publications = [];
+  for(const path of result.compressedPaths) {
+    for(const [i, subgraphItem] of Object.entries(path.path.subgraph)) {
+      if(i % 2 === 0)
+        continue;
+
+      let index = parseInt(i);
+      let subjectName = path.path.subgraph[index-1].name;
+      let predicateName = subgraphItem.predicates[0];
+      let objectName = path.path.subgraph[index + 1].name;
+      let edgeLabel = `${subjectName}|${predicateName}|${objectName}`;
+
+      for(const pubID of subgraphItem.publications) {
+        let type = getTypeFromPub(pubID);
+        let url = getUrlByType(pubID, type);
+        let newPub = {
+          edges: [{label: edgeLabel}],
+          type: type,
+          url: url,
+          id: pubID
+        }
+        evidenceObject.publications.push(newPub);
+      }
+    }
+  }
+  return evidenceObject;
+}
+
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, 
   currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null,
   hasNotes, activateNotes, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}}) => {
 
+  const currentEvidence = useMemo(() => getCurrentEvidence(item), [item]);
   let icon = getIcon(item.type);
-
-  let publicationCount = item.evidence.publications.length;
-  let sourcesCount = item.evidence.distinctSources.length;
+  let publicationCount = (currentEvidence.publications?.length) 
+    ? currentEvidence.publications.length
+    : 0;
+  let sourcesCount = (currentEvidence.distinctSources?.length) 
+    ? currentEvidence.distinctSources.length
+    : 0;
 
   const [isBookmarked, setIsBookmarked] = useState(bookmarked);
   const [itemBookmarkID, setItemBookmarkID] = useState(bookmarkID);
@@ -67,8 +134,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     let filteredPublications = filteredEvidence.publications;
     let filteredSources = filteredEvidence.sources;
     for (const edge of edgeGroup.edges) {
-      filterEvidenceObjs(item.evidence.publications, edge, filteredPublications);
-      filterEvidenceObjs(item.evidence.sources, edge, filteredSources);
+      filterEvidenceObjs(currentEvidence.publications, edge, filteredPublications);
+      filterEvidenceObjs(currentEvidence.sources, edge, filteredSources);
     }
 
     // call activateEvidence with the filtered evidence
@@ -201,7 +268,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           className={styles.evidenceLink}
           onClick={(e)=>{
             e.stopPropagation();
-            activateEvidence(item.evidence, item, [], true);
+            activateEvidence(currentEvidence, item, [], true);
           }}
           >
           <div>

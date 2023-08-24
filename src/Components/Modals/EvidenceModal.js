@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useRef} from "react";
+import {useState, useEffect, useCallback, useRef, useMemo} from "react";
 import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
 import Select from "../FormFields/Select";
@@ -440,13 +440,17 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                       {
                         clinicalTrials.current.map((item, i)=> {
                           const edge = Object.values(item.edges)[0];
+                          const splitEdge = edge.label.split("|");
+                          const subject = splitEdge[0];
+                          const predicate = splitEdge[1];
+                          const object = splitEdge[2];
                           return (
                             <div className={styles.evidenceItem} key={i}>
                               <span className={`${styles.cell} ${styles.relationship} relationship`}>
                                 {
                                   edge &&
                                   <span>
-                                    <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
+                                    <span>{subject}</span><strong>{predicate}</strong><span>{object}</span>
                                   </span>
                                 }
                               </span>
@@ -475,9 +479,10 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                       {
                         sources.map((src, i) => { 
                           const edge = Object.values(src.edges)[0];
-                          const subjectName = capitalizeAllWords(edge.subject);
-                          const predicateName = capitalizeAllWords(edge.predicate);
-                          const objectName = capitalizeAllWords(edge.object);
+                          const splitEdge = edge.label.split("|");
+                          const subject = splitEdge[0];
+                          const predicate = splitEdge[1];
+                          const object = splitEdge[2];
                           const name = (!Array.isArray(src) && typeof src === 'object') ? src.name: '';
                           const url = (!Array.isArray(src) && typeof src === 'object') ? src.url: src;
                           return(
@@ -485,9 +490,9 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                               { !isAll &&
                                 <span className={`${styles.cell} ${styles.relationship} relationship`}>
                                   <span className={styles.sourceEdge} key={i}>
-                                    <span>{subjectName}</span>
-                                    <strong>{predicateName}</strong>
-                                    <span>{objectName}</span>
+                                    <span>{subject}</span>
+                                    <strong>{predicate}</strong>
+                                    <span>{object}</span>
                                   </span>
                                 </span>
                               }

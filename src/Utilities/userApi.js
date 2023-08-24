@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
 
 export const defaultPrefs = {
@@ -85,12 +86,8 @@ const formatUserSaves = (saves) => {
 export const getFormattedBookmarkObject = (bookmarkType = "result", bookmarkName, notes = "", queryNodeID, queryNodeLabel = "",
   queryNodeDescription = "", typeObject, saveItem, pk) => {
 
-  for(const pub of saveItem.evidence.publications) {
-    delete pub.source;
-    delete pub.title;
-    delete pub.snippet;
-    delete pub.pubdate;
-  }
+  let newSaveItem = cloneDeep(saveItem);
+  delete newSaveItem.evidence.publications;
 
   let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
   return { 
@@ -98,11 +95,11 @@ export const getFormattedBookmarkObject = (bookmarkType = "result", bookmarkName
     label: bookmarkName, 
     notes: notes, 
     ars_pkey: pk, 
-    object_ref: saveItem.id, 
+    object_ref: newSaveItem.id, 
     data: {
       type: bookmarkType,
       query: queryObject,
-      item: saveItem
+      item: newSaveItem
     }
   }
 }
