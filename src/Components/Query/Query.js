@@ -13,10 +13,12 @@ import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import { getEntityLink, generateEntityLink, handleFetchErrors, getLastItemInArray } from "../../Utilities/utilities";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import {ReactComponent as Drug} from '../../Icons/drug.svg';
+import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Chemical} from '../../Icons/Queries/Chemical.svg';
 import {ReactComponent as Gene} from '../../Icons/Queries/Gene.svg';
 import {ReactComponent as Back} from '../../Icons/Directional/Undo.svg';
 import {ReactComponent as Search} from '../../Icons/Buttons/Search.svg';
+import {ReactComponent as ArrowForward} from '../../Icons/Directional/arrow_forward.svg';
 import styles from './Query.module.scss';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { queryTypes } from "../../Utilities/queryTypes";
@@ -104,10 +106,11 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     return lowerButtonId;
   }
 
-  const initSelectedUpperButton = getInitSelectedUpperButton(initPresetTypeObject);
-  const initSelectedLowerButton = getInitSelectedLowerButton(initPresetTypeObject);
-  const [selectedUpperButton, setSelectedUpperButton] = useState(initSelectedUpperButton);
-  const [selectedLowerButton, setSelectedLowerButton] = useState(initSelectedLowerButton);
+  // const initSelectedUpperButton = getInitSelectedUpperButton(initPresetTypeObject);
+  // const initSelectedLowerButton = getInitSelectedLowerButton(initPresetTypeObject);
+  const [selectedUpperButton, setSelectedUpperButton] = useState(null);
+  const [selectedMiddleButton, setSelectedMiddleButton] = useState(null);
+  const [selectedLowerButton, setSelectedLowerButton] = useState(null);
 
   // Get example diseases from config endpoint on component mount
   useEffect(() => {
@@ -288,6 +291,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
 
   const handleSelectUpperButton = (index) => {
     setSelectedLowerButton(null);
+    setSelectedMiddleButton(null);
     setSelectedUpperButton(index);
 
     // if we've picked drug/disease, set the query type to 0 and reset the input text
@@ -296,18 +300,23 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     }
   }
 
+  const handleSelectMiddleButton = (index) => {
+    setSelectedLowerButton(null);
+    setSelectedMiddleButton(index);
+  }
+
   const handleSelectLowerButton = (index, prevIndex) => {
     setSelectedLowerButton(index);
     // if prevIndex is null, we're coming from another upper button, so reset the input text. otherwise keep it the same.
     const resetInputText = (prevIndex === null) ? true : false;
-    switch (selectedUpperButton) {
-      case 1:
+    switch (selectedMiddleButton) {
+      case 0:
         if(index === 0)
           handleQueryTypeChange(1, resetInputText);
         else 
           handleQueryTypeChange(2, resetInputText);
         break;
-      case 2:
+      case 1:
         if(index === 0)
           handleQueryTypeChange(3, resetInputText);
         else 
@@ -381,16 +390,26 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 <h4 className={styles.heading}>What relationship would you like to explore?</h4>
                 <div className={styles.upperButtons}>
                   <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)}>
-                    <Drug />Drug/Disease
+                    <Drug/>Drug <ArrowForward className={styles.arrow} /> <Disease/>Disease
                   </button>
-                  <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(1)}>
-                    <Chemical />Chemical/Gene
-                  </button>
-                  <button className={`${styles.upperButton} ${selectedUpperButton === 2 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(2)}>
-                    <Gene />Gene/Chemical
+                  <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(2)}>
+                    <Gene/>Genes <span className={styles.dualArrows}><ArrowForward/><ArrowForward/></span> <Chemical/>Chemicals
                   </button>
                 </div>
                 {(selectedUpperButton && selectedUpperButton > 0)
+                  ? 
+                    <div className={`${styles.middleButtons} visible`}>
+                      <button className={`${styles.middleButton} ${selectedMiddleButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectMiddleButton(0)}>
+                        Find chemicals that regulate a particular gene
+                      </button>
+                      <button className={`${styles.middleButton} ${selectedMiddleButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectMiddleButton(1)}>
+                        Find genes regulated by a particular chemical
+                      </button>
+                    </div>
+                  :
+                    <div className={`${styles.middleButtons}`}></div>
+                }
+                {(selectedUpperButton && selectedUpperButton > 0 && selectedMiddleButton !== null)
                   ? 
                     <div className={`${styles.lowerButtons} visible`}>
                       <button className={`${styles.lowerButton} ${selectedLowerButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(0, selectedLowerButton)}>

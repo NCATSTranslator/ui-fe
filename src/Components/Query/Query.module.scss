@@ -229,7 +229,7 @@
       font-size: 14px;
     }
   }
-  .upperButtons, .lowerButtons {
+  .upperButtons, .middleButtons, .lowerButtons {
     display: flex;
     justify-content: space-evenly;
     max-width: 80%;
@@ -240,13 +240,13 @@
       }
     }
   }
-  .upperButton, .lowerButton {
+  .upperButton, .middleButton, .lowerButton {
     transition: all .25s ease;
     &.selected {
       box-shadow: $dropShadowPressed;
     }
   }
-  .upperButton {
+  .upperButton, .middleButton {
     background-color: $purpleTwo;
     &.selected {
       background-color: $purpleOne;
@@ -255,5 +255,25 @@
   .lowerButton {
     background-color: $white;
     color: $purpleOne;
+  }
+}
+
+.arrow, .dualArrows {
+  margin: 0 8px;
+}
+
+button .dualArrows {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  svg {
+    margin: 0;
+  }
+  svg:first-child {
+    transform: rotate(180deg);
+    margin-right: -8px;
+  }
+  svg:last-child {
+
   }
 }
