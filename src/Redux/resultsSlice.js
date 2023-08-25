@@ -30,4 +30,4 @@ export const { setCurrentQueryResultsID, setCurrentResults } = resultsSlice.acti
 export const currentResults = state => state.results.currentResults;
 export const currentQueryResultsID = state => state.results.currentQueryResultsID;
 
-export default resultsSlice.reducer
+export default resultsSlice.reducer;

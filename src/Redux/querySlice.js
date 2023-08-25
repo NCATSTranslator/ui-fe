@@ -25,4 +25,4 @@ export const { setCurrentQuery } = querySlice.actions
 
 export const currentQuery = state => state.query.currentQuery;
 
-export default querySlice.reducer
+export default querySlice.reducer;

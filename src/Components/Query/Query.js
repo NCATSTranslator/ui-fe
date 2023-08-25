@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import QueryBar from "../QueryBar/QueryBar";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
-import { currentRoot } from "../../Redux/rootSlice";
+import { currentConfig, currentRoot } from "../../Redux/rootSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
 import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import cloneDeep from "lodash/cloneDeep";
@@ -32,6 +32,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const dispatch = useDispatch();
   const { pathname } = useLocation();
   const root = useSelector(currentRoot);
+  const config = useSelector(currentConfig);
 
   loading = (loading) ? true : false;
 
@@ -72,60 +73,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   // String, used to set navigation url for example disease buttons
   const [presetURL, setPresetURL] = useState(false);
 
-  const [exampleDiseases, setExampleDiseases] = useState(null);
-  // const [nodeDescription, setNodeDescription] = useState(null);
-
-  const getInitSelectedUpperButton = (presetTypeObject) => {
-    if(!presetTypeObject)
-    return null;
-    let upperButtonId = null;
-    let typeId = presetTypeObject.id;
-    if(typeId === 0) 
-      upperButtonId = 0;
-    else if(typeId === 1 || typeId === 2)
-      upperButtonId = 1;
-    else if(typeId === 3 || typeId === 4)
-      upperButtonId = 2;
-
-    return upperButtonId;
-  }
-
-  const getInitSelectedLowerButton = (presetTypeObject) => {
-    if(!presetTypeObject)
-      return null;
-    let lowerButtonId = null;
-    let typeId = presetTypeObject.id;
-
-    if(typeId === 0)
-      lowerButtonId = null;
-    else if(typeId % 2 === 0) 
-      lowerButtonId = 1;
-    else
-      lowerButtonId = 0;
-    
-    return lowerButtonId;
-  }
-
-  // const initSelectedUpperButton = getInitSelectedUpperButton(initPresetTypeObject);
-  // const initSelectedLowerButton = getInitSelectedLowerButton(initPresetTypeObject);
+  const exampleDiseases = (config?.cached_queries) ? config.cached_queries: null;
   const [selectedUpperButton, setSelectedUpperButton] = useState(null);
   const [selectedMiddleButton, setSelectedMiddleButton] = useState(null);
   const [selectedLowerButton, setSelectedLowerButton] = useState(null);
-
-  // Get example diseases from config endpoint on component mount
-  useEffect(() => {
-    const requestOptions = {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    fetch(`/${root}/api/v1/pub/config`, requestOptions)
-    .then(response => handleFetchErrors(response))
-    .then(response => response.json())
-    .then(data => {
-      if(data)
-        setExampleDiseases(data);
-    });
-  }, []);
 
   const submitQuery = (item) => {
 

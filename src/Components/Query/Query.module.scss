@@ -252,6 +252,14 @@
       background-color: $purpleOne;
     }
   }
+  .upperButton {
+    min-width: 260px;
+    text-align: center;
+  }
+  .middleButton {
+    min-width: 385px;
+    text-align: center;
+  }
   .lowerButton {
     background-color: $white;
     color: $purpleOne;

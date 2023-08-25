@@ -40,19 +40,20 @@
       font-size: $buttonSize;
       font-weight: bold;
       line-height: 1;
-      padding: 10px $xs;
+      padding: 14px 45px;
       border-radius: $defaultBorderRadius;
       border: none;
       cursor: pointer;
       transition: $defaultBoxShadowAnim;
       color: $white;
-      background-color: $purpleOne;
+      background-color: $purpleTwo;
       text-decoration: none;
       display: inline-flex;
       width: fit-content;
       justify-content: center;
       align-items: center;
       margin-bottom: $s;
+      box-shadow: $dropShadow;
       &:hover {
         box-shadow: $dropShadowHover;
       }
