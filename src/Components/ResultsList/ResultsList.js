@@ -31,7 +31,7 @@ import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
 import { getSaves } from "../../Utilities/userApi";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { BookmarkAddedMarkup, BookmarkRemovedMarkup } from "../BookmarkToasts/BookmarkToasts";
+import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "../BookmarkToasts/BookmarkToasts";
 import NotesModal from "../Modals/NotesModal";
 
 const ResultsList = ({loading}) => {
@@ -137,6 +137,7 @@ const ResultsList = ({loading}) => {
   const [userSaves, setUserSaves] = useState(null);
   const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
+  const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
@@ -827,6 +828,7 @@ const ResultsList = ({loading}) => {
                             bookmarked={item.bookmarked}
                             bookmarkID={item.bookmarkID}
                             hasNotes={item.hasNotes}
+                            handleBookmarkError={handleBookmarkError}
                             bookmarkAddedToast={bookmarkAddedToast}
                             bookmarkRemovedToast={bookmarkRemovedToast}
                           />

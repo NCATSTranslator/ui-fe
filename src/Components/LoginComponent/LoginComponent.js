@@ -3,9 +3,7 @@ import tempImage from '../../Assets/Images/Home/home1.jpg';
 
 const LoginComponent = () => {
 
-
   const loginURL = "https://a-ci.ncats.io/_api/auth/transltr/authorize?response_type=code&client_id=transltr-local&scope=openid%20profile%20email&redirect_uri=http%3A%2F%2Flocalhost%3A8386%2Foauth2%2Fredir%2Funa";
-  
   
   return(
     <div className={styles.loginContainer}>

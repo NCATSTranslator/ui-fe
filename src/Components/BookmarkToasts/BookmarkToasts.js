@@ -11,3 +11,9 @@ export const BookmarkRemovedMarkup = () => (
     <h5 className='heading'>Bookmark Removed</h5>
   </div>
 );
+export const BookmarkErrorMarkup = () => (
+  <div>
+    <h5 className='heading'>Error Adding Bookmark</h5>
+    <p>We were unable to save this bookmark to your account.</p>
+  </div>
+);

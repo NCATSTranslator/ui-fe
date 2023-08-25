@@ -82,7 +82,7 @@ const getCurrentEvidence = (result) => {
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, 
   currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null,
-  hasNotes, activateNotes, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}}) => {
+  hasNotes, activateNotes, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, handleBookmarkError = ()=>{}}) => {
 
   const currentEvidence = useMemo(() => getCurrentEvidence(item), [item]);
   let icon = getIcon(item.type);
@@ -205,12 +205,17 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       let bookmarkObject = getFormattedBookmarkObject("result", item.name, "", queryNodeID, 
         queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
 
-      let bookmarkedItem = await createUserSave(bookmarkObject);
+      console.log(bookmarkObject);
+
+      let bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
       console.log('bookmarked: ', bookmarkedItem);
-      setIsBookmarked(true);
-      setItemBookmarkID(bookmarkedItem.id);
-      bookmarkAddedToast();
-      return bookmarkedItem.id;
+      if(bookmarkedItem) {
+        setIsBookmarked(true);
+        setItemBookmarkID(bookmarkedItem.id);
+        bookmarkAddedToast();
+        return bookmarkedItem.id;
+      }
+      return false;
     }
   }
 
@@ -222,8 +227,10 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       console.log("new id: ", replacementID);
       tempBookmarkID = (replacementID) ? replacementID : tempBookmarkID;
     }
-    activateNotes(nameString, tempBookmarkID, item);
-    setItemHasNotes(true);
+    if(tempBookmarkID) {
+      activateNotes(nameString, tempBookmarkID, item);
+      setItemHasNotes(true);
+    }
   }
 
   useEffect(() => {

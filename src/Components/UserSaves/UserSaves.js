@@ -9,7 +9,7 @@ import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { getFormattedDate } from '../../Utilities/utilities';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { BookmarkAddedMarkup, BookmarkRemovedMarkup } from '../BookmarkToasts/BookmarkToasts';
+import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from '../BookmarkToasts/BookmarkToasts';
 import NotesModal from '../Modals/NotesModal';
 import TextInput from "../FormFields/TextInput";
 import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
@@ -34,6 +34,7 @@ const UserSaves = () => {
 
   const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
+  const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
 
   const queryClient = new QueryClient();
 
@@ -273,6 +274,7 @@ const UserSaves = () => {
                                   bookmarked
                                   bookmarkID={save.id}
                                   hasNotes={queryItem.hasNotes}
+                                  handleBookmarkError={handleBookmarkError}
                                   bookmarkAddedToast={bookmarkAddedToast}
                                   bookmarkRemovedToast={bookmarkRemovedToast}
                                 />

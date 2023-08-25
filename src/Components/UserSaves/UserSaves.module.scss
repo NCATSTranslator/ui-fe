@@ -41,6 +41,14 @@
 .query {
   padding: 30px 40px 15px;
   background-color: $white;
+  &:first-child {
+    border-top-right-radius: $defaultBorderRadius;
+    border-top-left-radius: $defaultBorderRadius;
+  }
+  &:last-child {
+    border-bottom-right-radius: $defaultBorderRadius;
+    border-bottom-left-radius: $defaultBorderRadius;
+  }
   &:nth-child(odd) {
     background-color: $lightGray;
   }
