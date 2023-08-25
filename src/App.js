@@ -60,7 +60,6 @@ const App = ({children}) => {
         .then(response => handleFetchErrors(response))
         .then(response => response.json());
 
-        console.log(config);
       dispatch(setCurrentConfig(config));
     }
   

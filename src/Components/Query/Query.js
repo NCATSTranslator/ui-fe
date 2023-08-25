@@ -24,6 +24,7 @@ import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFuncti
 import { queryTypes } from "../../Utilities/queryTypes";
 import AutoHeight from "../AutoHeight/AutoHeight";
 import { Link, useLocation } from "react-router-dom";
+import ExampleQueryList from "../ExampleQueryList/ExampleQueryList";
 
 const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription}) => {
 
@@ -73,7 +74,22 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   // String, used to set navigation url for example disease buttons
   const [presetURL, setPresetURL] = useState(false);
 
-  const exampleDiseases = (config?.cached_queries) ? config.cached_queries: null;
+  const exampleDiseases = (!config?.cached_queries) 
+    ? null
+    : config.cached_queries.filter((query)=>query.type === 'drug');
+  const exampleChemsUp = (!config?.cached_queries) 
+    ? null
+    : config.cached_queries.filter((query)=>query.type === 'chemical' && query.direction === 'increased');
+  const exampleChemsDown = (!config?.cached_queries) 
+    ? null
+    : config.cached_queries.filter((query)=>query.type === 'chemical' && query.direction === 'decreased');
+  const exampleGenesUp = (!config?.cached_queries) 
+    ? null
+    : config.cached_queries.filter((query)=>query.type === 'gene' && query.direction === 'increased');
+  const exampleGenesDown = (!config?.cached_queries) 
+    ? null
+    : config.cached_queries.filter((query)=>query.type === 'gene' && query.direction === 'decreased');
+
   const [selectedUpperButton, setSelectedUpperButton] = useState(null);
   const [selectedMiddleButton, setSelectedMiddleButton] = useState(null);
   const [selectedLowerButton, setSelectedLowerButton] = useState(null);
@@ -343,7 +359,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                   <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)}>
                     <Drug/>Drug <ArrowForward className={styles.arrow} /> <Disease/>Disease
                   </button>
-                  <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(2)}>
+                  <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(1)}>
                     <Gene/>Genes <span className={styles.dualArrows}><ArrowForward/><ArrowForward/></span> <Chemical/>Chemicals
                   </button>
                 </div>
@@ -390,33 +406,40 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     />
                   </OutsideClickHandler>
                 }
-
+                {/* Example Diseases */}
                 {selectedUpperButton === 0 &&
-                  <div className={styles.examples}>
-                    {exampleDiseases && Array.isArray(exampleDiseases) &&
-                      <>
-                        <p className={styles.subTwo}>Example Diseases:</p>
-                        <div className={styles.exampleList}>
-                          {
-                            exampleDiseases.map((item, i)=> {
-                              return(
-                                <button
-                                  className={styles.button}
-                                  onClick={(e)=>{
-                                    setPresetURL(e.target.dataset.url);
-                                  }}
-                                  data-testid={item.name}
-                                  data-url={getResultsShareURLPath(item.name, item.id, 0, item.uuid)}
-                                  >
-                                  {item.name}
-                              </button>
-                              )
-                            })
-                          }
-                        </div>
-                      </>
-                    }
-                  </div>
+                  <ExampleQueryList 
+                    examples={exampleDiseases} 
+                    setPresetURL={setPresetURL} 
+                  />
+                }
+                {/* Examples for chemicals UPregulated by a particular gene */}
+                {selectedUpperButton === 1 && selectedMiddleButton === 0 && selectedLowerButton == 0 &&
+                  <ExampleQueryList 
+                    examples={exampleGenesUp} 
+                    setPresetURL={setPresetURL} 
+                  />
+                }
+                {/* Examples for chemicals DOWNregulated by a particular gene */}
+                {selectedUpperButton === 1 && selectedMiddleButton === 0 && selectedLowerButton == 1 &&
+                  <ExampleQueryList 
+                    examples={exampleGenesDown} 
+                    setPresetURL={setPresetURL} 
+                  />
+                }
+                {/* Examples for genes UPregulated by a particular chemical */}
+                {selectedUpperButton === 1 && selectedMiddleButton === 1 && selectedLowerButton == 0 &&
+                  <ExampleQueryList 
+                    examples={exampleChemsUp} 
+                    setPresetURL={setPresetURL} 
+                  />
+                }
+                {/* Examples for genes DOWNregulated by a particular chemical */}
+                {selectedUpperButton === 1 && selectedMiddleButton === 1 && selectedLowerButton == 1 &&
+                  <ExampleQueryList 
+                    examples={exampleChemsDown} 
+                    setPresetURL={setPresetURL} 
+                  />
                 }
               </>
             }

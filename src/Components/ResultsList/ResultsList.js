@@ -185,8 +185,11 @@ const ResultsList = ({loading}) => {
   }
 
   useEffect(() => {
+    if(root !== "main")
+      return;
+
     getUserSaves();
-  }, []);
+  }, [root]);
 
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
   const numberOfStatusChecks = useRef(0);
