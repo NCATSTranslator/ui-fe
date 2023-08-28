@@ -180,7 +180,7 @@ const ResultsList = ({loading}) => {
         setUserSaves(temp[queryID]);
       }
     }
-  }, [])
+  }, [currentQueryID])
 
   const handleClearNotesEditor = async () => {
     await getUserSaves();

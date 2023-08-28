@@ -65,7 +65,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
 
     return null;
 
-  },[result, rawResults, active, prebuiltGraph])
+  },[result, rawResults, prebuiltGraph, updateGraphFunction])
 
 
   const graphVisibilityPref = (prefs?.graph_visibility) ? prefs.graph_visibility.pref_value: 'sometimes';

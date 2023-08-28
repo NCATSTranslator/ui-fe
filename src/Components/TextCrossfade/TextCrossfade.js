@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import styles from './TextCrossfade.module.scss';
 
 const defaultPhrases = [
@@ -13,16 +13,22 @@ const defaultPhrases = [
 
 const TextCrossfade = ({ phrases = defaultPhrases, small, interval = 5000 }) => {
   const [index, setIndex] = useState(0);
+  const hasStarted = useRef(false);
 
   useEffect(() => {
+    if(hasStarted.current)
+      return;
+      
     const phraseChangeInterval = setInterval(() => {
       setIndex(prevIndex => (prevIndex + 1) % phrases.length);
     }, interval);
 
+    hasStarted.current = true;
+
     return () => {
       clearInterval(phraseChangeInterval);
     };
-  }, []);
+  }, [interval, phrases.length]);
 
   return(
     <div className={`${styles.fadeText} ${(small) ? styles.small : ''}`}>
