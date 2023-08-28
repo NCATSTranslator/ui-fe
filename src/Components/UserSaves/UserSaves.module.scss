@@ -3,6 +3,16 @@
 .heading, .pageHeading {
   color: $purpleTwo
 }
+.none {
+  p {
+    margin-bottom: 0;
+    &:first-of-type {
+      font-size: 20px;
+      font-weight: 700;
+    }
+  }
+  
+}
 .prefs {
   display: grid;
   grid-template-columns: repeat(auto-fill, 250px);

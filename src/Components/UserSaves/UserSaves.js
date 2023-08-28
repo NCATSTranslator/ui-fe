@@ -180,25 +180,28 @@ const UserSaves = () => {
           edgeGroup={selectedEdges}
         />
         <h1 className={`h4 ${styles.pageHeading}`}>Saved Results</h1>
-        <div className={styles.searchBarContainer}>
-          <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form} ref={formRef}>
-            <TextInput 
-              placeholder="Search Saved Results" 
-              handleChange={(e)=>handleSearch(e)} 
-              className={styles.input}
-              size=""
-              icon={<SearchIcon/>}
-            />
-            <button type="submit" size="" >
-              <span>Clear</span>
-            </button>
-          </form>
-        </div>
         {
           (userSaves == null || Object.entries(userSaves).length <= 0)
           ? 
-            <p>No bookmarks to show</p>
+            <div className={styles.none}>
+              <p>You haven't saved any results yet!</p>
+              <p>Submit a query, then click the bookmark icon on a result to save it for later. You can then view that result here.</p>
+            </div>
           : <>
+              <div className={styles.searchBarContainer}>
+                <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form} ref={formRef}>
+                  <TextInput 
+                    placeholder="Search Saved Results" 
+                    handleChange={(e)=>handleSearch(e)} 
+                    className={styles.input}
+                    size=""
+                    icon={<SearchIcon/>}
+                  />
+                  <button type="submit" size="" >
+                    <span>Clear</span>
+                  </button>
+                </form>
+              </div>
               {
                 Object.entries(filteredUserSaves).length < Object.entries(userSaves).length &&
                 <div className={styles.showingContainer}>
