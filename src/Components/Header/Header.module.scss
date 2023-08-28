@@ -43,10 +43,24 @@
           width: fit-content;
           box-shadow: none;
           svg {
-            margin-right: 8px;
+            margin-right: 4px;
+            height: 24px;
+            width: 24px;
           }
           &:hover {
             box-shadow: none;
+          }
+        }
+        .workspaceLink {
+          svg {
+            width: 22px;
+            margin-right: 6px;
+          }
+        }
+        .helpLink {
+          svg {
+            width: 27px;
+            height: 27px
           }
         }
         a:last-of-type {

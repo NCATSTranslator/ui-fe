@@ -16,6 +16,7 @@ import { round } from 'mathjs';
 import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
+import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -26,7 +27,7 @@ const getTypeFromPub = (publicationID) => {
     return "PMC";
   if(publicationID.toLowerCase().includes("clinicaltrials"))
     return "NCT";
-  return "";
+  return "other";
 }
 
 const getUrlByType = (publicationID, type) => {
@@ -42,6 +43,7 @@ const getUrlByType = (publicationID, type) => {
       url = `https://clinicaltrials.gov/ct2/show/${publicationID.replace("clinicaltrials:", "")}}`
       break;
     default:
+      url = publicationID;
       break;
   }
   return url;
@@ -64,7 +66,7 @@ const getCurrentEvidence = (result) => {
       let subjectName = path.path.subgraph[index-1].name;
       let predicateName = subgraphItem.predicates[0];
       let objectName = path.path.subgraph[index + 1].name;
-      let edgeLabel = `${subjectName}|${predicateName}|${objectName}`;
+      let edgeLabel = getFormattedEdgeLabel(subjectName, predicateName, objectName);
 
       for(const pubID of subgraphItem.publications) {
         let type = getTypeFromPub(pubID);
@@ -120,11 +122,19 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   const handleEdgeSpecificEvidence = (edgeGroup) => {
     const filterEvidenceObjs = (objs, selectedEdge, container) => {
+      const selectedEdgeLabel = getFormattedEdgeLabel(selectedEdge.subject.name, selectedEdge.predicate, selectedEdge.object.name);
       for (const obj of objs) {
-        if (obj.edges[selectedEdge.id] !== undefined) {
+        let proceed = false;
+        if(Array.isArray(obj.edges) && obj.edges[0].label === selectedEdgeLabel) {
+          proceed = true;
+        } else if(obj.edges[selectedEdge.id] !== undefined) {
+          proceed = true;
+        }
+
+        if(proceed) {
           const includedObj = cloneDeep(obj);
-          includedObj.edges = {};
-          includedObj.edges[selectedEdge.id] = obj.edges[selectedEdge.id];
+          // includedObj.edges = {};
+          // includedObj.edges[selectedEdge.id] = obj.edges[selectedEdge.id];
           container.push(includedObj);
         }
       }
@@ -141,7 +151,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       filterEvidenceObjs(currentEvidence.publications, edge, filteredPublications);
       filterEvidenceObjs(currentEvidence.sources, edge, filteredSources);
     }
-
     // call activateEvidence with the filtered evidence
     activateEvidence(filteredEvidence, item, edgeGroup, false);
   }

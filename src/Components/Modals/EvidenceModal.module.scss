@@ -71,6 +71,12 @@
         grid-template-columns: 1fr 1fr;
       }
     }
+    &.misc {
+      .link svg {
+        min-width: 20px;
+        min-height: 20px;
+      }
+    }
     &.sources {
       .tableHead, .evidenceItem {
         display: grid;

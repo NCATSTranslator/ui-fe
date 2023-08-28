@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { currentRoot, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
 import {ReactComponent as Logo} from '../../Assets/Images/Logo.svg';
+import {ReactComponent as History} from '../../Icons/Navigation/History.svg';
+import {ReactComponent as Feedback} from '../../Icons/Navigation/Feedback.svg';
+import {ReactComponent as Workspace} from '../../Icons/Navigation/Workspace.svg';
+import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import defaultPfp from '../../Assets/Images/pfp.png';
 import styles from './Header.module.scss';
 
@@ -21,18 +25,18 @@ const Header = ({children, handleFeedbackModalOpen}) => {
           <div className={styles.right}>
             {
               root === 'main' &&
-              <Link to={`/${root}/workspace`}>Workspace</Link>
+              <Link to={`/${root}/workspace`} className={styles.workspaceLink}><Workspace/>Workspace</Link>
             }
-            <Link to={`/${root}/history`}>Search History</Link>
-            <button onClick={()=>handleFeedbackModalOpen()}>Send Feedback</button>
-            <Link to={`/${root}/help`} className={styles.help} rel="noreferrer" target={'_blank'} >Help</Link>
+            <Link to={`/${root}/history`}><History/>Search History</Link>
+            <button onClick={()=>handleFeedbackModalOpen()}><Feedback/>Send Feedback</button>
+            <Link to={`/${root}/help`} className={styles.helpLink} rel="noreferrer" target={'_blank'} ><Question/>Help</Link>
             {
               root === 'demo'
               ? 
                 <Link to={`/login`} className={styles.login} >Log In</Link>
               : 
                 <>
-                  <Link to={`/main/home`} className={styles.help} >
+                  <Link to={`/main/home`} >
                     <div className={styles.imageContainer}>
                       {(user?.profile_pic_url)
                         ? <img src={user.profile_pic_url} alt="user profile" className={styles.profilePic}/>
