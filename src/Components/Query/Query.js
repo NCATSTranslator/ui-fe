@@ -10,7 +10,7 @@ import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/results
 import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
 import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
-import { getEntityLink, generateEntityLink, handleFetchErrors, getLastItemInArray } from "../../Utilities/utilities";
+import { getEntityLink, generateEntityLink, getLastItemInArray } from "../../Utilities/utilities";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import {ReactComponent as Drug} from '../../Icons/drug.svg';
 import {ReactComponent as Disease} from '../../Icons/disease2.svg';
@@ -79,16 +79,16 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     : config.cached_queries.filter((query)=>query.type === 'drug');
   const exampleChemsUp = (!config?.cached_queries) 
     ? null
-    : config.cached_queries.filter((query)=>query.type === 'chemical' && query.direction === 'increased');
+    : config.cached_queries.filter((query)=>query.type === 'gene' && query.direction === 'increased');
   const exampleChemsDown = (!config?.cached_queries) 
     ? null
-    : config.cached_queries.filter((query)=>query.type === 'chemical' && query.direction === 'decreased');
+    : config.cached_queries.filter((query)=>query.type === 'gene' && query.direction === 'decreased');
   const exampleGenesUp = (!config?.cached_queries) 
     ? null
-    : config.cached_queries.filter((query)=>query.type === 'gene' && query.direction === 'increased');
+    : config.cached_queries.filter((query)=>query.type === 'chemical' && query.direction === 'increased');
   const exampleGenesDown = (!config?.cached_queries) 
     ? null
-    : config.cached_queries.filter((query)=>query.type === 'gene' && query.direction === 'decreased');
+    : config.cached_queries.filter((query)=>query.type === 'chemical' && query.direction === 'decreased');
 
   const [selectedUpperButton, setSelectedUpperButton] = useState(null);
   const [selectedMiddleButton, setSelectedMiddleButton] = useState(null);
@@ -411,34 +411,39 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                   <ExampleQueryList 
                     examples={exampleDiseases} 
                     setPresetURL={setPresetURL} 
+                    label="Example Diseases:"
                   />
                 }
                 {/* Examples for chemicals UPregulated by a particular gene */}
-                {selectedUpperButton === 1 && selectedMiddleButton === 0 && selectedLowerButton == 0 &&
+                {selectedUpperButton === 1 && selectedMiddleButton === 0 && selectedLowerButton === 0 &&
                   <ExampleQueryList 
                     examples={exampleGenesUp} 
                     setPresetURL={setPresetURL} 
+                    label="Example Genes:"
                   />
                 }
                 {/* Examples for chemicals DOWNregulated by a particular gene */}
-                {selectedUpperButton === 1 && selectedMiddleButton === 0 && selectedLowerButton == 1 &&
+                {selectedUpperButton === 1 && selectedMiddleButton === 0 && selectedLowerButton === 1 &&
                   <ExampleQueryList 
                     examples={exampleGenesDown} 
                     setPresetURL={setPresetURL} 
+                    label="Example Genes:"
                   />
                 }
                 {/* Examples for genes UPregulated by a particular chemical */}
-                {selectedUpperButton === 1 && selectedMiddleButton === 1 && selectedLowerButton == 0 &&
+                {selectedUpperButton === 1 && selectedMiddleButton === 1 && selectedLowerButton === 0 &&
                   <ExampleQueryList 
                     examples={exampleChemsUp} 
                     setPresetURL={setPresetURL} 
+                    label="Example Chemicals:"
                   />
                 }
                 {/* Examples for genes DOWNregulated by a particular chemical */}
-                {selectedUpperButton === 1 && selectedMiddleButton === 1 && selectedLowerButton == 1 &&
+                {selectedUpperButton === 1 && selectedMiddleButton === 1 && selectedLowerButton === 1 &&
                   <ExampleQueryList 
                     examples={exampleChemsDown} 
                     setPresetURL={setPresetURL} 
+                    label="Example Chemicals:"
                   />
                 }
               </>
