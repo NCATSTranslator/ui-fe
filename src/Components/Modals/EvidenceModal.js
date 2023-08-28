@@ -257,7 +257,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
 
   const fetchPubmedData = useCallback(async () => {
     const metadata = processedEvidenceIDs.map(async (ids, i) => {
-      const response = await fetch(`https://3md2qwxrrk.us-east-1.awsapprunner.com/publications?pubids=${ids}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`)
+      const response = await fetch(`https://docmetadata.transltr.io/publications?pubids=${ids}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`)
       .then(response => response.json())
       .then(data => {
         evidenceToUpdate.current = {...evidenceToUpdate.current, ...data.results } ;
