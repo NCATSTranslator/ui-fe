@@ -367,3 +367,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
 
   return newSummarizedResults;
 }
+
+export const getFormattedEdgeLabel = (subjectName, predicateName, objectName) => {
+  return `${subjectName}|${predicateName}|${objectName}`;
+}
