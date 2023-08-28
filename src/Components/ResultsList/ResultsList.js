@@ -128,10 +128,13 @@ const ResultsList = ({loading}) => {
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
 
   // Float, weight for confidence score
+  // eslint-disable-next-line
   const [confidenceWeight, setConfidenceWeight] = useState(1.0);
   // Float, weight for novelty score
+  // eslint-disable-next-line
   const [noveltyWeight, setNoveltyWeight] = useState(0.1);
   // Float, weight for clinical score
+  // eslint-disable-next-line
   const [clinicalWeight, setClinicalWeight] = useState(1.0);
 
   const [userSaves, setUserSaves] = useState(null);
@@ -170,14 +173,14 @@ const ResultsList = ({loading}) => {
     };
   }, []);
 
-  const getUserSaves = async () => {
+  const getUserSaves = useCallback(async () => {
     let temp = await getSaves();
     for(const queryID of Object.keys(temp)){
-      if(queryID == currentQueryID) {
+      if(queryID === currentQueryID) {
         setUserSaves(temp[queryID]);
       }
     }
-  }
+  }, [])
 
   const handleClearNotesEditor = async () => {
     await getUserSaves();
@@ -189,7 +192,7 @@ const ResultsList = ({loading}) => {
       return;
 
     getUserSaves();
-  }, [root]);
+  }, [root, getUserSaves]);
 
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
   const numberOfStatusChecks = useRef(0);

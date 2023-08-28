@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import styles from "./NotesModal.module.scss";
 import Modal from "./Modal";
 import TextEditor from "../TextEditor/TextEditor";
@@ -10,9 +10,9 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
   const [showSaved, setShowSaved] = useState(false);
   const [triggerClearEditor, setTriggerClearEditor] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     setShowSaved(true);
-  }
+  }, []);
 
   const handleClearNote = async () => {
     if(!bookmarkID) {

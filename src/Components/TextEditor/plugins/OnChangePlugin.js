@@ -1,13 +1,10 @@
-import { useEffect, useRef } from "react";
-import { $getRoot } from 'lexical';
+import { useEffect } from "react";
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import { getUserSave } from "../../../Utilities/userApi";
 import { CLEAR_EDITOR_COMMAND } from "lexical";
 
 const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditorComplete }) => {
-  // Access the editor through the LexicalComposerContext
   const [editor] = useLexicalComposerContext();
-  const isFirstRender = useRef(true);
 
   const clearEditor = (editor) => {
     editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
@@ -45,7 +42,7 @@ const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditor
     
     getNotesFromBookmark(bookmarkID);
 
-  }, [isFirstRender.current, bookmarkID, editor])
+  }, [bookmarkID, editor])
 
   // register listener for onChange
   useEffect(() => {

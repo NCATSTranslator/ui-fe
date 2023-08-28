@@ -15,7 +15,6 @@ import {
 } from "lexical";
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import {
-  $isParentElementRTL,
   $wrapNodes,
   $isAtNodeEnd
 } from "@lexical/selection";
@@ -424,7 +423,6 @@ export default function ToolbarPlugin() {
   const [selectedElementKey, setSelectedElementKey] = useState(null);
   const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] = useState(false);
   const [codeLanguage, setCodeLanguage] = useState("");
-  const [isRTL, setIsRTL] = useState(false);
   const [isLink, setIsLink] = useState(false);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
@@ -464,7 +462,6 @@ export default function ToolbarPlugin() {
       setIsUnderline(selection.hasFormat("underline"));
       setIsStrikethrough(selection.hasFormat("strikethrough"));
       setIsCode(selection.hasFormat("code"));
-      setIsRTL($isParentElementRTL(selection));
 
       // Update links
       const node = getSelectedNode(selection);

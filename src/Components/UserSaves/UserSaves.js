@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { deleteUserSave, getSaves, emptyEditor } from '../../Utilities/userApi';
+import { getSaves, emptyEditor } from '../../Utilities/userApi';
 import { handleEvidenceModalClose, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import styles from './UserSaves.module.scss';
 import ResultsItem from '../ResultsItem/ResultsItem';
@@ -223,13 +223,12 @@ const UserSaves = () => {
                           <div className={styles.headingContainer}>
                             <a href={shareURL} target="_blank" rel="noreferrer">
                               <h4 className={styles.heading}>{typeString}: 
-                              <Highlighter
-                                highlightClassName="highlight"
-                                searchWords={[currentSearchString.current]}
-                                autoEscape={true}
-                                textToHighlight={queryNodeString}
-                              />
-                                {/* <span>{queryNodeString}</span> */}
+                                <Highlighter
+                                  highlightClassName="highlight"
+                                  searchWords={[currentSearchString.current]}
+                                  autoEscape={true}
+                                  textToHighlight={queryNodeString}
+                                />
                               </h4>
                             </a>
                             <p className={styles.date}>

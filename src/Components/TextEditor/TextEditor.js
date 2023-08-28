@@ -70,7 +70,7 @@ const TextEditor = ({bookmarkID, handleSave, shouldClearEditor, onClearEditorCom
       handleSave();
     }
 
-  }, 750), []);
+  }, 750), [handleSave]);
 
   const onChange = (editorStateJSON) => {
     if(bookmarkID === null) 
