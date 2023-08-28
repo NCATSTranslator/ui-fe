@@ -16,15 +16,13 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   const groupAvailableTags = (tags) => {
     let clonedTags = cloneDeep(tags);
     let roleTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('role:')));
-    let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
+    let chemicalTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('cc:')));
     let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
-    let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda:')));
     let araTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ara:')));
     let diTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('di:')));
     // The ordering of newGroupedTags determines the order of the facets in the UI
     const newGroupedTags = {
-      fda: fdaTags,
-      resultType: resultTypeTags,
+      chemicalType: chemicalTypeTags,
       nodeType: nodeTypeTags,
       role: roleTags,
       di: diTags,
@@ -82,31 +80,19 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getFdaHeading = () => {
+  const getChemicalTypeHeading = () => {
     return(
       <div className={styles.labelContainer} >
-          <div className={styles.label} data-tooltip-id="fda-tooltip" >
-            <p className={styles.subTwo}>FDA Status</p>
+          <div className={styles.label} data-tooltip-id="chemical-type-tooltip" >
+            <p className={styles.subTwo}>Chemical Categories</p>
             <Alert/>
-            <Tooltip id="fda-tooltip">
-              <span className={styles.fdaSpan}>Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.</span>
+            <Tooltip id="chemical-type-tooltip">
+              <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
+              <p className={styles.tooltipParagraph}>Phase 1-3 Drugs are chemicals that are part of a clinical trial and do not yet have FDA approval.</p>
+              <p className={styles.tooltipParagraph}>Other includes all other chemicals.</p>
             </Tooltip>
           </div>
-      </div>
-    )
-  }
-
-  const getResultTypeHeading = () => {
-    return(
-      <div className={styles.labelContainer} >
-          <div className={styles.label} data-tooltip-id="biolink-tooltip-1" >
-            <p className={styles.subTwo}>Result Type</p>
-            <Alert/>
-            <Tooltip id="biolink-tooltip-1">
-              <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
-            </Tooltip>
-          </div>
-          <p className={styles.caption}>Show only results that begin with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+          <p className={styles.caption}>Filter on different categories of chemicals.</p>
       </div>
     )
   }
@@ -151,11 +137,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   const getTagHeadingMarkup = (tagType) => {
     let headingToReturn;
     switch(tagType) {
-      case 'fda':
-        headingToReturn = getFdaHeading();
-        break;
-      case 'resultType':
-        headingToReturn = getResultTypeHeading();
+      case 'chemicalType':
+        headingToReturn = getChemicalTypeHeading();
         break;
       case 'nodeType':
         headingToReturn = getNodeTypeHeading();
@@ -208,7 +191,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let tagKey = tag[0];
     let object = tag[1];
     let tagName = '';
-    if (type === 'resultType' || type === 'nodeType') {
+    if (type === 'nodeType') {
       tagName = formatBiolinkEntity(object.name);
     } else {
       tagName = object.name;

@@ -14,6 +14,8 @@ import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 import { round } from 'mathjs';
 import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
+import { useSelector } from 'react-redux';
+import { currentRoot } from '../../Redux/rootSlice';
 import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
@@ -85,6 +87,8 @@ const getCurrentEvidence = (result) => {
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, 
   currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null,
   hasNotes, activateNotes, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, handleBookmarkError = ()=>{}}) => {
+
+  const root = useSelector(currentRoot);
 
   const currentEvidence = useMemo(() => getCurrentEvidence(item), [item]);
   let icon = getIcon(item.type);
@@ -272,12 +276,18 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
-        <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
-          <Bookmark onClick={handleBookmarkClick} />
-        </div>
-        <div className={`${styles.icon} ${styles.notesIcon} ${itemHasNotes ? styles.filled : ''}`}>
-          <Notes onClick={handleNotesClick} />
-        </div>
+        {
+          root === "main" 
+            ? <>
+                <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
+                  <Bookmark onClick={handleBookmarkClick} />
+                </div>
+                <div className={`${styles.icon} ${styles.notesIcon} ${itemHasNotes ? styles.filled : ''}`}>
+                  <Notes onClick={handleNotesClick} />
+                </div>
+              </>
+            : <></>
+        }
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span
