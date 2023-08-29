@@ -1,6 +1,6 @@
 import React from "react";
-import { Link } from 'react-router-dom';
-import { currentRoot, currentUser } from "../../Redux/rootSlice";
+import { Link, useNavigate } from 'react-router-dom';
+import { currentConfig, currentRoot, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
 import {ReactComponent as Logo} from '../../Assets/Images/Logo.svg';
 import {ReactComponent as History} from '../../Icons/Navigation/History.svg';
@@ -9,11 +9,18 @@ import {ReactComponent as Workspace} from '../../Icons/Navigation/Workspace.svg'
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import defaultPfp from '../../Assets/Images/pfp.png';
 import styles from './Header.module.scss';
+import { handleLogout } from "../../Utilities/userApi";
 
 const Header = ({children, handleFeedbackModalOpen}) => {
   
   const root = useSelector(currentRoot);
   const user = useSelector(currentUser);
+  const config = useSelector(currentConfig);
+  const navigate = useNavigate();
+
+  const handleLogoutClick = () => {
+    handleLogout(config?.social_providers?.una?.client_id, navigate);
+  } 
 
   return (
     <header className={styles.header}>
@@ -43,7 +50,7 @@ const Header = ({children, handleFeedbackModalOpen}) => {
                         : <img src={defaultPfp} alt="user profile" className={styles.profilePic}/>}
                     </div>
                   </Link>
-                  <a href={`/main/logout`} className={styles.login} >Log Out</a>
+                  <button className={styles.login} onClick={handleLogoutClick} >Log Out</button>
                 </>
             }
           </div>

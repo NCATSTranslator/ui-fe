@@ -10,9 +10,8 @@ const LoginComponent = () => {
   const loginURL = (socialProviders === null || !socialProviders?.una) 
     ? null 
     : `https://a-ci.ncats.io/_api/auth/transltr/authorize?response_type=code&client_id=${socialProviders.una.client_id}&scope=openid%20profile%20email&redirect_uri=${socialProviders.una.redirect_uri}`;
-  console.log(socialProviders);
-  console.log(loginURL);
-  return(
+
+    return(
     <div className={styles.loginContainer}>
       <div className={styles.left}>
         <img src={tempImage} alt="Decorative for login page." />
