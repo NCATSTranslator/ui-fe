@@ -76,19 +76,24 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
 
   const exampleDiseases = (!config?.cached_queries) 
     ? null
-    : config.cached_queries.filter((query)=>query.type === 'drug');
+    : config.cached_queries.filter((query)=>query.type === 'drug')
+      .sort((a, b) => (a.name > b.name) ? 1: -1);
   const exampleChemsUp = (!config?.cached_queries) 
     ? null
-    : config.cached_queries.filter((query)=>query.type === 'gene' && query.direction === 'increased');
+    : config.cached_queries.filter((query)=>query.type === 'gene' && query.direction === 'increased')
+      .sort((a, b) => (a.name > b.name) ? 1: -1);
   const exampleChemsDown = (!config?.cached_queries) 
     ? null
-    : config.cached_queries.filter((query)=>query.type === 'gene' && query.direction === 'decreased');
+    : config.cached_queries.filter((query)=>query.type === 'gene' && query.direction === 'decreased')
+      .sort((a, b) => (a.name > b.name) ? 1: -1);
   const exampleGenesUp = (!config?.cached_queries) 
     ? null
-    : config.cached_queries.filter((query)=>query.type === 'chemical' && query.direction === 'increased');
+    : config.cached_queries.filter((query)=>query.type === 'chemical' && query.direction === 'increased')
+      .sort((a, b) => (a.name > b.name) ? 1: -1);
   const exampleGenesDown = (!config?.cached_queries) 
     ? null
-    : config.cached_queries.filter((query)=>query.type === 'chemical' && query.direction === 'decreased');
+    : config.cached_queries.filter((query)=>query.type === 'chemical' && query.direction === 'decreased')
+      .sort((a, b) => (a.name > b.name) ? 1: -1);
 
   const [selectedUpperButton, setSelectedUpperButton] = useState(null);
   const [selectedMiddleButton, setSelectedMiddleButton] = useState(null);
