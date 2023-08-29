@@ -59,6 +59,16 @@ const newFetchNodesFromInputText = async (inputText, type, prefixes) => {
   return fetch(`https://name-resolution-sri-dev.apps.renci.org/lookup?string=${inputText}&offset=0&limit=100&biolink_type=${type}${prefixString}`, nameResolverRequestOptions)
 }
 
+export const filterAndSortExamples = (arr, type, direction = null) => {
+
+  if(direction) {
+    return arr.filter((query)=>query.type === type && query.direction === direction)
+      .sort((a, b) => (a.name > b.name) ? 1: -1);
+  }
+  
+  return arr.filter((query)=>query.type === type).sort((a, b) => (a.name > b.name) ? 1: -1);
+}
+
 // Do a node search based on user input text
 // const fetchNodesFromInputText = async (inputText) => {
 //   const nameResolverRequestOptions = {
