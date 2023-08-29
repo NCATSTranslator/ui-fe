@@ -2,40 +2,44 @@ import styles from './ResultsListLoadingButton.module.scss';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
 import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
+import TextCrossfade from '../TextCrossfade/TextCrossfade';
 
-const ResultsListLoadingButton = ({data}) => {
+const ResultsListLoadingButton = ({ data = {} }) => {
 
   const containerClassName = (data.containerClassName) ? data.containerClassName : '';
   const buttonClassName = (data.buttonClassName) ? data.buttonClassName : '';
 
   return(
-    <div className={`${containerClassName} ${styles.loadingButtonContainer}`}>
+    <div 
+      className={`${containerClassName} ${styles.loadingButtonContainer}`}
+      >
       {
-        (!data.isFetchingARAStatus && !data.isFetchingResults) &&
+        (!data.hasFreshResults && !data.isFetchingARAStatus && !data.isFetchingResults) &&
         <div className={styles.complete}>
           <CompleteIcon/>
+          <span>Results Complete</span>
         </div>
       }
       {
         (!data.hasFreshResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&
         <button className={`${buttonClassName} ${styles.loadingButton} ${styles.inactive}`}>
           <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
-          Calculating
+          <TextCrossfade small />
         </button>
       }
       {
-        (data.hasFreshResults && (data.isFetchingARAStatus || data.isFetchingResults)) &&
+        (data.hasFreshResults) &&
         <>
           <button onClick={data.handleResultsRefresh} className={`${buttonClassName} ${styles.loadingButton} ${styles.active}`}>
             {
-              (data.isFetchingARAStatus) &&
+              (data.isFetchingARAStatus || data.isFetchingResults) &&
               <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
             }
             {
-              !data.isFetchingARAStatus &&
+              !(data.isFetchingARAStatus || data.isFetchingResults) &&
               <ResultsAvailableIcon/>
             }
-            Load New Results
+            <span>Load New Results</span>
           </button>
           {
             data.showDisclaimer &&

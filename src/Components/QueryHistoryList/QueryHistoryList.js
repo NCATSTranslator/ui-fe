@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import styles from "./QueryHistoryList.module.scss";
 import { getDifferenceInDays } from "../../Utilities/utilities";
 import { pastQueryState, setHistory } from "../../Redux/historySlice";
+import { currentRoot } from "../../Redux/rootSlice";
 import { useSelector, useDispatch } from 'react-redux';
 import ShareModal from '../../Components/Modals/ShareModal';
 import TextInput from "../FormFields/TextInput";
@@ -19,6 +20,7 @@ const QueryHistoryList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const root = useSelector(currentRoot);
   let tempQueryHistory = useSelector(pastQueryState);
   // query history stored from oldest -> newest, so we must reverse it to display the most recent first
   const [queryHistoryState, setQueryHistoryState] = useState(cloneDeep(tempQueryHistory).reverse());
@@ -27,6 +29,8 @@ const QueryHistoryList = () => {
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [exportQueryID, setExportQueryID] = useState(null);
+  const [exportLabel, setExportLabel] = useState(null);
+  const [exportTypeID, setExportTypeID] = useState(null);
 
   const handleRemoveHistoryItem = (i) => {
     let temp = cloneDeep(queryHistoryState);
@@ -40,9 +44,7 @@ const QueryHistoryList = () => {
   }, [queryHistoryState]);
 
   const handleClick = (query) => {
-    navigate(
-      getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, query.id)
-    );
+    navigate(`/${root}/${getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, query.id)}`);
   }
 
   const handleSearch = (value) => {
@@ -68,6 +70,8 @@ const QueryHistoryList = () => {
 
   const handleExportClick = (e, query) => {
     e.stopPropagation();
+    setExportLabel(query?.item?.node?.label);
+    setExportTypeID(query?.item?.type?.id);
     setExportQueryID(query.id);
   }
     
@@ -92,6 +96,8 @@ const QueryHistoryList = () => {
           handleShareModalClose();
         }} 
         qid={exportQueryID}
+        label={exportLabel}
+        typeID={exportTypeID}
       />
       <div className={styles.searchBarContainer}>
         <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form}>

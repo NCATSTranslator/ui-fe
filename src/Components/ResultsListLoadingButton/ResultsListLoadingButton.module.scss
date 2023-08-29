@@ -2,6 +2,9 @@
 
 .loadingButtonContainer {
   text-align: center;
+  span {
+    white-space: nowrap;
+  }
   .refreshDisclaimer {
     font-size: $captionSize;
     margin-top: $xs;
@@ -9,12 +12,22 @@
     text-align: center;
   }
 }
-.complete, .loadingButtonIcon {
+.loadingButtonIcon {
   height: $m;
   width: $m;
 }
 .complete {
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  cursor: default;
+  span {
+    font-size: 16px;
+    color: $purpleOne;
+    line-height: 1;
+    padding: 10px 8px;
+    font-weight: 700;
+  }
 }
 .loadingButtonIcon {
   -webkit-animation:spin 2s linear infinite;

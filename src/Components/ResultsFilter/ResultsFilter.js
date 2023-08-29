@@ -5,24 +5,24 @@ import SimpleRange from '../Range/SimpleRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
+import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacet, isEvidenceFilter } from '../../Utilities/filterFunctions';
+import { cloneDeep } from 'lodash';
 
 const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
 
   // returns a new object with each tag grouped by its type
   const groupAvailableTags = (tags) => {
-    let clonedTags = global.structuredClone(tags);
+    let clonedTags = cloneDeep(tags);
     let roleTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('role:')));
-    let resultTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('rc:')));
+    let chemicalTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('cc:')));
     let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
-    let fdaTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('fda:')));
     let araTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ara:')));
     let diTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('di:')));
     // The ordering of newGroupedTags determines the order of the facets in the UI
     const newGroupedTags = {
-      fda: fdaTags,
-      resultType: resultTypeTags,
+      chemicalType: chemicalTypeTags,
       nodeType: nodeTypeTags,
       role: roleTags,
       di: diTags,
@@ -80,31 +80,19 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getFdaHeading = () => {
+  const getChemicalTypeHeading = () => {
     return(
       <div className={styles.labelContainer} >
-          <div className={styles.label} data-tooltip-id="fda-tooltip" >
-            <p className={styles.subTwo}>FDA Status</p>
+          <div className={styles.label} data-tooltip-id="chemical-type-tooltip" >
+            <p className={styles.subTwo}>Chemical Categories</p>
             <Alert/>
-            <Tooltip id="fda-tooltip">
-              <span className={styles.fdaSpan}>Please note that an “Approved” status does not mean that the FDA has approved these drugs to treat the disease(s) you specified in your search, but rather that they have been approved to treat a specific disease or condition.</span>
+            <Tooltip id="chemical-type-tooltip">
+              <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
+              <p className={styles.tooltipParagraph}>Phase 1-3 Drugs are chemicals that are part of a clinical trial and do not yet have FDA approval.</p>
+              <p className={styles.tooltipParagraph}>Other includes all other chemicals.</p>
             </Tooltip>
           </div>
-      </div>
-    )
-  }
-
-  const getResultTypeHeading = () => {
-    return(
-      <div className={styles.labelContainer} >
-          <div className={styles.label} data-tooltip-id="biolink-tooltip-1" >
-            <p className={styles.subTwo}>Result Type</p>
-            <Alert/>
-            <Tooltip id="biolink-tooltip-1">
-              <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
-            </Tooltip>
-          </div>
-          <p className={styles.caption}>Show only results that begin with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+          <p className={styles.caption}>Filter on different categories of chemicals.</p>
       </div>
     )
   }
@@ -149,11 +137,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   const getTagHeadingMarkup = (tagType) => {
     let headingToReturn;
     switch(tagType) {
-      case 'fda':
-        headingToReturn = getFdaHeading();
-        break;
-      case 'resultType':
-        headingToReturn = getResultTypeHeading();
+      case 'chemicalType':
+        headingToReturn = getChemicalTypeHeading();
         break;
       case 'nodeType':
         headingToReturn = getNodeTypeHeading();
@@ -171,6 +156,11 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
         headingToReturn = '';
     }
     return headingToReturn;
+  }
+
+  const getRoleLinkout = (tagKey) => {
+    const id = tagKey.split(':').slice(1,).join('%3A');
+    return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
   }
 
   const showMoreFacets = (type) => {
@@ -197,44 +187,66 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     setCountsToShow(newCountsToShow);
   }
 
+  const tagDisplay = (tag, type, tagObject, setTagObjectFunc, availableTags) => {
+    let tagKey = tag[0];
+    let object = tag[1];
+    let tagName = '';
+    if (type === 'nodeType') {
+      tagName = formatBiolinkEntity(object.name);
+    } else {
+      tagName = object.name;
+    }
+
+    return (
+      availableTags[tagKey] && availableTags[tagKey].count &&
+      <div className={styles.facetContainer} key={tagKey}>
+        <Checkbox
+          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, tagName)}
+          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
+          className={`${styles.checkbox}`}
+          >
+          {tagName} 
+          <span className={styles.facetCount}>
+            {
+            (type === "role") &&
+              <a href={getRoleLinkout(tagKey)} rel="noreferrer" target="_blank">
+                <ExternalLink className={styles.extLinkIcon}/>
+              </a>
+            }
+            ({(object.count) ? object.count : 0})
+          </span>
+        </Checkbox>
+      </div>
+    )
+  }
+
   const displayFacets = (type) => {
     return (
-      <div className={styles.section}>
+      <div className={`${styles.section} ${styles[type]}`}>
         { // Sort each set of tags, then map them to return each facet
-          Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
-            let tagKey = tag[0];
-            let object = tag[1];
-            let tagName = '';
-            if (type === 'resultType' || type === 'nodeType') {
-              tagName = formatBiolinkEntity(object.name);
-            } else {
-              tagName = object.name;
-            }
-
-            return (
-              availableTags[tagKey] && availableTags[tagKey].count &&
-              <div className={styles.facetContainer} key={tagKey}>
-                <Checkbox
-                  handleClick={() => handleFacetChange(tagKey, tagObject, setTagObject, tagName)}
-                  checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
-                  className={styles.checkbox}
-                  >
-                  {tagName} <span className={styles.facetCount}>({(object.count) ? object.count : 0})</span>
-                </Checkbox>
-              </div>
-            )
-          })
+          (type === "role") 
+          ?
+            Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).map((tag, j) => {
+              return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
+            })
+          :
+            Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
+              return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
+            })
         }
-        <div className={styles.showButtonsContainer}>
-          {
-            Object.keys(groupedTags[type]).length > countsToShow[type] &&
-            <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
-          }
-          {
-            (Object.keys(groupedTags[type]).length > 0) && countsToShow[type] > facetShowMoreIncrement &&
-            <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
-          }
-        </div>
+        {
+          (type !== "role") &&
+          <div className={styles.showButtonsContainer}>
+            {
+              Object.keys(groupedTags[type]).length > countsToShow[type] &&
+              <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
+            }
+            {
+              (Object.keys(groupedTags[type]).length > 0) && countsToShow[type] > facetShowMoreIncrement &&
+              <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
+            }
+          </div>
+        }
       </div>
     )
   }

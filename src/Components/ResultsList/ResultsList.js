@@ -10,11 +10,13 @@ import Tooltip from '../Tooltip/Tooltip';
 import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
 import ResultsListHeader from "../ResultsListHeader/ResultsListHeader";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
+import StickyToolbar from "../StickyToolbar/StickyToolbar";
 import ReactPaginate from 'react-paginate';
 import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
 import { useSelector } from 'react-redux';
 import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
+import { currentPrefs, currentRoot }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
   sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag, 
@@ -26,9 +28,16 @@ import { isFacet, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamil
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
+import { getSaves } from "../../Utilities/userApi";
+import { ToastContainer, toast, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "../BookmarkToasts/BookmarkToasts";
+import NotesModal from "../Modals/NotesModal";
 
 const ResultsList = ({loading}) => {
 
+  const root = useSelector(currentRoot);
+  const prefs = useSelector(currentPrefs);
   let blocker = useBlocker(true);
 
   // URL search params
@@ -68,6 +77,9 @@ const ResultsList = ({loading}) => {
   const [isSortedByScore, setIsSortedByScore] = useState(false);
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const noteLabel = useRef("");
+  const currentBookmarkID = useRef(null);
   // String, active title of evidence modal
   const [isAllEvidence, setIsAllEvidence] = useState(true);
   // Object, the currently selected item
@@ -81,7 +93,8 @@ const ResultsList = ({loading}) => {
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
   // Int, how many items per page
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const initItemsPerPage = (prefs?.result_per_screen?.pref_value) ? parseInt(prefs.result_per_screen.pref_value) : 10;
+  const [itemsPerPage, setItemsPerPage] = useState(initItemsPerPage);
   // Int, last result item index
   const [endResultIndex, setEndResultIndex] = useState(itemsPerPage);
   // Obj, original raw results from the BE
@@ -96,7 +109,8 @@ const ResultsList = ({loading}) => {
   const [formattedResults, setFormattedResults] = useState([]);
   // Array, results meant to display based on the pagination
   const displayedResults = formattedResults.slice(itemOffset, endResultIndex);
-  const currentSortString = useRef('scoreHighLow');
+  const initSortString = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
+  const currentSortString = useRef(initSortString);
   // Int, number of pages
   const pageCount = Math.ceil(formattedResults.length / itemsPerPage);
   // Array, currently active filters
@@ -113,7 +127,31 @@ const ResultsList = ({loading}) => {
   // Bool, is the shift key being held down
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
 
+  // Float, weight for confidence score
+  // eslint-disable-next-line
+  const [confidenceWeight, setConfidenceWeight] = useState(1.0);
+  // Float, weight for novelty score
+  // eslint-disable-next-line
+  const [noveltyWeight, setNoveltyWeight] = useState(0.1);
+  // Float, weight for clinical score
+  // eslint-disable-next-line
+  const [clinicalWeight, setClinicalWeight] = useState(1.0);
+
+  const [userSaves, setUserSaves] = useState(null);
+  const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
+  const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
+  const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
+
+  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
+  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
+    currentSortString.current = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
+    const tempItemsPerPage = (prefs?.result_per_screen?.pref_value) ? parseInt(prefs.result_per_screen.pref_value) : 10;
+    setItemsPerPage(tempItemsPerPage);
+  }, [prefs]);
+
+  useEffect(() => {
+
     const handleKeyDown = (ev) => {
       if (ev.keyCode === 90) {
         setZoomKeyDown(true);
@@ -134,6 +172,27 @@ const ResultsList = ({loading}) => {
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
+
+  const getUserSaves = useCallback(async () => {
+    let temp = await getSaves();
+    for(const queryID of Object.keys(temp)){
+      if(queryID === currentQueryID) {
+        setUserSaves(temp[queryID]);
+      }
+    }
+  }, [currentQueryID])
+
+  const handleClearNotesEditor = async () => {
+    await getUserSaves();
+    handleUpdateResults(activeFilters, activeStringFilters, prevRawResults.current, [], false, currentSortString.current);
+  }
+
+  useEffect(() => {
+    if(root !== "main")
+      return;
+
+    getUserSaves();
+  }, [root, getUserSaves]);
 
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
   const numberOfStatusChecks = useRef(0);
@@ -156,9 +215,10 @@ const ResultsList = ({loading}) => {
 
     let newFormattedResults = [];
     let newOriginalResults = [];
+    let saves = (userSaves) ? userSaves.saves: null;
     
     if(or.length === 0) {
-      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data);
+      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
       newOriginalResults = cloneDeep(newFormattedResults);
     } else {
       newFormattedResults = (justSort) ? fr : or;
@@ -218,15 +278,14 @@ const ResultsList = ({loading}) => {
     if(!currentQueryID)
       return;
 
-    let queryIDJson = JSON.stringify({qid: currentQueryID});
+    // let queryIDJson = JSON.stringify({qid: currentQueryID});
 
     const requestOptions = {
-      method: 'POST',
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      body: queryIDJson
     };
     // eslint-disable-next-line
-    const response = await fetch('/api/creative_status', requestOptions)
+    const response = await fetch(`/${root}/api/v1/pub/query/${currentQueryID}/status`, requestOptions)
       .then(response => handleFetchErrors(response))
       .then(response => response.json())
       .then(data => {
@@ -278,16 +337,17 @@ const ResultsList = ({loading}) => {
     if(!currentQueryID)
       return;
 
-    let queryIDJson = JSON.stringify({qid: currentQueryID});
+    // let queryIDJson = JSON.stringify({qid: currentQueryID});
 
     const requestOptions = {
-      method: 'POST',
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      body: queryIDJson
+      // body: queryIDJson
     };
     // eslint-disable-next-line
-    const response = await fetch('/api/creative_result', requestOptions)
+    const response = await fetch(`/${root}/api/v1/pub/query/${currentQueryID}/result`, requestOptions)
       .then(response => handleFetchErrors(response, () => {
+        console.log(response.json());
         setIsFetchingARAStatus(false);
         setIsFetchingResults(false);
         if(formattedResults.length <= 0) {
@@ -432,6 +492,12 @@ const ResultsList = ({loading}) => {
     setSelectedEdges(edgeGroup);
     setCurrentEvidence(evidence);
     setEvidenceOpen(true);
+  }
+
+  const activateNotes = (label, bookmarkID, item) => {
+    noteLabel.current = label;
+    currentBookmarkID.current = bookmarkID;
+    setNotesOpen(true);
   }
 
   const filterAndFacet = (facetsAndFilters, stringFilters, fResults, oResults, rResults) => {
@@ -604,8 +670,29 @@ const ResultsList = ({loading}) => {
     }
   },[formattedResults, initNodeIdParam]);
 
+
+
   return (
     <QueryClientProvider client={queryClient}>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        theme="light"
+        transition={Slide}
+        pauseOnFocusLoss={false}
+        hideProgressBar
+        className="toastContainer"
+        closeOnClick={false}
+        closeButton={false}
+      />
+      <NotesModal
+        isOpen={notesOpen}
+        onClose={()=>(setNotesOpen(false))}
+        handleClearNotesEditor={handleClearNotesEditor}
+        className="notes-modal"
+        noteLabel={noteLabel.current}
+        bookmarkID={currentBookmarkID.current}
+      />
       <EvidenceModal
         isOpen={evidenceOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
@@ -688,6 +775,7 @@ const ResultsList = ({loading}) => {
                       >
                         Name
                       </div>
+                      <div></div>
                       <div
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
                         onClick={()=>{
@@ -736,8 +824,19 @@ const ResultsList = ({loading}) => {
                             type={initPresetTypeObject}
                             item={item}
                             activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
+                            activateNotes={activateNotes}
                             activeStringFilters={activeStringFilters}
                             zoomKeyDown={zoomKeyDown}
+                            currentQueryID={currentQueryID}
+                            queryNodeID={initNodeIdParam}
+                            queryNodeLabel={initNodeLabelParam}
+                            queryNodeDescription={nodeDescription}
+                            bookmarked={item.bookmarked}
+                            bookmarkID={item.bookmarkID}
+                            hasNotes={item.hasNotes}
+                            handleBookmarkError={handleBookmarkError}
+                            bookmarkAddedToast={bookmarkAddedToast}
+                            bookmarkRemovedToast={bookmarkRemovedToast}
                           />
                         )
                       })
@@ -761,6 +860,7 @@ const ResultsList = ({loading}) => {
                         <option value="5" key="0">5</option>
                         <option value="10" key="1">10</option>
                         <option value="20" key="2">20</option>
+                        <option value="50" key="3">50</option>
                       </Select>
                     </div>
                     <ReactPaginate
@@ -797,6 +897,22 @@ const ResultsList = ({loading}) => {
             </>
           }
         </div>
+        {
+          formattedResults.length > 0 &&
+          <StickyToolbar
+            loadingButtonData={{
+              handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
+              isFetchingARAStatus: isFetchingARAStatus,
+              isFetchingResults: isFetchingResults,
+              showDisclaimer: false,
+              containerClassName: styles.shareLoadingButtonContainer,
+              buttonClassName: styles.loadingButton,
+              hasFreshResults: (freshRawResults !== null),
+              isSticky: true
+            }}
+            setShareModalFunction={setShareModalOpen}
+          />
+        }
       </div>
       {blocker ? <NavConfirmationPromptModal blocker={blocker} /> : null}
     </QueryClientProvider>

@@ -89,6 +89,8 @@ export const validateEmail = (email) => {
 };
 
 export const formatBiolinkEntity = (string) => {
+  if(!string)
+    return "";
   // remove 'biolink:' from the type, then add spaces before each capital letter
   // then trim the leading space and replace any underlines with spaces
   return(string.replace('biolink:', '')
@@ -110,8 +112,9 @@ export const getUrlAndOrg = (id) => {
     url = `https://www.ebi.ac.uk/chembl/compound_report_card/${id.replace(':', '')}/`;
     org = 'ChEMBL';
   } else if(formattedID.includes('MONDO')){
-    url = `https://monarchinitiative.org/disease/${id}`;
-    org = 'Monarch Initiative';
+    id = id.replace(":", "_");
+    url = `http://purl.obolibrary.org/obo/${id}`;
+    org = 'OLS';
   } else if(formattedID.includes('HP')) {
     url = `https://monarchinitiative.org/phenotype/${id}`;
     org = 'Monarch Initiative';
@@ -133,7 +136,16 @@ export const getUrlAndOrg = (id) => {
   } else if(formattedID.includes('NCIT')) {
     url = `https://ncithesaurus.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&ns=ncit&code=${id.replace('NCIT:', '')}`;
     org = 'NCI Thesaurus';
-  }
+  } else if(formattedID.includes('NCBIGENE')) {
+    url = `https://www.ncbi.nlm.nih.gov/gene/${id.replace('NCBIGene:', '')}`;
+    org = 'NCBI Gene';
+  } else if(formattedID.includes('PUBCHEM')) {
+    url = `https://pubchem.ncbi.nlm.nih.gov/compound/${id.replace('PUBCHEM.COMPOUND:', '')}`;
+    org = 'PubChem';
+  } else if(formattedID.includes('HMDB')) {
+  url = `https://hmdb.ca/metabolites/${id.replace('HMDB:', '')}`;
+  org = 'HMDB';
+}
 
   return [url, org];
 }
@@ -211,4 +223,30 @@ export const customDebounce = (method, delay) => {
   method._tId= setTimeout(function(){
     method();
   }, delay);
+}
+
+export const getFormattedDate = (date) => {
+  if (!(date instanceof Date)) {
+      throw new Error('Input should be a Date object');
+  }
+
+  const monthNames = ["January", "February", "March", "April", "May", "June", 
+    "July", "August", "September", "October", "November", "December"];
+  const options = {
+    timeZoneName: 'short'
+  };
+
+  const formatter = new Intl.DateTimeFormat('en-US', options);
+  const parts = formatter.formatToParts(date);
+
+  const timeZone = parts.find(part => part.type === 'timeZoneName').value;
+
+  // Get month name, day, year, hours, minutes
+  const month = monthNames[date.getMonth()];
+  const day = date.getDate();
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return `${month} ${day}, ${year} (${hours}:${minutes} ${timeZone})`;
 }

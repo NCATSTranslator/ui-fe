@@ -1,15 +1,17 @@
 import React, {useRef, useEffect} from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
+import { currentRoot } from "../../Redux/rootSlice";
 import { currentQuery} from "../../Redux/querySlice";
 import { useSelector } from 'react-redux';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 
-const ShareModal = ({isOpen, onClose, qid}) => {
+const ShareModal = ({isOpen, onClose, qid, label = null, typeID = null}) => {
 
   let storedQuery = useSelector(currentQuery);
-  const sharedQueryLabel = new URLSearchParams(window.location.search).get("l")
-  const sharedQueryType = new URLSearchParams(window.location.search).get("t")
+  const root = useSelector(currentRoot);
+  const sharedQueryLabel = (label) ? label : new URLSearchParams(window.location.search).get("l")
+  const sharedQueryType = (typeID) ? typeID : new URLSearchParams(window.location.search).get("t")
   const sharedQueryItemID = new URLSearchParams(window.location.search).get("i")
   const queryLabel = (sharedQueryLabel) 
     ? sharedQueryLabel 
@@ -32,7 +34,7 @@ const ShareModal = ({isOpen, onClose, qid}) => {
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
   const qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, qid);
-  const qidURL = `${window.location.origin}${qidPath}`;
+  const qidURL = `${window.location.origin}/${root}/${qidPath}`;
   
   useEffect(() => {
     if(window.location.pathname.includes("results") && !isResultsUrlSet.current && qidURL) {

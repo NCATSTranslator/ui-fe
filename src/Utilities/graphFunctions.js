@@ -6,6 +6,7 @@ import {ReactComponent as ExternalLink} from '../Icons/external-link.svg';
 
 export const layoutList = {
   klay: {
+    label: 'vertical',
     name: 'klay', spacingFactor: 1.3, klay:{direction: 'RIGHT', edgeSpacingFactor: .1}, 
     ready: (ev)=>{ 
       if(ev.target?.options?.eles?.length < 10) { 
@@ -15,9 +16,11 @@ export const layoutList = {
     }
   },
   breadthfirst: {
+    label: 'horizontal',
     name: 'breadthfirst', spacingFactor: 1.1, avoidOverlap: true, directed: true
   },
   concentric: {
+    label: 'concentric',
     name: 'concentric'
   },
 }

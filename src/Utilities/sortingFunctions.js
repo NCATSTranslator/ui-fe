@@ -1,3 +1,5 @@
+import * as math from 'mathjs';
+
 // alphabetical order
 export const sortNameLowHigh = (items, isEvidence) => {
   if(isEvidence)
@@ -33,11 +35,23 @@ export const sortEvidenceHighLow = (items) => {
 }
 
 export const sortScoreLowHigh = (items) => {
-  return items.sort((a, b) => a.score - b.score);
+  return items.sort((a, b) => {
+    if (math.equal(a.score.sugeno, b.score.sugeno)) {
+      return a.score.weightedMean - b.score.weightedMean;
+    }
+
+    return a.score.sugeno - b.score.sugeno;
+  });
 }
 
 export const sortScoreHighLow = (items) => {
-  return items.sort((a, b) => b.score - a.score);
+  return items.sort((a, b) => {
+    if (math.equal(a.score.sugeno, b.score.sugeno)) {
+      return b.score.weightedMean - a.score.weightedMean;
+    }
+
+    return b.score.sugeno - a.score.sugeno;
+  });
 }
 
 export const sortByEntityStrings = (items, strings) => {

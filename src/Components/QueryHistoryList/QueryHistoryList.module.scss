@@ -4,6 +4,7 @@
 .historyListContainer {
   .searchBarContainer {
     .form {
+      border-radius: $defaultBorderRadius;
       display: flex;
       justify-content: space-between;
       padding: 24px;
