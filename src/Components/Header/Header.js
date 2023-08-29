@@ -16,10 +16,9 @@ const Header = ({children, handleFeedbackModalOpen}) => {
   const root = useSelector(currentRoot);
   const user = useSelector(currentUser);
   const config = useSelector(currentConfig);
-  const navigate = useNavigate();
 
   const handleLogoutClick = () => {
-    handleLogout(config?.social_providers?.una?.client_id, navigate);
+    handleLogout(config?.social_providers?.una?.client_id);
   } 
 
   return (

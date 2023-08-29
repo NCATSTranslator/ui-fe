@@ -215,7 +215,7 @@ const deleteUserData = async (url, httpErrorHandler, fetchErrorHandler) => {
   return await fetchUserData(async () => await remove(url), httpErrorHandler, fetchErrorHandler, () => true);
 }
 
-export const handleLogout = async (clientID, navigate) => {
+export const handleLogout = async (clientID) => {
   if(!clientID) {
     console.warn("No client id available from config endpoint, unable to log out.");
     return;
