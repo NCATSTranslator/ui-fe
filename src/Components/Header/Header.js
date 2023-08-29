@@ -9,7 +9,6 @@ import {ReactComponent as Workspace} from '../../Icons/Navigation/Workspace.svg'
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import defaultPfp from '../../Assets/Images/pfp.png';
 import styles from './Header.module.scss';
-import { handleLogout } from "../../Utilities/userApi";
 
 const Header = ({children, handleFeedbackModalOpen}) => {
   
@@ -17,9 +16,9 @@ const Header = ({children, handleFeedbackModalOpen}) => {
   const user = useSelector(currentUser);
   const config = useSelector(currentConfig);
 
-  const handleLogoutClick = () => {
-    handleLogout(config?.social_providers?.una?.client_id);
-  } 
+  const clientID = config?.social_providers?.una?.client_id;
+  const redirectURI = `${window.location.origin}/main/logout`;
+  const logoutReady = (clientID) ? true : false;
 
   return (
     <header className={styles.header}>
@@ -49,7 +48,15 @@ const Header = ({children, handleFeedbackModalOpen}) => {
                         : <img src={defaultPfp} alt="user profile" className={styles.profilePic}/>}
                     </div>
                   </Link>
-                  <button className={styles.login} onClick={handleLogoutClick} >Log Out</button>
+                  {
+                    logoutReady && 
+                    <form method="post" action={"https://a-ci.ncats.io:443/_api/auth/transltr/session/end"}>
+                      <input type="hidden" name="client_id" value={clientID} />
+                      <input type="hidden" name="show_prompt" value="false" />
+                      <input type="hidden" name="post_logout_redirect_uri" value={redirectURI}/> 
+                      <button type="submit" value="submit" className={styles.login}>Log Out</button>
+                    </form>
+                  }
                 </>
             }
           </div>

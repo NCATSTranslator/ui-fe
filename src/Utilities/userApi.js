@@ -214,29 +214,3 @@ const putUserData = async (url, body, httpErrorHandler, fetchErrorHandler) => {
 const deleteUserData = async (url, httpErrorHandler, fetchErrorHandler) => {
   return await fetchUserData(async () => await remove(url), httpErrorHandler, fetchErrorHandler, () => true);
 }
-
-export const handleLogout = async (clientID) => {
-  if(!clientID) {
-    console.warn("No client id available from config endpoint, unable to log out.");
-    return;
-  }
-
-  const requestOptions = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: {
-      client_id: clientID,
-      show_prompt: false
-    }
-  }
-  await fetch('https://a-ci.ncats.io/_api/auth/transltr/session/end', requestOptions)
-    .then((data) => {
-        if(data.status === 200) {
-          console.log("success", data);
-          window.location.assign("/main/logout");
-        } else {
-          console.error("Logout unsuccessful. Response:", data);
-        }
-      }
-    );
-}
