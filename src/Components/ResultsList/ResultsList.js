@@ -28,6 +28,11 @@ import { isFacet, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamil
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { ReactComponent as Alert } from '../../Icons/Alerts/Info.svg';
+import { getSaves } from "../../Utilities/userApi";
+import { ToastContainer, toast, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "../BookmarkToasts/BookmarkToasts";
+import NotesModal from "../Modals/NotesModal";
 
 const ResultsList = ({loading}) => {
 
@@ -72,6 +77,9 @@ const ResultsList = ({loading}) => {
   const [isSortedByScore, setIsSortedByScore] = useState(false);
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const noteLabel = useRef("");
+  const currentBookmarkID = useRef(null);
   // String, active title of evidence modal
   const [isAllEvidence, setIsAllEvidence] = useState(true);
   // Object, the currently selected item
@@ -120,11 +128,19 @@ const ResultsList = ({loading}) => {
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
 
   // Float, weight for confidence score
+  // eslint-disable-next-line
   const [confidenceWeight, setConfidenceWeight] = useState(1.0);
   // Float, weight for novelty score
+  // eslint-disable-next-line
   const [noveltyWeight, setNoveltyWeight] = useState(0.1);
   // Float, weight for clinical score
+  // eslint-disable-next-line
   const [clinicalWeight, setClinicalWeight] = useState(1.0);
+
+  const [userSaves, setUserSaves] = useState(null);
+  const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
+  const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
+  const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
@@ -135,6 +151,7 @@ const ResultsList = ({loading}) => {
   }, [prefs]);
 
   useEffect(() => {
+
     const handleKeyDown = (ev) => {
       if (ev.keyCode === 90) {
         setZoomKeyDown(true);
@@ -155,6 +172,27 @@ const ResultsList = ({loading}) => {
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
+
+  const getUserSaves = useCallback(async () => {
+    let temp = await getSaves();
+    for(const queryID of Object.keys(temp)){
+      if(queryID === currentQueryID) {
+        setUserSaves(temp[queryID]);
+      }
+    }
+  }, [currentQueryID])
+
+  const handleClearNotesEditor = async () => {
+    await getUserSaves();
+    handleUpdateResults(activeFilters, activeStringFilters, prevRawResults.current, [], false, currentSortString.current);
+  }
+
+  useEffect(() => {
+    if(root !== "main")
+      return;
+
+    getUserSaves();
+  }, [root, getUserSaves]);
 
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
   const numberOfStatusChecks = useRef(0);
@@ -177,9 +215,10 @@ const ResultsList = ({loading}) => {
 
     let newFormattedResults = [];
     let newOriginalResults = [];
+    let saves = (userSaves) ? userSaves.saves: null;
     
     if(or.length === 0) {
-      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight);
+      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
       newOriginalResults = cloneDeep(newFormattedResults);
     } else {
       newFormattedResults = (justSort) ? fr : or;
@@ -455,6 +494,12 @@ const ResultsList = ({loading}) => {
     setEvidenceOpen(true);
   }
 
+  const activateNotes = (label, bookmarkID, item) => {
+    noteLabel.current = label;
+    currentBookmarkID.current = bookmarkID;
+    setNotesOpen(true);
+  }
+
   const filterAndFacet = (facetsAndFilters, stringFilters, fResults, oResults, rResults) => {
     const filterResults = (filters, stringFilters, oResults, resultPathRanks) => {
       const filteredResults = [];
@@ -625,8 +670,29 @@ const ResultsList = ({loading}) => {
     }
   },[formattedResults, initNodeIdParam]);
 
+
+
   return (
     <QueryClientProvider client={queryClient}>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        theme="light"
+        transition={Slide}
+        pauseOnFocusLoss={false}
+        hideProgressBar
+        className="toastContainer"
+        closeOnClick={false}
+        closeButton={false}
+      />
+      <NotesModal
+        isOpen={notesOpen}
+        onClose={()=>(setNotesOpen(false))}
+        handleClearNotesEditor={handleClearNotesEditor}
+        className="notes-modal"
+        noteLabel={noteLabel.current}
+        bookmarkID={currentBookmarkID.current}
+      />
       <EvidenceModal
         isOpen={evidenceOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
@@ -709,6 +775,7 @@ const ResultsList = ({loading}) => {
                       >
                         Name
                       </div>
+                      <div></div>
                       <div
                         className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
                         onClick={()=>{
@@ -757,8 +824,19 @@ const ResultsList = ({loading}) => {
                             type={initPresetTypeObject}
                             item={item}
                             activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
+                            activateNotes={activateNotes}
                             activeStringFilters={activeStringFilters}
                             zoomKeyDown={zoomKeyDown}
+                            currentQueryID={currentQueryID}
+                            queryNodeID={initNodeIdParam}
+                            queryNodeLabel={initNodeLabelParam}
+                            queryNodeDescription={nodeDescription}
+                            bookmarked={item.bookmarked}
+                            bookmarkID={item.bookmarkID}
+                            hasNotes={item.hasNotes}
+                            handleBookmarkError={handleBookmarkError}
+                            bookmarkAddedToast={bookmarkAddedToast}
+                            bookmarkRemovedToast={bookmarkRemovedToast}
                           />
                         )
                       })

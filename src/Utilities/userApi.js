@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
 
 export const defaultPrefs = {
@@ -49,6 +50,68 @@ export const prefKeyToString = (prefKey) => {
       return "Publications to show per page";
     default: 
       return `No label provided for ${prefKey}`;
+  }
+}
+
+export const emptyEditor = '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
+
+export const getSaves = async (setUserSaves = undefined) => {
+  let saves = await getAllUserSaves();
+  saves = formatUserSaves(saves);
+
+  if(setUserSaves !== undefined)
+    setUserSaves(saves);
+  
+  return saves;
+}
+
+const formatUserSaves = (saves) => { 
+  let newSaves = {};
+  for(const save of saves) {
+    if(!save?.data?.query)
+      continue;
+
+    if(!newSaves.hasOwnProperty(save.ars_pkey)) {
+      newSaves[save.ars_pkey] = {
+        saves: new Set([save]),
+        query: save.data.query
+      };
+    } else {
+      newSaves[save.ars_pkey].saves.add(save);
+    }
+  }
+  return newSaves;
+}
+
+export const getFormattedBookmarkObject = (bookmarkType = "result", bookmarkName, notes = "", queryNodeID, queryNodeLabel = "",
+  queryNodeDescription = "", typeObject, saveItem, pk) => {
+
+  let newSaveItem = cloneDeep(saveItem);
+  delete newSaveItem.evidence.publications;
+
+  let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
+  return { 
+    save_type: "bookmark", 
+    label: bookmarkName, 
+    notes: notes, 
+    ars_pkey: pk, 
+    object_ref: newSaveItem.id, 
+    data: {
+      type: bookmarkType,
+      query: queryObject,
+      item: newSaveItem
+    }
+  }
+}
+
+export const getQueryObjectForSave = (nodeID = 0, nodeLabel = "", nodeDescription = "", typeObject, pk) => {
+  return {
+    type: typeObject, 
+    nodeId: nodeID,
+    nodeLabel: nodeLabel,
+    nodeDescription: nodeDescription,
+    pk: pk, 
+    submitted_time: new Date() 
   }
 }
 
@@ -150,4 +213,30 @@ const putUserData = async (url, body, httpErrorHandler, fetchErrorHandler) => {
 
 const deleteUserData = async (url, httpErrorHandler, fetchErrorHandler) => {
   return await fetchUserData(async () => await remove(url), httpErrorHandler, fetchErrorHandler, () => true);
+}
+
+export const handleLogout = async (clientID) => {
+  if(!clientID) {
+    console.warn("No client id available from config endpoint, unable to log out.");
+    return;
+  }
+
+  const requestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: {
+      client_id: clientID,
+      show_prompt: false
+    }
+  }
+  await fetch('https://a-ci.ncats.io/_api/auth/transltr/session/end', requestOptions)
+    .then((data) => {
+        if(data.status === 200) {
+          console.log("success", data);
+          window.location.assign("/main/logout");
+        } else {
+          console.error("Logout unsuccessful. Response:", data);
+        }
+      }
+    );
 }

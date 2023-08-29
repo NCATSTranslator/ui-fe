@@ -4,24 +4,27 @@ import { useNavigate } from 'react-router-dom';
 import QueryBar from "../QueryBar/QueryBar";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
-import { currentRoot } from "../../Redux/rootSlice";
+import { currentConfig, currentRoot } from "../../Redux/rootSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
 import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
-import { getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
-import { getEntityLink, generateEntityLink, handleFetchErrors, getLastItemInArray } from "../../Utilities/utilities";
+import { filterAndSortExamples, getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
+import { getEntityLink, generateEntityLink, getLastItemInArray } from "../../Utilities/utilities";
 import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
 import {ReactComponent as Drug} from '../../Icons/drug.svg';
+import {ReactComponent as Disease} from '../../Icons/disease2.svg';
 import {ReactComponent as Chemical} from '../../Icons/Queries/Chemical.svg';
 import {ReactComponent as Gene} from '../../Icons/Queries/Gene.svg';
 import {ReactComponent as Back} from '../../Icons/Directional/Undo.svg';
 import {ReactComponent as Search} from '../../Icons/Buttons/Search.svg';
+import {ReactComponent as ArrowForward} from '../../Icons/Directional/arrow_forward.svg';
 import styles from './Query.module.scss';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { queryTypes } from "../../Utilities/queryTypes";
 import AutoHeight from "../AutoHeight/AutoHeight";
 import { Link, useLocation } from "react-router-dom";
+import ExampleQueryList from "../ExampleQueryList/ExampleQueryList";
 
 const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription}) => {
 
@@ -30,6 +33,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const dispatch = useDispatch();
   const { pathname } = useLocation();
   const root = useSelector(currentRoot);
+  const config = useSelector(currentConfig);
 
   loading = (loading) ? true : false;
 
@@ -70,59 +74,25 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   // String, used to set navigation url for example disease buttons
   const [presetURL, setPresetURL] = useState(false);
 
-  const [exampleDiseases, setExampleDiseases] = useState(null);
-  // const [nodeDescription, setNodeDescription] = useState(null);
+  const exampleDiseases = (!config?.cached_queries) 
+    ? null
+    : filterAndSortExamples(config.cached_queries, 'drug');
+  const exampleChemsUp = (!config?.cached_queries) 
+    ? null
+    : filterAndSortExamples(config.cached_queries, 'gene', 'increased');
+  const exampleChemsDown = (!config?.cached_queries) 
+    ? null
+    : filterAndSortExamples(config.cached_queries, 'gene', 'decreased');
+  const exampleGenesUp = (!config?.cached_queries) 
+    ? null
+    : filterAndSortExamples(config.cached_queries, 'chemical', 'increased');
+  const exampleGenesDown = (!config?.cached_queries) 
+    ? null
+    : filterAndSortExamples(config.cached_queries, 'chemical', 'decreased');
 
-  const getInitSelectedUpperButton = (presetTypeObject) => {
-    if(!presetTypeObject)
-    return null;
-    let upperButtonId = null;
-    let typeId = presetTypeObject.id;
-    if(typeId === 0) 
-      upperButtonId = 0;
-    else if(typeId === 1 || typeId === 2)
-      upperButtonId = 1;
-    else if(typeId === 3 || typeId === 4)
-      upperButtonId = 2;
-
-    return upperButtonId;
-  }
-
-  const getInitSelectedLowerButton = (presetTypeObject) => {
-    if(!presetTypeObject)
-      return null;
-    let lowerButtonId = null;
-    let typeId = presetTypeObject.id;
-
-    if(typeId === 0)
-      lowerButtonId = null;
-    else if(typeId % 2 === 0) 
-      lowerButtonId = 1;
-    else
-      lowerButtonId = 0;
-    
-    return lowerButtonId;
-  }
-
-  const initSelectedUpperButton = getInitSelectedUpperButton(initPresetTypeObject);
-  const initSelectedLowerButton = getInitSelectedLowerButton(initPresetTypeObject);
-  const [selectedUpperButton, setSelectedUpperButton] = useState(initSelectedUpperButton);
-  const [selectedLowerButton, setSelectedLowerButton] = useState(initSelectedLowerButton);
-
-  // Get example diseases from config endpoint on component mount
-  useEffect(() => {
-    const requestOptions = {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    fetch('/config', requestOptions)
-    .then(response => handleFetchErrors(response))
-    .then(response => response.json())
-    .then(data => {
-      if(data)
-        setExampleDiseases(data);
-    });
-  }, []);
+  const [selectedUpperButton, setSelectedUpperButton] = useState(null);
+  const [selectedMiddleButton, setSelectedMiddleButton] = useState(null);
+  const [selectedLowerButton, setSelectedLowerButton] = useState(null);
 
   const submitQuery = (item) => {
 
@@ -288,6 +258,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
 
   const handleSelectUpperButton = (index) => {
     setSelectedLowerButton(null);
+    setSelectedMiddleButton(null);
     setSelectedUpperButton(index);
 
     // if we've picked drug/disease, set the query type to 0 and reset the input text
@@ -296,18 +267,23 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     }
   }
 
+  const handleSelectMiddleButton = (index) => {
+    setSelectedLowerButton(null);
+    setSelectedMiddleButton(index);
+  }
+
   const handleSelectLowerButton = (index, prevIndex) => {
     setSelectedLowerButton(index);
     // if prevIndex is null, we're coming from another upper button, so reset the input text. otherwise keep it the same.
     const resetInputText = (prevIndex === null) ? true : false;
-    switch (selectedUpperButton) {
-      case 1:
+    switch (selectedMiddleButton) {
+      case 0:
         if(index === 0)
           handleQueryTypeChange(1, resetInputText);
         else 
           handleQueryTypeChange(2, resetInputText);
         break;
-      case 2:
+      case 1:
         if(index === 0)
           handleQueryTypeChange(3, resetInputText);
         else 
@@ -381,16 +357,26 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 <h4 className={styles.heading}>What relationship would you like to explore?</h4>
                 <div className={styles.upperButtons}>
                   <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)}>
-                    <Drug />Drug/Disease
+                    <Drug/>Drug <ArrowForward className={styles.arrow} /> <Disease/>Disease
                   </button>
                   <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(1)}>
-                    <Chemical />Chemical/Gene
-                  </button>
-                  <button className={`${styles.upperButton} ${selectedUpperButton === 2 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(2)}>
-                    <Gene />Gene/Chemical
+                    <Gene/>Genes <span className={styles.dualArrows}><ArrowForward/><ArrowForward/></span> <Chemical/>Chemicals
                   </button>
                 </div>
                 {(selectedUpperButton && selectedUpperButton > 0)
+                  ? 
+                    <div className={`${styles.middleButtons} visible`}>
+                      <button className={`${styles.middleButton} ${selectedMiddleButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectMiddleButton(0)}>
+                        Find chemicals that regulate a particular gene
+                      </button>
+                      <button className={`${styles.middleButton} ${selectedMiddleButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectMiddleButton(1)}>
+                        Find genes regulated by a particular chemical
+                      </button>
+                    </div>
+                  :
+                    <div className={`${styles.middleButtons}`}></div>
+                }
+                {(selectedUpperButton && selectedUpperButton > 0 && selectedMiddleButton !== null)
                   ? 
                     <div className={`${styles.lowerButtons} visible`}>
                       <button className={`${styles.lowerButton} ${selectedLowerButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(0, selectedLowerButton)}>
@@ -420,33 +406,45 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     />
                   </OutsideClickHandler>
                 }
-
+                {/* Example Diseases */}
                 {selectedUpperButton === 0 &&
-                  <div className={styles.examples}>
-                    {exampleDiseases && Array.isArray(exampleDiseases) &&
-                      <>
-                        <p className={styles.subTwo}>Example Diseases:</p>
-                        <div className={styles.exampleList}>
-                          {
-                            exampleDiseases.map((item, i)=> {
-                              return(
-                                <button
-                                  className={styles.button}
-                                  onClick={(e)=>{
-                                    setPresetURL(e.target.dataset.url);
-                                  }}
-                                  data-testid={item.name}
-                                  data-url={getResultsShareURLPath(item.name, item.id, 0, item.uuid)}
-                                  >
-                                  {item.name}
-                              </button>
-                              )
-                            })
-                          }
-                        </div>
-                      </>
-                    }
-                  </div>
+                  <ExampleQueryList 
+                    examples={exampleDiseases} 
+                    setPresetURL={setPresetURL} 
+                    label="Example Diseases:"
+                  />
+                }
+                {/* Examples for chemicals UPregulated by a particular gene */}
+                {selectedUpperButton === 1 && selectedMiddleButton === 0 && selectedLowerButton === 0 &&
+                  <ExampleQueryList 
+                    examples={exampleGenesUp} 
+                    setPresetURL={setPresetURL} 
+                    label="Example Genes:"
+                  />
+                }
+                {/* Examples for chemicals DOWNregulated by a particular gene */}
+                {selectedUpperButton === 1 && selectedMiddleButton === 0 && selectedLowerButton === 1 &&
+                  <ExampleQueryList 
+                    examples={exampleGenesDown} 
+                    setPresetURL={setPresetURL} 
+                    label="Example Genes:"
+                  />
+                }
+                {/* Examples for genes UPregulated by a particular chemical */}
+                {selectedUpperButton === 1 && selectedMiddleButton === 1 && selectedLowerButton === 0 &&
+                  <ExampleQueryList 
+                    examples={exampleChemsUp} 
+                    setPresetURL={setPresetURL} 
+                    label="Example Chemicals:"
+                  />
+                }
+                {/* Examples for genes DOWNregulated by a particular chemical */}
+                {selectedUpperButton === 1 && selectedMiddleButton === 1 && selectedLowerButton === 1 &&
+                  <ExampleQueryList 
+                    examples={exampleChemsDown} 
+                    setPresetURL={setPresetURL} 
+                    label="Example Chemicals:"
+                  />
                 }
               </>
             }

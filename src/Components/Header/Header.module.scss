@@ -42,16 +42,60 @@
           padding: 10px 8px;
           width: fit-content;
           box-shadow: none;
+          span {
+            position: relative;
+            font-size: 16px;
+            color: $darkGray;
+            font-weight: 700;
+            line-height: 1;
+            &:after {
+              content: '';
+              position: absolute;
+              bottom: -5px;
+              left: 0;
+              right: 0;
+              background-color: transparent;
+              height: 2px;
+              width: 100%;
+              transition: all .3s ease;
+              transform: scaleX(0);
+            }
+          }
           svg {
-            margin-right: 8px;
+            margin-right: 4px;
+            height: 24px;
+            width: 24px;
+            fill: $darkGray;
           }
           &:hover {
             box-shadow: none;
+            span:after {
+              transform: scaleX(1);
+              background-color: $darkGray;
+            }
           }
         }
-        a:last-of-type {
-          margin-right: 0;
-          padding-right: 0;
+        .workspaceLink {
+          svg {
+            width: 22px;
+            margin-right: 6px;
+            rect, polygon, line {
+              stroke: $darkGray;
+            }
+          }
+        }
+        .helpLink {
+          svg {
+            width: 27px;
+            height: 27px;
+            fill: transparent;
+            circle {
+              stroke: $darkGray;
+            }
+            path {
+              fill: $darkGray;
+            }
+          }
         }
         .login {
           background-color: $purpleTwo;

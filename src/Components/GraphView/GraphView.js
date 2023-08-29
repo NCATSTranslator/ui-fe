@@ -43,7 +43,7 @@ cytoscape.use(navigator);
 cytoscape.use(popper);
 cytoscape.warnings(false);
 
-const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active, zoomKeyDown}) => {
+const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active, zoomKeyDown, updateGraphFunction, prebuiltGraph}) => {
 
   const prefs = useSelector(currentPrefs);
 
@@ -52,11 +52,20 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
   let graphLayoutPref = getInitialGraphLayoutFromPrefs(prefs, layoutList);
   const [currentLayout, setCurrentLayout] = useState(graphLayoutPref);
   const graph = useMemo(() => {
-    if(!active)
-      return null;
+    // if(!active)
+    //   return null;
+    if(prebuiltGraph)
+      return prebuiltGraph;
 
-    return resultToCytoscape(result.rawResult, rawResults.data)
-  },[result, rawResults, active])
+    if(rawResults) {
+      let temp = resultToCytoscape(result.rawResult, rawResults.data);
+      updateGraphFunction(temp);
+      return temp;
+    }
+
+    return null;
+
+  },[result, rawResults, prebuiltGraph, updateGraphFunction])
 
 
   const graphVisibilityPref = (prefs?.graph_visibility) ? prefs.graph_visibility.pref_value: 'sometimes';

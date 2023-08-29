@@ -21,9 +21,7 @@ const getFormattedEvidence = (paths, results) => {
 
       const eid = item.edges[0].id;
       evidenceObj.edges[eid] = {
-        subject: item.edges[0].subject.names[0],
-        predicate: item.edges[0].predicate,
-        object: item.edges[0].object.names[0]
+        label : `${item.edges[0].subject.name}|${item.edges[0].predicate}|${item.edges[0].object.name}`
       };
     }
   };
@@ -50,7 +48,7 @@ const getFormattedEvidence = (paths, results) => {
   const formatSources = (sources, item, container) => {
     formatEvidenceObjs(
       sources, 
-      (src) => { return `${item.edges[0].subject.names[0]}${src.name}${item.edges[0].object.names[0]}`; }, 
+      (src) => { return `${item.edges[0].subject.name}${src.name}${item.edges[0].object.name}`; }, 
       item,
       (src) => { return src; },
       container);
@@ -105,7 +103,18 @@ const getNodeByCurie = (curie, results) => {
   if(results.nodes[curie] === undefined)
     return {};
 
+  const maxCurieCount = 5;
+
   const res = cloneDeep(results.nodes[curie]);
+  if(res.curies.length > maxCurieCount)
+    res.curies = res.curies.slice(0, maxCurieCount);
+
+  if(res.synonyms && res.synonyms.length > 0)
+    res.synonyms = null;
+
+  if(res.sameAs && res.sameAs.length > 0)
+    res.sameAs = null;
+
   res.id = curie;
   return res;
 }
@@ -122,9 +131,18 @@ const getEdgeByID = (id, results) => {
     return {};
   let newEdge = cloneDeep(results.edges[id]);
 
-  newEdge.object = getNodeByCurie(newEdge.object, results);
-  newEdge.subject = getNodeByCurie(newEdge.subject, results);
+  let tempObj = getNodeByCurie(newEdge.object, results);
+  newEdge.object = {
+    name: tempObj.names[0],
+    id: tempObj.id,
+  };
+  let tempSub = getNodeByCurie(newEdge.subject, results);
 
+  newEdge.subject = {
+    name: tempSub.names[0],
+    id: tempSub.id
+  };
+  
   return newEdge;
 }
 
@@ -261,19 +279,52 @@ const getCompressedPaths = (graph) => {
 }
 
 /**
+ * Checks if the given itemID exists in the bookmarks set and returns its ID if found.
+ *
+ * @param {string|number} itemID - The ID of the item to check.
+ * @param {Set<Object>} bookmarksSet - The set of bookmark objects to search in.
+ * @returns {string|number|boolean} Returns the ID of the matching item if found in bookmarksSet, otherwise returns false.
+ */
+const checkBookmarksForItem = (itemID, bookmarksSet) => {
+  if(bookmarksSet && bookmarksSet.size > 0) {
+    for(let val of bookmarksSet) {
+      if(val.object_ref === itemID) {
+        return val.id;
+      }
+    }
+  }
+  return false;
+}
+
+const checkBookmarkForNotes = (bookmarkID, bookmarksSet) => {
+  if(bookmarksSet && bookmarksSet.size > 0) {
+    for(let val of bookmarksSet) {
+      if(val.id === bookmarkID) {
+        return (val.notes.length > 0) ? true : false;
+      }
+    }
+  }
+  return false;
+}
+
+/**
  * Generates summarized results from the given results array. It processes each individual result item
  * to extract relevant information such as node names, descriptions, FDA approval status, paths, evidence,
  * scores, and tags. The summarized results are returned as an array.
  * @param {Array} results - The results array to be summarized.
+ * @param {Set} bookmarks - Set of bookmarked items for a given query
+ * @param {number} confidenceWeight - value representing a parameter for weighted scoring 
+ * @param {number} noveltyWeight - value representing a parameter for weighted scoring 
+ * @param {number} clinicalWeight - value representing a parameter for weighted scoring 
  * @returns {Array} The summarized results array.
 */
-export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, clinicalWeight) => {
+export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, clinicalWeight, bookmarks = null) => {
   if (results === null || results === undefined)
     return [];
 
   let newSummarizedResults = [];
 
-  // // for each individual result item
+  // for each individual result item
   for(const [i, item] of results.results.entries()) {
     // Get the object node's name
     let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]);
@@ -288,8 +339,12 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     let compressedPaths = getCompressedPaths(formattedPaths);
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
+    let itemID = `${item.subject}${item.object}-${i}`;
+    let bookmarkID = (bookmarks === null) ? false : checkBookmarksForItem(itemID, bookmarks);
+    let bookmarked = (!bookmarkID) ? false : true;
+    let hasNotes = checkBookmarkForNotes(bookmarkID, bookmarks);
     let formattedItem = {
-      id: `${item.subject}${item.object}-${i}`,
+      id: itemID,
       subjectNode: subjectNode,
       type: 'biolink:Drug',
       name: itemName,
@@ -302,10 +357,17 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
       scores: item.scores,
       score: maxSugenoScore(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
       tags: tags,
-      rawResult: item
+      rawResult: item,
+      bookmarked: bookmarked, 
+      bookmarkID: bookmarkID,
+      hasNotes: hasNotes
     }
     newSummarizedResults.push(formattedItem);
   }
 
   return newSummarizedResults;
+}
+
+export const getFormattedEdgeLabel = (subjectName, predicateName, objectName) => {
+  return `${subjectName}|${predicateName}|${objectName}`;
 }

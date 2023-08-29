@@ -7,7 +7,8 @@ import { useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import './App.scss';
-import { setCurrentRoot, setCurrentUser, setCurrentPrefs } from './Redux/rootSlice';
+import { handleFetchErrors } from './Utilities/utilities';
+import { setCurrentRoot, setCurrentUser, setCurrentPrefs, setCurrentConfig } from './Redux/rootSlice';
 import { getUserProfile, getUserPreferences, defaultPrefs } from './Utilities/userApi';
 
 const App = ({children}) => {
@@ -30,8 +31,6 @@ const App = ({children}) => {
   }
 
   useEffect(()=>{
-    if(root !== "main")
-      return;
 
     const fetchUser = async () => {
       let currentUser = null;
@@ -51,7 +50,22 @@ const App = ({children}) => {
 
       dispatch(setCurrentPrefs(prefs.preferences));
     };
+
+    const fetchConfig = async () => {
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      };
+      let config = await fetch(`/${root}/api/v1/pub/config`, requestOptions)
+        .then(response => handleFetchErrors(response))
+        .then(response => response.json());
+
+      dispatch(setCurrentConfig(config));
+    }
   
+    fetchConfig();
+    if(root !== "main")
+      return;
     fetchUser();
     fetchPrefs();
   },[dispatch, root]);

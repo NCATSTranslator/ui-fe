@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { getUserPreferences, defaultPrefs, prefKeyToString, updateUserPreferences } from '../../Utilities/userApi';
-import { useDispatch, useSelector } from 'react-redux';
-import { currentPrefs, setCurrentPrefs } from '../../Redux/rootSlice';
+import { defaultPrefs, prefKeyToString, updateUserPreferences } from '../../Utilities/userApi';
+import { useSelector } from 'react-redux';
+import { currentPrefs } from '../../Redux/rootSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Button from '../FormFields/Button';
@@ -11,25 +11,16 @@ import { cloneDeep } from 'lodash';
 
 const UserPreferences = () => {
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const initPrefs = useSelector(currentPrefs);
   // const userPrefs = useRef(initPrefs);
   const [userPrefs, setUserPrefs] = useState(initPrefs);
   const prefsSavedToast = () => toast.success("Preferences saved!");
 
-  const updatePrefs = async () => {
-    let prefs = await getUserPreferences(()=>{console.warn("no prefs found for this user, setting to default prefs.")});
-    if(prefs === undefined)
-      prefs = defaultPrefs;
-
-    setUserPrefs(prefs.preferences);
-    dispatch(setCurrentPrefs(prefs.preferences));
-  }
-
   const handleSubmitUserPrefs = async (e) => {
     e.preventDefault();
     
-    let response = await updateUserPreferences(userPrefs);
+    await updateUserPreferences(userPrefs);
     console.log('new prefs sent: ', userPrefs);
     prefsSavedToast();
   }

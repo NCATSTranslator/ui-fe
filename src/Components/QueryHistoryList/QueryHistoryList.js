@@ -29,6 +29,8 @@ const QueryHistoryList = () => {
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [exportQueryID, setExportQueryID] = useState(null);
+  const [exportLabel, setExportLabel] = useState(null);
+  const [exportTypeID, setExportTypeID] = useState(null);
 
   const handleRemoveHistoryItem = (i) => {
     let temp = cloneDeep(queryHistoryState);
@@ -42,7 +44,6 @@ const QueryHistoryList = () => {
   }, [queryHistoryState]);
 
   const handleClick = (query) => {
-    // navigate(getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, query.id));
     navigate(`/${root}/${getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, query.id)}`);
   }
 
@@ -69,6 +70,8 @@ const QueryHistoryList = () => {
 
   const handleExportClick = (e, query) => {
     e.stopPropagation();
+    setExportLabel(query?.item?.node?.label);
+    setExportTypeID(query?.item?.type?.id);
     setExportQueryID(query.id);
   }
     
@@ -93,6 +96,8 @@ const QueryHistoryList = () => {
           handleShareModalClose();
         }} 
         qid={exportQueryID}
+        label={exportLabel}
+        typeID={exportTypeID}
       />
       <div className={styles.searchBarContainer}>
         <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form}>

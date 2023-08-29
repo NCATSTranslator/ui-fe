@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useRef} from "react";
+import {useState, useEffect, useCallback, useRef} from "react";
 import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
 import Select from "../FormFields/Select";
@@ -31,6 +31,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
   const [pubmedEvidence, setPubmedEvidence] = useState([]);
   const [sources, setSources] = useState([]);
   const clinicalTrials = useRef([]);
+  const miscEvidence = useRef([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState({});
@@ -82,7 +83,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
     if(!Array.isArray(edgeGroup) && typeof edgeGroup === 'object') {
       const re = edgeGroup.edges[0];
       const formatted = edgeGroup.predicates.map((p) => {
-        return `${re.subject.names[0].toLowerCase()} ${p.toLowerCase()} ${re.object.names[0].toLowerCase()}`;
+        return `${re.subject.name.toLowerCase()} ${p.toLowerCase()} ${re.object.name.toLowerCase()}`;
       });
       setFormattedEdges(formatted);
     } else {
@@ -99,6 +100,8 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
     if(isOpen) {
       setPubmedEvidence(cloneDeep(currentEvidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
       clinicalTrials.current = cloneDeep(currentEvidence.publications.filter(item => item.type === 'NCT'));
+      miscEvidence.current = cloneDeep(currentEvidence.publications.filter(item => item.type === 'other'))
+        .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
       let displayedSources = currentEvidence.sources; 
       if (isAll) {
         displayedSources = currentEvidence.distinctSources;
@@ -254,7 +257,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
 
   const fetchPubmedData = useCallback(async () => {
     const metadata = processedEvidenceIDs.map(async (ids, i) => {
-      const response = await fetch(`https://3md2qwxrrk.us-east-1.awsapprunner.com/publications?pubids=${ids}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`)
+      const response = await fetch(`https://docmetadata.transltr.io/publications?pubids=${ids}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`)
       .then(response => response.json())
       .then(data => {
         evidenceToUpdate.current = {...evidenceToUpdate.current, ...data.results } ;
@@ -337,6 +340,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                           loading={isLoading}
                           useIcon
                           className={styles.loadingBar}
+                          loadingText="Retrieving Evidence"
                         />
                       }
                       {
@@ -345,13 +349,17 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                           {
                             displayedPubmedEvidence.map((item, i)=> {
                               const edge = Object.values(item.edges)[0];
+                              const splitEdge = edge.label.split("|");
+                              const subject = splitEdge[0];
+                              const predicate = splitEdge[1];
+                              const object = splitEdge[2];
                               return (
                                 <div className={styles.evidenceItem} key={i}>
                                   <span className={`${styles.cell} ${styles.relationship} relationship`}>
                                     {
                                       edge &&
                                       <span>
-                                        <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
+                                        <span>{subject}</span><strong>{predicate}</strong><span>{object}</span>
                                       </span>
                                     }
                                   </span>
@@ -435,13 +443,54 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                       {
                         clinicalTrials.current.map((item, i)=> {
                           const edge = Object.values(item.edges)[0];
+                          const splitEdge = edge.label.split("|");
+                          const subject = splitEdge[0];
+                          const predicate = splitEdge[1];
+                          const object = splitEdge[2];
                           return (
                             <div className={styles.evidenceItem} key={i}>
                               <span className={`${styles.cell} ${styles.relationship} relationship`}>
                                 {
                                   edge &&
                                   <span>
-                                    <span>{edge.subject}</span><strong>{edge.predicate}</strong><span>{edge.object}</span>
+                                    <span>{subject}</span><strong>{predicate}</strong><span>{object}</span>
+                                  </span>
+                                }
+                              </span>
+                              <div className={`${styles.cell} ${styles.link} link`}>
+                                {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
+                              </div>
+                            </div>
+                          )
+                        })
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+              {
+                miscEvidence.current.length > 0 &&
+                <div heading="Miscellaneous">
+                  <div className={`${styles.tableBody} ${styles.clinicalTrials} ${styles.misc}`}>
+                    <div className={`${styles.tableHead}`}>
+                      <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
+                      <div className={`${styles.head} ${styles.link}`}>Link</div>
+                    </div>
+                    <div className={styles.evidenceItems}>
+                      {
+                        miscEvidence.current.map((item, i) => {
+                          const edge = Object.values(item.edges)[0];
+                          const splitEdge = edge.label.split("|");
+                          const subject = splitEdge[0];
+                          const predicate = splitEdge[1];
+                          const object = splitEdge[2];
+                          return (
+                            <div className={styles.evidenceItem} key={i}>
+                              <span className={`${styles.cell} ${styles.relationship} relationship`}>
+                                {
+                                  edge &&
+                                  <span>
+                                    <span>{subject}</span><strong>{predicate}</strong><span>{object}</span>
                                   </span>
                                 }
                               </span>
@@ -470,9 +519,10 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                       {
                         sources.map((src, i) => { 
                           const edge = Object.values(src.edges)[0];
-                          const subjectName = capitalizeAllWords(edge.subject);
-                          const predicateName = capitalizeAllWords(edge.predicate);
-                          const objectName = capitalizeAllWords(edge.object);
+                          const splitEdge = edge.label.split("|");
+                          const subject = splitEdge[0];
+                          const predicate = splitEdge[1];
+                          const object = splitEdge[2];
                           const name = (!Array.isArray(src) && typeof src === 'object') ? src.name: '';
                           const url = (!Array.isArray(src) && typeof src === 'object') ? src.url: src;
                           return(
@@ -480,9 +530,9 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
                               { !isAll &&
                                 <span className={`${styles.cell} ${styles.relationship} relationship`}>
                                   <span className={styles.sourceEdge} key={i}>
-                                    <span>{subjectName}</span>
-                                    <strong>{predicateName}</strong>
-                                    <span>{objectName}</span>
+                                    <span>{subject}</span>
+                                    <strong>{predicate}</strong>
+                                    <span>{object}</span>
                                   </span>
                                 </span>
                               }

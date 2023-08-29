@@ -26,10 +26,10 @@ export const generateCsvFromItem = (item, csvSetter) => {
             return source.edges[edgeId] !== undefined;
           }).map((source) => source.url);
           const epc = pubs.concat(sources);
-          const subjectName = edge.subject.names[0];
+          const subjectName = edge.subject.name;
           const subjectCurie = edge.subject.id;
           const predicate = edge.predicate;
-          const objectName = edge.object.names[0];
+          const objectName = edge.object.name;
           const objectCurie = edge.object.id;
           csvData.push([
             resultName, resultCurie, targetName, targetCurie,

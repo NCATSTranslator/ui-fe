@@ -105,7 +105,7 @@
   width: calc(100% - 40px);
 }
 
-button {
+button, .button {
   box-shadow: $dropShadow;
   &:hover {
     box-shadow: $dropShadowHover;

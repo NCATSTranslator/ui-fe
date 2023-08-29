@@ -8,7 +8,7 @@
     display: grid;
     justify-items: center;
     align-content: center;
-    padding: 0;
+    padding: 100px 0;
   }
   .tableHead {
     border-bottom: 1px solid $midGray;
@@ -71,6 +71,12 @@
         grid-template-columns: 1fr 1fr;
       }
     }
+    &.misc {
+      .link svg {
+        min-width: 20px;
+        min-height: 20px;
+      }
+    }
     &.sources {
       .tableHead, .evidenceItem {
         display: grid;
@@ -122,9 +128,6 @@
           display: -webkit-box;
           overflow: hidden;
           text-overflow: ellipsis;
-        }
-        &.sourceItem {
-          height: 20px;
         }
         &.title {
           text-align: center;
