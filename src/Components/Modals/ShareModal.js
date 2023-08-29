@@ -6,12 +6,12 @@ import { currentQuery} from "../../Redux/querySlice";
 import { useSelector } from 'react-redux';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 
-const ShareModal = ({isOpen, onClose, qid}) => {
+const ShareModal = ({isOpen, onClose, qid, label = null, typeID = null}) => {
 
   let storedQuery = useSelector(currentQuery);
   const root = useSelector(currentRoot);
-  const sharedQueryLabel = new URLSearchParams(window.location.search).get("l")
-  const sharedQueryType = new URLSearchParams(window.location.search).get("t")
+  const sharedQueryLabel = (label) ? label : new URLSearchParams(window.location.search).get("l")
+  const sharedQueryType = (typeID) ? typeID : new URLSearchParams(window.location.search).get("t")
   const sharedQueryItemID = new URLSearchParams(window.location.search).get("i")
   const queryLabel = (sharedQueryLabel) 
     ? sharedQueryLabel 
