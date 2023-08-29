@@ -17,9 +17,12 @@ const Header = ({children, handleFeedbackModalOpen}) => {
   const user = useSelector(currentUser);
   const config = useSelector(currentConfig);
 
-  const handleLogoutClick = () => {
-    handleLogout(config?.social_providers?.una?.client_id);
-  } 
+  const clientID = config?.social_providers?.una?.client_id;
+  const redirectURL = `${window.location.origin}/main/logout`;
+
+  const logoutURL = (clientID)
+    ? `https://a-ci.ncats.io/_api/auth/transltr/session/end?client_id=${clientID}&post_logout_redirect_uri=${redirectURL}`
+    : false;
 
   return (
     <header className={styles.header}>
@@ -49,7 +52,9 @@ const Header = ({children, handleFeedbackModalOpen}) => {
                         : <img src={defaultPfp} alt="user profile" className={styles.profilePic}/>}
                     </div>
                   </Link>
-                  <button className={styles.login} onClick={handleLogoutClick} >Log Out</button>
+                  {
+                    logoutURL && <a className={styles.login} href={logoutURL} >Log Out</a>
+                  }
                 </>
             }
           </div>
