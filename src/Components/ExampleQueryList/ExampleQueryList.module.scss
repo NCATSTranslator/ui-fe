@@ -1,5 +1,11 @@
 @import "../../Assets/Styles/variables";
 
+.demoDisclaimer {
+  text-align: center;
+  font-weight: 700;
+  color: $darkGray;
+  margin: 0 0 35px;
+}
 .subTwo {
   margin: 10px $s 0 0;
   font-size: 14px;
@@ -21,13 +27,12 @@
   }
 }
 .examplesContainer {
-  margin: 0 0 35px;
+  margin: 12px 0 35px;
 }
 .examples {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  margin: 50px 0 0;
   white-space: nowrap;
 
   .exampleList {

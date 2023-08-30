@@ -19,16 +19,36 @@
     display: flex;
     align-items: center;
   }
-  // .bookmarkContainer, .notesContainer {
-  //   &.filled {
-  //     svg {
-  //       fill: $purpleOne;
-  //       &:hover {
-  //         fill: $purpleOne50;
-  //       }
-  //     }
-  //   }
-  // }
+  .tags {
+    margin: 10px 0 0;
+  }
+  .tag {
+    font-size: 14px;
+    background-color: transparent;
+    box-shadow: none;
+    color: $purpleTwo;
+    border: 1px solid $purpleTwo;
+    margin: 0 10px 10px 0;
+    padding: 6px;
+    border-radius: 8px;
+    transition: all .25s ease;
+    opacity: 1 !important;
+    &:hover {
+      box-shadow: none;
+      text-decoration: underline;
+      background-color: $purpleTwo;
+      color: $white;
+    }
+    &:last-of-type {
+      margin: 0 0 10px;
+    }
+    &.active {
+      box-shadow: none;
+      text-decoration: underline;
+      background-color: $purpleTwo;
+      color: $white;
+    }
+  }
   .bookmarkContainer {
     justify-content: space-between;
   }
@@ -124,7 +144,7 @@
   .accordionPanel {
     grid-column: 1/6;
     &.hasDescription {
-      min-height: 30px;
+      min-height: 45px;
     }
     &.open {
       padding: 0 0 20px;
@@ -133,9 +153,12 @@
       &>div {
         display: block !important;
       }
+      button {
+        opacity: 0;
+      }
     }
     .container {
-      max-width: calc(100% - 350px);
+      max-width: calc(100% - 300px);
       padding: 0;
       p, p span, p mark {
         font-size: 12px;
