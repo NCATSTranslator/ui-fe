@@ -1,6 +1,6 @@
 import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity } from './utilities';
 import { cloneDeep } from "lodash";
-import { maxSugenoScore } from "../Utilities/sugeno";
+import { maxSugenoScore } from "../Utilities/scoring";
 
 /**
  * Formats the evidence information for the provided paths by extracting and organizing publications and sources.
