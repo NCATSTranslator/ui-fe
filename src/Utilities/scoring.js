@@ -22,6 +22,10 @@ export const maxSugenoScore = function(scores, confidenceWeight, noveltyWeight, 
   return maxScore;
 }
 
+export const displayScore = function(score, decimalPlaces=2) {
+  return math.format(score, {notation: 'fixed', precision: decimalPlaces});
+}
+
 const computeSugeno = function(confidence, novelty, clinical,
     confidenceWeight, noveltyWeight, clinicalWeight) {
   const a = confidenceWeight;
