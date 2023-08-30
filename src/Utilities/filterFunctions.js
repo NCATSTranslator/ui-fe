@@ -1,6 +1,10 @@
 export const isFacet = (filter) => {
-  const family = filterFamily(filter);
-  return validFacetFamilies.has(family);
+  // const family = filterFamily(filter);
+  // return validFacetFamilies.has(family);
+  if(filter.value)
+    return true;
+  else 
+    return false;
 }
 
 export const isFdaFilter = (filter) => {
@@ -28,4 +32,4 @@ const filterFamily = (filter) => {
 }
 
 // TODO: Make this a configuration
-const validFacetFamilies = new Set(['role', 'rc', 'pc', 'fda', 'ara', 'di']);
+const validFacetFamilies = new Set(['role', 'rc', 'pc', 'fda', 'ara', 'di', 'cc']);
