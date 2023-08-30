@@ -245,7 +245,7 @@ const UserSaves = () => {
                           </div>
                           {
                             queryObject.saves && Array.from(queryObject.saves).length > 0 &&
-                            <p className={styles.numSaves}>{Array.from(queryObject.saves).length} saved items</p>
+                            <p className={styles.numSaves}>{Array.from(queryObject.saves).length} saved item{(Array.from(queryObject.saves).length > 1) && "s"}</p>
                           }
                           <a href={shareURL} target="_blank" rel="noreferrer" className={styles.link}><ExternalLink/></a>
                         </div>
