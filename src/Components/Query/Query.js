@@ -363,31 +363,25 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     <Gene/>Genes <span className={styles.dualArrows}><ArrowForward/><ArrowForward/></span> <Chemical/>Chemicals
                   </button>
                 </div>
-                {(selectedUpperButton && selectedUpperButton > 0)
-                  ? 
-                    <div className={`${styles.middleButtons} visible`}>
-                      <button className={`${styles.middleButton} ${selectedMiddleButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectMiddleButton(0)}>
-                        Find chemicals that regulate a particular gene
-                      </button>
-                      <button className={`${styles.middleButton} ${selectedMiddleButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectMiddleButton(1)}>
-                        Find genes regulated by a particular chemical
-                      </button>
-                    </div>
-                  :
-                    <div className={`${styles.middleButtons}`}></div>
+                {selectedUpperButton > 0 &&  
+                  <div className={`${styles.middleButtons} visible`}>
+                    <button className={`${styles.middleButton} ${selectedMiddleButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectMiddleButton(0)}>
+                      Find chemicals that regulate a particular gene
+                    </button>
+                    <button className={`${styles.middleButton} ${selectedMiddleButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectMiddleButton(1)}>
+                      Find genes regulated by a particular chemical
+                    </button>
+                  </div>
                 }
-                {(selectedUpperButton && selectedUpperButton > 0 && selectedMiddleButton !== null)
-                  ? 
-                    <div className={`${styles.lowerButtons} visible`}>
-                      <button className={`${styles.lowerButton} ${selectedLowerButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(0, selectedLowerButton)}>
-                        Upregulators
-                      </button>
-                      <button className={`${styles.lowerButton} ${selectedLowerButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(1, selectedLowerButton)}>
-                        Downregulators
-                      </button>
-                    </div>
-                  :
-                    <div className={`${styles.lowerButtons}`}></div>
+                {selectedUpperButton > 0 && selectedMiddleButton !== null &&
+                  <div className={`${styles.lowerButtons} visible`}>
+                    <button className={`${styles.lowerButton} ${selectedLowerButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(0, selectedLowerButton)}>
+                      Upregulators
+                    </button>
+                    <button className={`${styles.lowerButton} ${selectedLowerButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(1, selectedLowerButton)}>
+                      Downregulators
+                    </button>
+                  </div>
                 }
                 {isError &&
                   <p className={styles.error}>{errorText}</p>

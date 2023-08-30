@@ -1,4 +1,4 @@
-import * as math from 'mathjs';
+import { equal, larger, format, polynomialRoot, largerEq, min, max, round, Complex } from 'mathjs';
 
 export const maxSugenoScore = function(scores, confidenceWeight, noveltyWeight, clinicalWeight) {
   const scorePairs = scores.map((s) => {
@@ -12,9 +12,9 @@ export const maxSugenoScore = function(scores, confidenceWeight, noveltyWeight, 
 
   let maxScore = scorePairs[0];
   for (let i = 1; i < maxScore.length; i++) {
-    if (math.larger(scorePairs[i].sugeno, maxScore.sugeno) ||
-        (math.equal(scorePairs[i].sugeno, maxScore.sugeno) &&
-         math.larger(scorePairs[i].weightedMean, maxScore.weightedMean))) {
+    if (larger(scorePairs[i].sugeno, maxScore.sugeno) ||
+        (equal(scorePairs[i].sugeno, maxScore.sugeno) &&
+         larger(scorePairs[i].weightedMean, maxScore.weightedMean))) {
       maxScore = scorePairs[i];
     }
   }
@@ -22,19 +22,23 @@ export const maxSugenoScore = function(scores, confidenceWeight, noveltyWeight, 
   return maxScore;
 }
 
+export const displayScore = function(score, decimalPlaces=2) {
+  return format(score, {notation: 'fixed', precision: decimalPlaces});
+}
+
 const computeSugeno = function(confidence, novelty, clinical,
     confidenceWeight, noveltyWeight, clinicalWeight) {
   const a = confidenceWeight;
   const b = noveltyWeight;
   const c = clinicalWeight;
-  const solutions = math.polynomialRoot(a+b+c-1, a*b+a*c+b*c, a*b*c);
+  const solutions = polynomialRoot(a+b+c-1, a*b+a*c+b*c, a*b*c);
   let lambda = 0;
   solutions.forEach((s) => {
     if (isComplex(s)) {
       s = s.re;
     }
 
-    if (!(math.equal(s, 0)) && math.largerEq(s, -1)) {
+    if (!(equal(s, 0)) && largerEq(s, -1)) {
       lambda = s;
     }
   });
@@ -60,15 +64,15 @@ const computeSugeno = function(confidence, novelty, clinical,
   const weightKeys = Object.keys(weightsSorted);
   const mins = [];
   for (let i = 0; i < weightKeys.length; ++i) {
-    mins.push(math.min(allScores[i].score, weightsSorted[weightKeys[i]]));
+    mins.push(min(allScores[i].score, weightsSorted[weightKeys[i]]));
   }
 
   // Sugeno score
-  return math.max(...mins);
+  return max(...mins);
 } 
 
 const isComplex = function(x) {
-  return (x instanceof math.Complex);
+  return (x instanceof Complex);
 } 
 
 const computeWeightSets = function(lambda, confidenceWeight, noveltyWeight, clinicalWeight, n=2) {
@@ -94,7 +98,7 @@ const computeWeightSets = function(lambda, confidenceWeight, noveltyWeight, clin
           tf = `${tf}${p[j]}`;
         }
       }
-      ws[t] = math.round(ws[tl] + ws[tf] + (lambda * ws[tl] * ws[tf]), 2);
+      ws[t] = round(ws[tl] + ws[tf] + (lambda * ws[tl] * ws[tf]), 2);
     }
   }
 

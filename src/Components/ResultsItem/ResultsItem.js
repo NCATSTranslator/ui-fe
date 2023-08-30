@@ -12,11 +12,11 @@ import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
-import { round } from 'mathjs';
 import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
 import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
+import { displayScore } from '../../Utilities/scoring';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -84,8 +84,8 @@ const getCurrentEvidence = (result) => {
   return evidenceObject;
 }
 
-const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, 
-  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null,
+const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, handleFilter, activeFilters,
+  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags,
   hasNotes, activateNotes, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, handleBookmarkError = ()=>{}}) => {
 
   const root = useSelector(currentRoot);
@@ -246,6 +246,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     }
   }
 
+  const handleTagClick = (tagID, tagObject) => {
+    let newObj = {};
+    newObj.type = tagID;
+    newObj.value = tagObject.name;
+    handleFilter(newObj);
+  }
+
   useEffect(() => {
     setItemBookmarkID(bookmarkID);
   }, [bookmarkID]);
@@ -308,7 +315,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       </div>
       <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
         <span className={styles.score}>
-          <span className={styles.scoreNum}>{item.score === null ? '0' : round(item.score.sugeno, 2) }</span>
+          <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.sugeno) }</span>
         </span>
       </div>
       <CSVLink
@@ -322,11 +329,33 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         <ChevDown/>
       </button>
       <AnimateHeight
-        className={`${styles.accordionPanel} ${isExpanded ? styles.open : styles.closed } ${item.description ? styles.hasDescription : styles.noDescription }`}
+        className={`${styles.accordionPanel} 
+          ${isExpanded ? styles.open : styles.closed } 
+          ${item.description || item.tags.some(item=>item.includes("role")) ? styles.hasDescription : styles.noDescription }
+        `}
         duration={500}
         height={height}
         >
         <div className={styles.container}>
+          {
+            item.tags && 
+            <div className={styles.tags}>
+              {
+                availableTags &&
+                item.tags.map((tagID) => {
+                  if(!tagID.includes("role"))
+                    return;
+                  let tagObject = availableTags[tagID];
+                  let activeClass = (activeFilters.some((item)=> item.type === tagID && item.value === tagObject.name))
+                    ? styles.active
+                    : styles.inactive;
+                  return(
+                    <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                  )
+                })
+              }
+            </div>
+          }
           {
             item.description &&
             <p>

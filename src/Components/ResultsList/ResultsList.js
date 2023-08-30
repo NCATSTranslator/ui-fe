@@ -837,6 +837,9 @@ const ResultsList = ({loading}) => {
                             handleBookmarkError={handleBookmarkError}
                             bookmarkAddedToast={bookmarkAddedToast}
                             bookmarkRemovedToast={bookmarkRemovedToast}
+                            availableTags={availableTags}
+                            handleFilter={handleFilter}
+                            activeFilters={activeFilters}
                           />
                         )
                       })

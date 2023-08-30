@@ -1,26 +1,49 @@
 @import "../../Assets/Styles/variables";
 
-
+.demoDisclaimer {
+  text-align: center;
+  font-weight: 700;
+  color: $darkGray;
+  margin: 0 0 35px;
+}
+.subTwo {
+  margin: 10px $s 0 0;
+  font-size: 14px;
+}
+.subTwo, .showButton {
+  display: flex;
+  font-weight: 700;
+  color: $darkGray;
+}
+.showButton {
+  margin: 0 auto 16px;
+  display: flex;
+  background-color: transparent;
+  box-shadow: none;
+  font-size: 16px;
+  &:hover {
+    box-shadow: none;
+    text-decoration: underline;
+  }
+}
+.examplesContainer {
+  margin: 12px 0 35px;
+}
 .examples {
   display: flex;
   justify-content: center;
-  align-items: center;
-  margin: 50px 0 35px;
+  align-items: flex-start;
   white-space: nowrap;
-  .subTwo {
-    display: flex;
-    font-size: 14px;
-    font-weight: 700;
-    color: $darkGray;
-    margin: 0 $s 0 0;
-  }
+
   .exampleList {
-    display: grid;
-    grid-template-columns: repeat(3, auto);
-    grid-gap: 12px;
-    @media (min-width: $desktop) {
-      display: flex;
-      flex-wrap: wrap;
+    & > div {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      grid-gap: 12px;
+      @media (min-width: $desktop) {
+        display: flex;
+        flex-wrap: wrap;
+      }
     }
     .button {
       background-color: $white;

@@ -61,6 +61,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let newObj = global.structuredClone(objectToUpdate);
     newObj.type = facetID;
     newObj.value = label;
+    console.log(newObj);
     setterFunction(objectToUpdate);
     onFilter(newObj);
   }
