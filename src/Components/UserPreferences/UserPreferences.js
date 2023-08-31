@@ -96,9 +96,9 @@ const UserPreferences = () => {
             </form>
           </>
         :
-        <div>
-          <h4 className={styles.heading}>Use the Log In link above in order to manage and save your preferences.</h4>
-        </div>
+          <div>
+            <h4 className={styles.heading}>Use the Log In link above in order to manage and save your preferences.</h4>
+          </div>
       }
     </div>
   )
