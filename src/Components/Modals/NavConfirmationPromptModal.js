@@ -35,8 +35,8 @@ const NavConfirmationModal = ({blocker}) => {
         <p className={styles.subtitle}>Note: You can revisit this query later by visiting the Search History page.</p>
       </div>
       <div className={styles.buttonsContainer}>
-        <Button handleClick={() => blocker.proceed?.()} className={styles.button} isSecondary>Yes, let me through</Button>
-        <Button handleClick={() => blocker.reset?.()} className={styles.button}>No, stay here</Button>
+        <Button handleClick={() => blocker.proceed?.()} className={styles.button} isSecondary>Navigate away from the results page</Button>
+        <Button handleClick={() => blocker.reset?.()} className={styles.button}>Stay on the results page</Button>
       </div>
     </Modal>
   )
