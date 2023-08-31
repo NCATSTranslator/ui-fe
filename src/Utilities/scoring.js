@@ -11,7 +11,7 @@ export const maxSugenoScore = function(scores, confidenceWeight, noveltyWeight, 
   });
 
   let maxScore = scorePairs[0];
-  for (let i = 1; i < maxScore.length; i++) {
+  for (let i = 1; i < scorePairs.length; i++) {
     if (larger(scorePairs[i].sugeno, maxScore.sugeno) ||
         (equal(scorePairs[i].sugeno, maxScore.sugeno) &&
          larger(scorePairs[i].weightedMean, maxScore.weightedMean))) {
