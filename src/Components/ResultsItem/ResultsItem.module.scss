@@ -144,7 +144,7 @@
   .accordionPanel {
     grid-column: 1/6;
     &.hasDescription {
-      min-height: 45px;
+      min-height: 42px;
     }
     &.open {
       padding: 0 0 20px;
