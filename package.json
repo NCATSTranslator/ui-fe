@@ -68,13 +68,11 @@
   "devDependencies": {
     "@testing-library/cypress": "^8.0.3",
     "@testing-library/jest-dom": "^5.16.5",
-    "@typescript-eslint/parser": "^6.5.0",
     "cypress": "^10.9.0",
     "dotenv-cli": "^5.1.0",
     "env-cmd": "^10.1.0",
     "react-query": "^3.34.19",
     "react-scripts": "^5.0.1",
-    "typescript": "^5.2.2",
     "web-vitals": "^2.1.4"
   }
 }
