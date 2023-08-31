@@ -36,21 +36,21 @@ export const sortEvidenceHighLow = (items) => {
 
 export const sortScoreLowHigh = (items) => {
   return items.sort((a, b) => {
-    if (equal(a.score.sugeno, b.score.sugeno)) {
-      return a.score.weightedMean - b.score.weightedMean;
+    if (equal(a.score.main, b.score.main)) {
+      return a.score.secondary - b.score.secondary;
     }
 
-    return a.score.sugeno - b.score.sugeno;
+    return a.score.main - b.score.main;
   });
 }
 
 export const sortScoreHighLow = (items) => {
   return items.sort((a, b) => {
-    if (equal(a.score.sugeno, b.score.sugeno)) {
-      return b.score.weightedMean - a.score.weightedMean;
+    if (equal(a.score.main, b.score.main)) {
+      return b.score.secondary - a.score.secondary;
     }
 
-    return b.score.sugeno - a.score.sugeno;
+    return b.score.main - a.score.main;
   });
 }
 

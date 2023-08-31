@@ -1,29 +1,51 @@
 import { equal, larger, format, polynomialRoot, largerEq, min, max, round, Complex } from 'mathjs';
 
-export const maxSugenoScore = function(scores, confidenceWeight, noveltyWeight, clinicalWeight) {
-  const scorePairs = scores.map((s) => {
+export const score = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
+  return maxNormalizedScore(scoreComponents);
+}
+
+export const displayScore = function(score, decimalPlaces=2) {
+  return format(score, {notation: 'fixed', precision: decimalPlaces});
+}
+
+const maxNormalizedScore = function(scoreComponents) {
+  const normalizedScorePairs = scoreComponents.map((s) => {
+    const scaledNormalizedScore = 5 * s.normalized_score / 100;
     return {
-      sugeno: computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
+      main: scaledNormalizedScore,
+      secondary: scaledNormalizedScore
+    };
+  });
+
+  return maxScorePair(normalizedScorePairs);
+}
+
+// Not used until further notice
+const maxSugenoScore = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
+  const sugenoPairs = scoreComponents.map((s) => {
+    return {
+      main: computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
         confidenceWeight, noveltyWeight, clinicalWeight),
-      weightedMean: computeWeightedMean(s.confidence, s.novelty, s.clinical_evidence,
+      secondary: computeWeightedMean(s.confidence, s.novelty, s.clinical_evidence,
         confidenceWeight, noveltyWeight, clinicalWeight)
     };
   });
 
+  return maxScorePair(sugenoPairs);
+}
+
+
+const maxScorePair = function (scorePairs) {
   let maxScore = scorePairs[0];
-  for (let i = 1; i < maxScore.length; i++) {
-    if (larger(scorePairs[i].sugeno, maxScore.sugeno) ||
-        (equal(scorePairs[i].sugeno, maxScore.sugeno) &&
-         larger(scorePairs[i].weightedMean, maxScore.weightedMean))) {
+  for (let i = 1; i < scorePairs.length; i++) {
+    if (larger(scorePairs[i].main, maxScore.main) ||
+        (equal(scorePairs[i].main, maxScore.main) &&
+         larger(scorePairs[i].secondary, maxScore.secondary))) {
       maxScore = scorePairs[i];
     }
   }
 
   return maxScore;
-}
-
-export const displayScore = function(score, decimalPlaces=2) {
-  return format(score, {notation: 'fixed', precision: decimalPlaces});
 }
 
 const computeSugeno = function(confidence, novelty, clinical,

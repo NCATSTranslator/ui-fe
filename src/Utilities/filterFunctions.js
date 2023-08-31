@@ -1,10 +1,6 @@
 export const isFacet = (filter) => {
-  // const family = filterFamily(filter);
-  // return validFacetFamilies.has(family);
-  if(filter.value)
-    return true;
-  else 
-    return false;
+  const family = filterFamily(filter);
+  return validFacetFamilies.has(family);
 }
 
 export const isFdaFilter = (filter) => {

@@ -315,7 +315,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       </div>
       <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
         <span className={styles.score}>
-          <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.sugeno) }</span>
+          <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
         </span>
       </div>
       <CSVLink

@@ -1,6 +1,6 @@
 import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity } from './utilities';
 import { cloneDeep } from "lodash";
-import { maxSugenoScore } from "../Utilities/scoring";
+import { score } from "../Utilities/scoring";
 
 /**
  * Formats the evidence information for the provided paths by extracting and organizing publications and sources.
@@ -355,7 +355,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
       evidence: getFormattedEvidence(formattedPaths, results),
       fdaInfo: fdaInfo,
       scores: item.scores,
-      score: maxSugenoScore(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
+      score: score(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
       tags: tags,
       rawResult: item,
       bookmarked: bookmarked, 
