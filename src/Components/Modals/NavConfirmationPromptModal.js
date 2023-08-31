@@ -17,7 +17,7 @@ const NavConfirmationModal = ({blocker}) => {
 
   const handleClose = () => {
     blocker.reset?.();
-    setModalIsOpen(false)
+    setModalIsOpen(false);
   }
 
   return (
