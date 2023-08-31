@@ -231,9 +231,20 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
               return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
             })
           :
-            Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
-              return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
-            })
+            (type === 'chemicalType')
+            ?
+              Object.entries(groupedTags[type]).sort((a,b)=> { 
+                if(a[1].name === "Other") return 1; 
+                if(b[1].name === "Other") return -1; 
+                return (a[1].name > b[1].name ? 1 : -1)})
+                .slice(0, countsToShow[type]).map((tag, j) => {
+                  return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
+                }
+              )
+            :
+              Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
+                return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
+              })
         }
         {
           (type !== "role") &&
