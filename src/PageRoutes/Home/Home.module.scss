@@ -28,18 +28,27 @@
     }
     .arrow {
       height: 100px;
-      min-width: 100px; 
+      min-width: 100px;
+      transform: rotate(90deg); 
+      margin: 0 auto;
+      @media screen and (min-width: $desktop) {
+        transform: none;
+        margin: 0;
+      }
       path {
         fill: $purpleOne;
       }
     }
     .image {
       width: auto;
+      margin: 0 auto;
+      @media screen and (min-width: $desktop) {
+        margin: 0;
+      }
     }
   }
   .workflowHeadings {
-    display: grid;
-    justify-content: center;
+    display: none;
     align-items: center;
     margin-top: 20px;
     @media screen and (min-width: $desktop) {
