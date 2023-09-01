@@ -25,7 +25,6 @@ const FAQSidebar = ({articles}) => {
               articles.map((article, i)=> {
                 let isExtLink = (article.link) ? true : false;
                 let link = (article.link) ? article.link : `/${rootPrefix}/${article.slug}`;
-                console.log(link);
                 return (
                   <li key={i} className={(article.slug === activeSlug ? styles.active : '')}>
                     {

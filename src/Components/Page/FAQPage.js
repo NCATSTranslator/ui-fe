@@ -55,8 +55,8 @@ const FAQPage = ({title, children}) => {
       ]
     },
     {
-      title: 'Forming a Question', 
-      slug: 'forming-a-question',
+      title: 'Logging In', 
+      slug: 'logging-in',
     },
     {
       title: 'Results', 

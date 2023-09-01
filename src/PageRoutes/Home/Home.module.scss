@@ -2,8 +2,8 @@
 
 .homePageContent {
   .container {
-    padding-top: 0;
-    max-width: 1160px;
+    padding: 0;
+    max-width: $desktop;
   }
   .noMargin {
     margin: 0;
@@ -18,13 +18,29 @@
   .section:nth-of-type(even){
     background-color: $lightGray;
   }
+  .images {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    @media screen and (min-width: $desktop) {
+      display: flex;
+      justify-content: space-between;
+    }
+    .arrow {
+      height: 100px;
+      min-width: 100px; 
+      path {
+        fill: $purpleOne;
+      }
+    }
+    .image {
+      width: auto;
+    }
+  }
   .threeCol {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-column-gap: $m;
-    &.images {
-      margin-bottom: $m;
-    }
   }
   .twoCol {
     display: grid;
