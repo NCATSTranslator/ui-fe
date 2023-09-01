@@ -33,17 +33,13 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  white-space: nowrap;
-
+  .subTwo {
+    white-space: nowrap;
+  }
   .exampleList {
     & > div {
-      display: grid;
-      grid-template-columns: repeat(3, auto);
-      grid-gap: 12px;
-      @media (min-width: $desktop) {
-        display: flex;
-        flex-wrap: wrap;
-      }
+      display: flex;
+      flex-wrap: wrap;
     }
     .button {
       background-color: $white;
@@ -62,10 +58,8 @@
       text-decoration: none;
       transition: box-shadow .25s ease;
       box-shadow: $dropShadow;
-      margin: 0 $m 0 0;
-      @media (min-width: $desktop) {
-        margin: 0 $s 0 0;
-      }
+      margin: 0 $s $s 0;
+      white-space: nowrap;
       &:hover {
         box-shadow: $dropShadowHover;
       }
