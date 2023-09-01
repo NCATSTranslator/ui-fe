@@ -1,6 +1,3 @@
-import { useOutletContext, Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { currentRoot } from "../../Redux/rootSlice";
 import howItWorksImage from "../../Assets/Images/howitworks.png";
 import selectRelImage from "../../Assets/Images/selectRel.png";
 import geneQueryImage from "../../Assets/Images/genequery.png";
@@ -15,8 +12,6 @@ import pubsImage from "../../Assets/Images/pubs.png";
 import sourcesImage from "../../Assets/Images/sources.png";
 
 export const LoggingIn = () => {
-  const setFeedbackModalOpen = useOutletContext();
-  const root = useSelector(currentRoot);
 
   return (
     <>

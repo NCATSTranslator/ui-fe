@@ -25,7 +25,7 @@ const Header = ({children, handleFeedbackModalOpen}) => {
       <div className={styles.topBar}>
         <div className={styles.container}>
           <div className={styles.left}>
-            <Link to={`/${root}/`} className={styles.logo}><Logo/></Link>
+            <Link to={`/${root}/`} className={styles.logo} reloadDocument><Logo/></Link>
           </div>
           <div className={styles.right}>
             {

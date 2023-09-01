@@ -36,11 +36,16 @@ const Home = () => {
           <div className={`${styles.container} container`}>
             <h5 className={styles.heading}>Translator Workflow</h5>
             <div className={styles.images}>
-                <img className={styles.image} src={homeOne} alt="" />
-                <ArrowForward className={styles.arrow} />
-                <img className={styles.image} src={homeTwo} alt="" />
-                <ArrowForward className={styles.arrow} />
-                <img className={styles.image} src={homeThree} alt="" />
+              <img className={styles.image} src={homeOne} alt="" />
+              <ArrowForward className={styles.arrow} />
+              <img className={styles.image} src={homeTwo} alt="" />
+              <ArrowForward className={styles.arrow} />
+              <img className={styles.image} src={homeThree} alt="" />
+            </div>
+            <div className={styles.workflowHeadings}>
+              <h6 className={styles.heading}>Select a relationship to explore</h6>
+              <h6 className={styles.heading}>Review and select your favorite results</h6>
+              <h6 className={styles.heading}>Analyze evidence in the workspace</h6>
             </div>
           </div>
         </div>
