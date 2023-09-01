@@ -37,6 +37,23 @@
       width: auto;
     }
   }
+  .workflowHeadings {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    @media screen and (min-width: $desktop) {
+      display: flex;
+      justify-content: space-between;
+    }
+    .heading {
+      width: 390px;
+      text-align: center;
+      &:first-of-type, &:last-of-type {
+        width: 360px;
+      }
+    }
+  }
   .threeCol {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
