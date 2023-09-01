@@ -56,7 +56,7 @@ const newFetchNodesFromInputText = async (inputText, type, prefixes) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   };
-  return fetch(`https://name-resolution-sri-dev.apps.renci.org/lookup?string=${inputText}&offset=0&limit=100&biolink_type=${type}${prefixString}`, nameResolverRequestOptions)
+  return fetch(`https://name-lookup.ci.transltr.io/lookup?string=${inputText}&offset=0&limit=100&biolink_type=${type}${prefixString}`, nameResolverRequestOptions)
 }
 
 export const filterAndSortExamples = (arr, type, direction = null) => {
