@@ -1,9 +1,9 @@
 import React from "react";
 import Query from "../../Components/Query/Query";
-
-import homeOne from "../../Assets/Images/Home/home1.jpg";
-import homeTwo from "../../Assets/Images/Home/home2.jpg";
-import homeThree from "../../Assets/Images/Home/home3.jpg";
+import homeOne from "../../Assets/Images/Home/home1.svg";
+import homeTwo from "../../Assets/Images/Home/home2.svg";
+import homeThree from "../../Assets/Images/Home/home3.svg";
+import {ReactComponent as ArrowForward} from '../../Icons/Directional/arrow_forward.svg';
 // import berkeley from "../../Assets/Images/Logos/berkeley.png";
 // import bma from "../../Assets/Images/Logos/bma.png";
 // import broad from "../../Assets/Images/Logos/broad.png";
@@ -34,22 +34,13 @@ const Home = () => {
       <div className={styles.homePageContent}>
         <div className={styles.section}>
           <div className={`${styles.container} container`}>
-            <h5 className={styles.heading}>How it Works</h5>
-            <div className={`${styles.threeCol} ${styles.images}`}>
-                <img src={homeOne} alt="mockup of query interface" />
-                <img src={homeTwo} alt="mockup of evidence window" />
-                <img src={homeThree} alt="mockup of results page" />
-            </div>
-            <div className={`${styles.threeCol}`}>
-              <div className={styles.colOne}>
-                <p>The Translator Reasoner API (TRAPI) standard  defines a universal format of metadata, structure, and operations for transmitting queries within the Translator architecture and discovering answers. Open-source tools like the Biolink Model provide a high level structure that facilitates harmonization and reasoning across diverse knowledge sources to create these graph-based queries and answers.</p>
-              </div>
-              <div className={styles.colTwo}>
-                <p>Knowledge Providers (KPs) supply domain-specific information found from over 250 various knowledge sources, including curated biomedical databases, electronic health records, and machine learning predictions extracted from clinical data. Autonomous Relay Agents (ARAs) expand upon the knowledge contributed by KPs and use reasoning and inferencing to provide answers to queries.</p>
-              </div>
-              <div className={styles.colThree}>
-                <p>Once all query components have been broken down into a format readable by the Autonomous Relay System (ARS), the query graph is then sent to the ARAs, who distribute it to KPs. A variety of sophisticated reasoning and inference algorithms are applied to the KPs' answers to rank and score results based on attributes such as availability of evidence. Finally, the ARS compiles these results for the user.</p>
-              </div>
+            <h5 className={styles.heading}>Translator Workflow</h5>
+            <div className={styles.images}>
+                <img className={styles.image} src={homeOne} alt="" />
+                <ArrowForward className={styles.arrow} />
+                <img className={styles.image} src={homeTwo} alt="" />
+                <ArrowForward className={styles.arrow} />
+                <img className={styles.image} src={homeThree} alt="" />
             </div>
           </div>
         </div>

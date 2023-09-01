@@ -16,6 +16,7 @@ import Login from './PageRoutes/Login/Login';
 import UserHome from './PageRoutes/UserHome/UserHome';
 import Saves from './PageRoutes/Saves/Saves';
 import { Help } from './PageRoutes/Articles/Help';
+import { LoggingIn } from './PageRoutes/Articles/LoggingIn';
 import { WhatIs } from './PageRoutes/Articles/WhatIs';
 import { HowItWorks } from './PageRoutes/Articles/HowItWorks';
 import { Evidence } from './PageRoutes/Articles/Evidence';
@@ -51,6 +52,10 @@ const routes = [
   {
     path: "help",
     element: <FAQPage title="Frequently Asked Questions"><Help /></FAQPage>
+  },
+  {
+    path: "logging-in",
+    element: <FAQPage title="Frequently Asked Questions"><LoggingIn /></FAQPage>
   },
   {
     path: "what-is-translational-science",

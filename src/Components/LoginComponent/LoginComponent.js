@@ -1,5 +1,5 @@
 import styles from './LoginComponent.module.scss'
-import tempImage from '../../Assets/Images/Home/home1.jpg';
+import loginImage from '../../Assets/Images/login.png';
 import { useSelector } from 'react-redux';
 import { currentConfig } from '../../Redux/rootSlice';
 
@@ -14,7 +14,7 @@ const LoginComponent = () => {
     return(
     <div className={styles.loginContainer}>
       <div className={styles.left}>
-        <img src={tempImage} alt="Decorative for login page." />
+        <img src={loginImage} alt="Decorative for login page." />
         <p>An exploration tool integrating trusted data sources, which aids researchers in discovering novel connections representing biomedical knowledge.</p>
       </div>
       <div className={styles.right}>
