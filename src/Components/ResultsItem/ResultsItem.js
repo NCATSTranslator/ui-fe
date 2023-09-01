@@ -344,7 +344,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
                 availableTags &&
                 item.tags.map((tagID) => {
                   if(!tagID.includes("role"))
-                    return;
+                    return null;
                   let tagObject = availableTags[tagID];
                   let activeClass = (activeFilters.some((item)=> item.type === tagID && item.value === tagObject.name))
                     ? styles.active
