@@ -7,9 +7,9 @@ const LoginComponent = () => {
 
   const config = useSelector(currentConfig);
   const socialProviders = (config?.social_providers) ? config.social_providers: null;
-  const loginURL = (socialProviders === null || !socialProviders?.una) 
-    ? null 
-    : `https://a-ci.ncats.io/_api/auth/transltr/authorize?response_type=code&client_id=${socialProviders.una.client_id}&scope=openid%20profile%20email&redirect_uri=${socialProviders.una.redirect_uri}`;
+  const unaConfig = socialProviders ? socialProviders.una : null;
+  const loginURL = unaConfig ? `${unaConfig.auth_uri}?response_type=code&client_id=${encodeURIComponent(unaConfig.client_id)}&scope=${encodeURIComponent(unaConfig.scope)}&redirect_uri=${encodeURIComponent(unaConfig.redirect_uri)}`
+    : null;
 
     return(
     <div className={styles.loginContainer}>
