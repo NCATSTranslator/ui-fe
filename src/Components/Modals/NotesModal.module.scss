@@ -1,6 +1,57 @@
 @import "../../Assets/Styles/variables";
 
 .notesModal {
+  .clearConfirmation {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transition: opacity .25s ease;
+    z-index: 100;
+    background-color: rgba(96, 99, 104, .5);
+    .clearConfirmationContainer {
+      position: absolute;
+      top: 50px;
+      right: 50px;
+      left: 50px;
+      background-color: white;
+      padding: $m;
+      text-align: center;
+    }
+    &.show {
+      opacity: 1;
+      pointer-events: all;
+      .clearConfirmationContainer {
+      }
+    }
+    &.hide {
+      opacity: 0;
+      pointer-events: none;
+      .clearConfirmationContainer {
+      }
+    }
+  }
+  .buttons {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 50px;
+    grid-row-gap: 50px;
+    padding: 50px 0 0 0;
+    .button {
+      width: auto;
+      &:last-child {
+        background-color: $red;
+      }
+    }
+  }
+  .clearButton {
+    background-color: $red85;
+    margin: 16px 0 0 auto;
+    display: block;
+  }
   .top {
     display: grid;
     grid-template-columns: 1fr 120px;
