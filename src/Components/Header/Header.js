@@ -18,7 +18,8 @@ const Header = ({children, handleFeedbackModalOpen}) => {
 
   const clientID = config?.social_providers?.una?.client_id;
   const redirectURI = `${window.location.origin}/main/logout`;
-  const logoutReady = (clientID) ? true : false;
+  const logoutURI = config?.social_providers?.una?.logout_uri;
+  const logoutReady = (clientID && logoutURI) ? true : false;
 
   return (
     <header className={styles.header}>
@@ -50,7 +51,7 @@ const Header = ({children, handleFeedbackModalOpen}) => {
                   </Link>
                   {
                     logoutReady && 
-                    <form method="post" action={"https://a-ci.ncats.io:443/_api/auth/transltr/session/end"}>
+                    <form method="post" action={logoutURI}>
                       <input type="hidden" name="client_id" value={clientID} />
                       <input type="hidden" name="show_prompt" value="false" />
                       <input type="hidden" name="post_logout_redirect_uri" value={redirectURI}/> 
