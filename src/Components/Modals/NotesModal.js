@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import styles from "./NotesModal.module.scss";
 import Modal from "./Modal";
 import TextEditor from "../TextEditor/TextEditor";
+import Button from "../FormFields/Button";
 import { getUserSave, updateUserSave } from "../../Utilities/userApi";
 
 const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClearNotesEditor = ()=>{}}) => {
@@ -9,6 +10,12 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
   const startOpen = (isOpen === undefined) ? false : isOpen;
   const [showSaved, setShowSaved] = useState(false);
   const [triggerClearEditor, setTriggerClearEditor] = useState(false);
+  const [confirmClearNote, setConfirmClearNote] = useState(false);
+
+  const handleClose = () => {
+    setConfirmClearNote(false);
+    onClose();
+  }
 
   const handleSave = useCallback(() => {
     setShowSaved(true);
@@ -29,6 +36,8 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
     setTriggerClearEditor(true);
     handleSave();
     handleClearNotesEditor();
+    setConfirmClearNote(false);
+    handleClose();
   }
 
   const handleEditorCleared = () => {
@@ -46,10 +55,20 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
   return (
     <Modal 
       isOpen={startOpen} 
-      onClose={onClose} 
+      onClose={handleClose} 
       className={styles.notesModal}
       containerClass={styles.notesContainer}
       >
+        <div className={`${confirmClearNote ? styles.show : styles.hide} ${styles.clearConfirmation}`}>
+          <div className={styles.clearConfirmationContainer}>
+            <h5>Are you sure you want to clear this note?</h5>
+            <p className="bold ">This is permanent, and cannot be undone.</p>
+            <div className={styles.buttons}>
+              <Button handleClick={() => setConfirmClearNote(false)} className={styles.button} isSecondary>Keep Note</Button>
+              <Button handleClick={handleClearNote} className={styles.button} >Clear Note</Button>
+            </div>
+          </div>
+        </div>
         <div className={styles.top}>
           {
             noteLabel 
@@ -65,7 +84,6 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
                 <span className={`${styles.saved} ${showSaved ? styles.show : styles.hide}`}>Note Saved</span>
               </h5>
           }
-          <button onClick={handleClearNote} className={styles.button} >Clear Note</button>
         </div>
       <TextEditor 
         bookmarkID={bookmarkID} 
@@ -73,6 +91,7 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
         shouldClearEditor={triggerClearEditor}
         onClearEditorComplete={handleEditorCleared}
       />
+      <button onClick={() => setConfirmClearNote(true)} className={styles.clearButton} >Clear Note</button>
     </Modal>
   );
 }
