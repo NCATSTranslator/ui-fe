@@ -282,3 +282,24 @@ button .dualArrows {
     margin-right: -8px;
   }
 }
+
+.queryBarContainer {
+  position: relative;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 35px;
+}
+.loadingIcon {
+  opacity: 0;
+  transition: all .25s ease;
+  margin-right: 0;
+  margin-left: 10px;
+  height: 64px;
+  width: 0;
+  &.active {
+    width: 64px;
+    opacity: 1;
+  }
+}
