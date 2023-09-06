@@ -57,7 +57,7 @@
       padding: 10px 8px;
       text-decoration: none;
       transition: box-shadow .25s ease;
-      box-shadow: $dropShadow;
+      box-shadow: none;
       margin: 0 $s $s 0;
       white-space: nowrap;
       &:hover {
