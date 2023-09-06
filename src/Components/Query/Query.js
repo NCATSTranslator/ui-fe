@@ -19,6 +19,7 @@ import {ReactComponent as Gene} from '../../Icons/Queries/Gene.svg';
 import {ReactComponent as Back} from '../../Icons/Directional/Undo.svg';
 import {ReactComponent as Search} from '../../Icons/Buttons/Search.svg';
 import {ReactComponent as ArrowForward} from '../../Icons/Directional/arrow_forward.svg';
+import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './Query.module.scss';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { queryTypes } from "../../Utilities/queryTypes";
@@ -387,7 +388,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                   <p className={styles.error}>{errorText}</p>
                 }
                 {(selectedLowerButton !== null || selectedUpperButton === 0) && root !== 'demo' &&
-                  <OutsideClickHandler onOutsideClick={()=>{clearAutocompleteItems();}}>
+                  <OutsideClickHandler onOutsideClick={()=>{clearAutocompleteItems();}} className={styles.queryBarContainer}>
                     <QueryBar
                       handleSubmission={handleSubmission}
                       handleChange={handleQueryItemChange}
@@ -398,6 +399,9 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       autocompleteLoading={loadingAutocomplete}
                       handleItemClick={handleItemSelection}
                     />
+                    { 
+                      <img src={loadingIcon} className={`${styles.loadingIcon} ${isLoading ? styles.active : ''} loadingIcon`} alt="loading icon"/>
+                    }
                   </OutsideClickHandler>
                 }
                 {/* Example Diseases */}
