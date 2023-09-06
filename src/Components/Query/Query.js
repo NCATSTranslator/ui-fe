@@ -158,7 +158,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
           handleRevertQueryItem(originalQueryItem);
         } else {
           // Otherwise, navigate to the results page 
-          // navigate(newQueryPath);
+          navigate(newQueryPath);
         }
       })
       .catch((error) => {
