@@ -9,7 +9,7 @@ import AnimateHeight from 'react-animate-height';
 const ExampleQueryList = ({examples, setPresetURL, label}) => {
 
   const root = useSelector(currentRoot);
-  const minHeight = 45;
+  const minHeight = 52;
   const [height, setHeight] = useState(minHeight);
   const [examplesMaxHeight, setExamplesMaxHeight] = useState(0);
   const exampleListRef = useRef(null);
