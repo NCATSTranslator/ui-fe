@@ -7,7 +7,7 @@ const FAQPage = ({title, children}) => {
 
   const articles = [
     {
-      title: 'Frequestly Asked Questions', 
+      title: 'Frequently Asked Questions', 
       slug:'help'
     },
     {

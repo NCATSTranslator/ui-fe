@@ -1,3 +1,16 @@
+import { getTypeFromPub, getUrlByType } from "./resultsFormattingFunctions";
+
+const getUrlArrayFromPubIDs = (ids) => {
+  let urlsFromIds = [];
+  for(const id of ids) {
+    let type = getTypeFromPub(id);
+    let url = getUrlByType(id, type);
+    if(url)
+      urlsFromIds.push(url);
+  }
+  return urlsFromIds;
+}
+
 export const generateCsvFromItem = (item, csvSetter) => {
   return () => {
     const headers = [
@@ -11,7 +24,7 @@ export const generateCsvFromItem = (item, csvSetter) => {
     const targetName = item.object;
     const targetCurie = item.rawResult.object;
     const seen = new Set();
-    item.paths.forEach((path) => {
+    item.compressedPaths.forEach((path) => {
       const subgraph = path.path.subgraph;
       for (let i = 1; i < subgraph.length; i+=2) { // Only look at edges
         const edgeGroup = subgraph[i];
@@ -19,13 +32,17 @@ export const generateCsvFromItem = (item, csvSetter) => {
         const edgeId = edge.id;
         if (!seen.has(edgeId)) {
           seen.add(edgeId);
-          const pubs = item.evidence.publications.filter((pub) => {
-            return pub.edges[edgeId] !== undefined;
-          }).map((pub) => pub.url);
+          const pubs = (item?.evidence?.publications) 
+            ? item.evidence.publications.filter((pub) => {
+                return pub.edges[edgeId] !== undefined;
+              }).map((pub) => pub.url)
+            : (subgraph[i]?.publications.length > 0) 
+              ? getUrlArrayFromPubIDs(subgraph[i].publications)
+              : null;
           const sources = item.evidence.sources.filter((source) => {
             return source.edges[edgeId] !== undefined;
           }).map((source) => source.url);
-          const epc = pubs.concat(sources);
+          const epc = (pubs !== null) ? pubs.concat(sources) : sources;
           const subjectName = edge.subject.name;
           const subjectCurie = edge.subject.id;
           const predicate = edge.predicate;
