@@ -371,3 +371,32 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
 export const getFormattedEdgeLabel = (subjectName, predicateName, objectName) => {
   return `${subjectName}|${predicateName}|${objectName}`;
 }
+
+export const getUrlByType = (publicationID, type) => {
+  let url = false;
+  switch (type) {
+    case "PMID":
+      url = `http://www.ncbi.nlm.nih.gov/pubmed/${publicationID.replace("PMID:", "")}`;
+      break;
+    case "PMC":
+      url = `https://www.ncbi.nlm.nih.gov/pmc/${publicationID}`;
+      break;
+    case "NCT":
+      url = `https://clinicaltrials.gov/ct2/show/${publicationID.replace("clinicaltrials:", "")}}`
+      break;
+    default:
+      url = publicationID;
+      break;
+  }
+  return url;
+}
+
+export const getTypeFromPub = (publicationID) => { 
+  if(publicationID.toLowerCase().includes("pmid"))
+    return "PMID";
+  if(publicationID.toLowerCase().includes("pmc"))
+    return "PMC";
+  if(publicationID.toLowerCase().includes("clinicaltrials"))
+    return "NCT";
+  return "other";
+}

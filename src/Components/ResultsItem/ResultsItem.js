@@ -15,39 +15,10 @@ import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
-import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
+import { getFormattedEdgeLabel, getUrlByType, getTypeFromPub } from '../../Utilities/resultsFormattingFunctions';
 import { displayScore } from '../../Utilities/scoring';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
-
-const getTypeFromPub = (publicationID) => { 
-  if(publicationID.toLowerCase().includes("pmid"))
-    return "PMID";
-  if(publicationID.toLowerCase().includes("pmc"))
-    return "PMC";
-  if(publicationID.toLowerCase().includes("clinicaltrials"))
-    return "NCT";
-  return "other";
-}
-
-const getUrlByType = (publicationID, type) => {
-  let url = false;
-  switch (type) {
-    case "PMID":
-      url = `http://www.ncbi.nlm.nih.gov/pubmed/${publicationID.replace("PMID:", "")}`;
-      break;
-    case "PMC":
-      url = `https://www.ncbi.nlm.nih.gov/pmc/${publicationID}`;
-      break;
-    case "NCT":
-      url = `https://clinicaltrials.gov/ct2/show/${publicationID.replace("clinicaltrials:", "")}}`
-      break;
-    default:
-      url = publicationID;
-      break;
-  }
-  return url;
-}
 
 const getCurrentEvidence = (result) => {
   let evidenceObject = {};
