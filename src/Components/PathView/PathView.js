@@ -29,7 +29,8 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
   const prefs = useSelector(currentPrefs);
 
   const initItemsPerPage = (prefs?.path_show_count?.pref_value) ? prefs.path_show_count.pref_value : 5;
-  let initialNumberToShow = (initItemsPerPage === -1 || paths.length < initItemsPerPage) ? paths.length : initItemsPerPage;
+  let initialNumberToShow = (parseInt(initItemsPerPage) === -1 || paths.length < initItemsPerPage) ? paths.length : initItemsPerPage;
+
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
 
@@ -39,12 +40,16 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
     const tempItemsPerPage = (prefs?.path_show_count?.pref_value) ? prefs.path_show_count.pref_value : 5;
-    const tempNumberToShow = (tempItemsPerPage === -1 || paths.length < tempItemsPerPage) ? paths.length : tempItemsPerPage;
+    const tempNumberToShow = (parseInt(tempItemsPerPage) === -1 || paths.length < tempItemsPerPage) ? paths.length : tempItemsPerPage;
     setNumberToShow(tempNumberToShow);
   }, [prefs, paths]);
 
   useEffect(() => {
-    setNumberToShow((paths.length < initItemsPerPage) ? paths.length : initItemsPerPage);
+    let temp = initItemsPerPage;
+    if(parseInt(initItemsPerPage) === -1 || paths.length < initItemsPerPage)
+      temp = paths.length;
+
+    setNumberToShow(temp);
   }, [paths, initItemsPerPage]);
 
   const handleNameClick = (name) => {
@@ -108,7 +113,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
               <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
             }
             {
-              (numberToShow <= paths.length && numberToShow > initItemsPerPage) &&
+              (numberToShow <= paths.length && numberToShow > initItemsPerPage && parseInt(initItemsPerPage) !== -1) &&
               <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
             }
           </div>
