@@ -65,9 +65,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
   }
 
   const handleShowMore = () => {
-    console.log(initItemsPerPage, numberToShow + initItemsPerPage, paths.length);
     let newAmount = (numberToShow + initItemsPerPage > paths.length) ? paths.length : numberToShow + initItemsPerPage;
-    console.log(newAmount);
     setNumberToShow(newAmount);
   }
 
