@@ -7,10 +7,6 @@ const FAQPage = ({title, children}) => {
 
   const articles = [
     {
-      title: 'Frequently Asked Questions', 
-      slug:'help'
-    },
-    {
       title: 'About Translator', 
       link:'https://ncats.nih.gov/translator/about',
       subArticles: [
@@ -29,42 +25,32 @@ const FAQPage = ({title, children}) => {
       ]
     },
     {
-      title: 'How it Works', 
-      slug:'how-it-works',
-      subArticles: [
-        {
-          title: 'Knowledge Providers', 
-          slug:'knowledge-providers'
-        },
-        {
-          title: 'Autonomous Relay Agents', 
-          slug:'autonomous-relay-agents'
-        },
-        {
-          title: 'Autonomous Relay System', 
-          slug:'autonomous-relay-system'
-        },
-        {
-          title: 'Knowledge Graphs', 
-          slug:'knowledge-graphs'
-        },
-        {
-          title: 'SmartAPI', 
-          slug:'smartapi'
-        },
-      ]
-    },
-    {
       title: 'Logging In', 
       slug: 'logging-in',
     },
     {
-      title: 'Results', 
-      slug:'article-results',
+      title: 'Overview', 
+      slug: 'overview',
     },
     {
-      title: 'Evidence', 
-      slug:'evidence'
+      title: 'Exploring Relationships', 
+      slug: 'exploring-relationships',
+    },
+    {
+      title: 'Review and Identify Favorite Results', 
+      slug: 'review-and-identify',
+    },
+    {
+      title: 'Focused Analysis of the Top Results', 
+      slug: 'focused-analysis',
+    },
+    {
+      title: 'User Preferences', 
+      slug: 'user-preferences',
+    },
+    {
+      title: 'Frequently Asked Questions', 
+      slug:'help'
     },
     {
       title: 'Search History', 
