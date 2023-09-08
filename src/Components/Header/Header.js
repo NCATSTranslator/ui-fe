@@ -31,9 +31,11 @@ const Header = ({children, handleFeedbackModalOpen}) => {
           <div className={styles.right}>
             {
               root === 'main' &&
-              <Link to={`/${root}/workspace`} className={styles.workspaceLink}><Workspace/><span>Workspace</span></Link>
+              <>
+                <Link to={`/${root}/workspace`} className={styles.workspaceLink}><Workspace/><span>Workspace</span></Link>
+                <Link to={`/${root}/history`}><History/><span>Search History</span></Link>
+              </>
             }
-            <Link to={`/${root}/history`}><History/><span>Search History</span></Link>
             <button onClick={()=>handleFeedbackModalOpen()}><Feedback/><span>Send Feedback</span></button>
             <Link to={`/${root}/help`} className={styles.helpLink} rel="noreferrer" target={'_blank'} ><Question/><span>Help</span></Link>
             {
