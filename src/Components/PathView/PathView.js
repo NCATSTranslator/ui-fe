@@ -28,8 +28,8 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
 
   const prefs = useSelector(currentPrefs);
 
-  const initItemsPerPage = (prefs?.path_show_count?.pref_value) ? prefs.path_show_count.pref_value : 5;
-  let initialNumberToShow = (parseInt(initItemsPerPage) === -1 || paths.length < initItemsPerPage) ? paths.length : initItemsPerPage;
+  const initItemsPerPage = (prefs?.path_show_count?.pref_value) ? parseInt(prefs.path_show_count.pref_value) : parseInt(5);
+  let initialNumberToShow = (initItemsPerPage === -1 || paths.length < initItemsPerPage) ? paths.length : initItemsPerPage;
 
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
@@ -39,8 +39,8 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
-    const tempItemsPerPage = (prefs?.path_show_count?.pref_value) ? prefs.path_show_count.pref_value : 5;
-    const tempNumberToShow = (parseInt(tempItemsPerPage) === -1 || paths.length < tempItemsPerPage) ? paths.length : tempItemsPerPage;
+    const tempItemsPerPage = (prefs?.path_show_count?.pref_value) ? parseInt(prefs.path_show_count.pref_value) : 5;
+    const tempNumberToShow = (tempItemsPerPage === -1 || paths.length < tempItemsPerPage) ? paths.length : tempItemsPerPage;
     setNumberToShow(tempNumberToShow);
   }, [prefs, paths]);
 
@@ -65,7 +65,9 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
   }
 
   const handleShowMore = () => {
+    console.log(initItemsPerPage, numberToShow + initItemsPerPage, paths.length);
     let newAmount = (numberToShow + initItemsPerPage > paths.length) ? paths.length : numberToShow + initItemsPerPage;
+    console.log(newAmount);
     setNumberToShow(newAmount);
   }
 
