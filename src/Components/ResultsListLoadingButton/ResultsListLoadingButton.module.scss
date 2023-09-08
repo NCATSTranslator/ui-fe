@@ -45,6 +45,8 @@
   &.active {
     cursor: pointer;
     pointer-events: all;
+    margin-left: auto;
+    margin-right: auto;
   }
   &:hover {
     text-decoration: underline;
