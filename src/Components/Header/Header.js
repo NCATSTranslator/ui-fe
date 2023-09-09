@@ -41,7 +41,7 @@ const Header = ({children, handleFeedbackModalOpen}) => {
             {
               root === 'demo'
               ? 
-                <Link to={`/login`} className={styles.login} >Log In</Link>
+                <Link to={`/main`} className={styles.login} reloadDocument>Log In</Link>
               : 
                 <>
                   <Link to={`/main/home`} >
