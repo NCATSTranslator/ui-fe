@@ -382,7 +382,7 @@ export const getUrlByType = (publicationID, type) => {
       url = `https://www.ncbi.nlm.nih.gov/pmc/${publicationID}`;
       break;
     case "NCT":
-      url = `https://clinicaltrials.gov/ct2/show/${publicationID.replace("clinicaltrials:", "")}}`
+      url = `https://clinicaltrials.gov/ct2/show/${publicationID.replace("clinicaltrials:", "")}`
       break;
     default:
       url = publicationID;
