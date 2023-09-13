@@ -19,6 +19,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
     nameString = capitalizeAllWords(pathObject.name);
     typeString = formatBiolinkEntity(pathObject.type)
   }
+  const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
 
   const uuid = uuidv4();
 
@@ -59,10 +60,10 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
               <span><strong>{nameString}</strong> ({typeString})</span>
               <span className={styles.description}>{pathObject.description}</span>
               {
-                pathObject.provenance && 
-                <a href={pathObject.provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
+                provenance && 
+                <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
                   <ExternalLink/>
-                  <span>{pathObject.provenance}</span>
+                  <span>{provenance}</span>
                 </a>
               }
             </Tooltip>
@@ -151,10 +152,10 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
             <span><strong>{nameString}</strong> ({typeString})</span>
             <span className={styles.description}>{pathObject.description}</span>
             {
-              pathObject.provenance && 
-              <a href={pathObject.provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
+              provenance && 
+              <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
                 <ExternalLink/>
-                <span>{pathObject.provenance}</span>
+                <span>{provenance}</span>
               </a>
             }
           </Tooltip>
