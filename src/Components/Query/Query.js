@@ -326,7 +326,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 <div className={styles.resultsHeader}>
                   <div className={styles.buttons}>
                     <Link to={`/${root}`} className={styles.button}><Back/>Return To Home Page</Link>
-                    <Link to={`/${root}`} target="_blank" className={`${styles.button} ${styles.buttonTwo}`}><Search className={styles.svgFillWhite}/>Submit Another Query</Link>
+                    {
+                      root !== 'demo' &&
+                      <Link to={`/${root}`} target="_blank" className={`${styles.button} ${styles.buttonTwo}`}><Search className={styles.svgFillWhite}/>Submit Another Query</Link>
+                    }
                   </div>
                   <div className={styles.showingResultsContainer}>
                     <div>
