@@ -103,11 +103,11 @@ const getNodeByCurie = (curie, results) => {
   if(results.nodes[curie] === undefined)
     return {};
 
-  const maxCurieCount = 5;
+  // const maxCurieCount = 5;
 
   const res = cloneDeep(results.nodes[curie]);
-  if(res.curies.length > maxCurieCount)
-    res.curies = res.curies.slice(0, maxCurieCount);
+  // if(res.curies.length > maxCurieCount)
+  //   res.curies = res.curies.slice(0, maxCurieCount);
 
   if(res.synonyms && res.synonyms.length > 0)
     res.synonyms = null;
