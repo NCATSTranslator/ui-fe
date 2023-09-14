@@ -15,7 +15,7 @@ Results can be filtered and sorted according to several different critera, such 
 
 - [ ] Additional Filtering Facets
 - [ ] Migration to Vite from CRA
-- [ ] Results CSV Export
+- [x] Results CSV Export
 - [x] Query Submission Redesign
 - [x] Graph View
 - [x] Path View
