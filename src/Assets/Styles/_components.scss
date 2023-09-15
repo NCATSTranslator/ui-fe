@@ -170,8 +170,8 @@
     list-style-type: none;
   }
   
-  h1 {
-    font-size: 30px;
+  h1, h1 em, h1 strong, h1 .editor-text-underline {
+    font-size: 32px;
     color: #333;
   }
   
@@ -347,7 +347,7 @@
   }
   
   .editor-heading-h1 span {
-    font-size: 30px;
+    font-size: 32px;
     color: rgb(5, 5, 5);
     font-weight: 400;
     margin: 0;
@@ -356,9 +356,9 @@
   }
   
   .editor-heading-h2 {
-    font-size: 18px;
-    span {
-      font-size: 18px;
+    font-size: 22px;
+    span, strong, em {
+      font-size: 22px;
       color: rgb(101, 103, 107);
       font-weight: 700;
       margin: 0;
