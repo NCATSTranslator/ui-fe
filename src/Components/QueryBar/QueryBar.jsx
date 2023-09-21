@@ -1,7 +1,7 @@
 
 import TextInput from "../FormFields/TextInput";
 import Autocomplete from "../Autocomplete/Autocomplete";
-import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
+import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 import styles from './QueryBar.module.scss';
 
 const QueryBar = ({handleSubmission, handleChange, queryType, value, autocompleteItems, autocompleteLoading, handleItemClick}) => {

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import styles from 'CustomCarousel.module.scss';
 import "react-responsive-carousel/lib/styles/carousel.min.css"; 
 import { Carousel } from 'react-responsive-carousel';
-import {ReactComponent as Left} from '../../Icons/Directional/Left.svg';
-import {ReactComponent as Right} from '../../Icons/Directional/Right.svg';
+import Left from '../../Icons/Directional/Left.svg?react';
+import Right from '../../Icons/Directional/Right.svg?react';
 
 
 const CustomCarousel = ({numberOfSlides, children}) => {

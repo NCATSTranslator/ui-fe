@@ -1,17 +1,16 @@
-import React from 'react';
-import {ReactComponent as Chemical} from '../Icons/Queries/Chemical.svg';
-import {ReactComponent as Disease} from '../Icons/disease2.svg';
-import {ReactComponent as Gene} from '../Icons/Queries/Gene.svg';
-import {ReactComponent as Phenotype} from '../Icons/Queries/Phenotype.svg';
-import {ReactComponent as Protein} from '../Icons/protein.svg';
-import {ReactComponent as Drug} from '../Icons/drug.svg';
-import {ReactComponent as SmallMolecule} from '../Icons/small-molecule.svg';
-import {ReactComponent as Taxon} from '../Icons/taxon.svg';
-import {ReactComponent as PathologicalProcess} from '../Icons/pathological-process.svg';
-import {ReactComponent as PhysiologicalProcess} from '../Icons/physiological-process.svg';
-import {ReactComponent as BiologicalEntity} from '../Icons/biological-entity.svg';
-import {ReactComponent as AnatomicalEntity} from '../Icons/anatomical-entity.svg';
-import {ReactComponent as ExternalLink} from '../Icons/external-link.svg';
+import Chemical from '../Icons/Queries/Chemical.svg?react';
+import Disease from '../Icons/disease2.svg?react';
+import Gene from '../Icons/Queries/Gene.svg?react';
+import Phenotype from '../Icons/Queries/Phenotype.svg?react';
+import Protein from '../Icons/protein.svg?react';
+import Drug from '../Icons/drug.svg?react';
+import SmallMolecule from '../Icons/small-molecule.svg?react';
+import Taxon from '../Icons/taxon.svg?react';
+import PathologicalProcess from '../Icons/pathological-process.svg?react';
+import PhysiologicalProcess from '../Icons/physiological-process.svg?react';
+import BiologicalEntity from '../Icons/biological-entity.svg?react';
+import AnatomicalEntity from '../Icons/anatomical-entity.svg?react';
+import ExternalLink from '../Icons/external-link.svg?react';
 
 export const getIcon = (category) => {
   var icon = <Chemical/>;

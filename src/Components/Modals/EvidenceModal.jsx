@@ -5,7 +5,7 @@ import Select from "../FormFields/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import styles from './EvidenceModal.module.scss';
 import ReactPaginate from "react-paginate";
-import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
+import ExternalLink from '../../Icons/external-link.svg?react';
 import { capitalizeAllWords } from "../../Utilities/utilities";
 import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
          compareByKeyLexographic, sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from './FAQSidebar.module.scss';
 import { NavLink } from 'react-router-dom';
 import Accordion from '../Accordion/Accordion';
 import { useLocation } from "react-router-dom";
-import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
+import ExternalLink from '../../Icons/external-link.svg?react';
 
 const FAQSidebar = ({articles}) => {
 

@@ -7,14 +7,14 @@ import styles from './UserSaves.module.scss';
 import ResultsItem from '../ResultsItem/ResultsItem';
 import EvidenceModal from '../Modals/EvidenceModal';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
+import ExternalLink from '../../Icons/external-link.svg?react';
+import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 import { getFormattedDate } from '../../Utilities/utilities';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from '../BookmarkToasts/BookmarkToasts';
 import NotesModal from '../Modals/NotesModal';
 import TextInput from "../FormFields/TextInput";
-import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
 
