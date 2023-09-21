@@ -360,7 +360,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               <>
                 <h4 className={styles.heading}>What relationship would you like to explore?</h4>
                 <div className={styles.upperButtons}>
-                  <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)}>
+                  <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)} data-testid="drug-disease-selector">
                     <Drug/>Drug <ArrowForward className={styles.arrow} /> <Disease/>Disease
                   </button>
                   <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(1)}>
