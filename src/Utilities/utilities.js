@@ -31,7 +31,7 @@ export const getIcon = (category) => {
     case 'biolink:Disease':
       icon = <Disease/>;
       break;
-    case 'biolink:SmallMolecule': case 'biolink:MolecularEntity': case 'biolink:MolecularActivity':
+    case 'biolink:SmallMolecule': case 'biolink:Small_Molecule': case 'biolink:MolecularEntity': case 'biolink:MolecularActivity':
       icon = <SmallMolecule/>;
       break;
     case 'biolink:OrganismTaxon':
@@ -152,7 +152,9 @@ export const getUrlAndOrg = (id) => {
 
 export const getEntityLink = (id, className, queryType) => {
   return generateEntityLink(id, className, (org) => {
-    const linkType = (queryType !== undefined && queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
+    let linkType = (queryType !== undefined && queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
+    if(linkType === "smallmolecule")
+      linkType = "small molecule";
     return `View this ${linkType} on ${org}`;
   });
 }
