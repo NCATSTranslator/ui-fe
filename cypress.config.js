@@ -1,9 +1,10 @@
-const { defineConfig } = require("cypress");
+import { defineConfig } from 'cypress'
+import vitePreprocessor from 'cypress-vite'
 
-module.exports = defineConfig({
+export default defineConfig({
   e2e: {
-    setupNodeEvents(on, config) {
-      // implement node event listeners here
+    setupNodeEvents(on) {
+      on('file:preprocessor', vitePreprocessor())
     },
   },
-});
+})

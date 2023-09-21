@@ -2,6 +2,7 @@
   "name": "translator-ui-platform",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@lexical/react": "^0.12.0",
     "@reduxjs/toolkit": "^1.7.1",
@@ -63,12 +64,14 @@
     "node": "17.x"
   },
   "devDependencies": {
-    "@testing-library/cypress": "^8.0.3",
+    "@testing-library/cypress": "^10.0.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@vitejs/plugin-react": "^4.0.4",
-    "cypress": "^10.9.0",
+    "cypress": "^13.2.0",
+    "cypress-vite": "^1.4.2",
     "eslint": "^8.49.0",
     "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-cypress": "^2.15.1",
     "react-query": "^3.34.19",
     "vite": "^4.4.9",
     "vite-plugin-eslint": "^1.8.1",

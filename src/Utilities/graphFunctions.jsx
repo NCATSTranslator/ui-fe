@@ -179,12 +179,12 @@ export const handleDeselectAllNodes = (cy, selNodes, excNodes, clearSelectedPath
   clearSelectedPaths();
 }
 
-export const handleZoomByInterval = (cy, interval = 0.25, direction = true) => {
-  const currentZoomLevel = cy.zoom();
+export const handleZoomByInterval = (cyGraph, interval = 0.25, direction = true) => {
+  const currentZoomLevel = cyGraph.zoom();
   if(direction)
-    cy.zoom(currentZoomLevel + interval);
+    cyGraph.zoom(currentZoomLevel + interval);
   else 
-    cy.zoom(currentZoomLevel - interval);
+    cyGraph.zoom(currentZoomLevel - interval);
 }
 
 const handleHideTooltip = (graphTooltipIdString) => {
@@ -259,7 +259,7 @@ const handleSetupAndUpdateGraphTooltip = debounce((ev, graphTooltipIdString) => 
 * @returns {void}
 */
 export const initCytoscapeInstance = (dataObj) => {
-  let cy = cytoscape({
+  let cyGraph = cytoscape({
     container: dataObj.graphRef.current,
     elements: dataObj.graph,
     layout: dataObj.layout,
@@ -341,29 +341,29 @@ export const initCytoscapeInstance = (dataObj) => {
   });
 
   // cy.on('vclick');
-  cy.on('vclick', 'node', (ev, formattedResults)=>dataObj.handleNodeClick(ev, formattedResults, dataObj.graph));
-  cy.on('vclick', 'edge', (ev)=>console.log(ev.target.data()));
+  cyGraph.on('vclick', 'node', (ev, formattedResults)=>dataObj.handleNodeClick(ev, formattedResults, dataObj.graph));
+  cyGraph.on('vclick', 'edge', (ev)=>console.log(ev.target.data()));
 
-  cy.on('mouseover', 'node', (ev) => {
+  cyGraph.on('mouseover', 'node', (ev) => {
     ev.target.style('border-width', '2px' );
     handleSetupAndUpdateGraphTooltip(ev, dataObj.graphTooltipIdString);
   });
-  cy.on('mouseout', 'node', (ev) => ev.target.style('border-width', '1px' ));
-  cy.on('mousemove', (ev) => {
+  cyGraph.on('mouseout', 'node', (ev) => ev.target.style('border-width', '1px' ));
+  cyGraph.on('mousemove', (ev) => {
     // if we're on the background, or not on a node, hide the tooltip 
-    if(ev.target === cy || !ev.target.isNode()) 
+    if(ev.target === cyGraph || !ev.target.isNode()) 
       handleHideTooltip(dataObj.graphTooltipIdString)
   });
-  cy.on('pan zoom resize', ()=>{
+  cyGraph.on('pan zoom resize', ()=>{
     handleHideTooltip(dataObj.graphTooltipIdString)
   });
 
-  cy.on('mouseover', 'edge', (ev) => handleEdgeMouseOver(ev, dataObj.edgeInfoWindowIdString));
-  cy.on('mouseout', 'edge', (ev) => handleEdgeMouseOut(ev, dataObj.edgeInfoWindowIdString));
+  cyGraph.on('mouseover', 'edge', (ev) => handleEdgeMouseOver(ev, dataObj.edgeInfoWindowIdString));
+  cyGraph.on('mouseout', 'edge', (ev) => handleEdgeMouseOut(ev, dataObj.edgeInfoWindowIdString));
 
   // when background is clicked, remove highlight and hide classes from all elements
-  cy.on('click', (ev) => {
-    if(ev.target === cy) {
+  cyGraph.on('click', (ev) => {
+    if(ev.target === cyGraph) {
       handleDeselectAllNodes(
         ev.cy, 
         dataObj.selectedNodes, 
@@ -375,14 +375,14 @@ export const initCytoscapeInstance = (dataObj) => {
   });
 
   // add class for nodes that are targets but aren't the main result's target 
-  for(const node of cy.elements('node')) {
+  for(const node of cyGraph.elements('node')) {
     if(node.data('isSourceCount') === 0) {
       node.addClass('isNotSource')
     }
   }
 
   // init view
-  handleResetView(cy);
+  handleResetView(cyGraph);
 
   if(dataObj.cyNav !== null) {
     dataObj.cyNav.destroy();
@@ -398,10 +398,10 @@ export const initCytoscapeInstance = (dataObj) => {
     rerenderDelay: 100, // ms to throttle rerender updates to the panzoom for performance
   };
 
-  let nav = cy.navigator( defaults ); // init navigator instance
+  let nav = cyGraph.navigator( defaults ); // init navigator instance
 
   return {
-    cy: cy,
+    cy: cyGraph,
     nav: nav
   };
 }
