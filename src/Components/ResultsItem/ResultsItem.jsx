@@ -3,10 +3,10 @@ import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
-import {ReactComponent as ChevDown } from "../../Icons/Directional/Property 1 Down.svg"
-import {ReactComponent as Export } from "../../Icons/Buttons/Export.svg"
-import {ReactComponent as Bookmark } from "../../Icons/Navigation/Bookmark.svg"
-import {ReactComponent as Notes } from "../../Icons/note.svg"
+import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
+import Export from "../../Icons/Buttons/Export.svg?react"
+import Bookmark from "../../Icons/Navigation/Bookmark.svg?react"
+import Notes from "../../Icons/note.svg?react"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import { cloneDeep } from 'lodash';
@@ -80,6 +80,20 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const [csvData, setCsvData] = useState([]);
 
   const initPathString = useRef((type?.pathString) ? type.pathString : 'may affect');
+  const tagsRef = useRef(null);
+  const [tagsHeight, setTagsHeight] = useState(0);
+  const minTagsHeight = 45;
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+      setTagsHeight(tagsRef.current.clientHeight);
+    });
+
+    resizeObserver.observe(tagsRef.current);
+    return() => {
+      resizeObserver.disconnect();
+    };
+  },[]);
 
   const pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const nameString = (item.name !== null) ? item.name : '';
@@ -310,7 +324,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         <div className={styles.container}>
           {
             item.tags && 
-            <div className={styles.tags}>
+            <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
               {
                 availableTags &&
                 item.tags.map((tagID) => {

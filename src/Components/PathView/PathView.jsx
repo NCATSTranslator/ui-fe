@@ -1,7 +1,7 @@
 import styles from './PathView.module.scss';
-import React, {useState, useEffect, useMemo} from "react";
+import {useState, useEffect, useMemo} from "react";
 import PathObject from '../PathObject/PathObject';
-import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
+import Question from '../../Icons/Navigation/Question.svg?react';
 import { useOutletContext } from 'react-router-dom';
 import { cloneDeep, isEqual } from 'lodash';
 import { useSelector } from 'react-redux';

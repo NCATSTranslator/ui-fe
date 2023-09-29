@@ -1,6 +1,6 @@
-import React, {useEffect, useCallback} from "react";
+import {useEffect, useCallback} from "react";
 import styles from './ModalGlobals.module.scss';
-import {ReactComponent as Close} from '../../Icons/Buttons/Close.svg';
+import Close from '../../Icons/Buttons/Close.svg?react';
 
 const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseButton, testId}) => {
 

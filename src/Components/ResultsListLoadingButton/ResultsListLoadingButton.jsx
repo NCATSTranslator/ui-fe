@@ -1,7 +1,7 @@
 import styles from './ResultsListLoadingButton.module.scss';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
-import {ReactComponent as ResultsAvailableIcon} from '../../Icons/Alerts/Checkmark.svg';
-import {ReactComponent as CompleteIcon} from '../../Icons/Alerts/Checkmark.svg';
+import ResultsAvailableIcon from '../../Icons/Alerts/Checkmark.svg?react';
+import CompleteIcon from '../../Icons/Alerts/Checkmark.svg?react';
 import TextCrossfade from '../TextCrossfade/TextCrossfade';
 
 const ResultsListLoadingButton = ({ data = {} }) => {

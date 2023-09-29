@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from "react";
+import {useEffect, useState, useCallback} from "react";
 import styles from "./SendFeedbackModal.module.scss";
 import Modal from "./Modal";
 import Button from '../FormFields/Button';
@@ -6,7 +6,7 @@ import TextInput from "../FormFields/TextInput";
 import FileInput from "../FormFields/FileInput";
 import Select from "../FormFields/Select";
 import { Fade } from "react-awesome-reveal";
-import {ReactComponent as Warning} from '../../Icons/information.svg'
+import Warning from '../../Icons/information.svg?react'
 import { currentQueryResultsID } from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux'
 

@@ -1,11 +1,11 @@
 import styles from './PathObject.module.scss';
 import Tooltip from '../Tooltip/Tooltip';
 import { getIcon } from '../../Utilities/utilities';
-import {ReactComponent as Disease} from '../../Icons/disease2.svg';
-import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
-import {ReactComponent as Connector} from '../../Icons/connector-os.svg';
-import {ReactComponent as ResearchSingle} from '../../Icons/research-single.svg';
-import {ReactComponent as ResearchMultiple} from '../../Icons/research-multiple.svg';
+import Disease from '../../Icons/disease2.svg?react';
+import ExternalLink from '../../Icons/external-link.svg?react';
+import Connector from '../../Icons/connector-os.svg?react';
+import ResearchSingle from '../../Icons/research-single.svg?react';
+import ResearchMultiple from '../../Icons/research-multiple.svg?react';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
