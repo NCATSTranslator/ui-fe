@@ -13,8 +13,14 @@ Results can be filtered and sorted according to several different critera, such 
 
 ## Feature Roadmap
 
-- [ ] Additional Filtering Facets
-- [ ] Migration to Vite from CRA
+- [ ] Additional Query Types
+- [ ] Additional Facets
+- [ ] Knowledge Type Display For Edges
+- [x] Bookmark & Add Notes To Results
+- [x] User Workspace
+- [x] User Preferences
+- [x] User Login (SSO)
+- [x] Migration to Vite from CRA
 - [x] Results CSV Export
 - [x] Query Submission Redesign
 - [x] Graph View
@@ -42,6 +48,8 @@ Installation:
 In order to submit queries you'll need a copy of the UI's backend running locally as well. You can find it [here](https://github.com/NCATSTranslator/ui-be). Clone it, then run `npm install` inside its root directory. You can then run `npm run prod` or `npm run dev` depending on your preferred environment.
 
 The last step will be running the following command in the root directory of the ui-fe repo: `npm run build && cp -R  /Path/To/Your/ui-fe/build /Path/To/Your/ui-be`. This will build the frontend, then copy it to the backend repo's root. You should then be able to view the application at `localhost:8386`.
+
+The full feature set will not be accessible without a full docker setup in order to serve the database, which is required to facilitate user login and arbitrary query submission.
 
 ## Project Screen Shot(s)
 
