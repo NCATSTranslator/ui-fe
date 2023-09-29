@@ -9,15 +9,18 @@ describe('run example query', () => {
     // click the drug disease query button
     cy.get('button[data-testid="drug-disease-selector"]').click();
 
-    // click the heart disease button
+    // click the Type 2 Diabetes Mellitus button
     cy.get('button[data-testid="Type 2 Diabetes Mellitus"]').click();
 
     // wait for /creative_result to return success
     cy.intercept(  {
-      method: 'GET', // Route all GET requests
+      method: 'GET',
       url: "/demo/api/v1/pub/query/*/result", 
     }).as('results'); 
-    // cy.intercept('POST' , '/api/creative_result').as('results'); 
-    cy.wait('@results', {timeout: 60000}).its('response.body.status').should('eq', 'success');
+    cy.wait('@results', {timeout: 60000}).its('response.body.status')
+      .should('eq', 'success');
+
+    // click share button
+    cy.get('button[data-testid="share-button"]').click();
   })
 })

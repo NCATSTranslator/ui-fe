@@ -60,6 +60,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
           <button
             className={styles.shareButton}
             onClick={()=>{data.setShareModalOpen(true)}}
+            data-testid="share-button"
             >
               <ShareIcon/>
           </button>
