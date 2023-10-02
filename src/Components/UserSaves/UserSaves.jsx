@@ -6,6 +6,7 @@ import { currentRoot } from '../../Redux/rootSlice';
 import styles from './UserSaves.module.scss';
 import ResultsItem from '../ResultsItem/ResultsItem';
 import EvidenceModal from '../Modals/EvidenceModal';
+import Tooltip from '../Tooltip/Tooltip';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
@@ -243,7 +244,19 @@ const UserSaves = () => {
                                 queryObject.saves && Array.from(queryObject.saves).length > 0 &&
                                 <p className={styles.numSaves}>{Array.from(queryObject.saves).length} saved item{(Array.from(queryObject.saves).length > 1) && "s"}</p>
                               }
-                              <a href={shareURL} target="_blank" rel="noreferrer" className={styles.link}><ExternalLink/></a>
+                              <a 
+                                href={shareURL} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className={styles.link} 
+                                data-tooltip-id={`originalquery-${key}`} 
+                                aria-describedby={`originalquery-${key}`}
+                                >
+                                <ExternalLink/>
+                                <Tooltip id={`originalquery-${key}`}>
+                                  <span className={styles.tooltip}>Open this query in a new tab.</span>
+                                </Tooltip>
+                              </a>
                             </div>
                             <div className={styles.separator}></div>
                             <div className={styles.resultsList}>
