@@ -9,6 +9,8 @@ import Bookmark from "../../Icons/Navigation/Bookmark.svg?react"
 import Notes from "../../Icons/note.svg?react"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
+import Tooltip from '../Tooltip/Tooltip';
+import { Link } from 'react-router-dom';
 import { cloneDeep } from 'lodash';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
@@ -272,10 +274,16 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           root === "main" 
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
-                  <Bookmark onClick={handleBookmarkClick} />
+                  <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString}`} aria-describedby={`bookmark-tooltip-${nameString}`} />
+                  <Tooltip id={`bookmark-tooltip-${nameString}`}>
+                    <span className={styles.tooltip}>Bookmark this result to review it later in the <Link to="/main/workspace" target='_blank'>Workspace</Link></span>
+                  </Tooltip>
                 </div>
                 <div className={`${styles.icon} ${styles.notesIcon} ${itemHasNotes ? styles.filled : ''}`}>
-                  <Notes onClick={handleNotesClick} />
+                  <Notes onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString}`} aria-describedby={`notes-tooltip-${nameString}`} />
+                  <Tooltip id={`notes-tooltip-${nameString}`}>
+                    <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/main/workspace" target='_blank'>Workspace</Link>)</span>
+                  </Tooltip>
                 </div>
               </>
             : <></>
@@ -308,7 +316,10 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         data={csvData}
         filename={`${item.name.toLowerCase()}.csv`}
         onClick={generateCsvFromItem(item, setCsvData)}>
-          <Export/>
+          <Export data-tooltip-id={`csv-tooltip-${nameString}`} aria-describedby={`csv-tooltip-${nameString}`}/>
+          <Tooltip id={`csv-tooltip-${nameString}`}>
+            <span className={styles.tooltip}>Download a version of this result in CSV format.</span>
+          </Tooltip>
       </CSVLink>
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>

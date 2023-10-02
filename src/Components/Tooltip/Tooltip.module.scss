@@ -5,8 +5,8 @@
   color: $white;
   border-radius: $defaultBorderRadius;
   padding: $xs;
-  width: 330px !important;
-  z-index: 90;
+  max-width: 330px !important;
+  z-index: 150;
   text-align: left;
   box-shadow: $dropShadowHover;
   p {
@@ -16,15 +16,21 @@
     font-size: 14px;
     line-height: 17.5px;
   }
-  .text {
-    font-size: 12px;
-    line-height: 15px;
-    font-weight: 400;
-    text-transform: none;
+  .text, span, a {
+    font-size: 12px !important;
+    line-height: 15px !important;
+    font-weight: 400 !important;
+    text-transform: none !important;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 12;
     -webkit-box-orient: vertical;
+    color: $white !important;
+  }
+  a {
+    font-weight: 700 !important;
+    text-decoration: underline !important;
+    display: inline !important;
   }
   .children {
     p {

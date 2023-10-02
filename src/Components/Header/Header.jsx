@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Tooltip from '../Tooltip/Tooltip';
 import { currentConfig, currentRoot, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
 import Logo from '../../Assets/Images/Logo.svg?react';
@@ -43,12 +44,15 @@ const Header = ({children, handleFeedbackModalOpen}) => {
                 <Link to={`/main`} className={styles.login} reloadDocument>Log In</Link>
               : 
                 <>
-                  <Link to={`/main/home`} >
+                  <Link to={`/main/home`} data-tooltip-id={`prefs-tooltip`} aria-describedby={`prefs-tooltip`} className={styles.userIcon}>
                     <div className={styles.imageContainer}>
                       {(user?.profile_pic_url)
                         ? <img src={user.profile_pic_url} alt="user profile" className={styles.profilePic}/>
                         : <img src={defaultPfp} alt="user profile" className={styles.profilePic}/>}
                     </div>
+                    <Tooltip id={`prefs-tooltip`} place="bottom">
+                      <span className={styles.tooltip}>Click here to view and edit your user preferences.</span>
+                    </Tooltip>
                   </Link>
                   {
                     logoutReady && 

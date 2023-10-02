@@ -2,7 +2,8 @@
 
 .pathView {
   padding: $m 0;
-
+  position: relative;
+  z-index: 100;
   .tableHead, .tableItem {
     display: flex;
     justify-content: flex-start;
