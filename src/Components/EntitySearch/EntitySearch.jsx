@@ -2,15 +2,16 @@ import {useState} from 'react';
 import styles from './EntitySearch.module.scss';
 import TextInput from '../FormFields/TextInput';
 import Tooltip from '../Tooltip/Tooltip';
-import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
+import Alert from '../../Icons/Alerts/Info.svg?react';
+import { cloneDeep } from 'lodash';
 
-const EntitySearch = ({activeFilters, onFilter}) => {
+const EntitySearch = ({ onFilter }) => {
 
   const [searchStringObject, setSearchStringObject] = useState({type:'str:', value: ''});
 
   const handleStringSearchChange = (value) => {
     if(searchStringObject.value !== value) {
-      let newStringObj  = global.structuredClone(searchStringObject);
+      let newStringObj  = cloneDeep(searchStringObject);
       newStringObj.value = value;
       setSearchStringObject(newStringObj);
     }

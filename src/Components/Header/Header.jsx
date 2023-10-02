@@ -1,12 +1,11 @@
-import React from "react";
 import { Link } from 'react-router-dom';
 import { currentConfig, currentRoot, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
-import {ReactComponent as Logo} from '../../Assets/Images/Logo.svg';
-import {ReactComponent as History} from '../../Icons/Navigation/History.svg';
-import {ReactComponent as Feedback} from '../../Icons/Navigation/Feedback.svg';
-import {ReactComponent as Workspace} from '../../Icons/Navigation/Workspace.svg';
-import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
+import Logo from '../../Assets/Images/Logo.svg?react';
+import History from '../../Icons/Navigation/History.svg?react';
+import Feedback from '../../Icons/Navigation/Feedback.svg?react';
+import Workspace from '../../Icons/Navigation/Workspace.svg?react';
+import Question from '../../Icons/Navigation/Question.svg?react';
 import defaultPfp from '../../Assets/Images/pfp.png';
 import styles from './Header.module.scss';
 

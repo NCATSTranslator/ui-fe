@@ -3,7 +3,7 @@ import Query from "../../Components/Query/Query";
 import homeOne from "../../Assets/Images/Home/home1.svg";
 import homeTwo from "../../Assets/Images/Home/home2.svg";
 import homeThree from "../../Assets/Images/Home/home3.svg";
-import {ReactComponent as ArrowForward} from '../../Icons/Directional/arrow_forward.svg';
+import ArrowForward from '../../Icons/Directional/arrow_forward.svg?react';
 // import berkeley from "../../Assets/Images/Logos/berkeley.png";
 // import bma from "../../Assets/Images/Logos/bma.png";
 // import broad from "../../Assets/Images/Logos/broad.png";

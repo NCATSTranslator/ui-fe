@@ -1,5 +1,4 @@
-import React from "react";
-import {ReactComponent as SearchIcon} from '../../Icons/Buttons/Search.svg';
+import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 import styles from './Search.module.scss';
 
 const Search = ({iconInternal, handleClick, size }) => {

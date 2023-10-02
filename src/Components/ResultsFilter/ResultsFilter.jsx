@@ -1,11 +1,11 @@
-import React, {useState, useMemo} from 'react';
+import {useState, useMemo} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
 import SimpleRange from '../Range/SimpleRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
-import {ReactComponent as Alert} from '../../Icons/Alerts/Info.svg';
-import {ReactComponent as ExternalLink} from '../../Icons/external-link.svg';
+import Alert from '../../Icons/Alerts/Info.svg?react';
+import ExternalLink from '../../Icons/external-link.svg?react';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacet, isEvidenceFilter } from '../../Utilities/filterFunctions';
 import { cloneDeep } from 'lodash';
@@ -58,7 +58,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       return;
     }
 
-    let newObj = global.structuredClone(objectToUpdate);
+    let newObj = cloneDeep(objectToUpdate);
     newObj.type = facetID;
     newObj.value = label;
     setterFunction(objectToUpdate);
@@ -171,7 +171,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
         : countsToShow[type] + facetShowMoreIncrement;
     }
 
-    let newCountsToShow = global.structuredClone(countsToShow);
+    let newCountsToShow = cloneDeep(countsToShow);
     newCountsToShow[type] = newCount;
     setCountsToShow(newCountsToShow);
   }
@@ -182,7 +182,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     else
       newCount = countsToShow[type] - facetShowMoreIncrement;
 
-    let newCountsToShow = global.structuredClone(countsToShow);
+    let newCountsToShow = cloneDeep(countsToShow);
     newCountsToShow[type] = newCount;
     setCountsToShow(newCountsToShow);
   }

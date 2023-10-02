@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useMemo, useCallback} from "react";
+import {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import QueryBar from "../QueryBar/QueryBar";
@@ -11,14 +11,14 @@ import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
 import { filterAndSortExamples, getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import { getEntityLink, generateEntityLink, getLastItemInArray } from "../../Utilities/utilities";
-import {ReactComponent as Question} from '../../Icons/Navigation/Question.svg';
-import {ReactComponent as Drug} from '../../Icons/drug.svg';
-import {ReactComponent as Disease} from '../../Icons/disease2.svg';
-import {ReactComponent as Chemical} from '../../Icons/Queries/Chemical.svg';
-import {ReactComponent as Gene} from '../../Icons/Queries/Gene.svg';
-import {ReactComponent as Back} from '../../Icons/Directional/Undo.svg';
-import {ReactComponent as Search} from '../../Icons/Buttons/Search.svg';
-import {ReactComponent as ArrowForward} from '../../Icons/Directional/arrow_forward.svg';
+import Question from '../../Icons/Navigation/Question.svg?react';
+import Drug from '../../Icons/drug.svg?react';
+import Disease from '../../Icons/disease2.svg?react';
+import Chemical from '../../Icons/Queries/Chemical.svg?react';
+import Gene from '../../Icons/Queries/Gene.svg?react';
+import Back from '../../Icons/Directional/Undo.svg?react';
+import Search from '../../Icons/Buttons/Search.svg?react';
+import ArrowForward from '../../Icons/Directional/arrow_forward.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './Query.module.scss';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
@@ -360,7 +360,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               <>
                 <h4 className={styles.heading}>What relationship would you like to explore?</h4>
                 <div className={styles.upperButtons}>
-                  <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)}>
+                  <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)} data-testid="drug-disease-selector">
                     <Drug/>Drug <ArrowForward className={styles.arrow} /> <Disease/>Disease
                   </button>
                   <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(1)}>

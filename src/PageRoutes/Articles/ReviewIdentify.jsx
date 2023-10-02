@@ -4,8 +4,7 @@ import filterImage from "../../Assets/Images/filter.png";
 import bookmarkImage from "../../Assets/Images/bookmark.png";
 import pubsImage from "../../Assets/Images/pubs.png";
 import sourcesImage from "../../Assets/Images/sources.png";
-
-import {ReactComponent as Bookmark } from "../../Icons/Navigation/Bookmark.svg"
+import Bookmark from "../../Icons/Navigation/Bookmark.svg?react";
 
 export const ReviewIdentify = () => {
 

@@ -20,6 +20,7 @@
 .vscode/
 **/*.swp
 **/*.swo
+*.cpuprofile
 
 npm-debug.log*
 yarn-debug.log*
