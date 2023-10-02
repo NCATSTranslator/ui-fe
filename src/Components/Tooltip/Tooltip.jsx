@@ -8,7 +8,7 @@ const Tooltip = ({
   id, 
   anchorSelect,
   offset, 
-  delayShow = 250, 
+  delayShow = 500, 
   delayHide = 100, 
   clickable = true, 
   className,

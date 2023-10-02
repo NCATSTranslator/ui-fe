@@ -1,6 +1,7 @@
 import styles from './ResultsListHeader.module.scss';
 import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
 import ShareModal from "../Modals/ShareModal"; 
+import Tooltip from '../Tooltip/Tooltip';
 import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter } from '../../Utilities/filterFunctions';
 import CloseIcon from '../../Icons/Buttons/Close.svg?react'
 import ShareIcon from '../../Icons/share.svg?react';
@@ -61,8 +62,13 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
             className={styles.shareButton}
             onClick={()=>{data.setShareModalOpen(true)}}
             data-testid="share-button"
+            data-tooltip-id={`share-button-results-header`}
+            aria-describedby={`share-button-results-header`}
             >
               <ShareIcon/>
+              <Tooltip id={`share-button-results-header`}>
+                <span className={styles.tooltip}>Generate a sharable link for this set of results.</span>
+              </Tooltip>
           </button>
           <ShareModal
             isOpen={data.shareModalOpen}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
+import Tooltip from "../Tooltip/Tooltip";
 import styles from './StickyToolbar.module.scss';
 import ShareIcon from '../../Icons/share.svg?react';
 import Subtract from '../../Icons/Buttons/Subtract.svg?react';
@@ -50,8 +51,13 @@ const StickyToolbar = ({ loadingButtonData, setShareModalFunction }) => {
         <button
           className={styles.shareButton}
           onClick={()=>{setShareModalFunction(true)}}
+          data-tooltip-id="share-button-sticky"
+          aria-describedby="share-button-sticky"
           >
             <ShareIcon/>
+            <Tooltip id={`share-button-sticky`}>
+              <span className={styles.tooltip}>Generate a sharable link for this set of results.</span>
+            </Tooltip>
         </button>
       </div>
     </div>

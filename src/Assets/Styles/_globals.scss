@@ -3,6 +3,10 @@
 @import "./pages";
 @import "./components";
 
+body {
+  overflow-x: hidden !important;
+}
+
 // Colors
 .bg-red {
   background-color: $red;
