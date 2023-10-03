@@ -61,8 +61,8 @@
       }
     }
     .term {
-      display: flex;
-      align-items: center;
+      width: 95%;
+      display: block;
       cursor: pointer;
       overflow: hidden;
       text-overflow: ellipsis;
