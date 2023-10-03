@@ -1,0 +1,64 @@
+@import "../../Assets/Styles/variables";
+
+.query {
+  padding: 30px 40px 15px;
+  background-color: $white;
+  &:first-child {
+    border-top-right-radius: $defaultBorderRadius;
+    border-top-left-radius: $defaultBorderRadius;
+  }
+  &:last-child {
+    border-bottom-right-radius: $defaultBorderRadius;
+    border-bottom-left-radius: $defaultBorderRadius;
+  }
+  &:nth-child(odd) {
+    background-color: $lightGray;
+  }
+  .topBar {
+    display: grid;
+    grid-template-columns: 1.25fr .5fr 25px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    .heading, .date, .link {
+      margin: 0;
+    }
+    .headingContainer {
+      display: grid;
+    }
+    .heading {
+      font-size: 30px;
+      font-weight: 700;
+      & > span {
+        margin-left: 5px;
+      } 
+      span, mark {
+        font-size: 30px;
+        font-weight: 400;
+      }
+    }
+    .date {
+      font-size: 14px;
+      font-weight: 400;
+      font-style: italic;
+      margin: 5px 0 0 20px;
+      color: $purpleOne;
+    }
+    .link {
+      svg path {
+        fill: $purpleOne;
+      }
+    }
+    .numSaves {
+      margin: 0;
+      text-align: center;
+    }
+  }
+}
+
+.result {
+  border-bottom: 1px solid $midGray;
+  &:last-of-type {
+    border-bottom: none;
+  }
+}

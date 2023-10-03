@@ -1,14 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
-import { getSaves, emptyEditor } from '../../Utilities/userApi';
-import { handleEvidenceModalClose, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
+import { getSaves } from '../../Utilities/userApi';
+import { handleEvidenceModalClose } from "../../Utilities/resultsInteractionFunctions";
 import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
 import styles from './UserSaves.module.scss';
-import ResultsItem from '../ResultsItem/ResultsItem';
 import EvidenceModal from '../Modals/EvidenceModal';
-import Tooltip from '../Tooltip/Tooltip';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import ExternalLink from '../../Icons/external-link.svg?react';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 import { getFormattedDate } from '../../Utilities/utilities';
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -17,7 +14,7 @@ import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from 
 import NotesModal from '../Modals/NotesModal';
 import TextInput from "../FormFields/TextInput";
 import { cloneDeep } from 'lodash';
-import Highlighter from 'react-highlight-words';
+import UserSave from '../UserSave/UserSave';
 
 const UserSaves = () => {
 
@@ -60,13 +57,11 @@ const UserSaves = () => {
     let newSaves = await getSaves(setUserSaves);
     setFilteredUserSaves(cloneDeep(newSaves));
   }
-  useEffect(() => {
-    initSaves();
-  },[]);
 
   const handleSearch = (value = false) => {
     if(!value) {
       setFilteredUserSaves(cloneDeep(userSaves));
+      currentSearchString.current = "";
       return;
     }
 
@@ -117,6 +112,8 @@ const UserSaves = () => {
   }
 
   useEffect(() => {
+    initSaves();
+
     const handleKeyDown = (ev) => {
       if (ev.keyCode === 90) {
         setZoomKeyDown(true);
@@ -176,7 +173,7 @@ const UserSaves = () => {
               isAll={isAllEvidence}
               edgeGroup={selectedEdges}
             />
-            <h1 className={`h4 ${styles.pageHeading}`}>Saved Results</h1>
+            <h1 className={`h4 ${styles.pageHeading}`}>Workspace</h1>
             {
               (userSaves == null || Object.entries(userSaves).length <= 0)
               ? 
@@ -209,91 +206,17 @@ const UserSaves = () => {
                   <div className={styles.saves}>
                     {
                       Object.entries(filteredUserSaves).reverse().map((item) => {
-                        let key = item[0];
-                        let queryObject = item[1];
-                        let typeString = queryObject.query.type.label;
-                        let queryNodeString = queryObject.query.nodeLabel;
-                        let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryObject.query.type.id, key);
-                        // console.log(queryObject.saves.values().next());
-                        let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
-                        // let submittedDate = new Date();
                         return(
-                          <div key={key} className={styles.query}>
-                            <div className={styles.topBar}>
-                              <div className={styles.headingContainer}>
-                                <a href={shareURL} target="_blank" rel="noreferrer">
-                                  <h4 className={styles.heading}>{typeString}: 
-                                    <Highlighter
-                                      highlightClassName="highlight"
-                                      searchWords={[currentSearchString.current]}
-                                      autoEscape={true}
-                                      textToHighlight={queryNodeString}
-                                    />
-                                  </h4>
-                                </a>
-                                <p className={styles.date}>
-                                  <Highlighter
-                                    highlightClassName="highlight"
-                                    searchWords={[currentSearchString.current]}
-                                    autoEscape={true}
-                                    textToHighlight={submittedDate.toString()}
-                                  />
-                                </p>
-                              </div>
-                              {
-                                queryObject.saves && Array.from(queryObject.saves).length > 0 &&
-                                <p className={styles.numSaves}>{Array.from(queryObject.saves).length} saved item{(Array.from(queryObject.saves).length > 1) && "s"}</p>
-                              }
-                              <a 
-                                href={shareURL} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className={styles.link} 
-                                data-tooltip-id={`originalquery-${key}`} 
-                                aria-describedby={`originalquery-${key}`}
-                                >
-                                <ExternalLink/>
-                                <Tooltip id={`originalquery-${key}`}>
-                                  <span className={styles.tooltip}>Open this query in a new tab.</span>
-                                </Tooltip>
-                              </a>
-                            </div>
-                            <div className={styles.separator}></div>
-                            <div className={styles.resultsList}>
-                              {queryObject.saves && Array.from(queryObject.saves).sort((a, b) => a.label.localeCompare(b.label)).map((save) => {
-                                let queryType = save.data.query.type;
-                                let queryItem = save.data.item;
-                                let arspk = save.data.query.pk;
-                                let queryNodeID = save.data.query.nodeId;
-                                let queryNodeLabel = save.data.query.nodeLabel;
-                                let queryNodeDescription = save.data.query.nodeDescription;
-                                queryItem.hasNotes = (save.notes.length === 0 || JSON.stringify(save.notes) === emptyEditor) ? false : true;
-                                return (
-                                  <div key={save.id} className={styles.result}>
-                                    <ResultsItem
-                                      rawResults={null}
-                                      type={queryType}
-                                      item={queryItem}
-                                      activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
-                                      activateNotes={activateNotes}
-                                      activeStringFilters={[currentSearchString.current]}
-                                      zoomKeyDown={zoomKeyDown}
-                                      currentQueryID={arspk}
-                                      queryNodeID={queryNodeID}
-                                      queryNodeLabel={queryNodeLabel}
-                                      queryNodeDescription={queryNodeDescription}
-                                      bookmarked
-                                      bookmarkID={save.id}
-                                      hasNotes={queryItem.hasNotes}
-                                      handleBookmarkError={handleBookmarkError}
-                                      bookmarkAddedToast={bookmarkAddedToast}
-                                      bookmarkRemovedToast={bookmarkRemovedToast}
-                                    />
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          </div>
+                          <UserSave
+                            save={item}
+                            currentSearchString={currentSearchString}
+                            zoomKeyDown={zoomKeyDown}
+                            activateEvidence={activateEvidence}
+                            activateNotes={activateNotes}
+                            handleBookmarkError={handleBookmarkError}
+                            bookmarkAddedToast={bookmarkAddedToast}
+                            bookmarkRemovedToast={bookmarkRemovedToast}
+                          />
                         );
                       })
                     }
