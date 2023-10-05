@@ -1,7 +1,9 @@
 import styles from './Autocomplete.module.scss';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import { useCallback, useState, useEffect } from 'react';
-import { getMoreInfoLink } from '../../Utilities/utilities';
+import { getMoreInfoLink, getIcon, formatBiolinkEntity } from '../../Utilities/utilities';
+import Disease from '../../Icons/Queries/Disease.svg?react';
+import Tooltip from '../Tooltip/Tooltip';
 
 const Autocomplete = ({isLoading, items, handleItemClick}) => {
 
@@ -57,14 +59,26 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
         <div>
           {
             items.slice(0, numberVisibleItems).map((item, i) => {
+              console.log(item);
+              const type = item.types[0];
+              const typeString = formatBiolinkEntity(type);
+              const icon = getIcon(type);
               return (
                   <div key={i} className={styles.item}>
+                    <span className={styles.icon} data-tooltip-id={`${type}${item.label}-${i}`}>
+                      {icon}
+                      <Tooltip id={`${type}${item.label}-${i}`} place="left">
+                        <span className={styles.tooltip}>{typeString}</span>
+                      </Tooltip>
+                    </span>
                     <span className={styles.term} onClick={()=>handleItemClick(item)}>
                       {item.label}{item.match && <span className={styles.match}>{` (${item.match})`}</span>}
                     </span>
-                    <span className={styles.link}>
-                      {getMoreInfoLink(item.id, styles.link)}
-                    </span>
+                    {
+                      type && 
+                      <span className={styles.type}>{typeString}</span>
+                    }
+                    <span className={styles.link}>{getMoreInfoLink(item.id, styles.link)}</span>
                   </div>)
             })
           }

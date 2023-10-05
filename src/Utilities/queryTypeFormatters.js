@@ -7,6 +7,7 @@ export const defaultQueryFormatter = async (items, formatData) => {
     const id = item.curie
     const input = formatData.input
     const matches = formatData.resolved[id];
+    const types = item.types;
     // Attempt to find an exact text match
     let bestMatch = false;
     for (const match of matches) {
@@ -29,7 +30,8 @@ export const defaultQueryFormatter = async (items, formatData) => {
     return {
       id: id,
       label: capitalizeAllWords(item.label),
-      match: matchText
+      match: matchText,
+      types: types
     };
   });
 
@@ -43,6 +45,7 @@ export const diseaseQueryFormatter = async (diseases, formatData) => {
     const id = disease.curie
     const input = formatData.input
     const matches = formatData.resolved[id];
+    const types = disease.types;
     // Attempt to find an exact text match
     let bestMatch = false;
     for (const match of matches) {
@@ -65,7 +68,8 @@ export const diseaseQueryFormatter = async (diseases, formatData) => {
     return {
       id: id,
       label: capitalizeAllWords(disease.label),
-      match: matchText
+      match: matchText,
+      types: types
     };
   });
 
@@ -76,7 +80,8 @@ export const diseaseQueryFormatter = async (diseases, formatData) => {
 // The result of gene annotation includes the symbol and species information
 export const geneQueryFormatter = async (genes) => {
   return Promise.resolve(genes.map((gene) => {
-    return { id: gene.curie, label: gene.symbol, match: gene.species };
+    console.log(gene);
+    return { id: gene.curie, label: gene.symbol, match: gene.species, types: ['biolink:Gene'] };
   }));
 }
 
