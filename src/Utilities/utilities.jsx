@@ -13,12 +13,13 @@ import AnatomicalEntity from '../Icons/anatomical-entity.svg?react';
 import ExternalLink from '../Icons/external-link.svg?react';
 
 export const getIcon = (category) => {
+  console.log(category);
   var icon = <Chemical/>;
   switch(category) {
     case 'biolink:Gene':
       icon = <Gene/>;
       break;
-    case 'phenotype':
+    case 'phenotype': case 'biolink:PhenotypicFeature':
       icon = <Phenotype/>;
       break;
     case 'biolink:Protein': case 'biolink:Polypeptide':
