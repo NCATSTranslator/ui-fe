@@ -59,7 +59,9 @@
     display: none;
   }
   .nameContainer {
-    display: block;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
     overflow: hidden;
     cursor: pointer;
     span {
