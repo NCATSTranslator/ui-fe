@@ -75,60 +75,62 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
   }
 
   return(
-    <>
-    {
-      (!active) 
-      ? <></>
-      : <div className={styles.pathView}>
-          <div className={styles.header}>
-            <p className={styles.subtitle}>Paths</p>
-            <p>Click on any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
-          </div>
-          {
-            formattedPaths.slice(0, numberToShow).map((pathToDisplay, i)=> {
-              return (
-                <div className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} key={i}> 
-                  {
-                    pathToDisplay.path.subgraph.map((pathItem, j) => {
-                      let key = `${i}_${j}`;
-                      return (
-                        <PathObject 
-                          pathObject={pathItem} 
-                          key={key}
-                          handleNameClick={handleNameClick}
-                          handleEdgeClick={(edge)=>handleEdgeClick(edge)}
-                          handleTargetClick={handleTargetClick}
-                          activeStringFilters={activeStringFilters}
-                        />
-                        ) 
-                      }) 
-                    }
-                </div>
-              )
-            })
-          }
-          <div className={styles.buttons}>
-            {
-              (numberToShow < paths.length) &&
-              <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
-            }
-            {
-              (numberToShow <= paths.length && numberToShow > initItemsPerPage && parseInt(initItemsPerPage) !== -1) &&
-              <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
-            }
-          </div>
-          {
-            (numberToShow < paths.length) &&
-            <button onClick={(e)=> {e.stopPropagation(); setNumberToShow(paths.length);}} className={`${styles.show} ${styles.showAll}`}>Show All</button>
-          }
-          <p className={styles.needHelp}>
-            <Question/> 
-            Was this helpful?
-            <button onClick={()=>{setFeedbackModalOpen(true)}} rel="noreferrer " target="_blank">Send Feedback</button>
-          </p>
-        </div>
-    }
-    </>
+    <div className={styles.pathView}>
+      <div className={styles.header}>
+        <p className={styles.subtitle}>Paths</p>
+        <p>Click on any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
+      </div>
+      {
+        (!active) 
+        ? <></>
+        :
+          formattedPaths.slice(0, numberToShow).map((pathToDisplay, i)=> {
+            let hovered = false;
+            return (
+              <div 
+                className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} 
+                key={i}
+                > 
+                {
+                  pathToDisplay.path.subgraph.map((pathItem, j) => {
+                    let key = `${i}_${j}`;
+                    return (
+                      <PathObject 
+                        pathObject={pathItem} 
+                        id={key}
+                        key={key}
+                        handleNameClick={handleNameClick}
+                        handleEdgeClick={(edge)=>handleEdgeClick(edge)}
+                        handleTargetClick={handleTargetClick}
+                        activeStringFilters={activeStringFilters}
+                      />
+                    ) 
+                  }) 
+                }
+              </div>
+            )
+          })
+      }
+      <div className={styles.buttons}>
+        {
+          (numberToShow < paths.length) &&
+          <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
+        }
+        {
+          (numberToShow <= paths.length && numberToShow > initItemsPerPage && parseInt(initItemsPerPage) !== -1) &&
+          <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
+        }
+      </div>
+      {
+        (numberToShow < paths.length) &&
+        <button onClick={(e)=> {e.stopPropagation(); setNumberToShow(paths.length);}} className={`${styles.show} ${styles.showAll}`}>Show All</button>
+      }
+      <p className={styles.needHelp}>
+        <Question/> 
+        Was this helpful?
+        <button onClick={()=>{setFeedbackModalOpen(true)}} rel="noreferrer " target="_blank">Send Feedback</button>
+      </p>
+    </div>
   )
 }
 

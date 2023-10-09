@@ -2,7 +2,6 @@ import styles from './Autocomplete.module.scss';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import { useCallback, useState, useEffect } from 'react';
 import { getMoreInfoLink, getIcon, formatBiolinkEntity } from '../../Utilities/utilities';
-import Disease from '../../Icons/Queries/Disease.svg?react';
 import Tooltip from '../Tooltip/Tooltip';
 
 const Autocomplete = ({isLoading, items, handleItemClick}) => {
