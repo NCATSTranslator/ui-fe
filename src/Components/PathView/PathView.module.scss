@@ -19,7 +19,6 @@
   }
   .tableHead {
     margin-bottom: $m;
-
     span {
       text-transform: uppercase;
       font-size: 10px;
@@ -35,9 +34,9 @@
     }
   }
   .tableItem {
-    margin-bottom: $m;
+    padding-bottom: 15px;
+    margin-bottom: calc($m - 15px);
     position: relative;
-    z-index: 10;
     .pathContainer, .name, .target {
       line-height: 17.5px;
       border-radius: $defaultBorderRadius;

@@ -9,9 +9,8 @@ import ResearchMultiple from '../../Icons/research-multiple.svg?react';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 import Highlighter from 'react-highlight-words';
-import { v4 as uuidv4 } from 'uuid';
 
-const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters}) => {
+const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters}) => {
 
   let nameString = '';
   let typeString = '';
@@ -21,7 +20,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
   }
   const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
 
-  const uuid = uuidv4();
+  const uid = `${id}`;
 
   // filter path by a provided predicate, then call handleEdgeClick with the filtered path object
   const predicateSpecificEdgeClick = (path, predicate) => {
@@ -43,7 +42,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
         pathObject.category === 'object' &&
         <span className={styles.nameContainer} 
           onClick={(e)=> {e.stopPropagation(); handleNameClick(pathObject);}}
-          data-tooltip-id={`${nameString}${uuid}`}
+          data-tooltip-id={`${nameString}${uid}`}
           >
           <span className={styles.name} >
             {getIcon(pathObject.type)}
@@ -56,7 +55,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
               />
             </span>
           </span>
-            <Tooltip id={`${nameString}${uuid}`}>
+            <Tooltip id={`${nameString}${uid}`}>
               <span><strong>{nameString}</strong> ({typeString})</span>
               <span className={styles.description}>{pathObject.description}</span>
               {
@@ -73,7 +72,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
         pathObject.category === 'predicate' &&
         <span 
           className={styles.pathContainer} 
-          data-tooltip-id={`${pathObject.predicates[0]}${uuid}`}
+          data-tooltip-id={`${pathObject.predicates[0]}${uid}`}
           onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject);}}
           >
           <Connector />
@@ -101,7 +100,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
             </span>
           </span>
           <Tooltip 
-            id={`${pathObject.predicates[0]}${uuid}`}
+            id={`${pathObject.predicates[0]}${uid}`}
             > 
             {
               pathObject.predicates &&
@@ -110,7 +109,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
                   pathObject.predicates.map((predicate, i)=> {
                     return (
                       <p 
-                        key={`${pathObject.predicates[0]}${uuid}${i}`} 
+                        key={`${pathObject.predicates[0]}${uid}${i}`} 
                         className={styles.predicate} 
                         // Predicate click to get specific evidence will go here 
                         onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(pathObject, predicate)}}
@@ -134,7 +133,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
         pathObject.category === 'target' && 
         <span 
           className={styles.targetContainer} 
-          data-tooltip-id={`${nameString}${uuid}`}
+          data-tooltip-id={`${nameString}${uid}`}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(pathObject);}}
           >
           <span className={styles.target} >
@@ -148,7 +147,7 @@ const PathObject = ({pathObject, handleNameClick, handleEdgeClick, handleTargetC
               />
             </span>
           </span>
-          <Tooltip id={`${nameString}${uuid}`}>
+          <Tooltip id={`${nameString}${uid}`}>
             <span><strong>{nameString}</strong> ({typeString})</span>
             <span className={styles.description}>{pathObject.description}</span>
             {
