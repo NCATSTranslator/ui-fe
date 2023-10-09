@@ -86,6 +86,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const [tagsHeight, setTagsHeight] = useState(0);
   const minTagsHeight = 45;
 
+  const numRoles = item.tags.filter(tag => tag.includes("role")).length;
+
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
       setTagsHeight(tagsRef.current.clientHeight);
@@ -338,13 +340,25 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
               {
                 availableTags &&
-                item.tags.map((tagID) => {
+                item.tags.map((tagID, i) => {
                   if(!tagID.includes("role"))
                     return null;
                   let tagObject = availableTags[tagID];
                   let activeClass = (activeFilters.some((item)=> item.type === tagID && item.value === tagObject.name))
                     ? styles.active
                     : styles.inactive;
+
+                  if(numRoles > 4 && i === 4) {
+                    const moreCount = numRoles - 4;
+                    return (
+                      <>
+                        <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                        <span className={styles.hasMore}>(+{moreCount} more)</span>
+                        {/* <CircleAdd className={styles.hasMore}/> */}
+                      </>
+                    );
+                  }
+
                   return(
                     <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
                   )
