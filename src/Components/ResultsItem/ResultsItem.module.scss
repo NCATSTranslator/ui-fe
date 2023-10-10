@@ -15,7 +15,7 @@
     }
   }
   .resultSub {
-    padding: $xs 0;
+    padding: 4px 0;
     display: flex;
     align-items: center;
   }
@@ -144,10 +144,11 @@
     }
     .info {
       display: block;
-      font-size: $bodyTwoSize;
+      font-size: 13px;
       font-weight: 400;
       line-height: 1;
-      color: $darkGray
+      color: $darkGray;
+      margin-bottom: 4px;
     }
   }
   .downloadButton {

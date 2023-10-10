@@ -85,7 +85,6 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
         ? <></>
         :
           formattedPaths.slice(0, numberToShow).map((pathToDisplay, i)=> {
-            let hovered = false;
             return (
               <div 
                 className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} 
