@@ -8,6 +8,7 @@ export default defineConfig(() => {
     build: {
       outDir: 'build',
       chunkSizeWarningLimit: 1600,
+      sourcemap: true
     },
     plugins: [
       react(),
