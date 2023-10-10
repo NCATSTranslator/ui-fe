@@ -66,10 +66,17 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const currentEvidence = useMemo(() => getCurrentEvidence(item), [item]);
   let icon = getIcon(item.type);
   let publicationCount = (currentEvidence.publications?.length) 
-    ? currentEvidence.publications.length
+    ? currentEvidence.publications.filter((item)=> item.type === "PMID" || item.type === "PMC").length
+    : 0;
+  let clinicalCount = (currentEvidence.publications?.length) 
+    ? currentEvidence.publications.filter((item)=> item.type === "NCT").length
     : 0;
   let sourcesCount = (currentEvidence.distinctSources?.length) 
     ? currentEvidence.distinctSources.length
+    : 0;
+
+  let roleCount = (item.tags) 
+    ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
 
   const [isBookmarked, setIsBookmarked] = useState(bookmarked);
@@ -89,6 +96,9 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const numRoles = item.tags.filter(tag => tag.includes("role")).length;
 
   useEffect(() => {
+    if(!tagsRef.current)
+      return;
+    
     const resizeObserver = new ResizeObserver(() => {
       setTagsHeight(tagsRef.current.clientHeight);
     });
@@ -304,6 +314,10 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           </div>
           <div>
             <span className={styles.info}>Publications ({publicationCount})</span>
+            {
+              clinicalCount > 0 &&
+              <span className={styles.info}>Clinical Trials ({clinicalCount})</span>
+            }
             <span className={styles.info}>Sources ({sourcesCount})</span>
           </div>
         </span>
@@ -335,48 +349,50 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         height={height}
         >
         <div className={styles.container}>
-          {
-            item.tags && 
-            <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
-              {
-                availableTags &&
-                item.tags.map((tagID, i) => {
-                  if(!tagID.includes("role"))
-                    return null;
-                  let tagObject = availableTags[tagID];
-                  let activeClass = (activeFilters.some((item)=> item.type === tagID && item.value === tagObject.name))
-                    ? styles.active
-                    : styles.inactive;
+          <div>
+            {
+              item.tags && roleCount > 0 && 
+              <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
+                {
+                  availableTags &&
+                  item.tags.map((tagID, i) => {
+                    if(!tagID.includes("role"))
+                      return null;
+                    // console.log(item.tags.filter((tag)=>tag.includes("role")));
+                    let tagObject = availableTags[tagID];
+                    let activeClass = (activeFilters.some((item)=> item.type === tagID && item.value === tagObject.name))
+                      ? styles.active
+                      : styles.inactive;
 
-                  if(numRoles > 4 && i === 4) {
-                    const moreCount = numRoles - 4;
-                    return (
-                      <>
-                        <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
-                        <span className={styles.hasMore}>(+{moreCount} more)</span>
-                        {/* <CircleAdd className={styles.hasMore}/> */}
-                      </>
-                    );
-                  }
+                    if(numRoles > 4 && i === 4) {
+                      const moreCount = numRoles - 4;
+                      return (
+                        <>
+                          <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                          <span className={styles.hasMore}>(+{moreCount} more)</span>
+                        </>
+                      );
+                    }
 
-                  return(
-                    <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
-                  )
-                })
-              }
-            </div>
-          }
-          {
-            item.description &&
-            <p>
-              <Highlighter
-                highlightClassName="highlight"
-                searchWords={activeStringFilters}
-                autoEscape={true}
-                textToHighlight={item.description}
-              />
-            </p>
-          }
+                    return(
+                      <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                    )
+                  })
+                }
+              </div>
+            }
+            {
+              item.description &&
+              <p>
+                <Highlighter
+                  highlightClassName="highlight"
+                  searchWords={activeStringFilters}
+                  autoEscape={true}
+                  textToHighlight={item.description}
+                />
+              </p>
+            }
+          </div>
         </div>
         <Suspense fallback={<LoadingBar loading useIcon reducedPadding />}>
           <GraphView
