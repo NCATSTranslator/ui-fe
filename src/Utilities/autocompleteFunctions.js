@@ -18,7 +18,6 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
     newFetchNodesFromInputText(inputText, limitType, limitPrefixes)
       .then(response => response.json())
       .then(nodes => {
-        console.log(nodes);
         let newNodes = {};
         for(const node of nodes) {
           newNodes[node.curie] = node.synonyms;
