@@ -22,6 +22,17 @@ import { displayScore } from '../../Utilities/scoring';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
+const sortTagsBySelected = (a, b, selected) => {
+  const aExistsInSelected = selected.some((item)=> item.type === a );
+  const bExistsInSelected = selected.some((item)=> item.type === b );
+
+  if (aExistsInSelected && bExistsInSelected) return 0; 
+  if (aExistsInSelected) return -1; 
+  if (bExistsInSelected) return 1; 
+
+  return 0; 
+}
+
 const getCurrentEvidence = (result) => {
   let evidenceObject = {};
   if(!result || !result.evidence)
@@ -355,7 +366,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
               <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
                 {
                   availableTags &&
-                  item.tags.map((tagID, i) => {
+                  item.tags.sort((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagID, i) => {
                     if(!tagID.includes("role"))
                       return null;
                     // console.log(item.tags.filter((tag)=>tag.includes("role")));
