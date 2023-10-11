@@ -369,7 +369,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
                   item.tags.sort((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagID, i) => {
                     if(!tagID.includes("role"))
                       return null;
-                    // console.log(item.tags.filter((tag)=>tag.includes("role")));
                     let tagObject = availableTags[tagID];
                     let activeClass = (activeFilters.some((item)=> item.type === tagID && item.value === tagObject.name))
                       ? styles.active
