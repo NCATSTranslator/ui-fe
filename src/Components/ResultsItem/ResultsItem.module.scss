@@ -181,7 +181,7 @@
   .accordionPanel {
     grid-column: 1/6;
     &.hasDescription {
-      min-height: 50px;
+      min-height: 46px;
     }
     &>div {
       display: block !important;
