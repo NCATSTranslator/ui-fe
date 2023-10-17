@@ -5,7 +5,7 @@ import SmallScreenOverlay from './Components/SmallScreenOverlay/SmallScreenOverl
 import SendFeedbackModal from "./Components/Modals/SendFeedbackModal";
 import { useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux';
 import './App.scss';
 import { handleFetchErrors, getDataFromQueryVar } from './Utilities/utilities';
 import { setCurrentRoot, setCurrentUser, setCurrentPrefs, setCurrentConfig } from './Redux/rootSlice';
@@ -77,7 +77,7 @@ const App = ({children}) => {
       <div className='header-disclaimer'>
         <p>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
       </div>
-      <Header handleFeedbackModalOpen={()=>setFeedbackModalOpen(true)} />
+      <Header />
       <div className='body'>
         {
           children 

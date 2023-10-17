@@ -10,7 +10,7 @@ import Question from '../../Icons/Navigation/Question.svg?react';
 import defaultPfp from '../../Assets/Images/pfp.png';
 import styles from './Header.module.scss';
 
-const Header = ({children, handleFeedbackModalOpen}) => {
+const Header = ({children}) => {
   
   const root = useSelector(currentRoot);
   const user = useSelector(currentUser);
