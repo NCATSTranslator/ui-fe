@@ -7,7 +7,7 @@ import { useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import './App.scss';
-import { handleFetchErrors } from './Utilities/utilities';
+import { handleFetchErrors, getDataFromQueryVar } from './Utilities/utilities';
 import { setCurrentRoot, setCurrentUser, setCurrentPrefs, setCurrentConfig } from './Redux/rootSlice';
 import { getUserProfile, getUserPreferences, defaultPrefs } from './Utilities/userApi';
 
@@ -25,7 +25,8 @@ const App = ({children}) => {
   pathnameClass = (pathnameClass.includes('/')) ? pathnameClass.replace(/\//g, '-') : pathnameClass;
   pathnameClass = (pathnameClass === "") ? "home" : pathnameClass;
 
-  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const initFeedbackModalOpen = getDataFromQueryVar("fm");
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(initFeedbackModalOpen);
   const handleModalClose = () => {
     setFeedbackModalOpen(false);
   }
