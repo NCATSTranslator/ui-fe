@@ -20,6 +20,7 @@ const Header = ({children, handleFeedbackModalOpen}) => {
   const redirectURI = `${window.location.origin}/main/logout`;
   const logoutURI = config?.social_providers?.una?.logout_uri;
   const logoutReady = (clientID && logoutURI) ? true : false;
+  const openFeedbackModal = true;
 
   return (
     <header className={styles.header}>
@@ -36,7 +37,7 @@ const Header = ({children, handleFeedbackModalOpen}) => {
                 <Link to={`/${root}/history`}><History/><span>Search History</span></Link>
               </>
             }
-            <button onClick={()=>handleFeedbackModalOpen()}><Feedback/><span>Send Feedback</span></button>
+            <Link to={`/${root}?fm=${openFeedbackModal}`} reloadDocument target={'_blank'}><Feedback/><span>Send Feedback</span></Link>
             <Link to={`/${root}/help`} className={styles.helpLink} rel="noreferrer" target={'_blank'} ><Question/><span>Help</span></Link>
             {
               root === 'demo'
