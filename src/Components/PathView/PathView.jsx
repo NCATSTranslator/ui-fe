@@ -2,10 +2,10 @@ import styles from './PathView.module.scss';
 import {useState, useEffect, useMemo} from "react";
 import PathObject from '../PathObject/PathObject';
 import Question from '../../Icons/Navigation/Question.svg?react';
-import { useOutletContext } from 'react-router-dom';
 import { cloneDeep, isEqual } from 'lodash';
 import { useSelector } from 'react-redux';
-import { currentPrefs } from '../../Redux/rootSlice';
+import { currentPrefs, currentRoot } from '../../Redux/rootSlice';
+import { Link } from 'react-router-dom';
 
 const getPathsWithSelectionsSet = (paths, selectedPaths) => {
   if(selectedPaths.size > 0) {
@@ -34,7 +34,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
 
-  const setFeedbackModalOpen = useOutletContext();
+  const root = useSelector(currentRoot);
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
@@ -127,7 +127,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
       <p className={styles.needHelp}>
         <Question/> 
         Was this helpful?
-        <button onClick={()=>{setFeedbackModalOpen(true)}} rel="noreferrer " target="_blank">Send Feedback</button>
+        <Link to={`/${root}?fm=true`} reloadDocument target={'_blank'}>Send Feedback</Link>
       </p>
     </div>
   )
