@@ -362,10 +362,9 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         <div className={styles.container}>
           <div>
             {
-              item.tags && roleCount > 0 && 
+              item.tags && roleCount > 0 && availableTags && 
               <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
                 {
-                  availableTags &&
                   item.tags.sort((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagID, i) => {
                     if(!tagID.includes("role"))
                       return null;

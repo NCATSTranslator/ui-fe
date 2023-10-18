@@ -16,7 +16,7 @@
   }
   .topBar {
     display: grid;
-    grid-template-columns: 1.25fr .5fr 25px;
+    grid-template-columns: 1.25fr .5fr 25px 75px;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 20px;
@@ -29,6 +29,11 @@
     .heading {
       font-size: 30px;
       font-weight: 700;
+      color: $purpleOne;
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
+      }
       & > span {
         margin-left: 5px;
       } 
@@ -53,6 +58,9 @@
       margin: 0;
       text-align: center;
     }
+  }
+  .accordionButton {
+    justify-self: flex-end;
   }
 }
 
