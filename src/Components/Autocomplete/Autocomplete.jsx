@@ -58,7 +58,6 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
         <div>
           {
             items.slice(0, numberVisibleItems).map((item, i) => {
-              console.log(item);
               const type = item.types[0];
               const typeString = formatBiolinkEntity(type);
               const icon = getIcon(type);
