@@ -19,7 +19,7 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
   let queryNodeString = queryObject.query.nodeLabel;
   let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryObject.query.type.id, key);
   let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [height, setHeight] = useState(0);
 
   useEffect(() => {
