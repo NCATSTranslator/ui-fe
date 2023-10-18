@@ -1,4 +1,5 @@
 import styles from './UserSave.module.scss';
+import { useState, useEffect } from 'react';
 import Highlighter from 'react-highlight-words';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import Tooltip from '../Tooltip/Tooltip';
@@ -6,7 +7,8 @@ import ResultsItem from '../ResultsItem/ResultsItem';
 import { emptyEditor } from '../../Utilities/userApi';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { getFormattedDate } from '../../Utilities/utilities';
-
+import AnimateHeight from 'react-animate-height';
+import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
 
 const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, activateNotes, 
   handleBookmarkError, bookmarkAddedToast, bookmarkRemovedToast}) => {
@@ -16,15 +18,26 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
   let typeString = queryObject.query.type.label;
   let queryNodeString = queryObject.query.nodeLabel;
   let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryObject.query.type.id, key);
-  // console.log(queryObject.saves.values().next());
   let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
-  // let submittedDate = new Date();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if(isExpanded === false)
+      setHeight(0);
+    else
+      setHeight('auto');
+  }, [isExpanded])
+
+  const handleToggle = () => {
+    setIsExpanded(!isExpanded);
+  }
 
   return (
     <div key={key} className={styles.query}>
       <div className={styles.topBar}>
         <div className={styles.headingContainer}>
-          <a href={shareURL} target="_blank" rel="noreferrer">
+          <span onClick={handleToggle} target="_blank" rel="noreferrer">
             <h4 className={styles.heading}>{typeString}: 
               <Highlighter
                 highlightClassName="highlight"
@@ -33,7 +46,7 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
                 textToHighlight={queryNodeString}
               />
             </h4>
-          </a>
+          </span>
           <p className={styles.date}>
             <Highlighter
               highlightClassName="highlight"
@@ -60,9 +73,18 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
             <span className={styles.tooltip}>Open this query in a new tab.</span>
           </Tooltip>
         </a>
+        <button className={`${styles.accordionButton} accordionButton ${isExpanded ? 'open' : 'closed' }`} onClick={handleToggle}>
+          <ChevDown/>
+        </button>
       </div>
       <div className={styles.separator}></div>
-      <div className={styles.resultsList}>
+      <AnimateHeight
+        className={`${styles.resultsList} 
+          ${isExpanded ? styles.open : styles.closed } 
+        `}
+        duration={500}
+        height={height}
+        >
         {queryObject.saves && Array.from(queryObject.saves).sort((a, b) => a.label.localeCompare(b.label)).map((save) => {
           let queryType = save.data.query.type;
           let queryItem = save.data.item;
@@ -95,7 +117,7 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
             </div>
           )
         })}
-      </div>
+      </AnimateHeight>
     </div>
   )
 }

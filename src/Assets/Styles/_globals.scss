@@ -194,3 +194,20 @@ img {
   word-break: break-word;
 }
 
+.accordionButton {
+  box-shadow: none;
+  background-color: transparent;
+  margin: 0;
+  svg {
+    transition: transform .25s ease;
+    margin-right: 0;
+  }
+  &:hover {
+    box-shadow: none;
+  }
+  &.open {
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+}
