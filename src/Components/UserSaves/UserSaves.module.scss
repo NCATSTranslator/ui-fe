@@ -61,6 +61,7 @@
       width: 100%;
       margin: 0;
       input {
+        width: -moz-available;
         width: -webkit-fill-available;
       }
     }
