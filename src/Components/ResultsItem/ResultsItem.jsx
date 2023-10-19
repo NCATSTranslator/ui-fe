@@ -325,10 +325,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           </div>
           <div>
             <span className={styles.info}>Publications ({publicationCount})</span>
-            {
-              clinicalCount > 0 &&
-              <span className={styles.info}>Clinical Trials ({clinicalCount})</span>
-            }
+            <span className={styles.info}>Clinical Trials ({clinicalCount})</span>
             <span className={styles.info}>Sources ({sourcesCount})</span>
           </div>
         </span>
