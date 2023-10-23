@@ -24,7 +24,7 @@ const getPathsWithSelectionsSet = (paths, selectedPaths) => {
   }
 }
 
-const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, activeStringFilters}) => {
+const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeStringFilters}) => {
 
   const prefs = useSelector(currentPrefs);
 
@@ -56,8 +56,8 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
     console.log("handle name click");
   }
 
-  const handleEdgeClick = (edgeGroup) => {
-    handleEdgeSpecificEvidence(edgeGroup)
+  const handleEdgeClick = (edgeGroup, path) => {
+    handleEdgeSpecificEvidence(edgeGroup, path)
   }
 
   const handleTargetClick = (target) => {
@@ -86,27 +86,30 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
         :
           formattedPaths.slice(0, numberToShow).map((pathToDisplay, i)=> {
             return (
-              <div 
-                className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} 
-                key={i}
-                > 
-                {
-                  pathToDisplay.path.subgraph.map((pathItem, j) => {
-                    let key = `${i}_${j}`;
-                    return (
-                      <PathObject 
-                        pathObject={pathItem} 
-                        id={key}
-                        key={key}
-                        handleNameClick={handleNameClick}
-                        handleEdgeClick={(edge)=>handleEdgeClick(edge)}
-                        handleTargetClick={handleTargetClick}
-                        activeStringFilters={activeStringFilters}
-                      />
-                    ) 
-                  }) 
-                }
-              </div>
+              <>
+              <button onClick={()=>handleActivateEvidence(pathToDisplay)}>Evidence</button>
+                <div 
+                  className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} 
+                  key={i}
+                  > 
+                  {
+                    pathToDisplay.path.subgraph.map((pathItem, j) => {
+                      let key = `${i}_${j}`;
+                      return (
+                        <PathObject 
+                          pathObject={pathItem} 
+                          id={key}
+                          key={key}
+                          handleNameClick={handleNameClick}
+                          handleEdgeClick={(edge)=>handleEdgeClick(edge, pathToDisplay)}
+                          handleTargetClick={handleTargetClick}
+                          activeStringFilters={activeStringFilters}
+                        />
+                      ) 
+                    }) 
+                  }
+                </div>
+              </>
             )
           })
       }

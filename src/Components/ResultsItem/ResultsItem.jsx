@@ -11,7 +11,6 @@ import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';
 import { Link } from 'react-router-dom';
-import { cloneDeep } from 'lodash';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
@@ -130,39 +129,40 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     setIsExpanded(!isExpanded);
   }
 
-  const handleEdgeSpecificEvidence = (edgeGroup) => {
-    const filterEvidenceObjs = (objs, selectedEdge, container) => {
-      const selectedEdgeLabel = getFormattedEdgeLabel(selectedEdge.subject.name, selectedEdge.predicate, selectedEdge.object.name);
-      for (const obj of objs) {
-        let proceed = false;
-        if(Array.isArray(obj.edges) && obj.edges[0].label === selectedEdgeLabel) {
-          proceed = true;
-        } else if(obj.edges[selectedEdge.id] !== undefined) {
-          proceed = true;
-        }
+  const handleEdgeSpecificEvidence = (edgeGroup, path) => {
+    // const filterEvidenceObjs = (objs, selectedEdge, container) => {
+    //   const selectedEdgeLabel = getFormattedEdgeLabel(selectedEdge.subject.name, selectedEdge.predicate, selectedEdge.object.name);
+    //   for (const obj of objs) {
+    //     let proceed = false;
+    //     if(Array.isArray(obj.edges) && obj.edges[0].label === selectedEdgeLabel) {
+    //       proceed = true;
+    //     } else if(obj.edges[selectedEdge.id] !== undefined) {
+    //       proceed = true;
+    //     }
 
-        if(proceed) {
-          const includedObj = cloneDeep(obj);
-          // includedObj.edges = {};
-          // includedObj.edges[selectedEdge.id] = obj.edges[selectedEdge.id];
-          container.push(includedObj);
-        }
-      }
-    }
+    //     if(proceed) {
+    //       const includedObj = cloneDeep(obj);
+    //       // includedObj.edges = {};
+    //       // includedObj.edges[selectedEdge.id] = obj.edges[selectedEdge.id];
+    //       container.push(includedObj);
+    //     }
+    //   }
+    // }
 
-    let filteredEvidence = {
-      publications: [],
-      sources: []
-    };
+    // let filteredEvidence = {
+    //   publications: [],
+    //   sources: []
+    // };
 
-    let filteredPublications = filteredEvidence.publications;
-    let filteredSources = filteredEvidence.sources;
-    for (const edge of edgeGroup.edges) {
-      filterEvidenceObjs(currentEvidence.publications, edge, filteredPublications);
-      filterEvidenceObjs(currentEvidence.sources, edge, filteredSources);
-    }
+    // let filteredPublications = filteredEvidence.publications;
+    // let filteredSources = filteredEvidence.sources;
+    // for (const edge of edgeGroup.edges) {
+    //   filterEvidenceObjs(currentEvidence.publications, edge, filteredPublications);
+    //   filterEvidenceObjs(currentEvidence.sources, edge, filteredSources);
+    // }
     // call activateEvidence with the filtered evidence
-    activateEvidence(filteredEvidence, item, edgeGroup, false);
+    // activateEvidence(filteredEvidence, item, edgeGroup, path, false);
+    activateEvidence(currentEvidence, item, edgeGroup, path, false);
   }
 
   useEffect(() => {
@@ -317,7 +317,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           className={styles.evidenceLink}
           onClick={(e)=>{
             e.stopPropagation();
-            activateEvidence(currentEvidence, item, [], true);
+            activateEvidence(currentEvidence, item, [], null, true);
           }}
           >
           <div>
@@ -416,7 +416,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           paths={formattedPaths}
           selectedPaths={selectedPaths}
           active={isExpanded}
-          handleEdgeSpecificEvidence={(edgeGroup)=> {handleEdgeSpecificEvidence(edgeGroup)}}
+          handleEdgeSpecificEvidence={(edgeGroup, path)=> {handleEdgeSpecificEvidence(edgeGroup, path)}}
+          handleActivateEvidence={(path)=>activateEvidence(currentEvidence, item, [], path, false)}
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>

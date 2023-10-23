@@ -305,3 +305,11 @@
     font-weight: 700;
   }
 }
+.pathView {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 15px;
+  margin: 10px 0 15px;
+  position: relative;
+}

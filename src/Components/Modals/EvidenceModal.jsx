@@ -3,18 +3,23 @@ import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
 import Select from "../FormFields/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
+import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ReactPaginate from "react-paginate";
 import ExternalLink from '../../Icons/external-link.svg?react';
 import { capitalizeAllWords } from "../../Utilities/utilities";
 import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
          compareByKeyLexographic, sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
+import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
 
-const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup}) => {
+const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isAll, edgeGroup}) => {
+
+  console.log("path: ", path);
+  console.log("edge: ", edgeGroup);
 
   const prefs = useSelector(currentPrefs);
 
@@ -28,6 +33,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
 
+  const [evidence, setEvidence] = useState(currentEvidence);
   const [pubmedEvidence, setPubmedEvidence] = useState([]);
   const [sources, setSources] = useState([]);
   const clinicalTrials = useRef([]);
@@ -79,8 +85,42 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
     setSelectedItem(item);
   }, [item])
 
+  const filterEvidenceObjs = (objs, selectedEdge, container) => {
+    const selectedEdgeLabel = getFormattedEdgeLabel(selectedEdge.subject.name, selectedEdge.predicate, selectedEdge.object.name);
+    for (const obj of objs) {
+      let proceed = false;
+      if(Array.isArray(obj.edges) && obj.edges[0].label === selectedEdgeLabel) {
+        proceed = true;
+      } else if(obj.edges[selectedEdge.id] !== undefined) {
+        proceed = true;
+      }
+
+      if(proceed) {
+        const includedObj = cloneDeep(obj);
+        // includedObj.edges = {};
+        // includedObj.edges[selectedEdge.id] = obj.edges[selectedEdge.id];
+        container.push(includedObj);
+      }
+    }
+  }
+
   useEffect(() => {
     if(!Array.isArray(edgeGroup) && typeof edgeGroup === 'object') {
+
+      let filteredEvidence = {
+        publications: [],
+        sources: []
+      };
+    
+      let filteredPublications = filteredEvidence.publications;
+      let filteredSources = filteredEvidence.sources;
+      for (const edge of edgeGroup.edges) {
+        filterEvidenceObjs(currentEvidence.publications, edge, filteredPublications);
+        filterEvidenceObjs(currentEvidence.sources, edge, filteredSources);
+      }
+      console.log(filteredEvidence)
+      setEvidence(filteredEvidence);
+
       const re = edgeGroup.edges[0];
       const formatted = edgeGroup.predicates.map((p) => {
         return `${re.subject.name.toLowerCase()} ${p.toLowerCase()} ${re.object.name.toLowerCase()}`;
@@ -89,7 +129,7 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
     } else {
       setFormattedEdges(null);
     }
-  }, [edgeGroup]);
+  }, [edgeGroup, currentEvidence]);
 
   useEffect(() => {
     setDisplayedPubmedEvidence(pubmedEvidence.slice(itemOffset, endOffset));
@@ -98,19 +138,19 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
 
   useEffect(() => {
     if(isOpen) {
-      setPubmedEvidence(cloneDeep(currentEvidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
-      clinicalTrials.current = cloneDeep(currentEvidence.publications.filter(item => item.type === 'NCT'));
-      miscEvidence.current = cloneDeep(currentEvidence.publications.filter(item => item.type === 'other'))
+      setPubmedEvidence(cloneDeep(evidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
+      clinicalTrials.current = cloneDeep(evidence.publications.filter(item => item.type === 'NCT'));
+      miscEvidence.current = cloneDeep(evidence.publications.filter(item => item.type === 'other'))
         .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
-      let displayedSources = currentEvidence.sources; 
+      let displayedSources = evidence.sources; 
       if (isAll) {
-        displayedSources = currentEvidence.distinctSources;
+        displayedSources = evidence.distinctSources;
       }
 
       displayedSources.sort(compareByKeyLexographic('name'));
       setSources(displayedSources);
     }
-  }, [currentEvidence, isOpen, isAll])
+  }, [evidence, isOpen, isAll])
 
   // Handles direct page click
   const handlePageClick = useCallback((event) => {
@@ -298,6 +338,28 @@ const EvidenceModal = ({isOpen, onClose, currentEvidence, item, isAll, edgeGroup
               )
             })
           }
+          {
+            path &&
+            <div className={styles.pathView}>
+              {
+                path.path.subgraph.map((pathItem, j) => {
+                  let key = `${j}`;
+                  return (
+                    <PathObject 
+                      pathObject={pathItem} 
+                      id={key}
+                      key={key}
+                      handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
+                      handleEdgeClick={()=>{console.log("evidence modal path edge clicked!")}}
+                      handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
+                      activeStringFilters={[]}
+                    />
+                  ) 
+                }) 
+              }
+            </div>
+          }
+
           {
             <Tabs isOpen={modalIsOpen}>
               {
