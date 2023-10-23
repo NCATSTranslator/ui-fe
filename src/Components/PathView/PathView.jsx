@@ -6,6 +6,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { useSelector } from 'react-redux';
 import { currentPrefs, currentRoot } from '../../Redux/rootSlice';
 import { Link } from 'react-router-dom';
+import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
 
 const getPathsWithSelectionsSet = (paths, selectedPaths) => {
   if(selectedPaths.size > 0) {
@@ -127,7 +128,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
       <p className={styles.needHelp}>
         <Question/> 
         Was this helpful?
-        <Link to={`/${root}?fm=true`} reloadDocument target={'_blank'}>Send Feedback</Link>
+        <Link to={`${getGeneratedSendFeedbackLink(true, root)}`} reloadDocument target={'_blank'}>Send Feedback</Link>
       </p>
     </div>
   )

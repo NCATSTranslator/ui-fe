@@ -251,3 +251,8 @@ export const getFormattedDate = (date) => {
 
   return `${month} ${day}, ${year} (${hours}:${minutes} ${timeZone})`;
 }
+
+export const getGeneratedSendFeedbackLink = (openDefault = true, root) => {
+  let link = encodeURIComponent(window.location.href);
+  return `/${root}?fm=${openDefault}&link=${link}`;
+}
