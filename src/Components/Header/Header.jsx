@@ -9,6 +9,7 @@ import Workspace from '../../Icons/Navigation/Workspace.svg?react';
 import Question from '../../Icons/Navigation/Question.svg?react';
 import defaultPfp from '../../Assets/Images/pfp.png';
 import styles from './Header.module.scss';
+import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
 
 const Header = ({children}) => {
   
@@ -37,7 +38,7 @@ const Header = ({children}) => {
                 <Link to={`/${root}/history`}><History/><span>Search History</span></Link>
               </>
             }
-            <Link to={`/${root}?fm=${openFeedbackModal}`} reloadDocument target={'_blank'}><Feedback/><span>Send Feedback</span></Link>
+            <Link to={`${getGeneratedSendFeedbackLink(openFeedbackModal, root)}`} reloadDocument target={'_blank'}><Feedback/><span>Send Feedback</span></Link>
             <Link to={`/${root}/help`} className={styles.helpLink} rel="noreferrer" target={'_blank'} ><Question/><span>Help</span></Link>
             {
               root === 'demo'

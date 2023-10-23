@@ -8,7 +8,8 @@ import Select from "../FormFields/Select";
 import { Fade } from "react-awesome-reveal";
 import Warning from '../../Icons/information.svg?react'
 import { currentQueryResultsID } from "../../Redux/resultsSlice";
-import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux';
+import { getDataFromQueryVar } from "../../Utilities/utilities";
 
 const SendFeedbackModal = ({isOpen, onClose}) => {
 
@@ -117,7 +118,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
   }, [currentScreenshots]);
 
   const submitForm = useCallback(() => {
-    let url = window.location.href;
+    let url = encodeURI(decodeURIComponent(getDataFromQueryVar("link")));
     let feedbackJson = JSON.stringify({
       url: url,
       ars_pk: currentARSpk,
