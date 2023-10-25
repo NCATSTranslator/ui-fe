@@ -11,15 +11,13 @@ import { capitalizeAllWords } from "../../Utilities/utilities";
 import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
          compareByKeyLexographic, sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
 import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
+import { checkForEdgeMatch, handleEvidenceSort } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
 
 const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isAll, edgeGroup}) => {
-
-  console.log("path: ", path);
-  console.log("edge: ", edgeGroup);
 
   const prefs = useSelector(currentPrefs);
 
@@ -41,7 +39,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
 
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState({});
-  const [formattedEdges, setFormattedEdges] = useState(null)
+  const [selectedEdge, setSelectedEdge] = useState(edgeGroup);
+  const [formattedEdges, setFormattedEdges] = useState(null);
   const initItemsPerPage = parseInt((prefs?.evidence_per_screen?.pref_value) ? parseInt(prefs.evidence_per_screen.pref_value) : 5);
   const [itemsPerPage, setItemsPerPage] = useState(initItemsPerPage);
   const [newItemsPerPage, setNewItemsPerPage] = useState(null);
@@ -49,6 +48,18 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
   const [isSortedByTitle, setIsSortedByTitle] = useState(null);
   const [isSortedBySource, setIsSortedBySource] = useState(null);
   const [isSortedByDate, setIsSortedByDate] = useState(null);
+
+  useEffect(() => {
+    // console.log(selectedEdge)
+    setSelectedEdge(edgeGroup);
+  }, [edgeGroup]);
+
+  const sortingSetters = {
+    setIsSortedByTitle: setIsSortedByTitle,
+    setIsSortedBySource: setIsSortedBySource,
+    setIsSortedByDate: setIsSortedByDate,
+    setPubmedEvidence: setPubmedEvidence
+  }
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
@@ -72,6 +83,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
     onClose();
     setCurrentPage(0);
     setItemOffset(0);
+    setSelectedEdge(null);
     setIsLoading(true);
     setIsSortedBySource(null);
     setIsSortedByTitle(null);
@@ -105,7 +117,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
   }
 
   useEffect(() => {
-    if(!Array.isArray(edgeGroup) && typeof edgeGroup === 'object') {
+    if(!Array.isArray(selectedEdge) && typeof selectedEdge === 'object' && selectedEdge !== null) {
 
       let filteredEvidence = {
         publications: [],
@@ -114,22 +126,22 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
     
       let filteredPublications = filteredEvidence.publications;
       let filteredSources = filteredEvidence.sources;
-      for (const edge of edgeGroup.edges) {
+      for (const edge of selectedEdge.edges) {
         filterEvidenceObjs(currentEvidence.publications, edge, filteredPublications);
         filterEvidenceObjs(currentEvidence.sources, edge, filteredSources);
       }
-      console.log(filteredEvidence)
       setEvidence(filteredEvidence);
 
-      const re = edgeGroup.edges[0];
-      const formatted = edgeGroup.predicates.map((p) => {
+      const re = selectedEdge.edges[0];
+      const formatted = selectedEdge.predicates.map((p) => {
         return `${re.subject.name.toLowerCase()} ${p.toLowerCase()} ${re.object.name.toLowerCase()}`;
       });
       setFormattedEdges(formatted);
     } else {
       setFormattedEdges(null);
+      setEvidence(currentEvidence);
     }
-  }, [edgeGroup, currentEvidence]);
+  }, [selectedEdge, currentEvidence]);
 
   useEffect(() => {
     setDisplayedPubmedEvidence(pubmedEvidence.slice(itemOffset, endOffset));
@@ -137,7 +149,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
   }, [itemOffset, itemsPerPage, pubmedEvidence, endOffset]);
 
   useEffect(() => {
-    if(isOpen) {
+    if(isOpen && !Array.isArray(evidence)) {
       setPubmedEvidence(cloneDeep(evidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
       clinicalTrials.current = cloneDeep(evidence.publications.filter(item => item.type === 'NCT'));
       miscEvidence.current = cloneDeep(evidence.publications.filter(item => item.type === 'other'))
@@ -159,58 +171,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
     setItemOffset(newOffset);
   },[itemsPerPage, pubmedEvidence]);
 
-  const handleSort = useCallback((sortName) => {
-    let sortedPubmedEvidence = cloneDeep(pubmedEvidence);
-    switch (sortName) {
-      case 'titleLowHigh':
-        sortedPubmedEvidence = sortNameLowHigh(sortedPubmedEvidence, true);
-        setIsSortedByTitle(true);
-        setIsSortedBySource(null);
-        setIsSortedByDate(null);
-        break;
-      case 'titleHighLow':
-        sortedPubmedEvidence = sortNameHighLow(sortedPubmedEvidence, true);
-        setIsSortedByTitle(false);
-        setIsSortedBySource(null);
-        setIsSortedByDate(null);
-        break;
-      case 'sourceLowHigh':
-        sortedPubmedEvidence = sortSourceLowHigh(sortedPubmedEvidence);
-        setIsSortedBySource(true);
-        setIsSortedByTitle(null);
-        setIsSortedByDate(null);
-        break;
-      case 'sourceHighLow':
-        sortedPubmedEvidence = sortSourceHighLow(sortedPubmedEvidence);
-        setIsSortedBySource(false);
-        setIsSortedByTitle(null);
-        setIsSortedByDate(null);
-        break;
-      case 'dateLowHigh':
-        sortedPubmedEvidence = sortDateYearLowHigh(sortedPubmedEvidence);
-        setIsSortedByDate(false);
-        setIsSortedBySource(null);
-        setIsSortedByTitle(null);
-        break;
-      case 'dateHighLow':
-        sortedPubmedEvidence = sortDateYearHighLow(sortedPubmedEvidence);
-        setIsSortedByDate(true);
-        setIsSortedBySource(null);
-        setIsSortedByTitle(null);
-        break;
-      default:
-        break;
-    }
-
-    // assign the newly sorted results (no need to set formatted results, since they'll be filtered after being sorted, then set there)
-    setPubmedEvidence(sortedPubmedEvidence);
-
-    // reset to page one.
-    handlePageClick({selected: 0});
-  }, [pubmedEvidence, handlePageClick]);
-
   const insertAdditionalPubmedData = useCallback((data) => {
-
     let newPubmedEvidence = cloneDeep(pubmedEvidence)
     for(const element of newPubmedEvidence) {
       if(data[element.id] !== undefined) {
@@ -324,8 +285,22 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
     enabled: isFetchingPubmedData.current
   });
 
+  const handleEdgeClick = (edge) => {
+    if(!edge || !selectedEdge || checkForEdgeMatch(edge, selectedEdge) === true) 
+      return;
+    
+    console.log(edge);
+    setIsLoading(true);
+    setCurrentPage(0);
+    setItemOffset(0);
+    setSelectedEdge(edge);
+    amountOfIDsProcessed.current = 0;
+    evidenceToUpdate.current = null;
+    fetchedPubmedData.current = false;
+  }
+
   return (
-    <Modal isOpen={modalIsOpen} onClose={handleClose} className={styles.evidenceModal} containerClass={styles.evidenceContainer}>
+    <Modal isOpen={modalIsOpen} onClose={handleClose} className={`${styles.evidenceModal} scrollable`} containerClass={styles.evidenceContainer}>
       {selectedItem.name &&       
         <div className={styles.top}>
           <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
@@ -344,15 +319,18 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
               {
                 path.path.subgraph.map((pathItem, j) => {
                   let key = `${j}`;
+                  console.log(pathItem);
+                  let isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, pathItem));
                   return (
                     <PathObject 
                       pathObject={pathItem} 
                       id={key}
                       key={key}
                       handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
-                      handleEdgeClick={()=>{console.log("evidence modal path edge clicked!")}}
+                      handleEdgeClick={(edge)=>handleEdgeClick(edge)}
                       handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
                       activeStringFilters={[]}
+                      selected={isSelected}
                     />
                   ) 
                 }) 
@@ -372,7 +350,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
                         <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
                         <div 
                           className={`${styles.head} ${styles.date} ${isSortedByDate ? styles.true : (isSortedByDate === null) ? '' : styles.false}`}
-                          onClick={()=>{handleSort((isSortedByDate) ? 'dateLowHigh': 'dateHighLow')}}
+                          onClick={()=>{handleEvidenceSort((isSortedByDate) ? 'dateLowHigh': 'dateHighLow', pubmedEvidence, handlePageClick, sortingSetters)}}
                           >
                           <span className={styles.headSpan}>
                             Date(s)
@@ -380,7 +358,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
                         </div>
                         <div
                           className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
-                          onClick={()=>{handleSort((isSortedBySource) ? 'sourceHighLow': 'sourceLowHigh')}}
+                          onClick={()=>{handleEvidenceSort((isSortedBySource) ? 'sourceHighLow': 'sourceLowHigh', pubmedEvidence, handlePageClick, sortingSetters)}}
                           >
                           <span className={styles.headSpan}>
                             Source
@@ -388,7 +366,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, currentEvidence, item, isA
                         </div>
                         <div
                           className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`}
-                          onClick={()=>{handleSort((isSortedByTitle) ? 'titleHighLow': 'titleLowHigh')}}
+                          onClick={()=>{handleEvidenceSort((isSortedByTitle) ? 'titleHighLow': 'titleLowHigh', pubmedEvidence, handlePageClick, sortingSetters)}}
                           >
                           <span className={styles.headSpan}>
                             Title

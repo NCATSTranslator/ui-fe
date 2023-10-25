@@ -85,7 +85,7 @@ const ResultsList = ({loading}) => {
   // Object, the currently selected item
   const [selectedItem, setSelectedItem] = useState({});
   // Array, edges represented in current evidence
-  const [selectedEdges, setSelectedEdges] = useState([]);
+  const [selectedEdge, setSelectedEdge] = useState(null);
   // Obj, path represented in current evidence
   const [selectedPath, setSelectedPath] = useState(null);
   // Array, evidence relating to the item last clicked
@@ -493,7 +493,7 @@ const ResultsList = ({loading}) => {
   const activateEvidence = (evidence, item, edgeGroup, path, isAll) => {
     setIsAllEvidence(isAll);
     setSelectedItem(item);
-    setSelectedEdges(edgeGroup);
+    setSelectedEdge(edgeGroup);
     setSelectedPath(path);
     setCurrentEvidence(evidence);
     setEvidenceOpen(true);
@@ -706,7 +706,7 @@ const ResultsList = ({loading}) => {
         item={selectedItem}
         results={rawResults.current}
         isAll={isAllEvidence}
-        edgeGroup={selectedEdges}
+        edgeGroup={selectedEdge}
         path={selectedPath}
       />
       <div className={styles.resultsList}>

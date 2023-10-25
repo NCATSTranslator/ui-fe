@@ -46,6 +46,12 @@
   padding: 0;
   position: relative;
   cursor: pointer;
+  &.selected {
+    span.path {
+      border: 1px solid $purpleTwo;
+      background-color: darken($greenPath, 20);
+    }
+  }
   .more {
     display: block;
     font-weight: 700;
@@ -92,6 +98,7 @@ span.path {
   transition: all .25s ease;
   border-radius: $defaultBorderRadius;
   box-shadow: $dropShadow;
+  border: 1px solid transparent;
   cursor: pointer;
   &.hasMore {
     padding: 3px 7px;

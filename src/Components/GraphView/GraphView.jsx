@@ -355,7 +355,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
               className={styles.graphNavigatorContainer} 
               onMouseEnter={()=>{
                 document.body.style.overflow = 'hidden';
-                document.body.style.paddingRight = '15px';
+                document.body.style.paddingRight = '10px';
               }}
               onMouseLeave={()=>{
                 document.body.style.overflow = 'auto';

@@ -1,16 +1,15 @@
 import styles from './PathObject.module.scss';
 import Tooltip from '../Tooltip/Tooltip';
-import { getIcon } from '../../Utilities/utilities';
 import Disease from '../../Icons/disease2.svg?react';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import Connector from '../../Icons/connector-os.svg?react';
 import ResearchSingle from '../../Icons/research-single.svg?react';
 import ResearchMultiple from '../../Icons/research-multiple.svg?react';
-import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
-import { cloneDeep } from 'lodash';
+import { capitalizeAllWords, formatBiolinkEntity, getIcon } from '../../Utilities/utilities';
+import { predicateSpecificEdgeClick } from '../../Utilities/resultsInteractionFunctions';
 import Highlighter from 'react-highlight-words';
 
-const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters}) => {
+const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters, selected}) => {
 
   let nameString = '';
   let typeString = '';
@@ -21,20 +20,6 @@ const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTar
   const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
 
   const uid = `${id}`;
-
-  // filter path by a provided predicate, then call handleEdgeClick with the filtered path object
-  const predicateSpecificEdgeClick = (path, predicate) => {
-    let filteredPath = cloneDeep(path);
-    for(const edge of path.edges) {
-      if(edge.predicate === predicate) {
-        // filter out the non-matching edges and predicates
-        filteredPath.edges = filteredPath.edges.filter(edge => edge.predicate === predicate);
-        filteredPath.predicates = filteredPath.predicates.filter(pred => pred === predicate);
-      }
-    }
-    // call the edge click handler with the newly filtered path
-    handleEdgeClick(filteredPath);
-  }
 
   return (
     <>
@@ -71,7 +56,7 @@ const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTar
       {
         pathObject.category === 'predicate' &&
         <span 
-          className={styles.pathContainer} 
+          className={`${selected ? styles.selected : ''} ${styles.pathContainer}`} 
           data-tooltip-id={`${pathObject.predicates[0]}${uid}`}
           onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject);}}
           >

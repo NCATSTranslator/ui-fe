@@ -11,9 +11,9 @@ export const sortNameLowHigh = (items, isEvidence) => {
 // reverse alphabetical order
 export const sortNameHighLow = (items, isEvidence) => {
   if(isEvidence)
-    return items.sort((a, b) => -a.title.localeCompare(b.title));
+    return items.sort((a, b) => !a.title - !b.title || -a.title.localeCompare(b.title));
   else
-    return items.sort((a, b) => -a.name.localeCompare(b.name));
+    return items.sort((a, b) => !a.name - !b.name || -a.name.localeCompare(b.name));
 }
 
 // alphabetical order
@@ -23,7 +23,7 @@ export const sortSourceLowHigh = (items) => {
 
 // reverse alphabetical order
 export const sortSourceHighLow = (items) => {
-  return items.sort((a, b) => -a.source.localeCompare(b.source));
+  return items.sort((a, b) => !a.source - !b.source || -a.source.localeCompare(b.source));
 }
 
 export const sortEvidenceLowHigh = (items) => {

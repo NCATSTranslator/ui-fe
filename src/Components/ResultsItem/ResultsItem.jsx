@@ -130,38 +130,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   }
 
   const handleEdgeSpecificEvidence = (edgeGroup, path) => {
-    // const filterEvidenceObjs = (objs, selectedEdge, container) => {
-    //   const selectedEdgeLabel = getFormattedEdgeLabel(selectedEdge.subject.name, selectedEdge.predicate, selectedEdge.object.name);
-    //   for (const obj of objs) {
-    //     let proceed = false;
-    //     if(Array.isArray(obj.edges) && obj.edges[0].label === selectedEdgeLabel) {
-    //       proceed = true;
-    //     } else if(obj.edges[selectedEdge.id] !== undefined) {
-    //       proceed = true;
-    //     }
-
-    //     if(proceed) {
-    //       const includedObj = cloneDeep(obj);
-    //       // includedObj.edges = {};
-    //       // includedObj.edges[selectedEdge.id] = obj.edges[selectedEdge.id];
-    //       container.push(includedObj);
-    //     }
-    //   }
-    // }
-
-    // let filteredEvidence = {
-    //   publications: [],
-    //   sources: []
-    // };
-
-    // let filteredPublications = filteredEvidence.publications;
-    // let filteredSources = filteredEvidence.sources;
-    // for (const edge of edgeGroup.edges) {
-    //   filterEvidenceObjs(currentEvidence.publications, edge, filteredPublications);
-    //   filterEvidenceObjs(currentEvidence.sources, edge, filteredSources);
-    // }
-    // call activateEvidence with the filtered evidence
-    // activateEvidence(filteredEvidence, item, edgeGroup, path, false);
     activateEvidence(currentEvidence, item, edgeGroup, path, false);
   }
 

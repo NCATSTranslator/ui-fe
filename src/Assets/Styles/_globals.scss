@@ -211,3 +211,28 @@ img {
     }
   }
 }
+
+.scrollable {
+  overflow-y: scroll; 
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: $midGray $lightGray;
+}
+
+/* Webkit */
+.scrollable::-webkit-scrollbar {
+  width: 10px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+  background-color: $lightGray;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+  background-color: $midGray;
+  border-radius: 10px;
+}
+
+.scrollable::-webkit-scrollbar-thumb:hover {
+  background-color: $darkGray;
+}
