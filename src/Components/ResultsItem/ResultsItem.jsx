@@ -385,7 +385,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           selectedPaths={selectedPaths}
           active={isExpanded}
           handleEdgeSpecificEvidence={(edgeGroup, path)=> {handleEdgeSpecificEvidence(edgeGroup, path)}}
-          handleActivateEvidence={(path)=>activateEvidence(currentEvidence, item, [], path, false)}
+          handleActivateEvidence={(path)=>activateEvidence(currentEvidence, item, null, path, false)}
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>

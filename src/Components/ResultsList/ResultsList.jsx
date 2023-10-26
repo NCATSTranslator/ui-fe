@@ -702,7 +702,7 @@ const ResultsList = ({loading}) => {
         isOpen={evidenceOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
         className="evidence-modal"
-        currentEvidence={currentEvidence}
+        rawEvidence={currentEvidence}
         item={selectedItem}
         results={rawResults.current}
         isAll={isAllEvidence}

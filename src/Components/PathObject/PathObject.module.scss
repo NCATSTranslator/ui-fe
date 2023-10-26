@@ -49,7 +49,7 @@
   &.selected {
     span.path {
       border: 1px solid $purpleTwo;
-      background-color: darken($greenPath, 20);
+      background-color: $hoverGray;
     }
   }
   .more {
@@ -91,7 +91,7 @@ span.path {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background-color: $greenPath;
+  background-color: $white;
   z-index: 10;
   color: $black;
   margin-right: 0;
@@ -120,6 +120,7 @@ span.path {
   &:hover {
     color: $black;
     box-shadow: $dropShadowHover;
+    background-color: $hoverGray;
     text-decoration: underline;
   }
 }
