@@ -64,8 +64,8 @@ const App = ({children}) => {
         .then(response => handleFetchErrors(response))
         .then(response => response.json());
       
-      if(config?.gaID)
-        setGaID(config.gaID); 
+      if(config?.galID)
+        setGaID(config.galID); 
 
       dispatch(setCurrentConfig(config));
     }
