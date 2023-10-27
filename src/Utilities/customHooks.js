@@ -43,3 +43,29 @@ export const useWindowSize = (delay = 100) => {
 
   return windowSize;
 }
+
+export const useGoogleAnalytics = (gaID) => {
+  useEffect(() => {
+    if (!gaID) return;
+
+    const script1 = document.createElement('script');
+    script1.async = true;
+    script1.src = `https://www.googletagmanager.com/gtag/js?id=${gaID}`;
+
+    const script2 = document.createElement('script');
+    script2.innerHTML = `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${gaID}');
+    `;
+
+    document.head.appendChild(script1);
+    document.head.appendChild(script2);
+
+    return () => {
+      document.head.removeChild(script1);
+      document.head.removeChild(script2);
+    };
+  }, [gaID]);
+};

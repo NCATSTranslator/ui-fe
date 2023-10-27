@@ -3,7 +3,7 @@ import Footer from './Components/Footer/Footer';
 import Header from './Components/Header/Header';
 import SmallScreenOverlay from './Components/SmallScreenOverlay/SmallScreenOverlay';
 import SendFeedbackModal from "./Components/Modals/SendFeedbackModal";
-import { useWindowSize } from './Utilities/customHooks';
+import { useGoogleAnalytics, useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import './App.scss';
@@ -16,6 +16,9 @@ const App = ({children}) => {
   const location = useLocation();
   const minScreenWidth = 1024;
   const {width} = useWindowSize();
+
+  const [gaID, setGaID] = useState(1234); 
+  useGoogleAnalytics(gaID);
 
   const dispatch = useDispatch();
   const root = location.pathname.includes("main") ? "main" : "demo";
@@ -60,11 +63,15 @@ const App = ({children}) => {
       let config = await fetch(`/${root}/api/v1/pub/config`, requestOptions)
         .then(response => handleFetchErrors(response))
         .then(response => response.json());
+      
+      if(config?.gaID)
+        setGaID(config.gaID); 
 
       dispatch(setCurrentConfig(config));
     }
   
     fetchConfig();
+
     if(root !== "main")
       return;
     fetchUser();
