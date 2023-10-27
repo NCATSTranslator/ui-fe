@@ -27,12 +27,16 @@
 .nameContainer {
   position: relative;
   box-shadow: none;
+  background-color: $lightGray;
+  border-radius: $defaultBorderRadius;
+  border: 1px solid $midDarkGray;
+  box-shadow: $dropShadow;
+  &:hover {
+    box-shadow: $dropShadowHover;
+  }
   &:first-child {
+    border: none;
     background-color: $yellow;
-    box-shadow: $dropShadow;
-    &:hover {
-      box-shadow: $dropShadowHover;
-    }
   }
   svg {
     margin-right: 5px;
@@ -48,8 +52,10 @@
   cursor: pointer;
   &.selected {
     span.path {
-      border: 1px solid $purpleTwo;
       background-color: $hoverGray;
+      border-radius: 5px;
+      border: 2px solid $purpleTwo;
+      background: $purpleEdgeBG;
     }
   }
   .more {
@@ -86,7 +92,6 @@ span.path {
   align-content: center;
   justify-content: flex-start;
   width: auto;
-  padding: 9px;
   max-width: 70%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -98,7 +103,7 @@ span.path {
   transition: all .25s ease;
   border-radius: $defaultBorderRadius;
   box-shadow: $dropShadow;
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   cursor: pointer;
   &.hasMore {
     padding: 3px 7px;
@@ -124,8 +129,8 @@ span.path {
     text-decoration: underline;
   }
 }
-.name, .target {
-  padding: 8px;
+.name, .target, .path {
+  padding: 7px 9px;
 }
 .name span, .name mark, .target span, .target mark, .path span {
   font-size: 14px;
