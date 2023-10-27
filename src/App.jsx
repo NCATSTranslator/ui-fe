@@ -17,9 +17,6 @@ const App = ({children}) => {
   const minScreenWidth = 1024;
   const {width} = useWindowSize();
 
-  const [gaID, setGaID] = useState(null); 
-  useGoogleAnalytics(gaID);
-
   const dispatch = useDispatch();
   const root = location.pathname.includes("main") ? "main" : "demo";
   dispatch(setCurrentRoot(root))
@@ -63,8 +60,6 @@ const App = ({children}) => {
       let config = await fetch(`/${root}/api/v1/pub/config`, requestOptions)
         .then(response => handleFetchErrors(response))
         .then(response => response.json());
-
-        console.log(config);
       
       if(config?.galID)
         setGaID(config.galID); 
@@ -73,7 +68,6 @@ const App = ({children}) => {
     }
   
     fetchConfig();
-
     if(root !== "main")
       return;
     fetchUser();
