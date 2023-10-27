@@ -63,9 +63,11 @@ const App = ({children}) => {
       let config = await fetch(`/${root}/api/v1/pub/config`, requestOptions)
         .then(response => handleFetchErrors(response))
         .then(response => response.json());
+
+        console.log(config);
       
-      if(config?.gaID)
-        setGaID(config.gaID); 
+      if(config?.galID)
+        setGaID(config.galID); 
 
       dispatch(setCurrentConfig(config));
     }
