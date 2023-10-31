@@ -2,7 +2,7 @@
 
 .evidenceModal {
   .evidenceContainer {
-    width: 1130px;
+    width: 1200px;
     height: 80%;
   }
   .loadingBar {
@@ -307,11 +307,19 @@
   }
 }
 .pathView {
-  display: flex;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
   margin: 10px 0 15px;
+  padding: 20px;
   position: relative;
   background-color: $lightGray;
+  span {
+    width: auto;
+  }
+}
+
+.groupedPreds {
+  font-weight: 500;
 }

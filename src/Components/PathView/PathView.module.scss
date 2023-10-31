@@ -5,8 +5,9 @@
   position: relative;
   z-index: 100;
   .tableHead, .tableItem {
-    display: flex;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    justify-content: space-between;
     align-items: center;
     .name, .target {
       font-size: 14px;
@@ -27,7 +28,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 14.3%;
       text-align: center;
       margin-right: 4px;
       cursor: pointer;

@@ -29,7 +29,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
   }, [prefs]);
   const initItemsPerPage = parseInt((prefs?.evidence_per_screen?.pref_value) ? parseInt(prefs.evidence_per_screen.pref_value) : 5);
 
-  const [evidence, setEvidence] = useState(rawEvidence);
   const [pubmedEvidence, setPubmedEvidence] = useState([]);
   const [sources, setSources] = useState([]);
   const clinicalTrials = useRef([]);
@@ -91,19 +90,19 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
   }
 
   // handles opening of modal by initializing state, called in useEffect tracking isOpen prop
-  const handleModalOpen = (rawEvi, selEdge, selPath, isAll) => {
-    console.log("open modal");
+  const handleModalOpen = (rawEvi, selEdge, selPath) => {
     if(selEdge)
       handleSelectedEdge(selEdge, rawEvi);
     else 
       handleSelectedEdge(selPath.path.subgraph[1], rawEvi);
   }
+
   useEffect(() => {
     if(isOpen && !hasBeenOpened.current) {
       handleModalOpen(rawEvidence, edgeGroup, path, isAll);
       hasBeenOpened.current = true;
     }
-  }, [rawEvidence, isOpen, isAll, edgeGroup, path])
+  })
 
   // filter publications/sources based on a selectedEdge
   const filterEvidenceObjs = (objs, selectedEdge, container) => {
@@ -118,6 +117,14 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
 
       if(proceed) {
         const includedObj = cloneDeep(obj);
+        let filteredEdges = {};
+        filteredEdges[selectedEdge.id] = (obj.edges[selectedEdge.id] !== undefined)
+          ? includedObj.edges[selectedEdge.id]
+          : includedObj.edges[0];
+        includedObj.edges = filteredEdges;
+
+        console.log(obj)
+        console.log(includedObj)
         container.push(includedObj);
       }
     }
@@ -134,11 +141,11 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
     
       let filteredPublications = filteredEvidence.publications;
       let filteredSources = filteredEvidence.sources;
-      for (const edge of selEdge.edges) {
-        filterEvidenceObjs(rawEvidence.publications, edge, filteredPublications);
-        filterEvidenceObjs(rawEvidence.sources, edge, filteredSources);
-      }
-      setEvidence(filteredEvidence);
+
+      const edgeToFilterBy = selEdge.edges.find((edge)=> edge.predicate === selEdge.predicate);
+      filterEvidenceObjs(rawEvidence.publications, edgeToFilterBy, filteredPublications);
+      filterEvidenceObjs(rawEvidence.sources, edgeToFilterBy, filteredSources);
+      
       evidenceToDistribute = filteredEvidence;
       setSelectedEdge(selEdge)
 
@@ -149,7 +156,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
       setFormattedEdges(formatted);
     } else {
       setFormattedEdges(null);
-      setEvidence(rawEvidence);
       evidenceToDistribute(rawEvidence);
     }
     distributeEvidence(evidenceToDistribute);
@@ -304,7 +310,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} scrollable`} containerClass={styles.evidenceContainer}>
+    <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal}`} containerClass={`${styles.evidenceContainer} scrollable`}>
       {selectedItem.name &&       
         <div className={styles.top}>
           <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
@@ -321,21 +327,52 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
             path &&
             <div className={styles.pathView}>
               {
-                path.path.subgraph.map((pathItem, j) => {
-                  let key = `${j}`;
-                  let isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, pathItem));
-                  return (
-                    <PathObject 
-                      pathObject={pathItem} 
-                      id={key}
-                      key={key}
-                      handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
-                      handleEdgeClick={(edge)=>handleEdgeClick(edge, rawEvidence)}
-                      handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
-                      activeStringFilters={[]}
-                      selected={isSelected}
-                    />
-                  ) 
+                path.path.subgraph.map((pathItem, i) => {
+                  let key = `${i}`;
+                  let isSelected = false;
+                  if(pathItem.category === "predicate" && pathItem.predicates.length > 1) {
+                    return( 
+                      <div className={styles.groupedPreds}>
+                        {
+                          pathItem.predicates.map((pred, j) => {
+                            let newPathItem = cloneDeep(pathItem);
+                            newPathItem.predicates = [pred];
+                            newPathItem.predicate = pred;
+                            isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, newPathItem));
+                            key = `${i}_${j}`;
+                            return (
+                              <PathObject 
+                                pathObject={newPathItem} 
+                                id={key}
+                                key={key}
+                                handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
+                                handleEdgeClick={(edge)=>handleEdgeClick(edge, rawEvidence)}
+                                handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
+                                activeStringFilters={[]}
+                                selected={isSelected}
+                                inModal
+                              />
+                            ) 
+                          })
+                        }
+                      </div>
+                    )
+                  } else {
+                    isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, pathItem));
+                    return (
+                      <PathObject 
+                        pathObject={pathItem} 
+                        id={key}
+                        key={key}
+                        handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
+                        handleEdgeClick={(edge)=>handleEdgeClick(edge, rawEvidence)}
+                        handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
+                        activeStringFilters={[]}
+                        selected={isSelected}
+                        inModal
+                      />
+                    ) 
+                  }
                 }) 
               }
             </div>

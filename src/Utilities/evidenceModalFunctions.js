@@ -55,7 +55,7 @@ export const handleEvidenceSort = (sortName, pubmedEvidence, handlePageClick, so
 export const checkForEdgeMatch = (edgeOne, edgeTwo) => {
   return (!edgeOne || !edgeTwo ||
     edgeOne.edges[0].subject.id !== edgeTwo.edges[0].subject.id ||
-    edgeOne.edges[0].predicate !== edgeTwo.edges[0].predicate || 
+    edgeOne.predicate !== edgeTwo.predicate || 
     edgeOne.edges[0].object.id !== edgeTwo.edges[0].object.id) 
     ? false
     : true;

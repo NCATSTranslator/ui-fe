@@ -2,14 +2,11 @@ import styles from './PathObject.module.scss';
 import Tooltip from '../Tooltip/Tooltip';
 import Disease from '../../Icons/disease2.svg?react';
 import ExternalLink from '../../Icons/external-link.svg?react';
-import Connector from '../../Icons/connector-os.svg?react';
-import ResearchSingle from '../../Icons/research-single.svg?react';
-import ResearchMultiple from '../../Icons/research-multiple.svg?react';
 import { capitalizeAllWords, formatBiolinkEntity, getIcon } from '../../Utilities/utilities';
-import { predicateSpecificEdgeClick } from '../../Utilities/resultsInteractionFunctions';
 import Highlighter from 'react-highlight-words';
+import Predicate from './Predicate';
 
-const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters, selected}) => {
+const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters, selected, inModal = false}) => {
 
   let nameString = '';
   let typeString = '';
@@ -54,65 +51,16 @@ const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTar
         </span>
       }
       {
-        pathObject.category === 'predicate' &&
-        <span 
-          className={`${selected ? styles.selected : ''} ${styles.pathContainer}`} 
-          data-tooltip-id={`${pathObject.predicates[0]}${uid}`}
-          onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject);}}
-          >
-          <Connector />
-          <span className={`${styles.path} path ${(pathObject.predicates.length > 1) ? styles.hasMore : ''}`}>
-            {
-              pathObject.publications?.length > 1
-              ? <ResearchMultiple />
-              : (pathObject.publications?.length > 0 || pathObject.provenance?.length > 0) 
-                ? <ResearchSingle /> 
-                : '' 
-            }
-            <span>
-              <Highlighter
-                highlightClassName="highlight"
-                searchWords={activeStringFilters}
-                autoEscape={true}
-                textToHighlight={capitalizeAllWords(pathObject.predicates[0])}
-              />
-              {
-                pathObject.predicates.length > 1 && 
-                <span className={styles.more}>
-                  + {pathObject.predicates.length - 1} More
-                </span>
-              }
-            </span>
-          </span>
-          <Tooltip 
-            id={`${pathObject.predicates[0]}${uid}`}
-            > 
-            {
-              pathObject.predicates &&
-              <div className={styles.predicatesList}>
-                {
-                  pathObject.predicates.map((predicate, i)=> {
-                    return (
-                      <p 
-                        key={`${pathObject.predicates[0]}${uid}${i}`} 
-                        className={styles.predicate} 
-                        // Predicate click to get specific evidence will go here 
-                        onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(pathObject, predicate)}}
-                        >
-                        <Highlighter
-                          highlightClassName="highlight"
-                          searchWords={activeStringFilters}
-                          autoEscape={true}
-                          textToHighlight={capitalizeAllWords(predicate)}
-                        />
-                      </p>
-                    )
-                  })
-                }
-              </div>
-            }
-          </Tooltip>
-        </span>
+        pathObject.category === 'predicate' && 
+        <Predicate 
+          pathObject={pathObject} 
+          selected={selected} 
+          activeStringFilters={activeStringFilters} 
+          uid={uid}
+          handleEdgeClick={handleEdgeClick}
+          parentClass={styles.pathContainer}
+          inModal={inModal}
+        />
       }
       {
         pathObject.category === 'target' && 

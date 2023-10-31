@@ -1,0 +1,78 @@
+@import "../../Assets/Styles/variables";
+
+.path {
+  display: flex;
+  align-content: center;
+  justify-content: flex-start;
+  width: auto;
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-color: $white;
+  z-index: 10;
+  color: $black;
+  margin-right: 0;
+  transition: all .25s ease;
+  border-radius: $defaultBorderRadius;
+  box-shadow: $dropShadow;
+  border: 2px solid transparent;
+  cursor: pointer;
+  &.hasMore {
+    padding: 3px 7px;
+    .more {
+      font-size: 12px;
+      color: $darkGray;
+      display: block;
+      font-weight: 700;
+    }
+  }
+  span {
+    cursor: pointer; 
+    text-overflow: ellipsis;
+    overflow: hidden;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  path {
+    transition: all .25s ease;
+  }
+  &:hover {
+    color: $black;
+    box-shadow: $dropShadowHover;
+    background-color: $hoverGray;
+    text-decoration: underline;
+  }
+}
+.selected {
+  span.path {
+    background-color: $hoverGray;
+    border-radius: 5px;
+    border: 2px solid $purpleTwo;
+    background: $purpleEdgeBG;
+  }
+
+  .predicatesList {
+    margin: 0;
+    list-style-type: none;
+  }
+  .predicate, .predicate span {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    margin-bottom: 0 !important;
+    color: $white;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+.connector {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  transform: translateY(-50%);
+}
