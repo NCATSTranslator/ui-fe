@@ -1,11 +1,10 @@
 import styles from './Predicate.module.scss';
-import Connector from '../../Icons/connector-os.svg?react';
 import ResearchSingle from '../../Icons/research-single.svg?react';
 import ResearchMultiple from '../../Icons/research-multiple.svg?react';
-import { predicateSpecificEdgeClick } from '../../Utilities/resultsInteractionFunctions';
 import Highlighter from 'react-highlight-words';
 import { capitalizeAllWords } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
+import { cloneDeep } from 'lodash';
 
 const Predicate = ({pathObject, selected, activeStringFilters, uid, parentClass = '', handleEdgeClick, inModal = false}) => {
 
@@ -13,11 +12,13 @@ const Predicate = ({pathObject, selected, activeStringFilters, uid, parentClass 
   return (
     <span 
       className={`${selected ? styles.selected : ''} ${parentClass}`} 
-      data-tooltip-id={`${pathObject.predicate}${uid}`}
       onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject);}}
       >
-      <Connector className={styles.connector} />
-      <span className={`${styles.path} path ${(pathObject.predicates.length > 1) ? styles.hasMore : ''}`}>
+      <span className={`connector ${styles.connector}`}></span>
+      <span 
+        className={`${styles.path} path ${(pathObject.predicates.length > 1) ? styles.hasMore : ''}`}
+        data-tooltip-id={`${pathObject.predicate}${uid}`}
+        >
         {
           pathObject.publications?.length > 1
           ? <ResearchMultiple />
@@ -42,9 +43,9 @@ const Predicate = ({pathObject, selected, activeStringFilters, uid, parentClass 
         </span>
       </span>
       {
-        !inModal &&
         <Tooltip 
           id={`${pathObject.predicate}${uid}`}
+          place={`${inModal ? 'left' : 'top' }`}
           > 
           {
             pathObject.predicates &&
@@ -53,10 +54,14 @@ const Predicate = ({pathObject, selected, activeStringFilters, uid, parentClass 
                 pathObject.predicates.map((predicate, i)=> {
                   return (
                     <p 
-                      key={`${pathObject.predicate}${uid}${i}`} 
-                      className={styles.predicate} 
-                      // Predicate click to get specific evidence will go here 
-                      onClick={(e)=> {e.stopPropagation(); predicateSpecificEdgeClick(pathObject, predicate)}}
+                      key={`${predicate}${uid}${i}`} 
+                      className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`} 
+                      onClick={(e)=> {
+                        e.stopPropagation(); 
+                        const newPathObject = cloneDeep(pathObject);
+                        newPathObject.predicate = predicate;
+                        handleEdgeClick(newPathObject);
+                      }}
                       >
                       <Highlighter
                         highlightClassName="highlight"

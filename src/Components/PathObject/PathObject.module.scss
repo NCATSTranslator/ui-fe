@@ -7,6 +7,40 @@
     min-width: 24px;
     height: 24px;
   }
+  .provenance {
+    display: flex !important;
+    align-items: center;
+    margin: $xs 0 0 0;
+    color: $white;
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+    font-size: 14px;
+    text-decoration: underline;
+    span {
+      font-size: 12px;
+      text-decoration: underline;
+      color: $white;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline;
+    }
+    svg {
+      display: inline;
+      margin: 0 3px 0 0;
+      min-width: 18px;
+      circle:first-child {
+        stroke: $white;
+        fill: transparent;
+      }
+      circle {
+        fill: $white;
+      }
+      path {
+        fill: $white;
+      }
+    }
+  }
 }
 .nameContainer,.pathContainer {
   margin-right: 4px;
@@ -27,8 +61,10 @@
   box-shadow: none;
   background-color: $lightGray;
   border-radius: $defaultBorderRadius;
-  border: 1px solid $midDarkGray;
   box-shadow: $dropShadow;
+  &.inModal {
+    border: 1px solid $midDarkGray;
+  }
   &:hover {
     box-shadow: $dropShadowHover;
   }
@@ -48,8 +84,8 @@
   padding: 0;
   position: relative;
   cursor: pointer;
-  
 }
+
 .pathContainer, .nameContainer, .targetContainer {
   &>span {
     padding: 7px 9px;
@@ -58,6 +94,12 @@
     font-size: 14px;
     font-weight: 700;
     cursor: default;
+  }
+  span.hasMore {
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
@@ -82,40 +124,7 @@
   fill: #000 !important;
 }
 
-.provenance {
-  display: flex;
-  align-items: center;
-  margin: $xs 0 0 0;
-  color: $white;
-  background-color: transparent;
-  box-shadow: none;
-  padding: 0;
-  font-size: 14px;
-  text-decoration: underline;
-  span {
-    font-size: 12px;
-    text-decoration: underline;
-    color: $white;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline;
-  }
-  svg {
-    display: inline;
-    margin: 0 3px 0 0;
-    min-width: 18px;
-    circle:first-child {
-      stroke: $white;
-      fill: transparent;
-    }
-    circle {
-      fill: $white;
-    }
-    path {
-      fill: $white;
-    }
-  }
-}
+
 
 .sourceEdgeContainer {
   display: flex;

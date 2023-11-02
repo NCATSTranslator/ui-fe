@@ -38,7 +38,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState({});
   const [selectedEdge, setSelectedEdge] = useState(edgeGroup);
-  const [formattedEdges, setFormattedEdges] = useState(null);
+  const [formattedEdge, setFormattedEdge] = useState(null);
   const [itemsPerPage, setItemsPerPage] = useState(initItemsPerPage);
   const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
   const [isSortedByTitle, setIsSortedByTitle] = useState(null);
@@ -123,8 +123,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
           : includedObj.edges[0];
         includedObj.edges = filteredEdges;
 
-        console.log(obj)
-        console.log(includedObj)
         container.push(includedObj);
       }
     }
@@ -149,13 +147,11 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
       evidenceToDistribute = filteredEvidence;
       setSelectedEdge(selEdge)
 
-      const re = selEdge.edges[0];
-      const formatted = selEdge.predicates.map((p) => {
-        return `${re.subject.name.toLowerCase()} ${p.toLowerCase()} ${re.object.name.toLowerCase()}`;
-      });
-      setFormattedEdges(formatted);
+      const soloEdge = selEdge.edges.find(edge => edge.predicate === selEdge.predicate);
+      const formatted = getFormattedEdgeLabel(soloEdge.subject.name, soloEdge.predicate, soloEdge.object.name).replaceAll("|", " ");
+      setFormattedEdge(formatted);
     } else {
-      setFormattedEdges(null);
+      setFormattedEdge(null);
       evidenceToDistribute(rawEvidence);
     }
     distributeEvidence(evidenceToDistribute);
@@ -316,12 +312,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
           <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
           {
             !isAll &&
-            formattedEdges &&
-            formattedEdges.map((edge, i) => {
-              return (
-                <h5 className={styles.subtitle} key={i}>{capitalizeAllWords(edge)}</h5>
-              )
-            })
+            formattedEdge &&
+            <h5 className={styles.subtitle}>{capitalizeAllWords(formattedEdge)}</h5>
           }
           {
             path &&
@@ -332,7 +324,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                   let isSelected = false;
                   if(pathItem.category === "predicate" && pathItem.predicates.length > 1) {
                     return( 
-                      <div className={styles.groupedPreds}>
+                      <div className={`groupedPreds ${styles.groupedPreds}`}>
                         {
                           pathItem.predicates.map((pred, j) => {
                             let newPathItem = cloneDeep(pathItem);

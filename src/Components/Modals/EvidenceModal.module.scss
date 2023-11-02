@@ -309,6 +309,7 @@
 .pathView {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
   justify-content: space-between;
   align-items: center;
   margin: 10px 0 15px;
@@ -322,4 +323,20 @@
 
 .groupedPreds {
   font-weight: 500;
+  &>span {
+    margin-bottom: 10px; 
+  }
+  &>span:last-child {
+    margin-bottom: 0; 
+  }
+  &:first-child {
+    .connector {
+      background-image: url('../../Icons/top.svg');
+    }
+  }
+  &:last-child {
+    .connector {
+      background-image: url('../../Icons/bottom.svg');
+    }
+  }
 }

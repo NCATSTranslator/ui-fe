@@ -22,7 +22,7 @@ const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTar
     <>
       {
         pathObject.category === 'object' &&
-        <span className={styles.nameContainer} 
+        <span className={`${styles.nameContainer} ${inModal ? styles.inModal : ''}`} 
           onClick={(e)=> {e.stopPropagation(); handleNameClick(pathObject);}}
           data-tooltip-id={`${nameString}${uid}`}
           >

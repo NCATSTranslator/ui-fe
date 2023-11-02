@@ -5,7 +5,7 @@
   align-content: center;
   justify-content: flex-start;
   width: auto;
-  max-width: 70%;
+  max-width: 65%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -45,6 +45,30 @@
     text-decoration: underline;
   }
 }
+.tooltipPredicate {
+  margin-bottom: 5px;
+}
+.tooltipPredicate {
+  span {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: $white;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  &:last-child span {
+    margin-bottom: 0;
+  }
+  &.inModal span {
+    cursor: default;
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
 .selected {
   span.path {
     background-color: $hoverGray;
@@ -57,22 +81,18 @@
     margin: 0;
     list-style-type: none;
   }
-  .predicate, .predicate span {
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    margin-bottom: 0 !important;
-    color: $white;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 }
+
+
 .connector {
   position: absolute;
   top: 50%;
   right: 0;
   bottom: 0;
   left: 0;
-  width: 100%;
   transform: translateY(-50%);
+  background-image: url('../../Icons/straight.svg');
+  background-position: center;
+  background-size: 100%;
+  background-repeat: no-repeat;
 }

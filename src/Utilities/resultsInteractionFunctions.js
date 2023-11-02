@@ -73,17 +73,3 @@ export const handleClearAllFilters = (asFilters, rResults, oResults, setActiveFi
 export const getResultsShareURLPath = (label, nodeID, typeID, pk) => {
   return `results?l=${label}&i=${nodeID}&t=${typeID}&q=${pk}`;
 }
-
-// filter path by a provided predicate, then call handleEdgeClick with the filtered path object
-export const predicateSpecificEdgeClick = (path, predicate, handleEdgeClick) => {
-  let filteredPath = cloneDeep(path);
-  for(const edge of path.edges) {
-    if(edge.predicate === predicate) {
-      // filter out the non-matching edges and predicates
-      filteredPath.edges = filteredPath.edges.filter(edge => edge.predicate === predicate);
-      filteredPath.predicates = filteredPath.predicates.filter(pred => pred === predicate);
-    }
-  }
-  // call the edge click handler with the newly filtered path
-  handleEdgeClick(filteredPath);
-}

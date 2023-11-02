@@ -28,10 +28,13 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
   }, [handleKeypress]);
 
   useEffect(() => {
-    if(startOpen) 
+    if(startOpen) {
       document.body.style.overflow = 'hidden';
-    else 
+      document.body.style.paddingRight = '10px';
+    } else {
       document.body.style.overflow = 'auto';
+      document.body.style.paddingRight = '0';
+    } 
     return () => {
       document.body.style.overflow = 'auto';
     }
