@@ -1,4 +1,3 @@
-import { cloneDeep } from "lodash";
 
 /**
  * Finds a string match in the given element by comparing the value with the element's name, description,
