@@ -283,13 +283,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span
           className={styles.evidenceLink}
-          onClick={(e)=>{
-            e.stopPropagation();
-            activateEvidence(currentEvidence, item, [], null, true);
-          }}
+          // onClick={(e)=>{
+          //   e.stopPropagation();
+          //   activateEvidence(currentEvidence, item, [], null, true);
+          // }}
           >
           <div>
-            <span className={styles.viewAll}>View All Evidence</span>
+            <span className={styles.viewAll}>Evidence</span>
           </div>
           <div>
             <span className={styles.info}>Publications ({publicationCount})</span>
