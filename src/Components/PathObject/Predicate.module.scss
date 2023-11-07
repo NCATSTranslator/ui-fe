@@ -9,15 +9,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background-color: $white;
+  background-color: $purpleEdgeBG;
   z-index: 10;
   color: $black;
   margin-right: 0;
   transition: all .25s ease;
   border-radius: $defaultBorderRadius;
   box-shadow: $dropShadow;
-  border: 2px solid transparent;
+  border: 1px solid $purpleTwo;
   cursor: pointer;
+  svg, svg path, svg circle, svg line {
+    transition: all .25s ease;
+  }
   &.hasMore {
     padding: 3px 7px;
     .more {
@@ -71,10 +74,12 @@
 }
 .selected {
   span.path {
-    background-color: $hoverGray;
-    border-radius: 5px;
-    border: 2px solid $purpleTwo;
-    background: $purpleEdgeBG;
+    border: 1px solid $purpleEdgeBGSelected;
+    background-color: $purpleEdgeBGSelected;
+    color: $white;
+    svg, svg path, svg circle, svg line {
+      stroke: $white;
+    }
   }
 
   .predicatesList {

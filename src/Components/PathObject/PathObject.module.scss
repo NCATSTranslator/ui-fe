@@ -62,9 +62,7 @@
   background-color: $lightGray;
   border-radius: $defaultBorderRadius;
   box-shadow: $dropShadow;
-  &.inModal {
-    border: 1px solid $midDarkGray;
-  }
+  border: 1px solid transparent;
   &:hover {
     box-shadow: $dropShadowHover;
   }
