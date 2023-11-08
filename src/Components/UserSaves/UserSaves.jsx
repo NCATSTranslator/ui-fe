@@ -25,7 +25,8 @@ const UserSaves = () => {
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [currentEvidence, setCurrentEvidence] = useState([]);
   const [selectedItem, setSelectedItem] = useState({});
-  const [selectedEdges, setSelectedEdges] = useState([]);
+  const [selectedEdge, setSelectedEdge] = useState(null);
+  const [selectedPath, setSelectedPath] = useState(null);
   const [isAllEvidence, setIsAllEvidence] = useState(true);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
@@ -39,10 +40,11 @@ const UserSaves = () => {
 
   const queryClient = new QueryClient();
 
-  const activateEvidence = (evidence, item, edgeGroup, isAll) => {
+  const activateEvidence = (evidence, item, edgeGroup, path, isAll) => {
     setIsAllEvidence(isAll);
     setSelectedItem(item);
-    setSelectedEdges(edgeGroup);
+    setSelectedEdge(edgeGroup);
+    setSelectedPath(path);
     setCurrentEvidence(evidence);
     setEvidenceOpen(true);
   }
@@ -171,7 +173,8 @@ const UserSaves = () => {
               rawEvidence={currentEvidence}
               item={selectedItem}
               isAll={isAllEvidence}
-              edgeGroup={selectedEdges}
+              edgeGroup={selectedEdge}
+              path={selectedPath}
             />
             <h1 className={`h4 ${styles.pageHeading}`}>Workspace</h1>
             {

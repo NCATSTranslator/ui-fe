@@ -99,7 +99,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
 
   useEffect(() => {
     if(isOpen && !hasBeenOpened.current) {
-      handleModalOpen(rawEvidence, edgeGroup, path, isAll);
+      handleModalOpen(rawEvidence, edgeGroup, path);
       hasBeenOpened.current = true;
     }
   })
@@ -391,7 +391,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                         onClick={()=>{handleEvidenceSort((isSortedBySource) ? 'sourceHighLow': 'sourceLowHigh', pubmedEvidence, handlePageClick, sortingSetters)}}
                         >
                         <span className={styles.headSpan}>
-                          Source
+                          Journal
                         </span>
                       </div>
                       <div
