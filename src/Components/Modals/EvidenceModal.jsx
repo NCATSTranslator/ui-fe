@@ -16,6 +16,8 @@ import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
+import Information from '../../Icons/information.svg?react';
+import Tooltip from "../Tooltip/Tooltip";
 
 const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, edgeGroup = null}) => {
 
@@ -315,6 +317,9 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
             formattedEdge &&
             <h5 className={styles.subtitle}>{capitalizeAllWords(formattedEdge)}</h5>
           }
+          <Tooltip id="knowledge-sources-tooltip" >
+            <span>The resources that provided the information supporting the selected relationship.</span>
+          </Tooltip>
           {
             path &&
             <div className={styles.pathView}>
@@ -578,7 +583,11 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
             {
               // Add sources modal for predicates
               sources.length > 0 &&
-              <div heading="Sources">
+              <div 
+                heading='Knowledge Sources' 
+                tooltipIcon={<Information className={styles.infoIcon} 
+                data-tooltip-id="knowledge-sources-tooltip" />}
+                >
                 <div className={`${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
                   <div className={`${styles.tableHead}`}>
                     { !isAll && <div className={`${styles.head}`}>Relationship</div> }

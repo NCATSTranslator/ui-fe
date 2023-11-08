@@ -38,12 +38,13 @@ const Tabs = ({children, isOpen}) => {
         {children.map((child, i) => {
           if(!child)
             return undefined;
-          const { heading } = child.props;
+          const { heading, tooltipIcon = false} = child.props;
           return (
             <Tab
               activeTabHeading={activeTabHeading}
               key={i}
               heading={heading}
+              tooltipIcon={tooltipIcon}
               onClick={handleTabClick}
             />
           );
