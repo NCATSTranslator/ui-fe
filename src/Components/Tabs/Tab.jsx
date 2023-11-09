@@ -9,8 +9,8 @@ const Tab = ({heading, onClick, activeTabHeading, tooltipIcon}) => {
   }
 
   return (
-    <div className={className}>
-        <span className={styles.heading} onClick={onClick} data-heading={heading}>{heading}</span>
+    <div className={className} onClick={()=>onClick(heading)} data-heading={heading}>
+        <span className={styles.heading}>{heading}</span>
         {
           tooltipIcon && 
           tooltipIcon

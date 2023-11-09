@@ -11,8 +11,8 @@ const Tabs = ({children, isOpen}) => {
   const tabClicked = useRef(false);
   const prevChildrenRef = useRef();
 
-  const handleTabClick = (event) => {
-    setActiveTab(event.target.dataset.heading);
+  const handleTabClick = (heading) => {
+    setActiveTab(heading);
     tabClicked.current = true;
   }
 
