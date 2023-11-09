@@ -587,13 +587,12 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
               // Add sources modal for predicates
               sources.length > 0 &&
               <div 
-                heading='Knowledge Sources' 
+                heading="Knowledge Sources" 
                 tooltipIcon={<Information className={styles.infoIcon} 
                 data-tooltip-id="knowledge-sources-tooltip" />}
                 >
                 <div className={`${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
                   <div className={`${styles.tableHead}`}>
-                    { !isAll && <div className={`${styles.head}`}>Relationship</div> }
                     <div className={`${styles.head}`}>Source</div>
                     <div className={`${styles.head}`}>Link</div>
                   </div>
@@ -609,15 +608,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                         const url = (!Array.isArray(src) && typeof src === 'object') ? src.url: src;
                         return(
                           <div className={styles.evidenceItem}>
-                            { !isAll &&
-                              <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                                <span className={styles.sourceEdge} key={i}>
-                                  <span>{subject}</span>
-                                  <strong>{predicate}</strong>
-                                  <span>{object}</span>
-                                </span>
-                              </span>
-                            }
                             <span className={`${styles.cell} ${styles.source} ${styles.sourceItem}`}>
                               <span className={styles.sourceEdge} key={i}>{name}</span>
                             </span>
