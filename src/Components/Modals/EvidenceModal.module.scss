@@ -97,6 +97,7 @@
       }
     }
     .relationship {
+      text-align: center;
       &>span {
         text-align: center;
       }
@@ -109,7 +110,7 @@
       // Columns with no title 
       // grid-template-columns: 1fr 1.25fr 3.5fr 1.25fr;
       // Columns with title included
-      grid-template-columns: 1.25fr 1fr 1.25fr 2fr 2.5fr;
+      grid-template-columns: .75fr .75fr 1.25fr 2fr 2.5fr;
       .cell {
         padding: 12px;
         strong {

@@ -382,7 +382,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                 {
                   <div className={`${styles.tableBody}`}>
                     <div className={styles.tableHead}>
-                      <div className={`${styles.head} ${styles.relationship}`}>Relationship</div>
+                      <div className={`${styles.head} ${styles.relationship}`}>Knowledge Level</div>
                       <div 
                         className={`${styles.head} ${styles.date} ${isSortedByDate ? styles.true : (isSortedByDate === null) ? '' : styles.false}`}
                         onClick={()=>{handleEvidenceSort((isSortedByDate) ? 'dateLowHigh': 'dateHighLow', pubmedEvidence, handlePageClick, sortingSetters)}}
@@ -422,40 +422,43 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                       !isLoading &&
                       <div className={styles.evidenceItems} >
                         {
-                          displayedPubmedEvidence.map((item, i)=> {
-                            const edge = Object.values(item.edges)[0];
-                            const splitEdge = edge.label.split("|");
-                            const subject = splitEdge[0];
-                            const predicate = splitEdge[1];
-                            const object = splitEdge[2];
+                          displayedPubmedEvidence.map((pub, i)=> {
+                            const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
+                            let knowledgeLevelString;
+                              switch (knowledgeLevel) {
+                                case 'trusted':
+                                  knowledgeLevelString = 'Curated'
+                                  break;
+                                case 'ml':
+                                  knowledgeLevelString = 'Text-Mined'
+                                  break;
+                                default:
+                                  knowledgeLevelString = 'Unknown';
+                                  break;
+                              }
                             return (
                               <div className={styles.evidenceItem} key={i}>
                                 <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                                  {
-                                    edge &&
-                                    <span>
-                                      <span>{subject}</span><strong>{predicate}</strong><span>{object}</span>
-                                    </span>
-                                  }
+                                  {knowledgeLevelString}
                                 </span>
                                 <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
-                                  {item.pubdate && (item.pubdate === 0 ) ? '' : item.pubdate }
+                                  {pub.pubdate && (pub.pubdate === 0 ) ? '' : pub.pubdate }
                                 </span>
                                 <span className={`${styles.cell} ${styles.source} source`}>
                                   <span>
-                                    {item.source && item.source }
+                                    {pub.source && pub.source }
                                   </span>
                                 </span>
                                 <span className={`${styles.cell} ${styles.title} title`} >
-                                  {item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a> }
-                                  {!item.title && item.url && <a href={item.url} target="_blank" rel="noreferrer">No Title Available</a> }
+                                  {pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">{pub.title}</a> }
+                                  {!pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">No Title Available</a> }
                                 </span>
                                 <span className={`${styles.cell} ${styles.abstract} abstract`}>
                                   <span>
-                                    {!item.snippet && "No snippet available."}
-                                    {item.snippet && item.snippet}
+                                    {!pub.snippet && "No snippet available."}
+                                    {pub.snippet && pub.snippet}
                                   </span>
-                                    {item.url && <a href={item.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
+                                    {pub.url && <a href={pub.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
                                 </span>
                               </div>
                             )
