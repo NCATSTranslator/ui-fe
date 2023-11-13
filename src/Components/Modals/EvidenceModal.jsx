@@ -379,6 +379,10 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
               pubmedEvidence.length > 0 &&
               <div heading="Publications">
                 <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Publications</p>
+                <div className={styles.knowledgeType}>
+                  <button>Text Mined</button>
+                  <button>Curated</button>
+                </div>
                 {
                   <div className={`${styles.tableBody}`}>
                     <div className={styles.tableHead}>
@@ -514,27 +518,13 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
               <div heading="Clinical Trials">
                 <div className={`${styles.tableBody} ${styles.clinicalTrials}`}>
                   <div className={`${styles.tableHead}`}>
-                    <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
                     <div className={`${styles.head} ${styles.link}`}>Link</div>
                   </div>
                   <div className={styles.evidenceItems}>
                     {
                       clinicalTrials.current.map((item, i)=> {
-                        const edge = Object.values(item.edges)[0];
-                        const splitEdge = edge.label.split("|");
-                        const subject = splitEdge[0];
-                        const predicate = splitEdge[1];
-                        const object = splitEdge[2];
                         return (
                           <div className={styles.evidenceItem} key={i}>
-                            <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                              {
-                                edge &&
-                                <span>
-                                  <span>{subject}</span><strong>{predicate}</strong><span>{object}</span>
-                                </span>
-                              }
-                            </span>
                             <div className={`${styles.cell} ${styles.link} link`}>
                               {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
                             </div>
@@ -551,27 +541,13 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
               <div heading="Miscellaneous">
                 <div className={`${styles.tableBody} ${styles.clinicalTrials} ${styles.misc}`}>
                   <div className={`${styles.tableHead}`}>
-                    <div className={`${styles.head} ${styles.edge}`}>Edge Supported</div>
                     <div className={`${styles.head} ${styles.link}`}>Link</div>
                   </div>
                   <div className={styles.evidenceItems}>
                     {
                       miscEvidence.current.map((item, i) => {
-                        const edge = Object.values(item.edges)[0];
-                        const splitEdge = edge.label.split("|");
-                        const subject = splitEdge[0];
-                        const predicate = splitEdge[1];
-                        const object = splitEdge[2];
                         return (
                           <div className={styles.evidenceItem} key={i}>
-                            <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                              {
-                                edge &&
-                                <span>
-                                  <span>{subject}</span><strong>{predicate}</strong><span>{object}</span>
-                                </span>
-                              }
-                            </span>
                             <div className={`${styles.cell} ${styles.link} link`}>
                               {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
                             </div>
