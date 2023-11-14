@@ -1,11 +1,8 @@
 import {useState, useEffect, useCallback, useRef} from "react";
 import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
-import Select from "../FormFields/Select";
-import LoadingBar from "../LoadingBar/LoadingBar";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
-import ReactPaginate from "react-paginate";
 import ExternalLink from '../../Icons/external-link.svg?react';
 import { capitalizeAllWords } from "../../Utilities/utilities";
 import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
@@ -18,6 +15,7 @@ import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
 import Information from '../../Icons/information.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
+import PublicationsTable from "../EvidenceTables/PublicationsTable";
 
 const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, edgeGroup = null}) => {
 
@@ -57,6 +55,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
     setIsSortedByDate: setIsSortedByDate,
     setPubmedEvidence: setPubmedEvidence
   }
+
   // Int, number of pages
   const [pageCount, setPageCount] = useState(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
@@ -75,6 +74,14 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
   const isFetchingPubmedData = useRef(false);
   const fetchedPubmedData = useRef(false);
   const didMountRef = useRef(false);
+
+  const pubTablePageData = {
+    itemOffset: itemOffset,
+    endOffset: endOffset,
+    itemsPerPage: itemsPerPage,
+    currentPage: currentPage,
+    pageCount: pageCount
+  }
 
   const handleClose = () => {
     onClose();
@@ -187,6 +194,12 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
     setCurrentPage(event.selected);
     setItemOffset(newOffset);
   },[itemsPerPage, pubmedEvidence]);
+
+  const pubTableEventHandlers = {
+    handlePageClick: handlePageClick,
+    handleEvidenceSort: handleEvidenceSort,
+    setItemsPerPage: setItemsPerPage
+  }
 
   const insertAdditionalPubmedData = (data, pubmedEvidence) => {
     let newPubmedEvidence = cloneDeep(pubmedEvidence)
@@ -378,154 +391,39 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
             {
               pubmedEvidence.length > 0 &&
               <div heading="Publications">
-                <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {pubmedEvidence.length} Publications</p>
-                <div className={styles.knowledgeType}>
-                  <button>Text Mined</button>
-                  <button>Curated</button>
-                </div>
-                {
-                  <div className={`${styles.tableBody}`}>
-                    <div className={styles.tableHead}>
-                      <div className={`${styles.head} ${styles.relationship}`}>Knowledge Level</div>
-                      <div 
-                        className={`${styles.head} ${styles.date} ${isSortedByDate ? styles.true : (isSortedByDate === null) ? '' : styles.false}`}
-                        onClick={()=>{handleEvidenceSort((isSortedByDate) ? 'dateLowHigh': 'dateHighLow', pubmedEvidence, handlePageClick, sortingSetters)}}
-                        >
-                        <span className={styles.headSpan}>
-                          Date(s)
-                        </span>
-                      </div>
-                      <div
-                        className={`${styles.head} ${styles.source} ${isSortedBySource ? styles.true : (isSortedBySource === null) ? '' : styles.false}`}
-                        onClick={()=>{handleEvidenceSort((isSortedBySource) ? 'sourceHighLow': 'sourceLowHigh', pubmedEvidence, handlePageClick, sortingSetters)}}
-                        >
-                        <span className={styles.headSpan}>
-                          Journal
-                        </span>
-                      </div>
-                      <div
-                        className={`${styles.head} ${styles.title} ${isSortedByTitle ? styles.true : (isSortedByTitle === null) ? '' : styles.false}`}
-                        onClick={()=>{handleEvidenceSort((isSortedByTitle) ? 'titleHighLow': 'titleLowHigh', pubmedEvidence, handlePageClick, sortingSetters)}}
-                        >
-                        <span className={styles.headSpan}>
-                          Title
-                        </span>
-                      </div>
-                      <div className={`${styles.head} ${styles.abstract}`}>Snippet</div>
-                    </div>
-                    {
-                      isLoading &&
-                      <LoadingBar
-                        loading={isLoading}
-                        useIcon
-                        className={styles.loadingBar}
-                        loadingText="Retrieving Evidence"
-                      />
-                    }
-                    {
-                      !isLoading &&
-                      <div className={styles.evidenceItems} >
-                        {
-                          displayedPubmedEvidence.map((pub, i)=> {
-                            const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
-                            let knowledgeLevelString;
-                              switch (knowledgeLevel) {
-                                case 'trusted':
-                                  knowledgeLevelString = 'Curated'
-                                  break;
-                                case 'ml':
-                                  knowledgeLevelString = 'Text-Mined'
-                                  break;
-                                default:
-                                  knowledgeLevelString = 'Unknown';
-                                  break;
-                              }
-                            return (
-                              <div className={styles.evidenceItem} key={i}>
-                                <span className={`${styles.cell} ${styles.relationship} relationship`}>
-                                  {knowledgeLevelString}
-                                </span>
-                                <span className={`${styles.cell} ${styles.pubdate} pubdate`}>
-                                  {pub.pubdate && (pub.pubdate === 0 ) ? '' : pub.pubdate }
-                                </span>
-                                <span className={`${styles.cell} ${styles.source} source`}>
-                                  <span>
-                                    {pub.source && pub.source }
-                                  </span>
-                                </span>
-                                <span className={`${styles.cell} ${styles.title} title`} >
-                                  {pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">{pub.title}</a> }
-                                  {!pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">No Title Available</a> }
-                                </span>
-                                <span className={`${styles.cell} ${styles.abstract} abstract`}>
-                                  <span>
-                                    {!pub.snippet && "No snippet available."}
-                                    {pub.snippet && pub.snippet}
-                                  </span>
-                                    {pub.url && <a href={pub.url} className={styles.url} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
-                                </span>
-                              </div>
-                            )
-                          })
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-                {
-                  <div className={styles.bottom}>
-                    <div className={styles.perPage}>
-                      <Select
-                        label=""
-                        name="Items Per Page"
-                        size="m"
-                        handleChange={(value)=>{
-                          setItemsPerPage(parseInt(value));
-                          handlePageClick({selected: 0});
-                        }}
-                        value={itemsPerPage}
-                        >
-                        <option value="5" key="0">5</option>
-                        <option value="10" key="1">10</option>
-                        <option value="20" key="2">20</option>
-                      </Select>
-                    </div>
-                    <div className={styles.pagination}>
-                      <ReactPaginate
-                        breakLabel="..."
-                        nextLabel="Next"
-                        previousLabel="Previous"
-                        onPageChange={handlePageClick}
-                        pageRangeDisplayed={2}
-                        marginPagesDisplayed={2}
-                        pageCount={pageCount}
-                        renderOnZeroPageCount={null}
-                        className={styles.pageNums}
-                        pageClassName={styles.pageNum}
-                        activeClassName={styles.current}
-                        previousLinkClassName={`${styles.prev} ${styles.button}`}
-                        nextLinkClassName={`${styles.prev} ${styles.button}`}
-                        disabledLinkClassName={styles.disabled}
-                        forcePage={currentPage}
-                      />
-                    </div>
-                  </div>
-                }
+                <PublicationsTable
+                  pubmedEvidence={pubmedEvidence} 
+                  itemOffset={itemOffset}
+                  endOffset={endOffset}
+                  displayedPubmedEvidence={displayedPubmedEvidence} 
+                  handlePageClick={handlePageClick} 
+                  handleEvidenceSort={handleEvidenceSort}
+                  sortingSetters={sortingSetters} 
+                  sortingStates={{
+                    isSortedByDate: isSortedByDate,
+                    isSortedBySource: isSortedBySource,
+                    isSortedByTitle: isSortedByTitle
+                  }} 
+                  pageData={pubTablePageData}
+                  eventHandlers={pubTableEventHandlers}
+                  isLoading={isLoading}
+                  item={item}
+                />
               </div>
             }
             {
               clinicalTrials.current.length > 0 &&
               <div heading="Clinical Trials">
-                <div className={`${styles.tableBody} ${styles.clinicalTrials}`}>
-                  <div className={`${styles.tableHead}`}>
-                    <div className={`${styles.head} ${styles.link}`}>Link</div>
+                <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
+                  <div className={`table-head ${styles.tableHead}`}>
+                    <div className={`head ${styles.head} ${styles.link}`}>Link</div>
                   </div>
-                  <div className={styles.evidenceItems}>
+                  <div className={`table-items ${styles.tableItems}`}>
                     {
                       clinicalTrials.current.map((item, i)=> {
                         return (
-                          <div className={styles.evidenceItem} key={i}>
-                            <div className={`${styles.cell} ${styles.link} link`}>
+                          <div className={styles.tableItem} key={i}>
+                            <div className={`table-cell ${styles.cell} ${styles.link} link`}>
                               {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
                             </div>
                           </div>
@@ -539,16 +437,16 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
             {
               miscEvidence.current.length > 0 &&
               <div heading="Miscellaneous">
-                <div className={`${styles.tableBody} ${styles.clinicalTrials} ${styles.misc}`}>
-                  <div className={`${styles.tableHead}`}>
-                    <div className={`${styles.head} ${styles.link}`}>Link</div>
+                <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
+                  <div className={`table-head ${styles.tableHead}`}>
+                    <div className={`head ${styles.head} ${styles.link}`}>Link</div>
                   </div>
-                  <div className={styles.evidenceItems}>
+                  <div className={`table-items ${styles.tableItems}`}>
                     {
                       miscEvidence.current.map((item, i) => {
                         return (
-                          <div className={styles.evidenceItem} key={i}>
-                            <div className={`${styles.cell} ${styles.link} link`}>
+                          <div className={`table-item ${styles.tableItem}`} key={i}>
+                            <div className={`table-cell ${styles.cell} ${styles.link} link`}>
                               {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
                             </div>
                           </div>
@@ -567,28 +465,23 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                 tooltipIcon={<Information className={styles.infoIcon} 
                 data-tooltip-id="knowledge-sources-tooltip" />}
                 >
-                <div className={`${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
-                  <div className={`${styles.tableHead}`}>
-                    <div className={`${styles.head}`}>Source</div>
-                    <div className={`${styles.head}`}>Link</div>
+                <div className={`table-body ${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
+                  <div className={`table-head ${styles.tableHead}`}>
+                    <div className={`head ${styles.head}`}>Source</div>
+                    <div className={`head ${styles.head}`}>Link</div>
                   </div>
-                  <div className={styles.evidenceItems}>
+                  <div className={`table-items ${styles.tableItems}`}>
                     {
                       sources.map((src, i) => { 
-                        const edge = Object.values(src.edges)[0];
-                        const splitEdge = edge.label.split("|");
-                        const subject = splitEdge[0];
-                        const predicate = splitEdge[1];
-                        const object = splitEdge[2];
                         const name = (!Array.isArray(src) && typeof src === 'object') ? src.name: '';
                         const url = (!Array.isArray(src) && typeof src === 'object') ? src.url: src;
                         return(
-                          <div className={styles.evidenceItem}>
-                            <span className={`${styles.cell} ${styles.source} ${styles.sourceItem}`}>
+                          <div className={`table-item ${styles.tableItem}`}>
+                            <span className={`table-cell ${styles.cell} ${styles.source} ${styles.sourceItem}`}>
                               <span className={styles.sourceEdge} key={i}>{name}</span>
                             </span>
-                            <span className={`${styles.cell} ${styles.link} ${styles.sourceItem}`}>
-                              <a key={i} href={url} target="_blank" rel="noreferrer" className={styles.edgeProvenanceLink}>
+                            <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
+                              <a key={i} href={url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
                                 {url}
                                 <ExternalLink/>
                               </a>
