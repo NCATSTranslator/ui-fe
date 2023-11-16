@@ -5,8 +5,10 @@
   position: relative;
   z-index: 100;
   .tableHead, .tableItem {
-    display: flex;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 5px;
+    justify-content: space-between;
     align-items: center;
     .name, .target {
       font-size: 14px;
@@ -27,15 +29,12 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 14.3%;
       text-align: center;
       margin-right: 4px;
       cursor: pointer;
     }
   }
   .tableItem {
-    padding-bottom: 15px;
-    margin-bottom: calc($m - 15px);
     position: relative;
     .pathContainer, .name, .target {
       line-height: 17.5px;
@@ -97,6 +96,38 @@
       color: $white;
       svg {
         margin-right: 8px;
+      }
+    }
+  }
+  .formattedPath {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    .pathEvidenceButton {
+      background-color: $white;
+      border: 1px solid $midDarkGray;
+      padding: 4px 3px 3px 4px;
+      border-radius: 50px;
+      margin: 0;
+      transition: all .25s ease;
+      svg {
+        width: 20px;
+        height: 20px;
+        margin-right: 0;
+        path, line, circle {
+          transition: all .25s ease;
+          stroke: $midDarkGray;
+        }
+      }
+      &:hover {
+        background-color: $midDarkGray;
+        svg {
+          path, line, circle {
+            stroke: $white;
+          }
+        }
       }
     }
   }

@@ -17,20 +17,20 @@
     line-height: 17.5px;
   }
   .text, span, a {
-    font-size: 12px !important;
-    line-height: 15px !important;
-    font-weight: 400 !important;
-    text-transform: none !important;
+    font-size: 12px;
+    line-height: 1.1;
+    font-weight: 400;
+    text-transform: none;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 12;
     -webkit-box-orient: vertical;
-    color: $white !important;
+    color: $white;
   }
   a {
-    font-weight: 700 !important;
-    text-decoration: underline !important;
-    display: inline !important;
+    font-weight: 700;
+    text-decoration: underline;
+    display: inline;
   }
   .children {
     p {

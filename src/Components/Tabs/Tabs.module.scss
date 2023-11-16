@@ -5,10 +5,11 @@
   width: 100%;
   padding-left: 0;
   margin: 10px auto 20px;
+  position: relative;
   .tabList {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 0 $m;
+    margin: 0 0 16px;
   }
   .tabContent {
     padding: 0px;

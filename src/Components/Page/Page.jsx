@@ -1,13 +1,13 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import DisclaimerModal from "../Modals/DisclaimerModal";
 
-const Page = (props) => {
+const Page = ({title, children}) => {
   useEffect(() => {
-    document.title = `${props.title} - NCATS Biomedical Data Translator`|| "";
-  }, [props.title]);
+    document.title = `${title} - NCATS Biomedical Data Translator`|| "";
+  }, [title]);
   return (
     <>
-      {props.children}
+      {children}
       <DisclaimerModal></DisclaimerModal>
     </>
   )

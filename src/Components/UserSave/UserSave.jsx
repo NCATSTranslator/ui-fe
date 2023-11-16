@@ -99,7 +99,7 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
                 rawResults={null}
                 type={queryType}
                 item={queryItem}
-                activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
+                activateEvidence={(evidence, item, edgeGroup, path, isAll)=>activateEvidence(evidence, item, edgeGroup, path, isAll)}
                 activateNotes={activateNotes}
                 activeStringFilters={[currentSearchString.current]}
                 zoomKeyDown={zoomKeyDown}

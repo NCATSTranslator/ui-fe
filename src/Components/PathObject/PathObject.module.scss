@@ -2,15 +2,47 @@
 
 
 .nameContainer,.pathContainer,.targetContainer {
-  width: 14.3%;
   border-radius: $defaultBorderRadius;
   svg {
     min-width: 24px;
     height: 24px;
   }
+  .provenance {
+    display: flex !important;
+    align-items: center;
+    margin: $xs 0 0 0;
+    color: $white;
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+    font-size: 14px;
+    text-decoration: underline;
+    span {
+      font-size: 12px;
+      text-decoration: underline;
+      color: $white;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline;
+    }
+    svg {
+      display: inline;
+      margin: 0 3px 0 0;
+      min-width: 18px;
+      circle:first-child {
+        stroke: $white;
+        fill: transparent;
+      }
+      circle {
+        fill: $white;
+      }
+      path {
+        fill: $white;
+      }
+    }
+  }
 }
 .nameContainer,.pathContainer {
-  width: calc(14.3% - 4px);
   margin-right: 4px;
 }
 .name,.pathContainer,.target {
@@ -27,12 +59,16 @@
 .nameContainer {
   position: relative;
   box-shadow: none;
+  background-color: $lightGray;
+  border-radius: $defaultBorderRadius;
+  box-shadow: $dropShadow;
+  border: 1px solid transparent;
+  &:hover {
+    box-shadow: $dropShadowHover;
+  }
   &:first-child {
+    border: none;
     background-color: $yellow;
-    box-shadow: $dropShadow;
-    &:hover {
-      box-shadow: $dropShadowHover;
-    }
   }
   svg {
     margin-right: 5px;
@@ -46,84 +82,35 @@
   padding: 0;
   position: relative;
   cursor: pointer;
-  .more {
-    display: block;
-    font-weight: 700;
-    font-size: 12px;
-    color: $darkGray;
-  }
-  >svg {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    transform: translateY(-50%);
-  }
-  .predicatesList {
-    margin: 0;
-    list-style-type: none;
-  }
-  .predicate, .predicate span {
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    margin-bottom: 0 !important;
-    color: $white;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 }
-span.path {
-  display: flex;
-  align-content: center;
-  justify-content: flex-start;
-  width: auto;
-  padding: 9px;
-  max-width: 70%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  background-color: $greenPath;
-  z-index: 10;
-  color: $black;
-  margin-right: 0;
-  transition: all .25s ease;
-  border-radius: $defaultBorderRadius;
-  box-shadow: $dropShadow;
-  cursor: pointer;
-  &.hasMore {
-    padding: 3px 7px;
-    span {
-      font-size: 12px;
-    }
-  }
-  span {
-    cursor: pointer; 
-    text-overflow: ellipsis;
-    overflow: hidden;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-  path {
-    transition: all .25s ease;
-  }
-  &:hover {
-    color: $black;
-    box-shadow: $dropShadowHover;
-    text-decoration: underline;
-  }
-}
-.name, .target {
-  padding: 8px;
-}
-.name span, .name mark, .target span, .target mark, .path span {
-  font-size: 14px;
-  font-weight: 700;
+.nameContainer span, .targetContainer span{
   cursor: default;
 }
+.pathContainer, .nameContainer, .targetContainer {
+  &>span {
+    padding: 7px 9px;
+  }
+  span {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  span.hasMore {
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .description {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+    font-size: 14px;
+    margin: 3px 0 8px;
+    font-weight: 400;
+  }
+}
+
 .nameContainer, .targetContainer {
   transition: all .25s ease;
   max-height: 40px;
@@ -145,40 +132,7 @@ span.path {
   fill: #000 !important;
 }
 
-.provenance {
-  display: flex;
-  align-items: center;
-  margin: $xs 0 0 0;
-  color: $white;
-  background-color: transparent;
-  box-shadow: none;
-  padding: 0;
-  font-size: 14px;
-  text-decoration: underline;
-  span {
-    font-size: 12px;
-    text-decoration: underline;
-    color: $white;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline;
-  }
-  svg {
-    display: inline;
-    margin: 0 3px 0 0;
-    min-width: 18px;
-    circle:first-child {
-      stroke: $white;
-      fill: transparent;
-    }
-    circle {
-      fill: $white;
-    }
-    path {
-      fill: $white;
-    }
-  }
-}
+
 
 .sourceEdgeContainer {
   display: flex;
@@ -204,11 +158,3 @@ span.path {
   text-decoration: underline;
 }
 
-.description {
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;  
-  overflow: hidden;
-  font-size: 14px;
-  margin: 3px 0 8px;
-}

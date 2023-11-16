@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import {useState, useEffect} from "react";
 import AnimateHeight from "react-animate-height";
 import { NavLink } from "react-router-dom";
 import styles from './Accordion.module.scss';

@@ -1,7 +1,9 @@
 import styles from './PathView.module.scss';
 import {useState, useEffect, useMemo} from "react";
 import PathObject from '../PathObject/PathObject';
+import Tooltip from '../Tooltip/Tooltip';
 import Question from '../../Icons/Navigation/Question.svg?react';
+import ResearchMultiple from '../../Icons/research-multiple.svg?react';
 import { cloneDeep, isEqual } from 'lodash';
 import { useSelector } from 'react-redux';
 import { currentPrefs, currentRoot } from '../../Redux/rootSlice';
@@ -25,7 +27,7 @@ const getPathsWithSelectionsSet = (paths, selectedPaths) => {
   }
 }
 
-const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, activeStringFilters}) => {
+const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeStringFilters}) => {
 
   const prefs = useSelector(currentPrefs);
 
@@ -57,8 +59,8 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
     console.log("handle name click");
   }
 
-  const handleEdgeClick = (edgeGroup) => {
-    handleEdgeSpecificEvidence(edgeGroup)
+  const handleEdgeClick = (edgeGroup, path) => {
+    handleEdgeSpecificEvidence(edgeGroup, path);
   }
 
   const handleTargetClick = (target) => {
@@ -86,27 +88,42 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, act
         ? <></>
         :
           formattedPaths.slice(0, numberToShow).map((pathToDisplay, i)=> {
+            const tooltipID = pathToDisplay.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] );
             return (
-              <div 
-                className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} 
-                key={i}
-                > 
-                {
-                  pathToDisplay.path.subgraph.map((pathItem, j) => {
-                    let key = `${i}_${j}`;
-                    return (
-                      <PathObject 
-                        pathObject={pathItem} 
-                        id={key}
-                        key={key}
-                        handleNameClick={handleNameClick}
-                        handleEdgeClick={(edge)=>handleEdgeClick(edge)}
-                        handleTargetClick={handleTargetClick}
-                        activeStringFilters={activeStringFilters}
-                      />
-                    ) 
-                  }) 
-                }
+              <div className={styles.formattedPath}>
+                <button 
+                  onClick={()=>handleActivateEvidence(pathToDisplay)}
+                  className={styles.pathEvidenceButton}
+                  data-tooltip-id={tooltipID}
+                  >
+                    <ResearchMultiple />
+                </button>
+                <Tooltip 
+                  id={tooltipID}
+                  >
+                    <span>View evidence for this path.</span>
+                </Tooltip>
+                <div 
+                  className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} 
+                  key={i}
+                  > 
+                  {
+                    pathToDisplay.path.subgraph.map((pathItem, j) => {
+                      let key = `${i}_${j}`;
+                      return (
+                        <PathObject 
+                          pathObject={pathItem} 
+                          id={key}
+                          key={key}
+                          handleNameClick={handleNameClick}
+                          handleEdgeClick={(edge)=>handleEdgeClick(edge, pathToDisplay)}
+                          handleTargetClick={handleTargetClick}
+                          activeStringFilters={activeStringFilters}
+                        />
+                      ) 
+                    }) 
+                  }
+                </div>
               </div>
             )
           })

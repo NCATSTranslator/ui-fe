@@ -1,0 +1,104 @@
+@import "../../Assets/Styles/variables";
+
+.path {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: auto;
+  max-width: 65%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-color: $purpleEdgeBG;
+  z-index: 10;
+  color: $white;
+  margin-right: 0;
+  transition: all .25s ease;
+  border-radius: $defaultBorderRadius;
+  box-shadow: $dropShadow;
+  border: 1px solid $purpleEdgeBG;
+  cursor: pointer;
+  svg, svg path, svg circle, svg line {
+    transition: all .25s ease;
+    stroke: $white;
+  }
+  &.hasMore {
+    padding: 3px 7px;
+    .more {
+      font-size: 12px;
+      color: $lightGray;
+      display: block;
+      font-weight: 700;
+    }
+  }
+  span {
+    cursor: pointer; 
+    text-overflow: ellipsis;
+    overflow: hidden;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  path {
+    transition: all .25s ease;
+  }
+  &:hover {
+    // color: $black;
+    box-shadow: $dropShadowHover;
+    background-color: $purpleEdgeBGHover;
+    text-decoration: underline;
+  }
+}
+.tooltipPredicate {
+  margin-bottom: 5px;
+}
+.tooltipPredicate {
+  span {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: $white;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  &:last-child span {
+    margin-bottom: 0;
+  }
+  &.inModal span {
+    cursor: default;
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+.selected {
+  span.path {
+    border: 1px solid $purpleEdgeBGSelected;
+    background-color: $purpleEdgeBGSelected;
+    color: $white;
+    svg, svg path, svg circle, svg line {
+      stroke: $white;
+    }
+  }
+
+  .predicatesList {
+    margin: 0;
+    list-style-type: none;
+  }
+}
+
+
+.connector {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateY(-50%);
+  background-image: url('../../Icons/straight.svg');
+  background-position: center;
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
