@@ -1,16 +1,14 @@
-import {useState, useEffect, useCallback, useRef} from "react";
+import {useState, useEffect, useRef} from "react";
 import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import { capitalizeAllWords } from "../../Utilities/utilities";
-import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
-         compareByKeyLexographic, sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
+import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
 import { checkForEdgeMatch, handleEvidenceSort } from "../../Utilities/evidenceModalFunctions";
-import { cloneDeep, chunk } from "lodash";
-import { useQuery } from "react-query";
+import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
 import Information from '../../Icons/information.svg?react';
@@ -20,81 +18,23 @@ import PublicationsTable from "../EvidenceTables/PublicationsTable";
 const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, edgeGroup = null}) => {
 
   const prefs = useSelector(currentPrefs);
-
-  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
-  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
-  useEffect(() => {
-    const tempItemsPerPage = (prefs?.evidence_per_screen?.pref_value) ? parseInt(prefs.evidence_per_screen.pref_value) : 10;
-    setItemsPerPage(parseInt(tempItemsPerPage));
-  }, [prefs]);
-  const initItemsPerPage = parseInt((prefs?.evidence_per_screen?.pref_value) ? parseInt(prefs.evidence_per_screen.pref_value) : 5);
-
   const [pubmedEvidence, setPubmedEvidence] = useState([]);
   const [sources, setSources] = useState([]);
   const clinicalTrials = useRef([]);
   const miscEvidence = useRef([]);
   const hasBeenOpened = useRef(false);
-
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState({});
   const [selectedEdge, setSelectedEdge] = useState(edgeGroup);
+  const [selectedEdgeTrigger, setEdgeSelectedTrigger] = useState(false);
   const [formattedEdge, setFormattedEdge] = useState(null);
-  const [itemsPerPage, setItemsPerPage] = useState(initItemsPerPage);
-  const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
-  const [isSortedByTitle, setIsSortedByTitle] = useState(null);
-  const [isSortedBySource, setIsSortedBySource] = useState(null);
-  const [isSortedByDate, setIsSortedByDate] = useState(null);
 
   useEffect(() => {
     setSelectedItem(item);
   }, [item])
 
-  const sortingSetters = {
-    setIsSortedByTitle: setIsSortedByTitle,
-    setIsSortedBySource: setIsSortedBySource,
-    setIsSortedByDate: setIsSortedByDate,
-    setPubmedEvidence: setPubmedEvidence
-  }
-
-  // Int, number of pages
-  const [pageCount, setPageCount] = useState(0);
-  // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
-  const [itemOffset, setItemOffset] = useState(0);
-  // Int, current page
-  const [currentPage, setCurrentPage] = useState(0);
-  const endOffset = (itemOffset + itemsPerPage > pubmedEvidence.length)
-  ? pubmedEvidence.length
-  :  itemOffset + itemsPerPage;
-
-  const [processedEvidenceIDs, setProcessedEvidenceIDs] = useState([]);
-  const queryAmount = 200;
-
-  const amountOfIDsProcessed = useRef(0);
-  const evidenceToUpdate = useRef(null);
-  const isFetchingPubmedData = useRef(false);
-  const fetchedPubmedData = useRef(false);
-  const didMountRef = useRef(false);
-
-  const pubTablePageData = {
-    itemOffset: itemOffset,
-    endOffset: endOffset,
-    itemsPerPage: itemsPerPage,
-    currentPage: currentPage,
-    pageCount: pageCount
-  }
-
   const handleClose = () => {
     onClose();
-    setCurrentPage(0);
-    setItemOffset(0);
     setSelectedEdge(null);
-    setIsLoading(true);
-    setIsSortedBySource(null);
-    setIsSortedByTitle(null);
-    setIsSortedByDate(null);
-    amountOfIDsProcessed.current = 0;
-    evidenceToUpdate.current = null;
-    fetchedPubmedData.current = false;
     hasBeenOpened.current = false;
   }
 
@@ -182,142 +122,11 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
     }
   }
 
-  // hook to handle setting the correct evidence when itemOffset or itemsPerPage change
-  useEffect(() => {
-    setDisplayedPubmedEvidence(pubmedEvidence.slice(itemOffset, endOffset));
-    setPageCount(Math.ceil(pubmedEvidence.length / itemsPerPage));
-  }, [itemOffset, itemsPerPage, pubmedEvidence, endOffset]);
-
-  // Handles direct page click
-  const handlePageClick = useCallback((event) => {
-    const newOffset = (event.selected * itemsPerPage) % pubmedEvidence.length;
-    setCurrentPage(event.selected);
-    setItemOffset(newOffset);
-  },[itemsPerPage, pubmedEvidence]);
-
-  const pubTableEventHandlers = {
-    handlePageClick: handlePageClick,
-    handleEvidenceSort: handleEvidenceSort,
-    setItemsPerPage: setItemsPerPage
-  }
-
-  const insertAdditionalPubmedData = (data, pubmedEvidence) => {
-    let newPubmedEvidence = cloneDeep(pubmedEvidence)
-    for(const element of newPubmedEvidence) {
-      if(data[element.id] !== undefined) {
-        if(!element.source)
-          element.source = capitalizeAllWords(data[element.id].journal_name);
-        if(!element.title)
-          element.title = capitalizeAllWords(data[element.id].article_title.replace('[', '').replace(']',''));
-        if(!element.snippet)
-          element.snippet = data[element.id].abstract;
-        if(!element.pubdate) {
-          let year = (data[element.id].pub_year) ? data[element.id].pub_year: 0;
-          element.pubdate = year;
-        }
-      }
-      element.updated = true;
-    }
-    return newPubmedEvidence;
-  }
-
-  useEffect(()=> {
-    if(pubmedEvidence.length <= 0 && didMountRef.current) {
-      setIsLoading(false);
-      return;
-    }
-    didMountRef.current = true;
-
-    if(pubmedEvidence.length <= 0)
-      return;
-
-    if(fetchedPubmedData.current) {
-      setIsLoading(false);
-    } else {
-      let PMIDs = pubmedEvidence.map(item => item.id);
-      setProcessedEvidenceIDs(chunk(PMIDs, queryAmount));
-      isFetchingPubmedData.current = true;
-    }
-  }, [pubmedEvidence])
-
-  const insertAdditionalEvidenceAndSort = (prefs, insertAdditionalPubmedData) => {
-    if(prefs?.evidence_sort?.pref_value) {
-      let dataToSort = insertAdditionalPubmedData(evidenceToUpdate.current, pubmedEvidence);
-      switch (prefs.evidence_sort.pref_value) {
-        case "dateHighLow":
-          setIsSortedByDate(true);
-          setPubmedEvidence(sortDateYearHighLow(dataToSort));
-          break;
-        case "dateLowHigh":
-          setIsSortedByDate(false);
-          setPubmedEvidence(sortDateYearLowHigh(dataToSort));
-          break;
-        case "sourceHighLow":
-          setIsSortedBySource(false);
-          setPubmedEvidence(sortSourceHighLow(dataToSort));
-          break;
-        case "sourceLowHigh":
-          setIsSortedBySource(true);
-          setPubmedEvidence(sortSourceLowHigh(dataToSort));
-          break;
-        case "titleHighLow":
-          setIsSortedByTitle(false);
-          setPubmedEvidence(sortNameHighLow(dataToSort, true))
-          break;      
-        case "titleLowHigh":
-          setIsSortedByTitle(true);
-          setPubmedEvidence(sortNameLowHigh(dataToSort, true))
-          break;            
-        default:
-          break;
-      }
-    } else {
-      setIsSortedByDate(true);
-    }
-  }
-
-  // retrieves pubmed metadata, then inserts it into the existing evidence and sorts
-  // called in useQuery hook below, controlled by isFetchingPubmedData ref
-  const fetchPubmedData = async (processedEvidenceIDs, pubmedEvidenceLength, insertAndSortEvidence, prefs) => {
-    const metadata = processedEvidenceIDs.map(async (ids, i) => {
-      const response = await fetch(`https://docmetadata.transltr.io/publications?pubids=${ids}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`)
-      .then(response => response.json())
-      .then(data => {
-        evidenceToUpdate.current = {...evidenceToUpdate.current, ...data.results } ;
-        amountOfIDsProcessed.current = amountOfIDsProcessed.current + Object.keys(data.results).length;
-        if(amountOfIDsProcessed.current >= pubmedEvidenceLength) {
-          console.log('metadata fetches complete, inserting additional evidence information')
-          insertAndSortEvidence(prefs, insertAdditionalPubmedData);
-          fetchedPubmedData.current = true;
-          isFetchingPubmedData.current = false;
-        }
-      })
-      return response;
-    })
-    return Promise.all(metadata);
-  }
-  // eslint-disable-next-line
-  const pubMedMetadataQuery = useQuery({
-    queryKey: ['pubmedMetadata'],
-    queryFn: () => fetchPubmedData(processedEvidenceIDs, pubmedEvidence.length, insertAdditionalEvidenceAndSort, prefs),
-    refetchInterval: 1000,
-    enabled: isFetchingPubmedData.current
-  });
-
   const handleEdgeClick = (edge, rawEvi) => {
     if(!edge || checkForEdgeMatch(edge, selectedEdge) === true) 
       return;
-    setEdgeAndResetView(edge, rawEvi);
-  }
-
-  const setEdgeAndResetView = (edge, rawEvi) => {
-    setIsLoading(true);
-    setCurrentPage(0);
-    setItemOffset(0);
     handleSelectedEdge(edge, rawEvi)
-    amountOfIDsProcessed.current = 0;
-    evidenceToUpdate.current = null;
-    fetchedPubmedData.current = false;
+    setEdgeSelectedTrigger(prev=>!prev);
   }
 
   return (
@@ -392,22 +201,13 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
               pubmedEvidence.length > 0 &&
               <div heading="Publications">
                 <PublicationsTable
+                  selectedEdgeTrigger={selectedEdgeTrigger}
                   pubmedEvidence={pubmedEvidence} 
-                  itemOffset={itemOffset}
-                  endOffset={endOffset}
-                  displayedPubmedEvidence={displayedPubmedEvidence} 
-                  handlePageClick={handlePageClick} 
+                  setPubmedEvidence={setPubmedEvidence}
                   handleEvidenceSort={handleEvidenceSort}
-                  sortingSetters={sortingSetters} 
-                  sortingStates={{
-                    isSortedByDate: isSortedByDate,
-                    isSortedBySource: isSortedBySource,
-                    isSortedByTitle: isSortedByTitle
-                  }} 
-                  pageData={pubTablePageData}
-                  eventHandlers={pubTableEventHandlers}
-                  isLoading={isLoading}
                   item={item}
+                  prefs={prefs}
+                  isOpen={isOpen}
                 />
               </div>
             }
