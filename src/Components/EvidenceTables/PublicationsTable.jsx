@@ -14,9 +14,8 @@ import Info from '../../Icons/information.svg?react';
 
 const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvidence, item, prefs = null, isOpen }) => {
 
-  const initItemsPerPage = parseInt((prefs?.evidence_per_screen?.pref_value) ? parseInt(prefs.evidence_per_screen.pref_value) : 5);
   const prevSelectedEdgeTrigger = useRef(selectedEdgeTrigger);
-  const [itemsPerPage, setItemsPerPage] = useState(initItemsPerPage);
+  const [itemsPerPage, setItemsPerPage] = useState(parseInt(prefs?.evidence_per_screen?.pref_value) || 5);
   const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
   const [knowledgeLevelFilter, setKnowledgeLevelFilter] = useState('all');
   const filteredEvidence = useMemo(() => {
@@ -30,15 +29,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
   const endOffset = (itemOffset + itemsPerPage > filteredEvidence.length)
     ? filteredEvidence.length
     :  itemOffset + itemsPerPage;
-  const [isSortedByTitle, setIsSortedByTitle] = useState(null);
-  const [isSortedBySource, setIsSortedBySource] = useState(null);
-  const [isSortedByDate, setIsSortedByDate] = useState(null);
-  const sortingSetters = {
-    setIsSortedByTitle: setIsSortedByTitle,
-    setIsSortedBySource: setIsSortedBySource,
-    setIsSortedByDate: setIsSortedByDate,
-    setPubmedEvidence: setPubmedEvidence
-  }
+  const [sortingState, setSortingState] = useState({ title: null, source: null, date: null });
   const [isLoading, setIsLoading] = useState(true);
   const didMountRef = useRef(false);
   const isFetchingPubmedData = useRef(false);
@@ -59,9 +50,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
     setIsLoading(true);
     setCurrentPage(0);
     setItemOffset(0);
-    setIsSortedBySource(null);
-    setIsSortedByTitle(null);
-    setIsSortedByDate(null);
+    setSortingState({ title: null, source: null, date: null });
     setKnowledgeLevelFilter('all')
     amountOfIDsProcessed.current = 0;
     evidenceToUpdate.current = null;
@@ -93,34 +82,34 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
       let dataToSort = insertAdditionalPubmedData(evidenceToUpdate.current, pubmedEvidence);
       switch (prefs.evidence_sort.pref_value) {
         case "dateHighLow":
-          setIsSortedByDate(true);
+          setSortingState(prev => ({...prev, date: true}));
           setPubmedEvidence(sortDateYearHighLow(dataToSort));
           break;
         case "dateLowHigh":
-          setIsSortedByDate(false);
+          setSortingState(prev => ({...prev, date: false}));
           setPubmedEvidence(sortDateYearLowHigh(dataToSort));
           break;
         case "sourceHighLow":
-          setIsSortedBySource(false);
+          setSortingState(prev => ({...prev, source: false}));
           setPubmedEvidence(sortSourceHighLow(dataToSort));
           break;
         case "sourceLowHigh":
-          setIsSortedBySource(true);
+          setSortingState(prev => ({...prev, source: true}));
           setPubmedEvidence(sortSourceLowHigh(dataToSort));
           break;
         case "titleHighLow":
-          setIsSortedByTitle(false);
+          setSortingState(prev => ({...prev, title: false}));
           setPubmedEvidence(sortNameHighLow(dataToSort, true))
           break;      
         case "titleLowHigh":
-          setIsSortedByTitle(true);
+          setSortingState(prev => ({...prev, title: true}));
           setPubmedEvidence(sortNameLowHigh(dataToSort, true))
           break;            
         default:
           break;
       }
     } else {
-      setIsSortedByDate(true);
+      setSortingState(prev => ({...prev, date: true}));
     }
   }
 
@@ -179,6 +168,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
       setIsLoading(true);
       setCurrentPage(0);
       setItemOffset(0);
+      setSortingState({ title: null, source: null, date: true });
       amountOfIDsProcessed.current = 0;
       evidenceToUpdate.current = null;
       fetchedPubmedData.current = false;
@@ -198,9 +188,8 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
   }, [prefs]);
 
   useEffect(() => {
-    if(!isOpen) {
+    if(!isOpen) 
       handleClose();
-    }
   }, [isOpen]);
 
   // hook to handle setting the correct evidence when itemOffset or itemsPerPage change
@@ -208,13 +197,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
     setDisplayedPubmedEvidence(filteredEvidence.slice(itemOffset, endOffset));
     setPageCount(Math.ceil(filteredEvidence.length / itemsPerPage));
   }, [itemOffset, itemsPerPage, filteredEvidence, endOffset]);
-
-  // useEffect(() => {
-
-
-  //   if(didMountRef.current)
-  //     resetView();
-  // }, [selectedEdgeTrigger]);
 
   return(
     <div className={styles.publicationsTableContainer}>
@@ -249,24 +231,24 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
         <div className={`table-head`}>
           <div className={`head ${styles.knowledgeLevel}`}>Knowledge Level</div>
           <div 
-            className={`head ${styles.pubdate} ${isSortedByDate ? 'true' : (isSortedByDate === null) ? '' : 'false'}`}
-            onClick={()=>{handleEvidenceSort((isSortedByDate) ? 'dateLowHigh': 'dateHighLow', pubmedEvidence, handlePageClick, sortingSetters)}}
+            className={`head ${styles.pubdate} ${sortingState.date ? 'true' : (sortingState.date === null) ? '' : 'false'}`}
+            onClick={()=>{handleEvidenceSort((sortingState.date) ? 'dateLowHigh': 'dateHighLow', pubmedEvidence, handlePageClick, setSortingState, setPubmedEvidence)}}
             >
             <span className={`head-span`}>
               Date(s)
             </span>
           </div>
           <div
-            className={`head ${styles.source} ${isSortedBySource ? 'true' : (isSortedBySource === null) ? '' : 'false'}`}
-            onClick={()=>{handleEvidenceSort((isSortedBySource) ? 'sourceHighLow': 'sourceLowHigh', pubmedEvidence, handlePageClick, sortingSetters)}}
+            className={`head ${styles.source} ${sortingState.source ? 'true' : (sortingState.source === null) ? '' : 'false'}`}
+            onClick={()=>{handleEvidenceSort((sortingState.source) ? 'sourceHighLow': 'sourceLowHigh', pubmedEvidence, handlePageClick, setSortingState, setPubmedEvidence)}}
             >
             <span className={`head-span`}>
               Journal
             </span>
           </div>
           <div
-            className={`head ${styles.title} ${isSortedByTitle ? 'true' : (isSortedByTitle === null) ? '' : 'false'}`}
-            onClick={()=>{handleEvidenceSort((isSortedByTitle) ? 'titleHighLow': 'titleLowHigh', pubmedEvidence, handlePageClick, sortingSetters)}}
+            className={`head ${styles.title} ${sortingState.title ? 'true' : (sortingState.title === null) ? '' : 'false'}`}
+            onClick={()=>{handleEvidenceSort((sortingState.title) ? 'titleHighLow': 'titleLowHigh', pubmedEvidence, handlePageClick, setSortingState, setPubmedEvidence)}}
             >
             <span className={`head-span`}>
               Title
