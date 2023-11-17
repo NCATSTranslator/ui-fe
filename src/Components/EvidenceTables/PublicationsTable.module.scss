@@ -1,9 +1,5 @@
 @import "../../Assets/Styles/variables";
 
-.publicationsTableContainer {
-  // padding: 20px 0 0 0;
-}
-
 .pubsTable {
   .source, .pubdate, .pValue, .link, .location, .status, .knowledgeLevel {
     text-align: center;
@@ -117,6 +113,7 @@
   justify-items: center;
   align-content: center;
   padding: 100px 0;
+  grid-column: auto;
 }
 .noPubs {
   padding: 100px 0;

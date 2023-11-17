@@ -51,7 +51,7 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
           </div>
           {
             !hideCloseButton && 
-            <div className={styles.closeContainer}><button className={styles.closeButton} onClick={onClose}><Close/></button></div>
+            <div className={styles.closeContainer} data-test-id="modal-close-button"><button className={styles.closeButton} onClick={onClose}><Close/></button></div>
           }
       </div>
     </div>

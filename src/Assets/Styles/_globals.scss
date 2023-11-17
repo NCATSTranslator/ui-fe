@@ -149,10 +149,6 @@ img {
   background-color: rgb(251, 247, 25);
 }
 
-.table-head,.table-item {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-} 
 .table-head {
   border-bottom: 1px solid $midGray;
   border-radius: 5px 5px 0 0;
@@ -209,7 +205,11 @@ img {
   box-shadow: $dropShadow;
   font-size: $bodyTwoSize;
   border-radius: $defaultBorderRadius;
-  .table-head, &>div .table-item {
+  display: grid;
+  .table-head {
+    background-color: $purpleTwo;  
+  }
+  .table-head tr, .table-items .table-item {
     display: grid;
     // Columns with no title 
     // grid-template-columns: 1fr 1.25fr 3.5fr 1.25fr;
@@ -236,9 +236,6 @@ img {
       display: block;
     }
   }
-  &>div:first-child {
-    background-color: $purpleTwo;  
-  }
   .url, .link a {
     display: flex;
     align-items: flex-start;
@@ -256,7 +253,7 @@ img {
   }
 }
 .table-items {
-  &>div:nth-child(odd){
+  &>tr:nth-child(odd){
     background-color: $lightGray;
   }
 }

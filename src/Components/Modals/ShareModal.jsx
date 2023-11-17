@@ -53,7 +53,7 @@ const ShareModal = ({isOpen, onClose, qid, label = null, typeID = null}) => {
       <h5>Share</h5>
       <p>Easily return to this result set without needing to ask this question again. This link is unique to your question and will return results for up to 30 days, after which time your question will need to be run again.</p>
       <div className={styles.copyContainer}>
-        <p className={styles.url}>{qidURL}</p>
+        <p className={styles.url} data-testid='share-url-container'>{qidURL}</p>
         <button onClick={() => {navigator.clipboard.writeText(qidURL)}}>Copy Link</button>
       </div>
     </Modal>
