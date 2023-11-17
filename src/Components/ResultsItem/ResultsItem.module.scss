@@ -136,7 +136,7 @@
   }
   .evidenceLink {
     font-size: $bodyTwoSize;
-    cursor: pointer;
+    cursor: default;
     .viewAll {
       font-size: $bodyTwoSize;
       font-weight: 700;
@@ -179,7 +179,7 @@
     }
   }
   .accordionPanel {
-    grid-column: 1/6;
+    grid-column: 1/7;
     &.hasDescription {
       min-height: 46px;
     }

@@ -400,3 +400,66 @@ export const getTypeFromPub = (publicationID) => {
     return "NCT";
   return "other";
 }
+
+/**
+ * Extracts and formats the evidence data from a given result object.
+ *
+ * This function parses through the evidence information within the result object, 
+ * extracting distinct sources, general sources, and formatting publication data.
+ * It handles cases where certain pieces of evidence may not be present and formats
+ * the publications into a consumable array of objects.
+ *
+ * @param {Object} result - The result object from which to extract evidence.
+ * @returns {Object} An evidenceObject containing arrays of distinctSources, sources,
+ *                   and a publications array populated with formatted evidence data.
+ *                   Returns an empty object if the input is invalid or lacks evidence.
+ */
+export const getEvidenceFromResult = (result) => {
+  let evidenceObject = {};
+  if(!result || !result.evidence)
+    return evidenceObject; 
+
+  evidenceObject.distinctSources = (result.evidence.distinctSources) ? result.evidence.distinctSources : [];
+  evidenceObject.sources = (result.evidence.sources) ? result.evidence.sources : [];
+  evidenceObject.publications = [];
+  for(const path of result.compressedPaths) {
+    for(const [i, subgraphItem] of Object.entries(path.path.subgraph)) {
+      if(i % 2 === 0)
+        continue;
+
+      let index = parseInt(i);
+      let subjectName = path.path.subgraph[index-1].name;
+      let predicateName = subgraphItem.predicates[0];
+      let objectName = path.path.subgraph[index + 1].name;
+      let edgeLabel = getFormattedEdgeLabel(subjectName, predicateName, objectName);
+      let knowledgeLevel = 'unknown';
+      for(const source of result.evidence.distinctSources) {
+        switch (source.knowledge_level) {
+          case 'trusted':
+            knowledgeLevel = 'trusted'
+            break;
+          case 'ml':
+            if(knowledgeLevel === 'unknown')
+              knowledgeLevel = 'ml';
+            break;
+          default:
+            break;
+        }
+      }
+
+      for(const pubID of subgraphItem.publications) {
+        let type = getTypeFromPub(pubID);
+        let url = getUrlByType(pubID, type);
+        let newPub = {
+          edges: [{label: edgeLabel}],
+          type: type,
+          url: url,
+          id: pubID,
+          knowledgeLevel: knowledgeLevel
+        }
+        evidenceObject.publications.push(newPub);
+      }
+    }
+  }
+  return evidenceObject;
+}

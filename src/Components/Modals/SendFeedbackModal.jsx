@@ -6,7 +6,7 @@ import TextInput from "../FormFields/TextInput";
 import FileInput from "../FormFields/FileInput";
 import Select from "../FormFields/Select";
 import { Fade } from "react-awesome-reveal";
-import Warning from '../../Icons/information.svg?react'
+import Warning from '../../Icons/information.svg?react';
 import { currentQueryResultsID } from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux';
 import { getDataFromQueryVar } from "../../Utilities/utilities";

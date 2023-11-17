@@ -11,13 +11,12 @@ import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';
 import { Link } from 'react-router-dom';
-import { cloneDeep } from 'lodash';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
-import { getFormattedEdgeLabel, getUrlByType, getTypeFromPub } from '../../Utilities/resultsFormattingFunctions';
+import { getEvidenceFromResult } from '../../Utilities/resultsFormattingFunctions';
 import { displayScore } from '../../Utilities/scoring';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
@@ -33,48 +32,13 @@ const sortTagsBySelected = (a, b, selected) => {
   return 0; 
 }
 
-const getCurrentEvidence = (result) => {
-  let evidenceObject = {};
-  if(!result || !result.evidence)
-    return evidenceObject; 
-
-  evidenceObject.distinctSources = (result.evidence.distinctSources) ? result.evidence.distinctSources : [];
-  evidenceObject.sources = (result.evidence.sources) ? result.evidence.sources : [];
-  evidenceObject.publications = [];
-  for(const path of result.compressedPaths) {
-    for(const [i, subgraphItem] of Object.entries(path.path.subgraph)) {
-      if(i % 2 === 0)
-        continue;
-
-      let index = parseInt(i);
-      let subjectName = path.path.subgraph[index-1].name;
-      let predicateName = subgraphItem.predicates[0];
-      let objectName = path.path.subgraph[index + 1].name;
-      let edgeLabel = getFormattedEdgeLabel(subjectName, predicateName, objectName);
-
-      for(const pubID of subgraphItem.publications) {
-        let type = getTypeFromPub(pubID);
-        let url = getUrlByType(pubID, type);
-        let newPub = {
-          edges: [{label: edgeLabel}],
-          type: type,
-          url: url,
-          id: pubID
-        }
-        evidenceObject.publications.push(newPub);
-      }
-    }
-  }
-  return evidenceObject;
-}
-
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, handleFilter, activeFilters,
   currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags,
   hasNotes, activateNotes, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, handleBookmarkError = ()=>{}}) => {
 
   const root = useSelector(currentRoot);
 
-  const currentEvidence = useMemo(() => getCurrentEvidence(item), [item]);
+  const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
   let icon = getIcon(item.type);
   let publicationCount = (currentEvidence.publications?.length) 
     ? currentEvidence.publications.filter((item)=> item.type === "PMID" || item.type === "PMC").length
@@ -130,39 +94,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     setIsExpanded(!isExpanded);
   }
 
-  const handleEdgeSpecificEvidence = (edgeGroup) => {
-    const filterEvidenceObjs = (objs, selectedEdge, container) => {
-      const selectedEdgeLabel = getFormattedEdgeLabel(selectedEdge.subject.name, selectedEdge.predicate, selectedEdge.object.name);
-      for (const obj of objs) {
-        let proceed = false;
-        if(Array.isArray(obj.edges) && obj.edges[0].label === selectedEdgeLabel) {
-          proceed = true;
-        } else if(obj.edges[selectedEdge.id] !== undefined) {
-          proceed = true;
-        }
-
-        if(proceed) {
-          const includedObj = cloneDeep(obj);
-          // includedObj.edges = {};
-          // includedObj.edges[selectedEdge.id] = obj.edges[selectedEdge.id];
-          container.push(includedObj);
-        }
-      }
-    }
-
-    let filteredEvidence = {
-      publications: [],
-      sources: []
-    };
-
-    let filteredPublications = filteredEvidence.publications;
-    let filteredSources = filteredEvidence.sources;
-    for (const edge of edgeGroup.edges) {
-      filterEvidenceObjs(currentEvidence.publications, edge, filteredPublications);
-      filterEvidenceObjs(currentEvidence.sources, edge, filteredSources);
-    }
-    // call activateEvidence with the filtered evidence
-    activateEvidence(filteredEvidence, item, edgeGroup, false);
+  const handleEdgeSpecificEvidence = (edgeGroup, path) => {
+    activateEvidence(currentEvidence, item, edgeGroup, path, false);
   }
 
   useEffect(() => {
@@ -315,13 +248,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span
           className={styles.evidenceLink}
-          onClick={(e)=>{
-            e.stopPropagation();
-            activateEvidence(currentEvidence, item, [], true);
-          }}
+          // onClick={(e)=>{
+          //   e.stopPropagation();
+          //   activateEvidence(currentEvidence, item, [], null, true);
+          // }}
           >
           <div>
-            <span className={styles.viewAll}>View All Evidence</span>
+            <span className={styles.viewAll}>Evidence</span>
           </div>
           <div>
             <span className={styles.info}>Publications ({publicationCount})</span>
@@ -416,7 +349,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           paths={formattedPaths}
           selectedPaths={selectedPaths}
           active={isExpanded}
-          handleEdgeSpecificEvidence={(edgeGroup)=> {handleEdgeSpecificEvidence(edgeGroup)}}
+          handleEdgeSpecificEvidence={(edgeGroup, path)=> {handleEdgeSpecificEvidence(edgeGroup, path)}}
+          handleActivateEvidence={(path)=>activateEvidence(currentEvidence, item, null, path, false)}
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>

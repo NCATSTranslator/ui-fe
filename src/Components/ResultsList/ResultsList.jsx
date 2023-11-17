@@ -85,7 +85,9 @@ const ResultsList = ({loading}) => {
   // Object, the currently selected item
   const [selectedItem, setSelectedItem] = useState({});
   // Array, edges represented in current evidence
-  const [selectedEdges, setSelectedEdges] = useState([]);
+  const [selectedEdge, setSelectedEdge] = useState(null);
+  // Obj, path represented in current evidence
+  const [selectedPath, setSelectedPath] = useState(null);
   // Array, evidence relating to the item last clicked
   const [currentEvidence, setCurrentEvidence] = useState([]);
   // Int, current page
@@ -485,11 +487,14 @@ const ResultsList = ({loading}) => {
     tagSetterMethod(countedTags);
   }
 
-  // Click handler for opening the evidence modal and populating the evidence
-  const activateEvidence = (evidence, item, edgeGroup, isAll) => {
+  /**
+   * Activates sets the evidence and opens the evidence modal. 
+   */
+  const activateEvidence = (evidence, item, edgeGroup, path, isAll) => {
     setIsAllEvidence(isAll);
     setSelectedItem(item);
-    setSelectedEdges(edgeGroup);
+    setSelectedEdge(edgeGroup);
+    setSelectedPath(path);
     setCurrentEvidence(evidence);
     setEvidenceOpen(true);
   }
@@ -697,11 +702,12 @@ const ResultsList = ({loading}) => {
         isOpen={evidenceOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
         className="evidence-modal"
-        currentEvidence={currentEvidence}
+        rawEvidence={currentEvidence}
         item={selectedItem}
         results={rawResults.current}
         isAll={isAllEvidence}
-        edgeGroup={selectedEdges}
+        edgeGroup={selectedEdge}
+        path={selectedPath}
       />
       <div className={styles.resultsList}>
         <Query 
@@ -823,7 +829,7 @@ const ResultsList = ({loading}) => {
                             key={item.id}
                             type={initPresetTypeObject}
                             item={item}
-                            activateEvidence={(evidence, item, edgeGroup, isAll)=>activateEvidence(evidence, item, edgeGroup, isAll)}
+                            activateEvidence={(evidence, item, edgeGroup, path, isAll)=>activateEvidence(evidence, item, edgeGroup, path, isAll)}
                             activateNotes={activateNotes}
                             activeStringFilters={activeStringFilters}
                             zoomKeyDown={zoomKeyDown}

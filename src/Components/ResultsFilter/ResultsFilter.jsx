@@ -222,9 +222,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
 
   const displayFacets = (type) => {
     return (
-      <div className={`${styles.section} ${styles[type]}`}>
+      <div className={`${styles.section} ${styles[type]} ${type === 'role' ? 'scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
-          (type === "role") 
+          (type === 'role') 
           ?
             Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).map((tag, j) => {
               return tagDisplay(tag, type, tagObject, setTagObject, availableTags);

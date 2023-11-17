@@ -2,17 +2,22 @@
 
 .tabListItem {
   margin: 0 0 5px;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   font-weight: 700;
-  .heading {
-    padding: $xs $l;
-  }
+  padding: $xs $l;
+  position: relative;
   .underline {
     margin-top: 8px;
     height: 1px;
     background-color: $purpleOne50;
     transition: background-color .5s ease;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
   }
   &.active {
     .underline {
