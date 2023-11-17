@@ -1,6 +1,7 @@
 import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from './sortingFunctions';
 import { cloneDeep } from 'lodash';
+import { capitalizeAllWords } from "./utilities";
 
 export const handleEvidenceSort = (sortName, pubmedEvidence, handlePageClick, sortingStateSetter, setPubmedEvidence) => {
   let sortedPubmedEvidence = cloneDeep(pubmedEvidence);
@@ -61,5 +62,41 @@ export const checkForEdgeMatch = (edgeOne, edgeTwo) => {
     edgeOne.edges[0].object.id !== edgeTwo.edges[0].object.id) 
     ? false
     : true;
-  
+}
+
+export const updateSource = (element, data) => {
+  if(!element.source)
+    element.source = capitalizeAllWords(data[element.id].journal_name);
+}
+
+export const updateTitle = (element, data) => {
+  if(!element.title)
+    element.title = capitalizeAllWords(data[element.id].article_title.replace('[', '').replace(']',''));
+}
+
+export const updateSnippet = (element, data) => {
+  if(!element.snippet)
+    element.snippet = data[element.id].abstract;
+}
+export const updatePubdate = (element, data) => {
+  if(!element.pubdate) {
+    let year = (data[element.id].pub_year) ? data[element.id].pub_year: 0;
+    element.pubdate = year;
+  }
+}
+
+export const getKnowledgeLevelString = (knowledgeLevel) => {
+  let knowledgeLevelString;
+  switch (knowledgeLevel) {
+    case 'trusted':
+      knowledgeLevelString = 'Curated'
+      break;
+    case 'ml':
+      knowledgeLevelString = 'Text-Mined'
+      break;
+    default:
+      knowledgeLevelString = 'Unknown';
+      break;
+  }
+  return knowledgeLevelString;
 }

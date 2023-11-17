@@ -4,12 +4,12 @@ import LoadingBar from "../LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import Select from '../FormFields/Select';
 import ReactPaginate from "react-paginate";
-import { handleEvidenceSort } from "../../Utilities/evidenceModalFunctions";
+import { handleEvidenceSort, updatePubdate, updateSnippet, updateSource, 
+  updateTitle, getKnowledgeLevelString  } from "../../Utilities/evidenceModalFunctions";
 import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
-import { capitalizeAllWords } from "../../Utilities/utilities";
 import Info from '../../Icons/information.svg?react';
 
 const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvidence, item, prefs = null, isOpen }) => {
@@ -61,16 +61,10 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
     let newPubmedEvidence = cloneDeep(pubmedEvidence)
     for(const element of newPubmedEvidence) {
       if(data[element.id] !== undefined) {
-        if(!element.source)
-          element.source = capitalizeAllWords(data[element.id].journal_name);
-        if(!element.title)
-          element.title = capitalizeAllWords(data[element.id].article_title.replace('[', '').replace(']',''));
-        if(!element.snippet)
-          element.snippet = data[element.id].abstract;
-        if(!element.pubdate) {
-          let year = (data[element.id].pub_year) ? data[element.id].pub_year: 0;
-          element.pubdate = year;
-        }
+        updateSource(element, data);
+        updateTitle(element, data);
+        updateSnippet(element, data);
+        updatePubdate(element, data);
       }
       element.updated = true;
     }
@@ -274,18 +268,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
               :
                 displayedPubmedEvidence.map((pub, i)=> {
                   const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
-                  let knowledgeLevelString;
-                    switch (knowledgeLevel) {
-                      case 'trusted':
-                        knowledgeLevelString = 'Curated'
-                        break;
-                      case 'ml':
-                        knowledgeLevelString = 'Text-Mined'
-                        break;
-                      default:
-                        knowledgeLevelString = 'Unknown';
-                        break;
-                    }
+                  let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
                   return (
                     <div className={`table-item`} key={i}>
                       <span className={`table-cell ${styles.tableCell} ${styles.knowledgeLevel}`}>
