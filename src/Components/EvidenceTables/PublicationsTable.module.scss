@@ -132,11 +132,11 @@
     margin: 0;
   }
 }
-.knowledgeType {
+.knowledgeLevel {
   display: flex;
   align-items: center;
 }
-.knowledgeTypeLabel {
+.knowledgeLevelLabel {
   color: $darkGray;
   font-size: 14px;
   font-weight: 700;
@@ -150,7 +150,7 @@
     margin-left: 4px;
   }
 }
-.knowledgeTypeButton {
+.knowledgeLevelButton {
   border-radius: 8px;
   background-color: $white;
   border: 1px solid $borderGray;
