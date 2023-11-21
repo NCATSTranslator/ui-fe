@@ -85,7 +85,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
         publications: [],
         sources: []
       };
-    
       let filteredPublications = filteredEvidence.publications;
       let filteredSources = filteredEvidence.sources;
 
