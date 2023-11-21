@@ -9,6 +9,7 @@ import { cloneDeep } from 'lodash';
 const Predicate = ({pathObject, selected, activeStringFilters, uid, parentClass = '', handleEdgeClick, inModal = false}) => {
 
   pathObject.predicate = pathObject.predicates[0]; 
+  const pubCount = Object.values(pathObject.publications).reduce((sum, arr) => sum + arr.length, 0);
   return (
     <span 
       className={`${selected ? styles.selected : ''} ${parentClass}`} 
@@ -20,9 +21,9 @@ const Predicate = ({pathObject, selected, activeStringFilters, uid, parentClass 
         data-tooltip-id={`${pathObject.predicate}${uid}`}
         >
         {
-          pathObject.publications?.length > 1
+          pubCount > 1
           ? <ResearchMultiple />
-          : (pathObject.publications?.length > 0 || pathObject.provenance?.length > 0) 
+          : (pubCount > 0 || pathObject.provenance?.length > 0) 
             ? <ResearchSingle /> 
             : '' 
         }
