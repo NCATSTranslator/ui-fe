@@ -14,6 +14,10 @@ import Info from '../../Icons/information.svg?react';
 
 const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvidence, item, prefs = null, isOpen }) => {
 
+  const availableKnowledgeTypes = useMemo(() => {
+    return new Set(pubmedEvidence.map(pub => pub.knowledgeLevel));
+  }, [pubmedEvidence]);  
+
   const prevSelectedEdgeTrigger = useRef(selectedEdgeTrigger);
   const [itemsPerPage, setItemsPerPage] = useState(parseInt(prefs?.evidence_per_screen?.pref_value) || 5);
   const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
@@ -211,11 +215,13 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
             <button 
               className={`${styles.knowledgeTypeButton} ${knowledgeLevelFilter === 'trusted' ? styles.selected : ''}`} 
               onClick={() => setKnowledgeLevelFilter('trusted')}
-              >Curated
+              disabled={!availableKnowledgeTypes.has('trusted')}>
+              Curated
             </button>
             <button 
               className={`${styles.knowledgeTypeButton} ${knowledgeLevelFilter === 'ml' ? styles.selected : ''}`} 
-              onClick={() => setKnowledgeLevelFilter('ml')}>
+              onClick={() => setKnowledgeLevelFilter('ml')}
+              disabled={!availableKnowledgeTypes.has('ml')}>
               Text-Mined
             </button>
           </div>
@@ -271,7 +277,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
                 displayedPubmedEvidence.map((pub, i)=> {
                   const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
                   let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
-                  console.log(pub);
                   return (
                     <tr className={`table-item`} key={i}>
                       <td className={`table-cell ${styles.tableCell} ${styles.knowledgeLevel}`}>

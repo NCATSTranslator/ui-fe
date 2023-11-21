@@ -9,21 +9,32 @@ import { score } from "../Utilities/scoring";
  * @returns {Object} The formatted evidence object containing publications, sources, distinct sources, and length.
 */
 const getFormattedEvidence = (paths, results) => {
-  const formatEvidenceObjs = (objs, getId, item, constructor, container) => {
-    for (const obj of objs) {
-      const id = getId(obj);
-      let evidenceObj = container[id];
-      if (evidenceObj === undefined) {
-        evidenceObj = constructor(obj);
-        evidenceObj.edges = {};
-        container[id] = evidenceObj;
-      }
-
-      const eid = item.edges[0].id;
-      evidenceObj.edges[eid] = {
-        label : `${item.edges[0].subject.name}|${item.edges[0].predicate}|${item.edges[0].object.name}`
-      };
+  const formatObj = (obj, getId, item, constructor, container) => {
+    const id = getId(obj);
+    let evidenceObj = container[id];
+    if (evidenceObj === undefined) {
+      evidenceObj = constructor(obj);
+      evidenceObj.edges = {};
+      container[id] = evidenceObj;
     }
+
+    const eid = item.edges[0].id;
+    evidenceObj.edges[eid] = {
+      label : `${item.edges[0].subject.name}|${item.edges[0].predicate}|${item.edges[0].object.name}`
+    };
+  }
+
+  const formatEvidenceObjs = (objs, getId, item, constructor, container) => {
+    Object.keys(objs).forEach(key => {
+      if(!Array.isArray(objs[key])) {
+        formatObj(objs[key], getId, item, constructor, container)
+        return;
+      }
+      
+      for(const obj of objs[key]) {
+        formatObj(obj, getId, item, constructor, container)
+      }
+    })
   };
 
   const formatPublications = (publications, item, container) => {
@@ -364,7 +375,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     }
     newSummarizedResults.push(formattedItem);
   }
-
+  console.log(newSummarizedResults);
   return newSummarizedResults;
 }
 
@@ -432,33 +443,21 @@ export const getEvidenceFromResult = (result) => {
       let predicateName = subgraphItem.predicates[0];
       let objectName = path.path.subgraph[index + 1].name;
       let edgeLabel = getFormattedEdgeLabel(subjectName, predicateName, objectName);
-      let knowledgeLevel = 'unknown';
-      for(const source of result.evidence.distinctSources) {
-        switch (source.knowledge_level) {
-          case 'trusted':
-            knowledgeLevel = 'trusted'
-            break;
-          case 'ml':
-            if(knowledgeLevel === 'unknown')
-              knowledgeLevel = 'ml';
-            break;
-          default:
-            break;
-        }
-      }
 
-      for(const pubID of subgraphItem.publications) {
-        let type = getTypeFromPub(pubID);
-        let url = getUrlByType(pubID, type);
-        let newPub = {
-          edges: [{label: edgeLabel}],
-          type: type,
-          url: url,
-          id: pubID,
-          knowledgeLevel: knowledgeLevel
+      Object.keys(subgraphItem.publications).forEach(key => {
+        for(const pubID of subgraphItem.publications[key]) {
+          let type = getTypeFromPub(pubID);
+          let url = getUrlByType(pubID, type);
+          let newPub = {
+            edges: [{label: edgeLabel}],
+            type: type,
+            url: url,
+            id: pubID,
+            knowledgeLevel: key
+          }
+          evidenceObject.publications.push(newPub);
         }
-        evidenceObject.publications.push(newPub);
-      }
+      })
     }
   }
   return evidenceObject;
