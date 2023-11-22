@@ -11,6 +11,7 @@ import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 import Info from '../../Icons/information.svg?react';
+import Tooltip from '../Tooltip/Tooltip';
 
 const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvidence, item, prefs = null, isOpen }) => {
 
@@ -204,8 +205,11 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
             ? <p className={styles.evidenceCount}>Showing {itemOffset + 1}-{endOffset} of {filteredEvidence.length} {filteredEvidence.length !== pubmedEvidence.length && `(${pubmedEvidence.length}) `}Publications</p>
             : <p className={styles.evidenceCount}>Showing 0-0 of 0 ({pubmedEvidence.length}) Publications</p>
         }
-        <div className={styles.knowledgeLevel}>
-          <p className={styles.knowledgeLevelabel}>Knowledge Level <Info/></p>
+        <div className={styles.knowledgeLevelOptions}>
+          <p className={styles.knowledgeLevelLabel}>Knowledge Level <Info data-tooltip-id='knowledge-level-tooltip' /></p>
+          <Tooltip id='knowledge-level-tooltip'>
+            <span className={styles.knowledgeLevelTooltip}>Denotes the type of reasoning used to attribute a given publication to the selected relationship.</span>
+          </Tooltip>
           <div>
             <button 
               className={`${styles.knowledgeLevelButton} ${knowledgeLevelFilter === 'all' ? styles.selected : ''}`} 
