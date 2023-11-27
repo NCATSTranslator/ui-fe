@@ -114,6 +114,12 @@ button, .button {
   &:hover {
     box-shadow: $dropShadowHover;
   }
+  &:disabled  {
+    box-shadow: none;
+    &:hover {
+      box-shadow: none;
+    }
+  }
 }
 
 .link, a {
@@ -248,7 +254,6 @@ img {
   .url {
     font-size: 12px;
     font-weight: 700;
-    text-decoration: none;
     color: $darkGray;
   }
 }
