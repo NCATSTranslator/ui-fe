@@ -375,7 +375,6 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     }
     newSummarizedResults.push(formattedItem);
   }
-  console.log(newSummarizedResults);
   return newSummarizedResults;
 }
 
