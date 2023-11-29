@@ -28,7 +28,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
       return pubmedEvidence;
     return pubmedEvidence.filter(evidence => evidence.knowledgeLevel === knowledgeLevelFilter);
   }, [pubmedEvidence, knowledgeLevelFilter]);
-  const [pageCount, setPageCount] = useState(0);
+  const [pageCount, setPageCount] = useState(1);
   const [itemOffset, setItemOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const endOffset = (itemOffset + itemsPerPage > filteredEvidence.length)

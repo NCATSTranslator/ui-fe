@@ -7,7 +7,7 @@ import ExternalLink from '../../Icons/external-link.svg?react';
 import { capitalizeAllWords } from "../../Utilities/utilities";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
-import { checkForEdgeMatch, handleEvidenceSort } from "../../Utilities/evidenceModalFunctions";
+import { checkForEdgeMatch, handleEvidenceSort, filterEvidenceObjs } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
@@ -53,37 +53,14 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
     }
   })
 
-  // filter publications/sources based on a selectedEdge
-  const filterEvidenceObjs = (objs, selectedEdge, container) => {
-    const selectedEdgeLabel = getFormattedEdgeLabel(selectedEdge.subject.name, selectedEdge.predicate, selectedEdge.object.name);
-    for (const obj of objs) {
-      let proceed = false;
-      if(Array.isArray(obj.edges) && obj.edges[0].label === selectedEdgeLabel) {
-        proceed = true;
-      } else if(obj.edges[selectedEdge.id] !== undefined) {
-        proceed = true;
-      }
-
-      if(proceed) {
-        const includedObj = cloneDeep(obj);
-        let filteredEdges = {};
-        filteredEdges[selectedEdge.id] = (obj.edges[selectedEdge.id] !== undefined)
-          ? includedObj.edges[selectedEdge.id]
-          : includedObj.edges[0];
-        includedObj.edges = filteredEdges;
-
-        container.push(includedObj);
-      }
-    }
-  }
   // filters evidence based on provided selectedEdge (if any, otherwise returns full evidence), 
   // called in useEffect tracking selectedEdge (to accommodate both in-component edge selection and edgeGroup prop change)
   const handleSelectedEdge = (selEdge, rawEvidence) => {
     let evidenceToDistribute;
     if(!Array.isArray(selEdge) && typeof selEdge === 'object' && selEdge !== null) {
       let filteredEvidence = {
-        publications: [],
-        sources: []
+        publications: new Set(),
+        sources: new Set()
       };
       let filteredPublications = filteredEvidence.publications;
       let filteredSources = filteredEvidence.sources;
@@ -107,13 +84,13 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
 
   const distributeEvidence = (evidence) => {
     if(!Array.isArray(evidence)) {
-      setPubmedEvidence(cloneDeep(evidence.publications.filter(item => item.type === 'PMID' || item.type === 'PMC')));
-      clinicalTrials.current = cloneDeep(evidence.publications.filter(item => item.type === 'NCT'));
-      miscEvidence.current = cloneDeep(evidence.publications.filter(item => item.type === 'other'))
+      setPubmedEvidence(cloneDeep([...evidence.publications].filter(item => item.type === 'PMID' || item.type === 'PMC')));
+      clinicalTrials.current = cloneDeep([...evidence.publications].filter(item => item.type === 'NCT'));
+      miscEvidence.current = cloneDeep([...evidence.publications].filter(item => item.type === 'other'))
         .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
-      let displayedSources = evidence.sources; 
+      let displayedSources = [...evidence.sources]; 
       if (isAll) {
-        displayedSources = evidence.distinctSources;
+        displayedSources = [...evidence.distinctSources];
       }
 
       displayedSources.sort(compareByKeyLexographic('name'));
