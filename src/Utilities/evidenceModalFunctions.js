@@ -2,6 +2,7 @@ import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from './sortingFunctions';
 import { cloneDeep } from 'lodash';
 import { capitalizeAllWords } from "./utilities";
+import { getFormattedEdgeLabel } from './resultsFormattingFunctions';
 
 export const handleEvidenceSort = (sortName, pubmedEvidence, handlePageClick, sortingStateSetter, setPubmedEvidence) => {
   let sortedPubmedEvidence = cloneDeep(pubmedEvidence);
@@ -99,4 +100,34 @@ export const getKnowledgeLevelString = (knowledgeLevel) => {
       break;
   }
   return knowledgeLevelString;
+}
+
+// checks if an object with a matching ID already exists in a set before adding it
+const addEvidenceObjectToSet = (obj, container) => {
+  if(![...container].some(existingObj => existingObj.id === obj.id))
+    container.add(obj);
+}
+
+// filter publications/sources based on a selectedEdge
+export const filterEvidenceObjs = (objs, selectedEdge, container) => {
+  const selectedEdgeLabel = getFormattedEdgeLabel(selectedEdge.subject.name, selectedEdge.predicate, selectedEdge.object.name);
+  for (const obj of objs) {
+    let proceed = false;
+    if(Array.isArray(obj.edges) && obj.edges[0].label === selectedEdgeLabel) {
+      proceed = true;
+    } else if(obj.edges[selectedEdge.id] !== undefined) {
+      proceed = true;
+    }
+
+    if(proceed) {
+      const includedObj = cloneDeep(obj);
+      let filteredEdges = {};
+      filteredEdges[selectedEdge.id] = (obj.edges[selectedEdge.id] !== undefined)
+        ? includedObj.edges[selectedEdge.id]
+        : includedObj.edges[0];
+      includedObj.edges = filteredEdges;
+
+      addEvidenceObjectToSet(includedObj, container);
+    }
+  }
 }
