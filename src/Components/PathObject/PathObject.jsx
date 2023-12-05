@@ -15,8 +15,8 @@ const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTar
     typeString = formatBiolinkEntity(pathObject.type)
   }
   const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
-
-  const uid = `${id}`;
+  const type = (pathObject?.type) ? pathObject.type.replace("biolink:", ""): '';
+  const uid = `${type}${id}`;
 
   return (
     <>
