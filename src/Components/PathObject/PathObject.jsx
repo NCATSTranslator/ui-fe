@@ -18,8 +18,6 @@ const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTar
   const type = (pathObject?.type) ? pathObject.type.replace("biolink:", ""): '';
   const uid = `${type}${id}`;
 
-  console.log(pathObject);
-
   return (
     <>
       {
