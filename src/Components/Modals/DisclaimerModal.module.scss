@@ -39,8 +39,12 @@
   width: 300px;
   text-align: center;
 }
-.body p {
+.body p, .body a {
   font-size: 14px;
+}
+
+.body a {
+  text-decoration: underline;
 }
 
 .heading {
