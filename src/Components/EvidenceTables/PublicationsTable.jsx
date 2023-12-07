@@ -9,7 +9,7 @@ import { handleEvidenceSort, updatePubdate, updateSnippet, updateSource,
 import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery } from "react-query";
 import Info from '../../Icons/information.svg?react';
 import Tooltip from '../Tooltip/Tooltip';
 
@@ -43,7 +43,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
   const [processedEvidenceIDs, setProcessedEvidenceIDs] = useState([])
   const amountOfIDsProcessed = useRef(0);
   const evidenceToUpdate = useRef(null);
-  const pubMedMetadataQueryClient = useQueryClient();
 
   // Handles direct page click
   const handlePageClick = useCallback((event) => {
@@ -62,7 +61,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
     evidenceToUpdate.current = null;
     fetchedPubmedData.current = false;
     isFetchingPubmedData.current = false;
-    pubMedMetadataQueryClient.cancelQueries('pubmedMetadata');
   }
 
   const insertAdditionalPubmedData = (data, pubmedEvidence) => {
@@ -175,10 +173,10 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
       setCurrentPage(0);
       setItemOffset(0);
       setSortingState({ title: null, source: null, date: true });
+      setKnowledgeLevelFilter('all')
       amountOfIDsProcessed.current = 0;
       evidenceToUpdate.current = null;
       fetchedPubmedData.current = false;
-      pubMedMetadataQueryClient.cancelQueries('pubmedMetadata');
       setupPubmedDataFetch(pubmedEvidence, setProcessedEvidenceIDs);
     }
     if(prevSelectedEdgeTrigger.current !== selectedEdgeTrigger) {
