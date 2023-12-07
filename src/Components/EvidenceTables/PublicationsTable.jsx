@@ -175,6 +175,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
       setCurrentPage(0);
       setItemOffset(0);
       setSortingState({ title: null, source: null, date: true });
+      setKnowledgeLevelFilter('all')
       amountOfIDsProcessed.current = 0;
       evidenceToUpdate.current = null;
       fetchedPubmedData.current = false;
