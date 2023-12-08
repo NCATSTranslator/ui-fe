@@ -335,12 +335,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                   <div className={styles.showingResultsContainer}>
                     <div className={styles.showingResultsTop}>
                       <h4 className={styles.showingResultsText}>Showing results for:</h4>
-                      {
-                      queryTimestamp && isValidDate(queryTimestamp) &&
-                        <div className={styles.timestamp}>
-                          <p><span>Submitted:</span> {getFormattedDate(queryTimestamp)}</p>
-                        </div>
-                      }
+
                     </div>
                       <h5 className={styles.subHeading}>{queryItem.type.label}: 
                         {(queryItem?.node?.id && 
@@ -456,7 +451,14 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 }
               </>
             }
-            {queryItem?.node?.id &&
+            <div className={styles.timestamp}>
+              {
+                queryTimestamp && isValidDate(queryTimestamp) &&
+                <p>Submitted {getFormattedDate(queryTimestamp)}</p>
+              }
+            </div>
+            {
+              queryItem?.node?.id &&
               <p className={styles.needHelp}>
                 {getEntityLink(queryItem.node.id, styles.monarchLink, queryItem.type)}
               </p>
