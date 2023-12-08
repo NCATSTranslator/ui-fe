@@ -226,30 +226,20 @@ export const customDebounce = (method, delay) => {
   }, delay);
 }
 
+export const isValidDate = (date) => {
+  return (new Date(date) !== "Invalid Date") && !isNaN(new Date(date));
+}
+
 export const getFormattedDate = (date) => {
-  if (!(date instanceof Date)) {
-      throw new Error('Input should be a Date object');
-  }
+  if(!isValidDate(date))
+    return false;
 
-  const monthNames = ["January", "February", "March", "April", "May", "June", 
-    "July", "August", "September", "October", "November", "December"];
-  const options = {
-    timeZoneName: 'short'
-  };
+  const dateFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+  const timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, timeZoneName: 'short' };
+  const formattedDate = new Intl.DateTimeFormat('en-US', dateFormatOptions).format(date);
+  const formattedTime = new Intl.DateTimeFormat('en-US', timeFormatOptions).format(date);
 
-  const formatter = new Intl.DateTimeFormat('en-US', options);
-  const parts = formatter.formatToParts(date);
-
-  const timeZone = parts.find(part => part.type === 'timeZoneName').value;
-
-  // Get month name, day, year, hours, minutes
-  const month = monthNames[date.getMonth()];
-  const day = date.getDate();
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-
-  return `${month} ${day}, ${year} (${hours}:${minutes} ${timeZone})`;
+  return `${formattedDate} (${formattedTime})`;
 }
 
 export const getGeneratedSendFeedbackLink = (openDefault = true, root) => {
