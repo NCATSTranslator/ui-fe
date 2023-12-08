@@ -6,11 +6,11 @@ import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import { incrementHistory } from "../../Redux/historySlice";
 import { currentConfig, currentRoot } from "../../Redux/rootSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
-import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
+import { currentQueryTimestamp, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
 import { filterAndSortExamples, getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
-import { getEntityLink, generateEntityLink, getLastItemInArray } from "../../Utilities/utilities";
+import { getEntityLink, generateEntityLink, getLastItemInArray, getFormattedDate, isValidDate } from "../../Utilities/utilities";
 import Question from '../../Icons/Navigation/Question.svg?react';
 import Drug from '../../Icons/drug.svg?react';
 import Disease from '../../Icons/disease2.svg?react';
@@ -35,6 +35,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const { pathname } = useLocation();
   const root = useSelector(currentRoot);
   const config = useSelector(currentConfig);
+  const queryTimestamp = useSelector(currentQueryTimestamp);
 
   loading = (loading) ? true : false;
 
@@ -332,8 +333,15 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     }
                   </div>
                   <div className={styles.showingResultsContainer}>
-                    <div>
+                    <div className={styles.showingResultsTop}>
                       <h4 className={styles.showingResultsText}>Showing results for:</h4>
+                      {
+                      queryTimestamp && isValidDate(queryTimestamp) &&
+                        <div className={styles.timestamp}>
+                          <p><span>Submitted:</span> {getFormattedDate(queryTimestamp)}</p>
+                        </div>
+                      }
+                    </div>
                       <h5 className={styles.subHeading}>{queryItem.type.label}: 
                         {(queryItem?.node?.id && 
                           generateEntityLink(queryItem.node.id, styles.searchedTerm, ()=>queryItem.node.label, false)) 
@@ -343,7 +351,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                             <span className={styles.searchedTerm}>{queryItem.node && queryItem.node.label}</span>
                         }
                       </h5>
-                    </div>
                     <div className={styles.nodeDescriptionContainer}>
                       {
                         nodeDescription && 

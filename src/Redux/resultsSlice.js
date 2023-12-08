@@ -13,7 +13,8 @@ export const resultsSlice = createSlice({
   name: 'results',
   initialState: {
     currentResults: persistedResults,
-    currentQueryResultsID: persistedResultsID
+    currentQueryResultsID: persistedResultsID, 
+    currentQueryTimestamp: null
   }, 
   reducers: {
     setCurrentQueryResultsID: (state, action) => {
@@ -21,13 +22,17 @@ export const resultsSlice = createSlice({
     },
     setCurrentResults: (state, action) => {
       state.currentResults = action.payload;
+    },
+    setCurrentQueryTimestamp: (state, action) => {
+      state.currentQueryTimestamp = action.payload;
     }
   }
 })
 
-export const { setCurrentQueryResultsID, setCurrentResults } = resultsSlice.actions
+export const { setCurrentQueryResultsID, setCurrentResults, setCurrentQueryTimestamp } = resultsSlice.actions
 
 export const currentResults = state => state.results.currentResults;
 export const currentQueryResultsID = state => state.results.currentQueryResultsID;
+export const currentQueryTimestamp = state => state.results.currentQueryTimestamp;
 
 export default resultsSlice.reducer;

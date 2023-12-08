@@ -34,12 +34,12 @@ const Header = ({children}) => {
             {
               root === 'main' &&
               <>
-                <Link to={`/${root}/workspace`} className={styles.workspaceLink}><Workspace/><span>Workspace</span></Link>
-                <Link to={`/${root}/history`}><History/><span>Search History</span></Link>
+                <Link to={`/${root}/workspace`} className={styles.workspaceLink}><Workspace/><span className={styles.linkSpan}>Workspace</span></Link>
+                <Link to={`/${root}/history`}><History/><span className={styles.linkSpan}>Search History</span></Link>
               </>
             }
-            <Link to={`${getGeneratedSendFeedbackLink(openFeedbackModal, root)}`} reloadDocument target={'_blank'}><Feedback/><span>Send Feedback</span></Link>
-            <Link to={`/${root}/help`} className={styles.helpLink} rel="noreferrer" target={'_blank'} ><Question/><span>Help</span></Link>
+            <Link to={`${getGeneratedSendFeedbackLink(openFeedbackModal, root)}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
+            <Link to={`/${root}/help`} className={styles.helpLink} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
             {
               root === 'demo'
               ? 
