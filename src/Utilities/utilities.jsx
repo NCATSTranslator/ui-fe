@@ -234,7 +234,7 @@ export const getFormattedDate = (date) => {
   if(!isValidDate(date))
     return false;
 
-  const dateFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+  const dateFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
   const timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, timeZoneName: 'short' };
   const formattedDate = new Intl.DateTimeFormat('en-US', dateFormatOptions).format(date);
   const formattedTime = new Intl.DateTimeFormat('en-US', timeFormatOptions).format(date);
