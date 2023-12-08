@@ -14,8 +14,8 @@ import StickyToolbar from "../StickyToolbar/StickyToolbar";
 import ReactPaginate from 'react-paginate';
 import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
-import { useSelector } from 'react-redux';
-import { currentQueryResultsID, currentResults }from "../../Redux/resultsSlice";
+import { useSelector, useDispatch } from 'react-redux';
+import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "../../Redux/resultsSlice";
 import { currentPrefs, currentRoot }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
@@ -38,6 +38,7 @@ const ResultsList = ({loading}) => {
 
   const root = useSelector(currentRoot);
   const prefs = useSelector(currentPrefs);
+  const dispatch = useDispatch();
   let blocker = useBlocker(true);
 
   // URL search params
@@ -293,8 +294,9 @@ const ResultsList = ({loading}) => {
       .then(data => {
         // increment the number of status checks
         numberOfStatusChecks.current++;
-        console.log("ARA status:",data);
-
+        console.log("ARA status:", data);
+        dispatch(setCurrentQueryTimestamp(new Date(data.data.timestamp)));
+        
         let fetchResults = false;
 
         if(data.data.aras.length > returnedARAs.aras.length) {

@@ -303,3 +303,20 @@ button .dualArrows {
     opacity: 1;
   }
 }
+.timestamp {
+  span, p {
+    font-size: 14px;
+    font-style: italic;
+  }
+  span {
+    font-weight: 700;
+  }
+  p {
+    margin: 5px 0 0 0;
+  }
+}
+.showingResultsTop {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 10px;
+}
