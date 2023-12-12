@@ -4,7 +4,7 @@ import LoadingBar from "../LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import Select from '../FormFields/Select';
 import ReactPaginate from "react-paginate";
-import { handleEvidenceSort, updatePubdate, updateSnippet, updateSource, 
+import { handleEvidenceSort, updatePubdate, updateSnippet, updateJournal, 
   updateTitle, getKnowledgeLevelString  } from "../../Utilities/evidenceModalFunctions";
 import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
@@ -67,7 +67,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
     let newPubmedEvidence = cloneDeep(pubmedEvidence)
     for(const element of newPubmedEvidence) {
       if(data[element.id] !== undefined) {
-        updateSource(element, data);
+        updateJournal(element, data);
         updateTitle(element, data);
         updateSnippet(element, data);
         updatePubdate(element, data);
@@ -284,20 +284,24 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
               displayedPubmedEvidence.length === 0
               ? <p className={styles.noPubs}>No publications available.</p>
               :
-                displayedPubmedEvidence.map((pub, i)=> {
+                displayedPubmedEvidence.map((pub)=> {
                   const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
                   let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
                   return (
-                    <tr className={`table-item`} key={i}>
+                    <tr className={`table-item`} key={pub.id}>
                       <td className={`table-cell ${styles.tableCell} ${styles.knowledgeLevel}`}>
-                        {knowledgeLevelString}
+                        <span className={styles.knowledgeLevelSpan}>{knowledgeLevelString}</span>
+                        {
+                          pub.source && 
+                          <span>({pub.source})</span>
+                        }
                       </td>
                       <td className={`table-cell ${styles.tableCell} ${styles.pubdate} pubdate`}>
                         {pub.pubdate && (pub.pubdate === 0 ) ? '' : pub.pubdate }
                       </td>
                       <td className={`table-cell ${styles.tableCell} ${styles.source} source`}>
                         <span>
-                          {pub.source && pub.source }
+                          {pub.journal && pub.journal }
                         </span>
                       </td>
                       <td className={`table-cell ${styles.tableCell} ${styles.title} title`} >

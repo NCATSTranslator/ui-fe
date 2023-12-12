@@ -49,7 +49,7 @@ const getFormattedEvidence = (paths, results) => {
           publication.pubdate = formattedDate[0];
         }
         publication.id = id;
-        publication.source = '';
+        publication.journal = '';
         publication.title = '';
         return publication;
       },
@@ -76,7 +76,7 @@ const getFormattedEvidence = (paths, results) => {
     }
   }
 
-  const publications = Object.values(formattedPublications);
+  const publications = formattedPublications;
   const sources = Object.values(formattedSources);
   const distinctSources = {};
   sources.forEach((src) => {
@@ -411,6 +411,19 @@ export const getTypeFromPub = (publicationID) => {
   return "other";
 }
 
+export const formatPublicationSourceName = (sourceName) => {
+  let newSourceName = sourceName;
+  switch (sourceName.toLowerCase()) {
+    case "semantic medline database":
+      newSourceName = "SemMedDB"
+      break;
+  
+    default:
+      break;
+  }
+  return newSourceName;
+}
+
 /**
  * Extracts and formats the evidence data from a given result object.
  *
@@ -432,29 +445,27 @@ export const getEvidenceFromResult = (result) => {
   evidenceObject.distinctSources = (result.evidence.distinctSources) ? result.evidence.distinctSources : [];
   evidenceObject.sources = (result.evidence.sources) ? result.evidence.sources : [];
   evidenceObject.publications = [];
+  
+  const pubIds = new Set();
+  const addItemToPublications = (item, items, arr) => {
+    if (!items.has(item.id)) {
+        items.add(item.id);
+        arr.push(item);
+    }
+  }
+
   for(const path of result.compressedPaths) {
     for(const [i, subgraphItem] of Object.entries(path.path.subgraph)) {
       if(i % 2 === 0)
         continue;
-
-      let index = parseInt(i);
-      let subjectName = path.path.subgraph[index-1].name;
-      let predicateName = subgraphItem.predicates[0];
-      let objectName = path.path.subgraph[index + 1].name;
-      let edgeLabel = getFormattedEdgeLabel(subjectName, predicateName, objectName);
-
       Object.keys(subgraphItem.publications).forEach(key => {
         for(const pubID of subgraphItem.publications[key]) {
+          let newPub = result.evidence.publications[pubID];
+          newPub.knowledgeLevel = key;
           let type = getTypeFromPub(pubID);
-          let url = getUrlByType(pubID, type);
-          let newPub = {
-            edges: [{label: edgeLabel}],
-            type: type,
-            url: url,
-            id: pubID,
-            knowledgeLevel: key
-          }
-          evidenceObject.publications.push(newPub);
+          newPub.url = getUrlByType(pubID, type);
+          newPub.source = formatPublicationSourceName(newPub.source);
+          addItemToPublications(newPub, pubIds, evidenceObject.publications);
         }
       })
     }

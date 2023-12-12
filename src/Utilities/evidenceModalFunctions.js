@@ -65,9 +65,9 @@ export const checkForEdgeMatch = (edgeOne, edgeTwo) => {
     : true;
 }
 
-export const updateSource = (element, data) => {
-  if(!element.source)
-    element.source = capitalizeAllWords(data[element.id].journal_name);
+export const updateJournal = (element, data) => {
+  if(!element.journal)
+    element.journal = capitalizeAllWords(data[element.id].journal_name);
 }
 
 export const updateTitle = (element, data) => {
