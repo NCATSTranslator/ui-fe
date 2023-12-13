@@ -74,7 +74,20 @@ export const diseaseQueryFormatter = async (diseases, formatData) => {
   });
 
   // Ensure each autocomplete item is distinct
-  return Promise.resolve(removeDuplicateObjects(autocompleteObjects, o => o.id));
+  const distinctObjects = removeDuplicateObjects(autocompleteObjects, o => o.id);
+
+  // Sort disease objects by exact matches first
+  distinctObjects.sort((a, b) => {
+    if (a.match === '' && b.match !== '') {
+      return -1;
+    } else if (a.match !== '' && b.match === '') {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+
+  return Promise.resolve(distinctObjects);
 }
 
 // The result of gene annotation includes the symbol and species information
