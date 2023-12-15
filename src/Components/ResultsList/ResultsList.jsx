@@ -544,7 +544,7 @@ const ResultsList = ({loading}) => {
       if(!(newStringFilters.length === stringFilters.length && newStringFilters.every((value, index) => value === stringFilters[index])))
         setActiveStringFilters(newStringFilters);
 
-      // Set the formatted results to the newly filtered results
+      // Return the newly filtered results
       return filteredResults;
     }
 

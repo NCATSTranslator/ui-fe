@@ -2,6 +2,10 @@ import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity } from '
 import { cloneDeep } from "lodash";
 import { score } from "../Utilities/scoring";
 
+export const hasSupport = (item) => {
+  return (Array.isArray(item.support) && item.support.length > 0);
+}
+
 /**
  * Formats the evidence information for the provided paths by extracting and organizing publications and sources.
  * @param {Array} paths - The paths for which evidence is being formatted.
@@ -65,16 +69,24 @@ const getFormattedEvidence = (paths, results) => {
       container);
   };
 
-  const formattedPublications = {};
-  const formattedSources = {};
-  for(const path of paths) {
-    for(const item of path.path.subgraph) {
-      if(item.category === 'predicate') {
-        formatPublications(item.publications, item, formattedPublications);
-        formatSources(item.provenance, item, formattedSources);
+  const processSourcesAndPublications = (paths, formattedPublications, formattedSources) => {
+    for(const path of paths) {
+      for(const item of path.path.subgraph) {
+        if(item.category === 'predicate') {
+          formatPublications(item.publications, item, formattedPublications);
+          formatSources(item.provenance, item, formattedSources);
+          // recursively call processSourcesAndPublications to fill out pubs and sources from support edges
+          if(hasSupport(item)) 
+            processSourcesAndPublications(item.support, formattedPublications, formattedSources);
+          
+        }
       }
     }
   }
+
+  const formattedPublications = {};
+  const formattedSources = {};
+  processSourcesAndPublications(paths, formattedPublications, formattedSources);
 
   const publications = formattedPublications;
   const sources = Object.values(formattedSources);
@@ -182,6 +194,53 @@ const checkForNodeUniformity = (pathOne, pathTwo) => {
   return nodesMatch;
 }
 
+const getFormattedNode = (id, index, subgraph, results) => {
+  let node = getNodeByCurie(id, results);
+  let name = (node.names) ? node.names[0]: '';
+  let type = (node.types) ? node.types[0]: '';
+  let desc = (node.descriptions) ? node.descriptions[0]: '';
+  let category = (index === subgraph.length - 1) ? 'target' : 'object';
+  let newNode =  {
+    category: category,
+    name: name,
+    type: type,
+    description: desc,
+    curies: node.curies,
+    provenance: []
+  };
+  if(node.provenance !== undefined) 
+    newNode.provenance = node.provenance;
+  
+  return newNode;
+}
+
+const getFormattedEdge = (id, results) => {
+  let edge = getEdgeByID(id, results);
+  edge.id = id;
+  let pred = '';
+
+  if(edge.predicate) {
+    pred = formatBiolinkEntity(edge.predicate);
+    edge.predicate = pred;
+  }
+  let newEdge = {
+    category: 'predicate',
+    predicates: [pred],
+    edges: [edge],
+    publications: edge.publications
+  };
+  // if the edge has support, recursively call getFormattedPaths to fill out the support paths
+  if(hasSupport(edge)) {
+    newEdge.support = edge.support;
+    newEdge.support = getFormattedPaths(edge.support, results);
+  }
+  
+  if(edge.provenance !== undefined) 
+    newEdge.provenance = edge.provenance;
+  
+  return newEdge;
+}
+
 /**
  * Formats the raw path IDs into an array of formatted paths with node and edge information.
  * The formatted paths are extracted from the provided results object.
@@ -195,36 +254,10 @@ const getFormattedPaths = (rawPathIds, results) => {
     let formattedPath = cloneDeep(results.paths[id]);
     if(formattedPath) {
       for(const [i] of formattedPath.subgraph.entries()) {
-        if(i % 2 === 0) {
-          let node = getNodeByCurie(formattedPath.subgraph[i], results);
-          let name = (node.names) ? node.names[0]: '';
-          let type = (node.types) ? node.types[0]: '';
-          let desc = (node.descriptions) ? node.descriptions[0]: '';
-          let category = (i === formattedPath.subgraph.length - 1) ? 'target' : 'object';
-          formattedPath.subgraph[i] = {
-            category: category,
-            name: name,
-            type: type,
-            description: desc,
-            curies: node.curies,
-          };
-          if(node.provenance !== undefined) {
-            formattedPath.subgraph[i].provenance = node.provenance;
-          }
-        } else {
-          let eid = formattedPath.subgraph[i];
-          let edge = getEdgeByID(eid, results);
-          let pred = (edge.predicate) ? formatBiolinkEntity(edge.predicate) : '';
-          formattedPath.subgraph[i] = {
-            category: 'predicate',
-            predicates: [pred],
-            edges: [{id: eid, object: edge.object, predicate: pred, subject: edge.subject, provenance: edge.provenance}],
-            publications: edge.publications
-          };
-          if(edge.provenance !== undefined) {
-            formattedPath.subgraph[i].provenance = edge.provenance;
-          }
-        }
+        if(i % 2 === 0) 
+          formattedPath.subgraph[i] = getFormattedNode(formattedPath.subgraph[i], i, formattedPath.subgraph, results);
+         else 
+          formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results);
       }
       formattedPaths.push({highlighted: false, path: formattedPath});
     }
@@ -437,7 +470,7 @@ export const formatPublicationSourceName = (sourceName) => {
  *                   and a publications array populated with formatted evidence data.
  *                   Returns an empty object if the input is invalid or lacks evidence.
  */
-export const getEvidenceFromResult = (result) => {
+export const getEvidenceFromResult = (result) => { 
   let evidenceObject = {};
   if(!result || !result.evidence)
     return evidenceObject; 
@@ -453,22 +486,35 @@ export const getEvidenceFromResult = (result) => {
         arr.push(item);
     }
   }
+  const fillInPublications = (subgraphItem, result, evidenceObj) => {
+    // key here is the knowledge level, i.e. "trusted", "ml", etc
+    Object.keys(subgraphItem.publications).forEach(key => {
+      for(const pubID of subgraphItem.publications[key]) {
+        let newPub = result.evidence.publications[pubID];
+        newPub.knowledgeLevel = key;
+        let type = getTypeFromPub(pubID);
+        newPub.url = getUrlByType(pubID, type);
+        newPub.source = formatPublicationSourceName(newPub.source);
+        addItemToPublications(newPub, pubIds, evidenceObj.publications);
+      }
+    })
+  }
 
-  for(const path of result.compressedPaths) {
-    for(const [i, subgraphItem] of Object.entries(path.path.subgraph)) {
-      if(i % 2 === 0)
-        continue;
-      Object.keys(subgraphItem.publications).forEach(key => {
-        for(const pubID of subgraphItem.publications[key]) {
-          let newPub = result.evidence.publications[pubID];
-          newPub.knowledgeLevel = key;
-          let type = getTypeFromPub(pubID);
-          newPub.url = getUrlByType(pubID, type);
-          newPub.source = formatPublicationSourceName(newPub.source);
-          addItemToPublications(newPub, pubIds, evidenceObject.publications);
+  const loopPathsAndFillInPubs = (result, paths, evidenceObj) => {
+    for(const path of paths) {
+      for(const [i, subgraphItem] of Object.entries(path.path.subgraph)) {
+        if(i % 2 === 0)
+          continue;
+
+        fillInPublications(subgraphItem, result, evidenceObj);
+        if(hasSupport(subgraphItem)) {
+          loopPathsAndFillInPubs(result, subgraphItem.support, evidenceObj);
         }
-      })
+      }
     }
   }
+
+  loopPathsAndFillInPubs(result, result.compressedPaths, evidenceObject);
+
   return evidenceObject;
 }

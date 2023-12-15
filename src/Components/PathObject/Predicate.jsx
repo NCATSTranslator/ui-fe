@@ -2,20 +2,21 @@ import styles from './Predicate.module.scss';
 import ResearchSingle from '../../Icons/research-single.svg?react';
 import ResearchMultiple from '../../Icons/research-multiple.svg?react';
 import Highlighter from 'react-highlight-words';
-import { capitalizeAllWords } from '../../Utilities/utilities';
+import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
 import { cloneDeep } from 'lodash';
 
 const Predicate = ({pathObject, selected, activeStringFilters, uid, parentClass = '', handleEdgeClick, inModal = false}) => {
 
-  pathObject.predicate = pathObject.predicates[0]; 
+  pathObject.predicate = formatBiolinkEntity(pathObject.predicates[0]); 
   const pubCount = Object.values(pathObject.publications).reduce((sum, arr) => sum + arr.length, 0);
+  const isInferred = (pathObject?.support && pathObject.support.length > 0) ? true : false;
   return (
     <span 
       className={`${selected ? styles.selected : ''} ${parentClass}`} 
       onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject);}}
       >
-      <span className={`connector ${styles.connector}`}></span>
+      <span className={`connector ${styles.connector} ${isInferred ? styles.inferred : ''}`}></span>
       <span 
         className={`${styles.path} path ${(pathObject.predicates.length > 1) ? styles.hasMore : ''}`}
         data-tooltip-id={`${pathObject.predicate}${uid}`}

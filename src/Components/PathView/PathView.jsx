@@ -110,16 +110,70 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                   {
                     pathToDisplay.path.subgraph.map((pathItem, j) => {
                       let key = `${i}_${j}`;
+                      let pathHasSupport = false;
+                      if(Array.isArray(pathItem.support) && pathItem.support.length > 0) 
+                        pathHasSupport = true;
+
                       return (
-                        <PathObject 
-                          pathObject={pathItem} 
-                          id={key}
-                          key={key}
-                          handleNameClick={handleNameClick}
-                          handleEdgeClick={(edge)=>handleEdgeClick(edge, pathToDisplay)}
-                          handleTargetClick={handleTargetClick}
-                          activeStringFilters={activeStringFilters}
-                        />
+                        <>
+                          <PathObject 
+                            pathObject={pathItem} 
+                            id={key}
+                            key={key}
+                            handleNameClick={handleNameClick}
+                            handleEdgeClick={(edge)=>handleEdgeClick(edge, pathToDisplay)}
+                            handleTargetClick={handleTargetClick}
+                            activeStringFilters={activeStringFilters}
+                          />
+                          {
+                            pathHasSupport && 
+                            <div class={styles.support}>
+                              {
+                                pathItem.support.map((supportPath, k) => {
+                                  let key = `${i}_${j}_${k}`;
+                                  const tooltipID = supportPath.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] );
+                                  return (
+                                    <div className={`${styles.formattedPath} ${styles.supportPath}`} key={key}>
+                                      <button 
+                                        onClick={()=>handleActivateEvidence(supportPath)}
+                                        className={styles.pathEvidenceButton}
+                                        data-tooltip-id={tooltipID}
+                                        >
+                                          <ResearchMultiple />
+                                      </button>
+                                      <Tooltip 
+                                        id={tooltipID}
+                                        >
+                                          <span>View evidence for this path.</span>
+                                      </Tooltip>
+                                      <div 
+                                        className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} 
+                                        key={i}
+                                        > 
+                                        {
+                                          supportPath.path.subgraph.map((supportItem, l) => {
+                                            let key = `${i}_${j}_${k}_${l}`;
+                                            return (
+                                              <PathObject 
+                                                pathObject={supportItem} 
+                                                id={key}
+                                                key={key}
+                                                handleNameClick={handleNameClick}
+                                                handleEdgeClick={(edge)=>handleEdgeClick(edge, supportPath)}
+                                                handleTargetClick={handleTargetClick}
+                                                activeStringFilters={activeStringFilters}
+                                              />
+                                            );
+                                          })
+                                        }
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              }
+                            </div>
+                          }
+                        </>
                       ) 
                     }) 
                   }
