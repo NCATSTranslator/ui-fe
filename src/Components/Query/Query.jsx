@@ -138,7 +138,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
             )
           );
         }
-        let newQueryPath = getResultsShareURLPath(item.node.label, item.node.id, item.type.id, data.data);
+        let newQueryPath = getResultsShareURLPath(item.node.label, item.node.id, item.type.id, '0', data.data);
 
         // If we're submitting from the results page
         if(window.location.href.includes('results')) {
