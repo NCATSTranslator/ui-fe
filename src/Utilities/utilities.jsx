@@ -100,6 +100,24 @@ export const formatBiolinkEntity = (string) => {
     .replaceAll('gene ', '').trim());
 }
 
+export const formatBiolinkNode = (string, type = null) => {
+  let newString = string; 
+  if(type !== null) {
+    type = type.toLowerCase();
+    switch (type) {
+      case "gene":
+      case "protein":
+        newString = newString.toUpperCase();
+        break;
+      default:
+        newString = capitalizeAllWords(newString);
+        break;
+    }
+  }
+    
+  return newString;
+}
+
 export const getUrlAndOrg = (id) => {
   let url = null;
   let org = null;

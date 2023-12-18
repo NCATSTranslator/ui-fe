@@ -398,7 +398,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     let formattedItem = {
       id: itemID,
       subjectNode: subjectNode,
-      type: 'biolink:Drug',
+      type: subjectNode.types[0],
       name: itemName,
       paths: formattedPaths,
       compressedPaths: compressedPaths,

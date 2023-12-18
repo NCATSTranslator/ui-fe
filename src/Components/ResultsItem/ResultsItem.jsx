@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
+import { getIcon, capitalizeAllWords, formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
@@ -85,7 +85,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   },[]);
 
   const pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
-  const nameString = (item.name !== null) ? item.name : '';
+  const typeString = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
+  const nameString = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
   const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
   const [itemGraph, setItemGraph] = useState(null);
