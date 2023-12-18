@@ -227,18 +227,25 @@ const getFormattedEdge = (id, results) => {
     category: 'predicate',
     predicates: [pred],
     edges: [edge],
-    publications: edge.publications
+    publications: edge.publications,
+    inferred: false
   };
   // if the edge has support, recursively call getFormattedPaths to fill out the support paths
   if(hasSupport(edge)) {
     newEdge.support = edge.support;
     newEdge.support = getFormattedPaths(edge.support, results);
+    newEdge.inferred = true;
   }
   
   if(edge.provenance !== undefined) 
     newEdge.provenance = edge.provenance;
   
   return newEdge;
+}
+
+const checkPathForSupport = (path) => {
+  const hasNonEmptySupport = (element, index) => index % 2 !== 0 && element.inferred;
+  return path?.subgraph?.some(hasNonEmptySupport) || false;
 }
 
 /**
@@ -252,11 +259,12 @@ const getFormattedPaths = (rawPathIds, results) => {
   let formattedPaths = [];
   for(const id of rawPathIds) {
     let formattedPath = cloneDeep(results.paths[id]);
+    formattedPath.inferred = checkPathForSupport(formattedPath);
     if(formattedPath) {
       for(const [i] of formattedPath.subgraph.entries()) {
         if(i % 2 === 0) 
           formattedPath.subgraph[i] = getFormattedNode(formattedPath.subgraph[i], i, formattedPath.subgraph, results);
-         else 
+        else 
           formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results);
       }
       formattedPaths.push({highlighted: false, path: formattedPath});
