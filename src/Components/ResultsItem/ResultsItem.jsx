@@ -84,7 +84,20 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     };
   },[]);
 
-  const pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
+  const getPathsCount = (paths) => {
+    let count = paths.length;
+    for(const path of paths) {
+      for(const [i, subgraphItem] of path.path.subgraph.entries()) {
+        if(i % 2 === 0 || !subgraphItem.support)
+          continue;
+        count += subgraphItem.support.length;
+      }
+    }
+    return count;
+  } 
+  
+  const pathsCount = useMemo(()=>getPathsCount(formattedPaths), [formattedPaths]);
+  const pathString = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const typeString = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
   const nameString = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
   const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
@@ -224,7 +237,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             />
           </span>
         }
-        <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
+        <span className={styles.effect}>{pathsCount} {pathString} {objectString}</span>
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
         {
