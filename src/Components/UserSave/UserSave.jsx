@@ -113,6 +113,8 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
                 handleBookmarkError={handleBookmarkError}
                 bookmarkAddedToast={bookmarkAddedToast}
                 bookmarkRemovedToast={bookmarkRemovedToast}
+                isFocused={false}
+                focusedItemRef={null}
               />
             </div>
           )
