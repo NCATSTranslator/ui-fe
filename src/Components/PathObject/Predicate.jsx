@@ -95,7 +95,10 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
           <button 
             onClick={(e)=>{handleSupportExpansion(e);}} 
             className={`${styles.supportExpansionButton} ${isSupportExpanded ? styles.expanded : ''}`}>
-            <Up/>
+            <div className={styles.supportConnector}></div>
+            <span className={styles.supportButtonIcon}>
+              <Up/>
+            </span>
           </button>
         }
       </span>

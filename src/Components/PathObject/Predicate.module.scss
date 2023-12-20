@@ -122,11 +122,37 @@
   padding: 0;
   svg {
     margin: 0;
+  }
+  .supportButtonIcon {
+    margin: 0;
     transform: rotate(180deg);
+    z-index: 10;
+    position: relative;
+    background-color: $white;
+    border-radius: 50%;
+    height: 24px;
   }
   &.expanded {
-    svg {
+    border-radius: 50%;
+    background-color: $white;
+    .supportButtonIcon {
       transform: rotate(0);
     }
+    .supportConnector {
+      opacity: 1;
+      height: 20px;
+    }
+  }
+  .supportConnector {
+    opacity: 0;
+    transition: all .35s ease;
+    height: 0;
+    top: 20px;
+    background-color: $purpleEdgeBG;
+    width: 1px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
   }
 }
