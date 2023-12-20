@@ -9,7 +9,6 @@ import { useSelector } from 'react-redux';
 import { currentPrefs, currentRoot } from '../../Redux/rootSlice';
 import { Link } from 'react-router-dom';
 import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
-import SupportPath from '../SupportPath/SupportPath';
 
 const getPathsWithSelectionsSet = (paths, selectedPaths) => {
   if(selectedPaths.size > 0) {
@@ -112,9 +111,24 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                     pathToDisplay.path.subgraph.map((pathItem, j) => {
                       let key = `${i}_${j}`;
                       let pathItemHasSupport = pathItem.inferred;
+                      let supportDataObject = (pathItemHasSupport)
+                        ? {
+                            key: key,
+                            pathItem: pathItem,
+                            pathViewStyles: styles,
+                            selectedPaths: selectedPaths, 
+                            pathToDisplay: pathToDisplay, 
+                            handleActivateEvidence: handleActivateEvidence, 
+                            handleNameClick: handleNameClick, 
+                            handleEdgeClick: handleEdgeClick, 
+                            handleTargetClick: handleTargetClick, 
+                            activeStringFilters: activeStringFilters
+                          }
+                        : null;
                       return (
                         <>
                           <PathObject 
+                            supportDataObject={supportDataObject}
                             pathObject={pathItem} 
                             id={key}
                             key={key}
@@ -122,35 +136,8 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                             handleEdgeClick={(edge)=>handleEdgeClick(edge, pathToDisplay)}
                             handleTargetClick={handleTargetClick}
                             activeStringFilters={activeStringFilters}
+                            hasSupport={pathItemHasSupport}
                           />
-                          {
-                            pathItemHasSupport && 
-                            <div class={styles.support}>
-                              {
-                                pathItem.support.map((supportPath, k) => {
-                                  let key = `${i}_${j}_${k}`;
-                                  const tooltipID = supportPath.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] );
-                                  return (
-                                    <SupportPath 
-                                      supportPathDataObject={{
-                                        key: key,
-                                        pathViewStyles: styles,
-                                        tooltipID: tooltipID,
-                                        supportPath: supportPath, 
-                                        selectedPaths: selectedPaths, 
-                                        pathToDisplay: pathToDisplay, 
-                                        handleActivateEvidence: handleActivateEvidence, 
-                                        handleNameClick: handleNameClick, 
-                                        handleEdgeClick: handleEdgeClick, 
-                                        handleTargetClick: handleTargetClick, 
-                                        activeStringFilters: activeStringFilters
-                                      }}
-                                    />
-                                  );
-                                })
-                              }
-                            </div>
-                          }
                         </>
                       ) 
                     }) 

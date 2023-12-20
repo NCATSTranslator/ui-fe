@@ -2,19 +2,19 @@ import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import ResearchMultiple from '../../Icons/research-multiple.svg?react';
 
-const SupportPath = ({supportPathDataObject}) => {
-  
-  const pathViewStyles = supportPathDataObject.pathViewStyles;
-  const tooltipID = supportPathDataObject.tooltipID;
-  const key = supportPathDataObject.key;
-  const supportPath = supportPathDataObject.supportPath;
-  const selectedPaths = supportPathDataObject.selectedPaths;
-  const pathToDisplay = supportPathDataObject.pathToDisplay;
-  const handleActivateEvidence = supportPathDataObject.handleActivateEvidence;
-  const handleNameClick = supportPathDataObject.handleNameClick;
-  const handleEdgeClick = supportPathDataObject.handleEdgeClick;
-  const handleTargetClick = supportPathDataObject.handleTargetClick;
-  const activeStringFilters = supportPathDataObject.activeStringFilters;
+const SupportPath = ({ dataObj }) => {
+
+  const pathViewStyles = dataObj.pathViewStyles;
+  const tooltipID = dataObj.tooltipID;
+  const key = dataObj.key;
+  const supportPath = dataObj.supportPath;
+  const selectedPaths = dataObj.selectedPaths;
+  const pathToDisplay = dataObj.pathToDisplay;
+  const handleActivateEvidence = dataObj.handleActivateEvidence;
+  const handleNameClick = dataObj.handleNameClick;
+  const handleEdgeClick = dataObj.handleEdgeClick;
+  const handleTargetClick = dataObj.handleTargetClick;
+  const activeStringFilters = dataObj.activeStringFilters;
 
   return (
     <div className={`${pathViewStyles.formattedPath} ${pathViewStyles.supportPath}`} key={key}>

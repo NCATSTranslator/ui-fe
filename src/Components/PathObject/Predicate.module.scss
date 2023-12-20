@@ -105,5 +105,28 @@
 
 .inferred.connector {
   background-image: url('../../Icons/straight-dotted.svg');
+}
 
+.supportExpansionButton {
+  position: absolute;
+  bottom: -15px;
+  margin: 0;
+  border-radius: 50%;
+  background-color: $white;
+  color: $purpleEdgeBG;
+  box-shadow: $dropShadow;
+  z-index: 100;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  svg {
+    margin: 0;
+    transform: rotate(180deg);
+  }
+  &.expanded {
+    svg {
+      transform: rotate(0);
+    }
+  }
 }

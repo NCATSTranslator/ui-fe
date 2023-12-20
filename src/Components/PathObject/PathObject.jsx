@@ -6,7 +6,8 @@ import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities
 import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
 
-const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters, selected, inModal = false}) => {
+const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport, 
+  activeStringFilters, selected, supportDataObject = null, inModal = false }) => {
 
   const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const type = (pathObject?.type) ? pathObject.type.replace("biolink:", ""): '';
@@ -60,6 +61,8 @@ const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTar
           handleEdgeClick={handleEdgeClick}
           parentClass={styles.pathContainer}
           inModal={inModal}
+          hasSupport={hasSupport}
+          supportDataObject={supportDataObject}
         />
       }
       {
