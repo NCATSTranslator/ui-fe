@@ -84,7 +84,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     return() => {
       resizeObserver.disconnect();
     };
-  },[]);
+  },[focusedItemRef]);
 
   const pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const nameString = (item.name !== null) ? item.name : '';

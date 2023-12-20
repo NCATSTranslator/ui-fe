@@ -336,7 +336,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
   let newSummarizedResults = [];
 
   // for each individual result item
-  for(const [i, item] of results.results.entries()) {
+  for(const item of results.results) {
     // Get the object node's name
     let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]);
     // Get the subject node's name

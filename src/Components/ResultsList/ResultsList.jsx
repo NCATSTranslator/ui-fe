@@ -14,7 +14,6 @@ import StickyToolbar from "../StickyToolbar/StickyToolbar";
 import ReactPaginate from 'react-paginate';
 import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
-import { useSearchParams } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "../../Redux/resultsSlice";
 import { currentPrefs, currentRoot }from "../../Redux/rootSlice";
