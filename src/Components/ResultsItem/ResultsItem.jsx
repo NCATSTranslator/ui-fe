@@ -79,12 +79,19 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       setTagsHeight(tagsRef.current.clientHeight);
     });
 
-    focusedItemRef.current?.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
     resizeObserver.observe(tagsRef.current);
     return() => {
       resizeObserver.disconnect();
     };
-  },[focusedItemRef]);
+  },[]);
+
+  useEffect(() => {
+    if (!isFocused || focusedItemRef === null) {
+      return;
+    }
+
+    focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+  }, [focusedItemRef])
 
   const pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const nameString = (item.name !== null) ? item.name : '';
