@@ -13,6 +13,7 @@ const ShareModal = ({isOpen, onClose, qid, label = null, typeID = null}) => {
   const sharedQueryLabel = (label) ? label : new URLSearchParams(window.location.search).get("l")
   const sharedQueryType = (typeID) ? typeID : new URLSearchParams(window.location.search).get("t")
   const sharedQueryItemID = new URLSearchParams(window.location.search).get("i")
+  const sharedQueryResultID = new URLSearchParams(window.location.search).get("r")
   const queryLabel = (sharedQueryLabel) 
     ? sharedQueryLabel 
     : (storedQuery && storedQuery.node !== undefined) 
@@ -33,7 +34,7 @@ const ShareModal = ({isOpen, onClose, qid, label = null, typeID = null}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
-  const qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, qid);
+  const qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, sharedQueryResultID, qid);
   const qidURL = encodeURI(`${window.location.origin}/${root}/${qidPath}`);
   
   useEffect(() => {
