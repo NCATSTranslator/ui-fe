@@ -336,7 +336,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
   let newSummarizedResults = [];
 
   // for each individual result item
-  for(const [i, item] of results.results.entries()) {
+  for(const item of results.results) {
     // Get the object node's name
     let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]);
     // Get the subject node's name
@@ -350,7 +350,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     let compressedPaths = getCompressedPaths(formattedPaths);
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
-    let itemID = `${item.subject}${item.object}-${i}`;
+    let itemID = item.id;
     let bookmarkID = (bookmarks === null) ? false : checkBookmarksForItem(itemID, bookmarks);
     let bookmarked = (!bookmarkID) ? false : true;
     let hasNotes = checkBookmarkForNotes(bookmarkID, bookmarks);
