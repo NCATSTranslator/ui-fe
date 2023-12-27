@@ -24,7 +24,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHigh
 import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters } from "../../Utilities/resultsInteractionFunctions";
-import { isFacet, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
+import { isFacet, isExclusion, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import Alert from '../../Icons/Alerts/Info.svg?react';
@@ -444,11 +444,11 @@ const ResultsList = ({loading}) => {
     return newSortedResults;
   }, [activeStringFilters]);
 
-  const calculateFacetCounts = (fResults, rResults, activeFacets, tagSetterMethod) => {
+  const calculateFacetCounts = (filteredResults, rawResults, negatedResults, activeFacets, negatedFacets, tagSetterMethod) => {
     // Function that adds the tag counts when a certain condition (predicate) is met
     const addTagCountsWhen = (countedTags, result, predicate) => {
       for(const tag of result.tags) {
-        // if the tag exists on the list, either increment it or initialize its count
+        // If the tag exists on the list, either increment it or initialize its count
         if (predicate(tag)) {
           if (countedTags.hasOwnProperty(tag)){
             if (!countedTags[tag].count) {
@@ -456,7 +456,7 @@ const ResultsList = ({loading}) => {
             }
 
             countedTags[tag].count++;
-          // if it doesn't exist on the current list of tags, add it and initialize its count
+          // If it doesn't exist on the current list of tags, add it and initialize its count
           } else {
             countedTags[tag] = {name: tag, value: '', count: 1};
           }
@@ -464,11 +464,11 @@ const ResultsList = ({loading}) => {
       }
     }
 
-    // create a list of tags from the list provided by the backend
-    const countedTags = cloneDeep(rResults.data.tags);
+    // Create a list of tags from the master tag list provided by the backend
+    const countedTags = cloneDeep(rawResults.data.tags);
     const activeFamilies = new Set(activeFacets.map(f => facetFamily(f.type)));
-    for(const result of fResults) {
-      // determine the distance between a result's facets and the facet selection
+    for(const result of filteredResults) {
+      // Determine the distance between a result's facets and the facet selection
       const resultFamilies = new Set();
       for (const facet of activeFacets) {
         if (result.tags.includes(facet.type)) {
@@ -492,6 +492,15 @@ const ResultsList = ({loading}) => {
         });
       }
       // Otherwise skip this result
+    }
+
+    // Count all results that have a matching negated facet
+    for (const result of negatedResults) {
+      addTagCountsWhen(countedTags, result, (tag) => {
+        return negatedFacets.reduce((acc, facet) => {
+          return (tag === facet.type) || acc;
+        }, false);
+      });
     }
 
     Object.entries(countedTags).forEach((tag)=> {
@@ -520,20 +529,27 @@ const ResultsList = ({loading}) => {
     setNotesOpen(true);
   }
 
-  const filterAndFacet = (facetsAndFilters, stringFilters, fResults, oResults, rResults) => {
-    const filterResults = (filters, stringFilters, oResults, resultPathRanks) => {
+  const filterAndFacet = (facetsAndFilters, stringFilters, filteredResults, originalResults, rawResults) => {
+    const filterResults = (filters, stringFilters, originalResults, resultPathRanks) => {
       const filteredResults = [];
+      const negatedResults = [];
       /*
         For each result, check against each filter. If any filter is not met,
         skip that result.
       */
-      for(let result of oResults) {
+      for(let result of originalResults) {
         const pathRanks = result.compressedPaths.map((p) => { return { rank: 0, path: p }; });
         let addResult = true;
         for(const filter of filters) {
           if ((isEvidenceFilter(filter) && !(filter.value <= result.evidence.length)) ||
               (isTextFilter(filter) && !findStringMatch(result, filter.value, pathRanks))) {
             addResult = false;
+            break;
+          }
+
+          if (isFacet(filter) && result.tags.includes(filter.type)) {
+            addResult = false;
+            negatedResults.push(result);
             break;
           }
         }
@@ -558,15 +574,15 @@ const ResultsList = ({loading}) => {
         setActiveStringFilters(newStringFilters);
 
       // Set the formatted results to the newly filtered results
-      return filteredResults;
+      return [filteredResults, negatedResults];
     }
 
-    const facetResults = (facets, fResults, resultPathRanks) => {
+    const facetResults = (facets, filteredResults, resultPathRanks) => {
       const intersect = (a, b) => { return a && b; };
       const union = (a, b) => { return a || b; };
       const facetedResults = [];
       let resultIndex = 0;
-      for (const result of fResults) {
+      for (const result of filteredResults) {
         let addResult = true;
         let isInter = null;
         let combine = null;
@@ -609,15 +625,19 @@ const ResultsList = ({loading}) => {
         setActiveStringFilters([]);
       }
 
-      calculateFacetCounts(fResults, rResults, [], setAvailableTags);
-      return fResults;
+      calculateFacetCounts(filteredResults, rawResults, [], [], [], setAvailableTags);
+      return filteredResults;
     }
 
-    const facets = facetsAndFilters.filter(f => isFacet(f));
-    const filters = facetsAndFilters.filter(f => isTextFilter(f) || isEvidenceFilter(f));
+    const facets = facetsAndFilters.filter((f) => { return isFacet(f) && !isExclusion(f) });
+    const negatedFacets = facetsAndFilters.filter((f) => { return isFacet(f) && isExclusion(f) });
+    const filters = facetsAndFilters.filter(f => {
+      return isTextFilter(f) || isEvidenceFilter(f) || (isExclusion(f) && isFacet(f));
+    });
+
     const resultPathRanks = [];
-    let results = filterResults(filters, stringFilters, oResults, resultPathRanks);
-    calculateFacetCounts(results, rResults, facets, setAvailableTags);
+    let [results, negatedResults] = filterResults(filters, stringFilters, originalResults, resultPathRanks);
+    calculateFacetCounts(results, rawResults, negatedResults, facets, negatedFacets, setAvailableTags);
     results = facetResults(facets, results, resultPathRanks);
     return results
   }
@@ -644,9 +664,9 @@ const ResultsList = ({loading}) => {
 
     let addFilter = true;
     for(const index of indexes) {
-      // if the values also match, it's a real match
-      if (activeFilters[index].value === filter.value) {
-        // set newFilters to a new array with any matches removed
+      // If we get the same filter, we want to toggle it off
+      if (activeFilters[index].value === filter.value &&
+          activeFilters[index].negated === filter.negated) {
         newActiveFilters = activeFilters.reduce((newFilters, oldFilter, i) => {
           if(i !== index) {
             newFilters.push(oldFilter);
@@ -662,6 +682,7 @@ const ResultsList = ({loading}) => {
         newActiveFilters = newActiveFilters.map((activeFilter, i) => {
           if(i === index) {
             activeFilter.value = filter.value;
+            activeFilter.negated = filter.negated;
           }
 
           return activeFilter;

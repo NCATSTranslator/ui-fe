@@ -3,6 +3,10 @@ export const isFacet = (filter) => {
   return validFacetFamilies.has(family);
 }
 
+export const isExclusion = (filter) => {
+  return filter.negated
+}
+
 export const isFdaFilter = (filter) => {
   return filter.type === 'fda:approved';
 }

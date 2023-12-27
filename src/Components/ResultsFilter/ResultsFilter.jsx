@@ -41,7 +41,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   
   const facetShowMoreIncrement = 5;
 
-  const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1});
+  const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1, negated: false});
   const [tagObject, setTagObject] = useState({type:'', value: ''});
   const groupedTags = useMemo(()=>groupAvailableTags(availableTags), [availableTags]);
   const initialCountsToShow = initCountsToShow(groupedTags);
@@ -53,7 +53,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     onFilter(evidenceObject);
   }
 
-  const handleFacetChange = (facetID, objectToUpdate, setterFunction, label = '') => {
+  const handleFacetChange = (facetID, objectToUpdate, setterFunction, negated = false, label = '') => {
     if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
       return;
     }
@@ -61,6 +61,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let newObj = cloneDeep(objectToUpdate);
     newObj.type = facetID;
     newObj.value = label;
+    newObj.negated = negated;
     setterFunction(objectToUpdate);
     onFilter(newObj);
   }
@@ -201,7 +202,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       availableTags[tagKey] && availableTags[tagKey].count &&
       <div className={styles.facetContainer} key={tagKey}>
         <Checkbox
-          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, tagName)}
+          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, false, tagName)}
           checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
           className={`${styles.checkbox}`}
           >
@@ -280,7 +281,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             hideLabel
             min="1"
             max="99"
-            onChange={e => handleFacetChange('evi:', evidenceObject, setEvidenceObject, e)}
+            onChange={e => handleFacetChange('evi:', evidenceObject, setEvidenceObject, false, e)}
             initialValue={1}
           />
         <EntitySearch
