@@ -1,4 +1,4 @@
-import {useState, useMemo} from 'react';
+import {useState, useMemo, useEffect} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
 import SimpleRange from '../Range/SimpleRange';
@@ -188,6 +188,10 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     setCountsToShow(newCountsToShow);
   }
 
+  useEffect(() => {
+    console.log(activeFilters);
+  }, [activeFilters]);
+
   const tagDisplay = (tag, type, tagObject, setTagObjectFunc, availableTags) => {
     let tagKey = tag[0];
     let object = tag[1];
@@ -202,8 +206,13 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       availableTags[tagKey] && availableTags[tagKey].count &&
       <div className={styles.facetContainer} key={tagKey}>
         <Checkbox
+          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, true, tagName)}
+          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)}
+          className={`${styles.checkbox} ${styles.negative}`}
+        ></Checkbox>
+        <Checkbox
           handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, false, tagName)}
-          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
+          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && !filter.negated)}
           className={`${styles.checkbox}`}
           >
           {tagName} 
