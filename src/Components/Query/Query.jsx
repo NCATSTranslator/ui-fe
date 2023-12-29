@@ -453,7 +453,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
             }
             <div className={styles.timestamp}>
               {
-                queryTimestamp && isValidDate(queryTimestamp) &&
+                queryTimestamp && isValidDate(queryTimestamp) && results &&
                 <p>Submitted {getFormattedDate(queryTimestamp)}</p>
               }
             </div>
