@@ -206,7 +206,7 @@ const ResultsList = ({loading}) => {
 
   // Handles direct page click
   const handlePageClick = useCallback((event, newItemsPerPage = false, resultsLength = formattedResults.length, currentNumItemsPerPage = itemsPerPage ) => {
-    let perPageNum = (newItemsPerPage) ? newItemsPerPage : currentNumItemsPerPage;
+    let perPageNum = (newItemsPerPage) ? parseInt(newItemsPerPage) : currentNumItemsPerPage;
     currentPage.current = event.selected;
     const newOffset = (event.selected * perPageNum) % resultsLength;
     const endOffset = (parseInt(newOffset + perPageNum) > resultsLength)
@@ -880,7 +880,7 @@ const ResultsList = ({loading}) => {
                         size="s"
                         handleChange={(value)=>{
                           setItemsPerPage(parseInt(value));
-                          handlePageClick({selected: currentPage}, value);
+                          handlePageClick({selected: currentPage.current}, value, formattedResults.length);
                         }}
                         noanimate
                         >
