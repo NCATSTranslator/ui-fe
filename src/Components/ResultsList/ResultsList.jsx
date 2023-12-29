@@ -880,7 +880,7 @@ const ResultsList = ({loading}) => {
                         size="s"
                         handleChange={(value)=>{
                           setItemsPerPage(parseInt(value));
-                          handlePageClick({selected: currentPage}, value);
+                          handlePageClick({selected: currentPage.current}, value, formattedResults.length);
                         }}
                         noanimate
                         >
