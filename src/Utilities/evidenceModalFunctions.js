@@ -104,7 +104,7 @@ export const getKnowledgeLevelString = (knowledgeLevel) => {
 
 // checks if an object with a matching ID already exists in a set before adding it
 const addEvidenceObjectToSet = (obj, container) => {
-  if(![...container].some(existingObj => existingObj.id === obj.id))
+  if(!obj?.id || ![...container].some(existingObj => existingObj.id === obj.id))
     container.add(obj);
 }
 
