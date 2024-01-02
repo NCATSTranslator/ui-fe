@@ -1,7 +1,7 @@
 import { equal, larger, format, polynomialRoot, largerEq, min, max, round, Complex } from 'mathjs';
 
 export const score = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
-  return maxNormalizedScore(scoreComponents);
+  return maxSugenoScore(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight);
 }
 
 export const displayScore = function(score, decimalPlaces=2) {
@@ -91,11 +91,11 @@ const computeSugeno = function(confidence, novelty, clinical,
 
   // Sugeno score
   return max(...mins);
-} 
+}
 
 const isComplex = function(x) {
   return (x instanceof Complex);
-} 
+}
 
 const computeWeightSets = function(lambda, confidenceWeight, noveltyWeight, clinicalWeight, n=2) {
   const ws = {
