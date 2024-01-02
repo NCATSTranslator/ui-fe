@@ -182,6 +182,18 @@ const checkForNodeUniformity = (pathOne, pathTwo) => {
   return nodesMatch;
 }
 
+const removeDuplicatePubIds = (publications) => {
+  let uniquePublications = {};
+
+  for (let key in publications) {
+      if (publications.hasOwnProperty(key) && Array.isArray(publications[key])) {
+          uniquePublications[key] = Array.from(new Set(publications[key]));
+      }
+  }
+
+  return uniquePublications;
+}
+
 /**
  * Formats the raw path IDs into an array of formatted paths with node and edge information.
  * The formatted paths are extracted from the provided results object.
@@ -215,11 +227,12 @@ const getFormattedPaths = (rawPathIds, results) => {
           let eid = formattedPath.subgraph[i];
           let edge = getEdgeByID(eid, results);
           let pred = (edge.predicate) ? formatBiolinkEntity(edge.predicate) : '';
+          let publications = removeDuplicatePubIds(edge.publications);
           formattedPath.subgraph[i] = {
             category: 'predicate',
             predicates: [pred],
             edges: [{id: eid, object: edge.object, predicate: pred, subject: edge.subject, provenance: edge.provenance}],
-            publications: edge.publications
+            publications: publications
           };
           if(edge.provenance !== undefined) {
             formattedPath.subgraph[i].provenance = edge.provenance;
@@ -438,7 +451,7 @@ export const getEvidenceFromResult = (result) => {
         continue;
 
       let index = parseInt(i);
-      let subjectName = path.path.subgraph[index-1].name;
+      let subjectName = path.path.subgraph[index - 1].name;
       let predicateName = subgraphItem.predicates[0];
       let objectName = path.path.subgraph[index + 1].name;
       let edgeLabel = getFormattedEdgeLabel(subjectName, predicateName, objectName);
