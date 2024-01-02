@@ -29,12 +29,13 @@ const ShareModal = ({isOpen, onClose, qid, label = null, typeID = null}) => {
     : (storedQuery && storedQuery.type !== undefined) 
       ? storedQuery.type.id 
       : '';
+  const queryResultID = sharedQueryResultID || '0';
 
   const isResultsUrlSet = useRef(false);
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
-  const qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, sharedQueryResultID, qid);
+  const qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);
   const qidURL = encodeURI(`${window.location.origin}/${root}/${qidPath}`);
   
   useEffect(() => {

@@ -307,6 +307,8 @@ button .dualArrows {
   text-align: center;
   margin: 12px 0 0;
   min-height: 18px;
+  opacity: 0;
+  transition: opacity .5s ease;
   span, p {
     font-size: 14px;
     font-style: italic;
@@ -315,6 +317,9 @@ button .dualArrows {
   }
   span {
     font-weight: 700;
+  }
+  &.active {
+    opacity: 1;
   }
 }
 .showingResultsTop {

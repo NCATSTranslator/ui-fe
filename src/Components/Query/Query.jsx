@@ -451,7 +451,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 }
               </>
             }
-            <div className={styles.timestamp}>
+            <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
               {
                 queryTimestamp && isValidDate(queryTimestamp) && results &&
                 <p>Submitted {getFormattedDate(queryTimestamp)}</p>
