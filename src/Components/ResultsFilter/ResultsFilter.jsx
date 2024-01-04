@@ -266,9 +266,10 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
-        <div className={styles.labelContainer} >
-          <p className={styles.subTwo}>Evidence</p>
-        </div>
+        {/* 
+          <div className={styles.labelContainer} >
+            <p className={styles.subTwo}>Evidence</p>
+          </div>
           <Checkbox
             handleClick={handleEvidenceActive}
             className={styles.evidenceCheckbox}
@@ -282,7 +283,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             max="99"
             onChange={e => handleFacetChange('evi:', evidenceObject, setEvidenceObject, e)}
             initialValue={1}
-          />
+          /> 
+        */}
         <EntitySearch
           activeFilters={activeFilters}
           onFilter={onFilter}
