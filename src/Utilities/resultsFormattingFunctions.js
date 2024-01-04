@@ -194,6 +194,18 @@ const checkForNodeUniformity = (pathOne, pathTwo) => {
   return nodesMatch;
 }
 
+const removeDuplicatePubIds = (publications) => {
+  let uniquePublications = {};
+
+  for (let key in publications) {
+      if (publications.hasOwnProperty(key) && Array.isArray(publications[key])) {
+          uniquePublications[key] = Array.from(new Set(publications[key]));
+      }
+  }
+
+  return uniquePublications;
+}
+
 const getFormattedNode = (id, index, subgraph, results) => {
   let node = getNodeByCurie(id, results);
   let name = (node.names) ? node.names[0]: '';
@@ -262,10 +274,37 @@ const getFormattedPaths = (rawPathIds, results) => {
     formattedPath.inferred = checkPathForSupport(formattedPath);
     if(formattedPath) {
       for(const [i] of formattedPath.subgraph.entries()) {
-        if(i % 2 === 0) 
-          formattedPath.subgraph[i] = getFormattedNode(formattedPath.subgraph[i], i, formattedPath.subgraph, results);
-        else 
-          formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results);
+        if(i % 2 === 0) {
+          let node = getNodeByCurie(formattedPath.subgraph[i], results);
+          let name = (node.names) ? node.names[0]: '';
+          let type = (node.types) ? node.types[0]: '';
+          let desc = (node.descriptions) ? node.descriptions[0]: '';
+          let category = (i === formattedPath.subgraph.length - 1) ? 'target' : 'object';
+          formattedPath.subgraph[i] = {
+            category: category,
+            name: name,
+            type: type,
+            description: desc,
+            curies: node.curies,
+          };
+          if(node.provenance !== undefined) {
+            formattedPath.subgraph[i].provenance = node.provenance;
+          }
+        } else {
+          let eid = formattedPath.subgraph[i];
+          let edge = getEdgeByID(eid, results);
+          let pred = (edge.predicate) ? formatBiolinkEntity(edge.predicate) : '';
+          let publications = removeDuplicatePubIds(edge.publications);
+          formattedPath.subgraph[i] = {
+            category: 'predicate',
+            predicates: [pred],
+            edges: [{id: eid, object: edge.object, predicate: pred, subject: edge.subject, provenance: edge.provenance}],
+            publications: publications
+          };
+          if(edge.provenance !== undefined) {
+            formattedPath.subgraph[i].provenance = edge.provenance;
+          }
+        }
       }
       formattedPaths.push({highlighted: false, path: formattedPath});
     }
@@ -377,7 +416,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
   let newSummarizedResults = [];
 
   // for each individual result item
-  for(const [i, item] of results.results.entries()) {
+  for(const item of results.results) {
     // Get the object node's name
     let objectNodeName = capitalizeAllWords(getNodeByCurie(item.object, results).names[0]);
     // Get the subject node's name
@@ -391,7 +430,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     let compressedPaths = getCompressedPaths(formattedPaths);
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
-    let itemID = `${item.subject}${item.object}-${i}`;
+    let itemID = item.id;
     let bookmarkID = (bookmarks === null) ? false : checkBookmarksForItem(itemID, bookmarks);
     let bookmarked = (!bookmarkID) ? false : true;
     let hasNotes = checkBookmarkForNotes(bookmarkID, bookmarks);
@@ -430,7 +469,7 @@ export const getUrlByType = (publicationID, type) => {
       url = `http://www.ncbi.nlm.nih.gov/pubmed/${publicationID.replace("PMID:", "")}`;
       break;
     case "PMC":
-      url = `https://www.ncbi.nlm.nih.gov/pmc/${publicationID}`;
+      url = `https://www.ncbi.nlm.nih.gov/pmc/articles/${publicationID.replace(":", "")}`;
       break;
     case "NCT":
       url = `https://clinicaltrials.gov/ct2/show/${publicationID.replace("clinicaltrials:", "")}`

@@ -61,7 +61,7 @@ const ExampleQueryList = ({examples, setPresetURL, label}) => {
                         setPresetURL(e.target.dataset.url);
                       }}
                       data-testid={item.name}
-                      data-url={getResultsShareURLPath(item.name, item.id, typeID, item.uuid)}
+                      data-url={getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid)}
                       key={item.id}
                       >
                       {item.name}

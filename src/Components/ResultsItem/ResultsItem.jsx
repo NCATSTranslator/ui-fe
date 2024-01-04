@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
 import { getEvidenceFromResult } from '../../Utilities/resultsFormattingFunctions';
 import { displayScore } from '../../Utilities/scoring';
+import { setResultsQueryParam } from '../../Utilities/resultsInteractionFunctions';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -34,7 +35,7 @@ const sortTagsBySelected = (a, b, selected) => {
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, handleFilter, activeFilters,
   currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags,
-  hasNotes, activateNotes, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, handleBookmarkError = ()=>{}}) => {
+  hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, handleBookmarkError = ()=>{}}) => {
 
   const root = useSelector(currentRoot);
 
@@ -57,7 +58,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const [isBookmarked, setIsBookmarked] = useState(bookmarked);
   const [itemBookmarkID, setItemBookmarkID] = useState(bookmarkID);
   const [itemHasNotes, setItemHasNotes] = useState(hasNotes);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(isFocused);
   const [height, setHeight] = useState(0);
   const formattedPaths = item.compressedPaths;
   const [selectedPaths, setSelectedPaths] = useState(new Set());
@@ -84,6 +85,22 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     };
   },[]);
 
+  useEffect(() => {
+    if (!isFocused || focusedItemRef === null) {
+      return;
+    }
+
+    focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+  }, [focusedItemRef])
+
+  useEffect(() => {
+    if (!isFocused || focusedItemRef === null) {
+      return;
+    }
+
+    focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+  }, [focusedItemRef])
+
   const getPathsCount = (paths) => {
     let count = paths.length;
     for(const path of paths) {
@@ -105,6 +122,10 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const [itemGraph, setItemGraph] = useState(null);
 
   const handleToggle = () => {
+    if (!isExpanded) {
+      setResultsQueryParam('r', item.id);
+    }
+
     setIsExpanded(!isExpanded);
   }
 
@@ -219,7 +240,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   }, [item, hasNotes]);
 
   return (
-    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))}>
+    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={isFocused ? focusedItemRef : null}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
         {

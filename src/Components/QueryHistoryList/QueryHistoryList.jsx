@@ -44,7 +44,7 @@ const QueryHistoryList = () => {
   }, [queryHistoryState]);
 
   const handleClick = (query) => {
-    navigate(`/${root}/${getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, query.id)}`);
+    navigate(`/${root}/${getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, '0', query.id)}`);
   }
 
   const handleSearch = (value) => {

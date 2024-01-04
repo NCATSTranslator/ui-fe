@@ -50,6 +50,7 @@ const ResultsList = ({loading}) => {
     : null;
   const initNodeLabelParam = getDataFromQueryVar("l");
   const initNodeIdParam = getDataFromQueryVar("i");
+  const initResultIdParam = getDataFromQueryVar("r");
   const [nodeDescription, setNodeDescription] = useState();
 
   loading = (loading) ? loading : false;
@@ -93,6 +94,8 @@ const ResultsList = ({loading}) => {
   const [currentEvidence, setCurrentEvidence] = useState([]);
   // Int, current page
   const currentPage = useRef(0);
+  // ResultItem to focus on
+  const focusedItemRef = useRef(null);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
   // Int, how many items per page
@@ -154,7 +157,6 @@ const ResultsList = ({loading}) => {
   }, [prefs]);
 
   useEffect(() => {
-
     const handleKeyDown = (ev) => {
       if (ev.keyCode === 90) {
         setZoomKeyDown(true);
@@ -239,8 +241,19 @@ const ResultsList = ({loading}) => {
     // set results
     setFormattedResults(newFormattedResults);
 
-    if(newFormattedResults.length > 0)
-      handlePageClick({selected: 0}, false, newFormattedResults.length);
+    if(newFormattedResults.length > 0) {
+      let focusedPage = 0;
+      if (initResultIdParam !== '0') {
+        let focusedItemIndex = newFormattedResults.findIndex(result => result.id === initResultIdParam);
+        if (focusedItemIndex === -1) {
+          focusedItemIndex = 0;
+        }
+
+        focusedPage = Math.floor(focusedItemIndex / itemsPerPage);
+      }
+
+      handlePageClick({selected: focusedPage}, false, newFormattedResults.length);
+    }
 
     if(!justSort)
       originalResults.current = newOriginalResults;
@@ -675,6 +688,7 @@ const ResultsList = ({loading}) => {
         setNodeDescription(node.descriptions[0].replaceAll('"', ''));
       }
     }
+
   },[formattedResults, initNodeIdParam]);
 
 
@@ -848,6 +862,8 @@ const ResultsList = ({loading}) => {
                             availableTags={availableTags}
                             handleFilter={handleFilter}
                             activeFilters={activeFilters}
+                            isFocused={item.id === initResultIdParam}
+                            focusedItemRef={focusedItemRef}
                           />
                         )
                       })
@@ -864,7 +880,7 @@ const ResultsList = ({loading}) => {
                         size="s"
                         handleChange={(value)=>{
                           setItemsPerPage(parseInt(value));
-                          handlePageClick({selected: 0}, value);
+                          handlePageClick({selected: currentPage.current}, value, formattedResults.length);
                         }}
                         noanimate
                         >
