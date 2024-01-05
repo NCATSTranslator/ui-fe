@@ -235,11 +235,12 @@ const getFormattedEdge = (id, results) => {
     pred = formatBiolinkEntity(edge.predicate);
     edge.predicate = pred;
   }
+  let publications = removeDuplicatePubIds(edge.publications);
   let newEdge = {
     category: 'predicate',
     predicates: [pred],
     edges: [edge],
-    publications: edge.publications,
+    publications: publications,
     inferred: false
   };
   // if the edge has support, recursively call getFormattedPaths to fill out the support paths
@@ -274,37 +275,10 @@ const getFormattedPaths = (rawPathIds, results) => {
     formattedPath.inferred = checkPathForSupport(formattedPath);
     if(formattedPath) {
       for(const [i] of formattedPath.subgraph.entries()) {
-        if(i % 2 === 0) {
-          let node = getNodeByCurie(formattedPath.subgraph[i], results);
-          let name = (node.names) ? node.names[0]: '';
-          let type = (node.types) ? node.types[0]: '';
-          let desc = (node.descriptions) ? node.descriptions[0]: '';
-          let category = (i === formattedPath.subgraph.length - 1) ? 'target' : 'object';
-          formattedPath.subgraph[i] = {
-            category: category,
-            name: name,
-            type: type,
-            description: desc,
-            curies: node.curies,
-          };
-          if(node.provenance !== undefined) {
-            formattedPath.subgraph[i].provenance = node.provenance;
-          }
-        } else {
-          let eid = formattedPath.subgraph[i];
-          let edge = getEdgeByID(eid, results);
-          let pred = (edge.predicate) ? formatBiolinkEntity(edge.predicate) : '';
-          let publications = removeDuplicatePubIds(edge.publications);
-          formattedPath.subgraph[i] = {
-            category: 'predicate',
-            predicates: [pred],
-            edges: [{id: eid, object: edge.object, predicate: pred, subject: edge.subject, provenance: edge.provenance}],
-            publications: publications
-          };
-          if(edge.provenance !== undefined) {
-            formattedPath.subgraph[i].provenance = edge.provenance;
-          }
-        }
+        if(i % 2 === 0) 
+          formattedPath.subgraph[i] = getFormattedNode(formattedPath.subgraph[i], i, formattedPath.subgraph, results);
+        else 
+          formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results);
       }
       formattedPaths.push({highlighted: false, path: formattedPath});
     }
@@ -493,6 +467,7 @@ export const getTypeFromPub = (publicationID) => {
 
 export const formatPublicationSourceName = (sourceName) => {
   let newSourceName = sourceName;
+  if(typeof sourceName === 'string')
   switch (sourceName.toLowerCase()) {
     case "semantic medline database":
       newSourceName = "SemMedDB"
@@ -541,7 +516,7 @@ export const getEvidenceFromResult = (result) => {
         newPub.knowledgeLevel = key;
         let type = getTypeFromPub(pubID);
         newPub.url = getUrlByType(pubID, type);
-        newPub.source = formatPublicationSourceName(newPub.source);
+        newPub.source.name = formatPublicationSourceName(newPub.source.name);
         addItemToPublications(newPub, pubIds, evidenceObj.publications);
       }
     })
