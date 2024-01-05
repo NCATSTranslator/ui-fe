@@ -292,8 +292,9 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
                       <td className={`table-cell ${styles.tableCell} ${styles.knowledgeLevel}`}>
                         <span className={styles.knowledgeLevelSpan}>{knowledgeLevelString}</span>
                         {
-                          pub.source && 
-                          <span>({pub.source})</span>
+                          pub.source && pub.source?.url 
+                          ? <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer'><span>({pub.source.name})</span></a>
+                          : <span className={styles.sourceName}span>({pub.source.name})</span>
                         }
                       </td>
                       <td className={`table-cell ${styles.tableCell} ${styles.pubdate} pubdate`}>
