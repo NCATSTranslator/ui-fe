@@ -86,17 +86,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   },[]);
 
   useEffect(() => {
-    if (!isFocused || focusedItemRef === null) {
+    if (!isFocused || focusedItemRef === null) 
       return;
-    }
-
-    focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
-  }, [focusedItemRef])
-
-  useEffect(() => {
-    if (!isFocused || focusedItemRef === null) {
-      return;
-    }
 
     focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
   }, [focusedItemRef])
