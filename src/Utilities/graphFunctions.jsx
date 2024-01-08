@@ -3,6 +3,7 @@ import cytoscape from 'cytoscape';
 import { debounce, cloneDeep } from 'lodash';
 import { capitalizeFirstLetter } from './utilities';
 import ExternalLink from '../Icons/external-link.svg?react';
+import { hasSupport } from './resultsFormattingFunctions';
 
 export const layoutList = {
   klay: {
@@ -52,7 +53,7 @@ export const resultToCytoscape = (result, summary) => {
 
   const makeEdge = (eid, edge, nodes) =>
   {
-    let isInferred = edge?.support ? true : false;
+    let isInferred = hasSupport(edge) ? true : false;
     let src = edge.subject;
     let tgt = edge.object;
     let pred = edge.predicate;
@@ -73,29 +74,34 @@ export const resultToCytoscape = (result, summary) => {
 
   const makeEdges = (es, edges, nodes) =>
   {
-    return [...es].map((e) =>
+    let edgeIDList = [...es];
+    return edgeIDList.map((e) =>
       {
         return makeEdge(e, edges[e], nodes);
       });
+  }
+  const distributeEntitiesInPath = (pathID, pathsArray, edgesArray, nodeCollection, edgeCollection) => {
+    pathsArray[pathID].subgraph.forEach((elemID, i) =>
+    {
+      if (i % 2 === 0) {
+        nodeCollection.add(elemID);
+      } else {
+        edgeCollection.add(elemID);
+        if(hasSupport(edgesArray[elemID])){
+          for(const supportPathID of edgesArray[elemID].support) {
+            distributeEntitiesInPath(supportPathID, pathsArray, edgesArray, nodeCollection, edgeCollection);
+          }
+        }
+      }
+    });
   }
 
   const ps = result.paths;
   const ns = new Set();
   const es = new Set();
-  ps.forEach((p) =>
-  {
-    summary.paths[p].subgraph.forEach((elem, i) =>
-      {
-        if (i % 2 === 0)
-        {
-          ns.add(elem);
-        }
-        else
-        {
-          es.add(elem);
-        }
-      });
-  });
+  for(const pathID of ps) {
+    distributeEntitiesInPath(pathID, summary.paths, summary.edges, ns, es);
+  }
 
   const c = {
     nodes: makeNodes(ns, summary.nodes),
@@ -346,7 +352,7 @@ export const initCytoscapeInstance = (dataObj) => {
         selector: 'edge[?inferred]',
         style: {
           'line-style': 'dashed',
-          'line-dash-pattern': [10, 3]
+          'line-dash-pattern': [20, 5]
         }
       },
     ],
