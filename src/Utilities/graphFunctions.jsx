@@ -50,8 +50,14 @@ export const resultToCytoscape = (result, summary) => {
     return [...ns].map((n) => { return makeNode(n, nodes); });
   }
 
-  const makeEdge = (eid, src, srcLbl, tgt, tgtLbl, pred) =>
+  const makeEdge = (eid, edge, nodes) =>
   {
+    let isInferred = edge?.support ? true : false;
+    let src = edge.subject;
+    let tgt = edge.object;
+    let pred = edge.predicate;
+    let srcLbl = nodes[src].names[0];
+    let tgtLbl = nodes[tgt].names[0];
     return {
       data: {
         id: eid,
@@ -59,7 +65,8 @@ export const resultToCytoscape = (result, summary) => {
         sourceLabel: srcLbl,
         target: tgt,
         targetLabel: tgtLbl,
-        label: pred
+        label: pred,
+        inferred: isInferred
       }
     };
   }
@@ -68,8 +75,7 @@ export const resultToCytoscape = (result, summary) => {
   {
     return [...es].map((e) =>
       {
-        return makeEdge(e, edges[e].subject, nodes[edges[e].subject].names[0], edges[e].object, 
-          nodes[edges[e].object].names[0], edges[e].predicate);
+        return makeEdge(e, edges[e], nodes);
       });
   }
 
@@ -95,6 +101,12 @@ export const resultToCytoscape = (result, summary) => {
     nodes: makeNodes(ns, summary.nodes),
     edges: makeEdges(es, summary.edges, summary.nodes)
   };
+  for(const edge of c.edges) {
+    if(edge === undefined || edge === null)
+      console.log(edge);
+    if(edge.data.inferred === undefined || edge.data.inferred === null) 
+      console.log(edge);
+  }
 
   for(const node of c.nodes) {
     for(const edge of c.edges) {
@@ -328,6 +340,13 @@ export const initCytoscapeInstance = (dataObj) => {
         selector: '.excluded',
         style: {
           'background-color': 'red'
+        }
+      },
+      {
+        selector: 'edge[?inferred]',
+        style: {
+          'line-style': 'dashed',
+          'line-dash-pattern': [10, 3]
         }
       },
     ],
