@@ -3,7 +3,7 @@ import { cloneDeep } from "lodash";
 import { score } from "../Utilities/scoring";
 
 export const hasSupport = (item) => {
-  return (Array.isArray(item.support) && item.support.length > 0);
+  return (item?.support && Array.isArray(item.support) && item.support.length > 0);
 }
 
 /**
