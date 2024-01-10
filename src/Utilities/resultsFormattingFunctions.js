@@ -257,8 +257,8 @@ const getFormattedEdge = (id, results) => {
 }
 
 const checkPathForSupport = (path) => {
-  const hasNonEmptySupport = (element, index) => index % 2 !== 0 && element.inferred;
-  return path?.subgraph?.some(hasNonEmptySupport) || false;
+  const hasInferredEdge = (element, index) => {  return index % 2 !== 0 && element.inferred};
+  return path?.subgraph?.some(hasInferredEdge);
 }
 
 /**
@@ -272,7 +272,6 @@ const getFormattedPaths = (rawPathIds, results) => {
   let formattedPaths = [];
   for(const id of rawPathIds) {
     let formattedPath = cloneDeep(results.paths[id]);
-    formattedPath.inferred = checkPathForSupport(formattedPath);
     if(formattedPath) {
       for(const [i] of formattedPath.subgraph.entries()) {
         if(i % 2 === 0) 
@@ -280,6 +279,7 @@ const getFormattedPaths = (rawPathIds, results) => {
         else 
           formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results);
       }
+      formattedPath.inferred = checkPathForSupport(formattedPath);
       formattedPaths.push({highlighted: false, path: formattedPath});
     }
   }
