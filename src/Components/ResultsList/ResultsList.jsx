@@ -382,6 +382,11 @@ const ResultsList = ({loading}) => {
           handleNewResults(data);
         }
 
+        // The ARS can rarely report that it is done in the status check when it is not done
+        if (data.status === 'running') {
+          setIsFetchingARAStatus(true);
+        }
+
         setIsFetchingResults(false);
       })
       .catch((error) => {
