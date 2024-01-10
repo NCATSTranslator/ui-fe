@@ -18,8 +18,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "../../Redux/resultsSlice";
 import { currentPrefs, currentRoot }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
-  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag, 
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow,
+  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag,
   filterCompare } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
@@ -45,7 +45,7 @@ const ResultsList = ({loading}) => {
   const loadingParam = getDataFromQueryVar("loading");
   const queryIDParam = getDataFromQueryVar("q");
   const initPresetTypeID = getDataFromQueryVar("t");
-  const initPresetTypeObject = (initPresetTypeID) 
+  const initPresetTypeObject = (initPresetTypeID)
     ? queryTypes.find(type => type.id === parseInt(initPresetTypeID))
     : null;
   const initNodeLabelParam = getDataFromQueryVar("l");
@@ -148,8 +148,8 @@ const ResultsList = ({loading}) => {
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
   const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
 
-  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
-  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
+  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
+  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
   useEffect(() => {
     currentSortString.current = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
     const tempItemsPerPage = (prefs?.result_per_screen?.pref_value) ? parseInt(prefs.result_per_screen.pref_value) : 10;
@@ -162,13 +162,13 @@ const ResultsList = ({loading}) => {
         setZoomKeyDown(true);
       }
     };
-  
+
     const handleKeyUp = (ev) => {
       if (ev.keyCode === 90) {
         setZoomKeyDown(false);
       }
     };
-  
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
@@ -221,7 +221,7 @@ const ResultsList = ({loading}) => {
     let newFormattedResults = [];
     let newOriginalResults = [];
     let saves = (userSaves) ? userSaves.saves: null;
-    
+
     if(or.length === 0) {
       newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
       newOriginalResults = cloneDeep(newFormattedResults);
@@ -257,7 +257,7 @@ const ResultsList = ({loading}) => {
 
     if(!justSort)
       originalResults.current = newOriginalResults;
-    
+
     rawResults.current = rr;
 
     return newFormattedResults;
@@ -270,7 +270,7 @@ const ResultsList = ({loading}) => {
       return;
 
     // if the results status is error, or there is no results property in the data obj, return
-    if(rr.status === 'error' || rr.data.results === undefined)  
+    if(rr.status === 'error' || rr.data.results === undefined)
       return;
 
     // if rawResults are new, set prevRawResults for future comparison
@@ -309,7 +309,7 @@ const ResultsList = ({loading}) => {
         numberOfStatusChecks.current++;
         console.log("ARA status:", data);
         dispatch(setCurrentQueryTimestamp(new Date(data.data.timestamp)));
-        
+
         let fetchResults = false;
 
         if(data.data.aras.length > returnedARAs.aras.length) {
@@ -380,6 +380,11 @@ const ResultsList = ({loading}) => {
           setFreshRawResults(data);
         } else {
           handleNewResults(data);
+        }
+
+        // The ARS can rarely report that it is done in the status check when it is not done
+        if (data.status === 'running' && numberOfStatusChecks.current < 120) {
+          setIsFetchingARAStatus(true);
         }
 
         setIsFetchingResults(false);
@@ -503,7 +508,7 @@ const ResultsList = ({loading}) => {
   }
 
   /**
-   * Activates sets the evidence and opens the evidence modal. 
+   * Activates sets the evidence and opens the evidence modal.
    */
   const activateEvidence = (evidence, item, edgeGroup, path, isAll) => {
     setIsAllEvidence(isAll);
@@ -726,9 +731,9 @@ const ResultsList = ({loading}) => {
         path={selectedPath}
       />
       <div className={styles.resultsList}>
-        <Query 
-          results 
-          loading={isLoading} 
+        <Query
+          results
+          loading={isLoading}
           initPresetTypeID={initPresetTypeID}
           initPresetTypeObject={initPresetTypeObject}
           initNodeIdParam={initNodeIdParam}
@@ -782,7 +787,7 @@ const ResultsList = ({loading}) => {
                   hasFreshResults: (freshRawResults !== null)
                 }}
               />
-              
+
               <div className={styles.resultsTableContainer}>
                 <div className={styles.resultsTable}>
                   <div className={styles.tableBody}>
