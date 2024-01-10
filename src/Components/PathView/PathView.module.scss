@@ -221,14 +221,14 @@
 .inferenceLabel {
   font-weight: 700;
   padding-left: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   width: fit-content;
   position: relative;
   display: flex;
   align-items: center;
   cursor: default;
   svg {
-    margin-left: 2px;
+    margin-left: 4px;
   }
 }
 .inferenceSeparator {

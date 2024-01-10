@@ -93,10 +93,10 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
   return(
     <div className={styles.pathView}>
       <Tooltip id='direct-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>Temp.</span>
+        <span className={styles.inferredLabelTooltip}>These paths are supported by existing evidence, click on one of the relationships to view available evidence.</span>
       </Tooltip>
       <Tooltip id='inferred-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>Temp.</span>
+        <span className={styles.inferredLabelTooltip}>These paths are supported by the other asserted path(s) listed below, rather than purely by existing evidence.</span>
       </Tooltip>
       <div className={styles.header}>
         <p className={styles.subtitle}>Paths</p>
