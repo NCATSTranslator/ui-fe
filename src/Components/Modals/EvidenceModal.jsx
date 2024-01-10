@@ -238,8 +238,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
               sources.length > 0 &&
               <div 
                 heading="Knowledge Sources" 
-                tooltipIcon={<Information className={styles.infoIcon} 
-                data-tooltip-id="knowledge-sources-tooltip" />}
+                tooltipIcon={<Information className={styles.infoIcon} />}
+                data-tooltip-id="knowledge-sources-tooltip" 
                 >
                 <div className={`table-body ${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
                   <div className={`table-head ${styles.tableHead}`}>
