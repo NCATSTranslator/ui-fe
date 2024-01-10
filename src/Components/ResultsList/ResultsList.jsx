@@ -383,7 +383,7 @@ const ResultsList = ({loading}) => {
         }
 
         // The ARS can rarely report that it is done in the status check when it is not done
-        if (data.status === 'running') {
+        if (data.status === 'running' && numberOfStatusChecks.current < 120) {
           setIsFetchingARAStatus(true);
         }
 
