@@ -104,7 +104,11 @@
     grid-template-columns: min-content 1fr;
     align-items: center;
     gap: 10px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
+    padding-left: 20px;
+    .formattedPath {
+      padding-left: 0;
+    }
     .pathEvidenceButton {
       background-color: $white;
       border: 1px solid $midDarkGray;
@@ -161,7 +165,7 @@
       font-size: 12px;
     }
     .subtitle {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       color: $black;
       margin-bottom: 0;
@@ -213,4 +217,23 @@
 
 .edgeLabel {
   fill: #000 !important;
+}
+.inferenceLabel {
+  font-weight: 700;
+  padding-left: 10px;
+  margin-bottom: 10px;
+  width: fit-content;
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: default;
+  svg {
+    margin-left: 2px;
+  }
+}
+.inferenceSeparator {
+  width: 100%;
+  margin: 0 auto 20px;
+  height: 2px;
+  background-color: $borderGray;
 }
