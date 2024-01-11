@@ -30,7 +30,7 @@ const getFormattedEvidence = (paths, results) => {
         formatObj(objs[key], getId, item, constructor, container)
         return;
       }
-      
+
       for(const obj of objs[key]) {
         formatObj(obj, getId, item, constructor, container)
       }
@@ -44,10 +44,6 @@ const getFormattedEvidence = (paths, results) => {
       item,
       (id) => {
         const publication = getPubByID(id, results);
-        if(publication.pubdate !== null) {
-          let formattedDate = publication.pubdate.split(' ')
-          publication.pubdate = formattedDate[0];
-        }
         publication.id = id;
         publication.source = '';
         publication.title = '';
@@ -58,8 +54,8 @@ const getFormattedEvidence = (paths, results) => {
 
   const formatSources = (sources, item, container) => {
     formatEvidenceObjs(
-      sources, 
-      (src) => { return `${item.edges[0].subject.name}${src.name}${item.edges[0].object.name}`; }, 
+      sources,
+      (src) => { return `${item.edges[0].subject.name}${src.name}${item.edges[0].object.name}`; },
       item,
       (src) => { return src; },
       container);
@@ -120,12 +116,6 @@ const getNodeByCurie = (curie, results) => {
   // if(res.curies.length > maxCurieCount)
   //   res.curies = res.curies.slice(0, maxCurieCount);
 
-  if(res.synonyms && res.synonyms.length > 0)
-    res.synonyms = null;
-
-  if(res.sameAs && res.sameAs.length > 0)
-    res.sameAs = null;
-
   res.id = curie;
   return res;
 }
@@ -153,7 +143,7 @@ const getEdgeByID = (id, results) => {
     name: tempSub.names[0],
     id: tempSub.id
   };
-  
+
   return newEdge;
 }
 
@@ -337,9 +327,9 @@ const checkBookmarkForNotes = (bookmarkID, bookmarksSet) => {
  * scores, and tags. The summarized results are returned as an array.
  * @param {Array} results - The results array to be summarized.
  * @param {Set} bookmarks - Set of bookmarked items for a given query
- * @param {number} confidenceWeight - value representing a parameter for weighted scoring 
- * @param {number} noveltyWeight - value representing a parameter for weighted scoring 
- * @param {number} clinicalWeight - value representing a parameter for weighted scoring 
+ * @param {number} confidenceWeight - value representing a parameter for weighted scoring
+ * @param {number} noveltyWeight - value representing a parameter for weighted scoring
+ * @param {number} clinicalWeight - value representing a parameter for weighted scoring
  * @returns {Array} The summarized results array.
 */
 export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, clinicalWeight, bookmarks = null) => {
@@ -382,7 +372,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
       score: score(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
       tags: tags,
       rawResult: item,
-      bookmarked: bookmarked, 
+      bookmarked: bookmarked,
       bookmarkID: bookmarkID,
       hasNotes: hasNotes
     }
@@ -414,7 +404,7 @@ export const getUrlByType = (publicationID, type) => {
   return url;
 }
 
-export const getTypeFromPub = (publicationID) => { 
+export const getTypeFromPub = (publicationID) => {
   if(publicationID.toLowerCase().includes("pmid"))
     return "PMID";
   if(publicationID.toLowerCase().includes("pmc"))
@@ -427,7 +417,7 @@ export const getTypeFromPub = (publicationID) => {
 /**
  * Extracts and formats the evidence data from a given result object.
  *
- * This function parses through the evidence information within the result object, 
+ * This function parses through the evidence information within the result object,
  * extracting distinct sources, general sources, and formatting publication data.
  * It handles cases where certain pieces of evidence may not be present and formats
  * the publications into a consumable array of objects.
@@ -440,7 +430,7 @@ export const getTypeFromPub = (publicationID) => {
 export const getEvidenceFromResult = (result) => {
   let evidenceObject = {};
   if(!result || !result.evidence)
-    return evidenceObject; 
+    return evidenceObject;
 
   evidenceObject.distinctSources = (result.evidence.distinctSources) ? result.evidence.distinctSources : [];
   evidenceObject.sources = (result.evidence.sources) ? result.evidence.sources : [];
