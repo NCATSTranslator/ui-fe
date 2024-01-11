@@ -141,32 +141,50 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
     let newSelectedPaths = new Set();
 
-    for(const path of formattedPaths) {
-      if(path.path.subgraph.length === 3) {
-        newSelectedPaths.add(path);
+    const checkForNodeMatches = (nodeList, path) => {
+      let currentNodeIndex = 0;
+      let numMatches = 0;
+      for(const [i, el] of path.path.subgraph.entries()) {
+        if(i % 2 !== 0)
+          continue;
+
+        if(nodeList[currentNodeIndex] && el.curies.includes(nodeList[currentNodeIndex])) {
+          numMatches++;
+        }
+        currentNodeIndex++;
       }
+      if(numMatches === nodeList.length) {
+        newSelectedPaths.add(path);
+        return true;
+      }
+      return false;
     }
 
     for(const selPath of selectedPaths) {
       for(const path of formattedPaths) {
-        let currentNodeIndex = 0;
-        let numMatches = 0;
-        for(const [i, el] of path.path.subgraph.entries()) {
-          if(i % 2 !== 0)
-            continue;
-
-          if(selPath[currentNodeIndex] && el.curies.includes(selPath[currentNodeIndex])) {
-            numMatches++;
-          }
-          currentNodeIndex++;
-        }
-        if(numMatches === selPath.length) {
+        if(path.path.subgraph.length === 3
+          && path.path.subgraph[0].curies.includes(selPath[0])
+          && path.path.subgraph[path.path.subgraph.length - 1].curies.includes(selPath[selPath.length - 1])) {
+          console.log(path.path.subgraph[0], selPath);
           newSelectedPaths.add(path);
-          break;
         }
+        if(path.path.inferred) {
+          for(const [i, item] of path.path.subgraph.entries()) {
+            if(i % 2 === 0)
+              continue;
+            if(item.support) {
+              for(const supportPath of item.support){
+                if(checkForNodeMatches(selPath, supportPath))
+                  newSelectedPaths.add(supportPath);
+              }
+            }
+          }
+        }
+        if(checkForNodeMatches(selPath, path))
+          newSelectedPaths.add(path);
       }
     }
-
+    console.log(newSelectedPaths);
     setSelectedPaths(newSelectedPaths)
 
   },[formattedPaths]);

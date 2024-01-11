@@ -9,7 +9,7 @@ const SupportPath = ({ dataObj }) => {
   const key = dataObj.key;
   const supportPath = dataObj.supportPath;
   const selectedPaths = dataObj.selectedPaths;
-  const pathToDisplay = dataObj.pathToDisplay;
+  // const pathToDisplay = dataObj.pathToDisplay;
   const handleActivateEvidence = dataObj.handleActivateEvidence;
   const handleNameClick = dataObj.handleNameClick;
   const handleEdgeClick = dataObj.handleEdgeClick;
@@ -31,7 +31,7 @@ const SupportPath = ({ dataObj }) => {
           <span>View evidence for this path.</span>
       </Tooltip>
       <div 
-        className={`${pathViewStyles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? pathViewStyles.unhighlighted : ''}`} 
+        className={`${pathViewStyles.tableItem} ${selectedPaths.size > 0 && !supportPath.highlighted ? pathViewStyles.unhighlighted : 'asdfasdfasdf'}`} 
         key={key}
         > 
         {

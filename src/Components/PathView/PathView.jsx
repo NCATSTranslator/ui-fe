@@ -10,6 +10,21 @@ import { useSelector } from 'react-redux';
 import { currentPrefs, currentRoot } from '../../Redux/rootSlice';
 import { Link } from 'react-router-dom';
 import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
+import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
+
+const checkInferredPathForSelections = (path, selPath) => {
+  for(const [i, item] of path.path.subgraph.entries()) {
+    if(i % 2 === 0)
+      continue;
+    if(hasSupport(item)) {
+      for(const supportPath of item.support) {
+        if(isEqual(selPath, supportPath)) {
+          supportPath.highlighted = true;
+        }
+      }
+    }
+  }
+}
 
 const getPathsWithSelectionsSet = (paths, selectedPaths) => {
   if(selectedPaths.size > 0) {
@@ -18,7 +33,9 @@ const getPathsWithSelectionsSet = (paths, selectedPaths) => {
       for(const selPath of selectedPaths) {
         if(isEqual(selPath, path)) {
           path.highlighted = true;
-          break;
+        }
+        if(path.path.inferred) {
+          checkInferredPathForSelections(path, selPath);
         }
       }
     }
