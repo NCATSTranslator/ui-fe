@@ -6,7 +6,6 @@
   justify-content: flex-start;
   width: auto;
   max-width: 65%;
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   background-color: $purpleEdgeBG;
@@ -86,6 +85,39 @@
   .predicatesList {
     margin: 0;
     list-style-type: none;
+  }
+}
+.ml .path, .trusted .path {
+  position: relative;
+  .mlTooltip {    
+    span {
+      max-width: none;
+      font-size: 12px;
+      line-height: 1.1;
+      font-weight: 400;
+      cursor: default;
+      white-space: wrap;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }  
+}
+.badges {
+  position: absolute;
+  top: -13px;
+  right: -13px;
+}
+.robot {
+  width: 18px;
+  height: 18px;
+  border-radius: 20px;
+  background-color: $white;
+  padding: 3px;
+  z-index: 10;
+  margin-right: 3px;
+  &:last-of-type {
+    margin-right: 0;
   }
 }
 

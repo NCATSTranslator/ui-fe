@@ -1,4 +1,4 @@
-import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity } from './utilities';
+import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity, mergeObjects } from './utilities';
 import { cloneDeep } from "lodash";
 import { score } from "../Utilities/scoring";
 
@@ -175,22 +175,26 @@ const getEdgeByID = (id, results) => {
  * @param {Array} pathTwo - The second path to compare.
  * @returns {boolean} True if the nodes match, false otherwise.
 */
-const checkForNodeUniformity = (pathOne, pathTwo) => {
+const checkForNodeUniformity = (pathOne, pathTwo, respectKnowledgeLevel) => {
   // if the lengths of the paths are different, they cannot have the same nodes
   if(pathOne.length !== pathTwo.length)
     return false;
 
   let nodesMatch = true;
 
-  for(const [i, path] of pathOne.entries()) {
+  for(const [i, item] of pathOne.entries()) {
     // if we're at an odd index, it's a predicate, so skip it
     if(i % 2 !== 0)
       continue;
 
     // if the names of the nodes don't match, set nodesMatch to false
-    if(path.name !== pathTwo[i].name)
+    if(item.name !== pathTwo[i].name)
       nodesMatch = false;
   }
+  // check for same knowledge level. If different, return false
+  if(respectKnowledgeLevel && pathOne[1]?.provenance[0].knowledge_level !== pathTwo[1]?.provenance[0].knowledge_level)
+    nodesMatch = false;
+
   return nodesMatch;
 }
 
@@ -252,6 +256,8 @@ const getFormattedEdge = (id, results) => {
   
   if(edge.provenance !== undefined) 
     newEdge.provenance = edge.provenance;
+  if(!Array.isArray(newEdge.provenance) && Object.keys(newEdge.provenance).length === 0)
+    newEdge.provenance = [];
   
   return newEdge;
 }
@@ -259,6 +265,17 @@ const getFormattedEdge = (id, results) => {
 const checkPathForSupport = (path) => {
   const hasInferredEdge = (element, index) => {  return index % 2 !== 0 && element.inferred};
   return path?.subgraph?.some(hasInferredEdge);
+}
+
+const getStringNameFromPath = (path) => {
+  let stringName = "";
+  for(const [i, pathItem] of path.subgraph.entries()) {
+    if(i % 2 === 0)
+      stringName += `${pathItem.name} `;
+    else
+      stringName += `${pathItem.predicates[0]} `;
+  }
+  return stringName.trimEnd();
 }
 
 /**
@@ -280,6 +297,7 @@ const getFormattedPaths = (rawPathIds, results) => {
           formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results);
       }
       formattedPath.inferred = checkPathForSupport(formattedPath);
+      formattedPath.stringName = getStringNameFromPath(formattedPath);
       formattedPaths.push({highlighted: false, path: formattedPath});
     }
   }
@@ -290,9 +308,10 @@ const getFormattedPaths = (rawPathIds, results) => {
  * Compresses paths in the graph by merging consecutive paths with identical nodes.
  * The compressed paths are returned as a new array.
  * @param {Array} graph - The graph containing paths to be compressed.
+ * @param {Array} respectKnowledgeLevel - Whether or not to merge based on knowledge level.
  * @returns {Array} The compressed paths.
 */
-const getCompressedPaths = (graph) => {
+const getCompressedPaths = (graph, respectKnowledgeLevel = true) => {
   let newCompressedPaths = [];
   let pathToDisplay = null
   for(const [i, pathObj] of graph.entries()) {
@@ -301,33 +320,40 @@ const getCompressedPaths = (graph) => {
     let displayPath = false;
     let nextPath = (graph[i+1] !== undefined) ? graph[i+1] : null;
     // if all nodes are equal
-    let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path.subgraph, nextPath.path.subgraph) : false;
+    let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path.subgraph, nextPath.path.subgraph, respectKnowledgeLevel) : false;
 
-    // if theres another path after the current one, and the nodes of each are equal
-    if(nextPath && nodesEqual) {
+    // loop through the current path's items
+    for(const [i] of pathObj.path.subgraph.entries()) {
+      if(displayPath) {
+        break;
+      }
+      // if we're at an even index, it's a node, so skip it
+      if(i % 2 === 0)
+      continue;
 
-      // loop through the current path's items
-      for(const [i] of pathObj.path.subgraph.entries()) {
-        if(displayPath) {
-          break;
-        }
-        // if we're at an even index, it's a node, so skip it
-        if(i % 2 === 0)
-          continue;
+      // if theres another path after the current one, and the nodes of each are equal
+      if(nextPath && nodesEqual) {
 
         if(!nextPath.path.subgraph[i])
           continue;
 
-        // loop through nextPath's item's predicates
-        for(const predicate of nextPath.path.subgraph[i].predicates) {
-          // if the next path item to be displayed doesn't have the predicate,
-          if(!pathToDisplay.path.subgraph[i].predicates.includes(predicate)) {
-            // add it
-            pathToDisplay.path.subgraph[i].predicates.push(predicate);
-            pathToDisplay.path.subgraph[i].edges.push(nextPath.path.subgraph[i].edges[0]);
-          }
+        // add the contents of the nextPath's edge object to the pathToDisplay edge's object
+        // combine predicates (uses set to prevent duplicates)
+        pathToDisplay.path.subgraph[i].predicates = Array.from(new Set([...pathToDisplay.path.subgraph[i].predicates, ...nextPath.path.subgraph[i].predicates]));
+        // edges
+        pathToDisplay.path.subgraph[i].edges = [...pathToDisplay.path.subgraph[i].edges, ...nextPath.path.subgraph[i].edges];
+        // support paths
+        if(pathToDisplay.path.subgraph[i].support && nextPath.path.subgraph[i].support) {
+          pathToDisplay.path.subgraph[i].support = [...pathToDisplay.path.subgraph[i].support, ...nextPath.path.subgraph[i].support].sort((a, b) => !a.path.stringName - !b.path.stringName || a.path.stringName.localeCompare(b.path.stringName));
         }
+        // provenance
+        pathToDisplay.path.subgraph[i].provenance = [...pathToDisplay.path.subgraph[i].provenance, ...nextPath.path.subgraph[i].provenance];
+        // publications
+        pathToDisplay.path.subgraph[i].publications = mergeObjects(pathToDisplay.path.subgraph[i].publications, nextPath.path.subgraph[i].publications);
       }
+      // compress support paths for the edge, if they exist
+      if(hasSupport(pathToDisplay?.path?.subgraph[i])) 
+        pathToDisplay.path.subgraph[i].support = getCompressedPaths(pathToDisplay.path.subgraph[i].support.sort((a, b) => !a.path.stringName - !b.path.stringName || a.path.stringName.localeCompare(b.path.stringName)), false);
     }
     // if there's no nextPath or the nodes are different, display the path
     if(!nextPath || !nodesEqual) {
@@ -401,7 +427,8 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
     let formattedPaths = getFormattedPaths(item.paths, results);
-    let compressedPaths = getCompressedPaths(formattedPaths);
+    let compressedPaths = getCompressedPaths(formattedPaths, true);
+    // let compressedPaths = formattedPaths;
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
     let itemID = item.id;

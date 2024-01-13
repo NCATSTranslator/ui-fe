@@ -110,10 +110,10 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
   return(
     <div className={styles.pathView}>
       <Tooltip id='direct-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>These paths are supported by existing evidence, click on one of the relationships to view available evidence.</span>
+        <span className={styles.inferredLabelTooltip}>These paths are supported by existing evidence, click on one of the relationships to view the available evidence.</span>
       </Tooltip>
       <Tooltip id='inferred-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>These paths are supported by the other asserted path(s) listed below, rather than purely by existing evidence.</span>
+        <span className={styles.inferredLabelTooltip}>These paths are supported by the path(s) listed below, rather than purely by existing evidence.</span>
       </Tooltip>
       <div className={styles.header}>
         <p className={styles.subtitle}>Paths</p>
@@ -139,7 +139,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                     displayDirectLabel 
                       ? 
                         <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
-                          Asserted <Information className={styles.infoIcon} />
+                          Lookup <Information className={styles.infoIcon} />
                         </p>
                       : 
                         null
@@ -150,7 +150,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                         <>
                           { directLabelDisplayed ? <div className={styles.inferenceSeparator}></div> : null }
                           <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
-                            Predicted <Information className={styles.infoIcon} />
+                            Inferred <Information className={styles.infoIcon} />
                           </p>
                         </>
                       : null

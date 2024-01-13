@@ -165,7 +165,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
         if(path.path.subgraph.length === 3
           && path.path.subgraph[0].curies.includes(selPath[0])
           && path.path.subgraph[path.path.subgraph.length - 1].curies.includes(selPath[selPath.length - 1])) {
-          console.log(path.path.subgraph[0], selPath);
           newSelectedPaths.add(path);
         }
         if(path.path.inferred) {

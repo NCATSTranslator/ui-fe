@@ -264,3 +264,28 @@ export const getGeneratedSendFeedbackLink = (openDefault = true, root) => {
   let link = encodeURIComponent(window.location.href);
   return `/${root}?fm=${openDefault}&link=${link}`;
 }
+
+export const mergeObjects = (obj1, obj2) => {
+  let result = {};
+  // Merge obj1 into result
+  for (let key in obj1) {
+      if (obj1.hasOwnProperty(key)) {
+          // If key is not in obj2, or it's not an array in obj2, just copy the value from obj1
+          if (!obj2[key] || !Array.isArray(obj2[key])) {
+              result[key] = obj1[key];
+          } else {
+              // If it's an array in both, concatenate them
+              result[key] = obj1[key].concat(obj2[key]);
+          }
+      }
+  }
+
+  // Merge keys from obj2 that are not in obj1
+  for (let key in obj2) {
+      if (obj2.hasOwnProperty(key) && !result.hasOwnProperty(key)) {
+          result[key] = obj2[key];
+      }
+  }
+
+  return result;
+}
