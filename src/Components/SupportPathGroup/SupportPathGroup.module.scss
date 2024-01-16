@@ -1,0 +1,11 @@
+@import "../../Assets/Styles/variables";
+
+.support {
+  transition: all .35s ease !important;
+  &.closed {
+    border: 0px solid transparent;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+  }
+}

@@ -33,6 +33,10 @@
       }
     }
   }
+  .sourceName {
+    text-decoration: underline;
+    font-weight: 400;
+  }
 }
 .bottom {
   display: flex;
@@ -172,4 +176,8 @@
   &:last-of-type {
     margin: 0;
   }
+}
+.knowledgeLevelSpan {
+  font-weight: 700;
+  display: block;
 }

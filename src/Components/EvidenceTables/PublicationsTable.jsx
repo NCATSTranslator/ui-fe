@@ -4,9 +4,9 @@ import LoadingBar from "../LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import Select from '../FormFields/Select';
 import ReactPaginate from "react-paginate";
-import { handleEvidenceSort, updatePubdate, updateSnippet, updateSource, 
+import { handleEvidenceSort, updatePubdate, updateSnippet, updateJournal, 
   updateTitle, getKnowledgeLevelString  } from "../../Utilities/evidenceModalFunctions";
-import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
+import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
@@ -34,7 +34,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
   const endOffset = (itemOffset + itemsPerPage > filteredEvidence.length)
     ? filteredEvidence.length
     :  itemOffset + itemsPerPage;
-  const [sortingState, setSortingState] = useState({ title: null, source: null, date: null });
+  const [sortingState, setSortingState] = useState({ title: null, journal: null, date: null });
   const [isLoading, setIsLoading] = useState(true);
   const didMountRef = useRef(false);
   const isFetchingPubmedData = useRef(false);
@@ -55,7 +55,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
     setIsLoading(true);
     setCurrentPage(0);
     setItemOffset(0);
-    setSortingState({ title: null, source: null, date: null });
+    setSortingState({ title: null, journal: null, date: null });
     setKnowledgeLevelFilter('all')
     amountOfIDsProcessed.current = 0;
     evidenceToUpdate.current = null;
@@ -67,7 +67,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
     let newPubmedEvidence = cloneDeep(pubmedEvidence)
     for(const element of newPubmedEvidence) {
       if(data[element.id] !== undefined) {
-        updateSource(element, data);
+        updateJournal(element, data);
         updateTitle(element, data);
         updateSnippet(element, data);
         updatePubdate(element, data);
@@ -89,13 +89,13 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
           setSortingState(prev => ({...prev, date: false}));
           setPubmedEvidence(sortDateYearLowHigh(dataToSort));
           break;
-        case "sourceHighLow":
-          setSortingState(prev => ({...prev, source: false}));
-          setPubmedEvidence(sortSourceHighLow(dataToSort));
+        case "journalHighLow":
+          setSortingState(prev => ({...prev, journal: false}));
+          setPubmedEvidence(sortJournalHighLow(dataToSort));
           break;
-        case "sourceLowHigh":
-          setSortingState(prev => ({...prev, source: true}));
-          setPubmedEvidence(sortSourceLowHigh(dataToSort));
+        case "journalLowHigh":
+          setSortingState(prev => ({...prev, journal: true}));
+          setPubmedEvidence(sortJournalLowHigh(dataToSort));
           break;
         case "titleHighLow":
           setSortingState(prev => ({...prev, title: false}));
@@ -172,7 +172,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
       setIsLoading(true);
       setCurrentPage(0);
       setItemOffset(0);
-      setSortingState({ title: null, source: null, date: true });
+      setSortingState({ title: null, journal: null, date: true });
       setKnowledgeLevelFilter('all')
       amountOfIDsProcessed.current = 0;
       evidenceToUpdate.current = null;
@@ -250,8 +250,8 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
               </span>
             </th>
             <th
-              className={`head ${styles.source} ${sortingState.source ? 'true' : (sortingState.source === null) ? '' : 'false'}`}
-              onClick={()=>{handleEvidenceSort((sortingState.source) ? 'sourceHighLow': 'sourceLowHigh', pubmedEvidence, handlePageClick, setSortingState, setPubmedEvidence)}}
+              className={`head ${styles.source} ${sortingState.journal ? 'true' : (sortingState.journal === null) ? '' : 'false'}`}
+              onClick={()=>{handleEvidenceSort((sortingState.journal) ? 'journalHighLow': 'journalLowHigh', pubmedEvidence, handlePageClick, setSortingState, setPubmedEvidence)}}
               >
               <span className={`head-span`}>
                 Journal
@@ -284,20 +284,25 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
               displayedPubmedEvidence.length === 0
               ? <p className={styles.noPubs}>No publications available.</p>
               :
-                displayedPubmedEvidence.map((pub, i)=> {
+                displayedPubmedEvidence.map((pub)=> {
                   const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
                   let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
                   return (
-                    <tr className={`table-item`} key={i}>
+                    <tr className={`table-item`} key={pub.id}>
                       <td className={`table-cell ${styles.tableCell} ${styles.knowledgeLevel}`}>
-                        {knowledgeLevelString}
+                        <span className={styles.knowledgeLevelSpan}>{knowledgeLevelString}</span>
+                        {
+                          pub.source && pub.source?.url 
+                          ? <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer'><span>({pub.source.name})</span></a>
+                          : <span className={styles.sourceName}span>({pub.source.name})</span>
+                        }
                       </td>
                       <td className={`table-cell ${styles.tableCell} ${styles.pubdate} pubdate`}>
                         {pub.pubdate && (pub.pubdate === 0 ) ? '' : pub.pubdate }
                       </td>
                       <td className={`table-cell ${styles.tableCell} ${styles.source} source`}>
                         <span>
-                          {pub.source && pub.source }
+                          {pub.journal && pub.journal }
                         </span>
                       </td>
                       <td className={`table-cell ${styles.tableCell} ${styles.title} title`} >

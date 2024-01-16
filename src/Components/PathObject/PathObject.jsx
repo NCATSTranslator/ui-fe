@@ -2,21 +2,22 @@ import styles from './PathObject.module.scss';
 import Tooltip from '../Tooltip/Tooltip';
 import Disease from '../../Icons/disease2.svg?react';
 import ExternalLink from '../../Icons/external-link.svg?react';
-import { capitalizeAllWords, formatBiolinkEntity, getIcon } from '../../Utilities/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
 
-const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, activeStringFilters, selected, inModal = false}) => {
+const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport, 
+  activeStringFilters, selected, supportDataObject = null, inModal = false }) => {
 
-  let nameString = '';
-  let typeString = '';
-  if(pathObject.category !== 'predicate') {
-    nameString = capitalizeAllWords(pathObject.name);
-    typeString = formatBiolinkEntity(pathObject.type)
-  }
   const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const type = (pathObject?.type) ? pathObject.type.replace("biolink:", ""): '';
   const uid = `${type}${id}`;
+  let nameString = '';
+  let typeString = '';
+  if(pathObject.category !== 'predicate') {
+    nameString = formatBiolinkNode(pathObject.name, type);
+    typeString = formatBiolinkEntity(pathObject.type)
+  }
 
   return (
     <>
@@ -60,6 +61,8 @@ const PathObject = ({pathObject, id, handleNameClick, handleEdgeClick, handleTar
           handleEdgeClick={handleEdgeClick}
           parentClass={styles.pathContainer}
           inModal={inModal}
+          hasSupport={hasSupport}
+          supportDataObject={supportDataObject}
         />
       }
       {

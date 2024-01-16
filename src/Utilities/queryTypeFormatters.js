@@ -2,7 +2,6 @@ import { closest as closestStrMatch } from 'fastest-levenshtein';
 import { capitalizeAllWords, removeDuplicateObjects } from "./utilities";
 
 export const defaultQueryFormatter = async (items, formatData) => {
-  console.log(formatData);
   const autocompleteObjects = items.map((item) => {
     const id = item.curie
     const input = formatData.input

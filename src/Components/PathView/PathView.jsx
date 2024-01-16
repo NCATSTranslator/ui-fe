@@ -3,12 +3,28 @@ import {useState, useEffect, useMemo} from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import Question from '../../Icons/Navigation/Question.svg?react';
+import Information from '../../Icons/information.svg?react';
 import ResearchMultiple from '../../Icons/research-multiple.svg?react';
 import { cloneDeep, isEqual } from 'lodash';
 import { useSelector } from 'react-redux';
 import { currentPrefs, currentRoot } from '../../Redux/rootSlice';
 import { Link } from 'react-router-dom';
 import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
+import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
+
+const checkInferredPathForSelections = (path, selPath) => {
+  for(const [i, item] of path.path.subgraph.entries()) {
+    if(i % 2 === 0)
+      continue;
+    if(hasSupport(item)) {
+      for(const supportPath of item.support) {
+        if(isEqual(selPath, supportPath)) {
+          supportPath.highlighted = true;
+        }
+      }
+    }
+  }
+}
 
 const getPathsWithSelectionsSet = (paths, selectedPaths) => {
   if(selectedPaths.size > 0) {
@@ -17,7 +33,9 @@ const getPathsWithSelectionsSet = (paths, selectedPaths) => {
       for(const selPath of selectedPaths) {
         if(isEqual(selPath, path)) {
           path.highlighted = true;
-          break;
+        }
+        if(path.path.inferred) {
+          checkInferredPathForSelections(path, selPath);
         }
       }
     }
@@ -36,6 +54,9 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
 
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
+
+  let directLabelDisplayed = false;
+  let inferredLabelDisplayed = false;
 
   const root = useSelector(currentRoot);
 
@@ -77,56 +98,122 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
     setNumberToShow(newAmount);
   }
 
+  const sortArrayByInferred = (array) => {
+    return array.sort((a, b) => {
+        let inferredA = a.path.inferred ? 1 : 0;
+        let inferredB = b.path.inferred ? 1 : 0;
+        return inferredA - inferredB;
+    });
+  }
+
+
   return(
     <div className={styles.pathView}>
+      <Tooltip id='direct-label-tooltip'>
+        <span className={styles.inferredLabelTooltip}>Established from explicit evidence in external sources. Example: A research paper stating 'X is related to Y.'</span>
+      </Tooltip>
+      <Tooltip id='inferred-label-tooltip'>
+        <span className={styles.inferredLabelTooltip}>Deduced from patterns in Translator's knowledge graphs that suggest relationships which are not explicitly stated. The paths shown below them support the inferred relationship.</span>
+      </Tooltip>
       <div className={styles.header}>
         <p className={styles.subtitle}>Paths</p>
-        <p>Click on any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
+        <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
       </div>
       {
         (!active) 
         ? <></>
         :
-          formattedPaths.slice(0, numberToShow).map((pathToDisplay, i)=> {
-            const tooltipID = pathToDisplay.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] );
-            return (
-              <div className={styles.formattedPath}>
-                <button 
-                  onClick={()=>handleActivateEvidence(pathToDisplay)}
-                  className={styles.pathEvidenceButton}
-                  data-tooltip-id={tooltipID}
-                  >
-                    <ResearchMultiple />
-                </button>
-                <Tooltip 
-                  id={tooltipID}
-                  >
-                    <span>View evidence for this path.</span>
-                </Tooltip>
-                <div 
-                  className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} 
-                  key={i}
-                  > 
+        <div className={styles.paths}>
+          {
+            sortArrayByInferred(formattedPaths).slice(0, numberToShow).map((pathToDisplay, i)=> {
+              const displayInferredLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
+                if(displayInferredLabel)
+                  inferredLabelDisplayed = true;
+              const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
+                if(displayDirectLabel)
+                  directLabelDisplayed = true;
+              const tooltipID = pathToDisplay.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] );
+              return (
+                <>
                   {
-                    pathToDisplay.path.subgraph.map((pathItem, j) => {
-                      let key = `${i}_${j}`;
-                      return (
-                        <PathObject 
-                          pathObject={pathItem} 
-                          id={key}
-                          key={key}
-                          handleNameClick={handleNameClick}
-                          handleEdgeClick={(edge)=>handleEdgeClick(edge, pathToDisplay)}
-                          handleTargetClick={handleTargetClick}
-                          activeStringFilters={activeStringFilters}
-                        />
-                      ) 
-                    }) 
+                    displayDirectLabel 
+                      ? 
+                        <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
+                          Lookup <Information className={styles.infoIcon} />
+                        </p>
+                      : 
+                        null
                   }
-                </div>
-              </div>
-            )
-          })
+                  {
+                    displayInferredLabel 
+                      ? 
+                        <>
+                          { directLabelDisplayed ? <div className={styles.inferenceSeparator}></div> : null }
+                          <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
+                            Inferred <Information className={styles.infoIcon} />
+                          </p>
+                        </>
+                      : null
+                    }
+                  <div className={styles.formattedPath}>
+                    <button 
+                      onClick={()=>handleActivateEvidence(pathToDisplay)}
+                      className={styles.pathEvidenceButton}
+                      data-tooltip-id={tooltipID}
+                      >
+                        <ResearchMultiple />
+                    </button>
+                    <Tooltip 
+                      id={tooltipID}
+                      >
+                        <span>View evidence for this path.</span>
+                    </Tooltip>
+                    <div 
+                      className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} 
+                      key={i}
+                      > 
+                      {
+                        pathToDisplay.path.subgraph.map((pathItem, j) => {
+                          let key = `${i}_${j}`;
+                          let pathItemHasSupport = pathItem.inferred;
+                          let supportDataObject = (pathItemHasSupport)
+                            ? {
+                                key: key,
+                                pathItem: pathItem,
+                                pathViewStyles: styles,
+                                selectedPaths: selectedPaths, 
+                                pathToDisplay: pathToDisplay, 
+                                handleActivateEvidence: handleActivateEvidence, 
+                                handleNameClick: handleNameClick, 
+                                handleEdgeClick: handleEdgeClick, 
+                                handleTargetClick: handleTargetClick, 
+                                activeStringFilters: activeStringFilters
+                              }
+                            : null;
+                          return (
+                            <>
+                              <PathObject 
+                                supportDataObject={supportDataObject}
+                                pathObject={pathItem} 
+                                id={key}
+                                key={key}
+                                handleNameClick={handleNameClick}
+                                handleEdgeClick={(edge)=>handleEdgeClick(edge, pathToDisplay)}
+                                handleTargetClick={handleTargetClick}
+                                activeStringFilters={activeStringFilters}
+                                hasSupport={pathItemHasSupport}
+                              />
+                            </>
+                          ) 
+                        }) 
+                      }
+                    </div>
+                  </div>
+                </>
+              )
+            })
+          }
+        </div>
       }
       <div className={styles.buttons}>
         {
