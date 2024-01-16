@@ -34,13 +34,13 @@ const sortTagsBySelected = (a, b, selected) => {
 }
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, handleFilter, activeFilters,
-  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags,
-  hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, handleBookmarkError = ()=>{}}) => {
+  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags, hasFocusedOnFirstLoad,
+  hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, 
+  handleBookmarkError = ()=>{}, handleFocusedOnItem = ()=>{}}) => {
 
   const root = useSelector(currentRoot);
 
   const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
-  // console.log(currentEvidence);
   let icon = getIcon(item.type);
   let publicationCount = (currentEvidence.publications?.length) 
     ? currentEvidence.publications.filter((item)=> item.type === "PMID" || item.type === "PMC").length
@@ -51,7 +51,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   let sourcesCount = (currentEvidence.distinctSources?.length) 
     ? currentEvidence.distinctSources.length
     : 0;
-
   let roleCount = (item.tags) 
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
@@ -87,10 +86,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   },[]);
 
   useEffect(() => {
-    if (!isFocused || focusedItemRef === null) 
+    if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad) 
       return;
 
     focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+    handleFocusedOnItem();
   }, [focusedItemRef])
 
   const getPathsCount = (paths) => {
