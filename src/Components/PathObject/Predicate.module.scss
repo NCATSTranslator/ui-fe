@@ -6,7 +6,6 @@
   justify-content: flex-start;
   width: auto;
   max-width: 65%;
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   background-color: $purpleEdgeBG;
@@ -88,7 +87,53 @@
     list-style-type: none;
   }
 }
-
+.ml .path, .trusted .path {
+  position: relative;
+  .mlTooltip {    
+    span {
+      max-width: none;
+      font-size: 12px;
+      line-height: 1.1;
+      font-weight: 400;
+      cursor: default;
+      white-space: wrap;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }  
+}
+.badges {
+  position: absolute;
+  top: -13px;
+  right: -16px;
+  display: flex;
+}
+.robot {
+  width: 18px;
+  height: 18px;
+  border-radius: 20px;
+  background-color: $white;
+  padding: 3px;
+  z-index: 10;
+  margin-right: 3px;
+  transition: all .25s ease;
+  svg {
+    width: 18px;
+    height: 18px;
+    min-width: auto;
+    path {
+      fill: $purpleEdgeBG;
+      stroke: $purpleEdgeBG;
+    }
+  }
+  &.selected svg {
+    path {
+      fill: $purpleEdgeBGSelected;
+      stroke: $purpleEdgeBGSelected !important;
+    }
+  }
+}
 
 .connector {
   position: absolute;
@@ -101,4 +146,58 @@
   background-position: center;
   background-size: 100%;
   background-repeat: no-repeat;
+}
+
+.inferred.connector {
+  background-image: url('../../Icons/straight-dotted.svg');
+}
+
+.supportExpansionButton {
+  position: absolute;
+  bottom: -15px;
+  margin: 0;
+  border-radius: 50%;
+  background-color: $white;
+  color: $purpleEdgeBG;
+  box-shadow: $dropShadow;
+  z-index: 100;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  svg {
+    margin: 0;
+  }
+  .supportButtonIcon {
+    margin: 0;
+    transform: rotate(180deg);
+    z-index: 10;
+    position: relative;
+    background-color: $white;
+    border-radius: 50%;
+    height: 24px;
+  }
+  &.expanded {
+    border-radius: 50%;
+    background-color: $white;
+    .supportButtonIcon {
+      transform: rotate(0);
+    }
+    .supportConnector {
+      opacity: 1;
+      height: 20px;
+    }
+  }
+  .supportConnector {
+    opacity: 0;
+    transition: all .35s ease;
+    height: 0;
+    top: 20px;
+    background-color: $purpleEdgeBG;
+    width: 1px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
 }

@@ -1,4 +1,4 @@
-import { sortNameHighLow, sortNameLowHigh, sortSourceHighLow, sortSourceLowHigh,
+import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from './sortingFunctions';
 import { cloneDeep } from 'lodash';
 import { capitalizeAllWords } from "./utilities";
@@ -6,42 +6,42 @@ import { getFormattedEdgeLabel } from './resultsFormattingFunctions';
 
 export const handleEvidenceSort = (sortName, pubmedEvidence, handlePageClick, sortingStateSetter, setPubmedEvidence) => {
   let sortedPubmedEvidence = cloneDeep(pubmedEvidence);
-  let newSortingState = { title: null, source: null, date: null };
+  let newSortingState = { title: null, journal: null, date: null };
   switch (sortName) {
     case 'titleLowHigh':
       sortedPubmedEvidence = sortNameLowHigh(sortedPubmedEvidence, true);
       newSortingState.title = true;
-      newSortingState.source = null;
+      newSortingState.journal = null;
       newSortingState.date = null;
       break;
     case 'titleHighLow':
       sortedPubmedEvidence = sortNameHighLow(sortedPubmedEvidence, true);
       newSortingState.title = false;
-      newSortingState.source = null;
+      newSortingState.journal = null;
       newSortingState.date = null;
       break;
-    case 'sourceLowHigh':
-      sortedPubmedEvidence = sortSourceLowHigh(sortedPubmedEvidence);
+    case 'journalLowHigh':
+      sortedPubmedEvidence = sortJournalLowHigh(sortedPubmedEvidence);
       newSortingState.title = null;
-      newSortingState.source = true;
+      newSortingState.journal = true;
       newSortingState.date = null;
       break;
-    case 'sourceHighLow':
-      sortedPubmedEvidence = sortSourceHighLow(sortedPubmedEvidence);
+    case 'journalHighLow':
+      sortedPubmedEvidence = sortJournalHighLow(sortedPubmedEvidence);
       newSortingState.title = null;
-      newSortingState.source = false;
+      newSortingState.journal = false;
       newSortingState.date = null;
       break;
     case 'dateLowHigh':
       sortedPubmedEvidence = sortDateYearLowHigh(sortedPubmedEvidence);
       newSortingState.title = null;
-      newSortingState.source = null;
+      newSortingState.journal = null;
       newSortingState.date = false;
       break;
     case 'dateHighLow':
       sortedPubmedEvidence = sortDateYearHighLow(sortedPubmedEvidence);
       newSortingState.title = null;
-      newSortingState.source = null;
+      newSortingState.journal = null;
       newSortingState.date = true;
       break;
     default:
@@ -65,9 +65,9 @@ export const checkForEdgeMatch = (edgeOne, edgeTwo) => {
     : true;
 }
 
-export const updateSource = (element, data) => {
-  if(!element.source)
-    element.source = capitalizeAllWords(data[element.id].journal_name);
+export const updateJournal = (element, data) => {
+  if(!element.journal)
+    element.journal = capitalizeAllWords(data[element.id].journal_name);
 }
 
 export const updateTitle = (element, data) => {
@@ -109,23 +109,19 @@ const addEvidenceObjectToSet = (obj, container) => {
 }
 
 // filter publications/sources based on a selectedEdge
-export const filterEvidenceObjs = (objs, selectedEdge, container) => {
-  const selectedEdgeLabel = getFormattedEdgeLabel(selectedEdge.subject.name, selectedEdge.predicate, selectedEdge.object.name);
+export const filterEvidenceObjs = (objs, selectedEdges, container) => {
+  let idsToCheck = selectedEdges.map(edge => edge.id);
   for (const obj of objs) {
     let proceed = false;
-    if(Array.isArray(obj.edges) && obj.edges[0].label === selectedEdgeLabel) {
+    if(Array.isArray(obj.edges) && idsToCheck.some(id => Object.keys(obj.edges).includes(id))) {
       proceed = true;
-    } else if(obj.edges[selectedEdge.id] !== undefined) {
+    } else if(idsToCheck.some(id => obj.edges[id] !== undefined) ) {
       proceed = true;
     }
 
     if(proceed) {
       const includedObj = cloneDeep(obj);
-      let filteredEdges = {};
-      filteredEdges[selectedEdge.id] = (obj.edges[selectedEdge.id] !== undefined)
-        ? includedObj.edges[selectedEdge.id]
-        : includedObj.edges[0];
-      includedObj.edges = filteredEdges;
+      includedObj.edges = selectedEdges;
 
       addEvidenceObjectToSet(includedObj, container);
     }

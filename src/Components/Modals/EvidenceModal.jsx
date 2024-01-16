@@ -4,7 +4,7 @@ import Tabs from "../Tabs/Tabs";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/external-link.svg?react';
-import { capitalizeAllWords } from "../../Utilities/utilities";
+import { capitalizeAllWords, formatBiolinkEntity } from "../../Utilities/utilities";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
 import { checkForEdgeMatch, handleEvidenceSort, filterEvidenceObjs } from "../../Utilities/evidenceModalFunctions";
@@ -65,19 +65,19 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
       let filteredPublications = filteredEvidence.publications;
       let filteredSources = filteredEvidence.sources;
 
-      const edgeToFilterBy = selEdge.edges.find((edge)=> edge.predicate === selEdge.predicate);
-      filterEvidenceObjs(rawEvidence.publications, edgeToFilterBy, filteredPublications);
-      filterEvidenceObjs(rawEvidence.sources, edgeToFilterBy, filteredSources);
+      const edgesToFilterBy = selEdge.edges;
+      filterEvidenceObjs(rawEvidence.publications, edgesToFilterBy, filteredPublications);
+      filterEvidenceObjs(rawEvidence.sources, edgesToFilterBy, filteredSources);
       
       evidenceToDistribute = filteredEvidence;
-      setSelectedEdge(selEdge)
+      setSelectedEdge(selEdge);
 
-      const soloEdge = selEdge.edges.find(edge => edge.predicate === selEdge.predicate);
+      const soloEdge = selEdge.edges.find(edge => formatBiolinkEntity(edge.predicate) === selEdge.predicate);
       const formatted = getFormattedEdgeLabel(soloEdge.subject.name, soloEdge.predicate, soloEdge.object.name).replaceAll("|", " ");
       setFormattedEdge(formatted);
     } else {
       setFormattedEdge(null);
-      evidenceToDistribute(rawEvidence);
+      evidenceToDistribute = rawEvidence;
     }
     distributeEvidence(evidenceToDistribute);
   }
@@ -238,8 +238,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
               sources.length > 0 &&
               <div 
                 heading="Knowledge Sources" 
-                tooltipIcon={<Information className={styles.infoIcon} 
-                data-tooltip-id="knowledge-sources-tooltip" />}
+                tooltipIcon={<Information className={styles.infoIcon} />}
+                data-tooltip-id="knowledge-sources-tooltip" 
                 >
                 <div className={`table-body ${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
                   <div className={`table-head ${styles.tableHead}`}>

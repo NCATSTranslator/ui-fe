@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
+import { getIcon, capitalizeAllWords, formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
@@ -34,8 +34,9 @@ const sortTagsBySelected = (a, b, selected) => {
 }
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, handleFilter, activeFilters,
-  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags,
-  hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, handleBookmarkError = ()=>{}}) => {
+  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags, hasFocusedOnFirstLoad,
+  hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, 
+  handleBookmarkError = ()=>{}, handleFocusedOnItem = ()=>{}}) => {
 
   const root = useSelector(currentRoot);
 
@@ -50,7 +51,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   let sourcesCount = (currentEvidence.distinctSources?.length) 
     ? currentEvidence.distinctSources.length
     : 0;
-
   let roleCount = (item.tags) 
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
@@ -86,15 +86,29 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   },[]);
 
   useEffect(() => {
-    if (!isFocused || focusedItemRef === null) {
+    if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad) 
       return;
-    }
 
     focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+    handleFocusedOnItem();
   }, [focusedItemRef])
 
-  const pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
-  const nameString = (item.name !== null) ? item.name : '';
+  const getPathsCount = (paths) => {
+    let count = paths.length;
+    for(const path of paths) {
+      for(const [i, subgraphItem] of path.path.subgraph.entries()) {
+        if(i % 2 === 0 || !subgraphItem.support)
+          continue;
+        count += subgraphItem.support.length;
+      }
+    }
+    return count;
+  } 
+  
+  const pathsCount = useMemo(()=>getPathsCount(formattedPaths), [formattedPaths]);
+  const pathString = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
+  const typeString = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
+  const nameString = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
   const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
   const [itemGraph, setItemGraph] = useState(null);
@@ -128,32 +142,49 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
     let newSelectedPaths = new Set();
 
-    for(const path of formattedPaths) {
-      if(path.path.subgraph.length === 3) {
-        newSelectedPaths.add(path);
+    const checkForNodeMatches = (nodeList, path) => {
+      let currentNodeIndex = 0;
+      let numMatches = 0;
+      for(const [i, el] of path.path.subgraph.entries()) {
+        if(i % 2 !== 0)
+          continue;
+
+        if(nodeList[currentNodeIndex] && el.curies.includes(nodeList[currentNodeIndex])) {
+          numMatches++;
+        }
+        currentNodeIndex++;
       }
+      if(numMatches === nodeList.length) {
+        newSelectedPaths.add(path);
+        return true;
+      }
+      return false;
     }
 
     for(const selPath of selectedPaths) {
       for(const path of formattedPaths) {
-        let currentNodeIndex = 0;
-        let numMatches = 0;
-        for(const [i, el] of path.path.subgraph.entries()) {
-          if(i % 2 !== 0)
-            continue;
-
-          if(selPath[currentNodeIndex] && el.curies.includes(selPath[currentNodeIndex])) {
-            numMatches++;
-          }
-          currentNodeIndex++;
-        }
-        if(numMatches === selPath.length) {
+        if(path.path.subgraph.length === 3
+          && path.path.subgraph[0].curies.includes(selPath[0])
+          && path.path.subgraph[path.path.subgraph.length - 1].curies.includes(selPath[selPath.length - 1])) {
           newSelectedPaths.add(path);
-          break;
         }
+        if(path.path.inferred) {
+          for(const [i, item] of path.path.subgraph.entries()) {
+            if(i % 2 === 0)
+              continue;
+            if(item.support) {
+              for(const supportPath of item.support){
+                if(checkForNodeMatches(selPath, supportPath))
+                  newSelectedPaths.add(supportPath);
+              }
+            }
+          }
+        }
+        if(checkForNodeMatches(selPath, path))
+          newSelectedPaths.add(path);
       }
     }
-
+    console.log(newSelectedPaths);
     setSelectedPaths(newSelectedPaths)
 
   },[formattedPaths]);
@@ -236,7 +267,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             />
           </span>
         }
-        <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
+        <span className={styles.effect}>{pathsCount} {pathString} {objectString}</span>
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
         {

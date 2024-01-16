@@ -50,7 +50,8 @@ const ResultsList = ({loading}) => {
     : null;
   const initNodeLabelParam = getDataFromQueryVar("l");
   const initNodeIdParam = getDataFromQueryVar("i");
-  const initResultIdParam = getDataFromQueryVar("r");
+  let initResultIdParam = getDataFromQueryVar("r");
+  const hasFocusedOnFirstLoad = useRef(false);
   const [nodeDescription, setNodeDescription] = useState();
 
   loading = (loading) ? loading : false;
@@ -243,7 +244,7 @@ const ResultsList = ({loading}) => {
 
     if(newFormattedResults.length > 0) {
       let focusedPage = 0;
-      if (initResultIdParam !== '0') {
+      if (initResultIdParam !== '0' && !hasFocusedOnFirstLoad.current) {
         let focusedItemIndex = newFormattedResults.findIndex(result => result.id === initResultIdParam);
         if (focusedItemIndex === -1) {
           focusedItemIndex = 0;
@@ -562,7 +563,7 @@ const ResultsList = ({loading}) => {
       if(!(newStringFilters.length === stringFilters.length && newStringFilters.every((value, index) => value === stringFilters[index])))
         setActiveStringFilters(newStringFilters);
 
-      // Set the formatted results to the newly filtered results
+      // Return the newly filtered results
       return filteredResults;
     }
 
@@ -869,6 +870,7 @@ const ResultsList = ({loading}) => {
                             activeFilters={activeFilters}
                             isFocused={item.id === initResultIdParam}
                             focusedItemRef={focusedItemRef}
+                            handleFocusedOnItem={()=>hasFocusedOnFirstLoad.current = true}
                           />
                         )
                       })
@@ -916,7 +918,11 @@ const ResultsList = ({loading}) => {
                 }
                 <ResultsListLoadingButton
                   data={{
-                    handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
+                    handleResultsRefresh: () => 
+                    { 
+                      hasFocusedOnFirstLoad.current = false; 
+                      handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
+                    },
                     isFetchingARAStatus: isFetchingARAStatus,
                     isFetchingResults: isFetchingResults,
                     showDisclaimer: true,
@@ -933,7 +939,11 @@ const ResultsList = ({loading}) => {
           formattedResults.length > 0 &&
           <StickyToolbar
             loadingButtonData={{
-              handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
+              handleResultsRefresh: () => 
+                { 
+                  hasFocusedOnFirstLoad.current = false; 
+                  handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
+                },
               isFetchingARAStatus: isFetchingARAStatus,
               isFetchingResults: isFetchingResults,
               showDisclaimer: false,
