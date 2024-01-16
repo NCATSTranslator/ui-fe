@@ -110,7 +110,6 @@ const addEvidenceObjectToSet = (obj, container) => {
 
 // filter publications/sources based on a selectedEdge
 export const filterEvidenceObjs = (objs, selectedEdges, container) => {
-  console.log(selectedEdges);
   let idsToCheck = selectedEdges.map(edge => edge.id);
   for (const obj of objs) {
     let proceed = false;
@@ -122,10 +121,6 @@ export const filterEvidenceObjs = (objs, selectedEdges, container) => {
 
     if(proceed) {
       const includedObj = cloneDeep(obj);
-      // let filteredEdges = {};
-      // filteredEdges[selectedEdge.id] = (obj.edges[selectedEdge.id] !== undefined)
-      //   ? includedObj.edges[selectedEdge.id]
-      //   : includedObj.edges[0];
       includedObj.edges = selectedEdges;
 
       addEvidenceObjectToSet(includedObj, container);

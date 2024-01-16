@@ -350,8 +350,6 @@ const getCompressedPaths = (graph, respectKnowledgeLevel = true) => {
         pathToDisplay.path.subgraph[i].provenance = [...pathToDisplay.path.subgraph[i].provenance, ...nextPath.path.subgraph[i].provenance];
         // publications
         pathToDisplay.path.subgraph[i].publications = mergeObjects(pathToDisplay.path.subgraph[i].publications, nextPath.path.subgraph[i].publications);
-        if(pathToDisplay.path.subgraph[i].edges[0].subject.name === "Cholecalciferol")
-          console.log(pathToDisplay.path.subgraph[i]);
       }
       // compress support paths for the edge, if they exist
       if(hasSupport(pathToDisplay?.path?.subgraph[i])) 
@@ -537,18 +535,61 @@ export const getEvidenceFromResult = (result) => {
         arr.push(item);
     }
   }
+
+  const createNewPub = (result, pubID, subgraphItem, key) => {
+    let newPub;
+    let type;
+    // this is to deal with the old bookmark format, which removed publications from the result's evidence obj
+    if(!result.evidence.publications) {
+      console.log(subgraphItem);
+      type = getTypeFromPub(pubID);
+      newPub = {
+        type: getTypeFromPub(pubID),
+        url: getUrlByType(pubID, type),
+        id: pubID,
+        journal: '',
+        pubdate: '',
+        snippet: '', 
+        title: '',
+        knowledgeLevel: key,
+        edges: subgraphItem.edges.reduce((obj, item) => {
+            obj[item.id] = item;
+            return obj;
+        }, {}),
+        source: {
+          name: "unknown",
+          url: null,
+        }
+      }
+    // this is for the current format
+    } else {
+      newPub = result.evidence.publications[pubID];
+      newPub.knowledgeLevel = key;
+      type = getTypeFromPub(pubID);
+      newPub.url = getUrlByType(pubID, type);
+      newPub.source.name = formatPublicationSourceName(newPub.source.name);
+    }
+    return newPub;
+  }
+
   const fillInPublications = (subgraphItem, result, evidenceObj) => {
-    // key here is the knowledge level, i.e. "trusted", "ml", etc
-    Object.keys(subgraphItem.publications).forEach(key => {
-      for(const pubID of subgraphItem.publications[key]) {
-        let newPub = result.evidence.publications[pubID];
-        newPub.knowledgeLevel = key;
-        let type = getTypeFromPub(pubID);
-        newPub.url = getUrlByType(pubID, type);
-        newPub.source.name = formatPublicationSourceName(newPub.source.name);
+    // if subgraphItem.publications is an array, we're in the Workspace dealing with an old bookmark
+    if(Array.isArray(subgraphItem.publications)) {
+      for(const pubID of subgraphItem.publications) {
+        let knowledgeLevel = ""
+        let newPub = createNewPub(result, pubID, subgraphItem, knowledgeLevel);
         addItemToPublications(newPub, pubIds, evidenceObj.publications);
       }
-    })
+    // if it's not it's an object, and we're on the results page
+    } else {
+      // key here is the knowledge level, i.e. "trusted", "ml", etc
+      Object.keys(subgraphItem.publications).forEach(key => {
+        for(const pubID of subgraphItem.publications[key]) {
+          let newPub = createNewPub(result, pubID, subgraphItem, key);
+          addItemToPublications(newPub, pubIds, evidenceObj.publications);
+        }
+      })
+    }
   }
 
   const loopPathsAndFillInPubs = (result, paths, evidenceObj) => {
@@ -562,8 +603,6 @@ export const getEvidenceFromResult = (result) => {
           loopPathsAndFillInPubs(result, subgraphItem.support, evidenceObj);
         }
       }
-      // if(path.path.stringName.includes("Cholecalciferol"));
-      //   console.log(path, evidenceObj);
     }
   }
 

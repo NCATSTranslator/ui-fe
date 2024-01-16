@@ -87,7 +87,7 @@ export const getFormattedBookmarkObject = (bookmarkType = "result", bookmarkName
   queryNodeDescription = "", typeObject, saveItem, pk) => {
 
   let newSaveItem = cloneDeep(saveItem);
-  delete newSaveItem.evidence.publications;
+  // delete newSaveItem.evidence.publications;
 
   let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
   return { 

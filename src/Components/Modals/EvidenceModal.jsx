@@ -79,7 +79,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
       setFormattedEdge(null);
       evidenceToDistribute = rawEvidence;
     }
-    console.log(evidenceToDistribute);
     distributeEvidence(evidenceToDistribute);
   }
 
