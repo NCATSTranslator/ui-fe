@@ -109,23 +109,24 @@ const addEvidenceObjectToSet = (obj, container) => {
 }
 
 // filter publications/sources based on a selectedEdge
-export const filterEvidenceObjs = (objs, selectedEdge, container) => {
-  const selectedEdgeLabel = getFormattedEdgeLabel(selectedEdge.subject.name, selectedEdge.predicate, selectedEdge.object.name);
+export const filterEvidenceObjs = (objs, selectedEdges, container) => {
+  console.log(selectedEdges);
+  let idsToCheck = selectedEdges.map(edge => edge.id);
   for (const obj of objs) {
     let proceed = false;
-    if(Array.isArray(obj.edges) && obj.edges[0].label === selectedEdgeLabel) {
+    if(Array.isArray(obj.edges) && idsToCheck.some(id => Object.keys(obj.edges).includes(id))) {
       proceed = true;
-    } else if(obj.edges[selectedEdge.id] !== undefined) {
+    } else if(idsToCheck.some(id => obj.edges[id] !== undefined) ) {
       proceed = true;
     }
 
     if(proceed) {
       const includedObj = cloneDeep(obj);
-      let filteredEdges = {};
-      filteredEdges[selectedEdge.id] = (obj.edges[selectedEdge.id] !== undefined)
-        ? includedObj.edges[selectedEdge.id]
-        : includedObj.edges[0];
-      includedObj.edges = filteredEdges;
+      // let filteredEdges = {};
+      // filteredEdges[selectedEdge.id] = (obj.edges[selectedEdge.id] !== undefined)
+      //   ? includedObj.edges[selectedEdge.id]
+      //   : includedObj.edges[0];
+      includedObj.edges = selectedEdges;
 
       addEvidenceObjectToSet(includedObj, container);
     }

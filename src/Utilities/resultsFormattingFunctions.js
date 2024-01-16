@@ -350,6 +350,8 @@ const getCompressedPaths = (graph, respectKnowledgeLevel = true) => {
         pathToDisplay.path.subgraph[i].provenance = [...pathToDisplay.path.subgraph[i].provenance, ...nextPath.path.subgraph[i].provenance];
         // publications
         pathToDisplay.path.subgraph[i].publications = mergeObjects(pathToDisplay.path.subgraph[i].publications, nextPath.path.subgraph[i].publications);
+        if(pathToDisplay.path.subgraph[i].edges[0].subject.name === "Cholecalciferol")
+          console.log(pathToDisplay.path.subgraph[i]);
       }
       // compress support paths for the edge, if they exist
       if(hasSupport(pathToDisplay?.path?.subgraph[i])) 
@@ -560,6 +562,8 @@ export const getEvidenceFromResult = (result) => {
           loopPathsAndFillInPubs(result, subgraphItem.support, evidenceObj);
         }
       }
+      // if(path.path.stringName.includes("Cholecalciferol"));
+      //   console.log(path, evidenceObj);
     }
   }
 

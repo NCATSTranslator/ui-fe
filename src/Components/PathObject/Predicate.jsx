@@ -35,6 +35,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
 
   pathObject.predicate = formatBiolinkEntity(pathObject.predicates[0]); 
   const pubCount = Object.values(pathObject.publications).reduce((sum, arr) => sum + arr.length, 0);
+  // console.log(pathObject, pathObject.publications);
   const [isSupportExpanded, setIsSupportExpanded] = useState(true);
   const isMachineLearned = checkForProvenanceType(pathObject, "ml");
   const isTrusted = checkForProvenanceType(pathObject, "trusted");

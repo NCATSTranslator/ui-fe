@@ -40,6 +40,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const root = useSelector(currentRoot);
 
   const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
+  // console.log(currentEvidence);
   let icon = getIcon(item.type);
   let publicationCount = (currentEvidence.publications?.length) 
     ? currentEvidence.publications.filter((item)=> item.type === "PMID" || item.type === "PMC").length

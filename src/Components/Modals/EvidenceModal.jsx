@@ -65,20 +65,21 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
       let filteredPublications = filteredEvidence.publications;
       let filteredSources = filteredEvidence.sources;
 
-      const edgeToFilterBy = selEdge.edges.find((edge)=> formatBiolinkEntity(edge.predicate) === selEdge.predicate);
-      filterEvidenceObjs(rawEvidence.publications, edgeToFilterBy, filteredPublications);
-      filterEvidenceObjs(rawEvidence.sources, edgeToFilterBy, filteredSources);
+      const edgesToFilterBy = selEdge.edges;
+      filterEvidenceObjs(rawEvidence.publications, edgesToFilterBy, filteredPublications);
+      filterEvidenceObjs(rawEvidence.sources, edgesToFilterBy, filteredSources);
       
       evidenceToDistribute = filteredEvidence;
-      setSelectedEdge(selEdge)
+      setSelectedEdge(selEdge);
 
       const soloEdge = selEdge.edges.find(edge => formatBiolinkEntity(edge.predicate) === selEdge.predicate);
       const formatted = getFormattedEdgeLabel(soloEdge.subject.name, soloEdge.predicate, soloEdge.object.name).replaceAll("|", " ");
       setFormattedEdge(formatted);
     } else {
       setFormattedEdge(null);
-      evidenceToDistribute(rawEvidence);
+      evidenceToDistribute = rawEvidence;
     }
+    console.log(evidenceToDistribute);
     distributeEvidence(evidenceToDistribute);
   }
 
