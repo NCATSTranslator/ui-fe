@@ -6,6 +6,7 @@ import Robot from '../../Icons/robot-purple.png';
 import RobotSelected from '../../Icons/robot-darkpurple.png';
 import Badge from '../../Icons/badge-purple.png';
 import BadgeSelected from '../../Icons/badge-darkpurple.png';
+// import Notes from "../../Icons/note.svg?react"
 import Up from '../../Icons/Directional/Property 1=Up.svg?react';
 import Highlighter from 'react-highlight-words';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
@@ -78,6 +79,11 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
               ? <img src={selected ? RobotSelected : Robot} alt="" className={styles.robot} data-tooltip-id={`${pathObject.predicate}${uid}-ML`} />
               : null
             }
+            {/* {
+              isMachineLearned
+              ? <div className={`${styles.robot} ${selected ? styles.selected : ''}`}  data-tooltip-id={`${pathObject.predicate}${uid}-ML`} ><Notes /></div>
+              : null
+            } */}
           </div>
           {
             pubCount > 1
