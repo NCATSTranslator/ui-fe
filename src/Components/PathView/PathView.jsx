@@ -110,10 +110,10 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
   return(
     <div className={styles.pathView}>
       <Tooltip id='direct-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>These paths are supported by existing evidence, click on one of the relationships to view the available evidence.</span>
+        <span className={styles.inferredLabelTooltip}>Established from explicit evidence in external sources. Example: A research paper stating 'X is related to Y.'</span>
       </Tooltip>
       <Tooltip id='inferred-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>These paths are supported by the path(s) listed below, rather than purely by existing evidence.</span>
+        <span className={styles.inferredLabelTooltip}>Deduced from patterns in Translator's knowledge graphs that suggest relationships which are not explicitly stated. The paths shown below them support the inferred relationship.</span>
       </Tooltip>
       <div className={styles.header}>
         <p className={styles.subtitle}>Paths</p>
