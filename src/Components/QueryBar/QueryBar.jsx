@@ -3,8 +3,10 @@ import TextInput from "../FormFields/TextInput";
 import Autocomplete from "../Autocomplete/Autocomplete";
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 import styles from './QueryBar.module.scss';
+import QueryTypeIcon from "../QueryTypeIcon/QueryTypeIcon";
 
-const QueryBar = ({handleSubmission, handleChange, queryType, value, autocompleteItems, autocompleteLoading, handleItemClick}) => {
+const QueryBar = ({handleSubmission, handleChange, queryType, value, autocompleteItems, 
+  autocompleteLoading, handleItemClick}) => {
 
   const placeholderText = (queryType) ? queryType.placeholder : '';
     
@@ -27,7 +29,8 @@ const QueryBar = ({handleSubmission, handleChange, queryType, value, autocomplet
         handleChange={(e)=>handleChange(e)} 
         className={styles.input}
         size=""
-        icon={<SearchIcon/>}
+        iconLeft={<QueryTypeIcon type={queryType.searchTypeString}/>}
+        iconRight={<SearchIcon/>}
         value={value}
       />
     </form>

@@ -176,6 +176,8 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                         pathToDisplay.path.subgraph.map((pathItem, j) => {
                           let key = `${i}_${j}`;
                           let pathItemHasSupport = pathItem.inferred;
+                          if(pathItemHasSupport)
+                            console.log("make new data obj");
                           let supportDataObject = (pathItemHasSupport)
                             ? {
                                 key: key,

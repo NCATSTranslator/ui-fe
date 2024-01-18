@@ -1,7 +1,7 @@
 import {useState, useMemo} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
-import SimpleRange from '../Range/SimpleRange';
+// import SimpleRange from '../Range/SimpleRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import Alert from '../../Icons/Alerts/Info.svg?react';
@@ -41,7 +41,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   
   const facetShowMoreIncrement = 5;
 
-  const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1});
+  // const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1});
   const [tagObject, setTagObject] = useState({type:'', value: ''});
   const groupedTags = useMemo(()=>groupAvailableTags(availableTags), [availableTags]);
   const initialCountsToShow = initCountsToShow(groupedTags);
@@ -49,9 +49,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
 
-  const handleEvidenceActive = () => {
-    onFilter(evidenceObject);
-  }
+  // const handleEvidenceActive = () => {
+  //   onFilter(evidenceObject);
+  // }
 
   const handleFacetChange = (facetID, objectToUpdate, setterFunction, label = '') => {
     if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
