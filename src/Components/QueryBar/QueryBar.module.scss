@@ -5,6 +5,7 @@
   width: 100%;
   margin: 0;
   position: relative;
+  height: fit-content;
   label {
     width: 100%;
     margin: 0;
@@ -13,6 +14,13 @@
     margin: 0 0 0 $m;
     padding: 10px 20px;
     line-height: 20px;
+  }
+  input {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border-top-right-radius: $querySelectBorderRadius;
+    border-bottom-right-radius: $querySelectBorderRadius;
+    border: none;
   }
 }
 

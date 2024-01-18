@@ -10,13 +10,15 @@ export const queryTypes = [
     targetType: 'drug',
     direction: null,
     filterType: '',
-    limitPrefixes: ['MONDO'],
+    limitPrefixes: ['MONDO, HP'],
     functions: {
       filter: drugTreatsQueryFilterFactory('Disease'),
       annotate: defaultQueryAnnotator,
       format: diseaseQueryFormatter
     },
-    pathString: 'may treat'
+    pathString: 'may treat',
+    searchTypeString: 'disease',
+    iconString: 'drug'
   },
   {
     id: 1,
@@ -31,7 +33,9 @@ export const queryTypes = [
       annotate: geneQueryAnnotator,
       format: geneQueryFormatter
     },
-    pathString: 'may upregulate'
+    pathString: 'may upregulate',
+    searchTypeString: 'gene',
+    iconString: 'chemup'
   },
   {
     id: 2,
@@ -46,7 +50,9 @@ export const queryTypes = [
       annotate: geneQueryAnnotator,
       format: geneQueryFormatter
     },
-    pathString: 'may downregulate'
+    pathString: 'may downregulate',
+    searchTypeString: 'gene',
+    iconString: 'chemdown'
   },
   {
     id: 3,
@@ -61,7 +67,9 @@ export const queryTypes = [
       annotate: defaultQueryAnnotator,
       format: defaultQueryFormatter,
     },
-    pathString: 'may be upregulated by'
+    pathString: 'may be upregulated by',
+    searchTypeString: 'chemical',
+    iconString: 'geneup'
   },
   {
     id: 4,
@@ -76,6 +84,8 @@ export const queryTypes = [
       annotate: defaultQueryAnnotator,
       format: defaultQueryFormatter,
     },
-    pathString: 'may be downregulated by'
+    pathString: 'may be downregulated by',
+    searchTypeString: 'chemical',
+    iconString: 'genedown'
   }
 ]

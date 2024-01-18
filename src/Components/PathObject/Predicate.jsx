@@ -35,7 +35,6 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
 
   pathObject.predicate = formatBiolinkEntity(pathObject.predicates[0]); 
   const pubCount = Object.values(pathObject.publications).reduce((sum, arr) => sum + arr.length, 0);
-  // console.log(pathObject, pathObject.publications);
   const [isSupportExpanded, setIsSupportExpanded] = useState(true);
   const isMachineLearned = checkForProvenanceType(pathObject, "ml");
   const isTrusted = checkForProvenanceType(pathObject, "trusted");
@@ -59,7 +58,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
         place="top"
         className={styles.mlTooltip}
       >
-        <span>This relationship has been manually curated by a trusted source. Click on the relationship and view its knowledge sources to learn more.</span>
+        <span>This relationship was generated using information found in a database that includes human curation. Click on the relationship and view its knowledge sources to learn more.</span>
       </Tooltip> 
       <span 
         className={`${selected ? styles.selected : ''} ${parentClass} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''}`} 

@@ -1,11 +1,11 @@
-import React, {useState, useEffect, useRef} from "react";
+import {useState, useEffect, useRef} from "react";
 import AnimateHeight from "react-animate-height";
-import styles from './Select.module.scss';
+import styles from './QuerySelect.module.scss';
 
-const Select = ({label, subtitle, value, name, size, error, 
+const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stayExpanded = false,
   errorText, handleChange, noanimate, children, testId, className, iconClass}) => {
 
-  value = (value === null || isNaN(value)) ? "" : value;
+  value = (value === null || isNaN(value)) ? 0 : parseInt(value);
   const [selectedItem, setSelectedItem] = useState(value);
   const [selectOpen, setSelectOpen] = useState(false);
   const [height, setHeight] = useState(0);
@@ -13,8 +13,7 @@ const Select = ({label, subtitle, value, name, size, error,
   let animateClass = (noanimate) ? styles.noAnimate : styles.animate;
 
   const wrapperRef = useRef(null);  
-
-  size = (size) ? size : 's';
+  const selectListContainerRef = useRef(null);  
 
   handleChange = (handleChange) ? handleChange : () => {};
   errorText = (errorText) ? errorText : "Error Message";
@@ -26,8 +25,9 @@ const Select = ({label, subtitle, value, name, size, error,
 
   const handleOptionClick = (e) => {
     e.preventDefault();
-    setSelectedItem(e.target.dataset.value);
-    setSelectOpen(!selectOpen);
+    setSelectedItem(parseInt(e.target.dataset.value));
+    if(!stayExpanded)
+      setSelectOpen(!selectOpen);
     handleChange(e.target.dataset.value);
   }
   
@@ -39,7 +39,7 @@ const Select = ({label, subtitle, value, name, size, error,
   }, [selectOpen])
 
   useEffect(() => {
-    setSelectedItem(value);
+    setSelectedItem(parseInt(value));
   }, [value])
 
   useEffect(() => {
@@ -49,40 +49,59 @@ const Select = ({label, subtitle, value, name, size, error,
         setHeight(0);
       }
     };
-  
     document.addEventListener("click", handleClickOutside);
-  
     // Clean up the event listener on unmount
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []); 
   
+  useEffect(() => {
+    if(!startExpanded)
+      return;
+      
+    // wait 800ms before auto opening the dropdown
+    let openSelectTimeout = setTimeout(() => setSelectOpen(true), 800);
+    return () => {
+      clearTimeout(openSelectTimeout);
+    };
+  }, [startExpanded]);
 
   return (
     <>
-      <label className={`select ${styles.select} ${size} ${animateClass} ${className}`} ref={wrapperRef}> 
+      <label 
+        className={`select ${styles.select} ${animateClass} ${className} ${styles.querySelect}`} 
+        ref={wrapperRef}
+        > 
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         <div className={`${styles.selectContainer} ${openClass}`}>
-          <select type="text" 
-              name={name} 
-              onMouseDown={handleSelectClick} 
-              defaultValue={selectedItem} 
-              // rand number key to re-render with correct default value on state change 
-              key={`${Math.floor((Math.random() * 1000))}-min`}
-              data-testid={testId}
-              >
-            <option value="" disabled hidden>{name}</option>
-            {children}
-          </select>
-          <span className={`${styles.icon} ${iconClass}`} onMouseDown={handleSelectClick}></span>
+          <div 
+            className={styles.selectDisplay} 
+            onMouseDown={handleSelectClick} 
+            >
+            {
+              children.find((option) => option.props.value === selectedItem).props.children
+            }
+          </div>
+          <div className={styles.iconContainer}>
+            <span className={`${styles.icon} ${iconClass}`} onMouseDown={handleSelectClick}></span>
+          </div>
           {
             noanimate && 
-            <div className={`${styles.selectList} ${openClass}`}>
-              <div>
+            <div 
+              className={`${styles.selectList} ${openClass}`}
+              style={
+                selectOpen 
+                ? {'max-height': selectListContainerRef.current.clientHeight}
+                : {'max-height': '0px'}
+              }
+              >
+              <div ref={selectListContainerRef}>
               {
               children.map((child, i) => {
+                if(child.props.value === selectedItem)
+                  return null;
                 return(
                   <span 
                     onClick={handleOptionClick} 
@@ -91,7 +110,8 @@ const Select = ({label, subtitle, value, name, size, error,
                     data-value={child.props.value}
                     data-testid={child.props.value}
                     >
-                      {child.props.children}
+                    {child.props.children}
+                    <div className={styles.border}></div>
                   </span>
                   );
                 })
@@ -114,6 +134,7 @@ const Select = ({label, subtitle, value, name, size, error,
                     data-value={child.props.value}
                     >
                     {child.props.children}
+                    <div className={styles.border}></div>
                   </span>
                   );
                 })
@@ -128,4 +149,4 @@ const Select = ({label, subtitle, value, name, size, error,
   );
 }
 
-export default Select;
+export default QuerySelect;

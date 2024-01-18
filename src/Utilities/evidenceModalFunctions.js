@@ -2,7 +2,6 @@ import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHig
   sortDateYearHighLow, sortDateYearLowHigh } from './sortingFunctions';
 import { cloneDeep } from 'lodash';
 import { capitalizeAllWords } from "./utilities";
-import { getFormattedEdgeLabel } from './resultsFormattingFunctions';
 
 export const handleEvidenceSort = (sortName, pubmedEvidence, handlePageClick, sortingStateSetter, setPubmedEvidence) => {
   let sortedPubmedEvidence = cloneDeep(pubmedEvidence);

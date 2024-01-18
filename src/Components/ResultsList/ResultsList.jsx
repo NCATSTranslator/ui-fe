@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import styles from './ResultsList.module.scss';
 import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
@@ -115,7 +115,7 @@ const ResultsList = ({loading}) => {
   // Array, results formatted by any active filters, sorted by any active sorting
   const [formattedResults, setFormattedResults] = useState([]);
   // Array, results meant to display based on the pagination
-  const displayedResults = formattedResults.slice(itemOffset, endResultIndex);
+  const displayedResults = useMemo(()=>formattedResults.slice(itemOffset, endResultIndex), [formattedResults, itemOffset, endResultIndex]);
   const initSortString = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
   const currentSortString = useRef(initSortString);
   // Int, number of pages
