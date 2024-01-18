@@ -1,4 +1,5 @@
-import { equal, larger, format, polynomialRoot, largerEq, min, max, round, Complex } from 'mathjs';
+// import { equal, larger, format, polynomialRoot, largerEq, min, max, round, Complex } from 'mathjs';
+import { equal, larger, format } from 'mathjs';
 
 export const score = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
   return maxNormalizedScore(scoreComponents);
@@ -20,6 +21,19 @@ const maxNormalizedScore = function(scoreComponents) {
   return maxScorePair(normalizedScorePairs);
 }
 
+const maxScorePair = function (scorePairs) {
+  let maxScore = scorePairs[0];
+  for (let i = 1; i < scorePairs.length; i++) {
+    if (larger(scorePairs[i].main, maxScore.main) ||
+        (equal(scorePairs[i].main, maxScore.main) &&
+         larger(scorePairs[i].secondary, maxScore.secondary))) {
+      maxScore = scorePairs[i];
+    }
+  }
+
+  return maxScore;
+}
+/*
 // Not used until further notice
 const maxSugenoScore = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
   const sugenoPairs = scoreComponents.map((s) => {
@@ -33,21 +47,6 @@ const maxSugenoScore = function(scoreComponents, confidenceWeight, noveltyWeight
 
   return maxScorePair(sugenoPairs);
 }
-
-
-const maxScorePair = function (scorePairs) {
-  let maxScore = scorePairs[0];
-  for (let i = 1; i < scorePairs.length; i++) {
-    if (larger(scorePairs[i].main, maxScore.main) ||
-        (equal(scorePairs[i].main, maxScore.main) &&
-         larger(scorePairs[i].secondary, maxScore.secondary))) {
-      maxScore = scorePairs[i];
-    }
-  }
-
-  return maxScore;
-}
-
 const computeSugeno = function(confidence, novelty, clinical,
     confidenceWeight, noveltyWeight, clinicalWeight) {
   const a = confidenceWeight;
@@ -203,3 +202,4 @@ const computeWeightedMean = function(confidence, novelty, clinical,
     confidenceWeight, noveltyWeight, clinicalWeight) {
   return (confidence * confidenceWeight) + (novelty * noveltyWeight) + (clinical * clinicalWeight);
 }
+*/

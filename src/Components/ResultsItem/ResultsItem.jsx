@@ -91,7 +91,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
     focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
     handleFocusedOnItem();
-  }, [focusedItemRef])
+  })
 
   const getPathsCount = (paths) => {
     let count = paths.length;

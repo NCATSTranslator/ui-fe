@@ -5,7 +5,7 @@ import { currentPrefs, currentRoot } from '../../Redux/rootSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Button from '../FormFields/Button';
-import Select from 'react-select'
+import Select from 'react-select';
 import styles from './UserPreferences.module.scss';
 import { cloneDeep } from 'lodash';
 
