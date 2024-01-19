@@ -10,7 +10,6 @@ $querySelectPadding: 11px;
   height: 100%;
   select, .selectDisplay {
     display: flex;
-    justify-content: space-between;
     width: 360px;
     white-space: nowrap;
     border: none;
@@ -23,10 +22,12 @@ $querySelectPadding: 11px;
     border-bottom-left-radius: $querySelectBorderRadius;
     color: $white;
     font-weight: 700;
-    text-align: right;
     transition: $defaultAnim;
     &:focus, &:focus-visible {
       outline: none;
+    }
+    svg {
+      margin-right: 10px;
     }
     svg path {
       fill: $white;
@@ -95,14 +96,12 @@ $querySelectPadding: 11px;
       }
       .option {
         display: flex;
-        justify-content: space-between;
         cursor: pointer;
         padding: $querySelectPadding 20px;
         color: $black;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        text-align: right;
         background-color: $white;
         font-size: 14px;
         font-weight: 500;
@@ -112,6 +111,9 @@ $querySelectPadding: 11px;
         border-top: 1px solid transparent;
         span, svg {
           pointer-events: none;
+        }
+        svg {
+          margin-right: 10px;
         }
         span {
           font-size: 14px;
