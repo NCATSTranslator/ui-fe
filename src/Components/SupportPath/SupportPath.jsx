@@ -63,13 +63,11 @@ const areEqualProps = (prevProps, nextProps) => {
   const nextDataKeys = Object.keys(nextProps.dataObj);
 
   if (prevDataKeys.length !== nextDataKeys.length) {
-    console.log("dataObj has changed", prevDataKeys.length, nextDataKeys.length);
     return false;
   }
 
   for (const key of prevDataKeys) {
     if (prevProps.dataObj[key] !== nextProps.dataObj[key]) {
-      console.log("dataObj has changed", prevProps.dataObj[key], nextProps.dataObj[key]);
       return false;
     }
   }
