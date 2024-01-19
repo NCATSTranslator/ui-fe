@@ -12,6 +12,7 @@ $querySelectPadding: 11px;
     display: flex;
     justify-content: space-between;
     width: 360px;
+    white-space: nowrap;
     border: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -23,6 +24,7 @@ $querySelectPadding: 11px;
     color: $white;
     font-weight: 700;
     text-align: right;
+    transition: $defaultAnim;
     &:focus, &:focus-visible {
       outline: none;
     }
@@ -70,7 +72,7 @@ $querySelectPadding: 11px;
     grid-template-rows: minmax(0,1fr);
     align-items: center;
     height: fit-content;
-    transition: all .25s ease;
+    transition: $defaultAnim;
     &.open {
       border-bottom-left-radius: 0;
       .icon {
