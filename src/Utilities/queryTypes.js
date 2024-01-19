@@ -9,8 +9,8 @@ export const queryTypes = [
     placeholder: 'Enter a Disease',
     targetType: 'drug',
     direction: null,
-    filterType: '',
-    limitPrefixes: ['MONDO, HP'],
+    filterType: 'Disease',
+    limitPrefixes: ['MONDO','HP'],
     functions: {
       filter: drugTreatsQueryFilterFactory('Disease'),
       annotate: defaultQueryAnnotator,
