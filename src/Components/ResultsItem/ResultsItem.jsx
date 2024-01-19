@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, memo } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, capitalizeAllWords, formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
@@ -60,7 +60,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const [itemHasNotes, setItemHasNotes] = useState(hasNotes);
   const [isExpanded, setIsExpanded] = useState(isFocused);
   const [height, setHeight] = useState(0);
-  const formattedPaths = item.compressedPaths;
+  const formattedPaths = useRef(item.compressedPaths);
   const [selectedPaths, setSelectedPaths] = useState(new Set());
   const [csvData, setCsvData] = useState([]);
 
@@ -91,7 +91,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
     focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
     handleFocusedOnItem();
-  })
+  }, [focusedItemRef])
 
   const getPathsCount = (paths) => {
     let count = paths.length;
@@ -105,7 +105,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     return count;
   } 
   
-  const pathsCount = useMemo(()=>getPathsCount(formattedPaths), [formattedPaths]);
+  const pathsCount = useMemo(()=>getPathsCount(formattedPaths.current), [formattedPaths]);
   const pathString = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const typeString = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
   const nameString = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
@@ -121,9 +121,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     setIsExpanded(!isExpanded);
   }
 
-  const handleEdgeSpecificEvidence = (edgeGroup, path) => {
+  const handleEdgeSpecificEvidence = useCallback((edgeGroup, path) => {
     activateEvidence(currentEvidence, item, edgeGroup, path, false);
-  }
+  }, [currentEvidence, item, activateEvidence])
+
+  const handleActivateEvidence = useCallback((path) => {
+    activateEvidence(currentEvidence, item, null, path, false);
+  }, [currentEvidence, item, activateEvidence])
 
   useEffect(() => {
     if(isExpanded === false)
@@ -162,7 +166,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     }
 
     for(const selPath of selectedPaths) {
-      for(const path of formattedPaths) {
+      for(const path of formattedPaths.current) {
         if(path.path.subgraph.length === 3
           && path.path.subgraph[0].curies.includes(selPath[0])
           && path.path.subgraph[path.path.subgraph.length - 1].curies.includes(selPath[selPath.length - 1])) {
@@ -246,6 +250,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   useEffect(() => {
     setItemHasNotes(hasNotes);
+    formattedPaths.current = item.compressedPaths;
   }, [item, hasNotes]);
 
   return (
@@ -390,11 +395,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           />
         </Suspense>
         <PathView
-          paths={formattedPaths}
+          paths={formattedPaths.current}
           selectedPaths={selectedPaths}
           active={isExpanded}
-          handleEdgeSpecificEvidence={(edgeGroup, path)=> {handleEdgeSpecificEvidence(edgeGroup, path)}}
-          handleActivateEvidence={(path)=>activateEvidence(currentEvidence, item, null, path, false)}
+          handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
+          handleActivateEvidence={handleActivateEvidence}
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>
@@ -402,4 +407,23 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   );
 }
 
-export default ResultsItem;
+const areEqualProps = (prevProps, nextProps) => {
+  // Perform a shallow comparison of 'item' properties
+  const prevDataKeys = Object.keys(prevProps.item);
+  const nextDataKeys = Object.keys(nextProps.item);
+
+  if (prevDataKeys.length !== nextDataKeys.length) {
+    return false;
+  }
+
+  for (const key of prevDataKeys) {
+    if (prevProps.item[key] !== nextProps.item[key]) {
+      return false;
+    }
+  }
+
+  // If none of the above conditions are met, props are equal
+  return true;
+};
+
+export default memo(ResultsItem, areEqualProps);

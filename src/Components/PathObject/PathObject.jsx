@@ -6,7 +6,7 @@ import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities
 import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
 
-const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport, 
+const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false, 
   activeStringFilters, selected, supportDataObject = null, inModal = false }) => {
 
   const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;

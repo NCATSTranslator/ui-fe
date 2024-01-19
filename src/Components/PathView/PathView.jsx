@@ -1,5 +1,5 @@
 import styles from './PathView.module.scss';
-import {useState, useEffect, useMemo} from "react";
+import {useState, useEffect, useMemo, useCallback} from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import Question from '../../Icons/Navigation/Question.svg?react';
@@ -76,17 +76,17 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
     setNumberToShow(temp);
   }, [paths, initItemsPerPage]);
 
-  const handleNameClick = (name) => {
+  const handleNameClick = useCallback((name) => {
     console.log("handle name click");
-  }
+  },[]);
 
-  const handleEdgeClick = (edgeGroup, path) => {
+  const handleEdgeClick = useCallback((edgeGroup, path) => {
     handleEdgeSpecificEvidence(edgeGroup, path);
-  }
+  }, [handleEdgeSpecificEvidence]);
 
-  const handleTargetClick = (target) => {
+  const handleTargetClick = useCallback((target) => {
     console.log("handle target click");
-  }
+  },[]);
 
   const handleShowMore = () => {
     let newAmount = (numberToShow + initItemsPerPage > paths.length) ? paths.length : numberToShow + initItemsPerPage;
