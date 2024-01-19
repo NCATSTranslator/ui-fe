@@ -65,7 +65,7 @@ const History = () => {
             <h6>No Search History Found!</h6>
             <p>The results of the questions you have asked are stored locally in your browser's history.</p>
             <div className={styles.buttonContainer}>
-              <Link to="/" className="primary button">Ask a Question</Link>
+              <Link to="/main" className="primary button">Ask a Question</Link>
             </div>
           </div>
         }
