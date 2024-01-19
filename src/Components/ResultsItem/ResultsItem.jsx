@@ -18,7 +18,7 @@ import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
 import { getEvidenceFromResult } from '../../Utilities/resultsFormattingFunctions';
 import { displayScore } from '../../Utilities/scoring';
-import { setResultsQueryParam } from '../../Utilities/resultsInteractionFunctions';
+// import { setResultsQueryParam } from '../../Utilities/resultsInteractionFunctions';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -115,7 +115,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   const handleToggle = () => {
     if (!isExpanded) {
-      setResultsQueryParam('r', item.id);
+      // setResultsQueryParam('r', item.id);
     }
 
     setIsExpanded(!isExpanded);
