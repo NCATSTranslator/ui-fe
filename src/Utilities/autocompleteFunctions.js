@@ -9,13 +9,13 @@
 
 // Returns array of terms based on user input
 export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoCompleteItems, 
-  autocompleteFunctions, limitType = '', limitPrefixes = []) => {
+  autocompleteFunctions, limitType = '', limitPrefixes = [], endpoint) => {
   if(inputText) {
     console.log(`fetching '${inputText}'`);
     setLoadingAutocomplete(true);
     const formatData = { input: inputText.toLowerCase() };
 
-    newFetchNodesFromInputText(inputText, limitType, limitPrefixes)
+    newFetchNodesFromInputText(inputText, limitType, limitPrefixes, endpoint)
       .then(response => response.json())
       .then(nodes => {
         let newNodes = {};
@@ -42,7 +42,7 @@ export const getAutocompleteTerms = (inputText, setLoadingAutocomplete, setAutoC
 }
 
 // Do a node search based on user input text
-const newFetchNodesFromInputText = async (inputText, type, prefixes) => {
+const newFetchNodesFromInputText = async (inputText, type, prefixes, endpoint) => {
   let prefixString = "&only_prefixes=";
   if(prefixes.length > 0) {
     prefixes = prefixes.join('|');
@@ -55,7 +55,7 @@ const newFetchNodesFromInputText = async (inputText, type, prefixes) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   };
-  return fetch(`https://name-lookup.transltr.io/lookup?string=${inputText}&offset=0&limit=100&biolink_type=${type}${prefixString}`, nameResolverRequestOptions)
+  return fetch(`${endpoint}?string=${inputText}&offset=0&limit=100&biolink_type=${type}${prefixString}`, nameResolverRequestOptions)
 }
 
 export const filterAndSortExamples = (arr, type, direction = null) => {
