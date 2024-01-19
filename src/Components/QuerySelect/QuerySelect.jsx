@@ -9,7 +9,7 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
   const [selectedItem, setSelectedItem] = useState(value);
   const [selectOpen, setSelectOpen] = useState(false);
   const [height, setHeight] = useState(0);
-  let openClass = (selectOpen) ? styles.open : styles.closed;
+  let openClass = (selectOpen) ? styles.open : '';
   let animateClass = (noanimate) ? styles.noAnimate : styles.animate;
 
   const wrapperRef = useRef(null);  
@@ -60,8 +60,8 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
     if(!startExpanded)
       return;
       
-    // wait 800ms before auto opening the dropdown
-    let openSelectTimeout = setTimeout(() => setSelectOpen(true), 800);
+    // wait 750ms before auto opening the dropdown
+    let openSelectTimeout = setTimeout(() => setSelectOpen(true), 750);
     return () => {
       clearTimeout(openSelectTimeout);
     };
