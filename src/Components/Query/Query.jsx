@@ -61,8 +61,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
 
   // Function, type to send to autocomplete for result filtering
   const autocompleteFunctions = useRef(initAutocompleteFunctions);
-  const limitPrefixes = useRef(initLimitType);
-  const limitType = useRef(initLimitPrefixes);
+  const limitPrefixes = useRef(initLimitPrefixes);
+  const limitType = useRef(initLimitType);
   // Array, List of items to display in the autocomplete window
   const [autocompleteItems, setAutoCompleteItems] = useState(null);
   // Bool, are autocomplete items loading
