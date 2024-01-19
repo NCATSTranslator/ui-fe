@@ -32,7 +32,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const root = useSelector(currentRoot);
   const config = useSelector(currentConfig);
   const queryTimestamp = useSelector(currentQueryTimestamp);
-
+  const nameResolverEndpoint = (config?.name_resolver) ? config.name_resolver : 'https://name-lookup.transltr.io/lookup';
   loading = (loading) ? true : false;
 
   // Bool, are the results loading
@@ -69,8 +69,9 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
   // Function, delay query for fetching autocomplete items by 750ms each time the user types, so we only send a request once they're done
   const delayedQuery = useMemo(() => _.debounce(
-    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions, limitType, limitPrefixes) =>
-      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions, limitType, limitPrefixes), 750), []
+    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions, limitType, limitPrefixes, endpoint) =>
+      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, 
+        autocompleteFunctions, limitType, limitPrefixes, endpoint), 750), []
   );
 
   // String, used to set navigation url for example disease buttons
@@ -191,12 +192,12 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = useCallback((e) => {
     if(Object.keys(queryItem.type).length) {
-      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions.current, limitType.current, limitPrefixes.current);
+      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions.current, limitType.current, limitPrefixes.current, nameResolverEndpoint);
       setInputText(e);
     } else {
       setIsError(true);
     }
-  },[setLoadingAutocomplete, setAutoCompleteItems, setInputText, setIsError, delayedQuery, queryItem.type]);
+  },[setLoadingAutocomplete, setAutoCompleteItems, setInputText, setIsError, delayedQuery, queryItem.type, nameResolverEndpoint]);
 
   const clearAutocompleteItems = () => {
     setAutoCompleteItems(null);

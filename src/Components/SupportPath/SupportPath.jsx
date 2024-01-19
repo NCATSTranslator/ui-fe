@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import ResearchMultiple from '../../Icons/research-multiple.svg?react';
@@ -9,7 +10,6 @@ const SupportPath = ({ dataObj }) => {
   const key = dataObj.key;
   const supportPath = dataObj.supportPath;
   const selectedPaths = dataObj.selectedPaths;
-  // const pathToDisplay = dataObj.pathToDisplay;
   const handleActivateEvidence = dataObj.handleActivateEvidence;
   const handleNameClick = dataObj.handleNameClick;
   const handleEdgeClick = dataObj.handleEdgeClick;
@@ -37,6 +37,7 @@ const SupportPath = ({ dataObj }) => {
         {
           supportPath.path.subgraph.map((supportItem, i) => {
             let pathKey = `${key}_${i}`;
+            let supportItemHasSupport = supportItem.inferred;
             return (
               <PathObject 
                 pathObject={supportItem} 
@@ -46,6 +47,7 @@ const SupportPath = ({ dataObj }) => {
                 handleEdgeClick={(edge)=>handleEdgeClick(edge, supportPath)}
                 handleTargetClick={handleTargetClick}
                 activeStringFilters={activeStringFilters}
+                hasSupport={supportItemHasSupport}
               />
             );
           })
@@ -55,4 +57,25 @@ const SupportPath = ({ dataObj }) => {
   );
 }
 
-export default SupportPath;
+const areEqualProps = (prevProps, nextProps) => {
+  // Perform a shallow comparison of 'dataObj' properties
+  const prevDataKeys = Object.keys(prevProps.dataObj);
+  const nextDataKeys = Object.keys(nextProps.dataObj);
+
+  if (prevDataKeys.length !== nextDataKeys.length) {
+    console.log("dataObj has changed", prevDataKeys.length, nextDataKeys.length);
+    return false;
+  }
+
+  for (const key of prevDataKeys) {
+    if (prevProps.dataObj[key] !== nextProps.dataObj[key]) {
+      console.log("dataObj has changed", prevProps.dataObj[key], nextProps.dataObj[key]);
+      return false;
+    }
+  }
+
+  // If none of the above conditions are met, props are equal
+  return true;
+};
+
+export default memo(SupportPath, areEqualProps);

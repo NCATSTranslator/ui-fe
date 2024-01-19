@@ -6,7 +6,7 @@ import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities
 import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
 
-const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport, 
+const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false, 
   activeStringFilters, selected, supportDataObject = null, inModal = false }) => {
 
   const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
@@ -25,7 +25,7 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
         pathObject.category === 'object' &&
         <span className={`${styles.nameContainer} ${inModal ? styles.inModal : ''}`} 
           onClick={(e)=> {e.stopPropagation(); handleNameClick(pathObject);}}
-          data-tooltip-id={`${nameString}${uid}`}
+          data-tooltip-id={`${nameString.replaceAll("'")}${uid}`}
           >
           <span className={styles.name} >
             {getIcon(pathObject.type)}
@@ -38,7 +38,7 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
               />
             </span>
           </span>
-            <Tooltip id={`${nameString}${uid}`}>
+            <Tooltip id={`${nameString.replaceAll("'")}${uid}`}>
               <span><strong>{nameString}</strong> ({typeString})</span>
               <span className={styles.description}>{pathObject.description}</span>
               {
@@ -69,7 +69,7 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
         pathObject.category === 'target' && 
         <span 
           className={styles.targetContainer} 
-          data-tooltip-id={`${nameString}${uid}`}
+          data-tooltip-id={`${nameString.replaceAll("'")}${uid}`}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(pathObject);}}
           >
           <span className={styles.target} >
@@ -83,7 +83,7 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
               />
             </span>
           </span>
-          <Tooltip id={`${nameString}${uid}`}>
+          <Tooltip id={`${nameString.replaceAll("'")}${uid}`}>
             <span><strong>{nameString}</strong> ({typeString})</span>
             <span className={styles.description}>{pathObject.description}</span>
             {

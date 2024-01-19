@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import styles from './SupportPathGroup.module.scss';
 import SupportPath from '../SupportPath/SupportPath';
 import AnimateHeight from '../AnimateHeight/AnimateHeight';
@@ -58,4 +58,29 @@ const SupportPathGroup = ({ dataObj, isExpanded }) => {
     </AnimateHeight>
   )
 }
-export default SupportPathGroup;
+
+const areEqualProps = (prevProps, nextProps) => {
+  // Check if 'isExpanded' prop has changed
+  if (prevProps.isExpanded !== nextProps.isExpanded) {
+    return false;
+  }
+
+  // Perform a shallow comparison of 'dataObj' properties
+  const prevDataKeys = Object.keys(prevProps.dataObj);
+  const nextDataKeys = Object.keys(nextProps.dataObj);
+
+  if (prevDataKeys.length !== nextDataKeys.length) {
+    return false;
+  }
+
+  for (const key of prevDataKeys) {
+    if (prevProps.dataObj[key] !== nextProps.dataObj[key]) {
+      return false;
+    }
+  }
+
+  // If none of the above conditions are met, props are equal
+  return true;
+};
+
+export default memo(SupportPathGroup, areEqualProps);
