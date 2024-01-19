@@ -218,7 +218,6 @@ const ResultsList = ({loading}) => {
   }, [formattedResults.length, itemsPerPage]);
 
   const handleUpdateResults = (facetsAndFilters, asFilters, rr, or = [], justSort = false, sortType, fr = []) => {
-
     let newFormattedResults = [];
     let newOriginalResults = [];
     let saves = (userSaves) ? userSaves.saves: null;
@@ -227,7 +226,7 @@ const ResultsList = ({loading}) => {
       newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
       newOriginalResults = cloneDeep(newFormattedResults);
     } else {
-      newFormattedResults = (justSort) ? fr : or;
+      newFormattedResults = (justSort) ? cloneDeep(fr) : or;
       newOriginalResults = or;
     }
 

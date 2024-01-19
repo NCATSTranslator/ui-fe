@@ -197,7 +197,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     } else {
       setIsError(true);
     }
-  },[setLoadingAutocomplete, setAutoCompleteItems, setInputText, setIsError, delayedQuery, queryItem.type]);
+  },[setLoadingAutocomplete, setAutoCompleteItems, setInputText, setIsError, delayedQuery, queryItem.type, nameResolverEndpoint]);
 
   const clearAutocompleteItems = () => {
     setAutoCompleteItems(null);
