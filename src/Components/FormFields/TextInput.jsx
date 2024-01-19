@@ -4,7 +4,7 @@ import styles from "./TextInput.module.scss";
 const TextInput = (
   {label, subtitle, value, placeholder, size, rows,
     error, errorText, handleChange, className, iconLeft, iconRight,
-    maxLength, handleKeyDown, testId}) => {
+    maxLength, handleKeyDown, testId, disabled}) => {
   
   size = (size === undefined) ? 's' : size;
 
@@ -34,6 +34,7 @@ const TextInput = (
           value={value}
           onKeyDown={handleKeyDown}
           data-testid={testId}
+          disabled={disabled}
         />
         {error && <span className={styles.errorText}>{errorText}</span>}
       </label>
@@ -54,6 +55,7 @@ const TextInput = (
           value={value}
           onKeyDown={handleKeyDown}
           data-testid={testId}
+          disabled={disabled}
         />
         {error && <span className={styles.errorText}>{errorText}</span>}
       </label>

@@ -6,7 +6,7 @@ import styles from './QueryBar.module.scss';
 import QueryTypeIcon from "../QueryTypeIcon/QueryTypeIcon";
 
 const QueryBar = ({handleSubmission, handleChange, queryType, value, autocompleteItems, 
-  autocompleteLoading, handleItemClick}) => {
+  autocompleteLoading, handleItemClick, disabled = false}) => {
 
   const placeholderText = (queryType) ? queryType.placeholder : '';
     
@@ -32,6 +32,7 @@ const QueryBar = ({handleSubmission, handleChange, queryType, value, autocomplet
         iconLeft={<QueryTypeIcon type={queryType.searchTypeString}/>}
         iconRight={<SearchIcon/>}
         value={value}
+        disabled={disabled}
       />
     </form>
   )
