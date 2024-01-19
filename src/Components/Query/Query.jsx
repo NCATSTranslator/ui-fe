@@ -362,7 +362,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       autocompleteItems={autocompleteItems}
                       autocompleteLoading={loadingAutocomplete}
                       handleItemClick={handleItemSelection}
-                      // examples={}
+                      disabled={root === "main" ? false : true}
                     />
                     { 
                       <img src={loadingIcon} className={`${styles.loadingIcon} ${isLoading ? styles.active : ''} loadingIcon`} alt="loading icon"/>
