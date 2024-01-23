@@ -31,21 +31,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     return newGroupedTags;
   }
 
-  const initCountsToShow = (groupedTags) => {
-    let newCountsToShow = {};
-    Object.keys(groupedTags).forEach((key) => {
-      newCountsToShow[key] = facetShowMoreIncrement;
-    })
-    return newCountsToShow;
-  }
-  
-  const facetShowMoreIncrement = 5;
-
   // const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1});
   const [tagObject, setTagObject] = useState({type:'', value: ''});
   const groupedTags = useMemo(()=>groupAvailableTags(availableTags), [availableTags]);
-  const initialCountsToShow = initCountsToShow(groupedTags);
-  const [countsToShow, setCountsToShow] = useState(initialCountsToShow);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
 
@@ -163,30 +151,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
   }
 
-  const showMoreFacets = (type) => {
-    let newCount = countsToShow[type];
-    if(Object.keys(groupedTags[type]).length > countsToShow[type]) {
-      newCount = (countsToShow[type] + facetShowMoreIncrement > Object.keys(groupedTags[type]).length)
-        ? Object.keys(groupedTags[type]).length
-        : countsToShow[type] + facetShowMoreIncrement;
-    }
-
-    let newCountsToShow = cloneDeep(countsToShow);
-    newCountsToShow[type] = newCount;
-    setCountsToShow(newCountsToShow);
-  }
-  const showFewerFacets = (type) => {
-    let newCount = countsToShow[type];
-    if(countsToShow[type] - facetShowMoreIncrement < facetShowMoreIncrement)
-      newCount = facetShowMoreIncrement;
-    else
-      newCount = countsToShow[type] - facetShowMoreIncrement;
-
-    let newCountsToShow = cloneDeep(countsToShow);
-    newCountsToShow[type] = newCount;
-    setCountsToShow(newCountsToShow);
-  }
-
   const tagDisplay = (tag, type, tagObject, setTagObjectFunc, availableTags) => {
     let tagKey = tag[0];
     let object = tag[1];
@@ -205,7 +169,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
           className={`${styles.checkbox}`}
           >
-          {tagName} 
+          {tagName}
           <span className={styles.facetCount}>
             {
             (type === "role") &&
@@ -222,9 +186,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
 
   const displayFacets = (type) => {
     return (
-      <div className={`${styles.section} ${styles[type]} ${type === 'role' ? 'scrollable' : ''}`}>
+      <div className={`${styles.section} ${Object.keys(groupedTags[type]).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
-          (type === 'role') 
+          (type === 'role')
           ?
             Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).map((tag, j) => {
               return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
@@ -232,31 +196,18 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           :
             (type === 'chemicalType')
             ?
-              Object.entries(groupedTags[type]).sort((a,b)=> { 
-                if(a[1].name === "Other") return 1; 
-                if(b[1].name === "Other") return -1; 
+              Object.entries(groupedTags[type]).sort((a,b)=> {
+                if(a[1].name === "Other") return 1;
+                if(b[1].name === "Other") return -1;
                 return (a[1].name > b[1].name ? 1 : -1)})
-                .slice(0, countsToShow[type]).map((tag, j) => {
+                .map((tag, j) => {
                   return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
                 }
               )
             :
-              Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
+              Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).map((tag, j) => {
                 return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
               })
-        }
-        {
-          (type !== "role") &&
-          <div className={styles.showButtonsContainer}>
-            {
-              Object.keys(groupedTags[type]).length > countsToShow[type] &&
-              <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
-            }
-            {
-              (Object.keys(groupedTags[type]).length > 0) && countsToShow[type] > facetShowMoreIncrement &&
-              <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
-            }
-          </div>
         }
       </div>
     )
@@ -266,7 +217,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
-        {/* 
+        {/*
           <div className={styles.labelContainer} >
             <p className={styles.subTwo}>Evidence</p>
           </div>
@@ -283,7 +234,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             max="99"
             onChange={e => handleFacetChange('evi:', evidenceObject, setEvidenceObject, e)}
             initialValue={1}
-          /> 
+          />
         */}
         <EntitySearch
           activeFilters={activeFilters}
