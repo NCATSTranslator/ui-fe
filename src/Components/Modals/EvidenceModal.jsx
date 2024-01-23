@@ -125,6 +125,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                 path.path.subgraph.map((pathItem, i) => {
                   let key = `${i}`;
                   let isSelected = false;
+                  let pathItemHasSupport = pathItem.inferred;
                   if(pathItem.category === "predicate" && pathItem.predicates.length > 1) {
                     return( 
                       <div className={`groupedPreds ${styles.groupedPreds}`}>
@@ -146,6 +147,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                                 activeStringFilters={[]}
                                 selected={isSelected}
                                 inModal
+                                hasSupport={pathItemHasSupport}
                               />
                             ) 
                           })
@@ -165,6 +167,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                         activeStringFilters={[]}
                         selected={isSelected}
                         inModal
+                        hasSupport={pathItemHasSupport}
                       />
                     ) 
                   }
