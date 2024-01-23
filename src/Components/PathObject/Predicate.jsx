@@ -156,7 +156,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
         }
       </span>
       {
-        hasSupport && 
+        hasSupport && supportDataObject &&
         <SupportPathGroup 
           dataObj={supportDataObject} 
           isExpanded={isSupportExpanded}
