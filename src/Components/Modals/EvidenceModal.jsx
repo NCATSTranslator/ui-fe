@@ -15,7 +15,7 @@ import Information from '../../Icons/information.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 
-const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, edgeGroup = null}) => {
+const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGroup = null}) => {
 
   const prefs = useSelector(currentPrefs);
   const [pubmedEvidence, setPubmedEvidence] = useState([]);
@@ -89,9 +89,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
       miscEvidence.current = cloneDeep([...evidence.publications].filter(item => item.type === 'other'))
         .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
       let displayedSources = [...evidence.sources]; 
-      if (isAll) {
-        displayedSources = [...evidence.distinctSources];
-      }
 
       displayedSources.sort(compareByKeyLexographic('name'));
       setSources(displayedSources);
@@ -109,9 +106,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal}`} containerClass={`${styles.evidenceContainer} scrollable`}>
       {selectedItem.name &&       
         <div className={styles.top}>
-          <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
+          <h5 className={styles.title}>Showing Evidence for:</h5>
           {
-            !isAll &&
             formattedEdge &&
             <h5 className={styles.subtitle}>{capitalizeAllWords(formattedEdge)}</h5>
           }
@@ -244,7 +240,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                 tooltipIcon={<Information className={styles.infoIcon} />}
                 data-tooltip-id="knowledge-sources-tooltip" 
                 >
-                <div className={`table-body ${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
+                <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head}`}>Source</div>
                     <div className={`head ${styles.head}`}>Link</div>
