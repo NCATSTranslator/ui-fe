@@ -38,6 +38,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, 
   handleBookmarkError = ()=>{}, handleFocusedOnItem = ()=>{}}) => {
 
+    // console.log("rerender", item?.id);
+
   const root = useSelector(currentRoot);
 
   const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
@@ -122,11 +124,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   }
 
   const handleEdgeSpecificEvidence = useCallback((edgeGroup, path) => {
-    activateEvidence(currentEvidence, item, edgeGroup, path, false);
+    activateEvidence(currentEvidence, item, edgeGroup, path);
   }, [currentEvidence, item, activateEvidence])
 
   const handleActivateEvidence = useCallback((path) => {
-    activateEvidence(currentEvidence, item, null, path, false);
+    activateEvidence(currentEvidence, item, null, path);
   }, [currentEvidence, item, activateEvidence])
 
   useEffect(() => {
@@ -408,16 +410,17 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 }
 
 const areEqualProps = (prevProps, nextProps) => {
-  // Perform a shallow comparison of 'item' properties
   const prevDataKeys = Object.keys(prevProps.item);
   const nextDataKeys = Object.keys(nextProps.item);
 
   if (prevDataKeys.length !== nextDataKeys.length) {
+    console.log("props arent equal", prevDataKeys.length, nextDataKeys.length)
     return false;
   }
 
   for (const key of prevDataKeys) {
     if (prevProps.item[key] !== nextProps.item[key]) {
+      console.log("props arent equal", prevProps.item[key], nextProps.item[key])
       return false;
     }
   }
