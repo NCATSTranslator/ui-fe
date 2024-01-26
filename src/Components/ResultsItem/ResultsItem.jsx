@@ -281,14 +281,14 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           root === "main" 
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
-                  <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString}`} aria-describedby={`bookmark-tooltip-${nameString}`} />
-                  <Tooltip id={`bookmark-tooltip-${nameString}`}>
+                  <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <Tooltip id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`}>
                     <span className={styles.tooltip}>Bookmark this result to review it later in the <Link to="/main/workspace" target='_blank'>Workspace</Link></span>
                   </Tooltip>
                 </div>
                 <div className={`${styles.icon} ${styles.notesIcon} ${itemHasNotes ? styles.filled : ''}`}>
-                  <Notes onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString}`} aria-describedby={`notes-tooltip-${nameString}`} />
-                  <Tooltip id={`notes-tooltip-${nameString}`}>
+                  <Notes onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
                     <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/main/workspace" target='_blank'>Workspace</Link>)</span>
                   </Tooltip>
                 </div>
@@ -414,13 +414,11 @@ const areEqualProps = (prevProps, nextProps) => {
   const nextDataKeys = Object.keys(nextProps.item);
 
   if (prevDataKeys.length !== nextDataKeys.length) {
-    console.log("props arent equal", prevDataKeys.length, nextDataKeys.length)
     return false;
   }
 
   for (const key of prevDataKeys) {
     if (prevProps.item[key] !== nextProps.item[key]) {
-      console.log("props arent equal", prevProps.item[key], nextProps.item[key])
       return false;
     }
   }
