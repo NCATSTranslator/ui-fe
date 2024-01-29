@@ -105,7 +105,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal}`} containerClass={`${styles.evidenceContainer} scrollable`}>
+    <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer} scrollable`}>
       {selectedItem.name &&       
         <div className={styles.top}>
           <h5 className={styles.title}>Showing Evidence for:</h5> 
