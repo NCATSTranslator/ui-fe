@@ -7,7 +7,7 @@ import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
 
 const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false, 
-  activeStringFilters, selected, supportDataObject = null, inModal = false }) => {
+  activeStringFilters, selected, supportDataObject = null, inModal = false, isTop = null, isBottom = null }) => {
 
   const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const type = (pathObject?.type) ? pathObject.type.replace("biolink:", ""): '';
@@ -63,6 +63,8 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
           inModal={inModal}
           hasSupport={hasSupport}
           supportDataObject={supportDataObject}
+          isTop={isTop}
+          isBottom={isBottom}
         />
       }
       {

@@ -28,6 +28,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
   const [selectedEdgeTrigger, setEdgeSelectedTrigger] = useState(false);
   const [formattedEdge, setFormattedEdge] = useState(null);
 
+  const pathLength = (path) ? path.path.subgraph.length : 0;
+
   useEffect(() => {
     setSelectedItem(item);
   }, [item])
@@ -106,7 +108,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal}`} containerClass={`${styles.evidenceContainer} scrollable`}>
       {selectedItem.name &&       
         <div className={styles.top}>
-          <h5 className={styles.title}>Showing Evidence for:</h5>
+          <h5 className={styles.title}>Showing Evidence for:</h5> 
           {
             formattedEdge &&
             <h5 className={styles.subtitle}>{capitalizeAllWords(formattedEdge)}</h5>
@@ -116,7 +118,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
           </Tooltip>
           {
             path &&
-            <div className={styles.pathView}>
+            <div className={styles.pathView} style={{'gridTemplateColumns': `repeat(${pathLength}, minmax(0, 300px))`}}>
               {
                 path.path.subgraph.map((pathItem, i) => {
                   let key = `${i}`;
@@ -132,6 +134,12 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                             newPathItem.predicate = pred;
                             isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, newPathItem));
                             key = `${i}_${j}`;
+                            let isTop = null;
+                            let isBottom = null;
+                            if(j === 0)
+                              isTop = true;
+                            if(j === pathItem.predicates.length - 1)
+                              isBottom = true;
                             return (
                               <PathObject 
                                 pathObject={newPathItem} 
@@ -144,6 +152,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                                 selected={isSelected}
                                 inModal
                                 hasSupport={pathItemHasSupport}
+                                isTop={isTop}
+                                isBottom={isBottom}
                               />
                             ) 
                           })

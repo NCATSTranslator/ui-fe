@@ -6,6 +6,12 @@ import Robot from '../../Icons/robot-purple.png';
 import RobotSelected from '../../Icons/robot-darkpurple.png';
 import Badge from '../../Icons/badge-purple.png';
 import BadgeSelected from '../../Icons/badge-darkpurple.png';
+import Connector from '../../Icons/straight.svg?react';
+import ConnectorTop from '../../Icons/solid-top.svg?react';
+import ConnectorBottom from '../../Icons/solid-bottom.svg?react';
+import ConnectorDotted from '../../Icons/straight-dotted.svg?react';
+import ConnectorDottedTop from '../../Icons/dotted-top.svg?react';
+import ConnectorDottedBottom from '../../Icons/dotted-bottom.svg?react';
 // import Notes from "../../Icons/note.svg?react"
 import Up from '../../Icons/Directional/Property 1=Up.svg?react';
 import Highlighter from 'react-highlight-words';
@@ -15,7 +21,7 @@ import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { cloneDeep } from 'lodash';
 
 const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass = '', handleEdgeClick, 
-   hasSupport, supportDataObject = null, inModal = false }) => {
+   hasSupport, supportDataObject = null, inModal = false, isTop = null, isBottom = null }) => {
 
   const checkForProvenanceType = (pathObject, type) => {
     if(!pathObject?.provenance || !Array.isArray(pathObject.provenance))
@@ -29,7 +35,6 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
       if(pathObject.provenance.some(item => item.knowledge_level === "trusted"))
         return true;
     }
-
     return false;
   }
 
@@ -64,7 +69,30 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
         className={`${selected ? styles.selected : ''} ${parentClass} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''}`} 
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject);}}
         >
-        <span className={`connector ${styles.connector} ${hasSupport ? styles.inferred : ''}`}></span>
+          {
+            hasSupport && isTop &&
+            <ConnectorDottedTop className={`connector ${styles.connector}`}/>
+          }
+          {
+            hasSupport && isBottom &&
+            <ConnectorDottedBottom className={`connector ${styles.connector}`}/>
+          }
+          {
+            hasSupport && !isBottom && !isTop && 
+            <ConnectorDotted className={`connector ${styles.connector}`}/>
+          }
+          {
+            !hasSupport && isTop &&
+            <ConnectorTop className={`connector ${styles.connector}`}/>
+          }
+          {
+            !hasSupport && isBottom &&
+            <ConnectorBottom className={`connector ${styles.connector}`}/>
+          }
+          {
+            !hasSupport && !isBottom && !isTop && 
+            <Connector className={`connector ${styles.connector}`}/>
+          }
         <span 
           className={`${styles.path} path ${(pathObject.predicates.length > 1) ? styles.hasMore : ''}`}
           >
@@ -79,11 +107,6 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
               ? <img src={selected ? RobotSelected : Robot} alt="" className={styles.robot} data-tooltip-id={`${pathObject.predicate}${uid}-ML`} />
               : null
             }
-            {/* {
-              isMachineLearned
-              ? <div className={`${styles.robot} ${selected ? styles.selected : ''}`}  data-tooltip-id={`${pathObject.predicate}${uid}-ML`} ><Notes /></div>
-              : null
-            } */}
           </div>
           {
             pubCount > 1
