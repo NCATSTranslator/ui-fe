@@ -192,7 +192,7 @@ const checkForNodeUniformity = (pathOne, pathTwo, respectKnowledgeLevel) => {
       nodesMatch = false;
   }
   // check for same knowledge level. If different, return false
-  if(respectKnowledgeLevel && pathOne[1]?.provenance[0].knowledge_level !== pathTwo[1]?.provenance[0].knowledge_level)
+  if(respectKnowledgeLevel && pathOne[1].provenance[0]?.knowledge_level !== pathTwo[1].provenance[0]?.knowledge_level)
     nodesMatch = false;
 
   return nodesMatch;
@@ -217,6 +217,7 @@ const getFormattedNode = (id, index, subgraph, results) => {
   let desc = (node.descriptions) ? node.descriptions[0]: '';
   let category = (index === subgraph.length - 1) ? 'target' : 'object';
   let newNode =  {
+    id: id,
     category: category,
     name: name,
     type: type,
@@ -242,6 +243,7 @@ const getFormattedEdge = (id, results) => {
   let publications = removeDuplicatePubIds(edge.publications);
   let newEdge = {
     category: 'predicate',
+    id: id,
     predicates: [pred],
     edges: [edge],
     publications: publications,
@@ -254,9 +256,8 @@ const getFormattedEdge = (id, results) => {
     newEdge.inferred = true;
   }
   
-  if(edge.provenance !== undefined) 
-    newEdge.provenance = edge.provenance;
-  if(!Array.isArray(newEdge.provenance) && Object.keys(newEdge.provenance).length === 0)
+  newEdge.provenance = (edge.provenance !== undefined) ? edge.provenance : [];
+  if((!Array.isArray(newEdge.provenance) && Object.keys(newEdge.provenance).length === 0))
     newEdge.provenance = [];
   
   return newEdge;
@@ -298,7 +299,7 @@ const getFormattedPaths = (rawPathIds, results) => {
       }
       formattedPath.inferred = checkPathForSupport(formattedPath);
       formattedPath.stringName = getStringNameFromPath(formattedPath);
-      formattedPaths.push({highlighted: false, path: formattedPath});
+      formattedPaths.push({id: id, highlighted: false, path: formattedPath});
     }
   }
   return formattedPaths;
