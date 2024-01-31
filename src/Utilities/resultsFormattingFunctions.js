@@ -177,23 +177,23 @@ const getEdgeByID = (id, results) => {
 */
 const checkForNodeUniformity = (pathOne, pathTwo, respectKnowledgeLevel) => {
   // if the lengths of the paths are different, they cannot have the same nodes
-  if(pathOne.length !== pathTwo.length)
+  if(pathOne.subgraph.length !== pathTwo.subgraph.length)
     return false;
 
   let nodesMatch = true;
 
-  for(const [i, item] of pathOne.entries()) {
-    // if we're at an odd index, it's a predicate, so skip it
-    if(i % 2 !== 0)
-      continue;
-
-    // if the names of the nodes don't match, set nodesMatch to false
-    if(item.name !== pathTwo[i].name)
-      nodesMatch = false;
+  for(const [i, item] of pathOne.subgraph.entries()) {
+    // if we're at an odd index, it's a predicate
+    if(i % 2 !== 0) {
+      // check for same knowledge level. If different, return false
+      if(respectKnowledgeLevel && item.provenance[0]?.knowledge_level !== pathTwo.subgraph[i].provenance[0]?.knowledge_level)
+        nodesMatch = false;
+    } else {
+      // if the names of the nodes don't match, set nodesMatch to false
+      if(item.name !== pathTwo.subgraph[i].name)
+        nodesMatch = false;
+    }
   }
-  // check for same knowledge level. If different, return false
-  if(respectKnowledgeLevel && pathOne[1].provenance[0]?.knowledge_level !== pathTwo[1].provenance[0]?.knowledge_level)
-    nodesMatch = false;
 
   return nodesMatch;
 }
@@ -321,7 +321,7 @@ const getCompressedPaths = (graph, respectKnowledgeLevel = true) => {
     let displayPath = false;
     let nextPath = (graph[i+1] !== undefined) ? graph[i+1] : null;
     // if all nodes are equal
-    let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path.subgraph, nextPath.path.subgraph, respectKnowledgeLevel) : false;
+    let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path, nextPath.path, respectKnowledgeLevel) : false;
 
     // loop through the current path's items
     for(const [i] of pathObj.path.subgraph.entries()) {
