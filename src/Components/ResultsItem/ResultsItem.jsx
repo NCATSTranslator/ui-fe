@@ -38,6 +38,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, 
   handleBookmarkError = ()=>{}, handleFocusedOnItem = ()=>{}}) => {
 
+    // console.log("rerender", item?.id);
+
   const root = useSelector(currentRoot);
 
   const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
@@ -122,11 +124,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   }
 
   const handleEdgeSpecificEvidence = useCallback((edgeGroup, path) => {
-    activateEvidence(currentEvidence, item, edgeGroup, path, false);
+    activateEvidence(currentEvidence, item, edgeGroup, path);
   }, [currentEvidence, item, activateEvidence])
 
   const handleActivateEvidence = useCallback((path) => {
-    activateEvidence(currentEvidence, item, null, path, false);
+    activateEvidence(currentEvidence, item, null, path);
   }, [currentEvidence, item, activateEvidence])
 
   useEffect(() => {
@@ -279,14 +281,14 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           root === "main" 
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
-                  <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString}`} aria-describedby={`bookmark-tooltip-${nameString}`} />
-                  <Tooltip id={`bookmark-tooltip-${nameString}`}>
+                  <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <Tooltip id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`}>
                     <span className={styles.tooltip}>Bookmark this result to review it later in the <Link to="/main/workspace" target='_blank'>Workspace</Link></span>
                   </Tooltip>
                 </div>
                 <div className={`${styles.icon} ${styles.notesIcon} ${itemHasNotes ? styles.filled : ''}`}>
-                  <Notes onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString}`} aria-describedby={`notes-tooltip-${nameString}`} />
-                  <Tooltip id={`notes-tooltip-${nameString}`}>
+                  <Notes onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
                     <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/main/workspace" target='_blank'>Workspace</Link>)</span>
                   </Tooltip>
                 </div>
@@ -408,7 +410,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 }
 
 const areEqualProps = (prevProps, nextProps) => {
-  // Perform a shallow comparison of 'item' properties
   const prevDataKeys = Object.keys(prevProps.item);
   const nextDataKeys = Object.keys(nextProps.item);
 

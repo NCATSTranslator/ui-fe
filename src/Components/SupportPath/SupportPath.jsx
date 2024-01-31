@@ -10,28 +10,28 @@ const SupportPath = ({ dataObj }) => {
   const key = dataObj.key;
   const supportPath = dataObj.supportPath;
   const selectedPaths = dataObj.selectedPaths;
-  const handleActivateEvidence = dataObj.handleActivateEvidence;
+  const handleActivateEvidence = ()=>dataObj.handleActivateEvidence(supportPath);
   const handleNameClick = dataObj.handleNameClick;
   const handleEdgeClick = dataObj.handleEdgeClick;
   const handleTargetClick = dataObj.handleTargetClick;
   const activeStringFilters = dataObj.activeStringFilters;
-
+  
   return (
     <div className={`${pathViewStyles.formattedPath} ${pathViewStyles.supportPath}`} key={key}>
       <button 
-        onClick={()=>handleActivateEvidence(supportPath)}
+        onClick={handleActivateEvidence}
         className={pathViewStyles.pathEvidenceButton}
-        data-tooltip-id={tooltipID}
+        data-tooltip-id={`${tooltipID}-${key}`}
         >
           <ResearchMultiple />
       </button>
       <Tooltip 
-        id={tooltipID}
+        id={`${tooltipID}-${key}`}
         >
           <span>View evidence for this path.</span>
       </Tooltip>
       <div 
-        className={`${pathViewStyles.tableItem} ${selectedPaths.size > 0 && !supportPath.highlighted ? pathViewStyles.unhighlighted : 'asdfasdfasdf'}`} 
+        className={`${pathViewStyles.tableItem} ${selectedPaths.size > 0 && !supportPath.highlighted ? pathViewStyles.unhighlighted : ''}`} 
         key={key}
         > 
         {
@@ -58,7 +58,6 @@ const SupportPath = ({ dataObj }) => {
 }
 
 const areEqualProps = (prevProps, nextProps) => {
-  // Perform a shallow comparison of 'dataObj' properties
   const prevDataKeys = Object.keys(prevProps.dataObj);
   const nextDataKeys = Object.keys(nextProps.dataObj);
 
