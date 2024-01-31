@@ -85,8 +85,6 @@ const ResultsList = ({loading}) => {
   const [notesOpen, setNotesOpen] = useState(false);
   const noteLabel = useRef("");
   const currentBookmarkID = useRef(null);
-  // String, active title of evidence modal
-  const [isAllEvidence, setIsAllEvidence] = useState(true);
   // Object, the currently selected item
   const [selectedItem, setSelectedItem] = useState({});
   // Array, edges represented in current evidence
@@ -512,8 +510,7 @@ const ResultsList = ({loading}) => {
   /**
    * Activates sets the evidence and opens the evidence modal.
    */
-  const activateEvidence = useCallback((evidence, item, edgeGroup, path, isAll) => {
-    setIsAllEvidence(isAll);
+  const activateEvidence = useCallback((evidence, item, edgeGroup, path) => {
     setSelectedItem(item);
     setSelectedEdge(edgeGroup);
     setSelectedPath(path);
@@ -726,7 +723,6 @@ const ResultsList = ({loading}) => {
         rawEvidence={currentEvidence}
         item={selectedItem}
         results={rawResults.current}
-        isAll={isAllEvidence}
         edgeGroup={selectedEdge}
         path={selectedPath}
       />
@@ -850,7 +846,7 @@ const ResultsList = ({loading}) => {
                             key={item.id}
                             type={initPresetTypeObject}
                             item={item}
-                            activateEvidence={(evidence, item, edgeGroup, path, isAll)=>activateEvidence(evidence, item, edgeGroup, path, isAll)}
+                            activateEvidence={(evidence, item, edgeGroup, path)=>activateEvidence(evidence, item, edgeGroup, path)}
                             activateNotes={activateNotes}
                             activeStringFilters={activeStringFilters}
                             zoomKeyDown={zoomKeyDown}

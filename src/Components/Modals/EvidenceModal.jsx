@@ -15,7 +15,7 @@ import Information from '../../Icons/information.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 
-const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, edgeGroup = null}) => {
+const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGroup = null}) => {
 
   const prefs = useSelector(currentPrefs);
   const [pubmedEvidence, setPubmedEvidence] = useState([]);
@@ -27,6 +27,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
   const [selectedEdge, setSelectedEdge] = useState(edgeGroup);
   const [selectedEdgeTrigger, setEdgeSelectedTrigger] = useState(false);
   const [formattedEdge, setFormattedEdge] = useState(null);
+
+  const pathLength = (path) ? path.path.subgraph.length : 0;
 
   useEffect(() => {
     setSelectedItem(item);
@@ -89,9 +91,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
       miscEvidence.current = cloneDeep([...evidence.publications].filter(item => item.type === 'other'))
         .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
       let displayedSources = [...evidence.sources]; 
-      if (isAll) {
-        displayedSources = [...evidence.distinctSources];
-      }
 
       displayedSources.sort(compareByKeyLexographic('name'));
       setSources(displayedSources);
@@ -106,12 +105,11 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal}`} containerClass={`${styles.evidenceContainer} scrollable`}>
+    <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer} scrollable`}>
       {selectedItem.name &&       
         <div className={styles.top}>
-          <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
+          <h5 className={styles.title}>Showing Evidence for:</h5> 
           {
-            !isAll &&
             formattedEdge &&
             <h5 className={styles.subtitle}>{capitalizeAllWords(formattedEdge)}</h5>
           }
@@ -120,7 +118,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
           </Tooltip>
           {
             path &&
-            <div className={styles.pathView}>
+            <div className={styles.pathView} style={{'gridTemplateColumns': `repeat(${pathLength}, minmax(0, 300px))`}}>
               {
                 path.path.subgraph.map((pathItem, i) => {
                   let key = `${i}`;
@@ -136,6 +134,12 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                             newPathItem.predicate = pred;
                             isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, newPathItem));
                             key = `${i}_${j}`;
+                            let isTop = null;
+                            let isBottom = null;
+                            if(j === 0)
+                              isTop = true;
+                            if(j === pathItem.predicates.length - 1)
+                              isBottom = true;
                             return (
                               <PathObject 
                                 pathObject={newPathItem} 
@@ -148,6 +152,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                                 selected={isSelected}
                                 inModal
                                 hasSupport={pathItemHasSupport}
+                                isTop={isTop}
+                                isBottom={isBottom}
                               />
                             ) 
                           })
@@ -244,7 +250,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                 tooltipIcon={<Information className={styles.infoIcon} />}
                 data-tooltip-id="knowledge-sources-tooltip" 
                 >
-                <div className={`table-body ${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
+                <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head}`}>Source</div>
                     <div className={`head ${styles.head}`}>Link</div>

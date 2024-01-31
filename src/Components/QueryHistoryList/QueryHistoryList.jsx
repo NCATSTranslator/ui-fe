@@ -1,15 +1,16 @@
-import {useEffect, useState} from "react";
 import styles from "./QueryHistoryList.module.scss";
+import {useEffect, useState} from "react";
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "../../Utilities/utilities";
 import { pastQueryState, setHistory } from "../../Redux/historySlice";
 import { currentRoot } from "../../Redux/rootSlice";
-import { useSelector, useDispatch } from 'react-redux';
 import ShareModal from '../Modals/ShareModal';
 import TextInput from "../FormFields/TextInput";
+import Tooltip from "../Tooltip/Tooltip";
 import Close from '../../Icons/Buttons/Close.svg?react';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
-import Export from '../../Icons/export.svg?react';
-import { useNavigate } from "react-router-dom";
+import ShareIcon from '../../Icons/share.svg?react';
 import { cloneDeep } from "lodash";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 
@@ -148,7 +149,15 @@ const QueryHistoryList = () => {
                 <div className={styles.itemContainer}>
                   <span className={styles.query} onClick={() => handleClick(query)}>
                     <div className={styles.left}>
-                      <button className={styles.exportButton} onClick={(e)=>{handleExportClick(e, query)}}><Export/></button>
+                      <button 
+                        className={styles.exportButton} onClick={(e)=>{handleExportClick(e, query)}}
+                        data-tooltip-id={`query-history-share-button-${query.id}`}
+                        >
+                          <ShareIcon/>
+                        </button>
+                      <Tooltip id={`query-history-share-button-${query.id}`}>
+                        <span className={styles.tooltip}>Generate a sharable link for this set of results.</span>
+                      </Tooltip>
                     </div>
                     <div className={styles.right}>
                       <div className={styles.top}>
