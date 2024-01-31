@@ -21,12 +21,12 @@ const SupportPath = ({ dataObj }) => {
       <button 
         onClick={handleActivateEvidence}
         className={pathViewStyles.pathEvidenceButton}
-        data-tooltip-id={tooltipID}
+        data-tooltip-id={`${tooltipID}-${key}`}
         >
           <ResearchMultiple />
       </button>
       <Tooltip 
-        id={tooltipID}
+        id={`${tooltipID}-${key}`}
         >
           <span>View evidence for this path.</span>
       </Tooltip>
