@@ -52,7 +52,7 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
         </span>
       }
       {
-        pathObject.category === 'predicate' && 
+        pathObject.category === 'predicate' &&
         <Predicate 
           pathObject={pathObject} 
           selected={selected} 

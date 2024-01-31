@@ -8,14 +8,6 @@ const SupportPathGroup = ({ dataObj, isExpanded }) => {
   const pathItem = dataObj.pathItem;
   const pathViewStyles = dataObj.pathViewStyles;
   const key = dataObj.key;
-  const selectedPaths = dataObj.selectedPaths;
-  const pathToDisplay = dataObj.pathToDisplay;
-  const handleActivateEvidence = dataObj.handleActivateEvidence;
-  const handleNameClick = dataObj.handleNameClick;
-  const handleEdgeClick = dataObj.handleEdgeClick;
-  const handleTargetClick = dataObj.handleTargetClick;
-  const activeStringFilters = dataObj.activeStringFilters;
-  
   const initHeight = (isExpanded) ? 'auto' : 0;
   const [height, setHeight] = useState(initHeight);
 
@@ -35,22 +27,13 @@ const SupportPathGroup = ({ dataObj, isExpanded }) => {
       {
         pathItem.support.sort((a, b) => b.highlighted - a.highlighted).map((supportPath, i) => {
           let pathKey = `${key}_${i}`;
-          const tooltipID = supportPath.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] );
-          return (
-            <SupportPath 
-              dataObj={{
-                key: pathKey,
-                pathViewStyles: pathViewStyles,
-                tooltipID: tooltipID,
-                supportPath: supportPath, 
-                selectedPaths: selectedPaths, 
-                pathToDisplay: pathToDisplay, 
-                handleActivateEvidence: handleActivateEvidence, 
-                handleNameClick: handleNameClick, 
-                handleEdgeClick: handleEdgeClick, 
-                handleTargetClick: handleTargetClick, 
-                activeStringFilters: activeStringFilters
-              }}
+          const tooltipID = supportPath.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] ).join("-");
+          dataObj.key = pathKey;
+          dataObj.supportPath = supportPath;
+          dataObj.tooltipID = tooltipID;
+          return ( 
+            <SupportPath
+              dataObj={dataObj}
             />
           );
         })

@@ -132,7 +132,9 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
               const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
                 if(displayDirectLabel)
                   directLabelDisplayed = true;
-              const tooltipID = pathToDisplay.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] );
+              const tooltipID = pathToDisplay.id 
+                ? pathToDisplay.id 
+                : pathToDisplay.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] );
               return (
                 <>
                   {
@@ -155,7 +157,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                         </>
                       : null
                     }
-                  <div className={styles.formattedPath}>
+                  <div className={styles.formattedPath} key={tooltipID}>
                     <button 
                       onClick={()=>handleActivateEvidence(pathToDisplay)}
                       className={styles.pathEvidenceButton}
@@ -168,13 +170,10 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                       >
                         <span>View evidence for this path.</span>
                     </Tooltip>
-                    <div 
-                      className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} 
-                      key={i}
-                      > 
+                    <div className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} > 
                       {
                         pathToDisplay.path.subgraph.map((pathItem, j) => {
-                          let key = `${i}_${j}`;
+                          let key = `${pathItem.id ? pathItem.id : i}_${j}`;
                           let pathItemHasSupport = pathItem.inferred;
                           let supportDataObject = (pathItemHasSupport)
                             ? {
