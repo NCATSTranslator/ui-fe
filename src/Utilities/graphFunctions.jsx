@@ -81,19 +81,23 @@ export const resultToCytoscape = (result, summary) => {
       });
   }
   const distributeEntitiesInPath = (pathID, pathsArray, edgesArray, nodeCollection, edgeCollection) => {
-    pathsArray[pathID].subgraph.forEach((elemID, i) =>
-    {
-      if (i % 2 === 0) {
-        nodeCollection.add(elemID);
-      } else {
-        edgeCollection.add(elemID);
-        if(hasSupport(edgesArray[elemID])){
-          for(const supportPathID of edgesArray[elemID].support) {
-            distributeEntitiesInPath(supportPathID, pathsArray, edgesArray, nodeCollection, edgeCollection);
+    if(pathsArray[pathID] !== undefined) {
+      pathsArray[pathID].subgraph.forEach((elemID, i) =>
+      {
+        if (i % 2 === 0) {
+          nodeCollection.add(elemID);
+        } else {
+          edgeCollection.add(elemID);
+          if(hasSupport(edgesArray[elemID])){
+            for(const supportPathID of edgesArray[elemID].support) {
+              distributeEntitiesInPath(supportPathID, pathsArray, edgesArray, nodeCollection, edgeCollection);
+            }
           }
         }
-      }
-    });
+      });
+    }else {
+      console.log("path missing from list: ", pathsArray, ". pathID: ", pathID);
+    }
   }
 
   const ps = result.paths;
