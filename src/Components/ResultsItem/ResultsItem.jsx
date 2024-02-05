@@ -38,8 +38,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, 
   handleBookmarkError = ()=>{}, handleFocusedOnItem = ()=>{}}) => {
 
-    // console.log("rerender", item?.id);
-
   const root = useSelector(currentRoot);
 
   const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
@@ -111,7 +109,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const pathString = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const typeString = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
   const nameString = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
-  const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
+  // const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
   const [itemGraph, setItemGraph] = useState(null);
 
@@ -274,7 +272,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             />
           </span>
         }
-        <span className={styles.effect}>{pathsCount} {pathString} {objectString}</span>
+        <span className={styles.effect}>{pathsCount} {pathString} {queryNodeLabel}</span>
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
         {
