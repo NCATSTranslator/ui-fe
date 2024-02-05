@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, memo } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, capitalizeAllWords, formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
+import { getIcon, 
+  // capitalizeAllWords, 
+  formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
@@ -85,13 +87,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     };
   },[]);
 
-  useEffect(() => {
-    if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad) 
-      return;
+  // useEffect(() => {
+  //   if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad) 
+  //     return;
 
-    focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
-    handleFocusedOnItem();
-  }, [focusedItemRef])
+  //   focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+  //   handleFocusedOnItem();
+  // }, [focusedItemRef])
 
   const getPathsCount = (paths) => {
     let count = paths.length;
