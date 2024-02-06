@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Tooltip from '../Tooltip/Tooltip';
 import { currentConfig, currentRoot, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
@@ -16,6 +16,7 @@ const Header = ({children}) => {
   const root = useSelector(currentRoot);
   const user = useSelector(currentUser);
   const config = useSelector(currentConfig);
+  const location = useLocation();
 
   const clientID = config?.social_providers?.una?.client_id;
   const redirectURI = `${window.location.origin}/main/logout`;
@@ -28,7 +29,7 @@ const Header = ({children}) => {
       <div className={styles.topBar}>
         <div className={styles.container}>
           <div className={styles.left}>
-            <Link to={`/${root}/`} className={styles.logo} reloadDocument><Logo/></Link>
+            <Link to={`/${root}/`} className={styles.logo} reloadDocument={location.pathname === "/main/results" ? false : true}><Logo/></Link>
           </div>
           <div className={styles.right}>
             {

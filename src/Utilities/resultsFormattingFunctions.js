@@ -542,7 +542,6 @@ export const getEvidenceFromResult = (result) => {
     let type;
     // this is to deal with the old bookmark format, which removed publications from the result's evidence obj
     if(!result.evidence.publications) {
-      console.log(subgraphItem);
       type = getTypeFromPub(pubID);
       newPub = {
         type: getTypeFromPub(pubID),
