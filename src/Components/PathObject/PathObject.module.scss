@@ -123,6 +123,9 @@
   box-shadow: $dropShadow;
   svg {
     margin-right: 8px;
+    path {
+      fill: $white;
+    }
   }
   &:hover {
     box-shadow: $dropShadowHover;
@@ -132,8 +135,6 @@
 .edgeLabel {
   fill: #000 !important;
 }
-
-
 
 .sourceEdgeContainer {
   display: flex;

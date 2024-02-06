@@ -75,7 +75,7 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(pathObject);}}
           >
           <span className={styles.target} >
-            <Disease/>
+            {getIcon(pathObject.type)}
             <span className={styles.text}>
               <Highlighter
                 highlightClassName="highlight"
