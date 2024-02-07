@@ -2,21 +2,23 @@ import styles from './ResultsListHeader.module.scss';
 import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
 import ShareModal from "../Modals/ShareModal"; 
 import Tooltip from '../Tooltip/Tooltip';
-import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter } from '../../Utilities/filterFunctions';
+import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter, getFilterLabel } from '../../Utilities/filterFunctions';
 import CloseIcon from '../../Icons/Buttons/Close.svg?react'
 import ShareIcon from '../../Icons/share.svg?react';
 
   // Output jsx for selected filters
 const getSelectedFilterDisplay = (filter) => {
   let filterDisplay;
+  console.log(filter);
   if (isEvidenceFilter(filter)) {
     filterDisplay = <div>Minimum Evidence: <span>{filter.value}</span></div>;
   } else if (isTextFilter(filter)) {
-    filterDisplay = <div>String: <span>{filter.value}</span></div>;
+    filterDisplay = <div>Text Filter: <span>{filter.value}</span></div>;
   } else if (isFdaFilter(filter)) {
     filterDisplay = <div><span>FDA Approved</span></div>;
   } else if (isFacet(filter)) {
-    filterDisplay = <div>Tag:<span> {filter.value}</span></div>;
+    let filterLabel = getFilterLabel(filter);
+    filterDisplay = <div>{filterLabel}:<span> {filter.value}</span></div>;
   }
 
   return filterDisplay;

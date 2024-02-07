@@ -27,5 +27,31 @@ const filterFamily = (filter) => {
   return facetFamily(filter.type);
 }
 
+export const getFilterLabel = (filter) => {
+  let filterLabel = "Tag";
+  if(!filter.type)
+    return filterLabel;
+  let _filterFamily = filterFamily(filter);
+  switch(_filterFamily){
+    case "cc":
+      filterLabel = "Chemical Category";
+      break;
+    case "pc":
+      filterLabel = "Node Type";
+      break;
+    case "di":
+      filterLabel = "Drug Indication";
+      break;
+    case "ara":
+      filterLabel = "Reasoning Agent";
+      break;
+    case "role":
+      filterLabel = "ChEBI Role";
+      break;
+  }
+  console.log(_filterFamily);
+  return filterLabel;
+}
+
 // TODO: Make this a configuration
 const validFacetFamilies = new Set(['role', 'rc', 'pc', 'fda', 'ara', 'di', 'cc']);

@@ -34,12 +34,12 @@
 }
 
 .activeFilters {
-  margin: 0 0 30px;
+  margin: 0 0 $s;
   .filterTag {
     display: inline-flex;
     justify-content: space-between;
     align-items: center;
-    margin-right: $s;
+    margin: 0 $s $s 0;
     padding: 7px 4px 7px 12px;
     font-size: 14px;
     line-height: 1;
