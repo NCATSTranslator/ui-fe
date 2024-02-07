@@ -77,7 +77,9 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
   }, [paths, initItemsPerPage]);
 
   const handleNameClick = useCallback((name) => {
-    console.log("handle name click");
+    console.log("handle name click", name);
+    if(Array.isArray(name.provenance) && name.provenance[0].length > 0 && name.provenance[0].includes("http"))
+      window.open(name.provenance[0], '_blank');
   },[]);
 
   const handleEdgeClick = useCallback((edgeGroup, path) => {
@@ -85,7 +87,9 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
   }, [handleEdgeSpecificEvidence]);
 
   const handleTargetClick = useCallback((target) => {
-    console.log("handle target click");
+    console.log("handle target click", target);
+    if(Array.isArray(target.provenance) && target.provenance[0].length > 0 && target.provenance[0].includes("http"))
+      window.open(target.provenance[0], '_blank');
   },[]);
 
   const handleShowMore = () => {
@@ -173,7 +177,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                     <div className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} > 
                       {
                         pathToDisplay.path.subgraph.map((pathItem, j) => {
-                          let key = `${pathItem.id ? pathItem.id : i}_${j}`;
+                          let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;
                           let pathItemHasSupport = pathItem.inferred;
                           let supportDataObject = (pathItemHasSupport)
                             ? {

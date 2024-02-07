@@ -172,6 +172,8 @@ export const getEntityLink = (id, className, queryType) => {
     let linkType = (queryType !== undefined && queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
     if(linkType === "smallmolecule")
       linkType = "small molecule";
+    if(linkType === "diseaseorphenotypicfeature")
+      linkType = (id.includes("MONDO")) ? "disease" : "phenotype";
     return `View this ${linkType} on ${org}`;
   });
 }

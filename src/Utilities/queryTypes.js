@@ -6,10 +6,10 @@ export const queryTypes = [
   {
     id: 0,
     label: 'What drugs may treat',
-    placeholder: 'Enter a Disease',
+    placeholder: 'Enter a Disease or Phenotype',
     targetType: 'drug',
     direction: null,
-    filterType: 'Disease',
+    filterType: 'DiseaseOrPhenotypicFeature',
     limitPrefixes: ['MONDO','HP'],
     functions: {
       filter: drugTreatsQueryFilterFactory('Disease'),

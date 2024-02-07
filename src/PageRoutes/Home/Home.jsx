@@ -1,29 +1,8 @@
-import React from "react";
 import Query from "../../Components/Query/Query";
 import homeOne from "../../Assets/Images/Home/home1.svg";
 import homeTwo from "../../Assets/Images/Home/home2.svg";
 import homeThree from "../../Assets/Images/Home/home3.svg";
 import ArrowForward from '../../Icons/Directional/arrow_forward.svg?react';
-// import berkeley from "../../Assets/Images/Logos/berkeley.png";
-// import bma from "../../Assets/Images/Logos/bma.png";
-// import broad from "../../Assets/Images/Logos/broad.png";
-// import columbia from "../../Assets/Images/Logos/columbia.png";
-// import covar from "../../Assets/Images/Logos/covar.png";
-// import dartmouth from "../../Assets/Images/Logos/dartmouth.png";
-// import drexel from "../../Assets/Images/Logos/drexel.png";
-// import harvard from "../../Assets/Images/Logos/harvard.png";
-// import isb from "../../Assets/Images/Logos/isb.png";
-// import maas from "../../Assets/Images/Logos/maas.png";
-// import nih from "../../Assets/Images/Logos/nih.png";
-// import osu from "../../Assets/Images/Logos/osu.png";
-// import penn from "../../Assets/Images/Logos/penn.png";
-// import renci from "../../Assets/Images/Logos/renci.png";
-// import scripps from "../../Assets/Images/Logos/scripps.png";
-// import tufts from "../../Assets/Images/Logos/tufts.png";
-// import uab from "../../Assets/Images/Logos/uab.png";
-// import ucamc from "../../Assets/Images/Logos/ucamc.png";
-// import ucd from "../../Assets/Images/Logos/ucd.png";
-// import ucsf from "../../Assets/Images/Logos/ucsf.png";
 import styles from "./Home.module.scss";
 
 const Home = () => {
@@ -154,34 +133,6 @@ const Home = () => {
             </div>
           </div>
         </div>
-        {/* <div className={`${styles.section} ${styles.collaborators}`}>
-          <div className="container">
-            <h5>Collaborators</h5>
-            <p>Translator is made possible through collaboration with scientific experts and developers from the following institutions:</p>
-            <div className={styles.logos}>
-              <img src={ucd} alt="" />
-              <img src={penn} alt="" />
-              <img src={columbia} alt="" />
-              <img src={osu} alt="" />
-              <img src={maas} alt="" />
-              <img src={uab} alt="" />
-              <img src={bma} alt="" />
-              <img src={tufts} alt="" />
-              <img src={renci} alt="" />
-              <img src={harvard} alt="" />
-              <img src={scripps} alt="" />
-              <img src={drexel} alt="" />
-              <img src={berkeley} alt="" />
-              <img src={dartmouth} alt="" />
-              <img src={broad} alt="" />
-              <img src={isb} alt="" />
-              <img src={covar} alt="" />
-              <img src={ucamc} alt="" />
-              <img src={nih} alt="" />
-              <img src={ucsf} alt="" />
-            </div>
-          </div>
-        </div> */}
       </div>
     </div>
   );
