@@ -49,7 +49,6 @@ export const getFilterLabel = (filter) => {
       filterLabel = "ChEBI Role";
       break;
   }
-  console.log(_filterFamily);
   return filterLabel;
 }
 
