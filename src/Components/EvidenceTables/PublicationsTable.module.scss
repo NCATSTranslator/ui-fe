@@ -21,15 +21,16 @@
     a {
       font-weight: 700;
       color: $black;
-      text-decoration: none;
       font-size: 12px;
       -webkit-line-clamp: 4;
       -webkit-box-orient: vertical;
       display: -webkit-box;
       overflow: hidden;
       text-overflow: ellipsis;
+      transition: color .25s ease;
+      text-decoration: underline;
       &:hover {
-        text-decoration: underline;
+        color: $purpleEdgeBGSelected;
       }
     }
   }

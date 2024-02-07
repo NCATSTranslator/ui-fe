@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, memo } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, capitalizeAllWords, formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
+import { getIcon, 
+  // capitalizeAllWords, 
+  formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
@@ -37,8 +39,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags, hasFocusedOnFirstLoad,
   hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, 
   handleBookmarkError = ()=>{}, handleFocusedOnItem = ()=>{}}) => {
-
-    // console.log("rerender", item?.id);
 
   const root = useSelector(currentRoot);
 
@@ -87,13 +87,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     };
   },[]);
 
-  useEffect(() => {
-    if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad) 
-      return;
+  // useEffect(() => {
+  //   if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad) 
+  //     return;
 
-    focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
-    handleFocusedOnItem();
-  }, [focusedItemRef])
+  //   focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+  //   handleFocusedOnItem();
+  // }, [focusedItemRef])
 
   const getPathsCount = (paths) => {
     let count = paths.length;
@@ -111,7 +111,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const pathString = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const typeString = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
   const nameString = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
-  const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
+  // const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
   const [itemGraph, setItemGraph] = useState(null);
 
@@ -274,7 +274,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             />
           </span>
         }
-        <span className={styles.effect}>{pathsCount} {pathString} {objectString}</span>
+        <span className={styles.effect}>{pathsCount} {pathString} {queryNodeLabel}</span>
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
         {

@@ -11,7 +11,7 @@ export const defaultPrefs = {
     possible_values:[5, 10, 20]
   },
   graph_visibility: {
-    pref_value: "sometimes",
+    pref_value: "never",
     possible_values:["always", "never", "sometimes"]
   },
   graph_layout: {

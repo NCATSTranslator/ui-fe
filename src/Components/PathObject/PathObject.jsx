@@ -1,6 +1,5 @@
 import styles from './PathObject.module.scss';
 import Tooltip from '../Tooltip/Tooltip';
-import Disease from '../../Icons/disease2.svg?react';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
@@ -75,7 +74,7 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(pathObject);}}
           >
           <span className={styles.target} >
-            <Disease/>
+            {getIcon(pathObject.type)}
             <span className={styles.text}>
               <Highlighter
                 highlightClassName="highlight"
