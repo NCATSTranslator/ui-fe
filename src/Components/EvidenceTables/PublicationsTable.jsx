@@ -12,6 +12,7 @@ import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 import Info from '../../Icons/information.svg?react';
 import Tooltip from '../Tooltip/Tooltip';
+import EmphasizeWord from '../EmphasizeWord/EmphasizeWord';
 
 const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvidence, item, prefs = null, isOpen }) => {
 
@@ -73,6 +74,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
         updatePubdate(element, data);
       }
       element.updated = true;
+      console.log(element);
     }
     return newPubmedEvidence;
   }
@@ -184,6 +186,16 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
       prevSelectedEdgeTrigger.current = selectedEdgeTrigger;
     }
   }, [pubmedEvidence, selectedEdgeTrigger])
+
+  const handleGetSupportTextOrSnippet = (pub) => {
+    if(typeof pub.support === 'object' && pub.support !== null && !Array.isArray(pub.support)){
+      return <EmphasizeWord text={pub.support.text} positions={[pub.support.subject, pub.support.object]} className={styles.emphasizedSnippet}/>
+    } else {
+      return (pub.snippet)
+        ? pub.snippet
+        : "No snippet available."
+    }
+  }
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
@@ -312,9 +324,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
                       <td className={`table-cell ${styles.tableCell} ${styles.snippet}`}>
                         <span>
                           {
-                            pub.snippet 
-                              ? pub.snippet
-                              : "No snippet available."
+                            handleGetSupportTextOrSnippet(pub)
                           }
                         </span>
                           {pub.url && <a href={pub.url} className={`url ${styles.url}`} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
