@@ -74,7 +74,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
         updatePubdate(element, data);
       }
       element.updated = true;
-      console.log(element);
     }
     return newPubmedEvidence;
   }
