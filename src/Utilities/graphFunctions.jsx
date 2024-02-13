@@ -3,6 +3,7 @@ import cytoscape from 'cytoscape';
 import { debounce, cloneDeep } from 'lodash';
 import { capitalizeFirstLetter } from './utilities';
 import ExternalLink from '../Icons/external-link.svg?react';
+import { hasSupport } from './resultsFormattingFunctions';
 
 export const layoutList = {
   klay: {
@@ -50,8 +51,14 @@ export const resultToCytoscape = (result, summary) => {
     return [...ns].map((n) => { return makeNode(n, nodes); });
   }
 
-  const makeEdge = (eid, src, srcLbl, tgt, tgtLbl, pred) =>
+  const makeEdge = (eid, edge, nodes) =>
   {
+    let isInferred = hasSupport(edge) ? true : false;
+    let src = edge.subject;
+    let tgt = edge.object;
+    let pred = edge.predicate;
+    let srcLbl = nodes[src].names[0];
+    let tgtLbl = nodes[tgt].names[0];
     return {
       data: {
         id: eid,
@@ -59,42 +66,57 @@ export const resultToCytoscape = (result, summary) => {
         sourceLabel: srcLbl,
         target: tgt,
         targetLabel: tgtLbl,
-        label: pred
+        label: pred,
+        inferred: isInferred
       }
     };
   }
 
   const makeEdges = (es, edges, nodes) =>
   {
-    return [...es].map((e) =>
+    let edgeIDList = [...es];
+    return edgeIDList.map((e) =>
       {
-        return makeEdge(e, edges[e].subject, nodes[edges[e].subject].names[0], edges[e].object, 
-          nodes[edges[e].object].names[0], edges[e].predicate);
+        return makeEdge(e, edges[e], nodes);
       });
+  }
+  const distributeEntitiesInPath = (pathID, pathsArray, edgesArray, nodeCollection, edgeCollection) => {
+    if(pathsArray[pathID] !== undefined) {
+      pathsArray[pathID].subgraph.forEach((elemID, i) =>
+      {
+        if (i % 2 === 0) {
+          nodeCollection.add(elemID);
+        } else {
+          edgeCollection.add(elemID);
+          if(hasSupport(edgesArray[elemID])){
+            for(const supportPathID of edgesArray[elemID].support) {
+              distributeEntitiesInPath(supportPathID, pathsArray, edgesArray, nodeCollection, edgeCollection);
+            }
+          }
+        }
+      });
+    }else {
+      console.log("path missing from list: ", pathsArray, ". pathID: ", pathID);
+    }
   }
 
   const ps = result.paths;
   const ns = new Set();
   const es = new Set();
-  ps.forEach((p) =>
-  {
-    summary.paths[p].subgraph.forEach((elem, i) =>
-      {
-        if (i % 2 === 0)
-        {
-          ns.add(elem);
-        }
-        else
-        {
-          es.add(elem);
-        }
-      });
-  });
+  for(const pathID of ps) {
+    distributeEntitiesInPath(pathID, summary.paths, summary.edges, ns, es);
+  }
 
   const c = {
     nodes: makeNodes(ns, summary.nodes),
     edges: makeEdges(es, summary.edges, summary.nodes)
   };
+  for(const edge of c.edges) {
+    if(edge === undefined || edge === null)
+      console.log(edge);
+    if(edge.data.inferred === undefined || edge.data.inferred === null) 
+      console.log(edge);
+  }
 
   for(const node of c.nodes) {
     for(const edge of c.edges) {
@@ -328,6 +350,13 @@ export const initCytoscapeInstance = (dataObj) => {
         selector: '.excluded',
         style: {
           'background-color': 'red'
+        }
+      },
+      {
+        selector: 'edge[?inferred]',
+        style: {
+          'line-style': 'dashed',
+          'line-dash-pattern': [20, 5]
         }
       },
     ],

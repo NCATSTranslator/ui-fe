@@ -1,31 +1,27 @@
 import {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import QueryBar from "../QueryBar/QueryBar";
+import ExampleQueryList from "../ExampleQueryList/ExampleQueryList";
+import QuerySelect from "../QuerySelect/QuerySelect";
+import QueryTypeIcon from "../QueryTypeIcon/QueryTypeIcon";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
+import AutoHeight from "../AutoHeight/AutoHeight";
+import { queryTypes } from "../../Utilities/queryTypes";
 import { incrementHistory } from "../../Redux/historySlice";
 import { currentConfig, currentRoot } from "../../Redux/rootSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
 import { currentQueryTimestamp, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
+import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
 import { filterAndSortExamples, getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import { getEntityLink, generateEntityLink, getLastItemInArray, getFormattedDate, isValidDate } from "../../Utilities/utilities";
 import Question from '../../Icons/Navigation/Question.svg?react';
-import Drug from '../../Icons/drug.svg?react';
-import Disease from '../../Icons/disease2.svg?react';
-import Chemical from '../../Icons/Queries/Chemical.svg?react';
-import Gene from '../../Icons/Queries/Gene.svg?react';
 import Back from '../../Icons/Directional/Undo.svg?react';
 import Search from '../../Icons/Buttons/Search.svg?react';
-import ArrowForward from '../../Icons/Directional/arrow_forward.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import styles from './Query.module.scss';
-import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
-import { queryTypes } from "../../Utilities/queryTypes";
-import AutoHeight from "../AutoHeight/AutoHeight";
-import { Link, useLocation } from "react-router-dom";
-import ExampleQueryList from "../ExampleQueryList/ExampleQueryList";
 
 const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription}) => {
 
@@ -36,7 +32,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const root = useSelector(currentRoot);
   const config = useSelector(currentConfig);
   const queryTimestamp = useSelector(currentQueryTimestamp);
-
+  const nameResolverEndpoint = (config?.name_resolver) ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
   loading = (loading) ? true : false;
 
   // Bool, are the results loading
@@ -48,6 +44,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   // String, input text from query var
   const [inputText, setInputText] = useState(initNodeLabelParam);
 
+  initPresetTypeObject = (initPresetTypeObject === null) ? queryTypes[0] : initPresetTypeObject;
+  const initAutocompleteFunctions = (initPresetTypeObject === null) ? null : initPresetTypeObject.functions;
+  const initLimitType = (initPresetTypeObject === null) ? null : initPresetTypeObject.filterType;
+  const initLimitPrefixes = (initPresetTypeObject === null) ? null : initPresetTypeObject.limitPrefixes;
   // build initial node from query vars
   const initSelectedNode = (initNodeIdParam && initNodeLabelParam) ? {id: initNodeIdParam, label: initNodeLabelParam} : null;
   const initQueryItem = {
@@ -60,17 +60,18 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   var prevQueryItems = useRef([initQueryItem]);
 
   // Function, type to send to autocomplete for result filtering
-  const autocompleteFunctions = useRef(null);
-  const limitPrefixes = useRef(null);
-  const limitType = useRef(null);
+  const autocompleteFunctions = useRef(initAutocompleteFunctions);
+  const limitPrefixes = useRef(initLimitPrefixes);
+  const limitType = useRef(initLimitType);
   // Array, List of items to display in the autocomplete window
   const [autocompleteItems, setAutoCompleteItems] = useState(null);
   // Bool, are autocomplete items loading
   const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
   // Function, delay query for fetching autocomplete items by 750ms each time the user types, so we only send a request once they're done
   const delayedQuery = useMemo(() => _.debounce(
-    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions, limitType, limitPrefixes) =>
-      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions, limitType, limitPrefixes), 750), []
+    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions, limitType, limitPrefixes, endpoint) =>
+      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, 
+        autocompleteFunctions, limitType, limitPrefixes, endpoint), 750), []
   );
 
   // String, used to set navigation url for example disease buttons
@@ -91,10 +92,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const exampleGenesDown = (!config?.cached_queries) 
     ? null
     : filterAndSortExamples(config.cached_queries, 'chemical', 'decreased');
-
-  const [selectedUpperButton, setSelectedUpperButton] = useState(null);
-  const [selectedMiddleButton, setSelectedMiddleButton] = useState(null);
-  const [selectedLowerButton, setSelectedLowerButton] = useState(null);
 
   const submitQuery = (item) => {
 
@@ -195,12 +192,12 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = useCallback((e) => {
     if(Object.keys(queryItem.type).length) {
-      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions.current, limitType.current, limitPrefixes.current);
+      delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions.current, limitType.current, limitPrefixes.current, nameResolverEndpoint);
       setInputText(e);
     } else {
       setIsError(true);
     }
-  },[setLoadingAutocomplete, setAutoCompleteItems, setInputText, setIsError, delayedQuery, queryItem.type]);
+  },[setLoadingAutocomplete, setAutoCompleteItems, setInputText, setIsError, delayedQuery, queryItem.type, nameResolverEndpoint]);
 
   const clearAutocompleteItems = () => {
     setAutoCompleteItems(null);
@@ -258,44 +255,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     validateSubmission(item);
   }
 
-  const handleSelectUpperButton = (index) => {
-    setSelectedLowerButton(null);
-    setSelectedMiddleButton(null);
-    setSelectedUpperButton(index);
-
-    // if we've picked drug/disease, set the query type to 0 and reset the input text
-    if(index === 0) {
-      handleQueryTypeChange(0, true);
-    }
-  }
-
-  const handleSelectMiddleButton = (index) => {
-    setSelectedLowerButton(null);
-    setSelectedMiddleButton(index);
-  }
-
-  const handleSelectLowerButton = (index, prevIndex) => {
-    setSelectedLowerButton(index);
-    // if prevIndex is null, we're coming from another upper button, so reset the input text. otherwise keep it the same.
-    const resetInputText = (prevIndex === null) ? true : false;
-    switch (selectedMiddleButton) {
-      case 0:
-        if(index === 0)
-          handleQueryTypeChange(1, resetInputText);
-        else 
-          handleQueryTypeChange(2, resetInputText);
-        break;
-      case 1:
-        if(index === 0)
-          handleQueryTypeChange(3, resetInputText);
-        else 
-          handleQueryTypeChange(4, resetInputText);
-        break;
-      default:
-        break;
-    }
-  }
-
   useEffect(() => {
     setIsLoading(loading);
   }, [loading]);
@@ -335,7 +294,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                   <div className={styles.showingResultsContainer}>
                     <div className={styles.showingResultsTop}>
                       <h4 className={styles.showingResultsText}>Showing results for:</h4>
-
                     </div>
                       <h5 className={styles.subHeading}>{queryItem.type.label}: 
                         {(queryItem?.node?.id && 
@@ -360,40 +318,42 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               </>
               :
               <>
-                <h4 className={styles.heading}>What relationship would you like to explore?</h4>
-                <div className={styles.upperButtons}>
-                  <button className={`${styles.upperButton} ${selectedUpperButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(0)} data-testid="drug-disease-selector">
-                    <Drug/>Drug <ArrowForward className={styles.arrow} /> <Disease/>Disease
-                  </button>
-                  <button className={`${styles.upperButton} ${selectedUpperButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectUpperButton(1)}>
-                    <Gene/>Genes <span className={styles.dualArrows}><ArrowForward/><ArrowForward/></span> <Chemical/>Chemicals
-                  </button>
-                </div>
-                {selectedUpperButton > 0 &&  
-                  <div className={`${styles.middleButtons} visible`}>
-                    <button className={`${styles.middleButton} ${selectedMiddleButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectMiddleButton(0)}>
-                      Find chemicals that regulate a particular gene
-                    </button>
-                    <button className={`${styles.middleButton} ${selectedMiddleButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectMiddleButton(1)}>
-                      Find genes regulated by a particular chemical
-                    </button>
-                  </div>
-                }
-                {selectedUpperButton > 0 && selectedMiddleButton !== null &&
-                  <div className={`${styles.lowerButtons} visible`}>
-                    <button className={`${styles.lowerButton} ${selectedLowerButton === 0 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(0, selectedLowerButton)}>
-                      Upregulators
-                    </button>
-                    <button className={`${styles.lowerButton} ${selectedLowerButton === 1 ? styles.selected : ''}`} onClick={()=>handleSelectLowerButton(1, selectedLowerButton)}>
-                      Downregulators
-                    </button>
-                  </div>
-                }
-                {isError &&
+                <h4 className={styles.heading}>Select a question, then search for a term.</h4>
+                {
+                  isError &&
                   <p className={styles.error}>{errorText}</p>
                 }
-                {(selectedLowerButton !== null || selectedUpperButton === 0) && root !== 'demo' &&
+                {
                   <OutsideClickHandler onOutsideClick={()=>{clearAutocompleteItems();}} className={styles.queryBarContainer}>
+                    <QuerySelect
+                      label=""
+                      name="Select a question"
+                      handleChange={(value)=>{
+                        handleQueryTypeChange(value, true);
+                      }}
+                      startExpanded
+                      noanimate
+                      >
+                        {
+                          queryTypes.map(type => {
+                            return(
+                              <option value={type.id} key={type.id}>
+                                { 
+                                  <QueryTypeIcon type={type.iconString} />
+                                }
+                                <span>
+                                  { type.label } 
+                                  { 
+                                    (type.id !== queryItem.type.id) 
+                                      ? <span className={styles.gray}> (a {type.searchTypeString})</span>
+                                      : <span>...</span>
+                                  }
+                                </span>
+                              </option>
+                            )
+                          })
+                        }
+                    </QuerySelect>
                     <QueryBar
                       handleSubmission={handleSubmission}
                       handleChange={handleQueryItemChange}
@@ -403,6 +363,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       autocompleteItems={autocompleteItems}
                       autocompleteLoading={loadingAutocomplete}
                       handleItemClick={handleItemSelection}
+                      disabled={root === "main" ? false : true}
                     />
                     { 
                       <img src={loadingIcon} className={`${styles.loadingIcon} ${isLoading ? styles.active : ''} loadingIcon`} alt="loading icon"/>
@@ -410,7 +371,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                   </OutsideClickHandler>
                 }
                 {/* Example Diseases */}
-                {selectedUpperButton === 0 &&
+                {
+                  queryItem.type.id === 0 &&
                   <ExampleQueryList 
                     examples={exampleDiseases} 
                     setPresetURL={setPresetURL} 
@@ -418,7 +380,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                   />
                 }
                 {/* Examples for chemicals UPregulated by a particular gene */}
-                {selectedUpperButton === 1 && selectedMiddleButton === 0 && selectedLowerButton === 0 &&
+                {
+                  queryItem.type.id === 1 &&
                   <ExampleQueryList 
                     examples={exampleGenesUp} 
                     setPresetURL={setPresetURL} 
@@ -426,7 +389,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                   />
                 }
                 {/* Examples for chemicals DOWNregulated by a particular gene */}
-                {selectedUpperButton === 1 && selectedMiddleButton === 0 && selectedLowerButton === 1 &&
+                {
+                  queryItem.type.id === 2 &&
                   <ExampleQueryList 
                     examples={exampleGenesDown} 
                     setPresetURL={setPresetURL} 
@@ -434,7 +398,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                   />
                 }
                 {/* Examples for genes UPregulated by a particular chemical */}
-                {selectedUpperButton === 1 && selectedMiddleButton === 1 && selectedLowerButton === 0 &&
+                {
+                  queryItem.type.id === 3 &&
                   <ExampleQueryList 
                     examples={exampleChemsUp} 
                     setPresetURL={setPresetURL} 
@@ -442,7 +407,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                   />
                 }
                 {/* Examples for genes DOWNregulated by a particular chemical */}
-                {selectedUpperButton === 1 && selectedMiddleButton === 1 && selectedLowerButton === 1 &&
+                {
+                  queryItem.type.id === 4 &&
                   <ExampleQueryList 
                     examples={exampleChemsDown} 
                     setPresetURL={setPresetURL} 
@@ -451,9 +417,9 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 }
               </>
             }
-            <div className={styles.timestamp}>
+            <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
               {
-                queryTimestamp && isValidDate(queryTimestamp) &&
+                queryTimestamp && isValidDate(queryTimestamp) && results &&
                 <p>Submitted {getFormattedDate(queryTimestamp)}</p>
               }
             </div>

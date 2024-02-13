@@ -1,3 +1,4 @@
+import { hasSupport } from "./resultsFormattingFunctions";
 
 /**
  * Finds a string match in the given element by comparing the value with the element's name, description,
@@ -8,6 +9,10 @@
  * @returns {boolean} True if a match is found, false otherwise.
 */
 export const findStringMatch = (element, value, pathRanks) => {
+  const checkNodeEdgeForMatch = (item, formattedValue) => {
+    return (item.name && item.name.toLowerCase().includes(formattedValue)) ||
+      (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))
+  }
   const formattedValue = value.toLowerCase();
   let foundMatch = !value ||
     !element ||
@@ -15,13 +20,23 @@ export const findStringMatch = (element, value, pathRanks) => {
     (element.description && element.description.toLowerCase().includes(formattedValue));
   for (let i = 0; i < element.compressedPaths.length; ++i) {
     const path = element.compressedPaths[i];
-    for (let item of path.path.subgraph) {
-      if ((item.name && item.name.toLowerCase().includes(formattedValue)) ||
-          (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))) {
+    for (const item of path.path.subgraph) {
+      if (checkNodeEdgeForMatch(item, formattedValue)) {
         // Its confusing to update the pathRanks here, but it is more efficient
         pathRanks[i].rank -= 1;
         foundMatch = true;
         break;
+      }
+      if(hasSupport(item)){
+        for(const supportPath of item.support) {
+          for (const supportItem of supportPath.path.subgraph) {
+            if (checkNodeEdgeForMatch(supportItem, formattedValue)) {
+              pathRanks[i].rank -= 1;
+              foundMatch = true;
+              break;
+            }
+          }
+        }
       }
     }
   }

@@ -11,7 +11,7 @@ export const defaultPrefs = {
     possible_values:[5, 10, 20]
   },
   graph_visibility: {
-    pref_value: "sometimes",
+    pref_value: "never",
     possible_values:["always", "never", "sometimes"]
   },
   graph_layout: {
@@ -87,7 +87,7 @@ export const getFormattedBookmarkObject = (bookmarkType = "result", bookmarkName
   queryNodeDescription = "", typeObject, saveItem, pk) => {
 
   let newSaveItem = cloneDeep(saveItem);
-  delete newSaveItem.evidence.publications;
+  // delete newSaveItem.evidence.publications;
 
   let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
   return { 

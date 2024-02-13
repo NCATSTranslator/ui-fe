@@ -37,27 +37,51 @@
     border: 1px solid $midGray;
     font-size: $bodyOneSize;
     border-radius: $defaultBorderRadius;
-    padding: 10px 8px;
+    padding: 12px x;
     resize: none;
     line-height: 20px;
-  }
-  &.hasIcon {
-    input, textarea {
-      padding: 10px 8px 10px 30px;
+    &:focus {
+      outline-style: inset;
+      outline-offset: 0;
+      outline-color: $purpleOne;
+      outline-width: 1px;
     }
   }
-  .iconContainer {
+  &.hasIconLeft {
+    input, textarea {
+      padding: 12px 12px 12px 40px;
+    }
+  }
+  &.hasIconRight {
+    input, textarea {
+      padding: 12px 40px 12px 12px;
+    }
+    &.hasIconLeft {
+      input, textarea {
+        padding: 12px 40px;
+      }
+    }
+  }
+  .iconContainerLeft, .iconContainerRight {
     width: 25px;
     height: 25px;
     position: absolute;
     top: 50%;
-    left: 5px;
     transform: translateY(-50%);
     img, svg {
       width: 100%;
       height: 100%;
       object-fit: cover;
       object-position: center;
+      path {
+        fill: $black;
+      }
     }
+  }
+  .iconContainerLeft {
+    left: 10px;
+  }
+  .iconContainerRight {
+    right: 10px;
   }
 }

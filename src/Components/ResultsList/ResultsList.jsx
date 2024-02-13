@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import styles from './ResultsList.module.scss';
 import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
@@ -18,8 +18,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "../../Redux/resultsSlice";
 import { currentPrefs, currentRoot }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, 
-  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag, 
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow,
+  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag,
   filterCompare } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
@@ -45,12 +45,13 @@ const ResultsList = ({loading}) => {
   const loadingParam = getDataFromQueryVar("loading");
   const queryIDParam = getDataFromQueryVar("q");
   const initPresetTypeID = getDataFromQueryVar("t");
-  const initPresetTypeObject = (initPresetTypeID) 
+  const initPresetTypeObject = (initPresetTypeID)
     ? queryTypes.find(type => type.id === parseInt(initPresetTypeID))
     : null;
   const initNodeLabelParam = getDataFromQueryVar("l");
   const initNodeIdParam = getDataFromQueryVar("i");
-  const initResultIdParam = getDataFromQueryVar("r");
+  let initResultIdParam = getDataFromQueryVar("r");
+  const hasFocusedOnFirstLoad = useRef(false);
   const [nodeDescription, setNodeDescription] = useState();
 
   loading = (loading) ? loading : false;
@@ -68,9 +69,11 @@ const ResultsList = ({loading}) => {
   const presetIsLoading = (queryIDParam) ? true : loading;
   const [isLoading, setIsLoading] = useState(presetIsLoading);
   // Bool, should ara status be fetched
-  const [isFetchingARAStatus, setIsFetchingARAStatus] = useState(presetIsLoading);
+  // const [isFetchingARAStatus, setIsFetchingARAStatus] = useState(presetIsLoading);
+  const isFetchingARAStatus = useRef(presetIsLoading);
   // Bool, should results be fetched
-  const [isFetchingResults, setIsFetchingResults] = useState(false);
+  // const [isFetchingResults, setIsFetchingResults] = useState(false);
+  const isFetchingResults = useRef(false);
   // Bool, are the results currently sorted by name (true/false for asc/desc, null for not set)
   const [isSortedByName, setIsSortedByName] = useState(null);
   // Bool, are the results currently sorted by evidence count (true/false for asc/desc, null for not set)
@@ -82,8 +85,6 @@ const ResultsList = ({loading}) => {
   const [notesOpen, setNotesOpen] = useState(false);
   const noteLabel = useRef("");
   const currentBookmarkID = useRef(null);
-  // String, active title of evidence modal
-  const [isAllEvidence, setIsAllEvidence] = useState(true);
   // Object, the currently selected item
   const [selectedItem, setSelectedItem] = useState({});
   // Array, edges represented in current evidence
@@ -114,7 +115,7 @@ const ResultsList = ({loading}) => {
   // Array, results formatted by any active filters, sorted by any active sorting
   const [formattedResults, setFormattedResults] = useState([]);
   // Array, results meant to display based on the pagination
-  const displayedResults = formattedResults.slice(itemOffset, endResultIndex);
+  const displayedResults = useMemo(()=>formattedResults.slice(itemOffset, endResultIndex), [formattedResults, itemOffset, endResultIndex]);
   const initSortString = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
   const currentSortString = useRef(initSortString);
   // Int, number of pages
@@ -126,7 +127,7 @@ const ResultsList = ({loading}) => {
   // Array, currently active string filters
   const [activeStringFilters, setActiveStringFilters] = useState([]);
   // Array, aras that have returned data
-  const [returnedARAs, setReturnedARAs] = useState({aras: [], status: ''});
+  const returnedARAs = useRef({aras: [], status: ''});
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
@@ -148,8 +149,8 @@ const ResultsList = ({loading}) => {
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
   const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
 
-  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
-  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
+  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
+  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
   useEffect(() => {
     currentSortString.current = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
     const tempItemsPerPage = (prefs?.result_per_screen?.pref_value) ? parseInt(prefs.result_per_screen.pref_value) : 10;
@@ -162,13 +163,13 @@ const ResultsList = ({loading}) => {
         setZoomKeyDown(true);
       }
     };
-  
+
     const handleKeyUp = (ev) => {
       if (ev.keyCode === 90) {
         setZoomKeyDown(false);
       }
     };
-  
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
@@ -217,16 +218,15 @@ const ResultsList = ({loading}) => {
   }, [formattedResults.length, itemsPerPage]);
 
   const handleUpdateResults = (facetsAndFilters, asFilters, rr, or = [], justSort = false, sortType, fr = []) => {
-
     let newFormattedResults = [];
     let newOriginalResults = [];
     let saves = (userSaves) ? userSaves.saves: null;
-    
+
     if(or.length === 0) {
       newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
       newOriginalResults = cloneDeep(newFormattedResults);
     } else {
-      newFormattedResults = (justSort) ? fr : or;
+      newFormattedResults = (justSort) ? cloneDeep(fr) : or;
       newOriginalResults = or;
     }
 
@@ -243,7 +243,7 @@ const ResultsList = ({loading}) => {
 
     if(newFormattedResults.length > 0) {
       let focusedPage = 0;
-      if (initResultIdParam !== '0') {
+      if (initResultIdParam !== '0' && !hasFocusedOnFirstLoad.current) {
         let focusedItemIndex = newFormattedResults.findIndex(result => result.id === initResultIdParam);
         if (focusedItemIndex === -1) {
           focusedItemIndex = 0;
@@ -257,7 +257,7 @@ const ResultsList = ({loading}) => {
 
     if(!justSort)
       originalResults.current = newOriginalResults;
-    
+
     rawResults.current = rr;
 
     return newFormattedResults;
@@ -270,7 +270,7 @@ const ResultsList = ({loading}) => {
       return;
 
     // if the results status is error, or there is no results property in the data obj, return
-    if(rr.status === 'error' || rr.data.results === undefined)  
+    if(rr.status === 'error' || rr.data.results === undefined)
       return;
 
     // if rawResults are new, set prevRawResults for future comparison
@@ -282,7 +282,7 @@ const ResultsList = ({loading}) => {
       setIsLoading(false);
 
     // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
-    if(rr && rr.data.results && rr.data.results.length === 0 && !isFetchingARAStatus)
+    if(rr && rr.data.results && rr.data.results.length === 0 && !isFetchingARAStatus.current)
       setIsLoading(false);
   }
 
@@ -309,12 +309,12 @@ const ResultsList = ({loading}) => {
         numberOfStatusChecks.current++;
         console.log("ARA status:", data);
         dispatch(setCurrentQueryTimestamp(new Date(data.data.timestamp)));
-        
+
         let fetchResults = false;
 
-        if(data.data.aras.length > returnedARAs.aras.length) {
-          console.log(`Old ARAs: ${returnedARAs.aras}, New ARAs: ${data.data.aras}`);
-          setReturnedARAs(data.data);
+        if(data.data.aras.length > returnedARAs.current.aras.length) {
+          console.log(`Old ARAs: ${returnedARAs.current.aras}, New ARAs: ${data.data.aras}`);
+          returnedARAs.current = data.data;
           fetchResults = true;
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
@@ -324,25 +324,25 @@ const ResultsList = ({loading}) => {
         stop fetching ARA status and move to fetching results.
         */
         if(data.status === 'success' || numberOfStatusChecks.current >= 120) {
-          setIsFetchingARAStatus(false);
+          isFetchingARAStatus.current = false;
           fetchResults = true;
         }
         if(fetchResults)
-          setIsFetchingResults(true);
+          isFetchingResults.current = true;
       })
       .catch((error) => {
         if(formattedResults.length <= 0) {
           handleResultsError(true, setIsError, setIsLoading);
-          setIsFetchingARAStatus(false);
+          isFetchingARAStatus.current = false;
         }
         if(formattedResults.length > 0) {
-          setIsFetchingARAStatus(false);
+          isFetchingARAStatus.current = false;
         }
         console.error(error)
       });
   }, {
     refetchInterval: 10000,
-    enabled: isFetchingARAStatus,
+    enabled: isFetchingARAStatus.current,
     refetchOnWindowFocus: false
   });
 
@@ -365,8 +365,8 @@ const ResultsList = ({loading}) => {
     const response = await fetch(`/${root}/api/v1/pub/query/${currentQueryID}/result`, requestOptions)
       .then(response => handleFetchErrors(response, () => {
         console.log(response.json());
-        setIsFetchingARAStatus(false);
-        setIsFetchingResults(false);
+        isFetchingARAStatus.current = false;
+        isFetchingResults.current = false;
         if(formattedResults.length <= 0) {
           handleResultsError(true, setIsError, setIsLoading);
         }
@@ -382,13 +382,18 @@ const ResultsList = ({loading}) => {
           handleNewResults(data);
         }
 
-        setIsFetchingResults(false);
+        // The ARS can rarely report that it is done in the status check when it is not done
+        if (data.status === 'running' && numberOfStatusChecks.current < 120) {
+          isFetchingARAStatus.current = true;
+        }
+
+        isFetchingResults.current = false;
       })
       .catch((error) => {
         console.log(error);
       });
   }, {
-    enabled: isFetchingResults,
+    enabled: isFetchingResults.current,
     refetchOnWindowFocus: false,
   });
 
@@ -512,16 +517,15 @@ const ResultsList = ({loading}) => {
   }
 
   /**
-   * Activates sets the evidence and opens the evidence modal. 
+   * Activates sets the evidence and opens the evidence modal.
    */
-  const activateEvidence = (evidence, item, edgeGroup, path, isAll) => {
-    setIsAllEvidence(isAll);
+  const activateEvidence = useCallback((evidence, item, edgeGroup, path) => {
     setSelectedItem(item);
     setSelectedEdge(edgeGroup);
     setSelectedPath(path);
     setCurrentEvidence(evidence);
     setEvidenceOpen(true);
-  }
+  },[])
 
   const activateNotes = (label, bookmarkID, item) => {
     noteLabel.current = label;
@@ -712,8 +716,6 @@ const ResultsList = ({loading}) => {
 
   },[formattedResults, initNodeIdParam]);
 
-
-
   return (
     <QueryClientProvider client={queryClient}>
       <ToastContainer
@@ -742,14 +744,13 @@ const ResultsList = ({loading}) => {
         rawEvidence={currentEvidence}
         item={selectedItem}
         results={rawResults.current}
-        isAll={isAllEvidence}
         edgeGroup={selectedEdge}
         path={selectedPath}
       />
       <div className={styles.resultsList}>
-        <Query 
-          results 
-          loading={isLoading} 
+        <Query
+          results
+          loading={isLoading}
           initPresetTypeID={initPresetTypeID}
           initPresetTypeObject={initPresetTypeObject}
           initNodeIdParam={initNodeIdParam}
@@ -795,15 +796,15 @@ const ResultsList = ({loading}) => {
                 }}
                 loadingButtonData={{
                   handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
-                  isFetchingARAStatus: isFetchingARAStatus,
-                  isFetchingResults: isFetchingResults,
+                  isFetchingARAStatus: isFetchingARAStatus.current,
+                  isFetchingResults: isFetchingResults.current,
                   showDisclaimer: false,
                   containerClassName: styles.loadingButtonContainer,
                   buttonClassName: styles.loadingButton,
                   hasFreshResults: (freshRawResults !== null)
                 }}
               />
-              
+
               <div className={styles.resultsTableContainer}>
                 <div className={styles.resultsTable}>
                   <div className={styles.tableBody}>
@@ -866,7 +867,7 @@ const ResultsList = ({loading}) => {
                             key={item.id}
                             type={initPresetTypeObject}
                             item={item}
-                            activateEvidence={(evidence, item, edgeGroup, path, isAll)=>activateEvidence(evidence, item, edgeGroup, path, isAll)}
+                            activateEvidence={(evidence, item, edgeGroup, path)=>activateEvidence(evidence, item, edgeGroup, path)}
                             activateNotes={activateNotes}
                             activeStringFilters={activeStringFilters}
                             zoomKeyDown={zoomKeyDown}
@@ -885,6 +886,7 @@ const ResultsList = ({loading}) => {
                             activeFilters={activeFilters}
                             isFocused={item.id === initResultIdParam}
                             focusedItemRef={focusedItemRef}
+                            handleFocusedOnItem={()=>hasFocusedOnFirstLoad.current = true}
                           />
                         )
                       })
@@ -901,7 +903,7 @@ const ResultsList = ({loading}) => {
                         size="s"
                         handleChange={(value)=>{
                           setItemsPerPage(parseInt(value));
-                          handlePageClick({selected: currentPage}, value);
+                          handlePageClick({selected: currentPage.current}, value, formattedResults.length);
                         }}
                         noanimate
                         >
@@ -932,9 +934,13 @@ const ResultsList = ({loading}) => {
                 }
                 <ResultsListLoadingButton
                   data={{
-                    handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
-                    isFetchingARAStatus: isFetchingARAStatus,
-                    isFetchingResults: isFetchingResults,
+                    handleResultsRefresh: () => 
+                    { 
+                      hasFocusedOnFirstLoad.current = false; 
+                      handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
+                    },
+                    isFetchingARAStatus: isFetchingARAStatus.current,
+                    isFetchingResults: isFetchingResults.current,
                     showDisclaimer: true,
                     containerClassName: styles.bottomLoadingButtonContainer,
                     buttonClassName: styles.loadingButton,
@@ -949,9 +955,13 @@ const ResultsList = ({loading}) => {
           formattedResults.length > 0 &&
           <StickyToolbar
             loadingButtonData={{
-              handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
-              isFetchingARAStatus: isFetchingARAStatus,
-              isFetchingResults: isFetchingResults,
+              handleResultsRefresh: () => 
+                { 
+                  hasFocusedOnFirstLoad.current = false; 
+                  handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
+                },
+              isFetchingARAStatus: isFetchingARAStatus.current,
+              isFetchingResults: isFetchingResults.current,
               showDisclaimer: false,
               containerClassName: styles.shareLoadingButtonContainer,
               buttonClassName: styles.loadingButton,
