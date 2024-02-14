@@ -1,7 +1,6 @@
 import {useState, useMemo, useEffect} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
-// import SimpleRange from '../Range/SimpleRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import Alert from '../../Icons/Alerts/Info.svg?react';
@@ -31,15 +30,10 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     return newGroupedTags;
   }
 
-  // const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1});
   const [tagObject, setTagObject] = useState({type:'', value: ''});
   const groupedTags = useMemo(()=>groupAvailableTags(availableTags), [availableTags]);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
-
-  // const handleEvidenceActive = () => {
-  //   onFilter(evidenceObject);
-  // }
 
   const handleFacetChange = (facetID, objectToUpdate, setterFunction, negated = false, label = '') => {
     if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
@@ -152,30 +146,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
   }
 
-  const showMoreFacets = (type) => {
-    let newCount = countsToShow[type];
-    if(Object.keys(groupedTags[type]).length > countsToShow[type]) {
-      newCount = (countsToShow[type] + facetShowMoreIncrement > Object.keys(groupedTags[type]).length)
-        ? Object.keys(groupedTags[type]).length
-        : countsToShow[type] + facetShowMoreIncrement;
-    }
-
-    let newCountsToShow = cloneDeep(countsToShow);
-    newCountsToShow[type] = newCount;
-    setCountsToShow(newCountsToShow);
-  }
-  const showFewerFacets = (type) => {
-    let newCount = countsToShow[type];
-    if(countsToShow[type] - facetShowMoreIncrement < facetShowMoreIncrement)
-      newCount = facetShowMoreIncrement;
-    else
-      newCount = countsToShow[type] - facetShowMoreIncrement;
-
-    let newCountsToShow = cloneDeep(countsToShow);
-    newCountsToShow[type] = newCount;
-    setCountsToShow(newCountsToShow);
-  }
-
   useEffect(() => {
     console.log(activeFilters);
   }, [activeFilters]);
@@ -194,11 +164,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       availableTags[tagKey] && availableTags[tagKey].count &&
       <div className={styles.facetContainer} key={tagKey}>
         <Checkbox
-          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, true, tagName)}
-          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)}
-          className={`${styles.checkbox} ${styles.negative}`}
-        ></Checkbox>
-        <Checkbox
           handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, false, tagName)}
           checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && !filter.negated)}
           className={`${styles.checkbox}`}
@@ -214,6 +179,11 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             ({(object.count) ? object.count : 0})
           </span>
         </Checkbox>
+        <Checkbox
+          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, true, tagName)}
+          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)}
+          className={`${styles.checkbox} ${styles.negative}`}
+        ></Checkbox>
       </div>
     )
   }
@@ -251,25 +221,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
-        {/*
-          <div className={styles.labelContainer} >
-            <p className={styles.subTwo}>Evidence</p>
-          </div>
-          <Checkbox
-            handleClick={handleEvidenceActive}
-            className={styles.evidenceCheckbox}
-            checked={activeFilters.some(filter => isEvidenceFilter(filter))}>
-              Minimum Number of Evidence
-          </Checkbox>
-          <SimpleRange
-            label="Evidence Associated"
-            hideLabel
-            min="1"
-            max="99"
-            onChange={e => handleFacetChange('evi:', evidenceObject, setEvidenceObject, false, e)}
-            initialValue={1}
-          />
-        */}
         <EntitySearch
           activeFilters={activeFilters}
           onFilter={onFilter}

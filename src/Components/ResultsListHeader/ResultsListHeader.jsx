@@ -85,7 +85,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
           {
             data.activeFilters.map((activeFilter, i)=> {
               return(
-                <span key={i} className={`${styles.filterTag} ${activeFilter.type}`}>
+                <span key={i} className={`${styles.filterTag} ${activeFilter.type} ${activeFilter?.negated ? styles.negated : ''}`}>
                   { getSelectedFilterDisplay(activeFilter) }
                   <span className={styles.close} onClick={()=>{data.handleFilter(activeFilter)}}><CloseIcon/></span>
                 </span>

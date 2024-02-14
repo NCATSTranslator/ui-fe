@@ -19,9 +19,9 @@ const Checkbox = ({name, value, checked, children, handleClick, className}) => {
   return (
 
     <label className={`${styles.checkbox} ${isCheckedClass} ${className}`}>
-      <span className={styles.circle}></span>
       <input type="checkbox" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} />
       <span>{children}</span>
+      <span className={styles.circle}></span>
     </label>
 
   );

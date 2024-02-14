@@ -46,6 +46,9 @@
     box-shadow: $dropShadow;
     transition: $defaultBoxShadowAnim;
     border-radius: $defaultBorderRadius;
+    &.negated {
+      background-color: $red50;
+    }
     span {
       font-weight: 700;
       color: $black;
