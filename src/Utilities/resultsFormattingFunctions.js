@@ -227,7 +227,8 @@ const getFormattedNode = (id, index, subgraph, results) => {
   return newNode;
 }
 
-const getFormattedEdge = (id, results) => {
+const getFormattedEdge = (id, results, supportStack) => {
+  supportStack.push(id);
   let edge = getEdgeByID(id, results);
   edge.id = id;
   let pred = '';
@@ -247,8 +248,10 @@ const getFormattedEdge = (id, results) => {
   };
   // if the edge has support, recursively call getFormattedPaths to fill out the support paths
   if(hasSupport(edge)) {
-    newEdge.support = edge.support;
-    newEdge.support = getFormattedPaths(edge.support, results);
+    const validSupport = edge.support.filter(p => !supportStack.includes(p));
+    if (validSupport.length > 0) {
+      newEdge.support = getFormattedPaths(validSupport, results, supportStack);
+    }
     newEdge.inferred = true;
   }
 
@@ -256,6 +259,7 @@ const getFormattedEdge = (id, results) => {
   if((!Array.isArray(newEdge.provenance) && Object.keys(newEdge.provenance).length === 0))
     newEdge.provenance = [];
 
+  supportStack.pop();
   return newEdge;
 }
 
@@ -282,22 +286,26 @@ const getStringNameFromPath = (path) => {
  * @param {Object} results - The results object containing paths and node/edge information.
  * @returns {Array} The formatted paths array.
 */
-const getFormattedPaths = (rawPathIds, results) => {
+const getFormattedPaths = (rawPathIds, results, supportStack) => {
   let formattedPaths = [];
   for(const id of rawPathIds) {
     let formattedPath = cloneDeep(results.paths[id]);
     if(formattedPath) {
+      supportStack.push(id);
       for(const [i] of formattedPath.subgraph.entries()) {
-        if(i % 2 === 0)
+        if(i % 2 === 0) {
           formattedPath.subgraph[i] = getFormattedNode(formattedPath.subgraph[i], i, formattedPath.subgraph, results);
-        else
-          formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results);
+        } else {
+          formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results, supportStack);
+        }
       }
       formattedPath.inferred = checkPathForSupport(formattedPath);
       formattedPath.stringName = getStringNameFromPath(formattedPath);
       formattedPaths.push({id: id, highlighted: false, path: formattedPath});
+      supportStack.pop();
     }
   }
+
   return formattedPaths;
 }
 
@@ -423,7 +431,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     // Get the subject node's fda approval status
     let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
-    let formattedPaths = getFormattedPaths(item.paths, results);
+    let formattedPaths = getFormattedPaths(item.paths, results, []);
     let compressedPaths = getCompressedPaths(formattedPaths, true);
     // let compressedPaths = formattedPaths;
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
