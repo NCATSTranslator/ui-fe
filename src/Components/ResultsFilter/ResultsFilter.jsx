@@ -1,10 +1,11 @@
-import {useState, useMemo} from 'react';
+import {useState, useMemo, useEffect} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
-// import SimpleRange from '../Range/SimpleRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import Alert from '../../Icons/Alerts/Info.svg?react';
+import Include from '../../Icons/include.svg?react';
+import Exclude from '../../Icons/exclude.svg?react';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacet, isEvidenceFilter } from '../../Utilities/filterFunctions';
@@ -31,17 +32,12 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     return newGroupedTags;
   }
 
-  // const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1});
   const [tagObject, setTagObject] = useState({type:'', value: ''});
   const groupedTags = useMemo(()=>groupAvailableTags(availableTags), [availableTags]);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
 
-  // const handleEvidenceActive = () => {
-  //   onFilter(evidenceObject);
-  // }
-
-  const handleFacetChange = (facetID, objectToUpdate, setterFunction, label = '') => {
+  const handleFacetChange = (facetID, objectToUpdate, setterFunction, negated = false, label = '') => {
     if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
       return;
     }
@@ -49,6 +45,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let newObj = cloneDeep(objectToUpdate);
     newObj.type = facetID;
     newObj.value = label;
+    newObj.negated = negated;
     setterFunction(objectToUpdate);
     onFilter(newObj);
   }
@@ -160,16 +157,22 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     } else {
       tagName = object.name;
     }
+    let positiveChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && !filter.negated)) ? true: false;
+    let negativeChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)) ? true: false;
 
     return (
       availableTags[tagKey] && availableTags[tagKey].count &&
-      <div className={styles.facetContainer} key={tagKey}>
+      <div className={`${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey}>
         <Checkbox
-          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, tagName)}
-          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
-          className={`${styles.checkbox}`}
+          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, false, tagName)}
+          checked={positiveChecked}
+          className={`${styles.checkbox} ${styles.positive}`}
+          checkedClassName={positiveChecked ? styles.positiveChecked : ""}
+          icon={<Include/>}
           >
-          {tagName}
+          <span className={styles.tagName}>
+            {tagName}
+          </span>
           <span className={styles.facetCount}>
             {
             (type === "role") &&
@@ -180,6 +183,13 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             ({(object.count) ? object.count : 0})
           </span>
         </Checkbox>
+        <Checkbox
+          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, true, tagName)}
+          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)}
+          className={`${styles.checkbox} ${styles.negative}`}
+          checkedClassName={negativeChecked ? styles.negativeChecked : ""}
+          icon={<Exclude/>}
+        ></Checkbox>
       </div>
     )
   }
@@ -217,25 +227,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
-        {/*
-          <div className={styles.labelContainer} >
-            <p className={styles.subTwo}>Evidence</p>
-          </div>
-          <Checkbox
-            handleClick={handleEvidenceActive}
-            className={styles.evidenceCheckbox}
-            checked={activeFilters.some(filter => isEvidenceFilter(filter))}>
-              Minimum Number of Evidence
-          </Checkbox>
-          <SimpleRange
-            label="Evidence Associated"
-            hideLabel
-            min="1"
-            max="99"
-            onChange={e => handleFacetChange('evi:', evidenceObject, setEvidenceObject, e)}
-            initialValue={1}
-          />
-        */}
         <EntitySearch
           activeFilters={activeFilters}
           onFilter={onFilter}
