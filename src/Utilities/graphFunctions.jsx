@@ -80,22 +80,27 @@ export const resultToCytoscape = (result, summary) => {
         return makeEdge(e, edges[e], nodes);
       });
   }
-  const distributeEntitiesInPath = (pathID, pathsArray, edgesArray, nodeCollection, edgeCollection) => {
-    if(pathsArray[pathID] !== undefined) {
-      pathsArray[pathID].subgraph.forEach((elemID, i) =>
-      {
+
+  const distributeEntitiesInPath = (pathID, pathsArray, edgesArray,
+      nodeCollection, edgeCollection, supportStack) => {
+    if (pathsArray[pathID] !== undefined) {
+      supportStack.push(pathID);
+      pathsArray[pathID].subgraph.forEach((elemID, i) => {
         if (i % 2 === 0) {
           nodeCollection.add(elemID);
         } else {
           edgeCollection.add(elemID);
-          if(hasSupport(edgesArray[elemID])){
-            for(const supportPathID of edgesArray[elemID].support) {
-              distributeEntitiesInPath(supportPathID, pathsArray, edgesArray, nodeCollection, edgeCollection);
+          const edge = edgesArray[elemID];
+          if (hasSupport(edge)) {
+            const validSupport = edge.support.filter(p => !supportStack.includes(p));
+            for(const supportPathID of validSupport) {
+              distributeEntitiesInPath(supportPathID, pathsArray, edgesArray,
+                  nodeCollection, edgeCollection, supportStack);
             }
           }
         }
       });
-    }else {
+    } else {
       console.log("path missing from list: ", pathsArray, ". pathID: ", pathID);
     }
   }
@@ -104,7 +109,7 @@ export const resultToCytoscape = (result, summary) => {
   const ns = new Set();
   const es = new Set();
   for(const pathID of ps) {
-    distributeEntitiesInPath(pathID, summary.paths, summary.edges, ns, es);
+    distributeEntitiesInPath(pathID, summary.paths, summary.edges, ns, es, []);
   }
 
   const c = {
