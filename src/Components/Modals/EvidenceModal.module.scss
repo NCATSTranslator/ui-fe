@@ -109,6 +109,23 @@
   &>span:last-child {
     margin-bottom: 0; 
   }
+  .pathContainer {
+    &>svg {
+      height: 27px;
+    }
+    &:first-of-type {
+      &>svg {
+        top: 80%;
+        height: auto;
+      }
+    }
+    &:last-of-type {
+      &>svg {
+        top: 28%;
+        height: auto;
+      }
+    }
+  }
 }
 
 .infoIcon {
