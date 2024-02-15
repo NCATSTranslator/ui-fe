@@ -70,28 +70,60 @@
     margin-bottom: 4px;
     background-color: $white;
     border: 1px solid $borderGray;
-    border-radius: $querySelectBorderRadius;
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
-    input + span, .facetCount {
+    transition: $defaultAnim;
+    &.containerNegativeChecked {
+      border-color: $redTwo;
+    }
+    &.containerPositiveChecked {
+      border-color: $purpleEdgeBGSelected;
+    }
+    .positive input + span {
+      &:hover {
+        &+span {
+          svg path{
+            fill: $purpleEdgeBGSelected;
+          }
+        }
+      }
+      &+span:hover {
+        svg path{
+          fill: $purpleEdgeBGSelected;
+        }
+      }
+    }
+    .positiveChecked, .negativeChecked {
+      svg {
+        path {
+          fill: $white !important;
+        }
+      }
+    }
+    .positiveChecked {
+      background-color: $purpleEdgeBGSelected;
+      border-right-color: $purpleEdgeBGSelected;
+
+    }
+    .negativeChecked {
+      background-color: $redTwo;
+    }
+    input + span span, .facetCount {
       color: $black;
       font-size: 12px;
       font-weight: 700;
     }
     input + span {
       position: relative;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
       width: 100%;
       padding: 10px 45px 10px 15px;
       margin-right: 4px;
-      // padding-right: 45px;
     }
     label {
       width: 100%;
     }
-    span + span {
+    label span + span {
       height: 100%;
       min-width: 25px;
       border-top: none;
@@ -110,10 +142,22 @@
       }
       span + span {
         border: none;
-        border-top-right-radius: $querySelectBorderRadius;
-        border-bottom-right-radius: $querySelectBorderRadius;
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+        &:hover {
+          svg path {
+            fill: $red;
+          }
+        }
       }
     }
+  }
+  .tagName {
+    max-width: 155px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
   }
   .facetCount {
     position: absolute;
@@ -122,6 +166,7 @@
     bottom: 0;
     display: flex;
     align-items: center;
+    border: none;
     a {
       margin-right: 2px;
       display: flex;
@@ -140,11 +185,6 @@
   }
   .checkbox {
     margin-bottom: 0;
-    &.negative {
-      & > span {
-        background-color: $red50;
-      }
-    }
   }
   .showButtonsContainer {
     display: flex;
@@ -167,9 +207,6 @@
     &.role {
       max-height: 250px;
       overflow-y: scroll;
-      .facetContainer {
-        padding-right: 10px;
-      }
     }
   }
   .extLinkIcon {

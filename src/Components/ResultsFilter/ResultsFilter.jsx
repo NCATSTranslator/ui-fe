@@ -4,6 +4,8 @@ import Checkbox from '../FormFields/Checkbox';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import Alert from '../../Icons/Alerts/Info.svg?react';
+import Include from '../../Icons/include.svg?react';
+import Exclude from '../../Icons/exclude.svg?react';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacet, isEvidenceFilter } from '../../Utilities/filterFunctions';
@@ -146,10 +148,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
   }
 
-  useEffect(() => {
-    console.log(activeFilters);
-  }, [activeFilters]);
-
   const tagDisplay = (tag, type, tagObject, setTagObjectFunc, availableTags) => {
     let tagKey = tag[0];
     let object = tag[1];
@@ -159,16 +157,22 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     } else {
       tagName = object.name;
     }
+    let positiveChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && !filter.negated)) ? true: false;
+    let negativeChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)) ? true: false;
 
     return (
       availableTags[tagKey] && availableTags[tagKey].count &&
-      <div className={styles.facetContainer} key={tagKey}>
+      <div className={`${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey}>
         <Checkbox
           handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, false, tagName)}
-          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && !filter.negated)}
-          className={`${styles.checkbox}`}
+          checked={positiveChecked}
+          className={`${styles.checkbox} ${styles.positive}`}
+          checkedClassName={positiveChecked ? styles.positiveChecked : ""}
+          icon={<Include/>}
           >
-          {tagName}
+          <span className={styles.tagName}>
+            {tagName}
+          </span>
           <span className={styles.facetCount}>
             {
             (type === "role") &&
@@ -183,6 +187,8 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, true, tagName)}
           checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)}
           className={`${styles.checkbox} ${styles.negative}`}
+          checkedClassName={negativeChecked ? styles.negativeChecked : ""}
+          icon={<Exclude/>}
         ></Checkbox>
       </div>
     )

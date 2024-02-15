@@ -9,7 +9,6 @@ import ShareIcon from '../../Icons/share.svg?react';
   // Output jsx for selected filters
 const getSelectedFilterDisplay = (filter) => {
   let filterDisplay;
-  console.log(filter);
   if (isEvidenceFilter(filter)) {
     filterDisplay = <div>Minimum Evidence: <span>{filter.value}</span></div>;
   } else if (isTextFilter(filter)) {

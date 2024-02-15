@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import styles from './Checkbox.module.scss';
 
-const Checkbox = ({name, value, checked, children, handleClick, className}) => {
+const Checkbox = ({name, value, checked, children, handleClick, className = "", checkedClassName = "", icon = null}) => {
 
   const [isChecked, setIsChecked] = useState(checked);
 
@@ -21,7 +21,7 @@ const Checkbox = ({name, value, checked, children, handleClick, className}) => {
     <label className={`${styles.checkbox} ${isCheckedClass} ${className}`}>
       <input type="checkbox" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} />
       <span>{children}</span>
-      <span className={styles.circle}></span>
+      <span className={`${icon ? styles.hasIcon : ""} ${styles.circle} ${checkedClassName}`}>{icon && icon}</span>
     </label>
 
   );
