@@ -154,6 +154,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                                 hasSupport={pathItemHasSupport}
                                 isTop={isTop}
                                 isBottom={isBottom}
+                                className={styles.pathContainer}
                               />
                             ) 
                           })

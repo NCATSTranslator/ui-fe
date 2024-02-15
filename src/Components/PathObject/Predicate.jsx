@@ -21,7 +21,7 @@ import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { cloneDeep } from 'lodash';
 
 const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass = '', handleEdgeClick, 
-   hasSupport, supportDataObject = null, inModal = false, isTop = null, isBottom = null }) => {
+   hasSupport, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
 
   const checkForProvenanceType = (pathObject, type) => {
     if(!pathObject?.provenance || !Array.isArray(pathObject.provenance))
@@ -66,7 +66,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
         <span>This relationship was generated using information found in a database that includes human curation. Click on the relationship and view its knowledge sources to learn more.</span>
       </Tooltip> 
       <span 
-        className={`${selected ? styles.selected : ''} ${parentClass} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''}`} 
+        className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''}`} 
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject);}}
         >
           {

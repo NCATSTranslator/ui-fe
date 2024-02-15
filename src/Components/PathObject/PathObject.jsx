@@ -6,7 +6,7 @@ import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
 
 const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false, 
-  activeStringFilters, selected, supportDataObject = null, inModal = false, isTop = null, isBottom = null }) => {
+  activeStringFilters, selected, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
 
   const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const type = (pathObject?.type) ? pathObject.type.replace("biolink:", ""): '';
@@ -22,7 +22,7 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
     <>
       {
         pathObject.category === 'object' &&
-        <span className={`${styles.nameContainer} ${inModal ? styles.inModal : ''}`} 
+        <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''}`} 
           onClick={(e)=> {e.stopPropagation(); handleNameClick(pathObject);}}
           data-tooltip-id={`${nameString.replaceAll("'")}${uid}`}
           >
@@ -64,12 +64,13 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
           supportDataObject={supportDataObject}
           isTop={isTop}
           isBottom={isBottom}
+          className={className}
         />
       }
       {
         pathObject.category === 'target' && 
         <span 
-          className={styles.targetContainer} 
+          className={`${styles.targetContainer} ${className}`} 
           data-tooltip-id={`${nameString.replaceAll("'")}${uid}`}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(pathObject);}}
           >

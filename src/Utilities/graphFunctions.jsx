@@ -8,11 +8,11 @@ import { hasSupport } from './resultsFormattingFunctions';
 export const layoutList = {
   klay: {
     label: 'vertical',
-    name: 'klay', spacingFactor: 1.3, klay:{direction: 'RIGHT', edgeSpacingFactor: .1}, 
-    ready: (ev)=>{ 
-      if(ev.target?.options?.eles?.length < 10) { 
-        ev.cy.zoom({level:1.5}); 
-        ev.cy.center(); 
+    name: 'klay', spacingFactor: 1.3, klay:{direction: 'RIGHT', edgeSpacingFactor: .1},
+    ready: (ev)=>{
+      if(ev.target?.options?.eles?.length < 10) {
+        ev.cy.zoom({level:1.5});
+        ev.cy.center();
       }
     }
   },
@@ -46,7 +46,7 @@ export const resultToCytoscape = (result, summary) => {
     };
   }
 
-  const makeNodes = (ns, nodes) => 
+  const makeNodes = (ns, nodes) =>
   {
     return [...ns].map((n) => { return makeNode(n, nodes); });
   }
@@ -80,22 +80,27 @@ export const resultToCytoscape = (result, summary) => {
         return makeEdge(e, edges[e], nodes);
       });
   }
-  const distributeEntitiesInPath = (pathID, pathsArray, edgesArray, nodeCollection, edgeCollection) => {
-    if(pathsArray[pathID] !== undefined) {
-      pathsArray[pathID].subgraph.forEach((elemID, i) =>
-      {
+
+  const distributeEntitiesInPath = (pathID, pathsArray, edgesArray,
+      nodeCollection, edgeCollection, supportStack) => {
+    if (pathsArray[pathID] !== undefined) {
+      supportStack.push(pathID);
+      pathsArray[pathID].subgraph.forEach((elemID, i) => {
         if (i % 2 === 0) {
           nodeCollection.add(elemID);
         } else {
           edgeCollection.add(elemID);
-          if(hasSupport(edgesArray[elemID])){
-            for(const supportPathID of edgesArray[elemID].support) {
-              distributeEntitiesInPath(supportPathID, pathsArray, edgesArray, nodeCollection, edgeCollection);
+          const edge = edgesArray[elemID];
+          if (hasSupport(edge)) {
+            const validSupport = edge.support.filter(p => !supportStack.includes(p));
+            for(const supportPathID of validSupport) {
+              distributeEntitiesInPath(supportPathID, pathsArray, edgesArray,
+                  nodeCollection, edgeCollection, supportStack);
             }
           }
         }
       });
-    }else {
+    } else {
       console.log("path missing from list: ", pathsArray, ". pathID: ", pathID);
     }
   }
@@ -104,7 +109,7 @@ export const resultToCytoscape = (result, summary) => {
   const ns = new Set();
   const es = new Set();
   for(const pathID of ps) {
-    distributeEntitiesInPath(pathID, summary.paths, summary.edges, ns, es);
+    distributeEntitiesInPath(pathID, summary.paths, summary.edges, ns, es, []);
   }
 
   const c = {
@@ -114,7 +119,7 @@ export const resultToCytoscape = (result, summary) => {
   for(const edge of c.edges) {
     if(edge === undefined || edge === null)
       console.log(edge);
-    if(edge.data.inferred === undefined || edge.data.inferred === null) 
+    if(edge.data.inferred === undefined || edge.data.inferred === null)
       console.log(edge);
   }
 
@@ -142,10 +147,10 @@ export const resultToCytoscape = (result, summary) => {
  *
  * @param {string} start - The starting node identifier.
  * @param {Set} ends - A Set of end node identifiers.
- * @param {Object} graph - The graph object, expected to have an 'edges' property, 
- *                         which is an array of objects each having 'data' property 
+ * @param {Object} graph - The graph object, expected to have an 'edges' property,
+ *                         which is an array of objects each having 'data' property
  *                         that includes 'source' and 'target' properties.
- * @returns {Set} A set of all paths from the start node to any of the nodes in the 'ends' set. 
+ * @returns {Set} A set of all paths from the start node to any of the nodes in the 'ends' set.
  *                  Each path is represented as an array of node identifiers.
  * @example
  * const paths = findPaths('node1', new Set(['node3', 'node4']), graph);
@@ -205,7 +210,7 @@ export const handleZoomByInterval = (cyGraph, interval = 0.25, direction = true)
   const currentZoomLevel = cyGraph.zoom();
   if(direction)
     cyGraph.zoom(currentZoomLevel + interval);
-  else 
+  else
     cyGraph.zoom(currentZoomLevel - interval);
 }
 
@@ -233,7 +238,7 @@ const handleEdgeMouseOut = (ev, edgeInfoWindowIdString) => {
   let edgeInfoWindow = document.getElementById(edgeInfoWindowIdString);
   let edgeInfoMarkup = <></>;
   ReactDOM.render(edgeInfoMarkup, edgeInfoWindow);
-} 
+}
 
 const handleSetupAndUpdateGraphTooltip = debounce((ev, graphTooltipIdString) => {
   let elem = ev.target;
@@ -245,10 +250,10 @@ const handleSetupAndUpdateGraphTooltip = debounce((ev, graphTooltipIdString) => 
     content: () => {
       let tooltipElement = document.getElementById(graphTooltipIdString);
       let tooltipTextElement = tooltipElement.getElementsByClassName('tooltip-text')[0];
-      const tooltipMarkup = 
+      const tooltipMarkup =
         <span className='tooltip-markup'>
           <p class='label'>{elemLabel} <span className='type'>({type})</span></p>
-          {url && 
+          {url &&
             <a href={url} target="_blank" rel='noreferrer' className='url'>
               <ExternalLink/>
               <span>{url}</span>
@@ -259,16 +264,16 @@ const handleSetupAndUpdateGraphTooltip = debounce((ev, graphTooltipIdString) => 
       ReactDOM.render(tooltipMarkup, tooltipTextElement);
 
       tooltipElement.classList.add('visible');
-  
+
       return tooltipElement;
     },
     popper:{placement: 'top'}
   });
-  
+
   let update = () => {
     popper.update();
   };
-  
+
   elem.on('position', update);
   // cy.on('pan zoom resize', update);
 }, 300, []);
@@ -379,8 +384,8 @@ export const initCytoscapeInstance = (dataObj) => {
   });
   cyGraph.on('mouseout', 'node', (ev) => ev.target.style('border-width', '1px' ));
   cyGraph.on('mousemove', (ev) => {
-    // if we're on the background, or not on a node, hide the tooltip 
-    if(ev.target === cyGraph || !ev.target.isNode()) 
+    // if we're on the background, or not on a node, hide the tooltip
+    if(ev.target === cyGraph || !ev.target.isNode())
       handleHideTooltip(dataObj.graphTooltipIdString)
   });
   cyGraph.on('pan zoom resize', ()=>{
@@ -394,16 +399,16 @@ export const initCytoscapeInstance = (dataObj) => {
   cyGraph.on('click', (ev) => {
     if(ev.target === cyGraph) {
       handleDeselectAllNodes(
-        ev.cy, 
-        dataObj.selectedNodes, 
-        dataObj.excludedNodes, 
-        dataObj.clearSelectedPaths, 
+        ev.cy,
+        dataObj.selectedNodes,
+        dataObj.excludedNodes,
+        dataObj.clearSelectedPaths,
         {highlightClass: dataObj.highlightClass, hideClass: dataObj.hideClass, excludedClass: dataObj.excludedClass}
       );
     }
   });
 
-  // add class for nodes that are targets but aren't the main result's target 
+  // add class for nodes that are targets but aren't the main result's target
   for(const node of cyGraph.elements('node')) {
     if(node.data('isSourceCount') === 0) {
       node.addClass('isNotSource')
@@ -436,7 +441,7 @@ export const initCytoscapeInstance = (dataObj) => {
 }
 
 /**
-* Given a graph object, returns a filtered graph object with only one edge per source/target relationship  
+* Given a graph object, returns a filtered graph object with only one edge per source/target relationship
 * @param {Object} graph - An object with properties containing two arrays, nodes and edges.
 * @returns {Object} - A new graph object with only one edge per source/target relationship.
 */
