@@ -7,7 +7,7 @@ import { cloneDeep } from 'lodash';
 
 const EntitySearch = ({ onFilter }) => {
 
-  const [searchStringObject, setSearchStringObject] = useState({type:'str:', value: ''});
+  const [searchStringObject, setSearchStringObject] = useState({type:'str:', value: '', negated: false});
 
   const handleStringSearchChange = (value) => {
     if(searchStringObject.value !== value) {

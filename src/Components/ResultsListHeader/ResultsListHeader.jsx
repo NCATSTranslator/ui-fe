@@ -9,7 +9,6 @@ import ShareIcon from '../../Icons/share.svg?react';
   // Output jsx for selected filters
 const getSelectedFilterDisplay = (filter) => {
   let filterDisplay;
-  console.log(filter);
   if (isEvidenceFilter(filter)) {
     filterDisplay = <div>Minimum Evidence: <span>{filter.value}</span></div>;
   } else if (isTextFilter(filter)) {
@@ -85,7 +84,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
           {
             data.activeFilters.map((activeFilter, i)=> {
               return(
-                <span key={i} className={`${styles.filterTag} ${activeFilter.type}`}>
+                <span key={i} className={`${styles.filterTag} ${activeFilter.type} ${activeFilter?.negated ? styles.negated : ''}`}>
                   { getSelectedFilterDisplay(activeFilter) }
                   <span className={styles.close} onClick={()=>{data.handleFilter(activeFilter)}}><CloseIcon/></span>
                 </span>
