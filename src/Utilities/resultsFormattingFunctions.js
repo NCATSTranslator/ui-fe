@@ -34,7 +34,7 @@ const getFormattedEvidence = (paths, results) => {
         formatObj(objs[key], getId, item, constructor, container)
         return;
       }
-      
+
       for(const obj of objs[key]) {
         formatObj(obj, getId, item, constructor, container)
       }
@@ -58,8 +58,8 @@ const getFormattedEvidence = (paths, results) => {
 
   const formatSources = (sources, item, container) => {
     formatEvidenceObjs(
-      sources, 
-      (src) => { return `${item.edges[0].subject.name}${src.name}${item.edges[0].object.name}`; }, 
+      sources,
+      (src) => { return `${item.edges[0].subject.name}${src.name}${item.edges[0].object.name}`; },
       item,
       (src) => { return src; },
       container);
@@ -72,9 +72,9 @@ const getFormattedEvidence = (paths, results) => {
           formatPublications(item.publications, item, formattedPublications);
           formatSources(item.provenance, item, formattedSources);
           // recursively call processSourcesAndPublications to fill out pubs and sources from support edges
-          if(hasSupport(item)) 
+          if(hasSupport(item))
             processSourcesAndPublications(item.support, formattedPublications, formattedSources);
-          
+
         }
       }
     }
@@ -161,7 +161,7 @@ const getEdgeByID = (id, results) => {
     name: tempSub.names[0],
     id: tempSub.id
   };
-  
+
   return newEdge;
 }
 
@@ -221,13 +221,14 @@ const getFormattedNode = (id, index, subgraph, results) => {
     curies: node.curies,
     provenance: []
   };
-  if(node.provenance !== undefined) 
+  if(node.provenance !== undefined)
     newNode.provenance = node.provenance;
-  
+
   return newNode;
 }
 
-const getFormattedEdge = (id, results) => {
+const getFormattedEdge = (id, results, supportStack) => {
+  supportStack.push(id);
   let edge = getEdgeByID(id, results);
   edge.id = id;
   let pred = '';
@@ -247,15 +248,18 @@ const getFormattedEdge = (id, results) => {
   };
   // if the edge has support, recursively call getFormattedPaths to fill out the support paths
   if(hasSupport(edge)) {
-    newEdge.support = edge.support;
-    newEdge.support = getFormattedPaths(edge.support, results);
+    const validSupport = edge.support.filter(p => !supportStack.includes(p));
+    if (validSupport.length > 0) {
+      newEdge.support = getFormattedPaths(validSupport, results, supportStack);
+    }
     newEdge.inferred = true;
   }
-  
+
   newEdge.provenance = (edge.provenance !== undefined) ? edge.provenance : [];
   if((!Array.isArray(newEdge.provenance) && Object.keys(newEdge.provenance).length === 0))
     newEdge.provenance = [];
-  
+
+  supportStack.pop();
   return newEdge;
 }
 
@@ -282,22 +286,26 @@ const getStringNameFromPath = (path) => {
  * @param {Object} results - The results object containing paths and node/edge information.
  * @returns {Array} The formatted paths array.
 */
-const getFormattedPaths = (rawPathIds, results) => {
+const getFormattedPaths = (rawPathIds, results, supportStack) => {
   let formattedPaths = [];
   for(const id of rawPathIds) {
     let formattedPath = cloneDeep(results.paths[id]);
     if(formattedPath) {
+      supportStack.push(id);
       for(const [i] of formattedPath.subgraph.entries()) {
-        if(i % 2 === 0) 
+        if(i % 2 === 0) {
           formattedPath.subgraph[i] = getFormattedNode(formattedPath.subgraph[i], i, formattedPath.subgraph, results);
-        else 
-          formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results);
+        } else {
+          formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results, supportStack);
+        }
       }
       formattedPath.inferred = checkPathForSupport(formattedPath);
       formattedPath.stringName = getStringNameFromPath(formattedPath);
       formattedPaths.push({id: id, highlighted: false, path: formattedPath});
+      supportStack.pop();
     }
   }
+
   return formattedPaths;
 }
 
@@ -349,7 +357,7 @@ const getCompressedPaths = (graph, respectKnowledgeLevel = true) => {
         pathToDisplay.path.subgraph[i].publications = mergeObjects(pathToDisplay.path.subgraph[i].publications, nextPath.path.subgraph[i].publications);
       }
       // compress support paths for the edge, if they exist
-      if(hasSupport(pathToDisplay?.path?.subgraph[i])) 
+      if(hasSupport(pathToDisplay?.path?.subgraph[i]))
         pathToDisplay.path.subgraph[i].support = getCompressedPaths(pathToDisplay.path.subgraph[i].support.sort((a, b) => !a.path.stringName - !b.path.stringName || a.path.stringName.localeCompare(b.path.stringName)), false);
     }
     // if there's no nextPath or the nodes are different, display the path
@@ -401,9 +409,9 @@ const checkBookmarkForNotes = (bookmarkID, bookmarksSet) => {
  * scores, and tags. The summarized results are returned as an array.
  * @param {Array} results - The results array to be summarized.
  * @param {Set} bookmarks - Set of bookmarked items for a given query
- * @param {number} confidenceWeight - value representing a parameter for weighted scoring 
- * @param {number} noveltyWeight - value representing a parameter for weighted scoring 
- * @param {number} clinicalWeight - value representing a parameter for weighted scoring 
+ * @param {number} confidenceWeight - value representing a parameter for weighted scoring
+ * @param {number} noveltyWeight - value representing a parameter for weighted scoring
+ * @param {number} clinicalWeight - value representing a parameter for weighted scoring
  * @returns {Array} The summarized results array.
 */
 export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, clinicalWeight, bookmarks = null) => {
@@ -423,7 +431,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     // Get the subject node's fda approval status
     let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
-    let formattedPaths = getFormattedPaths(item.paths, results);
+    let formattedPaths = getFormattedPaths(item.paths, results, []);
     let compressedPaths = getCompressedPaths(formattedPaths, true);
     // let compressedPaths = formattedPaths;
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
@@ -447,7 +455,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
       score: score(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
       tags: tags,
       rawResult: item,
-      bookmarked: bookmarked, 
+      bookmarked: bookmarked,
       bookmarkID: bookmarkID,
       hasNotes: hasNotes
     }
@@ -479,7 +487,7 @@ export const getUrlByType = (publicationID, type) => {
   return url;
 }
 
-export const getTypeFromPub = (publicationID) => { 
+export const getTypeFromPub = (publicationID) => {
   if(publicationID.toLowerCase().includes("pmid"))
     return "PMID";
   if(publicationID.toLowerCase().includes("pmc"))
@@ -496,7 +504,7 @@ export const formatPublicationSourceName = (sourceName) => {
     case "semantic medline database":
       newSourceName = "SemMedDB"
       break;
-  
+
     default:
       break;
   }
@@ -506,7 +514,7 @@ export const formatPublicationSourceName = (sourceName) => {
 /**
  * Extracts and formats the evidence data from a given result object.
  *
- * This function parses through the evidence information within the result object, 
+ * This function parses through the evidence information within the result object,
  * extracting distinct sources, general sources, and formatting publication data.
  * It handles cases where certain pieces of evidence may not be present and formats
  * the publications into a consumable array of objects.
@@ -516,15 +524,15 @@ export const formatPublicationSourceName = (sourceName) => {
  *                   and a publications array populated with formatted evidence data.
  *                   Returns an empty object if the input is invalid or lacks evidence.
  */
-export const getEvidenceFromResult = (result) => { 
+export const getEvidenceFromResult = (result) => {
   let evidenceObject = {};
   if(!result || !result.evidence)
-    return evidenceObject; 
+    return evidenceObject;
 
   evidenceObject.distinctSources = (result.evidence.distinctSources) ? result.evidence.distinctSources : [];
   evidenceObject.sources = (result.evidence.sources) ? result.evidence.sources : [];
   evidenceObject.publications = [];
-  
+
   const pubIds = new Set();
   const addItemToPublications = (item, items, arr) => {
     if (!items.has(item.id)) {
@@ -545,7 +553,7 @@ export const getEvidenceFromResult = (result) => {
         id: pubID,
         journal: '',
         pubdate: '',
-        snippet: '', 
+        snippet: '',
         title: '',
         knowledgeLevel: key,
         edges: subgraphItem.edges.reduce((obj, item) => {
