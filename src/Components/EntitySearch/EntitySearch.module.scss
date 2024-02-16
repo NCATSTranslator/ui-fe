@@ -6,13 +6,15 @@
     padding: 15px 0;
   }
   .textInput {
-    width: calc(100% - 31px);
-    color: #202124;
+    width: calc(100% - 77px);
+    color: $black;
     font-size: 12px;
     font-weight: 700;
-    padding: 10px 15px;
+    padding: 10px 65px 10px 15px;
     border-radius: $querySelectBorderRadius;
     border: 1px solid $borderGray;
+    text-overflow: ellipsis;
+    overflow: hidden;
     &::placeholder {
       color: $placeholderGray;
     }
