@@ -316,3 +316,7 @@ img {
 .scrollable::-webkit-scrollbar-thumb:hover {
   background-color: $darkGray;
 }
+
+input::placeholder {
+  color: $placeholderGray;
+}
