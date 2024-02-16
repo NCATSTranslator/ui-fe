@@ -267,10 +267,16 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                               <span className={styles.sourceEdge} key={i}>{name}</span>
                             </span>
                             <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
-                              <a key={i} href={url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
-                                {url}
-                                <ExternalLink/>
-                              </a>
+                              {
+                                url 
+                                ? 
+                                  <a key={i} href={url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
+                                    {url}
+                                    <ExternalLink/>
+                                  </a>
+                                :
+                                  <span>Link Unavailable</span>
+                              }
                             </span>
                           </div>
                         )
