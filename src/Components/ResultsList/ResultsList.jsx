@@ -545,8 +545,13 @@ const ResultsList = ({loading}) => {
         const pathRanks = result.compressedPaths.map((p) => { return { rank: 0, path: p }; });
         let addResult = true;
         for(const filter of filters) {
-          if ((isEvidenceFilter(filter) && !(filter.value <= result.evidence.length)) ||
-              (isTextFilter(filter) && !findStringMatch(result, filter.value, pathRanks))) {
+          if ((isEvidenceFilter(filter) && !(filter.value <= result.evidence.length))) {
+            addResult = false;
+            break;
+          }
+
+          if((isTextFilter(filter) && !isExclusion(filter) && !findStringMatch(result, filter.value, pathRanks)) || 
+            (isTextFilter(filter) && isExclusion(filter) && findStringMatch(result, filter.value, pathRanks))){
             addResult = false;
             break;
           }
