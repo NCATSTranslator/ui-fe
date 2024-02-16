@@ -52,6 +52,8 @@ export const getFilterLabel = (filter) => {
     case "role":
       filterLabel = "ChEBI Role";
       break;
+    default:
+      break;
   }
   return filterLabel;
 }
