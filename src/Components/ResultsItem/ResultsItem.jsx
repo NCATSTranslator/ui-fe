@@ -12,6 +12,7 @@ import Notes from "../../Icons/note.svg?react"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';
+import BookmarkConfirmationModal from '../Modals/BookmarkConfirmationModal';
 import { Link } from 'react-router-dom';
 import { CSVLink } from 'react-csv';
 import { generateCsvFromItem } from '../../Utilities/csvGeneration';
@@ -65,6 +66,8 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const formattedPaths = useRef(item.compressedPaths);
   const [selectedPaths, setSelectedPaths] = useState(new Set());
   const [csvData, setCsvData] = useState([]);
+  const bookmarkRemovalApproved = useRef(false);
+  const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState(false);
 
   const initPathString = useRef((type?.pathString) ? type.pathString : 'may affect');
   const tagsRef = useRef(null);
@@ -197,12 +200,17 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   const handleBookmarkClick = async () => {
     if(isBookmarked) {
-      if(itemBookmarkID) {
+      if(bookmarkRemovalApproved.current && itemBookmarkID) {
+        console.log("remove bookmark");
         deleteUserSave(itemBookmarkID);
         setIsBookmarked(false);
         setItemHasNotes(false);
         setItemBookmarkID(null);
         bookmarkRemovedToast();
+      }
+      if(!bookmarkRemovalApproved.current) {
+        console.log("open conf modal");
+        setBookmarkRemovalConfirmationModalOpen(true);
       }
       return false;
     } else {
@@ -244,6 +252,12 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     newObj.type = tagID;
     newObj.value = tagObject.name;
     handleFilter(newObj);
+  }
+
+  const handleBookmarkRemovalApproval = () => {
+    console.log("removal approved");
+    bookmarkRemovalApproved.current = true;
+    handleBookmarkClick();
   }
 
   useEffect(() => {
@@ -405,6 +419,14 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>
+      <BookmarkConfirmationModal 
+        isOpen={bookmarkRemovalConfirmationModalOpen} 
+        onApprove={handleBookmarkRemovalApproval}
+        onClose={()=>{
+          setBookmarkRemovalConfirmationModalOpen(false);
+          bookmarkRemovalApproved.current = false;
+        }}
+      />
     </div>
   );
 }

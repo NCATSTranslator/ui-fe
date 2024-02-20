@@ -62,7 +62,7 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
         <div className={`${confirmClearNote ? styles.show : styles.hide} ${styles.clearConfirmation}`}>
           <div className={styles.clearConfirmationContainer}>
             <h5>Are you sure you want to clear this note?</h5>
-            <p className="bold ">This is permanent, and cannot be undone.</p>
+            <p className="bold ">This is permanent and cannot be undone.</p>
             <div className={styles.buttons}>
               <Button handleClick={() => setConfirmClearNote(false)} className={styles.button} isSecondary>Keep Note</Button>
               <Button handleClick={handleClearNote} className={styles.button} >Clear Note</Button>
@@ -91,7 +91,10 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
         shouldClearEditor={triggerClearEditor}
         onClearEditorComplete={handleEditorCleared}
       />
-      <button onClick={() => setConfirmClearNote(true)} className={styles.clearButton} >Clear Note</button>
+      <div className={styles.bottomButtons}>
+        <button onClick={handleSave} className={styles.saveButton} >Save Note</button>
+        <button onClick={() => setConfirmClearNote(true)} className={styles.clearButton} >Clear Note</button>
+      </div>
     </Modal>
   );
 }
