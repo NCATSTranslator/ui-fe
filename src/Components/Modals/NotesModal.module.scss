@@ -38,14 +38,24 @@
     padding: 50px 0 0 0;
     .button {
       width: auto;
+      margin: 0;
       &:last-child {
         background-color: $red;
       }
     }
   }
+  .bottomButtons {
+    display: flex;
+    justify-content: flex-end;
+  }
   .clearButton {
-    background-color: $red85;
-    margin: 16px 0 0 auto;
+    background-color: $red50;
+    margin: 16px 0 0 0;
+    display: block;
+  }
+  .saveButton {
+    // background-color: $red85;
+    margin: 16px 16px 0 0;
     display: block;
   }
   .top {
