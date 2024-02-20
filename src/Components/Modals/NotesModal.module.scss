@@ -44,9 +44,18 @@
       }
     }
   }
+  .bottomButtons {
+    display: flex;
+    justify-content: flex-end;
+  }
   .clearButton {
     background-color: $red85;
-    margin: 16px 0 0 auto;
+    margin: 16px 0 0 0;
+    display: block;
+  }
+  .saveButton {
+    // background-color: $red85;
+    margin: 16px 16px 0 0;
     display: block;
   }
   .top {
