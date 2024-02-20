@@ -208,7 +208,7 @@ const UserSaves = () => {
                   }
                   <div className={styles.saves}>
                     {
-                      Object.entries(filteredUserSaves).reverse().map((item) => {
+                      Object.entries(filteredUserSaves).sort((a, b)=> -a[1].query.submitted_time.localeCompare(b[1].query.submitted_time)).map((item) => {
                         return(
                           <UserSave
                             save={item}
