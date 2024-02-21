@@ -11,6 +11,7 @@
       display: inline-flex;
       align-items: center;
       position: relative;
+      margin: 0 0 5px;
     }
     p {
       cursor: default;
@@ -20,7 +21,8 @@
     }
   }
   .heading {
-    font-size: $m;
+    font-size: 26px;
+    line-height: 1.25;
     font-weight: 700;
     color: $purpleTwo;
     margin: 0;
@@ -44,7 +46,7 @@
   .subTwo {
     margin: 0;
     font-weight: 700;
-    font-size: 12px;
+    font-size: 16px;
     color: $darkGray;
   }
   .caption {
