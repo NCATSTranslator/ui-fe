@@ -126,6 +126,13 @@
       }
     }
   }
+  &.hasTwo {
+    .pathContainer {
+      &>svg {
+        top: 50% !important;
+      }
+    }
+  }
 }
 
 .infoIcon {

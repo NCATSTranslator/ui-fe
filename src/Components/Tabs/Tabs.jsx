@@ -38,7 +38,7 @@ const Tabs = ({children, isOpen}) => {
         {children.map((child, i) => {
           if(!child)
             return undefined;
-          const { heading, tooltipIcon = false} = child.props;
+          const { heading, tooltipIcon = false, dataTooltipId = ""} = child.props;
           return (
             <Tab
               activeTabHeading={activeTabHeading}
@@ -46,6 +46,7 @@ const Tabs = ({children, isOpen}) => {
               heading={heading}
               tooltipIcon={tooltipIcon}
               onClick={handleTabClick}
+              dataTooltipId={dataTooltipId}
             />
           );
         })}
