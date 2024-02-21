@@ -126,7 +126,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                   let pathItemHasSupport = pathItem.inferred;
                   if(pathItem.category === "predicate" && pathItem.predicates.length > 1) {
                     return( 
-                      <div className={`groupedPreds ${styles.groupedPreds} ${(pathItem.predicates.length == 2) ? styles.hasTwo :''}`}>
+                      <div className={`groupedPreds ${styles.groupedPreds} ${(pathItem.predicates.length === 2) ? styles.hasTwo :''}`}>
                         {
                           pathItem.predicates.map((pred, j) => {
                             let newPathItem = cloneDeep(pathItem);
@@ -141,7 +141,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                             if(j === pathItem.predicates.length - 1)
                               isBottom = true;
 
-                            if(pathItem.predicates.length == 2) {
+                            if(pathItem.predicates.length === 2) {
                               isTop = false;
                               isBottom = false;
                             }
@@ -254,7 +254,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
               <div 
                 heading="Knowledge Sources" 
                 tooltipIcon={<Information className={styles.infoIcon} />}
-                data-tooltip-id="knowledge-sources-tooltip" 
+                dataTooltipId="knowledge-sources-tooltip" 
                 >
                 <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
                   <div className={`table-head ${styles.tableHead}`}>

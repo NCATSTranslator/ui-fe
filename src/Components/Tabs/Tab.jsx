@@ -1,6 +1,6 @@
 import styles from './Tab.module.scss';
 
-const Tab = ({heading, onClick, activeTabHeading, tooltipIcon}) => {
+const Tab = ({heading, onClick, activeTabHeading, tooltipIcon, dataTooltipId = ""}) => {
 
   let className = `${styles.tabListItem}`;
 
@@ -10,10 +10,10 @@ const Tab = ({heading, onClick, activeTabHeading, tooltipIcon}) => {
 
   return (
     <div className={className} onClick={()=>onClick(heading)} >
-        <span className={styles.heading}>{heading}</span>
+        <span className={styles.heading} >{heading}</span>
         {
           tooltipIcon && 
-          tooltipIcon
+          <span data-tooltip-id={dataTooltipId} className={styles.iconContainer}>{tooltipIcon}</span>
         }
         <div className={styles.underline}></div>
     </div>
