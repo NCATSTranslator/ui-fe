@@ -129,12 +129,12 @@ export const getUrlAndOrg = (id) => {
     url = `https://www.ebi.ac.uk/chembl/compound_report_card/${id.replace(':', '')}/`;
     org = 'ChEMBL';
   } else if(formattedID.includes('MONDO')){
-    id = id.replace(":", "_");
-    url = `http://purl.obolibrary.org/obo/${id}`;
-    org = 'OLS';
-  } else if(formattedID.includes('HP')) {
-    url = `https://monarchinitiative.org/phenotype/${id}`;
+    // id = id.replace(":", "_");
+    url = `https://monarchinitiative.org/${id}`;
     org = 'Monarch Initiative';
+  } else if(formattedID.includes('HP')) {
+    url = `https://hpo.jax.org/app/browse/term/${id}`;
+    org = 'Human Phenotype Ontology';
   } else if(formattedID.includes('UMLS')) {
     url = `https://uts.nlm.nih.gov/uts/umls/concept/${id.replace('UMLS:', '')}`;
     org = 'UMLS Terminology Services';

@@ -29,7 +29,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
     <div className={styles.resultsHeader}>
       <div className={styles.top}>
         <div>
-          <h5>Results</h5>
+          <h5 className={styles.heading}>Results</h5>
           {
             data.formattedResultsLength !== 0 &&
             <p className={styles.resultsCount}>
