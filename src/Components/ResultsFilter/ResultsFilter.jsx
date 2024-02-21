@@ -24,9 +24,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     // The ordering of newGroupedTags determines the order of the facets in the UI
     const newGroupedTags = {
       chemicalType: chemicalTypeTags,
+      di: diTags,
       nodeType: nodeTypeTags,
       role: roleTags,
-      di: diTags,
       ara: araTags
     }
     return newGroupedTags;
