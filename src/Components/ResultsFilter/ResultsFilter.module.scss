@@ -144,8 +144,8 @@
       }
       span + span {
         border: none;
-        border-top-right-radius: $querySelectBorderRadius;
-        border-bottom-right-radius: $querySelectBorderRadius;
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
         &:hover {
           svg path {
             fill: $red;
