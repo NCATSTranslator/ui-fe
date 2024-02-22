@@ -2,12 +2,12 @@ import { Link, useLocation } from 'react-router-dom';
 import Tooltip from '../Tooltip/Tooltip';
 import { currentConfig, currentRoot, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
-import Logo from '../../Assets/Images/Logo.svg?react';
 import History from '../../Icons/Navigation/History.svg?react';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 import Workspace from '../../Icons/Navigation/Workspace.svg?react';
 import Question from '../../Icons/Navigation/Question.svg?react';
 import defaultPfp from '../../Assets/Images/pfp.png';
+import Logo from '../../Assets/Images/site-logo.png';
 import styles from './Header.module.scss';
 import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
 
@@ -29,7 +29,9 @@ const Header = ({children}) => {
       <div className={styles.topBar}>
         <div className={styles.container}>
           <div className={styles.left}>
-            <Link to={`/${root}/`} className={styles.logo} reloadDocument={location.pathname === "/main/results" ? false : true}><Logo/></Link>
+            <Link to={`/${root}/`} className={styles.logo} reloadDocument={location.pathname === "/main/results" ? false : true}>
+              <img src={Logo} alt="Translator Logo" />
+            </Link>
           </div>
           <div className={styles.right}>
             {
