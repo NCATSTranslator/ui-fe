@@ -67,7 +67,10 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
       let filteredPublications = filteredEvidence.publications;
       let filteredSources = filteredEvidence.sources;
 
-      const edgesToFilterBy = selEdge.edges;
+      // select specific edge in case of edge compression
+      let specificSelectedEdge = selEdge.edges.find((edge)=>edge.predicate === selEdge.predicate);
+      
+      const edgesToFilterBy = [specificSelectedEdge];
       filterEvidenceObjs(rawEvidence.publications, edgesToFilterBy, filteredPublications);
       filterEvidenceObjs(rawEvidence.sources, edgesToFilterBy, filteredSources);
       

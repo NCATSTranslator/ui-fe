@@ -195,29 +195,36 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   }
 
   const displayFacets = (type) => {
+    const typeIndexMapping = activeFilters.reduce((acc, filter, index) => {
+      acc[filter.type] = index;
+      return acc;
+    }, {});
+
+    const sortedFacets = Object.entries(groupedTags[type]).sort((a, b) => {
+      const indexA = typeIndexMapping[a[0]] !== undefined ? typeIndexMapping[a[0]] : Infinity;
+      const indexB = typeIndexMapping[b[0]] !== undefined ? typeIndexMapping[b[0]] : Infinity;
+      
+      // Prioritize items found in activeFilters
+      if (indexA !== Infinity && indexB === Infinity) {
+        return -1; // A is in activeFilters, B is not, A comes first
+      } else if (indexB !== Infinity && indexA === Infinity) {
+        return 1; // B is in activeFilters, A is not, B comes first
+      } else if (indexA === Infinity && indexB === Infinity) {
+        // Neither A nor B is in activeFilters, sort alphabetically by name
+        const nameA = a[1].name.toLowerCase();
+        const nameB = b[1].name.toLowerCase();
+        return nameA.localeCompare(nameB);
+      }
+      // If both are in activeFilters, retain their order (assuming activeFilters is pre-sorted or order doesn't matter)
+      return 0;
+    });
+
     return (
       <div className={`${styles.section} ${Object.keys(groupedTags[type]).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
-          (type === 'role')
-          ?
-            Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).map((tag, j) => {
-              return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
-            })
-          :
-            (type === 'chemicalType')
-            ?
-              Object.entries(groupedTags[type]).sort((a,b)=> {
-                if(a[1].name === "Other") return 1;
-                if(b[1].name === "Other") return -1;
-                return (a[1].name > b[1].name ? 1 : -1)})
-                .map((tag, j) => {
-                  return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
-                }
-              )
-            :
-              Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).map((tag, j) => {
-                return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
-              })
+          sortedFacets.map((tag, j) => {
+            return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
+          })
         }
       </div>
     )

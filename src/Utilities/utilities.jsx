@@ -288,6 +288,5 @@ export const mergeObjects = (obj1, obj2) => {
           result[key] = obj2[key];
       }
   }
-  // console.log(obj1, obj2, result);
   return result;
 }

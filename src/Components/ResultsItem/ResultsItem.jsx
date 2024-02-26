@@ -251,6 +251,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     let newObj = {};
     newObj.type = tagID;
     newObj.value = tagObject.name;
+    newObj.negated = false;
     handleFilter(newObj);
   }
 
