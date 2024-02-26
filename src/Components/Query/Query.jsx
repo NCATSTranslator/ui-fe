@@ -21,6 +21,7 @@ import Question from '../../Icons/Navigation/Question.svg?react';
 import Back from '../../Icons/Directional/Undo.svg?react';
 import Search from '../../Icons/Buttons/Search.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
+import { ToastContainer, toast, Slide } from 'react-toastify';
 import styles from './Query.module.scss';
 
 const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription}) => {
@@ -160,6 +161,14 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
         }
       })
       .catch((error) => {
+        toast.error(
+          <div>
+            <h5 className='heading'>Error</h5>
+            <p>We were unable to submit your query at this time. Please attempt to submit it again or try again later.</p>
+          </div>
+        );
+        setIsLoading(false);
+        clearSelectedItem();
         console.log(error)
       });
   }
@@ -278,6 +287,17 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   return (
     <>
       <div className={`${styles.query}`} >
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        theme="light"
+        transition={Slide}
+        pauseOnFocusLoss={false}
+        hideProgressBar
+        className="toastContainer"
+        closeOnClick={false}
+        closeButton={false}
+      />
         <AutoHeight className={styles.autoHeightContainer}>
           <div className={`${styles.container}`}>
             {results 
