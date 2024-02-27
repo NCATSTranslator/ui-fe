@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { defaultPrefs, prefKeyToString, updateUserPreferences } from '../../Utilities/userApi';
-import { useSelector } from 'react-redux';
-import { currentPrefs, currentRoot } from '../../Redux/rootSlice';
+import { useSelector, useDispatch } from 'react-redux';
+import { currentPrefs, currentRoot, setCurrentPrefs } from '../../Redux/rootSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Button from '../FormFields/Button';
@@ -15,12 +15,14 @@ const UserPreferences = () => {
   const root = useSelector(currentRoot);
   const [userPrefs, setUserPrefs] = useState(initPrefs);
   const prefsSavedToast = () => toast.success("Preferences saved!");
+  const dispatch = useDispatch();
 
   const handleSubmitUserPrefs = async (e) => {
     e.preventDefault();
     
     await updateUserPreferences(userPrefs);
     console.log('new prefs sent: ', userPrefs);
+    dispatch(setCurrentPrefs(userPrefs));
     prefsSavedToast();
   }
 
