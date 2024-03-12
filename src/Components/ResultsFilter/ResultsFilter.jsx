@@ -203,7 +203,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     const sortedFacets = Object.entries(groupedTags[type]).sort((a, b) => {
       const indexA = typeIndexMapping[a[0]] !== undefined ? typeIndexMapping[a[0]] : Infinity;
       const indexB = typeIndexMapping[b[0]] !== undefined ? typeIndexMapping[b[0]] : Infinity;
-      
+
       // Prioritize items found in activeFilters
       if (indexA !== Infinity && indexB === Infinity) {
         return -1; // A is in activeFilters, B is not, A comes first
