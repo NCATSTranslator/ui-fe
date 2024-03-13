@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import Tooltip from '../Tooltip/Tooltip';
 import { currentConfig, currentRoot, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
+import { useWindowSize } from '../../Utilities/customHooks';
 import History from '../../Icons/Navigation/History.svg?react';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 import Workspace from '../../Icons/Navigation/Workspace.svg?react';
@@ -17,7 +18,8 @@ const Header = ({children}) => {
   const user = useSelector(currentUser);
   const config = useSelector(currentConfig);
   const location = useLocation();
-
+  const {width} = useWindowSize();
+  const collapseNameScreenWidth = 1270;
   const clientID = config?.social_providers?.una?.client_id;
   const redirectURI = `${window.location.origin}/main/logout`;
   const logoutURI = config?.social_providers?.una?.logout_uri;
@@ -58,6 +60,10 @@ const Header = ({children}) => {
                     <Tooltip id={`prefs-tooltip`} place="bottom">
                       <span className={styles.tooltip}>Click here to view and edit your user preferences.</span>
                     </Tooltip>
+                    {
+                      user?.name &&
+                      <p className={`${width <= collapseNameScreenWidth ? styles.hide : ''} ${styles.userName}`}>{user.name}</p>
+                    }
                   </Link>
                   {
                     logoutReady && 

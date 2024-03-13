@@ -21,14 +21,17 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
     let araTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ara:')));
     let diTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('di:')));
+    let pathTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pt:')));
     // The ordering of newGroupedTags determines the order of the facets in the UI
     const newGroupedTags = {
       chemicalType: chemicalTypeTags,
       di: diTags,
       nodeType: nodeTypeTags,
+      pt: pathTypeTags,
       role: roleTags,
       ara: araTags
-    }
+    };
+
     return newGroupedTags;
   }
 
@@ -119,6 +122,18 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
+  const getPathTypeHeadings = () => {
+    return(
+      <div className={styles.labelContainer} >
+          <div className={styles.label} >
+            <p className={styles.subTwo}>Relationship Type</p>
+          </div>
+          <p className={styles.caption}>Filter based on direct (established from explicit evidence in external sources) and/or inferred (deduced from patterns in Translator's knowledge graphs that suggest relationships that are not explicitly stated)</p>
+      </div>
+    )
+  }
+
+
   const getTagHeadingMarkup = (tagType) => {
     let headingToReturn;
     switch(tagType) {
@@ -136,6 +151,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
         break;
       case 'di':
         headingToReturn = getDrugIndicationsHeading();
+        break;
+      case 'pt':
+        headingToReturn = getPathTypeHeadings();
         break;
       default:
         headingToReturn = '';
@@ -203,7 +221,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     const sortedFacets = Object.entries(groupedTags[type]).sort((a, b) => {
       const indexA = typeIndexMapping[a[0]] !== undefined ? typeIndexMapping[a[0]] : Infinity;
       const indexB = typeIndexMapping[b[0]] !== undefined ? typeIndexMapping[b[0]] : Infinity;
-      
+
       // Prioritize items found in activeFilters
       if (indexA !== Infinity && indexB === Infinity) {
         return -1; // A is in activeFilters, B is not, A comes first

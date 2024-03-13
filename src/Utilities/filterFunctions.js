@@ -52,6 +52,9 @@ export const getFilterLabel = (filter) => {
     case "role":
       filterLabel = "ChEBI Role";
       break;
+    case "pt":
+      filterLabel = "Relationship Type";
+      break;
     default:
       break;
   }
@@ -59,4 +62,4 @@ export const getFilterLabel = (filter) => {
 }
 
 // TODO: Make this a configuration
-const validFacetFamilies = new Set(['role', 'rc', 'pc', 'fda', 'ara', 'di', 'cc']);
+const validFacetFamilies = new Set(['role', 'rc', 'pc', 'fda', 'ara', 'di', 'cc', 'pt']);
