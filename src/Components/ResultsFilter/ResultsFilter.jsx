@@ -128,7 +128,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           <div className={styles.label} >
             <p className={styles.subTwo}>Relationship Type</p>
           </div>
-          <p className={styles.caption}>Filter based on direct (established from explicit evidence in external sources) and/or inferred (deduced from patterns in Translator's knowledge graphs that suggest relationships that are not explicitly stated)</p>
+          <p className={styles.caption}>Filter direct relationships (establed from evident from external sources) and/or inferred relationships (deduced from patterns in Translator's knowledge graphs).</p>
       </div>
     )
   }
