@@ -1,7 +1,7 @@
 import styles from './ResultsListHeader.module.scss';
 import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
-import ResultsListLoadingBar from '../ResultsListLoadingBar/ResultsListLoadingBAR';
-import ShareModal from "../Modals/ShareModal"; 
+import ResultsListLoadingBar from '../ResultsListLoadingBar/ResultsListLoadingBar';
+import ShareModal from "../Modals/ShareModal";
 import Tooltip from '../Tooltip/Tooltip';
 import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter, getFilterLabel } from '../../Utilities/filterFunctions';
 import CloseIcon from '../../Icons/Buttons/Close.svg?react'
@@ -58,7 +58,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
               containerClassName: loadingButtonData.containerClassName,
               buttonClassName: loadingButtonData.buttonClassName,
               hasFreshResults: loadingButtonData.hasFreshResults,
-              currentInterval: data.returnedARAs.status === "success" ? 100 : data.returnedARAs.aras.length, 
+              currentInterval: data.returnedARAs.status === "success" ? 100 : data.returnedARAs.aras.length,
               status: data.returnedARAs.status
             }}
           />
