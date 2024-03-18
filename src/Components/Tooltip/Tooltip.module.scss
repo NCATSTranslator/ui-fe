@@ -5,7 +5,7 @@
   color: $white;
   border-radius: $defaultBorderRadius;
   padding: $xs;
-  max-width: 330px !important;
+  max-width: 335px !important;
   z-index: 150;
   text-align: left;
   box-shadow: $dropShadowHover;
@@ -16,9 +16,9 @@
     font-size: 14px;
     line-height: 17.5px;
   }
-  .text, span, a {
+  .text, span, a, i {
     font-size: 12px;
-    line-height: 1.1;
+    line-height: 1.2;
     font-weight: 400;
     text-transform: none;
     overflow: hidden;
@@ -26,6 +26,9 @@
     -webkit-line-clamp: 12;
     -webkit-box-orient: vertical;
     color: $white;
+  }
+  i {
+    display: inline;
   }
   a {
     font-weight: 700;
