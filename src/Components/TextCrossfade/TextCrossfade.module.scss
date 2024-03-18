@@ -9,6 +9,11 @@
     height: 18px;
     margin: 0;
   }
+  &.centerText {
+    & > span {
+      text-align: center;
+    }
+  }
   & > span {
     transition: opacity 1.5s ease;
     position: absolute;

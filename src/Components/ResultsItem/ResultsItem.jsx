@@ -193,7 +193,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           newSelectedPaths.add(path);
       }
     }
-    console.log(newSelectedPaths);
     setSelectedPaths(newSelectedPaths)
 
   },[formattedPaths]);
@@ -340,7 +339,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
         </span>
       </div>
-      <CSVLink
+      {/* <CSVLink
         className={styles.downloadButton}
         data={csvData}
         filename={`${item.name.toLowerCase()}.csv`}
@@ -349,7 +348,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           <Tooltip id={`csv-tooltip-${nameString}`}>
             <span className={styles.tooltip}>Download a version of this result in CSV format.</span>
           </Tooltip>
-      </CSVLink>
+      </CSVLink> */}
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>
       </button>

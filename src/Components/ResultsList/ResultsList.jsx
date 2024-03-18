@@ -314,7 +314,9 @@ const ResultsList = ({loading}) => {
 
         if(data.data.aras.length > returnedARAs.current.aras.length) {
           console.log(`Old ARAs: ${returnedARAs.current.aras}, New ARAs: ${data.data.aras}`);
-          returnedARAs.current = data.data;
+          let newReturnedARAs = {...data.data};
+          newReturnedARAs.status = data.status; 
+          returnedARAs.current = newReturnedARAs;
           fetchResults = true;
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
@@ -797,7 +799,8 @@ const ResultsList = ({loading}) => {
                   handleFilter: handleFilter,
                   shareModalOpen: shareModalOpen,
                   setShareModalOpen: setShareModalOpen,
-                  currentQueryID: currentQueryID
+                  currentQueryID: currentQueryID,
+                  returnedARAs: returnedARAs.current
                 }}
                 loadingButtonData={{
                   handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),

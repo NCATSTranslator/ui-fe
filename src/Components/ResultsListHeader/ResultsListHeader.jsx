@@ -1,5 +1,6 @@
 import styles from './ResultsListHeader.module.scss';
 import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
+import ResultsListLoadingBar from '../ResultsListLoadingBar/ResultsListLoadingBAR';
 import ShareModal from "../Modals/ShareModal"; 
 import Tooltip from '../Tooltip/Tooltip';
 import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter, getFilterLabel } from '../../Utilities/filterFunctions';
@@ -47,8 +48,23 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
             </p>
           }
         </div>
+        <div className={styles.middle}>
+          <ResultsListLoadingBar
+            data={{
+              handleResultsRefresh: loadingButtonData.handleResultsRefresh,
+              isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
+              isFetchingResults: loadingButtonData.isFetchingResults,
+              showDisclaimer: loadingButtonData.showDisclaimer,
+              containerClassName: loadingButtonData.containerClassName,
+              buttonClassName: loadingButtonData.buttonClassName,
+              hasFreshResults: loadingButtonData.hasFreshResults,
+              currentInterval: data.returnedARAs.status === "success" ? 100 : data.returnedARAs.aras.length, 
+              status: data.returnedARAs.status
+            }}
+          />
+        </div>
         <div className={styles.right}>
-          <ResultsListLoadingButton
+          {/* <ResultsListLoadingButton
             data={{
               handleResultsRefresh: loadingButtonData.handleResultsRefresh,
               isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
@@ -58,7 +74,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
               buttonClassName: loadingButtonData.buttonClassName,
               hasFreshResults: loadingButtonData.hasFreshResults
             }}
-          />
+          /> */}
           <button
             className={styles.shareButton}
             onClick={()=>{data.setShareModalOpen(true)}}
