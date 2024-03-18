@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export const useWindowSize = (delay = 100) => {
   // Initialize state with undefined so that we can check if it's ready during the first render
@@ -68,4 +68,33 @@ export const useGoogleAnalytics = (gaID) => {
       document.head.removeChild(script2);
     };
   }, [gaID]);
+};
+
+/**
+ * Custom React hook that executes a callback function at specified time intervals.
+ *
+ * @param {number} time - The interval time in milliseconds.
+ * @param {Function} callback - The callback function to be executed.
+ */
+export const useInterval = (callback, time) => {
+  // Use useRef to persist the callback without re-creating the interval on every render
+  const callbackRef = useRef(callback);
+
+  // Update the current callback to the latest one provided,
+  // without needing to clear and re-set the interval
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    // Function to be executed at each interval
+    const tick = () => {
+      callbackRef.current();
+    };
+
+    if (time !== null) {
+      const id = setInterval(tick, time);
+      return () => clearInterval(id);
+    }
+  }, [time]);
 };
