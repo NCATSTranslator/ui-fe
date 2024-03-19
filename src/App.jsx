@@ -92,9 +92,9 @@ const App = ({children}) => {
               children
             :
               (width < minScreenWidth)
-              ? <SmallScreenOverlay />
-              : <Outlet context={setFeedbackModalOpen}/>
-        }
+              && <SmallScreenOverlay /> 
+            }
+          <Outlet context={setFeedbackModalOpen}/>
       </div>
       <Footer>
         <nav>

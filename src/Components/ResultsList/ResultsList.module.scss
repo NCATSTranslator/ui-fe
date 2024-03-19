@@ -5,16 +5,22 @@
   padding: 0 0 $s;
   .resultsContainer {
     display: grid;
-    grid-template-columns: 330px 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-columns: auto;
+    grid-template-rows: auto;
     grid-column-gap: $m;
     align-items: flex-start;
     position: relative;
     max-width: 2300px;
     width: auto;
     padding: 20px;
+    @media screen and (min-width: $large) {
+      grid-template-columns: 330px 1fr;
+      grid-template-rows: auto 1fr;
+    }
     .resultsTableContainer {
-      grid-column: 2/3;
+      @media screen and (min-width: $large) {
+        grid-column: 2/3;
+      }
     }
     .resultsTable {
       box-shadow: $dropShadow;
@@ -31,10 +37,13 @@
       .tableHead {
         border-bottom: 1px solid $midGray;
         display: grid;
-        grid-template-columns: 1fr 60px 225px 100px 50px 50px;
         padding: 12px;
         border-radius: 5px 5px 0 0;
         user-select: none;
+        grid-template-columns: 4fr 1fr 2fr 2fr 1fr;
+        @media screen and (min-width: $desktop) {
+          grid-template-columns: 1fr 60px 225px 100px 100px;
+        }
         .head {
           display: flex;
           align-items: center;
@@ -114,9 +123,13 @@
 
 .pagination {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   margin-top: $s;
-  grid-column: 2/3;
+  @media screen and (min-width: $large) {
+    grid-column: 2/3;
+  }
+  @media screen and (min-width: $desktop) {
+    grid-template-columns: 1fr 1fr;
+  }
   .pageNums {
     display: flex;
     justify-content: space-between;
