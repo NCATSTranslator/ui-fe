@@ -58,7 +58,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
               containerClassName: loadingButtonData.containerClassName,
               buttonClassName: loadingButtonData.buttonClassName,
               hasFreshResults: loadingButtonData.hasFreshResults,
-              currentInterval: data.returnedARAs.status === "success" ? 100 : data.returnedARAs.aras.length,
+              currentInterval: data.returnedARAs.aras.length,
               status: data.returnedARAs.status
             }}
           />

@@ -17,10 +17,15 @@ const ResultsListLoadingBar = ({ data, totalIntervals = 6 }) => {
   }, 2000);
 
   useEffect(() => {
-    if(currentInterval >= totalIntervals || data.status === "success")
-      setBarWidthPercentage(100);
-    else 
+
+    if(currentInterval >= totalIntervals || data.status === "success") {
+      if(!data.hasFreshResults && barWidthPercentage != 100) 
+        setBarWidthPercentage(95);
+      else 
+        setBarWidthPercentage(100)
+    } else {
       setBarWidthPercentage(((currentInterval / totalIntervals) * 100) - 5);
+    } 
 
   }, [currentInterval, data, totalIntervals]);
 
@@ -40,7 +45,7 @@ const ResultsListLoadingBar = ({ data, totalIntervals = 6 }) => {
                   data.hasFreshResults
                   ? <span>All results have been retrieved. Click <i>Load New Results</i> to incorporate them into the existing results.</span>
                   : <span>All results have been retrieved.</span>
-                : <span>Additional results are currently being retrieved. {currentInterval} of {totalIntervals} knowledge sources have returned results.</span>
+                : <span>Additional results are currently being retrieved. {currentInterval} of {totalIntervals} reasoning agents have returned results.</span>
               }
             </Tooltip>
           </div>
