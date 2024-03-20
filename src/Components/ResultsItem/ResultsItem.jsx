@@ -6,7 +6,7 @@ import { getIcon,
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
-import Export from "../../Icons/Buttons/Export.svg?react"
+// import Export from "../../Icons/Buttons/Export.svg?react"
 import Bookmark from "../../Icons/Navigation/Bookmark.svg?react"
 import Notes from "../../Icons/note.svg?react"
 import AnimateHeight from "react-animate-height";
@@ -14,8 +14,8 @@ import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';
 import BookmarkConfirmationModal from '../Modals/BookmarkConfirmationModal';
 import { Link } from 'react-router-dom';
-import { CSVLink } from 'react-csv';
-import { generateCsvFromItem } from '../../Utilities/csvGeneration';
+// import { CSVLink } from 'react-csv';
+// import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
@@ -65,7 +65,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const [height, setHeight] = useState(0);
   const formattedPaths = useRef(item.compressedPaths);
   const [selectedPaths, setSelectedPaths] = useState(new Set());
-  const [csvData, setCsvData] = useState([]);
+  // const [csvData, setCsvData] = useState([]);
   const bookmarkRemovalApproved = useRef(false);
   const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState(false);
 
