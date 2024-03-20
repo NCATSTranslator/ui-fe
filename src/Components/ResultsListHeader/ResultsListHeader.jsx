@@ -1,5 +1,5 @@
 import styles from './ResultsListHeader.module.scss';
-import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
+// import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
 import ResultsListLoadingBar from '../ResultsListLoadingBar/ResultsListLoadingBar';
 import ShareModal from "../Modals/ShareModal";
 import Tooltip from '../Tooltip/Tooltip';
