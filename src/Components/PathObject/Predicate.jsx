@@ -167,7 +167,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
           </Tooltip>
         }
         {
-          hasSupport && 
+          hasSupport && supportDataObject?.pathItem?.support &&
           <button 
             onClick={(e)=>{handleSupportExpansion(e);}} 
             className={`support-button ${styles.supportExpansionButton} ${isSupportExpanded ? styles.expanded : ''}`}>
@@ -179,7 +179,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
         }
       </span>
       {
-        hasSupport && supportDataObject &&
+        hasSupport && supportDataObject && supportDataObject?.pathItem?.support &&
         <SupportPathGroup 
           dataObj={supportDataObject} 
           isExpanded={isSupportExpanded}
