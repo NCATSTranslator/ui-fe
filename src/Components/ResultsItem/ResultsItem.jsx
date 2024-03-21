@@ -40,7 +40,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags, hasFocusedOnFirstLoad,
   hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, 
   handleBookmarkError = ()=>{}, handleFocusedOnItem = ()=>{}}) => {
-
   const root = useSelector(currentRoot);
 
   const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
@@ -437,21 +436,28 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   );
 }
 
+// check if certain props are really different before rerendering
 const areEqualProps = (prevProps, nextProps) => {
-  const prevDataKeys = Object.keys(prevProps.item);
-  const nextDataKeys = Object.keys(nextProps.item);
+  // keys for the item prop
+  const prevItemDataKeys = Object.keys(prevProps.item);
+  const nextItemDataKeys = Object.keys(nextProps.item);
 
-  if (prevDataKeys.length !== nextDataKeys.length) {
+  if (prevItemDataKeys.length !== nextItemDataKeys.length) {
     return false;
   }
 
-  for (const key of prevDataKeys) {
+  // check for nonequivalent properties within the item prop object
+  for (const key of prevItemDataKeys) {
     if (prevProps.item[key] !== nextProps.item[key]) {
       return false;
     }
   }
 
-  // If none of the above conditions are met, props are equal
+  // if zoom key status has changed, return false to rerender
+  if(prevProps.zoomKeyDown !== undefined && nextProps.zoomKeyDown !== undefined && prevProps.zoomKeyDown !== nextProps.zoomKeyDown)
+    return false;
+
+  // If none of the above conditions are met, props are equal, return true to not rerender
   return true;
 };
 
