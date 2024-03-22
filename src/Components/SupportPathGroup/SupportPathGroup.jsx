@@ -2,6 +2,7 @@ import { useState, useEffect, memo } from 'react';
 import styles from './SupportPathGroup.module.scss';
 import SupportPath from '../SupportPath/SupportPath';
 import AnimateHeight from '../AnimateHeight/AnimateHeight';
+import { sortSupportByEntityStrings, sortSupportByLength } from '../../Utilities/sortingFunctions';
 
 const SupportPathGroup = ({ dataObj, isExpanded }) => {
 
@@ -24,6 +25,14 @@ const SupportPathGroup = ({ dataObj, isExpanded }) => {
     else
       setHeight('auto');
   }, [isExpanded])
+
+  // if there are any active string filters, sort by those
+  if(activeStringFilters.length > 0 && pathItem.support) {
+    sortSupportByEntityStrings(pathItem.support, activeStringFilters);
+  // otherwise sort by shortest path length first
+  } else {
+    sortSupportByLength(pathItem.support);
+  }
 
   return(
     <AnimateHeight
