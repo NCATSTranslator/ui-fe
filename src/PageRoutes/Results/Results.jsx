@@ -1,4 +1,3 @@
-import React from "react";
 import ResultsList from "../../Components/ResultsList/ResultsList";
 import { QueryClient, QueryClientProvider } from 'react-query';
 const Results = () => {

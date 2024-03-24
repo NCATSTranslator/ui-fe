@@ -56,7 +56,7 @@ const Select = ({label, subtitle, value, name, size, error,
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);  // Empty array ensures this runs once on mount and unmount
+  }, []); 
   
 
   return (

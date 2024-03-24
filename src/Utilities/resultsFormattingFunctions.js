@@ -1,6 +1,10 @@
-import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity } from './utilities';
+import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity, mergeObjects } from './utilities';
 import { cloneDeep } from "lodash";
 import { score } from "../Utilities/scoring";
+
+export const hasSupport = (item) => {
+  return (item?.support && Array.isArray(item.support) && item.support.length > 0);
+}
 
 /**
  * Formats the evidence information for the provided paths by extracting and organizing publications and sources.
@@ -30,7 +34,7 @@ const getFormattedEvidence = (paths, results) => {
         formatObj(objs[key], getId, item, constructor, container)
         return;
       }
-      
+
       for(const obj of objs[key]) {
         formatObj(obj, getId, item, constructor, container)
       }
@@ -44,12 +48,8 @@ const getFormattedEvidence = (paths, results) => {
       item,
       (id) => {
         const publication = getPubByID(id, results);
-        if(publication.pubdate !== null) {
-          let formattedDate = publication.pubdate.split(' ')
-          publication.pubdate = formattedDate[0];
-        }
         publication.id = id;
-        publication.source = '';
+        publication.journal = '';
         publication.title = '';
         return publication;
       },
@@ -58,25 +58,33 @@ const getFormattedEvidence = (paths, results) => {
 
   const formatSources = (sources, item, container) => {
     formatEvidenceObjs(
-      sources, 
-      (src) => { return `${item.edges[0].subject.name}${src.name}${item.edges[0].object.name}`; }, 
+      sources,
+      (src) => { return `${item.edges[0].subject.name}${src.name}${item.edges[0].object.name}`; },
       item,
       (src) => { return src; },
       container);
   };
 
-  const formattedPublications = {};
-  const formattedSources = {};
-  for(const path of paths) {
-    for(const item of path.path.subgraph) {
-      if(item.category === 'predicate') {
-        formatPublications(item.publications, item, formattedPublications);
-        formatSources(item.provenance, item, formattedSources);
+  const processSourcesAndPublications = (paths, formattedPublications, formattedSources) => {
+    for(const path of paths) {
+      for(const item of path.path.subgraph) {
+        if(item.category === 'predicate') {
+          formatPublications(item.publications, item, formattedPublications);
+          formatSources(item.provenance, item, formattedSources);
+          // recursively call processSourcesAndPublications to fill out pubs and sources from support edges
+          if(hasSupport(item))
+            processSourcesAndPublications(item.support, formattedPublications, formattedSources);
+
+        }
       }
     }
   }
 
-  const publications = Object.values(formattedPublications);
+  const formattedPublications = {};
+  const formattedSources = {};
+  processSourcesAndPublications(paths, formattedPublications, formattedSources);
+
+  const publications = formattedPublications;
   const sources = Object.values(formattedSources);
   const distinctSources = {};
   sources.forEach((src) => {
@@ -153,7 +161,7 @@ const getEdgeByID = (id, results) => {
     name: tempSub.names[0],
     id: tempSub.id
   };
-  
+
   return newEdge;
 }
 
@@ -163,22 +171,26 @@ const getEdgeByID = (id, results) => {
  * @param {Array} pathTwo - The second path to compare.
  * @returns {boolean} True if the nodes match, false otherwise.
 */
-const checkForNodeUniformity = (pathOne, pathTwo) => {
+const checkForNodeUniformity = (pathOne, pathTwo, respectKnowledgeLevel) => {
   // if the lengths of the paths are different, they cannot have the same nodes
-  if(pathOne.length !== pathTwo.length)
+  if(pathOne.subgraph.length !== pathTwo.subgraph.length)
     return false;
 
   let nodesMatch = true;
 
-  for(const [i, path] of pathOne.entries()) {
-    // if we're at an odd index, it's a predicate, so skip it
-    if(i % 2 !== 0)
-      continue;
-
-    // if the names of the nodes don't match, set nodesMatch to false
-    if(path.name !== pathTwo[i].name)
-      nodesMatch = false;
+  for(const [i, item] of pathOne.subgraph.entries()) {
+    // if we're at an odd index, it's a predicate
+    if(i % 2 !== 0) {
+      // check for same knowledge level. If different, return false
+      if(respectKnowledgeLevel && item.provenance[0]?.knowledge_level !== pathTwo.subgraph[i].provenance[0]?.knowledge_level)
+        nodesMatch = false;
+    } else {
+      // if the names of the nodes don't match, set nodesMatch to false
+      if(item.name !== pathTwo.subgraph[i].name)
+        nodesMatch = false;
+    }
   }
+
   return nodesMatch;
 }
 
@@ -194,6 +206,79 @@ const removeDuplicatePubIds = (publications) => {
   return uniquePublications;
 }
 
+const getFormattedNode = (id, index, subgraph, results) => {
+  let node = getNodeByCurie(id, results);
+  let name = (node.names) ? node.names[0]: '';
+  let type = (node.types) ? node.types[0]: '';
+  let desc = (node.descriptions) ? node.descriptions[0]: '';
+  let category = (index === subgraph.length - 1) ? 'target' : 'object';
+  let newNode =  {
+    id: id,
+    category: category,
+    name: name,
+    type: type,
+    description: desc,
+    curies: node.curies,
+    provenance: []
+  };
+  if(node.provenance !== undefined)
+    newNode.provenance = node.provenance;
+
+  return newNode;
+}
+
+const getFormattedEdge = (id, results, supportStack) => {
+  supportStack.push(id);
+  let edge = getEdgeByID(id, results);
+  edge.id = id;
+  let pred = '';
+
+  if(edge.predicate) {
+    pred = formatBiolinkEntity(edge.predicate);
+    edge.predicate = pred;
+  }
+  let publications = removeDuplicatePubIds(edge.publications);
+  let newEdge = {
+    category: 'predicate',
+    id: id,
+    predicates: [pred],
+    edges: [edge],
+    publications: publications,
+    inferred: false
+  };
+  // if the edge has support, recursively call getFormattedPaths to fill out the support paths
+  if(hasSupport(edge)) {
+    const validSupport = edge.support.filter(p => !supportStack.includes(p));
+    if (validSupport.length > 0) {
+      newEdge.support = getFormattedPaths(validSupport, results, supportStack);
+    }
+    newEdge.inferred = true;
+  }
+
+  newEdge.provenance = (edge.provenance !== undefined) ? edge.provenance : [];
+  if((!Array.isArray(newEdge.provenance) && Object.keys(newEdge.provenance).length === 0))
+    newEdge.provenance = [];
+
+  supportStack.pop();
+  return newEdge;
+}
+
+const checkPathForSupport = (path) => {
+  const hasInferredEdge = (element, index) => {  return index % 2 !== 0 && element.inferred};
+  return path?.subgraph?.some(hasInferredEdge);
+}
+
+const getStringNameFromPath = (path) => {
+  let stringName = "";
+  for(const [i, pathItem] of path.subgraph.entries()) {
+    if(i % 2 === 0)
+      stringName += `${pathItem.name} `;
+    else
+      stringName += `${pathItem.predicates[0]} `;
+  }
+  return stringName.trimEnd();
+}
+
 /**
  * Formats the raw path IDs into an array of formatted paths with node and edge information.
  * The formatted paths are extracted from the provided results object.
@@ -201,47 +286,26 @@ const removeDuplicatePubIds = (publications) => {
  * @param {Object} results - The results object containing paths and node/edge information.
  * @returns {Array} The formatted paths array.
 */
-const getFormattedPaths = (rawPathIds, results) => {
+const getFormattedPaths = (rawPathIds, results, supportStack) => {
   let formattedPaths = [];
   for(const id of rawPathIds) {
     let formattedPath = cloneDeep(results.paths[id]);
     if(formattedPath) {
+      supportStack.push(id);
       for(const [i] of formattedPath.subgraph.entries()) {
         if(i % 2 === 0) {
-          let node = getNodeByCurie(formattedPath.subgraph[i], results);
-          let name = (node.names) ? node.names[0]: '';
-          let type = (node.types) ? node.types[0]: '';
-          let desc = (node.descriptions) ? node.descriptions[0]: '';
-          let category = (i === formattedPath.subgraph.length - 1) ? 'target' : 'object';
-          formattedPath.subgraph[i] = {
-            category: category,
-            name: name,
-            type: type,
-            description: desc,
-            curies: node.curies,
-          };
-          if(node.provenance !== undefined) {
-            formattedPath.subgraph[i].provenance = node.provenance;
-          }
+          formattedPath.subgraph[i] = getFormattedNode(formattedPath.subgraph[i], i, formattedPath.subgraph, results);
         } else {
-          let eid = formattedPath.subgraph[i];
-          let edge = getEdgeByID(eid, results);
-          let pred = (edge.predicate) ? formatBiolinkEntity(edge.predicate) : '';
-          let publications = removeDuplicatePubIds(edge.publications);
-          formattedPath.subgraph[i] = {
-            category: 'predicate',
-            predicates: [pred],
-            edges: [{id: eid, object: edge.object, predicate: pred, subject: edge.subject, provenance: edge.provenance}],
-            publications: publications
-          };
-          if(edge.provenance !== undefined) {
-            formattedPath.subgraph[i].provenance = edge.provenance;
-          }
+          formattedPath.subgraph[i] = getFormattedEdge(formattedPath.subgraph[i], results, supportStack);
         }
       }
-      formattedPaths.push({highlighted: false, path: formattedPath});
+      formattedPath.inferred = checkPathForSupport(formattedPath);
+      formattedPath.stringName = getStringNameFromPath(formattedPath);
+      formattedPaths.push({id: id, highlighted: false, path: formattedPath});
+      supportStack.pop();
     }
   }
+
   return formattedPaths;
 }
 
@@ -249,9 +313,10 @@ const getFormattedPaths = (rawPathIds, results) => {
  * Compresses paths in the graph by merging consecutive paths with identical nodes.
  * The compressed paths are returned as a new array.
  * @param {Array} graph - The graph containing paths to be compressed.
+ * @param {Array} respectKnowledgeLevel - Whether or not to merge based on knowledge level.
  * @returns {Array} The compressed paths.
 */
-const getCompressedPaths = (graph) => {
+const getCompressedPaths = (graph, respectKnowledgeLevel = true) => {
   let newCompressedPaths = [];
   let pathToDisplay = null
   for(const [i, pathObj] of graph.entries()) {
@@ -260,33 +325,40 @@ const getCompressedPaths = (graph) => {
     let displayPath = false;
     let nextPath = (graph[i+1] !== undefined) ? graph[i+1] : null;
     // if all nodes are equal
-    let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path.subgraph, nextPath.path.subgraph) : false;
+    let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path, nextPath.path, respectKnowledgeLevel) : false;
 
-    // if theres another path after the current one, and the nodes of each are equal
-    if(nextPath && nodesEqual) {
+    // loop through the current path's items
+    for(const [i] of pathObj.path.subgraph.entries()) {
+      if(displayPath) {
+        break;
+      }
+      // if we're at an even index, it's a node, so skip it
+      if(i % 2 === 0)
+      continue;
 
-      // loop through the current path's items
-      for(const [i] of pathObj.path.subgraph.entries()) {
-        if(displayPath) {
-          break;
-        }
-        // if we're at an even index, it's a node, so skip it
-        if(i % 2 === 0)
-          continue;
+      // if theres another path after the current one, and the nodes of each are equal
+      if(nextPath && nodesEqual) {
 
         if(!nextPath.path.subgraph[i])
           continue;
 
-        // loop through nextPath's item's predicates
-        for(const predicate of nextPath.path.subgraph[i].predicates) {
-          // if the next path item to be displayed doesn't have the predicate,
-          if(!pathToDisplay.path.subgraph[i].predicates.includes(predicate)) {
-            // add it
-            pathToDisplay.path.subgraph[i].predicates.push(predicate);
-            pathToDisplay.path.subgraph[i].edges.push(nextPath.path.subgraph[i].edges[0]);
-          }
+        // add the contents of the nextPath's edge object to the pathToDisplay edge's object
+        // combine predicates (uses set to prevent duplicates)
+        pathToDisplay.path.subgraph[i].predicates = Array.from(new Set([...pathToDisplay.path.subgraph[i].predicates, ...nextPath.path.subgraph[i].predicates]));
+        // edges
+        pathToDisplay.path.subgraph[i].edges = [...pathToDisplay.path.subgraph[i].edges, ...nextPath.path.subgraph[i].edges];
+        // support paths
+        if(pathToDisplay.path.subgraph[i].support && nextPath.path.subgraph[i].support) {
+          pathToDisplay.path.subgraph[i].support = [...pathToDisplay.path.subgraph[i].support, ...nextPath.path.subgraph[i].support].sort((a, b) => !a.path.stringName - !b.path.stringName || a.path.stringName.localeCompare(b.path.stringName));
         }
+        // provenance
+        pathToDisplay.path.subgraph[i].provenance = [...pathToDisplay.path.subgraph[i].provenance, ...nextPath.path.subgraph[i].provenance];
+        // publications
+        pathToDisplay.path.subgraph[i].publications = mergeObjects(pathToDisplay.path.subgraph[i].publications, nextPath.path.subgraph[i].publications);
       }
+      // compress support paths for the edge, if they exist
+      if(hasSupport(pathToDisplay?.path?.subgraph[i]))
+        pathToDisplay.path.subgraph[i].support = getCompressedPaths(pathToDisplay.path.subgraph[i].support.sort((a, b) => !a.path.stringName - !b.path.stringName || a.path.stringName.localeCompare(b.path.stringName)), false);
     }
     // if there's no nextPath or the nodes are different, display the path
     if(!nextPath || !nodesEqual) {
@@ -337,9 +409,9 @@ const checkBookmarkForNotes = (bookmarkID, bookmarksSet) => {
  * scores, and tags. The summarized results are returned as an array.
  * @param {Array} results - The results array to be summarized.
  * @param {Set} bookmarks - Set of bookmarked items for a given query
- * @param {number} confidenceWeight - value representing a parameter for weighted scoring 
- * @param {number} noveltyWeight - value representing a parameter for weighted scoring 
- * @param {number} clinicalWeight - value representing a parameter for weighted scoring 
+ * @param {number} confidenceWeight - value representing a parameter for weighted scoring
+ * @param {number} noveltyWeight - value representing a parameter for weighted scoring
+ * @param {number} clinicalWeight - value representing a parameter for weighted scoring
  * @returns {Array} The summarized results array.
 */
 export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, clinicalWeight, bookmarks = null) => {
@@ -359,8 +431,9 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     // Get the subject node's fda approval status
     let fdaInfo = (subjectNode.fda_info) ? subjectNode.fda_info : false;
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
-    let formattedPaths = getFormattedPaths(item.paths, results);
-    let compressedPaths = getCompressedPaths(formattedPaths);
+    let formattedPaths = getFormattedPaths(item.paths, results, []);
+    let compressedPaths = getCompressedPaths(formattedPaths, true);
+    // let compressedPaths = formattedPaths;
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNode.names[0]);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
     let itemID = item.id;
@@ -370,7 +443,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
     let formattedItem = {
       id: itemID,
       subjectNode: subjectNode,
-      type: 'biolink:Drug',
+      type: subjectNode.types[0],
       name: itemName,
       paths: formattedPaths,
       compressedPaths: compressedPaths,
@@ -382,7 +455,7 @@ export const getSummarizedResults = (results, confidenceWeight, noveltyWeight, c
       score: score(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
       tags: tags,
       rawResult: item,
-      bookmarked: bookmarked, 
+      bookmarked: bookmarked,
       bookmarkID: bookmarkID,
       hasNotes: hasNotes
     }
@@ -414,7 +487,7 @@ export const getUrlByType = (publicationID, type) => {
   return url;
 }
 
-export const getTypeFromPub = (publicationID) => { 
+export const getTypeFromPub = (publicationID) => {
   if(publicationID.toLowerCase().includes("pmid"))
     return "PMID";
   if(publicationID.toLowerCase().includes("pmc"))
@@ -424,10 +497,24 @@ export const getTypeFromPub = (publicationID) => {
   return "other";
 }
 
+export const formatPublicationSourceName = (sourceName) => {
+  let newSourceName = sourceName;
+  if(typeof sourceName === 'string')
+  switch (sourceName.toLowerCase()) {
+    case "semantic medline database":
+      newSourceName = "SemMedDB"
+      break;
+
+    default:
+      break;
+  }
+  return newSourceName;
+}
+
 /**
  * Extracts and formats the evidence data from a given result object.
  *
- * This function parses through the evidence information within the result object, 
+ * This function parses through the evidence information within the result object,
  * extracting distinct sources, general sources, and formatting publication data.
  * It handles cases where certain pieces of evidence may not be present and formats
  * the publications into a consumable array of objects.
@@ -440,37 +527,90 @@ export const getTypeFromPub = (publicationID) => {
 export const getEvidenceFromResult = (result) => {
   let evidenceObject = {};
   if(!result || !result.evidence)
-    return evidenceObject; 
+    return evidenceObject;
 
   evidenceObject.distinctSources = (result.evidence.distinctSources) ? result.evidence.distinctSources : [];
   evidenceObject.sources = (result.evidence.sources) ? result.evidence.sources : [];
   evidenceObject.publications = [];
-  for(const path of result.compressedPaths) {
-    for(const [i, subgraphItem] of Object.entries(path.path.subgraph)) {
-      if(i % 2 === 0)
-        continue;
 
-      let index = parseInt(i);
-      let subjectName = path.path.subgraph[index - 1].name;
-      let predicateName = subgraphItem.predicates[0];
-      let objectName = path.path.subgraph[index + 1].name;
-      let edgeLabel = getFormattedEdgeLabel(subjectName, predicateName, objectName);
+  const pubIds = new Set();
+  const addItemToPublications = (item, items, arr) => {
+    if (!items.has(item.id)) {
+        items.add(item.id);
+        arr.push(item);
+    }
+  }
 
+  const createNewPub = (result, pubID, subgraphItem, key) => {
+    let newPub;
+    let type;
+    // this is to deal with the old bookmark format, which removed publications from the result's evidence obj
+    if(!result.evidence.publications) {
+      type = getTypeFromPub(pubID);
+      newPub = {
+        type: getTypeFromPub(pubID),
+        url: getUrlByType(pubID, type),
+        id: pubID,
+        journal: '',
+        pubdate: '',
+        snippet: '',
+        title: '',
+        knowledgeLevel: key,
+        edges: subgraphItem.edges.reduce((obj, item) => {
+            obj[item.id] = item;
+            return obj;
+        }, {}),
+        source: {
+          name: "unknown",
+          url: null,
+        }
+      }
+    // this is for the current format
+    } else {
+      newPub = result.evidence.publications[pubID];
+      newPub.knowledgeLevel = key;
+      type = getTypeFromPub(pubID);
+      newPub.url = getUrlByType(pubID, type);
+      newPub.source.name = formatPublicationSourceName(newPub.source.name);
+    }
+    return newPub;
+  }
+
+  const fillInPublications = (subgraphItem, result, evidenceObj) => {
+    // if subgraphItem.publications is an array, we're in the Workspace dealing with an old bookmark
+    if(Array.isArray(subgraphItem.publications)) {
+      for(const pubID of subgraphItem.publications) {
+        let knowledgeLevel = ""
+        let newPub = createNewPub(result, pubID, subgraphItem, knowledgeLevel);
+        addItemToPublications(newPub, pubIds, evidenceObj.publications);
+      }
+    // if it's not it's an object, and we're on the results page
+    } else {
+      // key here is the knowledge level, i.e. "trusted", "ml", etc
       Object.keys(subgraphItem.publications).forEach(key => {
         for(const pubID of subgraphItem.publications[key]) {
-          let type = getTypeFromPub(pubID);
-          let url = getUrlByType(pubID, type);
-          let newPub = {
-            edges: [{label: edgeLabel}],
-            type: type,
-            url: url,
-            id: pubID,
-            knowledgeLevel: key
-          }
-          evidenceObject.publications.push(newPub);
+          let newPub = createNewPub(result, pubID, subgraphItem, key);
+          addItemToPublications(newPub, pubIds, evidenceObj.publications);
         }
       })
     }
   }
+
+  const loopPathsAndFillInPubs = (result, paths, evidenceObj) => {
+    for(const path of paths) {
+      for(const [i, subgraphItem] of Object.entries(path.path.subgraph)) {
+        if(i % 2 === 0)
+          continue;
+
+        fillInPublications(subgraphItem, result, evidenceObj);
+        if(hasSupport(subgraphItem)) {
+          loopPathsAndFillInPubs(result, subgraphItem.support, evidenceObj);
+        }
+      }
+    }
+  }
+
+  loopPathsAndFillInPubs(result, result.compressedPaths, evidenceObject);
+
   return evidenceObject;
 }

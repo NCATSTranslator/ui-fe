@@ -897,21 +897,8 @@
   }
 }
 
-.groupedPreds {
-  font-weight: 500;
-  &>span:first-child {
-    .connector {
-      background-image: url('./Icons/top.svg');
-      padding: 1px;
-      top: 0;
-      transform: none;
-    }
-  }
-  &>span:last-child {
-    .connector {
-      background-image: url('./Icons/bottom.svg');
-      top: 0;
-      transform: none;
-    }
+.evidence-modal {
+  .support-button {
+    display: none;
   }
 }

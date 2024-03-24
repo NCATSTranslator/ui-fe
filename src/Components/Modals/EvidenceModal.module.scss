@@ -90,7 +90,7 @@
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 5px;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin: 10px 0 15px;
   padding: 20px;
@@ -109,14 +109,28 @@
   &>span:last-child {
     margin-bottom: 0; 
   }
-  &:first-child {
-    .connector {
-      background-image: url('../../Icons/top.svg');
+  .pathContainer {
+    &>svg {
+      height: 27px;
+    }
+    &:first-of-type {
+      &>svg {
+        top: 80%;
+        height: auto;
+      }
+    }
+    &:last-of-type {
+      &>svg {
+        top: 28%;
+        height: auto;
+      }
     }
   }
-  &:last-child {
-    .connector {
-      background-image: url('../../Icons/bottom.svg');
+  &.hasTwo {
+    .pathContainer {
+      &>svg {
+        top: 50% !important;
+      }
     }
   }
 }

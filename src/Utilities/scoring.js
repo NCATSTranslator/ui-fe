@@ -20,7 +20,6 @@ const maxNormalizedScore = function(scoreComponents) {
   return maxScorePair(normalizedScorePairs);
 }
 
-// Not used until further notice
 const maxSugenoScore = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
   const sugenoPairs = scoreComponents.map((s) => {
     const scaledSugenoScore = 5 * computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
@@ -34,7 +33,6 @@ const maxSugenoScore = function(scoreComponents, confidenceWeight, noveltyWeight
 
   return maxScorePair(sugenoPairs);
 }
-
 
 const maxScorePair = function (scorePairs) {
   let maxScore = scorePairs[0];

@@ -1,13 +1,14 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Tooltip from '../Tooltip/Tooltip';
 import { currentConfig, currentRoot, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
-import Logo from '../../Assets/Images/Logo.svg?react';
+import { useWindowSize } from '../../Utilities/customHooks';
 import History from '../../Icons/Navigation/History.svg?react';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 import Workspace from '../../Icons/Navigation/Workspace.svg?react';
 import Question from '../../Icons/Navigation/Question.svg?react';
 import defaultPfp from '../../Assets/Images/pfp.png';
+import Logo from '../../Assets/Images/site-logo.png';
 import styles from './Header.module.scss';
 import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
 
@@ -16,7 +17,9 @@ const Header = ({children}) => {
   const root = useSelector(currentRoot);
   const user = useSelector(currentUser);
   const config = useSelector(currentConfig);
-
+  const location = useLocation();
+  const {width} = useWindowSize();
+  const collapseNameScreenWidth = 1270;
   const clientID = config?.social_providers?.una?.client_id;
   const redirectURI = `${window.location.origin}/main/logout`;
   const logoutURI = config?.social_providers?.una?.logout_uri;
@@ -28,7 +31,9 @@ const Header = ({children}) => {
       <div className={styles.topBar}>
         <div className={styles.container}>
           <div className={styles.left}>
-            <Link to={`/${root}/`} className={styles.logo} reloadDocument><Logo/></Link>
+            <Link to={`/${root}/`} className={styles.logo} reloadDocument={location.pathname === "/main/results" ? false : true}>
+              <img src={Logo} alt="Translator Logo" />
+            </Link>
           </div>
           <div className={styles.right}>
             {
@@ -55,6 +60,10 @@ const Header = ({children}) => {
                     <Tooltip id={`prefs-tooltip`} place="bottom">
                       <span className={styles.tooltip}>Click here to view and edit your user preferences.</span>
                     </Tooltip>
+                    {
+                      user?.name &&
+                      <p className={`${width <= collapseNameScreenWidth ? styles.hide : ''} ${styles.userName}`}>{user.name}</p>
+                    }
                   </Link>
                   {
                     logoutReady && 

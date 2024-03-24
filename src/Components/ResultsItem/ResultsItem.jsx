@@ -1,24 +1,27 @@
-import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, memo } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, capitalizeAllWords } from '../../Utilities/utilities';
+import { getIcon, 
+  // capitalizeAllWords, 
+  formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
-import Export from "../../Icons/Buttons/Export.svg?react"
+// import Export from "../../Icons/Buttons/Export.svg?react"
 import Bookmark from "../../Icons/Navigation/Bookmark.svg?react"
 import Notes from "../../Icons/note.svg?react"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';
+import BookmarkConfirmationModal from '../Modals/BookmarkConfirmationModal';
 import { Link } from 'react-router-dom';
-import { CSVLink } from 'react-csv';
-import { generateCsvFromItem } from '../../Utilities/csvGeneration';
+// import { CSVLink } from 'react-csv';
+// import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
 import { getEvidenceFromResult } from '../../Utilities/resultsFormattingFunctions';
 import { displayScore } from '../../Utilities/scoring';
-import { setResultsQueryParam } from '../../Utilities/resultsInteractionFunctions';
+// import { setResultsQueryParam } from '../../Utilities/resultsInteractionFunctions';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -34,9 +37,9 @@ const sortTagsBySelected = (a, b, selected) => {
 }
 
 const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, handleFilter, activeFilters,
-  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags,
-  hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, handleBookmarkError = ()=>{}}) => {
-
+  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags, hasFocusedOnFirstLoad,
+  hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, 
+  handleBookmarkError = ()=>{}, handleFocusedOnItem = ()=>{}}) => {
   const root = useSelector(currentRoot);
 
   const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
@@ -50,7 +53,6 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   let sourcesCount = (currentEvidence.distinctSources?.length) 
     ? currentEvidence.distinctSources.length
     : 0;
-
   let roleCount = (item.tags) 
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
@@ -60,9 +62,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   const [itemHasNotes, setItemHasNotes] = useState(hasNotes);
   const [isExpanded, setIsExpanded] = useState(isFocused);
   const [height, setHeight] = useState(0);
-  const formattedPaths = item.compressedPaths;
+  const formattedPaths = useRef(item.compressedPaths);
   const [selectedPaths, setSelectedPaths] = useState(new Set());
-  const [csvData, setCsvData] = useState([]);
+  // const [csvData, setCsvData] = useState([]);
+  const bookmarkRemovalApproved = useRef(false);
+  const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState(false);
 
   const initPathString = useRef((type?.pathString) ? type.pathString : 'may affect');
   const tagsRef = useRef(null);
@@ -85,31 +89,49 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     };
   },[]);
 
-  useEffect(() => {
-    if (!isFocused || focusedItemRef === null) {
-      return;
+  // useEffect(() => {
+  //   if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad) 
+  //     return;
+
+  //   focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+  //   handleFocusedOnItem();
+  // }, [focusedItemRef])
+
+  const getPathsCount = (paths) => {
+    let count = paths.length;
+    for(const path of paths) {
+      for(const [i, subgraphItem] of path.path.subgraph.entries()) {
+        if(i % 2 === 0 || !subgraphItem.support)
+          continue;
+        count += subgraphItem.support.length;
+      }
     }
-
-    focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
-  }, [focusedItemRef])
-
-  const pathString = (formattedPaths.length > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
-  const nameString = (item.name !== null) ? item.name : '';
-  const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
+    return count;
+  } 
+  
+  const pathsCount = useMemo(()=>getPathsCount(formattedPaths.current), [formattedPaths]);
+  const pathString = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
+  const typeString = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
+  const nameString = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
+  // const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
   const [itemGraph, setItemGraph] = useState(null);
 
   const handleToggle = () => {
     if (!isExpanded) {
-      setResultsQueryParam('r', item.id);
+      // setResultsQueryParam('r', item.id);
     }
 
     setIsExpanded(!isExpanded);
   }
 
-  const handleEdgeSpecificEvidence = (edgeGroup, path) => {
-    activateEvidence(currentEvidence, item, edgeGroup, path, false);
-  }
+  const handleEdgeSpecificEvidence = useCallback((edgeGroup, path) => {
+    activateEvidence(currentEvidence, item, edgeGroup, path);
+  }, [currentEvidence, item, activateEvidence])
+
+  const handleActivateEvidence = useCallback((path) => {
+    activateEvidence(currentEvidence, item, null, path);
+  }, [currentEvidence, item, activateEvidence])
 
   useEffect(() => {
     if(isExpanded === false)
@@ -128,44 +150,65 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
     let newSelectedPaths = new Set();
 
-    for(const path of formattedPaths) {
-      if(path.path.subgraph.length === 3) {
-        newSelectedPaths.add(path);
+    const checkForNodeMatches = (nodeList, path) => {
+      let currentNodeIndex = 0;
+      let numMatches = 0;
+      for(const [i, el] of path.path.subgraph.entries()) {
+        if(i % 2 !== 0)
+          continue;
+
+        if(nodeList[currentNodeIndex] && el.curies.includes(nodeList[currentNodeIndex])) {
+          numMatches++;
+        }
+        currentNodeIndex++;
       }
+      if(numMatches === nodeList.length) {
+        newSelectedPaths.add(path);
+        return true;
+      }
+      return false;
     }
 
     for(const selPath of selectedPaths) {
-      for(const path of formattedPaths) {
-        let currentNodeIndex = 0;
-        let numMatches = 0;
-        for(const [i, el] of path.path.subgraph.entries()) {
-          if(i % 2 !== 0)
-            continue;
-
-          if(selPath[currentNodeIndex] && el.curies.includes(selPath[currentNodeIndex])) {
-            numMatches++;
-          }
-          currentNodeIndex++;
-        }
-        if(numMatches === selPath.length) {
+      for(const path of formattedPaths.current) {
+        if(path.path.subgraph.length === 3
+          && path.path.subgraph[0].curies.includes(selPath[0])
+          && path.path.subgraph[path.path.subgraph.length - 1].curies.includes(selPath[selPath.length - 1])) {
           newSelectedPaths.add(path);
-          break;
         }
+        if(path.path.inferred) {
+          for(const [i, item] of path.path.subgraph.entries()) {
+            if(i % 2 === 0)
+              continue;
+            if(item.support) {
+              for(const supportPath of item.support){
+                if(checkForNodeMatches(selPath, supportPath))
+                  newSelectedPaths.add(supportPath);
+              }
+            }
+          }
+        }
+        if(checkForNodeMatches(selPath, path))
+          newSelectedPaths.add(path);
       }
     }
-
     setSelectedPaths(newSelectedPaths)
 
   },[formattedPaths]);
 
   const handleBookmarkClick = async () => {
     if(isBookmarked) {
-      if(itemBookmarkID) {
+      if(bookmarkRemovalApproved.current && itemBookmarkID) {
+        console.log("remove bookmark");
         deleteUserSave(itemBookmarkID);
         setIsBookmarked(false);
         setItemHasNotes(false);
         setItemBookmarkID(null);
         bookmarkRemovedToast();
+      }
+      if(!bookmarkRemovalApproved.current) {
+        console.log("open conf modal");
+        setBookmarkRemovalConfirmationModalOpen(true);
       }
       return false;
     } else {
@@ -206,7 +249,14 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     let newObj = {};
     newObj.type = tagID;
     newObj.value = tagObject.name;
+    newObj.negated = false;
     handleFilter(newObj);
+  }
+
+  const handleBookmarkRemovalApproval = () => {
+    console.log("removal approved");
+    bookmarkRemovalApproved.current = true;
+    handleBookmarkClick();
   }
 
   useEffect(() => {
@@ -215,6 +265,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
   useEffect(() => {
     setItemHasNotes(hasNotes);
+    formattedPaths.current = item.compressedPaths;
   }, [item, hasNotes]);
 
   return (
@@ -236,22 +287,28 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             />
           </span>
         }
-        <span className={styles.effect}>{formattedPaths.length} {pathString} {objectString}</span>
+        <span className={styles.effect}>{pathsCount} {pathString} {queryNodeLabel}</span>
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
         {
           root === "main" 
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
-                  <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString}`} aria-describedby={`bookmark-tooltip-${nameString}`} />
-                  <Tooltip id={`bookmark-tooltip-${nameString}`}>
-                    <span className={styles.tooltip}>Bookmark this result to review it later in the <Link to="/main/workspace" target='_blank'>Workspace</Link></span>
+                  <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <Tooltip id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`}>
+                    <span className={styles.tooltip}>
+                      {
+                        isBookmarked
+                        ? <>Remove this bookmark.</>
+                        : <>Bookmark this result to review it later in the <Link to="/main/workspace" target='_blank'>Workspace</Link>.</>
+                      }
+                    </span>
                   </Tooltip>
                 </div>
                 <div className={`${styles.icon} ${styles.notesIcon} ${itemHasNotes ? styles.filled : ''}`}>
-                  <Notes onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString}`} aria-describedby={`notes-tooltip-${nameString}`} />
-                  <Tooltip id={`notes-tooltip-${nameString}`}>
-                    <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/main/workspace" target='_blank'>Workspace</Link>)</span>
+                  <Notes onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
+                    <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/main/workspace" target='_blank'>Workspace</Link>).</span>
                   </Tooltip>
                 </div>
               </>
@@ -281,7 +338,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
         </span>
       </div>
-      <CSVLink
+      {/* <CSVLink
         className={styles.downloadButton}
         data={csvData}
         filename={`${item.name.toLowerCase()}.csv`}
@@ -290,7 +347,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           <Tooltip id={`csv-tooltip-${nameString}`}>
             <span className={styles.tooltip}>Download a version of this result in CSV format.</span>
           </Tooltip>
-      </CSVLink>
+      </CSVLink> */}
       <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
         <ChevDown/>
       </button>
@@ -359,16 +416,49 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
           />
         </Suspense>
         <PathView
-          paths={formattedPaths}
+          paths={formattedPaths.current}
           selectedPaths={selectedPaths}
           active={isExpanded}
-          handleEdgeSpecificEvidence={(edgeGroup, path)=> {handleEdgeSpecificEvidence(edgeGroup, path)}}
-          handleActivateEvidence={(path)=>activateEvidence(currentEvidence, item, null, path, false)}
+          handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
+          handleActivateEvidence={handleActivateEvidence}
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>
+      <BookmarkConfirmationModal 
+        isOpen={bookmarkRemovalConfirmationModalOpen} 
+        onApprove={handleBookmarkRemovalApproval}
+        onClose={()=>{
+          setBookmarkRemovalConfirmationModalOpen(false);
+          bookmarkRemovalApproved.current = false;
+        }}
+      />
     </div>
   );
 }
 
-export default ResultsItem;
+// check if certain props are really different before rerendering
+const areEqualProps = (prevProps, nextProps) => {
+  // keys for the item prop
+  const prevItemDataKeys = Object.keys(prevProps.item);
+  const nextItemDataKeys = Object.keys(nextProps.item);
+
+  if (prevItemDataKeys.length !== nextItemDataKeys.length) {
+    return false;
+  }
+
+  // check for nonequivalent properties within the item prop object
+  for (const key of prevItemDataKeys) {
+    if (prevProps.item[key] !== nextProps.item[key]) {
+      return false;
+    }
+  }
+
+  // if zoom key status has changed, return false to rerender
+  if(prevProps.zoomKeyDown !== undefined && nextProps.zoomKeyDown !== undefined && prevProps.zoomKeyDown !== nextProps.zoomKeyDown)
+    return false;
+
+  // If none of the above conditions are met, props are equal, return true to not rerender
+  return true;
+};
+
+export default memo(ResultsItem, areEqualProps);

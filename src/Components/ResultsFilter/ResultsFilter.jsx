@@ -1,10 +1,11 @@
 import {useState, useMemo} from 'react';
 import styles from './ResultsFilter.module.scss';
 import Checkbox from '../FormFields/Checkbox';
-import SimpleRange from '../Range/SimpleRange';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
 import Alert from '../../Icons/Alerts/Info.svg?react';
+import Include from '../../Icons/include.svg?react';
+import Exclude from '../../Icons/exclude.svg?react';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacet, isEvidenceFilter } from '../../Utilities/filterFunctions';
@@ -20,40 +21,26 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
     let araTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ara:')));
     let diTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('di:')));
+    let pathTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pt:')));
     // The ordering of newGroupedTags determines the order of the facets in the UI
     const newGroupedTags = {
       chemicalType: chemicalTypeTags,
-      nodeType: nodeTypeTags,
-      role: roleTags,
       di: diTags,
+      nodeType: nodeTypeTags,
+      pt: pathTypeTags,
+      role: roleTags,
       ara: araTags
-    }
+    };
+
     return newGroupedTags;
   }
 
-  const initCountsToShow = (groupedTags) => {
-    let newCountsToShow = {};
-    Object.keys(groupedTags).forEach((key) => {
-      newCountsToShow[key] = facetShowMoreIncrement;
-    })
-    return newCountsToShow;
-  }
-  
-  const facetShowMoreIncrement = 5;
-
-  const [evidenceObject, setEvidenceObject] = useState({type:'evi:', value: 1});
   const [tagObject, setTagObject] = useState({type:'', value: ''});
   const groupedTags = useMemo(()=>groupAvailableTags(availableTags), [availableTags]);
-  const initialCountsToShow = initCountsToShow(groupedTags);
-  const [countsToShow, setCountsToShow] = useState(initialCountsToShow);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
 
-  const handleEvidenceActive = () => {
-    onFilter(evidenceObject);
-  }
-
-  const handleFacetChange = (facetID, objectToUpdate, setterFunction, label = '') => {
+  const handleFacetChange = (facetID, objectToUpdate, setterFunction, negated = false, label = '') => {
     if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
       return;
     }
@@ -61,6 +48,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let newObj = cloneDeep(objectToUpdate);
     newObj.type = facetID;
     newObj.value = label;
+    newObj.negated = negated;
     setterFunction(objectToUpdate);
     onFilter(newObj);
   }
@@ -134,6 +122,18 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
+  const getPathTypeHeadings = () => {
+    return(
+      <div className={styles.labelContainer} >
+          <div className={styles.label} >
+            <p className={styles.subTwo}>Relationship Type</p>
+          </div>
+          <p className={styles.caption}>Filter direct relationships (establed from evident from external sources) and/or inferred relationships (deduced from patterns in Translator's knowledge graphs).</p>
+      </div>
+    )
+  }
+
+
   const getTagHeadingMarkup = (tagType) => {
     let headingToReturn;
     switch(tagType) {
@@ -152,6 +152,9 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       case 'di':
         headingToReturn = getDrugIndicationsHeading();
         break;
+      case 'pt':
+        headingToReturn = getPathTypeHeadings();
+        break;
       default:
         headingToReturn = '';
     }
@@ -163,30 +166,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
   }
 
-  const showMoreFacets = (type) => {
-    let newCount = countsToShow[type];
-    if(Object.keys(groupedTags[type]).length > countsToShow[type]) {
-      newCount = (countsToShow[type] + facetShowMoreIncrement > Object.keys(groupedTags[type]).length)
-        ? Object.keys(groupedTags[type]).length
-        : countsToShow[type] + facetShowMoreIncrement;
-    }
-
-    let newCountsToShow = cloneDeep(countsToShow);
-    newCountsToShow[type] = newCount;
-    setCountsToShow(newCountsToShow);
-  }
-  const showFewerFacets = (type) => {
-    let newCount = countsToShow[type];
-    if(countsToShow[type] - facetShowMoreIncrement < facetShowMoreIncrement)
-      newCount = facetShowMoreIncrement;
-    else
-      newCount = countsToShow[type] - facetShowMoreIncrement;
-
-    let newCountsToShow = cloneDeep(countsToShow);
-    newCountsToShow[type] = newCount;
-    setCountsToShow(newCountsToShow);
-  }
-
   const tagDisplay = (tag, type, tagObject, setTagObjectFunc, availableTags) => {
     let tagKey = tag[0];
     let object = tag[1];
@@ -196,16 +175,22 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     } else {
       tagName = object.name;
     }
+    let positiveChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && !filter.negated)) ? true: false;
+    let negativeChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)) ? true: false;
 
     return (
       availableTags[tagKey] && availableTags[tagKey].count &&
-      <div className={styles.facetContainer} key={tagKey}>
+      <div className={`${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey}>
         <Checkbox
-          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, tagName)}
-          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey)}
-          className={`${styles.checkbox}`}
+          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, false, tagName)}
+          checked={positiveChecked}
+          className={`${styles.checkbox} ${styles.positive}`}
+          checkedClassName={positiveChecked ? styles.positiveChecked : ""}
+          icon={<Include/>}
           >
-          {tagName} 
+          <span className={styles.tagName}>
+            {tagName}
+          </span>
           <span className={styles.facetCount}>
             {
             (type === "role") &&
@@ -216,47 +201,48 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
             ({(object.count) ? object.count : 0})
           </span>
         </Checkbox>
+        <Checkbox
+          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, true, tagName)}
+          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)}
+          className={`${styles.checkbox} ${styles.negative}`}
+          checkedClassName={negativeChecked ? styles.negativeChecked : ""}
+          icon={<Exclude/>}
+        ></Checkbox>
       </div>
     )
   }
 
   const displayFacets = (type) => {
+    const typeIndexMapping = activeFilters.reduce((acc, filter, index) => {
+      acc[filter.type] = index;
+      return acc;
+    }, {});
+
+    const sortedFacets = Object.entries(groupedTags[type]).sort((a, b) => {
+      const indexA = typeIndexMapping[a[0]] !== undefined ? typeIndexMapping[a[0]] : Infinity;
+      const indexB = typeIndexMapping[b[0]] !== undefined ? typeIndexMapping[b[0]] : Infinity;
+
+      // Prioritize items found in activeFilters
+      if (indexA !== Infinity && indexB === Infinity) {
+        return -1; // A is in activeFilters, B is not, A comes first
+      } else if (indexB !== Infinity && indexA === Infinity) {
+        return 1; // B is in activeFilters, A is not, B comes first
+      } else if (indexA === Infinity && indexB === Infinity) {
+        // Neither A nor B is in activeFilters, sort alphabetically by name
+        const nameA = a[1].name.toLowerCase();
+        const nameB = b[1].name.toLowerCase();
+        return nameA.localeCompare(nameB);
+      }
+      // If both are in activeFilters, retain their order (assuming activeFilters is pre-sorted or order doesn't matter)
+      return 0;
+    });
+
     return (
-      <div className={`${styles.section} ${styles[type]} ${type === 'role' ? 'scrollable' : ''}`}>
+      <div className={`${styles.section} ${Object.keys(groupedTags[type]).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
-          (type === 'role') 
-          ?
-            Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).map((tag, j) => {
-              return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
-            })
-          :
-            (type === 'chemicalType')
-            ?
-              Object.entries(groupedTags[type]).sort((a,b)=> { 
-                if(a[1].name === "Other") return 1; 
-                if(b[1].name === "Other") return -1; 
-                return (a[1].name > b[1].name ? 1 : -1)})
-                .slice(0, countsToShow[type]).map((tag, j) => {
-                  return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
-                }
-              )
-            :
-              Object.entries(groupedTags[type]).sort((a,b)=> { return (a[1].name > b[1].name ? 1 : -1)}).slice(0, countsToShow[type]).map((tag, j) => {
-                return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
-              })
-        }
-        {
-          (type !== "role") &&
-          <div className={styles.showButtonsContainer}>
-            {
-              Object.keys(groupedTags[type]).length > countsToShow[type] &&
-              <button onClick={()=>{showMoreFacets(type)}} className={styles.showButton}>Show More</button>
-            }
-            {
-              (Object.keys(groupedTags[type]).length > 0) && countsToShow[type] > facetShowMoreIncrement &&
-              <button onClick={()=>{showFewerFacets(type)}} className={styles.showButton}>Show Less</button>
-            }
-          </div>
+          sortedFacets.map((tag, j) => {
+            return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
+          })
         }
       </div>
     )
@@ -266,23 +252,6 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
-        <div className={styles.labelContainer} >
-          <p className={styles.subTwo}>Evidence</p>
-        </div>
-          <Checkbox
-            handleClick={handleEvidenceActive}
-            className={styles.evidenceCheckbox}
-            checked={activeFilters.some(filter => isEvidenceFilter(filter))}>
-              Minimum Number of Evidence
-          </Checkbox>
-          <SimpleRange
-            label="Evidence Associated"
-            hideLabel
-            min="1"
-            max="99"
-            onChange={e => handleFacetChange('evi:', evidenceObject, setEvidenceObject, e)}
-            initialValue={1}
-          />
         <EntitySearch
           activeFilters={activeFilters}
           onFilter={onFilter}

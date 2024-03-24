@@ -1,6 +1,6 @@
 import UserSaves from "../../Components/UserSaves/UserSaves";
 
-const Saves = () => {
+const Workspace = () => {
   return (
     <div className={`container`}>
       <UserSaves/>
@@ -8,4 +8,4 @@ const Saves = () => {
   );
 }
 
-export default Saves;
+export default Workspace;

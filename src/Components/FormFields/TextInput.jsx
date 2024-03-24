@@ -3,8 +3,8 @@ import styles from "./TextInput.module.scss";
 
 const TextInput = (
   {label, subtitle, value, placeholder, size, rows,
-    error, errorText, handleChange, className, icon, 
-    maxLength, handleKeyDown, testId}) => {
+    error, errorText, handleChange, className, iconLeft, iconRight,
+    maxLength, handleKeyDown, testId, disabled}) => {
   
   size = (size === undefined) ? 's' : size;
 
@@ -13,16 +13,18 @@ const TextInput = (
   handleKeyDown = (handleKeyDown) ? handleKeyDown : ()=>{};
   handleChange = (handleChange) ? handleChange : () => {};
   errorText = (errorText) ? errorText : "Error Message";
-  let hasIconClass = (icon) ? styles.hasIcon : styles.noIcon;
+  let hasIconLeftClass = (iconLeft) ? styles.hasIconLeft : styles.noIconLeft;
+  let hasIconRightClass = (iconRight) ? styles.hasIconRight : styles.noIconRight;
 
   return (
     <> 
     {
       rows > 1 &&
-      <label className={`text-input ${styles.textInput} ${size} ${hasIconClass} ${className}`}> 
+      <label className={`text-input ${styles.textInput} ${size} ${hasIconLeftClass} ${hasIconRightClass} ${className}`}> 
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
-        {icon && <div className={styles.iconContainer}>{icon}</div>}
+        {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
+        {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
         <textarea 
           type="text" 
           placeholder={placeholder} 
@@ -32,16 +34,18 @@ const TextInput = (
           value={value}
           onKeyDown={handleKeyDown}
           data-testid={testId}
+          disabled={disabled}
         />
         {error && <span className={styles.errorText}>{errorText}</span>}
       </label>
     }
     {
       (rows <= 1 || rows === undefined) &&
-      <label className={`text-input ${styles.textInput} ${size} ${hasIconClass} ${className}`}> 
+      <label className={`text-input ${styles.textInput} ${size} ${hasIconLeftClass} ${hasIconRightClass} ${className}`}> 
         {label && <span className={styles.label}>{label}</span>}
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
-        {icon && <div className={styles.iconContainer}>{icon}</div>}
+        {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
+        {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
         <input 
           type="text" 
           placeholder={placeholder} 
@@ -51,6 +55,7 @@ const TextInput = (
           value={value}
           onKeyDown={handleKeyDown}
           data-testid={testId}
+          disabled={disabled}
         />
         {error && <span className={styles.errorText}>{errorText}</span>}
       </label>

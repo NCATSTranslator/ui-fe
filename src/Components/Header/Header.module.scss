@@ -10,7 +10,10 @@
     align-items: center;
   }
   .logo {
-    max-width: 316px;
+    max-width: 250px;
+    @media screen and (min-width: 1125px) {
+      max-width: 316px;
+    }
     svg {
       width: 100%;
     }
@@ -30,18 +33,25 @@
         }
         button, a {
           color: $darkGray;
-          font-size: 16px;
+          font-size: 14px;
           background-color: transparent;
           text-decoration: none;
           font-weight: 700;
           margin-bottom: 0;
-          margin-right: $m;
+          margin-right: 5px;
           display: inline-flex;
           align-items: center;
           line-height: 1;
           padding: 10px 8px;
           width: fit-content;
           box-shadow: none;
+          @media screen and (min-width: 1125px) {
+            font-size: 16px;
+            margin-right: 10px;
+          }
+          @media screen and (min-width: 1350px) {
+            margin-right: $m;
+          }
           .linkSpan {
             position: relative;
             font-size: 16px;
@@ -110,6 +120,14 @@
           }
         }
       }
+    }
+  }
+  .userName {
+    // font-size: $bodyOneSize;
+    // color: $darkGray;
+    margin: 0 0 0 7px;
+    &.hide {
+      display: none;
     }
   }
   .userIcon {

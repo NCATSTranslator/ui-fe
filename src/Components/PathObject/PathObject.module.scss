@@ -84,14 +84,12 @@
   position: relative;
   cursor: pointer;
 }
-.nameContainer span, .targetContainer span{
-  cursor: default;
-}
 .pathContainer, .nameContainer, .targetContainer {
+  cursor: pointer;
   &>span {
     padding: 7px 9px;
   }
-  span {
+  span, mark {
     font-size: 14px;
     font-weight: 700;
   }
@@ -123,6 +121,9 @@
   box-shadow: $dropShadow;
   svg {
     margin-right: 8px;
+    path {
+      fill: $white;
+    }
   }
   &:hover {
     box-shadow: $dropShadowHover;
@@ -132,8 +133,6 @@
 .edgeLabel {
   fill: #000 !important;
 }
-
-
 
 .sourceEdgeContainer {
   display: flex;

@@ -1,11 +1,23 @@
 @import "../../Assets/Styles/variables";
 
 .entitySearch {
+  display: block;
   .labelContainer {
     padding: 15px 0;
   }
   .textInput {
-    width: 100%;
+    width: calc(100% - 82px);
+    color: $black;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px 65px 10px 15px;
+    border-radius: $querySelectBorderRadius;
+    border: 1px solid $borderGray;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    &::placeholder {
+      color: $placeholderGray;
+    }
   }
   .subTwo {
     align-items: center;
@@ -13,13 +25,63 @@
     position: relative;
     margin: 0;
     font-weight: 700;
-    font-size: 12px;
+    font-size: 16px;
     color: $darkGray;
-  }
-  svg {
-    margin-left: 4px;
+    svg {
+      margin-left: 4px;
+    }
   }
   .tooltip {
     font-size: 12px; 
+  }
+  .inputContainer {
+    position: relative;
+    display: block;
+  }
+  .checkboxContainer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+  }
+  .checkbox {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25px;
+    svg {
+      height: 20px;
+      width: 21px;
+      path {
+        transition: $defaultAnim;
+        fill: $midGray;
+      }
+    }
+    &.positive {
+      height: 100%;
+      min-width: 25px;
+      border-top: none;
+      border-right: 1px solid #D6D6D6;
+      border-bottom: none;
+      border-left: 1px solid #D6D6D6;
+      border-radius: 0;
+      &:hover {
+        svg path {
+          fill: $purpleEdgeBGSelected;
+        }
+      }
+    }
+    &.negative {
+      border: none;
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+      &:hover {
+        svg path {
+          fill: $redTwo;
+        }
+      }
+    }
   }
 }

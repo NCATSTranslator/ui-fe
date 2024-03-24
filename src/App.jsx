@@ -17,7 +17,7 @@ const App = ({children}) => {
   const minScreenWidth = 1024;
   const {width} = useWindowSize();
 
-  const [gaID, setGaID] = useState(null); 
+  const [gaID, setGaID] = useState(null);
   useGoogleAnalytics(gaID);
 
   const dispatch = useDispatch();
@@ -39,7 +39,7 @@ const App = ({children}) => {
     const fetchUser = async () => {
       let currentUser = null;
       try {
-        currentUser = await getUserProfile(); 
+        currentUser = await getUserProfile();
       } catch (err) {
         console.log(err);
       }
@@ -63,13 +63,13 @@ const App = ({children}) => {
       let config = await fetch(`/${root}/api/v1/pub/config`, requestOptions)
         .then(response => handleFetchErrors(response))
         .then(response => response.json());
-      
+
       if(config?.gaID)
-        setGaID(config.gaID); 
+        setGaID(config.gaID);
 
       dispatch(setCurrentConfig(config));
     }
-  
+
     fetchConfig();
 
     if(root !== "main")
@@ -87,26 +87,26 @@ const App = ({children}) => {
       <Header />
       <div className='body'>
         {
-          children 
-            ? 
+          children
+            ?
               children
             :
               (width < minScreenWidth)
-              ? <SmallScreenOverlay />
-              : <Outlet context={setFeedbackModalOpen}/>
-        }
+              && <SmallScreenOverlay /> 
+            }
+          <Outlet context={setFeedbackModalOpen}/>
       </div>
       <Footer>
         <nav>
-          <a 
+          <a
             href="https://ncats.nih.gov/translator/about"
             rel="noreferrer"
             target="_blank"
           >About Translator</a>
-          <NavLink to="/terms-of-use" 
+          <NavLink to={`/${root}/terms-of-use`}
             className={({isActive}) => {return (isActive) ? 'active' : '' }}
           >Terms of Use</NavLink>
-          <a 
+          <a
             href="https://ncats.nih.gov/privacy"
             rel="noreferrer"
             target="_blank"

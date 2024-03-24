@@ -17,21 +17,21 @@ export const sortNameHighLow = (items, isEvidence) => {
 }
 
 // alphabetical order
-export const sortSourceLowHigh = (items) => {
-  return items.sort((a, b) => !a.source - !b.source || a.source.localeCompare(b.source));
+export const sortJournalLowHigh = (items) => {
+  return items.sort((a, b) => !a.journal - !b.journal || a.journal.localeCompare(b.journal));
 }
 
 // reverse alphabetical order
-export const sortSourceHighLow = (items) => {
-  return items.sort((a, b) => !a.source - !b.source || -a.source.localeCompare(b.source));
+export const sortJournalHighLow = (items) => {
+  return items.sort((a, b) => !a.journal - !b.journal || -a.journal.localeCompare(b.journal));
 }
 
 export const sortEvidenceLowHigh = (items) => {
-  return items.sort((a, b) => a.evidence.publications.length - b.evidence.publications.length);
+  return items.sort((a, b) => Object.keys(a.evidence.publications).length - Object.keys(b.evidence.publications).length);
 }
 
 export const sortEvidenceHighLow = (items) => {
-  return items.sort((a, b) => b.evidence.publications.length - a.evidence.publications.length);
+  return items.sort((a, b) => Object.keys(b.evidence.publications).length - Object.keys(a.evidence.publications).length);
 }
 
 export const sortScoreLowHigh = (items) => {
@@ -62,6 +62,26 @@ export const sortByEntityStrings = (items, strings) => {
         return -1;
     }
     return 1;
+  });
+}
+
+export const sortSupportByEntityStrings = (items, strings) => {
+  return items.sort((a, b) => {
+    const nameA = a.path.stringName.toLowerCase();
+    for(const string of strings) {
+      if(nameA.includes(string.toLowerCase()))
+        return -1;
+    }
+    return 1;
+  });
+}
+
+export const sortSupportByLength = (items) => {
+  console.log(items);
+  return items.sort((a, b) => {
+    if(!a?.path?.subgraph.length || !b?.path?.subgraph.length) 
+      return 1;
+    return a.path.subgraph.length - b.path.subgraph.length;
   });
 }
 

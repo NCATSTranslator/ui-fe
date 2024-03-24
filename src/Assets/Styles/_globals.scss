@@ -258,7 +258,7 @@ img {
   }
 }
 .table-items {
-  &>tr:nth-child(odd){
+  &>tr:nth-child(odd), .table-item:nth-child(odd){
     background-color: $lightGray;
   }
 }
@@ -315,4 +315,8 @@ img {
 
 .scrollable::-webkit-scrollbar-thumb:hover {
   background-color: $darkGray;
+}
+
+input::placeholder {
+  color: $placeholderGray;
 }

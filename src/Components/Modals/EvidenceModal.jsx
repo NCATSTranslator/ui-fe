@@ -4,7 +4,7 @@ import Tabs from "../Tabs/Tabs";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/external-link.svg?react';
-import { capitalizeAllWords } from "../../Utilities/utilities";
+import { capitalizeAllWords, formatBiolinkEntity } from "../../Utilities/utilities";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
 import { checkForEdgeMatch, handleEvidenceSort, filterEvidenceObjs } from "../../Utilities/evidenceModalFunctions";
@@ -15,7 +15,7 @@ import Information from '../../Icons/information.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 
-const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, edgeGroup = null}) => {
+const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGroup = null}) => {
 
   const prefs = useSelector(currentPrefs);
   const [pubmedEvidence, setPubmedEvidence] = useState([]);
@@ -27,6 +27,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
   const [selectedEdge, setSelectedEdge] = useState(edgeGroup);
   const [selectedEdgeTrigger, setEdgeSelectedTrigger] = useState(false);
   const [formattedEdge, setFormattedEdge] = useState(null);
+
+  const pathLength = (path) ? path.path.subgraph.length : 0;
 
   useEffect(() => {
     setSelectedItem(item);
@@ -65,19 +67,22 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
       let filteredPublications = filteredEvidence.publications;
       let filteredSources = filteredEvidence.sources;
 
-      const edgeToFilterBy = selEdge.edges.find((edge)=> edge.predicate === selEdge.predicate);
-      filterEvidenceObjs(rawEvidence.publications, edgeToFilterBy, filteredPublications);
-      filterEvidenceObjs(rawEvidence.sources, edgeToFilterBy, filteredSources);
+      // select specific edge in case of edge compression
+      let specificSelectedEdge = selEdge.edges.find((edge)=>edge.predicate === selEdge.predicate);
+      
+      const edgesToFilterBy = [specificSelectedEdge];
+      filterEvidenceObjs(rawEvidence.publications, edgesToFilterBy, filteredPublications);
+      filterEvidenceObjs(rawEvidence.sources, edgesToFilterBy, filteredSources);
       
       evidenceToDistribute = filteredEvidence;
-      setSelectedEdge(selEdge)
+      setSelectedEdge(selEdge);
 
-      const soloEdge = selEdge.edges.find(edge => edge.predicate === selEdge.predicate);
+      const soloEdge = selEdge.edges.find(edge => formatBiolinkEntity(edge.predicate) === selEdge.predicate);
       const formatted = getFormattedEdgeLabel(soloEdge.subject.name, soloEdge.predicate, soloEdge.object.name).replaceAll("|", " ");
       setFormattedEdge(formatted);
     } else {
       setFormattedEdge(null);
-      evidenceToDistribute(rawEvidence);
+      evidenceToDistribute = rawEvidence;
     }
     distributeEvidence(evidenceToDistribute);
   }
@@ -89,9 +94,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
       miscEvidence.current = cloneDeep([...evidence.publications].filter(item => item.type === 'other'))
         .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
       let displayedSources = [...evidence.sources]; 
-      if (isAll) {
-        displayedSources = [...evidence.distinctSources];
-      }
 
       displayedSources.sort(compareByKeyLexographic('name'));
       setSources(displayedSources);
@@ -106,12 +108,11 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal}`} containerClass={`${styles.evidenceContainer} scrollable`}>
+    <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer} scrollable`}>
       {selectedItem.name &&       
         <div className={styles.top}>
-          <h5 className={styles.title}>{ isAll ? `All Evidence for ${selectedItem.name}` : 'Showing Evidence for:'}</h5>
+          <h5 className={styles.title}>Showing Evidence for:</h5> 
           {
-            !isAll &&
             formattedEdge &&
             <h5 className={styles.subtitle}>{capitalizeAllWords(formattedEdge)}</h5>
           }
@@ -120,14 +121,15 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
           </Tooltip>
           {
             path &&
-            <div className={styles.pathView}>
+            <div className={styles.pathView} style={{'gridTemplateColumns': `repeat(${pathLength}, minmax(0, 300px))`}}>
               {
                 path.path.subgraph.map((pathItem, i) => {
                   let key = `${i}`;
                   let isSelected = false;
+                  let pathItemHasSupport = pathItem.inferred;
                   if(pathItem.category === "predicate" && pathItem.predicates.length > 1) {
                     return( 
-                      <div className={`groupedPreds ${styles.groupedPreds}`}>
+                      <div className={`groupedPreds ${styles.groupedPreds} ${(pathItem.predicates.length === 2) ? styles.hasTwo :''}`}>
                         {
                           pathItem.predicates.map((pred, j) => {
                             let newPathItem = cloneDeep(pathItem);
@@ -135,6 +137,17 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                             newPathItem.predicate = pred;
                             isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, newPathItem));
                             key = `${i}_${j}`;
+                            let isTop = null;
+                            let isBottom = null;
+                            if(j === 0)
+                              isTop = true;
+                            if(j === pathItem.predicates.length - 1)
+                              isBottom = true;
+
+                            if(pathItem.predicates.length === 2) {
+                              isTop = false;
+                              isBottom = false;
+                            }
                             return (
                               <PathObject 
                                 pathObject={newPathItem} 
@@ -146,6 +159,10 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                                 activeStringFilters={[]}
                                 selected={isSelected}
                                 inModal
+                                hasSupport={pathItemHasSupport}
+                                isTop={isTop}
+                                isBottom={isBottom}
+                                className={styles.pathContainer}
                               />
                             ) 
                           })
@@ -165,6 +182,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                         activeStringFilters={[]}
                         selected={isSelected}
                         inModal
+                        hasSupport={pathItemHasSupport}
                       />
                     ) 
                   }
@@ -238,10 +256,10 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
               sources.length > 0 &&
               <div 
                 heading="Knowledge Sources" 
-                tooltipIcon={<Information className={styles.infoIcon} 
-                data-tooltip-id="knowledge-sources-tooltip" />}
+                tooltipIcon={<Information className={styles.infoIcon} />}
+                dataTooltipId="knowledge-sources-tooltip" 
                 >
-                <div className={`table-body ${styles.tableBody} ${isAll ? styles.distinctSources : styles.sources}`}>
+                <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head}`}>Source</div>
                     <div className={`head ${styles.head}`}>Link</div>
@@ -257,10 +275,16 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, isAll, 
                               <span className={styles.sourceEdge} key={i}>{name}</span>
                             </span>
                             <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
-                              <a key={i} href={url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
-                                {url}
-                                <ExternalLink/>
-                              </a>
+                              {
+                                url 
+                                ? 
+                                  <a key={i} href={url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
+                                    {url}
+                                    <ExternalLink/>
+                                  </a>
+                                :
+                                  <span>Link Unavailable</span>
+                              }
                             </span>
                           </div>
                         )

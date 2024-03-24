@@ -1,13 +1,14 @@
 import {useState} from 'react';
 import styles from './EntitySearch.module.scss';
-import TextInput from '../FormFields/TextInput';
 import Tooltip from '../Tooltip/Tooltip';
 import Alert from '../../Icons/Alerts/Info.svg?react';
+import Include from '../../Icons/include.svg?react';
+import Exclude from '../../Icons/exclude.svg?react';
 import { cloneDeep } from 'lodash';
 
 const EntitySearch = ({ onFilter }) => {
 
-  const [searchStringObject, setSearchStringObject] = useState({type:'str:', value: ''});
+  const [searchStringObject, setSearchStringObject] = useState({type:'str:', value: '', negated: false});
 
   const handleStringSearchChange = (value) => {
     if(searchStringObject.value !== value) {
@@ -19,11 +20,17 @@ const EntitySearch = ({ onFilter }) => {
 
   const handleKeyDown = (e) => {
     if(e.key === 'Enter') {
-      if(searchStringObject.value !== '') {
-        onFilter(searchStringObject);
-        setSearchStringObject({type:'str:', value: ''})
-      }
+      handleActivateFilter(false);
     }
+  }
+
+  const handleActivateFilter = (negated) => {
+    if(searchStringObject.value === '') 
+      return;
+    let newSearchStringObject = cloneDeep(searchStringObject);
+    newSearchStringObject.negated = negated;
+    onFilter(newSearchStringObject);
+    setSearchStringObject({type:'str:', value: '', negated: false})
   }
 
   return (
@@ -34,15 +41,32 @@ const EntitySearch = ({ onFilter }) => {
           <span className={styles.tooltip}>Search all textual elements (result name, description, node names, edge names) for a given string.</span>
         </Tooltip>
       </div>
-      <TextInput
-        label=""
-        rows={1}
-        maxLength={200}
-        handleChange={(value)=> handleStringSearchChange(value)}
-        handleKeyDown={handleKeyDown}
-        className={styles.textInput}
-        value={searchStringObject.value}
-      />
+      <span className={styles.inputContainer}>
+        <input 
+          type="text" 
+          placeholder="Filter Terms" 
+          size="1" 
+          onChange={(e)=> handleStringSearchChange(e.target.value)} 
+          maxLength={200}
+          value={searchStringObject.value}
+          onKeyDown={handleKeyDown}
+          className={styles.textInput}
+        />
+        <div className={styles.checkboxContainer}>
+          <span
+            onClick={() => handleActivateFilter(false)}
+            className={`${styles.checkbox} ${styles.positive}`}
+            >
+            <Include/>
+          </span>
+          <span
+            onClick={() => handleActivateFilter(true)}
+            className={`${styles.checkbox} ${styles.negative}`}
+            >
+            <Exclude/>
+          </span>
+        </div>
+      </span>
     </div>
   );
 }

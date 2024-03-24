@@ -2,7 +2,6 @@ import { closest as closestStrMatch } from 'fastest-levenshtein';
 import { capitalizeAllWords, removeDuplicateObjects } from "./utilities";
 
 export const defaultQueryFormatter = async (items, formatData) => {
-  console.log(formatData);
   const autocompleteObjects = items.map((item) => {
     const id = item.curie
     const input = formatData.input
@@ -40,7 +39,6 @@ export const defaultQueryFormatter = async (items, formatData) => {
 }
 
 export const diseaseQueryFormatter = async (diseases, formatData) => {
-  console.log(formatData);
   const autocompleteObjects = diseases.map((disease) => {
     const id = disease.curie
     const input = formatData.input
@@ -93,7 +91,6 @@ export const diseaseQueryFormatter = async (diseases, formatData) => {
 // The result of gene annotation includes the symbol and species information
 export const geneQueryFormatter = async (genes) => {
   return Promise.resolve(genes.map((gene) => {
-    console.log(gene);
     return { id: gene.curie, label: gene.symbol, match: gene.species, types: ['biolink:Gene'] };
   }));
 }

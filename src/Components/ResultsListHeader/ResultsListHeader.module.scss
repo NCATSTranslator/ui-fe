@@ -1,8 +1,10 @@
 @import "../../Assets/Styles/variables";
 
 .resultsHeader {
-  grid-column: 2/3;
   padding-top: $s;
+  @media screen and (min-width: $large) {
+    grid-column: 2/3;
+  }
   .top {
     display: flex;
     width: 100%;
@@ -12,6 +14,10 @@
   .right {
     display: flex;
     align-items: center;
+  }
+  .heading {
+    font-size: 26px;
+    line-height: 1.25;
   }
 }
 
@@ -34,18 +40,21 @@
 }
 
 .activeFilters {
-  margin: 0 0 30px;
+  margin: 0 0 $s;
   .filterTag {
     display: inline-flex;
     justify-content: space-between;
     align-items: center;
-    margin-right: $s;
+    margin: 0 $s $s 0;
     padding: 7px 4px 7px 12px;
     font-size: 14px;
     line-height: 1;
     box-shadow: $dropShadow;
     transition: $defaultBoxShadowAnim;
     border-radius: $defaultBorderRadius;
+    &.negated {
+      background-color: $red50;
+    }
     span {
       font-weight: 700;
       color: $black;

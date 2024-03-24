@@ -2,8 +2,11 @@
 
 .result {
   display: grid;
-  grid-template-columns: 1fr 60px 225px 100px 50px 50px;
+  grid-template-columns: 4fr 1fr 2fr 2fr 1fr;
   padding: 12px;
+  @media screen and (min-width: $desktop) {
+    grid-template-columns: 1fr 60px 225px 100px 100px;
+  }
   &:nth-child(even) {
     &.highlighted {
       background-color: $yellow20;
@@ -166,6 +169,7 @@
     box-shadow: none;
     background-color: transparent;
     margin: 0;
+    width: 100%;
     svg {
       transition: transform .25s ease;
     }

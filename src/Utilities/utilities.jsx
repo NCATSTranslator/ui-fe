@@ -93,11 +93,29 @@ export const formatBiolinkEntity = (string) => {
   // remove 'biolink:' from the type, then add spaces before each capital letter
   // then trim the leading space and replace any underlines with spaces
   return(string.replace('biolink:', '')
-    .replace(/([A-Z])/g, ' $1').trim())
+    .replace(/([A-Z])/g, ' $1')
     .replaceAll('_', ' ')
     .replaceAll('entity', '')
     .replaceAll('condition', '')
-    .replaceAll('gene ', '');
+    .replaceAll('gene ', '').trim());
+}
+
+export const formatBiolinkNode = (string, type = null) => {
+  let newString = string; 
+  if(type !== null) {
+    type = type.toLowerCase();
+    switch (type) {
+      case "gene":
+      case "protein":
+        newString = newString.toUpperCase();
+        break;
+      default:
+        newString = capitalizeAllWords(newString);
+        break;
+    }
+  }
+    
+  return newString;
 }
 
 export const getUrlAndOrg = (id) => {
@@ -111,12 +129,12 @@ export const getUrlAndOrg = (id) => {
     url = `https://www.ebi.ac.uk/chembl/compound_report_card/${id.replace(':', '')}/`;
     org = 'ChEMBL';
   } else if(formattedID.includes('MONDO')){
-    id = id.replace(":", "_");
-    url = `http://purl.obolibrary.org/obo/${id}`;
-    org = 'OLS';
-  } else if(formattedID.includes('HP')) {
-    url = `https://monarchinitiative.org/phenotype/${id}`;
+    // id = id.replace(":", "_");
+    url = `https://monarchinitiative.org/${id}`;
     org = 'Monarch Initiative';
+  } else if(formattedID.includes('HP')) {
+    url = `https://hpo.jax.org/app/browse/term/${id}`;
+    org = 'Human Phenotype Ontology';
   } else if(formattedID.includes('UMLS')) {
     url = `https://uts.nlm.nih.gov/uts/umls/concept/${id.replace('UMLS:', '')}`;
     org = 'UMLS Terminology Services';
@@ -154,6 +172,8 @@ export const getEntityLink = (id, className, queryType) => {
     let linkType = (queryType !== undefined && queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
     if(linkType === "smallmolecule")
       linkType = "small molecule";
+    if(linkType === "diseaseorphenotypicfeature")
+      linkType = (id.includes("MONDO")) ? "disease" : "phenotype";
     return `View this ${linkType} on ${org}`;
   });
 }
@@ -245,4 +265,28 @@ export const getFormattedDate = (date) => {
 export const getGeneratedSendFeedbackLink = (openDefault = true, root) => {
   let link = encodeURIComponent(window.location.href);
   return `/${root}?fm=${openDefault}&link=${link}`;
+}
+
+export const mergeObjects = (obj1, obj2) => {
+  let result = {};
+  // Merge obj1 into result
+  for (let key in obj1) {
+      if (obj1.hasOwnProperty(key)) {
+          // If key is not in obj2, or it's not an array in obj2, just copy the value from obj1
+          if (!obj2[key] || !Array.isArray(obj2[key])) {
+              result[key] = obj1[key];
+          } else {
+              // If it's an array in both, concatenate them
+              result[key] = obj1[key].concat(obj2[key]);
+          }
+      }
+  }
+
+  // Merge keys from obj2 that are not in obj1
+  for (let key in obj2) {
+      if (obj2.hasOwnProperty(key) && !result.hasOwnProperty(key)) {
+          result[key] = obj2[key];
+      }
+  }
+  return result;
 }

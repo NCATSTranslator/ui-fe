@@ -104,14 +104,19 @@
     grid-template-columns: min-content 1fr;
     align-items: center;
     gap: 10px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
+    padding-left: 20px;
+    .formattedPath {
+      padding-left: 0;
+    }
     .pathEvidenceButton {
       background-color: $white;
       border: 1px solid $midDarkGray;
       padding: 4px 3px 3px 4px;
       border-radius: 50px;
-      margin: 0;
+      margin: 6px 0 0 0;
       transition: all .25s ease;
+      align-self: start;
       svg {
         width: 20px;
         height: 20px;
@@ -160,7 +165,7 @@
       font-size: 12px;
     }
     .subtitle {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       color: $black;
       margin-bottom: 0;
@@ -192,12 +197,44 @@
       }
     }
   }
+  .support {
+    grid-column: 1/8;
+    grid-row: 2;
+    background-color: $purpleTwo20;
+    border: 1px solid $purpleEdgeBG;
+    border-radius: $defaultBorderRadius;
+    padding: 10px;
+    margin: 25px 0 0 0;
+    .formattedPath:last-of-type {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .unhighlighted {
   opacity: .5;
+  z-index: 10;
 }
 
 .edgeLabel {
   fill: #000 !important;
+}
+.inferenceLabel {
+  font-weight: 700;
+  padding-left: 10px;
+  margin-bottom: 15px;
+  width: fit-content;
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: default;
+  svg {
+    margin-left: 4px;
+  }
+}
+.inferenceSeparator {
+  width: 100%;
+  margin: 0 auto 20px;
+  height: 2px;
+  background-color: $borderGray;
 }

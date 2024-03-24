@@ -1,8 +1,9 @@
 import styles from './ResultsListHeader.module.scss';
-import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
-import ShareModal from "../Modals/ShareModal"; 
+// import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
+import ResultsListLoadingBar from '../ResultsListLoadingBar/ResultsListLoadingBar';
+import ShareModal from "../Modals/ShareModal";
 import Tooltip from '../Tooltip/Tooltip';
-import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter } from '../../Utilities/filterFunctions';
+import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter, getFilterLabel } from '../../Utilities/filterFunctions';
 import CloseIcon from '../../Icons/Buttons/Close.svg?react'
 import ShareIcon from '../../Icons/share.svg?react';
 
@@ -12,11 +13,12 @@ const getSelectedFilterDisplay = (filter) => {
   if (isEvidenceFilter(filter)) {
     filterDisplay = <div>Minimum Evidence: <span>{filter.value}</span></div>;
   } else if (isTextFilter(filter)) {
-    filterDisplay = <div>String: <span>{filter.value}</span></div>;
+    filterDisplay = <div>Text Filter: <span>{filter.value}</span></div>;
   } else if (isFdaFilter(filter)) {
     filterDisplay = <div><span>FDA Approved</span></div>;
   } else if (isFacet(filter)) {
-    filterDisplay = <div>Tag:<span> {filter.value}</span></div>;
+    let filterLabel = getFilterLabel(filter);
+    filterDisplay = <div>{filterLabel}:<span> {filter.value}</span></div>;
   }
 
   return filterDisplay;
@@ -28,7 +30,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
     <div className={styles.resultsHeader}>
       <div className={styles.top}>
         <div>
-          <h5>Results</h5>
+          <h5 className={styles.heading}>Results</h5>
           {
             data.formattedResultsLength !== 0 &&
             <p className={styles.resultsCount}>
@@ -46,8 +48,23 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
             </p>
           }
         </div>
+        <div className={styles.middle}>
+          <ResultsListLoadingBar
+            data={{
+              handleResultsRefresh: loadingButtonData.handleResultsRefresh,
+              isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
+              isFetchingResults: loadingButtonData.isFetchingResults,
+              showDisclaimer: loadingButtonData.showDisclaimer,
+              containerClassName: loadingButtonData.containerClassName,
+              buttonClassName: loadingButtonData.buttonClassName,
+              hasFreshResults: loadingButtonData.hasFreshResults,
+              currentInterval: data.returnedARAs.aras.length,
+              status: data.returnedARAs.status
+            }}
+          />
+        </div>
         <div className={styles.right}>
-          <ResultsListLoadingButton
+          {/* <ResultsListLoadingButton
             data={{
               handleResultsRefresh: loadingButtonData.handleResultsRefresh,
               isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
@@ -57,7 +74,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
               buttonClassName: loadingButtonData.buttonClassName,
               hasFreshResults: loadingButtonData.hasFreshResults
             }}
-          />
+          /> */}
           <button
             className={styles.shareButton}
             onClick={()=>{data.setShareModalOpen(true)}}
@@ -83,7 +100,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
           {
             data.activeFilters.map((activeFilter, i)=> {
               return(
-                <span key={i} className={`${styles.filterTag} ${activeFilter.type}`}>
+                <span key={i} className={`${styles.filterTag} ${activeFilter.type} ${activeFilter?.negated ? styles.negated : ''}`}>
                   { getSelectedFilterDisplay(activeFilter) }
                   <span className={styles.close} onClick={()=>{data.handleFilter(activeFilter)}}><CloseIcon/></span>
                 </span>

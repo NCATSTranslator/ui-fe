@@ -1,10 +1,19 @@
 @import "../../Assets/Styles/variables";
 
 .smallScreenOverlay {
+  position: sticky;
+  width: 99vw;
+  height: 100vh;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10000;
+  background-color: $white;
   .container {
     text-align: center;
     margin: 0 auto;
-    padding: $xl $s;
+    padding: $xl 20px $xl $s;
     max-width: $maxwidth;
     h4 {
       font-size: 18px;
