@@ -1,8 +1,7 @@
-// import { equal, larger, format, polynomialRoot, largerEq, min, max, round, Complex } from 'mathjs';
-import { equal, larger, format } from 'mathjs';
+import { equal, larger, format, polynomialRoot, largerEq, min, max, round, Complex } from 'mathjs';
 
 export const score = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
-  return maxNormalizedScore(scoreComponents);
+  return maxSugenoScore(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight);
 }
 
 export const displayScore = function(score, decimalPlaces=2) {
@@ -21,6 +20,20 @@ const maxNormalizedScore = function(scoreComponents) {
   return maxScorePair(normalizedScorePairs);
 }
 
+const maxSugenoScore = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
+  const sugenoPairs = scoreComponents.map((s) => {
+    const scaledSugenoScore = 5 * computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
+      confidenceWeight, noveltyWeight, clinicalWeight);
+    return {
+      main: scaledSugenoScore,
+      secondary: computeWeightedMean(s.confidence, s.novelty, s.clinical_evidence,
+        confidenceWeight, noveltyWeight, clinicalWeight)
+    };
+  });
+
+  return maxScorePair(sugenoPairs);
+}
+
 const maxScorePair = function (scorePairs) {
   let maxScore = scorePairs[0];
   for (let i = 1; i < scorePairs.length; i++) {
@@ -33,20 +46,7 @@ const maxScorePair = function (scorePairs) {
 
   return maxScore;
 }
-/*
-// Not used until further notice
-const maxSugenoScore = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
-  const sugenoPairs = scoreComponents.map((s) => {
-    return {
-      main: computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
-        confidenceWeight, noveltyWeight, clinicalWeight),
-      secondary: computeWeightedMean(s.confidence, s.novelty, s.clinical_evidence,
-        confidenceWeight, noveltyWeight, clinicalWeight)
-    };
-  });
 
-  return maxScorePair(sugenoPairs);
-}
 const computeSugeno = function(confidence, novelty, clinical,
     confidenceWeight, noveltyWeight, clinicalWeight) {
   const a = confidenceWeight;
@@ -90,11 +90,11 @@ const computeSugeno = function(confidence, novelty, clinical,
 
   // Sugeno score
   return max(...mins);
-} 
+}
 
 const isComplex = function(x) {
   return (x instanceof Complex);
-} 
+}
 
 const computeWeightSets = function(lambda, confidenceWeight, noveltyWeight, clinicalWeight, n=2) {
   const ws = {
@@ -202,4 +202,3 @@ const computeWeightedMean = function(confidence, novelty, clinical,
     confidenceWeight, noveltyWeight, clinicalWeight) {
   return (confidence * confidenceWeight) + (novelty * noveltyWeight) + (clinical * clinicalWeight);
 }
-*/
