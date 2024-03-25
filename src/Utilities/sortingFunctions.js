@@ -65,6 +65,25 @@ export const sortByEntityStrings = (items, strings) => {
   });
 }
 
+export const sortSupportByEntityStrings = (items, strings) => {
+  return items.sort((a, b) => {
+    const nameA = a.path.stringName.toLowerCase();
+    for(const string of strings) {
+      if(nameA.includes(string.toLowerCase()))
+        return -1;
+    }
+    return 1;
+  });
+}
+
+export const sortSupportByLength = (items) => {
+  return items.sort((a, b) => {
+    if(!a?.path?.subgraph.length || !b?.path?.subgraph.length) 
+      return 1;
+    return a.path.subgraph.length - b.path.subgraph.length;
+  });
+}
+
 export const sortDateYearLowHigh = (items) => {
   const failYear = 3000; // Ensure all invalid dates are sent to the end
   return items.sort((a, b) => {
