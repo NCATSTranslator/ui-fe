@@ -77,7 +77,6 @@ export const sortSupportByEntityStrings = (items, strings) => {
 }
 
 export const sortSupportByLength = (items) => {
-  console.log(items);
   return items.sort((a, b) => {
     if(!a?.path?.subgraph.length || !b?.path?.subgraph.length) 
       return 1;
