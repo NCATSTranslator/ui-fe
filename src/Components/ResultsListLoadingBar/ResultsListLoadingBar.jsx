@@ -18,9 +18,17 @@ const ResultsListLoadingBar = ({ data, totalIntervals = 6 }) => {
   }, 2000);
 
   useEffect(() => {
-    if(currentInterval >= totalIntervals || data.status === "success") {
+    if(data.isError) {
+      setBarWidthPercentage(100);
+      return;
+    }
+
+    if(currentInterval >= totalIntervals || data.status === "success" || (!data.hasFreshResults && !data.isFetchingARAStatus && !data.isFetchingResults) ) {
       // results complete on initial load
       if(isFirstLoad.current) 
+        setBarWidthPercentage(100);
+      // error returned after some results have returned
+      else if(data.isFetchingARAStatus == null && barWidthPercentage !== 100)
         setBarWidthPercentage(100);
       // results complete not on initial load, new results incoming, 
       else if(!data.hasFreshResults && barWidthPercentage !== 100) 
