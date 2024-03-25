@@ -234,7 +234,10 @@ const getFormattedEdge = (id, results, supportStack) => {
   let pred = '';
 
   if(edge.predicate) {
-    pred = formatBiolinkEntity(edge.predicate);
+    pred = {
+      predicate: formatBiolinkEntity(edge.predicate),
+      url: edge?.predicate_url ? edge.predicate_url : null
+    };
     edge.predicate = pred;
   }
   let publications = removeDuplicatePubIds(edge.publications);

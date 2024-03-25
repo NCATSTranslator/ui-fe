@@ -12,6 +12,7 @@ import ConnectorBottom from '../../Icons/solid-bottom.svg?react';
 import ConnectorDotted from '../../Icons/straight-dotted.svg?react';
 import ConnectorDottedTop from '../../Icons/dotted-top.svg?react';
 import ConnectorDottedBottom from '../../Icons/dotted-bottom.svg?react';
+import ExternalLink from '../../Icons/external-link.svg?react';
 // import Notes from "../../Icons/note.svg?react"
 import Up from '../../Icons/Directional/Property 1=Up.svg?react';
 import Highlighter from 'react-highlight-words';
@@ -38,7 +39,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
     return false;
   }
 
-  pathObject.predicate = formatBiolinkEntity(pathObject.predicates[0]); 
+  pathObject.predicate = formatBiolinkEntity(pathObject.predicates[0].predicate); 
   const pubCount = Object.values(pathObject.publications).reduce((sum, arr) => sum + arr.length, 0);
   const [isSupportExpanded, setIsSupportExpanded] = useState(true);
   const isMachineLearned = checkForProvenanceType(pathObject, "ml");
@@ -141,14 +142,15 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
               <div className={styles.predicatesList}>
                 {
                   pathObject.predicates.map((predicate, i)=> {
+                    let formattedPredicate = (predicate?.predicate) ? predicate.predicate : "No Predicate Available";
                     return (
                       <p 
-                        key={`${predicate}${uid}${i}`} 
+                        key={`${formattedPredicate}${uid}${i}`} 
                         className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`} 
                         onClick={(e)=> {
                           e.stopPropagation(); 
                           const newPathObject = cloneDeep(pathObject);
-                          newPathObject.predicate = predicate;
+                          newPathObject.predicate = formattedPredicate;
                           handleEdgeClick(newPathObject);
                         }}
                         >
@@ -156,8 +158,20 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
                           highlightClassName="highlight"
                           searchWords={activeStringFilters}
                           autoEscape={true}
-                          textToHighlight={capitalizeAllWords(predicate)}
+                          textToHighlight={capitalizeAllWords(formattedPredicate)}
                         />
+                        {
+                          predicate?.url &&
+                          <a 
+                            href={predicate.url} 
+                            onClick={(e)=> {
+                              e.stopPropagation(); 
+                            }} 
+                            target="_blank" 
+                            rel='noreferrer'>
+                              <ExternalLink/>
+                          </a>
+                        }
                       </p>
                     )
                   })
