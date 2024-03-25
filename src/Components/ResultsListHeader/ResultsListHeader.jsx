@@ -59,7 +59,8 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
               buttonClassName: loadingButtonData.buttonClassName,
               hasFreshResults: loadingButtonData.hasFreshResults,
               currentInterval: data.returnedARAs.aras.length,
-              status: data.returnedARAs.status
+              status: data.returnedARAs.status, 
+              isError: data.isError
             }}
           />
         </div>

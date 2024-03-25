@@ -335,16 +335,16 @@ const ResultsList = ({loading}) => {
       .catch((error) => {
         if(formattedResults.length <= 0) {
           handleResultsError(true, setIsError, setIsLoading);
-          isFetchingARAStatus.current = false;
+          isFetchingARAStatus.current = null;
         }
         if(formattedResults.length > 0) {
-          isFetchingARAStatus.current = false;
+          isFetchingARAStatus.current = null;
         }
         console.error(error)
       });
   }, {
     refetchInterval: 10000,
-    enabled: isFetchingARAStatus.current,
+    enabled: isFetchingARAStatus.current === null ? false : isFetchingARAStatus.current,
     refetchOnWindowFocus: false
   });
 
@@ -800,7 +800,8 @@ const ResultsList = ({loading}) => {
                   shareModalOpen: shareModalOpen,
                   setShareModalOpen: setShareModalOpen,
                   currentQueryID: currentQueryID,
-                  returnedARAs: returnedARAs.current
+                  returnedARAs: returnedARAs.current,
+                  isError: isError
                 }}
                 loadingButtonData={{
                   handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
