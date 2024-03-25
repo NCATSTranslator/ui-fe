@@ -1,6 +1,7 @@
 @import "../../Assets/Styles/variables";
 
 .loadingButtonContainer {
+  width: 100%;
   text-align: center;
   span {
     white-space: nowrap;
@@ -27,8 +28,9 @@
     font-size: 16px;
     color: $purpleOne;
     line-height: 1;
-    padding: 10px 8px;
+    padding: 14px 8px;
     font-weight: 700;
+    width: 100%;
   }
 }
 .loadingButtonIcon {

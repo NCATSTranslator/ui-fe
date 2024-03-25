@@ -5,6 +5,12 @@
   .top {
     display: flex;
     align-items: center;
+    justify-content: space-between; 
+    min-width: 225px;
+    svg {
+      min-width: 24px;
+      height: 24px;
+    }
   }
   .loadingText {
     color: $midDarkGray;
@@ -21,6 +27,7 @@
     background-color: $borderGray;
     border-radius: $querySelectBorderRadius;
     height: 10px;
+    width: 100%;
     .fill {
       height: 100%;
       width: 50%;
