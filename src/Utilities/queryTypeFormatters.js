@@ -72,7 +72,7 @@ export const diseaseQueryFormatter = async (diseases, formatData) => {
   });
 
   // Ensure each autocomplete item is distinct
-  const distinctObjects = removeDuplicateObjects(autocompleteObjects, o => o.id);
+  const distinctObjects = removeDuplicateObjects(autocompleteObjects, 'id');
 
   // Sort disease objects by exact matches first
   distinctObjects.sort((a, b) => {

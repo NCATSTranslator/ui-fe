@@ -11,7 +11,7 @@ import { hasSupport } from "./resultsFormattingFunctions";
 export const findStringMatch = (element, value, pathRanks) => {
   const checkNodeEdgeForMatch = (item, formattedValue) => {
     return (item.name && item.name.toLowerCase().includes(formattedValue)) ||
-      (item.predicates && item.predicates[0].toLowerCase().includes(formattedValue))
+      (item.predicates && item.predicates[0]?.predicate && item.predicates[0].predicate.toLowerCase().includes(formattedValue))
   }
   const formattedValue = value.toLowerCase();
   let foundMatch = !value ||
