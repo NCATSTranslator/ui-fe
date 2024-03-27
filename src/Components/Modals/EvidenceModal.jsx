@@ -68,7 +68,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
       let filteredSources = filteredEvidence.sources;
 
       // select specific edge in case of edge compression
-      let specificSelectedEdge = selEdge.edges.find((edge)=>edge.predicate === selEdge.predicate);
+      let specificSelectedEdge = selEdge.edges.find((edge)=>edge.predicate.predicate === selEdge.predicate);
       
       const edgesToFilterBy = [specificSelectedEdge];
       filterEvidenceObjs(rawEvidence.publications, edgesToFilterBy, filteredPublications);
@@ -77,8 +77,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
       evidenceToDistribute = filteredEvidence;
       setSelectedEdge(selEdge);
 
-      const soloEdge = selEdge.edges.find(edge => formatBiolinkEntity(edge.predicate) === selEdge.predicate);
-      const formatted = getFormattedEdgeLabel(soloEdge.subject.name, soloEdge.predicate, soloEdge.object.name).replaceAll("|", " ");
+      const soloEdge = selEdge.edges.find(edge => formatBiolinkEntity(edge.predicate.predicate) === selEdge.predicate);
+      const formatted = getFormattedEdgeLabel(soloEdge.subject.name, soloEdge.predicate.predicate, soloEdge.object.name).replaceAll("|", " ");
       setFormattedEdge(formatted);
     } else {
       setFormattedEdge(null);
@@ -134,7 +134,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                           pathItem.predicates.map((pred, j) => {
                             let newPathItem = cloneDeep(pathItem);
                             newPathItem.predicates = [pred];
-                            newPathItem.predicate = pred;
+                            newPathItem.predicate = pred.predicate;
                             isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, newPathItem));
                             key = `${i}_${j}`;
                             let isTop = null;
