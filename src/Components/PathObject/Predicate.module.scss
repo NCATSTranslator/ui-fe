@@ -50,8 +50,15 @@
 }
 .tooltipPredicate {
   margin-bottom: 5px;
-}
-.tooltipPredicate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  svg {
+    margin-left: 5px;
+    path {
+      fill: $white;
+    }
+  } 
   span {
     font-size: 16px;
     font-weight: 700;

@@ -196,19 +196,19 @@ export const getRandomIntInclusive = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Remove duplicate objects from an array and keep the relative ordering
-export const removeDuplicateObjects = (arr, getKey) => {
-  const set = {};
-  const distinctElements = [];
-  arr.forEach((obj) => {
-    const key = getKey(obj);
-    if (set[key] === undefined) {
-      set[key] = true;
-      distinctElements.push(obj);
+// Remove duplicate objects from an array and keep the relative ordering based on a supplied property 
+export const removeDuplicateObjects = (arr, propName) => {
+  const unique = [];
+  const seenValues = new Set();
+
+  arr.forEach(item => {
+    if (!seenValues.has(item[propName])) {
+      unique.push(item);
+      seenValues.add(item[propName]);
     }
   });
 
-  return distinctElements;
+  return unique;
 }
 
 export const generateEntityLink = (id, className, linkTextGenerator, useIcon = true) => {

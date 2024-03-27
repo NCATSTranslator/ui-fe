@@ -1,4 +1,4 @@
-import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity, mergeObjects } from './utilities';
+import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity, mergeObjects, removeDuplicateObjects } from './utilities';
 import { cloneDeep } from "lodash";
 import { score } from "../Utilities/scoring";
 
@@ -24,7 +24,7 @@ const getFormattedEvidence = (paths, results) => {
 
     const eid = item.edges[0].id;
     evidenceObj.edges[eid] = {
-      label : `${item.edges[0].subject.name}|${item.edges[0].predicate}|${item.edges[0].object.name}`
+      label : `${item.edges[0].subject.name}|${item.edges[0].predicate.predicate}|${item.edges[0].object.name}`
     };
   }
 
@@ -234,7 +234,10 @@ const getFormattedEdge = (id, results, supportStack) => {
   let pred = '';
 
   if(edge.predicate) {
-    pred = formatBiolinkEntity(edge.predicate);
+    pred = {
+      predicate: formatBiolinkEntity(edge.predicate),
+      url: edge?.predicate_url ? edge.predicate_url : null
+    };
     edge.predicate = pred;
   }
   let publications = removeDuplicatePubIds(edge.publications);
@@ -274,7 +277,7 @@ const getStringNameFromPath = (path) => {
     if(i % 2 === 0)
       stringName += `${pathItem.name} `;
     else
-      stringName += `${pathItem.predicates[0]} `;
+      stringName += `${pathItem.predicates[0].predicate} `;
   }
   return stringName.trimEnd();
 }
@@ -344,7 +347,10 @@ const getCompressedPaths = (graph, respectKnowledgeLevel = true) => {
 
         // add the contents of the nextPath's edge object to the pathToDisplay edge's object
         // combine predicates (uses set to prevent duplicates)
-        pathToDisplay.path.subgraph[i].predicates = Array.from(new Set([...pathToDisplay.path.subgraph[i].predicates, ...nextPath.path.subgraph[i].predicates]));
+        pathToDisplay.path.subgraph[i].predicates = removeDuplicateObjects(
+          [...pathToDisplay.path.subgraph[i].predicates, ...nextPath.path.subgraph[i].predicates],
+          'predicate'
+        );
         // edges
         pathToDisplay.path.subgraph[i].edges = [...pathToDisplay.path.subgraph[i].edges, ...nextPath.path.subgraph[i].edges];
         // support paths
