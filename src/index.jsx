@@ -128,7 +128,6 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <App><Page title="Login"><Login /></Page></App>,
-        children: routes
       },
       { 
         path: "*", 
