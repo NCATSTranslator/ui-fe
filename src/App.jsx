@@ -87,14 +87,12 @@ const App = ({children}) => {
       <Header />
       <div className='body'>
         {
-          children
-            ?
-              children
-            :
-              (width < minScreenWidth)
-              && <SmallScreenOverlay /> 
-            }
-          <Outlet context={setFeedbackModalOpen}/>
+          children && children
+        }
+        {
+          (width < minScreenWidth) && <SmallScreenOverlay /> 
+        }
+        <Outlet context={setFeedbackModalOpen}/>
       </div>
       <Footer>
         <nav>
