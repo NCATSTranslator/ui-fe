@@ -1,14 +1,24 @@
-import {useEffect, useCallback} from "react";
+import {useEffect, useCallback, FC, ReactNode} from "react";
 import styles from './ModalGlobals.module.scss';
 import Close from '../../Icons/Buttons/Close.svg?react';
 
-const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseButton, testId}) => {
+interface ModalProps {
+  children?: ReactNode;
+  isOpen?: boolean;
+  hideCloseButton?: boolean;
+  onClose?: () => void;
+  className?: string;
+  containerClass?: string;
+  testId?: string;
+}
+
+const Modal: FC<ModalProps> = ({children, isOpen = false, onClose = () => { console.log('No onClose method specified for Modal component.') }, 
+  className = "", containerClass = "", hideCloseButton = false, testId = ""}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpenClass = (startOpen) ? styles.true : styles.false;
-  onClose = (onClose) ? onClose : ()=>{console.log('no onClose method specified for Modal component.')};
 
-  const handleKeypress = useCallback((e) => {
+  const handleKeypress = useCallback((e: KeyboardEvent) => {
     if(e.key === 'Escape') {
       onClose();
     }
@@ -51,7 +61,9 @@ const Modal = ({children, isOpen, onClose, className, containerClass, hideCloseB
           </div>
           {
             !hideCloseButton && 
-            <div className={styles.closeContainer} data-test-id="modal-close-button"><button className={styles.closeButton} onClick={onClose}><Close/></button></div>
+            <div className={styles.closeContainer} data-test-id="modal-close-button">
+              <button className={styles.closeButton} onClick={onClose}><Close/></button>
+            </div>
           }
       </div>
     </div>
