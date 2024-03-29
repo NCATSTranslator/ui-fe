@@ -49,7 +49,7 @@ const ResultsList = ({loading}) => {
     ? queryTypes.find(type => type.id === parseInt(initPresetTypeID))
     : null;
   const initNodeLabelParam = getDataFromQueryVar("l");
-  const initNodeIdParam = getDataFromQueryVar("i");
+  const initNodeIdParam = parseInt(getDataFromQueryVar("i"));
   let initResultIdParam = getDataFromQueryVar("r");
   const hasFocusedOnFirstLoad = useRef(false);
   const [nodeDescription, setNodeDescription] = useState();
