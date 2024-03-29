@@ -2,7 +2,21 @@ import { defaultQueryFilterFactory, drugTreatsQueryFilterFactory } from './query
 import { defaultQueryAnnotator, geneQueryAnnotator } from './queryTypeAnnotators';
 import { defaultQueryFormatter, geneQueryFormatter, diseaseQueryFormatter } from './queryTypeFormatters';
 
-export const queryTypes = [
+export interface QueryType {
+  id: number;
+  label: string;
+  placeholder: string;
+  targetType: string;
+  direction: string | null;
+  filterType: string;
+  limitPrefixes: string[];
+  functions: object;
+  pathString: string;
+  searchTypeString: string;
+  iconString: string;
+}
+
+export const queryTypes: QueryType[] = [
   {
     id: 0,
     label: 'What drugs may treat',
