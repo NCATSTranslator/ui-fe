@@ -6,7 +6,7 @@ import Button from '../FormFields/Button';
 interface BookmarkConfirmationModalProps {
   onClose?: () => void;
   onApprove?: () => void;
-  isOpen?: boolean;
+  isOpen: boolean;
 }
 
 const BookmarkConfirmationModal: FC<BookmarkConfirmationModalProps> = ({ onClose = ()=>{}, onApprove = ()=>{}, isOpen = false }) => {

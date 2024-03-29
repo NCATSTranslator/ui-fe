@@ -4,7 +4,7 @@ import Close from '../../Icons/Buttons/Close.svg?react';
 
 interface ModalProps {
   children?: ReactNode;
-  isOpen?: boolean;
+  isOpen: boolean;
   hideCloseButton?: boolean;
   onClose?: () => void;
   className?: string;
