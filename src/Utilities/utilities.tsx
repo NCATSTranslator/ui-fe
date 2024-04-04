@@ -11,8 +11,10 @@ import PhysiologicalProcess from '../Icons/physiological-process.svg?react';
 import BiologicalEntity from '../Icons/biological-entity.svg?react';
 import AnatomicalEntity from '../Icons/anatomical-entity.svg?react';
 import ExternalLink from '../Icons/external-link.svg?react';
+import { QueryType } from '../Types/results';
+import { mergeWith } from 'lodash';
 
-export const getIcon = (category) => {
+export const getIcon = (category: string): JSX.Element => {
   var icon = <Chemical/>;
   switch(category) {
     case 'biolink:Gene':
@@ -53,7 +55,7 @@ export const getIcon = (category) => {
   }
   return icon;
 }
-export const capitalizeFirstLetter = (string) => {
+export const capitalizeFirstLetter = (string: string): string => {
   if(!string)
     return '';
 
@@ -61,7 +63,7 @@ export const capitalizeFirstLetter = (string) => {
   return newString.charAt(0).toUpperCase() + newString.slice(1);
 }
 
-export const capitalizeAllWords = (string) => {
+export const capitalizeAllWords = (string: string): string => {
   if(!string)
     return '';
 
@@ -69,7 +71,7 @@ export const capitalizeAllWords = (string) => {
   return newString.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
 }
 
-export const getDifferenceInDays = (date2, date1) => {
+export const getDifferenceInDays = (date2: Date, date1: Date) => {
   const _MS_PER_DAY = 1000 * 60 * 60 * 24;
 
   // Discard the time and time-zone information.
@@ -79,7 +81,7 @@ export const getDifferenceInDays = (date2, date1) => {
   return Math.round(Math.abs((utc2 - utc1) / _MS_PER_DAY));
 }
 
-export const validateEmail = (email) => {
+export const validateEmail = (email: string): RegExpMatchArray | null => {
   return String(email)
     .toLowerCase()
     .match(
@@ -87,7 +89,7 @@ export const validateEmail = (email) => {
     );
 };
 
-export const formatBiolinkEntity = (string) => {
+export const formatBiolinkEntity = (string: string): string => {
   if(!string)
     return "";
   // remove 'biolink:' from the type, then add spaces before each capital letter
@@ -100,7 +102,7 @@ export const formatBiolinkEntity = (string) => {
     .replaceAll('gene ', '').trim());
 }
 
-export const formatBiolinkNode = (string, type = null) => {
+export const formatBiolinkNode = (string: string, type: string | null = null): string => {
   let newString = string; 
   if(type !== null) {
     type = type.toLowerCase();
@@ -118,7 +120,7 @@ export const formatBiolinkNode = (string, type = null) => {
   return newString;
 }
 
-export const getUrlAndOrg = (id) => {
+export const getUrlAndOrg = (id: string): (string | null)[] => {
   let url = null;
   let org = null;
   const formattedID = id.toUpperCase();
@@ -167,7 +169,7 @@ export const getUrlAndOrg = (id) => {
   return [url, org];
 }
 
-export const getEntityLink = (id, className, queryType) => {
+export const getEntityLink = (id: string, className: string, queryType: QueryType): JSX.Element | null => {
   return generateEntityLink(id, className, (org) => {
     let linkType = (queryType !== undefined && queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
     if(linkType === "smallmolecule")
@@ -178,27 +180,30 @@ export const getEntityLink = (id, className, queryType) => {
   });
 }
 
-export const getMoreInfoLink = (id, className) => {
+export const getMoreInfoLink = (id: string, className: string): JSX.Element | null => {
   return generateEntityLink(id, className, (org) => { return ' '});
 }
 
-export const handleFetchErrors = (response, onErrorCallback = () => console.log('No error callback function specified.')) => {
-  if(!response.ok) {
-    onErrorCallback(response);
-    throw Error(response.statusText);
-  }
-  return response
+export const handleFetchErrors = (
+    response: Response, 
+    onErrorCallback: (res: Response) => void = () => console.log('No error callback function specified.')
+  ): Response => {
+    if(!response.ok) {
+      onErrorCallback(response);
+      throw Error(response.statusText);
+    }
+    return response
 }
 
-export const getRandomIntInclusive = (min, max) => {
+export const getRandomIntInclusive = (min: number, max: number) => {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 // Remove duplicate objects from an array and keep the relative ordering based on a supplied property 
-export const removeDuplicateObjects = (arr, propName) => {
-  const unique = [];
+export const removeDuplicateObjects = (arr: any[], propName: string): any[] => {
+  const unique: any[] = [];
   const seenValues = new Set();
 
   arr.forEach(item => {
@@ -211,7 +216,7 @@ export const removeDuplicateObjects = (arr, propName) => {
   return unique;
 }
 
-export const generateEntityLink = (id, className, linkTextGenerator, useIcon = true) => {
+export const generateEntityLink = (id: string, className: string, linkTextGenerator: (org: string | null) => string, useIcon = true): JSX.Element | null => {
   const [url, org] = getUrlAndOrg(id);
   const linkText = linkTextGenerator(org);
 
@@ -229,64 +234,45 @@ export const generateEntityLink = (id, className, linkTextGenerator, useIcon = t
   return null;
 }
 
-export const getLastItemInArray = (arr) => {
+export const getLastItemInArray = (arr: any[]) => {
   return arr.at(-1);
 } 
 
-export const getDataFromQueryVar = (varID) => {
+export const getDataFromQueryVar = (varID: string) => {
   const dataValue = new URLSearchParams(window.location.search).get(varID);
   const valueToReturn = (dataValue) ? dataValue : null;
   return valueToReturn;
 }
 
-export const customDebounce = (method, delay) => {
-  clearTimeout(method._tId);
-  method._tId= setTimeout(function(){
-    method();
-  }, delay);
-}
+export const isValidDate = (date: string | number | Date): boolean => {
+  const parsedDate = new Date(date);
+  return !isNaN(parsedDate.getTime());
+};
 
-export const isValidDate = (date) => {
-  return (new Date(date) !== "Invalid Date") && !isNaN(new Date(date));
-}
-
-export const getFormattedDate = (date) => {
-  if(!isValidDate(date))
+export const getFormattedDate = (date: Date): string | boolean => {
+  if (!isValidDate(date)) 
     return false;
 
-  const dateFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-  const timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, timeZoneName: 'short' };
+  const dateFormatOptions: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+  const timeFormatOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, timeZoneName: 'short' };
   const formattedDate = new Intl.DateTimeFormat('en-US', dateFormatOptions).format(date);
   const formattedTime = new Intl.DateTimeFormat('en-US', timeFormatOptions).format(date);
 
   return `${formattedDate} (${formattedTime})`;
-}
+};
 
-export const getGeneratedSendFeedbackLink = (openDefault = true, root) => {
+export const getGeneratedSendFeedbackLink = (openDefault: boolean = true, root: string): string => {
   let link = encodeURIComponent(window.location.href);
   return `/${root}?fm=${openDefault}&link=${link}`;
 }
 
-export const mergeObjects = (obj1, obj2) => {
-  let result = {};
-  // Merge obj1 into result
-  for (let key in obj1) {
-      if (obj1.hasOwnProperty(key)) {
-          // If key is not in obj2, or it's not an array in obj2, just copy the value from obj1
-          if (!obj2[key] || !Array.isArray(obj2[key])) {
-              result[key] = obj1[key];
-          } else {
-              // If it's an array in both, concatenate them
-              result[key] = obj1[key].concat(obj2[key]);
-          }
-      }
-  }
-
-  // Merge keys from obj2 that are not in obj1
-  for (let key in obj2) {
-      if (obj2.hasOwnProperty(key) && !result.hasOwnProperty(key)) {
-          result[key] = obj2[key];
-      }
-  }
-  return result;
-}
+export const mergeObjects = <T, U>(obj1: T, obj2: U): T & U => {
+  return mergeWith({}, obj1, obj2, (objValue, srcValue) => {
+    // Check if both values to merge are arrays
+    if (Array.isArray(objValue) && Array.isArray(srcValue)) {
+      // Concatenate the arrays if both values are arrays
+      return objValue.concat(srcValue);
+    }
+    // When not both arrays, return undefined to let mergeWith handle the merge according to its default behavior
+  });
+};
