@@ -1,30 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { defaultPrefs, Preferences } from '../Utilities/userApi';
+import { defaultPrefs } from '../Utilities/userApi';
+import { Config, RootState, Preferences, User } from '../Types/global';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  time_created: string;
-  time_updated: string;
-  profile_pic_url: string;
-  data: object | null;
-  deleted: boolean;
-}
-
-interface Config {
-  cached_queries: object[];
-  gaID: string;
-  name_resolver: string;
-  socialProviders: object;
-}
-
-interface RootState {
-  currentRoot: string;
-  currentUser: User | null; 
-  currentPrefs: Preferences;
-  currentConfig: Config | null;
-}
 
 // Define initialState with the RootState type
 const initialState: RootState = {

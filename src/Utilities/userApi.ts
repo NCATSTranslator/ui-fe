@@ -1,24 +1,12 @@
 import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
 import { QueryType } from './queryTypes';
+import { ResultItem } from '../Types/results';
+import { Preferences } from '../Types/global';
 
-interface PrefObject {
-  pref_value: string | number;
-  possible_values: string[] | number[];
-}
-
-export interface Preferences {
-  result_sort: PrefObject;
-  result_per_screen: PrefObject;
-  graph_visibility: PrefObject;
-  graph_layout: PrefObject;
-  path_show_count: PrefObject;
-  evidence_sort: PrefObject;
-  evidence_per_screen: PrefObject;
-}
 
 // Default user preferences for application settings such as result sorting and visibility options.
-export const defaultPrefs = {
+export const defaultPrefs: Preferences = {
   result_sort: {
     pref_value: "scoreHighLow",
     possible_values:["scoreHighLow", "scoreLowHigh", "nameLowHigh", "nameHighLow", "evidenceLowHigh", "evidenceHighLow"]
@@ -81,7 +69,7 @@ export const emptyEditor = '{"root":{"children":[{"children":[],"direction":null
 
 interface QueryObject {
   type: QueryType; 
-  nodeId: number;
+  nodeId: number | string;
   nodeLabel: string;
   nodeDescription: string;
   pk: string;
@@ -99,8 +87,7 @@ interface Save {
   time_created: string | null;
   time_updated: string | null;
   data?: {
-    // fix this , create and add type
-    item?: object;
+    item?: ResultItem;
     type?: string;
     query?: QueryObject;
   };
@@ -121,7 +108,7 @@ type SetUserSavesFunction = (e: { [key: string]: SaveGroup }) => void;
  */
 export const getSaves = async (
     setUserSaves: SetUserSavesFunction | undefined = () => console.log("no setter function available to set user saves.")
-  ) => {
+  ): Promise<{ [key: string]: SaveGroup }> => {
     let saves = await getAllUserSaves();
     const formattedSaves = formatUserSaves(saves);
 
@@ -174,7 +161,7 @@ export const getFormattedBookmarkObject = (
     bookmarkType: string = "result",
     bookmarkName: string,
     notes: string = "",
-    queryNodeID: number | undefined,
+    queryNodeID: number | string | undefined,
     queryNodeLabel: string = "",
     queryNodeDescription: string = "",
     typeObject: QueryType,
@@ -216,7 +203,7 @@ export const getFormattedBookmarkObject = (
  * @returns {Object} The constructed query object.
  */
 export const getQueryObjectForSave = (
-    nodeID: number = 0, 
+    nodeID: number | string = 0, 
     nodeLabel: string = "", 
     nodeDescription: string = "", 
     typeObject: QueryType, 
@@ -322,6 +309,7 @@ export const createUserSave = async (
     saveObj: Save,
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
+    // fix this, add return type
   ) => {
     return postUserData(`${userApiPath}/saves`, saveObj, httpErrorHandler, fetchErrorHandler);
 }
@@ -451,7 +439,8 @@ const postUserData = async <RequestBodyType>(
     body: RequestBodyType, 
     httpErrorHandler: 
     ErrorHandler, fetchErrorHandler: ErrorHandler
-  ): Promise<Response> => {
+    // fix this, add return type
+  ) => {
   const response = await fetchUserData<Response>(async () => await post(url, body), httpErrorHandler, fetchErrorHandler);
 
   if (response === undefined || response === null) 

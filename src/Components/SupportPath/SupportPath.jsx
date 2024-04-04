@@ -31,7 +31,7 @@ const SupportPath = ({ dataObj }) => {
           <span>View evidence for this path.</span>
       </Tooltip>
       <div 
-        className={`${pathViewStyles.tableItem} ${selectedPaths.size > 0 && !supportPath.highlighted ? pathViewStyles.unhighlighted : ''}`} 
+        className={`${pathViewStyles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !supportPath.highlighted ? pathViewStyles.unhighlighted : ''}`} 
         key={key}
         > 
         {
