@@ -17,7 +17,6 @@ export const hasSupport = (item: RawPathObject | FormattedEdgeObject | RawEdge |
  * @returns {EvidenceContainer} The formatted evidence object containing publications, sources, distinct sources, and length.
 */
 const getFormattedEvidence = (paths: PathObjectContainer[], results: RawResults): EvidenceContainer => {
-  // fix this, come up with better type for obj and constructor 
   const formatObj = (obj: object, getId: (item: any) => string, item: EvidenceItem, constructor: Function, container: EvidenceObjectContainer) => {
     const id = getId(obj);
     let evidenceObj: EvidenceItem = container[id];
@@ -41,7 +40,6 @@ const getFormattedEvidence = (paths: PathObjectContainer[], results: RawResults)
       label: edgeLabel
     };
   }
-  // fix this, come up with better type for objs, obj, and constructor
   const formatEvidenceObjs = (objs: {[key: string]: any[]}, getId: (item: any) => string, item: EvidenceItem, constructor: Function, container: EvidenceObjectContainer) => {
     for (const objArray of Object.values(objs)) {
       if (!Array.isArray(objArray)) {
@@ -55,8 +53,7 @@ const getFormattedEvidence = (paths: PathObjectContainer[], results: RawResults)
     }
   };
 
-  // fix this, better type for publications
-  const formatPublications = (publications: any, item: EvidenceItem, container: EvidenceObjectContainer) => {
+  const formatPublications = (publications: {[key:string]: any}, item: EvidenceItem, container: EvidenceObjectContainer) => {
     formatEvidenceObjs(
       publications,
       (id: string) => { return id; },
@@ -73,7 +70,7 @@ const getFormattedEvidence = (paths: PathObjectContainer[], results: RawResults)
       container);
   };
 
-  const formatSources = (sources: any, item: EvidenceItem, container: EvidenceObjectContainer) => {
+  const formatSources = (sources: {[key:string]: any}, item: EvidenceItem, container: EvidenceObjectContainer) => {
     formatEvidenceObjs(
       sources,
       (src: SourceObject) => { 
@@ -466,7 +463,6 @@ const getCompressedPaths = (graph: PathObjectContainer[], respectKnowledgeLevel:
  * @param {any} bookmarksSet - The set of bookmark objects to search in.
  * @returns {string|null} Returns the ID of the matching item if found in bookmarksSet, otherwise returns false.
  */
-// fix this, improve bookmarksSet type
 const checkBookmarksForItem = (itemID: string, bookmarksSet: any): string | null => {
   if(bookmarksSet && bookmarksSet.size > 0) {
     for(let val of bookmarksSet) {
@@ -478,7 +474,6 @@ const checkBookmarksForItem = (itemID: string, bookmarksSet: any): string | null
   return null;
 }
 
-// fix this, improve bookmarksSet type
 const checkBookmarkForNotes = (bookmarkID: string | null, bookmarksSet: any): boolean => {
   if(bookmarkID === null)
     return false;
@@ -503,7 +498,6 @@ const checkBookmarkForNotes = (bookmarkID: string | null, bookmarksSet: any): bo
  * @param {Set} bookmarks - Set of bookmarked items for a given query
  * @returns {Array} The summarized results array.
 */
-// fix this, improve bookmarks type
 export const getSummarizedResults = (results: RawResults, confidenceWeight: number, noveltyWeight: number, clinicalWeight: number, bookmarks: any = null) => {
   if (results === null || results === undefined)
     return [];
@@ -630,7 +624,6 @@ export const getEvidenceFromResult = (result: ResultItem): EvidenceContainer => 
   evidenceObject.sources = (result.evidence.sources) ? result.evidence.sources : [];
 
   const pubIds = new Set();
-  // fix this, improve typing for all params
   const addItemToPublications = (item: any, items: any, arr: any) => {
     if (!!item && !items.has(item.id)) {
         items.add(item.id);

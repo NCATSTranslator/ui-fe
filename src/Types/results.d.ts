@@ -62,7 +62,6 @@ export interface ResultItem {
   description: string;
   evidence: Evidence;
   fdaInfo: boolean;
-  // fix this, add type for graph object
   graph: any | null;
   hasNotes: boolean;
   highlightedName: string | boolean | null;

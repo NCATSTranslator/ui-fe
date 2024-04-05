@@ -165,7 +165,6 @@ export const getFormattedBookmarkObject = (
     queryNodeLabel: string = "",
     queryNodeDescription: string = "",
     typeObject: QueryType,
-    // fix this , needs type
     saveItem: any,
     pk: string
   ): Save => { 
@@ -309,7 +308,6 @@ export const createUserSave = async (
     saveObj: Save,
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
-    // fix this, add return type
   ) => {
     return postUserData(`${userApiPath}/saves`, saveObj, httpErrorHandler, fetchErrorHandler);
 }
@@ -439,7 +437,6 @@ const postUserData = async <RequestBodyType>(
     body: RequestBodyType, 
     httpErrorHandler: 
     ErrorHandler, fetchErrorHandler: ErrorHandler
-    // fix this, add return type
   ) => {
   const response = await fetchUserData<Response>(async () => await post(url, body), httpErrorHandler, fetchErrorHandler);
 
