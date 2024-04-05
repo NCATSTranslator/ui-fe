@@ -167,17 +167,13 @@ export const getFormattedBookmarkObject = (
     typeObject: QueryType,
     saveItem: any,
     pk: string
-  ): Save => { 
+  ): any => { 
 
     let newSaveItem = cloneDeep(saveItem);
     // delete newSaveItem.evidence.publications;
 
     let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
     return { 
-      id: null,
-      user_id: null,
-      time_created: null,
-      time_updated: null,
       save_type: "bookmark", 
       label: bookmarkName, 
       notes: notes, 
@@ -367,7 +363,6 @@ const fetchUserData = async <T>(
   ): Promise<T | void> => {
     try {
       const resp = await fetchMethod();
-      
       if (!resp.ok) { 
         httpErrorHandler(new Error(`HTTP Error: ${resp.statusText}`));
       } else {
