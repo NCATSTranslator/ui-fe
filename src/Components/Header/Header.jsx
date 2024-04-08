@@ -26,6 +26,11 @@ const Header = ({children}) => {
   const logoutReady = (clientID && logoutURI) ? true : false;
   const openFeedbackModal = true;
 
+  const socialProviders = (config?.social_providers) ? config.social_providers: null;
+  const unaConfig = socialProviders ? socialProviders.una : null;
+  const loginURL = unaConfig ? `${unaConfig.auth_uri}?response_type=code&client_id=${encodeURIComponent(unaConfig.client_id)}&scope=${encodeURIComponent(unaConfig.scope)}&redirect_uri=${encodeURIComponent(unaConfig.redirect_uri)}`
+    : null;
+
   return (
     <header className={styles.header}>
       <div className={styles.topBar}>
@@ -48,7 +53,7 @@ const Header = ({children}) => {
             {
               root === 'demo'
               ? 
-                <Link to={`/main`} className={styles.login} reloadDocument>Log In</Link>
+                <a className={styles.login} href={loginURL}>Log In</a>
               : 
                 <>
                   <Link to={`/main/home`} data-tooltip-id={`prefs-tooltip`} aria-describedby={`prefs-tooltip`} className={styles.userIcon}>
