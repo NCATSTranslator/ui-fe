@@ -13,10 +13,11 @@ Results can be filtered and sorted according to several different critera, such 
 
 ## Feature Roadmap
 
-- [ ] Knowledge Type (Inferred vs Asserted) Edges Display Overhaul
 - [ ] Additional Query Types
 - [ ] Additional Facets
-- [ ] Facet Exclusion
+- [ ] Typescript Conversion
+- [x] Knowledge Type (Inferred vs Asserted) Edges Display Overhaul
+- [x] Facet Exclusion
 - [x] Evidence Modal Redesign
 - [x] Bookmark & Add Notes To Results
 - [x] User Workspace

@@ -40,7 +40,7 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "serve": "vite preview"
   },
   "eslintConfig": {
@@ -67,6 +67,10 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@testing-library/cypress": "^10.0.1",
     "@testing-library/jest-dom": "^5.16.5",
+    "@types/lodash": "^4.17.0",
+    "@types/react": "^18.2.73",
+    "@types/react-dom": "^18.2.22",
+    "@types/react-highlight-words": "^0.16.7",
     "@vitejs/plugin-react": "^4.0.4",
     "cypress": "^13.3.0",
     "cypress-vite": "^1.4.2",
@@ -74,6 +78,7 @@
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-cypress": "^2.15.1",
     "react-query": "^3.34.19",
+    "typescript": "^5.4.3",
     "vite": "^4.4.9",
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-svgr": "^4.0.0",

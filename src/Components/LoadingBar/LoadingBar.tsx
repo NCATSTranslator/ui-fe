@@ -1,8 +1,17 @@
+import { FC } from 'react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import TextCrossfade from '../TextCrossfade/TextCrossfade';
 import styles from './LoadingBar.module.scss';
 
-const LoadingBar = ({useIcon, disclaimerText, className, reducedPadding, loadingText}) => {
+interface LoadingBarProps {
+  useIcon: boolean;
+  disclaimerText?: string;
+  className?: string;
+  reducedPadding: boolean;
+  loadingText?: string;
+}
+
+const LoadingBar: FC<LoadingBarProps> = ({useIcon, disclaimerText, className, reducedPadding, loadingText}) => {
 
   return (
     <div className={`${styles.loadingBar} ${className} ${(reducedPadding) ? styles.reducedPadding : ''}`}> 

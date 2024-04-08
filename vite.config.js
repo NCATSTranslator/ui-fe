@@ -16,5 +16,8 @@ export default defineConfig(() => {
       // svgr options: https://react-svgr.com/docs/options/
       svgr(),
     ],
+    compilerOptions: {
+      jsx: "react-jsx"
+    }
   };
 });

@@ -27,7 +27,7 @@ const checkInferredPathForSelections = (path, selPath) => {
 }
 
 const getPathsWithSelectionsSet = (paths, selectedPaths) => {
-  if(selectedPaths.size > 0) {
+  if(selectedPaths!== null && selectedPaths.size > 0) {
     let newPaths = cloneDeep(paths);
     for(const path of newPaths) {
       for(const selPath of selectedPaths) {
@@ -138,7 +138,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                   directLabelDisplayed = true;
               const tooltipID = pathToDisplay.id 
                 ? pathToDisplay.id 
-                : pathToDisplay.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] );
+                : pathToDisplay.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0].predicate );
               return (
                 <>
                   {
@@ -174,7 +174,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                       >
                         <span>View evidence for this path.</span>
                     </Tooltip>
-                    <div className={`${styles.tableItem} ${selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} > 
+                    <div className={`${styles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} > 
                       {
                         pathToDisplay.path.subgraph.map((pathItem, j) => {
                           let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;

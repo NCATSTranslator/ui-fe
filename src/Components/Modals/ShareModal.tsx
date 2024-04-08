@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from "react";
+import {useRef, useEffect, FC} from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
 import { currentRoot } from "../../Redux/rootSlice";
@@ -6,7 +6,15 @@ import { currentQuery} from "../../Redux/querySlice";
 import { useSelector } from 'react-redux';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 
-const ShareModal = ({isOpen, onClose, qid, label = null, typeID = null}) => {
+interface ShareModalProps {
+  isOpen: boolean;
+  onClose: () => void; 
+  qid: string;
+  label?: string | null; 
+  typeID?: string | null; 
+}
+
+const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, typeID = null}) => {
 
   let storedQuery = useSelector(currentQuery);
   const root = useSelector(currentRoot);

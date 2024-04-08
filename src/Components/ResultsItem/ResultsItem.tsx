@@ -1,8 +1,6 @@
-import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, memo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, memo, FC, RefObject } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, 
-  // capitalizeAllWords, 
-  formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
+import { getIcon, formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
@@ -21,56 +19,111 @@ import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
 import { getEvidenceFromResult } from '../../Utilities/resultsFormattingFunctions';
 import { displayScore } from '../../Utilities/scoring';
+import { QueryType } from '../../Utilities/queryTypes';
 // import { setResultsQueryParam } from '../../Utilities/resultsInteractionFunctions';
+import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject } from '../../Types/results';
+import { EvidenceContainer, PublicationObject } from '../../Types/evidence';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
-const sortTagsBySelected = (a, b, selected) => {
-  const aExistsInSelected = selected.some((item)=> item.type === a );
-  const bExistsInSelected = selected.some((item)=> item.type === b );
+const sortTagsBySelected = (
+  a: string, 
+  b: string, 
+  selected: [{type: string;}] | Filter[]
+): number => {
+  const aExistsInSelected = selected.some((item) => item.type === a);
+  const bExistsInSelected = selected.some((item) => item.type === b);
 
-  if (aExistsInSelected && bExistsInSelected) return 0; 
-  if (aExistsInSelected) return -1; 
-  if (bExistsInSelected) return 1; 
+  if (aExistsInSelected && bExistsInSelected) return 0;
+  if (aExistsInSelected) return -1;
+  if (bExistsInSelected) return 1;
 
-  return 0; 
+  return 0;
+};
+
+interface ResultsItemProps {
+  activateEvidence?: (evidence: EvidenceContainer, item: ResultItem, edgeGroup: FormattedEdgeObject[] | null, path: PathObjectContainer) => void;
+  activateNotes?: (nameString: string, id: string | number, item: ResultItem) => void;
+  activeFilters: Filter[];
+  activeStringFilters: string[];
+  availableTags: {[key: string]: Tag};
+  bookmarkAddedToast?: () => void; 
+  bookmarkRemovedToast?: () => void; 
+  bookmarked?: boolean;
+  bookmarkID?: string | null;
+  currentQueryID: string;
+  focusedItemRef: RefObject<HTMLDivElement>;
+  handleBookmarkError?: () => void;
+  handleFilter: (tagObject: Tag) => void;
+  hasNotes: boolean;
+  item: ResultItem;
+  isFocused: boolean;
+  key: string;
+  queryNodeDescription: string;
+  queryNodeID: string;
+  queryNodeLabel: string;
+  rawResults: RawResult[];
+  type: QueryType;
+  zoomKeyDown: boolean;
 }
 
-const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, rawResults, zoomKeyDown, handleFilter, activeFilters,
-  currentQueryID, queryNodeID, queryNodeLabel, queryNodeDescription, bookmarked, bookmarkID = null, availableTags, hasFocusedOnFirstLoad,
-  hasNotes, activateNotes, isFocused, focusedItemRef, bookmarkAddedToast = ()=>{}, bookmarkRemovedToast = ()=>{}, 
-  handleBookmarkError = ()=>{}, handleFocusedOnItem = ()=>{}}) => {
+const ResultsItem: FC<ResultsItemProps> = ({
+    activateEvidence = () => {}, 
+    activateNotes = () => {}, 
+    activeFilters,
+    activeStringFilters, 
+    availableTags,
+    bookmarkAddedToast = () => {}, 
+    bookmarkRemovedToast = () => {}, 
+    bookmarked = false, 
+    bookmarkID = null, 
+    currentQueryID, 
+    focusedItemRef,
+    handleBookmarkError = () => {},
+    handleFilter = () => {}, 
+    hasNotes = false, 
+    isFocused = false, 
+    item, 
+    key, 
+    queryNodeID, 
+    queryNodeDescription, 
+    queryNodeLabel, 
+    rawResults, 
+    type, 
+    zoomKeyDown, 
+  }) => {
   const root = useSelector(currentRoot);
 
+  let icon: JSX.Element = getIcon(item.type);
   const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
-  let icon = getIcon(item.type);
-  let publicationCount = (currentEvidence.publications?.length) 
-    ? currentEvidence.publications.filter((item)=> item.type === "PMID" || item.type === "PMC").length
+  let publicationCount: number = (currentEvidence.publications?.length) 
+    ? currentEvidence.publications.filter((pub: PublicationObject)=> pub.type === "PMID" || pub.type === "PMC").length
     : 0;
-  let clinicalCount = (currentEvidence.publications?.length) 
-    ? currentEvidence.publications.filter((item)=> item.type === "NCT").length
+  let clinicalCount: number = (currentEvidence.publications?.length) 
+    ? currentEvidence.publications.filter((pub: PublicationObject)=> pub.type === "NCT").length
     : 0;
-  let sourcesCount = (currentEvidence.distinctSources?.length) 
+  let sourcesCount: number = (currentEvidence.distinctSources?.length) 
     ? currentEvidence.distinctSources.length
     : 0;
-  let roleCount = (item.tags) 
+  let roleCount: number = (item.tags) 
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
 
-  const [isBookmarked, setIsBookmarked] = useState(bookmarked);
-  const [itemBookmarkID, setItemBookmarkID] = useState(bookmarkID);
-  const [itemHasNotes, setItemHasNotes] = useState(hasNotes);
-  const [isExpanded, setIsExpanded] = useState(isFocused);
-  const [height, setHeight] = useState(0);
-  const formattedPaths = useRef(item.compressedPaths);
-  const [selectedPaths, setSelectedPaths] = useState(new Set());
+  const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
+  const [itemBookmarkID, setItemBookmarkID] = useState<string | null>(bookmarkID);
+  const [itemHasNotes, setItemHasNotes] = useState<boolean>(hasNotes);
+  const [isExpanded, setIsExpanded] = useState<boolean>(isFocused);
+  const [height, setHeight] = useState<number | string>(0);
+  const formattedPaths = useRef<PathObjectContainer[]>(item.compressedPaths);
+  // selectedPaths include the node ids of a path in a string array
+  const [selectedPaths, setSelectedPaths] = useState<Set<string[]> | Set<PathObjectContainer> | null>(null);
   // const [csvData, setCsvData] = useState([]);
-  const bookmarkRemovalApproved = useRef(false);
-  const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState(false);
+  const bookmarkRemovalApproved = useRef<boolean>(false);
+  const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState<boolean>(false);
 
   const initPathString = useRef((type?.pathString) ? type.pathString : 'may affect');
-  const tagsRef = useRef(null);
-  const [tagsHeight, setTagsHeight] = useState(0);
+  const tagsRef = useRef<HTMLDivElement>(null);
+  const [tagsHeight, setTagsHeight] = useState<number>(0);
   const minTagsHeight = 45;
 
   const numRoles = item.tags.filter(tag => tag.includes("role")).length;
@@ -80,6 +133,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       return;
     
     const resizeObserver = new ResizeObserver(() => {
+      if(tagsRef.current !== null)
       setTagsHeight(tagsRef.current.clientHeight);
     });
 
@@ -97,22 +151,21 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   //   handleFocusedOnItem();
   // }, [focusedItemRef])
 
-  const getPathsCount = (paths) => {
+  const getPathsCount = (paths: PathObjectContainer[]): number => {
     let count = paths.length;
     for(const path of paths) {
-      for(const [i, subgraphItem] of path.path.subgraph.entries()) {
-        if(i % 2 === 0 || !subgraphItem.support)
-          continue;
-        count += subgraphItem.support.length;
+      for(const subgraphItem of path.path.subgraph) {
+        if('support' in subgraphItem && subgraphItem.support !== undefined)
+          count += subgraphItem.support.length;
       }
     }
     return count;
   } 
   
-  const pathsCount = useMemo(()=>getPathsCount(formattedPaths.current), [formattedPaths]);
-  const pathString = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
-  const typeString = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
-  const nameString = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
+  const pathsCount: number = useMemo(()=>getPathsCount(formattedPaths.current), [formattedPaths]);
+  const pathString: string = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
+  const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
+  const nameString: string = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
   // const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
   const [itemGraph, setItemGraph] = useState(null);
@@ -125,11 +178,11 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     setIsExpanded(!isExpanded);
   }
 
-  const handleEdgeSpecificEvidence = useCallback((edgeGroup, path) => {
+  const handleEdgeSpecificEvidence = useCallback((edgeGroup: FormattedEdgeObject[], path: PathObjectContainer) => {
     activateEvidence(currentEvidence, item, edgeGroup, path);
   }, [currentEvidence, item, activateEvidence])
 
-  const handleActivateEvidence = useCallback((path) => {
+  const handleActivateEvidence = useCallback((path: PathObjectContainer) => {
     activateEvidence(currentEvidence, item, null, path);
   }, [currentEvidence, item, activateEvidence])
 
@@ -141,20 +194,20 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   }, [isExpanded])
 
   const handleClearSelectedPaths = useCallback(() => {
-    setSelectedPaths(new Set())
+    setSelectedPaths(null);
   },[]);
 
-  const handleNodeClick = useCallback((selectedPaths) => {
+  const handleNodeClick = useCallback((selectedPaths: Set<string[]>) => {
     if(!selectedPaths) 
       return;
 
-    let newSelectedPaths = new Set();
+    let newSelectedPaths: Set<PathObjectContainer> = new Set();
 
-    const checkForNodeMatches = (nodeList, path) => {
+    const checkForNodeMatches = (nodeList: string[], path: PathObjectContainer) => {
       let currentNodeIndex = 0;
       let numMatches = 0;
-      for(const [i, el] of path.path.subgraph.entries()) {
-        if(i % 2 !== 0)
+      for(const el of path.path.subgraph) {
+        if(!('curies' in el))
           continue;
 
         if(nodeList[currentNodeIndex] && el.curies.includes(nodeList[currentNodeIndex])) {
@@ -171,16 +224,19 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 
     for(const selPath of selectedPaths) {
       for(const path of formattedPaths.current) {
-        if(path.path.subgraph.length === 3
-          && path.path.subgraph[0].curies.includes(selPath[0])
-          && path.path.subgraph[path.path.subgraph.length - 1].curies.includes(selPath[selPath.length - 1])) {
-          newSelectedPaths.add(path);
+        if(path.path.subgraph.length === 3) {
+          const firstNode = path.path.subgraph[0];
+          const lastNode = path.path.subgraph[path.path.subgraph.length - 1];
+          if('curies' in firstNode && firstNode.curies.includes(selPath[0]) &&
+          'curies' in lastNode && lastNode.curies.includes(selPath[selPath.length - 1])) {
+            newSelectedPaths.add(path);
+          }
         }
         if(path.path.inferred) {
           for(const [i, item] of path.path.subgraph.entries()) {
             if(i % 2 === 0)
               continue;
-            if(item.support) {
+            if('support' in item && item.support) {
               for(const supportPath of item.support){
                 if(checkForNodeMatches(selPath, supportPath))
                   newSelectedPaths.add(supportPath);
@@ -197,7 +253,9 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
   },[formattedPaths]);
 
   const handleBookmarkClick = async () => {
+    console.log("bookmark click");
     if(isBookmarked) {
+      console.log(bookmarkRemovalApproved.current, itemBookmarkID);
       if(bookmarkRemovalApproved.current && itemBookmarkID) {
         console.log("remove bookmark");
         deleteUserSave(itemBookmarkID);
@@ -220,19 +278,20 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
       console.log(bookmarkObject);
 
       let bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
-      console.log('bookmarked: ', bookmarkedItem);
+      console.log(bookmarkedItem);
       if(bookmarkedItem) {
+        let newBookmarkedItem = bookmarkedItem as any;
         setIsBookmarked(true);
-        setItemBookmarkID(bookmarkedItem.id);
+        setItemBookmarkID(newBookmarkedItem.id.toString());
         bookmarkAddedToast();
-        return bookmarkedItem.id;
+        return newBookmarkedItem.id;
       }
       return false;
     }
   }
 
   const handleNotesClick = async () => {
-    let tempBookmarkID = itemBookmarkID;
+    let tempBookmarkID: string | number | null = itemBookmarkID;
     if(!isBookmarked) {
       console.log("no bookmark exists for this item, creating one...")
       let replacementID = await handleBookmarkClick();
@@ -245,11 +304,13 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
     }
   }
 
-  const handleTagClick = (tagID, tagObject) => {
-    let newObj = {};
-    newObj.type = tagID;
-    newObj.value = tagObject.name;
-    newObj.negated = false;
+  const handleTagClick = (tagID: string, tagObject: Tag) => {
+    let newObj: Tag = {
+      name: tagObject.name,
+      negated: false,
+      type: tagID,
+      value: tagObject.name
+    };
     handleFilter(newObj);
   }
 
@@ -403,7 +464,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
             }
           </div>
         </div>
-        <Suspense fallback={<LoadingBar loading useIcon reducedPadding />}>
+        <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
           <GraphView
             result={item}
             updateGraphFunction={setItemGraph}
@@ -437,7 +498,7 @@ const ResultsItem = ({key, item, type, activateEvidence, activeStringFilters, ra
 }
 
 // check if certain props are really different before rerendering
-const areEqualProps = (prevProps, nextProps) => {
+const areEqualProps = (prevProps: any, nextProps: any) => {
   // keys for the item prop
   const prevItemDataKeys = Object.keys(prevProps.item);
   const nextItemDataKeys = Object.keys(nextProps.item);
