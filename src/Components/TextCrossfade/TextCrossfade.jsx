@@ -11,7 +11,7 @@ const defaultPhrases = [
   {phrase: "Formatting Results", verb:"Formatting"},
 ];
 
-const TextCrossfade = ({ phrases = defaultPhrases, small, interval = 5000, centerText = false }) => {
+const TextCrossfade = ({ phrases = defaultPhrases, small = false, interval = 5000, centerText = false }) => {
   const [index, setIndex] = useState(0);
   const hasStarted = useRef(false);
 

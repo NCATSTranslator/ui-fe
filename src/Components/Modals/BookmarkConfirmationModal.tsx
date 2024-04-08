@@ -1,11 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, FC } from "react";
 import styles from './BookmarkConfirmationModal.module.scss';
 import Modal from "./Modal";
 import Button from '../FormFields/Button';
 
-const BookmarkConfirmationModal = ({ onClose = ()=>{}, onApprove = ()=>{}, isOpen }) => {
+interface BookmarkConfirmationModalProps {
+  onClose?: () => void;
+  onApprove?: () => void;
+  isOpen: boolean;
+}
 
-  const [fadeClass, setFadeClass] = useState(false);
+const BookmarkConfirmationModal: FC<BookmarkConfirmationModalProps> = ({ onClose = ()=>{}, onApprove = ()=>{}, isOpen = false }) => {
+
+  const [fadeClass, setFadeClass] = useState<boolean>(false);
 
   const handleClick = () => {
     onApprove();
