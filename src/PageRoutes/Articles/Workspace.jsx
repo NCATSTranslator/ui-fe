@@ -1,6 +1,6 @@
 import workspaceImage from "../../Assets/Images/workspace.png";
 
-export const FocusedAnalysis = () => {
+export const WorkspaceHelp = () => {
 
   return (
     <>

@@ -14,13 +14,13 @@ export const ExploringRelationships = () => {
         <li>Given a gene, find drugs that impact its activity.</li>
         <li>Given a chemical, what genes' activity is affected.</li>
       </ol>
-      <p><strong>Step 1: select a relationship to expose the search bar.</strong></p>
+      <p><strong>Select a relationship to expose the search bar.</strong></p>
       <p style={{'text-align': 'center'}}><img src={selectRelImage} alt="select a relationship you'd like to explore example" /></p>
 
-      <p><strong>Step 2: If the Gene - Chemical relationship is selected, this will expose options to further specify the type of relationship and which direction the gene activity will be impacted.</strong></p>
+      <p><strong>If the Gene - Chemical relationship is selected, this will expose options to further specify the type of relationship and which direction the gene activity will be impacted.</strong></p>
       <p style={{'text-align': 'center'}}><img src={geneQueryImage} alt="chemical gene query example" /></p>
 
-      <p><strong>Step 3: Enter the desired term to explore.</strong> The search bar's autocomplete function will provide options for searchable terms. Select the term by clicking it and the search will run.</p>
+      <p><strong>Enter the desired term to explore.</strong> The search bar's autocomplete function will provide options for searchable terms. Select the term by clicking it and the search will run.</p>
       <p style={{'text-align': 'center'}}><img src={searchTermImage} alt="submitting a search term example" /></p>
       <p><strong>Optimized search:</strong></p>
       <ol>
@@ -29,7 +29,7 @@ export const ExploringRelationships = () => {
         <li>If the term is a chemical, brand name drugs or the chemical name may be searched. Some terms are only mapped to one or the other. If the expected result is not show for one, try the other.</li>
       </ol>
 
-      <p><strong>Step 4: Results are returned.</strong> Translator has five reasoning engines that may return results. Once some of the results are ready, they will be displayed (as shown below) while the remaining reasoners continue to be developed. Once additional results are found, the process indicator will indicate 'Load New Results.' (see below). Click the link to load the new results in the view.</p>
+      <p><strong>Results are returned.</strong> Translator has five reasoning engines that may return results. Once some of the results are ready, they will be displayed (as shown below) while the remaining reasoners continue to be developed. Once additional results are found, the process indicator will indicate 'Load New Results.' (see below). Click the link to load the new results in the view.</p>
       <p style={{'text-align': 'center'}}><img src={returnedImage} alt="example showing results" /></p>
     </>
   );

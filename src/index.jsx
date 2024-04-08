@@ -25,7 +25,7 @@ import {store} from './Redux/store';
 import { Overview } from './PageRoutes/Articles/Overview';
 import { ExploringRelationships } from './PageRoutes/Articles/ExploringRelationships';
 import { ReviewIdentify } from './PageRoutes/Articles/ReviewIdentify';
-import { FocusedAnalysis } from './PageRoutes/Articles/FocusedAnalysis';
+import { WorkspaceHelp } from './PageRoutes/Articles/Workspace';
 import { UserPreferences } from './PageRoutes/Articles/UserPreferences';
 
 const container = document.getElementById('root');
@@ -65,8 +65,8 @@ const routes = [
     element: <FAQPage title="Review and Identify Favorite Results"><ReviewIdentify/></FAQPage>
   },
   {
-    path: 'focused-analysis',
-    element: <FAQPage title="Focused Analysis of the Top Results"><FocusedAnalysis/></FAQPage>
+    path: 'workspace-help',
+    element: <FAQPage title="Workspace"><WorkspaceHelp/></FAQPage>
   },
   {
     path: 'user-preferences',

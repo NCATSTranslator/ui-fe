@@ -41,8 +41,8 @@ const FAQPage = ({title, children}) => {
       slug: 'review-and-identify',
     },
     {
-      title: 'Focused Analysis of the Top Results', 
-      slug: 'focused-analysis',
+      title: 'Workspace', 
+      slug: 'workspace-help',
     },
     {
       title: 'User Preferences', 
