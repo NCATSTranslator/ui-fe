@@ -253,7 +253,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
   },[formattedPaths]);
 
   const handleBookmarkClick = async () => {
+    console.log("bookmark click");
     if(isBookmarked) {
+      console.log(bookmarkRemovalApproved.current, itemBookmarkID);
       if(bookmarkRemovalApproved.current && itemBookmarkID) {
         console.log("remove bookmark");
         deleteUserSave(itemBookmarkID);
@@ -276,13 +278,13 @@ const ResultsItem: FC<ResultsItemProps> = ({
       console.log(bookmarkObject);
 
       let bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
-      console.log('bookmarked: ', bookmarkedItem);
+      console.log(bookmarkedItem);
       if(bookmarkedItem) {
+        let newBookmarkedItem = bookmarkedItem as any;
         setIsBookmarked(true);
-        if(!!bookmarkObject.id)
-          setItemBookmarkID(bookmarkObject.id.toString());
+        setItemBookmarkID(newBookmarkedItem.id.toString());
         bookmarkAddedToast();
-        return bookmarkObject.id;
+        return newBookmarkedItem.id;
       }
       return false;
     }
