@@ -108,7 +108,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer} scrollable`}>
+    <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer}`}>
       {selectedItem.name &&       
         <div className={styles.top}>
           <h5 className={styles.title}>Showing Evidence for:</h5> 
@@ -190,10 +190,10 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
               }
             </div>
           }
-          <Tabs isOpen={isOpen}>
+          <Tabs isOpen={isOpen} className={styles.tabs}>
             {
               pubmedEvidence.length > 0 &&
-              <div heading="Publications">
+              <div heading="Publications" className={styles.tab}>
                 <PublicationsTable
                   selectedEdgeTrigger={selectedEdgeTrigger}
                   pubmedEvidence={pubmedEvidence} 
@@ -207,7 +207,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
             }
             {
               clinicalTrials.current.length > 0 &&
-              <div heading="Clinical Trials">
+              <div heading="Clinical Trials" className={styles.tab}>
                 <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head} ${styles.link}`}>Link</div>
@@ -230,7 +230,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
             }
             {
               miscEvidence.current.length > 0 &&
-              <div heading="Miscellaneous">
+              <div heading="Miscellaneous" className={styles.tab}>
                 <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head} ${styles.link}`}>Link</div>
@@ -258,6 +258,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                 heading="Knowledge Sources" 
                 tooltipIcon={<Information className={styles.infoIcon} />}
                 dataTooltipId="knowledge-sources-tooltip" 
+                className={styles.tab}
                 >
                 <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
                   <div className={`table-head ${styles.tableHead}`}>
