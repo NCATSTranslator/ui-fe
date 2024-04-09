@@ -290,7 +290,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
         }
         {
           !isLoading &&
-          <tbody className={`table-items`} >
+          <tbody className={`table-items scrollable`} >
             {
               displayedPubmedEvidence.length === 0
               ? <p className={styles.noPubs}>No publications available.</p>

@@ -13,5 +13,11 @@
   }
   .tabContent {
     padding: 0px;
+    display: grid;
+    overflow-y: hidden;
+  }
+  .fade {
+    display: grid;
+    overflow-y: hidden;
   }
 }
