@@ -4,7 +4,7 @@ import { Fade } from 'react-awesome-reveal';
 import styles from './Tabs.module.scss';
 import { isEqual } from "lodash";
 
-const Tabs = ({children, isOpen}) => {
+const Tabs = ({children, className, isOpen}) => {
 
   const firstElement = children.find(e => e);
   const [activeTabHeading, setActiveTab] = useState(firstElement?.props.heading);
@@ -33,7 +33,7 @@ const Tabs = ({children, isOpen}) => {
 
   return (
 
-    <div className={styles.tabs}>
+    <div className={`${styles.tabs} ${className}`}>
       <div className={styles.tabList}>
         {children.map((child, i) => {
           if(!child)
@@ -55,7 +55,7 @@ const Tabs = ({children, isOpen}) => {
         if(!child)
           return undefined;
         if (activeTabHeading !== child.props.heading) return undefined;
-        return <Fade key={i}><div className={`${styles.tabContent} ${activeTabHeading}`}>{child.props.children}</div></Fade>; 
+        return <Fade key={i} className={styles.fade}><div className={`${styles.tabContent} ${activeTabHeading}`}>{child.props.children}</div></Fade>; 
       })}
     </div>
 

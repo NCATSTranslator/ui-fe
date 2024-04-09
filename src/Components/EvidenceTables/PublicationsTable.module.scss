@@ -1,6 +1,18 @@
 @import "../../Assets/Styles/variables";
 
+.publicationsTableContainer {
+  display: grid;
+  overflow-y: hidden;
+}
 .pubsTable {
+    display: flex;
+    flex-direction: column;
+    overflow-y: hidden;
+    margin: 0 10px;
+  .tableItems {
+    display: flex;
+    flex-direction: column;
+  }
   .source, .pubdate, .pValue, .link, .location, .status, .knowledgeLevel {
     text-align: center;
   }
@@ -136,6 +148,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 0 16px; 
+  margin: 0 0 10px;
   .evidenceCount {
     margin: 0;
   }
