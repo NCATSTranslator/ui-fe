@@ -113,6 +113,9 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
 
   return(
     <div className={styles.pathView}>
+      <Tooltip id='paths-label-tooltip'>
+        <span className={styles.inferredLabelTooltip}>Paths are composed of stepwise links for each result's key concepts. Select a path to explore publications and additional resources supporting each relationship.</span>
+      </Tooltip>
       <Tooltip id='direct-label-tooltip'>
         <span className={styles.inferredLabelTooltip}>Established from explicit evidence in external sources. Example: A research paper stating 'X is related to Y.'</span>
       </Tooltip>
@@ -120,7 +123,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
         <span className={styles.inferredLabelTooltip}>Deduced from patterns in Translator's knowledge graphs that suggest relationships which are not explicitly stated. The paths shown below them support the inferred relationship.</span>
       </Tooltip>
       <div className={styles.header}>
-        <p className={styles.subtitle}>Paths</p>
+        <p className={styles.subtitle}>Paths<Information data-tooltip-id='paths-label-tooltip'/></p>
         <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
       </div>
       {
