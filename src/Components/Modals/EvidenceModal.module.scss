@@ -26,6 +26,7 @@
     box-shadow: $dropShadow;
     font-size: $bodyTwoSize;
     border-radius: $defaultBorderRadius;
+    margin: 0 10px 10px;
     .tableItems {
       display: flex;
       flex-direction: column;
