@@ -27,6 +27,9 @@
     font-size: $bodyTwoSize;
     border-radius: $defaultBorderRadius;
     margin: 0 10px 10px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: hidden;
     .tableItems {
       display: flex;
       flex-direction: column;

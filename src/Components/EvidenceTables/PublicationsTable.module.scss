@@ -132,7 +132,8 @@
   display: grid;
   justify-items: center;
   align-content: center;
-  padding: 100px 0;
+  min-height: 100px;
+  padding: 20px 0;
   grid-column: auto;
 }
 .noPubs {

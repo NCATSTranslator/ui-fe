@@ -280,59 +280,58 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
           </tr>
         </thead>
         {
-          isLoading &&
-          <LoadingBar
-            loading={isLoading}
-            useIcon
-            className={styles.loadingBar}
-            loadingText="Retrieving Evidence"
-          />
-        }
-        {
-          !isLoading &&
-          <tbody className={`table-items scrollable`} >
-            {
-              displayedPubmedEvidence.length === 0
-              ? <p className={styles.noPubs}>No publications available.</p>
-              :
-                displayedPubmedEvidence.map((pub)=> {
-                  const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
-                  let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
-                  return (
-                    <tr className={`table-item`} key={pub.id}>
-                      <td className={`table-cell ${styles.tableCell} ${styles.knowledgeLevel}`}>
-                        <span className={styles.knowledgeLevelSpan}>{knowledgeLevelString}</span>
-                        {
-                          pub.source && pub.source?.url 
-                          ? <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer'><span>({pub.source.name})</span></a>
-                          : <span className={styles.sourceName}span>({pub.source.name})</span>
-                        }
-                      </td>
-                      <td className={`table-cell ${styles.tableCell} ${styles.pubdate} pubdate`}>
-                        {pub.pubdate && (pub.pubdate === 0 ) ? '' : pub.pubdate }
-                      </td>
-                      <td className={`table-cell ${styles.tableCell} ${styles.source} source`}>
-                        <span>
-                          {pub.journal && pub.journal }
-                        </span>
-                      </td>
-                      <td className={`table-cell ${styles.tableCell} ${styles.title} title`} >
-                        {pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">{pub.title}</a> }
-                        {!pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">No Title Available</a> }
-                      </td>
-                      <td className={`table-cell ${styles.tableCell} ${styles.snippet}`}>
-                        <span>
+          isLoading
+          ?
+            <LoadingBar
+              loading={isLoading}
+              useIcon
+              className={styles.loadingBar}
+              loadingText="Retrieving Evidence"
+            />
+          :
+            <tbody className={`table-items scrollable`} >
+              {
+                displayedPubmedEvidence.length === 0
+                ? <p className={styles.noPubs}>No publications available.</p>
+                :
+                  displayedPubmedEvidence.map((pub)=> {
+                    const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
+                    let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
+                    return (
+                      <tr className={`table-item`} key={pub.id}>
+                        <td className={`table-cell ${styles.tableCell} ${styles.knowledgeLevel}`}>
+                          <span className={styles.knowledgeLevelSpan}>{knowledgeLevelString}</span>
                           {
-                            handleGetSupportTextOrSnippet(pub)
+                            pub.source && pub.source?.url 
+                            ? <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer'><span>({pub.source.name})</span></a>
+                            : <span className={styles.sourceName}span>({pub.source.name})</span>
                           }
-                        </span>
-                          {pub.url && <a href={pub.url} className={`url ${styles.url}`} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
-                      </td>
-                    </tr>
-                  )
-                })
-            }
-          </tbody>
+                        </td>
+                        <td className={`table-cell ${styles.tableCell} ${styles.pubdate} pubdate`}>
+                          {pub.pubdate && (pub.pubdate === 0 ) ? '' : pub.pubdate }
+                        </td>
+                        <td className={`table-cell ${styles.tableCell} ${styles.source} source`}>
+                          <span>
+                            {pub.journal && pub.journal }
+                          </span>
+                        </td>
+                        <td className={`table-cell ${styles.tableCell} ${styles.title} title`} >
+                          {pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">{pub.title}</a> }
+                          {!pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">No Title Available</a> }
+                        </td>
+                        <td className={`table-cell ${styles.tableCell} ${styles.snippet}`}>
+                          <span>
+                            {
+                              handleGetSupportTextOrSnippet(pub)
+                            }
+                          </span>
+                            {pub.url && <a href={pub.url} className={`url ${styles.url}`} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
+                        </td>
+                      </tr>
+                    )
+                  })
+              }
+            </tbody>
         }
       </table>
       <div className={styles.bottom}>

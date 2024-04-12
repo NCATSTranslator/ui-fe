@@ -212,7 +212,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head} ${styles.link}`}>Link</div>
                   </div>
-                  <div className={`table-items ${styles.tableItems}`}>
+                  <div className={`table-items ${styles.tableItems} scrollable`}>
                     {
                       clinicalTrials.current.map((item, i)=> {
                         return (
@@ -235,7 +235,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head} ${styles.link}`}>Link</div>
                   </div>
-                  <div className={`table-items ${styles.tableItems}`}>
+                  <div className={`table-items ${styles.tableItems} scrollable`}>
                     {
                       miscEvidence.current.map((item, i) => {
                         return (
@@ -265,7 +265,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                     <div className={`head ${styles.head}`}>Source</div>
                     <div className={`head ${styles.head}`}>Link</div>
                   </div>
-                  <div className={`table-items ${styles.tableItems}`}>
+                  <div className={`table-items ${styles.tableItems} scrollable`}>
                     {
                       sources.map((src, i) => { 
                         const name = (!Array.isArray(src) && typeof src === 'object') ? src.name: '';
