@@ -315,7 +315,7 @@ const ResultsList = ({loading}) => {
         if(data.data.aras.length > returnedARAs.current.aras.length) {
           console.log(`Old ARAs: ${returnedARAs.current.aras}, New ARAs: ${data.data.aras}`);
           let newReturnedARAs = {...data.data};
-          newReturnedARAs.status = data.status; 
+          newReturnedARAs.status = data.status;
           returnedARAs.current = newReturnedARAs;
           fetchResults = true;
         } else {
@@ -552,7 +552,7 @@ const ResultsList = ({loading}) => {
             break;
           }
 
-          if((isTextFilter(filter) && !isExclusion(filter) && !findStringMatch(result, filter.value, pathRanks)) || 
+          if((isTextFilter(filter) && !isExclusion(filter) && !findStringMatch(result, filter.value, pathRanks)) ||
             (isTextFilter(filter) && isExclusion(filter) && findStringMatch(result, filter.value, pathRanks))){
             addResult = false;
             break;
@@ -801,9 +801,9 @@ const ResultsList = ({loading}) => {
                   setShareModalOpen: setShareModalOpen,
                   currentQueryID: currentQueryID,
                   returnedARAs: returnedARAs.current,
-                  isError: isError, 
+                  isError: isError,
                   currentPage: currentPage.current,
-                  resultsListStyles: styles, 
+                  resultsListStyles: styles,
                   pageCount: pageCount,
                   handlePageClick: handlePageClick
                 }}
@@ -947,9 +947,9 @@ const ResultsList = ({loading}) => {
                 }
                 <ResultsListLoadingButton
                   data={{
-                    handleResultsRefresh: () => 
-                    { 
-                      hasFocusedOnFirstLoad.current = false; 
+                    handleResultsRefresh: () =>
+                    {
+                      hasFocusedOnFirstLoad.current = false;
                       handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
                     },
                     isFetchingARAStatus: isFetchingARAStatus.current,
@@ -968,9 +968,9 @@ const ResultsList = ({loading}) => {
           formattedResults.length > 0 &&
           <StickyToolbar
             loadingButtonData={{
-              handleResultsRefresh: () => 
-                { 
-                  hasFocusedOnFirstLoad.current = false; 
+              handleResultsRefresh: () =>
+                {
+                  hasFocusedOnFirstLoad.current = false;
                   handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
                 },
               isFetchingARAStatus: isFetchingARAStatus.current,

@@ -27,8 +27,8 @@ import { EvidenceContainer, PublicationObject } from '../../Types/evidence';
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const sortTagsBySelected = (
-  a: string, 
-  b: string, 
+  a: string,
+  b: string,
   selected: [{type: string;}] | Filter[]
 ): number => {
   const aExistsInSelected = selected.some((item) => item.type === a);
@@ -47,8 +47,8 @@ interface ResultsItemProps {
   activeFilters: Filter[];
   activeStringFilters: string[];
   availableTags: {[key: string]: Tag};
-  bookmarkAddedToast?: () => void; 
-  bookmarkRemovedToast?: () => void; 
+  bookmarkAddedToast?: () => void;
+  bookmarkRemovedToast?: () => void;
   bookmarked?: boolean;
   bookmarkID?: string | null;
   currentQueryID: string;
@@ -68,44 +68,44 @@ interface ResultsItemProps {
 }
 
 const ResultsItem: FC<ResultsItemProps> = ({
-    activateEvidence = () => {}, 
-    activateNotes = () => {}, 
+    activateEvidence = () => {},
+    activateNotes = () => {},
     activeFilters,
-    activeStringFilters, 
+    activeStringFilters,
     availableTags,
-    bookmarkAddedToast = () => {}, 
-    bookmarkRemovedToast = () => {}, 
-    bookmarked = false, 
-    bookmarkID = null, 
-    currentQueryID, 
+    bookmarkAddedToast = () => {},
+    bookmarkRemovedToast = () => {},
+    bookmarked = false,
+    bookmarkID = null,
+    currentQueryID,
     focusedItemRef,
     handleBookmarkError = () => {},
-    handleFilter = () => {}, 
-    hasNotes = false, 
-    isFocused = false, 
-    item, 
-    key, 
-    queryNodeID, 
-    queryNodeDescription, 
-    queryNodeLabel, 
-    rawResults, 
-    type, 
-    zoomKeyDown, 
+    handleFilter = () => {},
+    hasNotes = false,
+    isFocused = false,
+    item,
+    key,
+    queryNodeID,
+    queryNodeDescription,
+    queryNodeLabel,
+    rawResults,
+    type,
+    zoomKeyDown,
   }) => {
   const root = useSelector(currentRoot);
 
   let icon: JSX.Element = getIcon(item.type);
   const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
-  let publicationCount: number = (currentEvidence.publications?.length) 
+  let publicationCount: number = (currentEvidence.publications?.length)
     ? currentEvidence.publications.filter((pub: PublicationObject)=> pub.type === "PMID" || pub.type === "PMC").length
     : 0;
-  let clinicalCount: number = (currentEvidence.publications?.length) 
+  let clinicalCount: number = (currentEvidence.publications?.length)
     ? currentEvidence.publications.filter((pub: PublicationObject)=> pub.type === "NCT").length
     : 0;
-  let sourcesCount: number = (currentEvidence.distinctSources?.length) 
+  let sourcesCount: number = (currentEvidence.distinctSources?.length)
     ? currentEvidence.distinctSources.length
     : 0;
-  let roleCount: number = (item.tags) 
+  let roleCount: number = (item.tags)
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
 
@@ -131,7 +131,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   useEffect(() => {
     if(!tagsRef.current)
       return;
-    
+
     const resizeObserver = new ResizeObserver(() => {
       if(tagsRef.current !== null)
       setTagsHeight(tagsRef.current.clientHeight);
@@ -144,7 +144,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   },[]);
 
   // useEffect(() => {
-  //   if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad) 
+  //   if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad)
   //     return;
 
   //   focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
@@ -160,8 +160,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
       }
     }
     return count;
-  } 
-  
+  }
+
   const pathsCount: number = useMemo(()=>getPathsCount(formattedPaths.current), [formattedPaths]);
   const pathString: string = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
@@ -198,7 +198,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   },[]);
 
   const handleNodeClick = useCallback((selectedPaths: Set<string[]>) => {
-    if(!selectedPaths) 
+    if(!selectedPaths)
       return;
 
     let newSelectedPaths: Set<PathObjectContainer> = new Set();
@@ -272,7 +272,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     } else {
       item.graph = itemGraph;
       delete item.paths;
-      let bookmarkObject = getFormattedBookmarkObject("result", item.name, "", queryNodeID, 
+      let bookmarkObject = getFormattedBookmarkObject("result", item.name, "", queryNodeID,
         queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
 
       console.log(bookmarkObject);
@@ -352,7 +352,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
         {
-          root === "main" 
+          root === "main"
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
                   <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
@@ -413,8 +413,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
         <ChevDown/>
       </button>
       <AnimateHeight
-        className={`${styles.accordionPanel} 
-          ${isExpanded ? styles.open : styles.closed } 
+        className={`${styles.accordionPanel}
+          ${isExpanded ? styles.open : styles.closed }
           ${item.description || item.tags.some(item=>item.includes("role")) ? styles.hasDescription : styles.noDescription }
         `}
         duration={500}
@@ -423,7 +423,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
         <div className={styles.container}>
           <div>
             {
-              item.tags && roleCount > 0 && availableTags && 
+              item.tags && roleCount > 0 && availableTags &&
               <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
                 {
                   item.tags.sort((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagID, i) => {
@@ -485,8 +485,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>
-      <BookmarkConfirmationModal 
-        isOpen={bookmarkRemovalConfirmationModalOpen} 
+      <BookmarkConfirmationModal
+        isOpen={bookmarkRemovalConfirmationModalOpen}
         onApprove={handleBookmarkRemovalApproval}
         onClose={()=>{
           setBookmarkRemovalConfirmationModalOpen(false);
