@@ -130,63 +130,63 @@
   @media screen and (min-width: $desktop) {
     grid-template-columns: 1fr 1fr;
   }
-  .pageNums {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    list-style-type: none;
-    padding-left: 0;
-    margin: 0 0 0 auto;
-    flex-wrap: wrap;
+}
+.pageNums {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0 0 0 auto;
+  flex-wrap: wrap;
+  @media screen and (min-width: $desktop) {
+    flex-wrap: nowrap;
+  }
+  .button {
+    margin-bottom: 0;
+    background-color: $purpleOne;
+    padding: 10px 15px;
+    border-radius: $defaultBorderRadius;
+    color: $white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
     @media screen and (min-width: $desktop) {
-      flex-wrap: nowrap;
+      padding: 10px 25px;
     }
-    .button {
-      margin-bottom: 0;
-      background-color: $purpleOne;
-      padding: 10px 15px;
-      border-radius: $defaultBorderRadius;
-      color: $white;
-      font-size: 16px;
-      font-weight: 700;
+  }
+  .disabled {
+    background-color: transparent;
+    color: $midGray;
+    pointer-events: none;
+    cursor: default;
+  }
+  .pageNum {
+    a {
+      display: block;
       cursor: pointer;
+      padding: 10px ;
+      line-height: 1;
+      margin: 6px;
+      transition: all .25s ease;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      color: $darkGray;
+      font-size: $bodyOneSize;
+      font-weight: 700;
       @media screen and (min-width: $desktop) {
-        padding: 10px 25px;
+        padding: 10px 15px;
+        margin: 8px;
+      }
+      &:hover {
+        background-color: $purpleTwo20;
+        color: $purpleOne;
       }
     }
-    .disabled {
-      background-color: transparent;
-      color: $midGray;
-      pointer-events: none;
-      cursor: default;
-    }
-    .pageNum {
+    &.current {
       a {
-        display: block;
-        cursor: pointer;
-        padding: 10px ;
-        line-height: 1;
-        margin: 6px;
-        transition: all .25s ease;
-        border: 1px solid transparent;
-        border-radius: 5px;
-        color: $darkGray;
-        font-size: $bodyOneSize;
-        font-weight: 700;
-        @media screen and (min-width: $desktop) {
-          padding: 10px 15px;
-          margin: 8px;
-        }
-        &:hover {
-          background-color: $purpleTwo20;
-          color: $purpleOne;
-        }
-      }
-      &.current {
-        a {
-          background-color: $purpleTwo20;
-          color: $purpleOne;
-        }
+        background-color: $purpleTwo20;
+        color: $purpleOne;
       }
     }
   }
