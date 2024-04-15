@@ -801,7 +801,11 @@ const ResultsList = ({loading}) => {
                   setShareModalOpen: setShareModalOpen,
                   currentQueryID: currentQueryID,
                   returnedARAs: returnedARAs.current,
-                  isError: isError
+                  isError: isError, 
+                  currentPage: currentPage.current,
+                  resultsListStyles: styles, 
+                  pageCount: pageCount,
+                  handlePageClick: handlePageClick
                 }}
                 loadingButtonData={{
                   handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),

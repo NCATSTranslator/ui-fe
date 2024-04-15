@@ -1,6 +1,7 @@
 import styles from './ResultsListHeader.module.scss';
 // import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
 import ResultsListLoadingBar from '../ResultsListLoadingBar/ResultsListLoadingBar';
+import ReactPaginate from 'react-paginate';
 import ShareModal from "../Modals/ShareModal";
 import Tooltip from '../Tooltip/Tooltip';
 import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter, getFilterLabel } from '../../Utilities/filterFunctions';
@@ -29,6 +30,53 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
   return(
     <div className={styles.resultsHeader}>
       <div className={styles.top}>
+        <ResultsListLoadingBar
+          data={{
+            handleResultsRefresh: loadingButtonData.handleResultsRefresh,
+            isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
+            isFetchingResults: loadingButtonData.isFetchingResults,
+            showDisclaimer: loadingButtonData.showDisclaimer,
+            containerClassName: loadingButtonData.containerClassName,
+            buttonClassName: loadingButtonData.buttonClassName,
+            hasFreshResults: loadingButtonData.hasFreshResults,
+            currentInterval: data.returnedARAs.aras.length,
+            status: data.returnedARAs.status, 
+            isError: data.isError
+          }}
+        />
+      </div>
+      <div className={styles.right}>
+        <button
+          className={styles.shareButton}
+          onClick={()=>{data.setShareModalOpen(true)}}
+          data-testid="share-button"
+          data-tooltip-id={`share-button-results-header`}
+          aria-describedby={`share-button-results-header`}
+          >
+            <ShareIcon/>
+            <Tooltip id={`share-button-results-header`}>
+              <span className={styles.tooltip}>Generate a sharable link for this set of results.</span>
+            </Tooltip>
+        </button>
+        <ShareModal
+          isOpen={data.shareModalOpen}
+          onClose={()=>data.setShareModalOpen(false)}
+          qid={data.currentQueryID}
+        />
+        {/* <ResultsListLoadingButton
+          data={{
+            handleResultsRefresh: loadingButtonData.handleResultsRefresh,
+            isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
+            isFetchingResults: loadingButtonData.isFetchingResults,
+            showDisclaimer: loadingButtonData.showDisclaimer,
+            containerClassName: loadingButtonData.containerClassName,
+            buttonClassName: loadingButtonData.buttonClassName,
+            hasFreshResults: loadingButtonData.hasFreshResults
+          }}
+        /> */}
+        
+      </div>
+      <div className={styles.bottom}>
         <div>
           <h5 className={styles.heading}>Results</h5>
           {
@@ -48,52 +96,23 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
             </p>
           }
         </div>
-        <div className={styles.middle}>
-          <ResultsListLoadingBar
-            data={{
-              handleResultsRefresh: loadingButtonData.handleResultsRefresh,
-              isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
-              isFetchingResults: loadingButtonData.isFetchingResults,
-              showDisclaimer: loadingButtonData.showDisclaimer,
-              containerClassName: loadingButtonData.containerClassName,
-              buttonClassName: loadingButtonData.buttonClassName,
-              hasFreshResults: loadingButtonData.hasFreshResults,
-              currentInterval: data.returnedARAs.aras.length,
-              status: data.returnedARAs.status, 
-              isError: data.isError
-            }}
-          />
-        </div>
-        <div className={styles.right}>
-          {/* <ResultsListLoadingButton
-            data={{
-              handleResultsRefresh: loadingButtonData.handleResultsRefresh,
-              isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
-              isFetchingResults: loadingButtonData.isFetchingResults,
-              showDisclaimer: loadingButtonData.showDisclaimer,
-              containerClassName: loadingButtonData.containerClassName,
-              buttonClassName: loadingButtonData.buttonClassName,
-              hasFreshResults: loadingButtonData.hasFreshResults
-            }}
-          /> */}
-          <button
-            className={styles.shareButton}
-            onClick={()=>{data.setShareModalOpen(true)}}
-            data-testid="share-button"
-            data-tooltip-id={`share-button-results-header`}
-            aria-describedby={`share-button-results-header`}
-            >
-              <ShareIcon/>
-              <Tooltip id={`share-button-results-header`}>
-                <span className={styles.tooltip}>Generate a sharable link for this set of results.</span>
-              </Tooltip>
-          </button>
-          <ShareModal
-            isOpen={data.shareModalOpen}
-            onClose={()=>data.setShareModalOpen(false)}
-            qid={data.currentQueryID}
-          />
-        </div>
+        <ReactPaginate
+          breakLabel="..."
+          nextLabel="Next"
+          previousLabel="Previous"
+          onPageChange={data.handlePageClick}
+          pageRangeDisplayed={5}
+          marginPagesDisplayed={1}
+          pageCount={data.pageCount}
+          renderOnZeroPageCount={null}
+          className={data.resultsListStyles.pageNums}
+          pageClassName={data.resultsListStyles.pageNum}
+          activeClassName={data.resultsListStyles.current}
+          previousLinkClassName={`${data.resultsListStyles.prev} ${data.resultsListStyles.button}`}
+          nextLinkClassName={`${data.resultsListStyles.prev} ${data.resultsListStyles.button}`}
+          disabledLinkClassName={data.resultsListStyles.disabled}
+          forcePage={data.currentPage}
+        />
       </div>
       {
         data.activeFilters.length > 0 &&
