@@ -6,14 +6,23 @@
     grid-column: 2/3;
   }
   .top {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: -60px;
+  }
+  .bottom {
     display: flex;
     width: 100%;
     justify-content: space-between;
     align-items: center;
+    margin-top: 10px;
   }
   .right {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
   }
   .heading {
     font-size: 26px;
