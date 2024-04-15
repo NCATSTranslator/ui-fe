@@ -33,6 +33,7 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "../BookmarkToasts/BookmarkToasts";
 import NotesModal from "../Modals/NotesModal";
+import ResultFocusModal from "../Modals/ResultFocusModal";
 
 const ResultsList = ({loading}) => {
 
@@ -50,8 +51,8 @@ const ResultsList = ({loading}) => {
     : null;
   const initNodeLabelParam = getDataFromQueryVar("l");
   const initNodeIdParam = getDataFromQueryVar("i");
-  let initResultIdParam = getDataFromQueryVar("r");
-  const hasFocusedOnFirstLoad = useRef(false);
+  const initResultIdParam = getDataFromQueryVar("r");
+  const firstLoad = useRef(true);
   const [nodeDescription, setNodeDescription] = useState();
 
   loading = (loading) ? loading : false;
@@ -83,6 +84,11 @@ const ResultsList = ({loading}) => {
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [focusModalOpen, setFocusModalOpen] = useState(false);
+  const [sharedItem, setSharedItem] = useState({index: 0, page: 0, name: ''});
+  const [autoScrollToResult, setAutoScrollToResult] = useState(false);
+  const [expandSharedResult, setExpandSharedResult] = useState(false);
+  const sharedItemRef = useRef(null);
   const noteLabel = useRef("");
   const currentBookmarkID = useRef(null);
   // Object, the currently selected item
@@ -95,8 +101,6 @@ const ResultsList = ({loading}) => {
   const [currentEvidence, setCurrentEvidence] = useState([]);
   // Int, current page
   const currentPage = useRef(0);
-  // ResultItem to focus on
-  const focusedItemRef = useRef(null);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
   // Int, how many items per page
@@ -200,6 +204,17 @@ const ResultsList = ({loading}) => {
     getUserSaves();
   }, [root, getUserSaves]);
 
+  useEffect(() => {
+    if (!autoScrollToResult) {
+      return;
+    }
+
+    const yOffset = -40;
+    const y = sharedItemRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    window.scrollTo({top: y, behavior: 'smooth'});
+    setAutoScrollToResult(false);
+  }, [autoScrollToResult]);
+
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
   const numberOfStatusChecks = useRef(0);
   // Initialize queryClient for React Query to fetch results
@@ -215,6 +230,7 @@ const ResultsList = ({loading}) => {
       : parseInt(newOffset + perPageNum);
     setItemOffset(newOffset);
     setEndResultIndex(endOffset);
+    setExpandSharedResult(false);
   }, [formattedResults.length, itemsPerPage]);
 
   const handleUpdateResults = (facetsAndFilters, asFilters, rr, or = [], justSort = false, sortType, fr = []) => {
@@ -241,18 +257,20 @@ const ResultsList = ({loading}) => {
     // set results
     setFormattedResults(newFormattedResults);
 
-    if(newFormattedResults.length > 0) {
-      let focusedPage = 0;
-      if (initResultIdParam !== '0' && !hasFocusedOnFirstLoad.current) {
-        let focusedItemIndex = newFormattedResults.findIndex(result => result.id === initResultIdParam);
-        if (focusedItemIndex === -1) {
-          focusedItemIndex = 0;
+    if(firstLoad.current && newFormattedResults.length > 0) {
+      firstLoad.current = false;
+      if (initResultIdParam !== '0') {
+        let sharedItemIndex = newFormattedResults.findIndex(result => result.id === initResultIdParam);
+        if (sharedItemIndex !== -1) {
+          setSharedItem({
+            index: sharedItemIndex,
+            page: Math.floor(sharedItemIndex / itemsPerPage),
+            name: newFormattedResults[sharedItemIndex].name,
+          });
+
+          setFocusModalOpen(true);
         }
-
-        focusedPage = Math.floor(focusedItemIndex / itemsPerPage);
       }
-
-      handlePageClick({selected: focusedPage}, false, newFormattedResults.length);
     }
 
     if(!justSort)
@@ -754,6 +772,17 @@ const ResultsList = ({loading}) => {
         edgeGroup={selectedEdge}
         path={selectedPath}
       />
+      <ResultFocusModal
+        isOpen={focusModalOpen}
+        onAccept={() => {
+          setFocusModalOpen(false);
+          handlePageClick({selected: sharedItem.page}, false, formattedResults.length);
+          setExpandSharedResult(true);
+          setAutoScrollToResult(true);
+        }}
+        onReject={() => setFocusModalOpen(false)}
+        sharedItem={sharedItem}
+      />
       <div className={styles.resultsList}>
         <Query
           results
@@ -897,9 +926,8 @@ const ResultsList = ({loading}) => {
                             availableTags={availableTags}
                             handleFilter={handleFilter}
                             activeFilters={activeFilters}
-                            isFocused={item.id === initResultIdParam}
-                            focusedItemRef={focusedItemRef}
-                            handleFocusedOnItem={()=>hasFocusedOnFirstLoad.current = true}
+                            sharedItemRef={item.id === initResultIdParam ? sharedItemRef : null}
+                            startExpanded={item.id === initResultIdParam && expandSharedResult}
                           />
                         )
                       })
@@ -949,7 +977,6 @@ const ResultsList = ({loading}) => {
                   data={{
                     handleResultsRefresh: () =>
                     {
-                      hasFocusedOnFirstLoad.current = false;
                       handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
                     },
                     isFetchingARAStatus: isFetchingARAStatus.current,
@@ -970,7 +997,6 @@ const ResultsList = ({loading}) => {
             loadingButtonData={{
               handleResultsRefresh: () =>
                 {
-                  hasFocusedOnFirstLoad.current = false;
                   handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
                 },
               isFetchingARAStatus: isFetchingARAStatus.current,

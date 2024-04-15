@@ -52,12 +52,12 @@ interface ResultsItemProps {
   bookmarked?: boolean;
   bookmarkID?: string | null;
   currentQueryID: string;
-  focusedItemRef: RefObject<HTMLDivElement>;
+  sharedItemRef: RefObject<HTMLDivElement>;
+  startExpanded: boolean;
   handleBookmarkError?: () => void;
   handleFilter: (tagObject: Tag) => void;
   hasNotes: boolean;
   item: ResultItem;
-  isFocused: boolean;
   key: string;
   queryNodeDescription: string;
   queryNodeID: string;
@@ -78,11 +78,11 @@ const ResultsItem: FC<ResultsItemProps> = ({
     bookmarked = false,
     bookmarkID = null,
     currentQueryID,
-    focusedItemRef,
+    sharedItemRef,
+    startExpanded = false,
     handleBookmarkError = () => {},
     handleFilter = () => {},
     hasNotes = false,
-    isFocused = false,
     item,
     key,
     queryNodeID,
@@ -112,7 +112,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
   const [itemBookmarkID, setItemBookmarkID] = useState<string | null>(bookmarkID);
   const [itemHasNotes, setItemHasNotes] = useState<boolean>(hasNotes);
-  const [isExpanded, setIsExpanded] = useState<boolean>(isFocused);
+  const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
   const [height, setHeight] = useState<number | string>(0);
   const formattedPaths = useRef<PathObjectContainer[]>(item.compressedPaths);
   // selectedPaths include the node ids of a path in a string array
@@ -143,14 +143,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
     };
   },[]);
 
-  // useEffect(() => {
-  //   if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad)
-  //     return;
-
-  //   focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
-  //   handleFocusedOnItem();
-  // }, [focusedItemRef])
-
   const getPathsCount = (paths: PathObjectContainer[]): number => {
     let count = paths.length;
     for(const path of paths) {
@@ -171,10 +163,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const [itemGraph, setItemGraph] = useState(null);
 
   const handleToggle = () => {
-    if (!isExpanded) {
-      // setResultsQueryParam('r', item.id);
-    }
-
     setIsExpanded(!isExpanded);
   }
 
@@ -330,7 +318,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }, [item, hasNotes]);
 
   return (
-    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={isFocused ? focusedItemRef : null}>
+    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
         {
