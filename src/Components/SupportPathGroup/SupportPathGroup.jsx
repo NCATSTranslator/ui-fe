@@ -44,7 +44,7 @@ const SupportPathGroup = ({ dataObj, isExpanded }) => {
         pathItem.support && 
         pathItem.support.sort((a, b) => b.highlighted - a.highlighted).map((supportPath, i) => {
           let pathKey = `${key}_${i}`;
-          const tooltipID = supportPath.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0] ).join("-");
+          const tooltipID = supportPath.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0].predicate ).join("-");
           return ( 
             <SupportPath
               dataObj={{
