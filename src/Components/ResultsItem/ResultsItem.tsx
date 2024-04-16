@@ -129,6 +129,10 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const numRoles = item.tags.filter(tag => tag.includes("role")).length;
 
   useEffect(() => {
+    setIsExpanded(startExpanded);
+  }, [startExpanded]);
+
+  useEffect(() => {
     if(!tagsRef.current)
       return;
 
