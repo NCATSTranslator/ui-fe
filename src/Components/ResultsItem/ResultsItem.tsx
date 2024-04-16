@@ -506,6 +506,11 @@ const areEqualProps = (prevProps: any, nextProps: any) => {
   if(prevProps.zoomKeyDown !== undefined && nextProps.zoomKeyDown !== undefined && prevProps.zoomKeyDown !== nextProps.zoomKeyDown)
     return false;
 
+  // if the item is set to expand on render, return false to rerender
+  if(prevProps.startExpanded !== nextProps.startExpanded) {
+    return false;
+  }
+
   // If none of the above conditions are met, props are equal, return true to not rerender
   return true;
 };
