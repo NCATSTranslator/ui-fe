@@ -44,6 +44,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const [errorText, setErrorText] = useState('');
   // String, input text from query var
   const [inputText, setInputText] = useState(initNodeLabelParam);
+  const [isOpen, setIsOpen] = useState(false);
 
   initPresetTypeObject = (initPresetTypeObject === null) ? queryTypes[0] : initPresetTypeObject;
   const initAutocompleteFunctions = (initPresetTypeObject === null) ? null : initPresetTypeObject.functions;
@@ -298,7 +299,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
         closeOnClick={false}
         closeButton={false}
       />
-        <AutoHeight className={styles.autoHeightContainer}>
+        <AutoHeight className={styles.autoHeightContainer} duration={0}>
           <div className={`${styles.container}`}>
             {results 
               ?
@@ -348,8 +349,11 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     <QuerySelect
                       label=""
                       name="Select a question"
-                      handleChange={(value)=>{
-                        handleQueryTypeChange(value, true);
+                      handleChange={(val)=>{
+                        handleQueryTypeChange(val, true);
+                      }}
+                      handleToggle={(val)=>{
+                        setIsOpen(val);
                       }}
                       startExpanded
                       noanimate
@@ -397,6 +401,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleDiseases} 
                     setPresetURL={setPresetURL} 
                     label="Example Diseases:"
+                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for chemicals UPregulated by a particular gene */}
@@ -406,6 +411,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleGenesUp} 
                     setPresetURL={setPresetURL} 
                     label="Example Genes:"
+                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for chemicals DOWNregulated by a particular gene */}
@@ -415,6 +421,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleGenesDown} 
                     setPresetURL={setPresetURL} 
                     label="Example Genes:"
+                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for genes UPregulated by a particular chemical */}
@@ -424,6 +431,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleChemsUp} 
                     setPresetURL={setPresetURL} 
                     label="Example Chemicals:"
+                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for genes DOWNregulated by a particular chemical */}
@@ -433,6 +441,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleChemsDown} 
                     setPresetURL={setPresetURL} 
                     label="Example Chemicals:"
+                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
               </>

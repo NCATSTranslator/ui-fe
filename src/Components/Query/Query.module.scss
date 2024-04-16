@@ -139,49 +139,10 @@
     }
   }
   .examples {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 50px;
-    .subTwo {
-      display: flex;
-      font-size: 14px;
-      font-weight: 700;
-      color: $darkGray;
-      margin: 0 $s 0 0;
-    }
-    .exampleList {
-      display: grid;
-      grid-template-columns: repeat(3, auto);
-      grid-gap: 12px;
-      @media (min-width: $desktop) {
-        display: block;
-      }
-      .button {
-        background-color: $white;
-        color: $purpleOne;
-        align-items: center;
-        background-color: $white;
-        border-radius: 5px;
-        color: $purpleOne;
-        cursor: pointer;
-        display: inline-flex;
-        font-size: 16px;
-        font-weight: 700;
-        justify-content: center;
-        line-height: 1;
-        padding: 10px 8px;
-        text-decoration: none;
-        transition: box-shadow .25s ease;
-        box-shadow: $dropShadow;
-        margin: 0 $m 0 0;
-        @media (min-width: $desktop) {
-          margin: 0 $s 0 0;
-        }
-        &:hover {
-          box-shadow: $dropShadowHover;
-        }
-      }
+    padding: 0;
+    transition: all .5s ease;
+    &.isOpen {
+      padding: 180px 0 0 0;
     }
   }
   .needHelp {
