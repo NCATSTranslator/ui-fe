@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
 import AnimateHeight from 'react-animate-height';
 
-const ExampleQueryList = ({examples, setPresetURL, label}) => {
+const ExampleQueryList = ({examples, setPresetURL, label, className = ""}) => {
 
   const root = useSelector(currentRoot);
   const minHeight = 52;
@@ -31,7 +31,7 @@ const ExampleQueryList = ({examples, setPresetURL, label}) => {
   });
 
   return(
-    <div className={styles.examplesContainer}>
+    <div className={`${styles.examplesContainer} ${className}`}>
       {
         root === "demo" && 
         <p className={styles.demoDisclaimer}>Login to run additional queries or select an example below.</p>
