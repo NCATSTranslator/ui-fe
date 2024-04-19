@@ -230,7 +230,6 @@ const ResultsList = ({loading}) => {
       : parseInt(newOffset + perPageNum);
     setItemOffset(newOffset);
     setEndResultIndex(endOffset);
-    setExpandSharedResult(false);
   }, [formattedResults.length, itemsPerPage]);
 
   const handleUpdateResults = (facetsAndFilters, asFilters, rr, or = [], justSort = false, sortType, fr = []) => {
@@ -928,6 +927,7 @@ const ResultsList = ({loading}) => {
                             activeFilters={activeFilters}
                             sharedItemRef={item.id === initResultIdParam ? sharedItemRef : null}
                             startExpanded={item.id === initResultIdParam && expandSharedResult}
+                            setExpandSharedResult={setExpandSharedResult}
                           />
                         )
                       })

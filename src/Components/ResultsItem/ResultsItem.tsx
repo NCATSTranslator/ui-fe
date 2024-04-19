@@ -23,6 +23,7 @@ import { QueryType } from '../../Utilities/queryTypes';
 // import { setResultsQueryParam } from '../../Utilities/resultsInteractionFunctions';
 import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject } from '../../Types/results';
 import { EvidenceContainer, PublicationObject } from '../../Types/evidence';
+import { useTurnstileEffect } from '../../Utilities/customHooks';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -54,6 +55,7 @@ interface ResultsItemProps {
   currentQueryID: string;
   sharedItemRef: RefObject<HTMLDivElement>;
   startExpanded: boolean;
+  setExpandSharedResult: (state: boolean) => void;
   handleBookmarkError?: () => void;
   handleFilter: (tagObject: Tag) => void;
   hasNotes: boolean;
@@ -80,6 +82,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     currentQueryID,
     sharedItemRef,
     startExpanded = false,
+    setExpandSharedResult = () => {},
     handleBookmarkError = () => {},
     handleFilter = () => {},
     hasNotes = false,
@@ -128,9 +131,11 @@ const ResultsItem: FC<ResultsItemProps> = ({
 
   const numRoles = item.tags.filter(tag => tag.includes("role")).length;
 
-  useEffect(() => {
-    setIsExpanded(startExpanded);
-  }, [startExpanded]);
+  useTurnstileEffect(
+    () => startExpanded,
+    () => setIsExpanded(true),
+    () => setExpandSharedResult(false),
+    [startExpanded]);
 
   useEffect(() => {
     if(!tagsRef.current)

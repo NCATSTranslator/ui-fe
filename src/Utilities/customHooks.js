@@ -98,3 +98,22 @@ export const useInterval = (callback, time) => {
     }
   }, [time]);
 };
+
+/**
+ * Custom React hook that acts as a turnstile. The body of the effect is executed once when open which causes
+ * the turnstile to lock. The turnstile must be unlocked externally.
+ *
+ * @param {turnstileIsOpen} - Predicate that returns if the turnstile is currently open.
+ * @param {effectBody}    - Function called when the turnstile is open.
+ * @param {turnstileLock} - Function that will lock the turnstile.
+ * @param {dependencies}  - Dependencies the effect relies on.
+ */
+export const useTurnstileEffect = (turnstileIsOpen, effectBody, turnstileLock, dependencies) => {
+  useEffect(() => {
+    if (turnstileIsOpen()) {
+      effectBody(...dependencies);
+      turnstileLock();
+    }
+
+  }, dependencies);
+}
