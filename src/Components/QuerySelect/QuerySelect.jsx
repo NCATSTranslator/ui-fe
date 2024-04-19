@@ -3,7 +3,7 @@ import AnimateHeight from "react-animate-height";
 import styles from './QuerySelect.module.scss';
 
 const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stayExpanded = false,
-  errorText, handleChange, noanimate, children, testId, className, iconClass}) => {
+  errorText = "Error Message", handleChange = () => {}, handleToggle = () => {}, noanimate, children, testId, className, iconClass}) => {
 
   value = (value === null || isNaN(value)) ? 0 : parseInt(value);
   const [selectedItem, setSelectedItem] = useState(value);
@@ -15,19 +15,23 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
   const wrapperRef = useRef(null);  
   const selectListContainerRef = useRef(null);  
 
-  handleChange = (handleChange) ? handleChange : () => {};
-  errorText = (errorText) ? errorText : "Error Message";
-
   const handleSelectClick = (e) => {
     e.preventDefault();
-    setSelectOpen(!selectOpen);
+    setSelectOpen(prev=>{
+      handleToggle(!prev);
+      return(!prev);
+    });
   }
 
   const handleOptionClick = (e) => {
     e.preventDefault();
     setSelectedItem(parseInt(e.target.dataset.value));
-    if(!stayExpanded)
-      setSelectOpen(!selectOpen);
+    if(!stayExpanded) {
+      setSelectOpen(prev=>{
+        handleToggle(!prev);
+        return(!prev);
+      });
+    }
     handleChange(e.target.dataset.value);
   }
   
@@ -61,7 +65,10 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
       return;
       
     // wait 750ms before auto opening the dropdown
-    let openSelectTimeout = setTimeout(() => setSelectOpen(true), 750);
+    let openSelectTimeout = setTimeout(() => {
+      setSelectOpen(true);
+      handleToggle(true);
+    }, 750);
     return () => {
       clearTimeout(openSelectTimeout);
     };
