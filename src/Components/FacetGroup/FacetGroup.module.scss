@@ -1,0 +1,219 @@
+@import "../../Assets/Styles/variables";
+
+.facetGroup {
+  margin-bottom: 10px;
+  .facetButton {
+    display: grid;
+    grid-template-columns: 1fr 35px;
+    width: 100%;
+    box-shadow: none;
+    background-color: transparent;
+    border-radius: 0;
+    color: $black;
+    padding: 0;
+    text-align: left;
+    margin-bottom: 0;
+    &:hover {
+      box-shadow: none;
+    }
+    .expansionSVG {
+      transition: all .35s ease;
+    }
+    &.isExpanded {
+      .expansionSVG {
+        transform: rotate(180deg);
+      }
+    }
+  }
+  .labelContainer {
+    padding: 15px 0;
+    .label {
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+      margin: 0 0 5px;
+    }
+    svg {
+      margin-left: 4px;
+    }
+  }
+
+  .top,.left {
+    display: flex;
+    justify-content: space-between;
+    height: fit-content;
+    .select {
+      height: min-content;
+      width: 115px;
+    }
+  }
+
+  .subOne {
+    color: $darkGray;
+  }
+  .subTwo {
+    margin: 0;
+    font-weight: 700;
+    font-size: 16px;
+    color: $darkGray;
+  }
+  .caption {
+    font-size: $captionSize;
+    margin: 0;
+    font-weight: 400;
+  }
+  label {
+    margin: 0;
+  }
+  .evidenceCheckbox {
+    margin-bottom: $s;
+  }
+  .facetContainer {
+    margin-bottom: 4px;
+    background-color: $white;
+    border: 1px solid $borderGray;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    transition: $defaultAnim;
+    &.containerNegativeChecked {
+      border-color: $redTwo;
+    }
+    &.containerPositiveChecked {
+      border-color: $purpleEdgeBGSelected;
+    }
+    .positive input + span {
+      &:hover {
+        &+span {
+          svg path{
+            fill: $purpleEdgeBGSelected;
+          }
+        }
+      }
+      &+span:hover {
+        svg path{
+          fill: $purpleEdgeBGSelected;
+        }
+      }
+    }
+    .positiveChecked, .negativeChecked {
+      svg {
+        path {
+          fill: $white !important;
+        }
+      }
+    }
+    .positiveChecked {
+      background-color: $purpleEdgeBGSelected;
+      border-right-color: $purpleEdgeBGSelected;
+  
+    }
+    .negativeChecked {
+      background-color: $redTwo;
+    }
+    input + span span, .facetCount {
+      color: $black;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    input + span {
+      position: relative;
+      width: 100%;
+      padding: 10px 45px 10px 15px;
+      margin-right: 6px;
+    }
+    label {
+      width: 100%;
+    }
+    label span + span {
+      height: 100%;
+      min-width: 25px;
+      border-top: none;
+      border-right: 1px solid $borderGray;
+      border-bottom: none;
+      border-left: 1px solid $borderGray;
+      border-radius: 0px;
+    }
+    .negative {
+      width: min-content;
+      input {
+        display: none;
+        &+span {
+          display: none;
+        }
+      }
+      span + span {
+        border: none;
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+        &:hover {
+          svg path {
+            fill: $red;
+          }
+        }
+      }
+    }
+  }
+  .tagName {
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+  .facetCount {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border: none !important;
+    a {
+      margin-right: 2px;
+      display: flex;
+    }
+  }
+  .roleSpan, .fdaSpan {
+    font-size: 12px; 
+  }
+  .tooltipParagraph {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .tooltipLink {
+    font-size: 12px; 
+    color: $white;
+  }
+  .checkbox {
+    margin-bottom: 0;
+  }
+  .showButtonsContainer {
+    display: flex;
+    justify-content: center;
+  }
+  .showButton {
+    color: #606368;
+    font-size: 12px;
+    font-weight: 700;
+    background-color: transparent;
+    box-shadow: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .section {
+    &::-webkit-scrollbar-track {
+      background-color: $white;
+    }
+    &.role {
+      max-height: 250px;
+      overflow-y: scroll;
+    }
+  }
+  .extLinkIcon {
+    width: 20px;
+    height: 20px;
+  }
+}
