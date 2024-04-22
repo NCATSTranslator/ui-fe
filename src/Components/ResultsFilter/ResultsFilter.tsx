@@ -1,5 +1,6 @@
-import {useState, useMemo} from 'react';
+import {useState, useMemo, FC} from 'react';
 import styles from './ResultsFilter.module.scss';
+import { Filter, Tag, GroupedTags } from '../../Types/results';
 import Checkbox from '../FormFields/Checkbox';
 import EntitySearch from '../EntitySearch/EntitySearch';
 import Tooltip from '../Tooltip/Tooltip';
@@ -11,10 +12,18 @@ import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacet, isEvidenceFilter } from '../../Utilities/filterFunctions';
 import { cloneDeep } from 'lodash';
 
-const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
+interface ResultsFilterProps {
+  onClearAll: () => void;
+  onClearTag: () => void;
+  onFilter: (arg0: Tag) => void;
+  activeFilters: Filter[];
+  availableTags: {[key: string]: Tag};
+}
+
+const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
 
   // returns a new object with each tag grouped by its type
-  const groupAvailableTags = (tags) => {
+  const groupAvailableTags = (tags: {[key: string]: Tag}): GroupedTags => {
     let clonedTags = cloneDeep(tags);
     let roleTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('role:')));
     let chemicalTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('cc:')));
@@ -23,7 +32,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let diTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('di:')));
     let pathTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pt:')));
     // The ordering of newGroupedTags determines the order of the facets in the UI
-    const newGroupedTags = {
+    const newGroupedTags: GroupedTags = {
       chemicalType: chemicalTypeTags,
       di: diTags,
       nodeType: nodeTypeTags,
@@ -35,12 +44,17 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     return newGroupedTags;
   }
 
-  const [tagObject, setTagObject] = useState({type:'', value: ''});
-  const groupedTags = useMemo(()=>groupAvailableTags(availableTags), [availableTags]);
+  const [tagObject, setTagObject] = useState<Tag>({
+    name: "",
+    negated: false,
+    type: "",
+    value: ""
+  });
+  const groupedTags = useMemo(() => groupAvailableTags(availableTags), [availableTags]);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
 
-  const handleFacetChange = (facetID, objectToUpdate, setterFunction, negated = false, label = '') => {
+  const handleFacetChange = (facetID: string, objectToUpdate: Tag, setterFunction: (tag: Tag)=>void, negated: boolean = false, label: string = '') => {
     if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
       return;
     }
@@ -53,7 +67,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     onFilter(newObj);
   }
 
-  const getRoleHeading = () => {
+  const getRoleHeading = (): JSX.Element => {
     return (
       <div className={styles.labelContainer} >
         <div className={styles.label} data-tooltip-id="chebi-role-tooltip" >
@@ -68,7 +82,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getChemicalTypeHeading = () => {
+  const getChemicalTypeHeading = (): JSX.Element => {
     return(
       <div className={styles.labelContainer} >
           <div className={styles.label} data-tooltip-id="chemical-type-tooltip" >
@@ -85,7 +99,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getNodeTypeHeading = () => {
+  const getNodeTypeHeading = (): JSX.Element => {
     return(
       <div className={styles.labelContainer} >
         <div className={styles.label} data-tooltip-id="biolink-tooltip-2" >
@@ -100,7 +114,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getAraHeading = () => {
+  const getAraHeading = (): JSX.Element => {
     return(
       <div className={styles.labelContainer} >
           <div className={styles.label} >
@@ -111,7 +125,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getDrugIndicationsHeading = () => {
+  const getDrugIndicationsHeading = (): JSX.Element => {
     return(
       <div className={styles.labelContainer} >
           <div className={styles.label} >
@@ -122,7 +136,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const getPathTypeHeadings = () => {
+  const getPathTypeHeadings = (): JSX.Element => {
     return(
       <div className={styles.labelContainer} >
           <div className={styles.label} >
@@ -134,7 +148,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
   }
 
 
-  const getTagHeadingMarkup = (tagType) => {
+  const getTagHeadingMarkup = (tagType: string): JSX.Element | null => {
     let headingToReturn;
     switch(tagType) {
       case 'chemicalType':
@@ -156,17 +170,17 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
         headingToReturn = getPathTypeHeadings();
         break;
       default:
-        headingToReturn = '';
+        headingToReturn = null;
     }
     return headingToReturn;
   }
 
-  const getRoleLinkout = (tagKey) => {
+  const getRoleLinkout = (tagKey: string): string => {
     const id = tagKey.split(':').slice(1,).join('%3A');
     return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
   }
 
-  const tagDisplay = (tag, type, tagObject, setTagObjectFunc, availableTags) => {
+  const tagDisplay = (tag: [string, Tag], type: string, tagObjectState: Tag, setTagObjectFunc: (arg0:Tag)=>void, availableTags: {[key: string]: Tag}): JSX.Element => {
     let tagKey = tag[0];
     let object = tag[1];
     let tagName = '';
@@ -179,10 +193,10 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     let negativeChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)) ? true: false;
 
     return (
-      availableTags[tagKey] && availableTags[tagKey].count &&
+      // availableTags[tagKey] && availableTags[tagKey].count &&
       <div className={`${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey}>
         <Checkbox
-          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, false, tagName)}
+          handleClick={() => handleFacetChange(tagKey, tagObjectState, setTagObjectFunc, false, tagName)}
           checked={positiveChecked}
           className={`${styles.checkbox} ${styles.positive}`}
           checkedClassName={positiveChecked ? styles.positiveChecked : ""}
@@ -202,7 +216,7 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
           </span>
         </Checkbox>
         <Checkbox
-          handleClick={() => handleFacetChange(tagKey, tagObject, setTagObjectFunc, true, tagName)}
+          handleClick={() => handleFacetChange(tagKey, tagObjectState, setTagObjectFunc, true, tagName)}
           checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)}
           className={`${styles.checkbox} ${styles.negative}`}
           checkedClassName={negativeChecked ? styles.negativeChecked : ""}
@@ -212,12 +226,11 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     )
   }
 
-  const displayFacets = (type) => {
-    const typeIndexMapping = activeFilters.reduce((acc, filter, index) => {
+  const displayFacets = (type: string, activeFilters: Filter[], groupedTags: GroupedTags) => {
+    const typeIndexMapping = activeFilters.reduce<Record<string, number>>((acc, filter, index) => {
       acc[filter.type] = index;
       return acc;
     }, {});
-
     const sortedFacets = Object.entries(groupedTags[type]).sort((a, b) => {
       const indexA = typeIndexMapping[a[0]] !== undefined ? typeIndexMapping[a[0]] : Infinity;
       const indexB = typeIndexMapping[b[0]] !== undefined ? typeIndexMapping[b[0]] : Infinity;
@@ -236,11 +249,11 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
       // If both are in activeFilters, retain their order (assuming activeFilters is pre-sorted or order doesn't matter)
       return 0;
     });
-
+  
     return (
-      <div className={`${styles.section} ${Object.keys(groupedTags[type]).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
+      <div className={`${styles.section} ${Object.keys(groupedTags).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
-          sortedFacets.map((tag, j) => {
+          sortedFacets.map((tag) => {
             return tagDisplay(tag, type, tagObject, setTagObject, availableTags);
           })
         }
@@ -252,10 +265,10 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
-        <EntitySearch
+        {/* <EntitySearch
           activeFilters={activeFilters}
           onFilter={onFilter}
-        />
+        /> */}
         <div className={styles.tagsContainer}>
           {
             groupedTags &&
@@ -265,11 +278,11 @@ const ResultsFilter = ({activeFilters, onFilter, onClearAll, onClearTag, availab
                 <>
                   {
                     // if there are tags within this group, display the heading
-                    Object.keys(groupedTags[tagType]).length > 0 &&
+                    Object.keys(groupedTags[tagType]).length > 0 && typeHeadingMarkup !== null &&
                     typeHeadingMarkup
                   }
                   {
-                    displayFacets(tagType)
+                    displayFacets(tagType, activeFilters, groupedTags)
                   }
                 </>
               )
