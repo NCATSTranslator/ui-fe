@@ -1,9 +1,9 @@
-import {useState, useMemo, FC} from 'react';
+import { useMemo, FC } from 'react';
 import styles from './ResultsFilter.module.scss';
 import { Filter, Tag, GroupedTags } from '../../Types/results';
-
 import { cloneDeep } from 'lodash';
 import FacetGroup from '../FacetGroup/FacetGroup';
+import EntitySearch from '../EntitySearch/EntitySearch';
 
 interface ResultsFilterProps {
   onClearAll: () => void;
@@ -48,10 +48,9 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
     <div className={styles.resultsFilter}>
       <div className={styles.bottom}>
         <p className={styles.heading}>Filters</p>
-        {/* <EntitySearch
-          activeFilters={activeFilters}
+        <EntitySearch
           onFilter={onFilter}
-        /> */}
+        />
         <div>
           {
             groupedTags &&
