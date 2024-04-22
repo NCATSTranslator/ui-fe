@@ -1,11 +1,9 @@
 @import "../../Assets/Styles/variables";
 
 .facetGroup {
-  margin-bottom: 10px;
+  padding: 15px 0;
+  border-bottom: 1px solid $midGray;
   .facetButton {
-    display: grid;
-    grid-template-columns: 1fr 35px;
-    width: 100%;
     box-shadow: none;
     background-color: transparent;
     border-radius: 0;
@@ -13,6 +11,7 @@
     padding: 0;
     text-align: left;
     margin-bottom: 0;
+    width: 100%;
     &:hover {
       box-shadow: none;
     }
@@ -26,12 +25,16 @@
     }
   }
   .labelContainer {
-    padding: 15px 0;
+    width: 100%;
+    .labelHeading {
+      display: grid;
+      grid-template-columns: 1fr 35px;
+      width: 100%;
+    }
     .label {
       display: inline-flex;
       align-items: center;
       position: relative;
-      margin: 0 0 5px;
     }
     svg {
       margin-left: 4px;
@@ -59,7 +62,7 @@
   }
   .caption {
     font-size: $captionSize;
-    margin: 0;
+    margin: 0 0 15px;
     font-weight: 400;
   }
   label {

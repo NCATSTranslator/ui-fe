@@ -15,22 +15,30 @@ import { cloneDeep } from "lodash";
 
 const getRoleHeading = (): JSX.Element => {
   return (
-    <div className={styles.labelContainer} >
-      <div className={styles.label} data-tooltip-id="chebi-role-tooltip" >
-        <p className={styles.subTwo}>ChEBI Role Classification</p>
-        <Alert/>
-        <Tooltip id="chebi-role-tooltip">
-          <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
-        </Tooltip>
+    <div className={styles.labelContainer}>
+      <div className={styles.labelHeading}>
+        <div className={styles.label} data-tooltip-id="chebi-role-tooltip" >
+          <p className={styles.subTwo}>ChEBI Role Classification</p>
+          <Alert/>
+          <Tooltip id="chebi-role-tooltip">
+            <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
+          </Tooltip>
+        </div>
+        <ChevDown className={styles.expansionSVG}/>
       </div>
-      <p className={styles.caption}>Show only results that match a particular chemical role.</p>
     </div>
+  )
+}
+const getRoleCaption = (): JSX.Element => {
+  return (
+    <p className={styles.caption}>Show only results that match a particular chemical role.</p>
   )
 }
 
 const getChemicalTypeHeading = (): JSX.Element => {
   return(
-    <div className={styles.labelContainer} >
+    <div className={styles.labelContainer}>
+      <div className={styles.labelHeading}>
         <div className={styles.label} data-tooltip-id="chemical-type-tooltip" >
           <p className={styles.subTwo}>Chemical Categories</p>
           <Alert/>
@@ -40,59 +48,93 @@ const getChemicalTypeHeading = (): JSX.Element => {
             <p className={styles.tooltipParagraph}>Other includes all other chemicals.</p>
           </Tooltip>
         </div>
-        <p className={styles.caption}>Filter on different categories of chemicals.</p>
+        <ChevDown className={styles.expansionSVG}/>
+      </div>
     </div>
+  )
+}
+const getChemicalTypeCaption = (): JSX.Element => {
+  return(
+    <p className={styles.caption}>Filter on different categories of chemicals.</p>
   )
 }
 
 const getNodeTypeHeading = (): JSX.Element => {
   return(
-    <div className={styles.labelContainer} >
-      <div className={styles.label} data-tooltip-id="biolink-tooltip-2" >
-        <p className={styles.subTwo}>Node Type</p>
-        <Alert/>
-        <Tooltip id="biolink-tooltip-2">
-          <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
-        </Tooltip>
+    <div className={styles.labelContainer}>
+      <div className={styles.labelHeading}>
+        <div className={styles.label} data-tooltip-id="biolink-tooltip-2" >
+          <p className={styles.subTwo}>Node Type</p>
+          <Alert/>
+          <Tooltip id="biolink-tooltip-2">
+            <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
+          </Tooltip>
         </div>
-        <p className={styles.caption}>Show only results that include a node with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+        <ChevDown className={styles.expansionSVG}/>
+      </div>
     </div>
+  )
+}
+const getNodeTypeCaption = (): JSX.Element => {
+  return(
+    <p className={styles.caption}>Show only results that include a node with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
   )
 }
 
 const getAraHeading = (): JSX.Element => {
   return(
-    <div className={styles.labelContainer} >
+    <div className={styles.labelContainer}>
+      <div className={styles.labelHeading}>
         <div className={styles.label} >
           <p className={styles.subTwo}>Reasoning Agent</p>
         </div>
-        <p className={styles.caption}>Filter on specific reasoning agents used to calculate the results.</p>
+        <ChevDown className={styles.expansionSVG}/>
+      </div>
     </div>
   )
 }
+const getAraCaption = (): JSX.Element => {
+  return(
+    <p className={styles.caption}>Filter on specific reasoning agents used to calculate the results.</p>
+  )
+}
+
 
 const getDrugIndicationsHeading = (): JSX.Element => {
   return(
-    <div className={styles.labelContainer} >
+    <div className={styles.labelContainer}>
+      <div className={styles.labelHeading}>
         <div className={styles.label} >
           <p className={styles.subTwo}>Drug Indications</p>
         </div>
-        <p className={styles.caption}>Filter on if the drug is indicated for the given disease.</p>
+        <ChevDown className={styles.expansionSVG}/>
+      </div>
     </div>
+  )
+}
+const getDrugIndicationsCaption = (): JSX.Element => {
+  return(
+    <p className={styles.caption}>Filter on if the drug is indicated for the given disease.</p>
   )
 }
 
 const getPathTypeHeadings = (): JSX.Element => {
   return(
-    <div className={styles.labelContainer} >
+    <div className={styles.labelContainer}>
+      <div className={styles.labelHeading}>
         <div className={styles.label} >
           <p className={styles.subTwo}>Relationship Type</p>
         </div>
-        <p className={styles.caption}>Filter direct relationships (establed from evident from external sources) and/or inferred relationships (deduced from patterns in Translator's knowledge graphs).</p>
+        <ChevDown className={styles.expansionSVG}/>
+      </div>
     </div>
   )
 }
-
+const getPathTypeCaption = (): JSX.Element => {
+  return(
+    <p className={styles.caption}>Filter direct relationships (establed from evident from external sources) and/or inferred relationships (deduced from patterns in Translator's knowledge graphs).</p>
+  )
+}
 
 const getTagHeadingMarkup = (tagType: string): JSX.Element | null => {
   let headingToReturn;
@@ -119,6 +161,33 @@ const getTagHeadingMarkup = (tagType: string): JSX.Element | null => {
       headingToReturn = null;
   }
   return headingToReturn;
+}
+
+const getTagCaptionMarkup = (tagType: string): JSX.Element | null => {
+  let captionToReturn;
+  switch(tagType) {
+    case 'chemicalType':
+      captionToReturn = getChemicalTypeCaption();
+      break;
+    case 'nodeType':
+      captionToReturn = getNodeTypeCaption();
+      break;
+    case 'role':
+      captionToReturn = getRoleCaption();
+      break;
+    case 'ara':
+      captionToReturn = getAraCaption();
+      break;
+    case 'di':
+      captionToReturn = getDrugIndicationsCaption();
+      break;
+    case 'pt':
+      captionToReturn = getPathTypeCaption();
+      break;
+    default:
+      captionToReturn = null;
+  }
+  return captionToReturn;
 }
 
 const getRoleLinkout = (tagKey: string): string => {
@@ -240,6 +309,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
   }
   
   const typeHeadingMarkup = getTagHeadingMarkup(tagType);
+  const typeCaptionMarkup = getTagCaptionMarkup(tagType);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [height, setHeight] = useState<number | string>(0);
 
@@ -263,7 +333,6 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
           {
             typeHeadingMarkup
           }
-          <ChevDown className={styles.expansionSVG}/>
         </button>
       } 
       <AnimateHeight
@@ -271,9 +340,12 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
         duration={500}
         height={height}
       >
-      {
-        displayFacets(tagType, activeFilters, groupedTags, tagObject, setTagObject, availableTags)
-      }
+        {
+          typeCaptionMarkup
+        }
+        {
+          displayFacets(tagType, activeFilters, groupedTags, tagObject, setTagObject, availableTags)
+        }
       </AnimateHeight>
     </div>
   );
