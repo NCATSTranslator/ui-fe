@@ -17,9 +17,11 @@ const getRoleHeading = (): JSX.Element => {
   return (
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
-        <div className={styles.label} data-tooltip-id="chebi-role-tooltip" >
-          <p className={styles.subTwo}>ChEBI Role Classification</p>
-          <Alert/>
+        <div className={styles.label}>
+          <span data-tooltip-id="chebi-role-tooltip">
+            <p className={styles.subTwo} >ChEBI Role Classification</p>
+            <Alert/>
+          </span>
           <Tooltip id="chebi-role-tooltip">
             <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
           </Tooltip>
@@ -39,9 +41,11 @@ const getChemicalTypeHeading = (): JSX.Element => {
   return(
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
-        <div className={styles.label} data-tooltip-id="chemical-type-tooltip" >
-          <p className={styles.subTwo}>Chemical Categories</p>
-          <Alert/>
+        <div className={styles.label}>
+          <span data-tooltip-id="chemical-type-tooltip">
+            <p className={styles.subTwo}>Chemical Categories</p>
+            <Alert/>
+          </span>
           <Tooltip id="chemical-type-tooltip">
             <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
             <p className={styles.tooltipParagraph}>Phase 1-3 Drugs are chemicals that are part of a clinical trial and do not yet have FDA approval.</p>
@@ -63,9 +67,11 @@ const getNodeTypeHeading = (): JSX.Element => {
   return(
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
-        <div className={styles.label} data-tooltip-id="biolink-tooltip-2" >
-          <p className={styles.subTwo}>Node Type</p>
-          <Alert/>
+        <div className={styles.label}>
+          <span data-tooltip-id="biolink-tooltip-2">
+            <p className={styles.subTwo}>Node Type</p>
+            <Alert/>
+          </span>
           <Tooltip id="biolink-tooltip-2">
             <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
           </Tooltip>
