@@ -49,6 +49,7 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        handleToggle(false);
         setSelectOpen(false);
         setHeight(0);
       }
