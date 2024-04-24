@@ -265,6 +265,7 @@ const ResultsList = ({loading}) => {
             index: sharedItemIndex,
             page: Math.floor(sharedItemIndex / itemsPerPage),
             name: newFormattedResults[sharedItemIndex].name,
+            type: newFormattedResults[sharedItemIndex].type
           });
 
           setFocusModalOpen(true);
