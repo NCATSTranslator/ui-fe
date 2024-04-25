@@ -333,32 +333,32 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
   }, [isExpanded])
 
   return (
-    <div className={styles.facetGroup}>
-      {
-        // if there are tags within this group, display the heading
-        Object.keys(groupedTags[tagType]).length > 0 && typeHeadingMarkup !== null &&
-        <button 
-          className={`${styles.facetButton} ${isExpanded ? styles.isExpanded : ''}`}
-          onClick={()=>setIsExpanded(prev=>!prev)}
-        >
-          {
-            typeHeadingMarkup
-          }
-        </button>
-      } 
-      <AnimateHeight
-        className={`${styles.facetPanel}`}
-        duration={500}
-        height={height}
-      >
-        {
-          typeCaptionMarkup
-        }
-        {
-          displayFacets(tagType, activeFilters, groupedTags, tagObject, setTagObject, availableTags)
-        }
-      </AnimateHeight>
-    </div>
+    (Object.keys(groupedTags[tagType]).length > 0 && typeHeadingMarkup !== null )
+      ?
+        <div className={styles.facetGroup}>
+            <button 
+              className={`${styles.facetButton} ${isExpanded ? styles.isExpanded : ''}`}
+              onClick={()=>setIsExpanded(prev=>!prev)}
+            >
+              {
+                typeHeadingMarkup
+              }
+            </button>
+          <AnimateHeight
+            className={`${styles.facetPanel}`}
+            duration={500}
+            height={height}
+          >
+            {
+              typeCaptionMarkup
+            }
+            {
+              displayFacets(tagType, activeFilters, groupedTags, tagObject, setTagObject, availableTags)
+            }
+          </AnimateHeight>
+        </div>
+      :
+        <></>
   );
 }
 

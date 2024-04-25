@@ -54,7 +54,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
         <div>
           {
             groupedTags &&
-            Object.keys(groupedTags).map((tagType, i) => {
+            Object.keys(groupedTags).map((tagType) => {
               return (
                 <FacetGroup
                   tagType={tagType}
