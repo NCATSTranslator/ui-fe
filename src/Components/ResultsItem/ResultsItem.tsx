@@ -134,8 +134,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   useTurnstileEffect(
     () => startExpanded,
     () => setIsExpanded(true),
-    () => setExpandSharedResult(false),
-    [startExpanded]);
+    () => setExpandSharedResult(false));
 
   useEffect(() => {
     if(!tagsRef.current)
