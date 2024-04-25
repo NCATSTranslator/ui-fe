@@ -3,6 +3,9 @@
 .facetGroup {
   padding: 15px 0;
   border-bottom: 1px solid $midGray;
+  .underline {
+    text-decoration: underline;
+  }
   .facetButton {
     box-shadow: none;
     background-color: transparent;

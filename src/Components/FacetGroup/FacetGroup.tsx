@@ -13,13 +13,14 @@ import Alert from '../../Icons/Alerts/Info.svg?react';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
 import { cloneDeep } from "lodash";
 
-const getRoleHeading = (): JSX.Element => {
+const getRoleHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
+  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
   return (
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label}>
           <span data-tooltip-id="chebi-role-tooltip">
-            <p className={styles.subTwo} >ChEBI Role Classification</p>
+            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>ChEBI Role Classification</p>
             <Alert/>
           </span>
           <Tooltip id="chebi-role-tooltip">
@@ -37,13 +38,14 @@ const getRoleCaption = (): JSX.Element => {
   )
 }
 
-const getChemicalTypeHeading = (): JSX.Element => {
+const getChemicalTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
+  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
   return(
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label}>
           <span data-tooltip-id="chemical-type-tooltip">
-            <p className={styles.subTwo}>Chemical Categories</p>
+            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Chemical Categories</p>
             <Alert/>
           </span>
           <Tooltip id="chemical-type-tooltip">
@@ -63,13 +65,14 @@ const getChemicalTypeCaption = (): JSX.Element => {
   )
 }
 
-const getNodeTypeHeading = (): JSX.Element => {
+const getNodeTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
+  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
   return(
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label}>
           <span data-tooltip-id="biolink-tooltip-2">
-            <p className={styles.subTwo}>Node Type</p>
+            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Node Type</p>
             <Alert/>
           </span>
           <Tooltip id="biolink-tooltip-2">
@@ -87,12 +90,13 @@ const getNodeTypeCaption = (): JSX.Element => {
   )
 }
 
-const getAraHeading = (): JSX.Element => {
+const getAraHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
+  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
   return(
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label} >
-          <p className={styles.subTwo}>Reasoning Agent</p>
+          <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Reasoning Agent</p>
         </div>
         <ChevDown className={styles.expansionSVG}/>
       </div>
@@ -106,12 +110,13 @@ const getAraCaption = (): JSX.Element => {
 }
 
 
-const getDrugIndicationsHeading = (): JSX.Element => {
+const getDrugIndicationsHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
+  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
   return(
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label} >
-          <p className={styles.subTwo}>Drug Indications</p>
+          <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Drug Indications</p>
         </div>
         <ChevDown className={styles.expansionSVG}/>
       </div>
@@ -124,12 +129,13 @@ const getDrugIndicationsCaption = (): JSX.Element => {
   )
 }
 
-const getPathTypeHeadings = (): JSX.Element => {
+const getPathTypeHeadings = (tagType: string, activeFilters: Filter[]): JSX.Element => {
+  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
   return(
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label} >
-          <p className={styles.subTwo}>Relationship Type</p>
+          <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Relationship Type</p>
         </div>
         <ChevDown className={styles.expansionSVG}/>
       </div>
@@ -142,26 +148,26 @@ const getPathTypeCaption = (): JSX.Element => {
   )
 }
 
-const getTagHeadingMarkup = (tagType: string): JSX.Element | null => {
+const getTagHeadingMarkup = (tagType: string, activeFilters: Filter[]): JSX.Element | null => {
   let headingToReturn;
   switch(tagType) {
-    case 'chemicalType':
-      headingToReturn = getChemicalTypeHeading();
+    case 'cc':
+      headingToReturn = getChemicalTypeHeading(tagType, activeFilters);
       break;
-    case 'nodeType':
-      headingToReturn = getNodeTypeHeading();
+    case 'pc':
+      headingToReturn = getNodeTypeHeading(tagType, activeFilters);
       break;
     case 'role':
-      headingToReturn = getRoleHeading();
+      headingToReturn = getRoleHeading(tagType, activeFilters);
       break;
     case 'ara':
-      headingToReturn = getAraHeading();
+      headingToReturn = getAraHeading(tagType, activeFilters);
       break;
     case 'di':
-      headingToReturn = getDrugIndicationsHeading();
+      headingToReturn = getDrugIndicationsHeading(tagType, activeFilters);
       break;
     case 'pt':
-      headingToReturn = getPathTypeHeadings();
+      headingToReturn = getPathTypeHeadings(tagType, activeFilters);
       break;
     default:
       headingToReturn = null;
@@ -172,10 +178,10 @@ const getTagHeadingMarkup = (tagType: string): JSX.Element | null => {
 const getTagCaptionMarkup = (tagType: string): JSX.Element | null => {
   let captionToReturn;
   switch(tagType) {
-    case 'chemicalType':
+    case 'cc':
       captionToReturn = getChemicalTypeCaption();
       break;
-    case 'nodeType':
+    case 'pc':
       captionToReturn = getNodeTypeCaption();
       break;
     case 'role':
@@ -235,7 +241,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
     let tagKey = tag[0];
     let object = tag[1];
     let tagName = '';
-    if (type === 'nodeType') {
+    if (type === 'pc') {
       tagName = formatBiolinkEntity(object.name);
     } else {
       tagName = object.name;
@@ -314,11 +320,10 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
     )
   }
   
-  const typeHeadingMarkup = getTagHeadingMarkup(tagType);
+  const typeHeadingMarkup = getTagHeadingMarkup(tagType, activeFilters);
   const typeCaptionMarkup = getTagCaptionMarkup(tagType);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [height, setHeight] = useState<number | string>(0);
-
 
   useEffect(() => {
     if(isExpanded === false)

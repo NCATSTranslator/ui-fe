@@ -26,9 +26,9 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
     let pathTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pt:')));
     // The ordering of newGroupedTags determines the order of the facets in the UI
     const newGroupedTags: GroupedTags = {
-      chemicalType: chemicalTypeTags,
+      cc: chemicalTypeTags,
       di: diTags,
-      nodeType: nodeTypeTags,
+      pc: nodeTypeTags,
       pt: pathTypeTags,
       role: roleTags,
       ara: araTags
