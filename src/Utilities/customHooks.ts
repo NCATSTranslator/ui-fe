@@ -1,18 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 
-export const useWindowSize = (delay = 100) => {
-  // Initialize state with undefined so that we can check if it's ready during the first render
-  const [windowSize, setWindowSize] = useState({
+interface WindowSize {
+  width: number | undefined;
+  height: number | undefined;
+}
+
+export const useWindowSize = (delay: number = 100): WindowSize => {
+  const [windowSize, setWindowSize] = useState<WindowSize>({
     width: undefined,
     height: undefined,
   });
 
   useEffect(() => {
-    let timeoutId = null;
+    let timeoutId: NodeJS.Timeout | null = null;
 
-    // Handler to call on window resize
     function handleResize() {
-      // Set window's width and height to state after delay
       if (timeoutId !== null) {
         clearTimeout(timeoutId);
       }
@@ -25,13 +27,9 @@ export const useWindowSize = (delay = 100) => {
       }, delay);
     }
 
-    // Add event listener
     window.addEventListener("resize", handleResize);
-
-    // Call handler right away so state gets updated with initial window size
     handleResize();
 
-    // Remove event listener on cleanup
     return () => {
       if (timeoutId !== null) {
         clearTimeout(timeoutId);
@@ -39,12 +37,12 @@ export const useWindowSize = (delay = 100) => {
 
       window.removeEventListener("resize", handleResize);
     };
-  }, [delay]); // Re-run effect if delay changes
+  }, [delay]);
 
   return windowSize;
 }
 
-export const useGoogleAnalytics = (gaID) => {
+export const useGoogleAnalytics = (gaID: string | undefined): void => {
   useEffect(() => {
     if (!gaID) return;
 
@@ -76,18 +74,14 @@ export const useGoogleAnalytics = (gaID) => {
  * @param {number} time - The interval time in milliseconds.
  * @param {Function} callback - The callback function to be executed.
  */
-export const useInterval = (callback, time) => {
-  // Use useRef to persist the callback without re-creating the interval on every render
+export const useInterval = (callback: () => void, time: number | null): void => {
   const callbackRef = useRef(callback);
 
-  // Update the current callback to the latest one provided,
-  // without needing to clear and re-set the interval
   useEffect(() => {
     callbackRef.current = callback;
   }, [callback]);
 
   useEffect(() => {
-    // Function to be executed at each interval
     const tick = () => {
       callbackRef.current();
     };
@@ -100,20 +94,34 @@ export const useInterval = (callback, time) => {
 };
 
 /**
- * Custom React hook that acts as a turnstile. The body of the effect is executed once when open which causes
- * the turnstile to lock. The turnstile must be unlocked externally.
+ * Custom React hook that controls the execution of effects based on a gatekeeper function.
+ * It runs the effect only once when `checkOpen` returns true and then locks further executions until reset.
  *
- * @param {turnstileIsOpen} - Predicate that returns if the turnstile is currently open.
- * @param {effectBody}    - Function called when the turnstile is open.
- * @param {turnstileLock} - Function that will lock the turnstile.
- * @param {dependencies}  - Dependencies the effect relies on.
+ * @param checkOpen - Function that returns true to allow the effect to run.
+ * @param effectBody - The effect to execute when conditions are met.
+ * @param lockTurnstile - Function to lock the turnstile, preventing further executions.
+ *
+ * This hook manages controlled execution cycles by using internal state to monitor and block repeat executions,
+ * ensuring effects are only run under the appropriate conditions as dictated by `checkOpen`.
  */
-export const useTurnstileEffect = (turnstileIsOpen, effectBody, turnstileLock, dependencies) => {
-  useEffect(() => {
-    if (turnstileIsOpen()) {
-      effectBody(...dependencies);
-      turnstileLock();
-    }
+export function useTurnstileEffect( checkOpen: () => boolean, effectBody: () => void, lockTurnstile: () => void): void {
+    const [turnstileOpen, setTurnstileOpen] = useState(false);
 
-  }, dependencies);
+    // Handle the effect logic internally
+    useEffect(() => {
+        if (checkOpen() && !turnstileOpen) {
+            setTurnstileOpen(true);
+            effectBody();
+        }
+    }, [checkOpen, turnstileOpen, effectBody]);
+
+    // Lock the turnstile after running effect
+    useEffect(() => {
+        if (turnstileOpen) {
+            lockTurnstile();
+            setTurnstileOpen(false); // Reset the turnstile state
+        }
+    }, [turnstileOpen, lockTurnstile]);
 }
+
+
