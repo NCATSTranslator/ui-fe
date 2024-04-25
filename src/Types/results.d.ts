@@ -148,9 +148,13 @@ export interface Tag {
   type: string;
   value: string;
 }
+export interface GroupedTags {
+  [key: string]: {[key: string]: Tag};
+}
 export interface Filter {
   type: string;
   value: string;
+  negated: boolean;
 }
 export interface QueryType {
   filterType: string;

@@ -1,7 +1,19 @@
-import React, {useState, useEffect} from "react";
+import { useState, useEffect, FC, ReactNode } from "react";
 import styles from './Checkbox.module.scss';
 
-const Checkbox = ({name, value, checked, children, handleClick, className = "", checkedClassName = "", icon = null}) => {
+interface CheckboxProps {
+  name?: string;
+  value?: string | number | undefined;
+  checked?: boolean;
+  children?: ReactNode;
+  handleClick: ()=>void;
+  className?: string;
+  checkedClassName?: string;
+  icon: JSX.Element;
+}
+
+const Checkbox: FC<CheckboxProps> = ({name = "", value = undefined, checked, children, handleClick, className = "", 
+  checkedClassName = "", icon = null}) => {
 
   const [isChecked, setIsChecked] = useState(checked);
 
@@ -26,6 +38,5 @@ const Checkbox = ({name, value, checked, children, handleClick, className = "", 
 
   );
 }
-
 
 export default Checkbox;

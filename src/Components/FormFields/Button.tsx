@@ -1,4 +1,4 @@
-import React, { useEffect, useState, FC, MouseEvent } from "react";
+import { useEffect, useState, FC, MouseEvent, ReactNode } from "react";
 import styles from './Button.module.scss';
 
 interface ButtonProps {
@@ -9,7 +9,7 @@ interface ButtonProps {
   _blank?: boolean;
   type?: "button" | "submit" | "reset";
   size?: 's' | 'm' | 'l';
-  children?: React.ReactNode;
+  children?: ReactNode;
   disabled?: boolean;
   testId?: string;
   className?: string;
