@@ -54,6 +54,8 @@ const ResultsList = ({loading}) => {
   const initResultIdParam = getDataFromQueryVar("r");
   const firstLoad = useRef(true);
   const [nodeDescription, setNodeDescription] = useState();
+  const shareResultID = useRef(null);
+  const setShareResultID = (newID) => shareResultID.current = newID;
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
@@ -828,6 +830,8 @@ const ResultsList = ({loading}) => {
                   handleFilter: handleFilter,
                   shareModalOpen: shareModalOpen,
                   setShareModalOpen: setShareModalOpen,
+                  shareResultID: shareResultID.current,
+                  setShareResultID: setShareResultID,
                   currentQueryID: currentQueryID,
                   returnedARAs: returnedARAs.current,
                   isError: isError,
@@ -929,6 +933,8 @@ const ResultsList = ({loading}) => {
                             sharedItemRef={item.id === initResultIdParam ? sharedItemRef : null}
                             startExpanded={item.id === initResultIdParam && expandSharedResult}
                             setExpandSharedResult={setExpandSharedResult}
+                            setShareModalOpen={setShareModalOpen}
+                            setShareResultID={setShareResultID}
                           />
                         )
                       })

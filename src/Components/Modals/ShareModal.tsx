@@ -1,4 +1,4 @@
-import {useRef, useEffect, FC} from "react";
+import {useRef, useEffect, useState, FC} from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
 import { currentRoot } from "../../Redux/rootSlice";
@@ -12,16 +12,24 @@ interface ShareModalProps {
   qid: string;
   label?: string | null; 
   typeID?: string | null; 
+  shareResultID?: string;
 }
 
-const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, typeID = null}) => {
-
+const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, typeID = null, shareResultID = null}) => {
   let storedQuery = useSelector(currentQuery);
   const root = useSelector(currentRoot);
-  const sharedQueryLabel = (label) ? label : new URLSearchParams(window.location.search).get("l")
-  const sharedQueryType = (typeID) ? typeID : new URLSearchParams(window.location.search).get("t")
-  const sharedQueryItemID = new URLSearchParams(window.location.search).get("i")
-  const sharedQueryResultID = new URLSearchParams(window.location.search).get("r")
+  const sharedQueryLabel = (label) ? label : new URLSearchParams(window.location.search).get("l");
+  const sharedQueryType = (typeID) ? typeID : new URLSearchParams(window.location.search).get("t");
+  const sharedQueryItemID = new URLSearchParams(window.location.search).get("i");
+  // const sharedQueryResultID = (shareResultID != null) ? shareResultID : new URLSearchParams(window.location.search).get("r");
+  // // if a result share ID is not explictly provided, don't generate a url that send the user directly to any result
+  const initSharedQueryResultID = (shareResultID != null) ? shareResultID : new URLSearchParams(window.location.search).get("r");
+  const [sharedQueryResultID, setSharedQueryResultID] = useState(initSharedQueryResultID);
+
+  useEffect(() => {
+    setSharedQueryResultID(shareResultID)
+  }, [shareResultID]);
+
   const queryLabel = (sharedQueryLabel) 
     ? sharedQueryLabel 
     : (storedQuery && storedQuery.node !== undefined) 

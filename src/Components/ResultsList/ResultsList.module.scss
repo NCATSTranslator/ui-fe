@@ -40,9 +40,9 @@
         padding: 12px;
         border-radius: 5px 5px 0 0;
         user-select: none;
-        grid-template-columns: 4fr 1fr 2fr 2fr 1fr;
+        grid-template-columns: 4fr 1fr 2fr 2fr .75fr .75fr;
         @media screen and (min-width: $desktop) {
-          grid-template-columns: 1fr 60px 225px 100px 100px;
+          grid-template-columns: 1fr 60px 225px 100px 50px 50px;
         }
         .head {
           display: flex;

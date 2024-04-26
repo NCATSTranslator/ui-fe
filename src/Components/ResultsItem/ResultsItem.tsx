@@ -3,9 +3,9 @@ import styles from './ResultsItem.module.scss';
 import { getIcon, formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
-import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
-// import Export from "../../Icons/Buttons/Export.svg?react"
-import Bookmark from "../../Icons/Navigation/Bookmark.svg?react"
+import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react";
+import ShareIcon from '../../Icons/share.svg?react';
+import Bookmark from "../../Icons/Navigation/Bookmark.svg?react";
 import Notes from "../../Icons/note.svg?react"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
@@ -56,6 +56,8 @@ interface ResultsItemProps {
   sharedItemRef: RefObject<HTMLDivElement>;
   startExpanded: boolean;
   setExpandSharedResult: (state: boolean) => void;
+  setShareModalOpen: (state: boolean) => void;
+  setShareResultID: (state: string) => void;
   handleBookmarkError?: () => void;
   handleFilter: (tagObject: Tag) => void;
   hasNotes: boolean;
@@ -83,6 +85,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
     sharedItemRef,
     startExpanded = false,
     setExpandSharedResult = () => {},
+    setShareModalOpen = () => {},
+    setShareResultID = () => {},
     handleBookmarkError = () => {},
     handleFilter = () => {},
     hasNotes = false,
@@ -316,6 +320,11 @@ const ResultsItem: FC<ResultsItemProps> = ({
     handleBookmarkClick();
   }
 
+  const handleOpenResultShare = () => {
+    setShareResultID(item.id);
+    setShareModalOpen(true);
+  }
+
   useEffect(() => {
     setItemBookmarkID(bookmarkID);
   }, [bookmarkID]);
@@ -395,6 +404,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
           <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
         </span>
       </div>
+      <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleOpenResultShare}>
+        <ShareIcon/>
+      </button>
       {/* <CSVLink
         className={styles.downloadButton}
         data={csvData}
