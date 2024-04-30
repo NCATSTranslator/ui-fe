@@ -68,8 +68,21 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
       className={styles.feedbackModal}
       containerClass={styles.feedbackContainer}
       >
-      <h5>Share</h5>
-      <p>Easily return to this result set without needing to ask this question again. This link is unique to your question and will return results for up to 30 days, after which time your question will need to be run again.</p>
+      {
+        shareResultID != null
+        ?
+          <>
+            <h5>Share this result</h5>
+            <p className="italic">This link will return you to this result set with an option to automatically open this result.</p>
+            <p>It is unique to your question and will return results for up to 30 days, after which time your question will need to be run again.</p>
+          </>
+        :
+          <>
+            <h5>Share</h5>
+            <p>Easily return to this result set without needing to ask this question again.</p>
+            <p>This link is unique to your question and will return results for up to 30 days, after which time your question will need to be run again.</p>
+          </>
+      }
       <div className={styles.copyContainer}>
         <p className={styles.url} data-testid='share-url-container'>{qidURL}</p>
         <button onClick={() => {navigator.clipboard.writeText(qidURL)}}>Copy Link</button>
