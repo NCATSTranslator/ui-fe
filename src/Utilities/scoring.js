@@ -8,7 +8,7 @@ export const displayScore = function(score, decimalPlaces=2) {
   return format(score, {notation: 'fixed', precision: decimalPlaces});
 }
 
-const maxNormalizedScore = function(scoreComponents) {
+export const maxNormalizedScore = function(scoreComponents) {
   const normalizedScorePairs = scoreComponents.map((s) => {
     const scaledNormalizedScore = 5 * s.normalized_score / 100;
     return {
