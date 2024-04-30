@@ -3,9 +3,9 @@ import styles from './ResultsItem.module.scss';
 import { getIcon, formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
-import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
-// import Export from "../../Icons/Buttons/Export.svg?react"
-import Bookmark from "../../Icons/Navigation/Bookmark.svg?react"
+import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react";
+import ShareIcon from '../../Icons/share.svg?react';
+import Bookmark from "../../Icons/Navigation/Bookmark.svg?react";
 import Notes from "../../Icons/note.svg?react"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
@@ -23,12 +23,13 @@ import { QueryType } from '../../Utilities/queryTypes';
 // import { setResultsQueryParam } from '../../Utilities/resultsInteractionFunctions';
 import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject } from '../../Types/results';
 import { EvidenceContainer, PublicationObject } from '../../Types/evidence';
+import { useTurnstileEffect } from '../../Utilities/customHooks';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const sortTagsBySelected = (
-  a: string, 
-  b: string, 
+  a: string,
+  b: string,
   selected: [{type: string;}] | Filter[]
 ): number => {
   const aExistsInSelected = selected.some((item) => item.type === a);
@@ -47,17 +48,20 @@ interface ResultsItemProps {
   activeFilters: Filter[];
   activeStringFilters: string[];
   availableTags: {[key: string]: Tag};
-  bookmarkAddedToast?: () => void; 
-  bookmarkRemovedToast?: () => void; 
+  bookmarkAddedToast?: () => void;
+  bookmarkRemovedToast?: () => void;
   bookmarked?: boolean;
   bookmarkID?: string | null;
   currentQueryID: string;
-  focusedItemRef: RefObject<HTMLDivElement>;
+  sharedItemRef: RefObject<HTMLDivElement>;
+  startExpanded: boolean;
+  setExpandSharedResult: (state: boolean) => void;
+  setShareModalOpen: (state: boolean) => void;
+  setShareResultID: (state: string) => void;
   handleBookmarkError?: () => void;
   handleFilter: (tagObject: Tag) => void;
   hasNotes: boolean;
   item: ResultItem;
-  isFocused: boolean;
   key: string;
   queryNodeDescription: string;
   queryNodeID: string;
@@ -68,51 +72,54 @@ interface ResultsItemProps {
 }
 
 const ResultsItem: FC<ResultsItemProps> = ({
-    activateEvidence = () => {}, 
-    activateNotes = () => {}, 
+    activateEvidence = () => {},
+    activateNotes = () => {},
     activeFilters,
-    activeStringFilters, 
+    activeStringFilters,
     availableTags,
-    bookmarkAddedToast = () => {}, 
-    bookmarkRemovedToast = () => {}, 
-    bookmarked = false, 
-    bookmarkID = null, 
-    currentQueryID, 
-    focusedItemRef,
+    bookmarkAddedToast = () => {},
+    bookmarkRemovedToast = () => {},
+    bookmarked = false,
+    bookmarkID = null,
+    currentQueryID,
+    sharedItemRef,
+    startExpanded = false,
+    setExpandSharedResult = () => {},
+    setShareModalOpen = () => {},
+    setShareResultID = () => {},
     handleBookmarkError = () => {},
-    handleFilter = () => {}, 
-    hasNotes = false, 
-    isFocused = false, 
-    item, 
-    key, 
-    queryNodeID, 
-    queryNodeDescription, 
-    queryNodeLabel, 
-    rawResults, 
-    type, 
-    zoomKeyDown, 
+    handleFilter = () => {},
+    hasNotes = false,
+    item,
+    key,
+    queryNodeID,
+    queryNodeDescription,
+    queryNodeLabel,
+    rawResults,
+    type,
+    zoomKeyDown,
   }) => {
   const root = useSelector(currentRoot);
 
   let icon: JSX.Element = getIcon(item.type);
   const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
-  let publicationCount: number = (currentEvidence.publications?.length) 
+  let publicationCount: number = (currentEvidence.publications?.length)
     ? currentEvidence.publications.filter((pub: PublicationObject)=> pub.type === "PMID" || pub.type === "PMC").length
     : 0;
-  let clinicalCount: number = (currentEvidence.publications?.length) 
+  let clinicalCount: number = (currentEvidence.publications?.length)
     ? currentEvidence.publications.filter((pub: PublicationObject)=> pub.type === "NCT").length
     : 0;
-  let sourcesCount: number = (currentEvidence.distinctSources?.length) 
+  let sourcesCount: number = (currentEvidence.distinctSources?.length)
     ? currentEvidence.distinctSources.length
     : 0;
-  let roleCount: number = (item.tags) 
+  let roleCount: number = (item.tags)
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
 
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
   const [itemBookmarkID, setItemBookmarkID] = useState<string | null>(bookmarkID);
   const [itemHasNotes, setItemHasNotes] = useState<boolean>(hasNotes);
-  const [isExpanded, setIsExpanded] = useState<boolean>(isFocused);
+  const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
   const [height, setHeight] = useState<number | string>(0);
   const formattedPaths = useRef<PathObjectContainer[]>(item.compressedPaths);
   // selectedPaths include the node ids of a path in a string array
@@ -128,10 +135,15 @@ const ResultsItem: FC<ResultsItemProps> = ({
 
   const numRoles = item.tags.filter(tag => tag.includes("role")).length;
 
+  useTurnstileEffect(
+    () => startExpanded,
+    () => setIsExpanded(true),
+    () => setExpandSharedResult(false));
+
   useEffect(() => {
     if(!tagsRef.current)
       return;
-    
+
     const resizeObserver = new ResizeObserver(() => {
       if(tagsRef.current !== null)
       setTagsHeight(tagsRef.current.clientHeight);
@@ -143,14 +155,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
     };
   },[]);
 
-  // useEffect(() => {
-  //   if (!isFocused || focusedItemRef === null || hasFocusedOnFirstLoad) 
-  //     return;
-
-  //   focusedItemRef.current.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
-  //   handleFocusedOnItem();
-  // }, [focusedItemRef])
-
   const getPathsCount = (paths: PathObjectContainer[]): number => {
     let count = paths.length;
     for(const path of paths) {
@@ -160,8 +164,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
       }
     }
     return count;
-  } 
-  
+  }
+
   const pathsCount: number = useMemo(()=>getPathsCount(formattedPaths.current), [formattedPaths]);
   const pathString: string = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
@@ -171,10 +175,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const [itemGraph, setItemGraph] = useState(null);
 
   const handleToggle = () => {
-    if (!isExpanded) {
-      // setResultsQueryParam('r', item.id);
-    }
-
     setIsExpanded(!isExpanded);
   }
 
@@ -198,7 +198,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   },[]);
 
   const handleNodeClick = useCallback((selectedPaths: Set<string[]>) => {
-    if(!selectedPaths) 
+    if(!selectedPaths)
       return;
 
     let newSelectedPaths: Set<PathObjectContainer> = new Set();
@@ -272,7 +272,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     } else {
       item.graph = itemGraph;
       delete item.paths;
-      let bookmarkObject = getFormattedBookmarkObject("result", item.name, "", queryNodeID, 
+      let bookmarkObject = getFormattedBookmarkObject("result", item.name, "", queryNodeID,
         queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
 
       console.log(bookmarkObject);
@@ -320,6 +320,11 @@ const ResultsItem: FC<ResultsItemProps> = ({
     handleBookmarkClick();
   }
 
+  const handleOpenResultShare = () => {
+    setShareResultID(item.id);
+    setShareModalOpen(true);
+  }
+
   useEffect(() => {
     setItemBookmarkID(bookmarkID);
   }, [bookmarkID]);
@@ -330,7 +335,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }, [item, hasNotes]);
 
   return (
-    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={isFocused ? focusedItemRef : null}>
+    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
         {
@@ -352,7 +357,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
         {
-          root === "main" 
+          root === "main"
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
                   <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
@@ -399,6 +404,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
           <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
         </span>
       </div>
+      <button className={`${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed }`} onClick={handleOpenResultShare}>
+        <ShareIcon/>
+      </button>
       {/* <CSVLink
         className={styles.downloadButton}
         data={csvData}
@@ -413,8 +421,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
         <ChevDown/>
       </button>
       <AnimateHeight
-        className={`${styles.accordionPanel} 
-          ${isExpanded ? styles.open : styles.closed } 
+        className={`${styles.accordionPanel}
+          ${isExpanded ? styles.open : styles.closed }
           ${item.description || item.tags.some(item=>item.includes("role")) ? styles.hasDescription : styles.noDescription }
         `}
         duration={500}
@@ -423,7 +431,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
         <div className={styles.container}>
           <div>
             {
-              item.tags && roleCount > 0 && availableTags && 
+              item.tags && roleCount > 0 && availableTags &&
               <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
                 {
                   item.tags.sort((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagID, i) => {
@@ -485,8 +493,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
           activeStringFilters={activeStringFilters}
         />
       </AnimateHeight>
-      <BookmarkConfirmationModal 
-        isOpen={bookmarkRemovalConfirmationModalOpen} 
+      <BookmarkConfirmationModal
+        isOpen={bookmarkRemovalConfirmationModalOpen}
         onApprove={handleBookmarkRemovalApproval}
         onClose={()=>{
           setBookmarkRemovalConfirmationModalOpen(false);
@@ -517,6 +525,11 @@ const areEqualProps = (prevProps: any, nextProps: any) => {
   // if zoom key status has changed, return false to rerender
   if(prevProps.zoomKeyDown !== undefined && nextProps.zoomKeyDown !== undefined && prevProps.zoomKeyDown !== nextProps.zoomKeyDown)
     return false;
+
+  // if the item is set to expand on render, return false to rerender
+  if(prevProps.startExpanded !== nextProps.startExpanded) {
+    return false;
+  }
 
   // If none of the above conditions are met, props are equal, return true to not rerender
   return true;

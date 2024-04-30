@@ -103,7 +103,7 @@ export const formatBiolinkEntity = (string: string): string => {
 }
 
 export const formatBiolinkNode = (string: string, type: string | null = null): string => {
-  let newString = string; 
+  let newString = string;
   if(type !== null) {
     type = type.toLowerCase();
     switch (type) {
@@ -116,8 +116,14 @@ export const formatBiolinkNode = (string: string, type: string | null = null): s
         break;
     }
   }
-    
+
   return newString;
+}
+
+export const truncateStringIfTooLong = (string: string, maxLength: number = 20): string => {
+  if(string.length > maxLength)
+    return string.substring(0, maxLength) + '...';
+  return string;
 }
 
 export const getUrlAndOrg = (id: string): (string | null)[] => {
@@ -185,7 +191,7 @@ export const getMoreInfoLink = (id: string, className: string): JSX.Element | nu
 }
 
 export const handleFetchErrors = (
-    response: Response, 
+    response: Response,
     onErrorCallback: (res: Response) => void = () => console.log('No error callback function specified.')
   ): Response => {
     if(!response.ok) {
@@ -201,7 +207,7 @@ export const getRandomIntInclusive = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Remove duplicate objects from an array and keep the relative ordering based on a supplied property 
+// Remove duplicate objects from an array and keep the relative ordering based on a supplied property
 export const removeDuplicateObjects = (arr: any[], propName: string): any[] => {
   const unique: any[] = [];
   const seenValues = new Set();
@@ -236,7 +242,7 @@ export const generateEntityLink = (id: string, className: string, linkTextGenera
 
 export const getLastItemInArray = (arr: any[]) => {
   return arr.at(-1);
-} 
+}
 
 export const getDataFromQueryVar = (varID: string) => {
   const dataValue = new URLSearchParams(window.location.search).get(varID);
@@ -250,7 +256,7 @@ export const isValidDate = (date: string | number | Date): boolean => {
 };
 
 export const getFormattedDate = (date: Date): string | boolean => {
-  if (!isValidDate(date)) 
+  if (!isValidDate(date))
     return false;
 
   const dateFormatOptions: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
