@@ -48,7 +48,10 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
       <div className={styles.right}>
         <button
           className={styles.shareButton}
-          onClick={()=>{data.setShareModalOpen(true)}}
+          onClick={()=>{
+            data.setShareResultID(null);
+            data.setShareModalOpen(true);
+          }}
           data-testid="share-button"
           data-tooltip-id={`share-button-results-header`}
           aria-describedby={`share-button-results-header`}
@@ -62,6 +65,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
           isOpen={data.shareModalOpen}
           onClose={()=>data.setShareModalOpen(false)}
           qid={data.currentQueryID}
+          shareResultID={data.shareResultID}
         />
         {/* <ResultsListLoadingButton
           data={{

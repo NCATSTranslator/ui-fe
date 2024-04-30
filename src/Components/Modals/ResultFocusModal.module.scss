@@ -1,0 +1,39 @@
+@import "../../Assets/Styles/variables";
+
+.button {
+  width: 100% !important;
+  margin: 0;
+}
+
+.content {
+  text-align: center;
+}
+
+.subtitle {
+  font-style: italic;
+  font-size: $bodyTwoSize;
+}
+
+.heading {
+  color: $purpleOne;
+  margin-bottom: 35px;
+}
+
+.caption {
+  margin-bottom: 5px;
+}
+
+.sharedItem {
+  color: $purpleOne;
+  font-weight: 700;
+}
+
+.buttonsContainer {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 50px;
+  grid-row-gap: 50px;
+  padding: 35px 0 0 0;
+}
