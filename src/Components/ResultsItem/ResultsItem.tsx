@@ -404,7 +404,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
           <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
         </span>
       </div>
-      <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleOpenResultShare}>
+      <button className={`${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed }`} onClick={handleOpenResultShare}>
         <ShareIcon/>
       </button>
       {/* <CSVLink

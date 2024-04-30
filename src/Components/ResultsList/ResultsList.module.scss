@@ -42,7 +42,7 @@
         user-select: none;
         grid-template-columns: 4fr 1fr 2fr 2fr .75fr .75fr;
         @media screen and (min-width: $desktop) {
-          grid-template-columns: 1fr 60px 225px 100px 50px 50px;
+          grid-template-columns: 1fr 60px 225px 100px 50px 75px;
         }
         .head {
           display: flex;
