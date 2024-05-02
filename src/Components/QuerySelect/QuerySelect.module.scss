@@ -10,7 +10,7 @@ $querySelectPadding: 11px;
   height: 100%;
   select, .selectDisplay {
     display: flex;
-    width: 360px;
+    width: 410px;
     white-space: nowrap;
     border: none;
     -webkit-appearance: none;
@@ -28,6 +28,7 @@ $querySelectPadding: 11px;
     }
     svg {
       margin-right: 10px;
+      width: 30px;
     }
     svg path {
       fill: $white;

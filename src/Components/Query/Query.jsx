@@ -265,6 +265,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     validateSubmission(item);
   }
 
+  const handleSelectToggle = useCallback((val) => {
+    setIsOpen(val);
+  }, []);
+
   useEffect(() => {
     setIsLoading(loading);
   }, [loading]);
@@ -352,9 +356,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       handleChange={(val)=>{
                         handleQueryTypeChange(val, true);
                       }}
-                      handleToggle={(val)=>{
-                        setIsOpen(val);
-                      }}
+                      handleToggle={handleSelectToggle}
                       startExpanded
                       noanimate
                       >

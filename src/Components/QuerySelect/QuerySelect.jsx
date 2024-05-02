@@ -59,7 +59,7 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []); 
+  }, [handleToggle]); 
   
   useEffect(() => {
     if(!startExpanded)
@@ -73,7 +73,7 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
     return () => {
       clearTimeout(openSelectTimeout);
     };
-  }, [startExpanded]);
+  }, [startExpanded, handleToggle]);
 
   return (
     <>
