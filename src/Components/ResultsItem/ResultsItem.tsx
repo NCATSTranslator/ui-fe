@@ -117,7 +117,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     : 0;
 
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
-  const [itemBookmarkID, setItemBookmarkID] = useState<string | null>(bookmarkID);
+  const itemBookmarkID = useRef<string | null>(bookmarkID);
   const [itemHasNotes, setItemHasNotes] = useState<boolean>(hasNotes);
   const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
   const [height, setHeight] = useState<number | string>(0);
@@ -255,13 +255,12 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const handleBookmarkClick = async () => {
     console.log("bookmark click");
     if(isBookmarked) {
-      console.log(bookmarkRemovalApproved.current, itemBookmarkID);
-      if(bookmarkRemovalApproved.current && itemBookmarkID) {
+      if(bookmarkRemovalApproved.current && itemBookmarkID.current) {
         console.log("remove bookmark");
-        deleteUserSave(itemBookmarkID);
+        deleteUserSave(itemBookmarkID.current);
         setIsBookmarked(false);
         setItemHasNotes(false);
-        setItemBookmarkID(null);
+        itemBookmarkID.current = null;
         bookmarkRemovedToast();
       }
       if(!bookmarkRemovalApproved.current) {
@@ -282,7 +281,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       if(bookmarkedItem) {
         let newBookmarkedItem = bookmarkedItem as any;
         setIsBookmarked(true);
-        setItemBookmarkID(newBookmarkedItem.id.toString());
+        itemBookmarkID.current = newBookmarkedItem.id.toString()
         bookmarkAddedToast();
         return newBookmarkedItem.id;
       }
@@ -291,7 +290,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }
 
   const handleNotesClick = async () => {
-    let tempBookmarkID: string | number | null = itemBookmarkID;
+    let tempBookmarkID: string | number | null = itemBookmarkID.current;
     if(!isBookmarked) {
       console.log("no bookmark exists for this item, creating one...")
       let replacementID = await handleBookmarkClick();
@@ -326,7 +325,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }
 
   useEffect(() => {
-    setItemBookmarkID(bookmarkID);
+    itemBookmarkID.current = bookmarkID;
   }, [bookmarkID]);
 
   useEffect(() => {
