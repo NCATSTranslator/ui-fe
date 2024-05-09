@@ -913,7 +913,7 @@ const ResultsList = ({loading}) => {
                             key={item.id}
                             type={initPresetTypeObject}
                             item={item}
-                            activateEvidence={(evidence, item, edgeGroup, path)=>activateEvidence(evidence, item, edgeGroup, path)}
+                            activateEvidence={activateEvidence}
                             activateNotes={activateNotes}
                             activeStringFilters={activeStringFilters}
                             zoomKeyDown={zoomKeyDown}
