@@ -87,7 +87,7 @@ export const queryTypes: QueryType[] = [
   },
   {
     id: 4,
-    label: 'What gene\' activity may be decreased by',
+    label: 'What genes\' activity may be decreased by',
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'decreased',
