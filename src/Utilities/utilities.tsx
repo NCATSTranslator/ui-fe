@@ -13,6 +13,7 @@ import AnatomicalEntity from '../Icons/anatomical-entity.svg?react';
 import ExternalLink from '../Icons/external-link.svg?react';
 import { QueryType } from '../Types/results';
 import { mergeWith } from 'lodash';
+import { FormattedEdgeObject, FormattedNodeObject } from '../Types/results';
 
 export const getIcon = (category: string): JSX.Element => {
   var icon = <Chemical/>;
@@ -282,3 +283,10 @@ export const mergeObjects = <T, U>(obj1: T, obj2: U): T & U => {
     // When not both arrays, return undefined to let mergeWith handle the merge according to its default behavior
   });
 };
+
+export const isFormattedEdgeObject = (pathItem: any): pathItem is FormattedEdgeObject => {
+  return 'inferred' in pathItem;
+}
+export const isFormattedNodeObject = (pathItem: any): pathItem is FormattedNodeObject => {
+  return 'type' in pathItem && 'name' in pathItem;
+}
