@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FC, MouseEvent } from 'react';
 import styles from './Predicate.module.scss';
 import ResearchSingle from '../../Icons/research-single.svg?react';
 import ResearchMultiple from '../../Icons/research-multiple.svg?react';
@@ -20,11 +20,29 @@ import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utiliti
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { cloneDeep } from 'lodash';
+import { SupportDataObject, FormattedEdgeObject, PathObjectContainer } from '../../Types/results';
+import { isFormattedEdgeObject } from '../../Utilities/utilities';
 
-const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass = '', handleEdgeClick, 
+interface PredicateProps {
+  pathObject: FormattedEdgeObject;
+  pathObjectContainer: PathObjectContainer;
+  selected?: boolean;
+  activeStringFilters: string[];
+  uid: string;
+  parentClass?: string;
+  handleEdgeClick: (edge: FormattedEdgeObject[], path: PathObjectContainer) => void;
+  hasSupport: boolean;
+  supportDataObject: SupportDataObject | null;
+  inModal?: boolean | null;
+  isTop?: boolean | null;
+  isBottom?: boolean | null;
+  className?: string;
+}
+
+const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, selected = false, activeStringFilters, uid, parentClass = '', handleEdgeClick, 
    hasSupport, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
 
-  const checkForProvenanceType = (pathObject, type) => {
+  const checkForProvenanceType = (pathObject: FormattedEdgeObject, type: string) => {
     if(!pathObject?.provenance || !Array.isArray(pathObject.provenance))
       return false;
     
@@ -39,13 +57,13 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
     return false;
   }
 
-  pathObject.predicate = formatBiolinkEntity(pathObject.predicates[0].predicate); 
+  pathObject.predicate = (pathObject.predicates) ? formatBiolinkEntity(pathObject.predicates[0].predicate) : ""; 
   const pubCount = Object.values(pathObject.publications).reduce((sum, arr) => sum + arr.length, 0);
   const [isSupportExpanded, setIsSupportExpanded] = useState(true);
   const isMachineLearned = checkForProvenanceType(pathObject, "ml");
   const isTrusted = checkForProvenanceType(pathObject, "trusted");
 
-  const handleSupportExpansion = (e) => {
+  const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setIsSupportExpanded(prev=>!prev);
   }
@@ -68,7 +86,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
       </Tooltip> 
       <span 
         className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''}`} 
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick([pathObject], pathObjectContainer);}}
         >
           {
             hasSupport && isTop &&
@@ -95,7 +113,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
             <Connector className={`connector ${styles.connector}`}/>
           }
         <span 
-          className={`${styles.path} path ${(pathObject.predicates.length > 1) ? styles.hasMore : ''}`}
+          className={`${styles.path} path ${(pathObject.predicates && pathObject.predicates.length > 1) ? styles.hasMore : ''}`}
           >
           <div className={styles.badges}>
             {
@@ -125,6 +143,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
             />
 
             {
+              pathObject.predicates &&
               pathObject.predicates.length > 1 && 
               <span className={styles.more}>
                 + {pathObject.predicates.length - 1} More
@@ -151,7 +170,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
                           e.stopPropagation(); 
                           const newPathObject = cloneDeep(pathObject);
                           newPathObject.predicate = formattedPredicate;
-                          handleEdgeClick(newPathObject);
+                          handleEdgeClick([newPathObject], pathObjectContainer);
                         }}
                         >
                         <Highlighter
@@ -181,9 +200,9 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
           </Tooltip>
         }
         {
-          hasSupport && supportDataObject?.pathItem?.support &&
+          hasSupport && isFormattedEdgeObject(supportDataObject?.pathItem) && supportDataObject?.pathItem?.support &&
           <button 
-            onClick={(e)=>{handleSupportExpansion(e);}} 
+            onClick={handleSupportExpansion} 
             className={`support-button ${styles.supportExpansionButton} ${isSupportExpanded ? styles.expanded : ''}`}>
             <div className={styles.supportConnector}></div>
             <span className={styles.supportButtonIcon}>
@@ -193,7 +212,7 @@ const Predicate = ({ pathObject, selected, activeStringFilters, uid, parentClass
         }
       </span>
       {
-        hasSupport && supportDataObject && supportDataObject?.pathItem?.support &&
+        hasSupport && supportDataObject && isFormattedEdgeObject(supportDataObject?.pathItem) && supportDataObject?.pathItem?.support &&
         <SupportPathGroup 
           dataObj={supportDataObject} 
           isExpanded={isSupportExpanded}
