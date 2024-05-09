@@ -663,8 +663,6 @@ export const getEvidenceFromResult = (result: ResultItem): EvidenceContainer => 
         type = getTypeFromPub(pubID);
         newPub.url = getUrlByType(pubID, type);
         newPub.source.name = formatPublicationSourceName(newPub.source.name);
-      } else {
-        console.log("pubID not found within result publications list: ", pubID, result.evidence.publications);
       }
     }
     return newPub;

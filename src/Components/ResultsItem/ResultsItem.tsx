@@ -24,6 +24,7 @@ import { QueryType } from '../../Utilities/queryTypes';
 import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject } from '../../Types/results';
 import { EvidenceContainer, PublicationObject } from '../../Types/evidence';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
+import { isEqual } from 'lodash';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -123,7 +124,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const [height, setHeight] = useState<number | string>(0);
   const formattedPaths = useRef<PathObjectContainer[]>(item.compressedPaths);
   // selectedPaths include the node ids of a path in a string array
-  const [selectedPaths, setSelectedPaths] = useState<Set<string[]> | Set<PathObjectContainer> | null>(null);
+  const [selectedPaths, setSelectedPaths] = useState<Set<PathObjectContainer> | null>(null);
   // const [csvData, setCsvData] = useState([]);
   const bookmarkRemovalApproved = useRef<boolean>(false);
   const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState<boolean>(false);
@@ -433,7 +434,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
               item.tags && roleCount > 0 && availableTags &&
               <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
                 {
-                  item.tags.sort((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagID, i) => {
+                  item.tags.toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagID, i) => {
+                  // item.tags.map((tagID, i) => {
                     if(!tagID.includes("role"))
                       return null;
                     let tagObject = availableTags[tagID];
@@ -506,31 +508,26 @@ const ResultsItem: FC<ResultsItemProps> = ({
 
 // check if certain props are really different before rerendering
 const areEqualProps = (prevProps: any, nextProps: any) => {
-  // keys for the item prop
-  const prevItemDataKeys = Object.keys(prevProps.item);
-  const nextItemDataKeys = Object.keys(nextProps.item);
-
-  if (prevItemDataKeys.length !== nextItemDataKeys.length) {
+  // Check for deep equality of the item object
+  if (!isEqual(prevProps.item, nextProps.item)) {
     return false;
   }
 
-  // check for nonequivalent properties within the item prop object
-  for (const key of prevItemDataKeys) {
-    if (prevProps.item[key] !== nextProps.item[key]) {
-      return false;
-    }
-  }
-
-  // if zoom key status has changed, return false to rerender
-  if(prevProps.zoomKeyDown !== undefined && nextProps.zoomKeyDown !== undefined && prevProps.zoomKeyDown !== nextProps.zoomKeyDown)
+  // Check other properties
+  if (!isEqual(prevProps.zoomKeyDown, nextProps.zoomKeyDown)) {
     return false;
-
-  // if the item is set to expand on render, return false to rerender
-  if(prevProps.startExpanded !== nextProps.startExpanded) {
+  }
+  if (!isEqual(prevProps.startExpanded, nextProps.startExpanded)) {
+    return false;
+  }
+  if (!isEqual(prevProps.activeFilters, nextProps.activeFilters)) {
+    return false;
+  }
+  if (!isEqual(prevProps.activeStringFilters, nextProps.activeStringFilters)) {
     return false;
   }
 
-  // If none of the above conditions are met, props are equal, return true to not rerender
+  // If none of the conditions are met, props are equal
   return true;
 };
 
