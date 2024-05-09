@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { isEqual } from 'lodash';
 
 interface WindowSize {
   width: number | undefined;
@@ -104,7 +105,7 @@ export const useInterval = (callback: () => void, time: number | null): void => 
  * This hook manages controlled execution cycles by using internal state to monitor and block repeat executions,
  * ensuring effects are only run under the appropriate conditions as dictated by `checkOpen`.
  */
-export function useTurnstileEffect( checkOpen: () => boolean, effectBody: () => void, lockTurnstile: () => void): void {
+export const useTurnstileEffect = ( checkOpen: () => boolean, effectBody: () => void, lockTurnstile: () => void): void => {
     const [turnstileOpen, setTurnstileOpen] = useState(false);
 
     // Handle the effect logic internally
@@ -124,4 +125,38 @@ export function useTurnstileEffect( checkOpen: () => boolean, effectBody: () => 
     }, [turnstileOpen, lockTurnstile]);
 }
 
+// Helper function to perform a deep comparison and log differences
+const logDeepDifferences = (obj1: any, obj2: any, name: string, path: string = '') => {
+  const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+  let changes: any = [];
 
+  keys.forEach(key => {
+      const newPath = path ? `${path}.${key}` : key;
+      const value1 = obj1[key];
+      const value2 = obj2[key];
+
+      if (typeof value1 === 'object' && value1 != null && typeof value2 === 'object' && value2 != null) {
+          changes = changes.concat(logDeepDifferences(value1, value2, name, newPath));
+      } else if (!isEqual(value1, value2)) {
+          changes.push({ path: newPath, from: value1, to: value2 });
+      }
+  });
+
+  return changes;
+};
+
+export const useWhyDidComponentUpdate = <T extends Record<string, any>>(name: string, props: T) => {
+  const previousProps = useRef<T | undefined>(undefined);
+
+  useEffect(() => {
+      if (previousProps.current !== undefined) {
+          const changes = logDeepDifferences(previousProps.current, props, name);
+
+          if (changes.length > 0) {
+              console.log(`Why did ${name} update:`, changes);
+          }
+      }
+
+      previousProps.current = props;
+  }, [props]); // Depending only on props
+}

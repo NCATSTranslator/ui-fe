@@ -1,5 +1,5 @@
 import styles from './PathView.module.scss';
-import {useState, useEffect, useMemo, useCallback} from "react";
+import { useState, useEffect, useMemo, useCallback, FC } from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import Question from '../../Icons/Navigation/Question.svg?react';
@@ -11,13 +11,16 @@ import { currentPrefs, currentRoot } from '../../Redux/rootSlice';
 import { Link } from 'react-router-dom';
 import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
+import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject } from '../../Types/results';
+import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
 
-const checkInferredPathForSelections = (path, selPath) => {
+const checkInferredPathForSelections = (path: PathObjectContainer, selPath: PathObjectContainer) => {
   for(const [i, item] of path.path.subgraph.entries()) {
     if(i % 2 === 0)
       continue;
-    if(hasSupport(item)) {
-      for(const supportPath of item.support) {
+    let nextEdgeItem = item as FormattedEdgeObject;
+    if(hasSupport(nextEdgeItem) && nextEdgeItem.support !== undefined) {
+      for(const supportPath of nextEdgeItem.support) {
         if(isEqual(selPath, supportPath)) {
           supportPath.highlighted = true;
         }
@@ -26,7 +29,7 @@ const checkInferredPathForSelections = (path, selPath) => {
   }
 }
 
-const getPathsWithSelectionsSet = (paths, selectedPaths) => {
+const getPathsWithSelectionsSet = (paths: PathObjectContainer[], selectedPaths: Set<PathObjectContainer> | null) => {
   if(selectedPaths!== null && selectedPaths.size > 0) {
     let newPaths = cloneDeep(paths);
     for(const path of newPaths) {
@@ -39,17 +42,31 @@ const getPathsWithSelectionsSet = (paths, selectedPaths) => {
         }
       }
     }
-    return Array.from(newPaths).sort((a, b) => b.highlighted - a.highlighted);
+    return newPaths.sort((a: PathObjectContainer, b: PathObjectContainer) => (b.highlighted === a.highlighted ? 0 : b.highlighted ? -1 : 1));
   } else {
-    return Array.from(paths);
+    return paths;
   }
 }
 
-const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeStringFilters}) => {
+interface PathViewProps {
+  active: boolean;
+  paths: PathObjectContainer[];
+  selectedPaths: Set<PathObjectContainer> | null;
+  handleEdgeSpecificEvidence:(edgeGroup: FormattedEdgeObject[], path: PathObjectContainer) => void;
+  handleActivateEvidence: (path: PathObjectContainer) => void;
+  activeStringFilters: string[];
+}
+
+const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeStringFilters}) => {
 
   const prefs = useSelector(currentPrefs);
 
-  const initItemsPerPage = (prefs?.path_show_count?.pref_value) ? parseInt(prefs.path_show_count.pref_value) : parseInt(5);
+  const initItemsPerPage = (prefs?.path_show_count?.pref_value) 
+    ? (typeof prefs.path_show_count.pref_value == "string") 
+      ? parseInt(prefs.path_show_count.pref_value) 
+      : prefs.path_show_count.pref_value 
+    : 5;
+
   let initialNumberToShow = (initItemsPerPage === -1 || paths.length < initItemsPerPage) ? paths.length : initItemsPerPage;
 
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
@@ -63,30 +80,34 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
-    const tempItemsPerPage = (prefs?.path_show_count?.pref_value) ? parseInt(prefs.path_show_count.pref_value) : 5;
+    const tempItemsPerPage = (prefs?.path_show_count?.pref_value) 
+    ? (typeof prefs.path_show_count.pref_value == "string") 
+      ? parseInt(prefs.path_show_count.pref_value) 
+      : prefs.path_show_count.pref_value 
+    : 5;
     const tempNumberToShow = (tempItemsPerPage === -1 || paths.length < tempItemsPerPage) ? paths.length : tempItemsPerPage;
     setNumberToShow(tempNumberToShow);
   }, [prefs, paths]);
 
   useEffect(() => {
     let temp = initItemsPerPage;
-    if(parseInt(initItemsPerPage) === -1 || paths.length < initItemsPerPage)
+    if(initItemsPerPage === -1 || paths.length < initItemsPerPage)
       temp = paths.length;
 
     setNumberToShow(temp);
   }, [paths, initItemsPerPage]);
 
-  const handleNameClick = useCallback((name) => {
+  const handleNameClick = useCallback((name: FormattedNodeObject ) => {
     console.log("handle name click", name);
     if(Array.isArray(name.provenance) && name.provenance[0].length > 0 && name.provenance[0].includes("http"))
       window.open(name.provenance[0], '_blank');
   },[]);
 
-  const handleEdgeClick = useCallback((edgeGroup, path) => {
+  const handleEdgeClick = useCallback((edgeGroup: FormattedEdgeObject[], path: PathObjectContainer) => {
     handleEdgeSpecificEvidence(edgeGroup, path);
   }, [handleEdgeSpecificEvidence]);
 
-  const handleTargetClick = useCallback((target) => {
+  const handleTargetClick = useCallback((target: FormattedNodeObject) => {
     console.log("handle target click", target);
     if(Array.isArray(target.provenance) && target.provenance[0].length > 0 && target.provenance[0].includes("http"))
       window.open(target.provenance[0], '_blank');
@@ -102,14 +123,13 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
     setNumberToShow(newAmount);
   }
 
-  const sortArrayByInferred = (array) => {
+  const sortArrayByInferred = (array: any[]) => {
     return array.sort((a, b) => {
         let inferredA = a.path.inferred ? 1 : 0;
         let inferredB = b.path.inferred ? 1 : 0;
         return inferredA - inferredB;
     });
   }
-
 
   return(
     <div className={styles.pathView}>
@@ -132,16 +152,22 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
         :
         <div className={styles.paths}>
           {
-            sortArrayByInferred(formattedPaths).slice(0, numberToShow).map((pathToDisplay, i)=> {
+            sortArrayByInferred(formattedPaths).slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
               const displayInferredLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
                 if(displayInferredLabel)
                   inferredLabelDisplayed = true;
               const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
                 if(displayDirectLabel)
                   directLabelDisplayed = true;
-              const tooltipID = pathToDisplay.id 
+              const tooltipID: string = (pathToDisplay.id) 
                 ? pathToDisplay.id 
-                : pathToDisplay.path.subgraph.map((sub, j) => (j % 2 === 0) ? sub.name : sub.predicates[0].predicate );
+                : pathToDisplay.path.subgraph.map((sub: FormattedEdgeObject | FormattedNodeObject, j: number) => 
+                  (isFormattedNodeObject(sub)) 
+                    ? sub.name 
+                    : (sub.predicates && sub.predicates.length > 0 )
+                      ? sub.predicates[0].predicate 
+                      : "" 
+                ).toString();
               return (
                 <>
                   {
@@ -179,10 +205,10 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                     </Tooltip>
                     <div className={`${styles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} > 
                       {
-                        pathToDisplay.path.subgraph.map((pathItem, j) => {
+                        pathToDisplay.path.subgraph.map((pathItem: FormattedEdgeObject | FormattedNodeObject, j: number) => {
                           let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;
-                          let pathItemHasSupport = pathItem.inferred;
-                          let supportDataObject = (pathItemHasSupport)
+                          let pathItemHasSupport = (isFormattedEdgeObject(pathItem)) ? pathItem.inferred : false;
+                          let supportDataObject: SupportDataObject | null = (pathItemHasSupport)
                             ? {
                                 key: key,
                                 pathItem: pathItem,
@@ -200,11 +226,12 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
                             <>
                               <PathObject 
                                 supportDataObject={supportDataObject}
+                                pathObjectContainer={pathToDisplay}
                                 pathObject={pathItem} 
                                 id={key}
                                 key={key}
                                 handleNameClick={handleNameClick}
-                                handleEdgeClick={(edge)=>handleEdgeClick(edge, pathToDisplay)}
+                                handleEdgeClick={handleEdgeClick}
                                 handleTargetClick={handleTargetClick}
                                 activeStringFilters={activeStringFilters}
                                 hasSupport={pathItemHasSupport}
@@ -227,7 +254,7 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
           <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
         }
         {
-          (numberToShow <= paths.length && numberToShow > initItemsPerPage && parseInt(initItemsPerPage) !== -1) &&
+          (numberToShow <= paths.length && numberToShow > initItemsPerPage && initItemsPerPage !== -1) &&
           <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
         }
       </div>
@@ -244,4 +271,26 @@ const PathView = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, han
   )
 }
 
+// check if certain props are really different before rerendering
+const areEqualProps = (prevProps: any, nextProps: any) => {
+  // keys for the paths prop
+  const prevItemDataKeys = Object.keys(prevProps.paths);
+  const nextItemDataKeys = Object.keys(nextProps.paths);
+
+  if (prevItemDataKeys.length !== nextItemDataKeys.length) {
+    return false;
+  }
+
+  // check for nonequivalent properties within the paths prop object
+  for (const key of prevItemDataKeys) {
+    if (prevProps.paths[key] !== nextProps.paths[key]) {
+      return false;
+    }
+  }
+
+  // If none of the above conditions are met, props are equal, return true to not rerender
+  return true;
+};
+
+// export default memo(PathView, areEqualProps);
 export default PathView;

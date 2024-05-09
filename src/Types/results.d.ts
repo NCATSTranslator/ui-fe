@@ -97,7 +97,7 @@ export interface FormattedEdgeObject {
   id: string;
   label?: string;
   subject?: EdgeNodeObject;
-  predicate?: EdgePredicateObject;
+  predicate?: EdgePredicateObject | string;
   object?: EdgeNodeObject;
   inferred: boolean;
   predicate_url?: string | null;
@@ -133,6 +133,18 @@ export interface EdgePredicateObject {
 }
 export interface EdgeList {
   [key: string]: EdgeObject;
+}
+export interface SupportDataObject {
+  key: string;
+  pathItem: FormattedEdgeObject | FormattedNodeObject;
+  pathViewStyles: {[key: string]: string;} | null;
+  selectedPaths: Set<PathObjectContainer> | null;
+  pathToDisplay: any;
+  handleActivateEvidence: (path: PathObjectContainer) => void;
+  handleNameClick: (name: FormattedNodeObject) => void;
+  handleEdgeClick: (edgeGroup: FormattedEdgeObject[], path: PathObjectContainer) => void;
+  handleTargetClick: (target: FormattedNodeObject) => void;
+  activeStringFilters: string[];
 }
 export interface Score {
   clinical_evidence: number;

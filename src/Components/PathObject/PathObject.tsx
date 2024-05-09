@@ -1,19 +1,40 @@
 import styles from './PathObject.module.scss';
+import { FC } from 'react';
 import Tooltip from '../Tooltip/Tooltip';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
+import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject } from '../../Types/results';
+import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
 
-const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false, 
+interface PathObjectProps {
+  pathObject: FormattedEdgeObject | FormattedNodeObject;
+  pathObjectContainer: PathObjectContainer;
+  id: string;
+  handleNameClick: (name: FormattedNodeObject) => void;
+  handleEdgeClick: (edge: FormattedEdgeObject[], path: PathObjectContainer) => void;
+  handleTargetClick: (target: FormattedNodeObject) => void;
+  hasSupport: boolean;
+  activeStringFilters: string[];
+  selected?: boolean;
+  supportDataObject: SupportDataObject | null;
+  inModal?: boolean;
+  isTop?: boolean;
+  isBottom?: boolean;
+  className?: string;
+}
+
+const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false, 
   activeStringFilters, selected, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
 
   const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
-  const type = (pathObject?.type) ? pathObject.type.replace("biolink:", ""): '';
+  const isNode = isFormattedNodeObject(pathObject);
+  const type = (isNode && pathObject?.type) ? pathObject.type.replace("biolink:", ""): '';
   const uid = `${type}${id}`;
   let nameString = '';
   let typeString = '';
-  if(pathObject.category !== 'predicate') {
+  if(isNode) {
     nameString = formatBiolinkNode(pathObject.name, type);
     typeString = formatBiolinkEntity(pathObject.type)
   }
@@ -21,10 +42,10 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
   return (
     <>
       {
-        pathObject.category === 'object' &&
+        pathObject.category === 'object' && isNode &&
         <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''}`} 
           onClick={(e)=> {e.stopPropagation(); handleNameClick(pathObject);}}
-          data-tooltip-id={`${nameString.replaceAll("'")}${uid}`}
+          data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
           >
           <span className={styles.name} >
             {getIcon(pathObject.type)}
@@ -37,7 +58,7 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
               />
             </span>
           </span>
-            <Tooltip id={`${nameString.replaceAll("'")}${uid}`}>
+            <Tooltip id={`${nameString.replaceAll("'", "")}${uid}`}>
               <span><strong>{nameString}</strong> ({typeString})</span>
               <span className={styles.description}>{pathObject.description}</span>
               {
@@ -51,9 +72,10 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
         </span>
       }
       {
-        pathObject.category === 'predicate' &&
+        pathObject.category === 'predicate' && isFormattedEdgeObject(pathObject) &&
         <Predicate 
-          pathObject={pathObject} 
+          pathObject={pathObject}
+          pathObjectContainer={pathObjectContainer}
           selected={selected} 
           activeStringFilters={activeStringFilters} 
           uid={uid}
@@ -68,10 +90,10 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
         />
       }
       {
-        pathObject.category === 'target' && 
+        pathObject.category === 'target' && isNode &&
         <span 
           className={`${styles.targetContainer} ${className}`} 
-          data-tooltip-id={`${nameString.replaceAll("'")}${uid}`}
+          data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(pathObject);}}
           >
           <span className={styles.target} >
@@ -85,7 +107,7 @@ const PathObject = ({ pathObject, id, handleNameClick, handleEdgeClick, handleTa
               />
             </span>
           </span>
-          <Tooltip id={`${nameString.replaceAll("'")}${uid}`}>
+          <Tooltip id={`${nameString.replaceAll("'", "")}${uid}`}>
             <span><strong>{nameString}</strong> ({typeString})</span>
             <span className={styles.description}>{pathObject.description}</span>
             {
