@@ -303,6 +303,16 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
         // Neither A nor B is in activeFilters, sort alphabetically by name
         const nameA = a[1].name.toLowerCase();
         const nameB = b[1].name.toLowerCase();
+        // Check if either name is 'other'
+        if (nameA === 'other' && nameB === 'other') {
+          return 0; // Both are 'other', no need to change order
+        } else if (nameA === 'other') {
+          return 1; // 'other' should come last, so return 1 to sort it after b
+        } else if (nameB === 'other') {
+          return -1; // 'other' should come last, so return -1 to sort it after a
+        }
+
+        // If neither name is 'other', sort alphabetically
         return nameA.localeCompare(nameB);
       }
       // If both are in activeFilters, retain their order (assuming activeFilters is pre-sorted or order doesn't matter)
