@@ -1,11 +1,11 @@
 
 // User Prefs
-interface PrefObject {
+type PrefObject = {
   pref_value: string | number;
   possible_values: string[] | number[];
 }
 
-export interface Preferences {
+export type PreferencesContainer = {
   result_sort: PrefObject;
   result_per_screen: PrefObject;
   graph_visibility: PrefObject;
@@ -15,7 +15,7 @@ export interface Preferences {
   evidence_per_screen: PrefObject;
 }
 
-export interface User {
+export type User = {
   id: string;
   name: string;
   email: string;
@@ -26,16 +26,16 @@ export interface User {
   deleted: boolean;
 }
 
-export interface Config {
+export type Config = {
   cached_queries: object[];
   gaID: string;
   name_resolver: string;
   socialProviders: object;
 }
 
-export interface RootState {
+export type RootState = {
   currentRoot: string;
   currentUser: User | null; 
-  currentPrefs: Preferences;
+  currentPrefs: PreferencesContainer;
   currentConfig: Config | null;
 }

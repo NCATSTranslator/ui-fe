@@ -2,7 +2,7 @@ import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity, isClini
   isPublication, isPublicationObjectArray, mergeObjects, removeDuplicateObjects } from './utilities';
 import { cloneDeep } from "lodash";
 import { score } from "./scoring";
-import { RawResults, FormattedPathObject, PathObjectContainer, RawPathObject, SubgraphObject, FormattedNodeObject, 
+import { RawResultsContainer, FormattedPathObject, PathObjectContainer, RawPathObject, SubgraphObject, FormattedNodeObject, 
   FormattedEdgeObject, EdgePredicateObject, RawEdge, RawNode } from '../Types/results';
 import { rawAttachedPublications, PublicationObject } from '../Types/evidence';
 
@@ -13,10 +13,10 @@ export const hasSupport = (item: RawPathObject | FormattedEdgeObject | RawEdge |
 /**
  * Retrieves a publication from the results object based on its ID and returns a new publication object.
  * @param {string} id - The ID of the publication to retrieve.
- * @param {RawResults} results - The results object containing publication information.
+ * @param {RawResultsContainer} results - The results object containing publication information.
  * @returns {Object} The new publication object.
 */
-const getPubByID = (id: string , results: RawResults): PublicationObject | null => {
+const getPubByID = (id: string , results: RawResultsContainer): PublicationObject | null => {
   if(results.publications[id] === undefined)
     return null;
 
@@ -26,10 +26,10 @@ const getPubByID = (id: string , results: RawResults): PublicationObject | null 
 /**
  * Retrieves a node from the results object based on its CURIE (Compact URI) and returns a new node object.
  * @param {string} curie - The CURIE of the node to retrieve.
- * @param {RawResults} results - The results object containing node information.
+ * @param {RawResultsContainer} results - The results object containing node information.
  * @returns {Object} The new node object.
 */
-const getNodeByCurie = (curie: string | null, results: RawResults): RawNode | null => {
+const getNodeByCurie = (curie: string | null, results: RawResultsContainer): RawNode | null => {
   if(curie === null || results.nodes[curie] === undefined)
     return null;
 
@@ -49,10 +49,10 @@ const getNodeByCurie = (curie: string | null, results: RawResults): RawNode | nu
  * Retrieves an edge from the results object based on its ID and returns a new edge object
  * with additional information about the edge's object and subject nodes.
  * @param {string} id - The ID of the edge to retrieve.
- * @param {RawResults} results - The results object containing edge information.
+ * @param {RawResultsContainer} results - The results object containing edge information.
  * @returns {EdgeObject} The new edge object with object and subject nodes information.
 */
-const getEdgeByID = (id: string, results: RawResults): RawEdge | null => {
+const getEdgeByID = (id: string, results: RawResultsContainer): RawEdge | null => {
   if(results.edges[id] === undefined)
     return null;
   let newEdge = cloneDeep(results.edges[id]);
@@ -136,7 +136,7 @@ const getFormattedNode = (
   id: string, 
   index: number, 
   subgraph: SubgraphObject[], 
-  results: RawResults): FormattedNodeObject | null => {
+  results: RawResultsContainer): FormattedNodeObject | null => {
   let node = getNodeByCurie(id, results);
   if(node === null)
     return null;
@@ -161,7 +161,7 @@ const getFormattedNode = (
 
 // for all the publication IDs attached to a result, fill out the objects with
 // the information from the publications list in the result
-const fillOutPublications = (publicationIDs: rawAttachedPublications, results: RawResults) => {
+const fillOutPublications = (publicationIDs: rawAttachedPublications, results: RawResultsContainer) => {
   let filledPublicationsContainer: PublicationObject[] = [];
   for (let knowledgeLevelKey in publicationIDs) {
     if (publicationIDs.hasOwnProperty(knowledgeLevelKey)) {
@@ -180,7 +180,7 @@ const fillOutPublications = (publicationIDs: rawAttachedPublications, results: R
   return filledPublicationsContainer;
 }
 
-const getFormattedEdge = (id: string, results: RawResults, supportStack: any[]): FormattedEdgeObject => {
+const getFormattedEdge = (id: string, results: RawResultsContainer, supportStack: any[]): FormattedEdgeObject => {
   supportStack.push(id);
   let edge = getEdgeByID(id, results);
   if(edge !== null)
@@ -245,10 +245,10 @@ const getStringNameFromPath = (path: FormattedPathObject): string => {
  * Formats the raw path IDs into an array of formatted paths with node and edge information.
  * The formatted paths are extracted from the provided results object.
  * @param {string[]} rawPathIds - The raw path IDs to be formatted.
- * @param {RawResults} results - The results object containing paths and node/edge information.
+ * @param {RawResultsContainer} results - The results object containing paths and node/edge information.
  * @returns {PathObjectContainer[]} The formatted paths array.
 */
-const getFormattedPaths = (rawPathIds: string[], results: RawResults, supportStack: string[]): PathObjectContainer[] => {
+const getFormattedPaths = (rawPathIds: string[], results: RawResultsContainer, supportStack: string[]): PathObjectContainer[] => {
   let formattedPaths: PathObjectContainer[] = [];
   for(const id of rawPathIds) {
     let formattedPath = cloneDeep(results.paths[id]);
@@ -461,14 +461,14 @@ const calculateEvidenceCounts = (paths: PathObjectContainer[]) => {
  * Generates summarized results from the given results array. It processes each individual result item
  * to extract relevant information such as node names, descriptions, FDA approval status, paths, evidence,
  * scores, and tags. The summarized results are returned as an array.
- * @param {RawResults} results - The results array to be summarized.
+ * @param {RawResultsContainer} results - The results array to be summarized.
  * @param {number} confidenceWeight - value representing a parameter for weighted scoring
  * @param {number} noveltyWeight - value representing a parameter for weighted scoring
  * @param {number} clinicalWeight - value representing a parameter for weighted scoring
  * @param {Set} bookmarks - Set of bookmarked items for a given query
  * @returns {Array} The summarized results array.
 */
-export const getSummarizedResults = (results: RawResults, confidenceWeight: number, noveltyWeight: number, clinicalWeight: number, bookmarks: any = null) => {
+export const getSummarizedResults = (results: RawResultsContainer, confidenceWeight: number, noveltyWeight: number, clinicalWeight: number, bookmarks: any = null) => {
   if (results === null || results === undefined)
     return [];
 
