@@ -13,7 +13,6 @@ import ConnectorDotted from '../../Icons/straight-dotted.svg?react';
 import ConnectorDottedTop from '../../Icons/dotted-top.svg?react';
 import ConnectorDottedBottom from '../../Icons/dotted-bottom.svg?react';
 import ExternalLink from '../../Icons/external-link.svg?react';
-// import Notes from "../../Icons/note.svg?react"
 import Up from '../../Icons/Directional/Property 1=Up.svg?react';
 import Highlighter from 'react-highlight-words';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
@@ -30,7 +29,7 @@ interface PredicateProps {
   activeStringFilters: string[];
   uid: string;
   parentClass?: string;
-  handleEdgeClick: (edge: FormattedEdgeObject[], path: PathObjectContainer) => void;
+  handleEdgeClick: (edge: FormattedEdgeObject, path: PathObjectContainer) => void;
   hasSupport: boolean;
   supportDataObject: SupportDataObject | null;
   inModal?: boolean | null;
@@ -58,7 +57,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
   }
 
   pathObject.predicate = (pathObject.predicates) ? formatBiolinkEntity(pathObject.predicates[0].predicate) : ""; 
-  const pubCount = Object.values(pathObject.publications).reduce((sum, arr) => sum + arr.length, 0);
+  const pubCount = (Array.isArray(pathObject.publications)) ? pathObject.publications.length : 0;
   const [isSupportExpanded, setIsSupportExpanded] = useState(true);
   const isMachineLearned = checkForProvenanceType(pathObject, "ml");
   const isTrusted = checkForProvenanceType(pathObject, "trusted");
@@ -86,7 +85,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
       </Tooltip> 
       <span 
         className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''}`} 
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick([pathObject], pathObjectContainer);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject, pathObjectContainer);}}
         >
           {
             hasSupport && isTop &&
@@ -128,7 +127,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
             }
           </div>
           {
-            pubCount > 1
+            (pubCount >= 1 && pathObject.provenance?.length > 0)
             ? <ResearchMultiple />
             : (pubCount > 0 || pathObject.provenance?.length > 0) 
               ? <ResearchSingle /> 
@@ -170,7 +169,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
                           e.stopPropagation(); 
                           const newPathObject = cloneDeep(pathObject);
                           newPathObject.predicate = formattedPredicate;
-                          handleEdgeClick([newPathObject], pathObjectContainer);
+                          handleEdgeClick(newPathObject, pathObjectContainer);
                         }}
                         >
                         <Highlighter

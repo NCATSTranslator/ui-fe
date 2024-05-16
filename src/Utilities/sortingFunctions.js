@@ -27,11 +27,11 @@ export const sortJournalHighLow = (items) => {
 }
 
 export const sortEvidenceLowHigh = (items) => {
-  return items.sort((a, b) => Object.keys(a.evidence.publications).length - Object.keys(b.evidence.publications).length);
+  return items.sort((a, b) => a.evidenceCounts.publicationCount - b.evidenceCounts.publicationCount);
 }
 
 export const sortEvidenceHighLow = (items) => {
-  return items.sort((a, b) => Object.keys(b.evidence.publications).length - Object.keys(a.evidence.publications).length);
+  return items.sort((a, b) => b.evidenceCounts.publicationCount - a.evidenceCounts.publicationCount);
 }
 
 export const sortScoreLowHigh = (items) => {

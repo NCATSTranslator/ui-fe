@@ -84,14 +84,6 @@ export const handleClearAllFilters = (asFilters, rResults, oResults, setActiveFi
   handleUpdateResults([], asFilters, rResults, oResults, false, currentSortString);
 }
 
-export const setResultsQueryParam = (key, value) => {
-  const newUrl = new URL(window.location.href);
-  const searchParams = new URLSearchParams(window.location.search);
-  searchParams.set(key, value);
-  newUrl.search = searchParams.toString();
-  window.history.replaceState({ path: newUrl.href }, '', newUrl.href);
-}
-
 export const getResultsShareURLPath = (label, nodeID, typeID, resultID, pk) => {
   return `results?l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`;
 }

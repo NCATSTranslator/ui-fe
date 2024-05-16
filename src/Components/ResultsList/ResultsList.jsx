@@ -99,8 +99,6 @@ const ResultsList = ({loading}) => {
   const [selectedEdge, setSelectedEdge] = useState(null);
   // Obj, path represented in current evidence
   const [selectedPath, setSelectedPath] = useState(null);
-  // Array, evidence relating to the item last clicked
-  const [currentEvidence, setCurrentEvidence] = useState([]);
   // Int, current page
   const currentPage = useRef(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
@@ -541,11 +539,10 @@ const ResultsList = ({loading}) => {
   /**
    * Activates sets the evidence and opens the evidence modal.
    */
-  const activateEvidence = useCallback((evidence, item, edgeGroup, path) => {
+  const activateEvidence = useCallback((item, edgeGroup, path) => {
     setSelectedItem(item);
     setSelectedEdge(edgeGroup);
     setSelectedPath(path);
-    setCurrentEvidence(evidence);
     setEvidenceOpen(true);
   },[])
 
@@ -768,7 +765,6 @@ const ResultsList = ({loading}) => {
         isOpen={evidenceOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
         className="evidence-modal"
-        rawEvidence={currentEvidence}
         item={selectedItem}
         results={rawResults.current}
         edgeGroup={selectedEdge}

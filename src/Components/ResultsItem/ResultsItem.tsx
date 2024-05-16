@@ -17,12 +17,9 @@ import { Link } from 'react-router-dom';
 import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
 import { currentRoot } from '../../Redux/rootSlice';
-import { getEvidenceFromResult } from '../../Utilities/resultsFormattingFunctions';
 import { displayScore } from '../../Utilities/scoring';
 import { QueryType } from '../../Utilities/queryTypes';
-// import { setResultsQueryParam } from '../../Utilities/resultsInteractionFunctions';
 import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject } from '../../Types/results';
-import { EvidenceContainer, PublicationObject } from '../../Types/evidence';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
 import { isEqual } from 'lodash';
 
@@ -44,7 +41,7 @@ const sortTagsBySelected = (
 };
 
 interface ResultsItemProps {
-  activateEvidence?: (evidence: EvidenceContainer, item: ResultItem, edgeGroup: FormattedEdgeObject[] | null, path: PathObjectContainer) => void;
+  activateEvidence?: (item: ResultItem, edgeGroup: FormattedEdgeObject | null, path: PathObjectContainer) => void;
   activateNotes?: (nameString: string, id: string | number, item: ResultItem) => void;
   activeFilters: Filter[];
   activeStringFilters: string[];
@@ -103,16 +100,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const root = useSelector(currentRoot);
 
   let icon: JSX.Element = getIcon(item.type);
-  const currentEvidence = useMemo(() => getEvidenceFromResult(item), [item]);
-  let publicationCount: number = (currentEvidence.publications?.length)
-    ? currentEvidence.publications.filter((pub: PublicationObject)=> pub.type === "PMID" || pub.type === "PMC").length
-    : 0;
-  let clinicalCount: number = (currentEvidence.publications?.length)
-    ? currentEvidence.publications.filter((pub: PublicationObject)=> pub.type === "NCT").length
-    : 0;
-  let sourcesCount: number = (currentEvidence.distinctSources?.length)
-    ? currentEvidence.distinctSources.length
-    : 0;
   let roleCount: number = (item.tags)
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
@@ -179,13 +166,13 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setIsExpanded(!isExpanded);
   }
 
-  const handleEdgeSpecificEvidence = useCallback((edgeGroup: FormattedEdgeObject[], path: PathObjectContainer) => {
-    activateEvidence(currentEvidence, item, edgeGroup, path);
-  }, [currentEvidence, item, activateEvidence])
+  const handleEdgeSpecificEvidence = useCallback((edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => {
+    activateEvidence(item, edgeGroup, path);
+  }, [item, activateEvidence])
 
   const handleActivateEvidence = useCallback((path: PathObjectContainer) => {
-    activateEvidence(currentEvidence, item, null, path);
-  }, [currentEvidence, item, activateEvidence])
+    activateEvidence(item, null, path);
+  }, [item, activateEvidence])
 
   useEffect(() => {
     if(isExpanded === false)
@@ -386,16 +373,17 @@ const ResultsItem: FC<ResultsItemProps> = ({
           className={styles.evidenceLink}
           // onClick={(e)=>{
           //   e.stopPropagation();
-          //   activateEvidence(currentEvidence, item, [], null, true);
+          //   activateEvidence(item, [], null, true);
           // }}
           >
           <div>
             <span className={styles.viewAll}>Evidence</span>
           </div>
           <div>
-            <span className={styles.info}>Publications ({publicationCount})</span>
-            <span className={styles.info}>Clinical Trials ({clinicalCount})</span>
-            <span className={styles.info}>Sources ({sourcesCount})</span>
+            <span className={styles.info}>Publications ({item.evidenceCounts.publicationCount})</span>
+            <span className={styles.info}>Clinical Trials ({item.evidenceCounts.clinicalTrialCount})</span>
+            <span className={styles.info}>Misc ({item.evidenceCounts.miscCount})</span>
+            <span className={styles.info}>Sources ({item.evidenceCounts.sourceCount})</span>
           </div>
         </span>
       </div>
