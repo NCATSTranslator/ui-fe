@@ -14,6 +14,7 @@ import ExternalLink from '../Icons/external-link.svg?react';
 import { QueryType } from '../Types/results';
 import { mergeWith } from 'lodash';
 import { FormattedEdgeObject, FormattedNodeObject } from '../Types/results';
+import { PublicationObject } from '../Types/evidence';
 
 export const getIcon = (category: string): JSX.Element => {
   var icon = <Chemical/>;
@@ -284,9 +285,40 @@ export const mergeObjects = <T, U>(obj1: T, obj2: U): T & U => {
   });
 };
 
+export const isClinicalTrial = (publication: PublicationObject) => {
+  if(publication.type === "NCT")
+    return true;
+
+  return false
+}
+export const isPublication = (publication: PublicationObject) => {
+  if(publication.type === "PMID" || publication.type === "PMC")
+    return true;
+
+  return false
+}
+
 export const isFormattedEdgeObject = (pathItem: any): pathItem is FormattedEdgeObject => {
-  return 'inferred' in pathItem;
+  return !!pathItem && 'inferred' in pathItem;
 }
 export const isFormattedNodeObject = (pathItem: any): pathItem is FormattedNodeObject => {
-  return 'type' in pathItem && 'name' in pathItem;
+  return !!pathItem && 'type' in pathItem && 'name' in pathItem;
+}
+
+export const isPublicationObjectArray = (publications: any): publications is PublicationObject[] => {
+  return Array.isArray(publications) && publications.every(pub => typeof pub === 'object' && 'type' in pub);
+}
+
+export const isPublicationDictionary = (publications: any): publications is {[key: string]: string[]} => {
+  return typeof publications === 'object' && !Array.isArray(publications) && Object.values(publications).every(value => Array.isArray(value) && value.every(item => typeof item === 'string'));
+}
+
+export const checkPublicationsType = (edgeObject: FormattedEdgeObject): string => {
+  if (isPublicationObjectArray(edgeObject.publications)) {
+    return "PublicationObject[]";
+  } else if (isPublicationDictionary(edgeObject.publications)) {
+    return "{[key: string]: string[]}";
+  } else {
+    return "Unknown type";
+  }
 }

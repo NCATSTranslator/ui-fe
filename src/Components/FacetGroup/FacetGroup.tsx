@@ -259,7 +259,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
           checkedClassName={positiveChecked ? styles.positiveChecked : ""}
           icon={<Include/>}
           >
-          <span className={styles.tagName}>
+          <span className={styles.tagName} title={tagName}>
             {tagName}
           </span>
           <span className={styles.facetCount}>

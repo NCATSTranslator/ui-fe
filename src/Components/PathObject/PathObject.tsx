@@ -13,7 +13,7 @@ interface PathObjectProps {
   pathObjectContainer: PathObjectContainer;
   id: string;
   handleNameClick: (name: FormattedNodeObject) => void;
-  handleEdgeClick: (edge: FormattedEdgeObject[], path: PathObjectContainer) => void;
+  handleEdgeClick: (edge: FormattedEdgeObject, path: PathObjectContainer) => void;
   handleTargetClick: (target: FormattedNodeObject) => void;
   hasSupport: boolean;
   activeStringFilters: string[];
@@ -28,7 +28,7 @@ interface PathObjectProps {
 const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false, 
   activeStringFilters, selected, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
 
-  const provenance = (pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
+  const provenance = (!!pathObject.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const isNode = isFormattedNodeObject(pathObject);
   const type = (isNode && pathObject?.type) ? pathObject.type.replace("biolink:", ""): '';
   const uid = `${type}${id}`;
@@ -62,7 +62,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
               <span><strong>{nameString}</strong> ({typeString})</span>
               <span className={styles.description}>{pathObject.description}</span>
               {
-                provenance && 
+                provenance && typeof provenance === "string" &&
                 <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
                   <ExternalLink/>
                   <span>{provenance}</span>
@@ -111,7 +111,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
             <span><strong>{nameString}</strong> ({typeString})</span>
             <span className={styles.description}>{pathObject.description}</span>
             {
-              provenance && 
+              provenance && typeof provenance === "string" &&
               <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
                 <ExternalLink/>
                 <span>{provenance}</span>

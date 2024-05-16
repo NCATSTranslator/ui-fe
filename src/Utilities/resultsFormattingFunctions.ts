@@ -1,124 +1,15 @@
-import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity, mergeObjects, removeDuplicateObjects } from './utilities';
+import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity, isClinicalTrial, isFormattedEdgeObject, 
+  isPublication, isPublicationObjectArray, mergeObjects, removeDuplicateObjects } from './utilities';
 import { cloneDeep } from "lodash";
 import { score } from "./scoring";
 import { RawResults, FormattedPathObject, PathObjectContainer, RawPathObject, SubgraphObject, FormattedNodeObject, 
-  FormattedEdgeObject, ResultItem, EdgePredicateObject, RawEdge, RawNode,  } from '../Types/results';
-import { EvidenceContainer, EvidenceObjectContainer, EvidenceItem,
-  SourceObject, PublicationObject, PublicationsList } from '../Types/evidence';
+  FormattedEdgeObject, EdgePredicateObject, RawEdge, RawNode } from '../Types/results';
+import { rawAttachedPublications, PublicationObject } from '../Types/evidence';
 
 export const hasSupport = (item: RawPathObject | FormattedEdgeObject | RawEdge | null): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;
 };
   
-/**
- * Formats the evidence information for the provided paths by extracting and organizing publications and sources.
- * @param {PathObjectContainer[]} paths - The paths for which evidence is being formatted.
- * @param {RawResult[]} results - The results object.
- * @returns {EvidenceContainer} The formatted evidence object containing publications, sources, distinct sources, and length.
-*/
-const getFormattedEvidence = (paths: PathObjectContainer[], results: RawResults): EvidenceContainer => {
-  const formatObj = (obj: object, getId: (item: any) => string, item: EvidenceItem, constructor: Function, container: EvidenceObjectContainer) => {
-    const id = getId(obj);
-    let evidenceObj: EvidenceItem = container[id];
-    if (evidenceObj === undefined) {
-      evidenceObj = constructor(obj);
-      // evidenceObj.edges = {};
-      container[id] = evidenceObj;
-    }
-    if (!evidenceObj.edges) 
-      evidenceObj.edges = {};
-
-    const eid: string = item.edges[0].id;
-    const edgeLabel: string = (
-      item.edges[0].subject !== undefined && 
-      item.edges[0].predicate !== undefined && 
-      item.edges[0].object !== undefined)
-      ? `${item.edges[0].subject.name}|${item.edges[0].predicate.predicate}|${item.edges[0].object.name}`
-      : "";
-    evidenceObj.edges[eid] = {
-      id: eid,
-      label: edgeLabel
-    };
-  }
-  const formatEvidenceObjs = (objs: {[key: string]: any[]}, getId: (item: any) => string, item: EvidenceItem, constructor: Function, container: EvidenceObjectContainer) => {
-    for (const objArray of Object.values(objs)) {
-      if (!Array.isArray(objArray)) {
-        formatObj(objArray, getId, item, constructor, container);
-        continue;
-      }
-  
-      for (const obj of objArray) {
-        formatObj(obj, getId, item, constructor, container);
-      }
-    }
-  };
-
-  const formatPublications = (publications: {[key:string]: any}, item: EvidenceItem, container: EvidenceObjectContainer) => {
-    formatEvidenceObjs(
-      publications,
-      (id: string) => { return id; },
-      item,
-      (id: string) => {
-        const publication = getPubByID(id, results);
-        if(publication !== null) {
-          publication.id = id;
-          publication.journal = '';
-          publication.title = '';
-        }
-        return publication;
-      },
-      container);
-  };
-
-  const formatSources = (sources: {[key:string]: any}, item: EvidenceItem, container: EvidenceObjectContainer) => {
-    formatEvidenceObjs(
-      sources,
-      (src: SourceObject) => { 
-        if(item?.edges[0]?.subject === undefined || item?.edges[0]?.object === undefined)
-          return "";
-        return `${item.edges[0].subject.name}${src.name}${item.edges[0].object.name}`; 
-      },
-      item,
-      (src: SourceObject) => { return src; },
-      container);
-  };
-
-  const processSourcesAndPublications = (paths: PathObjectContainer[] | undefined, formattedPublications: any, formattedSources: any) => {
-    if(paths === undefined)
-      return;
-    for(const path of paths) {
-      for(const item of path.path.subgraph) {
-        if('publications' in item) {
-          formatPublications(item.publications, item, formattedPublications);
-          formatSources(item.provenance, item, formattedSources);
-          // recursively call processSourcesAndPublications to fill out pubs and sources from support edges
-          if(hasSupport(item))
-            processSourcesAndPublications(item.support, formattedPublications, formattedSources);
-        }
-      }
-    }
-  }
-
-  const formattedPublications = {};
-  const formattedSources = {};
-  processSourcesAndPublications(paths, formattedPublications, formattedSources);
-
-  const publications: PublicationsList = formattedPublications;
-  const sources: SourceObject[] = Object.values(formattedSources);
-  const distinctSources: {[key: string]: SourceObject;} = {};
-  for(const source of sources) {
-    distinctSources[source.name] = source;
-  }
-
-  const evidenceObject: EvidenceContainer = {
-    publications: publications,
-    sources: sources,
-    distinctSources: Object.values(distinctSources),
-    length: sources.length + Object.values(publications).length
-  };
-  return evidenceObject;
-}
-
 /**
  * Retrieves a publication from the results object based on its ID and returns a new publication object.
  * @param {string} id - The ID of the publication to retrieve.
@@ -224,11 +115,10 @@ const checkForNodeUniformity = (pathOne: FormattedPathObject, pathTwo: Formatted
   return nodesMatch;
 }
 
-const removeDuplicatePubIds = (publications: {[key: string]: string[]} | null): {[key: string]: string[]} => {
+const removeDuplicatePubIds = (publications: rawAttachedPublications | null): rawAttachedPublications => {
   if (publications === null) return {};
 
-  let uniquePublications: {[key: string]: string[]} = {};
-
+  let uniquePublications: rawAttachedPublications = {};
   for (let key in publications) {
       if (publications.hasOwnProperty(key)) {
           const value = publications[key];
@@ -269,6 +159,27 @@ const getFormattedNode = (
   return newNode;
 }
 
+// for all the publication IDs attached to a result, fill out the objects with
+// the information from the publications list in the result
+const fillOutPublications = (publicationIDs: rawAttachedPublications, results: RawResults) => {
+  let filledPublicationsContainer: PublicationObject[] = [];
+  for (let knowledgeLevelKey in publicationIDs) {
+    if (publicationIDs.hasOwnProperty(knowledgeLevelKey)) {
+      const knowledgeLevel = publicationIDs[knowledgeLevelKey];
+      knowledgeLevel.forEach(rawPub => {
+        let publication = getPubByID(rawPub.id, results);
+        if(publication != null) {
+          publication.id = rawPub.id;
+          publication.support = rawPub.support;
+          publication.knowledgeLevel = knowledgeLevelKey;
+          filledPublicationsContainer.push(publication);
+        }
+      })
+    }
+  }
+  return filledPublicationsContainer;
+}
+
 const getFormattedEdge = (id: string, results: RawResults, supportStack: any[]): FormattedEdgeObject => {
   supportStack.push(id);
   let edge = getEdgeByID(id, results);
@@ -284,7 +195,8 @@ const getFormattedEdge = (id: string, results: RawResults, supportStack: any[]):
     };
     edge.predicate = pred;
   }
-  let publications = removeDuplicatePubIds((edge !== null) ? edge.publications : null);
+  let rawPublications: rawAttachedPublications = removeDuplicatePubIds((edge !== null) ? edge.publications : null);
+  let publications: PublicationObject[] = fillOutPublications(rawPublications, results);
   let newEdge: FormattedEdgeObject = {
     category: 'predicate',
     id: id,
@@ -487,6 +399,64 @@ const checkBookmarkForNotes = (bookmarkID: string | null, bookmarksSet: any): bo
   return false;
 }
 
+const calculateEvidenceCounts = (paths: PathObjectContainer[]) => {
+  const addPubsAndCTsToSets = (edge: FormattedEdgeObject, pubSet: Set<string>, ctSet: Set<string>, miscSet: Set<string>) => {
+    if(isPublicationObjectArray(edge.publications)) {
+      for(const pub of edge.publications) {
+        if(isPublication(pub)) {
+          if(!pubSet.has(pub.id))
+            pubSet.add(pub.id);
+        } else if(isClinicalTrial(pub)) {
+          if(!ctSet.has(pub.id))
+            ctSet.add(pub.id);
+        } else {
+          if(!miscSet.has(pub.url))
+            miscSet.add(pub.url);
+        }
+      }
+    }
+  }
+  const addSourcesToSet = (edge: FormattedEdgeObject, sourceSet: Set<string>) => {
+    if(!!edge.provenance) {
+      for(const source of edge.provenance) {
+        if(!sourceSet.has(source.name))
+          sourceSet.add(source.name);
+      }
+    }
+  }
+
+  let allPubs: Set<string> = new Set<string>();
+  let allCTs: Set<string> = new Set<string>();
+  let allSources: Set<string> = new Set<string>();
+  let allMisc: Set<string> = new Set<string>();
+  for(const path of paths) {
+    for(const subgraphItem of path.path.subgraph) {
+      if(isFormattedEdgeObject(subgraphItem)) {
+        // add edge pubs and sources to counts
+        addPubsAndCTsToSets(subgraphItem, allPubs, allCTs, allMisc);
+        addSourcesToSet(subgraphItem, allSources);
+        if(hasSupport(subgraphItem) && subgraphItem.support !== undefined) {
+          for(const supportPath of subgraphItem.support){
+            for(const supportSubgraphItem of supportPath.path.subgraph){
+              if(isFormattedEdgeObject(supportSubgraphItem)) {
+                // add support edge pubs and sources to counts
+                addPubsAndCTsToSets(supportSubgraphItem, allPubs, allCTs, allMisc);
+                addSourcesToSet(subgraphItem, allSources);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return { 
+    clinicalTrialCount: allCTs.size,
+    miscCount: allMisc.size, 
+    publicationCount: allPubs.size, 
+    sourceCount: allSources.size 
+  };
+}
+
 /**
  * Generates summarized results from the given results array. It processes each individual result item
  * to extract relevant information such as node names, descriptions, FDA approval status, paths, evidence,
@@ -519,7 +489,7 @@ export const getSummarizedResults = (results: RawResults, confidenceWeight: numb
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
     let formattedPaths = getFormattedPaths(item.paths, results, []);
     let compressedPaths = getCompressedPaths(formattedPaths, true);
-    // let compressedPaths = formattedPaths;
+    let evidenceCounts = calculateEvidenceCounts(formattedPaths);
     let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNodeName);
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
     let itemID = item.id;
@@ -536,7 +506,7 @@ export const getSummarizedResults = (results: RawResults, confidenceWeight: numb
       compressedPaths: compressedPaths,
       object: objectNodeName,
       description: description,
-      evidence: getFormattedEvidence(formattedPaths, results),
+      evidenceCounts: evidenceCounts,
       fdaInfo: fdaInfo,
       scores: item.scores,
       score: score(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
@@ -596,117 +566,4 @@ export const formatPublicationSourceName = (sourceName: string): string => {
       break;
   }
   return newSourceName;
-}
-
-/**
- * Extracts and formats the evidence data from a given result object.
- *
- * This function parses through the evidence information within the result object,
- * extracting distinct sources, general sources, and formatting publication data.
- * It handles cases where certain pieces of evidence may not be present and formats
- * the publications into a consumable array of objects.
- *
- * @param {ResultsItem} result - The result object from which to extract evidence.
- * @returns {EvidenceContainer} An evidenceObject containing arrays of distinctSources, sources,
- *                   and a publications array populated with formatted evidence data.
- *                   Returns an empty object if the input is invalid or lacks evidence.
- */
-export const getEvidenceFromResult = (result: ResultItem): EvidenceContainer => {
-  let evidenceObject: EvidenceContainer = {
-    distinctSources: [],
-    sources: [],
-    publications: [],
-  };
-  if(!result || !result.evidence)
-    return evidenceObject;
-
-  evidenceObject.distinctSources = (result.evidence.distinctSources) ? result.evidence.distinctSources : [];
-  evidenceObject.sources = (result.evidence.sources) ? result.evidence.sources : [];
-
-  const pubIds = new Set();
-  const addItemToPublications = (item: any, items: any, arr: any) => {
-    if (!!item && !items.has(item.id)) {
-        items.add(item.id);
-        arr.push(item);
-    }
-  }
-
-  const createNewPub = (result: ResultItem, pubID: string, edgeObject: FormattedEdgeObject, key: string) => {
-    let newPub;
-    let type;
-    // this is to deal with the old bookmark format, which removed publications from the result's evidence obj
-    if(!result.evidence.publications) {
-      type = getTypeFromPub(pubID);
-      newPub = {
-        type: getTypeFromPub(pubID),
-        url: getUrlByType(pubID, type),
-        id: pubID,
-        journal: '',
-        pubdate: '',
-        snippet: '',
-        title: '',
-        knowledgeLevel: key,
-        edges: (edgeObject.edges == null) ? [] : edgeObject.edges.reduce((obj, item) => {
-            obj[item.id] = item;
-            return obj;
-        }, {}),
-        source: {
-          name: "unknown",
-          url: null,
-        }
-      }
-    // this is for the current format
-    } else {
-      newPub = result.evidence.publications[pubID];
-      if(!!newPub) {
-        newPub.knowledgeLevel = key;
-        type = getTypeFromPub(pubID);
-        newPub.url = getUrlByType(pubID, type);
-        newPub.source.name = formatPublicationSourceName(newPub.source.name);
-      }
-    }
-    return newPub;
-  }
-
-  const fillInPublications = (edgeItem: FormattedEdgeObject, result: ResultItem, evidenceObj: EvidenceContainer) => {
-    // if subgraphItem.publications is an array, we're in the Workspace dealing with an old bookmark
-    if(Array.isArray(edgeItem.publications)) {
-      for(const pubID of edgeItem.publications) {
-        let knowledgeLevel = ""
-        let newPub = createNewPub(result, pubID, edgeItem, knowledgeLevel);
-        addItemToPublications(newPub, pubIds, evidenceObj.publications);
-      }
-      // if it's not it's an object, and we're on the results page
-    } else {
-      // key here is the knowledge level, i.e. "trusted", "ml", etc
-      if(!!edgeItem.publications) {
-        Object.keys(edgeItem.publications).forEach(key => {
-          for(const pubID of edgeItem.publications[key]) {
-            if(typeof pubID === 'string') {
-              let newPub = createNewPub(result, pubID, edgeItem, key);
-              addItemToPublications(newPub, pubIds, evidenceObj.publications);
-            }
-          }
-        })
-      }
-    }
-  }
-
-  const loopPathsAndFillInPubs = (result: ResultItem, paths: PathObjectContainer[], evidenceObj: EvidenceContainer) => {
-    for(const path of paths) {
-      for(const subgraphItem of path.path.subgraph) {
-        if(!('predicates' in subgraphItem))
-          continue;
-        let edgeItem = subgraphItem as FormattedEdgeObject;
-        fillInPublications(edgeItem, result, evidenceObj);
-        if(edgeItem.support !== undefined && hasSupport(edgeItem)) {
-          loopPathsAndFillInPubs(result, edgeItem.support, evidenceObj);
-        }
-      }
-    }
-  }
-
-  loopPathsAndFillInPubs(result, result.compressedPaths, evidenceObject);
-
-  return evidenceObject;
 }
