@@ -1,6 +1,6 @@
-import { EvidenceCounts, PublicationObject } from "./evidence";
+import { EvidenceCountsContainer, PublicationObject } from "./evidence";
 
-interface RawNode {
+type RawNode = {
   aras: string[];
   curies: string[];
   descriptions: string[];
@@ -16,7 +16,7 @@ interface RawNode {
   synonyms: string[] | null;
   types: string[];
 }
-export interface RawEdge {
+export type RawEdge = {
   aras: string[];
   id: string | null;
   is_root: boolean;
@@ -29,14 +29,14 @@ export interface RawEdge {
   subject: string;
   support: string[];
 }
-export interface RawPathObject {
+export type RawPathObject = {
   aras: string[];
   stringName?: string;
   subgraph: RawNode[] | RawEdge[];
   support?: PathObject[] | RawPathObject[] | string[];
   tags: {[key:string]: {name: string; value: string;}}
 }
-export interface RawResult {
+export type RawResult = {
   drug_name: string;
   id: string;
   object: string;
@@ -45,7 +45,7 @@ export interface RawResult {
   subject: string;
   tags: Tag[];
 }
-export interface RawResults {
+export type RawResultsContainer = {
   edges: {[key: string]: any};
   errors: object;
   meta: object;
@@ -55,12 +55,12 @@ export interface RawResults {
   results: RawResult[];
   tags: object;
 }
-export interface ResultItem {
+export type ResultItem = {
   bookmarkID: number | boolean;
   bookmarked: boolean;
   compressedPaths: PathObjectContainer[];
   description: string;
-  evidenceCounts: EvidenceCounts;
+  evidenceCounts: EvidenceCountsContainer;
   fdaInfo: boolean;
   graph: any | null;
   hasNotes: boolean;
@@ -76,7 +76,7 @@ export interface ResultItem {
   tags: string[];
   type: string;
 }
-export interface FormattedPathObject {
+export type FormattedPathObject = {
   aras: string[];
   inferred?: boolean;
   stringName?: string;
@@ -84,14 +84,14 @@ export interface FormattedPathObject {
   support?: PathObject[] | RawPathObject[] | string[];
   tags: {[key:string]: {name: string; value: string;}}
 }
-export interface PathObjectContainer {
+export type PathObjectContainer = {
   id: string;
   inferred?: boolean;
   highlighted: boolean;
   path: FormattedPathObject;
   provenance?: ProvenanceObject[];
 }
-export interface FormattedEdgeObject {
+export type FormattedEdgeObject = {
   category?: string;
   edges: RawEdge[] | EdgeObject[] | null;
   id: string;
@@ -106,7 +106,7 @@ export interface FormattedEdgeObject {
   publications: PublicationObject[] | {[key: string]: string[]};
   support?: PathObjectContainer[];
 }
-export interface FormattedNodeObject {
+export type FormattedNodeObject = {
   id: string;
   category: string;
   curies: string[];
@@ -115,26 +115,26 @@ export interface FormattedNodeObject {
   provenance: string[];
   type: string;
 }
-interface ProvenanceObject {
+type ProvenanceObject = {
   knowledge_level: string;
 }
-interface SubgraphObject {
+type SubgraphObject = {
   inferred?: boolean;
   predicates: EdgePredicateObject[];
   provenance: ProvenanceObject[];
   name: string;
 }
-export interface EdgeNodeObject {
+export type EdgeNodeObject = {
   name: string;
 }
-export interface EdgePredicateObject {
+export type EdgePredicateObject = {
   predicate: string;
   url: string | null;
 }
-export interface EdgeList {
+export type EdgeList = {
   [key: string]: EdgeObject;
 }
-export interface SupportDataObject {
+export type SupportDataObject = {
   key: string;
   pathItem: FormattedEdgeObject | FormattedNodeObject;
   pathViewStyles: {[key: string]: string;} | null;
@@ -146,28 +146,28 @@ export interface SupportDataObject {
   handleTargetClick: (target: FormattedNodeObject) => void;
   activeStringFilters: string[];
 }
-export interface Score {
+export type Score = {
   clinical_evidence: number;
   confidence: number;
   main: number;
   novelty: number;
   normalized_score: number;
 }
-export interface Tag {
+export type Tag = {
   count?: number
   name: string;
   negated: boolean;
   type: string;
   value: string;
 }
-export interface GroupedTags {
+export type GroupedTags = {
   [key: string]: {[key: string]: Tag};
 }
-export interface Filter {
+export type Filter = {
   type: string;
   value: string;
   negated: boolean;
 }
-export interface QueryType {
+export type QueryType = {
   filterType: string;
 }

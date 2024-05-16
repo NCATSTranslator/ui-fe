@@ -1,17 +1,17 @@
-export interface EvidenceItem {
+export type EvidenceItem = {
   edges: EdgeList;
   id: string;
 }
-export interface EvidenceObjectContainer {
+export type EvidenceObjectContainer = {
   [key: string]: EvidenceItem;
 }
-export interface EvidenceContainer {
+export type EvidenceContainer = {
   distinctSources: any;
   length?: number;
   publications: any;
   sources: any;
 }
-export interface PublicationObject {
+export type PublicationObject = {
   id: string;
   journal: string;
   knowledgeLevel: string;
@@ -21,23 +21,23 @@ export interface PublicationObject {
   type: string;
   url: string;
 }
-export interface PublicationsList {
+export type PublicationsList = {
   [key: string]: PublicationObject[];
 }
-export interface SourceObject {
+export type SourceObject = {
   knowledge_level: string;
   name: string;
   url: string;
 }
-interface rawAttachedPublication {
+type rawAttachedPublication = {
   id: string;
   support: object | null;
 }
-export interface rawAttachedPublications {
+export type rawAttachedPublications = {
   [key: string]: rawAttachedPublication[];
 }
 
-export interface EvidenceCounts {
+export type EvidenceCountsContainer = {
   clinicalTrialCount: number;
   miscCount: number;
   publicationCount: number;

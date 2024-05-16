@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { defaultPrefs } from '../Utilities/userApi';
-import { Config, RootState, Preferences, User } from '../Types/global';
+import { Config, RootState, PreferencesContainer, User } from '../Types/global';
 
 
 // Define initialState with the RootState type
@@ -21,7 +21,7 @@ export const rootSlice = createSlice({
     setCurrentUser: (state, action: PayloadAction<User | null>) => {
       state.currentUser = action.payload;
     },
-    setCurrentPrefs: (state, action: PayloadAction<Preferences>) => {
+    setCurrentPrefs: (state, action: PayloadAction<PreferencesContainer>) => {
       state.currentPrefs = action.payload;
     },
     setCurrentConfig: (state, action: PayloadAction<Config | null>) => {

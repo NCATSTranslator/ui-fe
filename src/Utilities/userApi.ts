@@ -2,11 +2,11 @@ import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
 import { QueryType } from './queryTypes';
 import { ResultItem } from '../Types/results';
-import { Preferences } from '../Types/global';
+import { PreferencesContainer } from '../Types/global';
 
 
 // Default user preferences for application settings such as result sorting and visibility options.
-export const defaultPrefs: Preferences = {
+export const defaultPrefs: PreferencesContainer = {
   result_sort: {
     pref_value: "scoreHighLow",
     possible_values:["scoreHighLow", "scoreLowHigh", "nameLowHigh", "nameHighLow", "evidenceLowHigh", "evidenceHighLow"]
@@ -278,13 +278,13 @@ export const getUserSave = async (
 /**
  * Updates the current user's preferences.
  * 
- * @param {Preferences} preferences - The new preferences to be updated.
+ * @param {PreferencesContainer} preferences - The new preferences to be updated.
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
  * @returns {Promise<boolean>} Indicates success or failure of the update operation.
  */
 export const updateUserPreferences = async (
-    preferences: Preferences,
+    preferences: PreferencesContainer,
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler, 
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
   ) => {
