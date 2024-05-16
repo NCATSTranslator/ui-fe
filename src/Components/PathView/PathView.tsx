@@ -52,7 +52,7 @@ interface PathViewProps {
   active: boolean;
   paths: PathObjectContainer[];
   selectedPaths: Set<PathObjectContainer> | null;
-  handleEdgeSpecificEvidence:(edgeGroup: FormattedEdgeObject[], path: PathObjectContainer) => void;
+  handleEdgeSpecificEvidence:(edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => void;
   handleActivateEvidence: (path: PathObjectContainer) => void;
   activeStringFilters: string[];
 }
@@ -103,7 +103,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
       window.open(name.provenance[0], '_blank');
   },[]);
 
-  const handleEdgeClick = useCallback((edgeGroup: FormattedEdgeObject[], path: PathObjectContainer) => {
+  const handleEdgeClick = useCallback((edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => {
     handleEdgeSpecificEvidence(edgeGroup, path);
   }, [handleEdgeSpecificEvidence]);
 

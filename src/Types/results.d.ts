@@ -1,4 +1,4 @@
-import { PublicationObject } from "./evidence";
+import { EvidenceCounts, PublicationObject } from "./evidence";
 
 interface RawNode {
   aras: string[];
@@ -25,7 +25,7 @@ export interface RawEdge {
   predicate: EdgePredicateObject | string;
   predicate_url: string;
   provenance: ProvenanceObject[];
-  publications: {[key: string]: string[]};
+  publications: rawAttachedPublications;
   subject: string;
   support: string[];
 }
@@ -60,7 +60,7 @@ export interface ResultItem {
   bookmarked: boolean;
   compressedPaths: PathObjectContainer[];
   description: string;
-  evidence: Evidence;
+  evidenceCounts: EvidenceCounts;
   fdaInfo: boolean;
   graph: any | null;
   hasNotes: boolean;
@@ -103,7 +103,7 @@ export interface FormattedEdgeObject {
   predicate_url?: string | null;
   predicates?: EdgePredicateObject[] | null;
   provenance?: any;
-  publications: {[key: string]: PublicationObject[]} | {[key: string]: string[]};
+  publications: PublicationObject[] | {[key: string]: string[]};
   support?: PathObjectContainer[];
 }
 export interface FormattedNodeObject {
@@ -142,7 +142,7 @@ export interface SupportDataObject {
   pathToDisplay: any;
   handleActivateEvidence: (path: PathObjectContainer) => void;
   handleNameClick: (name: FormattedNodeObject) => void;
-  handleEdgeClick: (edgeGroup: FormattedEdgeObject[], path: PathObjectContainer) => void;
+  handleEdgeClick: (edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => void;
   handleTargetClick: (target: FormattedNodeObject) => void;
   activeStringFilters: string[];
 }

@@ -4,10 +4,10 @@ import Tabs from "../Tabs/Tabs";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/external-link.svg?react';
-import { capitalizeAllWords, formatBiolinkEntity } from "../../Utilities/utilities";
+import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isPublication } from "../../Utilities/utilities";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
-import { checkForEdgeMatch, handleEvidenceSort, filterEvidenceObjs } from "../../Utilities/evidenceModalFunctions";
+import { checkForEdgeMatch, handleEvidenceSort } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
@@ -15,7 +15,7 @@ import Information from '../../Icons/information.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 
-const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGroup = null}) => {
+const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) => {
 
   const prefs = useSelector(currentPrefs);
   const [pubmedEvidence, setPubmedEvidence] = useState([]);
@@ -41,69 +41,49 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
   }
 
   // handles opening of modal by initializing state, called in useEffect tracking isOpen prop
-  const handleModalOpen = (rawEvi, selEdge, selPath) => {
-    if(selEdge)
-      handleSelectedEdge(selEdge, rawEvi);
-    else 
-      handleSelectedEdge(selPath.path.subgraph[1], rawEvi);
+  const handleModalOpen = (selEdge) => {
+      handleSelectedEdge(selEdge);
   }
 
   useEffect(() => {
     if(isOpen && !hasBeenOpened.current) {
-      handleModalOpen(rawEvidence, edgeGroup, path);
+      handleModalOpen(edgeGroup);
       hasBeenOpened.current = true;
     }
   })
 
   // filters evidence based on provided selectedEdge (if any, otherwise returns full evidence), 
   // called in useEffect tracking selectedEdge (to accommodate both in-component edge selection and edgeGroup prop change)
-  const handleSelectedEdge = (selEdge, rawEvidence) => {
-    let evidenceToDistribute;
-    if(!Array.isArray(selEdge) && typeof selEdge === 'object' && selEdge !== null) {
-      let filteredEvidence = {
-        publications: new Set(),
-        sources: new Set()
-      };
-      let filteredPublications = filteredEvidence.publications;
-      let filteredSources = filteredEvidence.sources;
-
-      // select specific edge in case of edge compression
-      let specificSelectedEdge = selEdge.edges.find((edge)=>edge.predicate.predicate === selEdge.predicate);
-      
-      const edgesToFilterBy = [specificSelectedEdge];
-      filterEvidenceObjs(rawEvidence.publications, edgesToFilterBy, filteredPublications);
-      filterEvidenceObjs(rawEvidence.sources, edgesToFilterBy, filteredSources);
-      
-      evidenceToDistribute = filteredEvidence;
-      setSelectedEdge(selEdge);
-
-      const soloEdge = selEdge.edges.find(edge => formatBiolinkEntity(edge.predicate.predicate) === selEdge.predicate);
-      const formatted = getFormattedEdgeLabel(soloEdge.subject.name, soloEdge.predicate.predicate, soloEdge.object.name).replaceAll("|", " ");
-      setFormattedEdge(formatted);
-    } else {
-      setFormattedEdge(null);
-      evidenceToDistribute = rawEvidence;
-    }
-    distributeEvidence(evidenceToDistribute);
+  const handleSelectedEdge = (selEdge) => {
+    let filteredEvidence = {
+      publications: new Set(),
+      sources: new Set()
+    };
+    filteredEvidence.publications = selEdge.publications;
+    filteredEvidence.sources = selEdge.provenance;
+    setSelectedEdge(selEdge);
+    const soloEdge = selEdge.edges.find(edge => formatBiolinkEntity(edge.predicate.predicate) === selEdge.predicate);
+    const formatted = getFormattedEdgeLabel(soloEdge.subject.name, soloEdge.predicate.predicate, soloEdge.object.name).replaceAll("|", " ");
+    setFormattedEdge(formatted);
+    distributeEvidence(filteredEvidence);
   }
 
   const distributeEvidence = (evidence) => {
     if(!Array.isArray(evidence)) {
-      setPubmedEvidence(cloneDeep([...evidence.publications].filter(item => item.type === 'PMID' || item.type === 'PMC')));
-      clinicalTrials.current = cloneDeep([...evidence.publications].filter(item => item.type === 'NCT'));
-      miscEvidence.current = cloneDeep([...evidence.publications].filter(item => item.type === 'other'))
+      setPubmedEvidence(cloneDeep([...evidence.publications].filter(item => isPublication(item))));
+      clinicalTrials.current = cloneDeep([...evidence.publications].filter(item => isClinicalTrial(item)));
+      miscEvidence.current = cloneDeep([...evidence.publications].filter(item => !isPublication(item) && !isClinicalTrial(item)))
         .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
       let displayedSources = [...evidence.sources]; 
-
       displayedSources.sort(compareByKeyLexographic('name'));
       setSources(displayedSources);
     }
   }
 
-  const handleEdgeClick = (edge, rawEvi) => {
+  const handleEdgeClick = (edge) => {
     if(!edge || checkForEdgeMatch(edge, selectedEdge) === true) 
       return;
-    handleSelectedEdge(edge, rawEvi)
+    handleSelectedEdge(edge)
     setEdgeSelectedTrigger(prev=>!prev);
   }
 
@@ -154,7 +134,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                                 id={key}
                                 key={key}
                                 handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
-                                handleEdgeClick={(edge)=>handleEdgeClick(edge, rawEvidence)}
+                                handleEdgeClick={(edge)=>handleEdgeClick(edge)}
                                 handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
                                 activeStringFilters={[]}
                                 selected={isSelected}
@@ -177,7 +157,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, rawEvidence, item, edgeGro
                         id={key}
                         key={key}
                         handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
-                        handleEdgeClick={(edge)=>handleEdgeClick(edge, rawEvidence)}
+                        handleEdgeClick={(edge)=>handleEdgeClick(edge)}
                         handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
                         activeStringFilters={[]}
                         selected={isSelected}

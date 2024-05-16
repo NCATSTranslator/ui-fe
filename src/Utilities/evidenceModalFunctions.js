@@ -68,12 +68,10 @@ export const updateJournal = (element, data) => {
   if(!element.journal)
     element.journal = capitalizeAllWords(data[element.id].journal_name);
 }
-
 export const updateTitle = (element, data) => {
   if(!element.title)
     element.title = capitalizeAllWords(data[element.id].article_title.replace('[', '').replace(']',''));
 }
-
 export const updateSnippet = (element, data) => {
   if(!element.snippet)
     element.snippet = data[element.id].abstract;
@@ -99,30 +97,4 @@ export const getKnowledgeLevelString = (knowledgeLevel) => {
       break;
   }
   return knowledgeLevelString;
-}
-
-// checks if an object with a matching ID already exists in a set before adding it
-const addEvidenceObjectToSet = (obj, container) => {
-  if(!obj?.id || ![...container].some(existingObj => existingObj.id === obj.id))
-    container.add(obj);
-}
-
-// filter publications/sources based on a selectedEdge
-export const filterEvidenceObjs = (objs, selectedEdges, container) => {
-  let idsToCheck = selectedEdges.map(edge => edge.id);
-  for (const obj of objs) {
-    let proceed = false;
-    if(Array.isArray(obj.edges) && idsToCheck.some(id => Object.keys(obj.edges).includes(id))) {
-      proceed = true;
-    } else if(idsToCheck.some(id => obj.edges[id] !== undefined) ) {
-      proceed = true;
-    }
-
-    if(proceed) {
-      const includedObj = cloneDeep(obj);
-      includedObj.edges = selectedEdges;
-
-      addEvidenceObjectToSet(includedObj, container);
-    }
-  }
 }
