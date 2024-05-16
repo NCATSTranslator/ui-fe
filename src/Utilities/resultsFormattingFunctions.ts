@@ -441,7 +441,7 @@ const calculateEvidenceCounts = (paths: PathObjectContainer[]) => {
               if(isFormattedEdgeObject(supportSubgraphItem)) {
                 // add support edge pubs and sources to counts
                 addPubsAndCTsToSets(supportSubgraphItem, allPubs, allCTs, allMisc);
-                addSourcesToSet(subgraphItem, allSources);
+                addSourcesToSet(supportSubgraphItem, allSources);
               }
             }
           }
