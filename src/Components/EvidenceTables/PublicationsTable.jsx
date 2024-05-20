@@ -196,6 +196,12 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
     }
   }
 
+  const handleSetKnowledgeLevelFilter = (knowledgeLevel) => {
+    setCurrentPage(0);
+    setItemOffset(0);
+    setKnowledgeLevelFilter(knowledgeLevel);
+  }
+
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
@@ -230,18 +236,18 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
           <div>
             <button 
               className={`${styles.knowledgeLevelButton} ${knowledgeLevelFilter === 'all' ? styles.selected : ''}`} 
-              onClick={() => setKnowledgeLevelFilter('all')}>
+              onClick={() => handleSetKnowledgeLevelFilter('all')}>
               All
             </button>
             <button 
               className={`${styles.knowledgeLevelButton} ${knowledgeLevelFilter === 'trusted' ? styles.selected : ''}`} 
-              onClick={() => setKnowledgeLevelFilter('trusted')}
+              onClick={() => handleSetKnowledgeLevelFilter('trusted')}
               disabled={!availableKnowledgeLevels.has('trusted')}>
               Curated
             </button>
             <button 
               className={`${styles.knowledgeLevelButton} ${knowledgeLevelFilter === 'ml' ? styles.selected : ''}`} 
-              onClick={() => setKnowledgeLevelFilter('ml')}
+              onClick={() => handleSetKnowledgeLevelFilter('ml')}
               disabled={!availableKnowledgeLevels.has('ml')}>
               Text-Mined
             </button>
