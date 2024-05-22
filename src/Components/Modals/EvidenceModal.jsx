@@ -55,6 +55,9 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
   // filters evidence based on provided selectedEdge (if any, otherwise returns full evidence), 
   // called in useEffect tracking selectedEdge (to accommodate both in-component edge selection and edgeGroup prop change)
   const handleSelectedEdge = (selEdge) => {
+    if (selEdge == null || selEdge == undefined)
+      return;
+    
     let filteredEvidence = {
       publications: new Set(),
       sources: new Set()
