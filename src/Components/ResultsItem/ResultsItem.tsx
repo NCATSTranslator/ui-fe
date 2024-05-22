@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, memo, FC, RefObject } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, formatBiolinkEntity, formatBiolinkNode } from '../../Utilities/utilities';
+import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react";
@@ -171,7 +171,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }, [item, activateEvidence])
 
   const handleActivateEvidence = useCallback((path: PathObjectContainer) => {
-    activateEvidence(item, null, path);
+    if(path.path.subgraph[1] !== null && isFormattedEdgeObject(path.path.subgraph[1]))
+      activateEvidence(item, path.path.subgraph[1], path);
   }, [item, activateEvidence])
 
   useEffect(() => {
