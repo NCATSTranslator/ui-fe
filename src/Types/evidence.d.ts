@@ -36,10 +36,15 @@ type rawAttachedPublication = {
 export type rawAttachedPublications = {
   [key: string]: rawAttachedPublication[];
 }
-
 export type EvidenceCountsContainer = {
   clinicalTrialCount: number;
   miscCount: number;
   publicationCount: number;
   sourceCount: number;
+}
+export type OldEvidence = {
+  distinctSources: any[];
+  length: number;
+  publications: {[key: string]: PublicationObject};
+  sources: any[];
 }

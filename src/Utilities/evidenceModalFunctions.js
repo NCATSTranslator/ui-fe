@@ -98,3 +98,12 @@ export const getKnowledgeLevelString = (knowledgeLevel) => {
   }
   return knowledgeLevelString;
 }
+
+export const generatePubmedURL = (id) => {
+  if(id.includes("PMC")) 
+    return `https://www.ncbi.nlm.nih.gov/pmc/${id}`;
+  if(id.includes("PMID"))
+    return `http://www.ncbi.nlm.nih.gov/pubmed/${id.replace("PMID:", "")}`;
+
+  return "";
+}
