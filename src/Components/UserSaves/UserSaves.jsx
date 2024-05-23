@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { getSaves } from '../../Utilities/userApi';
 import { handleEvidenceModalClose } from "../../Utilities/resultsInteractionFunctions";
 import { useSelector } from 'react-redux';
@@ -23,13 +23,15 @@ const UserSaves = () => {
   const [filteredUserSaves, setFilteredUserSaves] = useState(null)
   const currentSearchString = useRef("");
   const [evidenceOpen, setEvidenceOpen] = useState(false);
-  const [currentEvidence, setCurrentEvidence] = useState([]);
   const [selectedItem, setSelectedItem] = useState({});
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [selectedPath, setSelectedPath] = useState(null);
-  const [isAllEvidence, setIsAllEvidence] = useState(true);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const shareResultID = useRef(null);
+  const setShareResultID = (newID) => shareResultID.current = newID;
+  
   const noteLabel = useRef("");
   const currentBookmarkID = useRef(null);
   const formRef = useRef(null);
@@ -40,14 +42,12 @@ const UserSaves = () => {
 
   const queryClient = new QueryClient();
 
-  const activateEvidence = (evidence, item, edgeGroup, path, isAll) => {
-    setIsAllEvidence(isAll);
+  const activateEvidence = useCallback((item, edgeGroup, path) => {
     setSelectedItem(item);
     setSelectedEdge(edgeGroup);
     setSelectedPath(path);
-    setCurrentEvidence(evidence);
     setEvidenceOpen(true);
-  }
+  },[])
 
   const activateNotes = (label, bookmarkID) => {
     noteLabel.current = label;
@@ -170,9 +170,7 @@ const UserSaves = () => {
               isOpen={evidenceOpen}
               onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
               className="evidence-modal"
-              rawEvidence={currentEvidence}
               item={selectedItem}
-              isAll={isAllEvidence}
               edgeGroup={selectedEdge}
               path={selectedPath}
             />
@@ -219,6 +217,8 @@ const UserSaves = () => {
                             handleBookmarkError={handleBookmarkError}
                             bookmarkAddedToast={bookmarkAddedToast}
                             bookmarkRemovedToast={bookmarkRemovedToast}
+                            setShareModalOpen={setShareModalOpen}
+                            setShareResultID={setShareResultID}
                           />
                         );
                       })

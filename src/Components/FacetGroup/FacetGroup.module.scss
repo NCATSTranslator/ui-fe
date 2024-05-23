@@ -47,7 +47,6 @@
       margin-left: 4px;
     }
   }
-
   .top,.left {
     display: flex;
     justify-content: space-between;
@@ -57,7 +56,6 @@
       width: 115px;
     }
   }
-
   .subOne {
     color: $darkGray;
   }
@@ -187,6 +185,9 @@
   }
   .roleSpan, .fdaSpan {
     font-size: 12px; 
+  }
+  .roleSpan {
+    display: block !important;
   }
   .tooltipParagraph {
     font-size: 12px;

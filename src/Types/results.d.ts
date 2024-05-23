@@ -1,4 +1,4 @@
-import { EvidenceCountsContainer, PublicationObject } from "./evidence";
+import { EvidenceCountsContainer, PublicationObject, OldEvidence } from "./evidence";
 
 type RawNode = {
   aras: string[];
@@ -61,6 +61,7 @@ export type ResultItem = {
   compressedPaths: PathObjectContainer[];
   description: string;
   evidenceCounts: EvidenceCountsContainer;
+  evidence?: OldEvidence;
   fdaInfo: boolean;
   graph: any | null;
   hasNotes: boolean;

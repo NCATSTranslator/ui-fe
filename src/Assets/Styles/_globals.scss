@@ -327,3 +327,9 @@ img {
 input::placeholder {
   color: $placeholderGray;
 }
+
+.workspace, .main-workspace {
+  .result .share-result-icon {
+    display: none;
+  }
+}

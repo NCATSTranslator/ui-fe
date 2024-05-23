@@ -158,5 +158,5 @@ export const useWhyDidComponentUpdate = <T extends Record<string, any>>(name: st
       }
 
       previousProps.current = props;
-  }, [props]); // Depending only on props
+  }, [props, name]); 
 }
