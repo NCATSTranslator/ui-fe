@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, memo, FC, RefObject } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject } from '../../Utilities/utilities';
+import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject, isPublication, isClinicalTrial, isMiscPublication } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react";
@@ -103,6 +103,27 @@ const ResultsItem: FC<ResultsItemProps> = ({
   let roleCount: number = (item.tags)
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
+
+  const publicationCount = (!!item.evidenceCounts) 
+    ? item.evidenceCounts.publicationCount
+    : (!!item.evidence && !!item.evidence.publications) 
+      ? Object.values(item.evidence.publications).filter(item => isPublication(item)).length
+      : 0;
+  const clinicalTrialCount = (!!item.evidenceCounts) 
+    ? item.evidenceCounts.clinicalTrialCount
+    : (!!item.evidence && !!item.evidence.publications) 
+      ? Object.values(item.evidence.publications).filter(item => isClinicalTrial(item)).length
+      : 0;
+  const miscCount = (!!item.evidenceCounts) 
+    ? item.evidenceCounts.miscCount
+    : (!!item.evidence && !!item.evidence.publications) 
+      ? Object.values(item.evidence.publications).filter(item => isMiscPublication(item)).length
+      : 0;
+  const sourceCount = (!!item.evidenceCounts) 
+    ? item.evidenceCounts.sourceCount
+    : (!!item.evidence && !!item.evidence.distinctSources) 
+      ? item.evidence.distinctSources.length
+      : 0;
 
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
   const itemBookmarkID = useRef<string | null>(bookmarkID);
@@ -322,6 +343,10 @@ const ResultsItem: FC<ResultsItemProps> = ({
     formattedPaths.current = item.compressedPaths;
   }, [item, hasNotes]);
 
+  if(!item.evidenceCounts) {
+    console.log(item);
+  }
+
   return (
     <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
@@ -370,21 +395,27 @@ const ResultsItem: FC<ResultsItemProps> = ({
         }
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
-        <span
-          className={styles.evidenceLink}
-          // onClick={(e)=>{
-          //   e.stopPropagation();
-          //   activateEvidence(item, [], null, true);
-          // }}
-          >
+        <span className={styles.evidenceLink}>
           <div>
             <span className={styles.viewAll}>Evidence</span>
           </div>
           <div>
-            <span className={styles.info}>Publications ({item.evidenceCounts.publicationCount})</span>
-            <span className={styles.info}>Clinical Trials ({item.evidenceCounts.clinicalTrialCount})</span>
-            <span className={styles.info}>Misc ({item.evidenceCounts.miscCount})</span>
-            <span className={styles.info}>Sources ({item.evidenceCounts.sourceCount})</span>
+            {
+              publicationCount > 0 &&
+              <span className={styles.info}>Publications ({publicationCount})</span>
+            }
+            {
+              clinicalTrialCount > 0 &&
+              <span className={styles.info}>Clinical Trials ({clinicalTrialCount})</span>
+            }
+            {
+              miscCount > 0 &&
+              <span className={styles.info}>Misc ({miscCount})</span>
+            }
+            {
+              sourceCount > 0 &&
+              <span className={styles.info}>Sources ({sourceCount})</span>
+            }
           </div>
         </span>
       </div>
@@ -393,7 +424,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
           <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
         </span>
       </div>
-      <button className={`${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed }`} onClick={handleOpenResultShare}>
+      <button className={`${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`} onClick={handleOpenResultShare}>
         <ShareIcon/>
       </button>
       {/* <CSVLink

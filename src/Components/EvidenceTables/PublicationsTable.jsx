@@ -5,7 +5,7 @@ import styles from './PublicationsTable.module.scss';
 import Select from '../FormFields/Select';
 import ReactPaginate from "react-paginate";
 import { handleEvidenceSort, updatePubdate, updateSnippet, updateJournal, 
-  updateTitle, getKnowledgeLevelString  } from "../../Utilities/evidenceModalFunctions";
+  updateTitle, getKnowledgeLevelString, generatePubmedURL } from "../../Utilities/evidenceModalFunctions";
 import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
@@ -72,6 +72,9 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
         updateTitle(element, data);
         updateSnippet(element, data);
         updatePubdate(element, data);
+        if(!element?.url){
+          element.url = generatePubmedURL(element.id);
+        }
       }
       element.updated = true;
     }
@@ -301,6 +304,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
                 ? <p className={styles.noPubs}>No publications available.</p>
                 :
                   displayedPubmedEvidence.map((pub)=> {
+                    console.log(pub);
                     const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
                     let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
                     return (
@@ -310,7 +314,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
                           {
                             pub.source && pub.source?.url 
                             ? <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer'><span>({pub.source.name})</span></a>
-                            : <span className={styles.sourceName}span>({pub.source.name})</span>
+                            : <span className={styles.sourceName}span>({(!!pub?.source?.name) ? pub.source.name : "Unknown"})</span>
                           }
                         </td>
                         <td className={`table-cell ${styles.tableCell} ${styles.pubdate} pubdate`}>

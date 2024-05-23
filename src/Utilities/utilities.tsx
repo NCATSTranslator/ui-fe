@@ -14,7 +14,7 @@ import ExternalLink from '../Icons/external-link.svg?react';
 import { QueryType } from '../Types/results';
 import { mergeWith } from 'lodash';
 import { FormattedEdgeObject, FormattedNodeObject } from '../Types/results';
-import { PublicationObject } from '../Types/evidence';
+import { PublicationObject, PublicationsList } from '../Types/evidence';
 
 export const getIcon = (category: string): JSX.Element => {
   var icon = <Chemical/>;
@@ -297,6 +297,12 @@ export const isPublication = (publication: PublicationObject) => {
 
   return false
 }
+export const isMiscPublication = (publication: PublicationObject) => {
+  if(publication.type !== "PMID" && publication.type !== "PMC" && publication.type !== "NCT")
+    return true;
+
+  return false
+}
 
 export const isFormattedEdgeObject = (pathItem: any): pathItem is FormattedEdgeObject => {
   return !!pathItem && 'inferred' in pathItem;
@@ -321,4 +327,30 @@ export const checkPublicationsType = (edgeObject: FormattedEdgeObject): string =
   } else {
     return "Unknown type";
   }
+}
+
+const isPublicationObject = (obj: any): obj is PublicationObject => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.id === 'string' &&
+    typeof obj.journal === 'string' &&
+    typeof obj.knowledgeLevel === 'string' &&
+    typeof obj.source === 'object' &&
+    (typeof obj.support === 'object' || obj.support === null) &&
+    typeof obj.title === 'string' &&
+    typeof obj.type === 'string' &&
+    typeof obj.url === 'string'
+  );
+}
+
+export const isPublicationsList = (obj: any): obj is PublicationsList => {
+  if (typeof obj !== 'object' || obj === null) {
+    return false;
+  }
+
+  return Object.values(obj).every(value => 
+    Array.isArray(value) && 
+    value.every(item => isPublicationObject(item))
+  );
 }

@@ -11,7 +11,7 @@ import AnimateHeight from 'react-animate-height';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
 
 const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, activateNotes, 
-  handleBookmarkError, bookmarkAddedToast, bookmarkRemovedToast}) => {
+  handleBookmarkError, bookmarkAddedToast, bookmarkRemovedToast, setShareModalOpen, setShareResultID}) => {
 
   let key = save[0];
   let queryObject = save[1];
@@ -97,9 +97,10 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
             <div key={save.id} className={styles.result}>
               <ResultsItem
                 rawResults={null}
+                key={queryItem.id}
                 type={queryType}
                 item={queryItem}
-                activateEvidence={(evidence, item, edgeGroup, path, isAll)=>activateEvidence(evidence, item, edgeGroup, path, isAll)}
+                activateEvidence={activateEvidence}
                 activateNotes={activateNotes}
                 activeStringFilters={[currentSearchString.current]}
                 zoomKeyDown={zoomKeyDown}
@@ -107,14 +108,14 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
                 queryNodeID={queryNodeID}
                 queryNodeLabel={queryNodeLabel}
                 queryNodeDescription={queryNodeDescription}
-                bookmarked
-                bookmarkID={save.id}
+                bookmarked={queryItem.bookmarked}
+                bookmarkID={queryItem.bookmarkID}
                 hasNotes={queryItem.hasNotes}
                 handleBookmarkError={handleBookmarkError}
                 bookmarkAddedToast={bookmarkAddedToast}
                 bookmarkRemovedToast={bookmarkRemovedToast}
-                isFocused={false}
-                focusedItemRef={null}
+                setShareModalOpen={setShareModalOpen}
+                setShareResultID={setShareResultID}
               />
             </div>
           )
