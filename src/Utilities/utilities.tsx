@@ -305,7 +305,7 @@ export const isMiscPublication = (publication: PublicationObject) => {
 }
 
 export const isFormattedEdgeObject = (pathItem: any): pathItem is FormattedEdgeObject => {
-  return !!pathItem && 'inferred' in pathItem;
+  return !!pathItem && 'edges' in pathItem;
 }
 export const isFormattedNodeObject = (pathItem: any): pathItem is FormattedNodeObject => {
   return !!pathItem && 'type' in pathItem && 'name' in pathItem;
