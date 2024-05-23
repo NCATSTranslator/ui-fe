@@ -95,7 +95,7 @@ interface Save {
 
 interface SaveGroup {
   saves: Set<Save>;
-  query: object;
+  query: QueryObject;
 }
 
 type SetUserSavesFunction = (e: { [key: string]: SaveGroup }) => void;
@@ -140,7 +140,15 @@ const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
       newSaves[save.ars_pkey].saves.add(save);
     }
   }
-  return newSaves;
+  // return only saves from after Jan 1, 2024
+  const cutoffDate = new Date('2024-01-01');
+  const filteredSaves = Object.fromEntries(
+    Object.entries(newSaves).filter(([key, value]) => {
+      console.log(typeof value.query.submitted_time);
+      return new Date(value.query.submitted_time) >= cutoffDate;
+    })
+  );
+  return filteredSaves;
 }
 
 /**
