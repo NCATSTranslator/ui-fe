@@ -6,7 +6,7 @@ import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isPublication, isPublicationDictionary } from "../../Utilities/utilities";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
-import { getFormattedEdgeLabel } from '../../Utilities/resultsFormattingFunctions';
+import { getFormattedEdgeLabel, getUrlByType } from '../../Utilities/resultsFormattingFunctions';
 import { checkForEdgeMatch, handleEvidenceSort } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
@@ -52,7 +52,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
     }
   })
 
-  // filters evidence based on provided selectedEdge (if any, otherwise returns full evidence), 
+  // filters evidence based on provided selectedEdge
   const handleSelectedEdge = (selEdge) => {
     if (selEdge === null || selEdge === undefined)
       return;
@@ -64,10 +64,31 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
     filteredEvidence.publications = selEdge.publications;
     filteredEvidence.sources = selEdge.provenance;
     setSelectedEdge(selEdge);
-    const soloEdge = selEdge.edges.find(edge => formatBiolinkEntity(edge.predicate.predicate) === selEdge.predicate);
+    let soloEdge = selEdge.edges.find(edge => formatBiolinkEntity(edge.predicate.predicate) === selEdge.predicate);
+    // handle old edge format for old user saves
+    if(soloEdge === undefined)
+      soloEdge = selEdge.edges.find(edge => formatBiolinkEntity(edge.predicate) === selEdge.predicate);
     const formatted = getFormattedEdgeLabel(soloEdge.subject.name, soloEdge.predicate.predicate, soloEdge.object.name).replaceAll("|", " ");
     setFormattedEdge(formatted);
     distributeEvidence(filteredEvidence);
+  }
+  
+  const loopIDsIntoNewPubs = (publications, knowledgeLevel = "unknown", objArray) => {
+    for(const pubID of publications) {
+      let type = (pubID.includes("PMID")) 
+      ? "PMID"
+      : (pubID.includes("PMC"))
+        ? "PMC"
+        : (pubID.includes("clinicaltrials"))
+          ? "NCT"
+          : null;
+      let newPub = {
+        id: pubID,
+        type: type,
+        knowledgeLevel: knowledgeLevel
+      }
+      objArray.push(newPub);
+    }
   }
 
   const distributeEvidence = (evidence) => {
@@ -76,22 +97,16 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
       if(isPublicationDictionary(evidence.publications)) {
         let pubs = [];
         for(const knowledgeLevel of Object.keys(evidence.publications)) {
-          for(const pubID of evidence.publications[knowledgeLevel]) {
-            let type = (pubID.includes("PMID")) 
-            ? "PMID"
-            : (pubID.includes("PMC"))
-              ? "PMC"
-              : (pubID.includes("NCT"))
-                ? "NCT"
-                : null;
-            let newPub = {
-              id: pubID,
-              type: type,
-              knowledgeLevel: knowledgeLevel
-            }
-            pubs.push(newPub);
-          }
+          loopIDsIntoNewPubs(evidence.publications[knowledgeLevel], knowledgeLevel, pubs);
         }
+        setPubmedEvidence(cloneDeep([...pubs].filter(item => isPublication(item))));
+        clinicalTrials.current = cloneDeep([...pubs].filter(item => isClinicalTrial(item)));
+        miscEvidence.current = cloneDeep([...pubs].filter(item => !isPublication(item) && !isClinicalTrial(item)))
+        .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
+      // support even older format
+      } else if(Array.isArray(evidence.publications) && evidence.publications.length > 0 && typeof evidence.publications[0] == "string") {
+        let pubs = [];
+        loopIDsIntoNewPubs(evidence.publications, "unknown", pubs);
         setPubmedEvidence(cloneDeep([...pubs].filter(item => isPublication(item))));
         clinicalTrials.current = cloneDeep([...pubs].filter(item => isClinicalTrial(item)));
         miscEvidence.current = cloneDeep([...pubs].filter(item => !isPublication(item) && !isClinicalTrial(item)))
@@ -223,10 +238,15 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                   <div className={`table-items ${styles.tableItems} scrollable`}>
                     {
                       clinicalTrials.current.map((item, i)=> {
+                        console.log(item);
+                        let url = item.url
+                        if(!item.url && !!item.id) {
+                          url = getUrlByType(item.id, item.type);
+                        }
                         return (
                           <div className={styles.tableItem} key={i}>
                             <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-                              {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
+                              {url && <a href={url} rel="noreferrer" target="_blank">{url} <ExternalLink/></a>}
                             </div>
                           </div>
                         )

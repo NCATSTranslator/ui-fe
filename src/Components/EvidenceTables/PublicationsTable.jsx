@@ -304,7 +304,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
                 ? <p className={styles.noPubs}>No publications available.</p>
                 :
                   displayedPubmedEvidence.map((pub)=> {
-                    console.log(pub);
                     const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
                     let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
                     return (
