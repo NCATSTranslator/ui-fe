@@ -343,10 +343,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
     formattedPaths.current = item.compressedPaths;
   }, [item, hasNotes]);
 
-  if(!item.evidenceCounts) {
-    console.log(item);
-  }
-
   return (
     <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>

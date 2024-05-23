@@ -71,7 +71,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
   }
 
   const distributeEvidence = (evidence) => {
-    console.log(evidence);
     if(!Array.isArray(evidence)) {
       // if evidence is using the old format, handle it differently
       if(isPublicationDictionary(evidence.publications)) {
