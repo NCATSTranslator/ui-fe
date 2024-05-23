@@ -32,7 +32,7 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   }
-
+console.log(save);
   return (
     <div key={key} className={styles.query}>
       <div className={styles.topBar}>
@@ -108,8 +108,8 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
                 queryNodeID={queryNodeID}
                 queryNodeLabel={queryNodeLabel}
                 queryNodeDescription={queryNodeDescription}
-                bookmarked={queryItem.bookmarked}
-                bookmarkID={queryItem.bookmarkID}
+                bookmarked={true}
+                bookmarkID={save.id}
                 hasNotes={queryItem.hasNotes}
                 handleBookmarkError={handleBookmarkError}
                 bookmarkAddedToast={bookmarkAddedToast}
