@@ -271,26 +271,4 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
   )
 }
 
-// check if certain props are really different before rerendering
-const areEqualProps = (prevProps: any, nextProps: any) => {
-  // keys for the paths prop
-  const prevItemDataKeys = Object.keys(prevProps.paths);
-  const nextItemDataKeys = Object.keys(nextProps.paths);
-
-  if (prevItemDataKeys.length !== nextItemDataKeys.length) {
-    return false;
-  }
-
-  // check for nonequivalent properties within the paths prop object
-  for (const key of prevItemDataKeys) {
-    if (prevProps.paths[key] !== nextProps.paths[key]) {
-      return false;
-    }
-  }
-
-  // If none of the above conditions are met, props are equal, return true to not rerender
-  return true;
-};
-
-// export default memo(PathView, areEqualProps);
 export default PathView;
