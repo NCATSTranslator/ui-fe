@@ -32,7 +32,6 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   }
-console.log(save);
   return (
     <div key={key} className={styles.query}>
       <div className={styles.topBar}>
