@@ -67,6 +67,7 @@ interface ResultsItemProps {
   rawResults: RawResult[];
   type: QueryType;
   zoomKeyDown: boolean;
+  isInUserSave?: boolean;
 }
 
 const ResultsItem: FC<ResultsItemProps> = ({
@@ -96,6 +97,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     rawResults,
     type,
     zoomKeyDown,
+    isInUserSave = false
   }) => {
   const root = useSelector(currentRoot);
 
@@ -439,7 +441,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <AnimateHeight
         className={`${styles.accordionPanel}
           ${isExpanded ? styles.open : styles.closed }
-          ${item.description || item.tags.some(item=>item.includes("role")) ? styles.hasDescription : styles.noDescription }
+          ${(item.description || item.tags.some(item=>item.includes("role")) && !isInUserSave) ? styles.hasDescription : styles.noDescription }
         `}
         duration={500}
         height={height}

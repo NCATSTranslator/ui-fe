@@ -115,6 +115,7 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
                 bookmarkRemovedToast={bookmarkRemovedToast}
                 setShareModalOpen={setShareModalOpen}
                 setShareResultID={setShareResultID}
+                isInUserSave={true}
               />
             </div>
           )
