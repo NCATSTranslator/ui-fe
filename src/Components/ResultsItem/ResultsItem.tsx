@@ -398,22 +398,10 @@ const ResultsItem: FC<ResultsItemProps> = ({
             <span className={styles.viewAll}>Evidence</span>
           </div>
           <div>
-            {
-              publicationCount > 0 &&
               <span className={styles.info}>Publications ({publicationCount})</span>
-            }
-            {
-              clinicalTrialCount > 0 &&
               <span className={styles.info}>Clinical Trials ({clinicalTrialCount})</span>
-            }
-            {
-              miscCount > 0 &&
               <span className={styles.info}>Misc ({miscCount})</span>
-            }
-            {
-              sourceCount > 0 &&
               <span className={styles.info}>Sources ({sourceCount})</span>
-            }
           </div>
         </span>
       </div>
@@ -441,7 +429,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <AnimateHeight
         className={`${styles.accordionPanel}
           ${isExpanded ? styles.open : styles.closed }
-          ${(item.description || item.tags.some(item=>item.includes("role")) && !isInUserSave) ? styles.hasDescription : styles.noDescription }
+          ${((item.description || item.tags.some(item=>item.includes("role"))) && !isInUserSave) ? styles.hasDescription : styles.noDescription }
         `}
         duration={500}
         height={height}
