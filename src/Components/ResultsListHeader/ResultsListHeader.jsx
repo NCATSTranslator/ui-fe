@@ -89,7 +89,7 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
               Showing <span className={styles.range}>
                 <span className={styles.start}>{data.itemOffset + 1}</span>
                 -
-                <span>{data.endResultIndex}</span>
+                <span>{data.endResultIndex > data.formattedResultsLength ? data.formattedResultsLength : data.endResultIndex}</span>
               </span> of
               <span className={styles.count}> {data.formattedResultsLength} </span>
               {

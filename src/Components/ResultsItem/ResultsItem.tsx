@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, memo, FC, RefObject } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo, FC, RefObject } from 'react';
 import styles from './ResultsItem.module.scss';
 import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject, isPublication, isClinicalTrial, isMiscPublication } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
