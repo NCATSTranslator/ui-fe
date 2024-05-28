@@ -76,7 +76,7 @@ const Home = () => {
                   </li>
                   <li>
                     <a 
-                      href="https://www.figma.com/exit?url=https%3A%2F%2Fwww.statnews.com%2F2019%2F07%2F31%2Fnih-funded-project-aims-to-build-a-google-for-biomedical-data%2F#:~:text=https%3A//www.statnews.com/2019/07/31/nih%2Dfunded%2Dproject%2Daims%2Dto%2Dbuild%2Da%2Dgoogle%2Dfor%2Dbiomedical%2Ddata/" 
+                      href="https://www.statnews.com/2019/07/31/nih-funded-project-aims-to-build-a-google-for-biomedical-data/" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       >
