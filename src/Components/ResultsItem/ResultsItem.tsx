@@ -177,7 +177,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     return count;
   }
 
-  const pathsCount: number = useMemo(()=>getPathsCount(formattedPaths.current), [formattedPaths]);
+  const pathsCount: number = getPathsCount(formattedPaths.current);
   const pathString: string = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
   const nameString: string = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
