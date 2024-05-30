@@ -14,7 +14,7 @@ import Info from '../../Icons/information.svg?react';
 import Tooltip from '../Tooltip/Tooltip';
 import EmphasizeWord from '../EmphasizeWord/EmphasizeWord';
 
-const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvidence, item, prefs = null, isOpen }) => {
+const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, setPubmedEvidence, item, prefs = null, isOpen }) => {
 
   const availableKnowledgeLevels = useMemo(() => {
     return new Set(pubmedEvidence.map(pub => pub.knowledgeLevel));
@@ -189,9 +189,19 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
     }
   }, [pubmedEvidence, selectedEdgeTrigger])
 
-  const handleGetSupportTextOrSnippet = (pub) => {
-    if(typeof pub.support === 'object' && pub.support !== null && !Array.isArray(pub.support)){
-      return <EmphasizeWord text={pub.support.text} positions={[pub.support.subject, pub.support.object]} className={styles.emphasizedSnippet}/>
+  const handleGetSupportTextOrSnippet = (pub, selectedEdge) => {
+    if(typeof pub.support === 'object' && pub.support !== null && !Array.isArray(pub.support)) {
+      let subjectName = (selectedEdge.edges.length > 0 && !!selectedEdge.edges[0]?.subject?.name) ? selectedEdge.edges[0].subject.name : false;
+      let objectName = (selectedEdge.edges.length > 0 && !!selectedEdge.edges[0]?.object?.name) ? selectedEdge.edges[0].object.name : false;
+      return (
+        <EmphasizeWord 
+          text={pub.support.text} 
+          positions={[pub.support.subject, pub.support.object]} 
+          subjectName={subjectName}
+          objectName={objectName}
+          className={styles.emphasizedSnippet}
+        />
+      )
     } else {
       return (pub.snippet)
         ? pub.snippet
@@ -331,7 +341,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, pubmedEvidence, setPubmedEvide
                         <td className={`table-cell ${styles.tableCell} ${styles.snippet}`}>
                           <span>
                             {
-                              handleGetSupportTextOrSnippet(pub)
+                              handleGetSupportTextOrSnippet(pub, selectedEdge)
                             }
                           </span>
                             {pub.url && <a href={pub.url} className={`url ${styles.url}`} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
