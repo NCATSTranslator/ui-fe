@@ -219,6 +219,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
               <div heading="Publications" className={styles.tab}>
                 <PublicationsTable
                   selectedEdgeTrigger={selectedEdgeTrigger}
+                  selectedEdge={selectedEdge}
                   pubmedEvidence={pubmedEvidence} 
                   setPubmedEvidence={setPubmedEvidence}
                   handleEvidenceSort={handleEvidenceSort}
