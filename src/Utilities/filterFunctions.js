@@ -41,7 +41,7 @@ export const getFilterLabel = (filter) => {
       filterLabel = "Chemical Category";
       break;
     case "pc":
-      filterLabel = "Node Type";
+      filterLabel = "Object Type";
       break;
     case "di":
       filterLabel = "Drug Indication";
