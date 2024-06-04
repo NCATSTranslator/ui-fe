@@ -191,8 +191,14 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
 
   const handleGetSupportTextOrSnippet = (pub, selectedEdge) => {
     if(typeof pub.support === 'object' && pub.support !== null && !Array.isArray(pub.support)) {
-      let subjectName = (selectedEdge.edges.length > 0 && !!selectedEdge.edges[0]?.subject?.name) ? selectedEdge.edges[0].subject.name : false;
-      let objectName = (selectedEdge.edges.length > 0 && !!selectedEdge.edges[0]?.object?.name) ? selectedEdge.edges[0].object.name : false;
+      let subjectName = 
+        (!!selectedEdge && selectedEdge.edges.length > 0 && !!selectedEdge.edges[0]?.subject?.name) 
+          ? selectedEdge.edges[0].subject.name 
+          : false;
+      let objectName = 
+        (!!selectedEdge && selectedEdge.edges.length > 0 && !!selectedEdge.edges[0]?.object?.name) 
+          ? selectedEdge.edges[0].object.name 
+          : false;
       return (
         <EmphasizeWord 
           text={pub.support.text} 
