@@ -65,14 +65,14 @@ const getChemicalTypeCaption = (): JSX.Element => {
   )
 }
 
-const getNodeTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
+const getObjectTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
   const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
   return(
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label}>
           <span data-tooltip-id="biolink-tooltip-2">
-            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Node Type</p>
+            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Object Type</p>
             <Alert/>
           </span>
           <Tooltip id="biolink-tooltip-2">
@@ -84,9 +84,9 @@ const getNodeTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Eleme
     </div>
   )
 }
-const getNodeTypeCaption = (): JSX.Element => {
+const getObjectTypeCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Show only results that include a node with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+    <p className={styles.caption}>Show only results that include an object of a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
   )
 }
 
@@ -155,7 +155,7 @@ const getTagHeadingMarkup = (tagType: string, activeFilters: Filter[]): JSX.Elem
       headingToReturn = getChemicalTypeHeading(tagType, activeFilters);
       break;
     case 'pc':
-      headingToReturn = getNodeTypeHeading(tagType, activeFilters);
+      headingToReturn = getObjectTypeHeading(tagType, activeFilters);
       break;
     case 'role':
       headingToReturn = getRoleHeading(tagType, activeFilters);
@@ -182,7 +182,7 @@ const getTagCaptionMarkup = (tagType: string): JSX.Element | null => {
       captionToReturn = getChemicalTypeCaption();
       break;
     case 'pc':
-      captionToReturn = getNodeTypeCaption();
+      captionToReturn = getObjectTypeCaption();
       break;
     case 'role':
       captionToReturn = getRoleCaption();
