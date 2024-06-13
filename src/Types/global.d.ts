@@ -6,6 +6,7 @@ type PrefObject = {
 }
 
 export type PreferencesContainer = {
+  [key:string]: PrefObject;
   result_sort: PrefObject;
   result_per_screen: PrefObject;
   graph_visibility: PrefObject;

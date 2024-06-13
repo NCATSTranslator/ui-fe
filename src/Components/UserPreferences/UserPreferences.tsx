@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import { defaultPrefs, prefKeyToString, updateUserPreferences } from '../../Utilities/userApi';
 import { useSelector, useDispatch } from 'react-redux';
 import { currentPrefs, currentRoot, setCurrentPrefs } from '../../Redux/rootSlice';
@@ -8,16 +8,17 @@ import Button from '../FormFields/Button';
 import Select from 'react-select';
 import styles from './UserPreferences.module.scss';
 import { cloneDeep } from 'lodash';
+import { PreferencesContainer } from '../../Types/global';
 
 const UserPreferences = () => {
 
   const initPrefs = useSelector(currentPrefs);
   const root = useSelector(currentRoot);
-  const [userPrefs, setUserPrefs] = useState(initPrefs);
+  const [userPrefs, setUserPrefs] = useState<PreferencesContainer>(initPrefs);
   const prefsSavedToast = () => toast.success("Preferences saved!");
   const dispatch = useDispatch();
 
-  const handleSubmitUserPrefs = async (e) => {
+  const handleSubmitUserPrefs = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     await updateUserPreferences(userPrefs);
@@ -71,7 +72,7 @@ const UserPreferences = () => {
                       return(<></>);
                     } else {
                       return(
-                        <label htmlFor={`#${pref}`} key={`${pref}-${defaultVal.value}`}>
+                        <label htmlFor={`#${pref}`} key={`${pref}-${(!!defaultVal) ? defaultVal.value : ''}`}>
                           {prefLabel}
                           <Select 
                             id={pref}
@@ -82,7 +83,8 @@ const UserPreferences = () => {
                               if(userPrefs[pref]) {
                                 setUserPrefs(prev => {
                                   let newPrefs = cloneDeep(prev);
-                                  newPrefs[pref].pref_value = e.value;
+                                  if(!!e)
+                                    newPrefs[pref].pref_value = e.value;
                                   return newPrefs;
                                 })
                               }
