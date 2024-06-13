@@ -552,6 +552,10 @@ const ResultsList = ({loading}) => {
     setNotesOpen(true);
   }
 
+  const handlePageReset = (newItemsPerPage, resultsLength) => {
+    handlePageClick({selected: 0}, newItemsPerPage, resultsLength);
+  }
+
   const filterAndFacet = (facetsAndFilters, stringFilters, filteredResults, originalResults, rawResults) => {
     const filterResults = (filters, stringFilters, originalResults, resultPathRanks) => {
       const filteredResults = [];
@@ -667,7 +671,11 @@ const ResultsList = ({loading}) => {
     let [results, negatedResults] = filterResults(filters, stringFilters, originalResults, resultPathRanks);
     calculateFacetCounts(results, rawResults, negatedResults, facets, negatedFacets, setAvailableTags);
     results = facetResults(facets, results, resultPathRanks);
-    return results
+    
+    if(currentPage !== 0)
+      handlePageReset(false, results.length);
+
+    return results;
   }
 
   // Handle the addition and removal of individual filters. Keep the invariant that
@@ -947,7 +955,7 @@ const ResultsList = ({loading}) => {
                         size="s"
                         handleChange={(value)=>{
                           setItemsPerPage(parseInt(value));
-                          handlePageClick({selected: 0}, value, formattedResults.length);
+                          handlePageReset(value, formattedResults.length);
                         }}
                         noanimate
                         >
