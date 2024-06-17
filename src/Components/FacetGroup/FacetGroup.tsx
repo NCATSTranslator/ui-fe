@@ -72,7 +72,7 @@ const getNodeTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Eleme
       <div className={styles.labelHeading}>
         <div className={styles.label}>
           <span data-tooltip-id="biolink-tooltip-2">
-            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Node Type</p>
+            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Object Type</p>
             <Alert/>
           </span>
           <Tooltip id="biolink-tooltip-2">
@@ -86,7 +86,7 @@ const getNodeTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Eleme
 }
 const getNodeTypeCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Show only results that include a node with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+    <p className={styles.caption}>Show only results that include an object of a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
   )
 }
 
