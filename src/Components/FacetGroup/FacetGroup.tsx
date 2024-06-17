@@ -24,7 +24,7 @@ const getRoleHeading = (tagType: string, activeFilters: Filter[]): JSX.Element =
             <Alert/>
           </span>
           <Tooltip id="chebi-role-tooltip">
-            <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology,<a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
+            <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
           </Tooltip>
         </div>
         <ChevDown className={styles.expansionSVG}/>
@@ -65,14 +65,14 @@ const getChemicalTypeCaption = (): JSX.Element => {
   )
 }
 
-const getObjectTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
+const getNodeTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
   const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
   return(
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label}>
           <span data-tooltip-id="biolink-tooltip-2">
-            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Object Type</p>
+            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Node Type</p>
             <Alert/>
           </span>
           <Tooltip id="biolink-tooltip-2">
@@ -84,9 +84,9 @@ const getObjectTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Ele
     </div>
   )
 }
-const getObjectTypeCaption = (): JSX.Element => {
+const getNodeTypeCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Show only results that include an object of a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+    <p className={styles.caption}>Show only results that include a node with a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
   )
 }
 
@@ -155,7 +155,7 @@ const getTagHeadingMarkup = (tagType: string, activeFilters: Filter[]): JSX.Elem
       headingToReturn = getChemicalTypeHeading(tagType, activeFilters);
       break;
     case 'pc':
-      headingToReturn = getObjectTypeHeading(tagType, activeFilters);
+      headingToReturn = getNodeTypeHeading(tagType, activeFilters);
       break;
     case 'role':
       headingToReturn = getRoleHeading(tagType, activeFilters);
@@ -182,7 +182,7 @@ const getTagCaptionMarkup = (tagType: string): JSX.Element | null => {
       captionToReturn = getChemicalTypeCaption();
       break;
     case 'pc':
-      captionToReturn = getObjectTypeCaption();
+      captionToReturn = getNodeTypeCaption();
       break;
     case 'role':
       captionToReturn = getRoleCaption();
@@ -290,33 +290,28 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
       acc[filter.type] = index;
       return acc;
     }, {});
-    const sortedFacets = Object.entries(groupedTags[type]).sort((a, b) => {
-      const indexA = typeIndexMapping[a[0]] !== undefined ? typeIndexMapping[a[0]] : Infinity;
-      const indexB = typeIndexMapping[b[0]] !== undefined ? typeIndexMapping[b[0]] : Infinity;
-  
-      // Prioritize items found in activeFilters
-      if (indexA !== Infinity && indexB === Infinity) {
-        return -1; // A is in activeFilters, B is not, A comes first
-      } else if (indexB !== Infinity && indexA === Infinity) {
-        return 1; // B is in activeFilters, A is not, B comes first
-      } else if (indexA === Infinity && indexB === Infinity) {
-        // Neither A nor B is in activeFilters, sort alphabetically by name
-        const nameA = a[1].name.toLowerCase();
-        const nameB = b[1].name.toLowerCase();
-        // Check if either name is 'other'
-        if (nameA === 'other' && nameB === 'other') {
-          return 0; // Both are 'other', no need to change order
-        } else if (nameA === 'other') {
-          return 1; // 'other' should come last, so return 1 to sort it after b
-        } else if (nameB === 'other') {
-          return -1; // 'other' should come last, so return -1 to sort it after a
-        }
 
-        // If neither name is 'other', sort alphabetically
-        return nameA.localeCompare(nameB);
-      }
-      // If both are in activeFilters, retain their order (assuming activeFilters is pre-sorted or order doesn't matter)
-      return 0;
+    const isOther = (name: string): boolean => name.toLowerCase() === 'other';
+    const getIndex = (key: string, typeIndexMapping: {[key: string]: number}): number => {
+      return typeIndexMapping[key] !== undefined ? typeIndexMapping[key] : Infinity;
+    }
+    const compareNames = (nameA: string, nameB: string): number => {
+      if (isOther(nameA) && isOther(nameB)) return 0;
+      if (isOther(nameA)) return 1;
+      if (isOther(nameB)) return -1;
+      return nameA.localeCompare(nameB);
+    };
+    const sortedFacets = Object.entries(groupedTags[type]).sort((a, b) => {
+      const indexA = getIndex(a[0], typeIndexMapping);
+      const indexB = getIndex(b[0], typeIndexMapping);
+    
+      if (indexA !== Infinity && indexB === Infinity) return -1;
+      if (indexB !== Infinity && indexA === Infinity) return 1;
+      
+      const nameA = a[1].name.toLowerCase();
+      const nameB = b[1].name.toLowerCase();
+      
+      return compareNames(nameA, nameB);
     });
   
     return (
