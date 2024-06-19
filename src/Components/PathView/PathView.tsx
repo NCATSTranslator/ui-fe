@@ -2,6 +2,7 @@ import styles from './PathView.module.scss';
 import { useState, useEffect, useMemo, useCallback, FC } from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
+import LastViewedTag from '../LastViewedTag/LastViewedTag';
 import Question from '../../Icons/Navigation/Question.svg?react';
 import Information from '../../Icons/information.svg?react';
 import ResearchMultiple from '../../Icons/research-multiple.svg?react';
@@ -71,6 +72,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
 
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
+  const [lastViewedPathID, setLastViewedPathID] = useState<string|null>(null);
 
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
@@ -104,6 +106,8 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
   },[]);
 
   const handleEdgeClick = useCallback((edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => {
+    if(!!path?.id) 
+      setLastViewedPathID(path.id);
     handleEdgeSpecificEvidence(edgeGroup, path);
   }, [handleEdgeSpecificEvidence]);
 
@@ -191,6 +195,10 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                       : null
                     }
                   <div className={styles.formattedPath} key={tooltipID}>
+                    {/* {
+                      lastViewedPathID === pathToDisplay.id &&
+                      <LastViewedTag/>
+                    } */}
                     <button 
                       onClick={()=>handleActivateEvidence(pathToDisplay)}
                       className={styles.pathEvidenceButton}
@@ -219,7 +227,10 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                                 handleNameClick: handleNameClick, 
                                 handleEdgeClick: handleEdgeClick, 
                                 handleTargetClick: handleTargetClick, 
-                                activeStringFilters: activeStringFilters
+                                activeStringFilters: activeStringFilters,
+                                lastViewedPathID: lastViewedPathID,
+                                tooltipID: null,
+                                supportPath: null
                               }
                             : null;
                           return (

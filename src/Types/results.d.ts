@@ -140,12 +140,15 @@ export type SupportDataObject = {
   pathItem: FormattedEdgeObject | FormattedNodeObject;
   pathViewStyles: {[key: string]: string;} | null;
   selectedPaths: Set<PathObjectContainer> | null;
+  supportPath: PathObjectContainer | null;
   pathToDisplay: any;
   handleActivateEvidence: (path: PathObjectContainer) => void;
   handleNameClick: (name: FormattedNodeObject) => void;
   handleEdgeClick: (edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => void;
   handleTargetClick: (target: FormattedNodeObject) => void;
   activeStringFilters: string[];
+  lastViewedPathID: string | null;
+  tooltipID: string | null;
 }
 export type Score = {
   clinical_evidence: number;
