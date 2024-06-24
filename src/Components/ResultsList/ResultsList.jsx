@@ -246,9 +246,8 @@ const ResultsList = ({loading}) => {
     }
 
     // filter
-    if (!justSort) {
+    if (!justSort) 
       newFormattedResults = filterAndFacet(facetsAndFilters, asFilters, newFormattedResults, newOriginalResults, rr);
-    }
 
     // sort
     newFormattedResults = getSortedResults(newFormattedResults, sortType);
@@ -735,7 +734,8 @@ const ResultsList = ({loading}) => {
     }
 
     setActiveFilters(newActiveFilters);
-    handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current)
+    let newFormattedResults = handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current);
+    handlePageReset(false, newFormattedResults.length);
   }
 
   useEffect(() => {
