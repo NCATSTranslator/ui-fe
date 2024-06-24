@@ -199,6 +199,7 @@ const getFormattedEdge = (id: string, results: RawResultsContainer, supportStack
   let publications: PublicationObject[] = fillOutPublications(rawPublications, results);
   let newEdge: FormattedEdgeObject = {
     category: 'predicate',
+    compressedEdges: [],
     id: id,
     predicates: (pred === null) ? null : [pred],
     edges: edge === null ? null : [edge],
@@ -291,20 +292,16 @@ const getCompressedPaths = (graph: PathObjectContainer[], respectKnowledgeLevel:
     let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path, nextPath.path, respectKnowledgeLevel) : false;
 
     // loop through the current path's items
-    for (const [i, subgraphItem] of pathObj.path.subgraph.entries()) {
+    for (const [i, subgraphItem] of pathToDisplay.path.subgraph.entries()) {
       if(displayPath) {
         break;
       }
       // confirm we're looking at an edge, ignore nodes
       if(
-        'predicates' in subgraphItem && 
-        'edges' in subgraphItem && 
-        'support' in subgraphItem && 
-        'publications' in subgraphItem && 
+        isFormattedEdgeObject(subgraphItem) &&
         pathToDisplay &&
         nextPath != null
         ) {
-        let edgeItem = subgraphItem as FormattedEdgeObject;
         let nextEdgeItem = nextPath.path.subgraph[i] as FormattedEdgeObject;
         // if theres another path after the current one, and the nodes of each are equal
         if(nextPath && nodesEqual) {
@@ -313,36 +310,36 @@ const getCompressedPaths = (graph: PathObjectContainer[], respectKnowledgeLevel:
             continue;
   
           // add the contents of the nextPath's edge object to the pathToDisplay edge's object
-          // combine predicates (uses set to prevent duplicates)
           let combinedPredicates = [];
-          if(!!edgeItem.predicates){
-            combinedPredicates.push(edgeItem.predicates);
+          if(!!subgraphItem.predicates){
+            for(const predObj of subgraphItem.predicates) {
+              combinedPredicates.push(predObj);
+            }
           }
           if(!!nextEdgeItem.predicates){
-            combinedPredicates.push(nextEdgeItem.predicates);
+            for(const predObj of nextEdgeItem.predicates) {
+              combinedPredicates.push(predObj);
+            }
           }
-          edgeItem.predicates = removeDuplicateObjects(combinedPredicates, 'predicate');
+          subgraphItem.predicates = removeDuplicateObjects(combinedPredicates, 'predicate');
+          subgraphItem.compressedEdges.push(nextEdgeItem);
           // edges
-          if(edgeItem.edges !== null && nextEdgeItem.edges !== null)
-            edgeItem.edges = [...edgeItem.edges, ...nextEdgeItem.edges];
+          if(subgraphItem.edges !== null && nextEdgeItem.edges !== null)
+            subgraphItem.edges = [...subgraphItem.edges, ...nextEdgeItem.edges];
           // support paths
-          if(edgeItem.support && nextEdgeItem.support) {
-            edgeItem.support = [...edgeItem.support, ...nextEdgeItem.support].sort((a, b) => {
+          if(subgraphItem.support && nextEdgeItem.support) {
+            subgraphItem.support = [...subgraphItem.support, ...nextEdgeItem.support].sort((a, b) => {
               const nameA = a.path.stringName ?? '';
               const nameB = b.path.stringName ?? '';
               // Compare the existence of stringName, then sort alphabetically
               return (nameB ? 1 : 0) - (nameA ? 1 : 0) || nameA.localeCompare(nameB);
             });    
           }
-          // provenance
-          edgeItem.provenance = [...edgeItem.provenance, ...nextEdgeItem.provenance];
-          // publications
-          edgeItem.publications = mergeObjects(edgeItem.publications, nextEdgeItem.publications);
         }
         // compress support paths for the edge, if they exist
-        if(!!edgeItem.support && hasSupport(edgeItem)) {
-          edgeItem.support = getCompressedPaths(
-            edgeItem.support.sort((a: PathObjectContainer, b: PathObjectContainer) => {
+        if(!!subgraphItem.support && hasSupport(subgraphItem)) {
+          subgraphItem.support = getCompressedPaths(
+            subgraphItem.support.sort((a: PathObjectContainer, b: PathObjectContainer) => {
               const nameA = a.path.stringName ?? '';
               const nameB = b.path.stringName ?? '';
             
