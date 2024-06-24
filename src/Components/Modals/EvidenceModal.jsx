@@ -151,29 +151,32 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                   let isSelected = false;
                   let pathItemHasSupport = pathItem.inferred;
                   if(pathItem.category === "predicate" && pathItem.predicates.length > 1) {
+                    let newPathItem = cloneDeep(pathItem);
+                    newPathItem.predicates = [newPathItem.predicates[0]];
+                    newPathItem.predicate = newPathItem.predicates[0].predicate;
+                    isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, newPathItem));
                     return( 
                       <div className={`groupedPreds ${styles.groupedPreds} ${(pathItem.predicates.length === 2) ? styles.hasTwo :''}`}>
+                        <PathObject 
+                          pathObject={newPathItem} 
+                          id={pathItem.id}
+                          key={pathItem.id}
+                          handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
+                          handleEdgeClick={(edge)=>handleEdgeClick(edge)}
+                          handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
+                          activeStringFilters={[]}
+                          selected={isSelected}
+                          inModal
+                          hasSupport={pathItemHasSupport}
+                          className={styles.pathContainer}
+                        />
                         {
-                          pathItem.predicates.map((pred, j) => {
-                            let newPathItem = cloneDeep(pathItem);
-                            newPathItem.predicates = [pred];
-                            newPathItem.predicate = pred.predicate;
-                            isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, newPathItem));
-                            key = `${i}_${j}`;
-                            let isTop = null;
-                            let isBottom = null;
-                            if(j === 0)
-                              isTop = true;
-                            if(j === pathItem.predicates.length - 1)
-                              isBottom = true;
-
-                            if(pathItem.predicates.length === 2) {
-                              isTop = false;
-                              isBottom = false;
-                            }
+                          pathItem.compressedEdges.map((edge, j) => {
+                            isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, edge));
+                            key = `${edge.id}`;
                             return (
                               <PathObject 
-                                pathObject={newPathItem} 
+                                pathObject={edge} 
                                 id={key}
                                 key={key}
                                 handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
@@ -183,8 +186,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                                 selected={isSelected}
                                 inModal
                                 hasSupport={pathItemHasSupport}
-                                isTop={isTop}
-                                isBottom={isBottom}
                                 className={styles.pathContainer}
                               />
                             ) 
@@ -239,7 +240,6 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                   <div className={`table-items ${styles.tableItems} scrollable`}>
                     {
                       clinicalTrials.current.map((item, i)=> {
-                        console.log(item);
                         let url = item.url
                         if(!item.url && !!item.id) {
                           url = getUrlByType(item.id, item.type);

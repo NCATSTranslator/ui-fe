@@ -94,7 +94,8 @@ export type PathObjectContainer = {
 }
 export type FormattedEdgeObject = {
   category?: string;
-  edges: RawEdge[] | EdgeObject[] | null;
+  compressedEdges: FormattedEdgeObject[];
+  edges: RawEdge[] | null;
   id: string;
   label?: string;
   subject?: EdgeNodeObject;
