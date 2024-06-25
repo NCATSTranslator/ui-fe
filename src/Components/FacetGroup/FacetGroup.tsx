@@ -135,7 +135,7 @@ const getPathTypeHeadings = (tagType: string, activeFilters: Filter[]): JSX.Elem
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label} >
-          <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Relationship Type</p>
+          <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Path Type</p>
         </div>
         <ChevDown className={styles.expansionSVG}/>
       </div>
@@ -144,7 +144,7 @@ const getPathTypeHeadings = (tagType: string, activeFilters: Filter[]): JSX.Elem
 }
 const getPathTypeCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Filter lookup paths (establed from evident from external sources) and/or inferred paths (deduced from patterns in Translator's knowledge graphs).</p>
+    <p className={styles.caption}>Filter by path type (lookup or inferred) and/or by number of connections.</p>
   )
 }
 
