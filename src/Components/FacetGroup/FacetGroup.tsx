@@ -210,12 +210,13 @@ const getRoleLinkout = (tagKey: string): string => {
 interface FacetGroupProps {
   tagType: string;
   activeFilters: Filter[];
+  facetSort: ((a: [string, Tag], b: [string, Tag]) => number) | undefined;
   groupedTags: GroupedTags;
   availableTags: {[key: string]: Tag};
   onFilter: (arg0: Tag) => void;
 }
 
-const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, availableTags, onFilter }) => {
+const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetSort, groupedTags, availableTags, onFilter }) => {
 
   const [tagObject, setTagObject] = useState<Tag>({
     name: "",
@@ -228,7 +229,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
     if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
       return;
     }
-  
+
     let newObj = cloneDeep(objectToUpdate);
     newObj.type = facetID;
     newObj.value = label;
@@ -248,7 +249,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
     }
     let positiveChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && !filter.negated)) ? true: false;
     let negativeChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)) ? true: false;
-  
+
     return (
       // availableTags[tagKey] && availableTags[tagKey].count &&
       <div className={`${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey}>
@@ -282,9 +283,8 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
       </div>
     )
   }
-  
-  const displayFacets = (type: string, activeFilters: Filter[], groupedTags: GroupedTags, tagObject: Tag, 
-    tagObjectSetter: Dispatch<SetStateAction<Tag>>, availableTags: {[key: string]: Tag}) => {
+
+  const displayFacets = (type: string, activeFilters: Filter[], facetSort: ((a: [string, Tag], b: [string, Tag]) => number) | undefined, groupedTags: GroupedTags, tagObject: Tag, tagObjectSetter: Dispatch<SetStateAction<Tag>>, availableTags: {[key: string]: Tag}) => {
 
     const typeIndexMapping = activeFilters.reduce<Record<string, number>>((acc, filter, index) => {
       acc[filter.type] = index;
@@ -301,19 +301,21 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
       if (isOther(nameB)) return -1;
       return nameA.localeCompare(nameB);
     };
-    const sortedFacets = Object.entries(groupedTags[type]).sort((a, b) => {
+    const defaultSort = (a: [string, Tag], b: [string, Tag]) => {
       const indexA = getIndex(a[0], typeIndexMapping);
       const indexB = getIndex(b[0], typeIndexMapping);
-    
+
       if (indexA !== Infinity && indexB === Infinity) return -1;
       if (indexB !== Infinity && indexA === Infinity) return 1;
-      
+
       const nameA = a[1].name.toLowerCase();
       const nameB = b[1].name.toLowerCase();
-      
+
       return compareNames(nameA, nameB);
-    });
-  
+    };
+
+    const sortedFacets = Object.entries(groupedTags[type]).sort(facetSort ? facetSort : defaultSort);
+
     return (
       <div className={`${styles.section} ${Object.keys(groupedTags).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
@@ -324,7 +326,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
       </div>
     )
   }
-  
+
   const typeHeadingMarkup = getTagHeadingMarkup(tagType, activeFilters);
   const typeCaptionMarkup = getTagCaptionMarkup(tagType);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
@@ -341,7 +343,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
     (Object.keys(groupedTags[tagType]).length > 0 && typeHeadingMarkup !== null )
       ?
         <div className={styles.facetGroup}>
-            <button 
+            <button
               className={`${styles.facetButton} ${isExpanded ? styles.isExpanded : ''}`}
               onClick={()=>setIsExpanded(prev=>!prev)}
             >
@@ -358,7 +360,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
               typeCaptionMarkup
             }
             {
-              displayFacets(tagType, activeFilters, groupedTags, tagObject, setTagObject, availableTags)
+              displayFacets(tagType, activeFilters, facetSort, groupedTags, tagObject, setTagObject, availableTags)
             }
           </AnimateHeight>
         </div>
