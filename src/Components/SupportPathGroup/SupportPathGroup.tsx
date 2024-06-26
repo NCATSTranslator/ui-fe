@@ -5,7 +5,7 @@ import AnimateHeight from '../AnimateHeight/AnimateHeight';
 import { sortSupportByEntityStrings, sortSupportByLength } from '../../Utilities/sortingFunctions';
 import { FormattedEdgeObject, FormattedNodeObject, SupportDataObject } from '../../Types/results';
 import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 
 interface SupportPathGroupProps {
   dataObj: SupportDataObject;
@@ -28,15 +28,17 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) =>
       setHeight('auto');
   }, [isExpanded])
 
-  if(isFormattedEdgeObject(pathItem)) {
-    // if there are any active string filters, sort by those
-    if(activeStringFilters.length > 0 && pathItem.support) {
-      sortSupportByEntityStrings(pathItem.support, activeStringFilters);
-    // otherwise sort by shortest path length first
-    } else {
-      sortSupportByLength(pathItem.support);
+  useEffect(() => {
+    if(isFormattedEdgeObject(pathItem)) {
+      // if there are any active string filters, sort by those
+      if(activeStringFilters.length > 0 && pathItem.support) {
+        sortSupportByEntityStrings(pathItem.support, activeStringFilters);
+      // otherwise sort by shortest path length first
+      } else {
+        sortSupportByLength(pathItem.support);
+      }
     }
-  }
+  }, [pathItem, activeStringFilters]);
 
   const generateTooltipID = (subgraph: (FormattedNodeObject | FormattedEdgeObject)[]) => {
     return subgraph.map((sub) => {
@@ -83,7 +85,6 @@ const areEqualProps = (prevProps: any, nextProps: any) => {
     return false;
   }
 
-  // Perform a shallow comparison of 'dataObj' properties
   const prevDataKeys = Object.keys(prevProps.dataObj);
   const nextDataKeys = Object.keys(nextProps.dataObj);
 
@@ -96,6 +97,8 @@ const areEqualProps = (prevProps: any, nextProps: any) => {
       return false;
     }
   }
+  // if(!isEqual(prevProps.dataObj["pathItem"], nextProps.dataObj["pathItem"]))
+  //   return false;
 
   // If none of the above conditions are met, props are equal
   return true;
