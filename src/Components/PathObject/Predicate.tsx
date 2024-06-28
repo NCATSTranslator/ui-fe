@@ -171,9 +171,11 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
                         className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`} 
                         onClick={(e)=> {
                           e.stopPropagation(); 
-                          const newPathObject = cloneDeep(pathObject);
-                          newPathObject.predicate = formattedPredicate;
-                          handleEdgeClick(newPathObject, pathObjectContainer);
+                          if(i > 0) {
+                            handleEdgeClick(pathObject.compressedEdges[i-1], pathObjectContainer);
+                          } else {
+                            handleEdgeClick(pathObject, pathObjectContainer);
+                          }
                         }}
                         >
                         <Highlighter

@@ -5,6 +5,7 @@ import ResearchMultiple from '../../Icons/research-multiple.svg?react';
 import { SupportDataObject } from '../../Types/results';
 import { isFormattedEdgeObject } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
+import { useLastViewedPath } from '../../Utilities/customHooks';
 
 interface SupportPathProps {
   dataObj: SupportDataObject;
@@ -22,7 +23,7 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj }) => {
   const handleEdgeClick = dataObj.handleEdgeClick;
   const handleTargetClick = dataObj.handleTargetClick;
   const activeStringFilters = dataObj.activeStringFilters;
-  const lastViewedPathID = dataObj.lastViewedPathID;
+  const { lastViewedPathID } = useLastViewedPath();
 
   return (
     <>
@@ -65,7 +66,6 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj }) => {
                     handleEdgeClick: handleEdgeClick, 
                     handleTargetClick: handleTargetClick, 
                     activeStringFilters: activeStringFilters,
-                    lastViewedPathID: lastViewedPathID,
                     tooltipID: null,
                     supportPath: null
                   }

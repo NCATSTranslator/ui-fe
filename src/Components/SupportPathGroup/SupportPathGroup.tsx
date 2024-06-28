@@ -5,7 +5,7 @@ import AnimateHeight from '../AnimateHeight/AnimateHeight';
 import { sortSupportByEntityStrings, sortSupportByLength } from '../../Utilities/sortingFunctions';
 import { FormattedEdgeObject, FormattedNodeObject, SupportDataObject } from '../../Types/results';
 import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 interface SupportPathGroupProps {
   dataObj: SupportDataObject;
@@ -97,8 +97,6 @@ const areEqualProps = (prevProps: any, nextProps: any) => {
       return false;
     }
   }
-  // if(!isEqual(prevProps.dataObj["pathItem"], nextProps.dataObj["pathItem"]))
-  //   return false;
 
   // If none of the above conditions are met, props are equal
   return true;
