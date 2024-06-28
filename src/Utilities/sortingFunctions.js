@@ -68,11 +68,23 @@ export const sortByEntityStrings = (items, strings) => {
 export const sortSupportByEntityStrings = (items, strings) => {
   return items.sort((a, b) => {
     const nameA = a.path.stringName.toLowerCase();
-    for(const string of strings) {
-      if(nameA.includes(string.toLowerCase()))
-        return -1;
+    const nameB = b.path.stringName.toLowerCase();
+
+    const nameAIncludesString = strings.some(string => nameA.includes(string.toLowerCase()));
+    const nameBIncludesString = strings.some(string => nameB.includes(string.toLowerCase()));
+
+    if (nameAIncludesString && !nameBIncludesString) {
+      return -1;
     }
-    return 1;
+    if (!nameAIncludesString && nameBIncludesString) {
+      return 1;
+    }
+
+    // If both or neither include a string, sort by the length of subgraph
+    const lengthA = a.path.subgraph.length;
+    const lengthB = b.path.subgraph.length;
+
+    return lengthA - lengthB;
   });
 }
 
