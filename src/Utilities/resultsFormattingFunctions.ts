@@ -1,10 +1,11 @@
 import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity, isClinicalTrial, isFormattedEdgeObject, 
-  isPublication, isPublicationObjectArray, mergeObjects, removeDuplicateObjects } from './utilities';
+  isPublication, isPublicationObjectArray, mergeObjectArrays, combineObjectArrays } from './utilities';
 import { cloneDeep } from "lodash";
 import { score } from "./scoring";
 import { RawResultsContainer, FormattedPathObject, PathObjectContainer, RawPathObject, SubgraphObject, FormattedNodeObject, 
   FormattedEdgeObject, EdgePredicateObject, RawEdge, RawNode } from '../Types/results';
-import { rawAttachedPublications, PublicationObject } from '../Types/evidence';
+import { rawAttachedPublications, PublicationObject, EvidenceCountsContainer } from '../Types/evidence';
+import { sortSupportByEntityStrings } from './sortingFunctions';
 
 export const hasSupport = (item: RawPathObject | FormattedEdgeObject | RawEdge | null): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;
@@ -274,6 +275,68 @@ const getFormattedPaths = (rawPathIds: string[], results: RawResultsContainer, s
 }
 
 /**
+ * Merges and compresses the properties of two FormattedEdgeObject instances.
+ *
+ * This function handles the merging of various properties of the given `subgraphItem` and `nextEdgeItem`
+ * if they share the same predicate and inferred properties. If they do not share these properties,
+ * it will handle the merging or compression of predicates and compressed edges.
+ *
+ * @param {FormattedEdgeObject} subgraphItem - The primary edge object to be merged and compressed.
+ * @param {FormattedEdgeObject} nextEdgeItem - The secondary edge object used for merging and compression.
+ * @returns {FormattedEdgeObject} - The updated `subgraphItem` after merging and compression.
+ **/
+const handleEdgePropMergingAndCompression = (subgraphItem: FormattedEdgeObject, nextEdgeItem: FormattedEdgeObject): FormattedEdgeObject => {
+  const predicatesMatch = subgraphItem.predicates?.[0]?.predicate === nextEdgeItem.predicates?.[0]?.predicate;
+  const inferredMatch = subgraphItem.inferred === nextEdgeItem.inferred;
+
+  if (predicatesMatch && inferredMatch) {
+    // Merge provenance
+    subgraphItem.provenance = mergeObjectArrays(subgraphItem.provenance, nextEdgeItem.provenance, "name");
+    
+    // Merge publications
+    if (isPublicationObjectArray(subgraphItem.publications) && isPublicationObjectArray(nextEdgeItem.publications)) {
+      subgraphItem.publications = mergeObjectArrays(subgraphItem.publications, nextEdgeItem.publications, "id");
+    }
+  } else {
+    // Combine predicates
+    subgraphItem.predicates = combineObjectArrays(subgraphItem.predicates, nextEdgeItem.predicates, "predicate");
+
+    // Handle compressed edges
+    const matchingCompressedEdgeIndex = subgraphItem.compressedEdges.findIndex(
+      item => item.predicates?.[0]?.predicate === nextEdgeItem.predicates?.[0]?.predicate && item.inferred === nextEdgeItem.inferred
+    );
+
+    if (matchingCompressedEdgeIndex !== -1) {
+      const compressedEdgeMatch = subgraphItem.compressedEdges[matchingCompressedEdgeIndex];
+      compressedEdgeMatch.provenance = mergeObjectArrays(compressedEdgeMatch.provenance, nextEdgeItem.provenance, "name");
+
+      if (isPublicationObjectArray(compressedEdgeMatch.publications) && isPublicationObjectArray(nextEdgeItem.publications)) {
+        compressedEdgeMatch.publications = mergeObjectArrays(compressedEdgeMatch.publications, nextEdgeItem.publications, "id");
+      }
+    } else if (!subgraphItem.compressedEdges.some(item => item.id === nextEdgeItem.id)) {
+      nextEdgeItem.predicate = nextEdgeItem.predicates ? nextEdgeItem.predicates[0].predicate : "";
+      subgraphItem.compressedEdges.push(nextEdgeItem);
+    }
+  }
+
+  // Combine edges
+  if (subgraphItem.edges && nextEdgeItem.edges) {
+    subgraphItem.edges = combineObjectArrays(subgraphItem.edges, nextEdgeItem.edges, "id");
+  }
+
+  // Combine support paths
+  if (subgraphItem.support && nextEdgeItem.support) {
+    subgraphItem.support = [...subgraphItem.support, ...nextEdgeItem.support].sort((a, b) => {
+      const nameA = a.path.stringName ?? '';
+      const nameB = b.path.stringName ?? '';
+      return (nameB ? 1 : 0) - (nameA ? 1 : 0) || nameA.localeCompare(nameB);
+    });
+  }
+
+  return subgraphItem;
+};
+
+/**
  * Compresses paths in the graph by merging consecutive paths with identical nodes.
  * The compressed paths are returned as a new array.
  * @param {PathObjectContainer[]} graph - The graph containing paths to be compressed.
@@ -291,63 +354,20 @@ const getCompressedPaths = (graph: PathObjectContainer[], respectKnowledgeLevel:
     // if all nodes are equal
     let nodesEqual = (nextPath) ? checkForNodeUniformity(pathToDisplay.path, nextPath.path, respectKnowledgeLevel) : false;
 
-    // loop through the current path's items
     for (const [i, subgraphItem] of pathToDisplay.path.subgraph.entries()) {
-      if(displayPath) {
-        break;
-      }
-      // confirm we're looking at an edge, ignore nodes
-      if(
-        isFormattedEdgeObject(subgraphItem) &&
-        pathToDisplay &&
-        nextPath != null
-        ) {
-        let nextEdgeItem = nextPath.path.subgraph[i] as FormattedEdgeObject;
-        // if theres another path after the current one, and the nodes of each are equal
-        if(nextPath && nodesEqual) {
-  
-          if(!nextPath.path.subgraph[i])
-            continue;
-  
-          // add the contents of the nextPath's edge object to the pathToDisplay edge's object
-          let combinedPredicates = [];
-          if(!!subgraphItem.predicates){
-            for(const predObj of subgraphItem.predicates) {
-              combinedPredicates.push(predObj);
-            }
-          }
-          if(!!nextEdgeItem.predicates){
-            for(const predObj of nextEdgeItem.predicates) {
-              combinedPredicates.push(predObj);
-            }
-          }
-          subgraphItem.predicates = removeDuplicateObjects(combinedPredicates, 'predicate');
-          subgraphItem.compressedEdges.push(nextEdgeItem);
-          // edges
-          if(subgraphItem.edges !== null && nextEdgeItem.edges !== null)
-            subgraphItem.edges = [...subgraphItem.edges, ...nextEdgeItem.edges];
-          // support paths
-          if(subgraphItem.support && nextEdgeItem.support) {
-            subgraphItem.support = [...subgraphItem.support, ...nextEdgeItem.support].sort((a, b) => {
-              const nameA = a.path.stringName ?? '';
-              const nameB = b.path.stringName ?? '';
-              // Compare the existence of stringName, then sort alphabetically
-              return (nameB ? 1 : 0) - (nameA ? 1 : 0) || nameA.localeCompare(nameB);
-            });    
-          }
+      if (displayPath) break;
+
+      if (isFormattedEdgeObject(subgraphItem) && pathToDisplay && nextPath != null) {
+        const nextEdgeItem = nextPath.path.subgraph[i] as FormattedEdgeObject;
+
+        if (nextPath && nodesEqual) {
+          if (!nextEdgeItem || subgraphItem.id === nextEdgeItem.id) continue;
+
+          handleEdgePropMergingAndCompression(subgraphItem, nextEdgeItem);
         }
-        // compress support paths for the edge, if they exist
-        if(!!subgraphItem.support && hasSupport(subgraphItem)) {
-          subgraphItem.support = getCompressedPaths(
-            subgraphItem.support.sort((a: PathObjectContainer, b: PathObjectContainer) => {
-              const nameA = a.path.stringName ?? '';
-              const nameB = b.path.stringName ?? '';
-            
-              // Sort by the existence of stringName, then alphabetically
-              return (nameB ? 1 : 0) - (nameA ? 1 : 0) || nameA.localeCompare(nameB);
-            }),
-            false
-          );
+
+        if (subgraphItem.support && hasSupport(subgraphItem)) {
+          subgraphItem.support = getCompressedPaths(subgraphItem.support, false);
         }
       }
     }
@@ -383,6 +403,13 @@ const checkBookmarksForItem = (itemID: string, bookmarksSet: any): string | null
   return null;
 }
 
+/**
+ * Checks if the given bookmarkID exists in the bookmarks set and if it has notes attached.
+ *
+ * @param {string} itemID - The ID of the item to check.
+ * @param {any} bookmarksSet - The set of bookmark objects to search in.
+ * @returns {boolean} Returns true if the matching item is found in bookmarksSet and has notes, otherwise returns false.
+ */
 const checkBookmarkForNotes = (bookmarkID: string | null, bookmarksSet: any): boolean => {
   if(bookmarkID === null)
     return false;
@@ -396,7 +423,13 @@ const checkBookmarkForNotes = (bookmarkID: string | null, bookmarksSet: any): bo
   return false;
 }
 
-const calculateEvidenceCounts = (paths: PathObjectContainer[]) => {
+/**
+ * Generates evidence counts for a provided list of paths
+ *
+ * @param {PathObjectContainer[]} paths - Array of paths to generate counts for.
+ * @returns {EvidenceCountsContainer} Returns an EvidenceCountsContainer object with the requested counts.
+ */
+const calculateEvidenceCounts = (paths: PathObjectContainer[]): EvidenceCountsContainer => {
   const addPubsAndCTsToSets = (edge: FormattedEdgeObject, pubSet: Set<string>, ctSet: Set<string>, miscSet: Set<string>) => {
     if(isPublicationObjectArray(edge.publications)) {
       for(const pub of edge.publications) {
