@@ -69,7 +69,7 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
                         <span className={styles.tooltip}>{typeString}</span>
                       </Tooltip>
                     </span>
-                    <span className={styles.term} onClick={()=>handleItemClick(item)}>
+                    <span className={`${styles.term} autocomplete-item`} onClick={()=>handleItemClick(item)}>
                       {item.label}{item.match && <span className={styles.match}>{` (${item.match})`}</span>}
                     </span>
                     {
