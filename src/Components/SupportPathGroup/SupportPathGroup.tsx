@@ -28,15 +28,17 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) =>
       setHeight('auto');
   }, [isExpanded])
 
-  if(isFormattedEdgeObject(pathItem)) {
-    // if there are any active string filters, sort by those
-    if(activeStringFilters.length > 0 && pathItem.support) {
-      sortSupportByEntityStrings(pathItem.support, activeStringFilters);
-    // otherwise sort by shortest path length first
-    } else {
-      sortSupportByLength(pathItem.support);
+  useEffect(() => {
+    if(isFormattedEdgeObject(pathItem)) {
+      // if there are any active string filters, sort by those
+      if(activeStringFilters.length > 0 && pathItem.support) {
+        sortSupportByEntityStrings(pathItem.support, activeStringFilters);
+      // otherwise sort by shortest path length first
+      } else {
+        sortSupportByLength(pathItem.support);
+      }
     }
-  }
+  }, [pathItem, activeStringFilters]);
 
   const generateTooltipID = (subgraph: (FormattedNodeObject | FormattedEdgeObject)[]) => {
     return subgraph.map((sub) => {
@@ -83,7 +85,6 @@ const areEqualProps = (prevProps: any, nextProps: any) => {
     return false;
   }
 
-  // Perform a shallow comparison of 'dataObj' properties
   const prevDataKeys = Object.keys(prevProps.dataObj);
   const nextDataKeys = Object.keys(nextProps.dataObj);
 

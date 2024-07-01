@@ -148,7 +148,6 @@ export type SupportDataObject = {
   handleEdgeClick: (edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => void;
   handleTargetClick: (target: FormattedNodeObject) => void;
   activeStringFilters: string[];
-  lastViewedPathID: string | null;
   tooltipID: string | null;
 }
 export type Score = {

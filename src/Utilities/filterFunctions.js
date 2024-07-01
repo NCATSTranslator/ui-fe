@@ -31,6 +31,10 @@ const filterFamily = (filter) => {
   return facetFamily(filter.type);
 }
 
+export const hasFilterFamily = (filter, facetFamily) => {
+  return filterFamily(filter) === facetFamily;
+}
+
 export const getFilterLabel = (filter) => {
   let filterLabel = "Tag";
   if(!filter.type)

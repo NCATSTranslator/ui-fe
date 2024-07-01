@@ -12,7 +12,7 @@ import BiologicalEntity from '../Icons/biological-entity.svg?react';
 import AnatomicalEntity from '../Icons/anatomical-entity.svg?react';
 import ExternalLink from '../Icons/external-link.svg?react';
 import { QueryType } from '../Types/results';
-import { mergeWith } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { FormattedEdgeObject, FormattedNodeObject } from '../Types/results';
 import { PublicationObject, PublicationsList } from '../Types/evidence';
 
@@ -274,16 +274,32 @@ export const getGeneratedSendFeedbackLink = (openDefault: boolean = true, root: 
   return `/${root}?fm=${openDefault}&link=${link}`;
 }
 
-export const mergeObjects = <T, U>(obj1: T, obj2: U): T & U => {
-  return mergeWith({}, obj1, obj2, (objValue, srcValue) => {
-    // Check if both values to merge are arrays
-    if (Array.isArray(objValue) && Array.isArray(srcValue)) {
-      // Concatenate the arrays if both values are arrays
-      return objValue.concat(srcValue);
+export const mergeObjectArrays = <T extends { [key: string]: any }>(array1: T[], array2: T[], uniqueProp: keyof T): T[] => {
+  const mergedMap = new Map<any, T>();
+
+  [...array1, ...array2].forEach(item => {
+    const uniqueValue = item[uniqueProp];
+    if (!mergedMap.has(uniqueValue)) {
+      mergedMap.set(uniqueValue, item);
     }
-    // When not both arrays, return undefined to let mergeWith handle the merge according to its default behavior
   });
+
+  return Array.from(mergedMap.values());
 };
+
+export const combineObjectArrays = (arr1: any[] | undefined | null, arr2: any[] | undefined | null, duplicateRemovalProperty?: string): any[] => {
+  let combinedArray: any[] = [];
+  if(!!arr1)
+    combinedArray = combinedArray.concat(cloneDeep(arr1));
+  
+  if(!!arr2)
+    combinedArray = combinedArray.concat(cloneDeep(arr2));
+  
+  if(!!duplicateRemovalProperty)
+    return removeDuplicateObjects(combinedArray, duplicateRemovalProperty);
+  
+  return combinedArray;
+}
 
 export const isClinicalTrial = (publication: PublicationObject) => {
   if(publication.type === "NCT")

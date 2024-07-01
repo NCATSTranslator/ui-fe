@@ -1,8 +1,7 @@
 import styles from './PathView.module.scss';
-import { useState, useEffect, useMemo, useCallback, FC } from "react";
+import { useState, useEffect, useMemo, useCallback, createContext, Dispatch, SetStateAction, FC } from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
-import LastViewedTag from '../LastViewedTag/LastViewedTag';
 import Question from '../../Icons/Navigation/Question.svg?react';
 import Information from '../../Icons/information.svg?react';
 import ResearchMultiple from '../../Icons/research-multiple.svg?react';
@@ -14,6 +13,9 @@ import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
 import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject } from '../../Types/results';
 import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
+import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
+
+export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 
 const checkInferredPathForSelections = (path: PathObjectContainer, selPath: PathObjectContainer) => {
   for(const [i, item] of path.path.subgraph.entries()) {
@@ -72,6 +74,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
 
   const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
+  // Create the context with a default value of null
   const [lastViewedPathID, setLastViewedPathID] = useState<string|null>(null);
 
   let directLabelDisplayed = false;
@@ -154,110 +157,107 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
         (!active) 
         ? <></>
         :
-        <div className={styles.paths}>
-          {
-            sortArrayByInferred(formattedPaths).slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
-              const displayInferredLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
-                if(displayInferredLabel)
-                  inferredLabelDisplayed = true;
-              const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
-                if(displayDirectLabel)
-                  directLabelDisplayed = true;
-              const tooltipID: string = (pathToDisplay.id) 
-                ? pathToDisplay.id 
-                : pathToDisplay.path.subgraph.map((sub: FormattedEdgeObject | FormattedNodeObject, j: number) => 
-                  (isFormattedNodeObject(sub)) 
-                    ? sub.name 
-                    : (sub.predicates && sub.predicates.length > 0 )
-                      ? sub.predicates[0].predicate 
-                      : "" 
-                ).toString();
-              return (
-                <>
-                  {
-                    displayDirectLabel 
-                      ? 
-                        <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
-                          Lookup <Information className={styles.infoIcon} />
-                        </p>
-                      : 
-                        null
-                  }
-                  {
-                    displayInferredLabel 
-                      ? 
-                        <>
-                          { directLabelDisplayed ? <div className={styles.inferenceSeparator}></div> : null }
-                          <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
-                            Inferred <Information className={styles.infoIcon} />
+        <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
+          <div className={styles.paths}>
+            {
+              sortArrayByInferred(formattedPaths).slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
+                const displayInferredLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
+                  if(displayInferredLabel)
+                    inferredLabelDisplayed = true;
+                const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
+                  if(displayDirectLabel)
+                    directLabelDisplayed = true;
+                const tooltipID: string = (pathToDisplay.id) 
+                  ? pathToDisplay.id 
+                  : pathToDisplay.path.subgraph.map((sub: FormattedEdgeObject | FormattedNodeObject, j: number) => 
+                    (isFormattedNodeObject(sub)) 
+                      ? sub.name 
+                      : (sub.predicates && sub.predicates.length > 0 )
+                        ? sub.predicates[0].predicate 
+                        : "" 
+                  ).toString();
+                return (
+                  <>
+                    {
+                      displayDirectLabel 
+                        ? 
+                          <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
+                            Lookup <Information className={styles.infoIcon} />
                           </p>
-                        </>
-                      : null
+                        : 
+                          null
                     }
-                  <div className={styles.formattedPath} key={tooltipID}>
-                    {/* {
-                      lastViewedPathID === pathToDisplay.id &&
-                      <LastViewedTag/>
-                    } */}
-                    <button 
-                      onClick={()=>handleActivateEvidence(pathToDisplay)}
-                      className={styles.pathEvidenceButton}
-                      data-tooltip-id={tooltipID}
-                      >
-                        <ResearchMultiple />
-                    </button>
-                    <Tooltip 
-                      id={tooltipID}
-                      >
-                        <span>View evidence for this path.</span>
-                    </Tooltip>
-                    <div className={`${styles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} > 
-                      {
-                        pathToDisplay.path.subgraph.map((pathItem: FormattedEdgeObject | FormattedNodeObject, j: number) => {
-                          let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;
-                          let pathItemHasSupport = (isFormattedEdgeObject(pathItem)) ? pathItem.inferred : false;
-                          let supportDataObject: SupportDataObject | null = (pathItemHasSupport)
-                            ? {
-                                key: key,
-                                pathItem: pathItem,
-                                pathViewStyles: styles,
-                                selectedPaths: selectedPaths, 
-                                pathToDisplay: pathToDisplay, 
-                                handleActivateEvidence: handleActivateEvidence, 
-                                handleNameClick: handleNameClick, 
-                                handleEdgeClick: handleEdgeClick, 
-                                handleTargetClick: handleTargetClick, 
-                                activeStringFilters: activeStringFilters,
-                                lastViewedPathID: lastViewedPathID,
-                                tooltipID: null,
-                                supportPath: null
-                              }
-                            : null;
-                          return (
-                            <>
-                              <PathObject 
-                                supportDataObject={supportDataObject}
-                                pathObjectContainer={pathToDisplay}
-                                pathObject={pathItem} 
-                                id={key}
-                                key={key}
-                                handleNameClick={handleNameClick}
-                                handleEdgeClick={handleEdgeClick}
-                                handleTargetClick={handleTargetClick}
-                                activeStringFilters={activeStringFilters}
-                                hasSupport={pathItemHasSupport}
-                              />
-                            </>
-                          ) 
-                        }) 
+                    {
+                      displayInferredLabel 
+                        ? 
+                          <>
+                            { directLabelDisplayed ? <div className={styles.inferenceSeparator}></div> : null }
+                            <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
+                              Inferred <Information className={styles.infoIcon} />
+                            </p>
+                          </>
+                        : null
                       }
+                    <div className={styles.formattedPath} key={tooltipID}>
+                      <button 
+                        onClick={()=>handleActivateEvidence(pathToDisplay)}
+                        className={styles.pathEvidenceButton}
+                        data-tooltip-id={tooltipID}
+                        >
+                          <ResearchMultiple />
+                      </button>
+                      <Tooltip 
+                        id={tooltipID}
+                        >
+                          <span>View evidence for this path.</span>
+                      </Tooltip>
+                      <div className={`${styles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} > 
+                        {
+                          pathToDisplay.path.subgraph.map((pathItem: FormattedEdgeObject | FormattedNodeObject, j: number) => {
+                            let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;
+                            let pathItemHasSupport = (isFormattedEdgeObject(pathItem)) ? pathItem.inferred : false;
+                            let supportDataObject: SupportDataObject | null = (pathItemHasSupport)
+                              ? {
+                                  key: key,
+                                  pathItem: pathItem,
+                                  pathViewStyles: styles,
+                                  selectedPaths: selectedPaths, 
+                                  pathToDisplay: pathToDisplay, 
+                                  handleActivateEvidence: handleActivateEvidence, 
+                                  handleNameClick: handleNameClick, 
+                                  handleEdgeClick: handleEdgeClick, 
+                                  handleTargetClick: handleTargetClick, 
+                                  activeStringFilters: activeStringFilters,
+                                  tooltipID: null,
+                                  supportPath: null
+                                }
+                              : null;
+                            return (
+                              <>
+                                <PathObject 
+                                  supportDataObject={supportDataObject}
+                                  pathObjectContainer={pathToDisplay}
+                                  pathObject={pathItem} 
+                                  id={key}
+                                  key={key}
+                                  handleNameClick={handleNameClick}
+                                  handleEdgeClick={handleEdgeClick}
+                                  handleTargetClick={handleTargetClick}
+                                  activeStringFilters={activeStringFilters}
+                                  hasSupport={pathItemHasSupport}
+                                />
+                              </>
+                            ) 
+                          }) 
+                        }
+                      </div>
                     </div>
-                  </div>
-                </>
-              )
-            })
-          }
-        </div>
+                  </>
+                )
+              })
+            }
+          </div>
+        </LastViewedPathIDContext.Provider>
       }
       <div className={styles.buttons}>
         {

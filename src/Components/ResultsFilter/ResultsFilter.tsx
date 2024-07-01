@@ -41,8 +41,10 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
   const groupedTags = useMemo(() => groupAvailableTags(availableTags), [availableTags]);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
+  const facetCompares: {[key: string]: (a: [string, Tag], b: [string, Tag]) => number} = {
+    pt: (a: [string, Tag], b: [string, Tag]) => -(a[1].name.localeCompare(b[1].name))
+  };
 
-  
 
   return (
     <div className={styles.resultsFilter}>
@@ -59,6 +61,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
                 <FacetGroup
                   tagType={tagType}
                   activeFilters={activeFilters}
+                  facetCompare={facetCompares[tagType]}
                   groupedTags={groupedTags}
                   availableTags={availableTags}
                   onFilter={onFilter}

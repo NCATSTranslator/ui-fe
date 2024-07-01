@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } from 'react';
+import { LastViewedPathIDContext } from '../Components/PathView/PathView';
 import { isEqual } from 'lodash';
 
 interface WindowSize {
@@ -160,3 +161,15 @@ export const useWhyDidComponentUpdate = <T extends Record<string, any>>(name: st
       previousProps.current = props;
   }, [props, name]); 
 }
+
+export type LastViewedPathIDContextType = {
+  lastViewedPathID: string | null;
+  setLastViewedPathID: Dispatch<SetStateAction<string | null>>;
+};
+export const useLastViewedPath = () => {
+  const context = useContext(LastViewedPathIDContext);
+  if (!context) {
+    throw new Error('useLastViewedPath must be used within a LastViewedPathProvider');
+  }
+  return context;
+};

@@ -68,17 +68,29 @@ export const sortByEntityStrings = (items, strings) => {
 export const sortSupportByEntityStrings = (items, strings) => {
   return items.sort((a, b) => {
     const nameA = a.path.stringName.toLowerCase();
-    for(const string of strings) {
-      if(nameA.includes(string.toLowerCase()))
-        return -1;
+    const nameB = b.path.stringName.toLowerCase();
+
+    const nameAIncludesString = strings.some(string => nameA.includes(string.toLowerCase()));
+    const nameBIncludesString = strings.some(string => nameB.includes(string.toLowerCase()));
+
+    if (nameAIncludesString && !nameBIncludesString) {
+      return -1;
     }
-    return 1;
+    if (!nameAIncludesString && nameBIncludesString) {
+      return 1;
+    }
+
+    // If both or neither include a string, sort by the length of subgraph
+    const lengthA = a.path.subgraph.length;
+    const lengthB = b.path.subgraph.length;
+
+    return lengthA - lengthB;
   });
 }
 
 export const sortSupportByLength = (items) => {
   return items.sort((a, b) => {
-    if(!a?.path?.subgraph.length || !b?.path?.subgraph.length) 
+    if(!a?.path?.subgraph.length || !b?.path?.subgraph.length)
       return 1;
     return a.path.subgraph.length - b.path.subgraph.length;
   });
@@ -126,4 +138,11 @@ export const updatePathRankByTag = (result, tag, pathRanks) => {
 
 export const compareByKeyLexographic = (k) => {
   return (a, b) => { return a[k].localeCompare(b[k]) };
-} 
+}
+
+// Returns a shallow copy of an array sorted independently on the left and right side of the pivot point
+export const pivotSort = (arr, pivot, compare) => {
+  const left = arr.slice(0, pivot).sort(compare);
+  const right = arr.slice(pivot).sort(compare);
+  return left.concat(right);
+}
