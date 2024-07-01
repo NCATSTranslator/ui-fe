@@ -90,7 +90,7 @@ export const sortSupportByEntityStrings = (items, strings) => {
 
 export const sortSupportByLength = (items) => {
   return items.sort((a, b) => {
-    if(!a?.path?.subgraph.length || !b?.path?.subgraph.length) 
+    if(!a?.path?.subgraph.length || !b?.path?.subgraph.length)
       return 1;
     return a.path.subgraph.length - b.path.subgraph.length;
   });
@@ -138,4 +138,11 @@ export const updatePathRankByTag = (result, tag, pathRanks) => {
 
 export const compareByKeyLexographic = (k) => {
   return (a, b) => { return a[k].localeCompare(b[k]) };
-} 
+}
+
+// Returns a shallow copy of an array sorted independently on the left and right side of the pivot point
+export const pivotSort = (arr, pivot, compare) => {
+  const left = arr.slice(0, pivot).sort(compare);
+  const right = arr.slice(pivot).sort(compare);
+  return left.concat(right);
+}

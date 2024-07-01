@@ -8,7 +8,8 @@ import Include from '../../Icons/include.svg?react';
 import Exclude from '../../Icons/exclude.svg?react';
 import ExternalLink from '../../Icons/external-link.svg?react';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
-import { isFacet, isEvidenceFilter } from '../../Utilities/filterFunctions';
+import { isFacet, isEvidenceFilter, hasFilterFamily } from '../../Utilities/filterFunctions';
+import { pivotSort } from '../../Utilities/sortingFunctions';
 import Alert from '../../Icons/Alerts/Info.svg?react';
 import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
 import { cloneDeep } from "lodash";
@@ -135,7 +136,7 @@ const getPathTypeHeadings = (tagType: string, activeFilters: Filter[]): JSX.Elem
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label} >
-          <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Relationship Type</p>
+          <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Path Type</p>
         </div>
         <ChevDown className={styles.expansionSVG}/>
       </div>
@@ -144,7 +145,7 @@ const getPathTypeHeadings = (tagType: string, activeFilters: Filter[]): JSX.Elem
 }
 const getPathTypeCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Filter direct relationships (establed from evident from external sources) and/or inferred relationships (deduced from patterns in Translator's knowledge graphs).</p>
+    <p className={styles.caption}>Filter by path type (lookup or inferred) and/or by number of connections.</p>
   )
 }
 
@@ -210,12 +211,13 @@ const getRoleLinkout = (tagKey: string): string => {
 interface FacetGroupProps {
   tagType: string;
   activeFilters: Filter[];
+  facetCompare: ((a: [string, Tag], b: [string, Tag]) => number) | undefined;
   groupedTags: GroupedTags;
   availableTags: {[key: string]: Tag};
   onFilter: (arg0: Tag) => void;
 }
 
-const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, availableTags, onFilter }) => {
+const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare, groupedTags, availableTags, onFilter }) => {
 
   const [tagObject, setTagObject] = useState<Tag>({
     name: "",
@@ -228,7 +230,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
     if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
       return;
     }
-  
+
     let newObj = cloneDeep(objectToUpdate);
     newObj.type = facetID;
     newObj.value = label;
@@ -248,7 +250,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
     }
     let positiveChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && !filter.negated)) ? true: false;
     let negativeChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)) ? true: false;
-  
+
     return (
       // availableTags[tagKey] && availableTags[tagKey].count &&
       <div className={`${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey}>
@@ -282,38 +284,52 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
       </div>
     )
   }
-  
-  const displayFacets = (type: string, activeFilters: Filter[], groupedTags: GroupedTags, tagObject: Tag, 
-    tagObjectSetter: Dispatch<SetStateAction<Tag>>, availableTags: {[key: string]: Tag}) => {
 
-    const typeIndexMapping = activeFilters.reduce<Record<string, number>>((acc, filter, index) => {
-      acc[filter.type] = index;
+  const displayFacets = (type: string, activeFilters: Filter[], facetCompare: ((a: [string, Tag], b: [string, Tag]) => number) | undefined, groupedTags: GroupedTags, tagObject: Tag, tagObjectSetter: Dispatch<SetStateAction<Tag>>, availableTags: {[key: string]: Tag}) => {
+
+    // The selected set of filters for the current facet family
+    const selectedFacetSet = activeFilters.reduce<Record<string, null>>((acc, filter, index) => {
+      if (hasFilterFamily(filter, type)) {
+        acc[filter.type] = null;
+      }
+
       return acc;
     }, {});
 
     const isOther = (name: string): boolean => name.toLowerCase() === 'other';
-    const getIndex = (key: string, typeIndexMapping: {[key: string]: number}): number => {
-      return typeIndexMapping[key] !== undefined ? typeIndexMapping[key] : Infinity;
+    const isSelected = (key: string, selectedFacetSet: {[key: string]: null}): boolean => {
+      return selectedFacetSet[key] !== undefined;
     }
+
     const compareNames = (nameA: string, nameB: string): number => {
       if (isOther(nameA) && isOther(nameB)) return 0;
       if (isOther(nameA)) return 1;
       if (isOther(nameB)) return -1;
       return nameA.localeCompare(nameB);
     };
-    const sortedFacets = Object.entries(groupedTags[type]).sort((a, b) => {
-      const indexA = getIndex(a[0], typeIndexMapping);
-      const indexB = getIndex(b[0], typeIndexMapping);
-    
-      if (indexA !== Infinity && indexB === Infinity) return -1;
-      if (indexB !== Infinity && indexA === Infinity) return 1;
-      
+
+    const defaultCompare = (a: [string, Tag], b: [string, Tag]) => {
+      const isFacetASelected = isSelected(a[0], selectedFacetSet);
+      const isFacetBSelected = isSelected(b[0], selectedFacetSet);
+      if (isFacetASelected && !isFacetBSelected) return -1;
+      if (!isFacetASelected && isFacetBSelected) return 1;
+
       const nameA = a[1].name.toLowerCase();
       const nameB = b[1].name.toLowerCase();
-      
+
       return compareNames(nameA, nameB);
-    });
-  
+    };
+
+    // Ensures that selected facets come first
+    let sortedFacets = Object.entries(groupedTags[type]).sort(defaultCompare);
+
+    // When there is a custom facet compare for this facet family, we want to sort selected and
+    // unselected facets independently while preserving that selected facets come first
+    if (facetCompare) {
+      const pivot = Object.keys(selectedFacetSet).length
+      sortedFacets = pivotSort(sortedFacets, pivot, facetCompare);
+    }
+
     return (
       <div className={`${styles.section} ${Object.keys(groupedTags).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
@@ -324,7 +340,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
       </div>
     )
   }
-  
+
   const typeHeadingMarkup = getTagHeadingMarkup(tagType, activeFilters);
   const typeCaptionMarkup = getTagCaptionMarkup(tagType);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
@@ -341,7 +357,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
     (Object.keys(groupedTags[tagType]).length > 0 && typeHeadingMarkup !== null )
       ?
         <div className={styles.facetGroup}>
-            <button 
+            <button
               className={`${styles.facetButton} ${isExpanded ? styles.isExpanded : ''}`}
               onClick={()=>setIsExpanded(prev=>!prev)}
             >
@@ -358,7 +374,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, groupedTags, 
               typeCaptionMarkup
             }
             {
-              displayFacets(tagType, activeFilters, groupedTags, tagObject, setTagObject, availableTags)
+              displayFacets(tagType, activeFilters, facetCompare, groupedTags, tagObject, setTagObject, availableTags)
             }
           </AnimateHeight>
         </div>
