@@ -44,13 +44,13 @@ export const useWindowSize = (delay: number = 100): WindowSize => {
   return windowSize;
 }
 
-const GA_ID_REGEX = /^UA-\d{4,9}-\d{1,4}$/;
+const GA_ID_REGEX = /^G-[A-Z0-9]{10}$/;
 const isValidGAID = (gaID: string): boolean => {
   return GA_ID_REGEX.test(gaID);
 };
 export const useGoogleAnalytics = (gaID: string | undefined): void => {
   useEffect(() => {
-    if (!gaID || !isValidGAID(gaID)) return;
+    if (!gaID || !isValidGAID) return;
 
     const script1 = document.createElement('script');
     script1.async = true;
