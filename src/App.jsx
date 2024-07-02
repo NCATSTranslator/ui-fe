@@ -3,7 +3,7 @@ import Footer from './Components/Footer/Footer';
 import Header from './Components/Header/Header';
 import SmallScreenOverlay from './Components/SmallScreenOverlay/SmallScreenOverlay';
 import SendFeedbackModal from "./Components/Modals/SendFeedbackModal";
-import { useGoogleAnalytics, useWindowSize } from './Utilities/customHooks';
+import { useGoogleAnalytics, useGoogleTagManager, useWindowSize } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import './App.scss';
@@ -19,6 +19,8 @@ const App = ({children}) => {
 
   const [gaID, setGaID] = useState(null);
   useGoogleAnalytics(gaID);
+  const [gtmID, setGtmID] = useState(null);
+  useGoogleTagManager(gtmID);
 
   const dispatch = useDispatch();
   const root = location.pathname.includes("main") ? "main" : "demo";
@@ -66,6 +68,8 @@ const App = ({children}) => {
 
       if(config?.gaID)
         setGaID(config.gaID);
+      if(config?.gtmID)
+        setGtmID(config.gtmID);
 
       dispatch(setCurrentConfig(config));
     }
