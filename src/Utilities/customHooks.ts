@@ -44,7 +44,7 @@ export const useWindowSize = (delay: number = 100): WindowSize => {
   return windowSize;
 }
 
-const GA_ID_REGEX = /^UA-\d{4,9}-\d{1,4}$/;
+const GA_ID_REGEX = /^G-[A-Z0-9]{10}$/;
 const isValidGAID = (gaID: string): boolean => {
   return GA_ID_REGEX.test(gaID);
 };
