@@ -50,7 +50,7 @@ const isValidGAID = (gaID: string): boolean => {
 };
 export const useGoogleAnalytics = (gaID: string | undefined): void => {
   useEffect(() => {
-    if (!gaID || !isValidGAID) return;
+    if (!gaID || !isValidGAID(gaID)) return;
 
     const script1 = document.createElement('script');
     script1.async = true;
