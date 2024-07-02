@@ -92,10 +92,13 @@ export const useGoogleTagManager = (gtmID: string | undefined): void => {
     `;
 
     const noscript = document.createElement('noscript');
-    noscript.innerHTML = `
-      <iframe src="https://www.googletagmanager.com/ns.html?id=${gtmID}"
-      height="0" width="0" style="display:none;visibility:hidden"></iframe>
-    `;
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.googletagmanager.com/ns.html?id=${gtmID}`;
+    iframe.height = '0';
+    iframe.width = '0';
+    iframe.style.display = 'none';
+    iframe.style.visibility = 'hidden';
+    noscript.appendChild(iframe);
 
     document.head.appendChild(headScript);
 
