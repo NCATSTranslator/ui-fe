@@ -423,7 +423,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
             <span className={styles.tooltip}>Download a version of this result in CSV format.</span>
           </Tooltip>
       </CSVLink> */}
-      <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
+      <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed } result-accordion-button`} onClick={handleToggle}>
         <ChevDown/>
       </button>
       <AnimateHeight
