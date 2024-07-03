@@ -56,7 +56,7 @@ const ExampleQueryList = ({examples, setPresetURL, label, className = ""}) => {
                     ); 
                   return(
                     <button
-                      className={styles.button}
+                      className={`${styles.button} example-query`}
                       onClick={(e)=>{
                         setPresetURL(e.target.dataset.url);
                       }}
