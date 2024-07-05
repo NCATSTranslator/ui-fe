@@ -253,7 +253,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
 
     return (
       // availableTags[tagKey] && availableTags[tagKey].count &&
-      <div className={`${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey}>
+      <div className={`facet-container ${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey} data-facet-name={tagName}>
         <Checkbox
           handleClick={() => handleFacetChange(tagKey, tagObjectState, setTagObjectFunc, false, tagName)}
           checked={positiveChecked}
