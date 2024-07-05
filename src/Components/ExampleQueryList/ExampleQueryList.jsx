@@ -56,7 +56,7 @@ const ExampleQueryList = ({examples, setPresetURL, label, className = ""}) => {
                     ); 
                   return(
                     <button
-                      className={styles.button}
+                      className={`${styles.button} example-query`}
                       onClick={(e)=>{
                         setPresetURL(e.target.dataset.url);
                       }}
@@ -75,7 +75,7 @@ const ExampleQueryList = ({examples, setPresetURL, label, className = ""}) => {
       </div>
       {
         examplesMaxHeight > minHeight &&
-        <button onClick={handleToggleHeight} className={styles.showButton}>
+        <button onClick={handleToggleHeight} className={`${styles.showButton} show-more-examples`}>
           {height === minHeight ? 'Show More' : 'Show Less' }
         </button>
       }
