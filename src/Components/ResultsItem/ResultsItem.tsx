@@ -371,7 +371,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
           root === "main"
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
-                  <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <Bookmark className='bookmark-icon' onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
                   <Tooltip id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`}>
                     <span className={styles.tooltip}>
                       {
