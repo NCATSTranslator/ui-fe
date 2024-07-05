@@ -20,6 +20,11 @@ const EntitySearch = ({ onFilter }) => {
 
   const handleKeyDown = (e) => {
     if(e.key === 'Enter') {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'textFilterInputEnterKeyPressed',
+        inputValue: searchStringObject.value,
+      });
       handleActivateFilter(false);
     }
   }
