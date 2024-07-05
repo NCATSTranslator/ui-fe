@@ -20,11 +20,7 @@ const EntitySearch = ({ onFilter }) => {
 
   const handleKeyDown = (e) => {
     if(e.key === 'Enter') {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: 'textFilterInputEnterKeyPressed',
-        inputValue: searchStringObject.value,
-      });
+
       handleActivateFilter(false);
     }
   }
@@ -32,6 +28,11 @@ const EntitySearch = ({ onFilter }) => {
   const handleActivateFilter = (negated) => {
     if(searchStringObject.value === '') 
       return;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'textFilterInputEnabled',
+      inputValue: searchStringObject.value,
+    });
     let newSearchStringObject = cloneDeep(searchStringObject);
     newSearchStringObject.negated = negated;
     onFilter(newSearchStringObject);
