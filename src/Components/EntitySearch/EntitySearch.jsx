@@ -26,13 +26,13 @@ const EntitySearch = ({ onFilter }) => {
   }
 
   const handleActivateFilter = (negated) => {
+    if(searchStringObject.value === '') 
+      return;
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: 'textFilterInputEnabled',
       inputValue: searchStringObject.value,
     });
-    if(searchStringObject.value === '') 
-      return;
     let newSearchStringObject = cloneDeep(searchStringObject);
     newSearchStringObject.negated = negated;
     onFilter(newSearchStringObject);
