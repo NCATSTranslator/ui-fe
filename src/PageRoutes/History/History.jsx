@@ -23,7 +23,7 @@ const History = () => {
         </div>
         <button 
           onClick={()=>setModalOpen(true)}
-          className={styles.button}
+          className={`${styles.button} clear-all-search-history`}
           >
           Clear All
         </button>
