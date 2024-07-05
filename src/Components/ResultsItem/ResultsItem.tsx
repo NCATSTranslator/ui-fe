@@ -371,7 +371,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
           root === "main"
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
-                  <Bookmark onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <Bookmark className='bookmark-icon' data-result-name={nameString} onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
                   <Tooltip id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`}>
                     <span className={styles.tooltip}>
                       {
@@ -383,7 +383,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                   </Tooltip>
                 </div>
                 <div className={`${styles.icon} ${styles.notesIcon} ${itemHasNotes ? styles.filled : ''}`}>
-                  <Notes onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <Notes className='note-icon' data-result-name={nameString} onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
                   <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
                     <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/main/workspace" target='_blank'>Workspace</Link>).</span>
                   </Tooltip>
