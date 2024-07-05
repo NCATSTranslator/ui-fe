@@ -20,16 +20,17 @@ const EntitySearch = ({ onFilter }) => {
 
   const handleKeyDown = (e) => {
     if(e.key === 'Enter') {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: 'textFilterInputEnterKeyPressed',
-        inputValue: searchStringObject.value,
-      });
+
       handleActivateFilter(false);
     }
   }
 
   const handleActivateFilter = (negated) => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'textFilterInputEnabled',
+      inputValue: searchStringObject.value,
+    });
     if(searchStringObject.value === '') 
       return;
     let newSearchStringObject = cloneDeep(searchStringObject);
