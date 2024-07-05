@@ -346,7 +346,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }, [item, hasNotes]);
 
   return (
-    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef}>
+    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef} data-result-name={nameString}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
         {
@@ -423,7 +423,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
             <span className={styles.tooltip}>Download a version of this result in CSV format.</span>
           </Tooltip>
       </CSVLink> */}
-      <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed }`} onClick={handleToggle}>
+      <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed } result-accordion-button`} onClick={handleToggle} data-result-name={nameString}>
         <ChevDown/>
       </button>
       <AnimateHeight
