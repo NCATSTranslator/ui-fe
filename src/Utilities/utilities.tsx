@@ -57,21 +57,6 @@ export const getIcon = (category: string): JSX.Element => {
   }
   return icon;
 }
-export const capitalizeFirstLetter = (string: string): string => {
-  if(!string)
-    return '';
-
-  let newString = string.toLowerCase();
-  return newString.charAt(0).toUpperCase() + newString.slice(1);
-}
-
-export const capitalizeAllWords = (string: string): string => {
-  if(!string)
-    return '';
-
-  let newString = string.toLowerCase();
-  return newString.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
-}
 
 export const getDifferenceInDays = (date2: Date, date1: Date) => {
   const _MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -102,6 +87,33 @@ export const formatBiolinkEntity = (string: string): string => {
     .replaceAll('entity', '')
     .replaceAll('condition', '')
     .replaceAll('gene ', '').trim());
+}
+
+export const capitalizeFirstLetter = (string: string): string => {
+  if(!string)
+    return '';
+
+  let newString = string.toLowerCase();
+  return newString.charAt(0).toUpperCase() + newString.slice(1);
+}
+
+const isRomanNumeral = (word: string): boolean => {
+  const romanNumeralPattern = /^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$/i;
+  return romanNumeralPattern.test(word);
+}
+
+export const capitalizeWord = (word: string): string => {
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+}
+
+export const capitalizeAllWords = (str: string): string => {
+  return str.split(' ').map(word => {
+    if (isRomanNumeral(word)) {
+      return word.toUpperCase();
+    } else {
+      return capitalizeWord(word);
+    }
+  }).join(' ');
 }
 
 export const formatBiolinkNode = (string: string, type: string | null = null): string => {
