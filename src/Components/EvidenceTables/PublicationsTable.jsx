@@ -202,9 +202,10 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
       return (
         <EmphasizeWord 
           text={pub.support.text} 
-          positions={[pub.support.subject, pub.support.object]} 
-          subjectName={subjectName}
           objectName={objectName}
+          objectPos={pub.support.object}
+          subjectName={subjectName}
+          subjectPos={pub.support.subject}
           className={styles.emphasizedSnippet}
         />
       )
