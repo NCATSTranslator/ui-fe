@@ -5,40 +5,52 @@ interface EmphasizeWordProps {
   objectName: string | boolean;
   subjectName: string | boolean;
   text: string;
-  positions: [number, number][];
+  subjectPos: [number, number];
+  objectPos: [number, number];
 }
 
-const EmphasizeWord: FC<EmphasizeWordProps> = ({ text, positions, subjectName, objectName }) => {
-  let characters = Array.from(text);
-  positions.sort((a, b) => a[0] - b[0]);
-
-  for (let i = positions.length - 1; i >= 0; i--) {
-    const position = positions[i];
+const EmphasizeWord: FC<EmphasizeWordProps> = ({ text, subjectPos, objectPos, subjectName, objectName }) => {
+  const handleUpdateCharacters = (position: [number, number], characters: string): string => {
     if (position.length !== 2) {
       console.warn("Invalid position ignored:", position);
-      continue;
+      return characters;
     }
     const [startPos, endPos] = position;
-
+  
     if (startPos < 0 || endPos >= characters.length || startPos > endPos) {
       console.warn("Invalid range ignored:", position);
-      continue;
+      return characters;
     }
-
-    characters.splice(endPos, 0, "</strong>"); 
-    characters.splice(startPos - 1, 0, `<strong data-tooltip-id="${startPos}-${endPos}" class="cursor-default">`);
+  
+    let newCharacters = [...characters];
+  
+    newCharacters.splice(endPos, 0, "</strong>"); 
+    newCharacters.splice(startPos - 1, 0, `<strong data-tooltip-id="${startPos}-${endPos}" class="cursor-default">`);
+    return newCharacters.join('');
   }
-  const emphasizedText = characters.join('');
+  
+  const formatEmphasizedText = (text: string, positions: [number, number][]): string => {
+    let newEmphasizedText = text;
+  
+    // Sort positions by start index descending
+    positions.sort((a, b) => b[0] - a[0]);
+    for (const position of positions) 
+      newEmphasizedText = handleUpdateCharacters(position, newEmphasizedText);
+  
+    return newEmphasizedText;
+  }
+  
+  let emphasizedText = formatEmphasizedText(text, [subjectPos, objectPos]);
 
   return (
     <>
       {
-        subjectName && positions.length > 0 && positions[0].length > 0 &&
-        <Tooltip id={`${positions[0][0]}-${positions[0][1]}`}><span>Matched on: {subjectName}</span></Tooltip>
+        subjectName && subjectPos.length > 0 &&
+        <Tooltip id={`${subjectPos[0]}-${subjectPos[1]}`}><span>Matched on: {subjectName}</span></Tooltip>
       }
       {
-        objectName && positions.length > 1 && positions[1].length > 0 &&
-        <Tooltip id={`${positions[1][0]}-${positions[1][1]}`}><span>Matched on: {objectName}</span></Tooltip>
+        objectName && objectPos.length > 1 && 
+        <Tooltip id={`${objectPos[0]}-${objectPos[1]}`}><span>Matched on: {objectName}</span></Tooltip>
       }
       <span dangerouslySetInnerHTML={{ __html: emphasizedText }} />
     </>
