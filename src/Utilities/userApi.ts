@@ -496,7 +496,7 @@ const deleteUserData = async (
 
 
 /* ========== AUTH REFACTOR ========== */
-
+const API_PATH_PREFIX = '/api/v1';
 interface SessionStatus {
   status: string;
 }
@@ -510,17 +510,20 @@ interface SessionStatus {
  * @returns {Promise<SessionStatus>} The session status data.
  * @throws {Error} If the request fails or the response is not ok.
  */
-const fetchSessionStatus = async (method: 'GET' | 'POST', expire?: boolean, refresh?: boolean): Promise<SessionStatus> => {
+const fetchSessionStatus = async (method: 'GET' | 'POST', expire?: boolean, update?: boolean): Promise<SessionStatus> => {
+  const ENDPOINT = `${API_PATH_PREFIX}/session/status`;
   try {
     let response: Response;
 
     if (method === 'POST') {
-      const payload = {
-        expire: expire ?? false,
-        refresh: refresh ?? false,
-      };
-
-      response = await fetch('/session/status', {
+      let payload = null;
+      if(!!expire) {
+        payload = {expire: true};
+      } else if(!!update) {
+        payload = {update: true};
+      }
+      
+      response = await fetch(ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -528,7 +531,7 @@ const fetchSessionStatus = async (method: 'GET' | 'POST', expire?: boolean, refr
         body: JSON.stringify(payload),
       });
     } else {
-      response = await fetch('/session/status', {
+      response = await fetch(ENDPOINT, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
