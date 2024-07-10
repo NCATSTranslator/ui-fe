@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
 import { QueryType } from './queryTypes';
@@ -491,3 +492,116 @@ const deleteUserData = async (
   
     return response;
 }
+
+
+
+/* ========== AUTH REFACTOR ========== */
+
+interface SessionStatus {
+  status: string;
+}
+
+/**
+ * Function to fetch the session status from the specified endpoint.
+ * 
+ * @param {string} method - The HTTP method to use ('GET' or 'POST').
+ * @param {boolean} [expire] - Optional parameter to indicate if the session should expire.
+ * @param {boolean} [refresh] - Optional parameter to indicate if the session should refresh.
+ * @returns {Promise<SessionStatus>} The session status data.
+ * @throws {Error} If the request fails or the response is not ok.
+ */
+const fetchSessionStatus = async (method: 'GET' | 'POST', expire?: boolean, refresh?: boolean): Promise<SessionStatus> => {
+  try {
+    let response: Response;
+
+    if (method === 'POST') {
+      const payload = {
+        expire: expire ?? false,
+        refresh: refresh ?? false,
+      };
+
+      response = await fetch('/session/status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      response = await fetch('/session/status', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    if (!response.ok) {
+      throw new Error(`Unable to retrieve session status. Error: ${response.status}`);
+    }
+
+    const data: SessionStatus = await response.json();
+    return data;
+  } catch (err) {
+    if (err instanceof Error) {
+      throw new Error(`Unable to retrieve session status. Error: ${err.message}`);
+    } else {
+      throw new Error(`Unable to retrieve session status. Unknown error.`);
+    }
+  }
+};
+
+/**
+ * Custom hook to fetch session status using the specified method.
+ *
+ * @param {string} method - The HTTP method to use ('GET' or 'POST').
+ * @param {boolean} [expire] - Optional parameter to indicate if the session should expire.
+ * @param {boolean} [refresh] - Optional parameter to indicate if the session should refresh.
+ * @returns {[SessionStatus | null, boolean, string | null]} The session status, loading state, and error state.
+ */
+const useSessionStatus = (method: 'GET' | 'POST', expire?: boolean, refresh?: boolean): [SessionStatus | null, boolean, string | null] => {
+  const [sessionStatus, setSessionStatus] = useState<SessionStatus | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchSessionStatus(method, expire, refresh);
+        setSessionStatus(data);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Unknown error occurred');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [method, expire, refresh]);
+
+  return [sessionStatus, loading, error];
+};
+
+/**
+ * Custom hook to fetch session status using GET method.
+ *
+ * @returns {[SessionStatus | null, boolean, string | null]} The session status, loading state, and error state.
+ */
+export const useGetSessionStatus = (): [SessionStatus | null, boolean, string | null] => {
+  return useSessionStatus('GET');
+};
+
+/**
+ * Custom hook to fetch session status using POST method with optional expire and refresh parameters.
+ *
+ * @param {boolean} [expire] - Optional parameter to indicate if the session should expire.
+ * @param {boolean} [refresh] - Optional parameter to indicate if the session should refresh.
+ * @returns {[SessionStatus | null, boolean, string | null]} The session status, loading state, and error state.
+ */
+export const usePostSessionStatus = (expire?: boolean, refresh?: boolean): [SessionStatus | null, boolean, string | null] => {
+  return useSessionStatus('POST', expire, refresh);
+};
