@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import Tooltip from '../Tooltip/Tooltip';
-import { currentConfig, currentRoot, currentUser } from "../../Redux/rootSlice";
+import { currentConfig, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
 import { useWindowSize } from '../../Utilities/customHooks';
 import History from '../../Icons/Navigation/History.svg?react';
@@ -14,7 +14,6 @@ import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
 
 const Header = ({children}) => {
   
-  const root = useSelector(currentRoot);
   const user = useSelector(currentUser);
   const config = useSelector(currentConfig);
   const location = useLocation();
@@ -36,27 +35,27 @@ const Header = ({children}) => {
       <div className={styles.topBar}>
         <div className={styles.container}>
           <div className={styles.left}>
-            <Link to={`/${root}/`} className={styles.logo} reloadDocument={location.pathname === "/main/results" ? false : true}>
+            <Link to={`/`} className={styles.logo} reloadDocument={location.pathname === "/main/results" ? false : true}>
               <img src={Logo} alt="Translator Logo" />
             </Link>
           </div>
           <div className={styles.right}>
             {
-              root === 'main' &&
+              !!user &&
               <>
-                <Link to={`/${root}/workspace`} className={styles.workspaceLink}><Workspace/><span className={styles.linkSpan}>Workspace</span></Link>
-                <Link to={`/${root}/history`}><History/><span className={styles.linkSpan}>Search History</span></Link>
+                <Link to={`/workspace`} className={styles.workspaceLink}><Workspace/><span className={styles.linkSpan}>Workspace</span></Link>
+                <Link to={`/history`}><History/><span className={styles.linkSpan}>Search History</span></Link>
               </>
             }
-            <Link to={`${getGeneratedSendFeedbackLink(openFeedbackModal, root)}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
-            <Link to={`/${root}/help`} className={styles.helpLink} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
+            <Link to={`${getGeneratedSendFeedbackLink(openFeedbackModal)}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
+            <Link to={`/help`} className={styles.helpLink} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
             {
-              root === 'demo'
+              !user 
               ? 
                 <a className={styles.login} href={loginURL}>Log In</a>
               : 
                 <>
-                  <Link to={`/main/home`} data-tooltip-id={`prefs-tooltip`} aria-describedby={`prefs-tooltip`} className={styles.userIcon}>
+                  <Link to={`/home`} data-tooltip-id={`prefs-tooltip`} aria-describedby={`prefs-tooltip`} className={styles.userIcon}>
                     <div className={styles.imageContainer}>
                       {(user?.profile_pic_url)
                         ? <img src={user.profile_pic_url} alt="user profile" className={styles.profilePic}/>

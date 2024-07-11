@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "../../Utilities/utilities";
 import { pastQueryState, setHistory } from "../../Redux/historySlice";
-import { currentRoot } from "../../Redux/rootSlice";
 import ShareModal from '../Modals/ShareModal';
 import TextInput from "../FormFields/TextInput";
 import Tooltip from "../Tooltip/Tooltip";
@@ -21,7 +20,6 @@ const QueryHistoryList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const root = useSelector(currentRoot);
   let tempQueryHistory = useSelector(pastQueryState);
   // query history stored from oldest -> newest, so we must reverse it to display the most recent first
   const [queryHistoryState, setQueryHistoryState] = useState(cloneDeep(tempQueryHistory).reverse());
@@ -45,7 +43,7 @@ const QueryHistoryList = () => {
   }, [queryHistoryState]);
 
   const handleClick = (query) => {
-    navigate(`/${root}/${getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, '0', query.id)}`);
+    navigate(`/${getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, '0', query.id)}`);
   }
 
   const handleSearch = (value) => {

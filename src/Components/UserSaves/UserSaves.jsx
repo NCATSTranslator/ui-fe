@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { getSaves } from '../../Utilities/userApi';
 import { handleEvidenceModalClose } from "../../Utilities/resultsInteractionFunctions";
 import { useSelector } from 'react-redux';
-import { currentRoot } from '../../Redux/rootSlice';
+import { currentUser } from '../../Redux/rootSlice';
 import styles from './UserSaves.module.scss';
 import EvidenceModal from '../Modals/EvidenceModal';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -18,7 +18,7 @@ import UserSave from '../UserSave/UserSave';
 
 const UserSaves = () => {
 
-  const root = useSelector(currentRoot);
+  const user = useSelector(currentUser);
   const [userSaves, setUserSaves] = useState(null);
   const [filteredUserSaves, setFilteredUserSaves] = useState(null)
   const currentSearchString = useRef("");
@@ -144,7 +144,7 @@ const UserSaves = () => {
   return(
     <QueryClientProvider client={queryClient}>
       {
-        root === "main"
+        !!user
         ?
           <div>
             <ToastContainer

@@ -10,11 +10,8 @@ import Warning from '../../Icons/information.svg?react';
 import { currentQueryResultsID } from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux';
 import { getDataFromQueryVar } from "../../Utilities/utilities";
-import { currentRoot } from "../../Redux/rootSlice";
 
 const SendFeedbackModal = ({isOpen, onClose}) => {
-
-  const root = useSelector(currentRoot);
 
   const categoryErrorText = "Please select a category.";
   const [categoryError, setCategoryError] = useState(false);
@@ -176,7 +173,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
         <Fade>
           <h5>Send Feedback</h5>
           <p>Enjoying Translator? Having an issue? Either way, we want to know - use this form to let us know your comments. All fields marked with * are required.</p>
-          <p className={styles.disclaimer}><Warning/>In the mean time, please check out our <a href={`/${root}/help`} target="_blank" rel="noreferrer">Help page</a> for Translator tips, tricks, and tutorials.</p>
+          <p className={styles.disclaimer}><Warning/>In the mean time, please check out our <a href={`/help`} target="_blank" rel="noreferrer">Help page</a> for Translator tips, tricks, and tutorials.</p>
           <form onSubmit={(e)=>handleSubmission(e)} name="send feedback form">
             {
               errorActive && categoryError &&

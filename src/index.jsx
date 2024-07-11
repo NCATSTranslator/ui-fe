@@ -1,7 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
-import Root from './Root';
 import App from './App';
 import Page from './Components/Page/Page';
 import FAQPage from './Components/Page/FAQPage';
@@ -103,38 +102,22 @@ const routes = [
   {
     path: "workspace",
     element: <Page title="User Workspace"><Workspace /></Page>
-  }
+  },
+  {
+    path: "login",
+    element: <Page title="Login"><Login /></Page>
+  },
+  { 
+    path: "*", 
+    element: <Page title="404 - Page Not Found"><Four /></Page>
+  },
 ]
-
-const FourOhFour = ()=>{
-  return(<App><Page title="404 - Page Not Found"><Four /></Page></App>);
-}
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root/>,
-    children: [ 
-      {
-        path: "demo",
-        element: <App/>,
-        children: routes
-      },
-      {
-        path: "main",
-        element: <App/>,
-        children: routes
-      },
-      {
-        path: "login",
-        element: <App><Page title="Login"><Login /></Page></App>,
-      },
-      { 
-        path: "*", 
-        element: <FourOhFour/>
-      },
-    ]
-
+    element: <App/>,
+    children: routes
   },
 ]);
 

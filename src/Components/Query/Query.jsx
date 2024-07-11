@@ -9,7 +9,7 @@ import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import AutoHeight from "../AutoHeight/AutoHeight";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { incrementHistory } from "../../Redux/historySlice";
-import { currentConfig, currentRoot } from "../../Redux/rootSlice";
+import { currentConfig } from "../../Redux/rootSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
 import { currentQueryTimestamp, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
@@ -19,10 +19,10 @@ import { filterAndSortExamples, getAutocompleteTerms } from "../../Utilities/aut
 import { getEntityLink, generateEntityLink, getLastItemInArray, getFormattedDate, isValidDate } from "../../Utilities/utilities";
 import Question from '../../Icons/Navigation/Question.svg?react';
 import Back from '../../Icons/Directional/Undo.svg?react';
-import Search from '../../Icons/Buttons/Search.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import styles from './Query.module.scss';
+import { API_PATH_PREFIX } from "../../Utilities/userApi";
 
 const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription}) => {
 
@@ -30,7 +30,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { pathname } = useLocation();
-  const root = useSelector(currentRoot);
   const config = useSelector(currentConfig);
   const queryTimestamp = useSelector(currentQueryTimestamp);
   const nameResolverEndpoint = (config?.name_resolver) ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
@@ -118,7 +117,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
       headers: { 'Content-Type': 'application/json' },
       body: queryJson
     };
-    fetch(`/${root}/api/v1/pub/query`, requestOptions)
+    fetch(`/${API_PATH_PREFIX}/query`, requestOptions)
       .then(response => response.json())
       .then(data => {
         console.log(data)
@@ -310,11 +309,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               <>
                 <div className={styles.resultsHeader}>
                   <div className={styles.buttons}>
-                    <Link to={`/${root}`} className={styles.button}><Back/>Return To Home Page</Link>
-                    {
-                      root !== 'demo' &&
-                      <Link to={`/${root}`} target="_blank" className={`${styles.button} ${styles.buttonTwo}`}><Search className={styles.svgFillWhite}/>Submit Another Query</Link>
-                    }
+                    <Link to={`/`} className={styles.button}><Back/>Return To Home Page</Link>
                   </div>
                   <div className={styles.showingResultsContainer}>
                     <div className={styles.showingResultsTop}>
@@ -389,7 +384,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       autocompleteItems={autocompleteItems}
                       autocompleteLoading={loadingAutocomplete}
                       handleItemClick={handleItemSelection}
-                      disabled={root === "main" ? false : true}
                     />
                     { 
                       <img src={loadingIcon} className={`${styles.loadingIcon} ${isLoading ? styles.active : ''} loadingIcon`} alt="loading icon"/>
@@ -461,7 +455,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               </p>
             }
             <p className={styles.needHelp}>
-              <a href={`/${root}/help`} rel="noreferrer " target="_blank"><Question/> Need Help?</a>
+              <a href={`/help`} rel="noreferrer " target="_blank"><Question/> Need Help?</a>
             </p>
           </div>
         </AutoHeight>

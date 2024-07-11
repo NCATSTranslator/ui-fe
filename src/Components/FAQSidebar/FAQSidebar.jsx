@@ -9,11 +9,10 @@ const FAQSidebar = ({articles}) => {
 
   const location = useLocation();
   const [activeSlug, setActiveSlug] = useState(location.pathname.replace('/', ''));
-  const rootPrefix = (location.pathname.includes("main")) ? "main" : "demo";
 
   useEffect(() => {
-    setActiveSlug(location.pathname.replace(`/${rootPrefix}/`, ''));
-  }, [location, rootPrefix]);
+    setActiveSlug(location.pathname.replace('/', ''));
+  }, [location]);
 
   return(
     <div className={styles.faqSidebar}>
@@ -24,7 +23,7 @@ const FAQSidebar = ({articles}) => {
             {
               articles.map((article, i)=> {
                 let isExtLink = (article.link) ? true : false;
-                let link = (article.link) ? article.link : `/${rootPrefix}/${article.slug}`;
+                let link = (article.link) ? article.link : `/${article.slug}`;
                 return (
                   <li key={i} className={(article.slug === activeSlug ? styles.active : '')}>
                     {
@@ -64,7 +63,7 @@ const FAQSidebar = ({articles}) => {
                             article.subArticles.map((subArticle, j) => {
                               let key = `${i}_${j}`;
                               let isExtLinkSub = (subArticle.link) ? true : false;
-                              let linkSub = (subArticle.link) ? subArticle.link : `/${rootPrefix}/${subArticle.slug}`;
+                              let linkSub = (subArticle.link) ? subArticle.link : `/${subArticle.slug}`;
                               return (             
                                 <li key={key} className={(subArticle.slug === activeSlug ? styles.active : '')}>
                                   {isExtLinkSub && 

@@ -13,6 +13,7 @@ import AnatomicalEntity from '../Icons/anatomical-entity.svg?react';
 import ExternalLink from '../Icons/external-link.svg?react';
 import { QueryType } from '../Types/results';
 import { cloneDeep } from 'lodash';
+import { PreferencesContainer, PrefObject } from '../Types/global';
 import { FormattedEdgeObject, FormattedNodeObject } from '../Types/results';
 import { PublicationObject, PublicationsList } from '../Types/evidence';
 
@@ -281,9 +282,9 @@ export const getFormattedDate = (date: Date): string | boolean => {
   return `${formattedDate} (${formattedTime})`;
 };
 
-export const getGeneratedSendFeedbackLink = (openDefault: boolean = true, root: string): string => {
+export const getGeneratedSendFeedbackLink = (openDefault: boolean = true): string => {
   let link = encodeURIComponent(window.location.href);
-  return `/${root}?fm=${openDefault}&link=${link}`;
+  return `/?fm=${openDefault}&link=${link}`;
 }
 
 export const mergeObjectArrays = <T extends { [key: string]: any }>(array1: T[], array2: T[], uniqueProp: keyof T): T[] => {
@@ -357,6 +358,12 @@ export const checkPublicationsType = (edgeObject: FormattedEdgeObject): string =
   }
 }
 
+/**
+ * Type guard to check if an object is a PublicationObject.
+ * 
+ * @param obj - The object to check.
+ * @returns {boolean} True if the object is a PublicationObject, otherwise false.
+ */
 const isPublicationObject = (obj: any): obj is PublicationObject => {
   return (
     typeof obj === 'object' &&
@@ -372,6 +379,12 @@ const isPublicationObject = (obj: any): obj is PublicationObject => {
   );
 }
 
+/**
+ * Type guard to check if an object is a PublicationsList.
+ * 
+ * @param obj - The object to check.
+ * @returns {boolean} True if the object is a PublicationsList, otherwise false.
+ */
 export const isPublicationsList = (obj: any): obj is PublicationsList => {
   if (typeof obj !== 'object' || obj === null) {
     return false;
@@ -382,3 +395,44 @@ export const isPublicationsList = (obj: any): obj is PublicationsList => {
     value.every(item => isPublicationObject(item))
   );
 }
+
+/**
+ * Type guard to check if an object is a PrefObject.
+ * 
+ * @param obj - The object to check.
+ * @returns {boolean} True if the object is a PrefObject, otherwise false.
+ */
+const isPrefObject = (obj: any): obj is PrefObject => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    ('pref_value' in obj) &&
+    (typeof obj.pref_value === 'string' || typeof obj.pref_value === 'number') &&
+    Array.isArray(obj.possible_values) &&
+    obj.possible_values.every((value: any) => typeof value === 'string' || typeof value === 'number')
+  );
+};
+
+/**
+ * Type guard to check if an object is a PreferencesContainer.
+ * 
+ * @param obj - The object to check.
+ * @returns {boolean} True if the object is a PreferencesContainer, otherwise false.
+ */
+export const isPreferencesContainer = (obj: any): obj is PreferencesContainer => {
+  if (typeof obj !== 'object' || obj === null) {
+    return false;
+  }
+
+  const requiredKeys: Array<keyof PreferencesContainer> = [
+    'result_sort',
+    'result_per_screen',
+    'graph_visibility',
+    'graph_layout',
+    'path_show_count',
+    'evidence_sort',
+    'evidence_per_screen',
+  ];
+
+  return requiredKeys.every(key => key in obj && isPrefObject(obj[key])) && Object.values(obj).every(isPrefObject); 
+};

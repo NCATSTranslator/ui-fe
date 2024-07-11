@@ -1,7 +1,7 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { defaultPrefs, prefKeyToString, updateUserPreferences } from '../../Utilities/userApi';
 import { useSelector, useDispatch } from 'react-redux';
-import { currentPrefs, currentRoot, setCurrentPrefs } from '../../Redux/rootSlice';
+import { currentPrefs, currentUser, setCurrentPrefs } from '../../Redux/rootSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Button from '../FormFields/Button';
@@ -13,7 +13,7 @@ import { PreferencesContainer } from '../../Types/global';
 const UserPreferences = () => {
 
   const initPrefs = useSelector(currentPrefs);
-  const root = useSelector(currentRoot);
+  const user = useSelector(currentUser);
   const [userPrefs, setUserPrefs] = useState<PreferencesContainer>(initPrefs);
   const prefsSavedToast = () => toast.success("Preferences saved!");
   const dispatch = useDispatch();
@@ -44,7 +44,7 @@ const UserPreferences = () => {
         hideProgressBar
       />
       {
-        root === "main" 
+        !!user
         ? 
           initPrefs && 
           <>
