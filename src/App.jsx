@@ -31,6 +31,7 @@ const App = ({children}) => {
   }
 
   const [sessionStatus, loading, error] = usePostSessionStatus(false, true);
+  console.log(sessionStatus);
   useFetchConfigAndPrefs(setGaID, setGtmID);
 
   return (

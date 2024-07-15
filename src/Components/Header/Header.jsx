@@ -11,6 +11,7 @@ import defaultPfp from '../../Assets/Images/pfp.png';
 import Logo from '../../Assets/Images/site-logo.png';
 import styles from './Header.module.scss';
 import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
+import { handleLogout } from '../../Utilities/userApi';
 
 const Header = ({children}) => {
   
@@ -71,12 +72,7 @@ const Header = ({children}) => {
                   </Link>
                   {
                     logoutReady && 
-                    <form method="post" action={logoutURI}>
-                      <input type="hidden" name="client_id" value={clientID} />
-                      <input type="hidden" name="show_prompt" value="false" />
-                      <input type="hidden" name="post_logout_redirect_uri" value={redirectURI}/> 
-                      <button type="submit" value="submit" className={styles.login}>Log Out</button>
-                    </form>
+                    <button onClick={handleLogout} className={styles.login}>Log Out</button>
                   }
                 </>
             }

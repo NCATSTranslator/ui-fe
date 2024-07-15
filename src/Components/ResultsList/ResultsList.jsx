@@ -318,7 +318,7 @@ const ResultsList = ({loading}) => {
       headers: { 'Content-Type': 'application/json' },
     };
     // eslint-disable-next-line
-    const response = await fetch(`/${API_PATH_PREFIX}/query/${currentQueryID}/status`, requestOptions)
+    const response = await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/status`, requestOptions)
       .then(response => handleFetchErrors(response))
       .then(response => response.json())
       .then(data => {
@@ -381,7 +381,7 @@ const ResultsList = ({loading}) => {
       // body: queryIDJson
     };
     // eslint-disable-next-line
-    const response = await fetch(`/${API_PATH_PREFIX}/query/${currentQueryID}/result`, requestOptions)
+    const response = await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/result`, requestOptions)
       .then(response => handleFetchErrors(response, () => {
         console.log(response.json());
         isFetchingARAStatus.current = false;

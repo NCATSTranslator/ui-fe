@@ -117,7 +117,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
       headers: { 'Content-Type': 'application/json' },
       body: queryJson
     };
-    fetch(`/${API_PATH_PREFIX}/query`, requestOptions)
+    fetch(`${API_PATH_PREFIX}/query`, requestOptions)
       .then(response => response.json())
       .then(data => {
         console.log(data)
