@@ -630,17 +630,23 @@ export const usePostSessionStatus = (expire?: boolean, refresh?: boolean): [Sess
  * @param {function} setGaID - Function to set the Google Analytics ID.
  * @param {function} setGtmID - Function to set the Google Tag Manager ID.
  */
-export const useFetchConfigAndPrefs = (setGaID: (id: string) => void, setGtmID: (id: string) => void) => {
+export const useFetchConfigAndPrefs = (userFound: boolean,  setGaID: (id: string) => void, setGtmID: (id: string) => void) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const fetchPrefs = async () => {
-      let prefs: any = await getUserPreferences(() => {
-        console.warn("no prefs found for this user, setting to default prefs.");
-      });
-      console.log("initial fetch of user prefs: ", prefs);
-      if(prefs === undefined) {
+    const fetchPrefs = async (hasUser: boolean) => {
+      let prefs: any;
+      if(!hasUser) {
         prefs = defaultPrefs;
+        console.warn("no user available, setting to default prefs.");
+      } else {
+        prefs = await getUserPreferences(() => {
+          console.warn("no prefs found for this user, setting to default prefs.");
+        });
+        console.log("initial fetch of user prefs: ", prefs);
+        if(prefs === undefined) {
+          prefs = defaultPrefs;
+        }
       }
       if(isPreferencesContainer(prefs.preferences))
         dispatch(setCurrentPrefs(prefs.preferences));
@@ -667,7 +673,7 @@ export const useFetchConfigAndPrefs = (setGaID: (id: string) => void, setGtmID: 
     };
 
     fetchConfig();
-    fetchPrefs();
+    fetchPrefs(userFound);
   }, [dispatch, setGaID, setGtmID]);
 };
 

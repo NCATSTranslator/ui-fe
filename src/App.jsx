@@ -7,7 +7,7 @@ import { useGoogleAnalytics, useGoogleTagManager, useWindowSize } from './Utilit
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import './App.scss';
 import { getDataFromQueryVar } from './Utilities/utilities';
-import { usePostSessionStatus, useFetchConfigAndPrefs } from './Utilities/userApi';
+import { usePostSessionStatus, useFetchConfigAndPrefs, useGetSessionStatus } from './Utilities/userApi';
 
 const App = ({children}) => {
 
@@ -30,9 +30,10 @@ const App = ({children}) => {
     setFeedbackModalOpen(false);
   }
 
-  const [sessionStatus, loading, error] = usePostSessionStatus(false, true);
+  // const [sessionStatus, loading, error] = usePostSessionStatus(false, true);
+  const [sessionStatus, loading, error] = useGetSessionStatus();
   console.log(sessionStatus);
-  useFetchConfigAndPrefs(setGaID, setGtmID);
+  useFetchConfigAndPrefs(!!sessionStatus?.user, setGaID, setGtmID);
 
   return (
     <div className={`app ${pathnameClass}`}>
