@@ -21,6 +21,7 @@ $lightPurpleOne: #C2ABC4;
 $purpleTwo: #524F81;
 $lightPurpleTwo: #BAB9CD;
 $palePurple: #DCDCE6;
+$midPurpleTwo: #9795B3;
 
 $purpleEdgeBG: #7271A4;
 $purpleEdgeBGSelected: #514F7E;
@@ -80,9 +81,9 @@ $querySelectBorderRadius: 8px;
 
 // Drop Shadow //
 $dropShadow: 0px 3px 10px  $dropShadowColor;
-$dropShadowTransparent: 0px 3px 10px  dropShadowColorTransparent;
+$dropShadowTransparent: 0px 3px 10px $dropShadowColorTransparent;
 $dropShadowHover: 0px 3px 10px  $dropShadowColorHover;
-// $dropShadowPressed: inset 0px 3px 10px  rgba(32, 33, 36, .5);
+$dropShadowPressed: inset 0px 3px 10px $dropShadowColorHover;
 
 
 // Animations //

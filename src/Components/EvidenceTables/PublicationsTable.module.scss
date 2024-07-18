@@ -114,13 +114,13 @@
           user-select: none;
           -o-user-select: none;
           &:hover {
-            background-color: $purpleTwo20;
+            background-color: $palePurple;
             color: $purpleOne;
           }
         }
         &.current {
           a {
-            background-color: $purpleTwo20;
+            background-color: $palePurple;
             color: $purpleOne;
           } 
         }
@@ -175,7 +175,7 @@
 .knowledgeLevelButton {
   border-radius: 8px;
   background-color: $white;
-  border: 1px solid $borderGray;
+  border: 1px solid $darkGray;
   color: $purpleEdgeBGSelected;
   transition: all .5s ease;
   color: #514F7E;

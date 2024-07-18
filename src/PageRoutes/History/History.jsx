@@ -4,7 +4,7 @@ import { pastQueryState, setHistory } from "../../Redux/historySlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
 import Modal from "../../Components/Modals/Modal";
-import Warning from '../../Icons/warning.svg?react'
+import Warning from '../../Icons/Status/Alerts/Warning.svg?react'
 import QueryHistoryList from "../../Components/QueryHistoryList/QueryHistoryList";
 
 const History = () => {

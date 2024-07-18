@@ -9,7 +9,7 @@
     padding: 0;
     li {
       &.active >a, .links li.active {
-        background-color: $purpleTwo20;
+        background-color: $palePurple;
         color: $purpleOne;
       }
     }

@@ -8,9 +8,9 @@ import { currentRoot } from "../../Redux/rootSlice";
 import ShareModal from '../Modals/ShareModal';
 import TextInput from "../FormFields/TextInput";
 import Tooltip from "../Tooltip/Tooltip";
-import Close from '../../Icons/Buttons/Close.svg?react';
+import Close from '../../Icons/Buttons/Close/Close.svg?react';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
-import ShareIcon from '../../Icons/share.svg?react';
+import ShareIcon from '../../Icons/Buttons/Export.svg?react';
 import { cloneDeep } from "lodash";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 

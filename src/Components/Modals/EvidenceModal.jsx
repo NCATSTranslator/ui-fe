@@ -3,7 +3,7 @@ import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
-import ExternalLink from '../../Icons/external-link.svg?react';
+import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isPublication, isPublicationDictionary } from "../../Utilities/utilities";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { getFormattedEdgeLabel, getUrlByType } from '../../Utilities/resultsFormattingFunctions';
@@ -11,7 +11,7 @@ import { checkForEdgeMatch, handleEvidenceSort } from "../../Utilities/evidenceM
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
-import Information from '../../Icons/information.svg?react';
+import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 

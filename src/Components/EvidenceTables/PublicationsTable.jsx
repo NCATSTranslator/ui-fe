@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import ExternalLink from '../../Icons/external-link.svg?react';
+import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import LoadingBar from "../LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import Select from '../FormFields/Select';
@@ -10,7 +10,7 @@ import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHig
   sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
-import Info from '../../Icons/information.svg?react';
+import Info from '../../Icons/Status/Alerts/Info.svg?react';
 import Tooltip from '../Tooltip/Tooltip';
 import EmphasizeWord from '../EmphasizeWord/EmphasizeWord';
 

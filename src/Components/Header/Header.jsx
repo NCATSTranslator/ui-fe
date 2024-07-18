@@ -6,7 +6,7 @@ import { useWindowSize } from '../../Utilities/customHooks';
 import History from '../../Icons/Navigation/History.svg?react';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 import Workspace from '../../Icons/Navigation/Workspace.svg?react';
-import Question from '../../Icons/Navigation/Question.svg?react';
+import Question from '../../Icons/Navigation/Help.svg?react';
 import defaultPfp from '../../Assets/Images/pfp.png';
 import Logo from '../../Assets/Images/site-logo.png';
 import styles from './Header.module.scss';

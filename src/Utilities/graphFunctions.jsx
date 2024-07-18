@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import cytoscape from 'cytoscape';
 import { debounce, cloneDeep } from 'lodash';
 import { capitalizeFirstLetter } from './utilities';
-import ExternalLink from '../Icons/external-link.svg?react';
+import ExternalLink from '../Icons/Buttons/External Link.svg?react';
 import { hasSupport } from './resultsFormattingFunctions';
 
 export const layoutList = {

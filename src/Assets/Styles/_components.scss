@@ -21,7 +21,7 @@
     margin-top: 8px;
     font-size: $captionSize;
     &:before {
-      content: url('./Icons/Alerts/Info.svg');
+      content: url('./Icons/Status/Alerts/Info.svg');
       margin-right: 4px;
     }
   }
@@ -123,7 +123,7 @@
       margin-bottom: 0;
     }
     svg {
-      fill: $purpleOne50
+      fill: $lightPurpleOne
     }
     .Toastify__toast--error {
       background-color: white;

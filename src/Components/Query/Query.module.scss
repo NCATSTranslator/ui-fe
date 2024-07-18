@@ -6,7 +6,7 @@
 
 .query {
   padding: 35px 0;
-  background-color: $purpleTwo20;
+  background-color: $palePurple;
   position: relative;
   .container {
     padding: 0 20px 0;
@@ -79,7 +79,7 @@
     .button {
       padding: 4px 8px;
       background-color: $white;
-      color: $blueTwo75;
+      color: $blueOne;
       transition: $defaultAnim;
       border-radius: $defaultBorderRadius;
       box-shadow: $dropShadow;
@@ -94,15 +94,15 @@
         box-shadow: $dropShadowHover;
       }
       svg path {
-        stroke: $blueTwo75;
+        stroke: $blueTwo;
       }
       .svgFillWhite path {
-        fill: $blueTwo75;
+        fill: $blueTwo;
         stroke: none;
       }
     }
     .buttonTwo {
-      background-color: $blueTwo75;
+      background-color: $blueTwo;
       color: $white;
       &:hover {
         box-shadow: $dropShadowHover;
@@ -245,7 +245,7 @@ button .dualArrows {
 }
 
 .gray {
-  color: $midDarkGray;
+  color: $darkGray;
 }
 
 .queryBarContainer {

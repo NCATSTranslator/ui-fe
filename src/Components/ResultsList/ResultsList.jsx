@@ -27,7 +27,7 @@ import { findStringMatch, handleResultsError, handleEvidenceModalClose,
 import { isFacet, isExclusion, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
-import Alert from '../../Icons/Alerts/Info.svg?react';
+import Alert from '../../Icons/Status/Alerts/Info.svg?react';
 import { getSaves } from "../../Utilities/userApi";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

@@ -5,8 +5,8 @@ import ReactPaginate from 'react-paginate';
 import ShareModal from "../Modals/ShareModal";
 import Tooltip from '../Tooltip/Tooltip';
 import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter, getFilterLabel } from '../../Utilities/filterFunctions';
-import CloseIcon from '../../Icons/Buttons/Close.svg?react'
-import ShareIcon from '../../Icons/share.svg?react';
+import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react'
+import ShareIcon from '../../Icons/Buttons/Link.svg?react';
 
   // Output jsx for selected filters
 const getSelectedFilterDisplay = (filter) => {

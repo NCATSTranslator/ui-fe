@@ -4,14 +4,14 @@ import styles from './FacetGroup.module.scss';
 import AnimateHeight from "react-animate-height";
 import Tooltip from '../Tooltip/Tooltip';
 import Checkbox from '../FormFields/Checkbox';
-import Include from '../../Icons/include.svg?react';
-import Exclude from '../../Icons/exclude.svg?react';
-import ExternalLink from '../../Icons/external-link.svg?react';
+import Include from '../../Icons/Buttons/View & Exclude/View.svg?react';
+import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
+import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
+import Alert from '../../Icons/Status/Alerts/Info.svg?react';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacet, isEvidenceFilter, hasFilterFamily } from '../../Utilities/filterFunctions';
 import { pivotSort } from '../../Utilities/sortingFunctions';
-import Alert from '../../Icons/Alerts/Info.svg?react';
-import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
+import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
 import { cloneDeep } from "lodash";
 
 const getRoleHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {

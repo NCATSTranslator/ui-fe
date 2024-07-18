@@ -1,6 +1,6 @@
 import {useEffect, useCallback, FC, ReactNode} from "react";
 import styles from './ModalGlobals.module.scss';
-import Close from '../../Icons/Buttons/Close.svg?react';
+import Close from '../../Icons/Buttons/Close/Close.svg?react';
 
 interface ModalProps {
   children?: ReactNode;

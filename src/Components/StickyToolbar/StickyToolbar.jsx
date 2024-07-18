@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
 import Tooltip from "../Tooltip/Tooltip";
 import styles from './StickyToolbar.module.scss';
-import ShareIcon from '../../Icons/share.svg?react';
-import Subtract from '../../Icons/Buttons/Subtract.svg?react';
-import Add from '../../Icons/Buttons/Add.svg?react';
+import ShareIcon from '../../Icons/Buttons/Link.svg?react';
+import Subtract from '../../Icons/Buttons/Subtract/Subtract.svg?react';
+import Add from '../../Icons/Buttons/Add/Add.svg?react';
 
 const StickyToolbar = ({ loadingButtonData, setShareModalFunction }) => {
 

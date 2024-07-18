@@ -1,9 +1,9 @@
 import {useState} from 'react';
 import styles from './EntitySearch.module.scss';
 import Tooltip from '../Tooltip/Tooltip';
-import Alert from '../../Icons/Alerts/Info.svg?react';
-import Include from '../../Icons/include.svg?react';
-import Exclude from '../../Icons/exclude.svg?react';
+import Alert from '../../Icons/Status/Alerts/Info.svg?react';
+import Include from '../../Icons/Buttons/View & Exclude/View.svg?react';
+import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import { cloneDeep } from 'lodash';
 
 const EntitySearch = ({ onFilter }) => {

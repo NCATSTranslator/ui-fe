@@ -3,8 +3,8 @@ import {useState, memo, useMemo, useRef, useCallback, useEffect} from 'react';
 import { resultToCytoscape, findPaths, layoutList, handleResetView, 
   handleDeselectAllNodes, initCytoscapeInstance, getGraphWithoutExtraneousPaths,
   handleZoomByInterval } from '../../Utilities/graphFunctions';
-import Plus from '../../Icons/Buttons/Add.svg?react';
-import Minus from '../../Icons/Buttons/Subtract.svg?react';
+import Plus from '../../Icons/Buttons/Add/Add.svg?react';
+import Minus from '../../Icons/Buttons/Subtract/Subtract.svg?react';
 import cytoscape from 'cytoscape';
 import { v4 as uuidv4 } from 'uuid';
 import klay from 'cytoscape-klay';

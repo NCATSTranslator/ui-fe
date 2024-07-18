@@ -14,7 +14,7 @@
     font-weight: 700;
     padding: 10px 65px 10px 15px;
     border-radius: $querySelectBorderRadius;
-    border: 1px solid $borderGray;
+    border: 1px solid $darkGray;
     text-overflow: ellipsis;
     overflow: hidden;
     &::placeholder {
@@ -81,7 +81,7 @@
       border-bottom-right-radius: 6px;
       &:hover {
         svg path {
-          fill: $redTwo;
+          fill: $red;
         }
       }
     }

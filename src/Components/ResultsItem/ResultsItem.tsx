@@ -3,10 +3,10 @@ import styles from './ResultsItem.module.scss';
 import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject, isPublication, isClinicalTrial, isMiscPublication } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
-import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react";
-import ShareIcon from '../../Icons/share.svg?react';
-import Bookmark from "../../Icons/Navigation/Bookmark.svg?react";
-import Notes from "../../Icons/note.svg?react"
+import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react";
+import ShareIcon from '../../Icons/Buttons/Link.svg?react';
+import Bookmark from "../../Icons/Navigation/Bookmark/Bookmark.svg?react";
+import Notes from "../../Icons/Buttons/Notes/Notes.svg?react"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';

@@ -79,13 +79,13 @@
   .facetContainer {
     margin-bottom: 4px;
     background-color: $white;
-    border: 1px solid $borderGray;
+    border: 1px solid $darkGray;
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
     transition: $defaultAnim;
     &.containerNegativeChecked {
-      border-color: $redTwo;
+      border-color: $red;
     }
     &.containerPositiveChecked {
       border-color: $purpleEdgeBGSelected;
@@ -117,7 +117,7 @@
   
     }
     .negativeChecked {
-      background-color: $redTwo;
+      background-color: $red;
     }
     input + span span, .facetCount {
       color: $black;
@@ -137,9 +137,9 @@
       height: 100%;
       min-width: 25px;
       border-top: none;
-      border-right: 1px solid $borderGray;
+      border-right: 1px solid $darkGray;
       border-bottom: none;
-      border-left: 1px solid $borderGray;
+      border-left: 1px solid $darkGray;
       border-radius: 0px;
     }
     .negative {

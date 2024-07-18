@@ -9,12 +9,12 @@
   }
   &:nth-child(even) {
     &.highlighted {
-      background-color: $yellow20;
+      background-color: $lightYellow;
     }
   }
   &:nth-child(odd) {
     &.highlighted {
-      background-color: $yellow50;
+      background-color: $yellow;
     }
   }
   .resultSub {
@@ -231,12 +231,12 @@
   position: relative;
   &:hover {
     svg path {
-      fill: $purpleOne20;
+      fill: $palePurple;
     }
   }
   &.filled {
     path {
-      fill: $purpleOne50;
+      fill: $lightPurpleOne;
     }
   }
   svg {

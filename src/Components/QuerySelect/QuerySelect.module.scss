@@ -55,7 +55,7 @@ $querySelectPadding: 11px;
     align-items: center;
   }
   .icon {
-    content: url('../../Icons/Directional/chevron-white.svg');
+    content: url('../../Icons/Directional/Chevron/Chevron White.svg');
     order: 1;
     transition: $defaultTransformAnim;
     transform: rotate(360deg);
@@ -132,8 +132,8 @@ $querySelectPadding: 11px;
           }
         }
         &:hover {
-          background-color: $purpleOne20;
-          border-top-color: $purpleOne20;
+          background-color: $palePurple;
+          border-top-color: $palePurple;
           margin-top: -1px;
           padding-top: calc($querySelectPadding + 1px);
         }
@@ -165,7 +165,7 @@ $querySelectPadding: 11px;
     }
   }
   .border {
-    border-bottom: 1px solid $purpleOne20;
+    border-bottom: 1px solid $palePurple;
     width: 95%;
     height: 0;
     position: absolute;
