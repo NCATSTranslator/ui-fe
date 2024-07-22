@@ -6,7 +6,7 @@ import { Config, RootState, PreferencesContainer, User } from '../Types/global';
 // Define initialState with the RootState type
 const initialState: RootState = {
   currentRoot: "",
-  currentUser: null,
+  currentUser: undefined,
   currentPrefs: defaultPrefs,
   currentConfig: null
 };

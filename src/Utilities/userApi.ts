@@ -569,7 +569,7 @@ const useSessionStatus = (method: 'GET' | 'POST', expire?: boolean, refresh?: bo
   const [error, setError] = useState<string | null>(null);
   const dispatch = useDispatch();
 
-  if(!!sessionStatus && !!sessionStatus.user) {
+  if(!!sessionStatus) {
     dispatch(setCurrentUser(sessionStatus.user));
   }
 

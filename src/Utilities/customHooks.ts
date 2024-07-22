@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } from 'react';
 import { LastViewedPathIDContext } from '../Components/PathView/PathView';
 import { isEqual } from 'lodash';
+import { User } from '../Types/global';
+import { useSelector } from 'react-redux';
+import { currentUser } from "../Redux/rootSlice";
 
 interface WindowSize {
   width: number | undefined;
@@ -214,4 +217,22 @@ export const useLastViewedPath = () => {
     throw new Error('useLastViewedPath must be used within a LastViewedPathProvider');
   }
   return context;
+};
+
+/**
+ * Custom hook to retrieve the current user from the Redux store. Also provides a loading state.
+ *
+ * @returns {Object} An object containing the user (User | null | undefined) and loading state (boolean).
+ */
+export const useUser = (): { user: User | null | undefined, loading: boolean } => {
+  const [loading, setLoading] = useState(true);
+  const user = useSelector(currentUser);
+
+  useEffect(() => {
+    if (user !== undefined) 
+      setLoading(false);
+    
+  }, [user]);
+
+  return { user, loading };
 };

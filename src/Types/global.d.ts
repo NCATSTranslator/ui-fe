@@ -52,7 +52,7 @@ export type Config = {
 
 export type RootState = {
   currentRoot: string;
-  currentUser: User | null; 
+  currentUser?: User | null; 
   currentPrefs: PreferencesContainer;
   currentConfig: Config | null;
 }
