@@ -15,6 +15,7 @@ import NotesModal from '../Modals/NotesModal';
 import TextInput from "../FormFields/TextInput";
 import { cloneDeep } from 'lodash';
 import UserSave from '../UserSave/UserSave';
+import LoginWarning from '../LoginWarning/LoginWarning';
 
 const UserSaves = () => {
 
@@ -228,9 +229,7 @@ const UserSaves = () => {
             }
           </div>
         :
-          <div>
-            <h4 className={styles.heading}>Use the Log In link above in order to view and manage your saved results.</h4>
-          </div>
+          <LoginWarning text="Use the Log In link above in order to view and manage your saved results."/>
       }
     </QueryClientProvider>
   )

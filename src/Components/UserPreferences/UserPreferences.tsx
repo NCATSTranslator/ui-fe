@@ -9,6 +9,7 @@ import Select from 'react-select';
 import styles from './UserPreferences.module.scss';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer } from '../../Types/global';
+import LoginWarning from '../LoginWarning/LoginWarning';
 
 const UserPreferences = () => {
 
@@ -52,7 +53,7 @@ const UserPreferences = () => {
             <form onSubmit={(e)=>handleSubmitUserPrefs(e)} name="user preferences form" className={styles.form}>
               <div className={styles.prefs}>
                 {
-                  Object.keys(initPrefs).map((pref, i)=>{
+                  Object.keys(initPrefs).map((pref) => {
                     const prefLabel = prefKeyToString(pref);
                     const prefValue = initPrefs[pref].pref_value;
                     let prefOptions = null;
@@ -100,9 +101,7 @@ const UserPreferences = () => {
             </form>
           </>
         :
-          <div>
-            <h4 className={styles.heading}>Use the Log In link above in order to manage and save your preferences.</h4>
-          </div>
+          <LoginWarning text="Use the Log In link above in order to view and manage your preferences." />
       }
     </div>
   )

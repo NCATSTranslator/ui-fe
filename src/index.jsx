@@ -11,7 +11,7 @@ import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
 import DesignSystem from './PageRoutes/DesignSystem/DesignSystem';
 import Login from './PageRoutes/Login/Login';
-import UserHome from './PageRoutes/UserHome/UserHome';
+import UserPrefs from './PageRoutes/UserPrefs/UserPrefs';
 import Workspace from './PageRoutes/Workspace/Workspace';
 import { Help } from './PageRoutes/Articles/Help';
 import { LoggingIn } from './PageRoutes/Articles/LoggingIn';
@@ -96,8 +96,8 @@ const routes = [
     element: <Page title="History"><History /></Page>
   },
   {
-    path: "home",
-    element: <Page title="User Home"><UserHome /></Page>
+    path: "preferences",
+    element: <Page title="User Preferences"><UserPrefs /></Page>
   },
   {
     path: "workspace",

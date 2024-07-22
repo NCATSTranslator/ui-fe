@@ -56,7 +56,7 @@ const Header = ({children}) => {
                 <a className={styles.login} href={loginURL}>Log In</a>
               : 
                 <>
-                  <Link to={`/home`} data-tooltip-id={`prefs-tooltip`} aria-describedby={`prefs-tooltip`} className={styles.userIcon}>
+                  <Link to={`/preferences`} data-tooltip-id={`prefs-tooltip`} aria-describedby={`prefs-tooltip`} className={styles.userIcon}>
                     <div className={styles.imageContainer}>
                       {(user?.profile_pic_url)
                         ? <img src={user.profile_pic_url} alt="user profile" className={styles.profilePic}/>
