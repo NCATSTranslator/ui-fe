@@ -3,10 +3,13 @@ import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
 import { QueryType } from './queryTypes';
 import { ResultItem } from '../Types/results';
-import { PrefObject, PreferencesContainer, SessionStatus } from '../Types/global';
+import { PreferencesContainer, SessionStatus } from '../Types/global';
 import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '../Redux/rootSlice';
 import { handleFetchErrors, isPreferencesContainer } from './utilities';
 import { useDispatch } from 'react-redux';
+import { User } from '../Types/global';
+import { useSelector } from 'react-redux';
+import { currentUser } from "../Redux/rootSlice";
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';
@@ -115,7 +118,7 @@ type SetUserSavesFunction = (e: { [key: string]: SaveGroup }) => void;
  * @returns {Promise<Object>} A promise that resolves to the formatted saves object.
  */
 export const getSaves = async (
-    setUserSaves: SetUserSavesFunction | undefined = () => console.log("no setter function available to set user saves.")
+    setUserSaves: SetUserSavesFunction | undefined = () => {}
   ): Promise<{ [key: string]: SaveGroup }> => {
     let saves = await getAllUserSaves();
     const formattedSaves = formatUserSaves(saves);
@@ -648,7 +651,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean,  setGaID: (id: string
           prefs = defaultPrefs;
         }
       }
-      if(isPreferencesContainer(prefs.preferences))
+      if(isPreferencesContainer(prefs.preferences)) 
         dispatch(setCurrentPrefs(prefs.preferences));
     };
 
@@ -672,9 +675,29 @@ export const useFetchConfigAndPrefs = (userFound: boolean,  setGaID: (id: string
       dispatch(setCurrentConfig(config));
     };
 
-    fetchConfig();
-    fetchPrefs(userFound);
-  }, [dispatch, setGaID, setGtmID]);
+    if(userFound !== undefined) {
+      fetchConfig();
+      fetchPrefs(userFound);
+    }
+  }, [dispatch, setGaID, setGtmID, userFound]);
+};
+
+/**
+ * Custom hook to retrieve the current user from the Redux store. Also provides a loading state.
+ *
+ * @returns {Object} An object containing the user (User | null | undefined) and loading state (boolean).
+ */
+export const useUser = (): [ user: User | null | undefined, loading: boolean ] => {
+  const [loading, setLoading] = useState(true);
+  const user = useSelector(currentUser);
+
+  useEffect(() => {
+    if (user !== undefined) 
+      setLoading(false);
+    
+  }, [user]);
+
+  return [ user, loading ];
 };
 
 /**

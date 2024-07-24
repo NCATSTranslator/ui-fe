@@ -30,10 +30,8 @@ const App = ({children}) => {
     setFeedbackModalOpen(false);
   }
 
-  // const [sessionStatus, loading, error] = usePostSessionStatus(false, true);
-  const [sessionStatus, loading, error] = useGetSessionStatus();
-  console.log(sessionStatus);
-  useFetchConfigAndPrefs(!!sessionStatus?.user, setGaID, setGtmID);
+  const [sessionStatus] = useGetSessionStatus();
+  useFetchConfigAndPrefs(sessionStatus?.user, setGaID, setGtmID);
 
   return (
     <div className={`app ${pathnameClass}`}>

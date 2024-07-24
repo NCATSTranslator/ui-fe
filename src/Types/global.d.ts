@@ -3,6 +3,9 @@
 export type PrefObject = {
   pref_value: string | number;
   possible_values: string[] | number[];
+  time_created?: string;
+  time_updated?: string;
+  pref_data_type?: string;
 }
 
 export type PreferencesContainer = {

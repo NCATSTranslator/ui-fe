@@ -17,11 +17,11 @@ import { cloneDeep } from 'lodash';
 import UserSave from '../UserSave/UserSave';
 import LoginWarning from '../LoginWarning/LoginWarning';
 import LoadingWrapper from '../LoadingWrapper/LoadingWrapper'
-import { useUser } from '../../Utilities/customHooks';
+import { useUser } from '../../Utilities/userApi';
 
 const UserSaves = () => {
 
-  const {user, loading} = useUser();
+  const [user, loading] = useUser();
   const [savesLoaded, setSavesLoaded] = useState(false);
   const [userSaves, setUserSaves] = useState(null);
   const [filteredUserSaves, setFilteredUserSaves] = useState(null)

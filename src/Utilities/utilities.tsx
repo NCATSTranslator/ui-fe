@@ -403,14 +403,17 @@ export const isPublicationsList = (obj: any): obj is PublicationsList => {
  * @returns {boolean} True if the object is a PrefObject, otherwise false.
  */
 const isPrefObject = (obj: any): obj is PrefObject => {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    ('pref_value' in obj) &&
-    (typeof obj.pref_value === 'string' || typeof obj.pref_value === 'number') &&
-    Array.isArray(obj.possible_values) &&
-    obj.possible_values.every((value: any) => typeof value === 'string' || typeof value === 'number')
-  );
+  const isAPrefObject = 
+    (
+      typeof obj === 'object' &&
+      obj !== null &&
+      ('pref_value' in obj) &&
+      (typeof obj.pref_value === 'string' || typeof obj.pref_value === 'number') 
+    );
+  if(!isAPrefObject)
+    console.warn(`The following object does not match the typing for PrefObject:`, obj);
+
+  return isAPrefObject;
 };
 
 /**
@@ -420,19 +423,24 @@ const isPrefObject = (obj: any): obj is PrefObject => {
  * @returns {boolean} True if the object is a PreferencesContainer, otherwise false.
  */
 export const isPreferencesContainer = (obj: any): obj is PreferencesContainer => {
+  let isPrefContainer;
   if (typeof obj !== 'object' || obj === null) {
-    return false;
+    isPrefContainer = false;
+  } else {
+    const requiredKeys: Array<keyof PreferencesContainer> = [
+      'result_sort',
+      'result_per_screen',
+      'graph_visibility',
+      'graph_layout',
+      'path_show_count',
+      'evidence_sort',
+      'evidence_per_screen',
+    ];
+  
+    isPrefContainer = requiredKeys.every(key => key in obj && isPrefObject(obj[key])) && Object.values(obj).every(isPrefObject); 
   }
+  if(!isPrefContainer)
+    console.warn(`The following object does not match the typing for a PreferencesContainer:`, obj);
 
-  const requiredKeys: Array<keyof PreferencesContainer> = [
-    'result_sort',
-    'result_per_screen',
-    'graph_visibility',
-    'graph_layout',
-    'path_show_count',
-    'evidence_sort',
-    'evidence_per_screen',
-  ];
-
-  return requiredKeys.every(key => key in obj && isPrefObject(obj[key])) && Object.values(obj).every(isPrefObject); 
+  return isPrefContainer;
 };

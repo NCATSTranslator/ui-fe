@@ -7,7 +7,7 @@ import Modal from "../../Components/Modals/Modal";
 import Warning from '../../Icons/warning.svg?react'
 import QueryHistoryList from "../../Components/QueryHistoryList/QueryHistoryList";
 import LoginWarning from '../../Components/LoginWarning/LoginWarning';
-import { useUser } from '../../Utilities/customHooks';
+import { useUser } from '../../Utilities/userApi';
 import LoadingWrapper from '../../Components/LoadingWrapper/LoadingWrapper';
 
 const History = () => {
@@ -15,7 +15,7 @@ const History = () => {
   const dispatch = useDispatch();
   let queryHistoryState = useSelector(pastQueryState);
   const [modalOpen, setModalOpen] = useState(false);
-  const {user, loading} = useUser();
+  const [user, loading] = useUser();
 
   return (
     <LoadingWrapper loading={loading}>
