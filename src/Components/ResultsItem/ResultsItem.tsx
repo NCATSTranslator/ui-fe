@@ -395,13 +395,22 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span className={styles.evidenceLink}>
           <div>
-            <span className={styles.viewAll}>Evidence</span>
-          </div>
-          <div>
-              <span className={styles.info}>Publications ({publicationCount})</span>
-              <span className={styles.info}>Clinical Trials ({clinicalTrialCount})</span>
-              <span className={styles.info}>Misc ({miscCount})</span>
-              <span className={styles.info}>Sources ({sourceCount})</span>
+              {
+                publicationCount > 0  && 
+                <span className={styles.info}>Publications ({publicationCount})</span>
+              }
+              {
+                clinicalTrialCount > 0  && 
+                <span className={styles.info}>Clinical Trials ({clinicalTrialCount})</span>
+              }
+              {
+                miscCount > 0  && 
+                <span className={styles.info}>Misc ({miscCount})</span>
+              }
+              {
+                sourceCount > 0  && 
+                <span className={styles.info}>Sources ({sourceCount})</span>
+              }
           </div>
         </span>
       </div>
