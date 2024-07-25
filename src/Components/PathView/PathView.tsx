@@ -1,5 +1,5 @@
 import styles from './PathView.module.scss';
-import { useState, useEffect, useMemo, useCallback, createContext, Dispatch, SetStateAction, FC } from "react";
+import { useState, useEffect, useMemo, useCallback, createContext, FC } from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import Question from '../../Icons/Navigation/Question.svg?react';

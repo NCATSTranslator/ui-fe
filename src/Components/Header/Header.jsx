@@ -21,7 +21,6 @@ const Header = ({children}) => {
   const {width} = useWindowSize();
   const collapseNameScreenWidth = 1270;
   const clientID = config?.social_providers?.una?.client_id;
-  const redirectURI = `${window.location.origin}/main/logout`;
   const logoutURI = config?.social_providers?.una?.logout_uri;
   const logoutReady = (clientID && logoutURI) ? true : false;
   const openFeedbackModal = true;

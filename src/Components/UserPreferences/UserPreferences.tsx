@@ -1,6 +1,6 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { defaultPrefs, prefKeyToString, updateUserPreferences } from '../../Utilities/userApi';
-import { useSelector, useDispatch, shallowEqual } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { currentPrefs, setCurrentPrefs } from '../../Redux/rootSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

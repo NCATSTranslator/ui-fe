@@ -7,7 +7,7 @@ import { useGoogleAnalytics, useGoogleTagManager, useWindowSize } from './Utilit
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import './App.scss';
 import { getDataFromQueryVar } from './Utilities/utilities';
-import { usePostSessionStatus, useFetchConfigAndPrefs, useGetSessionStatus } from './Utilities/userApi';
+import { useFetchConfigAndPrefs, useGetSessionStatus } from './Utilities/userApi';
 
 const App = ({children}) => {
 

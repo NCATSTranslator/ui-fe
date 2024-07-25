@@ -1,8 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { getSaves } from '../../Utilities/userApi';
 import { handleEvidenceModalClose } from "../../Utilities/resultsInteractionFunctions";
-import { useSelector } from 'react-redux';
-import { currentUser } from '../../Redux/rootSlice';
 import styles from './UserSaves.module.scss';
 import EvidenceModal from '../Modals/EvidenceModal';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -32,6 +30,7 @@ const UserSaves = () => {
   const [selectedPath, setSelectedPath] = useState(null);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  // eslint-disable-next-line
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const shareResultID = useRef(null);
   const setShareResultID = (newID) => shareResultID.current = newID;
