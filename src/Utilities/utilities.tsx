@@ -16,6 +16,7 @@ import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
 import { FormattedEdgeObject, FormattedNodeObject } from '../Types/results';
 import { PublicationObject, PublicationsList } from '../Types/evidence';
+import { Location } from 'react-router-dom';
 
 export const getIcon = (category: string): JSX.Element => {
   var icon = <Chemical/>;
@@ -444,3 +445,20 @@ export const isPreferencesContainer = (obj: any): obj is PreferencesContainer =>
 
   return isPrefContainer;
 };
+
+/**
+ * Utility function that returns a full pathname plus any search and hash params.
+ * 
+ * @param location - The Location object to check.
+ * @returns {string} String containing the full pathname.
+ */
+export const getFullPathname = (location: Location): string => {
+  let fullPath = location.pathname;
+  if(!!location.search)
+    fullPath += location.search;
+
+  if(!!location.hash)
+    fullPath += location.hash;
+  
+  return fullPath;
+}

@@ -1,4 +1,5 @@
-import { Link, useLocation } from 'react-router-dom';
+import { FC, ReactNode } from 'react';
+import { Link, useLocation, Location } from 'react-router-dom';
 import Tooltip from '../Tooltip/Tooltip';
 import { currentConfig, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
@@ -10,10 +11,21 @@ import Question from '../../Icons/Navigation/Question.svg?react';
 import defaultPfp from '../../Assets/Images/pfp.png';
 import Logo from '../../Assets/Images/site-logo.png';
 import styles from './Header.module.scss';
-import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
+import { getGeneratedSendFeedbackLink, getFullPathname } from '../../Utilities/utilities';
 import { handleLogout } from '../../Utilities/userApi';
 
-const Header = ({children}) => {
+type HeaderProps = {
+  children?: ReactNode;
+}
+
+const getFormattedLoginURL = (authURI: string, clientID: string, scope: string, redirectURI: string, location: Location): string => {
+  let url = `${authURI}?response_type=code&client_id=${encodeURIComponent(clientID)}`;
+  url += `&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectURI)}`;
+  url += `&state=${encodeURIComponent(getFullPathname(location))}`
+  return url;
+}
+
+const Header: FC<HeaderProps> = ({children}) => {
   
   const user = useSelector(currentUser);
   const config = useSelector(currentConfig);
@@ -27,7 +39,9 @@ const Header = ({children}) => {
 
   const socialProviders = (config?.social_providers) ? config.social_providers: null;
   const unaConfig = socialProviders ? socialProviders.una : null;
-  const loginURL = unaConfig ? `${unaConfig.auth_uri}?response_type=code&client_id=${encodeURIComponent(unaConfig.client_id)}&scope=${encodeURIComponent(unaConfig.scope)}&redirect_uri=${encodeURIComponent(unaConfig.redirect_uri)}`
+  const loginURL = unaConfig 
+    ? getFormattedLoginURL(unaConfig.auth_uri, unaConfig.client_id, 
+      unaConfig.scope, unaConfig.redirect_uri, location)
     : null;
 
   return (
@@ -52,7 +66,7 @@ const Header = ({children}) => {
             {
               !user 
               ? 
-                <a className={styles.login} href={loginURL}>Log In</a>
+                <a className={styles.login} href={!!loginURL ? loginURL : ''}>Log In</a>
               : 
                 <>
                   <Link to={`/preferences`} data-tooltip-id={`prefs-tooltip`} aria-describedby={`prefs-tooltip`} className={styles.userIcon}>
@@ -65,7 +79,7 @@ const Header = ({children}) => {
                       <span className={styles.tooltip}>Click here to view and edit your user preferences.</span>
                     </Tooltip>
                     {
-                      user?.name &&
+                      user?.name && !!width &&
                       <p className={`${width <= collapseNameScreenWidth ? styles.hide : ''} ${styles.userName}`}>{user.name}</p>
                     }
                   </Link>

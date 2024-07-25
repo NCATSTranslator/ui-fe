@@ -50,7 +50,7 @@ export type Config = {
   cached_queries: object[];
   gaID: string;
   name_resolver: string;
-  socialProviders: object;
+  social_providers: any;
 }
 
 export type RootState = {
