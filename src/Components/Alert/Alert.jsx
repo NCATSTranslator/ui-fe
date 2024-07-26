@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import Button from "../FormFields/Button";
+import Button from "../Core/Button";
 import Warning from '../../Icons/Status/Alerts/Warning.svg?react'
 import Info from '../../Icons/Status/Alerts/Info.svg?react'
 import Checkmark from '../../Icons/Status/Alerts/Checkmark.svg?react'

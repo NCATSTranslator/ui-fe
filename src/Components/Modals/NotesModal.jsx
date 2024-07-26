@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import styles from "./NotesModal.module.scss";
 import Modal from "./Modal";
 import TextEditor from "../TextEditor/TextEditor";
-import Button from "../FormFields/Button";
+import Button from "../Core/Button";
 import { getUserSave, updateUserSave } from "../../Utilities/userApi";
 
 const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClearNotesEditor = ()=>{}}) => {

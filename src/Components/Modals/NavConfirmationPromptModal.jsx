@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import styles from './NavConfirmationPromptModal.module.scss';
 import Modal from "./Modal";
-import Button from '../FormFields/Button';
+import Button from '../Core/Button';
 
 const NavConfirmationModal = ({blocker}) => {
 

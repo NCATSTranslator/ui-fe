@@ -3,7 +3,7 @@ import { Filter, GroupedTags, Tag } from "../../Types/results";
 import styles from './FacetGroup.module.scss';
 import AnimateHeight from "react-animate-height";
 import Tooltip from '../Tooltip/Tooltip';
-import Checkbox from '../FormFields/Checkbox';
+import Checkbox from '../Core/Checkbox';
 import Include from '../../Icons/Buttons/View & Exclude/View.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';

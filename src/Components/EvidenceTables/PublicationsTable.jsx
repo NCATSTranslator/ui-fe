@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import LoadingBar from "../LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
-import Select from '../FormFields/Select';
+import Select from '../Core/Select';
 import ReactPaginate from "react-paginate";
 import { handleEvidenceSort, updatePubdate, updateSnippet, updateJournal, 
   updateTitle, getKnowledgeLevelString, generatePubmedURL } from "../../Utilities/evidenceModalFunctions";

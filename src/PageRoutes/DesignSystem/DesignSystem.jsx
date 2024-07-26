@@ -1,8 +1,8 @@
-import Button from "../../Components/FormFields/Button";
-import Checkbox from "../../Components/FormFields/Checkbox";
-import Radio from "../../Components/FormFields/Radio";
-import Select from "../../Components/FormFields/Select";
-import TextInput from "../../Components/FormFields/TextInput";
+import Button from "../../Components/Core/Button";
+import Checkbox from "../../Components/Core/Checkbox";
+import Radio from "../../Components/Core/Radio";
+import Select from "../../Components/Core/Select";
+import TextInput from "../../Components/Core/TextInput";
 
 const DesignSystem = () => {
   return (

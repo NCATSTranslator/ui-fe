@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "../../Utilities/utilities";
 import { pastQueryState, setHistory } from "../../Redux/historySlice";
 import ShareModal from '../Modals/ShareModal';
-import TextInput from "../FormFields/TextInput";
+import TextInput from "../Core/TextInput";
 import Tooltip from "../Tooltip/Tooltip";
 import Close from '../../Icons/Buttons/Close/Close.svg?react';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';

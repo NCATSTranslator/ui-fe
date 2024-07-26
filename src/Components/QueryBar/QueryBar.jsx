@@ -1,5 +1,5 @@
 
-import TextInput from "../FormFields/TextInput";
+import TextInput from "../Core/TextInput";
 import Autocomplete from "../Autocomplete/Autocomplete";
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 import styles from './QueryBar.module.scss';

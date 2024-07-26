@@ -4,7 +4,7 @@ import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
-import Select from "../FormFields/Select";
+import Select from "../Core/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import Tooltip from '../Tooltip/Tooltip';
 import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";

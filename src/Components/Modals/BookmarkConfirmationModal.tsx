@@ -1,7 +1,7 @@
 import { useEffect, useState, FC } from "react";
 import styles from './BookmarkConfirmationModal.module.scss';
 import Modal from "./Modal";
-import Button from '../FormFields/Button';
+import Button from '../Core/Button';
 
 interface BookmarkConfirmationModalProps {
   onClose?: () => void;
