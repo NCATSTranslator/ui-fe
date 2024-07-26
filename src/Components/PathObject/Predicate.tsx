@@ -18,7 +18,6 @@ import Highlighter from 'react-highlight-words';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
-import { cloneDeep } from 'lodash';
 import { SupportDataObject, FormattedEdgeObject, PathObjectContainer } from '../../Types/results';
 import { isFormattedEdgeObject } from '../../Utilities/utilities';
 

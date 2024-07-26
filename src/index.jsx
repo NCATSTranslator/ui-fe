@@ -1,7 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
-import Root from './Root';
 import App from './App';
 import Page from './Components/Page/Page';
 import FAQPage from './Components/Page/FAQPage';
@@ -12,7 +11,7 @@ import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
 import DesignSystem from './PageRoutes/DesignSystem/DesignSystem';
 import Login from './PageRoutes/Login/Login';
-import UserHome from './PageRoutes/UserHome/UserHome';
+import UserPrefs from './PageRoutes/UserPrefs/UserPrefs';
 import Workspace from './PageRoutes/Workspace/Workspace';
 import { Help } from './PageRoutes/Articles/Help';
 import { LoggingIn } from './PageRoutes/Articles/LoggingIn';
@@ -97,44 +96,28 @@ const routes = [
     element: <Page title="History"><History /></Page>
   },
   {
-    path: "home",
-    element: <Page title="User Home"><UserHome /></Page>
+    path: "preferences",
+    element: <Page title="User Preferences"><UserPrefs /></Page>
   },
   {
     path: "workspace",
     element: <Page title="User Workspace"><Workspace /></Page>
-  }
+  },
+  {
+    path: "login",
+    element: <Page title="Login"><Login /></Page>
+  },
+  { 
+    path: "*", 
+    element: <Page title="404 - Page Not Found"><Four /></Page>
+  },
 ]
-
-const FourOhFour = ()=>{
-  return(<App><Page title="404 - Page Not Found"><Four /></Page></App>);
-}
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root/>,
-    children: [ 
-      {
-        path: "demo",
-        element: <App/>,
-        children: routes
-      },
-      {
-        path: "main",
-        element: <App/>,
-        children: routes
-      },
-      {
-        path: "login",
-        element: <App><Page title="Login"><Login /></Page></App>,
-      },
-      { 
-        path: "*", 
-        element: <FourOhFour/>
-      },
-    ]
-
+    element: <App/>,
+    children: routes
   },
 ]);
 

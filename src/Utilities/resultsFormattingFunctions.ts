@@ -5,7 +5,6 @@ import { score } from "./scoring";
 import { RawResultsContainer, FormattedPathObject, PathObjectContainer, RawPathObject, SubgraphObject, FormattedNodeObject, 
   FormattedEdgeObject, EdgePredicateObject, RawEdge, RawNode } from '../Types/results';
 import { rawAttachedPublications, PublicationObject, EvidenceCountsContainer } from '../Types/evidence';
-import { sortSupportByEntityStrings } from './sortingFunctions';
 
 export const hasSupport = (item: RawPathObject | FormattedEdgeObject | RawEdge | null): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;

@@ -1,6 +1,6 @@
 import UserPreferences from "../../Components/UserPreferences/UserPreferences";
 
-const UserHome = () => {
+const UserPrefs = () => {
   return (
     <div className={`container`}>
       <UserPreferences/>
@@ -8,4 +8,4 @@ const UserHome = () => {
   );
 }
 
-export default UserHome;
+export default UserPrefs;
