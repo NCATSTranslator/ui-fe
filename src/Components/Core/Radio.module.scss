@@ -6,11 +6,8 @@ label.radio {
   margin-bottom: $s;
   &:hover, &:focus {
     cursor: pointer;
-    .circle {
-      box-shadow: $dropShadowHover;
-    }
   } 
-  .circle {
+  .box {
     display: grid;
     place-content: center;
     content: "";
@@ -22,19 +19,18 @@ label.radio {
     background-color: $white;
     border: 1px solid $darkGray;
     transition: $defaultBoxShadowAnim;
-
     &:before {
       content: "";
-      width: 18px;
-      height: 18px;
+      width: 10px;
+      height: 10px;
       opacity: 0;
       transition: all .25s ease ;
-      background-color: $purpleOne;
+      background-color: $darkGray;
       border-radius: 50%;
     }
   }
   &.checked {
-    .circle {
+    .box {
       &:before {
         opacity: 1;
       }

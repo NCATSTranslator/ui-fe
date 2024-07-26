@@ -1,4 +1,5 @@
 import { useState, useEffect, FC, ReactNode } from "react";
+import DefaultIcon from '../../Icons/Buttons/Checkmark/Checkmark.svg?react';
 import styles from './Checkbox.module.scss';
 
 interface CheckboxProps {
@@ -9,14 +10,13 @@ interface CheckboxProps {
   handleClick: ()=>void;
   className?: string;
   checkedClassName?: string;
-  icon: JSX.Element;
+  icon?: any;
 }
 
 const Checkbox: FC<CheckboxProps> = ({name = "", value = undefined, checked, children, handleClick, className = "", 
-  checkedClassName = "", icon = null}) => {
+  checkedClassName = "", icon = false}) => {
 
   const [isChecked, setIsChecked] = useState(checked);
-
   let isCheckedClass = (isChecked) ? styles.checked : styles.unchecked;
 
   const handleChange = () => {
@@ -33,7 +33,7 @@ const Checkbox: FC<CheckboxProps> = ({name = "", value = undefined, checked, chi
     <label className={`${styles.checkbox} ${isCheckedClass} ${className}`}>
       <input type="checkbox" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} />
       <span>{children}</span>
-      <span className={`${icon ? styles.hasIcon : ""} ${styles.circle} ${checkedClassName}`}>{icon && icon}</span>
+      <span className={`${styles.hasIcon} ${styles.box} ${checkedClassName}`}>{icon ? icon : <DefaultIcon/>}</span>
     </label>
 
   );
