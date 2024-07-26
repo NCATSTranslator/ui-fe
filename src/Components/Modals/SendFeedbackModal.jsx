@@ -10,11 +10,8 @@ import Info from '../../Icons/Status/Alerts/Info.svg?react';
 import { currentQueryResultsID } from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux';
 import { getDataFromQueryVar } from "../../Utilities/utilities";
-import { currentRoot } from "../../Redux/rootSlice";
 
 const SendFeedbackModal = ({isOpen, onClose}) => {
-
-  const root = useSelector(currentRoot);
 
   const categoryErrorText = "Please select a category.";
   const [categoryError, setCategoryError] = useState(false);

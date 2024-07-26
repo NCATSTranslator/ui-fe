@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 // import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
-import { currentRoot } from '../../Redux/rootSlice';
+import { currentUser } from '../../Redux/rootSlice';
 import { displayScore } from '../../Utilities/scoring';
 import { QueryType } from '../../Utilities/queryTypes';
 import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject } from '../../Types/results';
@@ -99,7 +99,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     zoomKeyDown,
     isInUserSave = false
   }) => {
-  const root = useSelector(currentRoot);
+  const user = useSelector(currentUser);
 
   let icon: JSX.Element = getIcon(item.type);
   let roleCount: number = (item.tags)
@@ -368,7 +368,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
         {
-          root === "main"
+          !!user
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
                   <Bookmark className='bookmark-icon' data-result-name={nameString} onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
@@ -395,13 +395,22 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span className={styles.evidenceLink}>
           <div>
-            <span className={styles.viewAll}>Evidence</span>
-          </div>
-          <div>
-              <span className={styles.info}>Publications ({publicationCount})</span>
-              <span className={styles.info}>Clinical Trials ({clinicalTrialCount})</span>
-              <span className={styles.info}>Misc ({miscCount})</span>
-              <span className={styles.info}>Sources ({sourceCount})</span>
+              {
+                publicationCount > 0  && 
+                <span className={styles.info}>Publications ({publicationCount})</span>
+              }
+              {
+                clinicalTrialCount > 0  && 
+                <span className={styles.info}>Clinical Trials ({clinicalTrialCount})</span>
+              }
+              {
+                miscCount > 0  && 
+                <span className={styles.info}>Misc ({miscCount})</span>
+              }
+              {
+                sourceCount > 0  && 
+                <span className={styles.info}>Sources ({sourceCount})</span>
+              }
           </div>
         </span>
       </div>

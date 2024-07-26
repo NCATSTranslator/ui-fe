@@ -16,7 +16,7 @@ import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
 import { useSelector, useDispatch } from 'react-redux';
 import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "../../Redux/resultsSlice";
-import { currentPrefs, currentRoot }from "../../Redux/rootSlice";
+import { currentPrefs, currentUser }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow,
   sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag,
@@ -28,7 +28,7 @@ import { isFacet, isExclusion, isEvidenceFilter, isTextFilter, facetFamily, hasS
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
-import { getSaves } from "../../Utilities/userApi";
+import { API_PATH_PREFIX, getSaves } from "../../Utilities/userApi";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "../BookmarkToasts/BookmarkToasts";
@@ -37,7 +37,7 @@ import ResultFocusModal from "../Modals/ResultFocusModal";
 
 const ResultsList = ({loading}) => {
 
-  const root = useSelector(currentRoot);
+  const user = useSelector(currentUser);
   const prefs = useSelector(currentPrefs);
   const dispatch = useDispatch();
   let blocker = useBlocker(true);
@@ -198,11 +198,11 @@ const ResultsList = ({loading}) => {
   }
 
   useEffect(() => {
-    if(root !== "main")
+    if(!user)
       return;
 
     getUserSaves();
-  }, [root, getUserSaves]);
+  }, [user, getUserSaves]);
 
   useEffect(() => {
     if (!autoScrollToResult) {
@@ -318,7 +318,7 @@ const ResultsList = ({loading}) => {
       headers: { 'Content-Type': 'application/json' },
     };
     // eslint-disable-next-line
-    const response = await fetch(`/${root}/api/v1/pub/query/${currentQueryID}/status`, requestOptions)
+    const response = await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/status`, requestOptions)
       .then(response => handleFetchErrors(response))
       .then(response => response.json())
       .then(data => {
@@ -381,7 +381,7 @@ const ResultsList = ({loading}) => {
       // body: queryIDJson
     };
     // eslint-disable-next-line
-    const response = await fetch(`/${root}/api/v1/pub/query/${currentQueryID}/result`, requestOptions)
+    const response = await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/result`, requestOptions)
       .then(response => handleFetchErrors(response, () => {
         console.log(response.json());
         isFetchingARAStatus.current = false;
