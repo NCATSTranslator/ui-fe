@@ -10,7 +10,7 @@ import PathologicalProcess from '../Icons/Queries/Pathological Process.svg?react
 import PhysiologicalProcess from '../Icons/Queries/Physiological Process.svg?react';
 import BiologicalEntity from '../Icons/Queries/Biological Entity.svg?react';
 import AnatomicalEntity from '../Icons/Queries/Anatomical Entity.svg?react';
-import ExternalLink from '../Icons/Buttons/Link.svg?react';
+import ExternalLink from '../Icons/Buttons/External Link.svg?react';
 import { QueryType } from '../Types/results';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';

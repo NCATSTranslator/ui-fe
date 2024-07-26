@@ -173,7 +173,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
         <Fade>
           <h5>Send Feedback</h5>
           <p>Enjoying Translator? Having an issue? Either way, we want to know - use this form to let us know your comments. All fields marked with * are required.</p>
-          <p className={styles.disclaimer}><Info/>In the mean time, please check out our <a href={`/${root}/help`} target="_blank" rel="noreferrer">Help page</a> for Translator tips, tricks, and tutorials.</p>
+          <p className={styles.disclaimer}><Info/>In the mean time, please check out our <a href={`/help`} target="_blank" rel="noreferrer">Help page</a> for Translator tips, tricks, and tutorials.</p>
           <form onSubmit={(e)=>handleSubmission(e)} name="send feedback form">
             {
               errorActive && categoryError &&
