@@ -8,6 +8,9 @@ const DesignSystem = () => {
   return (
     <div className={`container`}>
       <Button handleClick={() => {alert('clicked!')}}>Click Me</Button>
+      <Button handleClick={() => {alert('clicked!')}} isSecondary>Click Me</Button>
+      <Button handleClick={() => {alert('clicked!')}} isTertiary>Click Me</Button>
+      <Button handleClick={() => {alert('clicked!')}} isTertiary smallFont>Tag</Button>
       <Checkbox handleClick={()=>alert('clicked!')} >
           checkbox
       </Checkbox>

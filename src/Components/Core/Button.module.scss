@@ -9,25 +9,34 @@
   border-radius: $defaultBorderRadius;
   border: none;
   cursor: pointer;
-  transition: $defaultBoxShadowAnim;
   color: $white;
-  background-color: $purpleOne;
+  background-color: $purpleTwo;
   text-decoration: none;
   display: inline-flex;
   width: fit-content;
   justify-content: center;
   align-items: center;
   margin-bottom: $s;
-  &:hover {
-    box-shadow: $dropShadowHover;
+  transition: all .35s ease;
+  &.smallFont {
+    font-size: 12px;
+    padding: 8.5px 8px;
   }
   svg {
     margin-right: 8px;
   }
-
   &.secondary {
-    color: $purpleOne;
+    color: $black;
+    background-color: $lightGray;
+  }
+  &.tertiary {
+    color: $purpleTwo;
     background-color: $white;
+    border: 1px solid $purpleTwo;
+    &:hover {
+      color: $white;
+      background-color: $purpleTwo;
+    }
   }
   &.iconOnly {
     border-radius: 50%;
@@ -36,14 +45,10 @@
       margin-right: 0;
     }
   }
-  &.clicked {
-    box-shadow: $dropShadowPressed;
-  }
   &:disabled, &[disabled] {
     color: $midGray;
     background-color: white;
     border-color: $midGray;
-    box-shadow: none;
     cursor: default;
   }
 }

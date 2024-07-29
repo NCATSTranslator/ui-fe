@@ -116,19 +116,6 @@ body {
   width: calc(100% - 40px);
 }
 
-button, .button {
-  box-shadow: $dropShadow;
-  &:hover {
-    box-shadow: $dropShadowHover;
-  }
-  &:disabled  {
-    box-shadow: none;
-    &:hover {
-      box-shadow: none;
-    }
-  }
-}
-
 .link, a {
   background-color: transparent;
   box-shadow: none;

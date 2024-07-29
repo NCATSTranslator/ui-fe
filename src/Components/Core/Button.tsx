@@ -4,26 +4,27 @@ import { Link } from "react-router-dom";
 
 interface ButtonProps {
   isSecondary?: boolean;
+  isTertiary?: boolean;
   handleClick?: (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   href?: string;
   link?: boolean;
   iconOnly?: boolean;
   _blank?: boolean;
   type?: "button" | "submit" | "reset";
-  size?: 's' | 'm' | 'l';
+  smallFont?: boolean;
   children?: ReactNode;
   disabled?: boolean;
   testId?: string;
   className?: string;
 }
 
-const Button: FC<ButtonProps> = ({isSecondary, handleClick = (e) => {}, href, iconOnly, _blank, link = false, size = "", type = '', children,
+const Button: FC<ButtonProps> = ({isSecondary, isTertiary, handleClick = (e) => {}, href, iconOnly, _blank, link = false, smallFont, type = '', children,
   disabled = false, testId, className}) => {
 
-  let buttonStyle = isSecondary ? styles.secondary : styles.primary;
+  let buttonStyle = isTertiary ? styles.tertiary : isSecondary ? styles.secondary : '';
   buttonStyle += iconOnly ? ` ${styles.iconOnly}` : '';
+  className = !!className ? className : "";
 
-  const [clicked, setClicked] = useState(false);
   const [isDisabled, setIsDisabled] = useState(disabled);
 
   useEffect(() => {
@@ -31,7 +32,6 @@ const Button: FC<ButtonProps> = ({isSecondary, handleClick = (e) => {}, href, ic
   }, [disabled]);
 
   const onClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
-    setClicked(true);
     if (handleClick) handleClick(e);
   };
 
@@ -40,7 +40,7 @@ const Button: FC<ButtonProps> = ({isSecondary, handleClick = (e) => {}, href, ic
       {href ? (
         link ? 
           <Link
-          className={`button ${styles.button} ${buttonStyle} ${clicked ? styles.clicked : ''} ${className}`}
+          className={`button ${styles.button} ${buttonStyle} ${!!smallFont && styles.smallFont} ${className}`}
           onClick={onClick}
           to={href}
           target={_blank ? '_blank' : undefined}
@@ -51,7 +51,7 @@ const Button: FC<ButtonProps> = ({isSecondary, handleClick = (e) => {}, href, ic
         </Link>
         :
           <a
-            className={`button ${styles.button} ${buttonStyle} ${clicked ? styles.clicked : ''} ${className}`}
+            className={`button ${styles.button} ${buttonStyle} ${!!smallFont && styles.smallFont} ${className}`}
             onClick={onClick}
             href={href}
             target={_blank ? '_blank' : undefined}
@@ -62,7 +62,7 @@ const Button: FC<ButtonProps> = ({isSecondary, handleClick = (e) => {}, href, ic
           </a>
       ) : (
         <button
-          className={`button ${styles.button} ${buttonStyle} ${clicked ? styles.clicked : ''} ${className}`}
+          className={`button ${styles.button} ${buttonStyle} ${!!smallFont && styles.smallFont} ${className}`}
           type={type as "button" | "submit" | "reset"}
           onClick={onClick}
           disabled={isDisabled}
