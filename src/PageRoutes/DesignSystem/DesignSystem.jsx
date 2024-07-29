@@ -3,6 +3,7 @@ import Checkbox from "../../Components/Core/Checkbox";
 import Radio from "../../Components/Core/Radio";
 import Select from "../../Components/Core/Select";
 import TextInput from "../../Components/Core/TextInput";
+import Toggle from "../../Components/Core/Toggle";
 
 const DesignSystem = () => {
   return (
@@ -11,6 +12,8 @@ const DesignSystem = () => {
       <Button handleClick={() => {alert('clicked!')}} isSecondary>Click Me</Button>
       <Button handleClick={() => {alert('clicked!')}} isTertiary>Click Me</Button>
       <Button handleClick={() => {alert('clicked!')}} isTertiary smallFont>Tag</Button>
+      <Toggle />
+      <Toggle labelOne="Off" labelTwo="On"/>
       <Checkbox handleClick={()=>alert('clicked!')} >
           checkbox
       </Checkbox>
