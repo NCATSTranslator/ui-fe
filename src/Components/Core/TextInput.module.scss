@@ -30,14 +30,14 @@
     color: $darkGray;
   }
   .subtitle {
-    font-size: $bodyTwoSize;
+    font-size: $captionSize;
     margin-bottom: $xxs;
   }
   input, textarea {
     border: 1px solid $midGray;
     font-size: $bodyOneSize;
     border-radius: $defaultBorderRadius;
-    padding: 12px x;
+    padding: 10px 12px;
     resize: none;
     line-height: 20px;
     &:focus {

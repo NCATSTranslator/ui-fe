@@ -43,6 +43,19 @@ const DesignSystem = () => {
         handleChange={(value)=>{
           alert(`new value: ${value}`);
         }}
+        noanimate
+        >
+        <option value="5" key="0">5</option>
+        <option value="10" key="1">10</option>
+        <option value="20" key="2">20</option>
+      </Select>
+      <Select 
+        label="Example Label" 
+        name="Example"
+        size="m" 
+        handleChange={(value)=>{
+          alert(`new value: ${value}`);
+        }}
         >
         <option value="5" key="0">5</option>
         <option value="10" key="1">10</option>
@@ -73,8 +86,8 @@ const DesignSystem = () => {
         <option value="20" key="2">20</option>
       </Select>
 
-      <TextInput label="Example Label" placeholder="placeholder text" />
-      <TextInput label="Example Label" placeholder="placeholder text" rows={5}/>
+      <TextInput label="Example Label" placeholder="Placeholder text" />
+      <TextInput label="Example Label" placeholder="Placeholder text" rows={5}/>
     </div>
   );
 }

@@ -8,6 +8,7 @@
     -moz-appearance: none;
     appearance: none;
     cursor: pointer;
+    border-radius: $defaultBorderRadius;
     &:focus, &:focus-visible {
       outline: none;
     }
@@ -19,7 +20,7 @@
     color: $darkGray;
   }
   .subtitle {
-    font-size: $bodyTwoSize;
+    font-size: $captionSize;
     margin-bottom: $xxs;
   }
   .icon {
@@ -31,8 +32,16 @@
     height: 24px;
     cursor: pointer;
   }
+  .option, select {
+    padding: 12px 15px;
+  }
+  .option {
+    &:hover {
+      color: $purpleOne;
+      background-color: $palePurple;
+    }
+  }
   .selectContainer {
-    padding: 7px $xs;
     border-radius: $defaultBorderRadius;
     border: 1px solid $midGray;
     color: $darkGray;
@@ -40,9 +49,8 @@
     display: grid;
     grid-template-columns: minmax(0,1fr);
     align-items: center;
-
-
     &.open {
+      box-shadow: $dropShadow;
       .icon {
         transform: rotate(180deg);
       }
@@ -62,7 +70,6 @@
       .option {
         display: block;
         cursor: pointer;
-        padding: $xs 0;
         color: $black;
         overflow: hidden;
         white-space: nowrap;
@@ -82,16 +89,13 @@
       opacity: 0;
       transition: all .25s ease;
       border-radius: $defaultBorderRadius;
-      .option {
-        padding: $xs;
-      }
     }
     .selectContainer {
       grid-template-columns: 1fr min-content;
       &.open {
         .selectList {
           opacity: 1;
-          padding-top: 8px;
+          padding-top: 0;
         }
       }
     }

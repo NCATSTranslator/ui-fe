@@ -311,8 +311,10 @@ img {
   background-color: $darkGray;
 }
 
-input::placeholder {
-  color: $placeholderGray;
+input {
+  &::-webkit-input-placeholder, &::-ms-input-placeholder &::placeholder, &::-moz-placeholder {
+    color: $placeholderGray;
+  }
 }
 
 .workspace, .main-workspace {
