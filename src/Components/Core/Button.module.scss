@@ -7,7 +7,7 @@
   line-height: 1;
   padding: 10px $xs;
   border-radius: $defaultBorderRadius;
-  border: none;
+  border: 1px solid $purpleTwo;
   cursor: pointer;
   color: $white;
   background-color: $purpleTwo;
@@ -31,6 +31,7 @@
   &.secondary {
     color: $black;
     background-color: $lightGray;
+    border: 1px solid $lightGray;
   }
   &.tertiary {
     color: $purpleTwo;
@@ -42,7 +43,6 @@
     }
   }
   &.iconOnly {
-    border-radius: 50%;
     padding: 8px;
     svg {
       margin-right: 0;

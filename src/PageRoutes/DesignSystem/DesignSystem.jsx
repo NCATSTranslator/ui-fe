@@ -14,6 +14,7 @@ const DesignSystem = () => {
       <Button handleClick={() => {alert('clicked!')}} isTertiary>Click Me</Button>
       <Button handleClick={() => {alert('clicked!')}} isTertiary smallFont>Tag</Button>
       <Button handleClick={() => {alert('clicked!')}} className="button-with-icon" ><Icon/>Button</Button>
+      <Button handleClick={() => {alert('clicked!')}} className="button-with-icon" iconOnly ><Icon/></Button>
       <Toggle />
       <Toggle labelOne="Off" labelTwo="On"/>
       <Checkbox handleClick={()=>alert('clicked!')} >
