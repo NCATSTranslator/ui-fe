@@ -1,5 +1,9 @@
 @import "./variables";
 
+button {
+  border: none;
+  cursor: pointer;
+}
 // Form Input Sizes
 .text-input, .select, .search-container, .file-input {
   display: inline-grid;
