@@ -12,7 +12,7 @@ type RadioProps = {
 const Radio: FC<RadioProps> = ({name = "", value = undefined, checked = false, children, handleClick = undefined}) => {
 
   const [isChecked, setIsChecked] = useState(checked);
-  let isCheckedClass = (isChecked) ? styles.checked : styles.unchecked;
+  let isCheckedClass = (isChecked) ? styles.checked : '';
   
   const handleChange = () => {
     setIsChecked(!isChecked);

@@ -1,7 +1,7 @@
 @import "./variables";
 
 // Form Input Sizes
-.text-input, .select, .search-container, .button, .file-input {
+.text-input, .select, .search-container, .file-input {
   display: inline-grid;
   margin: 0 $s $s 0;
   &.s {

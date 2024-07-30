@@ -31,9 +31,9 @@ const Checkbox: FC<CheckboxProps> = ({name = "", value = undefined, checked, chi
   return (
 
     <label className={`${styles.checkbox} ${isCheckedClass} ${className}`}>
+      <span className={`${styles.hasIcon} ${styles.box} ${checkedClassName}`}>{icon ? icon : <DefaultIcon/>}</span>
       <input type="checkbox" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} />
       <span>{children}</span>
-      <span className={`${styles.hasIcon} ${styles.box} ${checkedClassName}`}>{icon ? icon : <DefaultIcon/>}</span>
     </label>
 
   );

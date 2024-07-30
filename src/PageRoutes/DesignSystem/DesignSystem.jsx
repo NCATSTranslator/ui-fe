@@ -4,14 +4,16 @@ import Radio from "../../Components/Core/Radio";
 import Select from "../../Components/Core/Select";
 import TextInput from "../../Components/Core/TextInput";
 import Toggle from "../../Components/Core/Toggle";
+import Icon from '../../Icons/Buttons/Edit.svg?react';
 
 const DesignSystem = () => {
   return (
-    <div className={`container`}>
+    <div className={`container design-system`}>
       <Button handleClick={() => {alert('clicked!')}}>Click Me</Button>
       <Button handleClick={() => {alert('clicked!')}} isSecondary>Click Me</Button>
       <Button handleClick={() => {alert('clicked!')}} isTertiary>Click Me</Button>
       <Button handleClick={() => {alert('clicked!')}} isTertiary smallFont>Tag</Button>
+      <Button handleClick={() => {alert('clicked!')}} className="button-with-icon" ><Icon/>Button</Button>
       <Toggle />
       <Toggle labelOne="Off" labelTwo="On"/>
       <Checkbox handleClick={()=>alert('clicked!')} >

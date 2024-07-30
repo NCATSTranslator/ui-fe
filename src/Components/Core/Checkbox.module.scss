@@ -5,6 +5,7 @@ label.checkbox {
   display: flex;
   align-items: center;
   margin-bottom: $s;
+  width: fit-content;
   &:hover, &:focus {
     cursor: pointer;
     .box {

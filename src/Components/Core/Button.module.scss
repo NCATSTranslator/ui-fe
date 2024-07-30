@@ -16,14 +16,17 @@
   width: fit-content;
   justify-content: center;
   align-items: center;
-  margin-bottom: $s;
   transition: all .35s ease;
+  margin: 0 $s $s 0;
   &.smallFont {
     font-size: 12px;
     padding: 8.5px 8px;
   }
+  svg, svg path {
+    transition: all .35s ease;
+  }
   svg {
-    margin-right: 8px;
+    margin-right: 4px;
   }
   &.secondary {
     color: $black;

@@ -4,6 +4,7 @@ label.radio {
   display: flex;
   align-items: center;
   margin-bottom: $s;
+  width: fit-content;
   &:hover, &:focus {
     cursor: pointer;
   } 
@@ -40,5 +41,10 @@ label.radio {
     height: 0;
     width: 0;
     opacity: 0;
+  }
+  &:hover {
+    .box:before {
+      opacity: 1;
+    }
   }
 }
