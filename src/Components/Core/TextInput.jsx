@@ -21,8 +21,8 @@ const TextInput = (
     {
       rows > 1 &&
       <label className={`text-input ${styles.textInput} ${size} ${hasIconLeftClass} ${hasIconRightClass} ${className}`}> 
-        {label && <span className={styles.label}>{label}</span>}
-        {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+        {label && <span className="input-label">{label}</span>}
+        {subtitle && <span className="input-subtitle">{subtitle}</span>}
         {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
         {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
         <textarea 
@@ -42,8 +42,8 @@ const TextInput = (
     {
       (rows <= 1 || rows === undefined) &&
       <label className={`text-input ${styles.textInput} ${size} ${hasIconLeftClass} ${hasIconRightClass} ${className}`}> 
-        {label && <span className={styles.label}>{label}</span>}
-        {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+        {label && <span className="input-label">{label}</span>}
+        {subtitle && <span className="input-subtitle">{subtitle}</span>}
         {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
         {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
         <input 

@@ -326,3 +326,14 @@ input {
 .cursor-default {
   cursor: default;
 }
+
+.input-label {
+  font-size: $subTwoSize;
+  margin-bottom: $xxs;
+  font-weight: 700;
+  color: $darkGray;
+}
+.input-subtitle {
+  font-size: $captionSize;
+  margin-bottom: $xxs;
+}

@@ -38,6 +38,7 @@ const DesignSystem = () => {
       </Radio>
       <Select 
         label="Example Label" 
+        subtitle="Example Subtitle"
         name="Example"
         size="m" 
         handleChange={(value)=>{

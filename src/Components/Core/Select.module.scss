@@ -9,19 +9,10 @@
     appearance: none;
     cursor: pointer;
     border-radius: $defaultBorderRadius;
+    transition: $defaultBoxShadowAnim;
     &:focus, &:focus-visible {
       outline: none;
     }
-  }
-  .label {
-    font-size: $subTwoSize;
-    margin-bottom: $xs;
-    font-weight: 700;
-    color: $darkGray;
-  }
-  .subtitle {
-    font-size: $captionSize;
-    margin-bottom: $xxs;
   }
   .icon {
     content: url('../../Icons/Directional/Chevron/Chevron\ Down.svg');
