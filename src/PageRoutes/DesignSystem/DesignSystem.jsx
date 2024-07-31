@@ -17,78 +17,84 @@ const DesignSystem = () => {
       <Button handleClick={() => {alert('clicked!')}} className="button-with-icon" iconOnly ><Icon/></Button>
       <Toggle />
       <Toggle labelOne="Off" labelTwo="On"/>
-      <Checkbox handleClick={()=>alert('clicked!')} >
-          checkbox
-      </Checkbox>
-      <Checkbox 
-        handleClick={()=>alert('clicked!')} 
-        checked={true}>
-          starts checked
-      </Checkbox>
-      <Radio 
-        handleClick={() => alert('radio clicked')} 
-        >
-        Radio Button
-      </Radio>
-      <Radio 
-        handleClick={() => alert('radio clicked')} 
-        checked={true}
-        >
-        Radio Button (starts clicked)
-      </Radio>
-      <Select 
-        label="Example Label" 
-        subtitle="Example Subtitle"
-        name="Example"
-        size="m" 
-        handleChange={(value)=>{
-          alert(`new value: ${value}`);
-        }}
-        noanimate
-        >
-        <option value="5" key="0">5</option>
-        <option value="10" key="1">10</option>
-        <option value="20" key="2">20</option>
-      </Select>
-      <Select 
-        label="Example Label" 
-        name="Example"
-        size="m" 
-        handleChange={(value)=>{
-          alert(`new value: ${value}`);
-        }}
-        >
-        <option value="5" key="0">5</option>
-        <option value="10" key="1">10</option>
-        <option value="20" key="2">20</option>
-      </Select>
-      <Select 
-        label="Smaller one" 
-        name="Example"
-        size="s" 
-        handleChange={(value)=>{
-          alert(`new value: ${value}`);
-        }}
-        >
-        <option value="5" key="0">5</option>
-        <option value="10" key="1">10</option>
-        <option value="20" key="2">20</option>
-      </Select>
-      <Select 
-        label="Bigger one" 
-        name="Example"
-        size="l" 
-        handleChange={(value)=>{
-          alert(`new value: ${value}`);
-        }}
-        >
-        <option value="5" key="0">5</option>
-        <option value="10" key="1">10</option>
-        <option value="20" key="2">20</option>
-      </Select>
-
-      <TextInput label="Example Label" placeholder="Placeholder text" />
-      <TextInput label="Example Label" placeholder="Placeholder text" rows={5}/>
+      <div className="input-row four">
+        <Checkbox handleClick={()=>alert('clicked!')} >
+            checkbox
+        </Checkbox>
+        <Checkbox 
+          handleClick={()=>alert('clicked!')} 
+          checked={true}>
+            starts checked
+        </Checkbox>
+        <Radio 
+          handleClick={() => alert('radio clicked')} 
+          >
+          Radio Button
+        </Radio>
+        <Radio 
+          handleClick={() => alert('radio clicked')} 
+          checked={true}
+          >
+          Radio Button (starts clicked)
+        </Radio>
+      </div>
+      <div className="input-row">
+        <Select 
+          label="Example Label" 
+          subtitle="Example Subtitle"
+          name="Example"
+          handleChange={(value)=>{
+            alert(`new value: ${value}`);
+          }}
+          noanimate
+          >
+          <option value="5" key="0">5</option>
+          <option value="10" key="1">10</option>
+          <option value="20" key="2">20</option>
+        </Select>
+        <Select 
+          label="Example Label" 
+          name="Example"
+          handleChange={(value)=>{
+            alert(`new value: ${value}`);
+          }}
+          noanimate
+          >
+          <option value="5" key="0">5</option>
+          <option value="10" key="1">10</option>
+          <option value="20" key="2">20</option>
+        </Select>
+      </div>
+      <div className="input-row six">
+        <Select 
+          label="Smaller one" 
+          name="Example"
+          handleChange={(value)=>{
+            alert(`new value: ${value}`);
+          }}
+          noanimate
+          >
+          <option value="5" key="0">5</option>
+          <option value="10" key="1">10</option>
+          <option value="20" key="2">20</option>
+        </Select>
+        <Select 
+          label="Bigger one" 
+          name="Example"
+          handleChange={(value)=>{
+            alert(`new value: ${value}`);
+          }}
+          noanimate
+          >
+          <option value="5" key="0">5</option>
+          <option value="10" key="1">10</option>
+          <option value="20" key="2">20</option>
+        </Select>
+      </div>
+      <div className="input-row four">
+        <TextInput label="Example Label" placeholder="Placeholder text" />
+        <TextInput label="Example Label" placeholder="Placeholder text" rows={5}/>
+      </div>
     </div>
   );
 }

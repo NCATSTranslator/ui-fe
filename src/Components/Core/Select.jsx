@@ -14,7 +14,7 @@ const Select = ({label, subtitle, value, name, size, error,
 
   const wrapperRef = useRef(null);  
 
-  size = (size) ? size : 's';
+  size = (size) ? size : '';
 
   handleChange = (handleChange) ? handleChange : () => {};
   errorText = (errorText) ? errorText : "Error Message";

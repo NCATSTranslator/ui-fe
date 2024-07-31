@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./TextInput.module.scss";
 
 const TextInput = (
@@ -6,7 +5,7 @@ const TextInput = (
     error, errorText, handleChange, className, iconLeft, iconRight,
     maxLength, handleKeyDown, testId, disabled}) => {
   
-  size = (size === undefined) ? 's' : size;
+    size = (size) ? size : '';
 
   maxLength = (maxLength) ? maxLength : -1;
 

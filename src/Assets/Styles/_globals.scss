@@ -337,3 +337,25 @@ input {
   font-size: $captionSize;
   margin-bottom: $xxs;
 }
+
+.input-row {
+  display: grid;
+  justify-content: space-between;
+  align-items: flex-end;
+  grid-template-columns: repeat(2, 1fr);
+  &.two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  &.three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  &.four {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  &.five {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  &.six {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
