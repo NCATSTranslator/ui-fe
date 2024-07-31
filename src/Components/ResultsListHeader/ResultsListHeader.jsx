@@ -7,6 +7,8 @@ import Tooltip from '../Tooltip/Tooltip';
 import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter, getFilterLabel } from '../../Utilities/filterFunctions';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react'
 import ShareIcon from '../../Icons/Buttons/Link.svg?react';
+import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
+import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 
   // Output jsx for selected filters
 const getSelectedFilterDisplay = (filter) => {
@@ -102,8 +104,8 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
         </div>
         <ReactPaginate
           breakLabel="..."
-          nextLabel="Next"
-          previousLabel="Previous"
+          nextLabel={<ChevRight/>}
+          previousLabel={<ChevLeft/>}
           onPageChange={data.handlePageClick}
           pageRangeDisplayed={5}
           marginPagesDisplayed={1}
@@ -112,8 +114,8 @@ const ResultsListHeader = ({ data, loadingButtonData }) => {
           className={data.resultsListStyles.pageNums}
           pageClassName={data.resultsListStyles.pageNum}
           activeClassName={data.resultsListStyles.current}
-          previousLinkClassName={`${data.resultsListStyles.prev} ${data.resultsListStyles.button}`}
-          nextLinkClassName={`${data.resultsListStyles.prev} ${data.resultsListStyles.button}`}
+          previousLinkClassName={`${data.resultsListStyles.button}`}
+          nextLinkClassName={`${data.resultsListStyles.button}`}
           disabledLinkClassName={data.resultsListStyles.disabled}
           forcePage={data.currentPage}
         />

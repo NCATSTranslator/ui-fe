@@ -143,16 +143,21 @@
     flex-wrap: nowrap;
   }
   .button {
+    display: flex;
     margin-bottom: 0;
-    background-color: $purpleOne;
-    padding: 10px 15px;
+    background-color: $lightGray;
+    padding: 9px;
     border-radius: $defaultBorderRadius;
-    color: $white;
-    font-size: 16px;
+    color: $black;
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
-    @media screen and (min-width: $desktop) {
-      padding: 10px 25px;
+    transition: $defaultAnim;
+    // @media screen and (min-width: $desktop) {
+    //   padding: 10px 25px;
+    // }
+    &:hover {
+      background-color: $palePurple;
     }
   }
   .disabled {
@@ -160,6 +165,7 @@
     color: $midGray;
     pointer-events: none;
     cursor: default;
+    opacity: 0;
   }
   .pageNum {
     a {
@@ -168,10 +174,10 @@
       padding: 10px ;
       line-height: 1;
       margin: 6px;
-      transition: all .25s ease;
+      transition: $defaultAnim;
       border: 1px solid transparent;
       border-radius: 5px;
-      color: $darkGray;
+      color: $black;
       font-size: $bodyOneSize;
       font-weight: 700;
       @media screen and (min-width: $desktop) {
@@ -179,8 +185,9 @@
         margin: 8px;
       }
       &:hover {
-        background-color: $palePurple;
+        background-color: $lightGray;
         color: $purpleOne;
+        text-decoration: none;
       }
     }
     &.current {

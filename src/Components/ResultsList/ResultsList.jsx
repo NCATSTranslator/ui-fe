@@ -28,6 +28,8 @@ import { isFacet, isExclusion, isEvidenceFilter, isTextFilter, facetFamily, hasS
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
+import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
+import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import { API_PATH_PREFIX, getSaves } from "../../Utilities/userApi";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -967,8 +969,8 @@ const ResultsList = ({loading}) => {
                     </div>
                     <ReactPaginate
                       breakLabel="..."
-                      nextLabel="Next"
-                      previousLabel="Previous"
+                      nextLabel={<ChevRight/>}
+                      previousLabel={<ChevLeft/>}
                       onPageChange={handlePageClick}
                       pageRangeDisplayed={5}
                       marginPagesDisplayed={1}
@@ -977,8 +979,8 @@ const ResultsList = ({loading}) => {
                       className={styles.pageNums}
                       pageClassName={styles.pageNum}
                       activeClassName={styles.current}
-                      previousLinkClassName={`${styles.prev} ${styles.button}`}
-                      nextLinkClassName={`${styles.prev} ${styles.button}`}
+                      previousLinkClassName={`${styles.button}`}
+                      nextLinkClassName={`${styles.button}`}
                       disabledLinkClassName={styles.disabled}
                       forcePage={currentPage.current}
                     />
