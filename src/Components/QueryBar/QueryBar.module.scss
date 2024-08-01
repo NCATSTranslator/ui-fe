@@ -23,6 +23,13 @@
     border: none;
   }
 }
+.input input {
+  padding: 16px 0 16px 40px !important;
+  line-height: 22px;
+  &:focus {
+    outline: none;
+  }
+}
 
 .prefix {
   display: flex;

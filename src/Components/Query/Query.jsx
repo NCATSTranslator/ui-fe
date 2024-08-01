@@ -4,7 +4,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import QueryBar from "../QueryBar/QueryBar";
 import ExampleQueryList from "../ExampleQueryList/ExampleQueryList";
 import QuerySelect from "../QuerySelect/QuerySelect";
-import QueryTypeIcon from "../QueryTypeIcon/QueryTypeIcon";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import AutoHeight from "../AutoHeight/AutoHeight";
 import { queryTypes } from "../../Utilities/queryTypes";
@@ -338,7 +337,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               </>
               :
               <>
-                <h4 className={styles.heading}>Select a question, then search for a term.</h4>
+                <h3 className={styles.h3}>Translator finds associations between drugs, genes, and diseases</h3>
+                <h6 className={styles.h6}>Select a question, then search for a term.</h6>
                 {
                   isError &&
                   <p className={styles.error}>{errorText}</p>
@@ -359,9 +359,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                           queryTypes.map(type => {
                             return(
                               <option value={type.id} key={type.id}>
-                                { 
-                                  <QueryTypeIcon type={type.iconString} />
-                                }
                                 <span>
                                   { type.label } 
                                   { 

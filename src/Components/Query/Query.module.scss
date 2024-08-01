@@ -5,18 +5,26 @@
 }
 
 .query {
-  padding: 35px 0;
+  padding: 64px 0;
   background-color: $palePurple;
   position: relative;
   .container {
     padding: 0 20px 0;
-    max-width: 1150px;
+    max-width: 928px;
     margin: 0 auto;
   }
-  .heading {
-    color: $purpleTwo;
+  .h3, h6 {
     text-align: center;
-    margin-bottom: $xl;
+  }
+  .h3 {
+    color: $purpleTwo;
+    margin-bottom: 8px;
+    line-height: 60px;
+  }
+  .h6 {
+    color: $darkGray;
+    margin-bottom: $m;
+    line-height: 25px;
   }
   .showingResultsContainer {
     padding: $s;
@@ -58,6 +66,7 @@
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
   }
   .error {
@@ -258,6 +267,7 @@ button .dualArrows {
   box-shadow: $dropShadow;
   height: fit-content;
   border-radius: $querySelectBorderRadius;
+  background-color: $white;
 }
 .loadingIcon {
   opacity: 0;

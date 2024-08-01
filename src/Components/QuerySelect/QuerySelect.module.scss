@@ -1,6 +1,6 @@
 @import "../../Assets/Styles/variables";
 
-$querySelectPadding: 11px;
+$querySelectPadding: 16px 20px;
 
 // Select
 .querySelect {
@@ -8,20 +8,23 @@ $querySelectPadding: 11px;
   margin: 0;
   display: block;
   height: 100%;
+  .borderVert {
+    height: 30px;
+    width: 1px;
+    background-color: $midGray;
+  }
   select, .selectDisplay {
     display: flex;
-    width: 410px;
+    width: 342px;
     white-space: nowrap;
     border: none;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     cursor: pointer;
-    padding: $querySelectPadding 20px;
-    border-top-left-radius: $querySelectBorderRadius;
-    border-bottom-left-radius: $querySelectBorderRadius;
-    color: $white;
-    font-weight: 700;
+    padding: $querySelectPadding;
+    border-radius: $querySelectBorderRadius;
+    color: $black;
     transition: $defaultAnim;
     &:focus, &:focus-visible {
       outline: none;
@@ -31,7 +34,7 @@ $querySelectPadding: 11px;
       width: 30px;
     }
     svg path {
-      fill: $white;
+      fill: $black;
     }
   }
   .label {
@@ -45,17 +48,16 @@ $querySelectPadding: 11px;
     margin-bottom: $xxs;
   }
   .iconContainer, .selectContainer, .selectDisplay {
-    background-color: $purpleTwo;
-    position: relative;
-    z-index: 10;
+    background-color: $white;
   }
   .iconContainer {
     display: flex;
     height: 100%;
     align-items: center;
+    margin: 0 8px;
   }
   .icon {
-    content: url('../../Icons/Directional/Chevron/Chevron White.svg');
+    content: url('../../Icons/Directional/Chevron/Chevron\ Down.svg');
     order: 1;
     transition: $defaultTransformAnim;
     transform: rotate(360deg);
@@ -75,8 +77,8 @@ $querySelectPadding: 11px;
     align-items: center;
     height: fit-content;
     transition: $defaultAnim;
+    position: relative;
     &.open {
-      border-bottom-left-radius: 0;
       .icon {
         transform: rotate(180deg);
       }
@@ -89,16 +91,14 @@ $querySelectPadding: 11px;
       transition: $defaultAnim;
       pointer-events: none;
       z-index: 0;
-      border-bottom-left-radius: $querySelectBorderRadius;
-      border-bottom-right-radius: $querySelectBorderRadius;
-      margin-top: -20px;
+      border-radius: $querySelectBorderRadius;
       &.open {
         pointer-events: all;
       }
       .option {
         display: flex;
         cursor: pointer;
-        padding: $querySelectPadding 20px;
+        padding: 12px 15px;
         color: $black;
         overflow: hidden;
         white-space: nowrap;
@@ -109,7 +109,6 @@ $querySelectPadding: 11px;
         color: $black;
         transition: all .25s ease;
         position: relative;
-        border-top: 1px solid transparent;
         span, svg {
           pointer-events: none;
         }
@@ -120,43 +119,28 @@ $querySelectPadding: 11px;
           font-size: 14px;
           font-weight: 500;
         }
-        &:first-of-type {
-          padding: calc($querySelectPadding + 20px ) 20px $querySelectPadding 20px;
-          &:hover {
-            padding: calc($querySelectPadding + 21px ) 20px $querySelectPadding 20px;
-          }
-        }
-        &:last-of-type {
-          .border {
-            display: none;
-          }
-        }
         &:hover {
           background-color: $palePurple;
           border-top-color: $palePurple;
-          margin-top: -1px;
-          padding-top: calc($querySelectPadding + 1px);
         }
       }
     }
   }
   &.noAnimate {
-    position: relative;
     .selectList {
       position: absolute;
-      top: 100%;
+      top: calc(100% + 2px);
       left: 0;
-      right: 0;
+      right: 1px;
       background-color: $white;
       box-shadow: $dropShadow;
       opacity: 1;
       max-height: 0px;
       transition: all .5s ease;
-      border-bottom-left-radius: $querySelectBorderRadius;
-      border-bottom-right-radius: $querySelectBorderRadius;
+      border-radius: $querySelectBorderRadius;
     }
     .selectContainer {
-      grid-template-columns: 1fr min-content;
+      grid-template-columns: 1fr min-content min-content;
       &.open {
         .selectList {
           opacity: 1;
