@@ -10,10 +10,8 @@
     align-items: center;
   }
   .logo {
-    max-width: 250px;
-    @media screen and (min-width: 1125px) {
-      max-width: 316px;
-    }
+    max-width: 160px;
+    display: flex;
     svg {
       width: 100%;
     }
@@ -23,6 +21,8 @@
       display: flex;
       justify-content: space-between;
       padding: 16px;
+      max-width: $maxwidth;
+      margin: 0 auto;
       h5,h1,.h1 {
         margin-bottom: 0;
       }
@@ -31,7 +31,15 @@
         @media (min-width: $medium) {
           display: flex;
         }
+        button {
+          margin: 0;
+        }
         button, a {
+          display: inline-flex;
+          align-items: center;
+          width: fit-content;
+        }
+        a {
           color: $darkGray;
           font-size: 14px;
           background-color: transparent;
@@ -39,14 +47,10 @@
           font-weight: 700;
           margin-bottom: 0;
           margin-right: 5px;
-          display: inline-flex;
-          align-items: center;
           line-height: 1;
           padding: 10px 8px;
-          width: fit-content;
           box-shadow: none;
           @media screen and (min-width: 1125px) {
-            font-size: 16px;
             margin-right: 10px;
           }
           @media screen and (min-width: 1350px) {
@@ -54,7 +58,7 @@
           }
           .linkSpan {
             position: relative;
-            font-size: 16px;
+            font-size: 14px;
             color: $darkGray;
             font-weight: 700;
             line-height: 1;
@@ -76,6 +80,9 @@
             height: 24px;
             width: 24px;
             fill: $darkGray;
+            path {
+              fill: $darkGray;
+            }
           }
           &:hover {
             box-shadow: none;
@@ -87,7 +94,7 @@
         }
         .workspaceLink {
           svg {
-            width: 22px;
+            width: 24px;
             margin-right: 6px;
             rect, polygon, line {
               stroke: $darkGray;
@@ -115,17 +122,18 @@
           padding-right: 24px !important;
           border-radius: $defaultBorderRadius;
           transition: $defaultBoxShadowAnim;
+          font-size: 16px;
           &:hover {
             box-shadow: $dropShadowHover;
           }
+        }
+        .logout {
+          font-size: 16px;
         }
       }
     }
   }
   .userName {
-    // font-size: $bodyOneSize;
-    // color: $darkGray;
-    margin: 0 0 0 7px;
     &.hide {
       display: none;
     }
@@ -185,22 +193,5 @@
         }
       }
     }
-  }
-  .imageContainer {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    box-shadow: $dropShadow;
-    transition: $defaultBoxShadowAnim;
-    overflow: hidden;
-    &:hover {
-      box-shadow: $dropShadowHover;
-    }
-  }
-  .profilePic {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-    object-position: center;
   }
 }

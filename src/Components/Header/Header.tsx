@@ -1,6 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { Link, useLocation, Location } from 'react-router-dom';
 import Tooltip from '../Tooltip/Tooltip';
+import Button from '../Core/Button';
 import { currentConfig, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
 import { useWindowSize } from '../../Utilities/customHooks';
@@ -8,7 +9,7 @@ import History from '../../Icons/Navigation/History.svg?react';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 import Workspace from '../../Icons/Navigation/Workspace.svg?react';
 import Question from '../../Icons/Navigation/Help.svg?react';
-import defaultPfp from '../../Assets/Images/pfp.png';
+import Cog from '../../Icons/Navigation/Settings.svg?react';
 import Logo from '../../Assets/Images/site-logo.png';
 import styles from './Header.module.scss';
 import { getGeneratedSendFeedbackLink, getFullPathname } from '../../Utilities/utilities';
@@ -70,22 +71,18 @@ const Header: FC<HeaderProps> = ({children}) => {
               : 
                 <>
                   <Link to={`/preferences`} data-tooltip-id={`prefs-tooltip`} aria-describedby={`prefs-tooltip`} className={styles.userIcon}>
-                    <div className={styles.imageContainer}>
-                      {(user?.profile_pic_url)
-                        ? <img src={user.profile_pic_url} alt="user profile" className={styles.profilePic}/>
-                        : <img src={defaultPfp} alt="user profile" className={styles.profilePic}/>}
-                    </div>
+                    <Cog/>
                     <Tooltip id={`prefs-tooltip`} place="bottom">
                       <span className={styles.tooltip}>Click here to view and edit your user preferences.</span>
                     </Tooltip>
                     {
                       user?.name && !!width &&
-                      <p className={`${width <= collapseNameScreenWidth ? styles.hide : ''} ${styles.userName}`}>{user.name}</p>
+                      <span className={`${width <= collapseNameScreenWidth ? styles.hide : ''} ${styles.userName} ${styles.linkSpan}`}>Preferences</span>
                     }
                   </Link>
                   {
                     logoutReady && 
-                    <button onClick={handleLogout} className={styles.login}>Log Out</button>
+                    <Button handleClick={handleLogout} className={styles.logout} isSecondary>Log Out</Button>
                   }
                 </>
             }
