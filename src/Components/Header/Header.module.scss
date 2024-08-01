@@ -20,7 +20,7 @@
     .container {
       display: flex;
       justify-content: space-between;
-      padding: 16px;
+      padding: 8px 12px;
       max-width: $maxwidth;
       margin: 0 auto;
       h5,h1,.h1 {
@@ -46,15 +46,13 @@
           text-decoration: none;
           font-weight: 700;
           margin-bottom: 0;
-          margin-right: 5px;
+          margin-right: 8px;
           line-height: 1;
           padding: 10px 8px;
           box-shadow: none;
+          transition: $defaultAnim;
           @media screen and (min-width: 1125px) {
-            margin-right: 10px;
-          }
-          @media screen and (min-width: 1350px) {
-            margin-right: $m;
+            margin-right: 12px;
           }
           .linkSpan {
             position: relative;
@@ -62,33 +60,25 @@
             color: $darkGray;
             font-weight: 700;
             line-height: 1;
-            &:after {
-              content: '';
-              position: absolute;
-              bottom: -5px;
-              left: 0;
-              right: 0;
-              background-color: transparent;
-              height: 2px;
-              width: 100%;
-              transition: all .3s ease;
-              transform: scaleX(0);
-            }
+            transition: $defaultAnim;
+          }
+          svg, svg path {
+            fill: $darkGray;
+            transition: $defaultAnim;
           }
           svg {
             margin-right: 4px;
             height: 24px;
             width: 24px;
-            fill: $darkGray;
-            path {
-              fill: $darkGray;
-            }
           }
           &:hover {
             box-shadow: none;
-            .linkSpan:after {
-              transform: scaleX(1);
-              background-color: $darkGray;
+            background-color: $lightGray;
+            .linkSpan {
+              color: $purpleOne;
+            }
+            svg, svg path {
+              fill: $purpleOne;
             }
           }
         }
