@@ -23,11 +23,29 @@
     border: none;
   }
 }
-.input input {
-  padding: 16px 0 16px 40px !important;
-  line-height: 22px;
-  &:focus {
-    outline: none;
+.inputContainer {
+  display: flex;
+  align-items: center;
+  .icon {
+    width: 24px;
+    height: 24px;    
+    margin: 0 8px 0 12px;
+  }
+  .submitButton {
+    margin: 0 8px;
+    background-color: $purpleOne;
+    svg path {
+      stroke: $white;
+    }
+  }
+}
+.input {
+  input {
+    padding: 16px 0 !important;
+    line-height: 22px;
+    &:focus {
+      outline: none;
+    }
   }
 }
 
