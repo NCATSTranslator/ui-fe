@@ -122,6 +122,7 @@ $querySelectPadding: 16px 20px;
         &:hover {
           background-color: $palePurple;
           border-top-color: $palePurple;
+          color: $purpleOne;
         }
       }
     }
@@ -137,7 +138,7 @@ $querySelectPadding: 16px 20px;
       opacity: 1;
       max-height: 0px;
       transition: all .5s ease;
-      border-radius: $querySelectBorderRadius;
+      border-radius: $defaultBorderRadius;
     }
     .selectContainer {
       grid-template-columns: 1fr min-content min-content;

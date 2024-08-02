@@ -352,7 +352,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                         handleQueryTypeChange(val, true);
                       }}
                       handleToggle={handleSelectToggle}
-                      startExpanded
                       noanimate
                       >
                         {
