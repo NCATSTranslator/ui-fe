@@ -134,11 +134,12 @@ $querySelectPadding: 16px 20px;
       left: 0;
       right: 1px;
       background-color: $white;
-      box-shadow: $dropShadow;
+      box-shadow: $dropShadowHover;
       opacity: 1;
       max-height: 0px;
       transition: all .5s ease;
       border-radius: $defaultBorderRadius;
+      z-index: 10;
     }
     .selectContainer {
       grid-template-columns: 1fr min-content min-content;

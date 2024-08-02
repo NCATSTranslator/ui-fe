@@ -393,7 +393,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleDiseases} 
                     setPresetURL={setPresetURL} 
                     label="Example Diseases:"
-                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for chemicals UPregulated by a particular gene */}
@@ -403,7 +402,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleGenesUp} 
                     setPresetURL={setPresetURL} 
                     label="Example Genes:"
-                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for chemicals DOWNregulated by a particular gene */}
@@ -413,7 +411,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleGenesDown} 
                     setPresetURL={setPresetURL} 
                     label="Example Genes:"
-                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for genes UPregulated by a particular chemical */}
@@ -423,7 +420,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleChemsUp} 
                     setPresetURL={setPresetURL} 
                     label="Example Chemicals:"
-                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for genes DOWNregulated by a particular chemical */}
@@ -433,7 +429,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleChemsDown} 
                     setPresetURL={setPresetURL} 
                     label="Example Chemicals:"
-                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
               </>

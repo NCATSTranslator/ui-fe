@@ -27,10 +27,8 @@
   z-index: 100;
   max-height: 265px;
   overflow-y: scroll;
-  &::-webkit-scrollbar-track {
-    background-color: transparent;
-    scrollbar-track-color: transparent;
-  }
+  scrollbar-color: $midGray transparent; 
+  scrollbar-width: none;
   &.loading {
     overflow-y: hidden;
     min-height: 265px;

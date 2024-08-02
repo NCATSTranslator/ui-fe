@@ -7,27 +7,34 @@
   margin: 0 0 35px;
 }
 .subTwo {
-  margin: 10px $s 0 0;
+  margin: 0 0 4px;
   font-size: 14px;
-}
-.subTwo, .showButton {
   display: flex;
   font-weight: 700;
-  color: $darkGray;
+  color: $black;
 }
-.showButton {
-  margin: 0 auto 16px;
-  display: flex;
+.expandButton {
+  transition: $defaultAnim;
+  position: absolute;
+  right: 8px;
+  top: 8px;
   background-color: transparent;
-  box-shadow: none;
-  font-size: 16px;
-  &:hover {
-    box-shadow: none;
-    text-decoration: underline;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+.expanded {
+  .expandButton {
+    rotate: 180deg;
   }
 }
 .examplesContainer {
   margin: 12px 0 35px;
+  position: relative;
+  background-color: $lightPurpleTwo;
+  padding: $m;
+  border: 1px solid $midPurpleTwo;
+  border-radius: 8px;
 }
 .examples {
   display: flex;
@@ -43,14 +50,13 @@
     }
     .button {
       background-color: $white;
-      color: $purpleOne;
+      color: $black;
       align-items: center;
       background-color: $white;
       border-radius: 5px;
-      color: $purpleOne;
       cursor: pointer;
       display: inline-flex;
-      font-size: 16px;
+      font-size: 12px;
       font-weight: 700;
       justify-content: center;
       line-height: 1;
