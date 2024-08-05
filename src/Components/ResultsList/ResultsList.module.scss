@@ -12,7 +12,7 @@
     position: relative;
     max-width: 2300px;
     width: auto;
-    padding: 20px;
+    padding: $m;
     @media screen and (min-width: $large) {
       grid-template-columns: 330px 1fr;
       grid-template-rows: auto 1fr;

@@ -846,15 +846,6 @@ const ResultsList = ({loading}) => {
                   pageCount: pageCount,
                   handlePageClick: handlePageClick
                 }}
-                loadingButtonData={{
-                  handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
-                  isFetchingARAStatus: isFetchingARAStatus.current,
-                  isFetchingResults: isFetchingResults.current,
-                  showDisclaimer: false,
-                  containerClassName: styles.loadingButtonContainer,
-                  buttonClassName: styles.loadingButton,
-                  hasFreshResults: (freshRawResults !== null)
-                }}
               />
 
               <div className={styles.resultsTableContainer}>

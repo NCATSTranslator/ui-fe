@@ -1,12 +1,7 @@
 import styles from './ResultsListHeader.module.scss';
-// import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
-import ResultsListLoadingBar from '../ResultsListLoadingBar/ResultsListLoadingBar';
 import ReactPaginate from 'react-paginate';
-import ShareModal from "../Modals/ShareModal";
-import Tooltip from '../Tooltip/Tooltip';
 import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter, getFilterLabel } from '../../Utilities/filterFunctions';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react'
-import ShareIcon from '../../Icons/Buttons/Link.svg?react';
 import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 
@@ -27,64 +22,13 @@ const getSelectedFilterDisplay = (filter) => {
   return filterDisplay;
 }
 
-const ResultsListHeader = ({ data, loadingButtonData }) => {
+const ResultsListHeader = ({ data }) => {
 
   return(
     <div className={styles.resultsHeader}>
       <div className={styles.top}>
-        <ResultsListLoadingBar
-          data={{
-            handleResultsRefresh: loadingButtonData.handleResultsRefresh,
-            isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
-            isFetchingResults: loadingButtonData.isFetchingResults,
-            showDisclaimer: loadingButtonData.showDisclaimer,
-            containerClassName: loadingButtonData.containerClassName,
-            buttonClassName: loadingButtonData.buttonClassName,
-            hasFreshResults: loadingButtonData.hasFreshResults,
-            currentInterval: data.returnedARAs.aras.length,
-            status: data.returnedARAs.status, 
-            isError: data.isError
-          }}
-        />
-      </div>
-      <div className={styles.right}>
-        <button
-          className={styles.shareButton}
-          onClick={()=>{
-            data.setShareResultID(null);
-            data.setShareModalOpen(true);
-          }}
-          data-testid="share-button"
-          data-tooltip-id={`share-button-results-header`}
-          aria-describedby={`share-button-results-header`}
-          >
-            <ShareIcon/>
-            <Tooltip id={`share-button-results-header`}>
-              <span className={styles.tooltip}>Generate a sharable link for this set of results.</span>
-            </Tooltip>
-        </button>
-        <ShareModal
-          isOpen={data.shareModalOpen}
-          onClose={()=>data.setShareModalOpen(false)}
-          qid={data.currentQueryID}
-          shareResultID={data.shareResultID}
-        />
-        {/* <ResultsListLoadingButton
-          data={{
-            handleResultsRefresh: loadingButtonData.handleResultsRefresh,
-            isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
-            isFetchingResults: loadingButtonData.isFetchingResults,
-            showDisclaimer: loadingButtonData.showDisclaimer,
-            containerClassName: loadingButtonData.containerClassName,
-            buttonClassName: loadingButtonData.buttonClassName,
-            hasFreshResults: loadingButtonData.hasFreshResults
-          }}
-        /> */}
-        
-      </div>
-      <div className={styles.bottom}>
         <div>
-          <h5 className={styles.heading}>Results</h5>
+          <h4 className={styles.heading}>Results</h4>
           {
             data.formattedResultsLength !== 0 &&
             <p className={styles.resultsCount}>

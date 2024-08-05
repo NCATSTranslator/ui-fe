@@ -42,7 +42,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const [errorText, setErrorText] = useState('');
   // String, input text from query var
   const [inputText, setInputText] = useState(initNodeLabelParam);
-  const [isOpen, setIsOpen] = useState(false);
 
   initPresetTypeObject = (initPresetTypeObject === null) ? queryTypes[0] : initPresetTypeObject;
   const initAutocompleteFunctions = (initPresetTypeObject === null) ? null : initPresetTypeObject.functions;
@@ -263,10 +262,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     validateSubmission(item);
   }
 
-  const handleSelectToggle = useCallback((val) => {
-    setIsOpen(val);
-  }, []);
-
   useEffect(() => {
     setIsLoading(loading);
   }, [loading]);
@@ -346,7 +341,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       handleChange={(val)=>{
                         handleQueryTypeChange(val, true);
                       }}
-                      handleToggle={handleSelectToggle}
                       noanimate
                       >
                         {

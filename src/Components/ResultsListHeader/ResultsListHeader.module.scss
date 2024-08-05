@@ -2,31 +2,23 @@
 
 .resultsHeader {
   padding-top: $s;
+  margin-bottom: $s;
   @media screen and (min-width: $large) {
     grid-column: 2/3;
   }
   .top {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: -60px;
-  }
-  .bottom {
     display: flex;
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
-  }
-  .right {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    margin-top: $s;
   }
   .heading {
-    font-size: 26px;
-    line-height: 1.25;
+    color: $purpleOne;
+    margin-bottom: 0;
+  }
+  .resultsCount {
+    margin: 0;
   }
 }
 
