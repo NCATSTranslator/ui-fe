@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {  useLocation, useNavigate } from "react-router-dom";
 import QueryBar from "../QueryBar/QueryBar";
 import ExampleQueryList from "../ExampleQueryList/ExampleQueryList";
 import QuerySelect from "../QuerySelect/QuerySelect";
@@ -16,9 +16,9 @@ import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
 import { filterAndSortExamples, getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import { getEntityLink, generateEntityLink, getLastItemInArray, getFormattedDate, isValidDate } from "../../Utilities/utilities";
-import Question from '../../Icons/Navigation/Help.svg?react';
-import Back from '../../Icons/Directional/Undo & Redo/Undo.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
+import ShareIcon from '../../Icons/Buttons/Link.svg?react';
+import Button from "../Core/Button";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import styles from './Query.module.scss';
 import { API_PATH_PREFIX } from "../../Utilities/userApi";
@@ -307,14 +307,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               ?
               <>
                 <div className={styles.resultsHeader}>
-                  <div className={styles.buttons}>
-                    <Link to={`/`} className={styles.button}><Back/>Return To Home Page</Link>
-                  </div>
                   <div className={styles.showingResultsContainer}>
-                    <div className={styles.showingResultsTop}>
-                      <h4 className={styles.showingResultsText}>Showing results for:</h4>
-                    </div>
-                      <h5 className={styles.subHeading}>{queryItem.type.label}: 
+                      <h6 className={styles.subHeading}>{queryItem.type.label} 
                         {(queryItem?.node?.id && 
                           generateEntityLink(queryItem.node.id, styles.searchedTerm, ()=>queryItem.node.label, false)) 
                           ?
@@ -322,7 +316,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                           :
                             <span className={styles.searchedTerm}>{queryItem.node && queryItem.node.label}</span>
                         }
-                      </h5>
+                        ?
+                      </h6>
                     <div className={styles.nodeDescriptionContainer}>
                       {
                         nodeDescription && 
@@ -433,18 +428,25 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 }
               </>
             }
-            {
-              queryTimestamp && isValidDate(queryTimestamp) && results &&
-              <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
-                  <p>Submitted {getFormattedDate(queryTimestamp)}</p>
+            <div className={styles.bottom}>
+              <div className="left">
+                {
+                  queryItem?.node?.id &&
+                  <p className={styles.nodeLink}>
+                    {getEntityLink(queryItem.node.id, styles.nodeLinkAnchor, queryItem.type)}
+                  </p>
+                }
+                {
+                  queryTimestamp && isValidDate(queryTimestamp) && results &&
+                  <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
+                      <p>Submitted {getFormattedDate(queryTimestamp)}</p>
+                  </div>
+                }
               </div>
-            }
-            {
-              queryItem?.node?.id &&
-              <p className={styles.needHelp}>
-                {getEntityLink(queryItem.node.id, styles.monarchLink, queryItem.type)}
-              </p>
-            }
+              <div className="right">
+                <Button isSecondary><ShareIcon/>Share Result Set</Button>
+              </div>
+            </div>
           </div>
         </AutoHeight>
       </div>

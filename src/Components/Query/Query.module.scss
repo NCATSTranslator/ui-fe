@@ -5,16 +5,39 @@
 }
 
 .query {
-  padding: 64px 0;
+  padding: $l 0;
   background-color: $palePurple;
   position: relative;
+  .subHeading, .nodeDescriptionContainer {
+    margin-bottom: $s;
+  }
+  .nodeLink {
+    margin: 0 0 4px;
+    .nodeLinkAnchor {
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      svg {
+        margin-left: 4px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+  .bottom { 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    button {
+      margin: 0;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+  }
   .container {
     padding: 0 20px 0;
     max-width: 928px;
     margin: 0 auto;
-  }
-  .h3, h6 {
-    text-align: center;
   }
   .h3 {
     color: $purpleTwo;
@@ -27,10 +50,6 @@
     line-height: 25px;
   }
   .showingResultsContainer {
-    padding: $s;
-    border-radius: $defaultBorderRadius;
-    background: $white;
-    box-shadow: $dropShadow;
     display: grid;
   }
   .showingResultsText {
@@ -39,29 +58,28 @@
     margin-bottom: 0;
   }
   .subHeading, .searchedTerm {
-    font-weight: 400;
-    font-size: 30px;
+    font-weight: 700;
+    font-size: 20px;
     margin: 0;
-    color: $purpleTwo;
+    color: $black;
   }
   .searchedTerm {
     font-weight: 700;
-    text-decoration: underline;
     margin-left: $xxs;
     display: inline-block;
+    color: $purpleOne;
   }
   .nodeDescription, .nodeDescriptionHeading {
-    color: $darkGray;
+    color: $black;
     margin: 0;
   }
   .nodeDescriptionHeading {
     margin-top: 10px;
     font-weight: 700;
-    font-size: $bodyOneSize;
+    font-size: 12px;
   }
   .nodeDescription {
-    font-size: $bodyTwoSize;
-    font-style: italic;
+    font-size: $bodyOneSize;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -76,9 +94,8 @@
   .nodeDescriptionContainer{
     align-self: flex-end;
   }
-  .resultsHeader {
-    width: fit-content;
-    max-width: 1000px;
+  .resultsHeader, .bottom {
+    width: 640px;
     margin: 0 auto;
   }
   .buttons {
@@ -147,40 +164,6 @@
       padding: $m;
     }
   }
-  .needHelp {
-    text-align: center;
-    margin: 12px 0 0 0;
-    a {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      color: $purpleOne;
-      text-decoration: none;
-      font-weight: 700; 
-      font-size: 14px;
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-    svg {
-      circle {
-        stroke: $purpleOne; 
-      }
-      path {
-        fill: $purpleOne; 
-      }
-    }
-  }
-  .monarchLink {
-    display: inline-flex;
-    align-items: center;
-    font-size: 14px;
-    svg {
-      margin-left: 4px;
-      width: 18px;
-      height: 18px;
-    }
-  }
   .curieContainer {
     margin-bottom: 4px;
     .curieLabel {
@@ -191,41 +174,6 @@
       font-weight: 700;
       font-size: 14px;
     }
-  }
-  .upperButtons, .middleButtons, .lowerButtons {
-    display: flex;
-    justify-content: space-evenly;
-    max-width: 80%;
-    margin: 0 auto $s;
-    button {
-      svg path {
-        fill: $white;
-      }
-    }
-  }
-  .upperButton, .middleButton, .lowerButton {
-    transition: all .25s ease;
-    &.selected {
-      box-shadow: $dropShadowPressed;
-    }
-  }
-  .upperButton, .middleButton {
-    background-color: $purpleTwo;
-    &.selected {
-      background-color: $purpleOne;
-    }
-  }
-  .upperButton {
-    min-width: 260px;
-    text-align: center;
-  }
-  .middleButton {
-    min-width: 385px;
-    text-align: center;
-  }
-  .lowerButton {
-    background-color: $white;
-    color: $purpleOne;
   }
 }
 
@@ -277,19 +225,13 @@ button .dualArrows {
   }
 }
 .timestamp {
-  text-align: center;
-  margin: 12px 0 0;
-  min-height: 18px;
   opacity: 0;
   transition: opacity .5s ease;
+  min-height: 15px;
   span, p {
     font-size: 14px;
-    font-style: italic;
-    color: $purpleTwo;
+    color: $darkGray;
     margin: 0;
-  }
-  span {
-    font-weight: 700;
   }
   &.active {
     opacity: 1;
