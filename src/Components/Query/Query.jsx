@@ -433,21 +433,18 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 }
               </>
             }
-            <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
-              {
-                queryTimestamp && isValidDate(queryTimestamp) && results &&
-                <p>Submitted {getFormattedDate(queryTimestamp)}</p>
-              }
-            </div>
+            {
+              queryTimestamp && isValidDate(queryTimestamp) && results &&
+              <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
+                  <p>Submitted {getFormattedDate(queryTimestamp)}</p>
+              </div>
+            }
             {
               queryItem?.node?.id &&
               <p className={styles.needHelp}>
                 {getEntityLink(queryItem.node.id, styles.monarchLink, queryItem.type)}
               </p>
             }
-            <p className={styles.needHelp}>
-              <a href={`/help`} rel="noreferrer " target="_blank"><Question/> Need Help?</a>
-            </p>
           </div>
         </AutoHeight>
       </div>
