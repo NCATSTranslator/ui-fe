@@ -136,10 +136,8 @@ const ResultsList = ({loading}) => {
   const returnedARAs = useRef({aras: [], status: ''});
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
-
   // Bool, is the shift key being held down
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
-
   // Float, weight for confidence score
   // eslint-disable-next-line
   const [confidenceWeight, setConfidenceWeight] = useState(1.0);
@@ -149,6 +147,8 @@ const ResultsList = ({loading}) => {
   // Float, weight for clinical score
   // eslint-disable-next-line
   const [clinicalWeight, setClinicalWeight] = useState(1.0);
+
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   const [userSaves, setUserSaves] = useState(null);
   const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
@@ -832,6 +832,8 @@ const ResultsList = ({loading}) => {
                 onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults.current, originalResults.current, setActiveFilters, currentSortString.current, handleUpdateResults)}
                 activeFilters={activeFilters}
                 availableTags={availableTags}
+                expanded={filtersExpanded}
+                setExpanded={setFiltersExpanded}
               />
               <div>
                 <ResultsListHeader
@@ -852,7 +854,9 @@ const ResultsList = ({loading}) => {
                     currentPage: currentPage.current,
                     resultsListStyles: styles,
                     pageCount: pageCount,
-                    handlePageClick: handlePageClick
+                    handlePageClick: handlePageClick,
+                    filtersExpanded: filtersExpanded,
+                    setFiltersExpanded: setFiltersExpanded
                   }}
                 />
 

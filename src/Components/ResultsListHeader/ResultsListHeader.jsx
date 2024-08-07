@@ -4,6 +4,9 @@ import { isFacet, isEvidenceFilter, isTextFilter, isFdaFilter, getFilterLabel } 
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react'
 import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
+import FilterIcon from '../../Icons/Navigation/Filter.svg?react';
+import ExcludeIcon from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
+import Button from '../Core/Button';
 
   // Output jsx for selected filters
 const getSelectedFilterDisplay = (filter) => {
@@ -64,21 +67,24 @@ const ResultsListHeader = ({ data }) => {
           forcePage={data.currentPage}
         />
       </div>
-      {
-        data.activeFilters.length > 0 &&
-        <div className={styles.activeFilters}>
-          {
-            data.activeFilters.map((activeFilter, i)=> {
-              return(
-                <span key={i} className={`${styles.filterTag} ${activeFilter.type} ${activeFilter?.negated ? styles.negated : ''}`}>
-                  { getSelectedFilterDisplay(activeFilter) }
-                  <span className={styles.close} onClick={()=>{data.handleFilter(activeFilter)}}><CloseIcon/></span>
-                </span>
-              )
-            })
-          }
-        </div>
-      }
+      <div className={styles.activeFilters}>
+        {
+          !data.filtersExpanded &&
+          <Button isSecondary handleClick={data.setFiltersExpanded} className={styles.filterButton}><FilterIcon/>Filters</Button>
+        }
+        {
+          data.activeFilters.length > 0 &&
+          data.activeFilters.map((activeFilter, i)=> {
+            return(
+              <span key={i} className={`${styles.filterTag} ${activeFilter.type} ${activeFilter?.negated ? styles.negated : ''}`}>
+                {!!activeFilter?.negated && <ExcludeIcon className={styles.excludeIcon}/>}
+                { getSelectedFilterDisplay(activeFilter) }
+                <span className={styles.close} onClick={()=>{data.handleFilter(activeFilter)}}><CloseIcon/></span>
+              </span>
+            )
+          })
+        }
+      </div>
     </div>
   )
 }

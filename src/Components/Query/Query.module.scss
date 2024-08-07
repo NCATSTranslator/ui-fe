@@ -120,19 +120,19 @@
         box-shadow: $dropShadowHover;
       }
       svg path {
-        stroke: $blueTwo;
+        stroke: $blueOne;
       }
       .svgFillWhite path {
-        fill: $blueTwo;
+        fill: $blueOne;
         stroke: none;
       }
     }
     .buttonTwo {
-      background-color: $blueTwo;
+      background-color: $blueOne;
       color: $white;
       &:hover {
         box-shadow: $dropShadowHover;
-        background-color: $blueTwo;
+        background-color: $blueOne;
       }
       svg path {
         stroke: $white;

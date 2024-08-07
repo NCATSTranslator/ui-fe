@@ -5,7 +5,7 @@
 }
 
 .toggleButton {
-  background-color: $blueTwo;
+  background-color: $blueOne;
   margin: 16px auto;
   display: block;
   transition: all .25s ease;
@@ -68,7 +68,7 @@
   .graphControlButton {
     margin: 0 0 0 $s;
     color: $white;
-    background-color: $blueTwo;
+    background-color: $blueOne;
     transition: all .25s ease;
     &.withIcon {
       padding:0;
