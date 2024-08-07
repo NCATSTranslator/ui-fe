@@ -833,171 +833,173 @@ const ResultsList = ({loading}) => {
                 activeFilters={activeFilters}
                 availableTags={availableTags}
               />
-              <ResultsListHeader
-                data={{
-                  formattedResultsLength: formattedResults.length,
-                  originalResultsLength: originalResults.current.length,
-                  itemOffset: itemOffset,
-                  endResultIndex: endResultIndex,
-                  activeFilters: activeFilters,
-                  handleFilter: handleFilter,
-                  shareModalOpen: shareModalOpen,
-                  setShareModalOpen: setShareModalOpen,
-                  shareResultID: shareResultID.current,
-                  setShareResultID: setShareResultID,
-                  currentQueryID: currentQueryID,
-                  returnedARAs: returnedARAs.current,
-                  isError: isError,
-                  currentPage: currentPage.current,
-                  resultsListStyles: styles,
-                  pageCount: pageCount,
-                  handlePageClick: handlePageClick
-                }}
-              />
-
-              <div className={styles.resultsTableContainer}>
-                <div className={styles.resultsTable}>
-                  <div className={styles.tableBody}>
-                    <div className={`${styles.tableHead}`}>
-                      <div
-                        className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`}
-                        onClick={()=>{
-                          let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
-                          currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                        }}
-                      >
-                        Name
-                      </div>
-                      <div></div>
-                      <div
-                        className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
-                        onClick={()=>{
-                          let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
-                          currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                        }}
-                      >
-                        Evidence
-                      </div>
-                      <div
-                        className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
-                        onClick={()=>{
-                          let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
-                          currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                        }}
-                        data-tooltip-id="score-tooltip"
-                      >
-                        Score
-                        <Alert/>
-                        <Tooltip id="score-tooltip">
-                          <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added.</span>
-                        </Tooltip>
-                      </div>
-                    </div>
-                    {
-                      isError &&
-                      <h5 className={styles.errorText}>There was an error when processing your query. Please try again.</h5>
-                    }
-                    {
-                      !isLoading &&
-                      !isError &&
-                      displayedResults.length === 0 &&
-                      <h5 className={styles.errorText}>No results available.</h5>
-                    }
-                    {
-                      !isLoading &&
-                      !isError &&
-                      displayedResults.length > 0 &&
-                      displayedResults.map((item) => {
-                        return (
-                          <ResultsItem
-                            rawResults={rawResults.current}
-                            key={item.id}
-                            type={initPresetTypeObject}
-                            item={item}
-                            activateEvidence={activateEvidence}
-                            activateNotes={activateNotes}
-                            activeStringFilters={activeStringFilters}
-                            zoomKeyDown={zoomKeyDown}
-                            currentQueryID={currentQueryID}
-                            queryNodeID={initNodeIdParam}
-                            queryNodeLabel={initNodeLabelParam}
-                            queryNodeDescription={nodeDescription}
-                            bookmarked={item.bookmarked}
-                            bookmarkID={item.bookmarkID}
-                            hasNotes={item.hasNotes}
-                            handleBookmarkError={handleBookmarkError}
-                            bookmarkAddedToast={bookmarkAddedToast}
-                            bookmarkRemovedToast={bookmarkRemovedToast}
-                            availableTags={availableTags}
-                            handleFilter={handleFilter}
-                            activeFilters={activeFilters}
-                            sharedItemRef={item.id === initResultIdParam ? sharedItemRef : null}
-                            startExpanded={item.id === initResultIdParam && expandSharedResult}
-                            setExpandSharedResult={setExpandSharedResult}
-                            setShareModalOpen={setShareModalOpen}
-                            setShareResultID={setShareResultID}
-                          />
-                        )
-                      })
-                    }
-                  </div>
-                </div>
-                {
-                  formattedResults.length > 0 &&
-                  <div className={styles.pagination}>
-                    <div className={styles.perPage}>
-                      <Select
-                        label=""
-                        name="Results Per Page"
-                        size="s"
-                        handleChange={(value)=>{
-                          setItemsPerPage(parseInt(value));
-                          handlePageReset(value, formattedResults.length);
-                        }}
-                        noanimate
-                        >
-                        <option value="5" key="0">5</option>
-                        <option value="10" key="1">10</option>
-                        <option value="20" key="2">20</option>
-                        <option value="50" key="3">50</option>
-                      </Select>
-                    </div>
-                    <ReactPaginate
-                      breakLabel="..."
-                      nextLabel={<ChevRight/>}
-                      previousLabel={<ChevLeft/>}
-                      onPageChange={handlePageClick}
-                      pageRangeDisplayed={5}
-                      marginPagesDisplayed={1}
-                      pageCount={pageCount}
-                      renderOnZeroPageCount={null}
-                      className={styles.pageNums}
-                      pageClassName={styles.pageNum}
-                      activeClassName={styles.current}
-                      previousLinkClassName={`${styles.button}`}
-                      nextLinkClassName={`${styles.button}`}
-                      disabledLinkClassName={styles.disabled}
-                      forcePage={currentPage.current}
-                    />
-                  </div>
-                }
-                <ResultsListLoadingButton
+              <div>
+                <ResultsListHeader
                   data={{
-                    handleResultsRefresh: () =>
-                    {
-                      handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
-                    },
-                    isFetchingARAStatus: isFetchingARAStatus.current,
-                    isFetchingResults: isFetchingResults.current,
-                    showDisclaimer: true,
-                    containerClassName: styles.bottomLoadingButtonContainer,
-                    buttonClassName: styles.loadingButton,
-                    hasFreshResults: (freshRawResults !== null)
+                    formattedResultsLength: formattedResults.length,
+                    originalResultsLength: originalResults.current.length,
+                    itemOffset: itemOffset,
+                    endResultIndex: endResultIndex,
+                    activeFilters: activeFilters,
+                    handleFilter: handleFilter,
+                    shareModalOpen: shareModalOpen,
+                    setShareModalOpen: setShareModalOpen,
+                    shareResultID: shareResultID.current,
+                    setShareResultID: setShareResultID,
+                    currentQueryID: currentQueryID,
+                    returnedARAs: returnedARAs.current,
+                    isError: isError,
+                    currentPage: currentPage.current,
+                    resultsListStyles: styles,
+                    pageCount: pageCount,
+                    handlePageClick: handlePageClick
                   }}
                 />
+
+                <div className={styles.resultsTableContainer}>
+                  <div className={styles.resultsTable}>
+                    <div className={styles.tableBody}>
+                      <div className={`${styles.tableHead}`}>
+                        <div
+                          className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`}
+                          onClick={()=>{
+                            let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
+                            currentSortString.current = sortString;
+                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                          }}
+                        >
+                          Name
+                        </div>
+                        <div></div>
+                        <div
+                          className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
+                          onClick={()=>{
+                            let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
+                            currentSortString.current = sortString;
+                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                          }}
+                        >
+                          Evidence
+                        </div>
+                        <div
+                          className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
+                          onClick={()=>{
+                            let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
+                            currentSortString.current = sortString;
+                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                          }}
+                          data-tooltip-id="score-tooltip"
+                        >
+                          Score
+                          <Alert/>
+                          <Tooltip id="score-tooltip">
+                            <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added.</span>
+                          </Tooltip>
+                        </div>
+                      </div>
+                      {
+                        isError &&
+                        <h5 className={styles.errorText}>There was an error when processing your query. Please try again.</h5>
+                      }
+                      {
+                        !isLoading &&
+                        !isError &&
+                        displayedResults.length === 0 &&
+                        <h5 className={styles.errorText}>No results available.</h5>
+                      }
+                      {
+                        !isLoading &&
+                        !isError &&
+                        displayedResults.length > 0 &&
+                        displayedResults.map((item) => {
+                          return (
+                            <ResultsItem
+                              rawResults={rawResults.current}
+                              key={item.id}
+                              type={initPresetTypeObject}
+                              item={item}
+                              activateEvidence={activateEvidence}
+                              activateNotes={activateNotes}
+                              activeStringFilters={activeStringFilters}
+                              zoomKeyDown={zoomKeyDown}
+                              currentQueryID={currentQueryID}
+                              queryNodeID={initNodeIdParam}
+                              queryNodeLabel={initNodeLabelParam}
+                              queryNodeDescription={nodeDescription}
+                              bookmarked={item.bookmarked}
+                              bookmarkID={item.bookmarkID}
+                              hasNotes={item.hasNotes}
+                              handleBookmarkError={handleBookmarkError}
+                              bookmarkAddedToast={bookmarkAddedToast}
+                              bookmarkRemovedToast={bookmarkRemovedToast}
+                              availableTags={availableTags}
+                              handleFilter={handleFilter}
+                              activeFilters={activeFilters}
+                              sharedItemRef={item.id === initResultIdParam ? sharedItemRef : null}
+                              startExpanded={item.id === initResultIdParam && expandSharedResult}
+                              setExpandSharedResult={setExpandSharedResult}
+                              setShareModalOpen={setShareModalOpen}
+                              setShareResultID={setShareResultID}
+                            />
+                          )
+                        })
+                      }
+                    </div>
+                  </div>
+                  {
+                    formattedResults.length > 0 &&
+                    <div className={styles.pagination}>
+                      <div className={styles.perPage}>
+                        <Select
+                          label=""
+                          name="Results Per Page"
+                          size="s"
+                          handleChange={(value)=>{
+                            setItemsPerPage(parseInt(value));
+                            handlePageReset(value, formattedResults.length);
+                          }}
+                          noanimate
+                          >
+                          <option value="5" key="0">5</option>
+                          <option value="10" key="1">10</option>
+                          <option value="20" key="2">20</option>
+                          <option value="50" key="3">50</option>
+                        </Select>
+                      </div>
+                      <ReactPaginate
+                        breakLabel="..."
+                        nextLabel={<ChevRight/>}
+                        previousLabel={<ChevLeft/>}
+                        onPageChange={handlePageClick}
+                        pageRangeDisplayed={5}
+                        marginPagesDisplayed={1}
+                        pageCount={pageCount}
+                        renderOnZeroPageCount={null}
+                        className={styles.pageNums}
+                        pageClassName={styles.pageNum}
+                        activeClassName={styles.current}
+                        previousLinkClassName={`${styles.button}`}
+                        nextLinkClassName={`${styles.button}`}
+                        disabledLinkClassName={styles.disabled}
+                        forcePage={currentPage.current}
+                      />
+                    </div>
+                  }
+                  <ResultsListLoadingButton
+                    data={{
+                      handleResultsRefresh: () =>
+                      {
+                        handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
+                      },
+                      isFetchingARAStatus: isFetchingARAStatus.current,
+                      isFetchingResults: isFetchingResults.current,
+                      showDisclaimer: true,
+                      containerClassName: styles.bottomLoadingButtonContainer,
+                      buttonClassName: styles.loadingButton,
+                      hasFreshResults: (freshRawResults !== null)
+                    }}
+                  />
+                </div>
               </div>
             </>
           }

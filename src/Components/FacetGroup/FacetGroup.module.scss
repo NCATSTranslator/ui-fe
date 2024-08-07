@@ -64,6 +64,11 @@
     font-weight: 700;
     font-size: 16px;
     color: $darkGray;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
   }
   .caption {
     font-size: $captionSize;

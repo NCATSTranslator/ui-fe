@@ -6,7 +6,7 @@ import Include from '../../Icons/Buttons/View & Exclude/View.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import { cloneDeep } from 'lodash';
 
-const EntitySearch = ({ onFilter }) => {
+const EntitySearch = ({ onFilter, className }) => {
 
   const [searchStringObject, setSearchStringObject] = useState({type:'str:', value: '', negated: false});
 
@@ -40,7 +40,7 @@ const EntitySearch = ({ onFilter }) => {
   }
 
   return (
-    <div className={styles.entitySearch}>
+    <div className={`${styles.entitySearch} ${!!className && className}`}>
       <div className={styles.labelContainer}>
         <p className={`${styles.subTwo} sub-two`} data-tooltip-id="text-tooltip">Text Filter <Alert/></p>
         <Tooltip id="text-tooltip">

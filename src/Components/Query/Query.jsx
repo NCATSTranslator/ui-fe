@@ -433,12 +433,12 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       {getEntityLink(queryItem.node.id, styles.nodeLinkAnchor, queryItem.type)}
                     </p>
                   }
-                  {
-                    queryTimestamp && isValidDate(queryTimestamp) && results &&
-                    <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
-                        <p>Submitted {getFormattedDate(queryTimestamp)}</p>
-                    </div>
-                  }
+                  <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
+                    {
+                      queryTimestamp && isValidDate(queryTimestamp) && results &&
+                      <p>Submitted {getFormattedDate(queryTimestamp)}</p>
+                    }
+                  </div>
                 </div>
                 <div className="right">
                   <Button 
