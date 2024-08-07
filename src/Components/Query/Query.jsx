@@ -19,11 +19,12 @@ import { getEntityLink, generateEntityLink, getLastItemInArray, getFormattedDate
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import ShareIcon from '../../Icons/Buttons/Link.svg?react';
 import Button from "../Core/Button";
+import ShareModal from '../Modals/ShareModal';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import styles from './Query.module.scss';
 import { API_PATH_PREFIX } from "../../Utilities/userApi";
 
-const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription}) => {
+const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription, data}) => {
 
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
@@ -422,25 +423,33 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 }
               </>
             }
-            <div className={styles.bottom}>
-              <div className="left">
-                {
-                  queryItem?.node?.id &&
-                  <p className={styles.nodeLink}>
-                    {getEntityLink(queryItem.node.id, styles.nodeLinkAnchor, queryItem.type)}
-                  </p>
-                }
-                {
-                  queryTimestamp && isValidDate(queryTimestamp) && results &&
-                  <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
-                      <p>Submitted {getFormattedDate(queryTimestamp)}</p>
-                  </div>
-                }
+            {
+              results &&
+              <div className={styles.bottom}>
+                <div className="left">
+                  {
+                    queryItem?.node?.id &&
+                    <p className={styles.nodeLink}>
+                      {getEntityLink(queryItem.node.id, styles.nodeLinkAnchor, queryItem.type)}
+                    </p>
+                  }
+                  {
+                    queryTimestamp && isValidDate(queryTimestamp) && results &&
+                    <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
+                        <p>Submitted {getFormattedDate(queryTimestamp)}</p>
+                    </div>
+                  }
+                </div>
+                <div className="right">
+                  <Button 
+                    isSecondary
+                    handleClick={()=>{data.setShareModalOpen(true)}}
+                  >
+                    <ShareIcon/>Share Result Set
+                  </Button>
+                </div>
               </div>
-              <div className="right">
-                <Button isSecondary><ShareIcon/>Share Result Set</Button>
-              </div>
-            </div>
+            }
           </div>
         </AutoHeight>
       </div>
@@ -451,6 +460,12 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
             </div>
           }
       </div>
+      <ShareModal
+        isOpen={data.shareModalOpen}
+        onClose={()=>data.setShareModalOpen(false)}
+        qid={data.currentQueryID}
+        shareResultID={data.shareResultID}
+      />
     </>
   );
 }

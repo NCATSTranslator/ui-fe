@@ -40,7 +40,7 @@ const Modal: FC<ModalProps> = ({children, isOpen = false, onClose = () => { cons
   useEffect(() => {
     if(startOpen) {
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '10px';
+      document.body.style.paddingRight = '15px';
     } else {
       document.body.style.overflow = 'auto';
       document.body.style.paddingRight = '0';

@@ -800,6 +800,13 @@ const ResultsList = ({loading}) => {
           initNodeIdParam={initNodeIdParam}
           initNodeLabelParam={initNodeLabelParam}
           nodeDescription={nodeDescription}
+          setShareModalFunction={setShareModalOpen}
+          data={{
+            shareModalOpen: shareModalOpen,
+            setShareModalOpen: setShareModalOpen,
+            shareResultID: shareResultID.current,
+            currentQueryID: currentQueryID,
+          }}
         />
         <div className={`${styles.resultsContainer} container`}>
           {
