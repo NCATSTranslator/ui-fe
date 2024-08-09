@@ -35,7 +35,7 @@ export const defaultQueryFormatter = async (items, formatData) => {
   });
 
   // Ensure each autocomplete item is distinct
-  return Promise.resolve(removeDuplicateObjects(autocompleteObjects, o => o.id));
+  return Promise.resolve(removeDuplicateObjects(autocompleteObjects, 'id'));
 }
 
 export const diseaseQueryFormatter = async (diseases, formatData) => {
