@@ -460,12 +460,15 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
             </div>
           }
       </div>
-      <ShareModal
-        isOpen={data.shareModalOpen}
-        onClose={()=>data.setShareModalOpen(false)}
-        qid={data.currentQueryID}
-        shareResultID={data.shareResultID}
-      />
+      {
+        results &&
+        <ShareModal
+          isOpen={data.shareModalOpen}
+          onClose={()=>data.setShareModalOpen(false)}
+          qid={data.currentQueryID}
+          shareResultID={data.shareResultID}
+        />
+      }
     </>
   );
 }

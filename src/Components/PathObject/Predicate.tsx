@@ -132,9 +132,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
           {
             (pubCount >= 1 && pathObject.provenance?.length > 0)
             ? <ResearchMultiple />
-            : (pubCount > 0 || pathObject.provenance?.length > 0) 
-              ? <ResearchSingle /> 
-              : '' 
+            : ''
           }
           <span data-tooltip-id={`${pathObject.predicate}${uid}`}>
             <Highlighter
