@@ -17,10 +17,8 @@ type HeaderProps = {
   children?: ReactNode;
 }
 
-const getFormattedLoginURL = (authURI: string, clientID: string, scope: string, redirectURI: string, location: Location): string => {
-  let url = `${authURI}?response_type=code&client_id=${encodeURIComponent(clientID)}`;
-  url += `&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectURI)}`;
-  url += `&state=${encodeURIComponent(getFullPathname(location))}`
+const getFormattedLoginURL = (location: Location): string => {
+  let url = `/login?path=${encodeURIComponent(getFullPathname(location))}`;
   return url;
 }
 
@@ -39,10 +37,7 @@ const Header: FC<HeaderProps> = ({children}) => {
 
   const socialProviders = (config?.social_providers) ? config.social_providers: null;
   const unaConfig = socialProviders ? socialProviders.una : null;
-  const loginURL = unaConfig 
-    ? getFormattedLoginURL(unaConfig.auth_uri, unaConfig.client_id, 
-      unaConfig.scope, unaConfig.redirect_uri, location)
-    : null;
+  const loginURL = getFormattedLoginURL(location);
 
   return (
     <header className={styles.header}>
