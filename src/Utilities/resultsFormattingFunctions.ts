@@ -359,7 +359,7 @@ const getCompressedPaths = (graph: PathObjectContainer[], respectKnowledgeLevel:
       if (isFormattedEdgeObject(subgraphItem) && pathToDisplay && nextPath != null) {
         const nextEdgeItem = nextPath.path.subgraph[i] as FormattedEdgeObject;
 
-        const matchingInferredStatus = subgraphItem.inferred === nextEdgeItem.inferred;
+        const matchingInferredStatus = nextEdgeItem?.inferred === undefined || subgraphItem.inferred === nextEdgeItem.inferred;
         if(!matchingInferredStatus) {
           displayPath = true;
           continue;
