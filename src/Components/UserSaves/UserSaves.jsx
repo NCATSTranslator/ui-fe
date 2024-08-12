@@ -1,8 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { getSaves } from '../../Utilities/userApi';
 import { handleEvidenceModalClose } from "../../Utilities/resultsInteractionFunctions";
-import { useSelector } from 'react-redux';
-import { currentRoot } from '../../Redux/rootSlice';
 import styles from './UserSaves.module.scss';
 import EvidenceModal from '../Modals/EvidenceModal';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -15,10 +13,14 @@ import NotesModal from '../Modals/NotesModal';
 import TextInput from "../FormFields/TextInput";
 import { cloneDeep } from 'lodash';
 import UserSave from '../UserSave/UserSave';
+import LoginWarning from '../LoginWarning/LoginWarning';
+import LoadingWrapper from '../LoadingWrapper/LoadingWrapper'
+import { useUser } from '../../Utilities/userApi';
 
 const UserSaves = () => {
 
-  const root = useSelector(currentRoot);
+  const [user, loading] = useUser();
+  const [savesLoaded, setSavesLoaded] = useState(false);
   const [userSaves, setUserSaves] = useState(null);
   const [filteredUserSaves, setFilteredUserSaves] = useState(null)
   const currentSearchString = useRef("");
@@ -28,6 +30,7 @@ const UserSaves = () => {
   const [selectedPath, setSelectedPath] = useState(null);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  // eslint-disable-next-line
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const shareResultID = useRef(null);
   const setShareResultID = (newID) => shareResultID.current = newID;
@@ -57,6 +60,7 @@ const UserSaves = () => {
 
   const initSaves = async () => {
     let newSaves = await getSaves(setUserSaves);
+    setSavesLoaded(true);
     setFilteredUserSaves(cloneDeep(newSaves));
   }
 
@@ -143,95 +147,98 @@ const UserSaves = () => {
 
   return(
     <QueryClientProvider client={queryClient}>
-      {
-        root === "main"
-        ?
-          <div>
-            <ToastContainer
-              position="top-center"
-              autoClose={3000}
-              theme="light"
-              transition={Slide}
-              pauseOnFocusLoss={false}
-              hideProgressBar
-              className="toastContainer"
-              closeOnClick={false}
-              closeButton={false}
-            />
-            <NotesModal
-              isOpen={notesOpen}
-              onClose={()=>(setNotesOpen(false))}
-              handleClearNotesEditor={handleClearNotesEditor}
-              className="notes-modal"
-              noteLabel={noteLabel.current}
-              bookmarkID={currentBookmarkID.current}
-            />
-            <EvidenceModal
-              isOpen={evidenceOpen}
-              onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
-              className="evidence-modal"
-              item={selectedItem}
-              edgeGroup={selectedEdge}
-              path={selectedPath}
-            />
-            <h1 className={`h4 ${styles.pageHeading}`}>Workspace</h1>
-            {
-              (userSaves == null || Object.entries(userSaves).length <= 0)
-              ? 
-                <div className={styles.none}>
-                  <p>You haven't saved any results yet!</p>
-                  <p>Submit a query, then click the bookmark icon on a result to save it for later. You can then view that result here.</p>
-                </div>
-              : <>
-                  <div className={styles.searchBarContainer}>
-                    <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form} ref={formRef}>
-                      <TextInput 
-                        placeholder="Search Saved Results" 
-                        handleChange={(e)=>handleSearch(e)} 
-                        className={styles.input}
-                        size=""
-                        icon={<SearchIcon/>}
-                      />
-                      <button type="submit" size="" >
-                        <span>Clear</span>
-                      </button>
-                    </form>
-                  </div>
-                  {
-                    Object.entries(filteredUserSaves).length < Object.entries(userSaves).length &&
-                    <div className={styles.showingContainer}>
-                      <p className={styles.showing}>Showing {Object.entries(filteredUserSaves).length} of {Object.entries(userSaves).length} total saved results.</p>
-                      <button onClick={clearSearchBar} className={styles.showingButton}>(Clear Search Bar)</button>
+      <LoadingWrapper loading={loading}>
+        {
+          !!user
+          ?
+            <div>
+              <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                theme="light"
+                transition={Slide}
+                pauseOnFocusLoss={false}
+                hideProgressBar
+                className="toastContainer"
+                closeOnClick={false}
+                closeButton={false}
+              />
+              <NotesModal
+                isOpen={notesOpen}
+                onClose={()=>(setNotesOpen(false))}
+                handleClearNotesEditor={handleClearNotesEditor}
+                className="notes-modal"
+                noteLabel={noteLabel.current}
+                bookmarkID={currentBookmarkID.current}
+              />
+              <EvidenceModal
+                isOpen={evidenceOpen}
+                onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
+                className="evidence-modal"
+                item={selectedItem}
+                edgeGroup={selectedEdge}
+                path={selectedPath}
+              />
+              <h1 className={`h4 ${styles.pageHeading}`}>Workspace</h1>
+              {
+                savesLoaded
+                ? 
+                  (userSaves == null || Object.entries(userSaves).length <= 0)
+                  ? 
+                    <div className={styles.none}>
+                      <p>You haven't saved any results yet!</p>
+                      <p>Submit a query, then click the bookmark icon on a result to save it for later. You can then view that result here.</p>
                     </div>
-                  }
-                  <div className={styles.saves}>
-                    {
-                      Object.entries(filteredUserSaves).sort((a, b)=> -a[1].query.submitted_time.localeCompare(b[1].query.submitted_time)).map((item) => {
-                        return(
-                          <UserSave
-                            save={item}
-                            currentSearchString={currentSearchString}
-                            zoomKeyDown={zoomKeyDown}
-                            activateEvidence={activateEvidence}
-                            activateNotes={activateNotes}
-                            handleBookmarkError={handleBookmarkError}
-                            bookmarkAddedToast={bookmarkAddedToast}
-                            bookmarkRemovedToast={bookmarkRemovedToast}
-                            setShareModalOpen={setShareModalOpen}
-                            setShareResultID={setShareResultID}
+                  : <>
+                      <div className={styles.searchBarContainer}>
+                        <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form} ref={formRef}>
+                          <TextInput 
+                            placeholder="Search Saved Results" 
+                            handleChange={(e)=>handleSearch(e)} 
+                            className={styles.input}
+                            size=""
+                            icon={<SearchIcon/>}
                           />
-                        );
-                      })
-                    }
-                  </div>
-                </>
-            }
-          </div>
-        :
-          <div>
-            <h4 className={styles.heading}>Use the Log In link above in order to view and manage your saved results.</h4>
-          </div>
-      }
+                          <button type="submit" size="" >
+                            <span>Clear</span>
+                          </button>
+                        </form>
+                      </div>
+                      {
+                        Object.entries(filteredUserSaves).length < Object.entries(userSaves).length &&
+                        <div className={styles.showingContainer}>
+                          <p className={styles.showing}>Showing {Object.entries(filteredUserSaves).length} of {Object.entries(userSaves).length} total saved results.</p>
+                          <button onClick={clearSearchBar} className={styles.showingButton}>(Clear Search Bar)</button>
+                        </div>
+                      }
+                      <div className={styles.saves}>
+                        {
+                          Object.entries(filteredUserSaves).sort((a, b)=> -a[1].query.submitted_time.localeCompare(b[1].query.submitted_time)).map((item) => {
+                            return(
+                              <UserSave
+                                save={item}
+                                currentSearchString={currentSearchString}
+                                zoomKeyDown={zoomKeyDown}
+                                activateEvidence={activateEvidence}
+                                activateNotes={activateNotes}
+                                handleBookmarkError={handleBookmarkError}
+                                bookmarkAddedToast={bookmarkAddedToast}
+                                bookmarkRemovedToast={bookmarkRemovedToast}
+                                setShareModalOpen={setShareModalOpen}
+                                setShareResultID={setShareResultID}
+                              />
+                            );
+                          })
+                        }
+                      </div>
+                    </>
+                : <></>
+              }
+            </div>
+          :
+            <LoginWarning text="Use the Log In link above in order to view and manage your saved results."/>
+        }
+      </LoadingWrapper>
     </QueryClientProvider>
   )
 }

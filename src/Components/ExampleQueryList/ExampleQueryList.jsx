@@ -2,13 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import styles from './ExampleQueryList.module.scss';
 import { getResultsShareURLPath } from '../../Utilities/resultsInteractionFunctions';
 import { queryTypes } from '../../Utilities/queryTypes';
-import { useSelector } from 'react-redux';
-import { currentRoot } from '../../Redux/rootSlice';
 import AnimateHeight from 'react-animate-height';
 
 const ExampleQueryList = ({examples, setPresetURL, label, className = ""}) => {
 
-  const root = useSelector(currentRoot);
   const minHeight = 52;
   const [height, setHeight] = useState(minHeight);
   const [examplesMaxHeight, setExamplesMaxHeight] = useState(0);
@@ -32,10 +29,6 @@ const ExampleQueryList = ({examples, setPresetURL, label, className = ""}) => {
 
   return(
     <div className={`${styles.examplesContainer} ${className}`}>
-      {
-        root === "demo" && 
-        <p className={styles.demoDisclaimer}>Login to run additional queries or select an example below.</p>
-      }
       <div className={styles.examples}>
         {examples && Array.isArray(examples) &&
           <>

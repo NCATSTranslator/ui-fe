@@ -1,9 +1,20 @@
+import { useState, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
 import { QueryType } from './queryTypes';
 import { ResultItem } from '../Types/results';
-import { PreferencesContainer } from '../Types/global';
+import { PreferencesContainer, SessionStatus } from '../Types/global';
+import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '../Redux/rootSlice';
+import { handleFetchErrors, isPreferencesContainer } from './utilities';
+import { useDispatch } from 'react-redux';
+import { User } from '../Types/global';
+import { useSelector } from 'react-redux';
+import { currentUser } from "../Redux/rootSlice";
 
+// Base API path prefix
+export const API_PATH_PREFIX = '/api/v1';
+// API path for user-related endpoints.
+const userApiPath = `${API_PATH_PREFIX}/users/me`;
 
 // Default user preferences for application settings such as result sorting and visibility options.
 export const defaultPrefs: PreferencesContainer = {
@@ -107,7 +118,7 @@ type SetUserSavesFunction = (e: { [key: string]: SaveGroup }) => void;
  * @returns {Promise<Object>} A promise that resolves to the formatted saves object.
  */
 export const getSaves = async (
-    setUserSaves: SetUserSavesFunction | undefined = () => console.log("no setter function available to set user saves.")
+    setUserSaves: SetUserSavesFunction | undefined = () => {}
   ): Promise<{ [key: string]: SaveGroup }> => {
     let saves = await getAllUserSaves();
     const formattedSaves = formatUserSaves(saves);
@@ -350,9 +361,6 @@ export const deleteUserSave = async (
     return deleteUserData(`${userApiPath}/saves/${saveId}`, httpErrorHandler, fetchErrorHandler);                                    
 }                                    
 
-// Base API path for user-related endpoints.
-const userApiPath = '/main/api/v1/pvt/users/me';
-
 /**
  * Executes a fetch operation and processes the response.
  * 
@@ -370,7 +378,7 @@ const fetchUserData = async <T>(
   ): Promise<T | void> => {
     try {
       const resp = await fetchMethod();
-      if (!resp.ok) { 
+      if(!resp.ok) { 
         httpErrorHandler(new Error(`HTTP Error: ${resp.statusText}`));
       } else {
         return successHandler(resp);
@@ -419,7 +427,7 @@ const getUserData = async <T>(
   ): Promise<T> => {
   const response = await fetchUserData<T>(() => get(url), httpErrorHandler, fetchErrorHandler);
 
-  if (response === undefined) 
+  if(response === undefined) 
     throw new Error('Failed to fetch user data.');
 
   return response;
@@ -442,7 +450,7 @@ const postUserData = async <RequestBodyType>(
   ) => {
   const response = await fetchUserData<Response>(async () => await post(url, body), httpErrorHandler, fetchErrorHandler);
 
-  if (response === undefined || response === null) 
+  if(response === undefined || response === null) 
     throw new Error('Failed to post user data.');
 
   return response;
@@ -465,7 +473,7 @@ const putUserData = async <RequestBodyType>(
   ): Promise<Response> => {
     const response = await fetchUserData<Response>(async () => await put(url, body), httpErrorHandler, fetchErrorHandler);
 
-    if (response === undefined || response === null) 
+    if(response === undefined || response === null) 
       throw new Error('Failed to put user data.');
   
     return response;
@@ -486,8 +494,208 @@ const deleteUserData = async (
   ): Promise<boolean> => {
     const response = await fetchUserData<Promise<boolean>>(async () => await remove(url), httpErrorHandler, fetchErrorHandler);
 
-    if (response === undefined || response === null) 
+    if(response === undefined || response === null) 
       throw new Error('Failed to put user data.');
   
     return response;
 }
+
+
+
+/* ========== AUTH REFACTOR ========== */
+
+
+/**
+ * Function to fetch the session status from the specified endpoint.
+ * 
+ * @param {string} method - The HTTP method to use ('GET' or 'POST').
+ * @param {boolean} [expire] - Optional parameter to indicate if the session should expire.
+ * @param {boolean} [refresh] - Optional parameter to indicate if the session should refresh.
+ * @returns {Promise<SessionStatus>} The session status data.
+ * @throws {Error} If the request fails or the response is not ok.
+ */
+const fetchSessionStatus = async (method: 'GET' | 'POST', expire?: boolean, update?: boolean): Promise<SessionStatus> => {
+  const ENDPOINT = `${API_PATH_PREFIX}/session/status`;
+  try {
+    let response: Response;
+
+    if(method === 'POST') {
+      let payload = null;
+      if(!!expire) {
+        payload = {expire: true};
+      } else if(!!update) {
+        payload = {update: true};
+      }
+
+      response = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      response = await fetch(ENDPOINT, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    if(!response.ok) {
+      throw new Error(`Unable to retrieve session status. Error: ${response.status}`);
+    }
+
+    const data: SessionStatus = await response.json();
+    return data;
+  } catch (err) {
+    if(err instanceof Error) {
+      throw new Error(`Unable to retrieve session status. Error: ${err.message}`);
+    } else {
+      throw new Error(`Unable to retrieve session status. Unknown error.`);
+    }
+  }
+};
+
+/**
+ * Custom hook to fetch session status using the specified method.
+ *
+ * @param {string} method - The HTTP method to use ('GET' or 'POST').
+ * @param {boolean} [expire] - Optional parameter to indicate if the session should expire.
+ * @param {boolean} [refresh] - Optional parameter to indicate if the session should refresh.
+ * @returns {[SessionStatus | null, boolean, string | null]} The session status, loading state, and error state.
+ */
+const useSessionStatus = (method: 'GET' | 'POST', expire?: boolean, refresh?: boolean): [SessionStatus | null, boolean, string | null] => {
+  const [sessionStatus, setSessionStatus] = useState<SessionStatus | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch();
+
+  if(!!sessionStatus) {
+    dispatch(setCurrentUser(sessionStatus.user));
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchSessionStatus(method, expire, refresh);
+        setSessionStatus(data);
+      } catch (err) {
+        if(err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Unknown error occurred');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [method, expire, refresh]);
+
+  return [sessionStatus, loading, error];
+};
+
+/**
+ * Custom hook to fetch session status using GET method.
+ *
+ * @returns {[SessionStatus | null, boolean, string | null]} The session status, loading state, and error state.
+ */
+export const useGetSessionStatus = (): [SessionStatus | null, boolean, string | null] => {
+  return useSessionStatus('GET');
+};
+
+/**
+ * Custom hook to fetch session status using POST method with optional expire and refresh parameters.
+ *
+ * @param {boolean} [expire] - Optional parameter to indicate if the session should expire.
+ * @param {boolean} [refresh] - Optional parameter to indicate if the session should refresh.
+ * @returns {[SessionStatus | null, boolean, string | null]} The session status, loading state, and error state.
+ */
+export const usePostSessionStatus = (expire?: boolean, refresh?: boolean): [SessionStatus | null, boolean, string | null] => {
+  return useSessionStatus('POST', expire, refresh);
+};
+
+/**
+ * Custom hook to fetch user preferences and configuration data, then dispatch them to the Redux store.
+ *
+ * This hook performs two asynchronous operations:
+ * 1. Fetches user preferences and dispatches them to the Redux store.
+ *    - If no preferences are found, it uses default preferences.
+ * 2. Fetches configuration data from a specified endpoint and dispatches it to the Redux store.
+ *    - Sets the Google Analytics ID (gaID) and Google Tag Manager ID (gtmID) if they are present in the config.
+ *
+ * The hook accepts two functions as arguments to set the gaID and gtmID in the component state.
+ * It uses the `useEffect` hook to perform the data fetching on component mount and re-fetches if the dependencies change.
+ *
+ * @param {function} setGaID - Function to set the Google Analytics ID.
+ * @param {function} setGtmID - Function to set the Google Tag Manager ID.
+ */
+export const useFetchConfigAndPrefs = (userFound: boolean,  setGaID: (id: string) => void, setGtmID: (id: string) => void) => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchPrefs = async (hasUser: boolean) => {
+      let prefs: any;
+      if(!hasUser) {
+        prefs = defaultPrefs;
+        console.warn("no user available, setting to default prefs.");
+      } else {
+        prefs = await getUserPreferences(() => {
+          console.warn("no prefs found for this user, setting to default prefs.");
+        });
+        console.log("initial fetch of user prefs: ", prefs);
+        if(prefs === undefined) {
+          prefs = defaultPrefs;
+        }
+      }
+      if(isPreferencesContainer(prefs.preferences)) 
+        dispatch(setCurrentPrefs(prefs.preferences));
+    };
+
+    const fetchConfig = async () => {
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      };
+      let config = await fetch(`${API_PATH_PREFIX}/config`, requestOptions)
+        .then(response => handleFetchErrors(response))
+        .then(response => response.json());
+
+      if(config?.gaID) {
+        setGaID(config.gaID);
+      }
+      if(config?.gtmID) {
+        setGtmID(config.gtmID);
+      }
+
+      console.log("setting config", config);
+      dispatch(setCurrentConfig(config));
+    };
+
+    if(userFound !== undefined) {
+      fetchConfig();
+      fetchPrefs(userFound);
+    }
+  }, [dispatch, setGaID, setGtmID, userFound]);
+};
+
+/**
+ * Custom hook to retrieve the current user from the Redux store. Also provides a loading state.
+ *
+ * @returns {Object} An object containing the user (User | null | undefined) and loading state (boolean).
+ */
+export const useUser = (): [ user: User | null | undefined, loading: boolean ] => {
+  const [loading, setLoading] = useState(true);
+  const user = useSelector(currentUser);
+
+  useEffect(() => {
+    if (user !== undefined) 
+      setLoading(false);
+    
+  }, [user]);
+
+  return [ user, loading ];
+};

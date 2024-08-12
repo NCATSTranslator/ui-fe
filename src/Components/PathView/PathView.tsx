@@ -1,5 +1,5 @@
 import styles from './PathView.module.scss';
-import { useState, useEffect, useMemo, useCallback, createContext, Dispatch, SetStateAction, FC } from "react";
+import { useState, useEffect, useMemo, useCallback, createContext, FC } from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import Question from '../../Icons/Navigation/Question.svg?react';
@@ -7,7 +7,7 @@ import Information from '../../Icons/information.svg?react';
 import ResearchMultiple from '../../Icons/research-multiple.svg?react';
 import { cloneDeep, isEqual } from 'lodash';
 import { useSelector } from 'react-redux';
-import { currentPrefs, currentRoot } from '../../Redux/rootSlice';
+import { currentPrefs } from '../../Redux/rootSlice';
 import { Link } from 'react-router-dom';
 import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
@@ -79,8 +79,6 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
 
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
-
-  const root = useSelector(currentRoot);
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
@@ -276,7 +274,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
       <p className={styles.needHelp}>
         <Question/> 
         Was this helpful?
-        <Link to={`${getGeneratedSendFeedbackLink(true, root)}`} reloadDocument target={'_blank'}>Send Feedback</Link>
+        <Link to={`${getGeneratedSendFeedbackLink(true)}`} reloadDocument target={'_blank'}>Send Feedback</Link>
       </p>
     </div>
   )
