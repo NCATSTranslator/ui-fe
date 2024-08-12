@@ -699,20 +699,3 @@ export const useUser = (): [ user: User | null | undefined, loading: boolean ] =
 
   return [ user, loading ];
 };
-
-/**
- * Handles the logout process by calling the fetchSessionStatus function with 'POST' and 'true' parameters.
- * 
- * @returns {Promise<void>} A promise that resolves when the logout process is complete.
- * @throws {Error} If the logout process fails.
- */
-export const handleLogout = async (): Promise<void> => {
-  try {
-    await fetchSessionStatus('POST', true);
-    console.log('Logged out successfully');
-    window.location.reload();
-  } catch (error) {
-    console.error('Error during logout:', error);
-    throw error;
-  }
-};
