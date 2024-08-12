@@ -131,108 +131,6 @@ export const getSaves = async (
 }
 
 /**
- * Formats an array of user saves into a more convenient structure.
- *
- * @param {Array} saves - The array of save objects to format.
- * @returns {Object} The formatted saves, organized by primary key.
- */
-const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
-  let newSaves: { [key: string]: SaveGroup } = {};
-  for(const save of saves) {
-    if(!save?.data?.query)
-      continue;
-
-    if(!newSaves.hasOwnProperty(save.ars_pkey)) {
-      newSaves[save.ars_pkey] = {
-        saves: new Set([save]),
-        query: save.data.query
-      };
-    } else {
-      newSaves[save.ars_pkey].saves.add(save);
-    }
-  }
-  // return only saves from after Jan 1, 2024
-  const cutoffDate = new Date('2024-01-01');
-  const filteredSaves = Object.fromEntries(
-    Object.entries(newSaves).filter(([key, value]) => {
-      return new Date(value.query.submitted_time) >= cutoffDate;
-    })
-  );
-  return filteredSaves;
-}
-
-/**
- * Constructs a save object for bookmarking based on the provided parameters
- *
- * @param {string} [bookmarkType="result"] - The type of the bookmark (e.g., "result").
- * @param {string} bookmarkName - The name of the bookmark.
- * @param {string} [notes=""] - Additional notes associated with the bookmark.
- * @param {number} queryNodeID - The ID of the query node related to the bookmark.
- * @param {string} [queryNodeLabel=""] - The label of the query node.
- * @param {string} [queryNodeDescription=""] - The description of the query node.
- * @param {Object} typeObject - The type object associated with the bookmark.
- * @param {Object} saveItem - The item to be saved.
- * @param {string} pk - The primary key associated with the save.
- * @returns {Object} The formatted bookmark object.
- */
-export const getFormattedBookmarkObject = (
-    bookmarkType: string = "result",
-    bookmarkName: string,
-    notes: string = "",
-    queryNodeID: number | string | undefined,
-    queryNodeLabel: string = "",
-    queryNodeDescription: string = "",
-    typeObject: QueryType,
-    saveItem: any,
-    pk: string
-  ): any => {
-
-    let newSaveItem = cloneDeep(saveItem);
-    // delete newSaveItem.evidence.publications;
-
-    let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
-    return {
-      save_type: "bookmark",
-      label: bookmarkName,
-      notes: notes,
-      ars_pkey: pk,
-      object_ref: newSaveItem.id,
-      data: {
-        type: bookmarkType,
-        query: queryObject,
-        item: newSaveItem
-      }
-    }
-}
-
-/**
- * Constructs a query object for saving, encapsulating node and type details.
- *
- * @param {number} [nodeID=0] - The ID of the node related to the save.
- * @param {string} [nodeLabel=""] - The label of the node.
- * @param {string} [nodeDescription=""] - The description of the node.
- * @param {Object} typeObject - The type object for the save.
- * @param {string} pk - The primary key for the save.
- * @returns {Object} The constructed query object.
- */
-export const getQueryObjectForSave = (
-    nodeID: number | string = 0,
-    nodeLabel: string = "",
-    nodeDescription: string = "",
-    typeObject: QueryType,
-    pk: string
-  ): QueryObject => {
-    return {
-      type: typeObject,
-      nodeId: nodeID,
-      nodeLabel: nodeLabel,
-      nodeDescription: nodeDescription,
-      pk: pk,
-      submitted_time: new Date()
-    }
-}
-
-/**
  * Fetches the current user's profile.
  *
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - A handler function for HTTP errors.
@@ -308,6 +206,70 @@ export const updateUserPreferences = async (
   ) => {
     const body = { preferences: cloneDeep(preferences) };
     return postUserData(`${userApiPath}/preferences`, body, httpErrorHandler, fetchErrorHandler);
+}
+
+/**
+ * Creates a result bookmark for the current user.
+ *
+ * @param {string} bookmarkName - The name of the bookmark.
+ * @param {number} queryNodeID - The ID of the query node related to the bookmark.
+ * @param {string} [queryNodeLabel=""] - The label of the query node.
+ * @param {string} [queryNodeDescription=""] - The description of the query node.
+ * @param {Object} typeObject - The type object associated with the bookmark.
+ * @param {Object} saveItem - The item to be saved.
+ * @param {string} pk - The primary key associated with the save.
+ * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
+ * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
+ * @returns {Object} The formatted bookmark object.
+ */
+export const createUserResultBookmark = async (
+    bookmarkName: string,
+    queryNodeID: number | string | undefined,
+    queryNodeLabel: string = "",
+    queryNodeDescription: string = "",
+    typeObject: QueryType,
+    saveItem: any,
+    pk: string,
+    httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
+    fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
+): Promise<any> => {
+  return createUserBookmark("result", bookmarkName, "", queryNodeID, queryNodeLabel, queryNodeDescription,
+    typeObject, saveItem, pk, httpErrorHandler, fetchErrorHandler);
+}
+
+/**
+ * Creates a bookmark for the current user.
+ *
+ * @param {string} bookmarkType - The type of the bookmark (e.g., "result").
+ * @param {string} bookmarkName - The name of the bookmark.
+ * @param {string} [notes=""] - Additional notes associated with the bookmark.
+ * @param {number} queryNodeID - The ID of the query node related to the bookmark.
+ * @param {string} [queryNodeLabel=""] - The label of the query node.
+ * @param {string} [queryNodeDescription=""] - The description of the query node.
+ * @param {Object} typeObject - The type object associated with the bookmark.
+ * @param {Object} saveItem - The item to be saved.
+ * @param {string} pk - The primary key associated with the save.
+ * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
+ * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
+ * @returns {Object} The formatted bookmark object.
+ */
+export const createUserBookmark = async (
+    bookmarkType: string,
+    bookmarkName: string,
+    notes: string = "",
+    queryNodeID: number | string | undefined,
+    queryNodeLabel: string = "",
+    queryNodeDescription: string = "",
+    typeObject: QueryType,
+    saveItem: any,
+    pk: string,
+    httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
+    fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
+  ): Promise<any> => {
+    const bookmarkObject = genFormattedBookmarkObject(bookmarkType, bookmarkName, notes, queryNodeID,
+      queryNodeLabel, queryNodeDescription, typeObject, saveItem, pk);
+    console.log(bookmarkObject);
+    return createUserSave(bookmarkObject, httpErrorHandler, fetchErrorHandler);
 }
 
 /**
@@ -699,3 +661,105 @@ export const useUser = (): [ user: User | null | undefined, loading: boolean ] =
 
   return [ user, loading ];
 };
+
+/**
+ * Formats an array of user saves into a more convenient structure.
+ *
+ * @param {Array} saves - The array of save objects to format.
+ * @returns {Object} The formatted saves, organized by primary key.
+ */
+const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
+  let newSaves: { [key: string]: SaveGroup } = {};
+  for(const save of saves) {
+    if(!save?.data?.query)
+      continue;
+
+    if(!newSaves.hasOwnProperty(save.ars_pkey)) {
+      newSaves[save.ars_pkey] = {
+        saves: new Set([save]),
+        query: save.data.query
+      };
+    } else {
+      newSaves[save.ars_pkey].saves.add(save);
+    }
+  }
+  // return only saves from after Jan 1, 2024
+  const cutoffDate = new Date('2024-01-01');
+  const filteredSaves = Object.fromEntries(
+    Object.entries(newSaves).filter(([key, value]) => {
+      return new Date(value.query.submitted_time) >= cutoffDate;
+    })
+  );
+  return filteredSaves;
+}
+
+/**
+ * Constructs a save object for bookmarking based on the provided parameters
+ *
+ * @param {string} [bookmarkType="result"] - The type of the bookmark (e.g., "result").
+ * @param {string} bookmarkName - The name of the bookmark.
+ * @param {string} [notes=""] - Additional notes associated with the bookmark.
+ * @param {number} queryNodeID - The ID of the query node related to the bookmark.
+ * @param {string} [queryNodeLabel=""] - The label of the query node.
+ * @param {string} [queryNodeDescription=""] - The description of the query node.
+ * @param {Object} typeObject - The type object associated with the bookmark.
+ * @param {Object} saveItem - The item to be saved.
+ * @param {string} pk - The primary key associated with the save.
+ * @returns {Object} The formatted bookmark object.
+ */
+const genFormattedBookmarkObject = (
+    bookmarkType: string = "result",
+    bookmarkName: string,
+    notes: string = "",
+    queryNodeID: number | string | undefined,
+    queryNodeLabel: string = "",
+    queryNodeDescription: string = "",
+    typeObject: QueryType,
+    saveItem: any,
+    pk: string
+  ): any => {
+
+    let newSaveItem = cloneDeep(saveItem);
+    // delete newSaveItem.evidence.publications;
+
+    let queryObject = genQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
+    return {
+      save_type: "bookmark",
+      label: bookmarkName,
+      notes: notes,
+      ars_pkey: pk,
+      object_ref: newSaveItem.id,
+      data: {
+        type: bookmarkType,
+        query: queryObject,
+        item: newSaveItem
+      }
+    }
+}
+
+/**
+ * Constructs a query object for saving, encapsulating node and type details.
+ *
+ * @param {number} [nodeID=0] - The ID of the node related to the save.
+ * @param {string} [nodeLabel=""] - The label of the node.
+ * @param {string} [nodeDescription=""] - The description of the node.
+ * @param {Object} typeObject - The type object for the save.
+ * @param {string} pk - The primary key for the save.
+ * @returns {Object} The constructed query object.
+ */
+const genQueryObjectForSave = (
+    nodeID: number | string = 0,
+    nodeLabel: string = "",
+    nodeDescription: string = "",
+    typeObject: QueryType,
+    pk: string
+  ): QueryObject => {
+    return {
+      type: typeObject,
+      nodeId: nodeID,
+      nodeLabel: nodeLabel,
+      nodeDescription: nodeDescription,
+      pk: pk,
+      submitted_time: new Date()
+    }
+}
