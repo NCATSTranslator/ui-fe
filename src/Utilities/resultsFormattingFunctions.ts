@@ -360,7 +360,13 @@ const getCompressedPaths = (graph: PathObjectContainer[], respectKnowledgeLevel:
       if (isFormattedEdgeObject(subgraphItem) && pathToDisplay && nextPath != null) {
         const nextEdgeItem = nextPath.path.subgraph[i] as FormattedEdgeObject;
 
-        if (nextPath && nodesEqual) {
+        const matchingInferredStatus = subgraphItem.inferred === nextEdgeItem.inferred;
+        if(!matchingInferredStatus) {
+          displayPath = true;
+          continue;
+        }
+
+        if (nextPath && nodesEqual && matchingInferredStatus) {
           if (!nextEdgeItem || subgraphItem.id === nextEdgeItem.id) continue;
 
           handleEdgePropMergingAndCompression(subgraphItem, nextEdgeItem);
@@ -546,6 +552,8 @@ export const getSummarizedResults = (results: RawResultsContainer, confidenceWei
       bookmarkID: bookmarkID,
       hasNotes: hasNotes
     }
+    if(itemID === "25d66953") 
+      console.log(formattedItem);
     newSummarizedResults.push(formattedItem);
   }
   return newSummarizedResults;
