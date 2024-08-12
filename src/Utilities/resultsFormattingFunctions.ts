@@ -552,8 +552,6 @@ export const getSummarizedResults = (results: RawResultsContainer, confidenceWei
       bookmarkID: bookmarkID,
       hasNotes: hasNotes
     }
-    if(itemID === "25d66953") 
-      console.log(formattedItem);
     newSummarizedResults.push(formattedItem);
   }
   return newSummarizedResults;
