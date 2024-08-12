@@ -50,7 +50,7 @@ export const defaultPrefs: PreferencesContainer = {
 
 /**
  * Converts preference keys to user-friendly strings for display purposes.
- * 
+ *
  * @param {string} prefKey - The key of the preference to be converted.
  * @returns {string} The user-friendly string representation of the preference key.
  */
@@ -70,7 +70,7 @@ export const prefKeyToString = (prefKey: string): string => {
       return "Sort evidence by";
     case "evidence_per_screen":
       return "Publications to show per page";
-    default: 
+    default:
       return `No label provided for ${prefKey}`;
   }
 }
@@ -79,12 +79,12 @@ export const prefKeyToString = (prefKey: string): string => {
 export const emptyEditor = '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
 
 interface QueryObject {
-  type: QueryType; 
+  type: QueryType;
   nodeId: number | string;
   nodeLabel: string;
   nodeDescription: string;
   pk: string;
-  submitted_time: Date; 
+  submitted_time: Date;
 }
 
 interface Save {
@@ -113,7 +113,7 @@ type SetUserSavesFunction = (e: { [key: string]: SaveGroup }) => void;
 
 /**
  * Retrieves and optionally sets the current user's saved items via the provided callback.
- * 
+ *
  * @param {Function} [setUserSaves] - An optional setter function to update state with retrieved saves.
  * @returns {Promise<Object>} A promise that resolves to the formatted saves object.
  */
@@ -126,13 +126,13 @@ export const getSaves = async (
     if(setUserSaves !== undefined) {
       setUserSaves(formattedSaves);
     }
-    
+
     return formattedSaves;
 }
 
 /**
  * Formats an array of user saves into a more convenient structure.
- * 
+ *
  * @param {Array} saves - The array of save objects to format.
  * @returns {Object} The formatted saves, organized by primary key.
  */
@@ -163,7 +163,7 @@ const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
 
 /**
  * Constructs a save object for bookmarking based on the provided parameters
- * 
+ *
  * @param {string} [bookmarkType="result"] - The type of the bookmark (e.g., "result").
  * @param {string} bookmarkName - The name of the bookmark.
  * @param {string} [notes=""] - Additional notes associated with the bookmark.
@@ -185,18 +185,18 @@ export const getFormattedBookmarkObject = (
     typeObject: QueryType,
     saveItem: any,
     pk: string
-  ): any => { 
+  ): any => {
 
     let newSaveItem = cloneDeep(saveItem);
     // delete newSaveItem.evidence.publications;
 
     let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
-    return { 
-      save_type: "bookmark", 
-      label: bookmarkName, 
-      notes: notes, 
-      ars_pkey: pk, 
-      object_ref: newSaveItem.id, 
+    return {
+      save_type: "bookmark",
+      label: bookmarkName,
+      notes: notes,
+      ars_pkey: pk,
+      object_ref: newSaveItem.id,
       data: {
         type: bookmarkType,
         query: queryObject,
@@ -207,7 +207,7 @@ export const getFormattedBookmarkObject = (
 
 /**
  * Constructs a query object for saving, encapsulating node and type details.
- * 
+ *
  * @param {number} [nodeID=0] - The ID of the node related to the save.
  * @param {string} [nodeLabel=""] - The label of the node.
  * @param {string} [nodeDescription=""] - The description of the node.
@@ -216,25 +216,25 @@ export const getFormattedBookmarkObject = (
  * @returns {Object} The constructed query object.
  */
 export const getQueryObjectForSave = (
-    nodeID: number | string = 0, 
-    nodeLabel: string = "", 
-    nodeDescription: string = "", 
-    typeObject: QueryType, 
+    nodeID: number | string = 0,
+    nodeLabel: string = "",
+    nodeDescription: string = "",
+    typeObject: QueryType,
     pk: string
   ): QueryObject => {
     return {
-      type: typeObject, 
+      type: typeObject,
       nodeId: nodeID,
       nodeLabel: nodeLabel,
       nodeDescription: nodeDescription,
-      pk: pk, 
-      submitted_time: new Date() 
+      pk: pk,
+      submitted_time: new Date()
     }
 }
 
 /**
  * Fetches the current user's profile.
- * 
+ *
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - A handler function for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - A handler function for fetch errors.
  * @returns {Promise<Object>} A promise that resolves to the user profile data.
@@ -248,7 +248,7 @@ export const getUserProfile = async (
 
 /**
  * Fetches the current user's preferences.
- * 
+ *
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - A handler function for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - A handler function for fetch errors.
  * @returns {Promise<Object>} A promise that resolves to the user preferences data.
@@ -262,7 +262,7 @@ export const getUserPreferences = async (
 
 /**
  * Fetches all saves for the current user, with an option to include deleted saves.
- * 
+ *
  * @param {boolean} [doIncludeDeleted=false] - Whether to include deleted saves in the result.
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - A handler function for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - A handler function for fetch errors.
@@ -279,7 +279,7 @@ export const getAllUserSaves = async (
 
 /**
  * Fetches a specific save by ID for the current user.
- * 
+ *
  * @param {string} saveId - The ID of the save to fetch.
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
@@ -295,7 +295,7 @@ export const getUserSave = async (
 
 /**
  * Updates the current user's preferences.
- * 
+ *
  * @param {PreferencesContainer} preferences - The new preferences to be updated.
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
@@ -303,7 +303,7 @@ export const getUserSave = async (
  */
 export const updateUserPreferences = async (
     preferences: PreferencesContainer,
-    httpErrorHandler: ErrorHandler = defaultHttpErrorHandler, 
+    httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
   ) => {
     const body = { preferences: cloneDeep(preferences) };
@@ -312,7 +312,7 @@ export const updateUserPreferences = async (
 
 /**
  * Creates a new save for the current user.
- * 
+ *
  * @param {Object} saveObj - The object containing the save data.
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
@@ -328,7 +328,7 @@ export const createUserSave = async (
 
 /**
  * Updates a specific save for the current user by save ID, handling any HTTP or fetch errors.
- * 
+ *
  * @param {string} saveId - The ID of the save to be updated.
  * @param {Object} saveObj - The updated save data.
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
@@ -347,7 +347,7 @@ export const updateUserSave = async (
 
 /**
  * Deletes a specific save for the current user by save ID, handling any HTTP or fetch errors.
- * 
+ *
  * @param {string} saveId - The ID of the save to be deleted.
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
@@ -358,12 +358,12 @@ export const deleteUserSave = async (
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
   ) => {
-    return deleteUserData(`${userApiPath}/saves/${saveId}`, httpErrorHandler, fetchErrorHandler);                                    
-}                                    
+    return deleteUserData(`${userApiPath}/saves/${saveId}`, httpErrorHandler, fetchErrorHandler);
+}
 
 /**
  * Executes a fetch operation and processes the response.
- * 
+ *
  * @param {Function} fetchMethod - Function that performs the fetch operation.
  * @param {ErrorHandler} httpErrorHandler - Handles HTTP errors.
  * @param {ErrorHandler} fetchErrorHandler - Handles fetch errors.
@@ -378,7 +378,7 @@ const fetchUserData = async <T>(
   ): Promise<T | void> => {
     try {
       const resp = await fetchMethod();
-      if(!resp.ok) { 
+      if(!resp.ok) {
         httpErrorHandler(new Error(`HTTP Error: ${resp.statusText}`));
       } else {
         return successHandler(resp);
@@ -394,7 +394,7 @@ type ErrorHandler = (error: Error) => void | any;
 type SuccessHandler<T> = (response: Response) => Promise<T>;
 /**
  * Default handler for HTTP errors. Logs a message for an HTTP error and throws an error with the response status text.
- * 
+ *
  * @param {Error} error - The error object.
  */
 const defaultHttpErrorHandler = (error: Error): void => {
@@ -404,7 +404,7 @@ const defaultHttpErrorHandler = (error: Error): void => {
 
 /**
  * Default handler for fetch operation errors. Logs a message for a fetch operation error and throws an error with the fetch error message.
- * 
+ *
  * @param {Error} error - The error object.
  */
 const defaultFetchErrorHandler = (error: Error): void => {
@@ -414,20 +414,20 @@ const defaultFetchErrorHandler = (error: Error): void => {
 
 /**
  * Fetches user data from a specified URL.
- * 
+ *
  * @param {string} url - Endpoint URL.
  * @param {ErrorHandler} httpErrorHandler - Handles HTTP errors.
  * @param {ErrorHandler} fetchErrorHandler - Handles fetch errors.
  * @returns {Promise<Response>} User data as a JSON object.
  */
 const getUserData = async <T>(
-    url: string, 
-    httpErrorHandler: ErrorHandler, 
+    url: string,
+    httpErrorHandler: ErrorHandler,
     fetchErrorHandler: ErrorHandler
   ): Promise<T> => {
   const response = await fetchUserData<T>(() => get(url), httpErrorHandler, fetchErrorHandler);
 
-  if(response === undefined) 
+  if(response === undefined)
     throw new Error('Failed to fetch user data.');
 
   return response;
@@ -435,7 +435,7 @@ const getUserData = async <T>(
 
 /**
  * Posts user data to a specified URL.
- * 
+ *
  * @param {string} url - Endpoint URL.
  * @param {RequestBodyType} body - Payload for the request body.
  * @param {ErrorHandler} httpErrorHandler - Handles HTTP errors.
@@ -443,14 +443,14 @@ const getUserData = async <T>(
  * @returns {Promise<Response>} Response data.
  */
 const postUserData = async <RequestBodyType>(
-    url: string, 
-    body: RequestBodyType, 
-    httpErrorHandler: 
+    url: string,
+    body: RequestBodyType,
+    httpErrorHandler:
     ErrorHandler, fetchErrorHandler: ErrorHandler
   ) => {
   const response = await fetchUserData<Response>(async () => await post(url, body), httpErrorHandler, fetchErrorHandler);
 
-  if(response === undefined || response === null) 
+  if(response === undefined || response === null)
     throw new Error('Failed to post user data.');
 
   return response;
@@ -458,7 +458,7 @@ const postUserData = async <RequestBodyType>(
 
 /**
  * Updates user data at a specified URL via PUT request.
- * 
+ *
  * @param {string} url - Endpoint URL.
  * @param {RequestBodyType} body - Payload for the request body.
  * @param {ErrorHandler} httpErrorHandler - Handles HTTP errors.
@@ -466,37 +466,37 @@ const postUserData = async <RequestBodyType>(
  * @returns {Promise<Response>} Response data.
  */
 const putUserData = async <RequestBodyType>(
-    url: string, 
-    body: RequestBodyType, 
-    httpErrorHandler: 
+    url: string,
+    body: RequestBodyType,
+    httpErrorHandler:
     ErrorHandler, fetchErrorHandler: ErrorHandler
   ): Promise<Response> => {
     const response = await fetchUserData<Response>(async () => await put(url, body), httpErrorHandler, fetchErrorHandler);
 
-    if(response === undefined || response === null) 
+    if(response === undefined || response === null)
       throw new Error('Failed to put user data.');
-  
+
     return response;
 }
 
 /**
  * Deletes user data at a specified URL.
- * 
+ *
  * @param {string} url - Endpoint URL.
  * @param {ErrorHandler} httpErrorHandler - Handles HTTP errors.
  * @param {ErrorHandler} fetchErrorHandler - Handles fetch errors.
  * @returns {Promise<boolean>} Indicates success of deletion.
  */
 const deleteUserData = async (
-    url: string, 
-    httpErrorHandler: ErrorHandler, 
+    url: string,
+    httpErrorHandler: ErrorHandler,
     fetchErrorHandler: ErrorHandler
   ): Promise<boolean> => {
     const response = await fetchUserData<Promise<boolean>>(async () => await remove(url), httpErrorHandler, fetchErrorHandler);
 
-    if(response === undefined || response === null) 
+    if(response === undefined || response === null)
       throw new Error('Failed to put user data.');
-  
+
     return response;
 }
 
@@ -507,7 +507,7 @@ const deleteUserData = async (
 
 /**
  * Function to fetch the session status from the specified endpoint.
- * 
+ *
  * @param {string} method - The HTTP method to use ('GET' or 'POST').
  * @param {boolean} [expire] - Optional parameter to indicate if the session should expire.
  * @param {boolean} [refresh] - Optional parameter to indicate if the session should refresh.
@@ -651,7 +651,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean,  setGaID: (id: string
           prefs = defaultPrefs;
         }
       }
-      if(isPreferencesContainer(prefs.preferences)) 
+      if(isPreferencesContainer(prefs.preferences))
         dispatch(setCurrentPrefs(prefs.preferences));
     };
 
@@ -692,9 +692,9 @@ export const useUser = (): [ user: User | null | undefined, loading: boolean ] =
   const user = useSelector(currentUser);
 
   useEffect(() => {
-    if (user !== undefined) 
+    if (user !== undefined)
       setLoading(false);
-    
+
   }, [user]);
 
   return [ user, loading ];
@@ -702,7 +702,7 @@ export const useUser = (): [ user: User | null | undefined, loading: boolean ] =
 
 /**
  * Handles the logout process by calling the fetchSessionStatus function with 'POST' and 'true' parameters.
- * 
+ *
  * @returns {Promise<void>} A promise that resolves when the logout process is complete.
  * @throws {Error} If the logout process fails.
  */
