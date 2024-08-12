@@ -4,7 +4,7 @@ import styles from './FacetGroup.module.scss';
 import AnimateHeight from "react-animate-height";
 import Tooltip from '../Tooltip/Tooltip';
 import Checkbox from '../Core/Checkbox';
-import Include from '../../Icons/Buttons/View & Exclude/View.svg?react';
+import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
@@ -13,6 +13,7 @@ import { isFacet, isEvidenceFilter, hasFilterFamily } from '../../Utilities/filt
 import { pivotSort } from '../../Utilities/sortingFunctions';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
 import { cloneDeep } from "lodash";
+import FacetHeading from "../FacetHeading/FacetHeading";
 
 const getRoleHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
   const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
@@ -40,14 +41,16 @@ const getRoleCaption = (): JSX.Element => {
 }
 
 const getChemicalTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
-  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
+  const matchingActiveFacets = activeFilters.filter((val)=> val.type.includes(tagType)).length;
+  console.log(matchingActiveFacets, activeFilters)
   return(
     <div className={styles.labelContainer}>
       <div className={styles.labelHeading}>
         <div className={styles.label}>
-          <span data-tooltip-id="chemical-type-tooltip">
-            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Chemical Categories</p>
+          <span data-tooltip-id="chemical-type-tooltip" className={styles.heading}>
+            <p className={`${styles.subTwo}`}>Chemical Categories</p>
             <Alert/>
+            { matchingActiveFacets > 1 && <span className={styles.filterCount}>{matchingActiveFacets} Filter</span>}
           </span>
           <Tooltip id="chemical-type-tooltip">
             <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
@@ -153,7 +156,7 @@ const getTagHeadingMarkup = (tagType: string, activeFilters: Filter[]): JSX.Elem
   let headingToReturn;
   switch(tagType) {
     case 'cc':
-      headingToReturn = getChemicalTypeHeading(tagType, activeFilters);
+      headingToReturn = <FacetHeading tagType={tagType} activeFilters={activeFilters}/>;
       break;
     case 'pc':
       headingToReturn = getObjectTypeHeading(tagType, activeFilters);
@@ -208,7 +211,7 @@ const getRoleLinkout = (tagKey: string): string => {
   return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
 }
 
-interface FacetGroupProps {
+type FacetGroupProps = {
   tagType: string;
   activeFilters: Filter[];
   facetCompare: ((a: [string, Tag], b: [string, Tag]) => number) | undefined;
@@ -260,18 +263,19 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
           className={`${styles.checkbox} ${styles.positive}`}
           checkedClassName={positiveChecked ? styles.positiveChecked : ""}
           icon={<Include/>}
+          labelLeft
           >
           <span className={styles.tagName} title={tagName}>
             {tagName}
           </span>
           <span className={styles.facetCount}>
+            {(object.count) ? object.count : 0}
             {
             (type === "role") &&
               <a href={getRoleLinkout(tagKey)} rel="noreferrer" target="_blank">
                 <ExternalLink className={styles.extLinkIcon}/>
               </a>
             }
-            ({(object.count) ? object.count : 0})
           </span>
         </Checkbox>
         <Checkbox
@@ -280,6 +284,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
           className={`${styles.checkbox} ${styles.negative}`}
           checkedClassName={negativeChecked ? styles.negativeChecked : ""}
           icon={<Exclude/>}
+          labelLeft
         ></Checkbox>
       </div>
     )

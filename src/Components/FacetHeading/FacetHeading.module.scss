@@ -1,0 +1,22 @@
+@import "../../Assets/Styles/variables";
+
+.labelContainer {
+  width: 100%;
+  .labelHeading {
+    display: grid;
+    grid-template-columns: 1fr 35px;
+    width: 100%;
+  }
+  .label {
+    display: flex;
+    align-items: center;
+    span {
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+    }
+  } 
+  svg {
+    margin-left: 4px;
+  }
+}

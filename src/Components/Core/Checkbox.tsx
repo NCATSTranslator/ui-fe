@@ -11,10 +11,11 @@ interface CheckboxProps {
   className?: string;
   checkedClassName?: string;
   icon?: any;
+  labelLeft?: boolean; 
 }
 
 const Checkbox: FC<CheckboxProps> = ({name = "", value = undefined, checked, children, handleClick, className = "", 
-  checkedClassName = "", icon = false}) => {
+  checkedClassName = "", icon = false, labelLeft = false}) => {
 
   const [isChecked, setIsChecked] = useState(checked);
   let isCheckedClass = (isChecked) ? styles.checked : styles.unchecked;
@@ -31,9 +32,21 @@ const Checkbox: FC<CheckboxProps> = ({name = "", value = undefined, checked, chi
   return (
 
     <label className={`${styles.checkbox} ${isCheckedClass} ${className}`}>
-      <span className={`${styles.hasIcon} ${styles.box} ${checkedClassName}`}>{icon ? icon : <DefaultIcon/>}</span>
-      <input type="checkbox" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} />
-      <span>{children}</span>
+      {
+        labelLeft 
+        ?
+          <>
+          <input type="checkbox" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} />
+          <span>{children}</span>
+          <span className={`${styles.hasIcon} ${styles.box} ${checkedClassName}`}>{icon ? icon : <DefaultIcon/>}</span>
+          </>
+        :
+        <> 
+          <span className={`${styles.hasIcon} ${styles.box} ${checkedClassName}`}>{icon ? icon : <DefaultIcon/>}</span>
+          <input type="checkbox" defaultChecked={isChecked} name={name} value={value} onChange={handleChange} />
+          <span className={styles.children}>{children}</span>
+        </>
+      }
     </label>
 
   );

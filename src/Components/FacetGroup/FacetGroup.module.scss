@@ -3,6 +3,16 @@
 .facetGroup {
   padding: 15px 0;
   border-bottom: 1px solid $midGray;
+  .heading {
+    display: flex;
+    justify-content: space-between;
+    .filterCount {
+      background-color: $midGray;
+      color: $darkGray;
+      font-size: 12px;
+      padding: 2.5px 4px;
+    }
+  }
   .underline {
     text-decoration: underline;
   }
@@ -27,26 +37,7 @@
       }
     }
   }
-  .labelContainer {
-    width: 100%;
-    .labelHeading {
-      display: grid;
-      grid-template-columns: 1fr 35px;
-      width: 100%;
-    }
-    .label {
-      display: flex;
-      align-items: center;
-      span {
-        display: inline-flex;
-        align-items: center;
-        position: relative;
-      }
-    } 
-    svg {
-      margin-left: 4px;
-    }
-  }
+  
   .top,.left {
     display: flex;
     justify-content: space-between;
@@ -64,11 +55,6 @@
     font-weight: 700;
     font-size: 16px;
     color: $darkGray;
-    white-space: nowrap;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
   }
   .caption {
     font-size: $captionSize;
@@ -84,31 +70,39 @@
   .facetContainer {
     margin-bottom: 4px;
     background-color: $white;
-    border: 1px solid $darkGray;
+    border: 1px solid $midGray;
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
     transition: $defaultAnim;
-    &.containerNegativeChecked {
-      border-color: $red;
+    input {
+      margin: 0;
     }
-    &.containerPositiveChecked {
-      border-color: $purpleEdgeBGSelected;
+    svg path {
+      stroke: transparent !important;
+      fill: $midGray;
     }
-    .positive input + span {
+    .negative {
       &:hover {
-        &+span {
-          svg path{
-            fill: $purpleEdgeBGSelected;
+        input + span {
+          &+span {
+            background-color: $red;
           }
         }
       }
-      &+span:hover {
-        svg path{
-          fill: $purpleEdgeBGSelected;
+    }
+    .positive {
+      &:hover {
+      input + span {
+          &+span {
+            background-color: $green;
+            &:hover {
+              background-color: $green;
+            }
+          }
         }
       }
-    }
+    } 
     .positiveChecked, .negativeChecked {
       svg {
         path {
@@ -117,12 +111,11 @@
       }
     }
     .positiveChecked {
-      background-color: $purpleEdgeBGSelected;
-      border-right-color: $purpleEdgeBGSelected;
-  
+      background-color: $green !important;
+      border-right-color: $green;
     }
     .negativeChecked {
-      background-color: $red;
+      background-color: $red !important;
     }
     input + span span, .facetCount {
       color: $black;
@@ -132,7 +125,7 @@
     input + span {
       position: relative;
       width: 100%;
-      padding: 10px 45px 10px 15px;
+      padding: 12px 45px 12px 12px;
       margin-right: 6px;
     }
     label {
@@ -140,11 +133,11 @@
     }
     label span + span {
       height: 100%;
-      min-width: 25px;
+      min-width: 40px;
       border-top: none;
-      border-right: 1px solid $darkGray;
+      border-right: 1px solid $midGray;
       border-bottom: none;
-      border-left: 1px solid $darkGray;
+      border-left: 1px solid $midGray;
       border-radius: 0px;
     }
     .negative {
@@ -159,15 +152,11 @@
         border: none;
         border-top-right-radius: 6px;
         border-bottom-right-radius: 6px;
-        &:hover {
-          svg path {
-            fill: $red;
-          }
-        }
       }
     }
   }
   .tagName {
+    line-height: 15px;
     max-width: 160px;
     white-space: nowrap;
     overflow: hidden;
@@ -183,9 +172,13 @@
     align-items: center;
     justify-content: flex-end;
     border: none !important;
+    color: $darkGray !important;
     a {
-      margin-right: 2px;
+      margin-left: 2px;
       display: flex;
+    }
+    svg path {
+      fill: $black;
     }
   }
   .roleSpan, .fdaSpan {
@@ -231,7 +224,7 @@
     }
   }
   .extLinkIcon {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
   }
 }
