@@ -12,16 +12,13 @@ import defaultPfp from '../../Assets/Images/pfp.png';
 import Logo from '../../Assets/Images/site-logo.png';
 import styles from './Header.module.scss';
 import { getGeneratedSendFeedbackLink, getFullPathname } from '../../Utilities/utilities';
-import { handleLogout } from '../../Utilities/userApi';
 
 type HeaderProps = {
   children?: ReactNode;
 }
 
-const getFormattedLoginURL = (authURI: string, clientID: string, scope: string, redirectURI: string, location: Location): string => {
-  let url = `${authURI}?response_type=code&client_id=${encodeURIComponent(clientID)}`;
-  url += `&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectURI)}`;
-  url += `&state=${encodeURIComponent(getFullPathname(location))}`
+const getFormattedLoginURL = (location: Location): string => {
+  let url = `/login?path=${encodeURIComponent(getFullPathname(location))}`;
   return url;
 }
 
@@ -36,13 +33,8 @@ const Header: FC<HeaderProps> = ({children}) => {
   const logoutURI = config?.social_providers?.una?.logout_uri;
   const logoutReady = (clientID && logoutURI) ? true : false;
   const openFeedbackModal = true;
-
-  const socialProviders = (config?.social_providers) ? config.social_providers: null;
-  const unaConfig = socialProviders ? socialProviders.una : null;
-  const loginURL = unaConfig 
-    ? getFormattedLoginURL(unaConfig.auth_uri, unaConfig.client_id, 
-      unaConfig.scope, unaConfig.redirect_uri, location)
-    : null;
+  const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
+  const loginURL = getFormattedLoginURL(location);
 
   return (
     <header className={styles.header}>
@@ -85,7 +77,12 @@ const Header: FC<HeaderProps> = ({children}) => {
                   </Link>
                   {
                     logoutReady && 
-                    <button onClick={handleLogout} className={styles.login}>Log Out</button>
+                    <form method="post" action={logoutURI}>
+                      <input type="hidden" name="client_id" value={clientID} />
+                      <input type="hidden" name="show_prompt" value="false" />
+                      <input type="hidden" name="post_logout_redirect_uri" value={postLogoutRedirectUri}/> 
+                      <button type="submit" value="submit" className={styles.login}>Log Out</button>
+                    </form>
                   }
                 </>
             }
