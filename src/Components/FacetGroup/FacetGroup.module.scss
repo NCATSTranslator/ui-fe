@@ -28,11 +28,11 @@
     &:hover {
       box-shadow: none;
     }
-    .expansionSVG {
+    svg {
       transition: all .35s ease;
     }
     &.isExpanded {
-      .expansionSVG {
+      svg {
         transform: rotate(180deg);
       }
     }
@@ -53,8 +53,8 @@
   .subTwo {
     margin: 0;
     font-weight: 700;
-    font-size: 16px;
-    color: $darkGray;
+    font-size: 14px;
+    color: $black;
   }
   .caption {
     font-size: $captionSize;
@@ -87,6 +87,9 @@
         input + span {
           &+span {
             background-color: $red;
+            svg path {
+              fill: $white !important;
+            }
           }
         }
       }
@@ -96,8 +99,14 @@
       input + span {
           &+span {
             background-color: $green;
+            svg path {
+              fill: $white !important;
+            }
             &:hover {
               background-color: $green;
+              svg path {
+                fill: $white !important;
+              }
             }
           }
         }
@@ -150,14 +159,14 @@
       }
       span + span {
         border: none;
-        border-top-right-radius: 6px;
-        border-bottom-right-radius: 6px;
+        border-top-right-radius: 7px;
+        border-bottom-right-radius: 7px;
       }
     }
   }
   .tagName {
     line-height: 15px;
-    max-width: 160px;
+    max-width: 140px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

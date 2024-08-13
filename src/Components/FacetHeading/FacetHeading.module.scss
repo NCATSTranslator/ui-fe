@@ -15,8 +15,32 @@
       align-items: center;
       position: relative;
     }
+    svg path {
+      fill: $darkGray;
+    }
   } 
   svg {
     margin-left: 4px;
+    &.tooltipIcon {
+      transform: none !important;
+    }
+  }
+  .subOne {
+    color: $darkGray;
+  }
+  .subTwo {
+    margin: 0;
+    font-weight: 700;
+    font-size: 14px;
+    color: $black;
+  }
+  .caption {
+    font-size: $captionSize;
+    margin: 0 0 15px;
+    font-weight: 400;
+    color: $darkGray;
+  }
+  label {
+    margin: 0;
   }
 }

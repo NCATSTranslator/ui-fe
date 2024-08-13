@@ -2,7 +2,7 @@ import {useState} from 'react';
 import styles from './EntitySearch.module.scss';
 import Tooltip from '../Tooltip/Tooltip';
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
-import Include from '../../Icons/Buttons/View & Exclude/View.svg?react';
+import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import { cloneDeep } from 'lodash';
 
@@ -20,7 +20,6 @@ const EntitySearch = ({ onFilter, className }) => {
 
   const handleKeyDown = (e) => {
     if(e.key === 'Enter') {
-
       handleActivateFilter(false);
     }
   }

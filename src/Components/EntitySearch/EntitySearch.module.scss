@@ -3,7 +3,7 @@
 .entitySearch {
   display: block;
   border-bottom: 1px solid $midGray;
-  padding-bottom: 15px;
+  padding: 0 15px 15px 0;
   .labelContainer {
     padding: 15px 0;
   }
@@ -14,7 +14,7 @@
     font-weight: 700;
     padding: 10px 65px 10px 15px;
     border-radius: $querySelectBorderRadius;
-    border: 1px solid $darkGray;
+    border: 1px solid $midGray;
     text-overflow: ellipsis;
     overflow: hidden;
     &::placeholder {
@@ -27,8 +27,8 @@
     position: relative;
     margin: 0;
     font-weight: 700;
-    font-size: 16px;
-    color: $darkGray;
+    font-size: 14px;
+    color: $black;
     white-space: nowrap;
     user-select: none;
     -webkit-user-select: none;
@@ -36,6 +36,9 @@
     -ms-user-select: none;
     svg {
       margin-left: 4px;
+      path {
+        fill: $darkGray;
+      }
     }
   }
   .tooltip {
@@ -57,10 +60,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 25px;
+    width: 40px;
     svg {
-      height: 20px;
-      width: 21px;
+      height: 24px;
+      width: 24px;
       path {
         transition: $defaultAnim;
         fill: $midGray;
@@ -68,7 +71,7 @@
     }
     &.positive {
       height: 100%;
-      min-width: 25px;
+      min-width: 40px;
       border-top: none;
       border-right: 1px solid #D6D6D6;
       border-bottom: none;

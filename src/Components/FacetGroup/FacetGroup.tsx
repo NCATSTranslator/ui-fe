@@ -2,65 +2,19 @@ import { FC, useState, useEffect, Dispatch, SetStateAction } from "react";
 import { Filter, GroupedTags, Tag } from "../../Types/results";
 import styles from './FacetGroup.module.scss';
 import AnimateHeight from "react-animate-height";
-import Tooltip from '../Tooltip/Tooltip';
 import Checkbox from '../Core/Checkbox';
 import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
-import Alert from '../../Icons/Status/Alerts/Info.svg?react';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { isFacet, isEvidenceFilter, hasFilterFamily } from '../../Utilities/filterFunctions';
 import { pivotSort } from '../../Utilities/sortingFunctions';
-import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
 import { cloneDeep } from "lodash";
 import FacetHeading from "../FacetHeading/FacetHeading";
 
-const getRoleHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
-  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
-  return (
-    <div className={styles.labelContainer}>
-      <div className={styles.labelHeading}>
-        <div className={styles.label}>
-          <span data-tooltip-id="chebi-role-tooltip">
-            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>ChEBI Role Classification</p>
-            <Alert/>
-          </span>
-          <Tooltip id="chebi-role-tooltip">
-            <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
-          </Tooltip>
-        </div>
-        <ChevDown className={styles.expansionSVG}/>
-      </div>
-    </div>
-  )
-}
 const getRoleCaption = (): JSX.Element => {
   return (
     <p className={styles.caption}>Show only results that match a particular chemical role.</p>
-  )
-}
-
-const getChemicalTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
-  const matchingActiveFacets = activeFilters.filter((val)=> val.type.includes(tagType)).length;
-  console.log(matchingActiveFacets, activeFilters)
-  return(
-    <div className={styles.labelContainer}>
-      <div className={styles.labelHeading}>
-        <div className={styles.label}>
-          <span data-tooltip-id="chemical-type-tooltip" className={styles.heading}>
-            <p className={`${styles.subTwo}`}>Chemical Categories</p>
-            <Alert/>
-            { matchingActiveFacets > 1 && <span className={styles.filterCount}>{matchingActiveFacets} Filter</span>}
-          </span>
-          <Tooltip id="chemical-type-tooltip">
-            <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
-            <p className={styles.tooltipParagraph}>Phase 1-3 Drugs are chemicals that are part of a clinical trial and do not yet have FDA approval.</p>
-            <p className={styles.tooltipParagraph}>Other includes all other chemicals.</p>
-          </Tooltip>
-        </div>
-        <ChevDown className={styles.expansionSVG}/>
-      </div>
-    </div>
   )
 }
 const getChemicalTypeCaption = (): JSX.Element => {
@@ -68,43 +22,9 @@ const getChemicalTypeCaption = (): JSX.Element => {
     <p className={styles.caption}>Filter on different categories of chemicals.</p>
   )
 }
-
-const getObjectTypeHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
-  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
-  return(
-    <div className={styles.labelContainer}>
-      <div className={styles.labelHeading}>
-        <div className={styles.label}>
-          <span data-tooltip-id="biolink-tooltip-2">
-            <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Object Type</p>
-            <Alert/>
-          </span>
-          <Tooltip id="biolink-tooltip-2">
-            <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
-          </Tooltip>
-        </div>
-        <ChevDown className={styles.expansionSVG}/>
-      </div>
-    </div>
-  )
-}
 const getObjectTypeCaption = (): JSX.Element => {
   return(
     <p className={styles.caption}>Show only results that include an object of a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
-  )
-}
-
-const getAraHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
-  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
-  return(
-    <div className={styles.labelContainer}>
-      <div className={styles.labelHeading}>
-        <div className={styles.label} >
-          <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Reasoning Agent</p>
-        </div>
-        <ChevDown className={styles.expansionSVG}/>
-      </div>
-    </div>
   )
 }
 const getAraCaption = (): JSX.Element => {
@@ -112,38 +32,9 @@ const getAraCaption = (): JSX.Element => {
     <p className={styles.caption}>Filter on specific reasoning agents used to calculate the results.</p>
   )
 }
-
-
-const getDrugIndicationsHeading = (tagType: string, activeFilters: Filter[]): JSX.Element => {
-  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
-  return(
-    <div className={styles.labelContainer}>
-      <div className={styles.labelHeading}>
-        <div className={styles.label} >
-          <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Drug Indications</p>
-        </div>
-        <ChevDown className={styles.expansionSVG}/>
-      </div>
-    </div>
-  )
-}
 const getDrugIndicationsCaption = (): JSX.Element => {
   return(
     <p className={styles.caption}>Filter on if the drug is indicated for the given disease.</p>
-  )
-}
-
-const getPathTypeHeadings = (tagType: string, activeFilters: Filter[]): JSX.Element => {
-  const hasActiveFacet = activeFilters.some((val)=> val.type.includes(tagType))
-  return(
-    <div className={styles.labelContainer}>
-      <div className={styles.labelHeading}>
-        <div className={styles.label} >
-          <p className={`${styles.subTwo} ${hasActiveFacet ? styles.underline : ''}`}>Path Type</p>
-        </div>
-        <ChevDown className={styles.expansionSVG}/>
-      </div>
-    </div>
   )
 }
 const getPathTypeCaption = (): JSX.Element => {
@@ -156,22 +47,33 @@ const getTagHeadingMarkup = (tagType: string, activeFilters: Filter[]): JSX.Elem
   let headingToReturn;
   switch(tagType) {
     case 'cc':
-      headingToReturn = <FacetHeading tagType={tagType} activeFilters={activeFilters}/>;
+      headingToReturn = 
+        <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Chemical Categories">
+          <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
+          <p className={styles.tooltipParagraph}>Phase 1-3 Drugs are chemicals that are part of a clinical trial and do not yet have FDA approval.</p>
+          <p className={styles.tooltipParagraph}>Other includes all other chemicals.</p>
+        </FacetHeading>;
       break;
     case 'pc':
-      headingToReturn = getObjectTypeHeading(tagType, activeFilters);
+      headingToReturn = 
+        <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Object Type">
+          <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
+        </FacetHeading>;
       break;
     case 'role':
-      headingToReturn = getRoleHeading(tagType, activeFilters);
+      headingToReturn = 
+        <FacetHeading tagType={tagType} activeFilters={activeFilters} title="ChEBI Role Classification">
+          <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
+        </FacetHeading>;
       break;
     case 'ara':
-      headingToReturn = getAraHeading(tagType, activeFilters);
+      headingToReturn = <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Reasoning Agent" />;
       break;
     case 'di':
-      headingToReturn = getDrugIndicationsHeading(tagType, activeFilters);
+      headingToReturn = <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Drug Indications" />;
       break;
     case 'pt':
-      headingToReturn = getPathTypeHeadings(tagType, activeFilters);
+      headingToReturn = <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Path Type" />;
       break;
     default:
       headingToReturn = null;
