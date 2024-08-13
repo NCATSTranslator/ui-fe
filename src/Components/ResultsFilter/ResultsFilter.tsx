@@ -65,7 +65,10 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
     <div className={`${styles.resultsFilter} ${isExpanded ? styles.expanded : styles.collapsed}`}>
       <div className={styles.top}>
         <p className={styles.heading} onClick={toggleIsExpanded} ><FilterIcon/><span>Filters</span></p>
-        <Button className={styles.closeButton} iconOnly><CloseIcon onClick={toggleIsExpanded}/></Button>
+        <div className={styles.right}>
+          <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
+          <Button className={styles.closeButton} iconOnly><CloseIcon onClick={toggleIsExpanded}/></Button>
+        </div>
       </div>
       <div className={styles.bottom}>
         <EntitySearch
@@ -89,7 +92,6 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
             })
           }
         </div>
-        <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
       </div>
     </div>
   );

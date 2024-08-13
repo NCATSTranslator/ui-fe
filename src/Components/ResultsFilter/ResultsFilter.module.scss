@@ -6,9 +6,6 @@
   border-radius: $defaultBorderRadius;
   box-shadow: $dropShadow;
   transition: $defaultAnim;
-  // @media screen and (min-width: $large) {
-  //   grid-row: 1/3;
-  // }
   .entitySearch {
     span {
       overflow: hidden;
@@ -25,7 +22,7 @@
     .heading span {
       width: auto;
     }
-    .heading span, .bottom, .closeButton, .entitySearch input {
+    .heading span, .bottom, .closeButton, .clearAll, .entitySearch input {
       opacity: 1;
       pointer-events: all;
     }
@@ -35,7 +32,7 @@
     .heading span {
       width: 0;
     }
-    .heading span, .bottom, .closeButton, .entitySearch input {
+    .heading span, .bottom, .closeButton, .entitySearch input, .clearAll {
       opacity: 0;
       pointer-events: none;
       width: 0;
@@ -66,18 +63,31 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    .right {
+      display: flex;
+      align-items: center;
+    }
   }
   .bottom {
     position: relative;
   }
   .clearAll {
     display: block;
-    font-size: 14px;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 700;
     color: $purpleOne;
     background-color: transparent;
-    margin: 15px auto 10px;
+    margin: 0 $s 0 0;
     padding: 0;
     box-shadow: none;
+    white-space: nowrap;
+    -webkit-user-select: none;
+    -ms-user-select: none; 
+    user-select: none; 
+    &:hover {
+      text-decoration: underline;
+    }
   }
   .closeButton {
     background-color: transparent;
