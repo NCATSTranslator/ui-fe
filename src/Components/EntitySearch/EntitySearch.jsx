@@ -42,6 +42,7 @@ const EntitySearch = ({ onFilter, className }) => {
     <div className={`${styles.entitySearch} ${!!className && className}`}>
       <div className={styles.labelContainer}>
         <p className={`${styles.subTwo} sub-two`} data-tooltip-id="text-tooltip">Text Filter <Alert/></p>
+        <p className={`${styles.caption} caption`}>Include or exclude results or paths containing a word or phrase in the result name, description, or paths.</p>
         <Tooltip id="text-tooltip">
           <span className={styles.tooltip}>Search all textual elements (result name, description, node names, edge names) for a given string.</span>
         </Tooltip>

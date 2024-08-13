@@ -3,16 +3,6 @@
 .facetGroup {
   padding: 15px 0;
   border-bottom: 1px solid $midGray;
-  .heading {
-    display: flex;
-    justify-content: space-between;
-    .filterCount {
-      background-color: $midGray;
-      color: $darkGray;
-      font-size: 12px;
-      padding: 2.5px 4px;
-    }
-  }
   .underline {
     text-decoration: underline;
   }
@@ -58,8 +48,9 @@
   }
   .caption {
     font-size: $captionSize;
-    margin: 0 0 15px;
+    margin: 0 0 $s;
     font-weight: 400;
+    color: $darkGray
   }
   label {
     margin: 0;

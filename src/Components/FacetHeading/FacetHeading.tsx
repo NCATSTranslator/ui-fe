@@ -26,8 +26,8 @@ const FacetHeading: FC<FacetHeadingProps> = ({ title, tagType, activeFilters, ch
             {
               children && <Alert className={styles.tooltipIcon}/>
             }
-            { matchingActiveFacets > 1 && <span className={styles.filterCount}>{matchingActiveFacets} Filter</span>}
           </span>
+          { matchingActiveFacets > 0 && <span className={styles.filterCount}>{matchingActiveFacets} {matchingActiveFacets === 1 ? "Filter" : "Filters"}</span>}
           <Tooltip id={`${tagType}-type-tooltip`}>
             {
               children 

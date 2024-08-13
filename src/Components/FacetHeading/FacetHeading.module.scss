@@ -7,9 +7,19 @@
     grid-template-columns: 1fr 35px;
     width: 100%;
   }
+  .filterCount {
+    background-color: $midGray;
+    color: $darkGray;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    padding: 2.5px 4px;
+    border-radius: $defaultBorderRadius;
+  }
   .label {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     span {
       display: inline-flex;
       align-items: center;

@@ -3,16 +3,16 @@
 .entitySearch {
   display: block;
   border-bottom: 1px solid $midGray;
-  padding: 0 15px 15px 0;
+  padding: 0 $s $s 0;
   .labelContainer {
-    padding: 15px 0;
+    padding: $s 0 0;
   }
   .textInput {
-    width: calc(100% - 82px);
+    width: calc(100% - 83px);
     color: $black;
     font-size: 12px;
     font-weight: 700;
-    padding: 10px 65px 10px 15px;
+    padding: 10px 65px 10px $s;
     border-radius: $querySelectBorderRadius;
     border: 1px solid $midGray;
     text-overflow: ellipsis;
@@ -41,6 +41,12 @@
       }
     }
   }
+  .caption {
+    font-size: $captionSize;
+    margin: 0 0 $s;
+    font-weight: 400;
+    color: $darkGray;
+  }
   .tooltip {
     font-size: 12px; 
   }
@@ -61,6 +67,7 @@
     justify-content: center;
     align-items: center;
     width: 40px;
+    transition: $defaultAnim;
     svg {
       height: 24px;
       width: 24px;
@@ -78,18 +85,20 @@
       border-left: 1px solid #D6D6D6;
       border-radius: 0;
       &:hover {
+        background-color: $green;
         svg path {
-          fill: $purpleEdgeBGSelected;
+          fill: $white;
         }
       }
     }
     &.negative {
       border: none;
-      border-top-right-radius: 6px;
-      border-bottom-right-radius: 6px;
+      border-top-right-radius: 7px;
+      border-bottom-right-radius: 7px;
       &:hover {
+        background-color: $red;
         svg path {
-          fill: $red;
+          fill: $white;
         }
       }
     }
