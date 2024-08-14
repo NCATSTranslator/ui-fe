@@ -14,7 +14,7 @@ import BookmarkConfirmationModal from '../Modals/BookmarkConfirmationModal';
 import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '../../Utilities/csvGeneration';
-import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
+import { deleteUserSave, createUserResultBookmark } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
 import { currentUser } from '../../Redux/rootSlice';
 import { displayScore } from '../../Utilities/scoring';
@@ -106,24 +106,24 @@ const ResultsItem: FC<ResultsItemProps> = ({
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
 
-  const publicationCount = (!!item.evidenceCounts) 
+  const publicationCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.publicationCount
-    : (!!item.evidence && !!item.evidence.publications) 
+    : (!!item.evidence && !!item.evidence.publications)
       ? Object.values(item.evidence.publications).filter(item => isPublication(item)).length
       : 0;
-  const clinicalTrialCount = (!!item.evidenceCounts) 
+  const clinicalTrialCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.clinicalTrialCount
-    : (!!item.evidence && !!item.evidence.publications) 
+    : (!!item.evidence && !!item.evidence.publications)
       ? Object.values(item.evidence.publications).filter(item => isClinicalTrial(item)).length
       : 0;
-  const miscCount = (!!item.evidenceCounts) 
+  const miscCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.miscCount
-    : (!!item.evidence && !!item.evidence.publications) 
+    : (!!item.evidence && !!item.evidence.publications)
       ? Object.values(item.evidence.publications).filter(item => isMiscPublication(item)).length
       : 0;
-  const sourceCount = (!!item.evidenceCounts) 
+  const sourceCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.sourceCount
-    : (!!item.evidence && !!item.evidence.distinctSources) 
+    : (!!item.evidence && !!item.evidence.distinctSources)
       ? item.evidence.distinctSources.length
       : 0;
 
@@ -283,13 +283,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
     } else {
       item.graph = itemGraph;
       delete item.paths;
-      let bookmarkObject = getFormattedBookmarkObject("result", item.name, "", queryNodeID,
-        queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
-
-      console.log(bookmarkObject);
-
-      let bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
-      console.log(bookmarkedItem);
+      let bookmarkedItem = await createUserResultBookmark(item.name, queryNodeID, queryNodeLabel,
+        queryNodeDescription, type, item, currentQueryID, handleBookmarkError, handleBookmarkError);
       if(bookmarkedItem) {
         let newBookmarkedItem = bookmarkedItem as any;
         setIsBookmarked(true);
@@ -396,19 +391,19 @@ const ResultsItem: FC<ResultsItemProps> = ({
         <span className={styles.evidenceLink}>
           <div>
               {
-                publicationCount > 0  && 
+                publicationCount > 0  &&
                 <span className={styles.info}>Publications ({publicationCount})</span>
               }
               {
-                clinicalTrialCount > 0  && 
+                clinicalTrialCount > 0  &&
                 <span className={styles.info}>Clinical Trials ({clinicalTrialCount})</span>
               }
               {
-                miscCount > 0  && 
+                miscCount > 0  &&
                 <span className={styles.info}>Misc ({miscCount})</span>
               }
               {
-                sourceCount > 0  && 
+                sourceCount > 0  &&
                 <span className={styles.info}>Sources ({sourceCount})</span>
               }
           </div>
