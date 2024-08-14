@@ -32,7 +32,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser);
-  console.log(user);
   const queryTimestamp = useSelector(currentQueryTimestamp);
   const nameResolverEndpoint = (config?.name_resolver) ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
   loading = (loading) ? true : false;
