@@ -9,7 +9,7 @@ import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import AutoHeight from "../AutoHeight/AutoHeight";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { incrementHistory } from "../../Redux/historySlice";
-import { currentConfig } from "../../Redux/rootSlice";
+import { currentConfig, currentUser } from "../../Redux/rootSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
 import { currentQueryTimestamp, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
@@ -31,6 +31,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const dispatch = useDispatch();
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
+  const user = useSelector(currentUser);
+  console.log(user);
   const queryTimestamp = useSelector(currentQueryTimestamp);
   const nameResolverEndpoint = (config?.name_resolver) ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
   loading = (loading) ? true : false;
@@ -384,6 +386,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       autocompleteItems={autocompleteItems}
                       autocompleteLoading={loadingAutocomplete}
                       handleItemClick={handleItemSelection}
+                      disabled={user === null ? true : false}
+                      placeholderText={user === null ? "Select an example below, or log in to submit your own." : false}
                     />
                     { 
                       <img src={loadingIcon} className={`${styles.loadingIcon} ${isLoading ? styles.active : ''} loadingIcon`} alt="loading icon"/>
