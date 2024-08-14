@@ -89,16 +89,16 @@ interface QueryObject {
 
 interface Save {
   id: number | string | null;
-  label: string;
+  label: string | null;
   user_id: string | null;
   save_type: string;
-  notes: string;
+  notes: string | null;
   ars_pkey: string;
-  object_ref: string;
+  object_ref: string | null;
   time_created: string | null;
   time_updated: string | null;
   data?: {
-    item?: ResultItem;
+    item?: ResultItem | Object;
     type?: string;
     query?: QueryObject;
   };
@@ -209,6 +209,34 @@ export const updateUserPreferences = async (
 }
 
 /**
+ * Creates and submits and edge view save for the current user.
+ *
+ * @param {string} id - The ID of the edge.
+ * @param {string} status - The status for the edge. Can be one of [approved | rejected]
+ * @param {string} pk - The primary key associated with the save.
+ * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
+ * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
+ * @returns {Promise<any>} A promise representing the submission of the save.
+ */
+export const createUserEdgeView = async (
+  id: string,
+  status: string,
+  pk: string,
+  httpErrorHandler = defaultHttpErrorHandler,
+  fetchErrorHandler = defaultFetchErrorHandler
+): Promise<any> => {
+  const save = genSave("eview", pk, genEdgeView(id, status));
+  return createUserSave(save, httpErrorHandler, fetchErrorHandler);
+}
+
+//export const getUserEdgeViews = async (
+//  httpErrorHandler = defaultHttpErrorHandler,
+//  fetchErrorHandler = defaultFetchErrorHanalder
+//): null => {
+//  // TODO
+//}
+
+/**
  * Creates a result bookmark for the current user.
  *
  * @param {string} bookmarkName - The name of the bookmark.
@@ -266,10 +294,10 @@ export const createUserBookmark = async (
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
   ): Promise<any> => {
-    const bookmarkObject = genFormattedBookmarkObject(bookmarkType, bookmarkName, notes, queryNodeID,
+    const bookmark = genFormattedBookmark(bookmarkType, bookmarkName, notes, queryNodeID,
       queryNodeLabel, queryNodeDescription, typeObject, saveItem, pk);
-    console.log(bookmarkObject);
-    return createUserSave(bookmarkObject, httpErrorHandler, fetchErrorHandler);
+    console.log(bookmark);
+    return createUserSave(bookmark, httpErrorHandler, fetchErrorHandler);
 }
 
 /**
@@ -707,7 +735,7 @@ const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
  * @param {string} pk - The primary key associated with the save.
  * @returns {Object} The formatted bookmark object.
  */
-const genFormattedBookmarkObject = (
+const genFormattedBookmark = (
     bookmarkType: string = "result",
     bookmarkName: string,
     notes: string = "",
@@ -722,7 +750,7 @@ const genFormattedBookmarkObject = (
     let newSaveItem = cloneDeep(saveItem);
     // delete newSaveItem.evidence.publications;
 
-    let queryObject = genQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
+    let queryObject = genQuery(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
     return {
       save_type: "bookmark",
       label: bookmarkName,
@@ -738,6 +766,23 @@ const genFormattedBookmarkObject = (
 }
 
 /**
+ * Constructs an edge view
+ *
+ * @param {string} id - The ID for the edge.
+ * @param {string} status - The status for the edge. Can be one of [approved | rejected]
+ * @return {Object} - The edge view
+ */
+const genEdgeView = (
+  id: string,
+  status: string
+): Object => {
+  return {
+    id: id,
+    status: status
+  }
+}
+
+/**
  * Constructs a query object for saving, encapsulating node and type details.
  *
  * @param {number} [nodeID=0] - The ID of the node related to the save.
@@ -747,7 +792,7 @@ const genFormattedBookmarkObject = (
  * @param {string} pk - The primary key for the save.
  * @returns {Object} The constructed query object.
  */
-const genQueryObjectForSave = (
+const genQuery = (
     nodeID: number | string = 0,
     nodeLabel: string = "",
     nodeDescription: string = "",
@@ -762,4 +807,37 @@ const genQueryObjectForSave = (
       pk: pk,
       submitted_time: new Date()
     }
+}
+
+/**
+ * Constructs a generic save object
+ *
+ * @param {string} saveType - The type of save object.
+ * @param {string} pk - The primary key associated with the object.
+ * @param {Object} data - The data associated with the save object.
+ * @param {string} [label=null] - A custom label for the save object.
+ * @param {string} [notes=null] - Notes associated with the save object.
+ * @param {string} [objectRef=null] - A path reference to the data.
+ * @returns {Save} The constructed Save.
+ */
+const genSave = (
+  saveType: string,
+  pk: string,
+  data: Object,
+  label: string | null = null,
+  notes: string | null = null,
+  objectRef: string | null = null,
+): Save => {
+  return {
+    id: null,
+    label: label,
+    user_id: null,
+    save_type: saveType,
+    ars_pkey: pk,
+    notes: notes,
+    object_ref: objectRef,
+    time_created: null,
+    time_updated: null,
+    data: data
+  }
 }
