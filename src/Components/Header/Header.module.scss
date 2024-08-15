@@ -105,16 +105,13 @@
           }
         }
         .login {
-          background-color: $purpleTwo;
-          color: $white;
-          box-shadow: $dropShadow;
-          padding: 10px 24px;
-          padding-right: 24px !important;
+          font-weight: 700;
+          padding: 10px 12px;
           border-radius: $defaultBorderRadius;
-          transition: $defaultBoxShadowAnim;
-          font-size: 16px;
+          transition: $defaultAnim;
           &:hover {
-            box-shadow: $dropShadowHover;
+            background-color: $lightGray;
+            color: $purpleOne;
           }
         }
         .logout {
