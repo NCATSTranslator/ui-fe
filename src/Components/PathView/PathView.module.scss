@@ -111,27 +111,28 @@
       padding-left: 0;
     }
     .pathEvidenceButton {
+      display: flex;
       background-color: $white;
       border: 1px solid $darkGray;
-      padding: 4px 3px 3px 4px;
-      border-radius: 50px;
-      margin: 6px 0 0 0;
+      padding: 4px;
+      border-radius: $defaultBorderRadius;
+      margin: 0;
       transition: all .25s ease;
       align-self: start;
       svg {
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
         margin-right: 0;
         path, line, circle {
           transition: all .25s ease;
-          stroke: $darkGray;
+          fill: $darkGray;
         }
       }
       &:hover {
         background-color: $darkGray;
         svg {
           path, line, circle {
-            stroke: $white;
+            fill: $white;
           }
         }
       }
