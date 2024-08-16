@@ -34,6 +34,16 @@ export const sortEvidenceHighLow = (items) => {
   return items.sort((a, b) => b.evidenceCounts.publicationCount - a.evidenceCounts.publicationCount);
 }
 
+export const sortPathsLowHigh = (items) => {
+  console.log(items);
+  return items;
+}
+
+export const sortPathsHighLow = (items) => {
+  console.log(items);
+  return items;
+}
+
 export const sortScoreLowHigh = (items) => {
   return items.sort((a, b) => {
     if (equal(a.score.main, b.score.main)) {

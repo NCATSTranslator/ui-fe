@@ -15,7 +15,6 @@ type FacetHeadingProps = {
 const FacetHeading: FC<FacetHeadingProps> = ({ title, tagType, activeFilters, children }) => {
 
   const matchingActiveFacets = activeFilters.filter((val)=> val.type.includes(tagType)).length;
-  console.log(matchingActiveFacets, activeFilters)
 
   return (
     <div className={`${styles.labelContainer}`}>

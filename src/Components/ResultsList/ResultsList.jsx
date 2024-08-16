@@ -19,7 +19,7 @@ import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "
 import { currentPrefs, currentUser }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow,
-  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag,
+  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, updatePathRankByTag,
   filterCompare } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
@@ -83,6 +83,8 @@ const ResultsList = ({loading}) => {
   const [isSortedByName, setIsSortedByName] = useState(null);
   // Bool, are the results currently sorted by evidence count (true/false for asc/desc, null for not set)
   const [isSortedByEvidence, setIsSortedByEvidence] = useState(null);
+  // Bool, are the results currently sorted by path count (true/false for asc/desc, null for not set)
+  const [isSortedByPaths, setIsSortedByPaths] = useState(null);
   // Bool, are the results currently sorted by score
   const [isSortedByScore, setIsSortedByScore] = useState(false);
   // Bool, is evidence modal open?
@@ -427,39 +429,60 @@ const ResultsList = ({loading}) => {
         setIsSortedByName(true);
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
+        setIsSortedByPaths(null);
         break;
       case 'nameHighLow':
         newSortedResults = sortNameHighLow(newSortedResults);
         setIsSortedByName(false);
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
+        setIsSortedByPaths(null);
         break;
       case 'evidenceLowHigh':
         newSortedResults = sortEvidenceLowHigh(newSortedResults);
         setIsSortedByEvidence(true);
         setIsSortedByScore(null)
         setIsSortedByName(null);
+        setIsSortedByPaths(null);
         break;
       case 'evidenceHighLow':
         newSortedResults = sortEvidenceHighLow(newSortedResults);
         setIsSortedByEvidence(false);
         setIsSortedByScore(null)
         setIsSortedByName(null);
+        setIsSortedByPaths(null);
         break;
       case 'scoreLowHigh':
         newSortedResults = sortScoreLowHigh(newSortedResults);
         setIsSortedByScore(true)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
+        setIsSortedByPaths(null);
         break;
       case 'scoreHighLow':
         newSortedResults = sortScoreHighLow(newSortedResults);
         setIsSortedByScore(false)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
+        setIsSortedByPaths(null);
+        break;
+      case 'pathLowHigh':
+        newSortedResults = sortPathsLowHigh(newSortedResults);
+        setIsSortedByPaths(true)
+        setIsSortedByScore(null)
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
+        break;
+      case 'pathHighLow':
+        newSortedResults = sortPathsHighLow(newSortedResults);
+        setIsSortedByPaths(false)
+        setIsSortedByScore(null)
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
         break;
       case 'entityString':
         newSortedResults = sortByEntityStrings(newSortedResults, activeStringFilters);
+        setIsSortedByPaths(null);
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         break;
@@ -886,6 +909,16 @@ const ResultsList = ({loading}) => {
                           Evidence
                         </div>
                         <div
+                          className={`${styles.head} ${styles.pathsHead} ${isSortedByPaths ? styles.true : (isSortedByPaths === null) ? '': styles.false}`}
+                          onClick={()=>{
+                            let sortString = (isSortedByPaths === null) ? 'pathsHighLow' : (isSortedByPaths) ? 'pathsHighLow' : 'pathsLowHigh';
+                            currentSortString.current = sortString;
+                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                          }}
+                        >
+                          Paths
+                        </div>
+                        <div
                           className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
                           onClick={()=>{
                             let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
@@ -915,9 +948,10 @@ const ResultsList = ({loading}) => {
                         !isLoading &&
                         !isError &&
                         displayedResults.length > 0 &&
-                        displayedResults.map((item) => {
+                        displayedResults.map((item, i) => {
                           return (
                             <ResultsItem
+                              isEven={i % 2 !== 0}
                               rawResults={rawResults.current}
                               key={item.id}
                               type={initPresetTypeObject}

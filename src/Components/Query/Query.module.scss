@@ -146,11 +146,11 @@
   .queryItems {
     display: grid;
     grid-template-columns: 3fr 1fr;
-    grid-column-gap: $s;
+    column-gap: $s;
     .panel {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-column-gap: $s;
+      column-gap: $s;
       align-items: flex-start;
     }
     .build {

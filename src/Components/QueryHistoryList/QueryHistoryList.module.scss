@@ -64,7 +64,7 @@
       cursor: pointer;
       display: grid;
       grid-template-columns: auto 1fr;
-      grid-column-gap: $s;
+      column-gap: $s;
       align-items: center;
       .top {
         margin: 0 0 $xxs;

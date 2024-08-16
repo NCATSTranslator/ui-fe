@@ -70,6 +70,7 @@ interface ResultsItemProps {
   type: QueryType;
   zoomKeyDown: boolean;
   isInUserSave?: boolean;
+  isEven: boolean;
 }
 
 const ResultsItem: FC<ResultsItemProps> = ({
@@ -99,7 +100,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
     rawResults,
     type,
     zoomKeyDown,
-    isInUserSave = false
+    isInUserSave = false,
+    isEven = false
   }) => {
   const user = useSelector(currentUser);
 
@@ -346,6 +348,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setItemHasNotes(hasNotes);
     formattedPaths.current = item.compressedPaths;
   }, [item, hasNotes]);
+  console.log(item);
 
   return (
     <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef} data-result-name={nameString}>
@@ -368,7 +371,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
         }
         <span className={styles.effect}>{pathsCount} {pathString} {queryNodeLabel}</span>
       </div>
-      <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
+      <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${!!isEven && styles.even}`}>
         {
           !!user
             ? <>
@@ -395,6 +398,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
               </>
             : <></>
         }
+        <button className={`${styles.icon} ${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`} onClick={handleOpenResultShare}>
+          <ShareIcon/>
+        </button>
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span className={styles.evidenceLink}>
@@ -418,14 +424,16 @@ const ResultsItem: FC<ResultsItemProps> = ({
           </div>
         </span>
       </div>
+      <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
+        <span className={styles.paths}>
+          <span className={styles.pathsNum}>{ pathsCount } {pathsCount > 1 ? "Paths" : "Path"}</span>
+        </span>
+      </div>
       <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
         <span className={styles.score}>
           <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
         </span>
       </div>
-      <button className={`${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`} onClick={handleOpenResultShare}>
-        <ShareIcon/>
-      </button>
       {/* <CSVLink
         className={styles.downloadButton}
         data={csvData}
@@ -442,7 +450,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <AnimateHeight
         className={`${styles.accordionPanel}
           ${isExpanded ? styles.open : styles.closed }
-          ${((item.description || item.tags.some(item=>item.includes("role"))) && !isInUserSave) ? styles.hasDescription : styles.noDescription }
+          ${(item.tags.some(item=>item.includes("role")) && !isInUserSave) ? styles.hasTags : ''}
+          ${(item.description) ? styles.hasDescription : '' }
         `}
         duration={500}
         height={height}
