@@ -246,7 +246,7 @@ const ResultsList = ({loading}) => {
     }
 
     // filter
-    if (!justSort) 
+    if (!justSort)
       newFormattedResults = filterAndFacet(facetsAndFilters, asFilters, newFormattedResults, newOriginalResults, rr);
 
     // sort
@@ -670,7 +670,7 @@ const ResultsList = ({loading}) => {
     let [results, negatedResults] = filterResults(filters, stringFilters, originalResults, resultPathRanks);
     calculateFacetCounts(results, rawResults, negatedResults, facets, negatedFacets, setAvailableTags);
     results = facetResults(facets, results, resultPathRanks);
-    
+
     if(currentPage !== 0)
       handlePageReset(false, results.length);
 
