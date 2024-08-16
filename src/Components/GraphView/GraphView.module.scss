@@ -12,6 +12,9 @@
 }
 
 .graphContainer {
+  max-width: -webkit-fill-available;
+  max-width: -moz-available;
+  max-width: fill-available;
   width: 100%;
   height: 500px;
   margin: 0;
