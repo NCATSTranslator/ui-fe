@@ -191,7 +191,7 @@
   .accordionPanel {
     grid-column: 1/7;
     &.hasDescription, &.hasTags {
-      min-height: 46px;
+      min-height: 40px;
     }
     &.hasDescription.hasTags {
       min-height: 83px;

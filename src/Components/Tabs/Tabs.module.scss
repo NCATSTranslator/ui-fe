@@ -20,4 +20,10 @@
     display: grid;
     overflow-y: hidden;
   }
+  .inactive {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+  }
 }

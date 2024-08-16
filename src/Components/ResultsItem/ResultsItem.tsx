@@ -24,6 +24,8 @@ import { QueryType } from '../../Utilities/queryTypes';
 import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject } from '../../Types/results';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
 import { isEqual } from 'lodash';
+import Tabs from '../Tabs/Tabs';
+import Tab from '../Tabs/Tab';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -348,7 +350,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setItemHasNotes(hasNotes);
     formattedPaths.current = item.compressedPaths;
   }, [item, hasNotes]);
-  console.log(item);
 
   return (
     <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef} data-result-name={nameString}>
@@ -501,26 +502,32 @@ const ResultsItem: FC<ResultsItemProps> = ({
             }
           </div>
         </div>
-        <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
-          <GraphView
-            result={item}
-            updateGraphFunction={setItemGraph}
-            prebuiltGraph={(item.graph)? item.graph: null}
-            rawResults={rawResults}
-            onNodeClick={handleNodeClick}
-            clearSelectedPaths={handleClearSelectedPaths}
-            active={isExpanded}
-            zoomKeyDown={zoomKeyDown}
-          />
-        </Suspense>
-        <PathView
-          paths={formattedPaths.current}
-          selectedPaths={selectedPaths}
-          active={isExpanded}
-          handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
-          handleActivateEvidence={handleActivateEvidence}
-          activeStringFilters={activeStringFilters}
-        />
+        <Tabs isOpen>
+            <Tab heading="Paths">
+              <PathView
+                paths={formattedPaths.current}
+                selectedPaths={selectedPaths}
+                active={isExpanded}
+                handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
+                handleActivateEvidence={handleActivateEvidence}
+                activeStringFilters={activeStringFilters}
+              />
+            </Tab>
+            <Tab heading="Graph">
+              <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
+                <GraphView
+                  result={item}
+                  updateGraphFunction={setItemGraph}
+                  prebuiltGraph={(item.graph)? item.graph: null}
+                  rawResults={rawResults}
+                  onNodeClick={handleNodeClick}
+                  clearSelectedPaths={handleClearSelectedPaths}
+                  active={isExpanded}
+                  zoomKeyDown={zoomKeyDown}
+                />
+              </Suspense>
+            </Tab>
+        </Tabs>
       </AnimateHeight>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}

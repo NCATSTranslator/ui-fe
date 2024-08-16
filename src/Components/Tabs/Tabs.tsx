@@ -58,10 +58,10 @@ const Tabs: FC<TabsProps> = ({ children, className, isOpen }) => {
       </div>
       {Children.map(children, (child, i) => {
         if (!isValidElement(child)) return null;
-        if (activeTabHeading !== child.props.heading) return null;
+        // if (activeTabHeading !== child.props.heading) return <div className={`${styles.tabContent} ${styles.inactive}`}>{child.props.children}</div>;
         return (
           <Fade key={i} className={styles.fade}>
-            <div className={`${styles.tabContent} ${activeTabHeading}`}>{child.props.children}</div>
+            <div className={`${styles.tabContent} ${activeTabHeading !== child.props.heading ? styles.inactive : activeTabHeading}`}>{child.props.children}</div>
           </Fade>
         );
       })}
