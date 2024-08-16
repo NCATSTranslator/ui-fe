@@ -24,7 +24,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHigh
 import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters } from "../../Utilities/resultsInteractionFunctions";
-import { isFacet, isExclusion, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
+import { isFacet, isExclusion, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
@@ -250,7 +250,7 @@ const ResultsList = ({loading}) => {
     }
 
     // filter
-    if (!justSort) 
+    if (!justSort)
       newFormattedResults = filterAndFacet(facetsAndFilters, asFilters, newFormattedResults, newOriginalResults, rr);
 
     // sort
@@ -588,15 +588,10 @@ const ResultsList = ({loading}) => {
         For each result, check against each filter. If any filter is not met,
         skip that result.
       */
-      for(let result of originalResults) {
+      for (let result of originalResults) {
         const pathRanks = result.compressedPaths.map((p) => { return { rank: 0, path: p }; });
         let addResult = true;
         for(const filter of filters) {
-          if ((isEvidenceFilter(filter) && !(filter.value <= result.evidence.length))) {
-            addResult = false;
-            break;
-          }
-
           if((isTextFilter(filter) && !isExclusion(filter) && !findStringMatch(result, filter.value, pathRanks)) ||
             (isTextFilter(filter) && isExclusion(filter) && findStringMatch(result, filter.value, pathRanks))){
             addResult = false;
@@ -688,14 +683,14 @@ const ResultsList = ({loading}) => {
     const facets = facetsAndFilters.filter((f) => { return isFacet(f) && !isExclusion(f) });
     const negatedFacets = facetsAndFilters.filter((f) => { return isFacet(f) && isExclusion(f) });
     const filters = facetsAndFilters.filter(f => {
-      return isTextFilter(f) || isEvidenceFilter(f) || (isExclusion(f) && isFacet(f));
+      return isTextFilter(f) || (isExclusion(f) && isFacet(f));
     });
 
     const resultPathRanks = [];
     let [results, negatedResults] = filterResults(filters, stringFilters, originalResults, resultPathRanks);
     calculateFacetCounts(results, rawResults, negatedResults, facets, negatedFacets, setAvailableTags);
     results = facetResults(facets, results, resultPathRanks);
-    
+
     if(currentPage !== 0)
       handlePageReset(false, results.length);
 

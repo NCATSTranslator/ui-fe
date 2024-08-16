@@ -11,10 +11,6 @@ export const isFdaFilter = (filter) => {
   return filter.type === 'fda:approved';
 }
 
-export const isEvidenceFilter = (filter) => {
-  return filter.type === 'evi:';
-}
-
 export const isTextFilter = (filter) => {
   return filter.type === 'str:';
 }
