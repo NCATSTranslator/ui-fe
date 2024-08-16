@@ -48,8 +48,6 @@
         position: absolute;
         top: 4px;
         left: 100%;
-        // width: 20px;
-        // height: 20px;
         font-size: 12px;
         font-weight: 400;
         color: $purpleOne;
@@ -128,15 +126,10 @@
       color: $darkGray
     }
   }
-  // .fdaContainer, .evidenceContainer, .scoreContainer, .pathsContainer {
-  //   text-align: center;
-  //   justify-content: center;
-  // }
   .scoreNum, .pathsNum, .info {
     font-size: 12px;
     line-height: 1.25;
     color: $darkGray;
-
   }
   .fdaIcon {
     height: 24px;

@@ -77,9 +77,9 @@
       &:hover {
         input + span {
           &+span {
-            background-color: $red;
+            background-color: $white;
             svg path {
-              fill: $white !important;
+              fill: $red !important;
             }
           }
         }
@@ -89,14 +89,14 @@
       &:hover {
       input + span {
           &+span {
-            background-color: $green;
+            background-color: $white;
             svg path {
-              fill: $white !important;
+              fill: $green !important;
             }
             &:hover {
-              background-color: $green;
+              background-color: $white;
               svg path {
-                fill: $white !important;
+                fill: $green !important;
               }
             }
           }
