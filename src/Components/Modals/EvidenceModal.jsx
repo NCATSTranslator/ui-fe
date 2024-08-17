@@ -1,9 +1,10 @@
 import {useState, useEffect, useRef} from "react";
 import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
+import Tab from "../Tabs/Tab";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
-import ExternalLink from '../../Icons/external-link.svg?react';
+import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isPublication, isPublicationDictionary } from "../../Utilities/utilities";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { getFormattedEdgeLabel, getUrlByType } from '../../Utilities/resultsFormattingFunctions';
@@ -11,7 +12,7 @@ import { checkForEdgeMatch, handleEvidenceSort } from "../../Utilities/evidenceM
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
-import Information from '../../Icons/information.svg?react';
+import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 
@@ -217,7 +218,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
           <Tabs isOpen={isOpen} className={styles.tabs}>
             {
               pubmedEvidence.length > 0 &&
-              <div heading="Publications" className={styles.tab}>
+              <Tab heading="Publications" className={styles.tab}>
                 <PublicationsTable
                   selectedEdgeTrigger={selectedEdgeTrigger}
                   selectedEdge={selectedEdge}
@@ -228,11 +229,11 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                   prefs={prefs}
                   isOpen={isOpen}
                 />
-              </div>
+              </Tab>
             }
             {
               clinicalTrials.current.length > 0 &&
-              <div heading="Clinical Trials" className={styles.tab}>
+              <Tab heading="Clinical Trials" className={styles.tab}>
                 <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head} ${styles.link}`}>Link</div>
@@ -255,11 +256,11 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                     }
                   </div>
                 </div>
-              </div>
+              </Tab>
             }
             {
               miscEvidence.current.length > 0 &&
-              <div heading="Miscellaneous" className={styles.tab}>
+              <Tab heading="Miscellaneous" className={styles.tab}>
                 <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head} ${styles.link}`}>Link</div>
@@ -278,12 +279,12 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                     }
                   </div>
                 </div>
-              </div>
+              </Tab>
             }
             {
               // Add sources modal for predicates
               sources.length > 0 &&
-              <div 
+              <Tab 
                 heading="Knowledge Sources" 
                 tooltipIcon={<Information className={styles.infoIcon} />}
                 dataTooltipId="knowledge-sources-tooltip" 
@@ -322,15 +323,15 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                     }
                   </div>
                 </div>
-              </div>
+              </Tab>
             }
             {
               clinicalTrials.current.length <= 0 &&
               pubmedEvidence.length <= 0 &&
               sources.length <= 0 &&
-              <div heading="No Evidence Available">
+              <Tab heading="No Evidence Available">
                 <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
-              </div>
+              </Tab>
             }
           </Tabs>
         </div>

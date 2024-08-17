@@ -10,10 +10,8 @@
     align-items: center;
   }
   .logo {
-    max-width: 250px;
-    @media screen and (min-width: 1125px) {
-      max-width: 316px;
-    }
+    max-width: 160px;
+    display: flex;
     svg {
       width: 100%;
     }
@@ -22,7 +20,9 @@
     .container {
       display: flex;
       justify-content: space-between;
-      padding: 16px;
+      padding: 8px 12px;
+      max-width: $maxwidth;
+      margin: 0 auto;
       h5,h1,.h1 {
         margin-bottom: 0;
       }
@@ -31,63 +31,60 @@
         @media (min-width: $medium) {
           display: flex;
         }
+        button {
+          margin: 0;
+        }
         button, a {
+          display: inline-flex;
+          align-items: center;
+          width: fit-content;
+        }
+        a {
           color: $darkGray;
           font-size: 14px;
           background-color: transparent;
           text-decoration: none;
           font-weight: 700;
           margin-bottom: 0;
-          margin-right: 5px;
-          display: inline-flex;
-          align-items: center;
+          margin-right: 8px;
           line-height: 1;
           padding: 10px 8px;
-          width: fit-content;
           box-shadow: none;
+          transition: $defaultAnim;
           @media screen and (min-width: 1125px) {
-            font-size: 16px;
-            margin-right: 10px;
-          }
-          @media screen and (min-width: 1350px) {
-            margin-right: $m;
+            margin-right: 12px;
           }
           .linkSpan {
             position: relative;
-            font-size: 16px;
+            font-size: 14px;
             color: $darkGray;
             font-weight: 700;
             line-height: 1;
-            &:after {
-              content: '';
-              position: absolute;
-              bottom: -5px;
-              left: 0;
-              right: 0;
-              background-color: transparent;
-              height: 2px;
-              width: 100%;
-              transition: all .3s ease;
-              transform: scaleX(0);
-            }
+            transition: $defaultAnim;
+          }
+          svg, svg path {
+            fill: $darkGray;
+            transition: $defaultAnim;
           }
           svg {
             margin-right: 4px;
             height: 24px;
             width: 24px;
-            fill: $darkGray;
           }
           &:hover {
             box-shadow: none;
-            .linkSpan:after {
-              transform: scaleX(1);
-              background-color: $darkGray;
+            background-color: $lightGray;
+            .linkSpan {
+              color: $purpleOne;
+            }
+            svg, svg path {
+              fill: $purpleOne;
             }
           }
         }
         .workspaceLink {
           svg {
-            width: 22px;
+            width: 24px;
             margin-right: 6px;
             rect, polygon, line {
               stroke: $darkGray;
@@ -108,24 +105,22 @@
           }
         }
         .login {
-          background-color: $purpleTwo;
-          color: $white;
-          box-shadow: $dropShadow;
-          padding: 10px 24px;
-          padding-right: 24px !important;
+          font-weight: 700;
+          padding: 10px 12px;
           border-radius: $defaultBorderRadius;
-          transition: $defaultBoxShadowAnim;
+          transition: $defaultAnim;
           &:hover {
-            box-shadow: $dropShadowHover;
+            background-color: $lightGray;
+            color: $purpleOne;
           }
+        }
+        .logout {
+          font-size: 16px;
         }
       }
     }
   }
   .userName {
-    // font-size: $bodyOneSize;
-    // color: $darkGray;
-    margin: 0 0 0 7px;
     &.hide {
       display: none;
     }
@@ -185,22 +180,5 @@
         }
       }
     }
-  }
-  .imageContainer {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    box-shadow: $dropShadow;
-    transition: $defaultBoxShadowAnim;
-    overflow: hidden;
-    &:hover {
-      box-shadow: $dropShadowHover;
-    }
-  }
-  .profilePic {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-    object-position: center;
   }
 }

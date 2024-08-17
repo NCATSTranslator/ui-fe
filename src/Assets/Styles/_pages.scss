@@ -77,3 +77,11 @@
     }
   } 
 }
+
+.design-system {
+  .button-with-icon {
+    svg path {
+      fill: $white;
+    }
+  }
+}

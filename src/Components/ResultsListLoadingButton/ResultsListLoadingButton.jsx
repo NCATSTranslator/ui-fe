@@ -1,8 +1,8 @@
 import styles from './ResultsListLoadingButton.module.scss';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
-import ResultsAvailableIcon from '../../Icons/Alerts/Checkmark.svg?react';
-import CompleteIcon from '../../Icons/Alerts/Checkmark.svg?react';
-import AlertIcon from '../../Icons/Alerts/Warning.svg?react';
+import ResultsAvailableIcon from '../../Icons/Buttons/Checkmark/Checkmark.svg?react';
+import CompleteIcon from '../../Icons/Buttons/Checkmark/Checkmark.svg?react';
+import AlertIcon from '../../Icons/Status/Alerts/Warning.svg?react';
 import TextCrossfade from '../TextCrossfade/TextCrossfade';
 
 const ResultsListLoadingButton = ({ data = {} }) => {

@@ -1,9 +1,12 @@
-import { useMemo, FC } from 'react';
+import { useState, useEffect, useMemo, FC } from 'react';
 import styles from './ResultsFilter.module.scss';
 import { Filter, Tag, GroupedTags } from '../../Types/results';
 import { cloneDeep } from 'lodash';
 import FacetGroup from '../FacetGroup/FacetGroup';
 import EntitySearch from '../EntitySearch/EntitySearch';
+import Button from '../Core/Button';
+import FilterIcon from '../../Icons/Navigation/Filter.svg?react';
+import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
 
 interface ResultsFilterProps {
   onClearAll: () => void;
@@ -11,9 +14,19 @@ interface ResultsFilterProps {
   onFilter: (arg0: Tag) => void;
   activeFilters: Filter[];
   availableTags: {[key: string]: Tag};
+  expanded?: boolean;
+  setExpanded?: (arg0:boolean) => void
 }
 
-const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, onClearTag, availableTags}) => {
+const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, expanded = false, setExpanded = (arg0: boolean)=>{}, availableTags}) => {
+
+  const [isExpanded, setIsExpanded] = useState(expanded);
+  const toggleIsExpanded = () => {
+    setIsExpanded(prev => {
+      setExpanded(!prev);
+      return !prev;
+    });
+  }
 
   // returns a new object with each tag grouped by its type
   const groupAvailableTags = (tags: {[key: string]: Tag}): GroupedTags => {
@@ -37,7 +50,6 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
     return newGroupedTags;
   }
 
-
   const groupedTags = useMemo(() => groupAvailableTags(availableTags), [availableTags]);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
@@ -45,13 +57,23 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
     pt: (a: [string, Tag], b: [string, Tag]) => -(a[1].name.localeCompare(b[1].name))
   };
 
+  useEffect(() => {
+    setIsExpanded(expanded);
+  }, [expanded]);
 
   return (
-    <div className={styles.resultsFilter}>
+    <div className={`${styles.resultsFilter} ${isExpanded ? styles.expanded : styles.collapsed}`}>
+      <div className={styles.top}>
+        <p className={styles.heading} onClick={toggleIsExpanded} ><FilterIcon/><span>Filters</span></p>
+        <div className={styles.right}>
+          <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
+          <Button className={styles.closeButton} iconOnly><CloseIcon onClick={toggleIsExpanded}/></Button>
+        </div>
+      </div>
       <div className={styles.bottom}>
-        <p className={styles.heading}>Filters</p>
         <EntitySearch
           onFilter={onFilter}
+          className={styles.entitySearch}
         />
         <div>
           {
@@ -70,7 +92,6 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
             })
           }
         </div>
-        <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
       </div>
     </div>
   );

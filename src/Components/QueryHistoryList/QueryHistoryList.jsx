@@ -5,11 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "../../Utilities/utilities";
 import { pastQueryState, setHistory } from "../../Redux/historySlice";
 import ShareModal from '../Modals/ShareModal';
-import TextInput from "../FormFields/TextInput";
+import TextInput from "../Core/TextInput";
 import Tooltip from "../Tooltip/Tooltip";
-import Close from '../../Icons/Buttons/Close.svg?react';
+import Close from '../../Icons/Buttons/Close/Close.svg?react';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
-import ShareIcon from '../../Icons/share.svg?react';
+import ShareIcon from '../../Icons/Buttons/Export.svg?react';
 import { cloneDeep } from "lodash";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 

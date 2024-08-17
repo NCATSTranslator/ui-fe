@@ -1,7 +1,7 @@
 import { memo, FC } from 'react';
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
-import ResearchMultiple from '../../Icons/research-multiple.svg?react';
+import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { SupportDataObject } from '../../Types/results';
 import { isFormattedEdgeObject } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';

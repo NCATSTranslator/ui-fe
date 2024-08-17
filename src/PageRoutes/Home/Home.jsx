@@ -2,7 +2,7 @@ import Query from "../../Components/Query/Query";
 import homeOne from "../../Assets/Images/Home/home1.svg";
 import homeTwo from "../../Assets/Images/Home/home2.svg";
 import homeThree from "../../Assets/Images/Home/home3.svg";
-import ArrowForward from '../../Icons/Directional/arrow_forward.svg?react';
+import ArrowForward from '../../Icons/Directional/Arrows/Arrow Left.svg?react';
 import styles from "./Home.module.scss";
 
 const Home = () => {

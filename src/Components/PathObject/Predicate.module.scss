@@ -14,12 +14,12 @@
   margin-right: 0;
   transition: all .25s ease;
   border-radius: $defaultBorderRadius;
-  box-shadow: $dropShadow;
+  box-shadow: none;
   border: 1px solid $purpleEdgeBG;
   cursor: pointer;
   svg, svg path, svg circle, svg line {
     transition: all .25s ease;
-    stroke: $white;
+    fill: $white;
   }
   &.hasMore {
     padding: 3px 7px;
@@ -43,7 +43,7 @@
   }
   &:hover {
     // color: $black;
-    box-shadow: $dropShadowHover;
+    // box-shadow: $dropShadowHover;
     background-color: $purpleEdgeBGHover;
     text-decoration: underline;
   }
@@ -183,13 +183,20 @@ svg.connector {
     margin: 0;
   }
   .supportButtonIcon {
+    display: flex;
     margin: 0;
     transform: rotate(180deg);
     z-index: 10;
     position: relative;
     background-color: $white;
     border-radius: 50%;
-    height: 24px;
+    padding: 3.5px;
+    svg {
+      width: 17px;
+      min-width: 17px;
+      height: 17px;
+      min-height: 17px;
+    }
   }
   &.expanded {
     border-radius: 50%;

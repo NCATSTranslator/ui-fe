@@ -25,7 +25,7 @@
     }
     .container {
       display: grid;
-      grid-column-gap: $s;
+      column-gap: $s;
       grid-template-columns: auto minmax(0,1fr);
       align-items: center;
       padding: 24px;

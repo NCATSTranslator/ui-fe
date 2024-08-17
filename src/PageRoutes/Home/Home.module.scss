@@ -66,12 +66,12 @@
   .threeCol {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-column-gap: $m;
+    column-gap: $m;
   }
   .twoCol {
     display: grid;
     grid-template-columns: 7fr 5fr;
-    grid-column-gap: $m;
+    column-gap: $m;
   }
   .colTwo {
     ul li {

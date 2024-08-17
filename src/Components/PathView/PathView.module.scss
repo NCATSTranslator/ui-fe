@@ -92,7 +92,7 @@
       }
     }
     .target {
-      background-color: $blueTwo;
+      background-color: $blueOne;
       color: $white;
       svg {
         margin-right: 8px;
@@ -111,27 +111,28 @@
       padding-left: 0;
     }
     .pathEvidenceButton {
+      display: flex;
       background-color: $white;
-      border: 1px solid $midDarkGray;
-      padding: 4px 3px 3px 4px;
-      border-radius: 50px;
-      margin: 6px 0 0 0;
+      border: 1px solid $darkGray;
+      padding: 4px;
+      border-radius: $defaultBorderRadius;
+      margin: 0;
       transition: all .25s ease;
       align-self: start;
       svg {
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
         margin-right: 0;
         path, line, circle {
           transition: all .25s ease;
-          stroke: $midDarkGray;
+          fill: $darkGray;
         }
       }
       &:hover {
-        background-color: $midDarkGray;
+        background-color: $darkGray;
         svg {
           path, line, circle {
-            stroke: $white;
+            fill: $white;
           }
         }
       }
@@ -206,7 +207,7 @@
   .support {
     grid-column: 1/8;
     grid-row: 2;
-    background-color: $purpleTwo20;
+    background-color: $palePurple;
     border: 1px solid $purpleEdgeBG;
     border-radius: $defaultBorderRadius;
     padding: 10px;
@@ -242,5 +243,5 @@
   width: 100%;
   margin: 0 auto 20px;
   height: 2px;
-  background-color: $borderGray;
+  background-color: $darkGray;
 }

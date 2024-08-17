@@ -13,7 +13,7 @@
     }
   }
   .loadingText {
-    color: $midDarkGray;
+    color: $darkGray;
     font-weight: 700;
     text-align: center;
     display: flex;
@@ -24,7 +24,7 @@
     }
   }
   .loadingBarContainer {
-    background-color: $borderGray;
+    background-color: $darkGray;
     border-radius: $querySelectBorderRadius;
     height: 10px;
     width: 100%;
@@ -35,7 +35,7 @@
       background-color: $purpleOne;
       transition: all 2000ms ease-in-out;
       &.fade {
-        background-color: $purpleOne50;
+        background-color: $lightPurpleOne;
       }
     }
   }

@@ -1,10 +1,10 @@
 import {useState, useEffect} from "react";
-import Button from "../FormFields/Button";
-import Warning from '../../Icons/Alerts/Warning.svg?react'
-import Info from '../../Icons/Alerts/Info.svg?react'
-import Checkmark from '../../Icons/Alerts/Checkmark.svg?react'
-import Cross from '../../Icons/Alerts/Cancelled.svg?react'
-import Close from '../../Icons/Buttons/Close.svg?react'
+import Button from "../Core/Button";
+import Warning from '../../Icons/Status/Alerts/Warning.svg?react'
+import Info from '../../Icons/Status/Alerts/Info.svg?react'
+import Checkmark from '../../Icons/Status/Alerts/Checkmark.svg?react'
+import Cross from '../../Icons/Status/Alerts/Cancelled.svg?react'
+import Close from '../../Icons/Buttons/Close/Close.svg?react'
 import { Fade } from "react-awesome-reveal";
 import styles from './Alert.module.scss';
 
