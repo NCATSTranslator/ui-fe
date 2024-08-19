@@ -47,7 +47,7 @@ const getTagHeadingMarkup = (tagType: string, activeFilters: Filter[]): JSX.Elem
   let headingToReturn;
   switch(tagType) {
     case 'cc':
-      headingToReturn = 
+      headingToReturn =
         <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Chemical Categories">
           <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
           <p className={styles.tooltipParagraph}>Phase 1-3 Drugs are chemicals that are part of a clinical trial and do not yet have FDA approval.</p>
@@ -55,13 +55,13 @@ const getTagHeadingMarkup = (tagType: string, activeFilters: Filter[]): JSX.Elem
         </FacetHeading>;
       break;
     case 'pc':
-      headingToReturn = 
+      headingToReturn =
         <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Object Type">
           <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
         </FacetHeading>;
       break;
     case 'role':
-      headingToReturn = 
+      headingToReturn =
         <FacetHeading tagType={tagType} activeFilters={activeFilters} title="ChEBI Role Classification">
           <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
         </FacetHeading>;
