@@ -7,7 +7,7 @@ import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
-import { isFacet, isEvidenceFilter, hasFilterFamily } from '../../Utilities/filterFunctions';
+import { isFacet, hasFilterFamily } from '../../Utilities/filterFunctions';
 import { pivotSort } from '../../Utilities/sortingFunctions';
 import { cloneDeep } from "lodash";
 import FacetHeading from "../FacetHeading/FacetHeading";
@@ -132,7 +132,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
   });
 
   const handleFacetChange = (facetID: string, objectToUpdate: Tag, setterFunction: (tag: Tag)=>void, negated: boolean = false, label: string = '') => {
-    if(objectToUpdate.type === facetID && !isEvidenceFilter(objectToUpdate)) {
+    if (objectToUpdate.type === facetID) {
       return;
     }
 

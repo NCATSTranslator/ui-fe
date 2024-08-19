@@ -24,7 +24,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHigh
 import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters } from "../../Utilities/resultsInteractionFunctions";
-import { isFacet, isExclusion, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
+import { isFacet, isExclusion, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
@@ -592,11 +592,6 @@ const ResultsList = ({loading}) => {
         const pathRanks = result.compressedPaths.map((p) => { return { rank: 0, path: p }; });
         let addResult = true;
         for(const filter of filters) {
-          if ((isEvidenceFilter(filter) && !(filter.value <= result.evidence.length))) {
-            addResult = false;
-            break;
-          }
-
           if((isTextFilter(filter) && !isExclusion(filter) && !findStringMatch(result, filter.value, pathRanks)) ||
             (isTextFilter(filter) && isExclusion(filter) && findStringMatch(result, filter.value, pathRanks))){
             addResult = false;
@@ -688,7 +683,7 @@ const ResultsList = ({loading}) => {
     const facets = facetsAndFilters.filter((f) => { return isFacet(f) && !isExclusion(f) });
     const negatedFacets = facetsAndFilters.filter((f) => { return isFacet(f) && isExclusion(f) });
     const filters = facetsAndFilters.filter(f => {
-      return isTextFilter(f) || isEvidenceFilter(f) || (isExclusion(f) && isFacet(f));
+      return isTextFilter(f) || (isExclusion(f) && isFacet(f));
     });
 
     const resultPathRanks = [];
