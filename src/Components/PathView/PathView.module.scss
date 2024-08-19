@@ -1,14 +1,13 @@
 @import "../../Assets/Styles/variables";
 
 .pathView {
-  padding: $m 0;
+  padding: 0 0 $s;
   position: relative;
   z-index: 100;
   .tableHead, .tableItem {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 5px;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     .name, .target {
       font-size: 14px;
@@ -101,14 +100,26 @@
   }
   .formattedPath {
     display: grid;
-    grid-template-columns: min-content 1fr;
+    grid-template-columns: min-content min-content 1fr;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-    padding-left: 20px;
+    gap: 8px;
+    margin-bottom: $m;
+    padding-left: $m;
     position: relative;
     .formattedPath {
       padding-left: 0;
+    }
+    .num {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 1.25;
+      color: $darkGray;
+      align-self: flex-start;
     }
     .pathEvidenceButton {
       display: flex;
@@ -162,20 +173,10 @@
     }
   }
   .header {
-    margin-bottom: $l;
+    margin-bottom: $s;
     p {
       font-size: 12px;
-    }
-    .subtitle {
-      display: flex;
-      align-items: center;
-      font-size: 18px;
-      font-weight: 700;
-      color: $black;
-      margin-bottom: 0;
-      svg {
-        margin-left: 4px;
-      }
+      color: $darkGray;
     }
   }
   .needHelp {
@@ -210,8 +211,11 @@
     background-color: $palePurple;
     border: 1px solid $purpleEdgeBG;
     border-radius: $defaultBorderRadius;
-    padding: 10px;
-    margin: 25px 0 0 0;
+    padding: $s;
+    margin: $m 0 0 0;
+    overflow-x: scroll !important;
+    position: relative;
+    left: -42px;
     .formattedPath:last-of-type {
       margin-bottom: 0;
     }
@@ -229,7 +233,7 @@
 .inferenceLabel {
   font-weight: 700;
   padding-left: 10px;
-  margin-bottom: 15px;
+  margin-bottom: $s;
   width: fit-content;
   position: relative;
   display: flex;
