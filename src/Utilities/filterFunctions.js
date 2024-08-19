@@ -1,3 +1,7 @@
+export const makeEntitySearch = () => {
+  return { family: 'str', value: '', negated: false };
+}
+
 export const getValidFamilies = () => {
   return [...validFacetFamilies];
 }
@@ -23,9 +27,6 @@ export const facetFamily = (facet) => {
   return facet.split('/')[1];
 }
 
-const filterFamily = (filter) => {
-  return facetFamily(filter.family);
-}
 
 export const hasFilterFamily = (filter, facetFamily) => {
   return filterFamily(filter) === facetFamily;
@@ -53,9 +54,13 @@ export const getTagFamily = (tag, category) => {
   return splitTag(tag)[1];
 }
 
+// TODO: Make this a configuration
+const validFacetFamilies = ['cc', 'di', 'pc', 'pt', 'role', 'ara'];
+
 const splitTag = (tag) => {
   return tag.split('/');
 }
 
-// TODO: Make this a configuration
-const validFacetFamilies = ['cc', 'di', 'pc', 'pt', 'role', 'ara'];
+const filterFamily = (filter) => {
+  return facetFamily(filter.family);
+}
