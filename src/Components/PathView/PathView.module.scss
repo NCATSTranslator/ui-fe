@@ -1,7 +1,7 @@
 @import "../../Assets/Styles/variables";
 
 .pathView {
-  padding: 0 0 $s;
+  padding: 0;
   position: relative;
   z-index: 100;
   .tableHead, .tableItem {
@@ -182,13 +182,16 @@
   .needHelp {
     font-size: 12px;
     text-align: center;
-    margin: 12px 0 0 0;
     display: flex;
     justify-content: center;
     align-items: center;
     color: $purpleOne;
+    margin: 0;
     svg {
       margin-right: 4px;
+      path {
+        fill: $purpleOne;
+      }
     }
     a {
       padding: 0;
