@@ -1,6 +1,6 @@
 import styles from './ResultsListHeader.module.scss';
 import ReactPaginate from 'react-paginate';
-import { isFacet, isTextFilter, isFdaFilter, getFilterLabel } from '../../Utilities/filterFunctions';
+import { isFacet, isTextFilter, getFilterLabel } from '../../Utilities/filterFunctions';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react'
 import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
@@ -13,8 +13,6 @@ const getSelectedFilterDisplay = (filter) => {
   let filterDisplay;
   if (isTextFilter(filter)) {
     filterDisplay = <div>Text Filter: <span>{filter.value}</span></div>;
-  } else if (isFdaFilter(filter)) {
-    filterDisplay = <div><span>FDA Approved</span></div>;
   } else if (isFacet(filter)) {
     let filterLabel = getFilterLabel(filter);
     filterDisplay = <div>{filterLabel}:<span> {filter.value}</span></div>;

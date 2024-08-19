@@ -7,15 +7,15 @@ import EntitySearch from '../EntitySearch/EntitySearch';
 import Button from '../Core/Button';
 import FilterIcon from '../../Icons/Navigation/Filter.svg?react';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
+import * as faceting from '../../Utilities/filterFunctions';
 
 interface ResultsFilterProps {
-  onClearAll: () => void;
-  onClearTag: () => void;
-  onFilter: (arg0: Tag) => void;
   activeFilters: Filter[];
-  availableTags: {[key: string]: Tag};
+  onFilter: (arg0: Tag) => void;
+  onClearAll: () => void;
   expanded?: boolean;
   setExpanded?: (arg0:boolean) => void
+  availableTags: {[key: string]: Tag};
 }
 
 const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, expanded = false, setExpanded = (arg0: boolean)=>{}, availableTags}) => {
@@ -30,22 +30,15 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
 
   // returns a new object with each tag grouped by its type
   const groupAvailableTags = (tags: {[key: string]: Tag}): GroupedTags => {
-    let clonedTags = cloneDeep(tags);
-    let roleTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('role:')));
-    let chemicalTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('cc:')));
-    let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
-    let araTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ara:')));
-    let diTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('di:')));
-    let pathTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pt:')));
-    // The ordering of newGroupedTags determines the order of the facets in the UI
-    const newGroupedTags: GroupedTags = {
-      cc: chemicalTypeTags,
-      di: diTags,
-      pc: nodeTypeTags,
-      pt: pathTypeTags,
-      role: roleTags,
-      ara: araTags
-    };
+    const newGroupedTags: GroupedTags = {};
+    for (let family of faceting.getValidFamilies()) {
+      newGroupedTags[family] = {};
+    }
+
+    for (let [id, description] of Object.entries(cloneDeep(tags))) {
+      const family = faceting.getTagFamily(id);
+      newGroupedTags[family][id] = description;
+    }
 
     return newGroupedTags;
   }
@@ -78,12 +71,12 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
         <div>
           {
             groupedTags &&
-            Object.keys(groupedTags).map((tagType) => {
+            Object.keys(groupedTags).map((tagFamily) => {
               return (
                 <FacetGroup
-                  tagType={tagType}
+                  tagFamily={tagFamily}
                   activeFilters={activeFilters}
-                  facetCompare={facetCompares[tagType]}
+                  facetCompare={facetCompares[tagFamily]}
                   groupedTags={groupedTags}
                   availableTags={availableTags}
                   onFilter={onFilter}

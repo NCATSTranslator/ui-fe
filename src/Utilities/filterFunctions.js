@@ -1,18 +1,18 @@
+export const getValidFamilies = () => {
+  return [...validFacetFamilies];
+}
+
 export const isFacet = (filter) => {
   const family = filterFamily(filter);
-  return validFacetFamilies.has(family);
+  return validFacetFamilies.includes(family);
 }
 
 export const isExclusion = (filter) => {
   return filter.negated
 }
 
-export const isFdaFilter = (filter) => {
-  return filter.type === 'fda:approved';
-}
-
 export const isTextFilter = (filter) => {
-  return filter.type === 'str:';
+  return filter.family === 'str';
 }
 
 export const hasSameFacetFamily = (facetA, facetB) => {
@@ -20,11 +20,11 @@ export const hasSameFacetFamily = (facetA, facetB) => {
 }
 
 export const facetFamily = (facet) => {
-  return facet.split(':')[0];
+  return facet.split('/')[1];
 }
 
 const filterFamily = (filter) => {
-  return facetFamily(filter.type);
+  return facetFamily(filter.family);
 }
 
 export const hasFilterFamily = (filter, facetFamily) => {
@@ -32,34 +32,30 @@ export const hasFilterFamily = (filter, facetFamily) => {
 }
 
 export const getFilterLabel = (filter) => {
-  let filterLabel = "Tag";
-  if(!filter.type)
-    return filterLabel;
-  let _filterFamily = filterFamily(filter);
-  switch(_filterFamily){
-    case "cc":
-      filterLabel = "Chemical Category";
-      break;
-    case "pc":
-      filterLabel = "Object Type";
-      break;
-    case "di":
-      filterLabel = "Drug Indication";
-      break;
-    case "ara":
-      filterLabel = "Reasoning Agent";
-      break;
-    case "role":
-      filterLabel = "ChEBI Role";
-      break;
-    case "pt":
-      filterLabel = "Relationship Type";
-      break;
-    default:
-      break;
+  const defaultLabel = "Tag";
+  if(!filter.family) {
+    return defaultLabel;
   }
-  return filterLabel;
+
+  switch(filterFamily(filter)){
+    case "cc":   return "Chemical Category";
+    case "pc":   return "Object Type";
+    case "di":   return "Drug Indication";
+    case "ara":  return "Reasoning Agent";
+    case "role": return "ChEBI Role";
+    case "pt":   return "Relationship Type";
+  }
+
+  return defaultLabel;
+}
+
+export const getTagFamily = (tag, category) => {
+  return splitTag(tag)[1];
+}
+
+const splitTag = (tag) => {
+  return tag.split('/');
 }
 
 // TODO: Make this a configuration
-const validFacetFamilies = new Set(['role', 'rc', 'pc', 'fda', 'ara', 'di', 'cc', 'pt']);
+const validFacetFamilies = ['cc', 'di', 'pc', 'pt', 'role', 'ara'];

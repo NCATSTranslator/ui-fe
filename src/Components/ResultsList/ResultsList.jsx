@@ -515,13 +515,13 @@ const ResultsList = ({loading}) => {
 
     // Create a list of tags from the master tag list provided by the backend
     const countedTags = cloneDeep(rawResults.data.tags);
-    const activeFamilies = new Set(activeFacets.map(f => facetFamily(f.type)));
+    const activeFamilies = new Set(activeFacets.map(f => facetFamily(f.family)));
     for(const result of filteredResults) {
       // Determine the distance between a result's facets and the facet selection
       const resultFamilies = new Set();
       for (const facet of activeFacets) {
-        if (result.tags.includes(facet.type)) {
-          resultFamilies.add(facetFamily(facet.type));
+        if (result.tags.includes(facet.family)) {
+          resultFamilies.add(facetFamily(facet.family));
         }
       }
 
@@ -547,7 +547,7 @@ const ResultsList = ({loading}) => {
     for (const result of negatedResults) {
       addTagCountsWhen(countedTags, result, (tag) => {
         return negatedFacets.reduce((acc, facet) => {
-          return (tag === facet.type) || acc;
+          return (tag === facet.family) || acc;
         }, false);
       });
     }
@@ -598,7 +598,7 @@ const ResultsList = ({loading}) => {
             break;
           }
 
-          if (isFacet(filter) && result.tags.includes(filter.type)) {
+          if (isFacet(filter) && result.tags.includes(filter.family)) {
             addResult = false;
             negatedResults.push(result);
             break;
@@ -637,23 +637,23 @@ const ResultsList = ({loading}) => {
         let addResult = true;
         let isInter = null;
         let combine = null;
-        let lastFacetType = '';
+        let lastFacetFamily = '';
         for (const facet of facets) {
-          isInter = (!hasSameFacetFamily(lastFacetType, facet.type));
+          isInter = (!hasSameFacetFamily(lastFacetFamily, facet.family));
           if (isInter) {
             // We went through an entire facet group with no match
             if (!addResult) {
               break;
             }
 
-            lastFacetType = facet.type;
+            lastFacetFamily = facet.family;
             combine = intersect;
           } else {
             combine = union;
           }
 
-          addResult = combine(addResult, result.tags.includes(facet.type));
-          updatePathRankByTag(result, facet.type, resultPathRanks[resultIndex]);
+          addResult = combine(addResult, result.tags.includes(facet.family));
+          updatePathRankByTag(result, facet.family, resultPathRanks[resultIndex]);
         }
 
         if (addResult) {
@@ -702,7 +702,7 @@ const ResultsList = ({loading}) => {
   const handleFilter = (filter) => {
     let indexes = [];
     for(const [i, activeFilter] of activeFilters.entries()) {
-      if (activeFilter.type === filter.type) {
+      if (activeFilter.family === filter.family) {
         indexes.push(i);
       }
     }
@@ -842,16 +842,12 @@ const ResultsList = ({loading}) => {
             !isLoading &&
             <>
               <ResultsFilter
-                startIndex={itemOffset+1}
-                endIndex={endResultIndex}
-                formattedCount={formattedResults.length}
-                totalCount={originalResults.current.length}
+                activeFilters={activeFilters}
                 onFilter={handleFilter}
                 onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults.current, originalResults.current, setActiveFilters, currentSortString.current, handleUpdateResults)}
-                activeFilters={activeFilters}
-                availableTags={availableTags}
                 expanded={filtersExpanded}
                 setExpanded={setFiltersExpanded}
+                availableTags={availableTags}
               />
               <div>
                 <ResultsListHeader

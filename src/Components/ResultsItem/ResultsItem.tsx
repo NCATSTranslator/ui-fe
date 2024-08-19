@@ -32,10 +32,10 @@ const GraphView = lazy(() => import("../GraphView/GraphView"));
 const sortTagsBySelected = (
   a: string,
   b: string,
-  selected: [{type: string;}] | Filter[]
+  selected: [{family: string;}] | Filter[]
 ): number => {
-  const aExistsInSelected = selected.some((item) => item.type === a);
-  const bExistsInSelected = selected.some((item) => item.type === b);
+  const aExistsInSelected = selected.some((item) => item.family === a);
+  const bExistsInSelected = selected.some((item) => item.family === b);
 
   if (aExistsInSelected && bExistsInSelected) return 0;
   if (aExistsInSelected) return -1;
@@ -112,24 +112,24 @@ const ResultsItem: FC<ResultsItemProps> = ({
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
 
-  const publicationCount = (!!item.evidenceCounts) 
+  const publicationCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.publicationCount
-    : (!!item.evidence && !!item.evidence.publications) 
+    : (!!item.evidence && !!item.evidence.publications)
       ? Object.values(item.evidence.publications).filter(item => isPublication(item)).length
       : 0;
-  const clinicalTrialCount = (!!item.evidenceCounts) 
+  const clinicalTrialCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.clinicalTrialCount
-    : (!!item.evidence && !!item.evidence.publications) 
+    : (!!item.evidence && !!item.evidence.publications)
       ? Object.values(item.evidence.publications).filter(item => isClinicalTrial(item)).length
       : 0;
-  const miscCount = (!!item.evidenceCounts) 
+  const miscCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.miscCount
-    : (!!item.evidence && !!item.evidence.publications) 
+    : (!!item.evidence && !!item.evidence.publications)
       ? Object.values(item.evidence.publications).filter(item => isMiscPublication(item)).length
       : 0;
-  const sourceCount = (!!item.evidenceCounts) 
+  const sourceCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.sourceCount
-    : (!!item.evidence && !!item.evidence.distinctSources) 
+    : (!!item.evidence && !!item.evidence.distinctSources)
       ? item.evidence.distinctSources.length
       : 0;
 
@@ -321,11 +321,11 @@ const ResultsItem: FC<ResultsItemProps> = ({
     }
   }
 
-  const handleTagClick = (tagID: string, tagObject: Tag) => {
+  const handleTagClick = (tagFamily: string, tagObject: Tag) => {
     let newObj: Tag = {
       name: tagObject.name,
       negated: false,
-      type: tagID,
+      family: tagFamily,
       value: tagObject.name
     };
     handleFilter(newObj);
@@ -407,19 +407,19 @@ const ResultsItem: FC<ResultsItemProps> = ({
         <span className={styles.evidenceLink}>
           <div>
               {
-                publicationCount > 0  && 
+                publicationCount > 0  &&
                 <span className={styles.info}>Publications ({publicationCount})</span>
               }
               {
-                clinicalTrialCount > 0  && 
+                clinicalTrialCount > 0  &&
                 <span className={styles.info}>Clinical Trials ({clinicalTrialCount})</span>
               }
               {
-                miscCount > 0  && 
+                miscCount > 0  &&
                 <span className={styles.info}>Misc ({miscCount})</span>
               }
               {
-                sourceCount > 0  && 
+                sourceCount > 0  &&
                 <span className={styles.info}>Sources ({sourceCount})</span>
               }
           </div>
@@ -463,12 +463,11 @@ const ResultsItem: FC<ResultsItemProps> = ({
               item.tags && roleCount > 0 && availableTags &&
               <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
                 {
-                  item.tags.toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagID, i) => {
-                  // item.tags.map((tagID, i) => {
-                    if(!tagID.includes("role"))
+                  item.tags.toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagFamily, i) => {
+                    if(!tagFamily.includes("role"))
                       return null;
-                    let tagObject = availableTags[tagID];
-                    let activeClass = (activeFilters.some((item)=> item.type === tagID && item.value === tagObject.name))
+                    let tagObject = availableTags[tagFamily];
+                    let activeClass = (activeFilters.some((item)=> item.family === tagFamily && item.value === tagObject.name))
                       ? styles.active
                       : styles.inactive;
 
@@ -476,14 +475,14 @@ const ResultsItem: FC<ResultsItemProps> = ({
                       const moreCount = numRoles - 4;
                       return (
                         <>
-                          <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                          <button key={tagFamily} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagFamily, tagObject)}>{tagObject.name} ({tagObject.count})</button>
                           <span className={styles.hasMore}>(+{moreCount} more)</span>
                         </>
                       );
                     }
 
                     return(
-                      <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                      <button key={tagFamily} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagFamily, tagObject)}>{tagObject.name} ({tagObject.count})</button>
                     )
                   })
                 }

@@ -43,12 +43,12 @@ const getPathTypeCaption = (): JSX.Element => {
   )
 }
 
-const getTagHeadingMarkup = (tagType: string, activeFilters: Filter[]): JSX.Element | null => {
+const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.Element | null => {
   let headingToReturn;
-  switch(tagType) {
+  switch(tagFamily) {
     case 'cc':
       headingToReturn =
-        <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Chemical Categories">
+        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Chemical Categories">
           <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
           <p className={styles.tooltipParagraph}>Phase 1-3 Drugs are chemicals that are part of a clinical trial and do not yet have FDA approval.</p>
           <p className={styles.tooltipParagraph}>Other includes all other chemicals.</p>
@@ -56,24 +56,24 @@ const getTagHeadingMarkup = (tagType: string, activeFilters: Filter[]): JSX.Elem
       break;
     case 'pc':
       headingToReturn =
-        <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Object Type">
+        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Object Type">
           <span className={styles.fdaSpan}>Click <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}>here</a> to learn more about the Biolink Model.</span>
         </FacetHeading>;
       break;
     case 'role':
       headingToReturn =
-        <FacetHeading tagType={tagType} activeFilters={activeFilters} title="ChEBI Role Classification">
+        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="ChEBI Role Classification">
           <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
         </FacetHeading>;
       break;
     case 'ara':
-      headingToReturn = <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Reasoning Agent" />;
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Reasoning Agent" />;
       break;
     case 'di':
-      headingToReturn = <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Drug Indications" />;
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Drug Indications" />;
       break;
     case 'pt':
-      headingToReturn = <FacetHeading tagType={tagType} activeFilters={activeFilters} title="Path Type" />;
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Path Type" />;
       break;
     default:
       headingToReturn = null;
@@ -81,9 +81,9 @@ const getTagHeadingMarkup = (tagType: string, activeFilters: Filter[]): JSX.Elem
   return headingToReturn;
 }
 
-const getTagCaptionMarkup = (tagType: string): JSX.Element | null => {
+const getTagCaptionMarkup = (tagFamily: string): JSX.Element | null => {
   let captionToReturn;
-  switch(tagType) {
+  switch(tagFamily) {
     case 'cc':
       captionToReturn = getChemicalTypeCaption();
       break;
@@ -114,7 +114,7 @@ const getRoleLinkout = (tagKey: string): string => {
 }
 
 type FacetGroupProps = {
-  tagType: string;
+  tagFamily: string;
   activeFilters: Filter[];
   facetCompare: ((a: [string, Tag], b: [string, Tag]) => number) | undefined;
   groupedTags: GroupedTags;
@@ -122,39 +122,39 @@ type FacetGroupProps = {
   onFilter: (arg0: Tag) => void;
 }
 
-const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare, groupedTags, availableTags, onFilter }) => {
+const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompare, groupedTags, availableTags, onFilter }) => {
 
   const [tagObject, setTagObject] = useState<Tag>({
     name: "",
     negated: false,
-    type: "",
+    family: "",
     value: ""
   });
 
-  const handleFacetChange = (facetID: string, objectToUpdate: Tag, setterFunction: (tag: Tag)=>void, negated: boolean = false, label: string = '') => {
-    if (objectToUpdate.type === facetID) {
+  const handleFacetChange = (facetFamily: string, objectToUpdate: Tag, setterFunction: (tag: Tag)=>void, negated: boolean = false, label: string = '') => {
+    if (objectToUpdate.family === facetFamily) {
       return;
     }
 
     let newObj = cloneDeep(objectToUpdate);
-    newObj.type = facetID;
+    newObj.family = facetFamily;
     newObj.value = label;
     newObj.negated = negated;
     setterFunction(objectToUpdate);
     onFilter(newObj);
   }
 
-  const tagDisplay = (tag: [string, Tag], type: string, tagObjectState: Tag, setTagObjectFunc: (arg0:Tag)=>void, availableTags: {[key: string]: Tag}, activeFilters: Filter[]): JSX.Element => {
+  const tagDisplay = (tag: [string, Tag], family: string, tagObjectState: Tag, setTagObjectFunc: (arg0:Tag)=>void, availableTags: {[key: string]: Tag}, activeFilters: Filter[]): JSX.Element => {
     let tagKey = tag[0];
     let object = tag[1];
     let tagName = '';
-    if (type === 'pc') {
+    if (family === 'pc') {
       tagName = formatBiolinkEntity(object.name);
     } else {
       tagName = object.name;
     }
-    let positiveChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && !filter.negated)) ? true: false;
-    let negativeChecked = (activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)) ? true: false;
+    let positiveChecked = (activeFilters.some(filter => isFacet(filter) && filter.family === tagKey && !filter.negated)) ? true: false;
+    let negativeChecked = (activeFilters.some(filter => isFacet(filter) && filter.family === tagKey && filter.negated)) ? true: false;
 
     return (
       // availableTags[tagKey] && availableTags[tagKey].count &&
@@ -173,7 +173,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
           <span className={styles.facetCount}>
             {(object.count) ? object.count : 0}
             {
-            (type === "role") &&
+            (family === "role") &&
               <a href={getRoleLinkout(tagKey)} rel="noreferrer" target="_blank">
                 <ExternalLink className={styles.extLinkIcon}/>
               </a>
@@ -182,7 +182,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
         </Checkbox>
         <Checkbox
           handleClick={() => handleFacetChange(tagKey, tagObjectState, setTagObjectFunc, true, tagName)}
-          checked={activeFilters.some(filter => isFacet(filter) && filter.type === tagKey && filter.negated)}
+          checked={activeFilters.some(filter => isFacet(filter) && filter.family === tagKey && filter.negated)}
           className={`${styles.checkbox} ${styles.negative}`}
           checkedClassName={negativeChecked ? styles.negativeChecked : ""}
           icon={<Exclude/>}
@@ -192,12 +192,12 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
     )
   }
 
-  const displayFacets = (type: string, activeFilters: Filter[], facetCompare: ((a: [string, Tag], b: [string, Tag]) => number) | undefined, groupedTags: GroupedTags, tagObject: Tag, tagObjectSetter: Dispatch<SetStateAction<Tag>>, availableTags: {[key: string]: Tag}) => {
+  const displayFacets = (family: string, activeFilters: Filter[], facetCompare: ((a: [string, Tag], b: [string, Tag]) => number) | undefined, groupedTags: GroupedTags, tagObject: Tag, tagObjectSetter: Dispatch<SetStateAction<Tag>>, availableTags: {[key: string]: Tag}) => {
 
     // The selected set of filters for the current facet family
     const selectedFacetSet = activeFilters.reduce<Record<string, null>>((acc, filter, index) => {
-      if (hasFilterFamily(filter, type)) {
-        acc[filter.type] = null;
+      if (hasFilterFamily(filter, family)) {
+        acc[filter.family] = null;
       }
 
       return acc;
@@ -228,7 +228,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
     };
 
     // Ensures that selected facets come first
-    let sortedFacets = Object.entries(groupedTags[type]).sort(defaultCompare);
+    let sortedFacets = Object.entries(groupedTags[family]).sort(defaultCompare);
 
     // When there is a custom facet compare for this facet family, we want to sort selected and
     // unselected facets independently while preserving that selected facets come first
@@ -241,15 +241,15 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
       <div className={`${styles.section} ${Object.keys(groupedTags).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
           sortedFacets.map((tag) => {
-            return tagDisplay(tag, type, tagObject, tagObjectSetter, availableTags, activeFilters);
+            return tagDisplay(tag, family, tagObject, tagObjectSetter, availableTags, activeFilters);
           })
         }
       </div>
     )
   }
 
-  const typeHeadingMarkup = getTagHeadingMarkup(tagType, activeFilters);
-  const typeCaptionMarkup = getTagCaptionMarkup(tagType);
+  const familyHeadingMarkup = getTagHeadingMarkup(tagFamily, activeFilters);
+  const familyCaptionMarkup = getTagCaptionMarkup(tagFamily);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [height, setHeight] = useState<number | string>(0);
 
@@ -261,7 +261,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
   }, [isExpanded])
 
   return (
-    (Object.keys(groupedTags[tagType]).length > 0 && typeHeadingMarkup !== null )
+    (Object.keys(groupedTags[tagFamily]).length > 0 && familyHeadingMarkup !== null )
       ?
         <div className={styles.facetGroup}>
             <button
@@ -269,7 +269,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
               onClick={()=>setIsExpanded(prev=>!prev)}
             >
               {
-                typeHeadingMarkup
+                familyHeadingMarkup
               }
             </button>
           <AnimateHeight
@@ -278,10 +278,10 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
             height={height}
           >
             {
-              typeCaptionMarkup
+              familyCaptionMarkup
             }
             {
-              displayFacets(tagType, activeFilters, facetCompare, groupedTags, tagObject, setTagObject, availableTags)
+              displayFacets(tagFamily, activeFilters, facetCompare, groupedTags, tagObject, setTagObject, availableTags)
             }
           </AnimateHeight>
         </div>

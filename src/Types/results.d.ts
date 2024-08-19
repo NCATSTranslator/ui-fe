@@ -161,14 +161,14 @@ export type Tag = {
   count?: number
   name: string;
   negated: boolean;
-  type: string;
+  family: string;
   value: string;
 }
 export type GroupedTags = {
   [key: string]: {[key: string]: Tag};
 }
 export type Filter = {
-  type: string;
+  family: string;
   value: string;
   negated: boolean;
 }

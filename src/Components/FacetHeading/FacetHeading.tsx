@@ -7,29 +7,29 @@ import { Filter } from "../../Types/results";
 
 type FacetHeadingProps = {
   title: string;
-  tagType: string;
+  tagFamily: string;
   activeFilters: Filter[];
   children?: ReactNode;
 }
 
-const FacetHeading: FC<FacetHeadingProps> = ({ title, tagType, activeFilters, children }) => {
+const FacetHeading: FC<FacetHeadingProps> = ({ title, tagFamily, activeFilters, children }) => {
 
-  const matchingActiveFacets = activeFilters.filter((val)=> val.type.includes(tagType)).length;
+  const matchingActiveFacets = activeFilters.filter((filter)=> filter.family.includes(tagFamily)).length;
 
   return (
     <div className={`${styles.labelContainer}`}>
       <div className={styles.labelHeading}>
         <div className={styles.label}>
-          <span data-tooltip-id={`${tagType}-type-tooltip`} className={styles.heading}>
+          <span data-tooltip-id={`${tagFamily}-type-tooltip`} className={styles.heading}>
             <p className={`${styles.subTwo}`}>{title}</p>
             {
               children && <Alert className={styles.tooltipIcon}/>
             }
           </span>
           { matchingActiveFacets > 0 && <span className={styles.filterCount}>{matchingActiveFacets} {matchingActiveFacets === 1 ? "Filter" : "Filters"}</span>}
-          <Tooltip id={`${tagType}-type-tooltip`}>
+          <Tooltip id={`${tagFamily}-type-tooltip`}>
             {
-              children 
+              children
             }
           </Tooltip>
         </div>

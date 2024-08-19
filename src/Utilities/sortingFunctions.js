@@ -133,7 +133,7 @@ export const sortByHighlighted = (totalItems, highlightedItems) => {
 }
 
 export const filterCompare = (filter1, filter2) => {
-  return filter1.type < filter2.type;
+  return filter1.family < filter2.family;
 }
 
 // Given a result, a tag, and a ranking of paths, update the rank of a path to be lower if the
