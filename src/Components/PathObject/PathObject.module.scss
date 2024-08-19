@@ -104,7 +104,9 @@
   .description {
     display: -webkit-box;
     -webkit-line-clamp: 4;
+    line-clamp: 4;
     -webkit-box-orient: vertical;  
+    -moz-box-orient: vertical;
     overflow: hidden;
     font-size: 14px;
     margin: 3px 0 8px;
@@ -125,9 +127,6 @@
     path {
       fill: $white;
     }
-  }
-  &:hover {
-    // box-shadow: $dropShadowHover;
   }
 }
 
