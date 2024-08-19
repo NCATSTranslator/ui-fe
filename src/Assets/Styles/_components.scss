@@ -906,3 +906,23 @@ button {
     display: none;
   }
 }
+
+$nodeWidth: 150px;
+$predWidth: 220px;
+.path {
+  &.three {
+    grid-template-columns: $nodeWidth $predWidth $nodeWidth;
+  }
+  &.five {
+    grid-template-columns: $nodeWidth repeat(2, $predWidth $nodeWidth);
+  }
+  &.seven {
+    grid-template-columns: $nodeWidth repeat(3, $predWidth $nodeWidth);
+  }
+  &.nine {
+    grid-template-columns: $nodeWidth repeat(4, $predWidth $nodeWidth);
+  }
+  &.eleven {
+    grid-template-columns: $nodeWidth repeat(5, $predWidth $nodeWidth);
+  }
+}

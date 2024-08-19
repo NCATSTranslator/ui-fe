@@ -58,10 +58,11 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) =>
       duration={500}
       height={typeof height === "number" ? height : 'auto'}
     >
+      <p className={styles.supportLabel}>Supporting Paths</p>
       {
         isFormattedEdgeObject(pathItem) &&
         pathItem.support && 
-        pathItem.support.sort((a, b) => Number(b.highlighted) - Number(a.highlighted)).map((supportPath) => {
+        pathItem.support.sort((a, b) => Number(b.highlighted) - Number(a.highlighted)).map((supportPath, i) => {
           let pathKey = `${key}_${supportPath.id}`;
           const tooltipID = generateTooltipID(supportPath.path.subgraph);
           let newDataObj = cloneDeep(dataObj);
@@ -71,6 +72,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) =>
           return ( 
             <SupportPath
               dataObj={newDataObj}
+              index={i}
             />
           );
         })

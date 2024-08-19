@@ -3,7 +3,7 @@
 .path {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   width: auto;
   max-width: 65%;
   text-overflow: ellipsis;
@@ -22,7 +22,6 @@
     fill: $white;
   }
   &.hasMore {
-    padding: 3px 7px;
     .more {
       font-size: 12px;
       color: $lightGray;
@@ -115,6 +114,9 @@
   top: -13px;
   right: -16px;
   display: flex;
+  img {
+    box-shadow: $dropShadow;
+  }
 }
 .robot {
   width: 18px;
@@ -190,7 +192,8 @@ svg.connector {
     position: relative;
     background-color: $white;
     border-radius: 50%;
-    padding: 3.5px;
+    padding: 3px;
+    transition: $defaultAnim;
     svg {
       width: 17px;
       min-width: 17px;

@@ -9,7 +9,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
 import { Link } from 'react-router-dom';
-import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
+import { getGeneratedSendFeedbackLink, numberToWords } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
 import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject } from '../../Types/results';
 import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
@@ -148,7 +148,6 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
         <span className={styles.inferredLabelTooltip}>Deduced from patterns in Translator's knowledge graphs that suggest relationships which are not explicitly stated. The paths shown below them support the inferred relationship.</span>
       </Tooltip>
       <div className={styles.header}>
-        <p className={styles.subtitle}>Paths<Information data-tooltip-id='paths-label-tooltip'/></p>
         <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
       </div>
       {
@@ -180,7 +179,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                       displayDirectLabel 
                         ? 
                           <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
-                            Lookup <Information className={styles.infoIcon} />
+                            Direct <Information className={styles.infoIcon} />
                           </p>
                         : 
                           null
@@ -189,7 +188,6 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                       displayInferredLabel 
                         ? 
                           <>
-                            { directLabelDisplayed ? <div className={styles.inferenceSeparator}></div> : null }
                             <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
                               Inferred <Information className={styles.infoIcon} />
                             </p>
@@ -197,6 +195,9 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                         : null
                       }
                     <div className={styles.formattedPath} key={tooltipID}>
+                      <span className={styles.num}>
+                        { i + 1 }
+                      </span>
                       <button 
                         onClick={()=>handleActivateEvidence(pathToDisplay)}
                         className={styles.pathEvidenceButton}
@@ -209,7 +210,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                         >
                           <span>View evidence for this path.</span>
                       </Tooltip>
-                      <div className={`${styles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} > 
+                      <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} > 
                         {
                           pathToDisplay.path.subgraph.map((pathItem: FormattedEdgeObject | FormattedNodeObject, j: number) => {
                             let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;

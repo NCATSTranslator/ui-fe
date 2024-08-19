@@ -188,11 +188,8 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
   }, [onNodeClick])
 
   const cy = useMemo(()=>{
-    if(!active || !graphRef.current || graph === null) {
-      console.log("no graph for you", active, graphRef.current, graph)
+    if(!active || !graphRef.current || graph === null) 
       return null;
-    }
-    console.log("building your graph now, bud.")
 
     let cytoReqDataObject = {
       graphRef: graphRef, 

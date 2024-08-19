@@ -462,3 +462,37 @@ export const getFullPathname = (location: Location): string => {
   
   return fullPath;
 }
+
+/**
+ * Converts a number between 0 and 19 into its English word equivalent.
+ * 
+ * @param {number} num - The number to be converted. It must be within the range 0-19.
+ * @returns {string} - The English word equivalent of the provided number.
+ * 
+ * @throws {Error} - Throws an error if the input number is outside the range 0-19.
+ * 
+ */
+export const numberToWords = (num: number): string => {
+  const words = [
+      "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+      "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"
+  ];
+  
+  return num >= 0 && num < 20 ? words[num] : (() => { throw new Error("Number out of supported range"); })();
+}
+
+/**
+ * Converts an integer into its corresponding alphabetical character.
+ * 
+ * @param {number} num - The integer to convert (1 = a, 2 = b, ..., 26 = z).
+ * @returns {string} - The corresponding alphabetical character.
+ * 
+ * @throws {Error} - Throws an error if the number is outside the range 1-26.
+ * 
+ */
+export const intToChar = (num: number): string => {
+  if (num < 1 || num > 26) {
+      throw new Error("Number must be between 1 and 26");
+  }
+  return String.fromCharCode(96 + num);
+}
