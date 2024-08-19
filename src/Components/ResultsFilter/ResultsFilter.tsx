@@ -9,13 +9,12 @@ import FilterIcon from '../../Icons/Navigation/Filter.svg?react';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
 
 interface ResultsFilterProps {
-  onClearAll: () => void;
-  onClearTag: () => void;
-  onFilter: (arg0: Tag) => void;
   activeFilters: Filter[];
-  availableTags: {[key: string]: Tag};
+  onFilter: (arg0: Tag) => void;
+  onClearAll: () => void;
   expanded?: boolean;
-  setExpanded?: (arg0:boolean) => void
+  setExpanded?: (arg0:boolean) => void;
+  availableTags: {[key: string]: Tag};
 }
 
 const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, expanded = false, setExpanded = (arg0: boolean)=>{}, availableTags}) => {
@@ -53,7 +52,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
   const groupedTags = useMemo(() => groupAvailableTags(availableTags), [availableTags]);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
-  const facetCompares: {[key: string]: (a: [string, Tag], b: [string, Tag]) => number} = {
+  const facetCompare: {[key: string]: (a: [string, Tag], b: [string, Tag]) => number} = {
     pt: (a: [string, Tag], b: [string, Tag]) => -(a[1].name.localeCompare(b[1].name))
   };
 
@@ -83,7 +82,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
                 <FacetGroup
                   tagType={tagType}
                   activeFilters={activeFilters}
-                  facetCompare={facetCompares[tagType]}
+                  facetCompare={facetCompare[tagType]}
                   groupedTags={groupedTags}
                   availableTags={availableTags}
                   onFilter={onFilter}

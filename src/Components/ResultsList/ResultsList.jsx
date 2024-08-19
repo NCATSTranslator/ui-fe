@@ -842,16 +842,12 @@ const ResultsList = ({loading}) => {
             !isLoading &&
             <>
               <ResultsFilter
-                startIndex={itemOffset+1}
-                endIndex={endResultIndex}
-                formattedCount={formattedResults.length}
-                totalCount={originalResults.current.length}
+                activeFilters={activeFilters}
                 onFilter={handleFilter}
                 onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults.current, originalResults.current, setActiveFilters, currentSortString.current, handleUpdateResults)}
-                activeFilters={activeFilters}
-                availableTags={availableTags}
                 expanded={filtersExpanded}
                 setExpanded={setFiltersExpanded}
+                availableTags={availableTags}
               />
               <div>
                 <ResultsListHeader

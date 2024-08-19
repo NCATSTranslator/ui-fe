@@ -132,7 +132,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagType, activeFilters, facetCompare,
   });
 
   const handleFacetChange = (facetID: string, objectToUpdate: Tag, setterFunction: (tag: Tag)=>void, negated: boolean = false, label: string = '') => {
-    if (objectToUpdate.type === facetID) return;
+    if (objectToUpdate.type === facetID) return; // Why is this here?
     let newObj = cloneDeep(objectToUpdate);
     newObj.type = facetID;
     newObj.value = label;
