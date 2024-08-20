@@ -18,8 +18,8 @@
   input {
     border-top-left-radius: 0px;
     border-bottom-left-radius: 0px;
-    border-top-right-radius: $querySelectBorderRadius;
-    border-bottom-right-radius: $querySelectBorderRadius;
+    border-top-right-radius: $largeBorderRadius;
+    border-bottom-right-radius: $largeBorderRadius;
     border: none;
   }
 }

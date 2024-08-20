@@ -5,7 +5,7 @@ import Tab from "../Tabs/Tab";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
-import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isPublication, isPublicationDictionary } from "../../Utilities/utilities";
+import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isPublication, isPublicationDictionary, numberToWords } from "../../Utilities/utilities";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { getFormattedEdgeLabel, getUrlByType } from '../../Utilities/resultsFormattingFunctions';
 import { checkForEdgeMatch, handleEvidenceSort } from "../../Utilities/evidenceModalFunctions";
@@ -145,7 +145,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
           </Tooltip>
           {
             path &&
-            <div className={styles.pathView} style={{'gridTemplateColumns': `repeat(${pathLength}, minmax(0, 300px))`}}>
+            <div className={`${styles.pathView} path ${numberToWords(pathLength)}`}>
+            {/* <div className={styles.pathView} style={{'gridTemplateColumns': `repeat(${pathLength}, minmax(0, 300px))`}}> */}
               {
                 path.path.subgraph.map((pathItem, i) => {
                   let key = `${i}`;

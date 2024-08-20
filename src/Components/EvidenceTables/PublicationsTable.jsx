@@ -11,6 +11,7 @@ import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHig
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
 import Info from '../../Icons/Status/Alerts/Info.svg?react';
+import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Tooltip from '../Tooltip/Tooltip';
 import EmphasizeWord from '../EmphasizeWord/EmphasizeWord';
 
@@ -277,13 +278,22 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
       <table className={`table-body ${styles.pubsTable}`}>
         <thead className={`table-head`}>
           <tr>
-            <th className={`head ${styles.knowledgeLevel}`}>Knowledge Level</th>
+            <th
+              className={`head ${styles.title} ${sortingState.title ? 'true' : (sortingState.title === null) ? '' : 'false'}`}
+              onClick={()=>{handleEvidenceSort((sortingState.title) ? 'titleHighLow': 'titleLowHigh', pubmedEvidence, handlePageClick, setSortingState, setPubmedEvidence)}}
+              >
+              <span className={`head-span`}>
+                Title
+                <ChevUp className='chev'/>
+              </span>
+            </th>
             <th 
               className={`head ${styles.pubdate} ${sortingState.date ? 'true' : (sortingState.date === null) ? '' : 'false'}`}
               onClick={()=>{handleEvidenceSort((sortingState.date) ? 'dateLowHigh': 'dateHighLow', pubmedEvidence, handlePageClick, setSortingState, setPubmedEvidence)}}
               >
               <span className={`head-span`}>
                 Date(s)
+                <ChevUp className='chev'/>
               </span>
             </th>
             <th
@@ -292,17 +302,11 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
               >
               <span className={`head-span`}>
                 Journal
+                <ChevUp className='chev'/>
               </span>
             </th>
-            <th
-              className={`head ${styles.title} ${sortingState.title ? 'true' : (sortingState.title === null) ? '' : 'false'}`}
-              onClick={()=>{handleEvidenceSort((sortingState.title) ? 'titleHighLow': 'titleLowHigh', pubmedEvidence, handlePageClick, setSortingState, setPubmedEvidence)}}
-              >
-              <span className={`head-span`}>
-                Title
-              </span>
-            </th>
-            <th className={`head ${styles.abstract}`}>Snippet</th>
+            <th className={`head ${styles.snippet}`}>Snippet</th>
+            <th className={`head ${styles.knowledgeLevel}`}>Source & Rationale</th>
           </tr>
         </thead>
         {
@@ -325,13 +329,9 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
                     let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
                     return (
                       <tr className={`table-item`} key={pub.id}>
-                        <td className={`table-cell ${styles.tableCell} ${styles.knowledgeLevel}`}>
-                          <span className={styles.knowledgeLevelSpan}>{knowledgeLevelString}</span>
-                          {
-                            pub.source && pub.source?.url 
-                            ? <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer'><span>({pub.source.name})</span></a>
-                            : <span className={styles.sourceName}span>({(!!pub?.source?.name) ? pub.source.name : "Unknown"})</span>
-                          }
+                        <td className={`table-cell ${styles.tableCell} ${styles.title} title`} >
+                          {pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">{pub.title}</a> }
+                          {!pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">No Title Available</a> }
                         </td>
                         <td className={`table-cell ${styles.tableCell} ${styles.pubdate} pubdate`}>
                           {pub.pubdate && (pub.pubdate === 0 ) ? '' : pub.pubdate }
@@ -341,10 +341,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
                             {pub.journal && pub.journal }
                           </span>
                         </td>
-                        <td className={`table-cell ${styles.tableCell} ${styles.title} title`} >
-                          {pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">{pub.title}</a> }
-                          {!pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">No Title Available</a> }
-                        </td>
                         <td className={`table-cell ${styles.tableCell} ${styles.snippet}`}>
                           <span>
                             {
@@ -352,6 +348,14 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
                             }
                           </span>
                             {pub.url && <a href={pub.url} className={`url ${styles.url}`} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
+                        </td>
+                        <td className={`table-cell ${styles.tableCell} ${styles.knowledgeLevel}`}>
+                          {/* <span className={styles.knowledgeLevelSpan}>{knowledgeLevelString}</span> */}
+                          {
+                            pub.source && pub.source?.url 
+                            ? <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer'><span>{pub.source.name}</span></a>
+                            : <span className={`${styles.noLink} ${styles.sourceName}`}span>{(!!pub?.source?.name) ? pub.source.name : "Unknown"}</span>
+                          }
                         </td>
                       </tr>
                     )
@@ -362,10 +366,11 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
       </table>
       <div className={styles.bottom}>
         <div className={styles.perPage}>
+          <p className={styles.label}>Publications per Page</p>
           <Select
             label=""
             name="Items Per Page"
-            size="m"
+            size="s"
             handleChange={(value)=>{
               setItemsPerPage(parseInt(value));
               handlePageClick({selected: 0});
