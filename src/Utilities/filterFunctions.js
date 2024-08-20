@@ -1,35 +1,67 @@
+export const CONSTANTS = {
+  PATH: 'p',
+  RESULT: 'r',
+  FAMILIES: {
+    ROLE: 'role'
+  }
+}
+
 export const makeEntitySearch = () => {
-  return { family: 'str', value: '', negated: false };
+  return { id: 'g/str', value: '', negated: false };
+}
+
+export const getFamiliesByType = (type) => {
+  switch(type) {
+    case CONSTANTS.RESULT: return getResultFamilies();
+    case CONSTANTS.PATH: return getPathFamilies();
+    default: throw new RangeError(`Invalid filter type: ${type}`);
+  }
+}
+
+export const isResultTag = (tagID) => {
+  return getTagType(tagID) === CONSTANTS.RESULT;
+}
+
+export const isPathTag = (tagID) => {
+  return getTagType(tagID) === CONSTANTS.PATH;
 }
 
 export const getValidFamilies = () => {
-  return [...validFacetFamilies];
+  return ['cc', 'di', 'pc', 'pt', 'role', 'ara'];
 }
 
-export const isFacet = (filter) => {
+export const getResultFamilies = () => {
+  return ['cc', 'di', 'role'];
+}
+
+export const getPathFamilies = () => {
+  return ['pc', 'pt', 'ara'];
+}
+
+export const isTagFilter = (filter) => {
   const family = filterFamily(filter);
-  return validFacetFamilies.includes(family);
+  return getValidFamilies().includes(family);
 }
 
 export const isExclusion = (filter) => {
   return filter.negated
 }
 
-export const isTextFilter = (filter) => {
-  return filter.family === 'str';
+export const isEntityFilter = (filter) => {
+  return filterFamily(filter) === 'str';
 }
 
-export const hasSameFacetFamily = (facetA, facetB) => {
-  return facetFamily(facetA) === facetFamily(facetB);
+export const filterFamily = (filter) => {
+  return getTagFamily(filter.id);
 }
 
-export const facetFamily = (facet) => {
-  return facet.split('/')[1];
+export const hasSameFamily = (filterA, filterB) => {
+  if (filterA === null || filterB === null) return false;
+  return filterFamily(filterA) === filterFamily(filterB);
 }
 
-
-export const hasFilterFamily = (filter, facetFamily) => {
-  return filterFamily(filter) === facetFamily;
+export const hasFilterFamily = (filter, family) => {
+  return filterFamily(filter) === family;
 }
 
 export const getFilterLabel = (filter) => {
@@ -50,17 +82,14 @@ export const getFilterLabel = (filter) => {
   return defaultLabel;
 }
 
-export const getTagFamily = (tag, category) => {
-  return splitTag(tag)[1];
+export const getTagType = (tagID) => {
+  return splitTagID(tagID)[0];
 }
 
-// TODO: Make this a configuration
-const validFacetFamilies = ['cc', 'di', 'pc', 'pt', 'role', 'ara'];
-
-const splitTag = (tag) => {
-  return tag.split('/');
+export const getTagFamily = (tagID) => {
+  return splitTagID(tagID)[1];
 }
 
-const filterFamily = (filter) => {
-  return facetFamily(filter.family);
+const splitTagID = (tagID) => {
+  return tagID.split('/');
 }

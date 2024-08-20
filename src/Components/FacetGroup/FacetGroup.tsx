@@ -7,10 +7,10 @@ import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { formatBiolinkEntity } from '../../Utilities/utilities';
-import { isFacet, hasFilterFamily } from '../../Utilities/filterFunctions';
 import { pivotSort } from '../../Utilities/sortingFunctions';
 import { cloneDeep } from "lodash";
 import FacetHeading from "../FacetHeading/FacetHeading";
+import * as filtering from "../../Utilities/filterFunctions";
 
 const getRoleCaption = (): JSX.Element => {
   return (
@@ -127,21 +127,21 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
   const [tagObject, setTagObject] = useState<Tag>({
     name: "",
     negated: false,
-    family: "",
+    id: "",
     value: ""
   });
 
-  const handleFacetChange = (facetFamily: string, objectToUpdate: Tag, setterFunction: (tag: Tag)=>void, negated: boolean = false, label: string = '') => {
-    if (objectToUpdate.family === facetFamily) {
+  const handleFacetChange = (filterID: string, tag: Tag, setterFunction: (tag: Tag)=>void, negated: boolean = false, label: string = '') => {
+    if (tag.id === filterID) {
       return;
     }
 
-    let newObj = cloneDeep(objectToUpdate);
-    newObj.family = facetFamily;
-    newObj.value = label;
-    newObj.negated = negated;
-    setterFunction(objectToUpdate);
-    onFilter(newObj);
+    const newTag = cloneDeep(tag);
+    newTag.id = filterID;
+    newTag.value = label;
+    newTag.negated = negated;
+    setterFunction(tag);
+    onFilter(newTag);
   }
 
   const tagDisplay = (tag: [string, Tag], family: string, tagObjectState: Tag, setTagObjectFunc: (arg0:Tag)=>void, availableTags: {[key: string]: Tag}, activeFilters: Filter[]): JSX.Element => {
@@ -153,8 +153,8 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
     } else {
       tagName = object.name;
     }
-    let positiveChecked = (activeFilters.some(filter => isFacet(filter) && filter.family === tagKey && !filter.negated)) ? true: false;
-    let negativeChecked = (activeFilters.some(filter => isFacet(filter) && filter.family === tagKey && filter.negated)) ? true: false;
+    let positiveChecked = (activeFilters.some(filter => filtering.isTagFilter(filter) && filter.id === tagKey && !filter.negated)) ? true: false;
+    let negativeChecked = (activeFilters.some(filter => filtering.isTagFilter(filter) && filter.id === tagKey && filter.negated)) ? true: false;
 
     return (
       // availableTags[tagKey] && availableTags[tagKey].count &&
@@ -182,7 +182,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
         </Checkbox>
         <Checkbox
           handleClick={() => handleFacetChange(tagKey, tagObjectState, setTagObjectFunc, true, tagName)}
-          checked={activeFilters.some(filter => isFacet(filter) && filter.family === tagKey && filter.negated)}
+          checked={activeFilters.some(filter => filtering.isTagFilter(filter) && filter.id === tagKey && filter.negated)}
           className={`${styles.checkbox} ${styles.negative}`}
           checkedClassName={negativeChecked ? styles.negativeChecked : ""}
           icon={<Exclude/>}
@@ -196,8 +196,8 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
 
     // The selected set of filters for the current facet family
     const selectedFacetSet = activeFilters.reduce<Record<string, null>>((acc, filter, index) => {
-      if (hasFilterFamily(filter, family)) {
-        acc[filter.family] = null;
+      if (filtering.hasFilterFamily(filter, family)) {
+        acc[filter.id] = null;
       }
 
       return acc;

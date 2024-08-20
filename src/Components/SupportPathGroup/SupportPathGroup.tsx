@@ -17,7 +17,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) =>
   const pathItem = dataObj.pathItem;
   const pathViewStyles = dataObj.pathViewStyles;
   const key = dataObj.key;
-  const activeStringFilters = dataObj.activeStringFilters;
+  const activeEntityFilters = dataObj.activeEntityFilters;
   const initHeight = (isExpanded) ? 'auto' : 0;
   const [height, setHeight] = useState<number | string>(initHeight);
 
@@ -31,20 +31,20 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) =>
   useEffect(() => {
     if(isFormattedEdgeObject(pathItem)) {
       // if there are any active string filters, sort by those
-      if(activeStringFilters.length > 0 && pathItem.support) {
-        sortSupportByEntityStrings(pathItem.support, activeStringFilters);
+      if(activeEntityFilters.length > 0 && pathItem.support) {
+        sortSupportByEntityStrings(pathItem.support, activeEntityFilters);
       // otherwise sort by shortest path length first
       } else {
         sortSupportByLength(pathItem.support);
       }
     }
-  }, [pathItem, activeStringFilters]);
+  }, [pathItem, activeEntityFilters]);
 
   const generateTooltipID = (subgraph: (FormattedNodeObject | FormattedEdgeObject)[]) => {
     return subgraph.map((sub) => {
       if(isFormattedEdgeObject(sub)) {
         return !!sub.predicates && sub.predicates[0].predicate;
-      } 
+      }
       if(isFormattedNodeObject(sub)) {
         return sub.name;
       }
@@ -61,7 +61,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) =>
       <p className={styles.supportLabel}>Supporting Paths</p>
       {
         isFormattedEdgeObject(pathItem) &&
-        pathItem.support && 
+        pathItem.support &&
         pathItem.support.sort((a, b) => Number(b.highlighted) - Number(a.highlighted)).map((supportPath, i) => {
           let pathKey = `${key}_${supportPath.id}`;
           const tooltipID = generateTooltipID(supportPath.path.subgraph);
@@ -69,7 +69,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) =>
           newDataObj.tooltipID = tooltipID;
           newDataObj.supportPath = supportPath;
           newDataObj.key = pathKey;
-          return ( 
+          return (
             <SupportPath
               dataObj={newDataObj}
               index={i}

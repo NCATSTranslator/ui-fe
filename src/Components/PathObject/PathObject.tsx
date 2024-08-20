@@ -16,7 +16,7 @@ interface PathObjectProps {
   handleEdgeClick: (edge: FormattedEdgeObject, path: PathObjectContainer) => void;
   handleTargetClick: (target: FormattedNodeObject) => void;
   hasSupport: boolean;
-  activeStringFilters: string[];
+  activeEntityFilters: string[];
   selected?: boolean;
   supportDataObject: SupportDataObject | null;
   inModal?: boolean;
@@ -25,8 +25,8 @@ interface PathObjectProps {
   className?: string;
 }
 
-const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false, 
-  activeStringFilters, selected, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
+const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false,
+  activeEntityFilters, selected, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
 
   const provenance = (!!pathObject.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const isNode = isFormattedNodeObject(pathObject);
@@ -43,7 +43,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
     <>
       {
         pathObject.category === 'object' && isNode &&
-        <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''}`} 
+        <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''}`}
           onClick={(e)=> {e.stopPropagation(); handleNameClick(pathObject);}}
           data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
           >
@@ -52,7 +52,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
             <span className={styles.text}>
               <Highlighter
                 highlightClassName="highlight"
-                searchWords={activeStringFilters}
+                searchWords={activeEntityFilters}
                 autoEscape={true}
                 textToHighlight={nameString}
               />
@@ -73,11 +73,11 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
       }
       {
         pathObject.category === 'predicate' && isFormattedEdgeObject(pathObject) &&
-        <Predicate 
+        <Predicate
           pathObject={pathObject}
           pathObjectContainer={pathObjectContainer}
-          selected={selected} 
-          activeStringFilters={activeStringFilters} 
+          selected={selected}
+          activeEntityFilters={activeEntityFilters}
           uid={uid}
           handleEdgeClick={handleEdgeClick}
           parentClass={styles.pathContainer}
@@ -91,8 +91,8 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
       }
       {
         pathObject.category === 'target' && isNode &&
-        <span 
-          className={`${styles.targetContainer} ${className}`} 
+        <span
+          className={`${styles.targetContainer} ${className}`}
           data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(pathObject);}}
           >
@@ -101,7 +101,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
             <span className={styles.text}>
               <Highlighter
                 highlightClassName="highlight"
-                searchWords={activeStringFilters}
+                searchWords={activeEntityFilters}
                 autoEscape={true}
                 textToHighlight={nameString}
               />

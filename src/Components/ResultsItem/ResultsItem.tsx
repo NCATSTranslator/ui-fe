@@ -26,16 +26,17 @@ import { useTurnstileEffect } from '../../Utilities/customHooks';
 import { isEqual } from 'lodash';
 import Tabs from '../Tabs/Tabs';
 import Tab from '../Tabs/Tab';
+import * as filtering from '../../Utilities/filterFunctions';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const sortTagsBySelected = (
   a: string,
   b: string,
-  selected: [{family: string;}] | Filter[]
+  selected: [{id: string;}] | Filter[]
 ): number => {
-  const aExistsInSelected = selected.some((item) => item.family === a);
-  const bExistsInSelected = selected.some((item) => item.family === b);
+  const aExistsInSelected = selected.some((item) => item.id === a);
+  const bExistsInSelected = selected.some((item) => item.id === b);
 
   if (aExistsInSelected && bExistsInSelected) return 0;
   if (aExistsInSelected) return -1;
@@ -48,7 +49,7 @@ interface ResultsItemProps {
   activateEvidence?: (item: ResultItem, edgeGroup: FormattedEdgeObject | null, path: PathObjectContainer) => void;
   activateNotes?: (nameString: string, id: string | number, item: ResultItem) => void;
   activeFilters: Filter[];
-  activeStringFilters: string[];
+  activeEntityFilters: string[];
   availableTags: {[key: string]: Tag};
   bookmarkAddedToast?: () => void;
   bookmarkRemovedToast?: () => void;
@@ -61,7 +62,7 @@ interface ResultsItemProps {
   setShareModalOpen: (state: boolean) => void;
   setShareResultID: (state: string) => void;
   handleBookmarkError?: () => void;
-  handleFilter: (tagObject: Tag) => void;
+  handleFilter: (tag: Tag) => void;
   hasNotes: boolean;
   item: ResultItem;
   key: string;
@@ -79,7 +80,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     activateEvidence = () => {},
     activateNotes = () => {},
     activeFilters,
-    activeStringFilters,
+    activeEntityFilters,
     availableTags,
     bookmarkAddedToast = () => {},
     bookmarkRemovedToast = () => {},
@@ -321,12 +322,12 @@ const ResultsItem: FC<ResultsItemProps> = ({
     }
   }
 
-  const handleTagClick = (tagFamily: string, tagObject: Tag) => {
+  const handleTagClick = (tagID: string, tag: Tag) => {
     let newObj: Tag = {
-      name: tagObject.name,
+      name: tag.name,
       negated: false,
-      family: tagFamily,
-      value: tagObject.name
+      id: tagID,
+      value: tag.name
     };
     handleFilter(newObj);
   }
@@ -364,7 +365,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
           <span className={styles.name} >
             <Highlighter
               highlightClassName="highlight"
-              searchWords={activeStringFilters}
+              searchWords={activeEntityFilters}
               autoEscape={true}
               textToHighlight={nameString}
             />
@@ -463,11 +464,10 @@ const ResultsItem: FC<ResultsItemProps> = ({
               item.tags && roleCount > 0 && availableTags &&
               <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
                 {
-                  item.tags.toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagFamily, i) => {
-                    if(!tagFamily.includes("role"))
-                      return null;
-                    let tagObject = availableTags[tagFamily];
-                    let activeClass = (activeFilters.some((item)=> item.family === tagFamily && item.value === tagObject.name))
+                  item.tags.toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((fid, i) => {
+                    if (!(filtering.getTagFamily(fid) === filtering.CONSTANTS.FAMILIES.ROLE)) return null;
+                    const tag = availableTags[fid];
+                    const activeClass = (activeFilters.some((filter)=> filter.id === fid && filter.value === tag.name))
                       ? styles.active
                       : styles.inactive;
 
@@ -475,14 +475,14 @@ const ResultsItem: FC<ResultsItemProps> = ({
                       const moreCount = numRoles - 4;
                       return (
                         <>
-                          <button key={tagFamily} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagFamily, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                          <button key={fid} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(fid, tag)}>{tag.name} ({tag.count})</button>
                           <span className={styles.hasMore}>(+{moreCount} more)</span>
                         </>
                       );
                     }
 
                     return(
-                      <button key={tagFamily} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagFamily, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                      <button key={fid} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(fid, tag)}>{tag.name} ({tag.count})</button>
                     )
                   })
                 }
@@ -493,7 +493,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
               <p>
                 <Highlighter
                   highlightClassName="highlight"
-                  searchWords={activeStringFilters}
+                  searchWords={activeEntityFilters}
                   autoEscape={true}
                   textToHighlight={item.description}
                 />
@@ -509,7 +509,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 active={isExpanded}
                 handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
                 handleActivateEvidence={handleActivateEvidence}
-                activeStringFilters={activeStringFilters}
+                activeEntityFilters={activeEntityFilters}
               />
             </Tab>
             <Tab heading="Graph">
@@ -557,7 +557,7 @@ const areEqualProps = (prevProps: any, nextProps: any) => {
   if (!isEqual(prevProps.activeFilters, nextProps.activeFilters)) {
     return false;
   }
-  if (!isEqual(prevProps.activeStringFilters, nextProps.activeStringFilters)) {
+  if (!isEqual(prevProps.activeEntityFilters, nextProps.activeEntityFilters)) {
     return false;
   }
 

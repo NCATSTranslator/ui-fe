@@ -24,7 +24,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHigh
 import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters } from "../../Utilities/resultsInteractionFunctions";
-import { isFacet, isExclusion, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
+import * as filtering from '../../Utilities/filterFunctions';
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
@@ -133,7 +133,7 @@ const ResultsList = ({loading}) => {
   // Array, currently active filters
   const [availableTags, setAvailableTags] = useState([]);
   // Array, currently active string filters
-  const [activeStringFilters, setActiveStringFilters] = useState([]);
+  const [activeEntityFilters, setActiveEntityFilters] = useState([]);
   // Array, aras that have returned data
   const returnedARAs = useRef({aras: [], status: ''});
   // Bool, is share modal open
@@ -198,7 +198,7 @@ const ResultsList = ({loading}) => {
 
   const handleClearNotesEditor = async () => {
     await getUserSaves();
-    handleUpdateResults(activeFilters, activeStringFilters, prevRawResults.current, [], false, currentSortString.current);
+    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current);
   }
 
   useEffect(() => {
@@ -236,7 +236,7 @@ const ResultsList = ({loading}) => {
     setEndResultIndex(endOffset);
   }, [formattedResults.length, itemsPerPage]);
 
-  const handleUpdateResults = (facetsAndFilters, asFilters, rr, or = [], justSort = false, sortType, fr = []) => {
+  const handleUpdateResults = (filters, asFilters, rr, or = [], justSort = false, sortType, fr = []) => {
     let newFormattedResults = [];
     let newOriginalResults = [];
     let saves = (userSaves) ? userSaves.saves: null;
@@ -250,8 +250,9 @@ const ResultsList = ({loading}) => {
     }
 
     // filter
-    if (!justSort)
-      newFormattedResults = filterAndFacet(facetsAndFilters, asFilters, newFormattedResults, newOriginalResults, rr);
+    if (!justSort) {
+      newFormattedResults = applyFilters(filters, asFilters, newFormattedResults, newOriginalResults, rr);
+    }
 
     // sort
     newFormattedResults = getSortedResults(newFormattedResults, sortType);
@@ -296,7 +297,7 @@ const ResultsList = ({loading}) => {
 
     // if rawResults are new, set prevRawResults for future comparison
     prevRawResults.current = rr;
-    const newFormattedResults = handleUpdateResults(activeFilters, activeStringFilters, rr, [], false, currentSortString.current);
+    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, rr, [], false, currentSortString.current);
 
     // we have results to show, set isLoading to false
     if (newFormattedResults.length > 0)
@@ -481,7 +482,7 @@ const ResultsList = ({loading}) => {
         setIsSortedByName(null);
         break;
       case 'entityString':
-        newSortedResults = sortByEntityStrings(newSortedResults, activeStringFilters);
+        newSortedResults = sortByEntityStrings(newSortedResults, activeEntityFilters);
         setIsSortedByPaths(null);
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
@@ -491,7 +492,7 @@ const ResultsList = ({loading}) => {
     }
 
     return newSortedResults;
-  }, [activeStringFilters]);
+  }, [activeEntityFilters]);
 
   const calculateFacetCounts = (filteredResults, rawResults, negatedResults, activeFacets, negatedFacets, tagSetterMethod) => {
     // Function that adds the tag counts when a certain condition (predicate) is met
@@ -515,13 +516,13 @@ const ResultsList = ({loading}) => {
 
     // Create a list of tags from the master tag list provided by the backend
     const countedTags = cloneDeep(rawResults.data.tags);
-    const activeFamilies = new Set(activeFacets.map(f => facetFamily(f.family)));
+    const activeFamilies = new Set(activeFacets.map(facet => filtering.filterFamily(facet)));
     for(const result of filteredResults) {
       // Determine the distance between a result's facets and the facet selection
       const resultFamilies = new Set();
       for (const facet of activeFacets) {
-        if (result.tags.includes(facet.family)) {
-          resultFamilies.add(facetFamily(facet.family));
+        if (result.tags.includes(facet.id)) {
+          resultFamilies.add(filtering.filterFamily(facet));
         }
       }
 
@@ -536,8 +537,8 @@ const ResultsList = ({loading}) => {
           return !resultFamilies.has(family);
         })[0];
 
-        addTagCountsWhen(countedTags, result, (tag) => {
-          return facetFamily(tag) === missingFamily;
+        addTagCountsWhen(countedTags, result, (tagID) => {
+          return filtering.getTagFamily(tagID) === missingFamily;
         });
       }
       // Otherwise skip this result
@@ -545,9 +546,9 @@ const ResultsList = ({loading}) => {
 
     // Count all results that have a matching negated facet
     for (const result of negatedResults) {
-      addTagCountsWhen(countedTags, result, (tag) => {
+      addTagCountsWhen(countedTags, result, (tagID) => {
         return negatedFacets.reduce((acc, facet) => {
-          return (tag === facet.family) || acc;
+          return (tagID === facet.id) || acc;
         }, false);
       });
     }
@@ -580,25 +581,27 @@ const ResultsList = ({loading}) => {
     handlePageClick({selected: 0}, newItemsPerPage, resultsLength);
   }
 
-  const filterAndFacet = (facetsAndFilters, stringFilters, filteredResults, originalResults, rawResults) => {
-    const filterResults = (filters, stringFilters, originalResults, resultPathRanks) => {
+  const applyFilters = (filters, entityFilters, filteredResults, originalResults, rawResults) => {
+    const filterResults = (filters, entityFilters, originalResults, resultPathRanks) => {
       const filteredResults = [];
       const negatedResults = [];
       /*
         For each result, check against each filter. If any filter is not met,
         skip that result.
       */
-      for(let result of originalResults) {
+      for (let result of originalResults) {
         const pathRanks = result.compressedPaths.map((p) => { return { rank: 0, path: p }; });
         let addResult = true;
-        for(const filter of filters) {
-          if((isTextFilter(filter) && !isExclusion(filter) && !findStringMatch(result, filter.value, pathRanks)) ||
-            (isTextFilter(filter) && isExclusion(filter) && findStringMatch(result, filter.value, pathRanks))){
+        for (const filter of filters) {
+          if (filtering.isEntityFilter(filter) &&
+              filtering.isExclusion(filter) === findStringMatch(result, filter.value, pathRanks)) {
             addResult = false;
+            negatedResults.push(result);
             break;
           }
 
-          if (isFacet(filter) && result.tags.includes(filter.family)) {
+          if (filtering.isTagFilter(filter) &&
+              filtering.isExclusion(filter) === result.tags.includes(filter.id)) {
             addResult = false;
             negatedResults.push(result);
             break;
@@ -611,18 +614,20 @@ const ResultsList = ({loading}) => {
         }
       }
 
-      let newStringFilters = [];
-      for(const filter of filters) {
+      const newEntityFilters = [];
+      for (const filter of filters) {
         // String filters with identical values shouldn't be added to the activeFilters array,
         // so we don't have to check for duplicate values here, just for the str tag.
-        if(isTextFilter(filter)) {
-          newStringFilters.push(filter.value);
+        if (filtering.isEntityFilter(filter)) {
+          newEntityFilters.push(filter.value);
         }
       }
 
-      // if the new set of filters don't match the current ones, call setActiveStringFilters to update them
-      if(!(newStringFilters.length === stringFilters.length && newStringFilters.every((value, index) => value === stringFilters[index])))
-        setActiveStringFilters(newStringFilters);
+      // if the new set of filters don't match the current ones, call setActiveEntityFilters to update them
+      if (!(newEntityFilters.length === entityFilters.length &&
+            newEntityFilters.every((value, index) => value === entityFilters[index]))) {
+        setActiveEntityFilters(newEntityFilters);
+      }
 
       // Set the formatted results to the newly filtered results
       return [filteredResults, negatedResults];
@@ -637,23 +642,20 @@ const ResultsList = ({loading}) => {
         let addResult = true;
         let isInter = null;
         let combine = null;
-        let lastFacetFamily = '';
+        let lastFacet = null;
         for (const facet of facets) {
-          isInter = (!hasSameFacetFamily(lastFacetFamily, facet.family));
+          isInter = (!filtering.hasSameFamily(lastFacet, facet));
           if (isInter) {
             // We went through an entire facet group with no match
-            if (!addResult) {
-              break;
-            }
-
-            lastFacetFamily = facet.family;
+            if (!addResult) break;
+            lastFacet = facet;
             combine = intersect;
           } else {
             combine = union;
           }
 
-          addResult = combine(addResult, result.tags.includes(facet.family));
-          updatePathRankByTag(result, facet.family, resultPathRanks[resultIndex]);
+          addResult = combine(addResult, result.tags.includes(facet.id));
+          updatePathRankByTag(result, facet.id, resultPathRanks[resultIndex]);
         }
 
         if (addResult) {
@@ -670,29 +672,27 @@ const ResultsList = ({loading}) => {
       return facetedResults;
     }
 
-    // If there are no active filters or facets, get the full result set and reset the activeStringFilters
-    if(facetsAndFilters.length === 0) {
-      if(stringFilters.length > 0) {
-        setActiveStringFilters([]);
+    // If there are no active filters or facets, get the full result set and reset the activeEntityFilters
+    if (filters.length === 0) {
+      if (entityFilters.length > 0) {
+        setActiveEntityFilters([]);
       }
 
       calculateFacetCounts(filteredResults, rawResults, [], [], [], setAvailableTags);
       return filteredResults;
     }
 
-    const facets = facetsAndFilters.filter((f) => { return isFacet(f) && !isExclusion(f) });
-    const negatedFacets = facetsAndFilters.filter((f) => { return isFacet(f) && isExclusion(f) });
-    const filters = facetsAndFilters.filter(f => {
-      return isTextFilter(f) || (isExclusion(f) && isFacet(f));
-    });
-
+    const facets = filters.filter((f) => { return !filtering.isExclusion(f) && filtering.isTagFilter(f); });
+    const negatedFacets = filters.filter((f) => { return filtering.isExclusion(f) && filtering.isTagFilter(f); });
+    filters = filters.filter((f) => { return filtering.isEntityFilter(f) || filtering.isExclusion(f) });
     const resultPathRanks = [];
-    let [results, negatedResults] = filterResults(filters, stringFilters, originalResults, resultPathRanks);
+    let [results, negatedResults] = filterResults(filters, entityFilters, originalResults, resultPathRanks);
     calculateFacetCounts(results, rawResults, negatedResults, facets, negatedFacets, setAvailableTags);
     results = facetResults(facets, results, resultPathRanks);
 
-    if(currentPage !== 0)
+    if(currentPage !== 0) {
       handlePageReset(false, results.length);
+    }
 
     return results;
   }
@@ -702,7 +702,7 @@ const ResultsList = ({loading}) => {
   const handleFilter = (filter) => {
     let indexes = [];
     for(const [i, activeFilter] of activeFilters.entries()) {
-      if (activeFilter.family === filter.family) {
+      if (activeFilter.id === filter.id) {
         indexes.push(i);
       }
     }
@@ -713,7 +713,7 @@ const ResultsList = ({loading}) => {
       newActiveFilters.push(filter);
       newActiveFilters.sort(filterCompare);
       setActiveFilters(newActiveFilters);
-      handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current)
+      handleUpdateResults(newActiveFilters, activeEntityFilters, rawResults.current, originalResults.current, false, currentSortString.current)
       return;
     }
 
@@ -733,7 +733,7 @@ const ResultsList = ({loading}) => {
         addFilter = false;
         break;
       // If the values don't match and it's not a string search, update the value
-      } else if (!isTextFilter(filter)) {
+      } else if (!filtering.isEntityFilter(filter)) {
         newActiveFilters = newActiveFilters.map((activeFilter, i) => {
           if(i === index) {
             activeFilter.value = filter.value;
@@ -754,7 +754,7 @@ const ResultsList = ({loading}) => {
     }
 
     setActiveFilters(newActiveFilters);
-    let newFormattedResults = handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current);
+    let newFormattedResults = handleUpdateResults(newActiveFilters, activeEntityFilters, rawResults.current, originalResults.current, false, currentSortString.current);
     handlePageReset(false, newFormattedResults.length);
   }
 
@@ -844,7 +844,7 @@ const ResultsList = ({loading}) => {
               <ResultsFilter
                 activeFilters={activeFilters}
                 onFilter={handleFilter}
-                onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults.current, originalResults.current, setActiveFilters, currentSortString.current, handleUpdateResults)}
+                onClearAll={()=>handleClearAllFilters(activeEntityFilters, rawResults.current, originalResults.current, setActiveFilters, currentSortString.current, handleUpdateResults)}
                 expanded={filtersExpanded}
                 setExpanded={setFiltersExpanded}
                 availableTags={availableTags}
@@ -883,7 +883,7 @@ const ResultsList = ({loading}) => {
                           onClick={()=>{
                             let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
                             currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                           }}
                         >
                           Name
@@ -894,7 +894,7 @@ const ResultsList = ({loading}) => {
                           onClick={()=>{
                             let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
                             currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                           }}
                         >
                           Evidence
@@ -904,7 +904,7 @@ const ResultsList = ({loading}) => {
                           onClick={()=>{
                             let sortString = (isSortedByPaths === null) ? 'pathsHighLow' : (isSortedByPaths) ? 'pathsHighLow' : 'pathsLowHigh';
                             currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                           }}
                         >
                           Paths
@@ -914,7 +914,7 @@ const ResultsList = ({loading}) => {
                           onClick={()=>{
                             let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
                             currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                           }}
                           data-tooltip-id="score-tooltip"
                         >
@@ -949,7 +949,7 @@ const ResultsList = ({loading}) => {
                               item={item}
                               activateEvidence={activateEvidence}
                               activateNotes={activateNotes}
-                              activeStringFilters={activeStringFilters}
+                              activeEntityFilters={activeEntityFilters}
                               zoomKeyDown={zoomKeyDown}
                               currentQueryID={currentQueryID}
                               queryNodeID={initNodeIdParam}

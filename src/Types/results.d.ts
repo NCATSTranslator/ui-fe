@@ -147,7 +147,7 @@ export type SupportDataObject = {
   handleNameClick: (name: FormattedNodeObject) => void;
   handleEdgeClick: (edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => void;
   handleTargetClick: (target: FormattedNodeObject) => void;
-  activeStringFilters: string[];
+  activeEntityFilters: string[];
   tooltipID: string | null;
 }
 export type Score = {
@@ -161,14 +161,14 @@ export type Tag = {
   count?: number
   name: string;
   negated: boolean;
-  family: string;
+  id: string;
   value: string;
 }
 export type GroupedTags = {
   [key: string]: {[key: string]: Tag};
 }
 export type Filter = {
-  family: string;
+  id: string;
   value: string;
   negated: boolean;
 }

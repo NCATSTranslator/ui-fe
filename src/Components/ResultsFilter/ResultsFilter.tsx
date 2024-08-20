@@ -7,7 +7,7 @@ import EntitySearch from '../EntitySearch/EntitySearch';
 import Button from '../Core/Button';
 import FilterIcon from '../../Icons/Navigation/Filter.svg?react';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
-import * as faceting from '../../Utilities/filterFunctions';
+import * as filtering from '../../Utilities/filterFunctions';
 
 interface ResultsFilterProps {
   activeFilters: Filter[];
@@ -29,30 +29,34 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
   }
 
   // returns a new object with each tag grouped by its type
-  const groupAvailableTags = (tags: {[key: string]: Tag}): GroupedTags => {
+  const groupTags = (tags: {[key: string]: Tag}, type: string): GroupedTags => {
     const newGroupedTags: GroupedTags = {};
-    for (let family of faceting.getValidFamilies()) {
+    for (let family of filtering.getFamiliesByType(type)) {
       newGroupedTags[family] = {};
     }
 
     for (let [id, description] of Object.entries(cloneDeep(tags))) {
-      const family = faceting.getTagFamily(id);
-      newGroupedTags[family][id] = description;
+      if (filtering.getTagType(id) === type) {
+        const family = filtering.getTagFamily(id);
+        newGroupedTags[family][id] = description;
+      }
     }
 
     return newGroupedTags;
   }
 
-  const groupedTags = useMemo(() => groupAvailableTags(availableTags), [availableTags]);
+  const resultTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.RESULT),
+                             [availableTags]);
+  const pathTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.PATH),
+                           [availableTags]);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
-  const facetCompares: {[key: string]: (a: [string, Tag], b: [string, Tag]) => number} = {
+  const filterCompare: {[key: string]: (a: [string, Tag], b: [string, Tag]) => number} = {
     pt: (a: [string, Tag], b: [string, Tag]) => -(a[1].name.localeCompare(b[1].name))
   };
 
-  useEffect(() => {
-    setIsExpanded(expanded);
-  }, [expanded]);
+  useEffect(() => { setIsExpanded(expanded); },
+            [expanded]);
 
   return (
     <div className={`${styles.resultsFilter} ${isExpanded ? styles.expanded : styles.collapsed}`}>
@@ -69,15 +73,34 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
           className={styles.entitySearch}
         />
         <div>
+          <h4> Result Filters </h4>
           {
-            groupedTags &&
-            Object.keys(groupedTags).map((tagFamily) => {
+            resultTags &&
+            Object.keys(resultTags).map((tagFamily) => {
               return (
                 <FacetGroup
                   tagFamily={tagFamily}
                   activeFilters={activeFilters}
-                  facetCompare={facetCompares[tagFamily]}
-                  groupedTags={groupedTags}
+                  facetCompare={filterCompare[tagFamily]}
+                  groupedTags={resultTags}
+                  availableTags={availableTags}
+                  onFilter={onFilter}
+                />
+              )
+            })
+          }
+        </div>
+          <h4> Path Filters </h4>
+        <div>
+          {
+            pathTags &&
+            Object.keys(pathTags).map((tagFamily) => {
+              return (
+                <FacetGroup
+                  tagFamily={tagFamily}
+                  activeFilters={activeFilters}
+                  facetCompare={filterCompare[tagFamily]}
+                  groupedTags={pathTags}
                   availableTags={availableTags}
                   onFilter={onFilter}
                 />

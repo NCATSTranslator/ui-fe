@@ -15,9 +15,10 @@ export const findStringMatch = (element, value, pathRanks) => {
   }
   const formattedValue = value.toLowerCase();
   let foundMatch = !value ||
-    !element ||
-    element.name.toLowerCase().includes(formattedValue) ||
-    (element.description && element.description.toLowerCase().includes(formattedValue));
+                   !element ||
+                   element.name.toLowerCase().includes(formattedValue) ||
+                   (element.description && element.description.toLowerCase().includes(formattedValue));
+  if (foundMatch) return true;
   for (let i = 0; i < element.compressedPaths.length; ++i) {
     const path = element.compressedPaths[i];
     for (const item of path.path.subgraph) {
@@ -27,7 +28,8 @@ export const findStringMatch = (element, value, pathRanks) => {
         foundMatch = true;
         break;
       }
-      if(hasSupport(item)){
+
+      if (hasSupport(item)) {
         for(const supportPath of item.support) {
           for (const supportItem of supportPath.path.subgraph) {
             if (checkNodeEdgeForMatch(supportItem, formattedValue)) {
@@ -41,7 +43,7 @@ export const findStringMatch = (element, value, pathRanks) => {
     }
   }
 
-  return foundMatch;
+  return !!foundMatch;
 }
 
 /**
