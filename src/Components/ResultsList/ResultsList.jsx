@@ -30,6 +30,7 @@ import { queryTypes } from "../../Utilities/queryTypes";
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
 import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
+import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import { API_PATH_PREFIX, getSaves } from "../../Utilities/userApi";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -467,14 +468,14 @@ const ResultsList = ({loading}) => {
         setIsSortedByName(null);
         setIsSortedByPaths(null);
         break;
-      case 'pathLowHigh':
+      case 'pathsLowHigh':
         newSortedResults = sortPathsLowHigh(newSortedResults);
         setIsSortedByPaths(true)
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         break;
-      case 'pathHighLow':
+      case 'pathsHighLow':
         newSortedResults = sortPathsHighLow(newSortedResults);
         setIsSortedByPaths(false)
         setIsSortedByScore(null)
@@ -898,6 +899,7 @@ const ResultsList = ({loading}) => {
                           }}
                         >
                           Evidence
+                          <ChevUp className={styles.chev}/>
                         </div>
                         <div
                           className={`${styles.head} ${styles.pathsHead} ${isSortedByPaths ? styles.true : (isSortedByPaths === null) ? '': styles.false}`}
@@ -906,8 +908,14 @@ const ResultsList = ({loading}) => {
                             currentSortString.current = sortString;
                             handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                           }}
+                          data-tooltip-id="paths-tooltip"
                         >
                           Paths
+                          <Alert/>
+                          <ChevUp className={styles.chev}/>
+                          <Tooltip id="paths-tooltip">
+                            <span className={styles.scoreSpan}>Each path represents a discrete series of relationships that connect the result to the searched-for entity.</span>
+                          </Tooltip>
                         </div>
                         <div
                           className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
@@ -920,6 +928,7 @@ const ResultsList = ({loading}) => {
                         >
                           Score
                           <Alert/>
+                          <ChevUp className={styles.chev}/>
                           <Tooltip id="score-tooltip">
                             <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added.</span>
                           </Tooltip>
