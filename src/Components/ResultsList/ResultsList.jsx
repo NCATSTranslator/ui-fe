@@ -922,6 +922,9 @@ const ResultsList = ({loading}) => {
                           Paths
                           <Alert/>
                           <ChevUp className={styles.chev}/>
+                          <Tooltip id="paths-tooltip">
+                            <span className={styles.scoreSpan}>Each path represents a discrete series of relationships that connect the result to the searched-for entity.</span>
+                          </Tooltip>
                         </div>
                         <div
                           className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
