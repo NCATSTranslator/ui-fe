@@ -307,6 +307,39 @@ img {
   background-color: $darkGray;
 }
 
+.scrollable-support {
+  overflow: auto; 
+  position: relative;
+  scrollbar-width: thin; 
+  scrollbar-color: transparent transparent;
+  transition: $defaultAnim; 
+  padding-bottom: $xs;
+  margin-bottom: -$xs;
+}
+.scrollable-support::-webkit-scrollbar {
+  width: 0; 
+  height: 0; 
+}
+.scrollable-support:hover {
+  scrollbar-color: $midDarkGray transparent; 
+}
+.scrollable-support:hover::-webkit-scrollbar {
+  width: $xs;
+  height: $xs; 
+}
+
+.scrollable-support::-webkit-scrollbar-track {
+  background: transparent; 
+  border-radius: $defaultBorderRadius;
+}
+.scrollable-support::-webkit-scrollbar-thumb {
+  background-color: transparent; 
+  border-radius: $defaultBorderRadius;
+}
+.scrollable-support:hover::-webkit-scrollbar-thumb {
+  background-color: $midDarkGray;
+}
+
 input {
   &::-webkit-input-placeholder, &::-ms-input-placeholder &::placeholder, &::-moz-placeholder {
     color: $placeholderGray;

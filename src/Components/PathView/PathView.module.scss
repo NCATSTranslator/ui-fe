@@ -218,8 +218,12 @@
     margin: $m 0 0 0;
     position: relative;
     left: -42px;
+    overflow: hidden visible !important;
     .formattedPath:last-of-type {
       margin-bottom: 0;
+    }
+    .supportGroupContainer {
+      overflow-x: scroll;
     }
   }
 }
