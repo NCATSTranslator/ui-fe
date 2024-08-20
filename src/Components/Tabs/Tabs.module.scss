@@ -4,12 +4,12 @@
 .tabs {
   width: 100%;
   padding-left: 0;
-  margin: 10px auto 20px;
+  margin: $xs auto $m;
   position: relative;
   .tabList {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 0 16px;
+    margin: 0 0 $s;
   }
   .tabContent {
     padding: 0px;

@@ -146,7 +146,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const bookmarkRemovalApproved = useRef<boolean>(false);
   const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState<boolean>(false);
 
-  const initPathString = useRef((type?.pathString) ? type.pathString : 'may affect');
   const tagsRef = useRef<HTMLDivElement>(null);
   const [tagsHeight, setTagsHeight] = useState<number>(0);
   const minTagsHeight = 45;
@@ -185,10 +184,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }
 
   const pathsCount: number = getPathsCount(formattedPaths.current);
-  const pathString: string = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
   const nameString: string = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
-  // const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
   const [itemGraph, setItemGraph] = useState(null);
 
@@ -371,7 +368,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
             />
           </span>
         }
-        <span className={styles.effect}>{pathsCount} {pathString} {queryNodeLabel}</span>
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${!!isEven && styles.even}`}>
         {
@@ -490,7 +486,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
             }
             {
               item.description &&
-              <p>
+              <p className={styles.description}>
                 <Highlighter
                   highlightClassName="highlight"
                   searchWords={activeEntityFilters}
@@ -501,7 +497,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
             }
           </div>
         </div>
-        <Tabs isOpen>
+        <Tabs isOpen className={styles.resultTabs}>
             <Tab heading="Paths">
               <PathView
                 paths={formattedPaths.current}

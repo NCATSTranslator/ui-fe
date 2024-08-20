@@ -2,7 +2,7 @@ import styles from './PathView.module.scss';
 import { useState, useEffect, useMemo, useCallback, createContext, FC } from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
-import Question from '../../Icons/Navigation/Help.svg?react';
+import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { cloneDeep, isEqual } from 'lodash';
@@ -273,8 +273,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
         <button onClick={(e)=> {e.stopPropagation(); setNumberToShow(paths.length);}} className={`${styles.show} ${styles.showAll}`}>Show All</button>
       }
       <p className={styles.needHelp}>
-        <Question/>
-        Was this helpful?
+        <Feedback/>
         <Link to={`${getGeneratedSendFeedbackLink(true)}`} reloadDocument target={'_blank'}>Send Feedback</Link>
       </p>
     </div>
