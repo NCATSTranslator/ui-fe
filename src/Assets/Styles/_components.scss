@@ -3,6 +3,12 @@
 button {
   border: none;
   cursor: pointer;
+  &:disabled {
+    background-color: $lightGray;
+    color: $midGray;
+    border: none;
+    cursor: default;
+  }
 }
 // Form Input Sizes
 .text-input, .select, .search-container, .file-input {

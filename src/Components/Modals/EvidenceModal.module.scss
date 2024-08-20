@@ -5,6 +5,7 @@
     width: 1200px;
     height: 80%;
     overflow-y: hidden;
+    padding: $m $m 0;
   }
   .top {
     max-height: 100%;
@@ -135,10 +136,12 @@
   gap: 5px;
   justify-content: center;
   align-items: center;
-  margin: 10px 0 15px;
-  padding: 20px;
+  margin: $s 0 $l;
+  padding: $s;
   position: relative;
-  background-color: $lightGray;
+  background-color: $palePurple;
+  border-radius: $largeBorderRadius;
+  border: 1px solid $lightPurpleTwo;
   span {
     width: auto;
   }

@@ -23,7 +23,7 @@ $querySelectPadding: 16px 20px;
     appearance: none;
     cursor: pointer;
     padding: $querySelectPadding;
-    border-radius: $querySelectBorderRadius;
+    border-radius: $largeBorderRadius;
     color: $black;
     transition: $defaultAnim;
     &:focus, &:focus-visible {
@@ -67,8 +67,8 @@ $querySelectPadding: 16px 20px;
     margin-right: $querySelectPadding;
   }
   .selectContainer {
-    border-top-left-radius: $querySelectBorderRadius;
-    border-bottom-left-radius: $querySelectBorderRadius;
+    border-top-left-radius: $largeBorderRadius;
+    border-bottom-left-radius: $largeBorderRadius;
     color: $darkGray;
     font-size: $bodyOneSize;
     display: grid;
@@ -91,7 +91,7 @@ $querySelectPadding: 16px 20px;
       transition: $defaultAnim;
       pointer-events: none;
       z-index: 0;
-      border-radius: $querySelectBorderRadius;
+      border-radius: $largeBorderRadius;
       &.open {
         pointer-events: all;
       }
