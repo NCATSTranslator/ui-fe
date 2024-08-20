@@ -8,38 +8,48 @@ import { hasSupport } from "./resultsFormattingFunctions";
  * @param {array} pathRanks - The ranks of the compressed paths for more efficient searching.
  * @returns {boolean} True if a match is found, false otherwise.
 */
-export const findStringMatch = (element, value, pathRanks) => {
-  const checkNodeEdgeForMatch = (item, formattedValue) => {
-    return (item.name && item.name.toLowerCase().includes(formattedValue)) ||
-      (item.predicates && item.predicates[0]?.predicate && item.predicates[0].predicate.toLowerCase().includes(formattedValue))
+export const findStringMatch = (result, searchTerm, pathRanks) => {
+  const checkItemForMatch = (item, searchTerm) => {
+    return (
+      (item.name && item.name.toLowerCase().includes(searchTerm)) ||
+      (item.predicates && item.predicates[0]?.predicate && item.predicates[0].predicate.toLowerCase().includes(searchTerm))
+    );
   }
-  const formattedValue = value.toLowerCase();
-  let foundMatch = !value ||
-                   !element ||
-                   element.name.toLowerCase().includes(formattedValue) ||
-                   (element.description && element.description.toLowerCase().includes(formattedValue));
-  for (let i = 0; i < element.compressedPaths.length; ++i) {
-    const path = element.compressedPaths[i];
-    for (const item of path.path.subgraph) {
-      if (checkNodeEdgeForMatch(item, formattedValue)) {
-        // Its confusing to update the pathRanks here, but it is more efficient
-        pathRanks[i].rank -= 1;
-        foundMatch = true;
-        break;
-      }
 
+  const checkPathForMatch = (path, searchTerm, pathRank) => {
+    let foundMatch = false;
+    for (const item of path.path.subgraph) {
       if (hasSupport(item)) {
-        for(const supportPath of item.support) {
-          for (const supportItem of supportPath.path.subgraph) {
-            if (checkNodeEdgeForMatch(supportItem, formattedValue)) {
-              pathRanks[i].rank -= 1;
-              foundMatch = true;
-              break;
-            }
+        for (let i = 0; i < item.support.length; i++) {
+          const supportPath = item.support[i];
+          const supportRank = pathRank.support[i];
+          const supportMatch = checkPathForMatch(supportPath, searchTerm, supportRank);
+          foundMatch = supportMatch || foundMatch;
+          if (supportMatch) {
+            pathRank.rank += supportRank.rank;
           }
         }
       }
+
+      if (checkItemForMatch(item, searchTerm)) {
+        // Its confusing to update the pathRanks here, but it is more efficient
+        pathRank.rank -= 1;
+        foundMatch = true;
+      }
     }
+
+    return foundMatch;
+  }
+
+  searchTerm = searchTerm.toLowerCase();
+  let foundMatch = !searchTerm ||
+                   !result ||
+                   result.name.toLowerCase().includes(searchTerm) ||
+                   (result.description && result.description.toLowerCase().includes(searchTerm));
+  for (let i = 0; i < result.compressedPaths.length; i++) {
+    const path = result.compressedPaths[i];
+    const pathRank = pathRanks[i];
+    foundMatch = checkPathForMatch(path, searchTerm, pathRank) || foundMatch;
   }
 
   return !!foundMatch;

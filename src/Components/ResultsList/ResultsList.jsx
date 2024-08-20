@@ -18,10 +18,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "../../Redux/resultsSlice";
 import { currentPrefs, currentUser }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow,
-  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, updatePathRankByTag,
-  filterCompare } from "../../Utilities/sortingFunctions";
-import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, filterCompare, makePathRank, updatePathRanks, pathRankSort } from "../../Utilities/sortingFunctions";
+import { getSummarizedResults, hasSupport } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters } from "../../Utilities/resultsInteractionFunctions";
 import * as filtering from '../../Utilities/filterFunctions';
@@ -591,7 +589,7 @@ const ResultsList = ({loading}) => {
         skip that result.
       */
       for (let result of originalResults) {
-        const pathRanks = result.compressedPaths.map((p) => { return { rank: 0, path: p }; });
+        const pathRanks = result.compressedPaths.map((p) => makePathRank(p));
         let addResult = true;
         for (const filter of filters) {
           if (filtering.isEntityFilter(filter) &&
@@ -601,7 +599,7 @@ const ResultsList = ({loading}) => {
             break;
           }
 
-          if (filtering.isTagFilter(filter) &&
+          if (filtering.isResultFilter(filter) &&
               filtering.isExclusion(filter) === result.tags.includes(filter.id)) {
             addResult = false;
             negatedResults.push(result);
@@ -634,7 +632,7 @@ const ResultsList = ({loading}) => {
       return [filteredResults, negatedResults];
     }
 
-    const facetResults = (facets, filteredResults, resultPathRanks) => {
+    const facetResults = (resultFacets, pathFilters, filteredResults, resultPathRanks) => {
       const intersect = (a, b) => { return a && b; };
       const union = (a, b) => { return a || b; };
       const facetedResults = [];
@@ -644,33 +642,60 @@ const ResultsList = ({loading}) => {
         let isInter = null;
         let combine = null;
         let lastFacet = null;
-        for (const facet of facets) {
-          isInter = (!filtering.hasSameFamily(lastFacet, facet));
+        for (const resFacet of resultFacets) {
+          isInter = (!filtering.hasSameFamily(lastFacet, resFacet));
           if (isInter) {
-            // We went through an entire facet group with no match
-            if (!addResult) break;
-            lastFacet = facet;
+            if (!addResult) break; // We went through an entire facet group with no match
+            lastFacet = resFacet;
             combine = intersect;
           } else {
             combine = union;
           }
 
-          addResult = combine(addResult, result.tags.includes(facet.id));
-          updatePathRankByTag(result, facet.id, resultPathRanks[resultIndex]);
+          addResult = combine(addResult, result.tags.includes(resFacet.id));
         }
 
         if (addResult) {
-          const newResult = cloneDeep(result);
           const pathRanks = resultPathRanks[resultIndex];
-          pathRanks.sort((a, b) => { return a.rank - b.rank; });
-          newResult.compressedPaths = pathRanks.map((pr) => { return pr.path; });
-          facetedResults.push(newResult);
+          for (let i = 0; i < result.compressedPaths.length; i++) {
+            const path = result.compressedPaths[i];
+            const pathRank = pathRanks[i];
+            updatePathRanks(path, pathRank, pathFilters);
+          }
+
+          // If a path filter does not match any paths in a result, then remove the result
+          let resultRank = 0;
+          for (let pr of pathRanks) {
+            resultRank += pr.rank;
+          }
+
+          if (resultRank < 0) {
+            const newResult = cloneDeep(result);
+            pathRankSort(pathRanks);
+            newResult.compressedPaths = genRankedPaths(pathRanks);
+            facetedResults.push(newResult);
+          }
         }
 
         resultIndex++;
       };
 
       return facetedResults;
+    }
+
+    const genRankedPaths = (pathRanks) => {
+      return pathRanks.map((pr) => {
+        if (pr.support.length > 1) {
+          const path = pr.path.path;
+          for (const item of path.subgraph) {
+            if (hasSupport(item)) {
+              item.support = genRankedPaths(pr.support);
+            }
+          }
+        }
+
+        return pr.path;
+      });
     }
 
     // If there are no active filters or facets, get the full result set and reset the activeEntityFilters
@@ -690,7 +715,7 @@ const ResultsList = ({loading}) => {
     const resultPathRanks = [];
     let [results, negatedResults] = filterResults(resultFilters, entityFilters, originalResults, resultPathRanks);
     calculateFacetCounts(results, rawResults, negatedResults, resultFacets, negatedResultFacets, setAvailableTags);
-    results = facetResults(resultFacets, results, resultPathRanks);
+    results = facetResults(resultFacets, pathFilters, results, resultPathRanks);
 
     if(currentPage !== 0) {
       handlePageReset(false, results.length);
