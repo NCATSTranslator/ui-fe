@@ -45,6 +45,14 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
     return newGroupedTags;
   }
 
+  const groupHasTags = (tagGroup: GroupedTags): boolean => {
+    for (let categoryTags of Object.values(tagGroup)) {
+      if (Object.keys(categoryTags).length > 0) return true;
+    }
+
+    return false;
+  }
+
   const resultTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.RESULT),
                              [availableTags]);
   const pathTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.PATH),
@@ -73,39 +81,47 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
           className={styles.entitySearch}
         />
         <div>
-          <h4> Result Filters </h4>
           {
-            resultTags &&
-            Object.keys(resultTags).map((tagFamily) => {
-              return (
-                <FacetGroup
-                  tagFamily={tagFamily}
-                  activeFilters={activeFilters}
-                  facetCompare={filterCompare[tagFamily]}
-                  groupedTags={resultTags}
-                  availableTags={availableTags}
-                  onFilter={onFilter}
-                />
-              )
-            })
+            groupHasTags(resultTags) &&
+            <>
+              <h5 className={styles.typeHeading}> Result Filters </h5>
+              {
+                Object.keys(resultTags).map((tagFamily) => {
+                  return (
+                    <FacetGroup
+                      tagFamily={tagFamily}
+                      activeFilters={activeFilters}
+                      facetCompare={filterCompare[tagFamily]}
+                      groupedTags={resultTags}
+                      availableTags={availableTags}
+                      onFilter={onFilter}
+                    />
+                  )
+                })
+              }
+            </>
           }
         </div>
-          <h4> Path Filters </h4>
         <div>
           {
-            pathTags &&
-            Object.keys(pathTags).map((tagFamily) => {
-              return (
-                <FacetGroup
-                  tagFamily={tagFamily}
-                  activeFilters={activeFilters}
-                  facetCompare={filterCompare[tagFamily]}
-                  groupedTags={pathTags}
-                  availableTags={availableTags}
-                  onFilter={onFilter}
-                />
-              )
-            })
+            groupHasTags(pathTags) &&
+            <>
+              <h5 className={styles.typeHeading}> Path Filters </h5>
+              {
+                Object.keys(pathTags).map((tagFamily) => {
+                  return (
+                    <FacetGroup
+                      tagFamily={tagFamily}
+                      activeFilters={activeFilters}
+                      facetCompare={filterCompare[tagFamily]}
+                      groupedTags={pathTags}
+                      availableTags={availableTags}
+                      onFilter={onFilter}
+                    />
+                  )
+                })
+              }
+            </>
           }
         </div>
       </div>

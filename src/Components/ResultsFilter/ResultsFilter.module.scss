@@ -17,6 +17,10 @@
   .heading .span, .closeButton {
     transition: $defaultAnim;
   }
+  .typeHeading {
+    margin-top: 10px;
+    margin-bottom: 0px;
+  }
   &.expanded {
     width: calc(330px - $s*2);
     .heading span {
@@ -83,8 +87,8 @@
     box-shadow: none;
     white-space: nowrap;
     -webkit-user-select: none;
-    -ms-user-select: none; 
-    user-select: none; 
+    -ms-user-select: none;
+    user-select: none;
     &:hover {
       text-decoration: underline;
     }
