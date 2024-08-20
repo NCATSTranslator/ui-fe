@@ -1,6 +1,7 @@
 export const CONSTANTS = {
   PATH: 'p',
   RESULT: 'r',
+  GLOBAL: 'g',
   FAMILIES: {
     ROLE: 'role'
   }
@@ -26,6 +27,10 @@ export const isPathTag = (tagID) => {
   return getTagType(tagID) === CONSTANTS.PATH;
 }
 
+export const isGlobalTag = (tagID) => {
+  return getTagType(tagID) === CONSTANTS.GLOBAL;
+}
+
 export const getValidFamilies = () => {
   return ['cc', 'di', 'pc', 'pt', 'role', 'ara'];
 }
@@ -41,6 +46,35 @@ export const getPathFamilies = () => {
 export const isTagFilter = (filter) => {
   const family = filterFamily(filter);
   return getValidFamilies().includes(family);
+}
+
+export const groupFilterByType = (filters) => {
+  const resultFilters = [];
+  const pathFilters = [];
+  const globalFilters = [];
+  for (let filter of filters) {
+    if (isResultFilter(filter)) {
+      resultFilters.push(filter);
+    } else if (isPathFilter(filter)) {
+      pathFilters.push(filter);
+    } else {
+      globalFilters.push(filter);
+    }
+  }
+
+  return [resultFilters, pathFilters, globalFilters];
+}
+
+export const isResultFilter = (filter) => {
+  return isResultTag(filter.id);
+}
+
+export const isPathFilter = (filter) => {
+  return isPathTag(filter.id);
+}
+
+export const isGlobalFilter = (filter) => {
+  return isGlobalTag(filter.id);
 }
 
 export const isExclusion = (filter) => {

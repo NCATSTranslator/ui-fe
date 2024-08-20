@@ -683,13 +683,14 @@ const ResultsList = ({loading}) => {
       return filteredResults;
     }
 
-    const facets = filters.filter((f) => { return !filtering.isExclusion(f) && filtering.isTagFilter(f); });
-    const negatedFacets = filters.filter((f) => { return filtering.isExclusion(f) && filtering.isTagFilter(f); });
-    filters = filters.filter((f) => { return filtering.isEntityFilter(f) || filtering.isExclusion(f) });
+    let [resultFilters, pathFilters, globalFilters] = filtering.groupFilterByType(filters);
+    const resultFacets = resultFilters.filter((f) => !filtering.isExclusion(f));
+    const negatedResultFacets = resultFilters.filter((f) => filtering.isExclusion(f));
+    resultFilters = negatedResultFacets.concat(globalFilters);
     const resultPathRanks = [];
-    let [results, negatedResults] = filterResults(filters, entityFilters, originalResults, resultPathRanks);
-    calculateFacetCounts(results, rawResults, negatedResults, facets, negatedFacets, setAvailableTags);
-    results = facetResults(facets, results, resultPathRanks);
+    let [results, negatedResults] = filterResults(resultFilters, entityFilters, originalResults, resultPathRanks);
+    calculateFacetCounts(results, rawResults, negatedResults, resultFacets, negatedResultFacets, setAvailableTags);
+    results = facetResults(resultFacets, results, resultPathRanks);
 
     if(currentPage !== 0) {
       handlePageReset(false, results.length);

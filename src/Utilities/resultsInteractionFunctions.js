@@ -18,7 +18,6 @@ export const findStringMatch = (element, value, pathRanks) => {
                    !element ||
                    element.name.toLowerCase().includes(formattedValue) ||
                    (element.description && element.description.toLowerCase().includes(formattedValue));
-  if (foundMatch) return true;
   for (let i = 0; i < element.compressedPaths.length; ++i) {
     const path = element.compressedPaths[i];
     for (const item of path.path.subgraph) {
