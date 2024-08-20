@@ -14,7 +14,7 @@ import ExternalLink from '../Icons/Buttons/External Link.svg?react';
 import { QueryType } from '../Types/results';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
-import { FormattedEdgeObject, FormattedNodeObject } from '../Types/results';
+import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer } from '../Types/results';
 import { PublicationObject, PublicationsList } from '../Types/evidence';
 import { Location } from 'react-router-dom';
 
@@ -495,4 +495,22 @@ export const intToChar = (num: number): string => {
       throw new Error("Number must be between 1 and 26");
   }
   return String.fromCharCode(96 + num);
+}
+
+/**
+ * Calculates the total number of paths for a provided array of PathObjectContainer objects.
+ * 
+ * @param {PathObjectContainer[]} paths - An array of paths to count.
+ * @returns {number} - The total number of paths, including support paths.
+ * 
+ */
+export const getPathsCount = (paths: PathObjectContainer[]): number => {
+  let count = paths.length;
+  for(const path of paths) {
+    for(const subgraphItem of path.path.subgraph) {
+      if('support' in subgraphItem && subgraphItem.support !== undefined)
+        count += subgraphItem.support.length;
+    }
+  }
+  return count;
 }

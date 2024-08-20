@@ -22,32 +22,21 @@
     margin: $s auto $xs auto;
   }
   .description {
-    margin: 0;
+    margin: $xs 0 0 0;
   }
   .resultSub {
     display: flex;
     align-items: center;
   }
   .tags {
-    margin: 10px 0 10px;
+    margin: $xs 0 0;
     width: fit-content;
     display: grid;
     grid-template-columns: repeat(4, min-content);
-    gap: 12px;
+    gap: $xs;
     &.more {
       position: relative;
-      padding-right: 8px;
-      // &:after {
-      //   content: url('../../Icons/Buttons/Circle Add.svg');
-      //   position: absolute;
-      //   top: 0;
-      //   right: 0;
-      //   width: 16px;
-      //   height: 16px;
-      //   cursor: pointer;
-      //   opacity: 1;
-      //   transition: opacity .25s ease;
-      // }
+      padding-right: $xs;
     }
     .hasMore {
         position: absolute;
@@ -140,17 +129,20 @@
     height: 24px;
     position: relative;
   }
-  .evidenceLink {
-    font-size: $bodyTwoSize;
-    cursor: default;
-    .viewAll {
+  .evidenceContainer {    
+    .evidenceLink {
       font-size: $bodyTwoSize;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-    .info {
-      display: block;
-      margin-bottom: 2px;
+      cursor: default;
+      position: absolute;
+      .viewAll {
+        font-size: $bodyTwoSize;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+      .info {
+        display: block;
+        margin-bottom: 2px;
+      }
     }
   }
   .downloadButton {
@@ -195,11 +187,12 @@
   }
   .accordionPanel {
     grid-column: 1/7;
+    grid-row: 2;
     &.hasDescription, &.hasTags {
       min-height: 40px;
     }
     &.hasDescription.hasTags {
-      min-height: 83px;
+      min-height: 80px;
     }
     &>div {
       display: block !important;

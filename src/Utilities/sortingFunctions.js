@@ -1,4 +1,5 @@
 import { equal } from 'mathjs';
+import { getPathsCount } from './utilities';
 
 // alphabetical order
 export const sortNameLowHigh = (items, isEvidence) => {
@@ -35,13 +36,11 @@ export const sortEvidenceHighLow = (items) => {
 }
 
 export const sortPathsLowHigh = (items) => {
-  console.log(items);
-  return items;
+  return items.sort((a, b) => getPathsCount(a.compressedPaths) - getPathsCount(b.compressedPaths));
 }
 
 export const sortPathsHighLow = (items) => {
-  console.log(items);
-  return items;
+  return items.sort((a, b) => getPathsCount(b.compressedPaths) - getPathsCount(a.compressedPaths));
 }
 
 export const sortScoreLowHigh = (items) => {

@@ -27,7 +27,7 @@
       .tableHead {
         border-bottom: 1px solid $midGray;
         display: grid;
-        padding: 12px;
+        padding: 12px $s;
         border-radius: 5px 5px 0 0;
         user-select: none;
         grid-template-columns: 4fr 1fr 2fr 2fr .75fr;
@@ -79,29 +79,28 @@
           font-size: 12px;
           text-transform: none;
         }
-        .nameHead, .evidenceHead, .scoreHead {
+        .nameHead, .evidenceHead, .scoreHead, .pathsHead {
           &:hover {
             cursor: pointer;
           }
+          .chev {
+            display: none;
+          }
           &.true, &.false {
             position: relative;
-            &:after {
-              content: '';
-              width: 0;
-              height: 0;
-              position: absolute;
-              top: 2px;
-              right: -15px;
-              margin-left: 3px;
-              border-top: 0px solid transparent;
-              border-right: 5px solid transparent;
-              border-bottom: 5px solid $white;
-              border-left: 5px solid transparent;
+            .chev {
+              display: block;
+              width: 24px;
+              height: 24px;
+              transition: $defaultAnim;
+              path {
+                fill: transparent;
+                stroke: $white;
+              }
             }
           }
           &.false {
-            &:after {
-              top: 4px;
+            .chev {
               transform: rotate(180deg);
             }
           }

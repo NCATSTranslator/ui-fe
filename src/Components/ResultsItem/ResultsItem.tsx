@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo, FC, RefObject } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject, isPublication, isClinicalTrial, isMiscPublication } from '../../Utilities/utilities';
+import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject, 
+  isPublication, isClinicalTrial, isMiscPublication, getPathsCount } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react";
@@ -170,17 +171,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
       resizeObserver.disconnect();
     };
   },[]);
-
-  const getPathsCount = (paths: PathObjectContainer[]): number => {
-    let count = paths.length;
-    for(const path of paths) {
-      for(const subgraphItem of path.path.subgraph) {
-        if('support' in subgraphItem && subgraphItem.support !== undefined)
-          count += subgraphItem.support.length;
-      }
-    }
-    return count;
-  }
 
   const pathsCount: number = getPathsCount(formattedPaths.current);
   const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
