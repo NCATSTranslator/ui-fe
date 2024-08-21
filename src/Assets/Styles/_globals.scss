@@ -283,7 +283,7 @@ img {
 }
 
 .scrollable {
-  overflow-y: scroll; 
+  overflow-y: auto; 
   /* Firefox */
   scrollbar-width: thin;
   scrollbar-color: $midGray $lightGray;
