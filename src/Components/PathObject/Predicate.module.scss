@@ -3,7 +3,6 @@
 .path {
   display: flex;
   align-items: center;
-  justify-content: center;
   width: auto;
   max-width: 65%;
   text-overflow: ellipsis;
@@ -20,6 +19,7 @@
   svg, svg path, svg circle, svg line {
     transition: all .25s ease;
     fill: $white;
+    margin-right: 0;
   }
   &.hasMore {
     .more {
@@ -28,6 +28,9 @@
       display: block;
       font-weight: 700;
     }
+  }
+  .pathLabel {
+    padding: 0 4px;
   }
   span {
     cursor: pointer; 
@@ -83,9 +86,6 @@
     border: 1px solid $purpleEdgeBGSelected;
     background-color: $purpleEdgeBGSelected;
     color: $white;
-    svg, svg path, svg circle, svg line {
-      // stroke: $white;
-    }
   }
 
   .predicatesList {

@@ -151,9 +151,9 @@
   .pathContainer, .nameContainer, .targetContainer {
     cursor: pointer;
     &>span {
-      padding: 5px;
+      padding: 4px 8px 4px 4px;
       min-height: 22px;
-      width: 140px;
+      width: 136px;
     }
   }
 }

@@ -134,7 +134,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
             ? <ResearchMultiple />
             : ''
           }
-          <span data-tooltip-id={`${pathObject.predicate}${uid}`}>
+          <span data-tooltip-id={`${pathObject.predicate}${uid}`} className={styles.pathLabel}>
             <Highlighter
               highlightClassName="highlight"
               searchWords={activeStringFilters}
