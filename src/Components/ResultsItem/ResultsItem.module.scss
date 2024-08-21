@@ -33,7 +33,7 @@
     width: fit-content;
     display: grid;
     grid-template-columns: repeat(4, min-content);
-    gap: $xs;
+    gap: 6px;
     &.more {
       position: relative;
       padding-right: $xs;

@@ -1032,20 +1032,6 @@ const ResultsList = ({loading}) => {
                       />
                     </div>
                   }
-                  <ResultsListLoadingButton
-                    data={{
-                      handleResultsRefresh: () =>
-                      {
-                        handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
-                      },
-                      isFetchingARAStatus: isFetchingARAStatus.current,
-                      isFetchingResults: isFetchingResults.current,
-                      showDisclaimer: true,
-                      containerClassName: styles.bottomLoadingButtonContainer,
-                      buttonClassName: styles.loadingButton,
-                      hasFreshResults: (freshRawResults !== null)
-                    }}
-                  />
                 </div>
               </div>
             </>
@@ -1061,12 +1047,14 @@ const ResultsList = ({loading}) => {
                 },
               isFetchingARAStatus: isFetchingARAStatus.current,
               isFetchingResults: isFetchingResults.current,
-              showDisclaimer: false,
+              showDisclaimer: true,
               containerClassName: styles.shareLoadingButtonContainer,
               buttonClassName: styles.loadingButton,
               hasFreshResults: (freshRawResults !== null),
               isSticky: true
             }}
+            isError={isError}
+            returnedARAs={returnedARAs.current}
             setShareModalFunction={setShareModalOpen}
           />
         }
