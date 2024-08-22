@@ -1,10 +1,9 @@
 import styles from './ResultsListLoadingButton.module.scss';
-import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import ResultsAvailableIcon from '../../Icons/Buttons/Refresh.svg?react';
 import CompleteIcon from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
 import AlertIcon from '../../Icons/Status/Alerts/Warning.svg?react';
 import Button from '../Core/Button';
-import TextCrossfade from '../TextCrossfade/TextCrossfade';
+import CloseIcon from "../../Icons/Buttons/Close/Close.svg?react";
 
 const ResultsListLoadingButton = ({ data = {}, currentPercentage }) => {
 
@@ -64,6 +63,10 @@ const ResultsListLoadingButton = ({ data = {}, currentPercentage }) => {
             Sync New Results
           </Button>
         </>
+      }
+      {
+        (!data.isError && !data.hasFreshResults && !data.isFetchingARAStatus && !data.isFetchingResults) &&
+        <Button iconOnly handleClick={()=>data.setIsActive(false)} isSecondary><CloseIcon/></Button>
       }
       </div>
     </div>

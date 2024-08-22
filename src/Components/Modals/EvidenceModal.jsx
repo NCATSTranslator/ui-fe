@@ -135,7 +135,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer}`}>
       {selectedItem.name &&       
         <div className={styles.top}>
-          <h5 className={styles.title}>Showing Evidence for:</h5> 
+          <h5 className={styles.title}>Path Evidence</h5> 
           {
             formattedEdge &&
             <h5 className={styles.subtitle}>{capitalizeAllWords(formattedEdge)}</h5>

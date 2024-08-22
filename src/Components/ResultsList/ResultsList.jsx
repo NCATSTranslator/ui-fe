@@ -939,7 +939,7 @@ const ResultsList = ({loading}) => {
                           <Alert/>
                           <ChevUp className={styles.chev}/>
                           <Tooltip id="score-tooltip">
-                            <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added.</span>
+                            <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
                           </Tooltip>
                         </div>
                       </div>
@@ -987,6 +987,7 @@ const ResultsList = ({loading}) => {
                               setExpandSharedResult={setExpandSharedResult}
                               setShareModalOpen={setShareModalOpen}
                               setShareResultID={setShareResultID}
+                              resultsComplete={(!isError && freshRawResults === null && !isFetchingARAStatus.current && !isFetchingResults.current)}
                             />
                           )
                         })

@@ -74,6 +74,7 @@ interface ResultsItemProps {
   zoomKeyDown: boolean;
   isInUserSave?: boolean;
   isEven: boolean;
+  resultsComplete: boolean;
 }
 
 const ResultsItem: FC<ResultsItemProps> = ({
@@ -104,7 +105,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
     type,
     zoomKeyDown,
     isInUserSave = false,
-    isEven = false
+    isEven = false,
+    resultsComplete = false
   }) => {
   const user = useSelector(currentUser);
 
@@ -418,7 +420,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       </div>
       <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
         <span className={styles.score}>
-          <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
+          <span className={styles.scoreNum}>{resultsComplete ? item.score === null ? '0.00' : displayScore(item.score.main) : "Processing..." }</span>
         </span>
       </div>
       {/* <CSVLink

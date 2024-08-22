@@ -23,7 +23,8 @@ const StickyToolbar = ({ loadingButtonData, isError, returnedARAs }) => {
               hasFreshResults: loadingButtonData.hasFreshResults,
               currentInterval: returnedARAs.aras.length,
               status: returnedARAs.status, 
-              isError: isError
+              isError: isError,
+              setIsActive: setIsActive
             }}
           />
         }
