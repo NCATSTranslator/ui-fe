@@ -458,16 +458,16 @@ const ResultsItem: FC<ResultsItemProps> = ({
                       ? styles.active
                       : styles.inactive;
 
-                    if(numRoles > 4 && i === 4) {
-                      const moreCount = numRoles - 4;
-                      return (
-                        <>
-                          <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
-                          <span className={styles.hasMore}>(+{moreCount} more)</span>
-                        </>
-                      );
-                    }
-
+                    // + X more text for tags
+                    // if(numRoles > 4 && i === 4) {
+                    //   const moreCount = numRoles - 4;
+                    //   return (
+                    //     <>
+                    //       <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                    //       <span className={styles.hasMore}>(+{moreCount} more)</span>
+                    //     </>
+                    //   );
+                    // }
                     return(
                       <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
                     )

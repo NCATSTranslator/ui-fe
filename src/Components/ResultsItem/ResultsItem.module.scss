@@ -30,9 +30,9 @@
   }
   .tags {
     margin: $xs 0 0;
-    width: fit-content;
-    display: grid;
-    grid-template-columns: repeat(4, min-content);
+    width: 90%;
+    display: flex;
+    flex-wrap: wrap;
     gap: 6px;
     &.more {
       position: relative;
@@ -67,7 +67,6 @@
     transition: $defaultAnim;
     opacity: 1 !important;
     white-space: nowrap;
-    width: 100%;
     &:hover {
       box-shadow: none;
       text-decoration: underline;
