@@ -69,11 +69,8 @@ const Header: FC<HeaderProps> = ({children}) => {
                 <a className={styles.login} href={!!loginURL ? loginURL : ''}>Log In</a>
               : 
                 <>
-                  <Link to={`/preferences`} data-tooltip-id={`prefs-tooltip`} aria-describedby={`prefs-tooltip`} className={styles.userIcon}>
+                  <Link to={`/preferences`} className={styles.userIcon}>
                     <Cog/>
-                    <Tooltip id={`prefs-tooltip`} place="bottom">
-                      <span className={styles.tooltip}>Click here to view and edit your user preferences.</span>
-                    </Tooltip>
                     {
                       user?.name && !!width &&
                       <span className={`${width <= collapseNameScreenWidth ? styles.hide : ''} ${styles.userName} ${styles.linkSpan}`}>Preferences</span>
