@@ -1,17 +1,18 @@
 import { memo, FC } from 'react';
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
-import ResearchMultiple from '../../Icons/research-multiple.svg?react';
+import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { SupportDataObject } from '../../Types/results';
-import { isFormattedEdgeObject } from '../../Utilities/utilities';
+import { intToChar, isFormattedEdgeObject, numberToWords } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
 import { useLastViewedPath } from '../../Utilities/customHooks';
 
 interface SupportPathProps {
   dataObj: SupportDataObject;
+  index: number;
 }
 
-const SupportPath: FC<SupportPathProps> = ({ dataObj }) => {
+const SupportPath: FC<SupportPathProps> = ({ dataObj, index }) => {
 
   const pathViewStyles = dataObj.pathViewStyles;
   const tooltipID = dataObj.tooltipID;
@@ -34,6 +35,9 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj }) => {
             lastViewedPathID === supportPath.id &&
             <LastViewedTag/>
           }
+          <span className={`${!!pathViewStyles &&pathViewStyles.num}`}>
+            { intToChar(index + 1) }
+          </span>
           <button 
             onClick={handleActivateEvidence}
             className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
@@ -47,7 +51,7 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj }) => {
               <span>View evidence for this path.</span>
           </Tooltip>
           <div 
-            className={`${!!pathViewStyles && pathViewStyles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !supportPath.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''}`} 
+            className={`path ${numberToWords(supportPath.path.subgraph.length)}  ${!!pathViewStyles && pathViewStyles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !supportPath.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''}`} 
             key={key}
             > 
             {

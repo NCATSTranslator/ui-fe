@@ -1,7 +1,7 @@
 import styles from './PathObject.module.scss';
 import { FC } from 'react';
 import Tooltip from '../Tooltip/Tooltip';
-import ExternalLink from '../../Icons/external-link.svg?react';
+import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';

@@ -2,53 +2,46 @@
 
 .result {
   display: grid;
-  grid-template-columns: 4fr 1fr 2fr 2fr .75fr .75fr;
-  padding: 12px;
+  grid-template-columns: 4fr 1fr 2fr 2fr .75fr;
+  padding: $m $s;
+  column-gap: $s;
   @media screen and (min-width: $desktop) {
-    grid-template-columns: 1fr 60px 225px 100px 50px 75px;
+    grid-template-columns: 1fr 112px 110px 90px 90px 24px;
   }
   &:nth-child(even) {
     &.highlighted {
-      background-color: $yellow20;
+      background-color: $lightYellow;
     }
   }
   &:nth-child(odd) {
     &.highlighted {
-      background-color: $yellow50;
+      background-color: $yellow;
     }
   }
+  .resultTabs {
+    margin: $s auto $xs auto;
+  }
+  .description {
+    margin: $xs 0 0 0;
+  }
   .resultSub {
-    padding: 4px 0;
     display: flex;
     align-items: center;
   }
   .tags {
-    margin: 10px 0 10px;
-    width: fit-content;
-    display: grid;
-    grid-template-columns: repeat(4, min-content);
-    gap: 12px;
+    margin: $xs 0 0;
+    width: 90%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     &.more {
       position: relative;
-      padding-right: 8px;
-      // &:after {
-      //   content: url('../../Icons/Buttons/Circle Add.svg');
-      //   position: absolute;
-      //   top: 0;
-      //   right: 0;
-      //   width: 16px;
-      //   height: 16px;
-      //   cursor: pointer;
-      //   opacity: 1;
-      //   transition: opacity .25s ease;
-      // }
+      padding-right: $xs;
     }
     .hasMore {
         position: absolute;
         top: 4px;
         left: 100%;
-        // width: 20px;
-        // height: 20px;
         font-size: 12px;
         font-weight: 400;
         color: $purpleOne;
@@ -61,18 +54,19 @@
     opacity: 0;
   }
   .tag {
-    font-size: 14px;
+    font-size: 12px;
+    line-height: 1.25;
+    font-weight: 700;
     background-color: transparent;
     box-shadow: none;
     color: $purpleTwo;
     border: 1px solid $purpleTwo;
     margin: 0;
-    padding: 6px;
-    border-radius: 8px;
-    transition: all .25s ease;
+    padding: 8px 8.5px;
+    border-radius: $defaultBorderRadius;
+    transition: $defaultAnim;
     opacity: 1 !important;
     white-space: nowrap;
-    width: 100%;
     &:hover {
       box-shadow: none;
       text-decoration: underline;
@@ -87,7 +81,9 @@
     }
   }
   .bookmarkContainer {
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 8px;
   }
   .checkboxContainer {
     display: none;
@@ -108,13 +104,13 @@
       display: block;
     }
     .name, .name span, .name mark {
-      color: $purpleOne;
+      color: $black;
       font-size: 20px;
+      line-height: 25px;
       font-weight: 700;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
-      min-height: 25px;
       text-transform: none;
     }
     .effect {
@@ -123,35 +119,29 @@
       color: $darkGray
     }
   }
-  .fdaContainer, .evidenceContainer, .scoreContainer {
-    text-align: center;
-    padding-left: $s;
-    padding-right: $s;
-    justify-content: center;
-  }
-  .scoreNum {
-    font-size: 14px;
-    font-weight: 700;
+  .scoreNum, .pathsNum, .info {
+    font-size: 12px;
+    line-height: 1.25;
+    color: $darkGray;
   }
   .fdaIcon {
     height: 24px;
     position: relative;
   }
-  .evidenceLink {
-    font-size: $bodyTwoSize;
-    cursor: default;
-    .viewAll {
+  .evidenceContainer {    
+    .evidenceLink {
       font-size: $bodyTwoSize;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-    .info {
-      display: block;
-      font-size: 13px;
-      font-weight: 400;
-      line-height: 1;
-      color: $darkGray;
-      margin-bottom: 2px;
+      cursor: default;
+      position: absolute;
+      .viewAll {
+        font-size: $bodyTwoSize;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+      .info {
+        display: block;
+        margin-bottom: 2px;
+      }
     }
   }
   .downloadButton {
@@ -167,12 +157,12 @@
   }
   .shareResultIcon {
     box-shadow: none;
-    background-color: transparent;
     margin: 0;
     width: 100%;
     svg {
       margin-right: 0;
       width: 24px;
+      opacity: 1 !important;
     }
   }
   .accordionButton {
@@ -180,6 +170,7 @@
     background-color: transparent;
     margin: 0;
     width: 100%;
+    padding: 0;
     svg {
       transition: transform .25s ease;
       margin-right: 0;
@@ -195,14 +186,15 @@
   }
   .accordionPanel {
     grid-column: 1/7;
-    &.hasDescription {
-      min-height: 46px;
+    grid-row: 2;
+    &.hasDescription, &.hasTags {
+      min-height: 40px;
+    }
+    &.hasDescription.hasTags {
+      min-height: 80px;
     }
     &>div {
       display: block !important;
-    }
-    &.open {
-      padding: 0 0 20px;
     }
     &.closed {
       button {
@@ -210,7 +202,7 @@
       }
     }
     .container {
-      max-width: calc(100% - 300px);
+      max-width: calc(100% - 390px);
       padding: 0;
       p, p span, p mark {
         font-size: 12px;
@@ -219,50 +211,60 @@
   }
 }
 
-.notesIcon, .bookmarkIcon {
-  border-radius: 50%;
-  background-color: $purpleTwo;
-  padding: 1px;
-  cursor: pointer;
-  display: flex;
-
-  height: 24px;
-  width: 24px;
-  position: relative;
-  &:hover {
+.bookmarkContainer {
+  .icon, .notesIcon, .bookmarkIcon {
+    border-radius: $defaultBorderRadius;
+    background-color: $lightGray;
+    cursor: pointer;
+    position: relative;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: $defaultAnim;
+    svg {
+      opacity: 1;
+    }
+    .bookmarkFilledSVG, .notesFilledSVG {
+      opacity: 0;
+    }
+    &:hover {
+      background-color: $midGray;
+    }
+    &.filled {
+      svg {
+        opacity: 0;
+      }
+      .bookmarkFilledSVG, .notesFilledSVG {
+        opacity: 1;
+      }
+    }
+    svg {
+      height: 24px;
+      width: 24px;
+      transition: $defaultAnim;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate3d(-50%, -50%, 0);
+      path {
+        stroke-width: 0;
+        transition: all .25s ease;
+      }
+    } 
+  }
+  .bookmarkIcon {
     svg path {
-      fill: $purpleOne20;
+      fill: $black;
     }
   }
-  &.filled {
-    path {
-      fill: $purpleOne50;
+  &.even {
+    .icon, .notesIcon, .bookmarkIcon {
+      background-color: $white;
+      &:hover {
+        background-color: $midGray;
+      }
     }
-  }
-  svg {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    path {
-      fill: $white;
-      stroke-width: 0;
-      transition: all .25s ease;
-    }
-  } 
-}
-.bookmarkIcon {
-  svg {
-    top: -10%;
-    left: -10%;
-    height: 125%;
-    width: 122%;
-  }
-}
-.notesIcon {
-  svg {
-    left: 2px;
-    top: 0.5px;
   }
 }

@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo, FC, RefObject } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject, isPublication, isClinicalTrial, isMiscPublication } from '../../Utilities/utilities';
+import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject, 
+  isPublication, isClinicalTrial, isMiscPublication, getPathsCount } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
-import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react";
-import ShareIcon from '../../Icons/share.svg?react';
-import Bookmark from "../../Icons/Navigation/Bookmark.svg?react";
-import Notes from "../../Icons/note.svg?react"
+import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react";
+import ShareIcon from '../../Icons/Buttons/Link.svg?react';
+import Bookmark from "../../Icons/Navigation/Bookmark/Bookmark.svg?react";
+import BookmarkFilled from "../../Icons/Navigation/Bookmark/Filled Bookmark.svg?react";
+import Notes from "../../Icons/Buttons/Notes/Notes.svg?react"
+import NotesFilled from "../../Icons/Buttons/Notes/Filled Notes.svg?react"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';
@@ -22,6 +25,8 @@ import { QueryType } from '../../Utilities/queryTypes';
 import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject } from '../../Types/results';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
 import { isEqual } from 'lodash';
+import Tabs from '../Tabs/Tabs';
+import Tab from '../Tabs/Tab';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -68,6 +73,8 @@ interface ResultsItemProps {
   type: QueryType;
   zoomKeyDown: boolean;
   isInUserSave?: boolean;
+  isEven: boolean;
+  resultsComplete: boolean;
 }
 
 const ResultsItem: FC<ResultsItemProps> = ({
@@ -97,7 +104,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
     rawResults,
     type,
     zoomKeyDown,
-    isInUserSave = false
+    isInUserSave = false,
+    isEven = false,
+    resultsComplete = false
   }) => {
   const user = useSelector(currentUser);
 
@@ -139,12 +148,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const bookmarkRemovalApproved = useRef<boolean>(false);
   const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState<boolean>(false);
 
-  const initPathString = useRef((type?.pathString) ? type.pathString : 'may affect');
   const tagsRef = useRef<HTMLDivElement>(null);
   const [tagsHeight, setTagsHeight] = useState<number>(0);
   const minTagsHeight = 45;
-
-  const numRoles = item.tags.filter(tag => tag.includes("role")).length;
 
   useTurnstileEffect(
     () => startExpanded,
@@ -166,22 +172,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
     };
   },[]);
 
-  const getPathsCount = (paths: PathObjectContainer[]): number => {
-    let count = paths.length;
-    for(const path of paths) {
-      for(const subgraphItem of path.path.subgraph) {
-        if('support' in subgraphItem && subgraphItem.support !== undefined)
-          count += subgraphItem.support.length;
-      }
-    }
-    return count;
-  }
-
   const pathsCount: number = getPathsCount(formattedPaths.current);
-  const pathString: string = (pathsCount > 1) ? `Paths that ${initPathString.current}` : `Path that ${initPathString.current}`;
   const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
   const nameString: string = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
-  // const objectString = (item.object !== null) ? capitalizeAllWords(item.object) : '';
 
   const [itemGraph, setItemGraph] = useState(null);
 
@@ -364,14 +357,14 @@ const ResultsItem: FC<ResultsItemProps> = ({
             />
           </span>
         }
-        <span className={styles.effect}>{pathsCount} {pathString} {queryNodeLabel}</span>
       </div>
-      <div className={`${styles.bookmarkContainer} ${styles.resultSub}`}>
+      <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${!!isEven && styles.even}`}>
         {
           !!user
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
-                  <Bookmark className='bookmark-icon' data-result-name={nameString} onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <BookmarkFilled className={styles.bookmarkFilledSVG} data-result-name={nameString} onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
+                  <Bookmark data-result-name={nameString} onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
                   <Tooltip id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`}>
                     <span className={styles.tooltip}>
                       {
@@ -383,6 +376,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                   </Tooltip>
                 </div>
                 <div className={`${styles.icon} ${styles.notesIcon} ${itemHasNotes ? styles.filled : ''}`}>
+                  <NotesFilled className={styles.notesFilledSVG} data-result-name={nameString} onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
                   <Notes className='note-icon' data-result-name={nameString} onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
                   <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
                     <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/main/workspace" target='_blank'>Workspace</Link>).</span>
@@ -391,6 +385,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
               </>
             : <></>
         }
+        <button className={`${styles.icon} ${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`} onClick={handleOpenResultShare}>
+          <ShareIcon/>
+        </button>
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span className={styles.evidenceLink}>
@@ -414,14 +411,16 @@ const ResultsItem: FC<ResultsItemProps> = ({
           </div>
         </span>
       </div>
-      <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-        <span className={styles.score}>
-          <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
+      <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
+        <span className={styles.paths}>
+          <span className={styles.pathsNum}>{ pathsCount } {pathsCount > 1 ? "Paths" : "Path"}</span>
         </span>
       </div>
-      <button className={`${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`} onClick={handleOpenResultShare}>
-        <ShareIcon/>
-      </button>
+      <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
+        <span className={styles.score}>
+          <span className={styles.scoreNum}>{resultsComplete ? item.score === null ? '0.00' : displayScore(item.score.main) : "Processing..." }</span>
+        </span>
+      </div>
       {/* <CSVLink
         className={styles.downloadButton}
         data={csvData}
@@ -438,7 +437,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <AnimateHeight
         className={`${styles.accordionPanel}
           ${isExpanded ? styles.open : styles.closed }
-          ${((item.description || item.tags.some(item=>item.includes("role"))) && !isInUserSave) ? styles.hasDescription : styles.noDescription }
+          ${(item.tags.some(item=>item.includes("role")) && !isInUserSave) ? styles.hasTags : ''}
+          ${(item.description) ? styles.hasDescription : '' }
         `}
         duration={500}
         height={height}
@@ -458,16 +458,16 @@ const ResultsItem: FC<ResultsItemProps> = ({
                       ? styles.active
                       : styles.inactive;
 
-                    if(numRoles > 4 && i === 4) {
-                      const moreCount = numRoles - 4;
-                      return (
-                        <>
-                          <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
-                          <span className={styles.hasMore}>(+{moreCount} more)</span>
-                        </>
-                      );
-                    }
-
+                    // + X more text for tags
+                    // if(numRoles > 4 && i === 4) {
+                    //   const moreCount = numRoles - 4;
+                    //   return (
+                    //     <>
+                    //       <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                    //       <span className={styles.hasMore}>(+{moreCount} more)</span>
+                    //     </>
+                    //   );
+                    // }
                     return(
                       <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
                     )
@@ -477,7 +477,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
             }
             {
               item.description &&
-              <p>
+              <p className={styles.description}>
                 <Highlighter
                   highlightClassName="highlight"
                   searchWords={activeStringFilters}
@@ -488,26 +488,32 @@ const ResultsItem: FC<ResultsItemProps> = ({
             }
           </div>
         </div>
-        <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
-          <GraphView
-            result={item}
-            updateGraphFunction={setItemGraph}
-            prebuiltGraph={(item.graph)? item.graph: null}
-            rawResults={rawResults}
-            onNodeClick={handleNodeClick}
-            clearSelectedPaths={handleClearSelectedPaths}
-            active={isExpanded}
-            zoomKeyDown={zoomKeyDown}
-          />
-        </Suspense>
-        <PathView
-          paths={formattedPaths.current}
-          selectedPaths={selectedPaths}
-          active={isExpanded}
-          handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
-          handleActivateEvidence={handleActivateEvidence}
-          activeStringFilters={activeStringFilters}
-        />
+        <Tabs isOpen className={styles.resultTabs}>
+            <Tab heading="Paths">
+              <PathView
+                paths={formattedPaths.current}
+                selectedPaths={selectedPaths}
+                active={isExpanded}
+                handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
+                handleActivateEvidence={handleActivateEvidence}
+                activeStringFilters={activeStringFilters}
+              />
+            </Tab>
+            <Tab heading="Graph">
+              <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
+                <GraphView
+                  result={item}
+                  updateGraphFunction={setItemGraph}
+                  prebuiltGraph={(item.graph)? item.graph: null}
+                  rawResults={rawResults}
+                  onNodeClick={handleNodeClick}
+                  clearSelectedPaths={handleClearSelectedPaths}
+                  active={isExpanded}
+                  zoomKeyDown={zoomKeyDown}
+                />
+              </Suspense>
+            </Tab>
+        </Tabs>
       </AnimateHeight>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}

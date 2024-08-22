@@ -3,7 +3,6 @@
 .path {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
   width: auto;
   max-width: 65%;
   text-overflow: ellipsis;
@@ -14,21 +13,24 @@
   margin-right: 0;
   transition: all .25s ease;
   border-radius: $defaultBorderRadius;
-  box-shadow: $dropShadow;
+  box-shadow: none;
   border: 1px solid $purpleEdgeBG;
   cursor: pointer;
   svg, svg path, svg circle, svg line {
     transition: all .25s ease;
-    stroke: $white;
+    fill: $white;
+    margin-right: 0;
   }
   &.hasMore {
-    padding: 3px 7px;
     .more {
       font-size: 12px;
       color: $lightGray;
       display: block;
       font-weight: 700;
     }
+  }
+  .pathLabel {
+    padding: 0 4px;
   }
   span {
     cursor: pointer; 
@@ -43,7 +45,7 @@
   }
   &:hover {
     // color: $black;
-    box-shadow: $dropShadowHover;
+    // box-shadow: $dropShadowHover;
     background-color: $purpleEdgeBGHover;
     text-decoration: underline;
   }
@@ -84,9 +86,6 @@
     border: 1px solid $purpleEdgeBGSelected;
     background-color: $purpleEdgeBGSelected;
     color: $white;
-    svg, svg path, svg circle, svg line {
-      stroke: $white;
-    }
   }
 
   .predicatesList {
@@ -115,6 +114,9 @@
   top: -13px;
   right: -16px;
   display: flex;
+  img {
+    box-shadow: $dropShadow;
+  }
 }
 .robot {
   width: 18px;
@@ -183,13 +185,21 @@ svg.connector {
     margin: 0;
   }
   .supportButtonIcon {
+    display: flex;
     margin: 0;
     transform: rotate(180deg);
     z-index: 10;
     position: relative;
     background-color: $white;
     border-radius: 50%;
-    height: 24px;
+    padding: 3px;
+    transition: $defaultAnim;
+    svg {
+      width: 17px;
+      min-width: 17px;
+      height: 17px;
+      min-height: 17px;
+    }
   }
   &.expanded {
     border-radius: 50%;

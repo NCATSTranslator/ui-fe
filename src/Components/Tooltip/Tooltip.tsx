@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, FC} from 'react';
 import styles from './Tooltip.module.scss';
 import 'react-tooltip/dist/react-tooltip.css';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
@@ -17,7 +17,7 @@ interface TooltipProps {
   place?: PlacesType;
 }
 
-const Tooltip: React.FC<TooltipProps> = ({
+const Tooltip: FC<TooltipProps> = ({
   onClose = () => {}, 
   children, 
   id, 
@@ -40,6 +40,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       place={place}
       afterHide={onClose}
       offset={offset}
+      positionStrategy='fixed'
     >
       {children}
     </ReactTooltip>

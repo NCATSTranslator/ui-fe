@@ -10,7 +10,7 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from '../BookmarkToasts/BookmarkToasts';
 import NotesModal from '../Modals/NotesModal';
-import TextInput from "../FormFields/TextInput";
+import TextInput from "../Core/TextInput";
 import { cloneDeep } from 'lodash';
 import UserSave from '../UserSave/UserSave';
 import LoginWarning from '../LoginWarning/LoginWarning';

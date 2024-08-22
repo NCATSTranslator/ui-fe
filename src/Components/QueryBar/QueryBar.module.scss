@@ -18,9 +18,54 @@
   input {
     border-top-left-radius: 0px;
     border-bottom-left-radius: 0px;
-    border-top-right-radius: $querySelectBorderRadius;
-    border-bottom-right-radius: $querySelectBorderRadius;
+    border-top-right-radius: $largeBorderRadius;
+    border-bottom-right-radius: $largeBorderRadius;
     border: none;
+  }
+}
+.inputContainer {
+  display: flex;
+  align-items: center;
+  &.disabled {
+    input {
+      background-color: $white;
+      color: $purpleOne;
+      font-weight: 700;
+      &::-webkit-input-placeholder, &::-ms-input-placeholder &::placeholder, &::-moz-placeholder {
+        color: $purpleOne;
+        font-weight: 700;
+      }
+    }
+    .submitButton {
+      background-color: $lightGray;
+      border-color: $lightGray;
+      cursor: default;
+      pointer-events: none;
+      svg path {
+        stroke: $midGray;
+      }
+    }
+  }
+  .icon {
+    width: 24px;
+    height: 24px;    
+    margin: 0 8px 0 12px;
+  }
+  .submitButton {
+    margin: 0 8px;
+    background-color: $purpleOne;
+    svg path {
+      stroke: $white;
+    }
+  }
+}
+.input {
+  input {
+    padding: 16px 0 !important;
+    line-height: 22px;
+    &:focus {
+      outline: none;
+    }
   }
 }
 

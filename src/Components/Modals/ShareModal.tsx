@@ -1,6 +1,7 @@
 import {useRef, useEffect, useState, FC} from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
+import Button from "../Core/Button";
 import { currentQuery} from "../../Redux/querySlice";
 import { useSelector } from 'react-redux';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
@@ -83,7 +84,7 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
       }
       <div className={styles.copyContainer}>
         <p className={styles.url} data-testid='share-url-container'>{qidURL}</p>
-        <button onClick={() => {navigator.clipboard.writeText(qidURL)}}>Copy Link</button>
+        <Button handleClick={() => {navigator.clipboard.writeText(qidURL)}}>Copy Link</Button>
       </div>
     </Modal>
   );

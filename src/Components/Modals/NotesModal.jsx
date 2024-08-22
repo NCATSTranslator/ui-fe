@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import styles from "./NotesModal.module.scss";
 import Modal from "./Modal";
 import TextEditor from "../TextEditor/TextEditor";
-import Button from "../FormFields/Button";
+import Button from "../Core/Button";
 import { getUserSave, updateUserSave } from "../../Utilities/userApi";
 
 const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClearNotesEditor = ()=>{}}) => {
@@ -92,8 +92,8 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
         onClearEditorComplete={handleEditorCleared}
       />
       <div className={styles.bottomButtons}>
-        <button onClick={handleSave} className={styles.saveButton} >Save Note</button>
-        <button onClick={() => setConfirmClearNote(true)} className={styles.clearButton} >Clear Note</button>
+        <Button onClick={handleSave} className={styles.saveButton} >Save Note</Button>
+        <Button onClick={() => setConfirmClearNote(true)} className={styles.clearButton} >Clear Note</Button>
       </div>
     </Modal>
   );

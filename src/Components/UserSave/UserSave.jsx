@@ -1,14 +1,14 @@
 import styles from './UserSave.module.scss';
 import { useState, useEffect } from 'react';
 import Highlighter from 'react-highlight-words';
-import ExternalLink from '../../Icons/external-link.svg?react';
+import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import Tooltip from '../Tooltip/Tooltip';
 import ResultsItem from '../ResultsItem/ResultsItem';
 import { emptyEditor } from '../../Utilities/userApi';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { getFormattedDate } from '../../Utilities/utilities';
 import AnimateHeight from 'react-animate-height';
-import ChevDown from "../../Icons/Directional/Property_1_Down.svg?react"
+import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
 
 const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, activateNotes, 
   handleBookmarkError, bookmarkAddedToast, bookmarkRemovedToast, setShareModalOpen, setShareResultID}) => {

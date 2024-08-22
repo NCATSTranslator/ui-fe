@@ -2,38 +2,27 @@
 
 .sticky {
   background-color: $white;
-  border-radius: 25px;
-  padding: $s;
+  padding: $xs;
   position: sticky;
-  bottom: $s;
-  right: $s;
-  width: fit-content;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: calc(100% - 16px);
   margin: 0 0 0 auto;
-  box-shadow: $dropShadowHover;
-  transition: $defaultBoxShadowAnim;
+  transition: $defaultAnim;
   z-index: 100;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
   button {
     margin-bottom: 0;
-  }
-  &:hover {
-    box-shadow: 0 5px 15px rgba(32,33,36,.4);
   }
   .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
     transition: all .5s ease;
-  }
-  .container > div {
-    opacity: 0;
-    width: 0;
-    transition: all .5s ease;
-    overflow: hidden;
-  }
-  &.expanded {
-    .container {
-      width: 250px;
-    }
+    width: 100%;
   }
   &.showText {
     .container > div {
@@ -41,73 +30,8 @@
       width: auto;
     }
   }
-  &.collapsed {
-    .container > div {
-      opacity: 0;
-      width: 0;
-    }
-    .container {
-      width: 40px;
-      min-width: 40px;
-    }
+  &.inactive {
+    opacity: 0;
+    pointer-events: none;
   }
 }
-.shareButton {
-  border-radius: 50%;
-  min-width: 40px;
-  width: 40px;
-  height: 40px;
-  position: relative;
-  margin: 0;
-  svg {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin-right: 0;
-    path {
-      fill: $white;
-    }
-  }
-}
-
-.expandButton {
-  position: absolute;
-  top: -5px;
-  left: -5px;
-  border-radius: 50%;
-  padding: 0;
-  font-weight: 700;
-  cursor: pointer;
-  svg {
-    margin-right: 0;
-    path {
-      stroke: $white
-    }
-  }
-}
-// font-weight: 700;
-// // transition: all .5s ease;
-// overflow: hidden;
-// span {
-//   // transition: all .5s ease;
-//   white-space: nowrap;
-// }
-// &.expanded {
-//   width: calc(100% - 55px);
-//   transition: width .5s ease;
-//   padding-right: 10px;
-//   // span {
-//   //   opacity: 1;
-//   // }
-// }
-// &.collapsed {
-//   width: 0;
-//   padding-right: 0;
-//   // span {
-//   //   opacity: 0;
-//   // }
-// }
-// svg {
-//   min-width: 24px;
-// }

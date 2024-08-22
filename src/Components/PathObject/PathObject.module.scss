@@ -4,8 +4,10 @@
 .nameContainer,.pathContainer,.targetContainer {
   border-radius: $defaultBorderRadius;
   svg {
-    min-width: 24px;
+    width: 24px;
     height: 24px;
+    min-width: 24px;
+    min-height: 24px;
   }
   .provenance {
     display: flex !important;
@@ -28,7 +30,7 @@
     }
     svg {
       display: inline;
-      margin: 0 3px 0 0;
+      margin: 0 4px 0 0;
       min-width: 18px;
       circle:first-child {
         stroke: $white;
@@ -43,36 +45,28 @@
     }
   }
 }
-.nameContainer,.pathContainer {
-  margin-right: 4px;
-}
 .name,.pathContainer,.target {
   display: flex;
-  justify-content: center;
   align-items: center;
-  text-align: center;
 }
 .text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding: 0 4px;
 }
 .nameContainer {
   position: relative;
-  box-shadow: none;
   background-color: $lightGray;
   border-radius: $defaultBorderRadius;
-  box-shadow: $dropShadow;
   border: 1px solid transparent;
-  &:hover {
-    box-shadow: $dropShadowHover;
-  }
+  box-shadow: none;
   &:first-child {
     border: none;
     background-color: $yellow;
   }
   svg {
-    margin-right: 5px;
+    margin-right: 0;
     path {
       fill: $black;
     }
@@ -83,15 +77,20 @@
   padding: 0;
   position: relative;
   cursor: pointer;
+  min-width: 220px;
+  justify-content: center;
 }
 .pathContainer, .nameContainer, .targetContainer {
   cursor: pointer;
   &>span {
-    padding: 7px 9px;
+    padding: 4px;
+    min-height: 22px;
+    width: 140px;
   }
   span, mark {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
+    line-height: 1.25;
   }
   span.hasMore {
     cursor: pointer;
@@ -102,7 +101,9 @@
   .description {
     display: -webkit-box;
     -webkit-line-clamp: 4;
+    line-clamp: 4;
     -webkit-box-orient: vertical;  
+    -moz-box-orient: vertical;
     overflow: hidden;
     font-size: 14px;
     margin: 3px 0 8px;
@@ -112,21 +113,17 @@
 
 .nameContainer, .targetContainer {
   transition: all .25s ease;
-  max-height: 40px;
 }
 .targetContainer {
-  background-color: $blueTwo;
+  background-color: $blueOne;
   color: $white;
   position: relative;
-  box-shadow: $dropShadow;
+  box-shadow: none;
   svg {
-    margin-right: 8px;
+    margin-right: 0;
     path {
       fill: $white;
     }
-  }
-  &:hover {
-    box-shadow: $dropShadowHover;
   }
 }
 

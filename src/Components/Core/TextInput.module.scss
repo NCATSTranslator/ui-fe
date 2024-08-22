@@ -1,0 +1,77 @@
+@import "../../Assets/Styles/variables";
+
+.textInput {
+  position: relative; 
+  &.s {
+    width: 23%;
+  }
+  &.m {
+    width: 48%;
+  }
+  &.l {
+    width: 98%;
+  }
+  .errorText {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    color: $red;
+    margin-top: 8px;
+    font-size: $captionSize;
+    &:before {
+      content: url('../../Icons/Status/Alerts/Info.svg');
+      margin-right: 4px;
+    }
+  }
+  input, textarea {
+    border: 1px solid $midGray;
+    font-size: $bodyOneSize;
+    border-radius: $defaultBorderRadius;
+    padding: 10px 12px;
+    resize: none;
+    line-height: 20px;
+    &:focus {
+      outline-style: inset;
+      outline-offset: 0;
+      outline-color: $purpleOne;
+      outline-width: 1px;
+    }
+  }
+  &.hasIconLeft {
+    input, textarea {
+      padding: 12px 12px 12px 40px;
+    }
+  }
+  &.hasIconRight {
+    input, textarea {
+      padding: 12px 40px 12px 12px;
+    }
+    &.hasIconLeft {
+      input, textarea {
+        padding: 12px 40px;
+      }
+    }
+  }
+  .iconContainerLeft, .iconContainerRight {
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    img, svg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      path {
+        fill: $black;
+      }
+    }
+  }
+  .iconContainerLeft {
+    left: 10px;
+  }
+  .iconContainerRight {
+    right: 10px;
+  }
+}

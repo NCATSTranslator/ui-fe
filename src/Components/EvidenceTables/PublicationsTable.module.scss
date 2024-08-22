@@ -13,11 +13,13 @@
     display: flex;
     flex-direction: column;
   }
-  .source, .pubdate, .pValue, .link, .location, .status, .knowledgeLevel {
-    text-align: center;
+  .title, .snippet, .source, .pubdate, .pValue, .link, .location, .status, .knowledgeLevel {
+    text-align: left;
+    justify-content: flex-start;
   }
   .source.tableCell span {
     -webkit-line-clamp: 4;
+    line-clamp: 4;
     -webkit-box-orient: vertical;
     display: -webkit-box;
     overflow: hidden;
@@ -26,32 +28,42 @@
   .snippet.tableCell span {
     display: -webkit-box;
     -webkit-line-clamp: 4;
+    line-clamp: 4;
     -webkit-box-orient: vertical;
   }
   .emphasizedSnippet {
     font-size: 12px;
   }
   .title {
-    text-align: center;
     a {
       font-weight: 700;
-      color: $black;
+      color: $purpleOne;
       font-size: 12px;
       -webkit-line-clamp: 4;
+      line-clamp: 4;
       -webkit-box-orient: vertical;
       display: -webkit-box;
       overflow: hidden;
       text-overflow: ellipsis;
       transition: color .25s ease;
-      text-decoration: underline;
       &:hover {
+        text-decoration: underline;
         color: $purpleEdgeBGSelected;
       }
     }
   }
   .sourceName {
-    text-decoration: underline;
-    font-weight: 400;
+    font-weight: 700;
+    cursor: pointer;
+    &.noLink {
+      cursor: default;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+      &:hover {
+      text-decoration: underline;
+    }
   }
 }
 .bottom {
@@ -60,9 +72,17 @@
   justify-content: space-between;
   margin-top: $m;
   .perPage {
+    display: flex;
+    .label {
+      color: $darkGray;
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0 $xs 0 0;
+      padding: 15px 0;
+    }
     label {
       margin: 0;
-      width: 212px;
+      width: 115px;
     }
   }
   .pagination {
@@ -114,13 +134,13 @@
           user-select: none;
           -o-user-select: none;
           &:hover {
-            background-color: $purpleTwo20;
+            background-color: $palePurple;
             color: $purpleOne;
           }
         }
         &.current {
           a {
-            background-color: $purpleTwo20;
+            background-color: $palePurple;
             color: $purpleOne;
           } 
         }
@@ -148,10 +168,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0 16px; 
-  margin: 0 10px;
+  padding: $xs 0 $s; 
+  margin: 0 $xs;
   .evidenceCount {
     margin: 0;
+    color: $darkGray;
+    font-size: 14px;
+    line-height: 1.25;
+    padding: 12px 0;
   }
 }
 .knowledgeLevelOptions {
@@ -175,11 +199,11 @@
 .knowledgeLevelButton {
   border-radius: 8px;
   background-color: $white;
-  border: 1px solid $borderGray;
+  border: 1px solid $darkGray;
   color: $purpleEdgeBGSelected;
   transition: all .5s ease;
   color: #514F7E;
-  font-family: $poppins;
+  font-family: $opensans;
   font-size: 15px;
   font-weight: 500;
   line-height: 1; 
@@ -187,7 +211,7 @@
   padding: 8px 16px;
   margin: 0 16px 0 0;
   &.selected {
-    background-color: $hoverGray;
+    background-color: $palePurple;
     border: 1px solid $purpleEdgeBGSelected;
     box-shadow: $dropShadowTransparent;
   }

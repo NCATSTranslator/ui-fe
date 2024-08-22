@@ -1,10 +1,9 @@
 import {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {  useLocation, useNavigate } from "react-router-dom";
 import QueryBar from "../QueryBar/QueryBar";
 import ExampleQueryList from "../ExampleQueryList/ExampleQueryList";
 import QuerySelect from "../QuerySelect/QuerySelect";
-import QueryTypeIcon from "../QueryTypeIcon/QueryTypeIcon";
 import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import AutoHeight from "../AutoHeight/AutoHeight";
 import { queryTypes } from "../../Utilities/queryTypes";
@@ -17,14 +16,15 @@ import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
 import { filterAndSortExamples, getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
 import { getEntityLink, generateEntityLink, getLastItemInArray, getFormattedDate, isValidDate } from "../../Utilities/utilities";
-import Question from '../../Icons/Navigation/Question.svg?react';
-import Back from '../../Icons/Directional/Undo.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
+import ShareIcon from '../../Icons/Buttons/Link.svg?react';
+import Button from "../Core/Button";
+import ShareModal from '../Modals/ShareModal';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import styles from './Query.module.scss';
 import { API_PATH_PREFIX } from "../../Utilities/userApi";
 
-const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription}) => {
+const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription, data}) => {
 
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
@@ -44,7 +44,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const [errorText, setErrorText] = useState('');
   // String, input text from query var
   const [inputText, setInputText] = useState(initNodeLabelParam);
-  const [isOpen, setIsOpen] = useState(false);
 
   initPresetTypeObject = (initPresetTypeObject === null) ? queryTypes[0] : initPresetTypeObject;
   const initAutocompleteFunctions = (initPresetTypeObject === null) ? null : initPresetTypeObject.functions;
@@ -191,9 +190,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
         newPrevItems.push(newQueryItem);
         prevQueryItems.current = newPrevItems;
 
-        if(selectedNode.id !== '' && selectedNode.label !== '') {
-          handleSubmission(newQueryItem);
-        }
+        // automatically submits when item is clicked in autocomplete
+        // if(selectedNode.id !== '' && selectedNode.label !== '') {
+        //   handleSubmission(newQueryItem);
+        // }
         return newQueryItem;
       }
     )
@@ -262,12 +262,11 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
 
   // Event handler for form submission
   const handleSubmission = (item) => {
-    validateSubmission(item);
+    if(!item)
+      validateSubmission(queryItem.node);
+    else  
+      validateSubmission(item);
   }
-
-  const handleSelectToggle = useCallback((val) => {
-    setIsOpen(val);
-  }, []);
 
   useEffect(() => {
     setIsLoading(loading);
@@ -309,14 +308,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               ?
               <>
                 <div className={styles.resultsHeader}>
-                  <div className={styles.buttons}>
-                    <Link to={`/`} className={styles.button}><Back/>Return To Home Page</Link>
-                  </div>
                   <div className={styles.showingResultsContainer}>
-                    <div className={styles.showingResultsTop}>
-                      <h4 className={styles.showingResultsText}>Showing results for:</h4>
-                    </div>
-                      <h5 className={styles.subHeading}>{queryItem.type.label}: 
+                      <h6 className={styles.subHeading}>{queryItem.type.label} 
                         {(queryItem?.node?.id && 
                           generateEntityLink(queryItem.node.id, styles.searchedTerm, ()=>queryItem.node.label, false)) 
                           ?
@@ -324,7 +317,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                           :
                             <span className={styles.searchedTerm}>{queryItem.node && queryItem.node.label}</span>
                         }
-                      </h5>
+                        ?
+                      </h6>
                     <div className={styles.nodeDescriptionContainer}>
                       {
                         nodeDescription && 
@@ -339,7 +333,8 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               </>
               :
               <>
-                <h4 className={styles.heading}>Select a question, then search for a term.</h4>
+                <h3 className={styles.h3}>Translator finds associations between drugs, genes, and diseases</h3>
+                <h6 className={styles.h6}>Select a question, then search for a term.</h6>
                 {
                   isError &&
                   <p className={styles.error}>{errorText}</p>
@@ -352,17 +347,12 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       handleChange={(val)=>{
                         handleQueryTypeChange(val, true);
                       }}
-                      handleToggle={handleSelectToggle}
-                      startExpanded
                       noanimate
                       >
                         {
                           queryTypes.map(type => {
                             return(
                               <option value={type.id} key={type.id}>
-                                { 
-                                  <QueryTypeIcon type={type.iconString} />
-                                }
                                 <span>
                                   { type.label } 
                                   { 
@@ -382,11 +372,12 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       handleQueryTypeChange={handleQueryTypeChange}
                       value={inputText}
                       queryType={queryItem.type}
+                      queryItem={queryItem}
                       autocompleteItems={autocompleteItems}
                       autocompleteLoading={loadingAutocomplete}
                       handleItemClick={handleItemSelection}
                       disabled={user === null ? true : false}
-                      placeholderText={user === null ? "Select an example below, or log in to submit your own." : false}
+                      placeholderText={user === null ? "Log In to Enter a Search Term" : false}
                     />
                     { 
                       <img src={loadingIcon} className={`${styles.loadingIcon} ${isLoading ? styles.active : ''} loadingIcon`} alt="loading icon"/>
@@ -400,7 +391,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleDiseases} 
                     setPresetURL={setPresetURL} 
                     label="Example Diseases:"
-                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for chemicals UPregulated by a particular gene */}
@@ -410,7 +400,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleGenesUp} 
                     setPresetURL={setPresetURL} 
                     label="Example Genes:"
-                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for chemicals DOWNregulated by a particular gene */}
@@ -420,7 +409,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleGenesDown} 
                     setPresetURL={setPresetURL} 
                     label="Example Genes:"
-                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for genes UPregulated by a particular chemical */}
@@ -430,7 +418,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleChemsUp} 
                     setPresetURL={setPresetURL} 
                     label="Example Chemicals:"
-                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
                 {/* Examples for genes DOWNregulated by a particular chemical */}
@@ -440,26 +427,37 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                     examples={exampleChemsDown} 
                     setPresetURL={setPresetURL} 
                     label="Example Chemicals:"
-                    className={`${styles.examples} ${isOpen ? styles.isOpen : ''}`}
                   />
                 }
               </>
             }
-            <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
-              {
-                queryTimestamp && isValidDate(queryTimestamp) && results &&
-                <p>Submitted {getFormattedDate(queryTimestamp)}</p>
-              }
-            </div>
             {
-              queryItem?.node?.id &&
-              <p className={styles.needHelp}>
-                {getEntityLink(queryItem.node.id, styles.monarchLink, queryItem.type)}
-              </p>
+              results &&
+              <div className={styles.bottom}>
+                <div className="left">
+                  {
+                    queryItem?.node?.id &&
+                    <p className={styles.nodeLink}>
+                      {getEntityLink(queryItem.node.id, styles.nodeLinkAnchor, queryItem.type)}
+                    </p>
+                  }
+                  <div className={`${styles.timestamp} ${queryTimestamp && styles.active}`}>
+                    {
+                      queryTimestamp && isValidDate(queryTimestamp) && results &&
+                      <p>Submitted {getFormattedDate(queryTimestamp)}</p>
+                    }
+                  </div>
+                </div>
+                <div className="right">
+                  <Button 
+                    isSecondary
+                    handleClick={()=>{data.setShareModalOpen(true)}}
+                  >
+                    <ShareIcon/>Share Result Set
+                  </Button>
+                </div>
+              </div>
             }
-            <p className={styles.needHelp}>
-              <a href={`/help`} rel="noreferrer " target="_blank"><Question/> Need Help?</a>
-            </p>
           </div>
         </AutoHeight>
       </div>
@@ -470,6 +468,15 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
             </div>
           }
       </div>
+      {
+        results &&
+        <ShareModal
+          isOpen={data.shareModalOpen}
+          onClose={()=>data.setShareModalOpen(false)}
+          qid={data.currentQueryID}
+          shareResultID={data.shareResultID}
+        />
+      }
     </>
   );
 }

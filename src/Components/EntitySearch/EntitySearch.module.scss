@@ -3,18 +3,18 @@
 .entitySearch {
   display: block;
   border-bottom: 1px solid $midGray;
-  padding-bottom: 15px;
+  padding: 0 $s $s 0;
   .labelContainer {
-    padding: 15px 0;
+    padding: $s 0 0;
   }
   .textInput {
-    width: calc(100% - 82px);
+    width: calc(100% - 83px);
     color: $black;
     font-size: 12px;
     font-weight: 700;
-    padding: 10px 65px 10px 15px;
-    border-radius: $querySelectBorderRadius;
-    border: 1px solid $borderGray;
+    padding: 10px 65px 10px $s;
+    border-radius: $largeBorderRadius;
+    border: 1px solid $midGray;
     text-overflow: ellipsis;
     overflow: hidden;
     &::placeholder {
@@ -27,11 +27,25 @@
     position: relative;
     margin: 0;
     font-weight: 700;
-    font-size: 16px;
-    color: $darkGray;
+    font-size: 14px;
+    color: $black;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     svg {
       margin-left: 4px;
+      path {
+        fill: $darkGray;
+      }
     }
+  }
+  .caption {
+    font-size: $captionSize;
+    margin: 0 0 $s;
+    font-weight: 400;
+    color: $darkGray;
   }
   .tooltip {
     font-size: 12px; 
@@ -52,10 +66,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 25px;
+    width: 40px;
+    transition: $defaultAnim;
     svg {
-      height: 20px;
-      width: 21px;
+      height: 24px;
+      width: 24px;
       path {
         transition: $defaultAnim;
         fill: $midGray;
@@ -63,7 +78,7 @@
     }
     &.positive {
       height: 100%;
-      min-width: 25px;
+      min-width: 40px;
       border-top: none;
       border-right: 1px solid #D6D6D6;
       border-bottom: none;
@@ -71,17 +86,17 @@
       border-radius: 0;
       &:hover {
         svg path {
-          fill: $purpleEdgeBGSelected;
+          fill: $green;
         }
       }
     }
     &.negative {
       border: none;
-      border-top-right-radius: 6px;
-      border-bottom-right-radius: 6px;
+      border-top-right-radius: 7px;
+      border-bottom-right-radius: 7px;
       &:hover {
         svg path {
-          fill: $redTwo;
+          fill: $red;
         }
       }
     }

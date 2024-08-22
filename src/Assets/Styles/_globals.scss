@@ -39,12 +39,6 @@ body {
 .color-blue, .color-blue-one  {
   color: $blueOne;
 }
-.bg-blue-two {
-  background-color: $blueTwo;
-}
-.color-blue-two  {
-  color: $blueTwo;
-}
 .bg-purple, .bg-purple-one {
   background-color: $purpleOne;
 }
@@ -116,19 +110,6 @@ body {
   width: calc(100% - 40px);
 }
 
-button, .button {
-  box-shadow: $dropShadow;
-  &:hover {
-    box-shadow: $dropShadowHover;
-  }
-  &:disabled  {
-    box-shadow: none;
-    &:hover {
-      box-shadow: none;
-    }
-  }
-}
-
 .link, a {
   background-color: transparent;
   box-shadow: none;
@@ -181,34 +162,35 @@ img {
     .head-span {
       padding: 0;
       font-size: 10px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
       line-height: 1.25;
       cursor: pointer;
       position: relative;
-
+      display: flex;
+      align-items: center;
+      align-content: center;
+    }
+    .chev {
+      display: none;
     }
     &.true, &.false {
-      .head-span:after {
-        content: '';
-        width: 0;
-        height: 0;
-        position: absolute;
-        top: 2px;
-        right: -15px;
-        margin-left: 3px;
-        border-top: 0px solid transparent;        
-        border-right: 5px solid transparent;
-        border-bottom: 5px solid $white;
-        border-left: 5px solid transparent;
+      position: relative;
+      .chev {
+        display: block;
+        width: 24px;
+        height: 24px;
+        transition: $defaultAnim;
+        transform: rotate(180deg);
+        path {
+          fill: transparent;
+          stroke: $white;
+        }
       }
     }
     &.false {
-      .head-span {
-        &:after {
-          top: 4px;
-          transform: rotate(180deg);
-        }   
+      .chev {
+        transform: rotate(0deg);
       }
     }
   }
@@ -224,10 +206,7 @@ img {
   }
   .table-head tr, .table-items .table-item {
     display: grid;
-    // Columns with no title 
-    // grid-template-columns: 1fr 1.25fr 3.5fr 1.25fr;
-    // Columns with title included
-    grid-template-columns: .75fr .75fr 1.25fr 2fr 2.5fr;
+    grid-template-columns: 1fr .5fr 1fr 1fr .75fr;
     .table-cell {
       padding: 12px;
       strong {
@@ -251,21 +230,26 @@ img {
   }
   .url, .link a {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     svg {
       margin-left: 4px;
-      width: $s;
-      height: $s;
+      margin-bottom: 3px;
+      width: $m;
+      height: $m;
+      path {
+        fill: $purpleOne;
+      }
     }
   }
   .url {
     font-size: 12px;
     font-weight: 700;
-    color: $darkGray;
+    color: $purpleOne;
+    margin-top: 4px;
   }
 }
 .table-items {
-  &>tr:nth-child(odd), .table-item:nth-child(odd){
+  &>tr:nth-child(even), .table-item:nth-child(even){
     background-color: $lightGray;
   }
 }
@@ -300,7 +284,7 @@ img {
 }
 
 .scrollable {
-  overflow-y: scroll; 
+  overflow-y: auto; 
   /* Firefox */
   scrollbar-width: thin;
   scrollbar-color: $midGray $lightGray;
@@ -324,8 +308,43 @@ img {
   background-color: $darkGray;
 }
 
-input::placeholder {
-  color: $placeholderGray;
+.scrollable-support {
+  overflow: auto; 
+  position: relative;
+  scrollbar-width: thin; 
+  scrollbar-color: transparent transparent;
+  transition: $defaultAnim; 
+  padding-bottom: $xs;
+  margin-bottom: -$xs;
+}
+.scrollable-support::-webkit-scrollbar {
+  width: 0; 
+  height: 0; 
+}
+.scrollable-support:hover {
+  scrollbar-color: $midDarkGray transparent; 
+}
+.scrollable-support:hover::-webkit-scrollbar {
+  width: $xs;
+  height: $xs; 
+}
+
+.scrollable-support::-webkit-scrollbar-track {
+  background: transparent; 
+  border-radius: $defaultBorderRadius;
+}
+.scrollable-support::-webkit-scrollbar-thumb {
+  background-color: transparent; 
+  border-radius: $defaultBorderRadius;
+}
+.scrollable-support:hover::-webkit-scrollbar-thumb {
+  background-color: $midDarkGray;
+}
+
+input {
+  &::-webkit-input-placeholder, &::-ms-input-placeholder &::placeholder, &::-moz-placeholder {
+    color: $placeholderGray;
+  }
 }
 
 .workspace, .main-workspace {
@@ -336,4 +355,37 @@ input::placeholder {
 
 .cursor-default {
   cursor: default;
+}
+
+.input-label {
+  font-size: $subTwoSize;
+  margin-bottom: $xxs;
+  font-weight: 700;
+  color: $darkGray;
+}
+.input-subtitle {
+  font-size: $captionSize;
+  margin-bottom: $xxs;
+}
+
+.input-row {
+  display: grid;
+  justify-content: space-between;
+  align-items: flex-end;
+  grid-template-columns: repeat(2, 1fr);
+  &.two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  &.three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  &.four {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  &.five {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  &.six {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }

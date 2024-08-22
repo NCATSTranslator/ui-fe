@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { currentPrefs, setCurrentPrefs } from '../../Redux/rootSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Button from '../FormFields/Button';
+import Button from '../Core/Button';
 import Select from 'react-select';
 import styles from './UserPreferences.module.scss';
 import { cloneDeep } from 'lodash';
@@ -72,7 +72,8 @@ const UserPreferences = () => {
                         });
                       }
                       const defaultVal = prefOptions?.find(pref => pref.value.toString() === prefValue.toString());
-                      if(prefOptions === null) {
+                      // temporarily hide some prefs
+                      if(prefOptions === null || pref === "path_show_count" || pref === "graph_visibility") {
                         return(<></>);
                       } else {
                         return(
@@ -100,7 +101,7 @@ const UserPreferences = () => {
                     })
                   }
                 </div>
-                <Button size="s" className={styles.submit}>Save</Button>
+                <Button className={styles.submit}>Save</Button>
               </form>
             </>
           :
