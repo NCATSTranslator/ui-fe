@@ -10,7 +10,13 @@
   display: block;
   transition: all .25s ease;
 }
-
+.header {
+  margin-bottom: $s;
+  p {
+    font-size: 12px;
+    color: $darkGray;
+  }
+}
 .graphContainer {
   max-width: -webkit-fill-available;
   max-width: -moz-available;

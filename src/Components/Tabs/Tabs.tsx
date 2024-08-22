@@ -14,7 +14,7 @@ const Tabs: FC<TabsProps> = ({ children, className, isOpen }) => {
   const firstElement = Children.toArray(children).find((child) => isValidElement(child)) as ReactElement<TabProps> | undefined;
   const [activeTabHeading, setActiveTab] = useState(firstElement?.props.heading);
   const tabClicked = useRef(false);
-  // const prevChildrenRef = useRef<ReactElement<TabProps>[]>(children);
+  const prevChildrenRef = useRef<ReactElement<TabProps>[]>(children);
 
   const handleTabClick = (heading: string) => {
     setActiveTab(heading);
@@ -35,21 +35,33 @@ const Tabs: FC<TabsProps> = ({ children, className, isOpen }) => {
     return headingIsPresent
   }
 
+  const areChildrenHeadingsEqual = (children: ReactElement<TabProps>[], prevChildren: ReactElement<TabProps>[]) => {
+    if(children.length !== prevChildren.length)   
+      return false;
+    for(const [i, child] of children.entries()) {
+      if(!child?.props?.heading || !prevChildren[i]?.props?.heading || child?.props.heading !== prevChildren[i]?.props.heading) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   useEffect(() => {
+    if(isEqual(prevChildrenRef.current, children))
+      return;
+
     if (!isActiveHeadingWithinChildren(children, activeTabHeading)) {
       setActiveTab(firstElement?.props.heading);
+      prevChildrenRef.current = children;
+      return;
     }
-
-    // if (!isEqual(prevChildrenRef.current, children)) {
-    //   setActiveTab(firstElement?.props.heading);
-    // }
-    // prevChildrenRef.current = children;
-
-    if (!tabClicked.current) {
+    
+    if (!tabClicked.current || !areChildrenHeadingsEqual(prevChildrenRef.current, children)) {
       setActiveTab(firstElement?.props.heading);
       tabClicked.current = true;
     }
-  }, [children, firstElement]);
+    prevChildrenRef.current = children;
+  }, [children]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -77,7 +89,6 @@ const Tabs: FC<TabsProps> = ({ children, className, isOpen }) => {
       </div>
       {Children.map(children, (child, i) => {
         if (!isValidElement(child)) return null;
-        // if (activeTabHeading !== child.props.heading) return <div className={`${styles.tabContent} ${styles.inactive}`}>{child.props.children}</div>;
         return (
           <Fade key={i} className={styles.fade}>
             <div className={`${styles.tabContent} ${activeTabHeading !== child.props.heading ? styles.inactive : activeTabHeading}`}>{child.props.children}</div>

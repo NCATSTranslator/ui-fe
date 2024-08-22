@@ -264,6 +264,9 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
   
   return (
     <div>
+      <div className={styles.header}>
+        <p>Click on a node once to view only paths that include it or click it a second time to exclude it. Return to the Paths tab to view the filtered paths.</p>
+      </div>
       <div ref={graphViewRef}>
         <GraphLayoutButtons setCurrentLayout={setCurrentLayout} currentLayout={currentLayout} />
         <div className={styles.graphContainer} >
