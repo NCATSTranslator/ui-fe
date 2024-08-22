@@ -73,7 +73,7 @@ const QueryBar: FC<QueryBarProps> = ({
           <QueryTypeIcon type={queryType?.searchTypeString || ''} />
         </span>
         <TextInput 
-          placeholder={placeholderText} 
+          placeholder={placeholder} 
           handleChange={handleChange} 
           className={styles.input}
           size=""
