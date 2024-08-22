@@ -16,10 +16,8 @@ type HeaderProps = {
   children?: ReactNode;
 }
 
-const getFormattedLoginURL = (authURI: string, clientID: string, scope: string, redirectURI: string, location: Location): string => {
-  let url = `${authURI}?response_type=code&client_id=${encodeURIComponent(clientID)}`;
-  url += `&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectURI)}`;
-  url += `&state=${encodeURIComponent(getFullPathname(location))}`
+const getFormattedLoginURL = (location: Location): string => {
+  let url = `/login?path=${encodeURIComponent(getFullPathname(location))}`;
   return url;
 }
 

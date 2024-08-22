@@ -10,7 +10,6 @@ import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
 import DesignSystem from './PageRoutes/DesignSystem/DesignSystem';
-import Login from './PageRoutes/Login/Login';
 import UserPrefs from './PageRoutes/UserPrefs/UserPrefs';
 import Workspace from './PageRoutes/Workspace/Workspace';
 import { Help } from './PageRoutes/Articles/Help';
@@ -102,10 +101,6 @@ const routes = [
   {
     path: "workspace",
     element: <Page title="User Workspace"><Workspace /></Page>
-  },
-  {
-    path: "login",
-    element: <Page title="Login"><Login /></Page>
   },
   { 
     path: "*", 
