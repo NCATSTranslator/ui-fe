@@ -7,6 +7,7 @@ import { pastQueryState, setHistory } from "../../Redux/historySlice";
 import ShareModal from '../Modals/ShareModal';
 import TextInput from "../Core/TextInput";
 import Tooltip from "../Tooltip/Tooltip";
+import Button from "../Core/Button";
 import Close from '../../Icons/Buttons/Close/Close.svg?react';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 import ShareIcon from '../../Icons/Buttons/Export.svg?react';
@@ -107,9 +108,9 @@ const QueryHistoryList = () => {
             size=""
             icon={<SearchIcon/>}
           />
-          <button type="submit" size="" >
+          <Button type="submit" size="" >
             <span>Search</span>
-          </button>
+          </Button>
         </form>
       </div>
       <ul className={styles.historyList}> 
@@ -146,13 +147,15 @@ const QueryHistoryList = () => {
                 }
                 <div className={styles.itemContainer}>
                   <span className={styles.query} onClick={() => handleClick(query)}>
-                    <div className={styles.left}>
-                      <button 
-                        className={styles.exportButton} onClick={(e)=>{handleExportClick(e, query)}}
-                        data-tooltip-id={`query-history-share-button-${query.id}`}
+                    <div className={styles.left} >
+                      <Button 
+                        className={styles.exportButton} 
+                        handleClick={(e)=>{handleExportClick(e, query)}}
+                        iconOnly
+                        dataTooltipId={`query-history-share-button-${query.id}`}
                         >
                           <ShareIcon/>
-                        </button>
+                      </Button>
                       <Tooltip id={`query-history-share-button-${query.id}`}>
                         <span className={styles.tooltip}>Generate a sharable link for this set of results.</span>
                       </Tooltip>

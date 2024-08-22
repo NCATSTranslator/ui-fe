@@ -16,10 +16,11 @@ interface ButtonProps {
   disabled?: boolean;
   testId?: string;
   className?: string;
+  dataTooltipId?: string;
 }
 
-const Button: FC<ButtonProps> = ({isSecondary, isTertiary, handleClick = (e) => {}, href, iconOnly, _blank, link = false, smallFont, type = '', children,
-  disabled = false, testId, className}) => {
+const Button: FC<ButtonProps> = ({isSecondary, isTertiary, handleClick = (e) => {}, href, iconOnly, _blank, 
+  link = false, smallFont, type = '', children, disabled = false, testId, className, dataTooltipId = ""}) => {
 
   let buttonStyle = isTertiary ? styles.tertiary : isSecondary ? styles.secondary : '';
   buttonStyle += iconOnly ? ` ${styles.iconOnly}` : '';
@@ -46,6 +47,7 @@ const Button: FC<ButtonProps> = ({isSecondary, isTertiary, handleClick = (e) => 
           target={_blank ? '_blank' : undefined}
           rel={_blank ? 'noopener noreferrer' : undefined}
           data-testid={testId}
+          data-tooltip-id={dataTooltipId}
         >
           {children}
         </Link>
@@ -57,6 +59,7 @@ const Button: FC<ButtonProps> = ({isSecondary, isTertiary, handleClick = (e) => 
             target={_blank ? '_blank' : undefined}
             rel={_blank ? 'noopener noreferrer' : undefined}
             data-testid={testId}
+            data-tooltip-id={dataTooltipId}
           >
             {children}
           </a>
@@ -67,6 +70,7 @@ const Button: FC<ButtonProps> = ({isSecondary, isTertiary, handleClick = (e) => 
           onClick={onClick}
           disabled={isDisabled}
           data-testid={testId}
+          data-tooltip-id={dataTooltipId}
         >
           {children}
         </button>
