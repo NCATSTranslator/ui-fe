@@ -1,7 +1,7 @@
 @import "../../Assets/Styles/variables";
 
 .resultsFilter {
-  padding: $s;
+  padding: $s $s 0;
   background-color: $lightGray;
   border-radius: $defaultBorderRadius;
   box-shadow: $dropShadow;

@@ -78,6 +78,11 @@
       .source, .link {
         text-align: center;
       }
+      .source {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
     }
     &.distinctSources {
       .tableHead, .tableItem {

@@ -3,6 +3,9 @@
 .facetGroup {
   padding: 15px 0;
   border-bottom: 1px solid $midGray;
+  &:last-of-type {
+    border-bottom: none;
+  }
   .underline {
     text-decoration: underline;
   }
