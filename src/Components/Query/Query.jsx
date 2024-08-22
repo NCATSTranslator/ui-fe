@@ -189,9 +189,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
         newPrevItems.push(newQueryItem);
         prevQueryItems.current = newPrevItems;
 
-        if(selectedNode.id !== '' && selectedNode.label !== '') {
-          handleSubmission(newQueryItem);
-        }
+        // automatically submits when item is clicked in autocomplete
+        // if(selectedNode.id !== '' && selectedNode.label !== '') {
+        //   handleSubmission(newQueryItem);
+        // }
         return newQueryItem;
       }
     )
@@ -260,7 +261,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
 
   // Event handler for form submission
   const handleSubmission = (item) => {
-    validateSubmission(item);
+    if(!item)
+      validateSubmission(queryItem.node);
+    else  
+      validateSubmission(item);
   }
 
   useEffect(() => {
@@ -367,6 +371,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       handleQueryTypeChange={handleQueryTypeChange}
                       value={inputText}
                       queryType={queryItem.type}
+                      queryItem={queryItem}
                       autocompleteItems={autocompleteItems}
                       autocompleteLoading={loadingAutocomplete}
                       handleItemClick={handleItemSelection}
