@@ -4,10 +4,9 @@ import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
 import EvidenceModal from "../Modals/EvidenceModal";
-import Select from "../FormFields/Select";
+import Select from "../Core/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import Tooltip from '../Tooltip/Tooltip';
-import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
 import ResultsListHeader from "../ResultsListHeader/ResultsListHeader";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
 import StickyToolbar from "../StickyToolbar/StickyToolbar";
@@ -19,7 +18,7 @@ import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "
 import { currentPrefs, currentUser }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow,
-  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, updatePathRankByTag,
+  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, updatePathRankByTag,
   filterCompare } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
@@ -27,7 +26,10 @@ import { findStringMatch, handleResultsError, handleEvidenceModalClose,
 import { isFacet, isExclusion, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
-import Alert from '../../Icons/Alerts/Info.svg?react';
+import Alert from '../../Icons/Status/Alerts/Info.svg?react';
+import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
+import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
+import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import { API_PATH_PREFIX, getSaves } from "../../Utilities/userApi";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -81,6 +83,8 @@ const ResultsList = ({loading}) => {
   const [isSortedByName, setIsSortedByName] = useState(null);
   // Bool, are the results currently sorted by evidence count (true/false for asc/desc, null for not set)
   const [isSortedByEvidence, setIsSortedByEvidence] = useState(null);
+  // Bool, are the results currently sorted by path count (true/false for asc/desc, null for not set)
+  const [isSortedByPaths, setIsSortedByPaths] = useState(null);
   // Bool, are the results currently sorted by score
   const [isSortedByScore, setIsSortedByScore] = useState(false);
   // Bool, is evidence modal open?
@@ -134,10 +138,8 @@ const ResultsList = ({loading}) => {
   const returnedARAs = useRef({aras: [], status: ''});
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
-
   // Bool, is the shift key being held down
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
-
   // Float, weight for confidence score
   // eslint-disable-next-line
   const [confidenceWeight, setConfidenceWeight] = useState(1.0);
@@ -147,6 +149,8 @@ const ResultsList = ({loading}) => {
   // Float, weight for clinical score
   // eslint-disable-next-line
   const [clinicalWeight, setClinicalWeight] = useState(1.0);
+
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   const [userSaves, setUserSaves] = useState(null);
   const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
@@ -425,39 +429,60 @@ const ResultsList = ({loading}) => {
         setIsSortedByName(true);
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
+        setIsSortedByPaths(null);
         break;
       case 'nameHighLow':
         newSortedResults = sortNameHighLow(newSortedResults);
         setIsSortedByName(false);
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
+        setIsSortedByPaths(null);
         break;
       case 'evidenceLowHigh':
         newSortedResults = sortEvidenceLowHigh(newSortedResults);
         setIsSortedByEvidence(true);
         setIsSortedByScore(null)
         setIsSortedByName(null);
+        setIsSortedByPaths(null);
         break;
       case 'evidenceHighLow':
         newSortedResults = sortEvidenceHighLow(newSortedResults);
         setIsSortedByEvidence(false);
         setIsSortedByScore(null)
         setIsSortedByName(null);
+        setIsSortedByPaths(null);
         break;
       case 'scoreLowHigh':
         newSortedResults = sortScoreLowHigh(newSortedResults);
         setIsSortedByScore(true)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
+        setIsSortedByPaths(null);
         break;
       case 'scoreHighLow':
         newSortedResults = sortScoreHighLow(newSortedResults);
         setIsSortedByScore(false)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
+        setIsSortedByPaths(null);
+        break;
+      case 'pathsLowHigh':
+        newSortedResults = sortPathsLowHigh(newSortedResults);
+        setIsSortedByPaths(true)
+        setIsSortedByScore(null)
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
+        break;
+      case 'pathsHighLow':
+        newSortedResults = sortPathsHighLow(newSortedResults);
+        setIsSortedByPaths(false)
+        setIsSortedByScore(null)
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
         break;
       case 'entityString':
         newSortedResults = sortByEntityStrings(newSortedResults, activeStringFilters);
+        setIsSortedByPaths(null);
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         break;
@@ -798,6 +823,13 @@ const ResultsList = ({loading}) => {
           initNodeIdParam={initNodeIdParam}
           initNodeLabelParam={initNodeLabelParam}
           nodeDescription={nodeDescription}
+          setShareModalFunction={setShareModalOpen}
+          data={{
+            shareModalOpen: shareModalOpen,
+            setShareModalOpen: setShareModalOpen,
+            shareResultID: shareResultID.current,
+            currentQueryID: currentQueryID,
+          }}
         />
         <div className={`${styles.resultsContainer} container`}>
           {
@@ -823,181 +855,184 @@ const ResultsList = ({loading}) => {
                 onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults.current, originalResults.current, setActiveFilters, currentSortString.current, handleUpdateResults)}
                 activeFilters={activeFilters}
                 availableTags={availableTags}
+                expanded={filtersExpanded}
+                setExpanded={setFiltersExpanded}
               />
-              <ResultsListHeader
-                data={{
-                  formattedResultsLength: formattedResults.length,
-                  originalResultsLength: originalResults.current.length,
-                  itemOffset: itemOffset,
-                  endResultIndex: endResultIndex,
-                  activeFilters: activeFilters,
-                  handleFilter: handleFilter,
-                  shareModalOpen: shareModalOpen,
-                  setShareModalOpen: setShareModalOpen,
-                  shareResultID: shareResultID.current,
-                  setShareResultID: setShareResultID,
-                  currentQueryID: currentQueryID,
-                  returnedARAs: returnedARAs.current,
-                  isError: isError,
-                  currentPage: currentPage.current,
-                  resultsListStyles: styles,
-                  pageCount: pageCount,
-                  handlePageClick: handlePageClick
-                }}
-                loadingButtonData={{
-                  handleResultsRefresh: ()=>handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults),
-                  isFetchingARAStatus: isFetchingARAStatus.current,
-                  isFetchingResults: isFetchingResults.current,
-                  showDisclaimer: false,
-                  containerClassName: styles.loadingButtonContainer,
-                  buttonClassName: styles.loadingButton,
-                  hasFreshResults: (freshRawResults !== null)
-                }}
-              />
-
-              <div className={styles.resultsTableContainer}>
-                <div className={styles.resultsTable}>
-                  <div className={styles.tableBody}>
-                    <div className={`${styles.tableHead}`}>
-                      <div
-                        className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`}
-                        onClick={()=>{
-                          let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
-                          currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                        }}
-                      >
-                        Name
-                      </div>
-                      <div></div>
-                      <div
-                        className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
-                        onClick={()=>{
-                          let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
-                          currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                        }}
-                      >
-                        Evidence
-                      </div>
-                      <div
-                        className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
-                        onClick={()=>{
-                          let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
-                          currentSortString.current = sortString;
-                          handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                        }}
-                        data-tooltip-id="score-tooltip"
-                      >
-                        Score
-                        <Alert/>
-                        <Tooltip id="score-tooltip">
-                          <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added.</span>
-                        </Tooltip>
-                      </div>
-                    </div>
-                    {
-                      isError &&
-                      <h5 className={styles.errorText}>There was an error when processing your query. Please try again.</h5>
-                    }
-                    {
-                      !isLoading &&
-                      !isError &&
-                      displayedResults.length === 0 &&
-                      <h5 className={styles.errorText}>No results available.</h5>
-                    }
-                    {
-                      !isLoading &&
-                      !isError &&
-                      displayedResults.length > 0 &&
-                      displayedResults.map((item) => {
-                        return (
-                          <ResultsItem
-                            rawResults={rawResults.current}
-                            key={item.id}
-                            type={initPresetTypeObject}
-                            item={item}
-                            activateEvidence={activateEvidence}
-                            activateNotes={activateNotes}
-                            activeStringFilters={activeStringFilters}
-                            zoomKeyDown={zoomKeyDown}
-                            currentQueryID={currentQueryID}
-                            queryNodeID={initNodeIdParam}
-                            queryNodeLabel={initNodeLabelParam}
-                            queryNodeDescription={nodeDescription}
-                            bookmarked={item.bookmarked}
-                            bookmarkID={item.bookmarkID}
-                            hasNotes={item.hasNotes}
-                            handleBookmarkError={handleBookmarkError}
-                            bookmarkAddedToast={bookmarkAddedToast}
-                            bookmarkRemovedToast={bookmarkRemovedToast}
-                            availableTags={availableTags}
-                            handleFilter={handleFilter}
-                            activeFilters={activeFilters}
-                            sharedItemRef={item.id === initResultIdParam ? sharedItemRef : null}
-                            startExpanded={item.id === initResultIdParam && expandSharedResult}
-                            setExpandSharedResult={setExpandSharedResult}
-                            setShareModalOpen={setShareModalOpen}
-                            setShareResultID={setShareResultID}
-                          />
-                        )
-                      })
-                    }
-                  </div>
-                </div>
-                {
-                  formattedResults.length > 0 &&
-                  <div className={styles.pagination}>
-                    <div className={styles.perPage}>
-                      <Select
-                        label=""
-                        name="Results Per Page"
-                        size="s"
-                        handleChange={(value)=>{
-                          setItemsPerPage(parseInt(value));
-                          handlePageReset(value, formattedResults.length);
-                        }}
-                        noanimate
-                        >
-                        <option value="5" key="0">5</option>
-                        <option value="10" key="1">10</option>
-                        <option value="20" key="2">20</option>
-                        <option value="50" key="3">50</option>
-                      </Select>
-                    </div>
-                    <ReactPaginate
-                      breakLabel="..."
-                      nextLabel="Next"
-                      previousLabel="Previous"
-                      onPageChange={handlePageClick}
-                      pageRangeDisplayed={5}
-                      marginPagesDisplayed={1}
-                      pageCount={pageCount}
-                      renderOnZeroPageCount={null}
-                      className={styles.pageNums}
-                      pageClassName={styles.pageNum}
-                      activeClassName={styles.current}
-                      previousLinkClassName={`${styles.prev} ${styles.button}`}
-                      nextLinkClassName={`${styles.prev} ${styles.button}`}
-                      disabledLinkClassName={styles.disabled}
-                      forcePage={currentPage.current}
-                    />
-                  </div>
-                }
-                <ResultsListLoadingButton
+              <div>
+                <ResultsListHeader
                   data={{
-                    handleResultsRefresh: () =>
-                    {
-                      handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
-                    },
-                    isFetchingARAStatus: isFetchingARAStatus.current,
-                    isFetchingResults: isFetchingResults.current,
-                    showDisclaimer: true,
-                    containerClassName: styles.bottomLoadingButtonContainer,
-                    buttonClassName: styles.loadingButton,
-                    hasFreshResults: (freshRawResults !== null)
+                    formattedResultsLength: formattedResults.length,
+                    originalResultsLength: originalResults.current.length,
+                    itemOffset: itemOffset,
+                    endResultIndex: endResultIndex,
+                    activeFilters: activeFilters,
+                    handleFilter: handleFilter,
+                    shareModalOpen: shareModalOpen,
+                    setShareModalOpen: setShareModalOpen,
+                    shareResultID: shareResultID.current,
+                    setShareResultID: setShareResultID,
+                    currentQueryID: currentQueryID,
+                    returnedARAs: returnedARAs.current,
+                    isError: isError,
+                    currentPage: currentPage.current,
+                    resultsListStyles: styles,
+                    pageCount: pageCount,
+                    handlePageClick: handlePageClick,
+                    filtersExpanded: filtersExpanded,
+                    setFiltersExpanded: setFiltersExpanded
                   }}
                 />
+
+                <div className={styles.resultsTableContainer}>
+                  <div className={styles.resultsTable}>
+                    <div className={styles.tableBody}>
+                      <div className={`${styles.tableHead}`}>
+                        <div
+                          className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`}
+                          onClick={()=>{
+                            let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
+                            currentSortString.current = sortString;
+                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                          }}
+                        >
+                          Name
+                        </div>
+                        <div></div>
+                        <div
+                          className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
+                          onClick={()=>{
+                            let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
+                            currentSortString.current = sortString;
+                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                          }}
+                        >
+                          Evidence
+                          <ChevUp className={styles.chev}/>
+                        </div>
+                        <div
+                          className={`${styles.head} ${styles.pathsHead} ${isSortedByPaths ? styles.true : (isSortedByPaths === null) ? '': styles.false}`}
+                          onClick={()=>{
+                            let sortString = (isSortedByPaths === null) ? 'pathsHighLow' : (isSortedByPaths) ? 'pathsHighLow' : 'pathsLowHigh';
+                            currentSortString.current = sortString;
+                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                          }}
+                          data-tooltip-id="paths-tooltip"
+                        >
+                          Paths
+                          <Alert/>
+                          <ChevUp className={styles.chev}/>
+                          <Tooltip id="paths-tooltip">
+                            <span className={styles.scoreSpan}>Each path represents a discrete series of relationships that connect the result to the searched-for entity.</span>
+                          </Tooltip>
+                        </div>
+                        <div
+                          className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
+                          onClick={()=>{
+                            let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
+                            currentSortString.current = sortString;
+                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                          }}
+                          data-tooltip-id="score-tooltip"
+                        >
+                          Score
+                          <Alert/>
+                          <ChevUp className={styles.chev}/>
+                          <Tooltip id="score-tooltip">
+                            <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
+                          </Tooltip>
+                        </div>
+                      </div>
+                      {
+                        isError &&
+                        <h5 className={styles.errorText}>There was an error when processing your query. Please try again.</h5>
+                      }
+                      {
+                        !isLoading &&
+                        !isError &&
+                        displayedResults.length === 0 &&
+                        <h5 className={styles.errorText}>No results available.</h5>
+                      }
+                      {
+                        !isLoading &&
+                        !isError &&
+                        displayedResults.length > 0 &&
+                        displayedResults.map((item, i) => {
+                          return (
+                            <ResultsItem
+                              isEven={i % 2 !== 0}
+                              rawResults={rawResults.current}
+                              key={item.id}
+                              type={initPresetTypeObject}
+                              item={item}
+                              activateEvidence={activateEvidence}
+                              activateNotes={activateNotes}
+                              activeStringFilters={activeStringFilters}
+                              zoomKeyDown={zoomKeyDown}
+                              currentQueryID={currentQueryID}
+                              queryNodeID={initNodeIdParam}
+                              queryNodeLabel={initNodeLabelParam}
+                              queryNodeDescription={nodeDescription}
+                              bookmarked={item.bookmarked}
+                              bookmarkID={item.bookmarkID}
+                              hasNotes={item.hasNotes}
+                              handleBookmarkError={handleBookmarkError}
+                              bookmarkAddedToast={bookmarkAddedToast}
+                              bookmarkRemovedToast={bookmarkRemovedToast}
+                              availableTags={availableTags}
+                              handleFilter={handleFilter}
+                              activeFilters={activeFilters}
+                              sharedItemRef={item.id === initResultIdParam ? sharedItemRef : null}
+                              startExpanded={item.id === initResultIdParam && expandSharedResult}
+                              setExpandSharedResult={setExpandSharedResult}
+                              setShareModalOpen={setShareModalOpen}
+                              setShareResultID={setShareResultID}
+                              resultsComplete={(!isError && freshRawResults === null && !isFetchingARAStatus.current && !isFetchingResults.current)}
+                            />
+                          )
+                        })
+                      }
+                    </div>
+                  </div>
+                  {
+                    formattedResults.length > 0 &&
+                    <div className={styles.pagination}>
+                      <div className={styles.perPage}>
+                        <Select
+                          label=""
+                          name="Results Per Page"
+                          size="s"
+                          handleChange={(value)=>{
+                            setItemsPerPage(parseInt(value));
+                            handlePageReset(value, formattedResults.length);
+                          }}
+                          noanimate
+                          >
+                          <option value="5" key="0">5</option>
+                          <option value="10" key="1">10</option>
+                          <option value="20" key="2">20</option>
+                          <option value="50" key="3">50</option>
+                        </Select>
+                      </div>
+                      <ReactPaginate
+                        breakLabel="..."
+                        nextLabel={<ChevRight/>}
+                        previousLabel={<ChevLeft/>}
+                        onPageChange={handlePageClick}
+                        pageRangeDisplayed={5}
+                        marginPagesDisplayed={1}
+                        pageCount={pageCount}
+                        renderOnZeroPageCount={null}
+                        className={styles.pageNums}
+                        pageClassName={styles.pageNum}
+                        activeClassName={styles.current}
+                        previousLinkClassName={`${styles.button}`}
+                        nextLinkClassName={`${styles.button}`}
+                        disabledLinkClassName={styles.disabled}
+                        forcePage={currentPage.current}
+                      />
+                    </div>
+                  }
+                </div>
               </div>
             </>
           }
@@ -1012,12 +1047,14 @@ const ResultsList = ({loading}) => {
                 },
               isFetchingARAStatus: isFetchingARAStatus.current,
               isFetchingResults: isFetchingResults.current,
-              showDisclaimer: false,
+              showDisclaimer: true,
               containerClassName: styles.shareLoadingButtonContainer,
               buttonClassName: styles.loadingButton,
               hasFreshResults: (freshRawResults !== null),
               isSticky: true
             }}
+            isError={isError}
+            returnedARAs={returnedARAs.current}
             setShareModalFunction={setShareModalOpen}
           />
         }

@@ -1,12 +1,12 @@
 import {useState} from 'react';
 import styles from './EntitySearch.module.scss';
 import Tooltip from '../Tooltip/Tooltip';
-import Alert from '../../Icons/Alerts/Info.svg?react';
-import Include from '../../Icons/include.svg?react';
-import Exclude from '../../Icons/exclude.svg?react';
+import Alert from '../../Icons/Status/Alerts/Info.svg?react';
+import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
+import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import { cloneDeep } from 'lodash';
 
-const EntitySearch = ({ onFilter }) => {
+const EntitySearch = ({ onFilter, className }) => {
 
   const [searchStringObject, setSearchStringObject] = useState({type:'str:', value: '', negated: false});
 
@@ -20,7 +20,6 @@ const EntitySearch = ({ onFilter }) => {
 
   const handleKeyDown = (e) => {
     if(e.key === 'Enter') {
-
       handleActivateFilter(false);
     }
   }
@@ -40,9 +39,10 @@ const EntitySearch = ({ onFilter }) => {
   }
 
   return (
-    <div className={styles.entitySearch}>
+    <div className={`${styles.entitySearch} ${!!className && className}`}>
       <div className={styles.labelContainer}>
         <p className={`${styles.subTwo} sub-two`} data-tooltip-id="text-tooltip">Text Filter <Alert/></p>
+        <p className={`${styles.caption} caption`}>Include or exclude results or paths containing a word or phrase in the result name, description, or paths.</p>
         <Tooltip id="text-tooltip">
           <span className={styles.tooltip}>Search all textual elements (result name, description, node names, edge names) for a given string.</span>
         </Tooltip>

@@ -1,9 +1,7 @@
 import styles from './ResultsListLoadingBar.module.scss';
 import { useEffect, useState, useRef } from 'react';
-import Info from '../../Icons/Alerts/Info.svg?react'
 import { useInterval } from '../../Utilities/customHooks';
 import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
-import Tooltip from '../Tooltip/Tooltip';
 
 const ResultsListLoadingBar = ({ data, totalIntervals = 6 }) => {
 
@@ -53,20 +51,8 @@ const ResultsListLoadingBar = ({ data, totalIntervals = 6 }) => {
         className={`${styles.resultsListLoadingBar}`}
         >
           <div className={styles.top}>
-            <ResultsListLoadingButton data={data}/>
-            <Info data-tooltip-id="results-loading-bar-tooltip"/>
-            <Tooltip id="results-loading-bar-tooltip">
-              {
-                barWidthPercentage >= 100 
-                ? 
-                  data.hasFreshResults
-                  ? <span>All results have been retrieved. Click <i>Load New Results</i> to incorporate them into the existing results.</span>
-                  : <span>All results have been retrieved.</span>
-                : <span>Additional results are currently being retrieved. {currentInterval} of {totalIntervals} reasoning agents have returned results.</span>
-              }
-            </Tooltip>
+            <ResultsListLoadingButton data={data} currentPercentage={barWidthPercentage}/>
           </div>
-          {/* <p className={styles.loadingText}>Loading New Results <Info/></p> */}
           <div className={styles.loadingBarContainer}>
             <div 
               className={`${barColor || barWidthPercentage >= 100 ? '' : styles.fade} ${styles.fill}`}

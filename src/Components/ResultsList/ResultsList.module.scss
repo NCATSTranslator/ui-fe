@@ -5,23 +5,13 @@
   padding: 0 0 $s;
   .resultsContainer {
     display: grid;
-    grid-template-columns: auto;
-    grid-template-rows: auto;
-    grid-column-gap: $m;
+    grid-template-columns: auto 1fr;
+    column-gap: $l;
     align-items: flex-start;
     position: relative;
     max-width: 2300px;
     width: auto;
-    padding: 20px;
-    @media screen and (min-width: $large) {
-      grid-template-columns: 330px 1fr;
-      grid-template-rows: auto 1fr;
-    }
-    .resultsTableContainer {
-      @media screen and (min-width: $large) {
-        grid-column: 2/3;
-      }
-    }
+    padding: $m;
     .resultsTable {
       box-shadow: $dropShadow;
       font-size: $bodyTwoSize;
@@ -37,19 +27,20 @@
       .tableHead {
         border-bottom: 1px solid $midGray;
         display: grid;
-        padding: 12px;
+        padding: 12px $s;
         border-radius: 5px 5px 0 0;
         user-select: none;
-        grid-template-columns: 4fr 1fr 2fr 2fr .75fr .75fr;
+        grid-template-columns: 4fr 1fr 2fr 2fr .75fr;
+        column-gap: $s;
         @media screen and (min-width: $desktop) {
-          grid-template-columns: 1fr 60px 225px 100px 50px 75px;
+          grid-template-columns: 1fr 112px 110px 90px 90px 24px;
         }
         .head {
           display: flex;
           align-items: center;
           text-align: center;
           font-size: 10px;
-          font-weight: 700;
+          font-weight: 800;
           line-height: 1.25;
           text-transform: uppercase;
           color: $white;
@@ -68,12 +59,11 @@
           cursor: default;
           position: relative;
         }
-        .fdaHead, .evidenceHead, .scoreHead {
-          justify-self: center;
+        .fdaHead, .evidenceHead, .scoreHead, .pathsHead {
           svg {
             margin-left: 2px;
-            width: 18px;
-            height: 18px;
+            width: 24px;
+            height: 24px;
             circle {
               stroke: $white;
             }
@@ -89,29 +79,28 @@
           font-size: 12px;
           text-transform: none;
         }
-        .nameHead, .evidenceHead, .scoreHead {
+        .nameHead, .evidenceHead, .scoreHead, .pathsHead {
           &:hover {
             cursor: pointer;
           }
+          .chev {
+            display: none;
+          }
           &.true, &.false {
             position: relative;
-            &:after {
-              content: '';
-              width: 0;
-              height: 0;
-              position: absolute;
-              top: 2px;
-              right: -15px;
-              margin-left: 3px;
-              border-top: 0px solid transparent;
-              border-right: 5px solid transparent;
-              border-bottom: 5px solid $white;
-              border-left: 5px solid transparent;
+            .chev {
+              display: block;
+              width: 24px;
+              height: 24px;
+              transition: $defaultAnim;
+              path {
+                fill: transparent;
+                stroke: $white;
+              }
             }
           }
           &.false {
-            &:after {
-              top: 4px;
+            .chev {
               transform: rotate(180deg);
             }
           }
@@ -143,16 +132,18 @@
     flex-wrap: nowrap;
   }
   .button {
+    display: flex;
     margin-bottom: 0;
-    background-color: $purpleOne;
-    padding: 10px 15px;
+    background-color: $lightGray;
+    padding: 9px;
     border-radius: $defaultBorderRadius;
-    color: $white;
-    font-size: 16px;
+    color: $black;
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
-    @media screen and (min-width: $desktop) {
-      padding: 10px 25px;
+    transition: $defaultAnim;
+    &:hover {
+      background-color: $palePurple;
     }
   }
   .disabled {
@@ -160,6 +151,7 @@
     color: $midGray;
     pointer-events: none;
     cursor: default;
+    opacity: 0;
   }
   .pageNum {
     a {
@@ -168,10 +160,10 @@
       padding: 10px ;
       line-height: 1;
       margin: 6px;
-      transition: all .25s ease;
+      transition: $defaultAnim;
       border: 1px solid transparent;
       border-radius: 5px;
-      color: $darkGray;
+      color: $black;
       font-size: $bodyOneSize;
       font-weight: 700;
       @media screen and (min-width: $desktop) {
@@ -179,13 +171,14 @@
         margin: 8px;
       }
       &:hover {
-        background-color: $purpleTwo20;
+        background-color: $lightGray;
         color: $purpleOne;
+        text-decoration: none;
       }
     }
     &.current {
       a {
-        background-color: $purpleTwo20;
+        background-color: $palePurple;
         color: $purpleOne;
       }
     }

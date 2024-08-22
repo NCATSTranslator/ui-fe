@@ -1,20 +1,20 @@
 import Chemical from '../Icons/Queries/Chemical.svg?react';
-import Disease from '../Icons/disease2.svg?react';
+import Disease from '../Icons/Queries/Disease.svg?react';
 import Gene from '../Icons/Queries/Gene.svg?react';
 import Phenotype from '../Icons/Queries/Phenotype.svg?react';
-import Protein from '../Icons/protein.svg?react';
-import Drug from '../Icons/drug.svg?react';
-import SmallMolecule from '../Icons/small-molecule.svg?react';
-import Taxon from '../Icons/taxon.svg?react';
-import PathologicalProcess from '../Icons/pathological-process.svg?react';
-import PhysiologicalProcess from '../Icons/physiological-process.svg?react';
-import BiologicalEntity from '../Icons/biological-entity.svg?react';
-import AnatomicalEntity from '../Icons/anatomical-entity.svg?react';
-import ExternalLink from '../Icons/external-link.svg?react';
+import Protein from '../Icons/Queries/Gene.svg?react';
+import Drug from '../Icons/Queries/Drug.svg?react';
+import SmallMolecule from '../Icons/Queries/Small Molecule.svg?react';
+import Taxon from '../Icons/Queries/Taxon.svg?react';
+import PathologicalProcess from '../Icons/Queries/Pathological Process.svg?react';
+import PhysiologicalProcess from '../Icons/Queries/Physiological Process.svg?react';
+import BiologicalEntity from '../Icons/Queries/Biological Entity.svg?react';
+import AnatomicalEntity from '../Icons/Queries/Anatomical Entity.svg?react';
+import ExternalLink from '../Icons/Buttons/External Link.svg?react';
 import { QueryType } from '../Types/results';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
-import { FormattedEdgeObject, FormattedNodeObject } from '../Types/results';
+import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer } from '../Types/results';
 import { PublicationObject, PublicationsList } from '../Types/evidence';
 import { Location } from 'react-router-dom';
 
@@ -461,4 +461,62 @@ export const getFullPathname = (location: Location): string => {
     fullPath += location.hash;
   
   return fullPath;
+}
+
+/**
+ * Converts a number between 0 and 19 into its English word equivalent.
+ * 
+ * @param {number} num - The number to be converted. It must be within the range 0-19.
+ * @returns {string} - The English word equivalent of the provided number.
+ * 
+ * @throws {Error} - Throws an error if the input number is outside the range 0-19.
+ * 
+ */
+export const numberToWords = (num: number): string => {
+  const words = [
+      "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+      "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"
+  ];
+  
+  return num >= 0 && num < 20 ? words[num] : (() => { throw new Error("Number out of supported range"); })();
+}
+
+/**
+ * Converts an integer into its corresponding alphabetical character(s).
+ * 
+ * @param {number} num - The integer to convert (1 = a, 2 = b, ..., 26 = z, 27 = aa, ...).
+ * @returns {string} - The corresponding alphabetical character(s).
+ * 
+ */
+export const intToChar = (num: number): string => {
+  if (num < 1 || num > 1000) {
+    console.warn("Number supplied to intToChar function out of range, must be between 1 & 1000. Number provided:", num);
+    return "--";
+  }
+  
+  let result = '';
+  while (num > 0) {
+      num--;
+      result = String.fromCharCode(97 + (num % 26)) + result;
+      num = Math.floor(num / 26);
+  }
+  return result;
+}
+
+/**
+ * Calculates the total number of paths for a provided array of PathObjectContainer objects.
+ * 
+ * @param {PathObjectContainer[]} paths - An array of paths to count.
+ * @returns {number} - The total number of paths, including support paths.
+ * 
+ */
+export const getPathsCount = (paths: PathObjectContainer[]): number => {
+  let count = paths.length;
+  for(const path of paths) {
+    for(const subgraphItem of path.path.subgraph) {
+      if('support' in subgraphItem && subgraphItem.support !== undefined)
+        count += subgraphItem.support.length;
+    }
+  }
+  return count;
 }

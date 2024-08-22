@@ -1,16 +1,16 @@
-import { FC, ReactNode, ReactElement } from 'react';
+import { FC, ReactNode } from 'react';
 import styles from './Tab.module.scss';
 
 export interface TabProps {
   heading: string;
-  onClick: (heading: string) => void;
+  onClick?: (heading: string) => void;
   activeTabHeading?: string;
   tooltipIcon?: ReactNode;
   dataTooltipId?: string;
-  children?: ReactElement[];
+  children?: ReactNode;
 }
 
-const Tab: FC<TabProps> = ({ heading, onClick, activeTabHeading = "", tooltipIcon, dataTooltipId = "" }) => {
+const Tab: FC<TabProps> = ({ heading, onClick = ()=>{}, activeTabHeading = "", tooltipIcon, dataTooltipId = "" }) => {
 
   let className = `${styles.tabListItem}`;
 

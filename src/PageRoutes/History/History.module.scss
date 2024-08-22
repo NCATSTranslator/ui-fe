@@ -1,26 +1,35 @@
 @import "../../Assets/Styles/variables";
 
+.container {
+  max-width: 640px;
+  padding-top: 0;
+}
 .historyInner {
   display: grid;
   grid-template-rows: max-content;
+  max-width: none;
+  padding: 0;
+  width: 100%;
   .head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    background-color: $palePurple;
+    padding: $m $m 0;
+    .top {
+      margin-bottom: $xs;
+    }
+    .top, .blurb {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 640px;
+      margin: 0 auto $s;
+    }
     h2 {
-      font-size: 24px;
+      font-size: 32px;
+      margin: 0;
       color: $purpleTwo;
     }
     .button {
-      color: $purpleOne;
-      background-color: transparent;
-      padding: $s 0;
       margin: 0;
-      width: auto;
-      box-shadow: none;
-      &:hover {
-        box-shadow: none;
-      }
     }
   }
   .noHistory {
@@ -74,9 +83,15 @@
       border-radius: 61%;
       padding: 5px;
       margin-right: 8px;
+      path {
+        fill: $white;
+      }
     }
   }
   .buttonContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: $s;
     button {
       display: block;
       font-weight: 700;
@@ -87,10 +102,9 @@
     .buttonOne {
       color: $white;
       background-color: $yellow;
-      font-size: 16px;
+      border-color: $yellow;
     }
     .buttonTwo {
-      font-size: 12px;
       color: $darkGray;
       background-color: transparent;
       box-shadow: none;

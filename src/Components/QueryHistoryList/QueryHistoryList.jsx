@@ -5,11 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "../../Utilities/utilities";
 import { pastQueryState, setHistory } from "../../Redux/historySlice";
 import ShareModal from '../Modals/ShareModal';
-import TextInput from "../FormFields/TextInput";
+import TextInput from "../Core/TextInput";
 import Tooltip from "../Tooltip/Tooltip";
-import Close from '../../Icons/Buttons/Close.svg?react';
+import Button from "../Core/Button";
+import Close from '../../Icons/Buttons/Close/Close.svg?react';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
-import ShareIcon from '../../Icons/share.svg?react';
+import ShareIcon from '../../Icons/Buttons/Link.svg?react';
 import { cloneDeep } from "lodash";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 
@@ -107,88 +108,90 @@ const QueryHistoryList = () => {
             size=""
             icon={<SearchIcon/>}
           />
-          <button type="submit" size="" >
-            <span>Search</span>
-          </button>
         </form>
       </div>
-      <ul className={styles.historyList}> 
-        {
-          filteredQueryHistoryState.map((query, i)=> {
-            // hide past queries with old formatting
-            if(!query?.item?.node || !query?.item?.type)
-              return null;
+      <div className={`container ${styles.historyContainer}`}>
+        <ul className={styles.historyList}> 
+          {
+            filteredQueryHistoryState.map((query, i)=> {
+              // hide past queries with old formatting
+              if(!query?.item?.node || !query?.item?.type)
+                return null;
 
-            let itemTimestamp = new Date(query.date);
-            let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
-            let timeName = "";
-            let showNewTimeName = false;
-            switch (timestampDiff) {
-              case 0:
-                timeName = "Today";
-                break;
-              case 1:
-                timeName = "Yesterday";
-                break;
-              default:
-                timeName = itemTimestamp.toDateString();
-                break;
-            }
-            if(timeName !== previousTimeName) {
-              previousTimeName = timeName;
-              showNewTimeName = true;
-            }
-            return (
-              <li key={i} className={styles.historyItem} >
-                {
-                  showNewTimeName &&
-                  <div className={styles.timeName}>{timeName}</div>            
-                }
-                <div className={styles.itemContainer}>
-                  <span className={styles.query} onClick={() => handleClick(query)}>
-                    <div className={styles.left}>
-                      <button 
-                        className={styles.exportButton} onClick={(e)=>{handleExportClick(e, query)}}
-                        data-tooltip-id={`query-history-share-button-${query.id}`}
-                        >
-                          <ShareIcon/>
-                        </button>
-                      <Tooltip id={`query-history-share-button-${query.id}`}>
-                        <span className={styles.tooltip}>Generate a sharable link for this set of results.</span>
-                      </Tooltip>
-                    </div>
-                    <div className={styles.right}>
-                      <div className={styles.top}>
-                        {
-                          query.item?.type?.label &&
-                          <span>{query.item.type.label} </span>
-                        }
-                        {
-                          query.item?.node?.label &&
-                          <span className={styles.subject}>{query.item.node.label}</span>
-                        }
+              let itemTimestamp = new Date(query.date);
+              let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
+              let timeName = "";
+              let showNewTimeName = false;
+              switch (timestampDiff) {
+                case 0:
+                  timeName = "Today";
+                  break;
+                case 1:
+                  timeName = "Yesterday";
+                  break;
+                default:
+                  timeName = itemTimestamp.toDateString();
+                  break;
+              }
+              if(timeName !== previousTimeName) {
+                previousTimeName = timeName;
+                showNewTimeName = true;
+              }
+              return (
+                <li key={i} className={styles.historyItem} >
+                  {
+                    showNewTimeName &&
+                    <div className={styles.timeName}>{timeName}</div>            
+                  }
+                  <div className={styles.itemContainer}>
+                    <span className={styles.query} onClick={() => handleClick(query)}>
+                      <div className={styles.left} >
+                        <Button 
+                          className={styles.exportButton} 
+                          handleClick={(e)=>{handleExportClick(e, query)}}
+                          iconOnly
+                          dataTooltipId={`query-history-share-button-${query.id}`}
+                          isSecondary
+                          >
+                            <ShareIcon/>
+                        </Button>
+                        <Tooltip id={`query-history-share-button-${query.id}`}>
+                          <span className={styles.tooltip}>Generate a sharable link for this set of results.</span>
+                        </Tooltip>
                       </div>
-                      <div className={styles.bottom}>
-                        {
-                          query.time &&
-                          <span>{query.time}</span>
-                        }
+                      <div className={styles.right}>
+                        <div className={styles.top}>
+                          {
+                            query.item?.type?.label &&
+                            <span>{query.item.type.label} </span>
+                          }
+                          {
+                            query.item?.node?.label &&
+                            <span className={styles.subject}>{query.item.node.label}</span>
+                          }
+                        </div>
+                        <div className={styles.bottom}>
+                          {
+                            query.time &&
+                            <span>{query.time}</span>
+                          }
+                        </div>
                       </div>
-                    </div>
-                  </span>
-                  <button 
-                    className={styles.removeItem}
-                    onClick={(e)=> {
-                      handleRemoveHistoryItem(i)
-                    }}>
-                    <Close/>
-                  </button>
-                </div>
-              </li>
-            )
-          })
-        }
-      </ul>
+                    </span>
+                    <button 
+                      className={styles.removeItem}
+                      onClick={(e)=> {
+                        handleRemoveHistoryItem(i)
+                      }}>
+                      <Close/>
+                    </button>
+                  </div>
+                </li>
+              )
+            })
+          }
+        </ul>
+      </div>
     </div>
   )
   

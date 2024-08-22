@@ -1,12 +1,12 @@
 import {useEffect, useState, useCallback} from "react";
 import styles from "./SendFeedbackModal.module.scss";
 import Modal from "./Modal";
-import Button from '../FormFields/Button';
-import TextInput from "../FormFields/TextInput";
-import FileInput from "../FormFields/FileInput";
-import Select from "../FormFields/Select";
+import Button from '../Core/Button';
+import TextInput from "../Core/TextInput";
+import FileInput from "../Core/FileInput";
+import Select from "../Core/Select";
 import { Fade } from "react-awesome-reveal";
-import Warning from '../../Icons/information.svg?react';
+import Info from '../../Icons/Status/Alerts/Info.svg?react';
 import { currentQueryResultsID } from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux';
 import { getDataFromQueryVar } from "../../Utilities/utilities";
@@ -173,7 +173,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
         <Fade>
           <h5>Send Feedback</h5>
           <p>Enjoying Translator? Having an issue? Either way, we want to know - use this form to let us know your comments. All fields marked with * are required.</p>
-          <p className={styles.disclaimer}><Warning/>In the mean time, please check out our <a href={`/help`} target="_blank" rel="noreferrer">Help page</a> for Translator tips, tricks, and tutorials.</p>
+          <p className={styles.disclaimer}><Info/>In the mean time, please check out our <a href={`/help`} target="_blank" rel="noreferrer">Help page</a> for Translator tips, tricks, and tutorials.</p>
           <form onSubmit={(e)=>handleSubmission(e)} name="send feedback form">
             {
               errorActive && categoryError &&

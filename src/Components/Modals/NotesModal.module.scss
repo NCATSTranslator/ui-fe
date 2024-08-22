@@ -33,8 +33,8 @@
     justify-content: center;
     align-items: center;
     grid-template-columns: 1fr 1fr;
-    grid-column-gap: 50px;
-    grid-row-gap: 50px;
+    column-gap: 50px;
+    row-gap: 50px;
     padding: 50px 0 0 0;
     .button {
       width: auto;
@@ -49,12 +49,12 @@
     justify-content: flex-end;
   }
   .clearButton {
-    background-color: $red50;
+    background-color: $red;
     margin: 16px 0 0 0;
     display: block;
   }
   .saveButton {
-    // background-color: $red85;
+    // background-color: $red;
     margin: 16px 16px 0 0;
     display: block;
   }
@@ -94,7 +94,7 @@
       font-weight: 700;
       transition: all .5s ease;
       font-style: italic;
-      color: $purpleOne50;
+      color: $lightPurpleOne;
       margin-left: -20px;
       position: absolute;
       bottom: 0;
