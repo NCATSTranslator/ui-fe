@@ -33,13 +33,7 @@ const Header: FC<HeaderProps> = ({children}) => {
   const logoutReady = (clientID && logoutURI) ? true : false;
   const openFeedbackModal = true;
   const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
-
-  const socialProviders = (config?.social_providers) ? config.social_providers: null;
-  const unaConfig = socialProviders ? socialProviders.una : null;
-  const loginURL = unaConfig 
-    ? getFormattedLoginURL(unaConfig.auth_uri, unaConfig.client_id, 
-      unaConfig.scope, unaConfig.redirect_uri, location)
-    : null;
+  const loginURL = getFormattedLoginURL(location);
 
   return (
     <header className={styles.header}>
