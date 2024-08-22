@@ -3,16 +3,17 @@ import styles from './SupportPathGroup.module.scss';
 import SupportPath from '../SupportPath/SupportPath';
 import AnimateHeight from '../AnimateHeight/AnimateHeight';
 import { sortSupportByEntityStrings, sortSupportByLength } from '../../Utilities/sortingFunctions';
-import { FormattedEdgeObject, FormattedNodeObject, SupportDataObject } from '../../Types/results';
+import { FormattedEdgeObject, FormattedNodeObject, SupportDataObject, PathFilterState } from '../../Types/results';
 import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
 import { cloneDeep } from 'lodash';
 
 interface SupportPathGroupProps {
   dataObj: SupportDataObject;
   isExpanded: boolean;
+  pathFilterState: PathFilterState;
 }
 
-const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) => {
+const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded, pathFilterState }) => {
 
   const pathItem = dataObj.pathItem;
   const pathViewStyles = dataObj.pathViewStyles;
@@ -73,6 +74,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) =>
             <SupportPath
               dataObj={newDataObj}
               index={i}
+              pathFilterState={pathFilterState}
             />
           );
         })
@@ -83,17 +85,10 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded }) =>
 
 const areEqualProps = (prevProps: any, nextProps: any) => {
   // Check if 'isExpanded' prop has changed
-  if (prevProps.isExpanded !== nextProps.isExpanded) {
-    return false;
-  }
-
+  if (prevProps.isExpanded !== nextProps.isExpanded) return false;
   const prevDataKeys = Object.keys(prevProps.dataObj);
   const nextDataKeys = Object.keys(nextProps.dataObj);
-
-  if (prevDataKeys.length !== nextDataKeys.length) {
-    return false;
-  }
-
+  if (prevDataKeys.length !== nextDataKeys.length) return false;
   for (const key of prevDataKeys) {
     if (prevProps.dataObj[key] !== nextProps.dataObj[key]) {
       return false;

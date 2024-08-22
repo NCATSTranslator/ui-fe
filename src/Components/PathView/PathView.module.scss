@@ -78,7 +78,7 @@
         color: $black;
         path {
           fill: $black;
-        }  
+        }
       }
     }
     .name, .target {
@@ -197,7 +197,7 @@
       padding: 0;
       color: $purpleOne;
       text-decoration: none;
-      font-weight: 700; 
+      font-weight: 700;
       font-size: 12px;
       box-shadow: none;
       margin: 0 0 0 4px;
@@ -250,4 +250,7 @@
   margin: 0 auto 20px;
   height: 2px;
   background-color: $darkGray;
+}
+.filtered {
+  opacity: 0.5;
 }

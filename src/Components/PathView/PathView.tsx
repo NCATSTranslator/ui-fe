@@ -11,7 +11,7 @@ import { currentPrefs } from '../../Redux/rootSlice';
 import { Link } from 'react-router-dom';
 import { getGeneratedSendFeedbackLink, numberToWords } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
-import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject } from '../../Types/results';
+import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject, PathFilterState} from '../../Types/results';
 import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 
@@ -58,9 +58,10 @@ interface PathViewProps {
   handleEdgeSpecificEvidence:(edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => void;
   handleActivateEvidence: (path: PathObjectContainer) => void;
   activeEntityFilters: string[];
+  pathFilterState: PathFilterState;
 }
 
-const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeEntityFilters}) => {
+const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeEntityFilters, pathFilterState}) => {
 
   const prefs = useSelector(currentPrefs);
 
@@ -173,6 +174,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                         ? sub.predicates[0].predicate
                         : ""
                   ).toString();
+                const isPathFiltered = pathFilterState[pathToDisplay.id];
                 return (
                   <>
                     {
@@ -210,7 +212,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                         >
                           <span>View evidence for this path.</span>
                       </Tooltip>
-                      <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} >
+                      <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''}`} >
                         {
                           pathToDisplay.path.subgraph.map((pathItem: FormattedEdgeObject | FormattedNodeObject, j: number) => {
                             let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;
@@ -244,6 +246,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                                   handleTargetClick={handleTargetClick}
                                   activeEntityFilters={activeEntityFilters}
                                   hasSupport={pathItemHasSupport}
+                                  pathFilterState={pathFilterState}
                                 />
                               </>
                             )

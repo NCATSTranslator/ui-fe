@@ -168,13 +168,19 @@ export const updatePathRanks = (path, pathRank, pathFilters) => {
         const supportPath = item.support[i];
         const supportRank = pathRank.support[i];
         updatePathRanks(supportPath, supportRank, pathFilters);
-        pathRank.rank += supportRank.rank;
+        if (supportRank.rank < 0) {
+          pathRank.rank += supportRank.rank;
+        }
       }
     }
 
     for (let ftr of pathFilters) {
-      if (path.tags[ftr.id] !== undefined) {
-        pathRank.rank -= 1;
+      if (ftr.negated) {
+        pathRank.rank += (path.tags[ftr.id] === undefined) ? -1 : 100;
+      } else {
+        if (path.tags[ftr.id] !== undefined) {
+          pathRank.rank -= 1;
+        }
       }
     }
   }

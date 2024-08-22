@@ -102,6 +102,8 @@ const ResultsList = ({loading}) => {
   const [selectedEdge, setSelectedEdge] = useState(null);
   // Obj, path represented in current evidence
   const [selectedPath, setSelectedPath] = useState(null);
+  // Obj, represets the filter state of all paths
+  const [pathFilterState, setPathFilterState] = useState(null);
   // Int, current page
   const currentPage = useRef(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
@@ -235,14 +237,16 @@ const ResultsList = ({loading}) => {
     setEndResultIndex(endOffset);
   }, [formattedResults.length, itemsPerPage]);
 
-  const handleUpdateResults = (filters, asFilters, rr, or = [], justSort = false, sortType, fr = []) => {
+  const handleUpdateResults = (filters, asFilters, summary, or = [], justSort = false, sortType, fr = []) => {
     let newFormattedResults = [];
     let newOriginalResults = [];
+    let newPathFilterState = cloneDeep(pathFilterState);
     let saves = (userSaves) ? userSaves.saves: null;
 
     if(or.length === 0) {
-      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
+      newFormattedResults = (justSort) ? fr : getSummarizedResults(summary.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
       newOriginalResults = cloneDeep(newFormattedResults);
+      newPathFilterState = genPathFilterState(summary.data);
     } else {
       newFormattedResults = (justSort) ? cloneDeep(fr) : or;
       newOriginalResults = or;
@@ -250,7 +254,7 @@ const ResultsList = ({loading}) => {
 
     // filter
     if (!justSort) {
-      newFormattedResults = applyFilters(filters, asFilters, newFormattedResults, newOriginalResults, rr);
+      [newFormattedResults, newPathFilterState] = applyFilters(filters, asFilters, newFormattedResults, newOriginalResults, summary, newPathFilterState);
     }
 
     // sort
@@ -258,6 +262,7 @@ const ResultsList = ({loading}) => {
 
     // set results
     setFormattedResults(newFormattedResults);
+    setPathFilterState(newPathFilterState);
 
     if(firstLoad.current && newFormattedResults.length > 0) {
       firstLoad.current = false;
@@ -276,10 +281,11 @@ const ResultsList = ({loading}) => {
       }
     }
 
-    if(!justSort)
+    if (!justSort) {
       originalResults.current = newOriginalResults;
+    }
 
-    rawResults.current = rr;
+    rawResults.current = summary;
 
     return newFormattedResults;
   }
@@ -493,7 +499,27 @@ const ResultsList = ({loading}) => {
     return newSortedResults;
   }, [activeEntityFilters]);
 
-  const calculateFacetCounts = (filteredResults, rawResults, negatedResults, activeFacets, negatedFacets, tagSetterMethod) => {
+  const genPathFilterState = (summary) => {
+    const filterState = {};
+    for (let pid of Object.keys(summary.paths)) {
+      filterState[pid] = false;
+    }
+
+    return filterState;
+  }
+
+  const updatePathFilterState = (pathFilterState, pathRanks, unrankedIsFiltered) => {
+    for (let pathRank of pathRanks) {
+      if (pathRank.support.length !== 0) {
+        updatePathFilterState(pathFilterState, pathRank.support, unrankedIsFiltered);
+      }
+
+      const pid = pathRank.path.id;
+      pathFilterState[pid] = (pathRank.rank >= 0 && unrankedIsFiltered);
+    }
+  }
+
+  const calculateFacetCounts = (filteredResults, summary, negatedResults, activeFacets, negatedFacets, tagSetterMethod) => {
     // Function that adds the tag counts when a certain condition (predicate) is met
     const addTagCountsWhen = (countedTags, result, predicate) => {
       for(const tag of result.tags) {
@@ -514,7 +540,7 @@ const ResultsList = ({loading}) => {
     }
 
     // Create a list of tags from the master tag list provided by the backend
-    const countedTags = cloneDeep(rawResults.data.tags);
+    const countedTags = cloneDeep(summary.data.tags);
     const activeFamilies = new Set(activeFacets.map(facet => filtering.filterFamily(facet)));
     for(const result of filteredResults) {
       // Determine the distance between a result's facets and the facet selection
@@ -580,7 +606,7 @@ const ResultsList = ({loading}) => {
     handlePageClick({selected: 0}, newItemsPerPage, resultsLength);
   }
 
-  const applyFilters = (filters, entityFilters, filteredResults, originalResults, rawResults) => {
+  const applyFilters = (filters, entityFilters, filteredResults, originalResults, summary, pathFilterState) => {
     const filterResults = (filters, entityFilters, originalResults, resultPathRanks) => {
       const filteredResults = [];
       const negatedResults = [];
@@ -663,24 +689,40 @@ const ResultsList = ({loading}) => {
             updatePathRanks(path, pathRank, pathFilters);
           }
 
-          // If a path filter does not match any paths in a result, then remove the result
-          let resultRank = 0;
-          for (let pr of pathRanks) {
-            resultRank += pr.rank;
-          }
-
-          if (resultRank < 0) {
-            const newResult = cloneDeep(result);
-            pathRankSort(pathRanks);
-            newResult.compressedPaths = genRankedPaths(pathRanks);
-            facetedResults.push(newResult);
-          }
+          const newResult = cloneDeep(result);
+          pathRankSort(pathRanks);
+          newResult.compressedPaths = genRankedPaths(pathRanks);
+          facetedResults.push(newResult);
         }
 
         resultIndex++;
       };
 
       return facetedResults;
+    }
+
+    const filterNoMatchingPathResults = (results, resultPathRanks, pathFilterState) => {
+      let anyFilteredPaths = false;
+      for (let filterState of Object.values(pathFilterState)) {
+        anyFilteredPaths = anyFilteredPaths || filterState;
+      }
+
+      if (!anyFilteredPaths) return results;
+      const filteredResults = [];
+      for (let i = 0; i < results.length; ++i) {
+        const result = results[i];
+        const pathRanks = resultPathRanks[i];
+        let resultRank = 0;
+        for (let pathRank of pathRanks) {
+          resultRank += pathRank.rank;
+        }
+
+        if (resultRank !== 0) {
+          filteredResults.push(result);
+        }
+      }
+
+      return filteredResults;
     }
 
     const genRankedPaths = (pathRanks) => {
@@ -704,8 +746,9 @@ const ResultsList = ({loading}) => {
         setActiveEntityFilters([]);
       }
 
-      calculateFacetCounts(filteredResults, rawResults, [], [], [], setAvailableTags);
-      return filteredResults;
+      pathFilterState = genPathFilterState(summary.data);
+      calculateFacetCounts(filteredResults, summary, [], [], [], setAvailableTags);
+      return [filteredResults, pathFilterState];
     }
 
     let [resultFilters, pathFilters, globalFilters] = filtering.groupFilterByType(filters);
@@ -714,14 +757,25 @@ const ResultsList = ({loading}) => {
     resultFilters = negatedResultFacets.concat(globalFilters);
     const resultPathRanks = [];
     let [results, negatedResults] = filterResults(resultFilters, entityFilters, originalResults, resultPathRanks);
-    calculateFacetCounts(results, rawResults, negatedResults, resultFacets, negatedResultFacets, setAvailableTags);
+    calculateFacetCounts(results, summary, negatedResults, resultFacets, negatedResultFacets, setAvailableTags);
     results = facetResults(resultFacets, pathFilters, results, resultPathRanks);
+    let unrankedIsFiltered = false;
+    for (let pathRanks of resultPathRanks) {
+      for (let pathRank of pathRanks) {
+        unrankedIsFiltered = unrankedIsFiltered || (pathRank.rank < 0);
+      }
+    }
 
+    for (let pathRanks of resultPathRanks) {
+      updatePathFilterState(pathFilterState, pathRanks, unrankedIsFiltered);
+    }
+
+    results = filterNoMatchingPathResults(results, resultPathRanks, pathFilterState);
     if(currentPage !== 0) {
       handlePageReset(false, results.length);
     }
 
-    return results;
+    return [results, pathFilterState];
   }
 
   // Handle the addition and removal of individual filters. Keep the invariant that
@@ -982,6 +1036,7 @@ const ResultsList = ({loading}) => {
                               key={item.id}
                               type={initPresetTypeObject}
                               item={item}
+                              pathFilterState={pathFilterState}
                               activateEvidence={activateEvidence}
                               activateNotes={activateNotes}
                               activeEntityFilters={activeEntityFilters}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo, FC, RefObject } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject, 
+import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject,
   isPublication, isClinicalTrial, isMiscPublication, getPathsCount } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
@@ -22,7 +22,7 @@ import { useSelector } from 'react-redux';
 import { currentUser } from '../../Redux/rootSlice';
 import { displayScore } from '../../Utilities/scoring';
 import { QueryType } from '../../Utilities/queryTypes';
-import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject } from '../../Types/results';
+import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject, PathFilterState } from '../../Types/results';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
 import { isEqual } from 'lodash';
 import Tabs from '../Tabs/Tabs';
@@ -72,6 +72,7 @@ interface ResultsItemProps {
   queryNodeLabel: string;
   rawResults: RawResult[];
   type: QueryType;
+  pathFilterState: PathFilterState;
   zoomKeyDown: boolean;
   isInUserSave?: boolean;
   isEven: boolean;
@@ -103,6 +104,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     queryNodeLabel,
     rawResults,
     type,
+    pathFilterState,
     zoomKeyDown,
     isInUserSave = false,
     isEven = false
@@ -496,6 +498,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
                 handleActivateEvidence={handleActivateEvidence}
                 activeEntityFilters={activeEntityFilters}
+                pathFilterState={pathFilterState}
               />
             </Tab>
             <Tab heading="Graph">
@@ -529,24 +532,12 @@ const ResultsItem: FC<ResultsItemProps> = ({
 // check if certain props are really different before rerendering
 const areEqualProps = (prevProps: any, nextProps: any) => {
   // Check for deep equality of the item object
-  if (!isEqual(prevProps.item, nextProps.item)) {
-    return false;
-  }
-
+  if (!isEqual(prevProps.item, nextProps.item)) return false;
   // Check other properties
-  if (!isEqual(prevProps.zoomKeyDown, nextProps.zoomKeyDown)) {
-    return false;
-  }
-  if (!isEqual(prevProps.startExpanded, nextProps.startExpanded)) {
-    return false;
-  }
-  if (!isEqual(prevProps.activeFilters, nextProps.activeFilters)) {
-    return false;
-  }
-  if (!isEqual(prevProps.activeEntityFilters, nextProps.activeEntityFilters)) {
-    return false;
-  }
-
+  if (!isEqual(prevProps.zoomKeyDown, nextProps.zoomKeyDown)) return false;
+  if (!isEqual(prevProps.startExpanded, nextProps.startExpanded)) return false;
+  if (!isEqual(prevProps.activeFilters, nextProps.activeFilters)) return false;
+  if (!isEqual(prevProps.activeEntityFilters, nextProps.activeEntityFilters)) return false;
   // If none of the conditions are met, props are equal
   return true;
 };

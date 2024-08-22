@@ -18,7 +18,7 @@ import Highlighter from 'react-highlight-words';
 import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
-import { SupportDataObject, FormattedEdgeObject, PathObjectContainer } from '../../Types/results';
+import { SupportDataObject, FormattedEdgeObject, PathObjectContainer, PathFilterState } from '../../Types/results';
 import { isFormattedEdgeObject } from '../../Utilities/utilities';
 
 interface PredicateProps {
@@ -35,9 +35,10 @@ interface PredicateProps {
   isTop?: boolean | null;
   isBottom?: boolean | null;
   className?: string;
+  pathFilterState: PathFilterState
 }
 
-const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, selected = false, activeEntityFilters, uid, parentClass = '', handleEdgeClick,
+const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, selected = false, activeEntityFilters, uid, parentClass = '', handleEdgeClick, pathFilterState,
    hasSupport, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
 
   const checkForProvenanceType = (pathObject: FormattedEdgeObject, type: string) => {
@@ -218,6 +219,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
         <SupportPathGroup
           dataObj={supportDataObject}
           isExpanded={isSupportExpanded}
+          pathFilterState={pathFilterState}
         />
       }
     </>

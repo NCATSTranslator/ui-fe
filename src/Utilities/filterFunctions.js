@@ -36,11 +36,11 @@ export const getValidFamilies = () => {
 }
 
 export const getResultFamilies = () => {
-  return ['cc', 'di', 'role'];
+  return ['cc', 'di', 'role', 'ara'];
 }
 
 export const getPathFamilies = () => {
-  return ['pc', 'pt', 'ara'];
+  return ['pc', 'pt'];
 }
 
 export const isTagFilter = (filter) => {

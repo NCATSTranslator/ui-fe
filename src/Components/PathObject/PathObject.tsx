@@ -5,7 +5,7 @@ import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
-import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject } from '../../Types/results';
+import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject, PathFilterState } from '../../Types/results';
 import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
 
 interface PathObjectProps {
@@ -23,10 +23,11 @@ interface PathObjectProps {
   isTop?: boolean;
   isBottom?: boolean;
   className?: string;
+  pathFilterState: PathFilterState;
 }
 
 const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false,
-  activeEntityFilters, selected, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
+  activeEntityFilters, selected, pathFilterState, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
 
   const provenance = (!!pathObject.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const isNode = isFormattedNodeObject(pathObject);
@@ -87,6 +88,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
           isTop={isTop}
           isBottom={isBottom}
           className={className}
+          pathFilterState={pathFilterState}
         />
       }
       {

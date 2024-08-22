@@ -175,3 +175,6 @@ export type Filter = {
 export type QueryType = {
   filterType: string;
 }
+export type PathFilterState = {
+  [pid: string]: boolean;
+}
