@@ -7,7 +7,6 @@ import EvidenceModal from "../Modals/EvidenceModal";
 import Select from "../Core/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import Tooltip from '../Tooltip/Tooltip';
-import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
 import ResultsListHeader from "../ResultsListHeader/ResultsListHeader";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
 import StickyToolbar from "../StickyToolbar/StickyToolbar";
