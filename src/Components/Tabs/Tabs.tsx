@@ -14,21 +14,40 @@ const Tabs: FC<TabsProps> = ({ children, className, isOpen }) => {
   const firstElement = Children.toArray(children).find((child) => isValidElement(child)) as ReactElement<TabProps> | undefined;
   const [activeTabHeading, setActiveTab] = useState(firstElement?.props.heading);
   const tabClicked = useRef(false);
-  const prevChildrenRef = useRef<ReactElement<TabProps>[]>(children);
+  // const prevChildrenRef = useRef<ReactElement<TabProps>[]>(children);
 
   const handleTabClick = (heading: string) => {
     setActiveTab(heading);
     tabClicked.current = true;
   };
 
+  const isActiveHeadingWithinChildren = (children: ReactElement<TabProps>[], activeHeading: string | undefined) => {
+    if(!activeHeading)
+      return false;
+
+    let headingIsPresent = false;
+    for(const child of children) {
+      if(!!child?.props?.heading && child.props.heading === activeHeading) {
+        headingIsPresent = true;
+        break;
+      }
+    }
+    return headingIsPresent
+  }
+
   useEffect(() => {
-    if (!isEqual(prevChildrenRef.current, children)) {
+    if (!isActiveHeadingWithinChildren(children, activeTabHeading)) {
       setActiveTab(firstElement?.props.heading);
     }
-    prevChildrenRef.current = children;
+
+    // if (!isEqual(prevChildrenRef.current, children)) {
+    //   setActiveTab(firstElement?.props.heading);
+    // }
+    // prevChildrenRef.current = children;
 
     if (!tabClicked.current) {
       setActiveTab(firstElement?.props.heading);
+      tabClicked.current = true;
     }
   }, [children, firstElement]);
 
