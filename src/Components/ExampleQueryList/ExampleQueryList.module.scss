@@ -37,9 +37,7 @@
   border-radius: 8px;
 }
 .examples {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  display: grid;
   .subTwo {
     white-space: nowrap;
   }

@@ -26,6 +26,7 @@ type QueryBarProps = {
   autocompleteLoading: boolean;
   handleItemClick: (item: {id:string, label: string, match: string, types: Array<string>}) => void;
   disabled?: boolean;
+  placeholderText?: string; 
 }
 
 const QueryBar: FC<QueryBarProps> = ({
@@ -37,9 +38,10 @@ const QueryBar: FC<QueryBarProps> = ({
   autocompleteItems,
   autocompleteLoading,
   handleItemClick,
-  disabled = false
+  disabled = false,
+  placeholderText
 }) => {
-  const placeholderText = queryType ? queryType.placeholder : '';
+  const placeholder = (!!placeholderText) ? placeholderText : (queryType) ? queryType.placeholder : '';
 
   return (
     <form 
@@ -66,7 +68,7 @@ const QueryBar: FC<QueryBarProps> = ({
         items={autocompleteItems}
         handleItemClick={handleItemClick}
       />
-      <div className={styles.inputContainer}>
+      <div className={`${disabled && styles.disabled} ${styles.inputContainer}`}>
         <span className={styles.icon}>
           <QueryTypeIcon type={queryType?.searchTypeString || ''} />
         </span>
