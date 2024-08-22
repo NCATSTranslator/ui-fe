@@ -1,9 +1,7 @@
 import styles from './ResultsListLoadingBar.module.scss';
 import { useEffect, useState, useRef } from 'react';
-import Info from '../../Icons/Status/Alerts/Info.svg?react'
 import { useInterval } from '../../Utilities/customHooks';
 import ResultsListLoadingButton from '../ResultsListLoadingButton/ResultsListLoadingButton';
-import Tooltip from '../Tooltip/Tooltip';
 
 const ResultsListLoadingBar = ({ data, totalIntervals = 6 }) => {
 

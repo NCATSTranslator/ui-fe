@@ -61,6 +61,7 @@ const Tabs: FC<TabsProps> = ({ children, className, isOpen }) => {
       tabClicked.current = true;
     }
     prevChildrenRef.current = children;
+    // eslint-disable-next-line
   }, [children]);
 
   useEffect(() => {

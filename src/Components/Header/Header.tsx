@@ -1,6 +1,5 @@
 import { FC, ReactNode } from 'react';
 import { Link, useLocation, Location } from 'react-router-dom';
-import Tooltip from '../Tooltip/Tooltip';
 import { currentConfig, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
 import { useWindowSize } from '../../Utilities/customHooks';

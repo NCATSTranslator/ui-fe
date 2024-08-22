@@ -1,6 +1,5 @@
 import { useState, FC, MouseEvent } from 'react';
 import styles from './Predicate.module.scss';
-import ResearchSingle from '../../Icons/Queries/Evidence.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import Robot from '../../Icons/DEP/robot-purple.png';
 import RobotSelected from '../../Icons/DEP/robot-darkpurple.png';

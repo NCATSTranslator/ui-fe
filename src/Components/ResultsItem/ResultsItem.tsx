@@ -152,8 +152,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const [tagsHeight, setTagsHeight] = useState<number>(0);
   const minTagsHeight = 45;
 
-  const numRoles = item.tags.filter(tag => tag.includes("role")).length;
-
   useTurnstileEffect(
     () => startExpanded,
     () => setIsExpanded(true),

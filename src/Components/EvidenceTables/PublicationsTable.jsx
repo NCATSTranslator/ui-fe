@@ -5,7 +5,7 @@ import styles from './PublicationsTable.module.scss';
 import Select from '../Core/Select';
 import ReactPaginate from "react-paginate";
 import { handleEvidenceSort, updatePubdate, updateSnippet, updateJournal, 
-  updateTitle, getKnowledgeLevelString, generatePubmedURL } from "../../Utilities/evidenceModalFunctions";
+  updateTitle, generatePubmedURL } from "../../Utilities/evidenceModalFunctions";
 import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
@@ -325,8 +325,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
                 ? <p className={styles.noPubs}>No publications available.</p>
                 :
                   displayedPubmedEvidence.map((pub)=> {
-                    const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
-                    let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
                     return (
                       <tr className={`table-item`} key={pub.id}>
                         <td className={`table-cell ${styles.tableCell} ${styles.title} title`} >
