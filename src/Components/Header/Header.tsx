@@ -35,7 +35,6 @@ const Header: FC<HeaderProps> = ({children}) => {
   const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
   const loginURL = getFormattedLoginURL(location);
   const currentPage = location.pathname;
-  console.log(currentPage);
 
   return (
     <header className={styles.header}>

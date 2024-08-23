@@ -53,6 +53,7 @@ const QueryBar: FC<QueryBarProps> = ({
         }
 
         if(queryItem.node === null && autocompleteItems.length > 0) {
+          console.log("test");
           handleItemClick(autocompleteItems[0]);
           let newQueryItem = cloneDeep(queryItem);
           newQueryItem.node = autocompleteItems[0];

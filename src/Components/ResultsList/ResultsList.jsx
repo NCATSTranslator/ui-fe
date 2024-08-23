@@ -941,6 +941,7 @@ const ResultsList = ({loading}) => {
                             <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
                           </Tooltip>
                         </div>
+                        <div></div>
                       </div>
                       {
                         isError &&
