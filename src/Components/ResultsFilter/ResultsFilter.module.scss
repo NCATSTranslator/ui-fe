@@ -6,23 +6,25 @@
   border-radius: $defaultBorderRadius;
   box-shadow: $dropShadow;
   transition: $defaultAnim;
+  overflow: hidden;
   .entitySearch {
     span {
       overflow: hidden;
     }
-    input {
-      transition: opacity 1s ease;
-    }
   }
-  .heading .span, .closeButton {
+  .heading .span, .closeButton, .clearAll {
     transition: $defaultAnim;
   }
   &.expanded {
     width: calc(330px - $s*2);
+    .bottom {
+      opacity: 1;
+      pointer-events: all;
+    }
     .heading span {
       width: auto;
     }
-    .heading span, .bottom, .closeButton, .clearAll, .entitySearch input {
+    .heading span, .bottom, .closeButton, .clearAll, .entitySearch {
       opacity: 1;
       pointer-events: all;
     }
@@ -32,11 +34,20 @@
     .heading span {
       width: 0;
     }
-    .heading span, .bottom, .closeButton, .entitySearch input, .clearAll {
+    .bottom {
       opacity: 0;
       pointer-events: none;
       width: 0;
     }
+    .heading span, .bottom, .closeButton, .entitySearch, .clearAll {
+      opacity: 0;
+      pointer-events: none;
+      width: 0;
+    }
+  }
+  .bottom {
+    position: relative;
+    transition: all .35s cubic-bezier(1, -0.17, 0.93, 1.01);
   }
   .heading {
     font-size: 20px;
@@ -67,9 +78,6 @@
       display: flex;
       align-items: center;
     }
-  }
-  .bottom {
-    position: relative;
   }
   .clearAll {
     display: block;

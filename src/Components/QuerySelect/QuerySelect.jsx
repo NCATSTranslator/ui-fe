@@ -89,7 +89,7 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
             onMouseDown={handleSelectClick} 
             >
             {
-              children.find((option) => option.props.value === selectedItem).props.children
+              children.find((option) => option.props.value === selectedItem).props.children.props.modifiedName
             }
           </div>
           <div className={styles.iconContainer}>
