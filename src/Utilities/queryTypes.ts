@@ -19,7 +19,7 @@ export interface QueryType {
 export const queryTypes: QueryType[] = [
   {
     id: 0,
-    label: 'What drugs may treat conditions related to',
+    label: 'What drugs may treat conditions related to a disease?',
     placeholder: 'Enter a Disease or Phenotype',
     targetType: 'drug',
     direction: null,
@@ -36,7 +36,7 @@ export const queryTypes: QueryType[] = [
   },
   {
     id: 1,
-    label: 'What chemicals may increase the activity of',
+    label: 'What chemicals may increase the activity of a gene?',
     placeholder: 'Enter a Gene',
     targetType: 'chemical',
     direction: 'increased',
@@ -53,7 +53,7 @@ export const queryTypes: QueryType[] = [
   },
   {
     id: 2,
-    label: 'What chemicals may decrease the activity of',
+    label: 'What chemicals may decrease the activity of a gene?',
     placeholder: 'Enter a Gene',
     targetType: 'chemical',
     direction: 'decreased',
@@ -70,7 +70,7 @@ export const queryTypes: QueryType[] = [
   },
   {
     id: 3,
-    label: 'What genes\' activity may be increased by',
+    label: 'What genes\' activity may be increased by a chemical?',
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'increased',
@@ -87,7 +87,7 @@ export const queryTypes: QueryType[] = [
   },
   {
     id: 4,
-    label: 'What genes\' activity may be decreased by',
+    label: 'What genes\' activity may be decreased by a chemical?',
     placeholder: 'Enter a Chemical',
     targetType: 'gene',
     direction: 'decreased',

@@ -47,10 +47,10 @@
       flex-wrap: wrap;
     }
     .button {
-      background-color: $white;
       color: $black;
       align-items: center;
-      background-color: $white;
+      background-color: $lightGray;
+      border-color: $lightGray;
       border-radius: 5px;
       cursor: pointer;
       display: inline-flex;
@@ -65,7 +65,7 @@
       margin: 0 $s $s 0;
       white-space: nowrap;
       &:hover {
-        box-shadow: $dropShadowHover;
+        box-shadow: none;
       }
     }
   }

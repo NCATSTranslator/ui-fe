@@ -334,7 +334,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               :
               <>
                 <h3 className={styles.h3}>Translator finds associations between drugs, genes, and diseases</h3>
-                <h6 className={styles.h6}>Select a question, then search for a term.</h6>
+                <h6 className={styles.h6}>Select a question and enter a search term to get started</h6>
                 {
                   isError &&
                   <p className={styles.error}>{errorText}</p>
@@ -350,16 +350,11 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       noanimate
                       >
                         {
-                          queryTypes.map(type => {
+                          queryTypes.map((type, i) => {
                             return(
                               <option value={type.id} key={type.id}>
-                                <span>
+                                <span modifiedName={type.label.replaceAll("a disease?", "...").replaceAll("a chemical?", "...").replaceAll("a gene?", "...")}>
                                   { type.label } 
-                                  { 
-                                    (type.id !== queryItem.type.id) 
-                                      ? <span className={styles.gray}> (a {type.searchTypeString})</span>
-                                      : <span>...</span>
-                                  }
                                 </span>
                               </option>
                             )
