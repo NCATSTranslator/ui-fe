@@ -119,8 +119,10 @@
           font-size: 16px;
           background-color: $lightGray;
           box-shadow: none;
+          color: $black;
           &:hover {
             background-color: $lightGray;
+            color: $black;
             box-shadow: none;
           }
         }

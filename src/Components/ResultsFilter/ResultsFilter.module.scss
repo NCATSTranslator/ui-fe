@@ -4,9 +4,14 @@
   padding: $s $s 0;
   background-color: $lightGray;
   border-radius: $defaultBorderRadius;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
   box-shadow: $dropShadow;
   transition: $defaultAnim;
   overflow: hidden;
+  position: relative;
+  left: -24px;
+  margin-right: -24px;
   .entitySearch {
     span {
       overflow: hidden;

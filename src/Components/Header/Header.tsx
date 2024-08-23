@@ -75,7 +75,7 @@ const Header: FC<HeaderProps> = ({children}) => {
                       <input type="hidden" name="client_id" value={clientID} />
                       <input type="hidden" name="show_prompt" value="false" />
                       <input type="hidden" name="post_logout_redirect_uri" value={postLogoutRedirectUri}/> 
-                      <button type="submit" value="submit" className={styles.login}>Log Out</button>
+                      <button type="submit" value="submit" className={`${styles.logout} ${styles.login}`}>Log Out</button>
                     </form>
                   }
                 </>

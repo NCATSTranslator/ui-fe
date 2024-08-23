@@ -48,7 +48,7 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
       }
       <div className="top">
         <p className={`${styles.subTwo} sub-two`}>Examples</p>
-        <p className={`caption`}>Choose a different question for more options.</p>
+        <p className={`caption`}>Choose a different question for more examples. Run a new search with these terms for the most up-to-date results.</p>
       </div>
       <div className={styles.examples}>
         {examples && Array.isArray(examples) && (
