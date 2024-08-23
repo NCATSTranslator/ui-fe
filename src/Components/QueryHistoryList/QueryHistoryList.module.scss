@@ -2,13 +2,20 @@
 
 
 .historyListContainer {
+  .historyContainer {
+    padding-top: 0;
+    max-width: 640px;
+    margin: 0 auto;
+  }
   .searchBarContainer {
+    background-color: $palePurple;
+
     .form {
-      border-radius: $defaultBorderRadius;
       display: flex;
       justify-content: space-between;
-      padding: 24px;
-      background-color: $purpleTwo20;
+      padding: 0 24px 24px;
+      max-width: 640px;
+      margin: 0 auto;
       label {
         display: flex;
         width: 100%;
@@ -42,11 +49,10 @@
       margin: $xl 0 $m;
     }
     .exportButton {
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      width: 32px;
+      height: 32px;
       position: relative;
-      margin: 0 0 0 20px;
+      margin: 0;
       svg {
         position: absolute;
         top: 50%;
@@ -56,7 +62,7 @@
         width: 24px;
         height: 24px;
         path {
-          fill: $white;
+          fill: $black;
         }
       }
     }
@@ -64,19 +70,21 @@
       cursor: pointer;
       display: grid;
       grid-template-columns: auto 1fr;
-      grid-column-gap: $s;
+      column-gap: $s;
       align-items: center;
       .top {
         margin: 0 0 $xxs;
       }
       .bottom {
-        color: $darkGray;
-        font-size: 12px;
+        span {
+          color: $darkGray;
+          font-size: 12px;
+        }
       }
     }
     .itemContainer {
       padding: $m;
-      margin-bottom: $m;
+      margin-bottom: $s;
       box-shadow: $dropShadow;
       display: flex;
       justify-content: space-between;
@@ -92,7 +100,7 @@
       }
       .removeItem {
         background-color: transparent;
-        padding: $s;
+        padding: 0;
         margin: 0;
         box-shadow: none;
         &:hover {

@@ -1,8 +1,11 @@
 
 // User Prefs
-type PrefObject = {
+export type PrefObject = {
   pref_value: string | number;
   possible_values: string[] | number[];
+  time_created?: string;
+  time_updated?: string;
+  pref_data_type?: string;
 }
 
 export type PreferencesContainer = {
@@ -17,26 +20,42 @@ export type PreferencesContainer = {
 }
 
 export type User = {
+  data: null;
+  deleted: boolean;
+  email: string;
   id: string;
   name: string;
-  email: string;
+  profile_pic_url: string;
   time_created: string;
   time_updated: string;
-  profile_pic_url: string;
-  data: object | null;
-  deleted: boolean;
+}
+
+export type Session = {
+  auth_provider: string;
+  id: number;
+  linked_from: string | null;
+  time_session_created: string;
+  time_session_updated: string;
+  time_token_created: string;
+  token: string;
+  user_id: string;
+}
+export type SessionStatus = {
+  status: number;
+  session: Session;
+  user: User;
 }
 
 export type Config = {
   cached_queries: object[];
   gaID: string;
   name_resolver: string;
-  socialProviders: object;
+  social_providers: any;
 }
 
 export type RootState = {
   currentRoot: string;
-  currentUser: User | null; 
+  currentUser?: User | null; 
   currentPrefs: PreferencesContainer;
   currentConfig: Config | null;
 }

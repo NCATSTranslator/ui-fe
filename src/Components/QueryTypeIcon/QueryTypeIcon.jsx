@@ -1,11 +1,11 @@
 import Chemical from '../../Icons/Queries/Chemical.svg?react';
 import Gene from '../../Icons/Queries/Gene.svg?react';
-import Disease from '../../Icons/disease2.svg?react';
-import Drug from '../../Icons/drug.svg?react';
-import ChemUp from '../../Icons/Queries/chem-up.svg?react';
-import ChemDown from '../../Icons/Queries/chem-down.svg?react';
-import GeneUp from '../../Icons/Queries/gene-up.svg?react';
-import GeneDown from '../../Icons/Queries/gene-down.svg?react';
+import Disease from '../../Icons/Queries/Disease.svg?react';
+import Drug from '../../Icons/Queries/Drug.svg?react';
+import ChemUp from '../../Icons/Queries/Chemical.svg?react';
+import ChemDown from '../../Icons/Queries/Chemical.svg?react';
+import GeneUp from '../../Icons/Queries/Gene.svg?react';
+import GeneDown from '../../Icons/Queries/Gene.svg?react';
 
 const QueryTypeIcon = ({type}) => {
   let icon = null;

@@ -1,51 +1,43 @@
 
 // Colors //
-$red: #A62639;
-$redTwo: #D52B2B;
-$red85: #a62639D9;
-$red50: #D2939C;
-$red20: #EDD4D7;
+$red: #CC2E46;
+$lightRed: #F5D5DA;
 
-$yellow: #FBAF00;
-$yellow50: #FDD780;
-$yellow20: #FEEFCC;
+$yellow: #EBA400;
+$lightYellow: #FFF2C2;
 
-$green: #238571;
-$green50: #91C2B8;
-$green20: #D3E7E3;
-$greenPath: #a5e4a5;
+$green: #669F38;
 
-$blueOne: #003494;
-$blueOne50: #809AC9;
-$blueOne20: #CCD6EA;
-
-$blueTwo: #2D5492;
-$blueTwo75: #486ba4;
-$blueTwo50: #96A9C8;
-$blueTwo20: #D5DDE9;
+$blueOne: #3562AC;
+$lightBlueOne: #84A3DC;
 
 $purpleOne: #662E6B;
-$purpleOne75: #88518c;
-$purpleOne50: #B397B5;
-$purpleOne20: #E0D5E1;
+$lightPurpleOne: #C2ABC4;
 
 $purpleTwo: #524F81;
-$purpleTwo50: #A8A7C0;
-$purpleTwo20: #DCDCE6;
+$lightPurpleTwo: #BAB9CD;
+$midPurpleTwo: #9795B3;
+$palePurple: #DCDCE6;
+$midPurpleTwo: #9795B3;
+
 $purpleEdgeBG: #7271A4;
 $purpleEdgeBGSelected: #514F7E;
 $purpleEdgeBGHover: #7271A4;
 
 $darkGray: #606368;
-$midDarkGray: #555659;
+$midDarkGray: #919191;
 $placeholderGray: #A5A5A5;
 $midGray: #CED0D0;
-$borderGray: #D6D6D6;
 $hoverGray: #F5F4FF;
 $lightGray: #F2F4F7;
+$transparentBlack: #202124CC; // Black 80% 
+$dropShadowColor: #20212433; // Black 20%
+$dropShadowColorHover: #20212480; // Black 50%
+$dropShadowColorTransparent: #20212400; // Black 0%
 $black: #202124;
 $white: #ffffff;
 
+$backgroundBlur: 3px;
 
 // Font //
 $h1Size: 80px;
@@ -62,7 +54,6 @@ $buttonSize: 16px;
 $captionSize: 12px;
 $overlineSize: 8px;
 
-$poppins: 'Poppins', sans-serif;
 $opensans: 'Open Sans', sans-serif;
 
 // Spacing //
@@ -81,14 +72,14 @@ $medium: 768px;
 $large: 1024px;
 $desktop: 1250px;
 
-$defaultBorderRadius: 5px;
-$querySelectBorderRadius: 8px;
+$defaultBorderRadius: 4px;
+$largeBorderRadius: 8px;
 
 // Drop Shadow //
-$dropShadow: 0px 3px 10px  rgba(32, 33, 36, .2);
-$dropShadowTransparent: 0px 3px 10px  rgba(32, 33, 36, 0);
-$dropShadowHover: 0px 3px 10px  rgba(32, 33, 36, .5);
-$dropShadowPressed: inset 0px 3px 10px  rgba(32, 33, 36, .5);
+$dropShadow: 0px 3px 10px  $dropShadowColor;
+$dropShadowTransparent: 0px 3px 10px $dropShadowColorTransparent;
+$dropShadowHover: 0px 3px 10px  $dropShadowColorHover;
+$dropShadowPressed: inset 0px 3px 10px $dropShadowColorHover;
 
 
 // Animations //

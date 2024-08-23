@@ -2,16 +2,35 @@
 
 .loadingButtonContainer {
   width: 100%;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   span {
     white-space: nowrap;
   }
   .refreshDisclaimer {
-    font-size: $captionSize;
-    margin-top: $xs;
+    font-size: 12px;
+    margin: 0 $xs 0 0;
     color: $darkGray;
-    text-align: center;
+    text-align: right;
   }
+  .left {
+    display: grid;
+  }
+  .right {
+    display: flex;
+    align-items: center;
+  }
+}
+.loadPercentage {
+  font-size: 12px;
+  font-weight: 700;
+  color: $lightPurpleOne;
+}
+.resultsAvailable {
+  font-size: 12px;
+  font-weight: 700;
+  color: $purpleOne;
 }
 .loadingButtonIcon {
   height: $m;
@@ -24,13 +43,14 @@
   cursor: default;
   span {
     text-align: center;
-    min-width: 150px;
     font-size: 16px;
     color: $purpleOne;
     line-height: 1;
-    padding: 14px 8px;
+    padding: 4px;
     font-weight: 700;
-    width: 100%;
+  }
+  svg path {
+    fill: $purpleOne;
   }
 }
 .loadingButtonIcon {
@@ -40,12 +60,13 @@
   margin-right: 10px;
 }
 .loadingButton {
-  color: $purpleOne;
-  background-color: transparent;
   pointer-events: none;
   box-shadow: none;
   cursor: default;
   margin-bottom: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  background-color: $purpleOne;
   &.active {
     cursor: pointer;
     pointer-events: all;
@@ -55,6 +76,9 @@
   &:hover {
     text-decoration: underline;
     box-shadow: none;
+  }
+  svg path {
+    fill: $white;
   }
 }
 

@@ -21,16 +21,48 @@ const Tabs: FC<TabsProps> = ({ children, className, isOpen }) => {
     tabClicked.current = true;
   };
 
+  const isActiveHeadingWithinChildren = (children: ReactElement<TabProps>[], activeHeading: string | undefined) => {
+    if(!activeHeading)
+      return false;
+
+    let headingIsPresent = false;
+    for(const child of children) {
+      if(!!child?.props?.heading && child.props.heading === activeHeading) {
+        headingIsPresent = true;
+        break;
+      }
+    }
+    return headingIsPresent
+  }
+
+  const areChildrenHeadingsEqual = (children: ReactElement<TabProps>[], prevChildren: ReactElement<TabProps>[]) => {
+    if(children.length !== prevChildren.length)   
+      return false;
+    for(const [i, child] of children.entries()) {
+      if(!child?.props?.heading || !prevChildren[i]?.props?.heading || child?.props.heading !== prevChildren[i]?.props.heading) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   useEffect(() => {
-    if (!isEqual(prevChildrenRef.current, children)) {
+    if(isEqual(prevChildrenRef.current, children))
+      return;
+
+    if (!isActiveHeadingWithinChildren(children, activeTabHeading)) {
       setActiveTab(firstElement?.props.heading);
+      prevChildrenRef.current = children;
+      return;
+    }
+    
+    if (!tabClicked.current || !areChildrenHeadingsEqual(prevChildrenRef.current, children)) {
+      setActiveTab(firstElement?.props.heading);
+      tabClicked.current = true;
     }
     prevChildrenRef.current = children;
-
-    if (!tabClicked.current) {
-      setActiveTab(firstElement?.props.heading);
-    }
-  }, [children, firstElement]);
+    // eslint-disable-next-line
+  }, [children]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -58,10 +90,9 @@ const Tabs: FC<TabsProps> = ({ children, className, isOpen }) => {
       </div>
       {Children.map(children, (child, i) => {
         if (!isValidElement(child)) return null;
-        if (activeTabHeading !== child.props.heading) return null;
         return (
           <Fade key={i} className={styles.fade}>
-            <div className={`${styles.tabContent} ${activeTabHeading}`}>{child.props.children}</div>
+            <div className={`${styles.tabContent} ${activeTabHeading !== child.props.heading ? styles.inactive : activeTabHeading}`}>{child.props.children}</div>
           </Fade>
         );
       })}

@@ -1,14 +1,13 @@
 @import "../../Assets/Styles/variables";
 
 .pathView {
-  padding: $m 0;
+  padding: 0;
   position: relative;
   z-index: 100;
   .tableHead, .tableItem {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 5px;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     .name, .target {
       font-size: 14px;
@@ -92,7 +91,7 @@
       }
     }
     .target {
-      background-color: $blueTwo;
+      background-color: $blueOne;
       color: $white;
       svg {
         margin-right: 8px;
@@ -101,37 +100,50 @@
   }
   .formattedPath {
     display: grid;
-    grid-template-columns: min-content 1fr;
+    grid-template-columns: min-content min-content 1fr;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-    padding-left: 20px;
+    gap: 8px;
+    margin-bottom: $m;
+    padding-left: $m;
     position: relative;
     .formattedPath {
       padding-left: 0;
     }
+    .num {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 1.25;
+      color: $darkGray;
+      align-self: flex-start;
+    }
     .pathEvidenceButton {
+      display: flex;
       background-color: $white;
-      border: 1px solid $midDarkGray;
-      padding: 4px 3px 3px 4px;
-      border-radius: 50px;
-      margin: 6px 0 0 0;
+      border: 1px solid $darkGray;
+      padding: 4px;
+      border-radius: $defaultBorderRadius;
+      margin: 0;
       transition: all .25s ease;
       align-self: start;
       svg {
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
         margin-right: 0;
         path, line, circle {
           transition: all .25s ease;
-          stroke: $midDarkGray;
+          fill: $darkGray;
         }
       }
       &:hover {
-        background-color: $midDarkGray;
+        background-color: $darkGray;
         svg {
           path, line, circle {
-            stroke: $white;
+            fill: $white;
           }
         }
       }
@@ -161,32 +173,25 @@
     }
   }
   .header {
-    margin-bottom: $l;
+    margin-bottom: $s;
     p {
       font-size: 12px;
-    }
-    .subtitle {
-      display: flex;
-      align-items: center;
-      font-size: 18px;
-      font-weight: 700;
-      color: $black;
-      margin-bottom: 0;
-      svg {
-        margin-left: 4px;
-      }
+      color: $darkGray;
     }
   }
   .needHelp {
     font-size: 12px;
     text-align: center;
-    margin: 12px 0 0 0;
     display: flex;
     justify-content: center;
     align-items: center;
     color: $purpleOne;
+    margin: 0;
     svg {
       margin-right: 4px;
+      path {
+        fill: $purpleOne;
+      }
     }
     a {
       padding: 0;
@@ -206,13 +211,20 @@
   .support {
     grid-column: 1/8;
     grid-row: 2;
-    background-color: $purpleTwo20;
+    background-color: $palePurple;
     border: 1px solid $purpleEdgeBG;
     border-radius: $defaultBorderRadius;
-    padding: 10px;
-    margin: 25px 0 0 0;
+    padding: $s;
+    margin: $m 0 0 0;
+    position: relative;
+    left: -42px;
+    overflow: hidden visible !important;
     .formattedPath:last-of-type {
       margin-bottom: 0;
+    }
+    .supportGroupContainer {
+      overflow-x: scroll;
+      outline: none;
     }
   }
 }
@@ -228,7 +240,7 @@
 .inferenceLabel {
   font-weight: 700;
   padding-left: 10px;
-  margin-bottom: 15px;
+  margin-bottom: $s;
   width: fit-content;
   position: relative;
   display: flex;
@@ -242,5 +254,5 @@
   width: 100%;
   margin: 0 auto 20px;
   height: 2px;
-  background-color: $borderGray;
+  background-color: $darkGray;
 }

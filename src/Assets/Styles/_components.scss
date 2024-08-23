@@ -1,9 +1,19 @@
 @import "./variables";
 
+button {
+  border: none;
+  cursor: pointer;
+  &:disabled {
+    background-color: $lightGray;
+    color: $midGray;
+    border: none;
+    cursor: default;
+  }
+}
 // Form Input Sizes
-.text-input, .select, .search-container, .button, .file-input {
+.text-input, .select, .search-container, .file-input {
   display: inline-grid;
-  margin: 0 2% $s 0;
+  margin: 0 $s $s 0;
   &.s {
     width: 23%;
   }
@@ -21,7 +31,7 @@
     margin-top: 8px;
     font-size: $captionSize;
     &:before {
-      content: url('./Icons/Alerts/Info.svg');
+      content: url('./Icons/Status/Alerts/Info.svg');
       margin-right: 4px;
     }
   }
@@ -123,7 +133,7 @@
       margin-bottom: 0;
     }
     svg {
-      fill: $purpleOne50
+      fill: $lightPurpleOne
     }
     .Toastify__toast--error {
       background-color: white;
@@ -900,5 +910,25 @@
 .evidence-modal {
   .support-button {
     display: none;
+  }
+}
+
+$nodeWidth: 150px;
+$predWidth: 220px;
+.path {
+  &.three {
+    grid-template-columns: $nodeWidth $predWidth $nodeWidth;
+  }
+  &.five {
+    grid-template-columns: $nodeWidth repeat(2, $predWidth $nodeWidth);
+  }
+  &.seven {
+    grid-template-columns: $nodeWidth repeat(3, $predWidth $nodeWidth);
+  }
+  &.nine {
+    grid-template-columns: $nodeWidth repeat(4, $predWidth $nodeWidth);
+  }
+  &.eleven {
+    grid-template-columns: $nodeWidth repeat(5, $predWidth $nodeWidth);
   }
 }

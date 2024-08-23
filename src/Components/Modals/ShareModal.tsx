@@ -1,7 +1,7 @@
 import {useRef, useEffect, useState, FC} from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
-import { currentRoot } from "../../Redux/rootSlice";
+import Button from "../Core/Button";
 import { currentQuery} from "../../Redux/querySlice";
 import { useSelector } from 'react-redux';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
@@ -17,7 +17,6 @@ interface ShareModalProps {
 
 const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, typeID = null, shareResultID = null}) => {
   let storedQuery = useSelector(currentQuery);
-  const root = useSelector(currentRoot);
   const sharedQueryLabel = (label) ? label : new URLSearchParams(window.location.search).get("l");
   const sharedQueryType = (typeID) ? typeID : new URLSearchParams(window.location.search).get("t");
   const sharedQueryItemID = new URLSearchParams(window.location.search).get("i");
@@ -52,7 +51,7 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
   const qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);
-  const qidURL = encodeURI(`${window.location.origin}/${root}/${qidPath}`);
+  const qidURL = encodeURI(`${window.location.origin}/${qidPath}`);
   
   useEffect(() => {
     if(window.location.pathname.includes("results") && !isResultsUrlSet.current && qidURL) {
@@ -85,7 +84,7 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
       }
       <div className={styles.copyContainer}>
         <p className={styles.url} data-testid='share-url-container'>{qidURL}</p>
-        <button onClick={() => {navigator.clipboard.writeText(qidURL)}}>Copy Link</button>
+        <Button handleClick={() => {navigator.clipboard.writeText(qidURL)}}>Copy Link</Button>
       </div>
     </Modal>
   );

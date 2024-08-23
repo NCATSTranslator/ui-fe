@@ -1,6 +1,6 @@
 import Modal from './Modal';
 import styles from './ResultFocusModal.module.scss';
-import Button from '../FormFields/Button';
+import Button from '../Core/Button';
 import { formatBiolinkNode, truncateStringIfTooLong } from '../../Utilities/utilities';
 
 const ResultFocusModal = ({isOpen, onAccept, onReject, sharedItem}) => {

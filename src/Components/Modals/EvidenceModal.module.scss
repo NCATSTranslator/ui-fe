@@ -5,10 +5,11 @@
     width: 1200px;
     height: 80%;
     overflow-y: hidden;
+    padding: $m $m 0;
   }
   .top {
     max-height: 100%;
-    overflow-y: hidden;
+    overflow: hidden;
     display: grid;
     grid-template-rows: auto auto auto 1fr;
   }
@@ -33,7 +34,7 @@
     .tableItems {
       display: flex;
       flex-direction: column;
-      overflow-y: scroll; 
+      overflow-y: auto; 
       scrollbar-width: thin;
       scrollbar-color: $midGray $lightGray;
       &::-webkit-scrollbar {
@@ -76,6 +77,11 @@
       }
       .source, .link {
         text-align: center;
+      }
+      .source {
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
     }
     &.distinctSources {
@@ -129,18 +135,31 @@
     margin-bottom: $m;
   }
 }
+.pathViewContainer {
+  background-color: $palePurple;
+  border-radius: $largeBorderRadius;
+  border: 1px solid $lightPurpleTwo;
+  margin: $s auto $l;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+}
 .pathView {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 5px;
-  justify-content: center;
+  max-width: calc(100% - $l);
   align-items: center;
-  margin: 10px 0 15px;
-  padding: 20px;
+  margin: 0 auto;
+  padding: $s;
   position: relative;
-  background-color: $lightGray;
-  span {
-    width: auto;
+  .pathContainer, .nameContainer, .targetContainer {
+    cursor: pointer;
+    &>span {
+      padding: 4px 8px 4px 4px;
+      min-height: 22px;
+      width: 136px;
+    }
   }
 }
 

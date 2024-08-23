@@ -89,12 +89,13 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
             onMouseDown={handleSelectClick} 
             >
             {
-              children.find((option) => option.props.value === selectedItem).props.children
+              children.find((option) => option.props.value === selectedItem).props.children.props.modifiedName
             }
           </div>
           <div className={styles.iconContainer}>
             <span className={`${styles.icon} ${iconClass}`} onMouseDown={handleSelectClick}></span>
           </div>
+          <div className={styles.borderVert}></div>
           {
             noanimate && 
             <div 
@@ -119,7 +120,6 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
                     data-testid={child.props.value}
                     >
                     {child.props.children}
-                    <div className={styles.border}></div>
                   </span>
                   );
                 })
@@ -142,7 +142,6 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
                     data-value={child.props.value}
                     >
                     {child.props.children}
-                    <div className={styles.border}></div>
                   </span>
                   );
                 })

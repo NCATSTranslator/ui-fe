@@ -2,67 +2,59 @@
 
 .resultsHeader {
   padding-top: $s;
+  margin-bottom: $s;
   @media screen and (min-width: $large) {
     grid-column: 2/3;
   }
   .top {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: -60px;
-  }
-  .bottom {
     display: flex;
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
-  }
-  .right {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    margin-top: $s;
   }
   .heading {
-    font-size: 26px;
-    line-height: 1.25;
+    color: $purpleOne;
+    margin-bottom: 0;
   }
-}
-
-.shareButton {
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  position: relative;
-  margin: 0 0 0 20px;
-  svg {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin-right: 0;
-    path {
-      fill: $white;
-    }
+  .resultsCount {
+    margin: 0;
+  }
+  .filterButton {
+    font-size: 12px;
+    padding: 4px 8px;
+    margin: 0 $s 0 0;
   }
 }
 
 .activeFilters {
-  margin: 0 0 $s;
+  margin: $s 0 0;
+  display: flex;
+  align-items: center;
   .filterTag {
     display: inline-flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0 $s $s 0;
-    padding: 7px 4px 7px 12px;
-    font-size: 14px;
+    margin: 0 $s 0 0;
+    padding: 8px 4px 8px 12px;
+    font-size: 12px;
     line-height: 1;
     box-shadow: $dropShadow;
     transition: $defaultBoxShadowAnim;
     border-radius: $defaultBorderRadius;
     &.negated {
-      background-color: $red50;
+      color: $red;
+      span {
+        color: $red;
+      }
+    }
+    .excludeIcon {
+      margin: 0 4px 0 0;
+      width: $m;
+      height: $m;
+      path {
+        fill: $red;
+      }
     }
     span {
       font-weight: 700;
@@ -72,7 +64,10 @@
       display: flex;
       justify-content: center;
       align-items: center;
-
+      margin-left: 4px;
+      svg path {
+        stroke: $midGray;
+      }
       &:hover {
         cursor: pointer;
       }
