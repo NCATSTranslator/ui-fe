@@ -31,10 +31,22 @@
       background-color: $white;
       color: $purpleOne;
       font-weight: 700;
-      &::-webkit-input-placeholder, &::-ms-input-placeholder &::placeholder, &::-moz-placeholder {
-        color: $purpleOne;
-        font-weight: 700;
-      }
+    }
+    input::-webkit-input-placeholder {
+      color: $purpleOne;
+      font-weight: 700;
+    }
+    input::-ms-input-placeholder{
+      color: $purpleOne;
+      font-weight: 700;
+    }
+    input::placeholder {
+      color: $purpleOne;
+      font-weight: 700;
+    }
+    input::-moz-placeholder {
+      color: $purpleOne;
+      font-weight: 700;
     }
     .submitButton {
       background-color: $lightGray;

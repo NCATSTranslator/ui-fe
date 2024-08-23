@@ -34,6 +34,8 @@ const Header: FC<HeaderProps> = ({children}) => {
   const openFeedbackModal = true;
   const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
   const loginURL = getFormattedLoginURL(location);
+  const currentPage = location.pathname;
+  console.log(currentPage);
 
   return (
     <header className={styles.header}>
@@ -48,19 +50,19 @@ const Header: FC<HeaderProps> = ({children}) => {
             {
               !!user &&
               <>
-                <Link to={`/workspace`} className={styles.workspaceLink}><Workspace/><span className={styles.linkSpan}>Workspace</span></Link>
-                <Link to={`/history`}><History/><span className={styles.linkSpan}>Search History</span></Link>
+                <Link to={`/workspace`} className={`${currentPage.includes("workspace") && styles.active} ${styles.workspaceLink}`}><Workspace/><span className={styles.linkSpan}>Workspace</span></Link>
+                <Link to={`/history`} className={`${currentPage.includes("history") && styles.active}`}><History/><span className={styles.linkSpan}>Search History</span></Link>
               </>
             }
             <Link to={`${getGeneratedSendFeedbackLink(openFeedbackModal)}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
-            <Link to={`/help`} className={styles.helpLink} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
+            <Link to={`/help`}  className={`${currentPage.includes("help") && styles.active} ${styles.helpLink}`} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
             {
               !user 
               ? 
                 <a className={styles.login} href={!!loginURL ? loginURL : ''}>Log In</a>
               : 
                 <>
-                  <Link to={`/preferences`} className={styles.userIcon}>
+                  <Link to={`/preferences`} className={`${currentPage.includes("preferences") && styles.active} ${styles.userIcon}`}>
                     <Cog/>
                     {
                       user?.name && !!width &&
@@ -73,7 +75,7 @@ const Header: FC<HeaderProps> = ({children}) => {
                       <input type="hidden" name="client_id" value={clientID} />
                       <input type="hidden" name="show_prompt" value="false" />
                       <input type="hidden" name="post_logout_redirect_uri" value={postLogoutRedirectUri}/> 
-                      <button type="submit" value="submit" className={styles.login}>Log Out</button>
+                      <button type="submit" value="submit" className={`${styles.logout} ${styles.login}`}>Log Out</button>
                     </form>
                   }
                 </>

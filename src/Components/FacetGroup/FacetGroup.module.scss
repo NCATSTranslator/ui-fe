@@ -82,7 +82,7 @@
           &+span {
             background-color: $white;
             svg path {
-              fill: $red !important;
+              fill: $red;
             }
           }
         }
@@ -94,12 +94,12 @@
           &+span {
             background-color: $white;
             svg path {
-              fill: $green !important;
+              fill: $green;
             }
             &:hover {
               background-color: $white;
               svg path {
-                fill: $green !important;
+                fill: $green;
               }
             }
           }
@@ -110,6 +110,13 @@
       svg {
         path {
           fill: $white !important;
+        }
+      }
+      &:hover {
+        svg {
+          path {
+            fill: $white !important;
+          }
         }
       }
     }
@@ -223,7 +230,7 @@
     }
     &.role {
       max-height: 250px;
-      overflow-y: scroll;
+      overflow-y: auto;
     }
   }
   .extLinkIcon {
