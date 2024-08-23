@@ -101,7 +101,7 @@ const UserPreferences = () => {
                     })
                   }
                 </div>
-                <Button className={styles.submit}>Save</Button>
+                <Button className={styles.submit} type='submit'>Save</Button>
               </form>
             </>
           :

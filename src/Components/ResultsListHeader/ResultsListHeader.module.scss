@@ -31,11 +31,12 @@
   margin: $s 0 0;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   .filterTag {
     display: inline-flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0 $s 0 0;
+    margin: 0 $s $xs 0;
     padding: 8px 4px 8px 12px;
     font-size: 12px;
     line-height: 1;

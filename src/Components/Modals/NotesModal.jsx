@@ -92,8 +92,8 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
         onClearEditorComplete={handleEditorCleared}
       />
       <div className={styles.bottomButtons}>
-        <Button onClick={handleSave} className={styles.saveButton} >Save Note</Button>
-        <Button onClick={() => setConfirmClearNote(true)} className={styles.clearButton} >Clear Note</Button>
+        <Button handleClick={handleSave} className={styles.saveButton} >Save Note</Button>
+        <Button handleClick={() => setConfirmClearNote(true)} className={styles.clearButton} >Clear Note</Button>
       </div>
     </Modal>
   );

@@ -263,7 +263,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   // Event handler for form submission
   const handleSubmission = (item) => {
     if(!item)
-      validateSubmission(queryItem.node);
+      validateSubmission(queryItem);
     else  
       validateSubmission(item);
   }
@@ -309,7 +309,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               <>
                 <div className={styles.resultsHeader}>
                   <div className={styles.showingResultsContainer}>
-                      <h6 className={styles.subHeading}>{queryItem.type.label} 
+                      <h6 className={styles.subHeading}>{queryItem.type.label.replaceAll("a disease?", "").replaceAll("a chemical?", "").replaceAll("a gene?", "")}
                         {(queryItem?.node?.id && 
                           generateEntityLink(queryItem.node.id, styles.searchedTerm, ()=>queryItem.node.label, false)) 
                           ?
