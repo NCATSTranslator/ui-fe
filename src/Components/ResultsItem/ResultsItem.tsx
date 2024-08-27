@@ -76,6 +76,7 @@ interface ResultsItemProps {
   zoomKeyDown: boolean;
   isInUserSave?: boolean;
   isEven: boolean;
+  resultsComplete: boolean;
 }
 
 const ResultsItem: FC<ResultsItemProps> = ({
@@ -107,7 +108,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
     pathFilterState,
     zoomKeyDown,
     isInUserSave = false,
-    isEven = false
+    isEven = false,
+    resultsComplete = false
   }) => {
   const user = useSelector(currentUser);
 
@@ -152,8 +154,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const tagsRef = useRef<HTMLDivElement>(null);
   const [tagsHeight, setTagsHeight] = useState<number>(0);
   const minTagsHeight = 45;
-
-  const numRoles = item.tags.filter(tag => tag.includes("role")).length;
 
   useTurnstileEffect(
     () => startExpanded,
@@ -421,7 +421,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       </div>
       <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
         <span className={styles.score}>
-          <span className={styles.scoreNum}>{item.score === null ? '0.00' : displayScore(item.score.main) }</span>
+          <span className={styles.scoreNum}>{resultsComplete ? item.score === null ? '0.00' : displayScore(item.score.main) : "Processing..." }</span>
         </span>
       </div>
       {/* <CSVLink
@@ -458,17 +458,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
                     const activeClass = (activeFilters.some((filter)=> filter.id === fid && filter.value === tag.name))
                       ? styles.active
                       : styles.inactive;
-
-                    if(numRoles > 4 && i === 4) {
-                      const moreCount = numRoles - 4;
-                      return (
-                        <>
-                          <button key={fid} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(fid, tag)}>{tag.name} ({tag.count})</button>
-                          <span className={styles.hasMore}>(+{moreCount} more)</span>
-                        </>
-                      );
-                    }
-
                     return(
                       <button key={fid} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(fid, tag)}>{tag.name} ({tag.count})</button>
                     )

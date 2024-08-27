@@ -8,7 +8,7 @@ import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import AutoHeight from "../AutoHeight/AutoHeight";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { incrementHistory } from "../../Redux/historySlice";
-import { currentConfig } from "../../Redux/rootSlice";
+import { currentConfig, currentUser } from "../../Redux/rootSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
 import { currentQueryTimestamp, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
@@ -31,6 +31,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
   const dispatch = useDispatch();
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
+  const user = useSelector(currentUser);
   const queryTimestamp = useSelector(currentQueryTimestamp);
   const nameResolverEndpoint = (config?.name_resolver) ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
   loading = (loading) ? true : false;
@@ -189,9 +190,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
         newPrevItems.push(newQueryItem);
         prevQueryItems.current = newPrevItems;
 
-        if(selectedNode.id !== '' && selectedNode.label !== '') {
-          handleSubmission(newQueryItem);
-        }
+        // automatically submits when item is clicked in autocomplete
+        // if(selectedNode.id !== '' && selectedNode.label !== '') {
+        //   handleSubmission(newQueryItem);
+        // }
         return newQueryItem;
       }
     )
@@ -260,7 +262,10 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
 
   // Event handler for form submission
   const handleSubmission = (item) => {
-    validateSubmission(item);
+    if(!item)
+      validateSubmission(queryItem);
+    else  
+      validateSubmission(item);
   }
 
   useEffect(() => {
@@ -304,7 +309,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               <>
                 <div className={styles.resultsHeader}>
                   <div className={styles.showingResultsContainer}>
-                      <h6 className={styles.subHeading}>{queryItem.type.label} 
+                      <h6 className={styles.subHeading}>{queryItem.type.label.replaceAll("a disease?", "").replaceAll("a chemical?", "").replaceAll("a gene?", "")}
                         {(queryItem?.node?.id && 
                           generateEntityLink(queryItem.node.id, styles.searchedTerm, ()=>queryItem.node.label, false)) 
                           ?
@@ -329,7 +334,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
               :
               <>
                 <h3 className={styles.h3}>Translator finds associations between drugs, genes, and diseases</h3>
-                <h6 className={styles.h6}>Select a question, then search for a term.</h6>
+                <h6 className={styles.h6}>Select a question and enter a search term to get started</h6>
                 {
                   isError &&
                   <p className={styles.error}>{errorText}</p>
@@ -345,16 +350,11 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       noanimate
                       >
                         {
-                          queryTypes.map(type => {
+                          queryTypes.map((type, i) => {
                             return(
                               <option value={type.id} key={type.id}>
-                                <span>
+                                <span modifiedName={type.label.replaceAll("a disease?", "...").replaceAll("a chemical?", "...").replaceAll("a gene?", "...")}>
                                   { type.label } 
-                                  { 
-                                    (type.id !== queryItem.type.id) 
-                                      ? <span className={styles.gray}> (a {type.searchTypeString})</span>
-                                      : <span>...</span>
-                                  }
                                 </span>
                               </option>
                             )
@@ -367,9 +367,12 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                       handleQueryTypeChange={handleQueryTypeChange}
                       value={inputText}
                       queryType={queryItem.type}
+                      queryItem={queryItem}
                       autocompleteItems={autocompleteItems}
                       autocompleteLoading={loadingAutocomplete}
                       handleItemClick={handleItemSelection}
+                      disabled={user === null ? true : false}
+                      placeholderText={user === null ? "Log In to Enter a Search Term" : false}
                     />
                     { 
                       <img src={loadingIcon} className={`${styles.loadingIcon} ${isLoading ? styles.active : ''} loadingIcon`} alt="loading icon"/>

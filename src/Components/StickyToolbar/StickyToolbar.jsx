@@ -1,64 +1,33 @@
-import { useEffect, useState } from "react";
-import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
-import Tooltip from "../Tooltip/Tooltip";
+import { useState } from "react";
 import styles from './StickyToolbar.module.scss';
-import ShareIcon from '../../Icons/Buttons/Link.svg?react';
-import Subtract from '../../Icons/Buttons/Subtract/Subtract.svg?react';
-import Add from '../../Icons/Buttons/Add/Add.svg?react';
+import ResultsListLoadingBar from "../ResultsListLoadingBar/ResultsListLoadingBar";
 
-const StickyToolbar = ({ loadingButtonData, setShareModalFunction }) => {
+const StickyToolbar = ({ loadingButtonData, isError, returnedARAs }) => {
 
-  const resultsCompleteCollapseTime = 4000;
-  const containedDivsRevealTime = 250;
-  const [isExpanded, setIsExpanded] = useState(true);
-  const expandedClassName = isExpanded ? styles.expanded : styles.collapsed;
-  const [containedDivsClass, setContainedDivsClass] = useState(styles.showText);
-
-  useEffect(() => {
-    if(isExpanded) {
-      const collapseTimeout = setTimeout(() => {
-        setContainedDivsClass(styles.showText);
-      }, containedDivsRevealTime);
-      return () => clearTimeout(collapseTimeout);
-    } else {
-      setContainedDivsClass(styles.hideText);
-    }
-  }, [isExpanded]);
-
-  useEffect(() => {
-    if(!loadingButtonData.hasFreshResults &&
-       !loadingButtonData.isFetchingARAStatus &&
-       !loadingButtonData.isFetchingResults) {
-      const collapseTimeout = setTimeout(() => {
-        setIsExpanded(false);
-      }, resultsCompleteCollapseTime);
-      return () => clearTimeout(collapseTimeout);
-    }
-  }, [loadingButtonData.hasFreshResults, loadingButtonData.isFetchingARAStatus, loadingButtonData.isFetchingResults]);
+  const [isActive, setIsActive] = useState(true);
+  const activeClassName = isActive ? styles.active : styles.inactive;
 
   return(
-    <div className={`${styles.sticky} ${expandedClassName} ${containedDivsClass}`}>
-      <button 
-        className={styles.expandButton}
-        onClick={()=>{setIsExpanded(prev=>!prev)}} 
-        >
-        {isExpanded ? <Subtract/> : <Add/>}
-      </button>
+    <div className={`${styles.sticky} ${activeClassName}`}>
       <div className={styles.container}>
-        <ResultsListLoadingButton
-          data={loadingButtonData}
-        />
-        <button
-          className={styles.shareButton}
-          onClick={()=>{setShareModalFunction(true)}}
-          data-tooltip-id="share-button-sticky"
-          aria-describedby="share-button-sticky"
-          >
-            <ShareIcon/>
-            <Tooltip id={`share-button-sticky`}>
-              <span className={styles.tooltip}>Generate a sharable link for this set of results.</span>
-            </Tooltip>
-        </button>
+        {
+          !!returnedARAs?.aras &&
+          <ResultsListLoadingBar
+            data={{
+              handleResultsRefresh: loadingButtonData.handleResultsRefresh,
+              isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
+              isFetchingResults: loadingButtonData.isFetchingResults,
+              showDisclaimer: loadingButtonData.showDisclaimer,
+              containerClassName: loadingButtonData.containerClassName,
+              buttonClassName: loadingButtonData.buttonClassName,
+              hasFreshResults: loadingButtonData.hasFreshResults,
+              currentInterval: returnedARAs.aras.length,
+              status: returnedARAs.status, 
+              isError: isError,
+              setIsActive: setIsActive
+            }}
+          />
+        }
       </div>
     </div>
   );

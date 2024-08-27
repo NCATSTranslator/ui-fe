@@ -135,7 +135,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer}`}>
       {selectedItem.name &&
         <div className={styles.top}>
-          <h5 className={styles.title}>Showing Evidence for:</h5>
+          <h5 className={styles.title}>Evidence for:</h5>
           {
             formattedEdge &&
             <h5 className={styles.subtitle}>{capitalizeAllWords(formattedEdge)}</h5>
@@ -145,24 +145,63 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
           </Tooltip>
           {
             path &&
-            <div className={`${styles.pathView} path ${numberToWords(pathLength)}`}>
-            {/* <div className={styles.pathView} style={{'gridTemplateColumns': `repeat(${pathLength}, minmax(0, 300px))`}}> */}
-              {
-                path.path.subgraph.map((pathItem, i) => {
-                  let key = `${i}`;
-                  let isSelected = false;
-                  let pathItemHasSupport = pathItem.inferred;
-                  if(pathItem.category === "predicate" && pathItem.predicates.length > 1) {
-                    let newPathItem = cloneDeep(pathItem);
-                    newPathItem.predicates = [newPathItem.predicates[0]];
-                    newPathItem.predicate = newPathItem.predicates[0].predicate;
-                    isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, newPathItem));
-                    return(
-                      <div className={`groupedPreds ${styles.groupedPreds} ${(pathItem.predicates.length === 2) ? styles.hasTwo :''}`}>
+            <div className={styles.pathViewContainer}>
+              <div className={`${styles.pathView} scrollable-support path ${numberToWords(pathLength)}`}>
+                {
+                  path.path.subgraph.map((pathItem, i) => {
+                    let key = `${i}`;
+                    let isSelected = false;
+                    let pathItemHasSupport = pathItem.inferred;
+                    if(pathItem.category === "predicate" && pathItem.predicates.length > 1) {
+                      let newPathItem = cloneDeep(pathItem);
+                      newPathItem.predicates = [newPathItem.predicates[0]];
+                      newPathItem.predicate = newPathItem.predicates[0].predicate;
+                      isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, newPathItem));
+                      return(
+                        <div className={`groupedPreds ${styles.groupedPreds} ${(pathItem.predicates.length === 2) ? styles.hasTwo :''}`}>
+                          <PathObject
+                            pathObject={newPathItem}
+                            id={pathItem.id}
+                            key={pathItem.id}
+                            handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
+                            handleEdgeClick={(edge)=>handleEdgeClick(edge)}
+                            handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
+                            activeStringFilters={[]}
+                            selected={isSelected}
+                            inModal
+                            hasSupport={pathItemHasSupport}
+                            className={styles.pathContainer}
+                          />
+                          {
+                            pathItem.compressedEdges.map((edge, j) => {
+                              isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, edge));
+                              key = `${edge.id}`;
+                              return (
+                                <PathObject
+                                  pathObject={edge}
+                                  id={key}
+                                  key={key}
+                                  handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
+                                  handleEdgeClick={(edge)=>handleEdgeClick(edge)}
+                                  handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
+                                  activeStringFilters={[]}
+                                  selected={isSelected}
+                                  inModal
+                                  hasSupport={pathItemHasSupport}
+                                  className={styles.pathContainer}
+                                />
+                              )
+                            })
+                          }
+                        </div>
+                      )
+                    } else {
+                      isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, pathItem));
+                      return (
                         <PathObject
-                          pathObject={newPathItem}
-                          id={pathItem.id}
-                          key={pathItem.id}
+                          pathObject={pathItem}
+                          id={key}
+                          key={key}
                           handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
                           handleEdgeClick={(edge)=>handleEdgeClick(edge)}
                           handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
@@ -170,50 +209,12 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                           selected={isSelected}
                           inModal
                           hasSupport={pathItemHasSupport}
-                          className={styles.pathContainer}
                         />
-                        {
-                          pathItem.compressedEdges.map((edge, j) => {
-                            isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, edge));
-                            key = `${edge.id}`;
-                            return (
-                              <PathObject
-                                pathObject={edge}
-                                id={key}
-                                key={key}
-                                handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
-                                handleEdgeClick={(edge)=>handleEdgeClick(edge)}
-                                handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
-                                activeEntityFilters={[]}
-                                selected={isSelected}
-                                inModal
-                                hasSupport={pathItemHasSupport}
-                                className={styles.pathContainer}
-                              />
-                            )
-                          })
-                        }
-                      </div>
-                    )
-                  } else {
-                    isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, pathItem));
-                    return (
-                      <PathObject
-                        pathObject={pathItem}
-                        id={key}
-                        key={key}
-                        handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
-                        handleEdgeClick={(edge)=>handleEdgeClick(edge)}
-                        handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
-                        activeEntityFilters={[]}
-                        selected={isSelected}
-                        inModal
-                        hasSupport={pathItemHasSupport}
-                      />
-                    )
-                  }
-                })
-              }
+                      )
+                    }
+                  })
+                }
+              </div>
             </div>
           }
           <Tabs isOpen={isOpen} className={styles.tabs}>

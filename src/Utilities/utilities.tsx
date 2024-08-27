@@ -482,19 +482,25 @@ export const numberToWords = (num: number): string => {
 }
 
 /**
- * Converts an integer into its corresponding alphabetical character.
+ * Converts an integer into its corresponding alphabetical character(s).
  * 
- * @param {number} num - The integer to convert (1 = a, 2 = b, ..., 26 = z).
- * @returns {string} - The corresponding alphabetical character.
- * 
- * @throws {Error} - Throws an error if the number is outside the range 1-26.
+ * @param {number} num - The integer to convert (1 = a, 2 = b, ..., 26 = z, 27 = aa, ...).
+ * @returns {string} - The corresponding alphabetical character(s).
  * 
  */
 export const intToChar = (num: number): string => {
-  if (num < 1 || num > 26) {
-      throw new Error("Number must be between 1 and 26");
+  if (num < 1 || num > 1000) {
+    console.warn("Number supplied to intToChar function out of range, must be between 1 & 1000. Number provided:", num);
+    return "--";
   }
-  return String.fromCharCode(96 + num);
+  
+  let result = '';
+  while (num > 0) {
+      num--;
+      result = String.fromCharCode(97 + (num % 26)) + result;
+      num = Math.floor(num / 26);
+  }
+  return result;
 }
 
 /**

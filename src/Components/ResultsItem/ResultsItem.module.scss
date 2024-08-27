@@ -2,7 +2,7 @@
 
 .result {
   display: grid;
-  grid-template-columns: 4fr 1fr 2fr 2fr .75fr;
+  grid-template-columns: 1fr 112px 110px 90px 90px 24px;
   padding: $m $s;
   column-gap: $s;
   @media screen and (min-width: $desktop) {
@@ -30,10 +30,10 @@
   }
   .tags {
     margin: $xs 0 0;
-    width: fit-content;
-    display: grid;
-    grid-template-columns: repeat(4, min-content);
-    gap: $xs;
+    width: 90%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     &.more {
       position: relative;
       padding-right: $xs;
@@ -67,7 +67,6 @@
     transition: $defaultAnim;
     opacity: 1 !important;
     white-space: nowrap;
-    width: 100%;
     &:hover {
       box-shadow: none;
       text-decoration: underline;
@@ -133,7 +132,6 @@
     .evidenceLink {
       font-size: $bodyTwoSize;
       cursor: default;
-      position: absolute;
       .viewAll {
         font-size: $bodyTwoSize;
         font-weight: 700;

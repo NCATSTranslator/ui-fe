@@ -3,6 +3,9 @@
 .facetGroup {
   padding: 15px 0;
   border-bottom: 1px solid $midGray;
+  &:last-of-type {
+    border-bottom: none;
+  }
   .underline {
     text-decoration: underline;
   }
@@ -17,6 +20,9 @@
     width: 100%;
     &:hover {
       box-shadow: none;
+    }
+    &>div {
+      min-width: 298px;
     }
     svg {
       transition: all .35s ease;
@@ -64,7 +70,7 @@
     border: 1px solid $midGray;
     border-radius: 8px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     transition: $defaultAnim;
     input {
       margin: 0;
@@ -79,7 +85,7 @@
           &+span {
             background-color: $white;
             svg path {
-              fill: $red !important;
+              fill: $red;
             }
           }
         }
@@ -91,12 +97,12 @@
           &+span {
             background-color: $white;
             svg path {
-              fill: $green !important;
+              fill: $green;
             }
             &:hover {
               background-color: $white;
               svg path {
-                fill: $green !important;
+                fill: $green;
               }
             }
           }
@@ -107,6 +113,13 @@
       svg {
         path {
           fill: $white !important;
+        }
+      }
+      &:hover {
+        svg {
+          path {
+            fill: $white !important;
+          }
         }
       }
     }
@@ -220,7 +233,7 @@
     }
     &.role {
       max-height: 250px;
-      overflow-y: scroll;
+      overflow-y: auto;
     }
   }
   .extLinkIcon {

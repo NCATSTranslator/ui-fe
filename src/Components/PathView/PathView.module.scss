@@ -3,7 +3,6 @@
 .pathView {
   padding: 0;
   position: relative;
-  z-index: 100;
   .tableHead, .tableItem {
     display: grid;
     gap: 5px;
@@ -218,8 +217,13 @@
     margin: $m 0 0 0;
     position: relative;
     left: -42px;
+    overflow: hidden visible !important;
     .formattedPath:last-of-type {
       margin-bottom: 0;
+    }
+    .supportGroupContainer {
+      overflow-x: auto;
+      outline: none;
     }
   }
 }

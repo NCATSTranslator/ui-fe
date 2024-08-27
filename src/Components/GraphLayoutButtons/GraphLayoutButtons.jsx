@@ -1,6 +1,7 @@
 import styles from './GraphLayoutButtons.module.scss';
 import { layoutList } from '../../Utilities/graphFunctions';
 import { capitalizeAllWords } from '../../Utilities/utilities';
+import Button from '../Core/Button';
 
 const GraphLayoutButtons = ({setCurrentLayout, currentLayout}) => {
 
@@ -11,13 +12,13 @@ const GraphLayoutButtons = ({setCurrentLayout, currentLayout}) => {
         Object.keys(layoutList).map((key) => {
           let name = layoutList[key].label;
           return(
-            <button 
+            <Button 
               className={`${styles.layoutButton} ${(currentLayout.name === layoutList[key].name)? styles.active : ''}`} 
-              onClick={()=>setCurrentLayout(layoutList[key])}
+              handleClick={()=>setCurrentLayout(layoutList[key])}
               key={key}
               >
               {capitalizeAllWords(name)}
-            </button>
+            </Button>
           )
         })
       }

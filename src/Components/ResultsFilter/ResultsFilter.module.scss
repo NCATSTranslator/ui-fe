@@ -1,20 +1,23 @@
 @import "../../Assets/Styles/variables";
 
 .resultsFilter {
-  padding: $s;
+  padding: $s $s 0;
   background-color: $lightGray;
   border-radius: $defaultBorderRadius;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
   box-shadow: $dropShadow;
   transition: $defaultAnim;
+  overflow: hidden;
+  position: relative;
+  left: -24px;
+  margin-right: -24px;
   .entitySearch {
     span {
       overflow: hidden;
     }
-    input {
-      transition: opacity 1s ease;
-    }
   }
-  .heading .span, .closeButton {
+   .closeButton, .clearAll, .bottom {
     transition: $defaultAnim;
   }
   .typeHeading {
@@ -23,10 +26,14 @@
   }
   &.expanded {
     width: calc(330px - $s*2);
+    .bottom {
+      opacity: 1;
+      pointer-events: all;
+    }
     .heading span {
       width: auto;
     }
-    .heading span, .bottom, .closeButton, .clearAll, .entitySearch input {
+    .heading span, .bottom, .closeButton, .clearAll, .entitySearch {
       opacity: 1;
       pointer-events: all;
     }
@@ -34,13 +41,21 @@
   &.collapsed {
     width: calc(56px - $s*2);
     .heading span {
-      width: 0;
+      // width: 0;
     }
-    .heading span, .bottom, .closeButton, .entitySearch input, .clearAll {
+    .bottom {
       opacity: 0;
       pointer-events: none;
-      width: 0;
+      // width: 0;
     }
+    .heading span, .bottom, .closeButton, .entitySearch, .clearAll {
+      opacity: 0;
+      pointer-events: none;
+      // width: 0;
+    }
+  }
+  .bottom {
+    position: relative;
   }
   .heading {
     font-size: 20px;
@@ -71,9 +86,6 @@
       display: flex;
       align-items: center;
     }
-  }
-  .bottom {
-    position: relative;
   }
   .clearAll {
     display: block;

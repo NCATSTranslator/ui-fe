@@ -17,6 +17,7 @@ import popper from 'cytoscape-popper';
 import 'cytoscape-navigator/cytoscape.js-navigator.css';
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
+import Button from '../Core/Button';
 
 const getInitialGraphLayoutFromPrefs = (prefs, layoutList) => {
   let graphLayoutPref = (prefs?.graph_layout?.pref_value) ? prefs.graph_layout.pref_value : "vertical";
@@ -263,6 +264,9 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
   
   return (
     <div>
+      <div className={styles.header}>
+        <p>Click on a node once to view only paths that include it or click it a second time to exclude it. Return to the Paths tab to view the filtered paths.</p>
+      </div>
       <div ref={graphViewRef}>
         <GraphLayoutButtons setCurrentLayout={setCurrentLayout} currentLayout={currentLayout} />
         <div className={styles.graphContainer} >
@@ -280,26 +284,28 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
                 </p>
               </div>
               <div className={styles.graphControls}>
-                <button 
-                  onClick={()=>handleZoomByInterval(cy, 0.15, true)}
+                <Button 
+                  handleClick={()=>handleZoomByInterval(cy, 0.15, true)}
                   className={`${styles.graphControlButton} ${styles.withIcon}`}
+                  iconOnly
                   >
                   <Plus />
-                </button>
-                <button 
-                  onClick={()=>handleZoomByInterval(cy, 0.15, false)}
+                </Button>
+                <Button 
+                  handleClick={()=>handleZoomByInterval(cy, 0.15, false)}
                   className={`${styles.graphControlButton} ${styles.withIcon}`}
+                  iconOnly
                   >
                   <Minus />
-                </button>
-                <button 
-                  onClick={()=>handleResetView(cy)}
+                </Button>
+                <Button 
+                  handleClick={()=>handleResetView(cy)}
                   className={styles.graphControlButton}
                   >
                   Reset View
-                </button>
-                <button 
-                  onClick={() => {
+                </Button>
+                <Button 
+                  handleClick={() => {
                     handleDeselectAllNodes(
                       cy, 
                       selectedNodes, 
@@ -311,7 +317,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
                   className={styles.graphControlButton}
                   >
                   Deselect All Nodes
-                </button>
+                </Button>
               </div>
             </div>
           </div>

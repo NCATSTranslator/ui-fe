@@ -116,6 +116,7 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
                 setShareModalOpen={setShareModalOpen}
                 setShareResultID={setShareResultID}
                 isInUserSave={true}
+                resultsComplete={true}
               />
             </div>
           )

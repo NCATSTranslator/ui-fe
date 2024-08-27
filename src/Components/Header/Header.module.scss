@@ -20,11 +20,13 @@
     .container {
       display: flex;
       justify-content: space-between;
-      padding: 8px 12px;
       max-width: $maxwidth;
       margin: 0 auto;
       h5,h1,.h1 {
         margin-bottom: 0;
+      }
+      .left {
+        padding: $s 12px;
       }
       .right {
         display: none;
@@ -45,15 +47,11 @@
           background-color: transparent;
           text-decoration: none;
           font-weight: 700;
-          margin-bottom: 0;
-          margin-right: 8px;
+          margin: 0;
           line-height: 1;
-          padding: 10px 8px;
+          padding: 21px 12px;
           box-shadow: none;
           transition: $defaultAnim;
-          @media screen and (min-width: 1125px) {
-            margin-right: 12px;
-          }
           .linkSpan {
             position: relative;
             font-size: 14px;
@@ -71,9 +69,9 @@
             height: 24px;
             width: 24px;
           }
-          &:hover {
+          &:hover, &.active {
             box-shadow: none;
-            background-color: $lightGray;
+            background-color: $palePurple;
             .linkSpan {
               color: $purpleOne;
             }
@@ -93,8 +91,6 @@
         }
         .helpLink {
           svg {
-            width: 27px;
-            height: 27px;
             fill: transparent;
             circle {
               stroke: $darkGray;
@@ -104,25 +100,38 @@
             }
           }
         }
+        .login, .logout {
+          margin: 0 12px;
+        }
         .login {
           font-weight: 700;
           padding: 10px 12px;
           border-radius: $defaultBorderRadius;
           transition: $defaultAnim;
+          background-color: $purpleOne;
+          color: $white;
           &:hover {
-            background-color: $lightGray;
-            color: $purpleOne;
+            background-color: $purpleOne;
+            color: $white;
           }
         }
         .logout {
           font-size: 16px;
+          background-color: $lightGray;
+          box-shadow: none;
+          color: $black;
+          &:hover {
+            background-color: $lightGray;
+            color: $black;
+            box-shadow: none;
+          }
         }
       }
     }
   }
   .userName {
     &.hide {
-      display: none;
+      // display: none;
     }
   }
   .userIcon {

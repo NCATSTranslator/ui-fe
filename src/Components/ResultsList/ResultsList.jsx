@@ -7,7 +7,6 @@ import EvidenceModal from "../Modals/EvidenceModal";
 import Select from "../Core/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
 import Tooltip from '../Tooltip/Tooltip';
-import ResultsListLoadingButton from "../ResultsListLoadingButton/ResultsListLoadingButton";
 import ResultsListHeader from "../ResultsListHeader/ResultsListHeader";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
 import StickyToolbar from "../StickyToolbar/StickyToolbar";
@@ -1010,9 +1009,10 @@ const ResultsList = ({loading}) => {
                           <Alert/>
                           <ChevUp className={styles.chev}/>
                           <Tooltip id="score-tooltip">
-                            <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added.</span>
+                            <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
                           </Tooltip>
                         </div>
+                        <div></div>
                       </div>
                       {
                         isError &&
@@ -1059,6 +1059,7 @@ const ResultsList = ({loading}) => {
                               setExpandSharedResult={setExpandSharedResult}
                               setShareModalOpen={setShareModalOpen}
                               setShareResultID={setShareResultID}
+                              resultsComplete={(!isError && freshRawResults === null && !isFetchingARAStatus.current && !isFetchingResults.current)}
                             />
                           )
                         })
@@ -1104,20 +1105,6 @@ const ResultsList = ({loading}) => {
                       />
                     </div>
                   }
-                  <ResultsListLoadingButton
-                    data={{
-                      handleResultsRefresh: () =>
-                      {
-                        handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
-                      },
-                      isFetchingARAStatus: isFetchingARAStatus.current,
-                      isFetchingResults: isFetchingResults.current,
-                      showDisclaimer: true,
-                      containerClassName: styles.bottomLoadingButtonContainer,
-                      buttonClassName: styles.loadingButton,
-                      hasFreshResults: (freshRawResults !== null)
-                    }}
-                  />
                 </div>
               </div>
             </>
@@ -1133,12 +1120,14 @@ const ResultsList = ({loading}) => {
                 },
               isFetchingARAStatus: isFetchingARAStatus.current,
               isFetchingResults: isFetchingResults.current,
-              showDisclaimer: false,
+              showDisclaimer: true,
               containerClassName: styles.shareLoadingButtonContainer,
               buttonClassName: styles.loadingButton,
               hasFreshResults: (freshRawResults !== null),
               isSticky: true
             }}
+            isError={isError}
+            returnedARAs={returnedARAs.current}
             setShareModalFunction={setShareModalOpen}
           />
         }

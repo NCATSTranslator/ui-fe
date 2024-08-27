@@ -42,10 +42,13 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
 
   return (
     <div className={`${styles.examplesContainer} ${className} ${isExpanded && styles.expanded}`}>
-      <Button handleClick={handleToggle} className={styles.expandButton} iconOnly><ChevDown/></Button>
+      {
+        (examples?.length > 0 && examples[0].type === "drug") &&
+        <Button handleClick={handleToggle} className={styles.expandButton} iconOnly><ChevDown/></Button>
+      }
       <div className="top">
         <p className={`${styles.subTwo} sub-two`}>Examples</p>
-        <p className={`caption`}>Choose a different question for more options.</p>
+        <p className={`caption`}>Choose a different question for more examples. Run a new search with these terms for the most up-to-date results.</p>
       </div>
       <div className={styles.examples}>
         {examples && Array.isArray(examples) && (

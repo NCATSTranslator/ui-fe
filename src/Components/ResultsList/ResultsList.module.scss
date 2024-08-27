@@ -30,7 +30,7 @@
         padding: 12px $s;
         border-radius: 5px 5px 0 0;
         user-select: none;
-        grid-template-columns: 4fr 1fr 2fr 2fr .75fr;
+        grid-template-columns: 1fr 112px 110px 90px 90px 24px;
         column-gap: $s;
         @media screen and (min-width: $desktop) {
           grid-template-columns: 1fr 112px 110px 90px 90px 24px;
@@ -190,8 +190,7 @@
 }
 
 .loadingText {
-  max-width: 850px;
-  text-align: center;
+  max-width: 650px;
   margin-left: auto;
   margin-right: auto;
 }

@@ -1,6 +1,5 @@
 import { useState, FC, MouseEvent } from 'react';
 import styles from './Predicate.module.scss';
-import ResearchSingle from '../../Icons/Queries/Evidence.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import Robot from '../../Icons/DEP/robot-purple.png';
 import RobotSelected from '../../Icons/DEP/robot-darkpurple.png';
@@ -135,7 +134,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
             ? <ResearchMultiple />
             : ''
           }
-          <span data-tooltip-id={`${pathObject.predicate}${uid}`}>
+          <span data-tooltip-id={`${pathObject.predicate}${uid}`} className={styles.pathLabel}>
             <Highlighter
               highlightClassName="highlight"
               searchWords={activeEntityFilters}

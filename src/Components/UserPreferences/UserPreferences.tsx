@@ -72,7 +72,8 @@ const UserPreferences = () => {
                         });
                       }
                       const defaultVal = prefOptions?.find(pref => pref.value.toString() === prefValue.toString());
-                      if(prefOptions === null) {
+                      // temporarily hide some prefs
+                      if(prefOptions === null || pref === "path_show_count" || pref === "graph_visibility") {
                         return(<></>);
                       } else {
                         return(
@@ -100,7 +101,7 @@ const UserPreferences = () => {
                     })
                   }
                 </div>
-                <Button className={styles.submit}>Save</Button>
+                <Button className={styles.submit} type='submit'>Save</Button>
               </form>
             </>
           :

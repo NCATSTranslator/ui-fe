@@ -3,8 +3,8 @@
 .fadeText {
   position: relative;
   height: 30px;
-  min-width: 150px;
-  margin: 0 0 $s;
+  width: 100%;
+  margin: 0 0 0 $s;
   &.small {
     height: 18px;
     margin: 0;
@@ -21,7 +21,6 @@
     right: 0;
     bottom: 0;
     left: 0;
-    text-align: center;
     margin: 0;
     color: $purpleOne;
     font-size: 20px;

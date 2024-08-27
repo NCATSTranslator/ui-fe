@@ -30,7 +30,7 @@
     }
     svg {
       display: inline;
-      margin: 0 3px 0 0;
+      margin: 0 4px 0 0;
       min-width: 18px;
       circle:first-child {
         stroke: $white;
@@ -45,19 +45,15 @@
     }
   }
 }
-.nameContainer,.pathContainer {
-  margin-right: 4px;
-}
 .name,.pathContainer,.target {
   display: flex;
-  justify-content: center;
   align-items: center;
-  text-align: center;
 }
 .text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding: 0 4px;
 }
 .nameContainer {
   position: relative;
@@ -70,7 +66,7 @@
     background-color: $yellow;
   }
   svg {
-    margin-right: 5px;
+    margin-right: 0;
     path {
       fill: $black;
     }
@@ -82,11 +78,12 @@
   position: relative;
   cursor: pointer;
   min-width: 220px;
+  justify-content: center;
 }
 .pathContainer, .nameContainer, .targetContainer {
   cursor: pointer;
   &>span {
-    padding: 5px;
+    padding: 4px;
     min-height: 22px;
     width: 140px;
   }
@@ -123,7 +120,7 @@
   position: relative;
   box-shadow: none;
   svg {
-    margin-right: 8px;
+    margin-right: 0;
     path {
       fill: $white;
     }

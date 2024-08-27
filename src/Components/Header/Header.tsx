@@ -1,7 +1,5 @@
 import { FC, ReactNode } from 'react';
 import { Link, useLocation, Location } from 'react-router-dom';
-import Tooltip from '../Tooltip/Tooltip';
-import Button from '../Core/Button';
 import { currentConfig, currentUser } from "../../Redux/rootSlice";
 import { useSelector } from "react-redux";
 import { useWindowSize } from '../../Utilities/customHooks';
@@ -18,10 +16,8 @@ type HeaderProps = {
   children?: ReactNode;
 }
 
-const getFormattedLoginURL = (authURI: string, clientID: string, scope: string, redirectURI: string, location: Location): string => {
-  let url = `${authURI}?response_type=code&client_id=${encodeURIComponent(clientID)}`;
-  url += `&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectURI)}`;
-  url += `&state=${encodeURIComponent(getFullPathname(location))}`
+const getFormattedLoginURL = (location: Location): string => {
+  let url = `/login?path=${encodeURIComponent(getFullPathname(location))}`;
   return url;
 }
 
@@ -37,13 +33,8 @@ const Header: FC<HeaderProps> = ({children}) => {
   const logoutReady = (clientID && logoutURI) ? true : false;
   const openFeedbackModal = true;
   const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
-
-  const socialProviders = (config?.social_providers) ? config.social_providers: null;
-  const unaConfig = socialProviders ? socialProviders.una : null;
-  const loginURL = unaConfig 
-    ? getFormattedLoginURL(unaConfig.auth_uri, unaConfig.client_id, 
-      unaConfig.scope, unaConfig.redirect_uri, location)
-    : null;
+  const loginURL = getFormattedLoginURL(location);
+  const currentPage = location.pathname;
 
   return (
     <header className={styles.header}>
@@ -58,23 +49,20 @@ const Header: FC<HeaderProps> = ({children}) => {
             {
               !!user &&
               <>
-                <Link to={`/workspace`} className={styles.workspaceLink}><Workspace/><span className={styles.linkSpan}>Workspace</span></Link>
-                <Link to={`/history`}><History/><span className={styles.linkSpan}>Search History</span></Link>
+                <Link to={`/workspace`} className={`${currentPage.includes("workspace") && styles.active} ${styles.workspaceLink}`}><Workspace/><span className={styles.linkSpan}>Workspace</span></Link>
+                <Link to={`/history`} className={`${currentPage.includes("history") && styles.active}`}><History/><span className={styles.linkSpan}>Search History</span></Link>
               </>
             }
             <Link to={`${getGeneratedSendFeedbackLink(openFeedbackModal)}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
-            <Link to={`/help`} className={styles.helpLink} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
+            <Link to={`/help`}  className={`${currentPage.includes("help") && styles.active} ${styles.helpLink}`} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
             {
               !user 
               ? 
                 <a className={styles.login} href={!!loginURL ? loginURL : ''}>Log In</a>
               : 
                 <>
-                  <Link to={`/preferences`} data-tooltip-id={`prefs-tooltip`} aria-describedby={`prefs-tooltip`} className={styles.userIcon}>
+                  <Link to={`/preferences`} className={`${currentPage.includes("preferences") && styles.active} ${styles.userIcon}`}>
                     <Cog/>
-                    <Tooltip id={`prefs-tooltip`} place="bottom">
-                      <span className={styles.tooltip}>Click here to view and edit your user preferences.</span>
-                    </Tooltip>
                     {
                       user?.name && !!width &&
                       <span className={`${width <= collapseNameScreenWidth ? styles.hide : ''} ${styles.userName} ${styles.linkSpan}`}>Preferences</span>
@@ -86,7 +74,7 @@ const Header: FC<HeaderProps> = ({children}) => {
                       <input type="hidden" name="client_id" value={clientID} />
                       <input type="hidden" name="show_prompt" value="false" />
                       <input type="hidden" name="post_logout_redirect_uri" value={postLogoutRedirectUri}/> 
-                      <button type="submit" value="submit" className={styles.login}>Log Out</button>
+                      <button type="submit" value="submit" className={`${styles.logout} ${styles.login}`}>Log Out</button>
                     </form>
                   }
                 </>

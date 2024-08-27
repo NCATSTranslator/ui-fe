@@ -26,6 +26,39 @@
 .inputContainer {
   display: flex;
   align-items: center;
+  &.disabled {
+    input {
+      background-color: $white;
+      color: $purpleOne;
+      font-weight: 700;
+    }
+    input::-webkit-input-placeholder {
+      color: $purpleOne;
+      font-weight: 700;
+    }
+    input::-ms-input-placeholder{
+      color: $purpleOne;
+      font-weight: 700;
+    }
+    input::placeholder {
+      color: $purpleOne;
+      font-weight: 700;
+    }
+    input::-moz-placeholder {
+      color: $purpleOne;
+      font-weight: 700;
+      opacity: 1;
+    }
+    .submitButton {
+      background-color: $lightGray;
+      border-color: $lightGray;
+      cursor: default;
+      pointer-events: none;
+      svg path {
+        stroke: $midGray;
+      }
+    }
+  }
   .icon {
     width: 24px;
     height: 24px;    

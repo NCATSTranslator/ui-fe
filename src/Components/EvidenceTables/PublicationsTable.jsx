@@ -5,7 +5,7 @@ import styles from './PublicationsTable.module.scss';
 import Select from '../Core/Select';
 import ReactPaginate from "react-paginate";
 import { handleEvidenceSort, updatePubdate, updateSnippet, updateJournal, 
-  updateTitle, getKnowledgeLevelString, generatePubmedURL } from "../../Utilities/evidenceModalFunctions";
+  updateTitle, generatePubmedURL } from "../../Utilities/evidenceModalFunctions";
 import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from '../../Utilities/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
@@ -123,25 +123,35 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
   const fetchPubmedData = async (processedEvidenceIDs, pubmedEvidenceLength, insertAndSortEvidence, prefs) => {
     const metadata = processedEvidenceIDs.map(async (ids) => {
       const response = await fetch(`https://docmetadata.transltr.io/publications?pubids=${ids}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`)
-      .then(response => response.json())
-      .then(data => {
-        // early return in case the modal is closed before the fetch is complete
-        if(!isFetchingPubmedData.current || !isOpen) 
-          return;
-
-        evidenceToUpdate.current = {...evidenceToUpdate.current, ...data.results } ;
-        amountOfIDsProcessed.current = amountOfIDsProcessed.current + Object.keys(data.results).length;
-        if(amountOfIDsProcessed.current >= pubmedEvidenceLength) {
-          console.log('metadata fetches complete, inserting additional evidence information')
-          insertAndSortEvidence(prefs, insertAdditionalPubmedData);
+        .then(response => response.json())
+        .then(data => {
+          // Early return in case the modal is closed before the fetch is complete
+          if (!isFetchingPubmedData.current || !isOpen) 
+            return;
+  
+          evidenceToUpdate.current = { ...evidenceToUpdate.current, ...data.results };
+          amountOfIDsProcessed.current = amountOfIDsProcessed.current + Object.keys(data.results).length;
+  
+          if (amountOfIDsProcessed.current >= pubmedEvidenceLength) {
+            console.log('metadata fetches complete, inserting additional evidence information');
+            insertAndSortEvidence(prefs, insertAdditionalPubmedData);
+            fetchedPubmedData.current = true;
+            isFetchingPubmedData.current = false;
+          }
+        })
+        .catch(error => {
+          console.warn('Error fetching PubMed data:', error);
           fetchedPubmedData.current = true;
           isFetchingPubmedData.current = false;
-        }
-      });
+          setIsLoading(false);
+        });
+  
       return response;
-    })
+    });
+  
     return Promise.all(metadata);
-  }
+  };
+  
 
   // eslint-disable-next-line
   const pubMedMetadataQuery = useQuery({
@@ -325,8 +335,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
                 ? <p className={styles.noPubs}>No publications available.</p>
                 :
                   displayedPubmedEvidence.map((pub)=> {
-                    const knowledgeLevel = (pub?.knowledgeLevel) ? pub.knowledgeLevel : item?.evidence?.distinctSources[0]?.knowledgeLevel;
-                    let knowledgeLevelString = getKnowledgeLevelString(knowledgeLevel);
                     return (
                       <tr className={`table-item`} key={pub.id}>
                         <td className={`table-cell ${styles.tableCell} ${styles.title} title`} >
@@ -334,11 +342,11 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
                           {!pub.title && pub.url && <a href={pub.url} target="_blank" rel="noreferrer">No Title Available</a> }
                         </td>
                         <td className={`table-cell ${styles.tableCell} ${styles.pubdate} pubdate`}>
-                          {pub.pubdate && (pub.pubdate === 0 ) ? '' : pub.pubdate }
+                          {!!pub.pubdate ? pub.pubdate : 'N/A' }
                         </td>
                         <td className={`table-cell ${styles.tableCell} ${styles.source} source`}>
                           <span>
-                            {pub.journal && pub.journal }
+                            {!!pub.journal ? pub.journal : "N/A" }
                           </span>
                         </td>
                         <td className={`table-cell ${styles.tableCell} ${styles.snippet}`}>

@@ -15,14 +15,16 @@ const LoadingBar: FC<LoadingBarProps> = ({useIcon, disclaimerText, className, re
 
   return (
     <div className={`${styles.loadingBar} ${className} ${(reducedPadding) ? styles.reducedPadding : ''}`}> 
-      { useIcon && 
-        <img src={loadingIcon} alt="loading icon" className={styles.loadingIcon}/>
-      }
-      {
-        loadingText 
-        ? <span className={styles.heading}>{loadingText}</span>
-        : <TextCrossfade />
-      }
+      <div className={styles.top}>
+        { useIcon && 
+          <img src={loadingIcon} alt="loading icon" className={styles.loadingIcon}/>
+        }
+        {
+          loadingText 
+          ? <span className={styles.heading}>{loadingText}</span>
+          : <TextCrossfade />
+        }
+      </div>
       {disclaimerText && disclaimerText}
     </div>
   )
