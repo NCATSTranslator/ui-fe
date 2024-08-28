@@ -84,7 +84,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
           {
             groupHasTags(resultTags) &&
             <>
-              <h5 className={styles.typeHeading}> Result Filters </h5>
+              <h5 className={styles.typeHeading}> Results </h5>
               {
                 Object.keys(resultTags).map((tagFamily) => {
                   return (
@@ -106,7 +106,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
           {
             groupHasTags(pathTags) &&
             <>
-              <h5 className={styles.typeHeading}> Path Filters </h5>
+              <h5 className={styles.typeHeading}> Paths </h5>
               {
                 Object.keys(pathTags).map((tagFamily) => {
                   return (

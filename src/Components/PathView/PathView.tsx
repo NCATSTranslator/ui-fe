@@ -17,7 +17,7 @@ import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 
-const checkInferredPathForSelections = (path: PathObjectContainer, selPath: PathObjectContainer) => {
+const checkIndirectPathForSelections = (path: PathObjectContainer, selPath: PathObjectContainer) => {
   for(const [i, item] of path.path.subgraph.entries()) {
     if(i % 2 === 0)
       continue;
@@ -41,7 +41,7 @@ const getPathsWithSelectionsSet = (paths: PathObjectContainer[], selectedPaths: 
           path.highlighted = true;
         }
         if(path.path.inferred) {
-          checkInferredPathForSelections(path, selPath);
+          checkIndirectPathForSelections(path, selPath);
         }
       }
     }
@@ -129,7 +129,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
     setNumberToShow(newAmount);
   }
 
-  const sortArrayByInferred = (array: any[]) => {
+  const sortArrayByIndirect = (array: any[]) => {
     return array.sort((a, b) => {
         let inferredA = a.path.inferred ? 1 : 0;
         let inferredB = b.path.inferred ? 1 : 0;
@@ -158,9 +158,9 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
         <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
           <div className={styles.paths}>
             {
-              sortArrayByInferred(formattedPaths).slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
-                const displayInferredLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
-                  if(displayInferredLabel)
+              sortArrayByIndirect(formattedPaths).slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
+                const displayIndirectLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
+                  if(displayIndirectLabel)
                     inferredLabelDisplayed = true;
                 const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
                   if(displayDirectLabel)
@@ -187,11 +187,11 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                           null
                     }
                     {
-                      displayInferredLabel
+                      displayIndirectLabel
                         ?
                           <>
                             <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
-                              Inferred <Information className={styles.infoIcon} />
+                              Indirect <Information className={styles.infoIcon} />
                             </p>
                           </>
                         : null
