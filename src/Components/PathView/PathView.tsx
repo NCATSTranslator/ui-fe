@@ -189,7 +189,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                         ? 
                           <>
                             <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
-                              Inferred <Information className={styles.infoIcon} />
+                              Indirect <Information className={styles.infoIcon} />
                             </p>
                           </>
                         : null
