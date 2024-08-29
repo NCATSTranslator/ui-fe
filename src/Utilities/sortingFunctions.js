@@ -161,6 +161,8 @@ export const makePathRank = (path) => {
 }
 
 export const updatePathRanks = (path, pathRank, pathFilters) => {
+  const includeRank = -1;
+  const excludeRank = 10000;
   path = path.path;
   for (const item of path.subgraph) {
     if (hasSupport(item)) {
@@ -172,14 +174,12 @@ export const updatePathRanks = (path, pathRank, pathFilters) => {
           pathRank.rank += supportRank.rank;
         }
       }
-    }
-
-    for (let ftr of pathFilters) {
-      if (ftr.negated) {
-        pathRank.rank += (path.tags[ftr.id] === undefined) ? -1 : 100;
-      } else {
-        if (path.tags[ftr.id] !== undefined) {
-          pathRank.rank -= 1;
+    } else {
+      for (let ftr of pathFilters) {
+        if (ftr.negated && path.tags[ftr.id] !== undefined) {
+          pathRank.rank = excludeRank;
+        } else if (!ftr.negated && path.tags[ftr.id] !== undefined) {
+          pathRank.rank += includeRank;
         }
       }
     }

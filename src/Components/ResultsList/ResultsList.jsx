@@ -509,12 +509,18 @@ const ResultsList = ({loading}) => {
 
   const updatePathFilterState = (pathFilterState, pathRanks, unrankedIsFiltered) => {
     for (let pathRank of pathRanks) {
+      const pid = pathRank.path.id;
       if (pathRank.support.length !== 0) {
         updatePathFilterState(pathFilterState, pathRank.support, unrankedIsFiltered);
+        let filterIndirect = true;
+        for (let supportRank of pathRank.support) {
+          const supportPid = supportRank.path.id;
+          filterIndirect = filterIndirect && pathFilterState[supportPid];
+        }
+        pathFilterState[pid] = filterIndirect;
+      } else {
+        pathFilterState[pid] = (pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered));
       }
-
-      const pid = pathRank.path.id;
-      pathFilterState[pid] = (pathRank.rank >= 0 && unrankedIsFiltered);
     }
   }
 
@@ -700,7 +706,7 @@ const ResultsList = ({loading}) => {
       return facetedResults;
     }
 
-    const filterNoMatchingPathResults = (results, resultPathRanks, pathFilterState) => {
+    const filterResultsByPathFilterState = (results, pathFilterState) => {
       let anyFilteredPaths = false;
       for (let filterState of Object.values(pathFilterState)) {
         anyFilteredPaths = anyFilteredPaths || filterState;
@@ -708,15 +714,13 @@ const ResultsList = ({loading}) => {
 
       if (!anyFilteredPaths) return results;
       const filteredResults = [];
-      for (let i = 0; i < results.length; ++i) {
-        const result = results[i];
-        const pathRanks = resultPathRanks[i];
-        let resultRank = 0;
-        for (let pathRank of pathRanks) {
-          resultRank += pathRank.rank;
+      for (let result of results) {
+        let filterResult = true;
+        for (let path of result.paths) {
+          filterResult = filterResult && pathFilterState[path.id];
         }
 
-        if (resultRank !== 0) {
+        if (!filterResult) {
           filteredResults.push(result);
         }
       }
@@ -769,7 +773,7 @@ const ResultsList = ({loading}) => {
       updatePathFilterState(pathFilterState, pathRanks, unrankedIsFiltered);
     }
 
-    results = filterNoMatchingPathResults(results, resultPathRanks, pathFilterState);
+    results = filterResultsByPathFilterState(results, pathFilterState);
     if(currentPage !== 0) {
       handlePageReset(false, results.length);
     }
