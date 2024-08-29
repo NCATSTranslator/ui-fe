@@ -547,6 +547,9 @@ const areEqualProps = (prevProps: any, nextProps: any) => {
   if (!isEqual(prevProps.activeStringFilters, nextProps.activeStringFilters)) {
     return false;
   }
+  if (!isEqual(prevProps.resultsComplete, nextProps.resultsComplete)) {
+    return false;
+  }
 
   // If none of the conditions are met, props are equal
   return true;
