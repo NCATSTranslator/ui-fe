@@ -40,18 +40,13 @@
   }
   &.collapsed {
     width: calc(56px - $s*2);
-    .heading span {
-      // width: 0;
-    }
     .bottom {
       opacity: 0;
       pointer-events: none;
-      // width: 0;
     }
     .heading span, .bottom, .closeButton, .entitySearch, .clearAll {
       opacity: 0;
       pointer-events: none;
-      // width: 0;
     }
   }
   .bottom {

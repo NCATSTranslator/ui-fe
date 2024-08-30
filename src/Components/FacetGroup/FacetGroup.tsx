@@ -238,7 +238,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
     }
 
     return (
-      <div className={`${styles.section} ${Object.keys(groupedTags).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
+      <div className={`${styles.section} ${Object.keys(sortedFacets).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
           sortedFacets.map((tag) => {
             return tagDisplay(tag, family, tagObject, tagObjectSetter, availableTags, activeFilters);
