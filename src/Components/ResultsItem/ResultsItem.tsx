@@ -527,6 +527,7 @@ const areEqualProps = (prevProps: any, nextProps: any) => {
   if (!isEqual(prevProps.startExpanded, nextProps.startExpanded)) return false;
   if (!isEqual(prevProps.activeFilters, nextProps.activeFilters)) return false;
   if (!isEqual(prevProps.activeEntityFilters, nextProps.activeEntityFilters)) return false;
+  if (!isEqual(prevProps.resultsComplete, nextProps.resultsComplete)) return false;
   // If none of the conditions are met, props are equal
   return true;
 };
