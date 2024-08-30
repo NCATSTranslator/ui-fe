@@ -163,7 +163,7 @@ const QueryHistoryList = () => {
                         <div className={styles.top}>
                           {
                             query.item?.type?.label &&
-                            <span>{query.item.type.label} </span>
+                            <span>{query.item.type.label.replaceAll("a disease?", "").replaceAll("a chemical?", "").replaceAll("a gene?", "")} </span>
                           }
                           {
                             query.item?.node?.label &&
