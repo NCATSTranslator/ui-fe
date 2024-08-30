@@ -236,6 +236,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                             return (
                               <>
                                 <PathObject
+                                  pathViewStyles={styles}
                                   supportDataObject={supportDataObject}
                                   pathObjectContainer={pathToDisplay}
                                   pathObject={pathItem}

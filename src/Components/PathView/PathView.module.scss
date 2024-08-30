@@ -256,5 +256,7 @@
   background-color: $darkGray;
 }
 .filtered {
-  opacity: 0.5;
+  .predicateInterior, .nameInterior, .targetInterior {
+    opacity: 0.5;
+  }
 }

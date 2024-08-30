@@ -24,10 +24,11 @@ interface PathObjectProps {
   isBottom?: boolean;
   className?: string;
   pathFilterState: PathFilterState;
+  pathViewStyles?: {[key: string]: string;} | null;
 }
 
 const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false,
-  activeEntityFilters, selected, pathFilterState, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
+  activeEntityFilters, selected, pathFilterState, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "", pathViewStyles = null }) => {
 
   const provenance = (!!pathObject.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const isNode = isFormattedNodeObject(pathObject);
@@ -48,7 +49,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
           onClick={(e)=> {e.stopPropagation(); handleNameClick(pathObject);}}
           data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
           >
-          <span className={styles.name} >
+          <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
             {getIcon(pathObject.type)}
             <span className={styles.text}>
               <Highlighter
@@ -59,17 +60,17 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
               />
             </span>
           </span>
-            <Tooltip id={`${nameString.replaceAll("'", "")}${uid}`}>
-              <span><strong>{nameString}</strong> ({typeString})</span>
-              <span className={styles.description}>{pathObject.description}</span>
-              {
-                provenance && typeof provenance === "string" &&
-                <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
-                  <ExternalLink/>
-                  <span>{provenance}</span>
-                </a>
-              }
-            </Tooltip>
+          <Tooltip id={`${nameString.replaceAll("'", "")}${uid}`}>
+            <span><strong>{nameString}</strong> ({typeString})</span>
+            <span className={styles.description}>{pathObject.description}</span>
+            {
+              provenance && typeof provenance === "string" &&
+              <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
+                <ExternalLink/>
+                <span>{provenance}</span>
+              </a>
+            }
+          </Tooltip>
         </span>
       }
       {
@@ -89,6 +90,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
           isBottom={isBottom}
           className={className}
           pathFilterState={pathFilterState}
+          pathViewStyles={pathViewStyles}
         />
       }
       {
@@ -98,7 +100,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
           data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(pathObject);}}
           >
-          <span className={styles.target} >
+          <span className={`${!!pathViewStyles && pathViewStyles.targetInterior} ${styles.target}`}>
             {getIcon(pathObject.type)}
             <span className={styles.text}>
               <Highlighter

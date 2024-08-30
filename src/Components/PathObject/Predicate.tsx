@@ -34,11 +34,12 @@ interface PredicateProps {
   isTop?: boolean | null;
   isBottom?: boolean | null;
   className?: string;
-  pathFilterState: PathFilterState
+  pathFilterState: PathFilterState;
+  pathViewStyles?: {[key: string]: string;} | null;
 }
 
 const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, selected = false, activeEntityFilters, uid, parentClass = '', handleEdgeClick, pathFilterState,
-   hasSupport, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
+   hasSupport, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "", pathViewStyles = null }) => {
 
   const checkForProvenanceType = (pathObject: FormattedEdgeObject, type: string) => {
     if(!pathObject?.provenance || !Array.isArray(pathObject.provenance))
@@ -86,8 +87,56 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
       >
         <span>This relationship was generated using information found in a database that includes human curation. Click on the relationship and view its knowledge sources to learn more.</span>
       </Tooltip>
+      <Tooltip
+        id={`${pathObject.predicate}${uid}`}
+        place={`${inModal ? 'left' : 'top' }`}
+        >
+        {
+          pathObject.predicates &&
+          <div className={styles.predicatesList}>
+            {
+              pathObject.predicates.map((predicate, i)=> {
+                let formattedPredicate = (predicate?.predicate) ? predicate.predicate : "No Predicate Available";
+                return (
+                  <p
+                    key={`${formattedPredicate}${uid}${i}`}
+                    className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
+                    onClick={(e)=> {
+                      e.stopPropagation();
+                      if(i > 0) {
+                        handleEdgeClick(pathObject.compressedEdges[i-1], pathObjectContainer);
+                      } else {
+                        handleEdgeClick(pathObject, pathObjectContainer);
+                      }
+                    }}
+                    >
+                    <Highlighter
+                      highlightClassName="highlight"
+                      searchWords={activeEntityFilters}
+                      autoEscape={true}
+                      textToHighlight={capitalizeAllWords(formattedPredicate)}
+                    />
+                    {
+                      predicate?.url &&
+                      <a
+                        href={predicate.url}
+                        onClick={(e)=> {
+                          e.stopPropagation();
+                        }}
+                        target="_blank"
+                        rel='noreferrer'>
+                          <ExternalLink/>
+                      </a>
+                    }
+                  </p>
+                )
+              })
+            }
+          </div>
+        }
+      </Tooltip>
       <span
-        className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''}`}
+        className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior}`}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject, pathObjectContainer);}}
         >
           {
@@ -141,7 +190,6 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
               autoEscape={true}
               textToHighlight={capitalizeAllWords(pathObject.predicate)}
             />
-
             {
               pathObject.predicates &&
               pathObject.predicates.length > 1 &&
@@ -151,56 +199,6 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
             }
           </span>
         </span>
-        {
-          <Tooltip
-            id={`${pathObject.predicate}${uid}`}
-            place={`${inModal ? 'left' : 'top' }`}
-            >
-            {
-              pathObject.predicates &&
-              <div className={styles.predicatesList}>
-                {
-                  pathObject.predicates.map((predicate, i)=> {
-                    let formattedPredicate = (predicate?.predicate) ? predicate.predicate : "No Predicate Available";
-                    return (
-                      <p
-                        key={`${formattedPredicate}${uid}${i}`}
-                        className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-                        onClick={(e)=> {
-                          e.stopPropagation();
-                          if(i > 0) {
-                            handleEdgeClick(pathObject.compressedEdges[i-1], pathObjectContainer);
-                          } else {
-                            handleEdgeClick(pathObject, pathObjectContainer);
-                          }
-                        }}
-                        >
-                        <Highlighter
-                          highlightClassName="highlight"
-                          searchWords={activeEntityFilters}
-                          autoEscape={true}
-                          textToHighlight={capitalizeAllWords(formattedPredicate)}
-                        />
-                        {
-                          predicate?.url &&
-                          <a
-                            href={predicate.url}
-                            onClick={(e)=> {
-                              e.stopPropagation();
-                            }}
-                            target="_blank"
-                            rel='noreferrer'>
-                              <ExternalLink/>
-                          </a>
-                        }
-                      </p>
-                    )
-                  })
-                }
-              </div>
-            }
-          </Tooltip>
-        }
         {
           hasSupport && isFormattedEdgeObject(supportDataObject?.pathItem) && supportDataObject?.pathItem?.support &&
           <button

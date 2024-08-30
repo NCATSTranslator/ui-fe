@@ -88,6 +88,7 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj, index, pathFilterState }) 
                     hasSupport={supportItemHasSupport}
                     supportDataObject={supportDataObject}
                     pathFilterState={pathFilterState}
+                    pathViewStyles={pathViewStyles}
                   />
                 );
               })
