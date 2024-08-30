@@ -12,6 +12,7 @@ import Terms from './PageRoutes/Terms/Terms';
 import DesignSystem from './PageRoutes/DesignSystem/DesignSystem';
 import UserPrefs from './PageRoutes/UserPrefs/UserPrefs';
 import Workspace from './PageRoutes/Workspace/Workspace';
+import Pathfinder from './PageRoutes/Pathfinder/Pathfinder';
 import { Help } from './PageRoutes/Articles/Help';
 import { LoggingIn } from './PageRoutes/Articles/LoggingIn';
 import { WhatIs } from './PageRoutes/Articles/WhatIs';
@@ -33,6 +34,10 @@ const routes = [
   {
     path: "",
     element: <Page title="Home"><Home /></Page>
+  },
+  {
+    path: "pathfinder",
+    element: <Page title="Pathfinder"><Pathfinder /></Page>
   },
   {
     path: "design",
