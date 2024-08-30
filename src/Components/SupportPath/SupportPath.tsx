@@ -2,7 +2,7 @@ import { memo, FC } from 'react';
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
-import { SupportDataObject } from '../../Types/results';
+import { SupportDataObject, PathFilterState } from '../../Types/results';
 import { intToChar, isFormattedEdgeObject, numberToWords } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
 import { useLastViewedPath } from '../../Utilities/customHooks';
@@ -10,9 +10,10 @@ import { useLastViewedPath } from '../../Utilities/customHooks';
 interface SupportPathProps {
   dataObj: SupportDataObject;
   index: number;
+  pathFilterState: PathFilterState
 }
 
-const SupportPath: FC<SupportPathProps> = ({ dataObj, index }) => {
+const SupportPath: FC<SupportPathProps> = ({ dataObj, index, pathFilterState }) => {
 
   const pathViewStyles = dataObj.pathViewStyles;
   const tooltipID = dataObj.tooltipID;
@@ -23,7 +24,7 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj, index }) => {
   const handleNameClick = dataObj.handleNameClick;
   const handleEdgeClick = dataObj.handleEdgeClick;
   const handleTargetClick = dataObj.handleTargetClick;
-  const activeStringFilters = dataObj.activeStringFilters;
+  const activeEntityFilters = dataObj.activeEntityFilters;
   const { lastViewedPathID } = useLastViewedPath();
 
   return (
@@ -38,22 +39,22 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj, index }) => {
           <span className={`${!!pathViewStyles &&pathViewStyles.num}`}>
             { intToChar(index + 1) }
           </span>
-          <button 
+          <button
             onClick={handleActivateEvidence}
             className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
             data-tooltip-id={`${tooltipID}-${key}`}
             >
               <ResearchMultiple />
           </button>
-          <Tooltip 
+          <Tooltip
             id={`${tooltipID}-${key}`}
             >
               <span>View evidence for this path.</span>
           </Tooltip>
-          <div 
-            className={`path ${numberToWords(supportPath.path.subgraph.length)}  ${!!pathViewStyles && pathViewStyles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !supportPath.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''}`} 
+          <div
+            className={`path ${numberToWords(supportPath.path.subgraph.length)}  ${!!pathViewStyles && pathViewStyles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !supportPath.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''} ${pathFilterState[supportPath.id] ? !!pathViewStyles && pathViewStyles.filtered : ''}`}
             key={key}
-            > 
+            >
             {
               supportPath.path.subgraph.map((supportItem, i) => {
                 let pathKey = `${key}_${i}`;
@@ -63,29 +64,31 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj, index }) => {
                     key: key,
                     pathItem: supportItem,
                     pathViewStyles: pathViewStyles,
-                    selectedPaths: selectedPaths, 
-                    pathToDisplay: supportPath, 
-                    handleActivateEvidence: handleActivateEvidence, 
-                    handleNameClick: handleNameClick, 
-                    handleEdgeClick: handleEdgeClick, 
-                    handleTargetClick: handleTargetClick, 
-                    activeStringFilters: activeStringFilters,
+                    selectedPaths: selectedPaths,
+                    pathToDisplay: supportPath,
+                    handleActivateEvidence: handleActivateEvidence,
+                    handleNameClick: handleNameClick,
+                    handleEdgeClick: handleEdgeClick,
+                    handleTargetClick: handleTargetClick,
+                    activeEntityFilters: activeEntityFilters,
                     tooltipID: null,
                     supportPath: null
                   }
                 : null;
                 return (
-                  <PathObject 
+                  <PathObject
                     pathObjectContainer={supportPath}
-                    pathObject={supportItem} 
+                    pathObject={supportItem}
                     id={pathKey}
                     key={pathKey}
                     handleNameClick={handleNameClick}
                     handleEdgeClick={(edge)=>handleEdgeClick(edge, supportPath)}
                     handleTargetClick={handleTargetClick}
-                    activeStringFilters={activeStringFilters}
+                    activeEntityFilters={activeEntityFilters}
                     hasSupport={supportItemHasSupport}
                     supportDataObject={supportDataObject}
+                    pathFilterState={pathFilterState}
+                    pathViewStyles={pathViewStyles}
                   />
                 );
               })

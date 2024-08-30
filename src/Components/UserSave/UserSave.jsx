@@ -10,7 +10,7 @@ import { getFormattedDate } from '../../Utilities/utilities';
 import AnimateHeight from 'react-animate-height';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
 
-const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, activateNotes, 
+const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, activateNotes,
   handleBookmarkError, bookmarkAddedToast, bookmarkRemovedToast, setShareModalOpen, setShareResultID}) => {
 
   let key = save[0];
@@ -37,7 +37,7 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
       <div className={styles.topBar}>
         <div className={styles.headingContainer}>
           <span onClick={handleToggle} target="_blank" rel="noreferrer">
-            <h4 className={styles.heading}>{typeString}: 
+            <h4 className={styles.heading}>{typeString}:
               <Highlighter
                 highlightClassName="highlight"
                 searchWords={[currentSearchString.current]}
@@ -59,12 +59,12 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
           queryObject.saves && Array.from(queryObject.saves).length > 0 &&
           <p className={styles.numSaves}>{Array.from(queryObject.saves).length} saved item{(Array.from(queryObject.saves).length > 1) && "s"}</p>
         }
-        <a 
-          href={shareURL} 
-          target="_blank" 
-          rel="noreferrer" 
-          className={styles.link} 
-          data-tooltip-id={`originalquery-${key}`} 
+        <a
+          href={shareURL}
+          target="_blank"
+          rel="noreferrer"
+          className={styles.link}
+          data-tooltip-id={`originalquery-${key}`}
           aria-describedby={`originalquery-${key}`}
           >
           <ExternalLink/>
@@ -78,8 +78,8 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
       </div>
       <div className={styles.separator}></div>
       <AnimateHeight
-        className={`${styles.resultsList} 
-          ${isExpanded ? styles.open : styles.closed } 
+        className={`${styles.resultsList}
+          ${isExpanded ? styles.open : styles.closed }
         `}
         duration={500}
         height={height}
@@ -101,7 +101,7 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
                 item={queryItem}
                 activateEvidence={activateEvidence}
                 activateNotes={activateNotes}
-                activeStringFilters={[currentSearchString.current]}
+                activeEntityFilters={[currentSearchString.current]}
                 zoomKeyDown={zoomKeyDown}
                 currentQueryID={arspk}
                 queryNodeID={queryNodeID}

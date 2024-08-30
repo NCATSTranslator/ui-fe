@@ -5,37 +5,34 @@ import Alert from '../../Icons/Status/Alerts/Info.svg?react';
 import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import { cloneDeep } from 'lodash';
+import { makeEntitySearch } from '../../Utilities/filterFunctions';
 
 const EntitySearch = ({ onFilter, className }) => {
 
-  const [searchStringObject, setSearchStringObject] = useState({type:'str:', value: '', negated: false});
+  const [entitySearch, setEntitySearch] = useState(makeEntitySearch());
 
-  const handleStringSearchChange = (value) => {
-    if(searchStringObject.value !== value) {
-      let newStringObj  = cloneDeep(searchStringObject);
-      newStringObj.value = value;
-      setSearchStringObject(newStringObj);
+  const handleEntitySearchChange = (value) => {
+    if (entitySearch.value !== value) {
+      const newEntitySearch = cloneDeep(entitySearch);
+      newEntitySearch.value = value;
+      setEntitySearch(newEntitySearch);
     }
   }
 
   const handleKeyDown = (e) => {
-    if(e.key === 'Enter') {
+    if (e.key === 'Enter') {
       handleActivateFilter(false);
     }
   }
 
   const handleActivateFilter = (negated) => {
-    if(searchStringObject.value === '') 
-      return;
+    if (entitySearch.value === '') return;
     window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: 'textFilterInputEnabled',
-      inputValue: searchStringObject.value,
-    });
-    let newSearchStringObject = cloneDeep(searchStringObject);
-    newSearchStringObject.negated = negated;
-    onFilter(newSearchStringObject);
-    setSearchStringObject({type:'str:', value: '', negated: false})
+    window.dataLayer.push({ event: 'textFilterInputEnabled', inputValue: entitySearch.value, });
+    const newEntitySearch = cloneDeep(entitySearch);
+    newEntitySearch.negated = negated;
+    onFilter(newEntitySearch);
+    setEntitySearch(makeEntitySearch());
   }
 
   return (
@@ -48,13 +45,13 @@ const EntitySearch = ({ onFilter, className }) => {
         </Tooltip>
       </div>
       <span className={styles.inputContainer}>
-        <input 
-          type="text" 
-          placeholder="Filter Terms" 
-          size="1" 
-          onChange={(e)=> handleStringSearchChange(e.target.value)} 
+        <input
+          type="text"
+          placeholder="Filter Terms"
+          size="1"
+          onChange={(e)=> handleEntitySearchChange(e.target.value)}
           maxLength={200}
-          value={searchStringObject.value}
+          value={entitySearch.value}
           onKeyDown={handleKeyDown}
           className={styles.textInput}
         />
