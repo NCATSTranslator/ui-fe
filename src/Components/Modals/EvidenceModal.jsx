@@ -73,10 +73,10 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
     setFormattedEdge(formatted);
     distributeEvidence(filteredEvidence);
   }
-  
+
   const loopIDsIntoNewPubs = (publications, knowledgeLevel = "unknown", objArray) => {
     for(const pubID of publications) {
-      let type = (pubID.includes("PMID")) 
+      let type = (pubID.includes("PMID"))
       ? "PMID"
       : (pubID.includes("PMC"))
         ? "PMC"
@@ -118,14 +118,14 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
         miscEvidence.current = cloneDeep([...evidence.publications].filter(item => !isPublication(item) && !isClinicalTrial(item)))
           .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
       }
-      let displayedSources = [...evidence.sources]; 
+      let displayedSources = [...evidence.sources];
       displayedSources.sort(compareByKeyLexographic('name'));
       setSources(displayedSources);
     }
   }
 
   const handleEdgeClick = (edge) => {
-    if(!edge || checkForEdgeMatch(edge, selectedEdge) === true) 
+    if(!edge || checkForEdgeMatch(edge, selectedEdge) === true)
       return;
     handleSelectedEdge(edge)
     setEdgeSelectedTrigger(prev=>!prev);
@@ -133,9 +133,9 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer}`}>
-      {selectedItem.name &&       
+      {selectedItem.name &&
         <div className={styles.top}>
-          <h5 className={styles.title}>Evidence for:</h5> 
+          <h5 className={styles.title}>Evidence for:</h5>
           {
             formattedEdge &&
             <h5 className={styles.subtitle}>{capitalizeAllWords(formattedEdge)}</h5>
@@ -157,10 +157,10 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                       newPathItem.predicates = [newPathItem.predicates[0]];
                       newPathItem.predicate = newPathItem.predicates[0].predicate;
                       isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, newPathItem));
-                      return( 
+                      return(
                         <div className={`groupedPreds ${styles.groupedPreds} ${(pathItem.predicates.length === 2) ? styles.hasTwo :''}`}>
-                          <PathObject 
-                            pathObject={newPathItem} 
+                          <PathObject
+                            pathObject={newPathItem}
                             id={pathItem.id}
                             key={pathItem.id}
                             handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
@@ -177,8 +177,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                               isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, edge));
                               key = `${edge.id}`;
                               return (
-                                <PathObject 
-                                  pathObject={edge} 
+                                <PathObject
+                                  pathObject={edge}
                                   id={key}
                                   key={key}
                                   handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
@@ -190,7 +190,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                                   hasSupport={pathItemHasSupport}
                                   className={styles.pathContainer}
                                 />
-                              ) 
+                              )
                             })
                           }
                         </div>
@@ -198,21 +198,21 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                     } else {
                       isSelected = (pathItem.category === "predicate" && checkForEdgeMatch(selectedEdge, pathItem));
                       return (
-                        <PathObject 
-                          pathObject={pathItem} 
+                        <PathObject
+                          pathObject={pathItem}
                           id={key}
                           key={key}
                           handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
                           handleEdgeClick={(edge)=>handleEdgeClick(edge)}
                           handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
-                          activeStringFilters={[]}
+                          activeEntityFilters={[]}
                           selected={isSelected}
                           inModal
                           hasSupport={pathItemHasSupport}
                         />
-                      ) 
+                      )
                     }
-                  }) 
+                  })
                 }
               </div>
             </div>
@@ -224,7 +224,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                 <PublicationsTable
                   selectedEdgeTrigger={selectedEdgeTrigger}
                   selectedEdge={selectedEdge}
-                  pubmedEvidence={pubmedEvidence} 
+                  pubmedEvidence={pubmedEvidence}
                   setPubmedEvidence={setPubmedEvidence}
                   handleEvidenceSort={handleEvidenceSort}
                   item={item}
@@ -286,10 +286,10 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
             {
               // Add sources modal for predicates
               sources.length > 0 &&
-              <Tab 
-                heading="Knowledge Sources" 
+              <Tab
+                heading="Knowledge Sources"
                 tooltipIcon={<Information className={styles.infoIcon} />}
-                dataTooltipId="knowledge-sources-tooltip" 
+                dataTooltipId="knowledge-sources-tooltip"
                 className={styles.tab}
                 >
                 <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
@@ -299,7 +299,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                   </div>
                   <div className={`table-items ${styles.tableItems} scrollable`}>
                     {
-                      sources.map((src, i) => { 
+                      sources.map((src, i) => {
                         const name = (!Array.isArray(src) && typeof src === 'object') ? src.name: '';
                         const url = (!Array.isArray(src) && typeof src === 'object') ? src.url: src;
                         return(
@@ -309,8 +309,8 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                             </span>
                             <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
                               {
-                                url 
-                                ? 
+                                url
+                                ?
                                   <a key={i} href={url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
                                     {url}
                                     <ExternalLink/>

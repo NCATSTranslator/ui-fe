@@ -1,5 +1,6 @@
 import { equal } from 'mathjs';
 import { getPathsCount } from './utilities';
+import { hasSupport } from './resultsFormattingFunctions';
 
 // alphabetical order
 export const sortNameLowHigh = (items, isEvidence) => {
@@ -132,17 +133,7 @@ export const sortByHighlighted = (totalItems, highlightedItems) => {
 }
 
 export const filterCompare = (filter1, filter2) => {
-  return filter1.type < filter2.type;
-}
-
-// Given a result, a tag, and a ranking of paths, update the rank of a path to be lower if the
-// tag appears in the path.
-export const updatePathRankByTag = (result, tag, pathRanks) => {
-  result.compressedPaths.forEach((path, i) => {
-    if (path.path.tags[tag] !== undefined) {
-      pathRanks[i].rank -= 1;
-    }
-  });
+  return filter1.family < filter2.family;
 }
 
 export const compareByKeyLexographic = (k) => {
@@ -154,4 +145,58 @@ export const pivotSort = (arr, pivot, compare) => {
   const left = arr.slice(0, pivot).sort(compare);
   const right = arr.slice(pivot).sort(compare);
   return left.concat(right);
+}
+
+export const makePathRank = (path) => {
+  const pathRank  = { rank: 0, path: path, support: [] };
+  for (const item of path.path.subgraph) {
+    if (hasSupport(item)) {
+      for (const supportPath of item.support) {
+        pathRank.support.push(makePathRank(supportPath));
+      }
+    }
+  }
+
+  return pathRank;
+}
+
+export const updatePathRanks = (path, pathRank, pathFilters) => {
+  const includeRank = -1;
+  const excludeRank = 10000;
+  path = path.path;
+  for (const item of path.subgraph) {
+    if (hasSupport(item)) {
+      for (let i = 0; i < item.support.length; i++) {
+        const supportPath = item.support[i];
+        const supportRank = pathRank.support[i];
+        updatePathRanks(supportPath, supportRank, pathFilters);
+        if (supportRank.rank < 0) {
+          pathRank.rank += supportRank.rank;
+        }
+      }
+    } else {
+      for (let ftr of pathFilters) {
+        if (ftr.negated && path.tags[ftr.id] !== undefined) {
+          pathRank.rank = excludeRank;
+        } else if (!ftr.negated && path.tags[ftr.id] !== undefined) {
+          pathRank.rank += includeRank;
+        }
+      }
+    }
+  }
+}
+
+export const pathRankSort = (pathRanks) => {
+  for (let pathRank of pathRanks) {
+    if (pathRank.support.length > 1) {
+      pathRankSort(pathRank.support);
+    }
+  }
+
+  pathRanks.sort(pathRankCompare);
+}
+
+const pathRankCompare = (a, b) => {
+  if (b === undefined) return -1;
+  return a.rank - b.rank;
 }

@@ -5,7 +5,7 @@ import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
-import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject } from '../../Types/results';
+import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject, PathFilterState } from '../../Types/results';
 import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
 
 interface PathObjectProps {
@@ -16,17 +16,19 @@ interface PathObjectProps {
   handleEdgeClick: (edge: FormattedEdgeObject, path: PathObjectContainer) => void;
   handleTargetClick: (target: FormattedNodeObject) => void;
   hasSupport: boolean;
-  activeStringFilters: string[];
+  activeEntityFilters: string[];
   selected?: boolean;
   supportDataObject: SupportDataObject | null;
   inModal?: boolean;
   isTop?: boolean;
   isBottom?: boolean;
   className?: string;
+  pathFilterState: PathFilterState;
+  pathViewStyles?: {[key: string]: string;} | null;
 }
 
-const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false, 
-  activeStringFilters, selected, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "" }) => {
+const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false,
+  activeEntityFilters, selected, pathFilterState, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "", pathViewStyles = null }) => {
 
   const provenance = (!!pathObject.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const isNode = isFormattedNodeObject(pathObject);
@@ -43,41 +45,41 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
     <>
       {
         pathObject.category === 'object' && isNode &&
-        <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''}`} 
+        <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''}`}
           onClick={(e)=> {e.stopPropagation(); handleNameClick(pathObject);}}
           data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
           >
-          <span className={styles.name} >
+          <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
             {getIcon(pathObject.type)}
             <span className={styles.text}>
               <Highlighter
                 highlightClassName="highlight"
-                searchWords={activeStringFilters}
+                searchWords={activeEntityFilters}
                 autoEscape={true}
                 textToHighlight={nameString}
               />
             </span>
           </span>
-            <Tooltip id={`${nameString.replaceAll("'", "")}${uid}`}>
-              <span><strong>{nameString}</strong> ({typeString})</span>
-              <span className={styles.description}>{pathObject.description}</span>
-              {
-                provenance && typeof provenance === "string" &&
-                <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
-                  <ExternalLink/>
-                  <span>{provenance}</span>
-                </a>
-              }
-            </Tooltip>
+          <Tooltip id={`${nameString.replaceAll("'", "")}${uid}`}>
+            <span><strong>{nameString}</strong> ({typeString})</span>
+            <span className={styles.description}>{pathObject.description}</span>
+            {
+              provenance && typeof provenance === "string" &&
+              <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
+                <ExternalLink/>
+                <span>{provenance}</span>
+              </a>
+            }
+          </Tooltip>
         </span>
       }
       {
         pathObject.category === 'predicate' && isFormattedEdgeObject(pathObject) &&
-        <Predicate 
+        <Predicate
           pathObject={pathObject}
           pathObjectContainer={pathObjectContainer}
-          selected={selected} 
-          activeStringFilters={activeStringFilters} 
+          selected={selected}
+          activeEntityFilters={activeEntityFilters}
           uid={uid}
           handleEdgeClick={handleEdgeClick}
           parentClass={styles.pathContainer}
@@ -87,21 +89,23 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
           isTop={isTop}
           isBottom={isBottom}
           className={className}
+          pathFilterState={pathFilterState}
+          pathViewStyles={pathViewStyles}
         />
       }
       {
         pathObject.category === 'target' && isNode &&
-        <span 
-          className={`${styles.targetContainer} ${className}`} 
+        <span
+          className={`${styles.targetContainer} ${className}`}
           data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
           onClick={(e)=> {e.stopPropagation(); handleTargetClick(pathObject);}}
           >
-          <span className={styles.target} >
+          <span className={`${!!pathViewStyles && pathViewStyles.targetInterior} ${styles.target}`}>
             {getIcon(pathObject.type)}
             <span className={styles.text}>
               <Highlighter
                 highlightClassName="highlight"
-                searchWords={activeStringFilters}
+                searchWords={activeEntityFilters}
                 autoEscape={true}
                 textToHighlight={nameString}
               />

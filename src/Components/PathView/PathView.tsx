@@ -11,13 +11,13 @@ import { currentPrefs } from '../../Redux/rootSlice';
 import { Link } from 'react-router-dom';
 import { getGeneratedSendFeedbackLink, numberToWords } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
-import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject } from '../../Types/results';
+import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject, PathFilterState} from '../../Types/results';
 import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 
-const checkInferredPathForSelections = (path: PathObjectContainer, selPath: PathObjectContainer) => {
+const checkIndirectPathForSelections = (path: PathObjectContainer, selPath: PathObjectContainer) => {
   for(const [i, item] of path.path.subgraph.entries()) {
     if(i % 2 === 0)
       continue;
@@ -41,7 +41,7 @@ const getPathsWithSelectionsSet = (paths: PathObjectContainer[], selectedPaths: 
           path.highlighted = true;
         }
         if(path.path.inferred) {
-          checkInferredPathForSelections(path, selPath);
+          checkIndirectPathForSelections(path, selPath);
         }
       }
     }
@@ -57,17 +57,18 @@ interface PathViewProps {
   selectedPaths: Set<PathObjectContainer> | null;
   handleEdgeSpecificEvidence:(edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => void;
   handleActivateEvidence: (path: PathObjectContainer) => void;
-  activeStringFilters: string[];
+  activeEntityFilters: string[];
+  pathFilterState: PathFilterState;
 }
 
-const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeStringFilters}) => {
+const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeEntityFilters, pathFilterState}) => {
 
   const prefs = useSelector(currentPrefs);
 
-  const initItemsPerPage = (prefs?.path_show_count?.pref_value) 
-    ? (typeof prefs.path_show_count.pref_value == "string") 
-      ? parseInt(prefs.path_show_count.pref_value) 
-      : prefs.path_show_count.pref_value 
+  const initItemsPerPage = (prefs?.path_show_count?.pref_value)
+    ? (typeof prefs.path_show_count.pref_value == "string")
+      ? parseInt(prefs.path_show_count.pref_value)
+      : prefs.path_show_count.pref_value
     : 5;
 
   let initialNumberToShow = (initItemsPerPage === -1 || paths.length < initItemsPerPage) ? paths.length : initItemsPerPage;
@@ -80,13 +81,13 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
 
-  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
-  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
+  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
+  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
   useEffect(() => {
-    const tempItemsPerPage = (prefs?.path_show_count?.pref_value) 
-    ? (typeof prefs.path_show_count.pref_value == "string") 
-      ? parseInt(prefs.path_show_count.pref_value) 
-      : prefs.path_show_count.pref_value 
+    const tempItemsPerPage = (prefs?.path_show_count?.pref_value)
+    ? (typeof prefs.path_show_count.pref_value == "string")
+      ? parseInt(prefs.path_show_count.pref_value)
+      : prefs.path_show_count.pref_value
     : 5;
     const tempNumberToShow = (tempItemsPerPage === -1 || paths.length < tempItemsPerPage) ? paths.length : tempItemsPerPage;
     setNumberToShow(tempNumberToShow);
@@ -107,7 +108,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
   },[]);
 
   const handleEdgeClick = useCallback((edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => {
-    if(!!path?.id) 
+    if(!!path?.id)
       setLastViewedPathID(path.id);
     handleEdgeSpecificEvidence(edgeGroup, path);
   }, [handleEdgeSpecificEvidence]);
@@ -128,7 +129,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
     setNumberToShow(newAmount);
   }
 
-  const sortArrayByInferred = (array: any[]) => {
+  const sortArrayByIndirect = (array: any[]) => {
     return array.sort((a, b) => {
         let inferredA = a.path.inferred ? 1 : 0;
         let inferredB = b.path.inferred ? 1 : 0;
@@ -151,42 +152,43 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
         <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
       </div>
       {
-        (!active) 
+        (!active)
         ? <></>
         :
         <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
           <div className={styles.paths}>
             {
-              sortArrayByInferred(formattedPaths).slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
-                const displayInferredLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
-                  if(displayInferredLabel)
+              sortArrayByIndirect(formattedPaths).slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
+                const displayIndirectLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
+                  if(displayIndirectLabel)
                     inferredLabelDisplayed = true;
                 const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
                   if(displayDirectLabel)
                     directLabelDisplayed = true;
-                const tooltipID: string = (pathToDisplay.id) 
-                  ? pathToDisplay.id 
-                  : pathToDisplay.path.subgraph.map((sub: FormattedEdgeObject | FormattedNodeObject, j: number) => 
-                    (isFormattedNodeObject(sub)) 
-                      ? sub.name 
+                const tooltipID: string = (pathToDisplay.id)
+                  ? pathToDisplay.id
+                  : pathToDisplay.path.subgraph.map((sub: FormattedEdgeObject | FormattedNodeObject, j: number) =>
+                    (isFormattedNodeObject(sub))
+                      ? sub.name
                       : (sub.predicates && sub.predicates.length > 0 )
-                        ? sub.predicates[0].predicate 
-                        : "" 
+                        ? sub.predicates[0].predicate
+                        : ""
                   ).toString();
+                const isPathFiltered = pathFilterState[pathToDisplay.id];
                 return (
                   <>
                     {
-                      displayDirectLabel 
-                        ? 
+                      displayDirectLabel
+                        ?
                           <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
                             Direct <Information className={styles.infoIcon} />
                           </p>
-                        : 
+                        :
                           null
                     }
                     {
-                      displayInferredLabel 
-                        ? 
+                      displayIndirectLabel
+                        ?
                           <>
                             <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
                               Indirect <Information className={styles.infoIcon} />
@@ -198,19 +200,19 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                       <span className={styles.num}>
                         { i + 1 }
                       </span>
-                      <button 
+                      <button
                         onClick={()=>handleActivateEvidence(pathToDisplay)}
                         className={styles.pathEvidenceButton}
                         data-tooltip-id={tooltipID}
                         >
                           <ResearchMultiple />
                       </button>
-                      <Tooltip 
+                      <Tooltip
                         id={tooltipID}
                         >
                           <span>View evidence for this path.</span>
                       </Tooltip>
-                      <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''}`} > 
+                      <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''}`} >
                         {
                           pathToDisplay.path.subgraph.map((pathItem: FormattedEdgeObject | FormattedNodeObject, j: number) => {
                             let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;
@@ -220,34 +222,36 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                                   key: key,
                                   pathItem: pathItem,
                                   pathViewStyles: styles,
-                                  selectedPaths: selectedPaths, 
-                                  pathToDisplay: pathToDisplay, 
-                                  handleActivateEvidence: handleActivateEvidence, 
-                                  handleNameClick: handleNameClick, 
-                                  handleEdgeClick: handleEdgeClick, 
-                                  handleTargetClick: handleTargetClick, 
-                                  activeStringFilters: activeStringFilters,
+                                  selectedPaths: selectedPaths,
+                                  pathToDisplay: pathToDisplay,
+                                  handleActivateEvidence: handleActivateEvidence,
+                                  handleNameClick: handleNameClick,
+                                  handleEdgeClick: handleEdgeClick,
+                                  handleTargetClick: handleTargetClick,
+                                  activeEntityFilters: activeEntityFilters,
                                   tooltipID: null,
                                   supportPath: null
                                 }
                               : null;
                             return (
                               <>
-                                <PathObject 
+                                <PathObject
+                                  pathViewStyles={styles}
                                   supportDataObject={supportDataObject}
                                   pathObjectContainer={pathToDisplay}
-                                  pathObject={pathItem} 
+                                  pathObject={pathItem}
                                   id={key}
                                   key={key}
                                   handleNameClick={handleNameClick}
                                   handleEdgeClick={handleEdgeClick}
                                   handleTargetClick={handleTargetClick}
-                                  activeStringFilters={activeStringFilters}
+                                  activeEntityFilters={activeEntityFilters}
                                   hasSupport={pathItemHasSupport}
+                                  pathFilterState={pathFilterState}
                                 />
                               </>
-                            ) 
-                          }) 
+                            )
+                          })
                         }
                       </div>
                     </div>
@@ -273,7 +277,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
         <button onClick={(e)=> {e.stopPropagation(); setNumberToShow(paths.length);}} className={`${styles.show} ${styles.showAll}`}>Show All</button>
       }
       <p className={styles.needHelp}>
-        <Feedback/> 
+        <Feedback/>
         <Link to={`${getGeneratedSendFeedbackLink(true)}`} reloadDocument target={'_blank'}>Send Feedback</Link>
       </p>
     </div>
