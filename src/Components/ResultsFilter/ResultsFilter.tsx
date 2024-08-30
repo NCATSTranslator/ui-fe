@@ -7,15 +7,15 @@ import EntitySearch from '../EntitySearch/EntitySearch';
 import Button from '../Core/Button';
 import FilterIcon from '../../Icons/Navigation/Filter.svg?react';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
+import * as filtering from '../../Utilities/filterFunctions';
 
 interface ResultsFilterProps {
-  onClearAll: () => void;
-  onClearTag: () => void;
-  onFilter: (arg0: Tag) => void;
   activeFilters: Filter[];
-  availableTags: {[key: string]: Tag};
+  onFilter: (arg0: Tag) => void;
+  onClearAll: () => void;
   expanded?: boolean;
   setExpanded?: (arg0:boolean) => void
+  availableTags: {[key: string]: Tag};
 }
 
 const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, expanded = false, setExpanded = (arg0: boolean)=>{}, availableTags}) => {
@@ -29,37 +29,42 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
   }
 
   // returns a new object with each tag grouped by its type
-  const groupAvailableTags = (tags: {[key: string]: Tag}): GroupedTags => {
-    let clonedTags = cloneDeep(tags);
-    let roleTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('role:')));
-    let chemicalTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('cc:')));
-    let nodeTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pc:')));
-    let araTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('ara:')));
-    let diTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('di:')));
-    let pathTypeTags = Object.fromEntries(Object.entries(clonedTags).filter(([key]) => key.includes('pt:')));
-    // The ordering of newGroupedTags determines the order of the facets in the UI
-    const newGroupedTags: GroupedTags = {
-      cc: chemicalTypeTags,
-      di: diTags,
-      pc: nodeTypeTags,
-      pt: pathTypeTags,
-      role: roleTags,
-      ara: araTags
-    };
+  const groupTags = (tags: {[key: string]: Tag}, type: string): GroupedTags => {
+    const newGroupedTags: GroupedTags = {};
+    for (let family of filtering.getFamiliesByType(type)) {
+      newGroupedTags[family] = {};
+    }
+
+    for (let [id, description] of Object.entries(cloneDeep(tags))) {
+      if (filtering.getTagType(id) === type) {
+        const family = filtering.getTagFamily(id);
+        newGroupedTags[family][id] = description;
+      }
+    }
 
     return newGroupedTags;
   }
 
-  const groupedTags = useMemo(() => groupAvailableTags(availableTags), [availableTags]);
+  const groupHasTags = (tagGroup: GroupedTags): boolean => {
+    for (let categoryTags of Object.values(tagGroup)) {
+      if (Object.keys(categoryTags).length > 0) return true;
+    }
+
+    return false;
+  }
+
+  const resultTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.RESULT),
+                             [availableTags]);
+  const pathTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.PATH),
+                           [availableTags]);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
-  const facetCompares: {[key: string]: (a: [string, Tag], b: [string, Tag]) => number} = {
+  const filterCompare: {[key: string]: (a: [string, Tag], b: [string, Tag]) => number} = {
     pt: (a: [string, Tag], b: [string, Tag]) => -(a[1].name.localeCompare(b[1].name))
   };
 
-  useEffect(() => {
-    setIsExpanded(expanded);
-  }, [expanded]);
+  useEffect(() => { setIsExpanded(expanded); },
+            [expanded]);
 
   return (
     <div className={`${styles.resultsFilter} ${isExpanded ? styles.expanded : styles.collapsed}`}>
@@ -77,19 +82,46 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
         />
         <div>
           {
-            groupedTags &&
-            Object.keys(groupedTags).map((tagType) => {
-              return (
-                <FacetGroup
-                  tagType={tagType}
-                  activeFilters={activeFilters}
-                  facetCompare={facetCompares[tagType]}
-                  groupedTags={groupedTags}
-                  availableTags={availableTags}
-                  onFilter={onFilter}
-                />
-              )
-            })
+            groupHasTags(resultTags) &&
+            <>
+              <h5 className={styles.typeHeading}> Results </h5>
+              {
+                Object.keys(resultTags).map((tagFamily) => {
+                  return (
+                    <FacetGroup
+                      tagFamily={tagFamily}
+                      activeFilters={activeFilters}
+                      facetCompare={filterCompare[tagFamily]}
+                      groupedTags={resultTags}
+                      availableTags={availableTags}
+                      onFilter={onFilter}
+                    />
+                  )
+                })
+              }
+            </>
+          }
+        </div>
+        <div>
+          {
+            groupHasTags(pathTags) &&
+            <>
+              <h5 className={styles.typeHeading}> Paths </h5>
+              {
+                Object.keys(pathTags).map((tagFamily) => {
+                  return (
+                    <FacetGroup
+                      tagFamily={tagFamily}
+                      activeFilters={activeFilters}
+                      facetCompare={filterCompare[tagFamily]}
+                      groupedTags={pathTags}
+                      availableTags={availableTags}
+                      onFilter={onFilter}
+                    />
+                  )
+                })
+              }
+            </>
           }
         </div>
       </div>
