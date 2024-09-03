@@ -4,7 +4,7 @@ import styles from "./TextInput.module.scss";
 type TextInputProps = {
   label?: string;
   subtitle?: string;
-  value: string;
+  value?: string;
   placeholder?: string;
   size?: string;
   rows?: number;

@@ -178,3 +178,10 @@ export type QueryType = {
 export type PathFilterState = {
   [pid: string]: boolean;
 }
+
+export type AutocompleteItem = {
+  id:string, 
+  label: string, 
+  match: string, 
+  types: Array<string>
+}

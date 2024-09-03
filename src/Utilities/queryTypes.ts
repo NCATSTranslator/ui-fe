@@ -2,7 +2,13 @@ import { defaultQueryFilterFactory, drugTreatsQueryFilterFactory } from './query
 import { defaultQueryAnnotator, geneQueryAnnotator } from './queryTypeAnnotators';
 import { defaultQueryFormatter, geneQueryFormatter, diseaseQueryFormatter } from './queryTypeFormatters';
 
-export interface QueryType {
+export type QueryTypeFunctions = {
+  filter: (type: any) => (item: any) => any;
+  annotate: (normalizedNodes: any) => Promise<any>;
+  format: (items: any, formatData: any) => Promise<any[]>;
+}
+
+export type QueryType = {
   id: number;
   label: string;
   placeholder: string;
@@ -10,7 +16,7 @@ export interface QueryType {
   direction: string | null;
   filterType: string;
   limitPrefixes: string[];
-  functions: object;
+  functions: QueryTypeFunctions;
   pathString: string;
   searchTypeString: string;
   iconString: string;

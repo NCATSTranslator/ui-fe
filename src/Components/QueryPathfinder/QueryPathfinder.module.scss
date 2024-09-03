@@ -1,0 +1,58 @@
+@import "../../Assets/Styles/variables";
+
+.queryPathfinder {
+  background-color: $palePurple;
+  height: 100%;
+}
+.container,.form {
+  max-width: 928px;
+  margin: 0 auto;
+}
+.container {
+  padding: 80px 20px 0;
+}
+.h3 {
+  color: $purpleTwo;
+  margin-bottom: 8px;
+  line-height: 60px;
+  text-align: center;
+}
+.h6 {
+  color: $darkGray;
+  margin-bottom: $m;
+  line-height: 25px;
+  text-align: center;
+}
+.form {
+  display: grid;
+  grid-template-columns: 1fr 18px 1fr 40px;
+  column-gap: $xs;
+  align-items: center;
+  box-shadow: $dropShadow;
+  border-radius: $largeBorderRadius;
+  padding: 0 $xs;
+  background-color: $white;
+  margin-bottom: $l;
+  .inputContainer {
+    position: relative;
+    display: flex;
+  }
+  .input {
+    margin: 0;
+    width: 100%;
+    padding: 8px 12px;
+    input {
+      border: none;
+    }
+    svg path {
+      fill: $darkGray;
+    }
+  }
+  .submitButton {
+    margin: 0;
+    border: none;
+    svg path {
+      stroke: $white;
+    }
+  }
+}
