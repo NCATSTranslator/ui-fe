@@ -17,13 +17,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "../../Redux/resultsSlice";
 import { currentPrefs, currentUser }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow,
-  sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, updatePathRankByTag,
-  filterCompare } from "../../Utilities/sortingFunctions";
-import { getSummarizedResults } from "../../Utilities/resultsFormattingFunctions";
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, filterCompare, makePathRank, updatePathRanks, pathRankSort } from "../../Utilities/sortingFunctions";
+import { getSummarizedResults, hasSupport } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters } from "../../Utilities/resultsInteractionFunctions";
-import { isFacet, isExclusion, isEvidenceFilter, isTextFilter, facetFamily, hasSameFacetFamily } from '../../Utilities/filterFunctions';
+import * as filtering from '../../Utilities/filterFunctions';
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
@@ -103,6 +101,8 @@ const ResultsList = ({loading}) => {
   const [selectedEdge, setSelectedEdge] = useState(null);
   // Obj, path represented in current evidence
   const [selectedPath, setSelectedPath] = useState(null);
+  // Obj, represets the filter state of all paths
+  const [pathFilterState, setPathFilterState] = useState(null);
   // Int, current page
   const currentPage = useRef(0);
   // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
@@ -133,7 +133,7 @@ const ResultsList = ({loading}) => {
   // Array, currently active filters
   const [availableTags, setAvailableTags] = useState([]);
   // Array, currently active string filters
-  const [activeStringFilters, setActiveStringFilters] = useState([]);
+  const [activeEntityFilters, setActiveEntityFilters] = useState([]);
   // Array, aras that have returned data
   const returnedARAs = useRef({aras: [], status: ''});
   // Bool, is share modal open
@@ -198,7 +198,7 @@ const ResultsList = ({loading}) => {
 
   const handleClearNotesEditor = async () => {
     await getUserSaves();
-    handleUpdateResults(activeFilters, activeStringFilters, prevRawResults.current, [], false, currentSortString.current);
+    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current);
   }
 
   useEffect(() => {
@@ -236,28 +236,32 @@ const ResultsList = ({loading}) => {
     setEndResultIndex(endOffset);
   }, [formattedResults.length, itemsPerPage]);
 
-  const handleUpdateResults = (facetsAndFilters, asFilters, rr, or = [], justSort = false, sortType, fr = []) => {
+  const handleUpdateResults = (filters, asFilters, summary, or = [], justSort = false, sortType, fr = []) => {
     let newFormattedResults = [];
     let newOriginalResults = [];
+    let newPathFilterState = cloneDeep(pathFilterState);
     let saves = (userSaves) ? userSaves.saves: null;
 
     if(or.length === 0) {
-      newFormattedResults = (justSort) ? fr : getSummarizedResults(rr.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
+      newFormattedResults = (justSort) ? fr : getSummarizedResults(summary.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
       newOriginalResults = cloneDeep(newFormattedResults);
+      newPathFilterState = genPathFilterState(summary.data);
     } else {
       newFormattedResults = (justSort) ? cloneDeep(fr) : or;
       newOriginalResults = or;
     }
 
     // filter
-    if (!justSort) 
-      newFormattedResults = filterAndFacet(facetsAndFilters, asFilters, newFormattedResults, newOriginalResults, rr);
+    if (!justSort) {
+      [newFormattedResults, newPathFilterState] = applyFilters(filters, asFilters, newFormattedResults, newOriginalResults, summary, newPathFilterState);
+    }
 
     // sort
     newFormattedResults = getSortedResults(newFormattedResults, sortType);
 
     // set results
     setFormattedResults(newFormattedResults);
+    setPathFilterState(newPathFilterState);
 
     if(firstLoad.current && newFormattedResults.length > 0) {
       firstLoad.current = false;
@@ -276,10 +280,11 @@ const ResultsList = ({loading}) => {
       }
     }
 
-    if(!justSort)
+    if (!justSort) {
       originalResults.current = newOriginalResults;
+    }
 
-    rawResults.current = rr;
+    rawResults.current = summary;
 
     return newFormattedResults;
   }
@@ -296,7 +301,7 @@ const ResultsList = ({loading}) => {
 
     // if rawResults are new, set prevRawResults for future comparison
     prevRawResults.current = rr;
-    const newFormattedResults = handleUpdateResults(activeFilters, activeStringFilters, rr, [], false, currentSortString.current);
+    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, rr, [], false, currentSortString.current);
 
     // we have results to show, set isLoading to false
     if (newFormattedResults.length > 0)
@@ -481,7 +486,7 @@ const ResultsList = ({loading}) => {
         setIsSortedByName(null);
         break;
       case 'entityString':
-        newSortedResults = sortByEntityStrings(newSortedResults, activeStringFilters);
+        newSortedResults = sortByEntityStrings(newSortedResults, activeEntityFilters);
         setIsSortedByPaths(null);
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
@@ -491,9 +496,35 @@ const ResultsList = ({loading}) => {
     }
 
     return newSortedResults;
-  }, [activeStringFilters]);
+  }, [activeEntityFilters]);
 
-  const calculateFacetCounts = (filteredResults, rawResults, negatedResults, activeFacets, negatedFacets, tagSetterMethod) => {
+  const genPathFilterState = (summary) => {
+    const filterState = {};
+    for (let pid of Object.keys(summary.paths)) {
+      filterState[pid] = false;
+    }
+
+    return filterState;
+  }
+
+  const updatePathFilterState = (pathFilterState, pathRanks, unrankedIsFiltered) => {
+    for (let pathRank of pathRanks) {
+      const pid = pathRank.path.id;
+      if (pathRank.support.length !== 0) {
+        updatePathFilterState(pathFilterState, pathRank.support, unrankedIsFiltered);
+        let filterIndirect = true;
+        for (let supportRank of pathRank.support) {
+          const supportPid = supportRank.path.id;
+          filterIndirect = filterIndirect && pathFilterState[supportPid];
+        }
+        pathFilterState[pid] = filterIndirect;
+      } else {
+        pathFilterState[pid] = (pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered));
+      }
+    }
+  }
+
+  const calculateFacetCounts = (filteredResults, summary, negatedResults, activeFacets, negatedFacets, tagSetterMethod) => {
     // Function that adds the tag counts when a certain condition (predicate) is met
     const addTagCountsWhen = (countedTags, result, predicate) => {
       for(const tag of result.tags) {
@@ -514,14 +545,14 @@ const ResultsList = ({loading}) => {
     }
 
     // Create a list of tags from the master tag list provided by the backend
-    const countedTags = cloneDeep(rawResults.data.tags);
-    const activeFamilies = new Set(activeFacets.map(f => facetFamily(f.type)));
+    const countedTags = cloneDeep(summary.data.tags);
+    const activeFamilies = new Set(activeFacets.map(facet => filtering.filterFamily(facet)));
     for(const result of filteredResults) {
       // Determine the distance between a result's facets and the facet selection
       const resultFamilies = new Set();
       for (const facet of activeFacets) {
-        if (result.tags.includes(facet.type)) {
-          resultFamilies.add(facetFamily(facet.type));
+        if (result.tags.includes(facet.id)) {
+          resultFamilies.add(filtering.filterFamily(facet));
         }
       }
 
@@ -536,8 +567,8 @@ const ResultsList = ({loading}) => {
           return !resultFamilies.has(family);
         })[0];
 
-        addTagCountsWhen(countedTags, result, (tag) => {
-          return facetFamily(tag) === missingFamily;
+        addTagCountsWhen(countedTags, result, (tagID) => {
+          return filtering.getTagFamily(tagID) === missingFamily;
         });
       }
       // Otherwise skip this result
@@ -545,9 +576,9 @@ const ResultsList = ({loading}) => {
 
     // Count all results that have a matching negated facet
     for (const result of negatedResults) {
-      addTagCountsWhen(countedTags, result, (tag) => {
+      addTagCountsWhen(countedTags, result, (tagID) => {
         return negatedFacets.reduce((acc, facet) => {
-          return (tag === facet.type) || acc;
+          return (tagID === facet.id) || acc;
         }, false);
       });
     }
@@ -580,30 +611,27 @@ const ResultsList = ({loading}) => {
     handlePageClick({selected: 0}, newItemsPerPage, resultsLength);
   }
 
-  const filterAndFacet = (facetsAndFilters, stringFilters, filteredResults, originalResults, rawResults) => {
-    const filterResults = (filters, stringFilters, originalResults, resultPathRanks) => {
+  const applyFilters = (filters, entityFilters, filteredResults, originalResults, summary, pathFilterState) => {
+    const filterResults = (filters, entityFilters, originalResults, resultPathRanks) => {
       const filteredResults = [];
       const negatedResults = [];
       /*
         For each result, check against each filter. If any filter is not met,
         skip that result.
       */
-      for(let result of originalResults) {
-        const pathRanks = result.compressedPaths.map((p) => { return { rank: 0, path: p }; });
+      for (let result of originalResults) {
+        const pathRanks = result.compressedPaths.map((p) => makePathRank(p));
         let addResult = true;
-        for(const filter of filters) {
-          if ((isEvidenceFilter(filter) && !(filter.value <= result.evidence.length))) {
+        for (const filter of filters) {
+          if (filtering.isEntityFilter(filter) &&
+              filtering.isExclusion(filter) === findStringMatch(result, filter.value, pathRanks)) {
             addResult = false;
+            negatedResults.push(result);
             break;
           }
 
-          if((isTextFilter(filter) && !isExclusion(filter) && !findStringMatch(result, filter.value, pathRanks)) ||
-            (isTextFilter(filter) && isExclusion(filter) && findStringMatch(result, filter.value, pathRanks))){
-            addResult = false;
-            break;
-          }
-
-          if (isFacet(filter) && result.tags.includes(filter.type)) {
+          if (filtering.isResultFilter(filter) &&
+              filtering.isExclusion(filter) === result.tags.includes(filter.id)) {
             addResult = false;
             negatedResults.push(result);
             break;
@@ -616,24 +644,26 @@ const ResultsList = ({loading}) => {
         }
       }
 
-      let newStringFilters = [];
-      for(const filter of filters) {
+      const newEntityFilters = [];
+      for (const filter of filters) {
         // String filters with identical values shouldn't be added to the activeFilters array,
         // so we don't have to check for duplicate values here, just for the str tag.
-        if(isTextFilter(filter)) {
-          newStringFilters.push(filter.value);
+        if (filtering.isEntityFilter(filter)) {
+          newEntityFilters.push(filter.value);
         }
       }
 
-      // if the new set of filters don't match the current ones, call setActiveStringFilters to update them
-      if(!(newStringFilters.length === stringFilters.length && newStringFilters.every((value, index) => value === stringFilters[index])))
-        setActiveStringFilters(newStringFilters);
+      // if the new set of filters don't match the current ones, call setActiveEntityFilters to update them
+      if (!(newEntityFilters.length === entityFilters.length &&
+            newEntityFilters.every((value, index) => value === entityFilters[index]))) {
+        setActiveEntityFilters(newEntityFilters);
+      }
 
       // Set the formatted results to the newly filtered results
       return [filteredResults, negatedResults];
     }
 
-    const facetResults = (facets, filteredResults, resultPathRanks) => {
+    const facetResults = (resultFacets, pathFilters, filteredResults, resultPathRanks) => {
       const intersect = (a, b) => { return a && b; };
       const union = (a, b) => { return a || b; };
       const facetedResults = [];
@@ -642,30 +672,31 @@ const ResultsList = ({loading}) => {
         let addResult = true;
         let isInter = null;
         let combine = null;
-        let lastFacetType = '';
-        for (const facet of facets) {
-          isInter = (!hasSameFacetFamily(lastFacetType, facet.type));
+        let lastFacet = null;
+        for (const resFacet of resultFacets) {
+          isInter = (!filtering.hasSameFamily(lastFacet, resFacet));
           if (isInter) {
-            // We went through an entire facet group with no match
-            if (!addResult) {
-              break;
-            }
-
-            lastFacetType = facet.type;
+            if (!addResult) break; // We went through an entire facet group with no match
+            lastFacet = resFacet;
             combine = intersect;
           } else {
             combine = union;
           }
 
-          addResult = combine(addResult, result.tags.includes(facet.type));
-          updatePathRankByTag(result, facet.type, resultPathRanks[resultIndex]);
+          addResult = combine(addResult, result.tags.includes(resFacet.id));
         }
 
         if (addResult) {
-          const newResult = cloneDeep(result);
           const pathRanks = resultPathRanks[resultIndex];
-          pathRanks.sort((a, b) => { return a.rank - b.rank; });
-          newResult.compressedPaths = pathRanks.map((pr) => { return pr.path; });
+          for (let i = 0; i < result.compressedPaths.length; i++) {
+            const path = result.compressedPaths[i];
+            const pathRank = pathRanks[i];
+            updatePathRanks(path, pathRank, pathFilters);
+          }
+
+          const newResult = cloneDeep(result);
+          pathRankSort(pathRanks);
+          newResult.compressedPaths = genRankedPaths(pathRanks);
           facetedResults.push(newResult);
         }
 
@@ -675,31 +706,79 @@ const ResultsList = ({loading}) => {
       return facetedResults;
     }
 
-    // If there are no active filters or facets, get the full result set and reset the activeStringFilters
-    if(facetsAndFilters.length === 0) {
-      if(stringFilters.length > 0) {
-        setActiveStringFilters([]);
+    const filterResultsByPathFilterState = (results, pathFilterState) => {
+      let anyFilteredPaths = false;
+      for (let filterState of Object.values(pathFilterState)) {
+        anyFilteredPaths = anyFilteredPaths || filterState;
       }
 
-      calculateFacetCounts(filteredResults, rawResults, [], [], [], setAvailableTags);
+      if (!anyFilteredPaths) return results;
+      const filteredResults = [];
+      for (let result of results) {
+        let filterResult = true;
+        for (let path of result.paths) {
+          filterResult = filterResult && pathFilterState[path.id];
+        }
+
+        if (!filterResult) {
+          filteredResults.push(result);
+        }
+      }
+
       return filteredResults;
     }
 
-    const facets = facetsAndFilters.filter((f) => { return isFacet(f) && !isExclusion(f) });
-    const negatedFacets = facetsAndFilters.filter((f) => { return isFacet(f) && isExclusion(f) });
-    const filters = facetsAndFilters.filter(f => {
-      return isTextFilter(f) || isEvidenceFilter(f) || (isExclusion(f) && isFacet(f));
-    });
+    const genRankedPaths = (pathRanks) => {
+      return pathRanks.map((pr) => {
+        if (pr.support.length > 1) {
+          const path = pr.path.path;
+          for (const item of path.subgraph) {
+            if (hasSupport(item)) {
+              item.support = genRankedPaths(pr.support);
+            }
+          }
+        }
 
+        return pr.path;
+      });
+    }
+
+    // If there are no active filters or facets, get the full result set and reset the activeEntityFilters
+    if (filters.length === 0) {
+      if (entityFilters.length > 0) {
+        setActiveEntityFilters([]);
+      }
+
+      pathFilterState = genPathFilterState(summary.data);
+      calculateFacetCounts(filteredResults, summary, [], [], [], setAvailableTags);
+      return [filteredResults, pathFilterState];
+    }
+
+    let [resultFilters, pathFilters, globalFilters] = filtering.groupFilterByType(filters);
+    const resultFacets = resultFilters.filter((f) => !filtering.isExclusion(f));
+    const negatedResultFacets = resultFilters.filter((f) => filtering.isExclusion(f));
+    resultFilters = negatedResultFacets.concat(globalFilters);
     const resultPathRanks = [];
-    let [results, negatedResults] = filterResults(filters, stringFilters, originalResults, resultPathRanks);
-    calculateFacetCounts(results, rawResults, negatedResults, facets, negatedFacets, setAvailableTags);
-    results = facetResults(facets, results, resultPathRanks);
-    
-    if(currentPage !== 0)
-      handlePageReset(false, results.length);
+    let [results, negatedResults] = filterResults(resultFilters, entityFilters, originalResults, resultPathRanks);
+    calculateFacetCounts(results, summary, negatedResults, resultFacets, negatedResultFacets, setAvailableTags);
+    results = facetResults(resultFacets, pathFilters, results, resultPathRanks);
+    let unrankedIsFiltered = false;
+    for (let pathRanks of resultPathRanks) {
+      for (let pathRank of pathRanks) {
+        unrankedIsFiltered = unrankedIsFiltered || (pathRank.rank < 0);
+      }
+    }
 
-    return results;
+    for (let pathRanks of resultPathRanks) {
+      updatePathFilterState(pathFilterState, pathRanks, unrankedIsFiltered);
+    }
+
+    results = filterResultsByPathFilterState(results, pathFilterState);
+    if(currentPage !== 0) {
+      handlePageReset(false, results.length);
+    }
+
+    return [results, pathFilterState];
   }
 
   // Handle the addition and removal of individual filters. Keep the invariant that
@@ -707,7 +786,7 @@ const ResultsList = ({loading}) => {
   const handleFilter = (filter) => {
     let indexes = [];
     for(const [i, activeFilter] of activeFilters.entries()) {
-      if (activeFilter.type === filter.type) {
+      if (activeFilter.id === filter.id) {
         indexes.push(i);
       }
     }
@@ -718,7 +797,7 @@ const ResultsList = ({loading}) => {
       newActiveFilters.push(filter);
       newActiveFilters.sort(filterCompare);
       setActiveFilters(newActiveFilters);
-      handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current)
+      handleUpdateResults(newActiveFilters, activeEntityFilters, rawResults.current, originalResults.current, false, currentSortString.current)
       return;
     }
 
@@ -738,7 +817,7 @@ const ResultsList = ({loading}) => {
         addFilter = false;
         break;
       // If the values don't match and it's not a string search, update the value
-      } else if (!isTextFilter(filter)) {
+      } else if (!filtering.isEntityFilter(filter)) {
         newActiveFilters = newActiveFilters.map((activeFilter, i) => {
           if(i === index) {
             activeFilter.value = filter.value;
@@ -759,7 +838,7 @@ const ResultsList = ({loading}) => {
     }
 
     setActiveFilters(newActiveFilters);
-    let newFormattedResults = handleUpdateResults(newActiveFilters, activeStringFilters, rawResults.current, originalResults.current, false, currentSortString.current);
+    let newFormattedResults = handleUpdateResults(newActiveFilters, activeEntityFilters, rawResults.current, originalResults.current, false, currentSortString.current);
     handlePageReset(false, newFormattedResults.length);
   }
 
@@ -847,16 +926,12 @@ const ResultsList = ({loading}) => {
             !isLoading &&
             <>
               <ResultsFilter
-                startIndex={itemOffset+1}
-                endIndex={endResultIndex}
-                formattedCount={formattedResults.length}
-                totalCount={originalResults.current.length}
-                onFilter={handleFilter}
-                onClearAll={()=>handleClearAllFilters(activeStringFilters, rawResults.current, originalResults.current, setActiveFilters, currentSortString.current, handleUpdateResults)}
                 activeFilters={activeFilters}
-                availableTags={availableTags}
+                onFilter={handleFilter}
+                onClearAll={()=>handleClearAllFilters(activeEntityFilters, rawResults.current, originalResults.current, setActiveFilters, currentSortString.current, handleUpdateResults)}
                 expanded={filtersExpanded}
                 setExpanded={setFiltersExpanded}
+                availableTags={availableTags}
               />
               <div>
                 <ResultsListHeader
@@ -892,7 +967,7 @@ const ResultsList = ({loading}) => {
                           onClick={()=>{
                             let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
                             currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                           }}
                         >
                           Name
@@ -903,7 +978,7 @@ const ResultsList = ({loading}) => {
                           onClick={()=>{
                             let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
                             currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                           }}
                         >
                           Evidence
@@ -914,7 +989,7 @@ const ResultsList = ({loading}) => {
                           onClick={()=>{
                             let sortString = (isSortedByPaths === null) ? 'pathsHighLow' : (isSortedByPaths) ? 'pathsHighLow' : 'pathsLowHigh';
                             currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                           }}
                           data-tooltip-id="paths-tooltip"
                         >
@@ -930,7 +1005,7 @@ const ResultsList = ({loading}) => {
                           onClick={()=>{
                             let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
                             currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeStringFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
                           }}
                           data-tooltip-id="score-tooltip"
                         >
@@ -965,9 +1040,10 @@ const ResultsList = ({loading}) => {
                               key={item.id}
                               type={initPresetTypeObject}
                               item={item}
+                              pathFilterState={pathFilterState}
                               activateEvidence={activateEvidence}
                               activateNotes={activateNotes}
-                              activeStringFilters={activeStringFilters}
+                              activeEntityFilters={activeEntityFilters}
                               zoomKeyDown={zoomKeyDown}
                               currentQueryID={currentQueryID}
                               queryNodeID={initNodeIdParam}

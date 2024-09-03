@@ -146,6 +146,8 @@ img {
 .table-head {
   border-bottom: 1px solid $midGray;
   border-radius: 5px 5px 0 0;
+  padding-right: 10px;
+  background-color: $purpleTwo;  
   .head {
     display: flex;
     align-items: center;
@@ -201,9 +203,6 @@ img {
   font-size: $bodyTwoSize;
   border-radius: $defaultBorderRadius;
   display: grid;
-  .table-head {
-    background-color: $purpleTwo;  
-  }
   .table-head tr, .table-items .table-item {
     display: grid;
     grid-template-columns: 1fr .5fr 1fr 1fr .75fr;
@@ -249,6 +248,7 @@ img {
   }
 }
 .table-items {
+  padding-right: 10px;
   &>tr:nth-child(even), .table-item:nth-child(even){
     background-color: $lightGray;
   }

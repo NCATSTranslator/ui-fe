@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo, FC, RefObject } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject, 
+import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject,
   isPublication, isClinicalTrial, isMiscPublication, getPathsCount } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
@@ -22,21 +22,22 @@ import { useSelector } from 'react-redux';
 import { currentUser } from '../../Redux/rootSlice';
 import { displayScore } from '../../Utilities/scoring';
 import { QueryType } from '../../Utilities/queryTypes';
-import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject } from '../../Types/results';
+import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject, PathFilterState } from '../../Types/results';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
 import { isEqual } from 'lodash';
 import Tabs from '../Tabs/Tabs';
 import Tab from '../Tabs/Tab';
+import * as filtering from '../../Utilities/filterFunctions';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
 const sortTagsBySelected = (
   a: string,
   b: string,
-  selected: [{type: string;}] | Filter[]
+  selected: [{id: string;}] | Filter[]
 ): number => {
-  const aExistsInSelected = selected.some((item) => item.type === a);
-  const bExistsInSelected = selected.some((item) => item.type === b);
+  const aExistsInSelected = selected.some((item) => item.id === a);
+  const bExistsInSelected = selected.some((item) => item.id === b);
 
   if (aExistsInSelected && bExistsInSelected) return 0;
   if (aExistsInSelected) return -1;
@@ -49,7 +50,7 @@ interface ResultsItemProps {
   activateEvidence?: (item: ResultItem, edgeGroup: FormattedEdgeObject | null, path: PathObjectContainer) => void;
   activateNotes?: (nameString: string, id: string | number, item: ResultItem) => void;
   activeFilters: Filter[];
-  activeStringFilters: string[];
+  activeEntityFilters: string[];
   availableTags: {[key: string]: Tag};
   bookmarkAddedToast?: () => void;
   bookmarkRemovedToast?: () => void;
@@ -62,7 +63,7 @@ interface ResultsItemProps {
   setShareModalOpen: (state: boolean) => void;
   setShareResultID: (state: string) => void;
   handleBookmarkError?: () => void;
-  handleFilter: (tagObject: Tag) => void;
+  handleFilter: (tag: Tag) => void;
   hasNotes: boolean;
   item: ResultItem;
   key: string;
@@ -71,6 +72,7 @@ interface ResultsItemProps {
   queryNodeLabel: string;
   rawResults: RawResult[];
   type: QueryType;
+  pathFilterState: PathFilterState;
   zoomKeyDown: boolean;
   isInUserSave?: boolean;
   isEven: boolean;
@@ -81,7 +83,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     activateEvidence = () => {},
     activateNotes = () => {},
     activeFilters,
-    activeStringFilters,
+    activeEntityFilters,
     availableTags,
     bookmarkAddedToast = () => {},
     bookmarkRemovedToast = () => {},
@@ -103,6 +105,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     queryNodeLabel,
     rawResults,
     type,
+    pathFilterState,
     zoomKeyDown,
     isInUserSave = false,
     isEven = false,
@@ -115,24 +118,24 @@ const ResultsItem: FC<ResultsItemProps> = ({
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
 
-  const publicationCount = (!!item.evidenceCounts) 
+  const publicationCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.publicationCount
-    : (!!item.evidence && !!item.evidence.publications) 
+    : (!!item.evidence && !!item.evidence.publications)
       ? Object.values(item.evidence.publications).filter(item => isPublication(item)).length
       : 0;
-  const clinicalTrialCount = (!!item.evidenceCounts) 
+  const clinicalTrialCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.clinicalTrialCount
-    : (!!item.evidence && !!item.evidence.publications) 
+    : (!!item.evidence && !!item.evidence.publications)
       ? Object.values(item.evidence.publications).filter(item => isClinicalTrial(item)).length
       : 0;
-  const miscCount = (!!item.evidenceCounts) 
+  const miscCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.miscCount
-    : (!!item.evidence && !!item.evidence.publications) 
+    : (!!item.evidence && !!item.evidence.publications)
       ? Object.values(item.evidence.publications).filter(item => isMiscPublication(item)).length
       : 0;
-  const sourceCount = (!!item.evidenceCounts) 
+  const sourceCount = (!!item.evidenceCounts)
     ? item.evidenceCounts.sourceCount
-    : (!!item.evidence && !!item.evidence.distinctSources) 
+    : (!!item.evidence && !!item.evidence.distinctSources)
       ? item.evidence.distinctSources.length
       : 0;
 
@@ -308,12 +311,12 @@ const ResultsItem: FC<ResultsItemProps> = ({
     }
   }
 
-  const handleTagClick = (tagID: string, tagObject: Tag) => {
+  const handleTagClick = (tagID: string, tag: Tag) => {
     let newObj: Tag = {
-      name: tagObject.name,
+      name: tag.name,
       negated: false,
-      type: tagID,
-      value: tagObject.name
+      id: tagID,
+      value: tag.name
     };
     handleFilter(newObj);
   }
@@ -351,7 +354,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
           <span className={styles.name} >
             <Highlighter
               highlightClassName="highlight"
-              searchWords={activeStringFilters}
+              searchWords={activeEntityFilters}
               autoEscape={true}
               textToHighlight={nameString}
             />
@@ -393,19 +396,19 @@ const ResultsItem: FC<ResultsItemProps> = ({
         <span className={styles.evidenceLink}>
           <div>
               {
-                publicationCount > 0  && 
+                publicationCount > 0  &&
                 <span className={styles.info}>Publications ({publicationCount})</span>
               }
               {
-                clinicalTrialCount > 0  && 
+                clinicalTrialCount > 0  &&
                 <span className={styles.info}>Clinical Trials ({clinicalTrialCount})</span>
               }
               {
-                miscCount > 0  && 
+                miscCount > 0  &&
                 <span className={styles.info}>Misc ({miscCount})</span>
               }
               {
-                sourceCount > 0  && 
+                sourceCount > 0  &&
                 <span className={styles.info}>Sources ({sourceCount})</span>
               }
           </div>
@@ -449,27 +452,14 @@ const ResultsItem: FC<ResultsItemProps> = ({
               item.tags && roleCount > 0 && availableTags &&
               <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
                 {
-                  item.tags.toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((tagID, i) => {
-                  // item.tags.map((tagID, i) => {
-                    if(!tagID.includes("role"))
-                      return null;
-                    let tagObject = availableTags[tagID];
-                    let activeClass = (activeFilters.some((item)=> item.type === tagID && item.value === tagObject.name))
+                  item.tags.toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((fid, i) => {
+                    if (!(filtering.getTagFamily(fid) === filtering.CONSTANTS.FAMILIES.ROLE)) return null;
+                    const tag = availableTags[fid];
+                    const activeClass = (activeFilters.some((filter)=> filter.id === fid && filter.value === tag.name))
                       ? styles.active
                       : styles.inactive;
-
-                    // + X more text for tags
-                    // if(numRoles > 4 && i === 4) {
-                    //   const moreCount = numRoles - 4;
-                    //   return (
-                    //     <>
-                    //       <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
-                    //       <span className={styles.hasMore}>(+{moreCount} more)</span>
-                    //     </>
-                    //   );
-                    // }
                     return(
-                      <button key={tagID} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(tagID, tagObject)}>{tagObject.name} ({tagObject.count})</button>
+                      <button key={fid} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(fid, tag)}>{tag.name} ({tag.count})</button>
                     )
                   })
                 }
@@ -480,7 +470,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
               <p className={styles.description}>
                 <Highlighter
                   highlightClassName="highlight"
-                  searchWords={activeStringFilters}
+                  searchWords={activeEntityFilters}
                   autoEscape={true}
                   textToHighlight={item.description}
                 />
@@ -496,7 +486,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 active={isExpanded}
                 handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
                 handleActivateEvidence={handleActivateEvidence}
-                activeStringFilters={activeStringFilters}
+                activeEntityFilters={activeEntityFilters}
+                pathFilterState={pathFilterState}
               />
             </Tab>
             <Tab heading="Graph">
@@ -530,27 +521,13 @@ const ResultsItem: FC<ResultsItemProps> = ({
 // check if certain props are really different before rerendering
 const areEqualProps = (prevProps: any, nextProps: any) => {
   // Check for deep equality of the item object
-  if (!isEqual(prevProps.item, nextProps.item)) {
-    return false;
-  }
-
+  if (!isEqual(prevProps.item, nextProps.item)) return false;
   // Check other properties
-  if (!isEqual(prevProps.zoomKeyDown, nextProps.zoomKeyDown)) {
-    return false;
-  }
-  if (!isEqual(prevProps.startExpanded, nextProps.startExpanded)) {
-    return false;
-  }
-  if (!isEqual(prevProps.activeFilters, nextProps.activeFilters)) {
-    return false;
-  }
-  if (!isEqual(prevProps.activeStringFilters, nextProps.activeStringFilters)) {
-    return false;
-  }
-  if (!isEqual(prevProps.resultsComplete, nextProps.resultsComplete)) {
-    return false;
-  }
-
+  if (!isEqual(prevProps.zoomKeyDown, nextProps.zoomKeyDown)) return false;
+  if (!isEqual(prevProps.startExpanded, nextProps.startExpanded)) return false;
+  if (!isEqual(prevProps.activeFilters, nextProps.activeFilters)) return false;
+  if (!isEqual(prevProps.activeEntityFilters, nextProps.activeEntityFilters)) return false;
+  if (!isEqual(prevProps.resultsComplete, nextProps.resultsComplete)) return false;
   // If none of the conditions are met, props are equal
   return true;
 };

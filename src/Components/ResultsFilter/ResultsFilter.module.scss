@@ -20,6 +20,10 @@
    .closeButton, .clearAll, .bottom {
     transition: $defaultAnim;
   }
+  .typeHeading {
+    margin-top: 10px;
+    margin-bottom: 0px;
+  }
   &.expanded {
     width: calc(330px - $s*2);
     .bottom {
@@ -90,8 +94,8 @@
     box-shadow: none;
     white-space: nowrap;
     -webkit-user-select: none;
-    -ms-user-select: none; 
-    user-select: none; 
+    -ms-user-select: none;
+    user-select: none;
     &:hover {
       text-decoration: underline;
     }

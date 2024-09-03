@@ -18,19 +18,19 @@ interface TooltipProps {
 }
 
 const Tooltip: FC<TooltipProps> = ({
-  onClose = () => {}, 
-  children, 
-  id, 
+  onClose = () => {},
+  children,
+  id,
   anchorSelect,
-  offset, 
-  delayShow = 500, 
-  delayHide = 100, 
-  clickable = true, 
+  offset,
+  delayShow = 500,
+  delayHide = 100,
+  clickable = true,
   className = '',
   place = "top"
 }) => {
   return (
-    <ReactTooltip 
+    <ReactTooltip
       id={id}
       anchorSelect={anchorSelect}
       delayHide={delayHide}
