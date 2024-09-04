@@ -5,9 +5,6 @@
   grid-template-columns: 1fr 112px 110px 90px 90px 24px;
   padding: $m $s;
   column-gap: $s;
-  @media screen and (min-width: $desktop) {
-    grid-template-columns: 1fr 112px 110px 90px 90px 24px;
-  }
   &:nth-child(even) {
     &.highlighted {
       background-color: $lightYellow;
@@ -16,6 +13,12 @@
   &:nth-child(odd) {
     &.highlighted {
       background-color: $yellow;
+    }
+  }
+  &.pathfinder {
+    grid-template-columns: 1fr 112px 110px 90px 24px;
+    .accordionPanel {
+      grid-column: 1/6;
     }
   }
   .resultTabs {

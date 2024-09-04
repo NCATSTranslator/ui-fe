@@ -1,5 +1,5 @@
 import {createRoot} from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import Page from './Components/Page/Page';
@@ -37,7 +37,17 @@ const routes = [
   },
   {
     path: "pathfinder",
-    element: <Page title="Pathfinder"><Pathfinder /></Page>
+    element: <Outlet/>,
+    children: [
+      {
+        index: true,
+        element: <Page title="Pathfinder"><Pathfinder /></Page>,
+      },
+      {
+        path: "results",
+        element: <Page title="Pathfinder Results"><Results /></Page>
+      }
+    ]
   },
   {
     path: "design",

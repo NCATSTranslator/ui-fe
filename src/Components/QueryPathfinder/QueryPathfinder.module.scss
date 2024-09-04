@@ -3,13 +3,65 @@
 .queryPathfinder {
   background-color: $palePurple;
   height: 100%;
+  position: relative;
+  .container {
+    padding: 80px 20px 0;
+    max-width: 928px;
+  }
+  &.results {
+    .container {
+      padding: $l 0;
+    }
+  }
+  .loadingIcon {
+    opacity: 0;
+    transition: all .25s ease;
+    margin-right: 0;
+    margin-left: 10px;
+    width: $l;
+    height: $l;
+    position: absolute;
+    top: 8px;
+    right: -$l;
+    &.active {
+      opacity: 1;
+    }
+  }
+  .error {
+    color: $red;
+    text-align: center;
+  }
+  .showingResultsContainer {
+    max-width: 640px;
+    margin: 0 auto;
+    .subHeading {
+      color: $black;
+      font-weight: 700;
+      font-size: 20px;
+    }
+    .searchedTerm {
+      color: $purpleOne;
+      font-weight: 700;
+      font-size: 20px;
+      margin: 0 4px;
+      display: inline-flex;
+      align-items: center;
+      svg {
+        width: 20px;
+        height: 20px;
+        path {
+          fill: $purpleOne;
+        }
+      }
+    }
+    .shareButton {
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+  }
 }
-.container,.form {
-  max-width: 928px;
+.container, .form {
   margin: 0 auto;
-}
-.container {
-  padding: 80px 20px 0;
 }
 .h3 {
   color: $purpleTwo;
@@ -33,6 +85,7 @@
   padding: 0 $xs;
   background-color: $white;
   margin-bottom: $l;
+  max-width: 910px;
   .inputContainer {
     position: relative;
     display: flex;
@@ -43,6 +96,7 @@
     padding: 8px 12px;
     input {
       border: none;
+      outline: none;
     }
     svg path {
       fill: $darkGray;

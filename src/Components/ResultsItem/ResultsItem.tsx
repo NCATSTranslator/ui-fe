@@ -76,6 +76,7 @@ interface ResultsItemProps {
   zoomKeyDown: boolean;
   isInUserSave?: boolean;
   isEven: boolean;
+  isPathfinder?: boolean;
   resultsComplete: boolean;
 }
 
@@ -109,6 +110,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     zoomKeyDown,
     isInUserSave = false,
     isEven = false,
+    isPathfinder = false,
     resultsComplete = false
   }) => {
   const user = useSelector(currentUser);
@@ -178,6 +180,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const pathsCount: number = getPathsCount(formattedPaths.current);
   const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
   const nameString: string = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
+  const pathfinderNameArray = (isPathfinder) ? item.name.split("/") : null; 
 
   const [itemGraph, setItemGraph] = useState(null);
 
@@ -342,24 +345,17 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }, [item, hasNotes]);
 
   return (
-    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef} data-result-name={nameString}>
+    <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef} data-result-name={nameString}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <span className={styles.icon}>{icon}</span>
-        {
-          item.highlightedName &&
-          <span className={styles.name} dangerouslySetInnerHTML={{__html: item.highlightedName}} ></span>
-        }
-        {
-          !item.highlightedName &&
-          <span className={styles.name} >
-            <Highlighter
-              highlightClassName="highlight"
-              searchWords={activeEntityFilters}
-              autoEscape={true}
-              textToHighlight={nameString}
-            />
-          </span>
-        }
+        <span className={styles.name} >
+          <Highlighter
+            highlightClassName="highlight"
+            searchWords={activeEntityFilters}
+            autoEscape={true}
+            textToHighlight={nameString}
+          />
+        </span>
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${!!isEven && styles.even}`}>
         {
@@ -419,11 +415,14 @@ const ResultsItem: FC<ResultsItemProps> = ({
           <span className={styles.pathsNum}>{ pathsCount } {pathsCount > 1 ? "Paths" : "Path"}</span>
         </span>
       </div>
-      <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-        <span className={styles.score}>
-          <span className={styles.scoreNum}>{resultsComplete ? item.score === null ? '0.00' : displayScore(item.score.main) : "Processing..." }</span>
-        </span>
-      </div>
+      {
+        !isPathfinder &&
+        <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
+          <span className={styles.score}>
+            <span className={styles.scoreNum}>{resultsComplete ? item.score === null ? '0.00' : displayScore(item.score.main) : "Processing..." }</span>
+          </span>
+        </div>
+      }
       {/* <CSVLink
         className={styles.downloadButton}
         data={csvData}

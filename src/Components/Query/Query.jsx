@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef, useMemo, useCallback} from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import {  useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import QueryBar from "../QueryBar/QueryBar";
 import ExampleQueryList from "../ExampleQueryList/ExampleQueryList";
 import QuerySelect from "../QuerySelect/QuerySelect";
@@ -19,12 +19,11 @@ import { getEntityLink, generateEntityLink, getLastItemInArray, getFormattedDate
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import ShareIcon from '../../Icons/Buttons/Link.svg?react';
 import Button from "../Core/Button";
-import ShareModal from '../Modals/ShareModal';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import styles from './Query.module.scss';
 import { API_PATH_PREFIX } from "../../Utilities/userApi";
 
-const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription, data}) => {
+const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelParam, initNodeIdParam, nodeDescription, setShareModalFunction}) => {
 
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
@@ -446,7 +445,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
                 <div className="right">
                   <Button 
                     isSecondary
-                    handleClick={()=>{data.setShareModalOpen(true)}}
+                    handleClick={()=>{setShareModalFunction(true)}}
                   >
                     <ShareIcon/>Share Result Set
                   </Button>
@@ -457,21 +456,12 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
         </AutoHeight>
       </div>
       <div className={styles.panels}>
-          {results &&
-          isLoading &&
-            <div className="loading-results">
-            </div>
-          }
+        {results &&
+        isLoading &&
+          <div className="loading-results">
+          </div>
+        }
       </div>
-      {
-        results &&
-        <ShareModal
-          isOpen={data.shareModalOpen}
-          onClose={()=>data.setShareModalOpen(false)}
-          qid={data.currentQueryID}
-          shareResultID={data.shareResultID}
-        />
-      }
     </>
   );
 }

@@ -33,7 +33,9 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "../BookmarkToasts/BookmarkToasts";
 import NotesModal from "../Modals/NotesModal";
+import ShareModal from "../Modals/ShareModal";
 import ResultFocusModal from "../Modals/ResultFocusModal";
+import QueryPathfinder from "../QueryPathfinder/QueryPathfinder";
 
 const ResultsList = ({loading}) => {
 
@@ -49,6 +51,9 @@ const ResultsList = ({loading}) => {
   const initPresetTypeObject = (initPresetTypeID)
     ? queryTypes.find(type => type.id === parseInt(initPresetTypeID))
     : null;
+
+  const isPathfinder = (initPresetTypeID === "p");
+  
   const initNodeLabelParam = getDataFromQueryVar("l");
   const initNodeIdParam = getDataFromQueryVar("i");
   const initResultIdParam = getDataFromQueryVar("r");
@@ -865,6 +870,12 @@ const ResultsList = ({loading}) => {
         closeOnClick={false}
         closeButton={false}
       />
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={()=>setShareModalOpen(false)}
+        qid={currentQueryID}
+        shareResultID={shareResultID}
+      />
       <NotesModal
         isOpen={notesOpen}
         onClose={()=>(setNotesOpen(false))}
@@ -894,22 +905,25 @@ const ResultsList = ({loading}) => {
         sharedItem={sharedItem}
       />
       <div className={styles.resultsList}>
-        <Query
-          results
-          loading={isLoading}
-          initPresetTypeID={initPresetTypeID}
-          initPresetTypeObject={initPresetTypeObject}
-          initNodeIdParam={initNodeIdParam}
-          initNodeLabelParam={initNodeLabelParam}
-          nodeDescription={nodeDescription}
-          setShareModalFunction={setShareModalOpen}
-          data={{
-            shareModalOpen: shareModalOpen,
-            setShareModalOpen: setShareModalOpen,
-            shareResultID: shareResultID.current,
-            currentQueryID: currentQueryID,
-          }}
-        />
+        {
+          isPathfinder
+          ?
+            <QueryPathfinder 
+              results
+              setShareModalFunction={setShareModalOpen}
+            />
+          :
+            <Query
+              results
+              loading={isLoading}
+              initPresetTypeID={initPresetTypeID}
+              initPresetTypeObject={initPresetTypeObject}
+              initNodeIdParam={initNodeIdParam}
+              initNodeLabelParam={initNodeLabelParam}
+              nodeDescription={nodeDescription}
+              setShareModalFunction={setShareModalOpen}
+            />
+        }
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
@@ -957,8 +971,7 @@ const ResultsList = ({loading}) => {
                     setFiltersExpanded: setFiltersExpanded
                   }}
                 />
-
-                <div className={styles.resultsTableContainer}>
+                <div className={`${styles.resultsTableContainer} ${isPathfinder ? styles.pathfinder : ''}`}>
                   <div className={styles.resultsTable}>
                     <div className={styles.tableBody}>
                       <div className={`${styles.tableHead}`}>
@@ -1000,22 +1013,25 @@ const ResultsList = ({loading}) => {
                             <span className={styles.scoreSpan}>Each path represents a discrete series of relationships that connect the result to the searched-for entity.</span>
                           </Tooltip>
                         </div>
-                        <div
-                          className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
-                          onClick={()=>{
-                            let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
-                            currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                          }}
-                          data-tooltip-id="score-tooltip"
-                        >
-                          Score
-                          <Alert/>
-                          <ChevUp className={styles.chev}/>
-                          <Tooltip id="score-tooltip">
-                            <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
-                          </Tooltip>
-                        </div>
+                        {
+                          !isPathfinder &&
+                          <div
+                            className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
+                            onClick={()=>{
+                              let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
+                              currentSortString.current = sortString;
+                              handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                            }}
+                            data-tooltip-id="score-tooltip"
+                          >
+                            Score
+                            <Alert/>
+                            <ChevUp className={styles.chev}/>
+                            <Tooltip id="score-tooltip">
+                              <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
+                            </Tooltip>
+                          </div>
+                        }
                         <div></div>
                       </div>
                       {
@@ -1036,6 +1052,7 @@ const ResultsList = ({loading}) => {
                           return (
                             <ResultsItem
                               isEven={i % 2 !== 0}
+                              isPathfinder={isPathfinder}
                               rawResults={rawResults.current}
                               key={item.id}
                               type={initPresetTypeObject}

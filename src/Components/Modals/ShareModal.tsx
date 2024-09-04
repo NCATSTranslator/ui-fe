@@ -53,12 +53,12 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
   const qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);
   const qidURL = encodeURI(`${window.location.origin}/${qidPath}`);
   
-  useEffect(() => {
-    if(window.location.pathname.includes("results") && !isResultsUrlSet.current && qidURL) {
-      isResultsUrlSet.current = true;
-      window.history.replaceState(null, "Results", qidPath);
-    }
-  }, [qidPath, qidURL]);
+  // useEffect(() => {
+  //   if(window.location.pathname.includes("results") && !isResultsUrlSet.current && qidURL) {
+  //     isResultsUrlSet.current = true;
+  //     window.history.replaceState(null, "Results", qidPath);
+  //   }
+  // }, [qidPath, qidURL]);
 
   return (
     <Modal 
