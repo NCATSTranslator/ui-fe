@@ -13,6 +13,12 @@
       padding: $l 0;
     }
   }
+  .buttons {
+    button {
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+  }
   .loadingIcon {
     opacity: 0;
     transition: all .25s ease;

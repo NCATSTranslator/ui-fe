@@ -21,6 +21,7 @@ import QuestionIcon from '../../Icons/Buttons/Search.svg?react';
 import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "../../Icons/Queries/PathfinderDivider.svg?react";
 import ShareIcon from '../../Icons/Buttons/Link.svg?react';
+import SwapIcon from '../../Icons/Buttons/Swap.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 
 type QueryPathfinderProps = {
@@ -198,6 +199,16 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
     setInputTwoText("");
   }
 
+  const swapTerms = () => {
+    const prevItemOne = queryItemOne;
+    setQueryItemOne(queryItemTwo);
+    setQueryItemTwo(prevItemOne);
+
+    const prevTextOne = inputOneText;
+    setInputOneText(inputTwoText);
+    setInputTwoText(prevTextOne);
+  }
+
   return (
     <div className={`${styles.queryPathfinder} ${results && styles.results}`}>
       <ToastContainer
@@ -250,6 +261,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
             <>
               <h3 className={styles.h3}>Pathfinder finds associations between genes, diseases, and chemicals</h3>
               <h6 className={styles.h6}>Results will show paths beginning with the first search term and ending with the second</h6>
+              <div className={styles.buttons}>
+                <Button handleClick={swapTerms} isSecondary><SwapIcon/>Swap Terms</Button>
+              </div>
               {
                 isError &&
                 <p className={styles.error}>{errorText}</p>
