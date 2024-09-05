@@ -145,7 +145,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
     let queryJson = JSON.stringify({
       type: 'pathfinder',
       subject: {id: itemOne.id, category: itemOne.types[0]},
-      object: {id: itemOne.id, category: itemOne.types[0]}
+      object: {id: itemTwo.id, category: itemTwo.types[0]}
     });
 
     // submit query to /query
