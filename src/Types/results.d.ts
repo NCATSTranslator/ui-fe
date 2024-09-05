@@ -73,7 +73,8 @@ export type ResultItem = {
   rawResult: RawResult;
   score: Score;
   scores: Score[];
-  subjectNode: FormattedNodeObject;
+  subjectNode: RawNode;
+  objectNode: RawNode;
   tags: string[];
   type: string;
 }

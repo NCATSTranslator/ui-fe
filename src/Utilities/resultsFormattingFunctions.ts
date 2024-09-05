@@ -525,7 +525,7 @@ export const getSummarizedResults = (results: RawResultsContainer, confidenceWei
     let formattedPaths = getFormattedPaths(item.paths, results, []);
     let compressedPaths = getCompressedPaths(formattedPaths, true);
     let evidenceCounts = calculateEvidenceCounts(formattedPaths);
-    let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNodeName);
+    let itemName = (item.drug_name !== null) ? item.drug_name : subjectNodeName;
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
     let itemID = item.id;
     let bookmarkID = (bookmarks === null) ? null : checkBookmarksForItem(itemID, bookmarks);
@@ -535,6 +535,7 @@ export const getSummarizedResults = (results: RawResultsContainer, confidenceWei
     let formattedItem = {
       id: itemID,
       subjectNode: subjectNode,
+      objectNode: objectNode,
       type: type,
       name: itemName,
       paths: formattedPaths,

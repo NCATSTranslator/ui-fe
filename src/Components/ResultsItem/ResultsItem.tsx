@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo, FC, RefObject } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject,
+import { formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject,
   isPublication, isClinicalTrial, isMiscPublication, getPathsCount } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
@@ -28,6 +28,7 @@ import { isEqual } from 'lodash';
 import Tabs from '../Tabs/Tabs';
 import Tab from '../Tabs/Tab';
 import * as filtering from '../../Utilities/filterFunctions';
+import ResultsItemName from '../ResultsItemName/ResultsItemName';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -46,7 +47,7 @@ const sortTagsBySelected = (
   return 0;
 };
 
-interface ResultsItemProps {
+type ResultsItemProps = {
   activateEvidence?: (item: ResultItem, edgeGroup: FormattedEdgeObject | null, path: PathObjectContainer) => void;
   activateNotes?: (nameString: string, id: string | number, item: ResultItem) => void;
   activeFilters: Filter[];
@@ -115,7 +116,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }) => {
   const user = useSelector(currentUser);
 
-  let icon: JSX.Element = getIcon(item.type);
   let roleCount: number = (item.tags)
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
@@ -180,7 +180,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const pathsCount: number = getPathsCount(formattedPaths.current);
   const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
   const nameString: string = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
-  const pathfinderNameArray = (isPathfinder) ? item.name.split("/") : null; 
 
   const [itemGraph, setItemGraph] = useState(null);
 
@@ -347,15 +346,13 @@ const ResultsItem: FC<ResultsItemProps> = ({
   return (
     <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef} data-result-name={nameString}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
-        <span className={styles.icon}>{icon}</span>
-        <span className={styles.name} >
-          <Highlighter
-            highlightClassName="highlight"
-            searchWords={activeEntityFilters}
-            autoEscape={true}
-            textToHighlight={nameString}
-          />
-        </span>
+        <ResultsItemName
+          isPathfinder
+          item={item}
+          activeEntityFilters={activeEntityFilters}
+          nameString={nameString}
+          resultsItemStyles={styles}
+        />
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${!!isEven && styles.even}`}>
         {
