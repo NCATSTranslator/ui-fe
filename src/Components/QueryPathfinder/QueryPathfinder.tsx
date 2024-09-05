@@ -16,7 +16,7 @@ import { defaultQueryFormatter, diseaseQueryFormatter } from '../../Utilities/qu
 import { API_PATH_PREFIX } from "../../Utilities/userApi";
 import { getPathfinderResultsShareURLPath } from '../../Utilities/resultsInteractionFunctions';
 import { ToastContainer, toast, Slide } from 'react-toastify';
-import { generateEntityLink, getDataFromQueryVar } from '../../Utilities/utilities';
+import { generateEntityLink, getDataFromQueryVar, getIcon } from '../../Utilities/utilities';
 import QuestionIcon from '../../Icons/Buttons/Search.svg?react';
 import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "../../Icons/Queries/PathfinderDivider.svg?react";
@@ -70,12 +70,12 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
 
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = useCallback((e: string, isFirstBar:boolean) => {
-    let setAutocompleteLoading = (isFirstBar) ? setAutocompleteLoadingOne: setAutocompleteLoadingTwo;
-
     if(isFirstBar) {
+      setQueryItemOne(null);
       setInputOneText(e);
       delayedQuery(e, setAutocompleteLoadingOne, setAutoCompleteItemsOne, autocompleteFunctions.current, limitTypes.current, limitPrefixes.current, nameResolverEndpoint);
     } else {
+      setQueryItemTwo(null);
       setInputTwoText(e);
       delayedQuery(e, setAutocompleteLoadingTwo, setAutoCompleteItemsTwo, autocompleteFunctions.current, limitTypes.current, limitPrefixes.current, nameResolverEndpoint);
     }
@@ -279,9 +279,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
                   <TextInput 
                     placeholder="Enter First Search Term" 
                     handleChange={(e) => handleQueryItemChange(e, true)} 
-                    className={styles.input}
+                    className={`${styles.input} ${!!queryItemOne && styles.selected}`}
                     value={inputOneText}
-                    iconLeft={<QuestionIcon/>}
+                    iconLeft={!!queryItemOne ? getIcon(queryItemOne.types[0]) : <QuestionIcon/>}
                   />
                   <Autocomplete 
                     isLoading={autocompleteLoadingOne}
@@ -294,9 +294,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
                   <TextInput 
                     placeholder="Enter Second Search Term" 
                     handleChange={(e) => handleQueryItemChange(e, false)} 
-                    className={styles.input}
+                    className={`${styles.input} ${!!queryItemTwo && styles.selected}`}
                     value={inputTwoText}
-                    iconLeft={<QuestionIcon/>}
+                    iconLeft={!!queryItemTwo ? getIcon(queryItemTwo.types[0]) : <QuestionIcon/>}
                     iconRight
                   />
                   <Autocomplete 

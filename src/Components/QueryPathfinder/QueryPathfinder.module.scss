@@ -27,8 +27,8 @@
     width: $l;
     height: $l;
     position: absolute;
-    top: 8px;
-    right: -$l;
+    top: 14px;
+    right: -40px;
     &.active {
       opacity: 1;
     }
@@ -92,6 +92,7 @@
   background-color: $white;
   margin-bottom: $l;
   max-width: 910px;
+  position: relative;
   .inputContainer {
     position: relative;
     display: flex;
@@ -100,6 +101,11 @@
     margin: 0;
     width: 100%;
     padding: 8px 12px;
+    &.selected {
+      input {
+        font-weight: 600;
+      }
+    }
     input {
       border: none;
       outline: none;
