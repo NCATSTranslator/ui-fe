@@ -603,3 +603,8 @@ export const formatPublicationSourceName = (sourceName: string): string => {
   }
   return newSourceName;
 }
+
+export const getFormattedPathfinderName = (name: string) => {
+  const formattedName = name.replace(/([A-Z])/g, ' $1').trim()
+  return formattedName;
+}

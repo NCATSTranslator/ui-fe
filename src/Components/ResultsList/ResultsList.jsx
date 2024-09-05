@@ -903,6 +903,7 @@ const ResultsList = ({loading}) => {
         }}
         onReject={() => setFocusModalOpen(false)}
         sharedItem={sharedItem}
+        queryType={initPresetTypeID}
       />
       <div className={styles.resultsList}>
         {

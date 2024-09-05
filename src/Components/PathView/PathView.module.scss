@@ -160,10 +160,14 @@
   }
   .showAll {
     margin: 0 auto;
+    font-weight: 700;
   }
   .buttons {
     display: flex;
     justify-content: center;
+    button {
+      font-weight: 700;
+    }
     button:last-child {
       margin-left: $s;
     }
