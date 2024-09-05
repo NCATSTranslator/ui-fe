@@ -347,7 +347,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef} data-result-name={nameString}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <ResultsItemName
-          isPathfinder
+          isPathfinder={isPathfinder}
           item={item}
           activeEntityFilters={activeEntityFilters}
           nameString={nameString}
@@ -356,7 +356,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${!!isEven && styles.even}`}>
         {
-          !!user
+          !!user && !isPathfinder
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
                   <BookmarkFilled className={styles.bookmarkFilledSVG} data-result-name={nameString} onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
@@ -484,6 +484,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 handleActivateEvidence={handleActivateEvidence}
                 activeEntityFilters={activeEntityFilters}
                 pathFilterState={pathFilterState}
+                isEven={isEven}
               />
             </Tab>
             <Tab heading="Graph">

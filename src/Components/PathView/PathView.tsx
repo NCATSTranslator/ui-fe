@@ -53,6 +53,7 @@ const getPathsWithSelectionsSet = (paths: PathObjectContainer[], selectedPaths: 
 
 interface PathViewProps {
   active: boolean;
+  isEven: boolean;
   paths: PathObjectContainer[];
   selectedPaths: Set<PathObjectContainer> | null;
   handleEdgeSpecificEvidence:(edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => void;
@@ -61,7 +62,7 @@ interface PathViewProps {
   pathFilterState: PathFilterState;
 }
 
-const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeEntityFilters, pathFilterState}) => {
+const PathView: FC<PathViewProps> = ({active, isEven, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeEntityFilters, pathFilterState}) => {
 
   const prefs = useSelector(currentPrefs);
 
@@ -174,7 +175,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                         ? sub.predicates[0].predicate
                         : ""
                   ).toString();
-                const isPathFiltered = pathFilterState[pathToDisplay.id];
+                const isPathFiltered = (!!pathFilterState) ? pathFilterState[pathToDisplay.id] : false;
                 return (
                   <>
                     {
@@ -237,6 +238,7 @@ const PathView: FC<PathViewProps> = ({active, paths, selectedPaths, handleEdgeSp
                               <>
                                 <PathObject
                                   pathViewStyles={styles}
+                                  isEven={isEven}
                                   supportDataObject={supportDataObject}
                                   pathObjectContainer={pathToDisplay}
                                   pathObject={pathItem}

@@ -17,8 +17,8 @@ const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, item,
 
   const icon: JSX.Element = getIcon(item.type);
   const pathfinderNameArray = (isPathfinder) ? item.name.split("/") : null; 
-  const subjectIcon: JSX.Element = getIcon(item.subjectNode.types[0]);
-  const objectIcon: JSX.Element = getIcon(item.objectNode.types[0]);
+  const subjectIcon: JSX.Element | null = item.subjectNode?.types.length > 0 ? getIcon(item.subjectNode.types[0]) : null;
+  const objectIcon: JSX.Element | null = item.objectNode?.types.length > 0 ? getIcon(item.objectNode.types[0]) : null;
 
   const formatPathfinderName = (name: string) => {
     const formattedName = name.replace(/([A-Z])/g, ' $1').trim()

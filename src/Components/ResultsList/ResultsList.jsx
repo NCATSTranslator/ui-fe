@@ -874,7 +874,7 @@ const ResultsList = ({loading}) => {
         isOpen={shareModalOpen}
         onClose={()=>setShareModalOpen(false)}
         qid={currentQueryID}
-        shareResultID={shareResultID}
+        shareResultID={shareResultID.current}
       />
       <NotesModal
         isOpen={notesOpen}

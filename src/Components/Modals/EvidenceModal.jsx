@@ -166,7 +166,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                             handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
                             handleEdgeClick={(edge)=>handleEdgeClick(edge)}
                             handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
-                            activeStringFilters={[]}
+                            activeEntityFilters={[]}
                             selected={isSelected}
                             inModal
                             hasSupport={pathItemHasSupport}
@@ -184,7 +184,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
                                   handleNameClick={()=>{console.log("evidence modal path object clicked!")}}
                                   handleEdgeClick={(edge)=>handleEdgeClick(edge)}
                                   handleTargetClick={()=>{console.log("evidence modal path target clicked!")}}
-                                  activeStringFilters={[]}
+                                  activeEntityFilters={[]}
                                   selected={isSelected}
                                   inModal
                                   hasSupport={pathItemHasSupport}
