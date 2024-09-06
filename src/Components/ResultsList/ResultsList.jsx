@@ -1105,7 +1105,7 @@ const ResultsList = ({loading}) => {
                   {
                     formattedResults.length > 0 &&
                     <div className={styles.pagination}>
-                      <div className={styles.perPage}>
+                      <div>
                         <Select
                           label=""
                           name="Results Per Page"
@@ -1115,6 +1115,7 @@ const ResultsList = ({loading}) => {
                             handlePageReset(value, formattedResults.length);
                           }}
                           noanimate
+                          className={styles.perPage}
                           >
                           <option value="5" key="0">5</option>
                           <option value="10" key="1">10</option>

@@ -121,6 +121,9 @@
   @media screen and (min-width: $desktop) {
     grid-template-columns: 1fr 1fr;
   }
+  .perPage > div > div {
+    z-index: 1000 !important;
+  }
 }
 .pageNums {
   display: flex;
