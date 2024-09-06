@@ -17,7 +17,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "../../Redux/resultsSlice";
 import { currentPrefs, currentUser }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, 
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
   sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow,
   filterCompare, makePathRank, updatePathRanks, pathRankSort, } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, hasSupport } from "../../Utilities/resultsFormattingFunctions";
@@ -55,7 +55,7 @@ const ResultsList = ({loading}) => {
     : null;
 
   const isPathfinder = (initPresetTypeID === "p");
-  
+
   const initNodeLabelParam = getDataFromQueryVar("l");
   const initNodeIdParam = getDataFromQueryVar("i");
   const initResultIdParam = getDataFromQueryVar("r");
@@ -139,8 +139,8 @@ const ResultsList = ({loading}) => {
   const [formattedResults, setFormattedResults] = useState([]);
   // Array, results meant to display based on the pagination
   const displayedResults = useMemo(()=>formattedResults.slice(itemOffset, endResultIndex), [formattedResults, itemOffset, endResultIndex]);
-  const initSortString = (isPathfinder) 
-    ? 'nameLowHigh' 
+  const initSortString = (isPathfinder)
+    ? 'nameLowHigh'
     : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
   const currentSortString = useRef(initSortString);
   // Int, number of pages
@@ -734,7 +734,7 @@ const ResultsList = ({loading}) => {
       const filteredResults = [];
       for (let result of results) {
         let filterResult = true;
-        for (let path of result.paths) {
+        for (let path of result.compressedPaths) {
           filterResult = filterResult && pathFilterState[path.id];
         }
 
@@ -922,7 +922,7 @@ const ResultsList = ({loading}) => {
         {
           isPathfinder
           ?
-            <QueryPathfinder 
+            <QueryPathfinder
               results
               setShareModalFunction={setShareModalOpen}
             />
