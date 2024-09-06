@@ -55,25 +55,6 @@ export const findStringMatch = (result, searchTerm, pathRanks) => {
   return !!foundMatch;
 }
 
-/**
- * Removes the highlights from the specified elements if the highlightedName or highlightedDescription
- * contains the given value (case-insensitive match).
- * @param {Array} elements - The elements to remove the highlights from.
- * @param {string} value - The value to match against the highlightedName and highlightedDescription.
- * @returns {Array} The updated elements with removed highlights.
-*/
-export const removeHighlights = (elements, value) => {
-  for(const element of elements) {
-    if(element.highlightedName && element.highlightedName.toLowerCase().includes(value.toLowerCase().trim())) {
-      element.highlightedName = null;
-    }
-    if(element.highlightedDescription && element.highlightedDescription.toLowerCase().includes(value.toLowerCase().trim())) {
-      element.highlightedDescription = null;
-    }
-  }
-  return elements;
-}
-
 export const handleResultsError = (errorExists = true, setIsError, setIsLoading) => {
   setIsError(errorExists);
   setIsLoading(false);
@@ -97,4 +78,12 @@ export const handleClearAllFilters = (asFilters, rResults, oResults, setActiveFi
 
 export const getResultsShareURLPath = (label, nodeID, typeID, resultID, pk) => {
   return `results?l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`;
+}
+
+export const getPathfinderResultsShareURLPath = (itemOne, itemTwo, resultID, constraint, pk) => {
+  let labelOne = (itemOne.label) ? itemOne.label : null;
+  let labelTwo = (itemTwo.label) ? itemTwo.label : null;
+  let idOne = (itemOne.id) ? itemOne.id : null;
+  let idTwo = (itemTwo.id) ? itemTwo.id : null;
+  return `results?lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p&c=${constraint}&r=${resultID}&q=${pk}`;
 }

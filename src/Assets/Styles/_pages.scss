@@ -85,3 +85,13 @@
     }
   }
 }
+
+.pathfinder, .pathfinder- {
+  .body {
+    display: grid;
+    grid-template-rows: auto;
+  }
+  .footer {
+    background-color: $lightGray;
+  }
+} 

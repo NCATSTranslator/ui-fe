@@ -121,8 +121,8 @@ export const capitalizeAllWords = (str: string): string => {
 export const formatBiolinkNode = (string: string, type: string | null = null): string => {
   let newString = string;
   if(type !== null) {
-    type = type.toLowerCase();
-    switch (type) {
+    const formattedType = type.replaceAll("biolink:", "").toLowerCase();
+    switch (formattedType) {
       case "gene":
       case "protein":
         newString = newString.toUpperCase();

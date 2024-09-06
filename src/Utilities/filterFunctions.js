@@ -111,9 +111,8 @@ export const getFilterLabel = (filter) => {
     case "ara":  return "Reasoning Agent";
     case "role": return "ChEBI Role";
     case "pt":   return "Relationship Type";
+    default: return defaultLabel;
   }
-
-  return defaultLabel;
 }
 
 export const getTagType = (tagID) => {

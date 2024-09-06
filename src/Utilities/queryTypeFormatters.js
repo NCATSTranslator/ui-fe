@@ -26,9 +26,11 @@ export const defaultQueryFormatter = async (items, formatData) => {
       ? ''
       : `matched on ${capitalizeAllWords(bestMatch)}`;
 
+    const firstType = types[0];
+    const formattedLabel = firstType === "biolink:Gene" || firstType === "biolink:Protein" ? item.label.toUpperCase(): capitalizeAllWords(item.label);
     return {
       id: id,
-      label: capitalizeAllWords(item.label),
+      label: formattedLabel,
       match: matchText,
       types: types
     };

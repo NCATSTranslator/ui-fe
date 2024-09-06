@@ -1,10 +1,11 @@
-import {useRef, useEffect, useState, FC} from "react";
+import { useEffect, useState, FC } from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
 import Button from "../Core/Button";
 import { currentQuery} from "../../Redux/querySlice";
 import { useSelector } from 'react-redux';
-import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
+import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
+import { getDataFromQueryVar } from "../../Utilities/utilities";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -17,12 +18,12 @@ interface ShareModalProps {
 
 const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, typeID = null, shareResultID = null}) => {
   let storedQuery = useSelector(currentQuery);
-  const sharedQueryLabel = (label) ? label : new URLSearchParams(window.location.search).get("l");
-  const sharedQueryType = (typeID) ? typeID : new URLSearchParams(window.location.search).get("t");
-  const sharedQueryItemID = new URLSearchParams(window.location.search).get("i");
+  const sharedQueryLabel = (label) ? label : getDataFromQueryVar("l");
+  const sharedQueryType = (typeID) ? typeID : getDataFromQueryVar("t");
+  const sharedQueryItemID = getDataFromQueryVar("i");
   // const sharedQueryResultID = (shareResultID != null) ? shareResultID : new URLSearchParams(window.location.search).get("r");
   // // if a result share ID is not explictly provided, don't generate a url that send the user directly to any result
-  const initSharedQueryResultID = (shareResultID != null) ? shareResultID : new URLSearchParams(window.location.search).get("r");
+  const initSharedQueryResultID = (shareResultID != null) ? shareResultID : getDataFromQueryVar("r");
   const [sharedQueryResultID, setSharedQueryResultID] = useState(initSharedQueryResultID);
 
   useEffect(() => {
@@ -46,19 +47,33 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
       : '';
   const queryResultID = sharedQueryResultID || '0';
 
-  const isResultsUrlSet = useRef(false);
+  // const isResultsUrlSet = useRef(false);
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
-  const qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);
+  const isPathfinder = sharedQueryType === 'p';
+  let qidPath = null;  
+  if(isPathfinder) {
+    const itemOne = {
+      id: getDataFromQueryVar('ione'),
+      label: getDataFromQueryVar('lone')
+    }
+    const itemTwo = {
+      id: getDataFromQueryVar('itwo'),
+      label: getDataFromQueryVar('ltwo')
+    }
+    qidPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, qid);
+  } else {
+    qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);
+  }
   const qidURL = encodeURI(`${window.location.origin}/${qidPath}`);
   
-  useEffect(() => {
-    if(window.location.pathname.includes("results") && !isResultsUrlSet.current && qidURL) {
-      isResultsUrlSet.current = true;
-      window.history.replaceState(null, "Results", qidPath);
-    }
-  }, [qidPath, qidURL]);
+  // useEffect(() => {
+  //   if(window.location.pathname.includes("results") && !isResultsUrlSet.current && qidURL) {
+  //     isResultsUrlSet.current = true;
+  //     window.history.replaceState(null, "Results", qidPath);
+  //   }
+  // }, [qidPath, qidURL]);
 
   return (
     <Modal 

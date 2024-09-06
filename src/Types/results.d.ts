@@ -73,7 +73,8 @@ export type ResultItem = {
   rawResult: RawResult;
   score: Score;
   scores: Score[];
-  subjectNode: FormattedNodeObject;
+  subjectNode: RawNode;
+  objectNode: RawNode;
   tags: string[];
   type: string;
 }
@@ -177,4 +178,11 @@ export type QueryType = {
 }
 export type PathFilterState = {
   [pid: string]: boolean;
+}
+
+export type AutocompleteItem = {
+  id:string, 
+  label: string, 
+  match: string, 
+  types: Array<string>
 }

@@ -1,9 +1,17 @@
+import { FC } from 'react';
 import styles from './Autocomplete.module.scss';
-import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import { getMoreInfoLink, getIcon, formatBiolinkEntity } from '../../Utilities/utilities';
+import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import Tooltip from '../Tooltip/Tooltip';
+import { AutocompleteItem } from '../../Types/results';
 
-const Autocomplete = ({isLoading, items, handleItemClick}) => {
+type AutocompleteProps = {
+  isLoading: boolean;
+  items: Array<AutocompleteItem> | null;
+  handleItemClick: (item: AutocompleteItem) => void;
+}
+
+const Autocomplete: FC<AutocompleteProps> = ({isLoading, items, handleItemClick}) => {
 
   return (
     <div
@@ -17,15 +25,11 @@ const Autocomplete = ({isLoading, items, handleItemClick}) => {
         </div>
       }
       {
-        items && items.length === 1 && items[0] === 'node_norm_error' &&
-        <p className={styles.nodeNormError}>Unable to retrieve search terms due to an outage with the Node Normalizer. Click <a href="https://smart-api.info/registry/translator?q=node%20normalizer&tags=translator" rel="noreferrer" target="_blank">here</a> for more details, or try again later.</p>
-      }
-      {
         items && items.length === 0 && !isLoading &&
         <p className={styles.noResults}>No matching terms were found, please adjust your search term and try again.</p>
       }
       {
-        items && items.length > 0 && !isLoading && items[0] !== 'node_norm_error' && 
+        items && items.length > 0 && !isLoading &&
         <div>
           {
             items.map((item, i) => {

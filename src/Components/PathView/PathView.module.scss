@@ -158,12 +158,12 @@
       text-decoration: underline;
     }
   }
-  .showAll {
-    margin: 0 auto;
-  }
   .buttons {
     display: flex;
     justify-content: center;
+    button {
+      font-weight: 700;
+    }
     button:last-child {
       margin-left: $s;
     }
