@@ -480,6 +480,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 paths={formattedPaths.current}
                 selectedPaths={selectedPaths}
                 active={isExpanded}
+                isPathfinder={isPathfinder}
                 handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
                 handleActivateEvidence={handleActivateEvidence}
                 activeEntityFilters={activeEntityFilters}

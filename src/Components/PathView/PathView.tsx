@@ -54,6 +54,7 @@ const getPathsWithSelectionsSet = (paths: PathObjectContainer[], selectedPaths: 
 interface PathViewProps {
   active: boolean;
   isEven: boolean;
+  isPathfinder: boolean;
   paths: PathObjectContainer[];
   selectedPaths: Set<PathObjectContainer> | null;
   handleEdgeSpecificEvidence:(edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => void;
@@ -62,7 +63,8 @@ interface PathViewProps {
   pathFilterState: PathFilterState;
 }
 
-const PathView: FC<PathViewProps> = ({active, isEven, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, activeEntityFilters, pathFilterState}) => {
+const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, 
+  activeEntityFilters, pathFilterState }) => {
 
   const prefs = useSelector(currentPrefs);
 
@@ -160,24 +162,25 @@ const PathView: FC<PathViewProps> = ({active, isEven, paths, selectedPaths, hand
           <div className={styles.paths}>
             {
               sortArrayByIndirect(formattedPaths).slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
+              // formattedPaths.slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
                 const displayIndirectLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
                   if(displayIndirectLabel)
                     inferredLabelDisplayed = true;
                 const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
                   if(displayDirectLabel)
                     directLabelDisplayed = true;
-                const tooltipID: string = (pathToDisplay.id)
-                  ? pathToDisplay.id
-                  : pathToDisplay.path.subgraph.map((sub: FormattedEdgeObject | FormattedNodeObject, j: number) =>
-                    (isFormattedNodeObject(sub))
-                      ? sub.name
-                      : (sub.predicates && sub.predicates.length > 0 )
-                        ? sub.predicates[0].predicate
-                        : ""
-                  ).toString();
+                const tooltipID: string = pathToDisplay.id;
+                  // ? pathToDisplay.id
+                  // : pathToDisplay.path.subgraph.map((sub: FormattedEdgeObject | FormattedNodeObject, j: number) =>
+                  //   (isFormattedNodeObject(sub))
+                  //     ? sub.name
+                  //     : (sub.predicates && sub.predicates.length > 0 )
+                  //       ? sub.predicates[0].predicate
+                  //       : ""
+                  // ).toString();
                 const isPathFiltered = (!!pathFilterState) ? pathFilterState[pathToDisplay.id] : false;
                 return (
-                  <>
+                  <div key={tooltipID}>
                     {
                       displayDirectLabel
                         ?
@@ -197,7 +200,7 @@ const PathView: FC<PathViewProps> = ({active, isEven, paths, selectedPaths, hand
                           </>
                         : null
                       }
-                    <div className={styles.formattedPath} key={tooltipID}>
+                    <div className={styles.formattedPath} >
                       <span className={styles.num}>
                         { i + 1 }
                       </span>
@@ -257,7 +260,7 @@ const PathView: FC<PathViewProps> = ({active, isEven, paths, selectedPaths, hand
                         }
                       </div>
                     </div>
-                  </>
+                  </div>
                 )
               })
             }
@@ -275,8 +278,12 @@ const PathView: FC<PathViewProps> = ({active, isEven, paths, selectedPaths, hand
         }
       </div>
       {
-        (numberToShow < paths.length) &&
-        <button onClick={(e)=> {e.stopPropagation(); setNumberToShow(paths.length);}} className={`${styles.show} ${styles.showAll}`}>Show All</button>
+        <div className={styles.buttons}>
+          {
+            (numberToShow < paths.length) &&
+            <button onClick={(e)=> {e.stopPropagation(); setNumberToShow(paths.length);}} className={`${styles.show}`}>Show All</button>
+          }
+        </div>
       }
       <p className={styles.needHelp}>
         <Feedback/>
