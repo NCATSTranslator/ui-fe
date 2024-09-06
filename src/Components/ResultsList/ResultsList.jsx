@@ -960,6 +960,7 @@ const ResultsList = ({loading}) => {
                 expanded={filtersExpanded}
                 setExpanded={setFiltersExpanded}
                 availableTags={availableTags}
+                isPathfinder={isPathfinder}
               />
               <div>
                 <ResultsListHeader

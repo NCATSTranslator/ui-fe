@@ -14,11 +14,12 @@ interface ResultsFilterProps {
   onFilter: (arg0: Tag) => void;
   onClearAll: () => void;
   expanded?: boolean;
+  isPathfinder?: boolean;
   setExpanded?: (arg0:boolean) => void
   availableTags: {[key: string]: Tag};
 }
 
-const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, expanded = false, setExpanded = (arg0: boolean)=>{}, availableTags}) => {
+const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, expanded = false, isPathfinder = false, setExpanded = (arg0: boolean)=>{}, availableTags}) => {
 
   const [isExpanded, setIsExpanded] = useState(expanded);
   const toggleIsExpanded = () => {
@@ -53,18 +54,17 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
     return false;
   }
 
-  const resultTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.RESULT),
-                             [availableTags]);
-  const pathTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.PATH),
-                           [availableTags]);
+  const resultTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.RESULT), [availableTags]);
+  const pathTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.PATH), [availableTags]);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
   const filterCompare: {[key: string]: (a: [string, Tag], b: [string, Tag]) => number} = {
     pt: (a: [string, Tag], b: [string, Tag]) => -(a[1].name.localeCompare(b[1].name))
   };
 
-  useEffect(() => { setIsExpanded(expanded); },
-            [expanded]);
+  useEffect(() => { 
+    setIsExpanded(expanded); 
+  }, [expanded]);
 
   return (
     <div className={`${styles.resultsFilter} ${isExpanded ? styles.expanded : styles.collapsed}`}>
@@ -82,7 +82,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
         />
         <div>
           {
-            groupHasTags(resultTags) &&
+            groupHasTags(resultTags) && !isPathfinder && 
             <>
               <h5 className={styles.typeHeading}> Results </h5>
               {
