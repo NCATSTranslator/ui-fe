@@ -1,5 +1,5 @@
-import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity, isClinicalTrial, isFormattedEdgeObject, 
-  isPublication, isPublicationObjectArray, mergeObjectArrays, combineObjectArrays, formatBiolinkNode } from './utilities';
+import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isFormattedEdgeObject, 
+  isPublication, isPublicationObjectArray, mergeObjectArrays, combineObjectArrays } from './utilities';
 import { cloneDeep } from "lodash";
 import { score } from "./scoring";
 import { RawResultsContainer, FormattedPathObject, PathObjectContainer, RawPathObject, SubgraphObject, FormattedNodeObject, 

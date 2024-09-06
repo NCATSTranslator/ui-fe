@@ -1,4 +1,4 @@
-import {useRef, useEffect, useState, FC} from "react";
+import { useEffect, useState, FC } from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
 import Button from "../Core/Button";

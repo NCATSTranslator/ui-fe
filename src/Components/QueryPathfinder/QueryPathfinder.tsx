@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef, FC, Dispatch, SetStateAction } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
-import { currentConfig, currentUser } from "../../Redux/rootSlice";
+import { currentConfig } from "../../Redux/rootSlice";
 import styles from './QueryPathfinder.module.scss';
 import Autocomplete from '../Autocomplete/Autocomplete';
 import TextInput from '../Core/TextInput';
@@ -9,10 +9,10 @@ import Button from '../Core/Button';
 import { AutocompleteItem } from '../../Types/results';
 import { getAutocompleteTerms } from '../../Utilities/autocompleteFunctions';
 import { debounce } from 'lodash';
-import { QueryTypeFunctions, queryTypes } from "../../Utilities/queryTypes";
+import { QueryTypeFunctions } from "../../Utilities/queryTypes";
 import { defaultQueryFilterFactory } from '../../Utilities/queryTypeFilters';
 import { defaultQueryAnnotator } from '../../Utilities/queryTypeAnnotators';
-import { defaultQueryFormatter, diseaseQueryFormatter } from '../../Utilities/queryTypeFormatters';
+import { defaultQueryFormatter } from '../../Utilities/queryTypeFormatters';
 import { API_PATH_PREFIX } from "../../Utilities/userApi";
 import { getPathfinderResultsShareURLPath } from '../../Utilities/resultsInteractionFunctions';
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -79,7 +79,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
       setInputTwoText(e);
       delayedQuery(e, setAutocompleteLoadingTwo, setAutoCompleteItemsTwo, autocompleteFunctions.current, limitTypes.current, limitPrefixes.current, nameResolverEndpoint);
     }
-  },[setAutocompleteLoadingOne, setAutocompleteLoadingTwo, setAutoCompleteItemsOne, setAutoCompleteItemsTwo, setInputOneText, setIsError, delayedQuery, nameResolverEndpoint]);
+  },[setAutocompleteLoadingOne, setAutocompleteLoadingTwo, setAutoCompleteItemsOne, setAutoCompleteItemsTwo, setInputOneText, delayedQuery, nameResolverEndpoint]);
   
   const updateQueryItem = (selectedNode: AutocompleteItem, isFirstBar: boolean) => {
     // add in match text for genes, which should be the species
@@ -138,7 +138,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
 
   const submitQuery = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem) => {
 
-    let timestamp = new Date();
+    // let timestamp = new Date();
 
     // Set isLoading to true
     setIsLoading(true);

@@ -181,7 +181,7 @@ const ResultsList = ({loading}) => {
     const tempItemsPerPage = (prefs?.result_per_screen?.pref_value) ? parseInt(prefs.result_per_screen.pref_value) : 10;
     setItemsPerPage(tempItemsPerPage);
     setEndResultIndex(tempItemsPerPage);
-  }, [prefs]);
+  }, [prefs, isPathfinder]);
 
   useEffect(() => {
     const handleKeyDown = (ev) => {
@@ -514,7 +514,7 @@ const ResultsList = ({loading}) => {
     }
 
     return newSortedResults;
-  }, [activeEntityFilters]);
+  }, [activeEntityFilters, isPathfinder]);
 
   const genPathFilterState = (summary) => {
     const filterState = {};

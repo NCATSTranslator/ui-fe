@@ -1,5 +1,5 @@
 import { closest as closestStrMatch } from 'fastest-levenshtein';
-import { capitalizeAllWords, capitalizeWord, removeDuplicateObjects } from "./utilities";
+import { capitalizeAllWords, removeDuplicateObjects } from "./utilities";
 
 export const defaultQueryFormatter = async (items, formatData) => {
   const autocompleteObjects = items.map((item) => {

@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import { getGeneratedSendFeedbackLink, numberToWords } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
 import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject, PathFilterState} from '../../Types/results';
-import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
+import { isFormattedEdgeObject } from '../../Utilities/utilities';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
@@ -169,15 +169,7 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
                 const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
                   if(displayDirectLabel)
                     directLabelDisplayed = true;
-                const tooltipID: string = pathToDisplay.id;
-                  // ? pathToDisplay.id
-                  // : pathToDisplay.path.subgraph.map((sub: FormattedEdgeObject | FormattedNodeObject, j: number) =>
-                  //   (isFormattedNodeObject(sub))
-                  //     ? sub.name
-                  //     : (sub.predicates && sub.predicates.length > 0 )
-                  //       ? sub.predicates[0].predicate
-                  //       : ""
-                  // ).toString();
+                const tooltipID: string = (!!pathToDisplay?.id) ? pathToDisplay.id : i.toString();
                 const isPathFiltered = (!!pathFilterState) ? pathFilterState[pathToDisplay.id] : false;
                 return (
                   <div key={tooltipID}>
