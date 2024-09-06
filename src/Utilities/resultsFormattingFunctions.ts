@@ -523,7 +523,8 @@ export const getSummarizedResults = (results: RawResultsContainer, confidenceWei
     let fdaInfo = (subjectNode !== null && subjectNode.fda_info) ? subjectNode.fda_info : false;
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
     let formattedPaths = getFormattedPaths(item.paths, results, []);
-    let compressedPaths = getCompressedPaths(formattedPaths, true);
+    // let compressedPaths = getCompressedPaths(formattedPaths, true);
+    let compressedPaths = getCompressedPaths(formattedPaths, false);
     let evidenceCounts = calculateEvidenceCounts(formattedPaths);
     let itemName = (item.drug_name !== null) ? item.drug_name : subjectNodeName;
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
