@@ -17,6 +17,7 @@ import { API_PATH_PREFIX } from "../../Utilities/userApi";
 import { getPathfinderResultsShareURLPath } from '../../Utilities/resultsInteractionFunctions';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { generateEntityLink, getDataFromQueryVar, getIcon } from '../../Utilities/utilities';
+import { getFormattedPathfinderName } from '../../Utilities/resultsFormattingFunctions';
 import QuestionIcon from '../../Icons/Buttons/Search.svg?react';
 import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "../../Icons/Queries/PathfinderDivider.svg?react";
@@ -263,7 +264,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
                     }
                     {
                       constraintText &&
-                      `, contain a ${constraintText.replace("biolink:", "")}, `
+                      `, contain a ${getFormattedPathfinderName(constraintText.replace("Entity", "").replace("PhenotypicFeature", "Phenotype"))}, `
                     }
                     and end with
                     {
