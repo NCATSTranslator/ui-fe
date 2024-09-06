@@ -136,15 +136,15 @@ export const sortByNamePathfinderLowHigh = (items) => {
   return items.sort(
     (a,b) => {
       const countSlashes = (str) => (str.match(/\//g) || []).length;
-    
+
       const slashCountA = countSlashes(a.name);
       const slashCountB = countSlashes(b.name);
-    
+
       // First, sort by the number of slashes
       if (slashCountA !== slashCountB) {
         return slashCountA - slashCountB;
       }
-    
+
       // If the slash count is the same, sort alphabetically
       return a.name.localeCompare(b.name);
     }
@@ -155,15 +155,15 @@ export const sortByNamePathfinderHighLow = (items) => {
   return items.sort(
     (a,b) => {
       const countSlashes = (str) => (str.match(/\//g) || []).length;
-    
+
       const slashCountA = countSlashes(a.name);
       const slashCountB = countSlashes(b.name);
-    
+
       // First, sort by the number of slashes in reverse order (most slashes first)
       if (slashCountA !== slashCountB) {
         return slashCountB - slashCountA;
       }
-    
+
       // If the slash count is the same, sort alphabetically in reverse order
       return b.name.localeCompare(a.name);
     }
