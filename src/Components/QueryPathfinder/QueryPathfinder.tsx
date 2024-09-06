@@ -263,7 +263,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
                           <span className={styles.searchedTerm}>{labelOne}</span>
                     }
                     {
-                      constraintText &&
+                      !!constraintText && constraintText !== "undefined" &&
                       `, contain a ${getFormattedPathfinderName(constraintText.replace("Entity", "").replace("PhenotypicFeature", "Phenotype"))}, `
                     }
                     and end with
