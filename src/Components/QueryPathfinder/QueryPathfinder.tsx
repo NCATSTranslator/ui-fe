@@ -29,6 +29,7 @@ import AddIcon from '../../Icons/Buttons/Add/Add.svg?react';
 import SubtractIcon from '../../Icons/Buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import Select from '../Core/Select';
+import Tooltip from '../Tooltip/Tooltip';
 
 type QueryPathfinderProps = {
   results?: boolean;
@@ -230,8 +231,12 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
   }
 
   const handleMiddleTypeTrigger = () => {
+    if(hasMiddleType) {
+      setMiddleType(null);
+    } else {
+      setMiddleType("biolink:ChemicalEntity");
+    }
     setHasMiddleType(prev => !prev);
-    setMiddleType("biolink:ChemicalEntity");
   }
 
   return (
@@ -292,7 +297,12 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
               <h6 className={styles.h6}>Results will show paths beginning with the first search term and ending with the second</h6>
               <div className={styles.buttons}>
                 <Button handleClick={swapTerms} isSecondary><SwapIcon/>Swap Terms</Button>
-                <Button handleClick={handleMiddleTypeTrigger} isSecondary className={styles.middleTypeButton}>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon/></Button>
+                <Button handleClick={handleMiddleTypeTrigger} isSecondary className={styles.middleTypeButton} dataTooltipId='middle-type-tooltip'>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon/></Button>
+                <Tooltip
+                  id='middle-type-tooltip'
+                  >
+                    <span>Specify an intermediate object type that must exist between the two terms.</span>
+                </Tooltip>
               </div>
               {
                 isError &&
