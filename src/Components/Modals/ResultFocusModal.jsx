@@ -1,11 +1,12 @@
 import Modal from './Modal';
 import styles from './ResultFocusModal.module.scss';
 import Button from '../Core/Button';
-import { formatBiolinkNode, truncateStringIfTooLong } from '../../Utilities/utilities';
+import { truncateStringIfTooLong } from '../../Utilities/utilities';
+import { getFormattedPathfinderName } from '../../Utilities/resultsFormattingFunctions';
 
-const ResultFocusModal = ({isOpen, onAccept, onReject, sharedItem}) => {
+const ResultFocusModal = ({isOpen, onAccept, onReject, sharedItem, queryType}) => {
 
-  const name = truncateStringIfTooLong(formatBiolinkNode(sharedItem.name, sharedItem.type));
+  const name = truncateStringIfTooLong((queryType === 'p') ? getFormattedPathfinderName(sharedItem.name.replaceAll("/", " - ")) : sharedItem.name);
 
   return (
     <Modal isOpen={isOpen} onClose={onReject} hideCloseButton={true}>

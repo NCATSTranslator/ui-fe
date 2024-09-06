@@ -17,7 +17,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "../../Redux/resultsSlice";
 import { currentPrefs, currentUser }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, filterCompare, makePathRank, updatePathRanks, pathRankSort } from "../../Utilities/sortingFunctions";
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
+  sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow,
+  filterCompare, makePathRank, updatePathRanks, pathRankSort, } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, hasSupport } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
   handleResultsRefresh, handleClearAllFilters } from "../../Utilities/resultsInteractionFunctions";
@@ -33,7 +35,9 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "../BookmarkToasts/BookmarkToasts";
 import NotesModal from "../Modals/NotesModal";
+import ShareModal from "../Modals/ShareModal";
 import ResultFocusModal from "../Modals/ResultFocusModal";
+import QueryPathfinder from "../QueryPathfinder/QueryPathfinder";
 
 const ResultsList = ({loading}) => {
 
@@ -49,6 +53,9 @@ const ResultsList = ({loading}) => {
   const initPresetTypeObject = (initPresetTypeID)
     ? queryTypes.find(type => type.id === parseInt(initPresetTypeID))
     : null;
+
+  const isPathfinder = (initPresetTypeID === "p");
+
   const initNodeLabelParam = getDataFromQueryVar("l");
   const initNodeIdParam = getDataFromQueryVar("i");
   const initResultIdParam = getDataFromQueryVar("r");
@@ -77,14 +84,22 @@ const ResultsList = ({loading}) => {
   // Bool, should results be fetched
   // const [isFetchingResults, setIsFetchingResults] = useState(false);
   const isFetchingResults = useRef(false);
+
+  // set to not sort by score for Pathfinder, set to false to sort score high low for MVP queries
+  const initSortByScore = (isPathfinder) ? null : false;
+  // set to sort by name for Pathfinder, set to null for MVP queries
+  const initSortByName = (isPathfinder) ? true : null;
+  // ALSO REQUIRED TO SET INITSORTSTRING BELOW, along with useEffect for catching changes to prefs
+
+
   // Bool, are the results currently sorted by name (true/false for asc/desc, null for not set)
-  const [isSortedByName, setIsSortedByName] = useState(null);
+  const [isSortedByName, setIsSortedByName] = useState(initSortByName);
   // Bool, are the results currently sorted by evidence count (true/false for asc/desc, null for not set)
   const [isSortedByEvidence, setIsSortedByEvidence] = useState(null);
   // Bool, are the results currently sorted by path count (true/false for asc/desc, null for not set)
   const [isSortedByPaths, setIsSortedByPaths] = useState(null);
   // Bool, are the results currently sorted by score
-  const [isSortedByScore, setIsSortedByScore] = useState(false);
+  const [isSortedByScore, setIsSortedByScore] = useState(initSortByScore);
   // Bool, is evidence modal open?
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
@@ -124,7 +139,9 @@ const ResultsList = ({loading}) => {
   const [formattedResults, setFormattedResults] = useState([]);
   // Array, results meant to display based on the pagination
   const displayedResults = useMemo(()=>formattedResults.slice(itemOffset, endResultIndex), [formattedResults, itemOffset, endResultIndex]);
-  const initSortString = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
+  const initSortString = (isPathfinder)
+    ? 'nameLowHigh'
+    : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
   const currentSortString = useRef(initSortString);
   // Int, number of pages
   const pageCount = Math.ceil(formattedResults.length / itemsPerPage);
@@ -160,10 +177,11 @@ const ResultsList = ({loading}) => {
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
   useEffect(() => {
-    currentSortString.current = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
+    currentSortString.current = (isPathfinder) ? 'nameLowHigh' : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
     const tempItemsPerPage = (prefs?.result_per_screen?.pref_value) ? parseInt(prefs.result_per_screen.pref_value) : 10;
     setItemsPerPage(tempItemsPerPage);
-  }, [prefs]);
+    setEndResultIndex(tempItemsPerPage);
+  }, [prefs, isPathfinder]);
 
   useEffect(() => {
     const handleKeyDown = (ev) => {
@@ -430,14 +448,14 @@ const ResultsList = ({loading}) => {
     let newSortedResults = resultsToSort;
     switch (sortName) {
       case 'nameLowHigh':
-        newSortedResults = sortNameLowHigh(newSortedResults);
+        newSortedResults = (isPathfinder) ? sortByNamePathfinderLowHigh(newSortedResults) : sortNameLowHigh(newSortedResults);
         setIsSortedByName(true);
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
         setIsSortedByPaths(null);
         break;
       case 'nameHighLow':
-        newSortedResults = sortNameHighLow(newSortedResults);
+        newSortedResults = (isPathfinder) ? sortByNamePathfinderHighLow(newSortedResults) : sortNameHighLow(newSortedResults);
         setIsSortedByName(false);
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
@@ -496,7 +514,7 @@ const ResultsList = ({loading}) => {
     }
 
     return newSortedResults;
-  }, [activeEntityFilters]);
+  }, [activeEntityFilters, isPathfinder]);
 
   const genPathFilterState = (summary) => {
     const filterState = {};
@@ -716,7 +734,7 @@ const ResultsList = ({loading}) => {
       const filteredResults = [];
       for (let result of results) {
         let filterResult = true;
-        for (let path of result.paths) {
+        for (let path of result.compressedPaths) {
           filterResult = filterResult && pathFilterState[path.id];
         }
 
@@ -865,6 +883,12 @@ const ResultsList = ({loading}) => {
         closeOnClick={false}
         closeButton={false}
       />
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={()=>setShareModalOpen(false)}
+        qid={currentQueryID}
+        shareResultID={shareResultID.current}
+      />
       <NotesModal
         isOpen={notesOpen}
         onClose={()=>(setNotesOpen(false))}
@@ -892,24 +916,28 @@ const ResultsList = ({loading}) => {
         }}
         onReject={() => setFocusModalOpen(false)}
         sharedItem={sharedItem}
+        queryType={initPresetTypeID}
       />
       <div className={styles.resultsList}>
-        <Query
-          results
-          loading={isLoading}
-          initPresetTypeID={initPresetTypeID}
-          initPresetTypeObject={initPresetTypeObject}
-          initNodeIdParam={initNodeIdParam}
-          initNodeLabelParam={initNodeLabelParam}
-          nodeDescription={nodeDescription}
-          setShareModalFunction={setShareModalOpen}
-          data={{
-            shareModalOpen: shareModalOpen,
-            setShareModalOpen: setShareModalOpen,
-            shareResultID: shareResultID.current,
-            currentQueryID: currentQueryID,
-          }}
-        />
+        {
+          isPathfinder
+          ?
+            <QueryPathfinder
+              results
+              setShareModalFunction={setShareModalOpen}
+            />
+          :
+            <Query
+              results
+              loading={isLoading}
+              initPresetTypeID={initPresetTypeID}
+              initPresetTypeObject={initPresetTypeObject}
+              initNodeIdParam={initNodeIdParam}
+              initNodeLabelParam={initNodeLabelParam}
+              nodeDescription={nodeDescription}
+              setShareModalFunction={setShareModalOpen}
+            />
+        }
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
@@ -932,6 +960,7 @@ const ResultsList = ({loading}) => {
                 expanded={filtersExpanded}
                 setExpanded={setFiltersExpanded}
                 availableTags={availableTags}
+                isPathfinder={isPathfinder}
               />
               <div>
                 <ResultsListHeader
@@ -957,8 +986,7 @@ const ResultsList = ({loading}) => {
                     setFiltersExpanded: setFiltersExpanded
                   }}
                 />
-
-                <div className={styles.resultsTableContainer}>
+                <div className={`${styles.resultsTableContainer} ${isPathfinder ? styles.pathfinder : ''}`}>
                   <div className={styles.resultsTable}>
                     <div className={styles.tableBody}>
                       <div className={`${styles.tableHead}`}>
@@ -971,6 +999,7 @@ const ResultsList = ({loading}) => {
                           }}
                         >
                           Name
+                          <ChevUp className={styles.chev}/>
                         </div>
                         <div></div>
                         <div
@@ -1000,22 +1029,25 @@ const ResultsList = ({loading}) => {
                             <span className={styles.scoreSpan}>Each path represents a discrete series of relationships that connect the result to the searched-for entity.</span>
                           </Tooltip>
                         </div>
-                        <div
-                          className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
-                          onClick={()=>{
-                            let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
-                            currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                          }}
-                          data-tooltip-id="score-tooltip"
-                        >
-                          Score
-                          <Alert/>
-                          <ChevUp className={styles.chev}/>
-                          <Tooltip id="score-tooltip">
-                            <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
-                          </Tooltip>
-                        </div>
+                        {
+                          !isPathfinder &&
+                          <div
+                            className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
+                            onClick={()=>{
+                              let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
+                              currentSortString.current = sortString;
+                              handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
+                            }}
+                            data-tooltip-id="score-tooltip"
+                          >
+                            Score
+                            <Alert/>
+                            <ChevUp className={styles.chev}/>
+                            <Tooltip id="score-tooltip">
+                              <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
+                            </Tooltip>
+                          </div>
+                        }
                         <div></div>
                       </div>
                       {
@@ -1036,6 +1068,7 @@ const ResultsList = ({loading}) => {
                           return (
                             <ResultsItem
                               isEven={i % 2 !== 0}
+                              isPathfinder={isPathfinder}
                               rawResults={rawResults.current}
                               key={item.id}
                               type={initPresetTypeObject}
@@ -1073,7 +1106,7 @@ const ResultsList = ({loading}) => {
                   {
                     formattedResults.length > 0 &&
                     <div className={styles.pagination}>
-                      <div className={styles.perPage}>
+                      <div>
                         <Select
                           label=""
                           name="Results Per Page"
@@ -1083,6 +1116,7 @@ const ResultsList = ({loading}) => {
                             handlePageReset(value, formattedResults.length);
                           }}
                           noanimate
+                          className={styles.perPage}
                           >
                           <option value="5" key="0">5</option>
                           <option value="10" key="1">10</option>

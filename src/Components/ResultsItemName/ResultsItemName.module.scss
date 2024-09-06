@@ -1,0 +1,14 @@
+@import "../../Assets/Styles/variables";
+
+.nameContainer {
+  display: flex;
+  align-items: center;
+  .name, svg {
+    margin-right: 4px;
+  }
+  .arrow {
+    path {
+      stroke: $midPurpleTwo; 
+    }
+  }
+}

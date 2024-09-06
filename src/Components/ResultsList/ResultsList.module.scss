@@ -12,6 +12,11 @@
     max-width: 2300px;
     width: auto;
     padding: $m;
+    .resultsTableContainer.pathfinder {
+      .tableHead {
+        grid-template-columns: 1fr 112px 110px 90px 24px;
+      }
+    }
     .resultsTable {
       box-shadow: $dropShadow;
       font-size: $bodyTwoSize;
@@ -32,9 +37,6 @@
         user-select: none;
         grid-template-columns: 1fr 112px 110px 90px 90px 24px;
         column-gap: $s;
-        @media screen and (min-width: $desktop) {
-          grid-template-columns: 1fr 112px 110px 90px 90px 24px;
-        }
         .head {
           display: flex;
           align-items: center;
@@ -59,7 +61,7 @@
           cursor: default;
           position: relative;
         }
-        .fdaHead, .evidenceHead, .scoreHead, .pathsHead {
+        .fdaHead, .evidenceHead, .scoreHead, .pathsHead, .nameHead {
           svg {
             margin-left: 2px;
             width: 24px;
@@ -118,6 +120,9 @@
   }
   @media screen and (min-width: $desktop) {
     grid-template-columns: 1fr 1fr;
+  }
+  .perPage > div > div {
+    z-index: 1000 !important;
   }
 }
 .pageNums {

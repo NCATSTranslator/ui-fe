@@ -6,6 +6,7 @@ import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
 import QueryTypeIcon from "../QueryTypeIcon/QueryTypeIcon";
 import Button from "../Core/Button";
 import { cloneDeep } from 'lodash';
+import { AutocompleteItem } from '../../Types/results';
 
 export type QueryType = {
   placeholder?: string; 
@@ -22,9 +23,9 @@ type QueryBarProps = {
   queryType?: QueryType;
   queryItem?: QueryItem;
   value?: string;
-  autocompleteItems: Array<{id:string, label: string, match: string, types: Array<string>}>;
+  autocompleteItems: Array<AutocompleteItem>;
   autocompleteLoading: boolean;
-  handleItemClick: (item: {id:string, label: string, match: string, types: Array<string>}) => void;
+  handleItemClick: (item: AutocompleteItem) => void;
   disabled?: boolean;
   placeholderText?: string; 
 }

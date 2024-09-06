@@ -1,5 +1,5 @@
 import {createRoot} from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import Page from './Components/Page/Page';
@@ -12,6 +12,7 @@ import Terms from './PageRoutes/Terms/Terms';
 import DesignSystem from './PageRoutes/DesignSystem/DesignSystem';
 import UserPrefs from './PageRoutes/UserPrefs/UserPrefs';
 import Workspace from './PageRoutes/Workspace/Workspace';
+import Pathfinder from './PageRoutes/Pathfinder/Pathfinder';
 import { Help } from './PageRoutes/Articles/Help';
 import { LoggingIn } from './PageRoutes/Articles/LoggingIn';
 import { WhatIs } from './PageRoutes/Articles/WhatIs';
@@ -33,6 +34,20 @@ const routes = [
   {
     path: "",
     element: <Page title="Home"><Home /></Page>
+  },
+  {
+    path: "pathfinder",
+    element: <Outlet/>,
+    children: [
+      {
+        index: true,
+        element: <Page title="Pathfinder"><Pathfinder /></Page>,
+      },
+      {
+        path: "results",
+        element: <Page title="Pathfinder Results"><Results /></Page>
+      }
+    ]
   },
   {
     path: "design",

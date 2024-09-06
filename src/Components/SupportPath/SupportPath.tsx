@@ -52,7 +52,7 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj, index, pathFilterState }) 
               <span>View evidence for this path.</span>
           </Tooltip>
           <div
-            className={`path ${numberToWords(supportPath.path.subgraph.length)}  ${!!pathViewStyles && pathViewStyles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !supportPath.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''} ${pathFilterState[supportPath.id] ? !!pathViewStyles && pathViewStyles.filtered : ''}`}
+            className={`path ${numberToWords(supportPath.path.subgraph.length)}  ${!!pathViewStyles && pathViewStyles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !supportPath.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''} ${!!pathFilterState && pathFilterState[supportPath.id] ? !!pathViewStyles && pathViewStyles.filtered : ''}`}
             key={key}
             >
             {

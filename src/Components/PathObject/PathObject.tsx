@@ -22,13 +22,14 @@ interface PathObjectProps {
   inModal?: boolean;
   isTop?: boolean;
   isBottom?: boolean;
+  isEven?: boolean;
   className?: string;
   pathFilterState: PathFilterState;
   pathViewStyles?: {[key: string]: string;} | null;
 }
 
 const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false,
-  activeEntityFilters, selected, pathFilterState, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "", pathViewStyles = null }) => {
+  activeEntityFilters, selected, pathFilterState, supportDataObject = null, inModal = false, isTop = null, isBottom = null, isEven = false, className = "", pathViewStyles = null }) => {
 
   const provenance = (!!pathObject.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const isNode = isFormattedNodeObject(pathObject);
@@ -45,7 +46,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
     <>
       {
         pathObject.category === 'object' && isNode &&
-        <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''}`}
+        <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
           onClick={(e)=> {e.stopPropagation(); handleNameClick(pathObject);}}
           data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
           >

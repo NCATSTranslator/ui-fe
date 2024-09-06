@@ -124,9 +124,6 @@
     font-size: 16px;
     color: $black;
     margin-bottom: 0;
-    &:last-of-type {
-      margin-bottom: $s;
-    }
   }
   .title {
     margin-bottom: 0;
@@ -139,10 +136,11 @@
   background-color: $palePurple;
   border-radius: $largeBorderRadius;
   border: 1px solid $lightPurpleTwo;
-  margin: $s auto $l;
+  margin: $s auto $s;
   width: 100%;
   overflow: hidden;
   display: flex;
+  max-height: 175px;
 }
 .pathView {
   display: grid;

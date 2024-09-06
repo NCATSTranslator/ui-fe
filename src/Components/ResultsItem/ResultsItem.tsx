@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo, FC, RefObject } from 'react';
 import styles from './ResultsItem.module.scss';
-import { getIcon, formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject,
+import { formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject,
   isPublication, isClinicalTrial, isMiscPublication, getPathsCount } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
@@ -28,6 +28,7 @@ import { isEqual } from 'lodash';
 import Tabs from '../Tabs/Tabs';
 import Tab from '../Tabs/Tab';
 import * as filtering from '../../Utilities/filterFunctions';
+import ResultsItemName from '../ResultsItemName/ResultsItemName';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -46,7 +47,7 @@ const sortTagsBySelected = (
   return 0;
 };
 
-interface ResultsItemProps {
+type ResultsItemProps = {
   activateEvidence?: (item: ResultItem, edgeGroup: FormattedEdgeObject | null, path: PathObjectContainer) => void;
   activateNotes?: (nameString: string, id: string | number, item: ResultItem) => void;
   activeFilters: Filter[];
@@ -76,6 +77,7 @@ interface ResultsItemProps {
   zoomKeyDown: boolean;
   isInUserSave?: boolean;
   isEven: boolean;
+  isPathfinder?: boolean;
   resultsComplete: boolean;
 }
 
@@ -109,11 +111,11 @@ const ResultsItem: FC<ResultsItemProps> = ({
     zoomKeyDown,
     isInUserSave = false,
     isEven = false,
+    isPathfinder = false,
     resultsComplete = false
   }) => {
   const user = useSelector(currentUser);
 
-  let icon: JSX.Element = getIcon(item.type);
   let roleCount: number = (item.tags)
     ? item.tags.filter(tag => tag.includes("role")).length
     : 0;
@@ -342,28 +344,19 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }, [item, hasNotes]);
 
   return (
-    <div key={key} className={`${styles.result} result`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef} data-result-name={nameString}>
+    <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef} data-result-name={nameString}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
-        <span className={styles.icon}>{icon}</span>
-        {
-          item.highlightedName &&
-          <span className={styles.name} dangerouslySetInnerHTML={{__html: item.highlightedName}} ></span>
-        }
-        {
-          !item.highlightedName &&
-          <span className={styles.name} >
-            <Highlighter
-              highlightClassName="highlight"
-              searchWords={activeEntityFilters}
-              autoEscape={true}
-              textToHighlight={nameString}
-            />
-          </span>
-        }
+        <ResultsItemName
+          isPathfinder={isPathfinder}
+          item={item}
+          activeEntityFilters={activeEntityFilters}
+          nameString={nameString}
+          resultsItemStyles={styles}
+        />
       </div>
       <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${!!isEven && styles.even}`}>
         {
-          !!user
+          !!user && !isPathfinder
             ? <>
                 <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
                   <BookmarkFilled className={styles.bookmarkFilledSVG} data-result-name={nameString} onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
@@ -419,11 +412,14 @@ const ResultsItem: FC<ResultsItemProps> = ({
           <span className={styles.pathsNum}>{ pathsCount } {pathsCount > 1 ? "Paths" : "Path"}</span>
         </span>
       </div>
-      <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-        <span className={styles.score}>
-          <span className={styles.scoreNum}>{resultsComplete ? item.score === null ? '0.00' : displayScore(item.score.main) : "Processing..." }</span>
-        </span>
-      </div>
+      {
+        !isPathfinder &&
+        <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
+          <span className={styles.score}>
+            <span className={styles.scoreNum}>{resultsComplete ? item.score === null ? '0.00' : displayScore(item.score.main) : "Processing..." }</span>
+          </span>
+        </div>
+      }
       {/* <CSVLink
         className={styles.downloadButton}
         data={csvData}
@@ -484,10 +480,12 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 paths={formattedPaths.current}
                 selectedPaths={selectedPaths}
                 active={isExpanded}
+                isPathfinder={isPathfinder}
                 handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
                 handleActivateEvidence={handleActivateEvidence}
                 activeEntityFilters={activeEntityFilters}
                 pathFilterState={pathFilterState}
+                isEven={isEven}
               />
             </Tab>
             <Tab heading="Graph">

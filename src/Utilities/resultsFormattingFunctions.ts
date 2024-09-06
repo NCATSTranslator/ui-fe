@@ -1,4 +1,4 @@
-import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkEntity, isClinicalTrial, isFormattedEdgeObject, 
+import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isFormattedEdgeObject, 
   isPublication, isPublicationObjectArray, mergeObjectArrays, combineObjectArrays } from './utilities';
 import { cloneDeep } from "lodash";
 import { score } from "./scoring";
@@ -523,9 +523,10 @@ export const getSummarizedResults = (results: RawResultsContainer, confidenceWei
     let fdaInfo = (subjectNode !== null && subjectNode.fda_info) ? subjectNode.fda_info : false;
     // Get a list of properly formatted paths (turn the path ids into their actual path objects)
     let formattedPaths = getFormattedPaths(item.paths, results, []);
-    let compressedPaths = getCompressedPaths(formattedPaths, true);
+    // let compressedPaths = getCompressedPaths(formattedPaths, true);
+    let compressedPaths = getCompressedPaths(formattedPaths, false);
     let evidenceCounts = calculateEvidenceCounts(formattedPaths);
-    let itemName = (item.drug_name !== null) ? capitalizeFirstLetter(item.drug_name) : capitalizeAllWords(subjectNodeName);
+    let itemName = (item.drug_name !== null) ? item.drug_name : subjectNodeName;
     let tags = (item.tags !== null) ? Object.keys(item.tags) : [];
     let itemID = item.id;
     let bookmarkID = (bookmarks === null) ? null : checkBookmarksForItem(itemID, bookmarks);
@@ -535,6 +536,7 @@ export const getSummarizedResults = (results: RawResultsContainer, confidenceWei
     let formattedItem = {
       id: itemID,
       subjectNode: subjectNode,
+      objectNode: objectNode,
       type: type,
       name: itemName,
       paths: formattedPaths,
@@ -601,4 +603,9 @@ export const formatPublicationSourceName = (sourceName: string): string => {
       break;
   }
   return newSourceName;
+}
+
+export const getFormattedPathfinderName = (name: string) => {
+  const formattedName = name.replace(/([A-Z])/g, ' $1').trim()
+  return formattedName;
 }
