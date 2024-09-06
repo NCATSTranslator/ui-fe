@@ -23,7 +23,11 @@ import PathfinderDivider from "../../Icons/Queries/PathfinderDivider.svg?react";
 import ShareIcon from '../../Icons/Buttons/Link.svg?react';
 import SwapIcon from '../../Icons/Buttons/Swap.svg?react';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
+import InfoIcon from '../../Icons/Status/Alerts/Info.svg?react';
+import AddIcon from '../../Icons/Buttons/Add/Add.svg?react';
+import SubtractIcon from '../../Icons/Buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
+import Select from '../Core/Select';
 
 type QueryPathfinderProps = {
   results?: boolean;
@@ -42,11 +46,14 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
   const [inputTwoText, setInputTwoText] = useState("");
   const [queryItemOne, setQueryItemOne] = useState<AutocompleteItem | null>(null);
   const [queryItemTwo, setQueryItemTwo] = useState<AutocompleteItem | null>(null);
+  const [hasMiddleType, setHasMiddleType] = useState<boolean>(false);
+  const [middleType, setMiddleType] = useState<string | null>(null);
 
   const labelOne = getDataFromQueryVar("lone");
   const labelTwo = getDataFromQueryVar("ltwo");
   const idOne = getDataFromQueryVar("ione");
   const idTwo = getDataFromQueryVar("itwo");
+  const constraintText = getDataFromQueryVar("c");
 
   // Array, List of items to display in the autocomplete window
   const [autocompleteItemsOne, setAutoCompleteItemsOne] = useState<Array<AutocompleteItem> | null>(null);
@@ -144,11 +151,15 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
     // Set isLoading to true
     setIsLoading(true);
 
-    let queryJson = JSON.stringify({
+    let queryObject: {type: string, subject: {id: string, category: string}, object: {id: string, category: string}, constraint?: string} = {
       type: 'pathfinder',
       subject: {id: itemOne.id, category: itemOne.types[0]},
-      object: {id: itemTwo.id, category: itemTwo.types[0]}
-    });
+      object: {id: itemTwo.id, category: itemTwo.types[0]},
+    }
+    if(hasMiddleType && !!middleType)
+      queryObject.constraint = middleType;
+
+    let queryJson = JSON.stringify(queryObject);
 
     // submit query to /query
     const requestOptions = {
@@ -175,7 +186,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
           //   )
           // );
         // }
-        let newQueryPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, '0', data.data); 
+        let newQueryPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, '0', middleType?.replace("biolink:", ""), data.data); 
         console.log(newQueryPath);
         navigate(newQueryPath);
         // }
@@ -217,6 +228,11 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
     setInputTwoText(prevTextOne);
   }
 
+  const handleMiddleTypeTrigger = () => {
+    setHasMiddleType(prev => !prev);
+    setMiddleType("biolink:ChemicalEntity");
+  }
+
   return (
     <div className={`${styles.queryPathfinder} ${results && styles.results}`}>
       <ToastContainer
@@ -245,6 +261,10 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
                         :
                           <span className={styles.searchedTerm}>{labelOne}</span>
                     }
+                    {
+                      constraintText &&
+                      `, contain a ${constraintText.replace("biolink:", "")}, `
+                    }
                     and end with
                     {
                       !!idTwo && !!labelTwo
@@ -271,13 +291,14 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
               <h6 className={styles.h6}>Results will show paths beginning with the first search term and ending with the second</h6>
               <div className={styles.buttons}>
                 <Button handleClick={swapTerms} isSecondary><SwapIcon/>Swap Terms</Button>
+                <Button handleClick={handleMiddleTypeTrigger} isSecondary className={styles.middleTypeButton}>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon/></Button>
               </div>
               {
                 isError &&
                 <p className={styles.error}>{errorText}</p>
               }
               <form 
-                className={styles.form}
+                className={`${styles.form} ${hasMiddleType && styles.hasMiddleType}`}
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSubmission(queryItemOne, queryItemTwo);
@@ -299,6 +320,28 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
                   />
                 </div>
                 <PathfinderDivider/>
+                {
+                  hasMiddleType &&
+                  <>
+                    <Select
+                      label="" 
+                      name="Type"
+                      handleChange={(value)=>{
+                        setMiddleType(value.toString());
+                      }}
+                      value={middleType}
+                      noanimate
+                      className={styles.middleTypeSelector}
+                      >
+                      <option value="biolink:ChemicalEntity">Chemical</option>
+                      <option value="biolink:Disease">Disease</option>
+                      <option value="biolink:Drug">Drug</option>
+                      <option value="biolink:Gene">Gene</option>
+                      <option value="biolink:PhenotypicFeature">Phenotype</option>
+                    </Select>
+                    <PathfinderDivider/>
+                  </>
+                }
                 <div className={`${styles.inputContainer}`}>
                   <TextInput 
                     placeholder="Enter Second Search Term" 

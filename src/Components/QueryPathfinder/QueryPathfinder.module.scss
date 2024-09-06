@@ -18,6 +18,12 @@
       font-size: 12px;
       padding: 4px 8px;
     }
+    .middleTypeButton {
+      svg {
+        margin-right: 0;
+        margin-left: 4px;
+      }
+    }
   }
   .loadingIcon {
     opacity: 0;
@@ -93,6 +99,22 @@
   margin-bottom: $l;
   max-width: 910px;
   position: relative;
+  &.hasMiddleType {
+    grid-template-columns: 1fr 18px 140px 18px 1fr 40px;
+  }
+  .middleTypeSelector {
+    margin: 0;
+    & > div {
+      border: none;
+      box-shadow: none !important;
+      & > div {
+        top: calc(100% + 9px) !important;
+        max-height: 265px;
+        overflow: auto !important;
+        scrollbar-width: none;
+      }
+    }
+  }
   .inputContainer {
     position: relative;
     display: flex;
@@ -103,7 +125,7 @@
     padding: 8px 12px;
     &.selected {
       input {
-        font-weight: 600;
+        font-weight: 400;
       }
     }
     input {

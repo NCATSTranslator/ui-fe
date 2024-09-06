@@ -80,10 +80,10 @@ export const getResultsShareURLPath = (label, nodeID, typeID, resultID, pk) => {
   return `results?l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`;
 }
 
-export const getPathfinderResultsShareURLPath = (itemOne, itemTwo, resultID, pk) => {
+export const getPathfinderResultsShareURLPath = (itemOne, itemTwo, resultID, constraint, pk) => {
   let labelOne = (itemOne.label) ? itemOne.label : null;
   let labelTwo = (itemTwo.label) ? itemTwo.label : null;
   let idOne = (itemOne.id) ? itemOne.id : null;
   let idTwo = (itemTwo.id) ? itemTwo.id : null;
-  return `results?lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p&r=${resultID}&q=${pk}`;
+  return `results?lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p&c=${constraint}&r=${resultID}&q=${pk}`;
 }
