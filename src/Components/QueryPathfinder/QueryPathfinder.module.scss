@@ -121,4 +121,15 @@
       stroke: $white;
     }
   }
+  .close {
+    background-color: transparent;
+    padding: 0;
+    svg {
+      width: 24px;
+      height: 24px;
+      path {
+        fill: $darkGray;
+      }
+    }
+  }
 }

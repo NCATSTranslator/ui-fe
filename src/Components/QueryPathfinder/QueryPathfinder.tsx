@@ -22,6 +22,7 @@ import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "../../Icons/Queries/PathfinderDivider.svg?react";
 import ShareIcon from '../../Icons/Buttons/Link.svg?react';
 import SwapIcon from '../../Icons/Buttons/Swap.svg?react';
+import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 
 type QueryPathfinderProps = {
@@ -193,10 +194,17 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
   }
 
   const clearSelectedItems = () => {
-    setQueryItemOne(null);
-    setInputOneText("");
-    setQueryItemTwo(null);
-    setInputTwoText("");
+    clearItem(1);
+    clearItem(2);
+  }
+  const clearItem = (item: number) => {
+    if(item === 1) {
+      setQueryItemOne(null);
+      setInputOneText("");
+    } else if(item === 2) {
+      setQueryItemTwo(null);
+      setInputTwoText("");
+    }
   }
 
   const swapTerms = () => {
@@ -282,6 +290,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
                     className={`${styles.input} ${!!queryItemOne && styles.selected}`}
                     value={inputOneText}
                     iconLeft={!!queryItemOne ? getIcon(queryItemOne.types[0]) : <QuestionIcon/>}
+                    iconRight={!!queryItemOne ? <button className={styles.close} onClick={()=>clearItem(1)}><CloseIcon/></button> : false}
                   />
                   <Autocomplete 
                     isLoading={autocompleteLoadingOne}
@@ -297,7 +306,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
                     className={`${styles.input} ${!!queryItemTwo && styles.selected}`}
                     value={inputTwoText}
                     iconLeft={!!queryItemTwo ? getIcon(queryItemTwo.types[0]) : <QuestionIcon/>}
-                    iconRight
+                    iconRight={!!queryItemTwo ? <button className={styles.close} onClick={()=>clearItem(2)}><CloseIcon/></button> : false}
                   />
                   <Autocomplete 
                     isLoading={autocompleteLoadingTwo}
