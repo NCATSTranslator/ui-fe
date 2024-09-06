@@ -437,7 +437,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
         className={`${styles.accordionPanel}
           ${isExpanded ? styles.open : styles.closed }
           ${(item.tags.some(item=>item.includes("role")) && !isInUserSave) ? styles.hasTags : ''}
-          ${(item.description) ? styles.hasDescription : '' }
+          ${(item.description && !isPathfinder) ? styles.hasDescription : '' }
         `}
         duration={500}
         height={height}
@@ -462,7 +462,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
               </div>
             }
             {
-              item.description &&
+              item.description && !isPathfinder && 
               <p className={styles.description}>
                 <Highlighter
                   highlightClassName="highlight"
