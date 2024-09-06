@@ -85,5 +85,6 @@ export const getPathfinderResultsShareURLPath = (itemOne, itemTwo, resultID, con
   let labelTwo = (itemTwo.label) ? itemTwo.label : null;
   let idOne = (itemOne.id) ? itemOne.id : null;
   let idTwo = (itemTwo.id) ? itemTwo.id : null;
-  return `results?lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p&c=${constraint}&r=${resultID}&q=${pk}`;
+  let constraintVar = !!constraint ?  `&c=${constraint}`: '';
+  return `results?lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}&q=${pk}`;
 }
