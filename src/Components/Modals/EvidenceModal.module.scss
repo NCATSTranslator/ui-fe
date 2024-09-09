@@ -149,6 +149,7 @@
     right: $xs;
     margin: 0;
     padding: 0;
+    z-index: 100;
   }
   &.minimized {
     max-height: 42px;
