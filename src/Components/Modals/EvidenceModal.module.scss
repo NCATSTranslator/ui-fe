@@ -137,10 +137,23 @@
   border-radius: $largeBorderRadius;
   border: 1px solid $lightPurpleTwo;
   margin: $s auto $s;
-  width: 100%;
+  width: calc(100% - 2px);
   overflow: hidden;
   display: flex;
   max-height: 175px;
+  transition: all .4s ease;
+  position: relative;
+  .togglePathView {
+    position: absolute;
+    top: $xs;
+    right: $xs;
+    margin: 0;
+    padding: 0;
+  }
+  &.minimized {
+    max-height: 42px;
+    margin-bottom: 0;
+  }
 }
 .pathView {
   display: grid;
