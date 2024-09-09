@@ -20,6 +20,12 @@
     .accordionPanel {
       grid-column: 1/6;
     }
+    .tags {
+      display: none;
+    }
+    .accordionPanel {
+      min-height: initial !important;
+    }
   }
   .resultTabs {
     margin: $s auto $xs auto;
