@@ -12,9 +12,12 @@ import { checkForEdgeMatch, handleEvidenceSort } from "../../Utilities/evidenceM
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
-import Information from '../../Icons/Status/Alerts/Info.svg?react';
+import InfoIcon from '../../Icons/Status/Alerts/Info.svg?react';
+import PlusIcon from '../../Icons/Buttons/Add/Add.svg?react';
+import MinusIcon from '../../Icons/Buttons/Subtract/Subtract.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
+import Button from "../Core/Button";
 
 const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) => {
 
@@ -28,6 +31,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
   const [selectedEdge, setSelectedEdge] = useState(edgeGroup);
   const [selectedEdgeTrigger, setEdgeSelectedTrigger] = useState(false);
   const [formattedEdge, setFormattedEdge] = useState(null);
+  const [isPathViewMinimized, setIsPathViewMinimized] = useState(false);
 
   const pathLength = (path) ? path.path.subgraph.length : 0;
 
@@ -38,6 +42,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
   const handleClose = () => {
     onClose();
     setSelectedEdge(null);
+    setIsPathViewMinimized(false);
     hasBeenOpened.current = false;
   }
 
@@ -145,7 +150,14 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
           </Tooltip>
           {
             path &&
-            <div className={styles.pathViewContainer}>
+            <div className={`${styles.pathViewContainer} ${isPathViewMinimized && styles.minimized}`}>
+              <Button iconOnly isSecondary handleClick={()=>setIsPathViewMinimized(prev=>!prev)} className={styles.togglePathView}>
+                {
+                  isPathViewMinimized 
+                  ? <PlusIcon />
+                  : <MinusIcon />
+                }
+              </Button>
               <div className={`${styles.pathView} scrollable-support path ${numberToWords(pathLength)}`}>
                 {
                   path.path.subgraph.map((pathItem, i) => {
@@ -288,7 +300,7 @@ const EvidenceModal = ({path = null, isOpen, onClose, item, edgeGroup = null}) =
               sources.length > 0 &&
               <Tab
                 heading="Knowledge Sources"
-                tooltipIcon={<Information className={styles.infoIcon} />}
+                tooltipIcon={<InfoIcon className={styles.infoIcon} />}
                 dataTooltipId="knowledge-sources-tooltip"
                 className={styles.tab}
                 >
