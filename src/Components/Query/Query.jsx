@@ -222,7 +222,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
       return type.id === parseInt(value)
     })
     autocompleteFunctions.current = newQueryType.functions;
-    limitTypes.current = newQueryType.filterType;
+    limitTypes.current = [newQueryType.filterType];
     limitPrefixes.current = newQueryType.limitPrefixes;
     clearAutocompleteItems();
     if(resetInputText || resetInputText === undefined) {
