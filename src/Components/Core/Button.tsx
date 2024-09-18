@@ -1,4 +1,4 @@
-import { useEffect, useState, FC, MouseEvent, ReactNode } from "react";
+import { FC, MouseEvent, ReactNode } from "react";
 import styles from './Button.module.scss';
 import { Link } from "react-router-dom";
 
@@ -19,63 +19,55 @@ interface ButtonProps {
   dataTooltipId?: string;
 }
 
-const Button: FC<ButtonProps> = ({isSecondary, isTertiary, handleClick = (e) => {}, href, iconOnly, _blank, 
-  link = false, smallFont, type = '', children, disabled = false, testId, className, dataTooltipId = ""}) => {
+const Button: FC<ButtonProps> = ({
+  isSecondary = false,
+  isTertiary = false,
+  handleClick,
+  href,
+  iconOnly = false,
+  _blank = false,
+  link = false,
+  smallFont = false,
+  type = 'button',
+  children,
+  disabled = false,
+  testId,
+  className = "",
+  dataTooltipId = ""
+}) => {
+  const buttonStyle = `
+    button 
+    ${styles.button} 
+    ${isTertiary ? styles.tertiary : isSecondary ? styles.secondary : ''}
+    ${iconOnly ? styles.iconOnly : ''}
+    ${smallFont ? styles.smallFont : ''}
+    ${className}
+  `.trim();
 
-  let buttonStyle = isTertiary ? styles.tertiary : isSecondary ? styles.secondary : '';
-  buttonStyle += iconOnly ? ` ${styles.iconOnly}` : '';
-  className = !!className ? className : "";
-
-  const [isDisabled, setIsDisabled] = useState(disabled);
-
-  useEffect(() => {
-    setIsDisabled(disabled);
-  }, [disabled]);
-
-  const onClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
-    if (handleClick) handleClick(e);
+  const commonProps = {
+    className: buttonStyle,
+    onClick: handleClick,
+    'data-testid': testId,
+    'data-tooltip-id': dataTooltipId
   };
 
+  if (href) {
+    const linkProps = {
+      ...commonProps,
+      to: href,
+      ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
+    };
+    return link ? <Link {...linkProps}>{children}</Link> : <a {...linkProps}>{children}</a>;
+  }
+
   return (
-    <>
-      {href ? (
-        link ? 
-          <Link
-          className={`button ${styles.button} ${buttonStyle} ${!!smallFont && styles.smallFont} ${className}`}
-          onClick={onClick}
-          to={href}
-          target={_blank ? '_blank' : undefined}
-          rel={_blank ? 'noopener noreferrer' : undefined}
-          data-testid={testId}
-          data-tooltip-id={dataTooltipId}
-        >
-          {children}
-        </Link>
-        :
-          <a
-            className={`button ${styles.button} ${buttonStyle} ${!!smallFont && styles.smallFont} ${className}`}
-            onClick={onClick}
-            href={href}
-            target={_blank ? '_blank' : undefined}
-            rel={_blank ? 'noopener noreferrer' : undefined}
-            data-testid={testId}
-            data-tooltip-id={dataTooltipId}
-          >
-            {children}
-          </a>
-      ) : (
-        <button
-          className={`button ${styles.button} ${buttonStyle} ${!!smallFont && styles.smallFont} ${className}`}
-          type={type as "button" | "submit" | "reset"}
-          onClick={onClick}
-          disabled={isDisabled}
-          data-testid={testId}
-          data-tooltip-id={dataTooltipId}
-        >
-          {children}
-        </button>
-      )}
-    </>
+    <button
+      {...commonProps}
+      type={type}
+      disabled={disabled}
+    >
+      {children}
+    </button>
   );
 }
 
