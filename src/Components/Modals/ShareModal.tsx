@@ -62,11 +62,14 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
       id: getDataFromQueryVar('itwo'),
       label: getDataFromQueryVar('ltwo')
     }
-    qidPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, qid);
+    const constraint = getDataFromQueryVar('c');
+    qidPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid);
+    console.log("path: ", qidPath);
   } else {
     qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);
   }
   const qidURL = encodeURI(`${window.location.origin}/${qidPath}`);
+  console.log(qidURL);
   
   // useEffect(() => {
   //   if(window.location.pathname.includes("results") && !isResultsUrlSet.current && qidURL) {
