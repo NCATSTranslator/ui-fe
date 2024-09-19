@@ -273,11 +273,8 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
                     }
                     and end with
                     {
-                      !!idTwo && !!labelTwo
-                        ?
-                          generateEntityLink(idTwo, styles.searchedTerm, ()=>labelTwo, true)
-                        :
-                          <span className={styles.searchedTerm}>{labelTwo}</span>
+                      (!!labelTwo &&!!idTwo && idTwo !== 'null') 
+                        ? generateEntityLink(idTwo, styles.searchedTerm, ()=>labelTwo, true) : <span className={styles.searchedTerm}>{labelTwo}</span>
                     }
                     ?
                   </h6>
