@@ -381,8 +381,15 @@ const ResultsItem: FC<ResultsItemProps> = ({
               </>
             : <></>
         }
-        <button className={`${styles.icon} ${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`} onClick={handleOpenResultShare}>
+        <button 
+          className={`${styles.icon} ${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`} 
+          onClick={handleOpenResultShare} 
+          data-tooltip-id={`share-tooltip-${nameString.replaceAll("'", "")}`}
+          >
           <ShareIcon/>
+          <Tooltip id={`share-tooltip-${nameString.replaceAll("'", "")}`}>
+            <span className={styles.tooltip}>Generate a sharable link for this result.</span>
+          </Tooltip>
         </button>
       </div>
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
