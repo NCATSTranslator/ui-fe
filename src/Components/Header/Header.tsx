@@ -49,19 +49,19 @@ const Header: FC<HeaderProps> = ({children}) => {
             {
               !!user &&
               <>
-                <Link to={`/workspace`} className={`${currentPage.includes("workspace") && styles.active} ${styles.workspaceLink}`}><Workspace/><span className={styles.linkSpan}>Workspace</span></Link>
-                <Link to={`/history`} className={`${currentPage.includes("history") && styles.active}`}><History/><span className={styles.linkSpan}>Search History</span></Link>
+                <Link to={`/workspace`} className={`${currentPage === '/workspace' && styles.active} ${styles.workspaceLink}`}><Workspace/><span className={styles.linkSpan}>Workspace</span></Link>
+                <Link to={`/history`} className={`${currentPage === '/history' && styles.active}`}><History/><span className={styles.linkSpan}>Search History</span></Link>
               </>
             }
             <Link to={`${getGeneratedSendFeedbackLink(openFeedbackModal)}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
-            <Link to={`/help`}  className={`${currentPage.includes("help") && styles.active} ${styles.helpLink}`} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
+            <Link to={`/help`}  className={`${currentPage === '/help' && styles.active} ${styles.helpLink}`} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
             {
               !user 
               ? 
                 <a className={styles.login} href={!!loginURL ? loginURL : ''}>Log In</a>
               : 
                 <>
-                  <Link to={`/preferences`} className={`${currentPage.includes("preferences") && styles.active} ${styles.userIcon}`}>
+                  <Link to={`/preferences`} className={`${currentPage === '/preferences' && styles.active} ${styles.userIcon}`}>
                     <Cog/>
                     {
                       user?.name && !!width &&

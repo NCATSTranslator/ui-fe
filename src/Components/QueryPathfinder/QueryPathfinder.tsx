@@ -189,7 +189,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
           // );
         // }
         let newQueryPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, '0', middleType?.replace("biolink:", ""), data.data); 
-        console.log(newQueryPath);
         navigate(newQueryPath);
         // }
       })

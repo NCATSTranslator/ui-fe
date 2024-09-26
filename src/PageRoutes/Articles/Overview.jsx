@@ -4,7 +4,7 @@ export const Overview = () => {
 
   return (
     <>
-      <p className="caption">Last updated on September 8th, 2023</p>
+      <p className="caption">Last updated on September 25th, 2024</p>
       <p style={{'text-align': 'center'}}><img src={howItWorksImage} alt="shows how translator works in three steps" /></p>
       <p>The process of exploring Translator knowledge can be summarized as three steps:</p>
       <ol>
