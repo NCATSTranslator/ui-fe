@@ -1,9 +1,9 @@
 @import "../../Assets/Styles/variables";
 
 .smallScreenOverlay {
-  position: sticky;
-  width: 99vw;
-  height: 100vh;
+  position: absolute;
+  // width: 99vw;
+  // height: 100vh;
   top: 0;
   right: 0;
   bottom: 0;
