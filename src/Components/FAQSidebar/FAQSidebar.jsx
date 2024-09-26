@@ -3,7 +3,7 @@ import styles from './FAQSidebar.module.scss';
 import { NavLink } from 'react-router-dom';
 import Accordion from '../Accordion/Accordion';
 import { useLocation } from "react-router-dom";
-import ExternalLink from '../../Icons/Buttons/Link.svg?react';
+import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 
 const FAQSidebar = ({articles}) => {
 

@@ -19,6 +19,14 @@
       }
     }
   }
+  .accordion {
+    a {
+      padding: 8.5px 8px;
+    }
+    button {
+      display: flex;
+    }
+  }
   .accordionPanel {
     padding: 0 0 0 $s;
   }
