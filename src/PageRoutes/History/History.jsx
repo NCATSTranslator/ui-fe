@@ -29,7 +29,7 @@ const History = () => {
                 <h2>Search History</h2>
                 <Button 
                   handleClick={()=>setModalOpen(true)}
-                  className={`${styles.button} clear-all-search-history`}
+                  className={`${styles.button} ${styles.clearButton}`}
                   isSecondary
                   >
                   <CloseIcon/>
