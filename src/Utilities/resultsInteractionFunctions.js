@@ -71,11 +71,6 @@ export const handleResultsRefresh = (freshRawResults, handleNewResults, setFresh
   setFreshRawResults(null)
 }
 
-export const handleClearAllFilters = (asFilters, rResults, oResults, setActiveFilters, currentSortString, handleUpdateResults) => {
-  setActiveFilters([]);
-  handleUpdateResults([], asFilters, rResults, oResults, false, currentSortString);
-}
-
 export const getResultsShareURLPath = (label, nodeID, typeID, resultID, pk) => {
   return `results?l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`;
 }
