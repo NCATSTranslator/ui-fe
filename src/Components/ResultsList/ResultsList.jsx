@@ -22,7 +22,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHigh
   filterCompare, makePathRank, updatePathRanks, pathRankSort, } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, hasSupport } from "../../Utilities/resultsFormattingFunctions";
 import { findStringMatch, handleResultsError, handleEvidenceModalClose,
-  handleResultsRefresh, handleClearAllFilters } from "../../Utilities/resultsInteractionFunctions";
+  handleResultsRefresh } from "../../Utilities/resultsInteractionFunctions";
 import * as filtering from '../../Utilities/filterFunctions';
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
@@ -246,7 +246,7 @@ const ResultsList = ({loading}) => {
   const handlePageClick = useCallback((event, newItemsPerPage = false, resultsLength = formattedResults.length, currentNumItemsPerPage = itemsPerPage ) => {
     let perPageNum = (newItemsPerPage) ? parseInt(newItemsPerPage) : currentNumItemsPerPage;
     currentPage.current = event.selected;
-    const newOffset = (event.selected * perPageNum) % resultsLength;
+    const newOffset = isNaN((event.selected * perPageNum) % resultsLength) ? 0 : (event.selected * perPageNum) % resultsLength;
     const endOffset = (parseInt(newOffset + perPageNum) > resultsLength)
       ? resultsLength
       : parseInt(newOffset + perPageNum);
@@ -303,7 +303,6 @@ const ResultsList = ({loading}) => {
     }
 
     rawResults.current = summary;
-
     return newFormattedResults;
   }
 
@@ -854,10 +853,18 @@ const ResultsList = ({loading}) => {
       newActiveFilters.push(filter);
       newActiveFilters.sort(filterCompare);
     }
+    
+    handleApplyFilterAndCleanup(newActiveFilters, activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current);
+  }
 
-    setActiveFilters(newActiveFilters);
-    let newFormattedResults = handleUpdateResults(newActiveFilters, activeEntityFilters, rawResults.current, originalResults.current, false, currentSortString.current);
+  const handleApplyFilterAndCleanup = (filtersToActivate, activeEntityFilters, rawResults, originalResults, sortString) => {
+    setActiveFilters(filtersToActivate);
+    let newFormattedResults = handleUpdateResults(filtersToActivate, activeEntityFilters, rawResults, originalResults, false, sortString);
     handlePageReset(false, newFormattedResults.length);
+  }
+
+  const handleClearAllFilters = () => {
+    handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current);
   }
 
   useEffect(() => {
@@ -956,7 +963,7 @@ const ResultsList = ({loading}) => {
               <ResultsFilter
                 activeFilters={activeFilters}
                 onFilter={handleFilter}
-                onClearAll={()=>handleClearAllFilters(activeEntityFilters, rawResults.current, originalResults.current, setActiveFilters, currentSortString.current, handleUpdateResults)}
+                onClearAll={handleClearAllFilters}
                 expanded={filtersExpanded}
                 setExpanded={setFiltersExpanded}
                 availableTags={availableTags}
