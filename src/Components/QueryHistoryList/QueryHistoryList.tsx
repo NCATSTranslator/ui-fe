@@ -49,7 +49,6 @@ const QueryHistoryList = () => {
   };
 
   const handleSearch = debounce((value: string) => {
-    console.log('searching');
     setFilteredQueryHistoryState(
       queryHistoryState.filter((item) => {
         let tempValue = value.toLowerCase();
