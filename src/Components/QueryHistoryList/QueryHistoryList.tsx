@@ -107,7 +107,6 @@ const QueryHistoryList = () => {
             placeholder="Search by Subject"
             handleChange={(e) => handleSearch(e)}
             className={styles.input}
-            size=""
             iconLeft={<SearchIcon />}
             iconRight={isLoading && <SearchIcon />}
           />

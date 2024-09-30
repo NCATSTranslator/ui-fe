@@ -10,7 +10,7 @@ import Question from '../../Icons/Navigation/Help.svg?react';
 import Cog from '../../Icons/Navigation/Settings.svg?react';
 import Logo from '../../Assets/Images/site-logo.png';
 import styles from './Header.module.scss';
-import { getGeneratedSendFeedbackLink, getFullPathname } from '../../Utilities/utilities';
+import { getFullPathname } from '../../Utilities/utilities';
 
 type HeaderProps = {
   children?: ReactNode;
@@ -31,7 +31,6 @@ const Header: FC<HeaderProps> = ({children}) => {
   const clientID = config?.social_providers?.una?.client_id;
   const logoutURI = config?.social_providers?.una?.logout_uri;
   const logoutReady = (clientID && logoutURI) ? true : false;
-  const openFeedbackModal = true;
   const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
   const loginURL = getFormattedLoginURL(location);
   const currentPage = location.pathname;
@@ -53,7 +52,7 @@ const Header: FC<HeaderProps> = ({children}) => {
                 <Link to={`/history`} className={`${currentPage === '/history' && styles.active}`}><History/><span className={styles.linkSpan}>Search History</span></Link>
               </>
             }
-            <Link to={`${getGeneratedSendFeedbackLink(openFeedbackModal)}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
+            <Link to={`/send-feedback`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
             <Link to={`/help`}  className={`${currentPage === '/help' && styles.active} ${styles.helpLink}`} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
             {
               !user 

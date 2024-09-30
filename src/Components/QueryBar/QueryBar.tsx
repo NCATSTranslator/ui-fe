@@ -77,7 +77,6 @@ const QueryBar: FC<QueryBarProps> = ({
           placeholder={placeholder} 
           handleChange={handleChange} 
           className={styles.input}
-          size=""
           value={value}
           disabled={disabled}
         />

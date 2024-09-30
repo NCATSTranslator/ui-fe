@@ -48,7 +48,6 @@ const EntitySearch = ({ onFilter, className }) => {
         <input
           type="text"
           placeholder="Filter Terms"
-          size="1"
           onChange={(e)=> handleEntitySearchChange(e.target.value)}
           maxLength={200}
           value={entitySearch.value}

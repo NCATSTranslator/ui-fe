@@ -6,7 +6,6 @@ type TextInputProps = {
   subtitle?: string;
   value?: string;
   placeholder?: string;
-  size?: string;
   rows?: number;
   error?: boolean;
   errorText?: string;
@@ -23,11 +22,10 @@ type TextInputProps = {
 const TextInput: FC<TextInputProps> = ({
   label,
   subtitle,
-  value,
+  value = "",
   placeholder,
-  size = '',
   rows,
-  error,
+  error = false,
   errorText = "Error Message",
   handleChange,
   className = '',
@@ -38,50 +36,45 @@ const TextInput: FC<TextInputProps> = ({
   testId,
   disabled = false
 }) => {
-  const hasIconLeftClass = iconLeft ? styles.hasIconLeft : styles.noIconLeft;
-  const hasIconRightClass = iconRight ? styles.noIconRight : styles.hasIconRight;
+  const inputStyle = `
+    text-input
+    ${styles.textInput}
+    ${iconLeft ? styles.hasIconLeft : styles.noIconLeft}
+    ${iconRight ? styles.hasIconRight : styles.noIconRight}
+    ${className}
+  `.trim();
+
+  const commonProps = {
+    placeholder,
+    maxLength,
+    value,
+    onKeyDown: handleKeyDown,
+    onChange: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => handleChange(e.target.value),
+    'data-testid': testId,
+    disabled,
+    className: inputStyle,
+  };
 
   return (
-    <>
+    <label className={inputStyle}>
+      {label && <span className="input-label">{label}</span>}
+      {subtitle && <span className="input-subtitle">{subtitle}</span>}
+      {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
+      {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
       {rows && rows > 1 ? (
-        <label className={`text-input ${styles.textInput} ${size} ${hasIconLeftClass} ${hasIconRightClass} ${className}`}> 
-          {label && <span className="input-label">{label}</span>}
-          {subtitle && <span className="input-subtitle">{subtitle}</span>}
-          {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
-          {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
-          <textarea 
-            placeholder={placeholder} 
-            rows={rows} 
-            onChange={(e) => handleChange(e.target.value)} 
-            maxLength={maxLength} 
-            value={value}
-            onKeyDown={handleKeyDown}
-            data-testid={testId}
-            disabled={disabled}
-          />
-          {error && <span className={styles.errorText}>{errorText}</span>}
-        </label>
+        <textarea
+          {...commonProps}
+          rows={rows}
+        />
       ) : (
-        <label className={`text-input ${styles.textInput} ${size} ${hasIconLeftClass} ${hasIconRightClass} ${className}`}> 
-          {label && <span className="input-label">{label}</span>}
-          {subtitle && <span className="input-subtitle">{subtitle}</span>}
-          {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
-          {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
-          <input 
-            type="text" 
-            placeholder={placeholder} 
-            onChange={(e) => handleChange(e.target.value)} 
-            maxLength={maxLength} 
-            value={value}
-            onKeyDown={handleKeyDown}
-            data-testid={testId}
-            disabled={disabled}
-          />
-          {error && <span className={styles.errorText}>{errorText}</span>}
-        </label>
+        <input
+          {...commonProps}
+          type="text"
+        />
       )}
-    </>
+      {error && <span className={styles.errorText}>{errorText}</span>}
+    </label>
   );
-}
+};
 
 export default TextInput;

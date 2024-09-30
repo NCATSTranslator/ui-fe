@@ -1,10 +1,9 @@
-import React, {useState} from "react";
+import { useState } from "react";
 import styles from './FileInput.module.scss';
 
-const FileInput = ({buttonLabel, size, fileTypes, handleChange}) => {
+const FileInput = ({buttonLabel, fileTypes, handleChange}) => {
   
   const [fileNames, setFileNames] = useState(null);
-  size = (size) ? size : 's';
   handleChange = (handleChange) ? handleChange : ()=>{ console.log('No handleChange function prop provided to FileInput component.')};
 
   const handleUpdate = (e) => {
@@ -20,7 +19,7 @@ const FileInput = ({buttonLabel, size, fileTypes, handleChange}) => {
 
   return (
 
-    <label htmlFor={`file-upload`} className={`file-input ${styles.fileInput} ${size}`}>
+    <label htmlFor={`file-upload`} className={`file-input ${styles.fileInput}`}>
       <span className={styles.fileList}>
         {(fileNames) ?
           fileNames.join(', ') :

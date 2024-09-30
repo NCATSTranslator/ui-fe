@@ -196,7 +196,6 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
             <Select 
               label="Category *" 
               name="Select One"
-              size="l" 
               handleChange={(value)=>{
                 setCurrentCategory(value);
                 resetErrors();
@@ -213,7 +212,6 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
               currentCategory === 'Bug Report' &&
               <TextInput 
                 label="Steps to Reproduce *" 
-                size="l" 
                 rows={3}
                 maxLength={1500}
                 handleChange={(value)=>{
@@ -226,7 +224,6 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
             }
             <TextInput 
               label="Comments *" 
-              size="l" 
               rows={5}
               maxLength={1500}
               handleChange={(value)=>{
@@ -238,11 +235,10 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
             />
             <FileInput
               buttonLabel="Browse Files"
-              size="l"
               fileTypes=".png,.jpg,.jpeg"
               handleChange={(files)=>{setCurrentScreenshots(files);}}
             />
-            <Button type="submit" size="l" disabled={errorActive}>Send</Button>
+            <Button type="submit" disabled={errorActive}>Send</Button>
           </form>
         </Fade>
       }
