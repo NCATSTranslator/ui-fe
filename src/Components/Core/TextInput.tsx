@@ -45,14 +45,13 @@ const TextInput: FC<TextInputProps> = ({
   `.trim();
 
   const commonProps = {
-    placeholder,
-    maxLength,
-    value,
+    placeholder: placeholder,
+    maxLength: maxLength,
+    // value: value,
     onKeyDown: handleKeyDown,
-    onChange: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => handleChange(e.target.value),
+    onChange: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {handleChange(e.target.value)},
     'data-testid': testId,
     disabled,
-    className: inputStyle,
   };
 
   return (

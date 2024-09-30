@@ -14,6 +14,7 @@ import Button from "../Core/Button";
 import Close from '../../Icons/Buttons/Close/Close.svg?react';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 import ShareIcon from '../../Icons/Buttons/Link.svg?react';
+import RefreshIcon from '../../Icons/Buttons/Refresh.svg?react';
 
 const QueryHistoryList = () => {
   let previousTimeName: string | undefined;
@@ -105,10 +106,10 @@ const QueryHistoryList = () => {
         <form onSubmit={handleSubmit} className={styles.form}>
           <TextInput
             placeholder="Search by Subject"
-            handleChange={(e) => handleSearch(e)}
+            handleChange={(e) => {setIsLoading(true); handleSearch(e);}}
             className={styles.input}
             iconLeft={<SearchIcon />}
-            iconRight={isLoading && <SearchIcon />}
+            iconRight={isLoading && <RefreshIcon className={`loadingIcon ${styles.loadingIcon}`} />}
           />
         </form>
       </div>

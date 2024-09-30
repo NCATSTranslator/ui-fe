@@ -30,6 +30,11 @@
       }
     }
   }
+  .loadingIcon {
+    path {
+      fill: $midDarkGray !important;
+    }
+  }
 }
 .historyList {
   list-style: none;

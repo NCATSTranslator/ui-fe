@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { getGeneratedSendFeedbackLink } from '../../Utilities/utilities';
 
 export const SendFeedbackArticle = () => {
 
