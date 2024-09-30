@@ -390,3 +390,19 @@ input {
     grid-template-columns: repeat(6, 1fr);
   }
 }
+
+.page-header {
+  background-color: $palePurple;
+  padding: $l $s;
+  .container {
+    max-width: 640px;
+    padding: 0;
+  }
+  h1 {
+    color: $purpleTwo;
+    margin-bottom: 8px;
+  }
+  p, a {
+    font-size: $subTwoSize;
+  }
+}

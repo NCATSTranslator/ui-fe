@@ -13,6 +13,7 @@ import DesignSystem from './PageRoutes/DesignSystem/DesignSystem';
 import UserPrefs from './PageRoutes/UserPrefs/UserPrefs';
 import Workspace from './PageRoutes/Workspace/Workspace';
 import Pathfinder from './PageRoutes/Pathfinder/Pathfinder';
+import SendFeedbackPage from './PageRoutes/SendFeedback/SendFeedback';
 import { Help } from './PageRoutes/Articles/Help';
 import { LoggingIn } from './PageRoutes/Articles/LoggingIn';
 import { WhatIs } from './PageRoutes/Articles/WhatIs';
@@ -98,7 +99,7 @@ const routes = [
     element: <FAQPage title="Search History"><SearchHistoryArticle /></FAQPage>
   },
   {
-    path: "send-feedback",
+    path: "send-feedback-help",
     element: <FAQPage title="Send Feedback"><SendFeedbackArticle /></FAQPage>
   },
   {
@@ -116,6 +117,10 @@ const routes = [
   {
     path: "workspace",
     element: <Page title="User Workspace"><Workspace /></Page>
+  },
+  {
+    path: "send-feedback",
+    element: <Page title="Send Feedback"><SendFeedbackPage /></Page>
   },
   { 
     path: "*", 

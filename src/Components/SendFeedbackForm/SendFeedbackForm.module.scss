@@ -1,0 +1,16 @@
+@import "../../Assets/Styles/variables";
+
+.sendFeedbackFormContainer {
+  max-width: 640px;
+  margin: 0 auto;
+  form label {
+    margin-right: 0;
+    width: 100%;
+  }
+  .submitButton {
+    display: grid;
+    width: 100%;
+    margin: 0;
+    background-color: $purpleOne;
+  }
+}
