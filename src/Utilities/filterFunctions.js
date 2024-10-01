@@ -32,11 +32,11 @@ export const isGlobalTag = (tagID) => {
 }
 
 export const getValidFamilies = () => {
-  return ['cc', 'di', 'pc', 'pt', 'role', 'ara'];
+  return ['cc', 'di', 'pc', 'pt', 'role', 'ara', 'otc'];
 }
 
 export const getResultFamilies = () => {
-  return ['cc', 'di', 'role', 'ara'];
+  return ['cc', 'di', 'role', 'ara', 'otc'];
 }
 
 export const getPathFamilies = () => {
@@ -111,6 +111,7 @@ export const getFilterLabel = (filter) => {
     case "ara":  return "Reasoning Agent";
     case "role": return "ChEBI Role";
     case "pt":   return "Relationship Type";
+    case "otc":  return "Over the Counter Status";
     default: return defaultLabel;
   }
 }

@@ -42,6 +42,11 @@ const getPathTypeCaption = (): JSX.Element => {
     <p className={styles.caption}>Filter by path type (lookup or inferred) and/or by number of connections.</p>
   )
 }
+const getOtcCaption = (): JSX.Element => {
+  return(
+    <p className={styles.caption}>Show only results that meet the selected availability.</p>
+  )
+}
 
 const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.Element | null => {
   let headingToReturn;
@@ -75,6 +80,9 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.El
     case 'pt':
       headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Path Type" />;
       break;
+    case 'otc':
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Availability" />;
+      break;
     default:
       headingToReturn = null;
   }
@@ -101,6 +109,9 @@ const getTagCaptionMarkup = (tagFamily: string): JSX.Element | null => {
       break;
     case 'pt':
       captionToReturn = getPathTypeCaption();
+      break;
+    case 'otc':
+      captionToReturn = getOtcCaption();
       break;
     default:
       captionToReturn = null;
