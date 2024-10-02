@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useRef } from 'react';
+import { FC, ReactNode, useState, useEffect, useRef } from 'react';
 import ExportIcon from '../../Icons/Buttons/Export.svg?react';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
 import styles from './FileInput.module.scss';
@@ -10,7 +10,7 @@ type FileDropInputProps = {
   multiple?: boolean;
   disabled?: boolean;
   testId?: string;
-  label?: string;
+  label?: string | ReactNode;
   buttonLabel?: string;
   fileTypes?: string;
 };
