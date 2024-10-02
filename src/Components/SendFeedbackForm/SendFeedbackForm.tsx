@@ -23,8 +23,6 @@ const SendFeedbackForm = () => {
   const [stepsError, setStepsError] = useState<boolean>(false);
   const [currentSteps, setCurrentSteps] = useState<string>('');
 
-  const screenshotErrorText = "The images you've attached are too large to send. Consider compressing the images, or sending fewer of them.";
-  const [screenshotError, setScreenshotError] = useState<boolean>(false);
   const [currentScreenshots, setCurrentScreenshots] = useState<CustomFile[]>([]);
   const [base64Screenshots, setBase64Screenshots] = useState<string[]>([]);
   const currentARSpk = useSelector(currentQueryResultsID);
@@ -53,7 +51,7 @@ const SendFeedbackForm = () => {
     });
   }
 
-  const handleError = (error: 'category' | 'comments' | 'steps' | 'screenshot') => {
+  const handleError = (error: 'category' | 'comments' | 'steps') => {
     switch (error) {
       case 'category':
         setCategoryError(true);
@@ -63,9 +61,6 @@ const SendFeedbackForm = () => {
         break;
       case 'steps':
         setStepsError(true);
-        break;
-      case 'screenshot':
-        setScreenshotError(true);
         break;
     }
     setErrorActive(true);
@@ -204,6 +199,7 @@ const SendFeedbackForm = () => {
               testId="comments"
             />
             <FileInput
+              label={<>Add Files <span className="fw-normal">- Optional</span></>}
               buttonLabel="Browse Files"
               fileTypes=".png,.jpg,.jpeg"
               handleChange={(files: CustomFile[]) => setCurrentScreenshots(Array.from(files))}
