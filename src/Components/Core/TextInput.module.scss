@@ -2,15 +2,6 @@
 
 .textInput {
   position: relative; 
-  &.s {
-    width: 23%;
-  }
-  &.m {
-    width: 48%;
-  }
-  &.l {
-    width: 98%;
-  }
   .errorText {
     display: flex;
     justify-content: flex-start;

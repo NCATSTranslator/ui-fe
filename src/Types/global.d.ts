@@ -59,3 +59,24 @@ export type RootState = {
   currentPrefs: PreferencesContainer;
   currentConfig: Config | null;
 }
+
+export type QueryHistoryItem = {
+  item?: {
+    node?: {
+      id: string;
+      label: string;
+    };
+    type?: {
+      id: string;
+      label: string;
+    };
+  };
+  date: string;
+  id: string;
+  time?: string;
+}
+
+export type CustomFile = {
+  file: File;
+  thumbnailURL: string;
+}

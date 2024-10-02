@@ -1117,7 +1117,6 @@ const ResultsList = ({loading}) => {
                         <Select
                           label=""
                           name="Results Per Page"
-                          size="s"
                           handleChange={(value)=>{
                             setItemsPerPage(parseInt(value));
                             handlePageReset(value, formattedResults.length);

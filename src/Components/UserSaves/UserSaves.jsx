@@ -196,7 +196,6 @@ const UserSaves = () => {
                             placeholder="Search Saved Results" 
                             handleChange={(e)=>handleSearch(e)} 
                             className={styles.input}
-                            size=""
                             icon={<SearchIcon/>}
                           />
                           <button type="submit" size="" >

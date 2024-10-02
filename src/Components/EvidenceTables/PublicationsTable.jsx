@@ -378,7 +378,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
           <Select
             label=""
             name="Items Per Page"
-            size="s"
             handleChange={(value)=>{
               setItemsPerPage(parseInt(value));
               handlePageClick({selected: 0});
