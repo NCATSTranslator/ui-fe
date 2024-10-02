@@ -52,7 +52,7 @@ const Header: FC<HeaderProps> = ({children}) => {
                 <Link to={`/history`} className={`${currentPage === '/history' && styles.active}`}><History/><span className={styles.linkSpan}>Search History</span></Link>
               </>
             }
-            <Link to={`/send-feedback`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
+            <Link to={`/send-feedback`} className={`${currentPage === '/send-feedback' && styles.active}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
             <Link to={`/help`}  className={`${currentPage === '/help' && styles.active} ${styles.helpLink}`} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
             {
               !user 

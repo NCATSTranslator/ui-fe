@@ -358,7 +358,7 @@ input {
   cursor: default;
 }
 
-.input-label {
+.input-label, .input-label span {
   font-size: $subTwoSize;
   margin-bottom: $xxs;
   font-weight: 700;
