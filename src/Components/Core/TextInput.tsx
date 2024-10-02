@@ -47,7 +47,7 @@ const TextInput: FC<TextInputProps> = ({
   const commonProps = {
     placeholder: placeholder,
     maxLength: maxLength,
-    // value: value,
+    value: value,
     onKeyDown: handleKeyDown,
     onChange: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {handleChange(e.target.value)},
     'data-testid': testId,
