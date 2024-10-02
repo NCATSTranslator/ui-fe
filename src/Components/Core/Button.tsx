@@ -11,6 +11,7 @@ interface ButtonProps {
   iconOnly?: boolean;
   _blank?: boolean;
   type?: "button" | "submit" | "reset";
+  rel?: string;
   smallFont?: boolean;
   children?: ReactNode;
   disabled?: boolean;
@@ -29,6 +30,7 @@ const Button: FC<ButtonProps> = ({
   link = false,
   smallFont = false,
   type = 'button',
+  rel = '',
   children,
   disabled = false,
   testId,
@@ -55,6 +57,7 @@ const Button: FC<ButtonProps> = ({
     const linkProps = {
       ...commonProps,
       to: href,
+      rel: rel,
       ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
     };
     return link ? <Link {...linkProps}>{children}</Link> : <a {...linkProps}>{children}</a>;

@@ -13,16 +13,7 @@ button {
 // Form Input Sizes
 .text-input, .select, .search-container, .file-input {
   display: inline-grid;
-  margin: 0 $s $s 0;
-  &.s {
-    width: 23%;
-  }
-  &.m {
-    width: 48%;
-  }
-  &.l {
-    width: 98%;
-  }
+  margin: 0 0 $s 0;
   .error-text {
     display: flex;
     justify-content: flex-start;

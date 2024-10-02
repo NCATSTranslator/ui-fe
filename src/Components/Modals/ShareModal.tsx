@@ -47,8 +47,6 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
       : '';
   const queryResultID = sharedQueryResultID || '0';
 
-  // const isResultsUrlSet = useRef(false);
-
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
   const isPathfinder = sharedQueryType === 'p';
@@ -68,13 +66,6 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
     qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);
   }
   const qidURL = encodeURI(`${window.location.origin}/${qidPath}`);
-  
-  // useEffect(() => {
-  //   if(window.location.pathname.includes("results") && !isResultsUrlSet.current && qidURL) {
-  //     isResultsUrlSet.current = true;
-  //     window.history.replaceState(null, "Results", qidPath);
-  //   }
-  // }, [qidPath, qidURL]);
 
   return (
     <Modal 

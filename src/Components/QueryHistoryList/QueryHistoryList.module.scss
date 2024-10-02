@@ -1,6 +1,5 @@
 @import "../../Assets/Styles/variables";
 
-
 .historyListContainer {
   .historyContainer {
     padding-top: 0;
@@ -13,7 +12,7 @@
     .form {
       display: flex;
       justify-content: space-between;
-      padding: 0 24px 24px;
+      padding: 0 $l $l;
       max-width: 640px;
       margin: 0 auto;
       label {
@@ -29,6 +28,11 @@
         margin: 0 0 0 $xs;
         padding: 10px 20px;
       }
+    }
+  }
+  .loadingIcon {
+    path {
+      fill: $midDarkGray !important;
     }
   }
 }

@@ -172,25 +172,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
     fetch(`${API_PATH_PREFIX}/query`, requestOptions)
       .then(response => response.json())
       .then(data => {
-        console.log(data)
-        // if(data.data && data.status === 'success') {
-          // // Update the currentQueryResultsID in the application state
-          // dispatch(setCurrentQueryResultsID(data.data));
-          // // Update the query history in the application state
-          // dispatch(
-          //   incrementHistory(
-          //     {
-          //       item: item,
-          //       date: timestamp.toDateString(),
-          //       time: timestamp.toLocaleTimeString([], {hour12: true, hour: 'numeric', minute:'2-digit'}),
-          //       id: data.data
-          //     }
-          //   )
-          // );
-        // }
+        console.log(data);
         let newQueryPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, '0', middleType?.replace("biolink:", ""), data.data); 
         navigate(newQueryPath);
-        // }
       })
       .catch((error) => {
         toast.error(
