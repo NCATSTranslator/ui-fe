@@ -75,3 +75,8 @@ export type QueryHistoryItem = {
   id: string;
   time?: string;
 }
+
+export type CustomFile = {
+  file: File;
+  thumbnailURL: string;
+}

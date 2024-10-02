@@ -8,6 +8,7 @@ import { Fade } from "react-awesome-reveal";
 import { currentQueryResultsID } from "../../Redux/resultsSlice";
 import { useSelector } from 'react-redux';
 import { getDataFromQueryVar } from "../../Utilities/utilities";
+import { CustomFile } from '../../Types/global';
 
 const SendFeedbackForm = () => {
   const categoryErrorText = "Please select a category.";
@@ -22,7 +23,9 @@ const SendFeedbackForm = () => {
   const [stepsError, setStepsError] = useState<boolean>(false);
   const [currentSteps, setCurrentSteps] = useState<string>('');
 
-  const [currentScreenshots, setCurrentScreenshots] = useState<File[]>([]);
+  const screenshotErrorText = "The images you've attached are too large to send. Consider compressing the images, or sending fewer of them.";
+  const [screenshotError, setScreenshotError] = useState<boolean>(false);
+  const [currentScreenshots, setCurrentScreenshots] = useState<CustomFile[]>([]);
   const [base64Screenshots, setBase64Screenshots] = useState<string[]>([]);
   const currentARSpk = useSelector(currentQueryResultsID);
   
@@ -50,7 +53,7 @@ const SendFeedbackForm = () => {
     });
   }
 
-  const handleError = (error: 'category' | 'comments' | 'steps') => {
+  const handleError = (error: 'category' | 'comments' | 'steps' | 'screenshot') => {
     switch (error) {
       case 'category':
         setCategoryError(true);
@@ -60,6 +63,9 @@ const SendFeedbackForm = () => {
         break;
       case 'steps':
         setStepsError(true);
+        break;
+      case 'screenshot':
+        setScreenshotError(true);
         break;
     }
     setErrorActive(true);
@@ -102,7 +108,7 @@ const SendFeedbackForm = () => {
     if (currentScreenshots.length) {
       setBase64Screenshots([]);
       for (const file of currentScreenshots) {
-        getBase64(file);
+        getBase64(file.file);
       }
     }
   }, [currentScreenshots]);
@@ -129,12 +135,12 @@ const SendFeedbackForm = () => {
       .then((data) => {
         console.log(data);
         setCreatedIssueURL(data.url);
+        resetFormFields();
       })
       .catch((error) => {
         console.error('Error:', error);
       });
 
-    resetFormFields();
   }, [currentARSpk, currentComments, currentSteps, base64Screenshots, currentCategory]);
 
   useEffect(() => {
@@ -149,7 +155,7 @@ const SendFeedbackForm = () => {
       {createdIssueURL ? (
         <div className={styles.issueCreatedContainer}>
           <p>Your feedback has been submitted.<br/>Please click the link below to view the status of your issue:</p>
-          <Button href={createdIssueURL} _blank rel="noopener noreferrer" className={styles.viewIssue}>View Issue</Button>
+          <Button link href={createdIssueURL} _blank rel="noopener noreferrer" className={styles.viewIssue}>View Issue</Button>
           <Button isSecondary handleClick={() => setCreatedIssueURL(null)} className={styles.newIssue}>Submit More Feedback</Button>
         </div>
       ) : (
@@ -200,9 +206,10 @@ const SendFeedbackForm = () => {
             <FileInput
               buttonLabel="Browse Files"
               fileTypes=".png,.jpg,.jpeg"
-              handleChange={(files: FileList) => setCurrentScreenshots(Array.from(files))}
+              handleChange={(files: CustomFile[]) => setCurrentScreenshots(Array.from(files))}
+              multiple
             />
-            <Button type="submit" disabled={errorActive} className={styles.submitButton}>Send</Button>
+            <Button type="submit" disabled={errorActive} className={styles.submitButton}>Submit</Button>
           </form>
         </Fade>
       )}

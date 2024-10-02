@@ -10,6 +10,7 @@
     cursor: pointer;
     border-radius: $defaultBorderRadius;
     transition: $defaultBoxShadowAnim;
+    line-height: 1.5;
     &:focus, &:focus-visible {
       outline: none;
     }
