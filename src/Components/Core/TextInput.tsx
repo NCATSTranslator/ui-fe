@@ -22,7 +22,7 @@ type TextInputProps = {
 const TextInput: FC<TextInputProps> = ({
   label,
   subtitle,
-  value = "",
+  value,
   placeholder,
   rows,
   error = false,

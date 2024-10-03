@@ -106,7 +106,10 @@ const QueryHistoryList = () => {
         <form onSubmit={handleSubmit} className={styles.form}>
           <TextInput
             placeholder="Search by Subject"
-            handleChange={(e) => {setIsLoading(true); handleSearch(e);}}
+            handleChange={(e) => {
+              if(!isLoading) setIsLoading(true); 
+              handleSearch(e);
+            }}
             className={styles.input}
             iconLeft={<SearchIcon />}
             iconRight={isLoading && <RefreshIcon className={`loadingIcon ${styles.loadingIcon}`} />}
