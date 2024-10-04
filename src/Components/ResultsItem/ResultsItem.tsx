@@ -366,7 +366,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                       {
                         isBookmarked
                         ? <>Remove this bookmark.</>
-                        : <>Bookmark this result to review it later in the <Link to="/main/workspace" target='_blank'>Workspace</Link>.</>
+                        : <>Bookmark this result to review it later in the <Link to="/workspace" target='_blank'>Workspace</Link>.</>
                       }
                     </span>
                   </Tooltip>
@@ -375,7 +375,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                   <NotesFilled className={styles.notesFilledSVG} data-result-name={nameString} onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
                   <Notes className='note-icon' data-result-name={nameString} onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
                   <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
-                    <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/main/workspace" target='_blank'>Workspace</Link>).</span>
+                    <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/workspace" target='_blank'>Workspace</Link>).</span>
                   </Tooltip>
                 </div>
               </>
