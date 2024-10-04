@@ -40,7 +40,7 @@ const Header: FC<HeaderProps> = ({children}) => {
       <div className={styles.topBar}>
         <div className={styles.container}>
           <div className={styles.left}>
-            <Link to={`/`} className={styles.logo} reloadDocument={location.pathname === "/main/results" ? false : true}>
+            <Link to={`/`} className={styles.logo} reloadDocument={location.pathname === "/results" ? false : true}>
               <img src={Logo} alt="Translator Logo" />
             </Link>
           </div>
