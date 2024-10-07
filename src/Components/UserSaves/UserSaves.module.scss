@@ -53,7 +53,7 @@
   .form {
     display: flex;
     justify-content: space-between;
-    padding: 24px;
+    padding-top: $l;
     background-color: $palePurple;
     border-radius: $defaultBorderRadius;
     label {
@@ -69,5 +69,18 @@
       margin: 0 0 0 $s;
       padding: 10px 20px;
     }
+  }
+}
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $s;
+  h1 {
+    margin-bottom: 0;
+  }
+  .collapseButton {
+    margin: 0;
+    padding: 4px 8px;
   }
 }
