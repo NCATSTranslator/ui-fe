@@ -1,15 +1,15 @@
-import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isFormattedEdgeObject, 
+import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isFormattedEdgeObject,
   isPublication, isPublicationObjectArray, mergeObjectArrays, combineObjectArrays } from './utilities';
 import { cloneDeep } from "lodash";
 import { score } from "./scoring";
-import { RawResultsContainer, FormattedPathObject, PathObjectContainer, RawPathObject, SubgraphObject, FormattedNodeObject, 
+import { RawResultsContainer, FormattedPathObject, PathObjectContainer, RawPathObject, SubgraphObject, FormattedNodeObject,
   FormattedEdgeObject, EdgePredicateObject, RawEdge, RawNode } from '../Types/results';
 import { rawAttachedPublications, PublicationObject, EvidenceCountsContainer } from '../Types/evidence';
 
 export const hasSupport = (item: RawPathObject | FormattedEdgeObject | RawEdge | null): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;
 };
-  
+
 /**
  * Retrieves a publication from the results object based on its ID and returns a new publication object.
  * @param {string} id - The ID of the publication to retrieve.
@@ -97,17 +97,17 @@ const checkForNodeUniformity = (pathOne: FormattedPathObject, pathTwo: Formatted
       if (
         respectKnowledgeLevel &&
         typeof item.provenance[0] !== 'string' &&
-        typeof pathTwoItem.provenance[0] !== 'string' && 
+        typeof pathTwoItem.provenance[0] !== 'string' &&
         item.provenance[0]?.knowledge_level !== pathTwoItem.provenance[0]?.knowledge_level
       ) {
         nodesMatch = false;
-        break; 
+        break;
       }
     } else {
       // if the names of the nodes don't match, set nodesMatch to false
       if ('name' in item && 'name' in pathTwoItem && item.name !== pathTwoItem.name) {
         nodesMatch = false;
-        break; 
+        break;
       }
     }
   }
@@ -133,9 +133,9 @@ const removeDuplicatePubIds = (publications: rawAttachedPublications | null): ra
 };
 
 const getFormattedNode = (
-  id: string, 
-  index: number, 
-  subgraph: SubgraphObject[], 
+  id: string,
+  index: number,
+  subgraph: SubgraphObject[],
   results: RawResultsContainer): FormattedNodeObject | null => {
   let node = getNodeByCurie(id, results);
   if(node === null)
@@ -144,6 +144,7 @@ const getFormattedNode = (
   let type = (node.types) ? node.types[0]: '';
   let desc = (node.descriptions) ? node.descriptions[0]: '';
   let category = (index === subgraph.length - 1) ? 'target' : 'object';
+  let species = (node.species) ? node.species : null;
   let newNode: FormattedNodeObject = {
     id: id,
     category: category,
@@ -151,7 +152,8 @@ const getFormattedNode = (
     type: type,
     description: desc,
     curies: node.curies,
-    provenance: []
+    provenance: [],
+    species: species
   };
   if(node.provenance !== undefined)
     newNode.provenance = node.provenance;
@@ -291,7 +293,7 @@ const handleEdgePropMergingAndCompression = (subgraphItem: FormattedEdgeObject, 
   if (predicatesMatch && inferredMatch) {
     // Merge provenance
     subgraphItem.provenance = mergeObjectArrays(subgraphItem.provenance, nextEdgeItem.provenance, "name");
-    
+
     // Merge publications
     if (isPublicationObjectArray(subgraphItem.publications) && isPublicationObjectArray(nextEdgeItem.publications)) {
       subgraphItem.publications = mergeObjectArrays(subgraphItem.publications, nextEdgeItem.publications, "id");
@@ -484,11 +486,11 @@ const calculateEvidenceCounts = (paths: PathObjectContainer[]): EvidenceCountsCo
       }
     }
   }
-  return { 
+  return {
     clinicalTrialCount: allCTs.size,
-    miscCount: allMisc.size, 
-    publicationCount: allPubs.size, 
-    sourceCount: allSources.size 
+    miscCount: allMisc.size,
+    publicationCount: allPubs.size,
+    sourceCount: allSources.size
   };
 }
 
@@ -533,6 +535,7 @@ export const getSummarizedResults = (results: RawResultsContainer, confidenceWei
     let bookmarked = (!bookmarkID) ? false : true;
     let hasNotes =  checkBookmarkForNotes(bookmarkID, bookmarks);
     let type = (subjectNode !== null && subjectNode.types.length > 0) ? subjectNode.types[0] : [];
+    let species = (subjectNode !== null && subjectNode.species) ? subjectNode.species : null;
     let formattedItem = {
       id: itemID,
       subjectNode: subjectNode,
@@ -548,6 +551,7 @@ export const getSummarizedResults = (results: RawResultsContainer, confidenceWei
       scores: item.scores,
       score: score(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
       tags: tags,
+      species: species,
       rawResult: item,
       bookmarked: bookmarked,
       bookmarkID: bookmarkID,

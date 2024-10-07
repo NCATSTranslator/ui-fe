@@ -38,7 +38,7 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
   let nameString = '';
   let typeString = '';
   if(isNode) {
-    nameString = formatBiolinkNode(pathObject.name, type);
+    nameString = formatBiolinkNode(pathObject.name, type, pathObject.species);
     typeString = formatBiolinkEntity(pathObject.type)
   }
 

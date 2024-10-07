@@ -118,7 +118,7 @@ export const capitalizeAllWords = (str: string): string => {
   }).join(' ');
 }
 
-export const formatBiolinkNode = (string: string, type: string | null = null): string => {
+export const formatBiolinkNode = (string: string, type: string | null = null, species: string | null): string => {
   let newString = string;
   if(type !== null) {
     const formattedType = type.replaceAll("biolink:", "").toLowerCase();
@@ -126,6 +126,9 @@ export const formatBiolinkNode = (string: string, type: string | null = null): s
       case "gene":
       case "protein":
         newString = newString.toUpperCase();
+        if (species !== null) {
+          newString += ` (${species})`;
+        }
         break;
       default:
         newString = capitalizeAllWords(newString);
@@ -305,13 +308,13 @@ export const combineObjectArrays = (arr1: any[] | undefined | null, arr2: any[] 
   let combinedArray: any[] = [];
   if(!!arr1)
     combinedArray = combinedArray.concat(cloneDeep(arr1));
-  
+
   if(!!arr2)
     combinedArray = combinedArray.concat(cloneDeep(arr2));
-  
+
   if(!!duplicateRemovalProperty)
     return removeDuplicateObjects(combinedArray, duplicateRemovalProperty);
-  
+
   return combinedArray;
 }
 
@@ -361,7 +364,7 @@ export const checkPublicationsType = (edgeObject: FormattedEdgeObject): string =
 
 /**
  * Type guard to check if an object is a PublicationObject.
- * 
+ *
  * @param obj - The object to check.
  * @returns {boolean} True if the object is a PublicationObject, otherwise false.
  */
@@ -382,7 +385,7 @@ const isPublicationObject = (obj: any): obj is PublicationObject => {
 
 /**
  * Type guard to check if an object is a PublicationsList.
- * 
+ *
  * @param obj - The object to check.
  * @returns {boolean} True if the object is a PublicationsList, otherwise false.
  */
@@ -391,25 +394,25 @@ export const isPublicationsList = (obj: any): obj is PublicationsList => {
     return false;
   }
 
-  return Object.values(obj).every(value => 
-    Array.isArray(value) && 
+  return Object.values(obj).every(value =>
+    Array.isArray(value) &&
     value.every(item => isPublicationObject(item))
   );
 }
 
 /**
  * Type guard to check if an object is a PrefObject.
- * 
+ *
  * @param obj - The object to check.
  * @returns {boolean} True if the object is a PrefObject, otherwise false.
  */
 const isPrefObject = (obj: any): obj is PrefObject => {
-  const isAPrefObject = 
+  const isAPrefObject =
     (
       typeof obj === 'object' &&
       obj !== null &&
       ('pref_value' in obj) &&
-      (typeof obj.pref_value === 'string' || typeof obj.pref_value === 'number') 
+      (typeof obj.pref_value === 'string' || typeof obj.pref_value === 'number')
     );
   if(!isAPrefObject)
     console.warn(`The following object does not match the typing for PrefObject:`, obj);
@@ -419,7 +422,7 @@ const isPrefObject = (obj: any): obj is PrefObject => {
 
 /**
  * Type guard to check if an object is a PreferencesContainer.
- * 
+ *
  * @param obj - The object to check.
  * @returns {boolean} True if the object is a PreferencesContainer, otherwise false.
  */
@@ -437,8 +440,8 @@ export const isPreferencesContainer = (obj: any): obj is PreferencesContainer =>
       'evidence_sort',
       'evidence_per_screen',
     ];
-  
-    isPrefContainer = requiredKeys.every(key => key in obj && isPrefObject(obj[key])) && Object.values(obj).every(isPrefObject); 
+
+    isPrefContainer = requiredKeys.every(key => key in obj && isPrefObject(obj[key])) && Object.values(obj).every(isPrefObject);
   }
   if(!isPrefContainer)
     console.warn(`The following object does not match the typing for a PreferencesContainer:`, obj);
@@ -448,7 +451,7 @@ export const isPreferencesContainer = (obj: any): obj is PreferencesContainer =>
 
 /**
  * Utility function that returns a full pathname plus any search and hash params.
- * 
+ *
  * @param location - The Location object to check.
  * @returns {string} String containing the full pathname.
  */
@@ -459,41 +462,41 @@ export const getFullPathname = (location: Location): string => {
 
   if(!!location.hash)
     fullPath += location.hash;
-  
+
   return fullPath;
 }
 
 /**
  * Converts a number between 0 and 19 into its English word equivalent.
- * 
+ *
  * @param {number} num - The number to be converted. It must be within the range 0-19.
  * @returns {string} - The English word equivalent of the provided number.
- * 
+ *
  * @throws {Error} - Throws an error if the input number is outside the range 0-19.
- * 
+ *
  */
 export const numberToWords = (num: number): string => {
   const words = [
       "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
       "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"
   ];
-  
+
   return num >= 0 && num < 20 ? words[num] : (() => { throw new Error("Number out of supported range"); })();
 }
 
 /**
  * Converts an integer into its corresponding alphabetical character(s).
- * 
+ *
  * @param {number} num - The integer to convert (1 = a, 2 = b, ..., 26 = z, 27 = aa, ...).
  * @returns {string} - The corresponding alphabetical character(s).
- * 
+ *
  */
 export const intToChar = (num: number): string => {
   if (num < 1 || num > 1000) {
     console.warn("Number supplied to intToChar function out of range, must be between 1 & 1000. Number provided:", num);
     return "--";
   }
-  
+
   let result = '';
   while (num > 0) {
       num--;
@@ -505,10 +508,10 @@ export const intToChar = (num: number): string => {
 
 /**
  * Calculates the total number of paths for a provided array of PathObjectContainer objects.
- * 
+ *
  * @param {PathObjectContainer[]} paths - An array of paths to count.
  * @returns {number} - The total number of paths, including support paths.
- * 
+ *
  */
 export const getPathsCount = (paths: PathObjectContainer[]): number => {
   let count = paths.length;

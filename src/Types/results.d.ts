@@ -15,6 +15,7 @@ type RawNode = {
   support: any;
   synonyms: string[] | null;
   types: string[];
+  species: string | null;
 }
 export type RawEdge = {
   aras: string[];
@@ -77,6 +78,7 @@ export type ResultItem = {
   objectNode: RawNode;
   tags: string[];
   type: string;
+  species: string | null;
 }
 export type FormattedPathObject = {
   aras: string[];
@@ -117,6 +119,7 @@ export type FormattedNodeObject = {
   name: string;
   provenance: string[];
   type: string;
+  species: string | null;
 }
 type ProvenanceObject = {
   knowledge_level: string;
@@ -181,8 +184,8 @@ export type PathFilterState = {
 }
 
 export type AutocompleteItem = {
-  id:string, 
-  label: string, 
-  match: string, 
+  id:string,
+  label: string,
+  match: string,
   types: Array<string>
 }

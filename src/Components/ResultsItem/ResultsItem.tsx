@@ -179,7 +179,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
 
   const pathsCount: number = getPathsCount(formattedPaths.current);
   const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
-  const nameString: string = (item.name !== null) ? formatBiolinkNode(item.name, typeString) : '';
+  const nameString: string = (item.name !== null) ? formatBiolinkNode(item.name, typeString, item.species) : '';
 
   const [itemGraph, setItemGraph] = useState(null);
 
@@ -381,9 +381,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
               </>
             : <></>
         }
-        <button 
-          className={`${styles.icon} ${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`} 
-          onClick={handleOpenResultShare} 
+        <button
+          className={`${styles.icon} ${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`}
+          onClick={handleOpenResultShare}
           data-tooltip-id={`share-tooltip-${nameString.replaceAll("'", "")}`}
           >
           <ShareIcon/>
@@ -469,7 +469,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
               </div>
             }
             {
-              item.description && !isPathfinder && 
+              item.description && !isPathfinder &&
               <p className={styles.description}>
                 <Highlighter
                   highlightClassName="highlight"
