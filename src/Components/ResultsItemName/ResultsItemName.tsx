@@ -17,7 +17,7 @@ type ResultsItemNameProps = {
 const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, item, activeEntityFilters, nameString, resultsItemStyles }) => {
 
   const icon: JSX.Element = getIcon(item.type);
-  const pathfinderNameArray = (isPathfinder) ? item.name.split("/") : null; 
+  const pathfinderNameArray = (isPathfinder) ? item.name.split("/") : null;
   const subjectIcon: JSX.Element | null = item.subjectNode?.types.length > 0 ? getIcon(item.subjectNode.types[0]) : null;
   const objectIcon: JSX.Element | null = item.objectNode?.types.length > 0 ? getIcon(item.objectNode.types[0]) : null;
 
@@ -25,7 +25,7 @@ const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, item,
     let pfNameString = "";
     if(index === 0 || !isNotLastItem) {
       let type = (index === 0) ? subject.types[0]: object.types[0];
-      pfNameString = formatBiolinkNode(name, type);
+      pfNameString = formatBiolinkNode(name, type, null);
     } else {
       pfNameString = getFormattedPathfinderName(name);
     }
@@ -35,7 +35,7 @@ const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, item,
   return (
     <>
       {
-        isPathfinder 
+        isPathfinder
         ?
           <>
             {
@@ -63,7 +63,7 @@ const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, item,
                       autoEscape={true}
                       textToHighlight={pfNameString}
                       className={`${styles.name} ${resultsItemStyles.name}`}
-                    /> 
+                    />
                     {
                       (isNotLastItem) &&
                       <ArrowIcon className={styles.arrow}/>
