@@ -6,6 +6,8 @@ import EvidenceModal from '../Modals/EvidenceModal';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
+import RefreshIcon from '../../Icons/Buttons/Refresh.svg?react';
+import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
 import { getFormattedDate } from '../../Utilities/utilities';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -23,6 +25,7 @@ import Button from '../Core/Button';
 const UserSaves = () => {
 
   const [user, loading] = useUser();
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [savesLoaded, setSavesLoaded] = useState(false);
   const [userSaves, setUserSaves] = useState(null);
   const [filteredUserSaves, setFilteredUserSaves] = useState(null)
@@ -107,18 +110,21 @@ const UserSaves = () => {
 
       return include;
     }))
+    setIsSearchLoading(false);
   }, []);
-
+  
+  // eslint-disable-next-line
   const delayedSearch = useCallback(debounce((value, userSaves, setFilteredUserSaves)=>handleSearch(value, userSaves, setFilteredUserSaves), 750), [handleSearch]);
 
   const handleSearchBarItemChange = (value) => {
-    console.log(value);
+    if(!isSearchLoading)
+      setIsSearchLoading(true);
     delayedSearch(value, userSaves, setFilteredUserSaves);
   }
 
   const clearSearchBar = () => {
     formRef.current.reset();
-    handleSearch();
+    handleSearch(false, userSaves, setFilteredUserSaves);
   }
 
   const handleSubmit = (e) => {
@@ -209,6 +215,7 @@ const UserSaves = () => {
                         handleChange={(e)=>handleSearchBarItemChange(e)} 
                         className={styles.input}
                         iconLeft={<SearchIcon/>}
+                        iconRight={!!isSearchLoading ? <RefreshIcon className={`loadingIcon ${styles.loadingIcon}`}/> : !!currentSearchString.current && <CloseIcon className={styles.closeIcon} onClick={clearSearchBar} />}
                       />
                     </form>
                   </div>
@@ -230,7 +237,6 @@ const UserSaves = () => {
                           Object.entries(filteredUserSaves).length < Object.entries(userSaves).length &&
                           <div className={styles.showingContainer}>
                             <p className={styles.showing}>Showing {Object.entries(filteredUserSaves).length} of {Object.entries(userSaves).length} total saved results.</p>
-                            <button onClick={clearSearchBar} className={styles.showingButton}>(Clear Search Bar)</button>
                           </div>
                         }
                         <div className={styles.saves}>
