@@ -1,5 +1,5 @@
 import styles from "./QueryHistoryList.module.scss";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Dispatch, SetStateAction, useCallback } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "../../Utilities/utilities";
@@ -49,7 +49,7 @@ const QueryHistoryList = () => {
     navigate(`/${getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, '0', query.id)}`);
   };
 
-  const handleSearch = debounce((value: string) => {
+  const handleSearch = useCallback((value: string, setIsLoading: Dispatch<SetStateAction<boolean>>, setFilteredQueryHistoryState: Dispatch<SetStateAction<QueryHistoryItem[]>>) => {
     setFilteredQueryHistoryState(
       queryHistoryState.filter((item) => {
         let tempValue = value.toLowerCase();
@@ -66,12 +66,20 @@ const QueryHistoryList = () => {
       })
     );
     setIsLoading(false);
-  }, 500);
+  }, []);
+
+  const delayedSearch = useCallback(debounce((value, setIsLoading, setFilteredQueryHistoryState)=>handleSearch(value, setIsLoading, setFilteredQueryHistoryState), 750), [handleSearch]);
+
+  const handleSearchBarItemChange = (value:string) => {
+    if(!isLoading)
+      setIsLoading(true);
+    delayedSearch(value, setIsLoading, setFilteredQueryHistoryState);
+  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const target = e.currentTarget[0] as HTMLInputElement;
-    handleSearch(target.value);
+    handleSearch(target.value, setIsLoading, setFilteredQueryHistoryState);
   };
   
 
@@ -106,10 +114,7 @@ const QueryHistoryList = () => {
         <form onSubmit={handleSubmit} className={styles.form}>
           <TextInput
             placeholder="Search by Subject"
-            handleChange={(e) => {
-              if(!isLoading) setIsLoading(true); 
-              handleSearch(e);
-            }}
+            handleChange={(e)=>handleSearchBarItemChange(e)} 
             className={styles.input}
             iconLeft={<SearchIcon />}
             iconRight={isLoading && <RefreshIcon className={`loadingIcon ${styles.loadingIcon}`} />}
