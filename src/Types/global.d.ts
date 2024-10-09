@@ -51,6 +51,7 @@ export type Config = {
   gaID: string;
   name_resolver: string;
   social_providers: any;
+  include_pathfinder: boolean;
 }
 
 export type RootState = {
