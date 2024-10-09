@@ -5,7 +5,7 @@ import styles from './UserSaves.module.scss';
 import EvidenceModal from '../Modals/EvidenceModal';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
-import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
+// import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import RefreshIcon from '../../Icons/Buttons/Refresh.svg?react';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
 import { getFormattedDate } from '../../Utilities/utilities';
@@ -20,7 +20,7 @@ import LoginWarning from '../LoginWarning/LoginWarning';
 import LoadingWrapper from '../LoadingWrapper/LoadingWrapper'
 import { useUser } from '../../Utilities/userApi';
 import { debounce } from 'lodash';
-import Button from '../Core/Button';
+// import Button from '../Core/Button';
 
 const UserSaves = () => {
 
@@ -112,7 +112,7 @@ const UserSaves = () => {
     }))
     setIsSearchLoading(false);
   }, []);
-  
+
   // eslint-disable-next-line
   const delayedSearch = useCallback(debounce((value, userSaves, setFilteredUserSaves)=>handleSearch(value, userSaves, setFilteredUserSaves), 750), [handleSearch]);
 
@@ -199,13 +199,13 @@ const UserSaves = () => {
                 <div className="container">
                   <div className={styles.headerTop}>
                     <h1 className="h4">Workspace</h1>
-                    <Button
+                    {/* <Button
                       isSecondary
                       smallFont
                       className={styles.collapseButton}
                       >
                       <ChevUp/> Collapse All
-                    </Button>
+                    </Button> */}
                   </div>
                   <p>Bookmarked results and any notes added to them are stored indefinitely.</p>
                   <div className={styles.searchBarContainer}>
@@ -232,13 +232,6 @@ const UserSaves = () => {
                         <p>Submit a query, then click the bookmark icon on a result to save it for later. You can then view that result here.</p>
                       </div>
                     : <>
-
-                        {
-                          Object.entries(filteredUserSaves).length < Object.entries(userSaves).length &&
-                          <div className={styles.showingContainer}>
-                            <p className={styles.showing}>Showing {Object.entries(filteredUserSaves).length} of {Object.entries(userSaves).length} total saved results.</p>
-                          </div>
-                        }
                         <div className={styles.saves}>
                           {
                             Object.entries(filteredUserSaves).sort((a, b)=> -a[1].query.submitted_time.localeCompare(b[1].query.submitted_time)).map((item) => {
