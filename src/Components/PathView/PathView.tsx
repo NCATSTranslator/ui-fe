@@ -2,14 +2,12 @@ import styles from './PathView.module.scss';
 import { useState, useEffect, useMemo, useCallback, createContext, FC } from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
-import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { cloneDeep, isEqual } from 'lodash';
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
-import { Link } from 'react-router-dom';
-import { getGeneratedSendFeedbackLink, numberToWords } from '../../Utilities/utilities';
+import { numberToWords } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
 import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject, PathFilterState} from '../../Types/results';
 import { isFormattedEdgeObject } from '../../Utilities/utilities';
@@ -277,10 +275,6 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
           }
         </div>
       }
-      <p className={styles.needHelp}>
-        <Feedback/>
-        <Link to={`${getGeneratedSendFeedbackLink(true)}`} reloadDocument target={'_blank'}>Send Feedback</Link>
-      </p>
     </div>
   )
 }
