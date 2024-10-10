@@ -69,7 +69,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
   return (
     <div className={`${styles.resultsFilter} ${isExpanded ? styles.expanded : styles.collapsed}`} onClick={()=>(!isExpanded) ? toggleIsExpanded() : ()=>{}}>
       <div className={styles.top}>
-        <p className={styles.heading} onClick={toggleIsExpanded} ><FilterIcon/><span>Filters</span></p>
+        <p className={styles.heading} onClick={()=>(isExpanded) ? toggleIsExpanded() : ()=>{}} ><FilterIcon/><span>Filters</span></p>
         <div className={styles.right}>
           <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
           <Button className={styles.closeButton} iconOnly><CloseIcon onClick={toggleIsExpanded}/></Button>
