@@ -206,9 +206,19 @@
     font-weight: 400;
   }
   .tooltipLink {
-    margin: 0 4px;
+    margin: 0 2px;
     font-size: 12px; 
     color: $white;
+    display: inline-flex;
+    align-items: center;
+    svg {
+      width: 16px;
+      margin-left: 0;
+      transform: none !important;
+      path {
+        fill: $white !important;
+      }
+    }
   }
   .checkbox {
     margin-bottom: 0;
