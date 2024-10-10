@@ -40,6 +40,7 @@
   }
   &.collapsed {
     width: calc(56px - $s*2);
+    cursor: pointer;
     .bottom {
       opacity: 0;
       pointer-events: none;
