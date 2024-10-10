@@ -9,7 +9,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
 import { Link } from 'react-router-dom';
-import { getGeneratedSendFeedbackLink, numberToWords } from '../../Utilities/utilities';
+import { numberToWords } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
 import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject, PathFilterState} from '../../Types/results';
 import { isFormattedEdgeObject } from '../../Utilities/utilities';
@@ -279,7 +279,7 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
       }
       <p className={styles.needHelp}>
         <Feedback/>
-        <Link to={`${getGeneratedSendFeedbackLink(true)}`} reloadDocument target={'_blank'}>Send Feedback</Link>
+        <Link to={`/send-feedback`} target={'_blank'}>Send Feedback</Link>
       </p>
     </div>
   )
