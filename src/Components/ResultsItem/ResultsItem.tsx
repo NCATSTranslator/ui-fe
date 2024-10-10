@@ -29,6 +29,7 @@ import Tabs from '../Tabs/Tabs';
 import Tab from '../Tabs/Tab';
 import * as filtering from '../../Utilities/filterFunctions';
 import ResultsItemName from '../ResultsItemName/ResultsItemName';
+import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -510,6 +511,10 @@ const ResultsItem: FC<ResultsItemProps> = ({
               </Suspense>
             </Tab>
         </Tabs>
+        <p className={styles.needHelp}>
+          <Feedback/>
+          <Link to={`/send-feedback`} target={'_blank'}>Send Feedback</Link>
+        </p>
       </AnimateHeight>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}
