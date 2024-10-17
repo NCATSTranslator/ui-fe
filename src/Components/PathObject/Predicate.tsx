@@ -5,12 +5,10 @@ import Robot from '../../Icons/DEP/robot-purple.png';
 import RobotSelected from '../../Icons/DEP/robot-darkpurple.png';
 import Badge from '../../Icons/DEP/badge-purple.png';
 import BadgeSelected from '../../Icons/DEP/badge-darkpurple.png';
-import Connector from '../../Icons/DEP/straight.svg?react';
-import ConnectorTop from '../../Icons/DEP/solid-top.svg?react';
-import ConnectorBottom from '../../Icons/DEP/solid-bottom.svg?react';
-import ConnectorDotted from '../../Icons/DEP/straight-dotted.svg?react';
-import ConnectorDottedTop from '../../Icons/DEP/dotted-top.svg?react';
-import ConnectorDottedBottom from '../../Icons/DEP/dotted-bottom.svg?react';
+import ConnectorStart from '../../Icons/Connectors/direct-line-start.svg?react';
+import ConnectorEnd from '../../Icons/Connectors/direct-line-end.svg?react';
+import ConnectorDottedStart from '../../Icons/Connectors/inferred-line-start.svg?react';
+import ConnectorDottedEnd from '../../Icons/Connectors/inferred-line-end.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import Up from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Highlighter from 'react-highlight-words';
@@ -31,15 +29,13 @@ interface PredicateProps {
   hasSupport: boolean;
   supportDataObject: SupportDataObject | null;
   inModal?: boolean | null;
-  isTop?: boolean | null;
-  isBottom?: boolean | null;
   className?: string;
   pathFilterState: PathFilterState;
   pathViewStyles?: {[key: string]: string;} | null;
 }
 
 const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, selected = false, activeEntityFilters, uid, parentClass = '', handleEdgeClick, pathFilterState,
-   hasSupport, supportDataObject = null, inModal = false, isTop = null, isBottom = null, className = "", pathViewStyles = null }) => {
+   hasSupport, supportDataObject = null, inModal = false, className = "", pathViewStyles = null }) => {
 
   const checkForProvenanceType = (pathObject: FormattedEdgeObject, type: string) => {
     if(!pathObject?.provenance || !Array.isArray(pathObject.provenance))
@@ -65,6 +61,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
   const [isSupportExpanded, setIsSupportExpanded] = useState(true);
   const isMachineLearned = checkForProvenanceType(pathObject, "ml");
   const isTrusted = checkForProvenanceType(pathObject, "trusted");
+  const hasMore = (pathObject.predicates && pathObject.predicates.length > 1);
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -140,31 +137,20 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject, pathObjectContainer);}}
         >
           {
-            hasSupport && isTop &&
-            <ConnectorDottedTop className={`connector ${styles.connector}`}/>
-          }
-          {
-            hasSupport && isBottom &&
-            <ConnectorDottedBottom className={`connector ${styles.connector}`}/>
-          }
-          {
-            hasSupport && !isBottom && !isTop &&
-            <ConnectorDotted className={`connector ${styles.connector}`}/>
-          }
-          {
-            !hasSupport && isTop &&
-            <ConnectorTop className={`connector ${styles.connector}`}/>
-          }
-          {
-            !hasSupport && isBottom &&
-            <ConnectorBottom className={`connector ${styles.connector}`}/>
-          }
-          {
-            !hasSupport && !isBottom && !isTop &&
-            <Connector className={`connector ${styles.connector}`}/>
+            hasSupport 
+              ?
+                <>
+                  <ConnectorDottedStart className={`connector ${styles.connector} ${styles.start}`}/>
+                  <ConnectorDottedEnd className={`connector ${styles.connector} ${styles.end}`}/>
+                </>
+              :
+                <>
+                  <ConnectorStart className={`connector ${styles.connector} ${styles.start}`}/> 
+                  <ConnectorEnd className={`connector ${styles.connector} ${styles.end}`}/>
+                </>
           }
         <span
-          className={`${styles.path} path ${(pathObject.predicates && pathObject.predicates.length > 1) ? styles.hasMore : ''}`}
+          className={`${styles.path} path ${hasMore ? styles.hasMore : ''}`}
           >
           <div className={styles.badges}>
             {
@@ -191,8 +177,8 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
               textToHighlight={capitalizeAllWords(pathObject.predicate)}
             />
             {
-              pathObject.predicates &&
-              pathObject.predicates.length > 1 &&
+              !!pathObject.predicates &&
+              hasMore &&
               <span className={styles.more}>
                 + {pathObject.predicates.length - 1} More
               </span>

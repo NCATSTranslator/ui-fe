@@ -201,9 +201,26 @@
     }
   }
   &.hasTwo {
-    .pathContainer {
-      &>svg {
-        top: 50% !important;
+    span:first-child {
+      svg {
+        top: 65% !important;
+        &:first-of-type {
+          transform: translateY(-50%) rotate(-15deg);
+        }
+        &:last-of-type {
+          transform: translateY(-50%) rotate(15deg);
+        }
+      }
+    }
+    span:last-child {
+      svg {
+        top: 45% !important;
+        &:first-of-type {
+          transform: translateY(-50%) rotate(15deg);
+        }
+        &:last-of-type {
+          transform: translateY(-50%) rotate(-15deg);
+        }
       }
     }
   }
