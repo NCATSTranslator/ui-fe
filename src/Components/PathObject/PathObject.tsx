@@ -20,8 +20,6 @@ interface PathObjectProps {
   selected?: boolean;
   supportDataObject: SupportDataObject | null;
   inModal?: boolean;
-  isTop?: boolean;
-  isBottom?: boolean;
   isEven?: boolean;
   className?: string;
   pathFilterState: PathFilterState;
@@ -29,7 +27,7 @@ interface PathObjectProps {
 }
 
 const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false,
-  activeEntityFilters, selected, pathFilterState, supportDataObject = null, inModal = false, isTop = null, isBottom = null, isEven = false, className = "", pathViewStyles = null }) => {
+  activeEntityFilters, selected, pathFilterState, supportDataObject = null, inModal = false, isEven = false, className = "", pathViewStyles = null }) => {
 
   const provenance = (!!pathObject.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const isNode = isFormattedNodeObject(pathObject);
@@ -87,8 +85,6 @@ const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, 
           inModal={inModal}
           hasSupport={hasSupport}
           supportDataObject={supportDataObject}
-          isTop={isTop}
-          isBottom={isBottom}
           className={className}
           pathFilterState={pathFilterState}
           pathViewStyles={pathViewStyles}

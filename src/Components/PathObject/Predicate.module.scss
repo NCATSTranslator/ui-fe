@@ -145,26 +145,17 @@
 }
 
 svg.connector {
-  width: 100%;
+  width: 30px;
   position: absolute;
   top: 50%;
-  right: 0;
   bottom: 0;
-  left: 0;
   transform: translateY(-50%);
   height: auto;
-  // background-image: url('../../Icons/straight.svg');
-  // background-position: center;
-  // background-size: 100%;
-  // background-repeat: no-repeat;
-  // &:first-of-type {
-
-  // }
-  &:last-of-type {
-    top: 64%;
+  &.start {
+    left: 0;
   }
-  &:first-of-type {
-    top: 50%;
+  &.end {
+    right: 0;
   }
 }
 
