@@ -327,16 +327,21 @@ export const initCytoscapeInstance = (dataObj) => {
       {
         selector: 'edge',
         style: {
+          'curve-style': 'straight',
           'target-arrow-shape': 'triangle',
-          'target-arrow-color': '#000',
+          'target-arrow-color': '#CED0D0',
+          'target-arrow-fill': 'filled',
+          'target-arrow-width': '50px',
           'line-color': '#CED0D0',
+          'arrow-scale': '2'
         }
       },
       {
         selector: 'edge.highlight',
         style: {
-          'line-color': '#000',
-          'opacity': '1.0'
+          'line-color': '#242424',
+          'opacity': '1.0',
+          'target-arrow-color': '#242424',
         }
       },
       {
