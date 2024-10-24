@@ -487,7 +487,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
               <PathView
                 paths={formattedPaths.current}
                 selectedPaths={selectedPaths}
-                active={isExpanded}
                 isPathfinder={isPathfinder}
                 handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
                 handleActivateEvidence={handleActivateEvidence}

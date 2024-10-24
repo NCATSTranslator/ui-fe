@@ -1,5 +1,5 @@
 import styles from './PathView.module.scss';
-import { useState, useEffect, useMemo, useCallback, useRef, createContext, FC } from "react";
+import { useState, useMemo, useCallback, useRef, createContext, FC } from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import ReactPaginate from 'react-paginate';
@@ -8,8 +8,6 @@ import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { cloneDeep, isEqual } from 'lodash';
-import { useSelector } from 'react-redux';
-import { currentPrefs } from '../../Redux/rootSlice';
 import { numberToWords } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
 import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject, PathFilterState} from '../../Types/results';
@@ -61,7 +59,6 @@ const sortArrayByIndirect = (array: any[]) => {
 }
 
 interface PathViewProps {
-  active: boolean;
   isEven: boolean;
   isPathfinder: boolean;
   paths: PathObjectContainer[];
@@ -72,17 +69,10 @@ interface PathViewProps {
   pathFilterState: PathFilterState;
 }
 
-const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, 
-  activeEntityFilters, pathFilterState }) => {
+const PathView: FC<PathViewProps> = ({ isEven, isPathfinder = false, paths, selectedPaths, 
+  handleEdgeSpecificEvidence, handleActivateEvidence, activeEntityFilters, pathFilterState }) => {
 
-  const prefs = useSelector(currentPrefs);
-
-  const initItemsPerPage = (prefs?.path_show_count?.pref_value)
-    ? (typeof prefs.path_show_count.pref_value == "string")
-      ? parseInt(prefs.path_show_count.pref_value)
-      : prefs.path_show_count.pref_value
-    : 5;
-  const itemsPerPage: number = (initItemsPerPage === -1 || paths.length < initItemsPerPage) ? paths.length : initItemsPerPage;
+  const itemsPerPage: number = 10;
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const currentPage = useRef<number>(0);
@@ -108,26 +98,6 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
 
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
-
-  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
-  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
-  // useEffect(() => {
-  //   const tempItemsPerPage = (prefs?.path_show_count?.pref_value)
-  //   ? (typeof prefs.path_show_count.pref_value == "string")
-  //     ? parseInt(prefs.path_show_count.pref_value)
-  //     : prefs.path_show_count.pref_value
-  //   : 5;
-  //   // const tempNumberToShow = (tempItemsPerPage === -1 || paths.length < tempItemsPerPage) ? paths.length : tempItemsPerPage;
-  //   // setNumberToShow(tempNumberToShow);
-  // }, [prefs, paths]);
-
-  // useEffect(() => {
-  //   let temp = initItemsPerPage;
-  //   if(initItemsPerPage === -1 || paths.length < initItemsPerPage)
-  //     temp = paths.length;
-
-  //   // setNumberToShow(temp);
-  // }, [paths, initItemsPerPage]);
 
   const handleNameClick = useCallback((name: FormattedNodeObject ) => {
     console.log("handle name click", name);
@@ -161,110 +131,105 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
       <div className={styles.header}>
         <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
       </div>
-      {
-        (!active)
-        ? <></>
-        :
-        <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
-          <div className={styles.paths}>
-            {
-              displayedPaths.map((pathToDisplay: PathObjectContainer, i: number)=> {
-                const displayIndirectLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
-                  if(displayIndirectLabel)
-                    inferredLabelDisplayed = true;
-                const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
-                  if(displayDirectLabel)
-                    directLabelDisplayed = true;
-                const tooltipID: string = (!!pathToDisplay?.id) ? pathToDisplay.id : i.toString();
-                const isPathFiltered = (!!pathFilterState) ? pathFilterState[pathToDisplay.id] : false;
-                return (
-                  <div key={tooltipID}>
-                    {
-                      displayDirectLabel
-                        ?
-                          <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
-                            Direct <Information className={styles.infoIcon} />
+      <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
+        <div className={styles.paths}>
+          {
+            displayedPaths.map((pathToDisplay: PathObjectContainer, i: number)=> {
+              const displayIndirectLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
+                if(displayIndirectLabel)
+                  inferredLabelDisplayed = true;
+              const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
+                if(displayDirectLabel)
+                  directLabelDisplayed = true;
+              const tooltipID: string = (!!pathToDisplay?.id) ? pathToDisplay.id : i.toString();
+              const isPathFiltered = (!!pathFilterState) ? pathFilterState[pathToDisplay.id] : false;
+              return (
+                <div key={tooltipID}>
+                  {
+                    displayDirectLabel
+                      ?
+                        <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
+                          Direct <Information className={styles.infoIcon} />
+                        </p>
+                      :
+                        null
+                  }
+                  {
+                    displayIndirectLabel
+                      ?
+                        <>
+                          <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
+                            Indirect <Information className={styles.infoIcon} />
                           </p>
-                        :
-                          null
+                        </>
+                      : null
                     }
-                    {
-                      displayIndirectLabel
-                        ?
-                          <>
-                            <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
-                              Indirect <Information className={styles.infoIcon} />
-                            </p>
-                          </>
-                        : null
+                  <div className={styles.formattedPath} >
+                    <span className={styles.num}>
+                      { i + 1 }
+                    </span>
+                    <button
+                      onClick={()=>handleActivateEvidence(pathToDisplay)}
+                      className={styles.pathEvidenceButton}
+                      data-tooltip-id={tooltipID}
+                      >
+                        <ResearchMultiple />
+                    </button>
+                    <Tooltip
+                      id={tooltipID}
+                      >
+                        <span>View evidence for this path.</span>
+                    </Tooltip>
+                    <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''}`} >
+                      {
+                        pathToDisplay.path.subgraph.map((pathItem: FormattedEdgeObject | FormattedNodeObject, j: number) => {
+                          let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;
+                          let pathItemHasSupport = (isFormattedEdgeObject(pathItem)) ? pathItem.inferred : false;
+                          let supportDataObject: SupportDataObject | null = (pathItemHasSupport)
+                            ? {
+                                key: key,
+                                pathItem: pathItem,
+                                pathViewStyles: styles,
+                                selectedPaths: selectedPaths,
+                                pathToDisplay: pathToDisplay,
+                                handleActivateEvidence: handleActivateEvidence,
+                                handleNameClick: handleNameClick,
+                                handleEdgeClick: handleEdgeClick,
+                                handleTargetClick: handleTargetClick,
+                                activeEntityFilters: activeEntityFilters,
+                                tooltipID: null,
+                                supportPath: null
+                              }
+                            : null;
+                          return (
+                            <>
+                              <PathObject
+                                pathViewStyles={styles}
+                                isEven={isEven}
+                                supportDataObject={supportDataObject}
+                                pathObjectContainer={pathToDisplay}
+                                pathObject={pathItem}
+                                id={key}
+                                key={key}
+                                handleNameClick={handleNameClick}
+                                handleEdgeClick={handleEdgeClick}
+                                handleTargetClick={handleTargetClick}
+                                activeEntityFilters={activeEntityFilters}
+                                hasSupport={pathItemHasSupport}
+                                pathFilterState={pathFilterState}
+                              />
+                            </>
+                          )
+                        })
                       }
-                    <div className={styles.formattedPath} >
-                      <span className={styles.num}>
-                        { i + 1 }
-                      </span>
-                      <button
-                        onClick={()=>handleActivateEvidence(pathToDisplay)}
-                        className={styles.pathEvidenceButton}
-                        data-tooltip-id={tooltipID}
-                        >
-                          <ResearchMultiple />
-                      </button>
-                      <Tooltip
-                        id={tooltipID}
-                        >
-                          <span>View evidence for this path.</span>
-                      </Tooltip>
-                      <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''}`} >
-                        {
-                          pathToDisplay.path.subgraph.map((pathItem: FormattedEdgeObject | FormattedNodeObject, j: number) => {
-                            let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;
-                            let pathItemHasSupport = (isFormattedEdgeObject(pathItem)) ? pathItem.inferred : false;
-                            let supportDataObject: SupportDataObject | null = (pathItemHasSupport)
-                              ? {
-                                  key: key,
-                                  pathItem: pathItem,
-                                  pathViewStyles: styles,
-                                  selectedPaths: selectedPaths,
-                                  pathToDisplay: pathToDisplay,
-                                  handleActivateEvidence: handleActivateEvidence,
-                                  handleNameClick: handleNameClick,
-                                  handleEdgeClick: handleEdgeClick,
-                                  handleTargetClick: handleTargetClick,
-                                  activeEntityFilters: activeEntityFilters,
-                                  tooltipID: null,
-                                  supportPath: null
-                                }
-                              : null;
-                            return (
-                              <>
-                                <PathObject
-                                  pathViewStyles={styles}
-                                  isEven={isEven}
-                                  supportDataObject={supportDataObject}
-                                  pathObjectContainer={pathToDisplay}
-                                  pathObject={pathItem}
-                                  id={key}
-                                  key={key}
-                                  handleNameClick={handleNameClick}
-                                  handleEdgeClick={handleEdgeClick}
-                                  handleTargetClick={handleTargetClick}
-                                  activeEntityFilters={activeEntityFilters}
-                                  hasSupport={pathItemHasSupport}
-                                  pathFilterState={pathFilterState}
-                                />
-                              </>
-                            )
-                          })
-                        }
-                      </div>
                     </div>
                   </div>
-                )
-              })
-            }
-          </div>
-        </LastViewedPathIDContext.Provider>
-      }
+                </div>
+              )
+            })
+          }
+        </div>
+      </LastViewedPathIDContext.Provider>
       {
         pageCount > 1 &&
         <div className={styles.paginationContainer}>
