@@ -316,7 +316,6 @@ img {
   scrollbar-color: transparent transparent;
   transition: $defaultAnim; 
   padding-bottom: $xs;
-  margin-bottom: -$xs;
 }
 .scrollable-support::-webkit-scrollbar {
   width: 0; 
