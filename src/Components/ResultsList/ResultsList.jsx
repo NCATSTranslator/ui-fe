@@ -1139,7 +1139,7 @@ const ResultsList = ({loading}) => {
                         marginPagesDisplayed={1}
                         pageCount={pageCount}
                         renderOnZeroPageCount={null}
-                        className='pageNums'
+                        className={`pageNums ${styles.pageNums}`}
                         pageClassName='pageNum'
                         activeClassName='current'
                         previousLinkClassName={`button ${styles.button}`}

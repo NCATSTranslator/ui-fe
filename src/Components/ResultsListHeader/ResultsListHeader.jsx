@@ -54,12 +54,12 @@ const ResultsListHeader = ({ data }) => {
           marginPagesDisplayed={1}
           pageCount={data.pageCount}
           renderOnZeroPageCount={null}
-          className={data.resultsListStyles.pageNums}
-          pageClassName={data.resultsListStyles.pageNum}
-          activeClassName={data.resultsListStyles.current}
-          previousLinkClassName={`${data.resultsListStyles.button}`}
-          nextLinkClassName={`${data.resultsListStyles.button}`}
-          disabledLinkClassName={data.resultsListStyles.disabled}
+          className={`pageNums ${data.resultsListStyles.pageNums}`}
+          pageClassName='pageNum'
+          activeClassName='current'
+          previousLinkClassName={`button ${data.resultsListStyles.button}`}
+          nextLinkClassName={`button ${data.resultsListStyles.button}`}
+          disabledLinkClassName={`disabled ${data.resultsListStyles.disabled}`}
           forcePage={data.currentPage}
         />
       </div>

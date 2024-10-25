@@ -930,7 +930,7 @@ $predWidth: 220px;
   align-items: center;
   list-style-type: none;
   padding-left: 0;
-  margin: 0 0 0 auto;
+  margin: 0 auto 0 0;
   flex-wrap: wrap;
   @media screen and (min-width: $desktop) {
     flex-wrap: nowrap;
