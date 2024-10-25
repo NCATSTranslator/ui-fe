@@ -148,6 +148,7 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
                     directLabelDisplayed = true;
                 const tooltipID: string = (!!pathToDisplay?.id) ? pathToDisplay.id : i.toString();
                 const isPathFiltered = (!!pathFilterState) ? pathFilterState[pathToDisplay.id] : false;
+                const indexInFullCollection = (!!paths) ? paths.findIndex(item => item.id === pathToDisplay.id) : -1;
                 return (
                   <div key={tooltipID}>
                     {
@@ -171,7 +172,7 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
                       }
                     <div className={styles.formattedPath} >
                       <span className={styles.num}>
-                        { i + 1 }
+                        { indexInFullCollection + 1 }
                       </span>
                       <button
                         onClick={()=>handleActivateEvidence(pathToDisplay)}
