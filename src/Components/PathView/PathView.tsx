@@ -59,6 +59,7 @@ const sortArrayByIndirect = (array: any[]) => {
 }
 
 interface PathViewProps {
+  active: boolean;
   isEven: boolean;
   isPathfinder: boolean;
   paths: PathObjectContainer[];
@@ -69,8 +70,8 @@ interface PathViewProps {
   pathFilterState: PathFilterState;
 }
 
-const PathView: FC<PathViewProps> = ({ isEven, isPathfinder = false, paths, selectedPaths, 
-  handleEdgeSpecificEvidence, handleActivateEvidence, activeEntityFilters, pathFilterState }) => {
+const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, 
+  activeEntityFilters, pathFilterState }) => {
 
   const itemsPerPage: number = 10;
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
@@ -131,105 +132,110 @@ const PathView: FC<PathViewProps> = ({ isEven, isPathfinder = false, paths, sele
       <div className={styles.header}>
         <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
       </div>
-      <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
-        <div className={styles.paths}>
-          {
-            displayedPaths.map((pathToDisplay: PathObjectContainer, i: number)=> {
-              const displayIndirectLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
-                if(displayIndirectLabel)
-                  inferredLabelDisplayed = true;
-              const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
-                if(displayDirectLabel)
-                  directLabelDisplayed = true;
-              const tooltipID: string = (!!pathToDisplay?.id) ? pathToDisplay.id : i.toString();
-              const isPathFiltered = (!!pathFilterState) ? pathFilterState[pathToDisplay.id] : false;
-              return (
-                <div key={tooltipID}>
-                  {
-                    displayDirectLabel
-                      ?
-                        <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
-                          Direct <Information className={styles.infoIcon} />
-                        </p>
-                      :
-                        null
-                  }
-                  {
-                    displayIndirectLabel
-                      ?
-                        <>
-                          <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
-                            Indirect <Information className={styles.infoIcon} />
+      {
+        (!active)
+        ? <></>
+        :
+        <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
+          <div className={styles.paths}>
+            {
+              displayedPaths.map((pathToDisplay: PathObjectContainer, i: number)=> {
+                const displayIndirectLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
+                  if(displayIndirectLabel)
+                    inferredLabelDisplayed = true;
+                const displayDirectLabel = !pathToDisplay.path.inferred && !directLabelDisplayed;
+                  if(displayDirectLabel)
+                    directLabelDisplayed = true;
+                const tooltipID: string = (!!pathToDisplay?.id) ? pathToDisplay.id : i.toString();
+                const isPathFiltered = (!!pathFilterState) ? pathFilterState[pathToDisplay.id] : false;
+                return (
+                  <div key={tooltipID}>
+                    {
+                      displayDirectLabel
+                        ?
+                          <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
+                            Direct <Information className={styles.infoIcon} />
                           </p>
-                        </>
-                      : null
+                        :
+                          null
                     }
-                  <div className={styles.formattedPath} >
-                    <span className={styles.num}>
-                      { i + 1 }
-                    </span>
-                    <button
-                      onClick={()=>handleActivateEvidence(pathToDisplay)}
-                      className={styles.pathEvidenceButton}
-                      data-tooltip-id={tooltipID}
-                      >
-                        <ResearchMultiple />
-                    </button>
-                    <Tooltip
-                      id={tooltipID}
-                      >
-                        <span>View evidence for this path.</span>
-                    </Tooltip>
-                    <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''}`} >
-                      {
-                        pathToDisplay.path.subgraph.map((pathItem: FormattedEdgeObject | FormattedNodeObject, j: number) => {
-                          let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;
-                          let pathItemHasSupport = (isFormattedEdgeObject(pathItem)) ? pathItem.inferred : false;
-                          let supportDataObject: SupportDataObject | null = (pathItemHasSupport)
-                            ? {
-                                key: key,
-                                pathItem: pathItem,
-                                pathViewStyles: styles,
-                                selectedPaths: selectedPaths,
-                                pathToDisplay: pathToDisplay,
-                                handleActivateEvidence: handleActivateEvidence,
-                                handleNameClick: handleNameClick,
-                                handleEdgeClick: handleEdgeClick,
-                                handleTargetClick: handleTargetClick,
-                                activeEntityFilters: activeEntityFilters,
-                                tooltipID: null,
-                                supportPath: null
-                              }
-                            : null;
-                          return (
-                            <>
-                              <PathObject
-                                pathViewStyles={styles}
-                                isEven={isEven}
-                                supportDataObject={supportDataObject}
-                                pathObjectContainer={pathToDisplay}
-                                pathObject={pathItem}
-                                id={key}
-                                key={key}
-                                handleNameClick={handleNameClick}
-                                handleEdgeClick={handleEdgeClick}
-                                handleTargetClick={handleTargetClick}
-                                activeEntityFilters={activeEntityFilters}
-                                hasSupport={pathItemHasSupport}
-                                pathFilterState={pathFilterState}
-                              />
-                            </>
-                          )
-                        })
+                    {
+                      displayIndirectLabel
+                        ?
+                          <>
+                            <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
+                              Indirect <Information className={styles.infoIcon} />
+                            </p>
+                          </>
+                        : null
                       }
+                    <div className={styles.formattedPath} >
+                      <span className={styles.num}>
+                        { i + 1 }
+                      </span>
+                      <button
+                        onClick={()=>handleActivateEvidence(pathToDisplay)}
+                        className={styles.pathEvidenceButton}
+                        data-tooltip-id={tooltipID}
+                        >
+                          <ResearchMultiple />
+                      </button>
+                      <Tooltip
+                        id={tooltipID}
+                        >
+                          <span>View evidence for this path.</span>
+                      </Tooltip>
+                      <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''}`} >
+                        {
+                          pathToDisplay.path.subgraph.map((pathItem: FormattedEdgeObject | FormattedNodeObject, j: number) => {
+                            let key = `${pathItem.id ? pathItem.id : i}_${i}_${j}`;
+                            let pathItemHasSupport = (isFormattedEdgeObject(pathItem)) ? pathItem.inferred : false;
+                            let supportDataObject: SupportDataObject | null = (pathItemHasSupport)
+                              ? {
+                                  key: key,
+                                  pathItem: pathItem,
+                                  pathViewStyles: styles,
+                                  selectedPaths: selectedPaths,
+                                  pathToDisplay: pathToDisplay,
+                                  handleActivateEvidence: handleActivateEvidence,
+                                  handleNameClick: handleNameClick,
+                                  handleEdgeClick: handleEdgeClick,
+                                  handleTargetClick: handleTargetClick,
+                                  activeEntityFilters: activeEntityFilters,
+                                  tooltipID: null,
+                                  supportPath: null
+                                }
+                              : null;
+                            return (
+                              <>
+                                <PathObject
+                                  pathViewStyles={styles}
+                                  isEven={isEven}
+                                  supportDataObject={supportDataObject}
+                                  pathObjectContainer={pathToDisplay}
+                                  pathObject={pathItem}
+                                  id={key}
+                                  key={key}
+                                  handleNameClick={handleNameClick}
+                                  handleEdgeClick={handleEdgeClick}
+                                  handleTargetClick={handleTargetClick}
+                                  activeEntityFilters={activeEntityFilters}
+                                  hasSupport={pathItemHasSupport}
+                                  pathFilterState={pathFilterState}
+                                />
+                              </>
+                            )
+                          })
+                        }
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })
-          }
-        </div>
-      </LastViewedPathIDContext.Provider>
+                )
+              })
+            }
+          </div>
+        </LastViewedPathIDContext.Provider>
+      }
       {
         pageCount > 1 &&
         <div className={styles.paginationContainer}>
