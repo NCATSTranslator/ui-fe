@@ -1,8 +1,7 @@
 import styles from './GraphView.module.scss';
-import {useState, memo, useMemo, useRef, useCallback, useEffect} from 'react';
-import { resultToCytoscape, findPaths, layoutList, handleResetView, 
-  handleDeselectAllNodes, initCytoscapeInstance, getGraphWithoutExtraneousPaths,
-  handleZoomByInterval } from '../../Utilities/graphFunctions';
+import {useState, useMemo, useRef, useCallback, useEffect} from 'react';
+import { resultToCytoscape, findPaths, layoutList, handleResetView, handleDeselectAllNodes,
+  initCytoscapeInstance, getGraphWithoutExtraneousPaths, handleZoomByInterval } from '../../Utilities/graphFunctions';
 import Plus from '../../Icons/Buttons/Add/Add.svg?react';
 import Minus from '../../Icons/Buttons/Subtract/Subtract.svg?react';
 import cytoscape from 'cytoscape';
@@ -51,9 +50,8 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
   let graphViewRef = useRef(null);
   let graphLayoutPref = getInitialGraphLayoutFromPrefs(prefs, layoutList);
   const [currentLayout, setCurrentLayout] = useState(graphLayoutPref);
+  const [cyInstance, setCyInstance] = useState(null);
   const graph = useMemo(() => {
-    // if(!active)
-    //   return null;
     if(prebuiltGraph)
       return prebuiltGraph;
 
@@ -188,53 +186,63 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
 
   }, [onNodeClick])
 
-  const cy = useMemo(()=>{
-    if(!active || !graphRef.current || graph === null) 
-      return null;
-
-    let cytoReqDataObject = {
-      graphRef: graphRef, 
-      graphNavigatorContainerId: graphNavigatorContainerId.current,
-      graphTooltipIdString: graphTooltipIdString.current,
-      edgeInfoWindowIdString: edgeInfoWindowIdString.current,
-      graphScrollOverlayId: graphScrollOverlayId.current, 
-      graph: graph, 
-      layout: currentLayout, 
-      selectedNodes: selectedNodes, 
-      excludedNodes: excludedNodes,
-      handleNodeClick: handleNodeClick, 
-      clearSelectedPaths: clearSelectedPaths,
-      highlightClass: highlightClass, 
-      hideClass: hideClass, 
-      excludedClass: excludedClass,
-      subjectId: subjectId.current,
-      objectId: objectId.current,
-      cyNav: cyNav.current
-    }
-    let cyInstanceAndNav = initCytoscapeInstance(cytoReqDataObject);
-    cyNav.current = cyInstanceAndNav.nav;
-
-    if(cyInstanceAndNav.cy.data().layoutName === 'breadthfirst') {
-      var heightOffset = 200;
-      var objectNode = cyInstanceAndNav.cy.$(`[id = '${objectId.current}']`);
-
-      var maxY = cyInstanceAndNav.cy.nodes().max((node) => node.position('y')).value;
-      var minX = cyInstanceAndNav.cy.nodes().min((node) => node.position('x')).value;
-      var maxX = cyInstanceAndNav.cy.nodes().max((node) => node.position('x')).value;
-    
-      var centerX = (minX + maxX) / 2;
-    
-      objectNode.position({ x: centerX, y: maxY + heightOffset });
-      handleResetView(cyInstanceAndNav.cy);
-    }
-
-    return cyInstanceAndNav.cy;
-  }, [graph, currentLayout, active, clearSelectedPaths, handleNodeClick]);
 
   useEffect(() => {
-    if(cy) {
-      cy.userZoomingEnabled(zoomKeyDown);
-    }
+    if (!active || !graphRef.current || graph === null) 
+      return;
+    if (cyInstance !== null) 
+      return;
+
+    // Use a timeout to defer the graph initialization
+    const timeoutId = setTimeout(() => {
+      let cytoReqDataObject = {
+        graphRef: graphRef, 
+        graphNavigatorContainerId: graphNavigatorContainerId.current,
+        graphTooltipIdString: graphTooltipIdString.current,
+        edgeInfoWindowIdString: edgeInfoWindowIdString.current,
+        graphScrollOverlayId: graphScrollOverlayId.current, 
+        graph: graph, 
+        layout: currentLayout, 
+        selectedNodes: selectedNodes, 
+        excludedNodes: excludedNodes,
+        handleNodeClick: handleNodeClick, 
+        clearSelectedPaths: clearSelectedPaths,
+        highlightClass: highlightClass, 
+        hideClass: hideClass, 
+        excludedClass: excludedClass,
+        subjectId: subjectId.current,
+        objectId: objectId.current,
+        cyNav: cyNav.current
+      };
+
+      let cyInstanceAndNav = initCytoscapeInstance(cytoReqDataObject);
+      cyNav.current = cyInstanceAndNav.nav;
+
+      // Adjustments for 'breadthfirst' layout
+      if (cyInstanceAndNav.cy.data().layoutName === 'breadthfirst') {
+        var heightOffset = 200;
+        var objectNode = cyInstanceAndNav.cy.$(`[id = '${objectId.current}']`);
+
+        var maxY = cyInstanceAndNav.cy.nodes().max((node) => node.position('y')).value;
+        var minX = cyInstanceAndNav.cy.nodes().min((node) => node.position('x')).value;
+        var maxX = cyInstanceAndNav.cy.nodes().max((node) => node.position('x')).value;
+
+        var centerX = (minX + maxX) / 2;
+
+        objectNode.position({ x: centerX, y: maxY + heightOffset });
+        handleResetView(cyInstanceAndNav.cy);
+      }
+
+      setCyInstance(cyInstanceAndNav.cy);
+    // Set timeout to 0 to defer execution
+    }, 0); 
+
+    return () => clearTimeout(timeoutId);
+  }, [graph, currentLayout, active, clearSelectedPaths, handleNodeClick, cyInstance]);
+
+  useEffect(() => {
+    if(cyInstance) 
+      cyInstance.userZoomingEnabled(zoomKeyDown);
 
     const handleWheel = () => {
       if (!zoomKeyDown) {
@@ -260,7 +268,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
       if (retainedGraphViewRef) 
         retainedGraphViewRef.removeEventListener('wheel', handleWheel);
     };
-  }, [zoomKeyDown, graphViewRef, cy]);
+  }, [zoomKeyDown, graphViewRef, cyInstance]);
   
   return (
     <div>
@@ -285,21 +293,21 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
               </div>
               <div className={styles.graphControls}>
                 <Button 
-                  handleClick={()=>handleZoomByInterval(cy, 0.15, true)}
+                  handleClick={()=>handleZoomByInterval(cyInstance, 0.15, true)}
                   className={`${styles.graphControlButton} ${styles.withIcon}`}
                   iconOnly
                   >
                   <Plus />
                 </Button>
                 <Button 
-                  handleClick={()=>handleZoomByInterval(cy, 0.15, false)}
+                  handleClick={()=>handleZoomByInterval(cyInstance, 0.15, false)}
                   className={`${styles.graphControlButton} ${styles.withIcon}`}
                   iconOnly
                   >
                   <Minus />
                 </Button>
                 <Button 
-                  handleClick={()=>handleResetView(cy)}
+                  handleClick={()=>handleResetView(cyInstance)}
                   className={styles.graphControlButton}
                   >
                   Reset View
@@ -307,7 +315,7 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
                 <Button 
                   handleClick={() => {
                     handleDeselectAllNodes(
-                      cy, 
+                      cyInstance, 
                       selectedNodes, 
                       excludedNodes, 
                       clearSelectedPaths, 
@@ -343,4 +351,4 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
   );
 }
 
-export default memo(GraphView);
+export default GraphView;

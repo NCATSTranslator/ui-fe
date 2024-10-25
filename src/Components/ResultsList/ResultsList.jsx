@@ -1139,12 +1139,12 @@ const ResultsList = ({loading}) => {
                         marginPagesDisplayed={1}
                         pageCount={pageCount}
                         renderOnZeroPageCount={null}
-                        className={styles.pageNums}
-                        pageClassName={styles.pageNum}
-                        activeClassName={styles.current}
-                        previousLinkClassName={`${styles.button}`}
-                        nextLinkClassName={`${styles.button}`}
-                        disabledLinkClassName={styles.disabled}
+                        className='pageNums'
+                        pageClassName='pageNum'
+                        activeClassName='current'
+                        previousLinkClassName={`button ${styles.button}`}
+                        nextLinkClassName={`button ${styles.button}`}
+                        disabledLinkClassName={`disabled ${styles.disabled}`}
                         forcePage={currentPage.current}
                       />
                     </div>

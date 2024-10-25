@@ -182,9 +182,9 @@
     grid-column: 1/8;
     grid-row: 2;
     background-color: $palePurple;
-    border: 1px solid $purpleEdgeBG;
+    border: 1px solid $midPurpleTwo;
     border-radius: $defaultBorderRadius;
-    padding: $s;
+    padding: $s $s 0;
     margin: $m 0 0 0;
     position: relative;
     left: -42px;
@@ -230,4 +230,7 @@
   .predicateInterior, .nameInterior, .targetInterior {
     opacity: 0.5;
   }
+}
+.paginationContainer {
+  display: grid;
 }

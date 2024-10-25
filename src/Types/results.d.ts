@@ -105,6 +105,7 @@ export type FormattedEdgeObject = {
   predicate?: EdgePredicateObject | string;
   object?: EdgeNodeObject;
   inferred: boolean;
+  is_root: boolean;
   predicate_url?: string | null;
   predicates?: EdgePredicateObject[] | null;
   provenance?: any;

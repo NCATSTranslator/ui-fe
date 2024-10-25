@@ -58,7 +58,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
       : formatBiolinkEntity(pathObject.predicates[0].predicate)
     : "";
   const pubCount = (Array.isArray(pathObject.publications)) ? pathObject.publications.length : 0;
-  const [isSupportExpanded, setIsSupportExpanded] = useState(true);
+  const [isSupportExpanded, setIsSupportExpanded] = useState(pathObject.is_root);
   const isMachineLearned = checkForProvenanceType(pathObject, "ml");
   const isTrusted = checkForProvenanceType(pathObject, "trusted");
   const hasMore = (pathObject.predicates && pathObject.predicates.length > 1);

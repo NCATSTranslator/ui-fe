@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo, FC, RefObject } from 'react';
+import { useState, useEffect, useCallback, useRef, memo, FC, RefObject, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject,
   isPublication, isClinicalTrial, isMiscPublication, getPathsCount } from '../../Utilities/utilities';
@@ -146,6 +146,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const itemBookmarkID = useRef<string | null>(bookmarkID);
   const [itemHasNotes, setItemHasNotes] = useState<boolean>(hasNotes);
   const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
+  const [graphActive, setGraphActive] = useState<boolean>(false);
   const [height, setHeight] = useState<number | string>(0);
   const formattedPaths = useRef<PathObjectContainer[]>(item.compressedPaths);
   // selectedPaths include the node ids of a path in a string array
@@ -482,18 +483,27 @@ const ResultsItem: FC<ResultsItemProps> = ({
             }
           </div>
         </div>
-        <Tabs isOpen className={styles.resultTabs}>
+        <Tabs 
+          isOpen 
+          className={styles.resultTabs} 
+          handleTabSelection={(heading)=>{
+              if(heading === "Graph")
+                setGraphActive(true);
+              else 
+                setGraphActive(false);
+            }}
+          >
             <Tab heading="Paths">
               <PathView
                 paths={formattedPaths.current}
                 selectedPaths={selectedPaths}
-                active={isExpanded}
                 isPathfinder={isPathfinder}
                 handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
                 handleActivateEvidence={handleActivateEvidence}
                 activeEntityFilters={activeEntityFilters}
                 pathFilterState={pathFilterState}
                 isEven={isEven}
+                active={isExpanded}
               />
             </Tab>
             <Tab heading="Graph">
@@ -505,7 +515,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                   rawResults={rawResults}
                   onNodeClick={handleNodeClick}
                   clearSelectedPaths={handleClearSelectedPaths}
-                  active={isExpanded}
+                  active={graphActive}
                   zoomKeyDown={zoomKeyDown}
                 />
               </Suspense>

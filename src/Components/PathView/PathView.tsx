@@ -1,12 +1,13 @@
 import styles from './PathView.module.scss';
-import { useState, useEffect, useMemo, useCallback, createContext, FC } from "react";
+import { useState, useMemo, useCallback, useRef, createContext, FC } from "react";
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
+import ReactPaginate from 'react-paginate';
+import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
+import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { cloneDeep, isEqual } from 'lodash';
-import { useSelector } from 'react-redux';
-import { currentPrefs } from '../../Redux/rootSlice';
 import { numberToWords } from '../../Utilities/utilities';
 import { hasSupport } from '../../Utilities/resultsFormattingFunctions';
 import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject, PathFilterState} from '../../Types/results';
@@ -49,6 +50,14 @@ const getPathsWithSelectionsSet = (paths: PathObjectContainer[], selectedPaths: 
   }
 }
 
+const sortArrayByIndirect = (array: any[]) => {
+  return array.sort((a, b) => {
+      let inferredA = a.path.inferred ? 1 : 0;
+      let inferredB = b.path.inferred ? 1 : 0;
+      return inferredA - inferredB;
+  });
+}
+
 interface PathViewProps {
   active: boolean;
   isEven: boolean;
@@ -64,43 +73,32 @@ interface PathViewProps {
 const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, paths, selectedPaths, handleEdgeSpecificEvidence, handleActivateEvidence, 
   activeEntityFilters, pathFilterState }) => {
 
-  const prefs = useSelector(currentPrefs);
-
-  const initItemsPerPage = (prefs?.path_show_count?.pref_value)
-    ? (typeof prefs.path_show_count.pref_value == "string")
-      ? parseInt(prefs.path_show_count.pref_value)
-      : prefs.path_show_count.pref_value
-    : 5;
-
-  let initialNumberToShow = (initItemsPerPage === -1 || paths.length < initItemsPerPage) ? paths.length : initItemsPerPage;
-
-  const [numberToShow, setNumberToShow] = useState(initialNumberToShow);
+  const itemsPerPage: number = 10;
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(paths, selectedPaths), [paths, selectedPaths]);
+  const [itemOffset, setItemOffset] = useState<number>(0);
+  const currentPage = useRef<number>(0);
+  const endResultIndex = useRef<number>(itemsPerPage);
+  const pageCount = (!!formattedPaths) ? Math.ceil(formattedPaths.length / itemsPerPage) : 0;
+  
+  const handlePageClick = (event: {selected: number} ) => {
+    let pathsLength = formattedPaths.length;
+    if(!pathsLength)
+      return;
+    currentPage.current = event.selected;
+    const newOffset:number = isNaN((event.selected * itemsPerPage) % pathsLength) ? 0 : (event.selected * itemsPerPage) % pathsLength;
+    const endOffset:number = (newOffset + itemsPerPage) > pathsLength
+      ? pathsLength
+      : newOffset + itemsPerPage;
+    setItemOffset(newOffset);
+    endResultIndex.current = endOffset;
+  }
+
+  const displayedPaths = sortArrayByIndirect(formattedPaths).slice(itemOffset, endResultIndex.current);
   // Create the context with a default value of null
   const [lastViewedPathID, setLastViewedPathID] = useState<string|null>(null);
 
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
-
-  // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
-  // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
-  useEffect(() => {
-    const tempItemsPerPage = (prefs?.path_show_count?.pref_value)
-    ? (typeof prefs.path_show_count.pref_value == "string")
-      ? parseInt(prefs.path_show_count.pref_value)
-      : prefs.path_show_count.pref_value
-    : 5;
-    const tempNumberToShow = (tempItemsPerPage === -1 || paths.length < tempItemsPerPage) ? paths.length : tempItemsPerPage;
-    setNumberToShow(tempNumberToShow);
-  }, [prefs, paths]);
-
-  useEffect(() => {
-    let temp = initItemsPerPage;
-    if(initItemsPerPage === -1 || paths.length < initItemsPerPage)
-      temp = paths.length;
-
-    setNumberToShow(temp);
-  }, [paths, initItemsPerPage]);
 
   const handleNameClick = useCallback((name: FormattedNodeObject ) => {
     console.log("handle name click", name);
@@ -119,24 +117,6 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
     if(Array.isArray(target.provenance) && target.provenance[0].length > 0 && target.provenance[0].includes("http"))
       window.open(target.provenance[0], '_blank');
   },[]);
-
-  const handleShowMore = () => {
-    let newAmount = (numberToShow + initItemsPerPage > paths.length) ? paths.length : numberToShow + initItemsPerPage;
-    setNumberToShow(newAmount);
-  }
-
-  const handleShowLess = () => {
-    let newAmount = (numberToShow - initItemsPerPage <= initItemsPerPage) ? numberToShow - (numberToShow - initItemsPerPage) : numberToShow - initItemsPerPage;
-    setNumberToShow(newAmount);
-  }
-
-  const sortArrayByIndirect = (array: any[]) => {
-    return array.sort((a, b) => {
-        let inferredA = a.path.inferred ? 1 : 0;
-        let inferredB = b.path.inferred ? 1 : 0;
-        return inferredA - inferredB;
-    });
-  }
 
   return(
     <div className={styles.pathView}>
@@ -159,8 +139,7 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
         <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
           <div className={styles.paths}>
             {
-              sortArrayByIndirect(formattedPaths).slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
-              // formattedPaths.slice(0, numberToShow).map((pathToDisplay: PathObjectContainer, i: number)=> {
+              displayedPaths.map((pathToDisplay: PathObjectContainer, i: number)=> {
                 const displayIndirectLabel = pathToDisplay.path.inferred && !inferredLabelDisplayed;
                   if(displayIndirectLabel)
                     inferredLabelDisplayed = true;
@@ -257,22 +236,26 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
           </div>
         </LastViewedPathIDContext.Provider>
       }
-      <div className={styles.buttons}>
-        {
-          (numberToShow < paths.length) &&
-          <button onClick={(e)=> {e.stopPropagation(); handleShowMore();}} className={styles.show}>Show More</button>
-        }
-        {
-          (numberToShow <= paths.length && numberToShow > initItemsPerPage && initItemsPerPage !== -1) &&
-          <button onClick={(e)=> {e.stopPropagation(); handleShowLess();}} className={styles.show}>Show Less</button>
-        }
-      </div>
       {
-        <div className={styles.buttons}>
-          {
-            (numberToShow < paths.length) &&
-            <button onClick={(e)=> {e.stopPropagation(); setNumberToShow(paths.length);}} className={`${styles.show}`}>Show All</button>
-          }
+        pageCount > 1 &&
+        <div className={styles.paginationContainer}>
+          <ReactPaginate
+            breakLabel="..."
+            nextLabel={<ChevRight/>}
+            previousLabel={<ChevLeft/>}
+            onPageChange={handlePageClick}
+            pageRangeDisplayed={5}
+            marginPagesDisplayed={1}
+            pageCount={pageCount}
+            renderOnZeroPageCount={null}
+            className='pageNums'
+            pageClassName='pageNum'
+            activeClassName='current'
+            previousLinkClassName={`button ${styles.button}`}
+            nextLinkClassName={`button ${styles.button}`}
+            disabledLinkClassName={`disabled ${styles.disabled}`}
+            forcePage={currentPage.current}
+          />
         </div>
       }
     </div>
