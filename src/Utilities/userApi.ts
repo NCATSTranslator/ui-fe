@@ -35,7 +35,7 @@ export const defaultPrefs: PreferencesContainer = {
     possible_values:["vertical", "horizontal", "concentric"]
   },
   path_show_count: {
-    pref_value: 5,
+    pref_value: 10,
     possible_values:[5, 10, 20, -1]
   },
   evidence_sort: {

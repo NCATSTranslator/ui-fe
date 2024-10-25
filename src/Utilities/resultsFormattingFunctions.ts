@@ -188,7 +188,7 @@ const getFormattedEdge = (id: string, results: RawResultsContainer, supportStack
   if(edge !== null)
     edge.id = id;
   let pred: EdgePredicateObject | null = null;
-
+  let isRoot = (!!edge) ? edge?.is_root : false;
   if(edge !== null && edge.predicate) {
     let formattedPredicate = (typeof edge.predicate === "string") ? formatBiolinkEntity(edge.predicate) : formatBiolinkEntity(edge.predicate.predicate);
     pred = {
@@ -206,7 +206,8 @@ const getFormattedEdge = (id: string, results: RawResultsContainer, supportStack
     predicates: (pred === null) ? null : [pred],
     edges: edge === null ? null : [edge],
     publications: publications,
-    inferred: false
+    inferred: false,
+    is_root: isRoot
   };
   // if the edge has support, recursively call getFormattedPaths to fill out the support paths
   if(hasSupport(edge)) {

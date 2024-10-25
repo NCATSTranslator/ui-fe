@@ -104,3 +104,15 @@
     }
   }
 }
+.loadingOverlay {
+  position: absolute;
+  z-index: 100;
+  top:0;
+  right:0;
+  bottom:0;
+  left: 0;
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

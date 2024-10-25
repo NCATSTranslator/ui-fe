@@ -203,6 +203,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     if(Object.keys(queryItem.type).length) {
       delayedQuery(e, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions.current, limitTypes.current, limitPrefixes.current, nameResolverEndpoint);
       setInputText(e);
+      setIsError(false);
     } else {
       setIsError(true);
     }

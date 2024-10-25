@@ -379,7 +379,6 @@ export const initCytoscapeInstance = (dataObj) => {
     }
   });
 
-  // cy.on('vclick');
   cyGraph.on('vclick', 'node', (ev, formattedResults)=>dataObj.handleNodeClick(ev, formattedResults, dataObj.graph));
   cyGraph.on('vclick', 'edge', (ev)=>console.log(ev.target.data()));
 

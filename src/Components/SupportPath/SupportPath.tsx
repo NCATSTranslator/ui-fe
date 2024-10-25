@@ -3,17 +3,17 @@ import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { SupportDataObject, PathFilterState } from '../../Types/results';
-import { intToChar, isFormattedEdgeObject, numberToWords } from '../../Utilities/utilities';
+import { isFormattedEdgeObject, numberToWords } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
 import { useLastViewedPath } from '../../Utilities/customHooks';
 
 interface SupportPathProps {
   dataObj: SupportDataObject;
-  index: number;
+  character: string;
   pathFilterState: PathFilterState
 }
 
-const SupportPath: FC<SupportPathProps> = ({ dataObj, index, pathFilterState }) => {
+const SupportPath: FC<SupportPathProps> = ({ dataObj, character, pathFilterState }) => {
 
   const pathViewStyles = dataObj.pathViewStyles;
   const tooltipID = dataObj.tooltipID;
@@ -37,7 +37,7 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj, index, pathFilterState }) 
             <LastViewedTag/>
           }
           <span className={`${!!pathViewStyles &&pathViewStyles.num}`}>
-            { intToChar(index + 1) }
+            { character }
           </span>
           <button
             onClick={handleActivateEvidence}
