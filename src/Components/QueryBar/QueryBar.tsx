@@ -48,7 +48,6 @@ const QueryBar: FC<QueryBarProps> = ({
     <form 
       onSubmit={(e) => {
         e.preventDefault();
-        console.log(queryItem, autocompleteItems);
         if(!queryItem  || (queryItem.node === null && (!autocompleteItems || autocompleteItems.length === 0))) {
           handleSubmission(null);
           return;
