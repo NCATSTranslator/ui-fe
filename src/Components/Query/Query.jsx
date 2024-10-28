@@ -172,9 +172,12 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
       });
   }
 
-  const updateQueryItem = (selectedNode = {id:'', label: ''}) => {
+  const updateQueryItem = (selectedNode = null) => {
+    if(selectedNode === null)
+      return;
+
     // add in match text for genes, which should be the species
-    if(selectedNode.id.includes("NCBIGene") && selectedNode?.match)
+    if(!!selectedNode && selectedNode.id.includes("NCBIGene") && selectedNode?.match)
       selectedNode.label += ` (${selectedNode.match})`;
 
     setInputText(selectedNode.label);
@@ -227,7 +230,7 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     limitPrefixes.current = newQueryType.limitPrefixes;
     clearAutocompleteItems();
     if(resetInputText || resetInputText === undefined) {
-      setQueryItem({node: {}, type: newQueryType});
+      setQueryItem({node: null, type: newQueryType});
       clearSelectedItem();
     } else {
       setQueryItem((prev) => {return {...prev, type: newQueryType}});
