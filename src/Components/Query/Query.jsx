@@ -176,7 +176,6 @@ const Query = ({results, loading, initPresetTypeObject = null, initNodeLabelPara
     if(selectedNode === null)
       return;
 
-    console.log("update query item");
     // add in match text for genes, which should be the species
     if(!!selectedNode && selectedNode.id.includes("NCBIGene") && selectedNode?.match)
       selectedNode.label += ` (${selectedNode.match})`;
