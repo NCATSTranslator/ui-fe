@@ -1,11 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, FC } from "react";
 import styles from "./NotesModal.module.scss";
 import Modal from "./Modal";
 import TextEditor from "../TextEditor/TextEditor";
 import Button from "../Core/Button";
 import { getUserSave, updateUserSave } from "../../Utilities/userApi";
 
-const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClearNotesEditor = ()=>{}}) => {
+interface NotesModalProps {
+  isOpen?: boolean;
+  onClose?: Function;
+  noteLabel?: string;
+  bookmarkID?: string | null;
+  handleClearNotesEditor: any;
+}
+
+const NotesModal: FC<NotesModalProps> = ({isOpen = false, onClose = ()=>{}, noteLabel = "", bookmarkID = null , handleClearNotesEditor = ()=>{}}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   const [showSaved, setShowSaved] = useState(false);
@@ -29,7 +37,7 @@ const NotesModal = ({isOpen, onClose, noteLabel, bookmarkID = null , handleClear
 
     console.log("Clear notes from: ", bookmarkID);
     // update bookmark of given ID
-    let newSave = await getUserSave(bookmarkID);
+    let newSave: any = await getUserSave(bookmarkID);
     newSave.notes = "";
     await updateUserSave(bookmarkID, newSave);
     // clear text editor
