@@ -183,14 +183,12 @@ const UserSaves = () => {
                 isOpen={notesOpen}
                 onClose={()=>(setNotesOpen(false))}
                 handleClearNotesEditor={handleClearNotesEditor}
-                className="notes-modal"
                 noteLabel={noteLabel.current}
                 bookmarkID={currentBookmarkID.current}
               />
               <EvidenceModal
                 isOpen={evidenceOpen}
                 onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
-                className="evidence-modal"
                 item={selectedItem}
                 edgeGroup={selectedEdge}
                 path={selectedPath}

@@ -79,14 +79,12 @@ const ResultsListModals: FC<ResultsListModalsProps> = ({
         isOpen={notesModalOpen}
         onClose={()=>(setNotesModalOpen(false))}
         handleClearNotesEditor={handleClearNotesEditor}
-        // className="notes-modal"
         noteLabel={noteLabel}
         bookmarkID={currentBookmarkID}
       />
       <EvidenceModal
         isOpen={evidenceModalOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceModalOpen)}
-        // className="evidence-modal"
         item={selectedItem}
         edgeGroup={selectedEdge}
         path={selectedPath}
