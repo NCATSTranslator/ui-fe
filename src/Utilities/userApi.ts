@@ -87,7 +87,7 @@ interface QueryObject {
   submitted_time: Date; 
 }
 
-interface Save {
+export interface Save {
   id: number | string | null;
   label: string;
   user_id: string | null;
