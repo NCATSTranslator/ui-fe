@@ -67,7 +67,7 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.El
       break;
     case 'role':
       headingToReturn =
-        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="ChEBI Role Classification">
+        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Chemical Classification">
           <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more <ExternalLink/></a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
         </FacetHeading>;
       break;

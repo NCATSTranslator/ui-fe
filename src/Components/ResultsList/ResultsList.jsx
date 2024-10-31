@@ -3,14 +3,10 @@ import styles from './ResultsList.module.scss';
 import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
 import ResultsItem from "../ResultsItem/ResultsItem";
-import EvidenceModal from "../Modals/EvidenceModal";
-import Select from "../Core/Select";
 import LoadingBar from "../LoadingBar/LoadingBar";
-import Tooltip from '../Tooltip/Tooltip';
 import ResultsListHeader from "../ResultsListHeader/ResultsListHeader";
 import NavConfirmationPromptModal from "../Modals/NavConfirmationPromptModal";
 import StickyToolbar from "../StickyToolbar/StickyToolbar";
-import ReactPaginate from 'react-paginate';
 import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
 import { useSelector, useDispatch } from 'react-redux';
@@ -21,23 +17,18 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHigh
   sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow,
   filterCompare, makePathRank, updatePathRanks, pathRankSort, } from "../../Utilities/sortingFunctions";
 import { getSummarizedResults, hasSupport } from "../../Utilities/resultsFormattingFunctions";
-import { findStringMatch, handleResultsError, handleEvidenceModalClose,
-  handleResultsRefresh } from "../../Utilities/resultsInteractionFunctions";
+import { findStringMatch, handleResultsError, handleResultsRefresh } from "../../Utilities/resultsInteractionFunctions";
 import * as filtering from '../../Utilities/filterFunctions';
 import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
-import Alert from '../../Icons/Status/Alerts/Info.svg?react';
-import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
-import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
-import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import { API_PATH_PREFIX, getSaves } from "../../Utilities/userApi";
-import { ToastContainer, toast, Slide } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "../BookmarkToasts/BookmarkToasts";
-import NotesModal from "../Modals/NotesModal";
-import ShareModal from "../Modals/ShareModal";
-import ResultFocusModal from "../Modals/ResultFocusModal";
 import QueryPathfinder from "../QueryPathfinder/QueryPathfinder";
+import ResultsListTableHead from "./ResultsListTableHead";
+import ResultsListModals from "./ResultsListModals";
+import ResultsListBottomPagination from "./ResultsListBottomPagination";
 
 const ResultsList = ({loading}) => {
 
@@ -101,8 +92,8 @@ const ResultsList = ({loading}) => {
   // Bool, are the results currently sorted by score
   const [isSortedByScore, setIsSortedByScore] = useState(initSortByScore);
   // Bool, is evidence modal open?
-  const [evidenceOpen, setEvidenceOpen] = useState(false);
-  const [notesOpen, setNotesOpen] = useState(false);
+  const [evidenceModalOpen, setEvidenceModalOpen] = useState(false);
+  const [notesModalOpen, setNotesModalOpen] = useState(false);
   const [focusModalOpen, setFocusModalOpen] = useState(false);
   const [sharedItem, setSharedItem] = useState({index: 0, page: 0, name: ''});
   const [autoScrollToResult, setAutoScrollToResult] = useState(false);
@@ -615,13 +606,13 @@ const ResultsList = ({loading}) => {
     setSelectedItem(item);
     setSelectedEdge(edgeGroup);
     setSelectedPath(path);
-    setEvidenceOpen(true);
+    setEvidenceModalOpen(true);
   },[])
 
   const activateNotes = (label, bookmarkID, item) => {
     noteLabel.current = label;
     currentBookmarkID.current = bookmarkID;
-    setNotesOpen(true);
+    setNotesModalOpen(true);
   }
 
   const handlePageReset = (newItemsPerPage, resultsLength) => {
@@ -879,51 +870,29 @@ const ResultsList = ({loading}) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        theme="light"
-        transition={Slide}
-        pauseOnFocusLoss={false}
-        hideProgressBar
-        className="toastContainer"
-        closeOnClick={false}
-        closeButton={false}
-      />
-      <ShareModal
-        isOpen={shareModalOpen}
-        onClose={()=>setShareModalOpen(false)}
-        qid={currentQueryID}
+      <ResultsListModals
         shareResultID={shareResultID.current}
-      />
-      <NotesModal
-        isOpen={notesOpen}
-        onClose={()=>(setNotesOpen(false))}
+        presetTypeID={initPresetTypeID}
+        handlePageClick={handlePageClick}
+        shareModalOpen={shareModalOpen}
+        setShareModalOpen={setShareModalOpen}
+        notesModalOpen={notesModalOpen}
+        setNotesModalOpen={setNotesModalOpen}
         handleClearNotesEditor={handleClearNotesEditor}
-        className="notes-modal"
         noteLabel={noteLabel.current}
-        bookmarkID={currentBookmarkID.current}
-      />
-      <EvidenceModal
-        isOpen={evidenceOpen}
-        onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
-        className="evidence-modal"
-        item={selectedItem}
-        results={rawResults.current}
-        edgeGroup={selectedEdge}
-        path={selectedPath}
-      />
-      <ResultFocusModal
-        isOpen={focusModalOpen}
-        onAccept={() => {
-          setFocusModalOpen(false);
-          handlePageClick({selected: sharedItem.page}, false, formattedResults.length);
-          setExpandSharedResult(true);
-          setAutoScrollToResult(true);
-        }}
-        onReject={() => setFocusModalOpen(false)}
+        currentBookmarkID={currentBookmarkID.current}
+        currentQueryID={currentQueryID}
+        focusModalOpen={focusModalOpen}
+        setFocusModalOpen={setFocusModalOpen}
+        evidenceModalOpen={evidenceModalOpen}
+        setEvidenceModalOpen={setEvidenceModalOpen}
+        selectedEdge={selectedEdge}
+        selectedItem={selectedItem}
+        selectedPath={selectedPath}
         sharedItem={sharedItem}
-        queryType={initPresetTypeID}
+        formattedResultsLength={formattedResults.length} 
+        setExpandSharedResult={setExpandSharedResult} 
+        setAutoScrollToResult={setAutoScrollToResult}
       />
       <div className={styles.resultsList}>
         {
@@ -996,67 +965,16 @@ const ResultsList = ({loading}) => {
                 <div className={`${styles.resultsTableContainer} ${isPathfinder ? styles.pathfinder : ''}`}>
                   <div className={styles.resultsTable}>
                     <div className={styles.tableBody}>
-                      <div className={`${styles.tableHead}`}>
-                        <div
-                          className={`${styles.head} ${styles.nameHead} ${isSortedByName ? styles.true : (isSortedByName === null) ? '' : styles.false}`}
-                          onClick={()=>{
-                            let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
-                            currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                          }}
-                        >
-                          Name
-                          <ChevUp className={styles.chev}/>
-                        </div>
-                        <div></div>
-                        <div
-                          className={`${styles.head} ${styles.evidenceHead} ${isSortedByEvidence ? styles.true : (isSortedByEvidence === null) ? '': styles.false}`}
-                          onClick={()=>{
-                            let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
-                            currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                          }}
-                        >
-                          Evidence
-                          <ChevUp className={styles.chev}/>
-                        </div>
-                        <div
-                          className={`${styles.head} ${styles.pathsHead} ${isSortedByPaths ? styles.true : (isSortedByPaths === null) ? '': styles.false}`}
-                          onClick={()=>{
-                            let sortString = (isSortedByPaths === null) ? 'pathsHighLow' : (isSortedByPaths) ? 'pathsHighLow' : 'pathsLowHigh';
-                            currentSortString.current = sortString;
-                            handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                          }}
-                          data-tooltip-id="paths-tooltip"
-                        >
-                          Paths
-                          <Alert/>
-                          <ChevUp className={styles.chev}/>
-                          <Tooltip id="paths-tooltip">
-                            <span className={styles.scoreSpan}>Each path represents a discrete series of relationships that connect the result to the searched-for entity.</span>
-                          </Tooltip>
-                        </div>
-                        {
-                          !isPathfinder &&
-                          <div
-                            className={`${styles.head} ${styles.scoreHead} ${isSortedByScore ? styles.true : (isSortedByScore === null) ? '': styles.false}`}
-                            onClick={()=>{
-                              let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
-                              currentSortString.current = sortString;
-                              handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, sortString, formattedResults);
-                            }}
-                            data-tooltip-id="score-tooltip"
-                          >
-                            Score
-                            <Alert/>
-                            <ChevUp className={styles.chev}/>
-                            <Tooltip id="score-tooltip">
-                              <span className={styles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
-                            </Tooltip>
-                          </div>
-                        }
-                        <div></div>
-                      </div>
+                      <ResultsListTableHead
+                        parentStyles={styles}
+                        currentSortString={currentSortString}
+                        isPathfinder={isPathfinder}
+                        isSortedByEvidence={isSortedByEvidence}
+                        isSortedByName={isSortedByName}
+                        isSortedByPaths={isSortedByPaths}
+                        isSortedByScore={isSortedByScore}
+                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, currentSortString.current, formattedResults)}
+                      />
                       {
                         isError &&
                         <h5 className={styles.errorText}>There was an error when processing your query. Please try again.</h5>
@@ -1112,42 +1030,16 @@ const ResultsList = ({loading}) => {
                   </div>
                   {
                     formattedResults.length > 0 &&
-                    <div className={styles.pagination}>
-                      <div>
-                        <Select
-                          label=""
-                          name="Results Per Page"
-                          handleChange={(value)=>{
-                            setItemsPerPage(parseInt(value));
-                            handlePageReset(value, formattedResults.length);
-                          }}
-                          noanimate
-                          className={styles.perPage}
-                          >
-                          <option value="5" key="0">5</option>
-                          <option value="10" key="1">10</option>
-                          <option value="20" key="2">20</option>
-                          <option value="50" key="3">50</option>
-                        </Select>
-                      </div>
-                      <ReactPaginate
-                        breakLabel="..."
-                        nextLabel={<ChevRight/>}
-                        previousLabel={<ChevLeft/>}
-                        onPageChange={handlePageClick}
-                        pageRangeDisplayed={5}
-                        marginPagesDisplayed={1}
-                        pageCount={pageCount}
-                        renderOnZeroPageCount={null}
-                        className={`pageNums ${styles.pageNums}`}
-                        pageClassName='pageNum'
-                        activeClassName='current'
-                        previousLinkClassName={`button ${styles.button}`}
-                        nextLinkClassName={`button ${styles.button}`}
-                        disabledLinkClassName={`disabled ${styles.disabled}`}
-                        forcePage={currentPage.current}
-                      />
-                    </div>
+                    <ResultsListBottomPagination
+                      parentStyles={styles}
+                      itemsPerPage={itemsPerPage}
+                      setItemsPerPage={setItemsPerPage}
+                      handlePageReset={handlePageReset}
+                      handlePageClick={handlePageClick}
+                      formattedResultsLength={formattedResults.length}
+                      pageCount={pageCount}
+                      currentPage={currentPage.current}
+                    />
                   }
                 </div>
               </div>

@@ -245,7 +245,7 @@ const PathView: FC<PathViewProps> = ({ active, isEven, isPathfinder = false, pat
             nextLabel={<ChevRight/>}
             previousLabel={<ChevLeft/>}
             onPageChange={handlePageClick}
-            pageRangeDisplayed={5}
+            pageRangeDisplayed={4}
             marginPagesDisplayed={1}
             pageCount={pageCount}
             renderOnZeroPageCount={null}

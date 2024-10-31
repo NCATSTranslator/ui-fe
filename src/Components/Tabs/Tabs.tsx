@@ -8,10 +8,10 @@ interface TabsProps {
   children: ReactElement<TabProps>[];
   className?: string;
   isOpen: boolean;
-  handleTabSelection: (heading: string) => void;
+  handleTabSelection?: (heading: string) => void;
 }
 
-const Tabs: FC<TabsProps> = ({ children, className, isOpen, handleTabSelection }) => {
+const Tabs: FC<TabsProps> = ({ children, className, isOpen, handleTabSelection = ()=>{} }) => {
   const firstElement = Children.toArray(children).find((child) => isValidElement(child)) as ReactElement<TabProps> | undefined;
   const [activeTabHeading, setActiveTab] = useState(firstElement?.props.heading);
   const tabClicked = useRef(false);
