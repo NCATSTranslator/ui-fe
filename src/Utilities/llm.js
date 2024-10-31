@@ -1,4 +1,4 @@
-export function genTopNResultsContext(results, n) {
+export const genTopNResultsContext = (results, n) => {
   n = Math.min(n, results.length);
   const resultContexts = [];
   for (let i = 0; i < n; i++) {
@@ -7,7 +7,7 @@ export function genTopNResultsContext(results, n) {
   return resultContexts;
 }
 
-export function genResultContext(result) {
+export const genResultContext = (result) => {
   const name = result.name;
   const seenPids = new Set();
   const pathStrings = new Set();
@@ -41,7 +41,7 @@ export function genResultContext(result) {
   };
 }
 
-function genPathString(subgraph) {
+const genPathString = (subgraph) => {
   if (subgraph === undefined) {
     return false;
   }
@@ -54,10 +54,10 @@ function genPathString(subgraph) {
   return pathNames.join('-');
 }
 
-function getNodeName(node) {
+const getNodeName = (node) => {
   return node.name;
 }
 
-function getPredicateName(edge) {
+const getPredicateName = (edge) => {
   return edge.edges[0].predicate.predicate;
 }
