@@ -50,7 +50,7 @@ const ResultsListHeader = ({ data }) => {
           nextLabel={<ChevRight/>}
           previousLabel={<ChevLeft/>}
           onPageChange={data.handlePageClick}
-          pageRangeDisplayed={5}
+          pageRangeDisplayed={4}
           marginPagesDisplayed={1}
           pageCount={data.pageCount}
           renderOnZeroPageCount={null}

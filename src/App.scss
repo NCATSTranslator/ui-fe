@@ -8,7 +8,7 @@
 }
 
 .header-disclaimer {
-  padding: $s;
+  padding: $xs;
   background-color: $red;
   position: sticky;
   top: 0;
@@ -17,7 +17,7 @@
     text-align: center;
     margin: 0;
     color: $white;
-    font-weight: 700;
-    font-size: 16px;
+    font-weight: 800;
+    font-size: $captionSize;
   }
 }
