@@ -951,23 +951,25 @@ $predWidth: 220px;
     cursor: default;
     opacity: 0;
   }
+  .pageNum a, .next .button, .prev .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    font-size: $captionSize;
+  }
   .pageNum {
     a {
-      display: block;
       cursor: pointer;
-      padding: 10px;
       line-height: 1;
-      margin: 6px;
+      margin: 4px;
       transition: $defaultAnim;
       border: 1px solid transparent;
       border-radius: 5px;
       color: $darkGray;
-      font-size: $captionSize;
       font-weight: 800;
-      @media screen and (min-width: $desktop) {
-        padding: 10px 15px;
-        margin: 8px;
-      }
       &:hover {
         background-color: $lightGray;
         color: $purpleOne;
