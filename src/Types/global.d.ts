@@ -1,3 +1,4 @@
+import { Example } from "./querySubmission";
 
 // User Prefs
 export type PrefObject = {
@@ -47,7 +48,7 @@ export type SessionStatus = {
 }
 
 export type Config = {
-  cached_queries: object[];
+  cached_queries: Example[];
   gaID: string;
   name_resolver: string;
   social_providers: any;

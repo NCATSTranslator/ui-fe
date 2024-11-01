@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
-import { QueryType } from './queryTypes';
+import { QueryType } from '../Types/querySubmission';
 import { ResultItem } from '../Types/results';
 import { PreferencesContainer, SessionStatus } from '../Types/global';
 import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '../Redux/rootSlice';

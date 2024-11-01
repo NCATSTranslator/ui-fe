@@ -6,7 +6,7 @@ import styles from './QueryPathfinder.module.scss';
 import Autocomplete from '../Autocomplete/Autocomplete';
 import TextInput from '../Core/TextInput';
 import Button from '../Core/Button';
-import { AutocompleteItem } from '../../Types/results';
+import { AutocompleteItem } from '../../Types/querySubmission';
 import { getAutocompleteTerms } from '../../Utilities/autocompleteFunctions';
 import { debounce } from 'lodash';
 import { QueryTypeFunctions } from "../../Utilities/queryTypes";

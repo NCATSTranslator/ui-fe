@@ -904,9 +904,8 @@ const ResultsList = ({loading}) => {
             />
           :
             <Query
-              results
+              isResults
               loading={isLoading}
-              initPresetTypeID={initPresetTypeID}
               initPresetTypeObject={initPresetTypeObject}
               initNodeIdParam={initNodeIdParam}
               initNodeLabelParam={initNodeLabelParam}
