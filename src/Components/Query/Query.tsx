@@ -20,10 +20,12 @@ import { getEntityLink, generateEntityLink, getLastItemInArray, getFormattedDate
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import ShareIcon from '../../Icons/Buttons/Link.svg?react';
 import SparkleIcon from '../../Icons/Buttons/Sparkles.svg?react';
+import InfoIcon from '../../Icons/Status/Alerts/Info.svg?react';
 import Button from "../Core/Button";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import styles from './Query.module.scss';
 import { API_PATH_PREFIX } from "../../Utilities/userApi";
+import Tooltip from "../Tooltip/Tooltip";
 
 interface QueryProps {
   isResults: boolean;
@@ -275,8 +277,14 @@ const Query: FC<QueryProps> = ({
   }, [pathname]);
 
   const handleSummaryButtonClick = () => {
-    if (!isSummaryLoading) {
-      // Implement your logic here
+    if (isSummaryAvailable) {
+      // display summary
+      return;
+    } 
+
+    if(!isSummaryLoading) {
+      setIsSummaryLoading(true);
+      // initiate summary generation
     }
   };
 
@@ -452,8 +460,22 @@ const Query: FC<QueryProps> = ({
                     isSecondary
                     handleClick={handleSummaryButtonClick}
                   >
-                    <SparkleIcon />
+                    {
+                      !!isSummaryLoading
+                      ?                  
+                        <img
+                          src={loadingIcon}
+                          className={`${styles.summaryLoadingIcon} loadingIcon`}
+                          alt="loading icon"
+                        />
+                      : 
+                        <SparkleIcon className={styles.summaryLoadingIcon} />
+                    }
                     View Results Summary
+                    <InfoIcon className={styles.infoIcon} data-tooltip-id="result-summary-tooltip" />
+                    <Tooltip id="result-summary-tooltip">
+                      <span>This AI-generated summary reviews the data returned by Translator and identifies interesting results, ChEBI roles, and objects found in paths. <br/><br/> This summary is not intended to be a replacement for medical advice.</span>
+                    </Tooltip>
                   </Button>
                 </div>
               </div>
