@@ -12,7 +12,7 @@
     margin-bottom: $s;
   }
   .nodeLink {
-    margin: 0 0 4px;
+    margin: 0;
     .nodeLinkAnchor {
       display: inline;
       font-size: 12px;
@@ -20,20 +20,22 @@
         margin-left: 4px;
         width: 14px;
         height: 14px;
+        path {
+          fill: $white;
+        }
       }
     }
   }
   .bottom { 
-    display: grid;
-    grid-template-columns: .75fr 1fr;
-    gap: $xs;
-    justify-content: space-between;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
     align-items: center;
     margin: $s auto $s;
     button {
       margin: 0 $s 0 0;
-      padding: $xxs;
       font-size: $captionSize;
+      font-weight: 800;
     }
     .summaryButton {
       margin-right: 0;
@@ -72,7 +74,7 @@
     margin-bottom: 0;
   }
   .subHeading, .searchedTerm {
-    font-weight: 700;
+    font-weight: 800;
     font-size: 20px;
     margin: 0;
     color: $black;
@@ -255,4 +257,14 @@ button .dualArrows {
   display: flex;
   justify-content: space-between;
   margin: 0 0 10px;
+}
+.entityLinkContainer {
+  font-size: 20px;
+  svg {
+    width: 20px;
+    height: 20px;
+    path {
+      fill: $purpleOne;
+    }
+  } 
 }

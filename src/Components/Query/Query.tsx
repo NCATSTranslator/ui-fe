@@ -16,16 +16,18 @@ import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFuncti
 import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
 import { filterAndSortExamples, getAutocompleteTerms } from "../../Utilities/autocompleteFunctions";
-import { getEntityLink, generateEntityLink, getLastItemInArray, getFormattedDate, isValidDate } from "../../Utilities/utilities";
+import { getEntityLink, getLastItemInArray } from "../../Utilities/utilities";
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import ShareIcon from '../../Icons/Buttons/Link.svg?react';
 import SparkleIcon from '../../Icons/Buttons/Sparkles.svg?react';
 import InfoIcon from '../../Icons/Status/Alerts/Info.svg?react';
+import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import Button from "../Core/Button";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import styles from './Query.module.scss';
 import { API_PATH_PREFIX } from "../../Utilities/userApi";
 import Tooltip from "../Tooltip/Tooltip";
+import EntityLink from "../EntityLink/EntityLink";
 
 interface QueryProps {
   isResults: boolean;
@@ -313,27 +315,67 @@ const Query: FC<QueryProps> = ({
                         .replaceAll("a disease?", "")
                         .replaceAll("a chemical?", "")
                         .replaceAll("a gene?", "")}
-                      {generateEntityLink(
-                        queryItem.node?.id || "",
-                        styles.searchedTerm,
-                        () => queryItem.node?.label || "",
-                        false
-                      ) || (
-                        <span className={styles.searchedTerm}>
-                          {queryItem.node?.label}
-                        </span>
-                      )}
-                      ?
+                      <span className={styles.entityLinkContainer}>
+                        <EntityLink
+                          id={queryItem.node?.id || ""}
+                          className={styles.searchedTerm}
+                          linkTextGenerator={() => `${queryItem.node?.label}` || ""}
+                          useIcon
+                          fallbackText={queryItem.node?.label}
+                          data-tooltip-id="query-node-description-tooltip"
+                        />
+                        ?
+                      </span>
                     </h6>
                     {nodeDescription && (
-                      <div className={styles.nodeDescriptionContainer}>
-                        <p className={styles.nodeDescriptionHeading}>
-                          Description:
-                        </p>
-                        <p className={styles.nodeDescription}>{nodeDescription}</p>
-                      </div>
+                      <Tooltip id="query-node-description-tooltip" place="bottom">
+                        <span>{nodeDescription}</span>
+                        {queryItem?.node?.id && (
+                          <span className={styles.nodeLink}>
+                            {getEntityLink(
+                              queryItem.node.id,
+                              styles.nodeLinkAnchor,
+                              queryItem.type
+                            )}
+                            <ExternalLink/>
+                          </span>
+                        )}
+                      </Tooltip>
                     )}
                   </div>
+                </div>
+                <div className={styles.bottom}>
+                  <Button
+                    isSecondary
+                    handleClick={() => setShareModalFunction(true)}
+                    smallFont
+                  >
+                    <ShareIcon />
+                    <span>Share Result Set</span>
+                  </Button>
+                  <Button
+                    className={styles.summaryButton}
+                    isSecondary
+                    handleClick={handleSummaryButtonClick}
+                    smallFont
+                  >
+                    {
+                      !!isSummaryLoading
+                      ?                  
+                        <img
+                          src={loadingIcon}
+                          className={`${styles.summaryLoadingIcon} loadingIcon`}
+                          alt="loading icon"
+                        />
+                      : 
+                        <SparkleIcon className={styles.summaryLoadingIcon} />
+                    }
+                    <span>View Results Summary</span>
+                    <InfoIcon className={styles.infoIcon} data-tooltip-id="result-summary-tooltip" />
+                    <Tooltip id="result-summary-tooltip">
+                      <span>This AI-generated summary reviews the data returned by Translator and identifies interesting results, ChEBI roles, and objects found in paths. <br/><br/> This summary is not intended to be a replacement for medical advice.</span>
+                    </Tooltip>
+                  </Button>
                 </div>
               </>
             ) : (
@@ -422,63 +464,6 @@ const Query: FC<QueryProps> = ({
                   />
                 )}
               </>
-            )}
-            {isResults && (
-              <div className={styles.bottom}>
-                <div className="left">
-                  {queryItem?.node?.id && (
-                    <p className={styles.nodeLink}>
-                      {getEntityLink(
-                        queryItem.node.id,
-                        styles.nodeLinkAnchor,
-                        queryItem.type
-                      )}
-                    </p>
-                  )}
-                  <div
-                    className={`${styles.timestamp} ${
-                      queryTimestamp && styles.active
-                    }`}
-                  >
-                    {queryTimestamp &&
-                      isValidDate(queryTimestamp) &&
-                      isResults && (
-                        <p>Submitted {getFormattedDate(queryTimestamp)}</p>
-                      )}
-                  </div>
-                </div>
-                <div className="right">
-                  <Button
-                    isSecondary
-                    handleClick={() => setShareModalFunction(true)}
-                  >
-                    <ShareIcon />
-                    Share Result Set
-                  </Button>
-                  <Button
-                    className={styles.summaryButton}
-                    isSecondary
-                    handleClick={handleSummaryButtonClick}
-                  >
-                    {
-                      !!isSummaryLoading
-                      ?                  
-                        <img
-                          src={loadingIcon}
-                          className={`${styles.summaryLoadingIcon} loadingIcon`}
-                          alt="loading icon"
-                        />
-                      : 
-                        <SparkleIcon className={styles.summaryLoadingIcon} />
-                    }
-                    View Results Summary
-                    <InfoIcon className={styles.infoIcon} data-tooltip-id="result-summary-tooltip" />
-                    <Tooltip id="result-summary-tooltip">
-                      <span>This AI-generated summary reviews the data returned by Translator and identifies interesting results, ChEBI roles, and objects found in paths. <br/><br/> This summary is not intended to be a replacement for medical advice.</span>
-                    </Tooltip>
-                  </Button>
-                </div>
-              </div>
             )}
           </div>
         </AutoHeight>
