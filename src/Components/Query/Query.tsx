@@ -19,8 +19,6 @@ import { filterAndSortExamples, getAutocompleteTerms } from "../../Utilities/aut
 import { getEntityLink, getLastItemInArray } from "../../Utilities/utilities";
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import ShareIcon from '../../Icons/Buttons/Link.svg?react';
-import SparkleIcon from '../../Icons/Buttons/Sparkles.svg?react';
-import InfoIcon from '../../Icons/Status/Alerts/Info.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import Button from "../Core/Button";
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -28,6 +26,7 @@ import styles from './Query.module.scss';
 import { API_PATH_PREFIX } from "../../Utilities/userApi";
 import Tooltip from "../Tooltip/Tooltip";
 import EntityLink from "../EntityLink/EntityLink";
+import ResultsSummaryButton from "../ResultsSummaryButton/ResultsSummaryButton";
 
 interface QueryProps {
   isResults: boolean;
@@ -54,12 +53,10 @@ const Query: FC<QueryProps> = ({
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser);
-  const queryTimestamp = useSelector(currentQueryTimestamp);
   const nameResolverEndpoint = config?.name_resolver ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
   loading = !!loading;
 
-  const [isSummaryLoading, setIsSummaryLoading] = useState<boolean>(false);
-  const [isSummaryAvailable, setIsSummaryAvailable] = useState<boolean>(false);
+
   const [isLoading, setIsLoading] = useState<boolean>(loading);
   const [isError, setIsError] = useState<boolean>(false);
   const [errorText, setErrorText] = useState<string>('');
@@ -278,18 +275,6 @@ const Query: FC<QueryProps> = ({
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  const handleSummaryButtonClick = () => {
-    if (isSummaryAvailable) {
-      // display summary
-      return;
-    } 
-
-    if(!isSummaryLoading) {
-      setIsSummaryLoading(true);
-      // initiate summary generation
-    }
-  };
-
   return (
     <>
       <div className={styles.query}>
@@ -353,29 +338,10 @@ const Query: FC<QueryProps> = ({
                     <ShareIcon />
                     <span>Share Result Set</span>
                   </Button>
-                  <Button
-                    className={styles.summaryButton}
-                    isSecondary
-                    handleClick={handleSummaryButtonClick}
-                    smallFont
-                  >
-                    {
-                      !!isSummaryLoading
-                      ?                  
-                        <img
-                          src={loadingIcon}
-                          className={`${styles.summaryLoadingIcon} loadingIcon`}
-                          alt="loading icon"
-                        />
-                      : 
-                        <SparkleIcon className={styles.summaryLoadingIcon} />
-                    }
-                    <span>View Results Summary</span>
-                    <InfoIcon className={styles.infoIcon} data-tooltip-id="result-summary-tooltip" />
-                    <Tooltip id="result-summary-tooltip">
-                      <span>This AI-generated summary reviews the data returned by Translator and identifies interesting results, ChEBI roles, and objects found in paths. <br/><br/> This summary is not intended to be a replacement for medical advice.</span>
-                    </Tooltip>
-                  </Button>
+                  {
+                    !loading &&
+                    <ResultsSummaryButton/>
+                  }
                 </div>
               </>
             ) : (
