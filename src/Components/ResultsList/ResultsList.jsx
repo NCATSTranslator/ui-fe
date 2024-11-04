@@ -911,6 +911,7 @@ const ResultsList = ({loading}) => {
               initNodeLabelParam={initNodeLabelParam}
               nodeDescription={nodeDescription}
               setShareModalFunction={setShareModalOpen}
+              results={formattedResults}
             />
         }
         <div className={`${styles.resultsContainer} container`}>

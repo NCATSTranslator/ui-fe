@@ -11,7 +11,7 @@ import { queryTypes } from "../../Utilities/queryTypes";
 import { incrementHistory } from "../../Redux/historySlice";
 import { currentConfig, currentUser } from "../../Redux/rootSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
-import { currentQueryTimestamp, setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
+import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
@@ -27,6 +27,7 @@ import { API_PATH_PREFIX } from "../../Utilities/userApi";
 import Tooltip from "../Tooltip/Tooltip";
 import EntityLink from "../EntityLink/EntityLink";
 import ResultsSummaryButton from "../ResultsSummaryButton/ResultsSummaryButton";
+import { ResultItem } from "../../Types/results";
 
 interface QueryProps {
   isResults: boolean;
@@ -36,6 +37,7 @@ interface QueryProps {
   initNodeIdParam: string | null;
   nodeDescription: string | null;
   setShareModalFunction: Dispatch<SetStateAction<boolean>>;
+  results: ResultItem[];
 }
 
 const Query: FC<QueryProps> = ({
@@ -45,7 +47,8 @@ const Query: FC<QueryProps> = ({
   initNodeLabelParam,
   initNodeIdParam,
   nodeDescription,
-  setShareModalFunction
+  setShareModalFunction,
+  results
 }) => {
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
@@ -55,7 +58,6 @@ const Query: FC<QueryProps> = ({
   const user = useSelector(currentUser);
   const nameResolverEndpoint = config?.name_resolver ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
   loading = !!loading;
-
 
   const [isLoading, setIsLoading] = useState<boolean>(loading);
   const [isError, setIsError] = useState<boolean>(false);
@@ -106,6 +108,8 @@ const Query: FC<QueryProps> = ({
   const exampleChemsDown = config?.cached_queries ? filterAndSortExamples(config.cached_queries, 'gene', 'decreased') : null;
   const exampleGenesUp = config?.cached_queries ? filterAndSortExamples(config.cached_queries, 'chemical', 'increased') : null;
   const exampleGenesDown = config?.cached_queries ? filterAndSortExamples(config.cached_queries, 'chemical', 'decreased') : null;
+
+  const resultsPaneQuestionText = queryItem.type.label.replaceAll("a disease?", "").replaceAll("a chemical?", "").replaceAll("a gene?", "");
 
   const submitQuery = (item: QueryItem) => {
     const handleRevertQueryItem = (item: QueryItem) => {
@@ -296,10 +300,7 @@ const Query: FC<QueryProps> = ({
                 <div className={styles.resultsHeader}>
                   <div className={styles.showingResultsContainer}>
                     <h6 className={styles.subHeading}>
-                      {queryItem.type.label
-                        .replaceAll("a disease?", "")
-                        .replaceAll("a chemical?", "")
-                        .replaceAll("a gene?", "")}
+                      { resultsPaneQuestionText }
                       <span className={styles.entityLinkContainer}>
                         <EntityLink
                           id={queryItem.node?.id || ""}
@@ -340,7 +341,10 @@ const Query: FC<QueryProps> = ({
                   </Button>
                   {
                     !loading &&
-                    <ResultsSummaryButton/>
+                    <ResultsSummaryButton
+                      results={results}
+                      queryString={`${resultsPaneQuestionText}${queryItem.node?.label || ""}`}
+                    />
                   }
                 </div>
               </>
