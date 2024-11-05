@@ -17,7 +17,7 @@ const LoadingBar: FC<LoadingBarProps> = ({useIcon, disclaimerText, className, re
     <div className={`${styles.loadingBar} ${className} ${(reducedPadding) ? styles.reducedPadding : ''}`}> 
       <div className={styles.top}>
         { useIcon && 
-          <img src={loadingIcon} alt="loading icon" className={`${styles.loadingIcon} ${!!loadingText && styles.small}`}/>
+          <img src={loadingIcon} alt="loading icon" className={`${styles.loadingIcon}`}/>
         }
         {
           loadingText 

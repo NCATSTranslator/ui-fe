@@ -40,15 +40,11 @@
     -webkit-animation:spin 2s linear infinite;
     -moz-animation:spin 2s linear infinite;
     animation:spin 2s linear infinite;
-    &.small {
-      width: $m;
-      height: $m;
-    }
   }
   .heading {
     color: $purpleTwo;
     font-weight: 800;
-    font-size: $bodyOneSize;
+    font-size: $h5Size;
     padding-left: $xxs;
   }
 }
