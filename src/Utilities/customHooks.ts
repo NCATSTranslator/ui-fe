@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } from 'react';
 import { LastViewedPathIDContext } from '../Components/PathView/PathView';
 import { isEqual } from 'lodash';
+import { useQuery, QueryFunction } from 'react-query';
 
 interface WindowSize {
   width: number | undefined;
@@ -215,3 +216,15 @@ export const useLastViewedPath = () => {
   }
   return context;
 };
+
+export const useTextStream = (fetchTextStream: QueryFunction<unknown, "textStream">, onComplete?: Function | undefined) => {
+  return useQuery('textStream', fetchTextStream, {
+    enabled: false,
+    refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      if(!!onComplete)
+        onComplete();
+      console.log('Streaming complete:', data);
+    },
+  });
+}
