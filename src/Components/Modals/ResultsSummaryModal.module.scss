@@ -1,0 +1,28 @@
+@import "../../Assets/Styles/variables";
+
+.summaryModal {
+  .summaryModalContainer {
+    padding: $l;
+    height: 80%;
+    overflow: hidden;
+    max-width: 640px;
+  }
+  .top {
+    padding: 0 0 $s;
+    border-bottom: 1px solid $midGray;
+    .heading {
+      margin-bottom: $xxs;
+    }
+    .statusText {
+      font-size: $subTwoSize;
+      color: $darkGray;
+      font-weight: 400;
+      margin: 0;
+    }
+  }
+  .bottom {
+    padding: $s 0 0 0;
+    display: grid;
+    height: 85%;
+  }
+}

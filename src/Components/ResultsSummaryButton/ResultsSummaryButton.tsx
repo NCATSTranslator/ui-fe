@@ -9,8 +9,7 @@ import ResultsSummaryModal from "../Modals/ResultsSummaryModal";
 import { genTopNResultsContext } from "../../Utilities/llm";
 import { ResultItem } from "../../Types/results";
 import { ResultContextObject } from "../../Utilities/llm";
-import { useQuery } from "react-query";
-import { handleFetchErrors } from "../../Utilities/utilities";
+import { useTextStream } from "../../Utilities/customHooks";
 
 interface ResultsSummaryButtonProps {
   results: ResultItem[];
@@ -25,24 +24,23 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
 
   const resultContext = useRef<ResultContextObject[]>([]);
 
-  const handleSummaryButtonClick = () => {
+  const handleSummaryButtonClick = async () => {
     setIsSummaryModalOpen(true);
-    if (isSummaryAvailable) {
-      // display summary
+    // display summary if available
+    if (isSummaryAvailable) 
       return;
-    } 
 
+    // initiate summary generation
     if(!isSummaryLoading) {
-      // initiate summary generation
       const newContext = genTopNResultsContext(results, 50);
       resultContext.current = newContext;
       setIsSummaryLoading(true);
+      await refetch();
     }
   };
 
-  const resultsData = useQuery('resultsSummarization', async () => {
+  const fetchTextStream = async () => {
     console.log("Fetching new summary...");
-
     let requestJson = JSON.stringify({
       query: queryString,
       results: resultContext.current
@@ -53,24 +51,31 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
       headers: { 'Content-Type': 'application/json' },
       body: requestJson
     };
-    // eslint-disable-next-line
-    const response = await fetch(`https://ncats-llm-summarization.onrender.com/summary`, requestOptions)
-      .then(response => handleFetchErrors(response, () => {
-        console.log(response.json());
-        //   handleResultsError(true, setIsError, setIsLoading);
-      }))
-      .then(response => response.json())
-      .then(data => {
-        console.log('Summarization:', data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, {
-    enabled: isSummaryLoading,
-    refetchInterval: false,
-    refetchOnWindowFocus: false,
-  });
+    const response = await fetch('https://ncats-llm-summarization.onrender.com/summary', requestOptions);
+    if(!response.body) 
+      return null;
+    
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let result = '';
+  
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      result += decoder.decode(value, { stream: true });
+      setStreamedText((prev) => prev + decoder.decode(value, { stream: true }));
+    }
+  
+    return result;
+  }
+
+  const handleStreamedDataCompletion = () => {
+    setIsSummaryLoading(false);
+    setIsSummaryAvailable(true);
+  }
+
+  const [streamedText, setStreamedText] = useState<string>('');
+  const { refetch } = useTextStream(fetchTextStream, handleStreamedDataCompletion);
 
   return(
     <>
@@ -79,6 +84,7 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
         isSecondary
         handleClick={handleSummaryButtonClick}
         smallFont
+        disabled={isSummaryLoading}
         >
         {
           !!isSummaryLoading
@@ -98,6 +104,7 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
         </Tooltip>
       </Button>
       <ResultsSummaryModal
+        streamedText={streamedText}
         isOpen={isSummaryModalOpen}
         isSummaryLoading={isSummaryLoading}
         isSummaryAvailable={isSummaryAvailable}
