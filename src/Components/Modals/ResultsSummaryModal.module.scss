@@ -14,10 +14,17 @@
       margin-bottom: $xxs;
     }
     .statusText {
+      display: flex;
+      align-items: center;
       font-size: $subTwoSize;
       color: $darkGray;
       font-weight: 400;
       margin: 0;
+      svg, img {
+        margin: 0 0 0 $xxs;
+        width: $s;
+        height: $s;
+      }
     }
   }
   .bottom {
@@ -44,5 +51,10 @@
     &.active {
       opacity: 1;
     }
+  }
+  .summaryMatch {
+    font-weight: 800;
+    color: $purpleOne;
+    cursor: pointer;
   }
 }

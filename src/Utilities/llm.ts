@@ -2,6 +2,7 @@ import { ResultItem, FormattedEdgeObject, FormattedNodeObject } from "../Types/r
 import { isFormattedNodeObject } from "./utilities";
 
 export type ResultContextObject = {
+  id: string;
   name: string;
   paths: string[];
 }
@@ -47,7 +48,8 @@ export const genResultContext = (result: ResultItem): ResultContextObject => {
   }
   return {
     name: name,
-    paths: [...pathStrings]
+    paths: [...pathStrings],
+    id: result.id
   };
 }
 

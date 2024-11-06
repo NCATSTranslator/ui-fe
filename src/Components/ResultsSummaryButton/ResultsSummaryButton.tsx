@@ -33,6 +33,7 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
     // initiate summary generation
     if(!isSummaryLoading) {
       const newContext = genTopNResultsContext(results, 50);
+      console.log(newContext);
       resultContext.current = newContext;
       setIsSummaryLoading(true);
       await refetch();
@@ -62,8 +63,9 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      result += decoder.decode(value, { stream: true });
-      setStreamedText((prev) => prev + decoder.decode(value, { stream: true }));
+      let chunk = decoder.decode(value, { stream: true })
+      result += chunk;
+      setStreamedText((prev) => prev + chunk);
     }
   
     return result;
@@ -105,6 +107,7 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
       </Button>
       <ResultsSummaryModal
         streamedText={streamedText}
+        resultContext={resultContext.current}
         isOpen={isSummaryModalOpen}
         isSummaryLoading={isSummaryLoading}
         isSummaryAvailable={isSummaryAvailable}
