@@ -2,27 +2,28 @@ import { FC, useCallback, useMemo } from "react";
 import styles from "./ResultsSummaryModal.module.scss";
 import Modal from "./Modal";
 import LoadingBar from "../LoadingBar/LoadingBar";
+import Tooltip from "../Tooltip/Tooltip";
 import { ResultContextObject } from "../../Utilities/llm";
-import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import { Link } from "react-router-dom";
+import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 
 interface ResultsSummaryModalProps {
   isOpen?: boolean;
-  isSummaryAvailable: boolean;
   isSummaryLoading: boolean;
   onClose?: Function;
   resultContext: ResultContextObject[];
   streamedText: string;
+  handleResultMatchClick: Function;
 }
 
-const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({isOpen = false, isSummaryAvailable, isSummaryLoading, onClose = ()=>{}, streamedText, resultContext}) => {
+const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({isOpen = false, isSummaryLoading, onClose = ()=>{}, handleResultMatchClick, streamedText, resultContext}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
 
   const handleMatchedNameClick = useCallback((match: ResultContextObject) => {
-    console.log(match);
-  }, []);
+    handleResultMatchClick(match);
+  }, [handleResultMatchClick]);
 
   const processedText = useMemo(() => {
     const names = resultContext.map((contextItem) => contextItem.name).join("|");
@@ -41,7 +42,9 @@ const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({isOpen = false, isSu
               key={`${paraIndex}-${index}`}
               onClick={() => handleMatchedNameClick(match)}
               className={styles.summaryMatch}
+              data-tooltip-id={`${paraIndex}-${index}`}
             >
+              <Tooltip id={`${paraIndex}-${index}`}><span>View this result</span></Tooltip>
               {match.name}
             </span>
           );

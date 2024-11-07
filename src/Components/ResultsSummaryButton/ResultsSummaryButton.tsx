@@ -14,9 +14,10 @@ import { useTextStream } from "../../Utilities/customHooks";
 interface ResultsSummaryButtonProps {
   results: ResultItem[];
   queryString: string;
+  handleResultMatchClick: Function;
 }
 
-const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryString }) => {
+const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryString, handleResultMatchClick }) => {
 
   const [isSummaryLoading, setIsSummaryLoading] = useState<boolean>(false);
   const [isSummaryAvailable, setIsSummaryAvailable] = useState<boolean>(false);
@@ -33,7 +34,6 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
     // initiate summary generation
     if(!isSummaryLoading) {
       const newContext = genTopNResultsContext(results, 50);
-      console.log(newContext);
       resultContext.current = newContext;
       setIsSummaryLoading(true);
       await refetch();
@@ -86,7 +86,6 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
         isSecondary
         handleClick={handleSummaryButtonClick}
         smallFont
-        disabled={isSummaryLoading}
         >
         {
           !!isSummaryLoading
@@ -110,8 +109,11 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
         resultContext={resultContext.current}
         isOpen={isSummaryModalOpen}
         isSummaryLoading={isSummaryLoading}
-        isSummaryAvailable={isSummaryAvailable}
         onClose={()=>setIsSummaryModalOpen(false)}
+        handleResultMatchClick={(match: ResultContextObject)=> {
+          setIsSummaryModalOpen(false);
+          handleResultMatchClick(match);
+        }}
       />
     </>
 
