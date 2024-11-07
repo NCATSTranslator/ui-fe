@@ -166,7 +166,7 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
           </div>
           {
             (pubCount >= 1 && pathObject.provenance?.length > 0)
-            ? <ResearchMultiple />
+            ? <ResearchMultiple className={styles.evidenceIcon} />
             : ''
           }
           <span data-tooltip-id={`${pathObject.predicate}${uid}`} className={styles.pathLabel}>
