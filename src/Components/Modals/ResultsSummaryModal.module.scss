@@ -6,6 +6,7 @@
     height: 80%;
     overflow: hidden;
     max-width: 640px;
+    position: relative;
   }
   .top {
     padding: 0 0 $s;
@@ -20,18 +21,12 @@
       color: $darkGray;
       font-weight: 400;
       margin: 0;
-      svg, img {
-        margin: 0 0 0 $xxs;
-        width: $s;
-        height: $s;
-      }
     }
   }
   .bottom {
     padding: $s 0 0 0;
     display: grid;
     height: 85%;
-    position: relative;
   }
   .loadingArea {
     position: absolute;
@@ -47,14 +42,60 @@
     display: grid;
     justify-content: center;
     align-content: center;
-    max-width: 480px;
+    background-color: $white;
     &.active {
       opacity: 1;
+    }
+    p, .top {
+      max-width: 480px;
     }
   }
   .summaryMatch {
     font-weight: 800;
     color: $purpleOne;
     cursor: pointer;
+  }
+  .summaryLoadingIcon {
+    display: flex;
+    margin-top: $m;
+    margin-right: auto;
+    margin-bottom: 0;
+    margin-left: auto;
+  }
+  .linkContainer {
+    display: flex;
+    justify-content: center;
+  }
+  .sendFeedbackLink {
+    display: inline-flex;
+    font-weight: 800;
+    color: $purpleOne;
+    justify-content: center;
+    margin-top: $xs;
+    svg {
+      margin-right: $xxs;
+      path {
+        fill: $purpleOne;
+      }
+    } 
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .cursor {
+    animation: cursor-fade 1s ease 0s infinite; 
+    margin: 0 0 0 1px;
+  }
+}
+
+@keyframes cursor-fade {
+  0%{
+    opacity: 0.0;
+  }
+  50% {
+    opacity: 1.0;
+  }
+  100% {
+    opacity: 0.0;
   }
 }
