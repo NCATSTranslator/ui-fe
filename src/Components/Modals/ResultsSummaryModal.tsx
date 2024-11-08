@@ -29,6 +29,7 @@ const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({isOpen = false, isSu
     const names = resultContext.map((contextItem) => contextItem.name).join("|");
     const regex = new RegExp(`\\b(${names})\\b`, "gi");
     const paragraphs = streamedText.split("\n");
+    console.log(paragraphs);
 
     return paragraphs.map((paragraph, paraIndex) => {
       const isLastParagraph = (paraIndex === paragraphs.length - 1);
@@ -77,7 +78,7 @@ const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({isOpen = false, isSu
           loadingText="Summarizing Results"
           disclaimerText={
             <>
-              <p>This AI-generated summary reviews the data returned by Translator and identifies interesting results, ChEBI roles, and objects found in paths from within the top 50 results.</p>
+              <p>This AI-generated summary reviews the data returned by Translator and identifies interesting results found in paths from within the top 50 results.</p>
               <p>A new summary is generated each time the results are filtered.</p>
             </>
           }
