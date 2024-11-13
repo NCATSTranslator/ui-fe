@@ -1,4 +1,4 @@
-import { useRef, useState, FC } from "react";
+import { useRef, useState, FC, useCallback } from "react";
 import styles from './ResultsSummaryButton.module.scss';
 import Button from "../Core/Button";
 import SparkleIcon from '../../Icons/Buttons/Sparkles.svg?react';
@@ -79,6 +79,11 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
   const [streamedText, setStreamedText] = useState<string>('');
   const { refetch } = useTextStream(fetchTextStream, handleStreamedDataCompletion);
 
+  const handleResultMatchSelection = useCallback((match: ResultContextObject) => {
+    setIsSummaryModalOpen(false);
+    handleResultMatchClick(match);
+  }, [handleResultMatchClick]);
+
   return(
     <>
       <Button
@@ -110,10 +115,7 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
         isOpen={isSummaryModalOpen}
         isSummaryLoading={isSummaryLoading}
         onClose={()=>setIsSummaryModalOpen(false)}
-        handleResultMatchClick={(match: ResultContextObject)=> {
-          setIsSummaryModalOpen(false);
-          handleResultMatchClick(match);
-        }}
+        handleResultMatchClick={handleResultMatchSelection}
       />
     </>
 

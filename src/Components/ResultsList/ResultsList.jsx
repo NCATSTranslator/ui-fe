@@ -868,7 +868,7 @@ const ResultsList = ({loading}) => {
 
   },[formattedResults, initNodeIdParam]);
 
-  const handleResultMatchClick = (match) => {
+  const handleResultMatchClick = useCallback((match) => {
     if(!match)
       return;
 
@@ -887,7 +887,7 @@ const ResultsList = ({loading}) => {
     handlePageClick({selected: newPage}, false, formattedResults.length);
     setExpandSharedResult(true);
     setAutoScrollToResult(true);
-  }
+  }, [formattedResults, itemsPerPage, handlePageClick]);
 
   return (
     <QueryClientProvider client={queryClient}>
