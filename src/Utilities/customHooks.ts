@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } from 'react';
 import { LastViewedPathIDContext } from '../Components/PathView/PathView';
 import { isEqual } from 'lodash';
-import { useQuery, QueryFunction } from 'react-query';
+import { useQuery, QueryKey, QueryFunction, UseQueryResult } from 'react-query';
+import { ResultContextObject } from './llm';
 
 interface WindowSize {
   width: number | undefined;
@@ -217,14 +218,136 @@ export const useLastViewedPath = () => {
   return context;
 };
 
-export const useTextStream = (fetchTextStream: QueryFunction<unknown, "textStream">, onComplete?: Function | undefined) => {
-  return useQuery('textStream', fetchTextStream, {
-    enabled: false,
-    refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      if(!!onComplete)
-        onComplete();
-      console.log('Streaming complete:', data);
-    },
-  });
+interface TextStreamHookResult {
+  streamedText: string;
+  isStreaming: boolean;
+  isError: boolean;
+  startStream: () => Promise<void>;
+  cancelStream: () => void;
 }
+
+export const useTextStream = (
+  endpoint: string,
+  queryString: string,
+  resultContext: React.RefObject<any>,
+  onComplete?: Function,
+  onCancel?: Function
+): TextStreamHookResult => {
+  const [streamedText, setStreamedText] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
+  const hasBeenCanceled = useRef<boolean>(false);
+
+  const fetchTextStream = async (signal: AbortSignal) => {
+    console.log("Fetching new summary...");
+    const requestJson = JSON.stringify({
+      query: queryString,
+      results: resultContext.current
+    });
+
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: requestJson,
+      signal // abort signal 
+    };
+
+    try {
+      const response = await fetch(endpoint, requestOptions);
+      if (!response.ok) 
+        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.body) 
+        throw new Error('No response body received');
+
+      const reader = response.body.getReader();
+      readerRef.current = reader;
+      const decoder = new TextDecoder('utf-8');
+      let result = '';
+
+      while (true) {
+        try {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          result += chunk;
+          setStreamedText((prev) => prev + chunk);
+        } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') 
+            break;
+          throw error;
+        }
+      }
+
+      return result;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Stream cancelled');
+        return null;
+      }
+      throw error;
+    } finally {
+      readerRef.current = null;
+    }
+  };
+
+  const { isError, refetch } = useQuery(
+    'textStream',
+    () => {
+      abortControllerRef.current = new AbortController();
+      return fetchTextStream(abortControllerRef.current.signal);
+    },
+    {
+      enabled: false,
+      refetchOnWindowFocus: false,
+      retry: 3,
+      onSuccess: (data) => {
+        setIsStreaming(false);
+        if (!!onComplete && data !== null && !hasBeenCanceled.current) 
+          onComplete();
+        hasBeenCanceled.current = false;
+      },
+      onError: (error) => {
+        setIsStreaming(false);
+        if (!(error instanceof Error && error.name === 'AbortError')) {
+          console.error('Stream error:', error);
+        }
+      }
+    }
+  );
+
+  const startStream = async () => {
+    setStreamedText('');
+    setIsStreaming(true);
+    hasBeenCanceled.current = false;
+    await refetch();
+  };
+
+  const cancelStream = async () => {
+    try {
+      if (readerRef.current) {
+        await readerRef.current.cancel();
+        readerRef.current = null;
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    } catch (error) {
+      console.log('Error during cancellation:', error);
+    } finally {
+      if(!!onCancel)
+        onCancel();
+      hasBeenCanceled.current = true;
+      setIsStreaming(false);
+    }
+  };
+
+  return {
+    streamedText,
+    isStreaming,
+    isError,
+    startStream,
+    cancelStream
+  };
+};

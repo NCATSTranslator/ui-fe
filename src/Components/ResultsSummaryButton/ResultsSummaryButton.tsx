@@ -1,4 +1,4 @@
-import { useRef, useState, FC, useCallback } from "react";
+import { useEffect, useRef, useState, FC, useCallback } from "react";
 import styles from './ResultsSummaryButton.module.scss';
 import Button from "../Core/Button";
 import SparkleIcon from '../../Icons/Buttons/Sparkles.svg?react';
@@ -10,6 +10,7 @@ import { genTopNResultsContext } from "../../Utilities/llm";
 import { ResultItem } from "../../Types/results";
 import { ResultContextObject } from "../../Utilities/llm";
 import { useTextStream } from "../../Utilities/customHooks";
+import { isEqual } from "lodash";
 
 interface ResultsSummaryButtonProps {
   results: ResultItem[];
@@ -19,81 +20,77 @@ interface ResultsSummaryButtonProps {
 
 const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryString, handleResultMatchClick }) => {
 
-  const [isSummaryLoading, setIsSummaryLoading] = useState<boolean>(false);
-  const [isSummaryAvailable, setIsSummaryAvailable] = useState<boolean>(false);
+  const isSummaryAvailable = useRef<boolean>(false);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState<boolean>(false);
 
   const resultContext = useRef<ResultContextObject[]>([]);
+  const lastResults = useRef<ResultItem[]>([]);
 
-  const handleSummaryButtonClick = async () => {
+  const generateNewSummary = async () => {
+    const newContext = genTopNResultsContext(results, 50);
+    resultContext.current = newContext;
+    startStream();
+  }
+
+  const handleSummaryButtonClick = async (summaryAvailable: boolean) => {
     setIsSummaryModalOpen(true);
     // display summary if available
-    if (isSummaryAvailable) 
+    if (summaryAvailable) 
       return;
 
     // initiate summary generation
-    if(!isSummaryLoading) {
-      const newContext = genTopNResultsContext(results, 50);
-      resultContext.current = newContext;
-      setIsSummaryLoading(true);
-      await refetch();
+    if(!isStreaming) {
+      await generateNewSummary();
     }
-  };
-
-  const fetchTextStream = async () => {
-    console.log("Fetching new summary...");
-    let requestJson = JSON.stringify({
-      query: queryString,
-      results: resultContext.current
-    });
-
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: requestJson
-    };
-    const response = await fetch('https://ncats-llm-summarization.onrender.com/summary', requestOptions);
-    if(!response.body) 
-      return null;
-    
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let result = '';
-  
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      let chunk = decoder.decode(value, { stream: true })
-      result += chunk;
-      setStreamedText((prev) => prev + chunk);
-    }
-  
-    return result;
   }
 
   const handleStreamedDataCompletion = () => {
-    setIsSummaryLoading(false);
-    setIsSummaryAvailable(true);
+    isSummaryAvailable.current = true;
+    console.log("summary generation complete");
   }
 
-  const [streamedText, setStreamedText] = useState<string>('');
-  const { refetch } = useTextStream(fetchTextStream, handleStreamedDataCompletion);
+  const handleStreamedDataCancellation = () => {
+    isSummaryAvailable.current = false;
+  }
+
+  const {
+    streamedText,
+    isStreaming,
+    isError,
+    startStream,
+    cancelStream
+  } = useTextStream('https://ncats-llm-summarization.onrender.com/summary', queryString , resultContext, handleStreamedDataCompletion, handleStreamedDataCancellation);
 
   const handleResultMatchSelection = useCallback((match: ResultContextObject) => {
     setIsSummaryModalOpen(false);
     handleResultMatchClick(match);
   }, [handleResultMatchClick]);
 
+  const resetSummary = useCallback(() => {
+    isSummaryAvailable.current = false;
+    cancelStream();
+  }, [cancelStream]);
+  
+  useEffect(() => {
+    if(isEqual(results, lastResults.current))
+      return;
+
+    if(lastResults.current.length > 0) 
+      resetSummary();
+
+    lastResults.current = results;
+  }, [results, resetSummary, isStreaming]);
+
   return(
     <>
       <Button
         className={styles.summaryButton}
         isSecondary
-        handleClick={handleSummaryButtonClick}
+        handleClick={()=>handleSummaryButtonClick(isSummaryAvailable.current)}
         smallFont
         >
         {
-          !!isSummaryLoading
+          !!isStreaming
           ?                  
             <img
               src={loadingIcon}
@@ -113,12 +110,12 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
         streamedText={streamedText}
         resultContext={resultContext.current}
         isOpen={isSummaryModalOpen}
-        isSummaryLoading={isSummaryLoading}
+        isSummaryLoading={isStreaming}
         onClose={()=>setIsSummaryModalOpen(false)}
         handleResultMatchClick={handleResultMatchSelection}
+        isError={isError}
       />
     </>
-
   );
 }
 
