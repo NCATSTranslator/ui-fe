@@ -34,9 +34,7 @@ const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({isError = false, isO
     return paragraphs.map((paragraph, paraIndex) => {
       const isLastParagraph = (paraIndex === paragraphs.length - 1);
       const processedParagraph = paragraph.split(regex).map((part, index) => {
-        const match = resultContext.find(
-          (contextItem) => contextItem.name.toLowerCase() === part.toLowerCase()
-        );
+        const match = resultContext.find((contextItem) => !!part && contextItem.name.toLowerCase() === part.toLowerCase());
         if (match) {
           return (
             <span

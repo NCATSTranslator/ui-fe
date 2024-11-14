@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } from 'react';
 import { LastViewedPathIDContext } from '../Components/PathView/PathView';
 import { isEqual } from 'lodash';
-import { useQuery, QueryKey, QueryFunction, UseQueryResult } from 'react-query';
-import { ResultContextObject } from './llm';
+import { useQuery } from 'react-query';
 
 interface WindowSize {
   width: number | undefined;
