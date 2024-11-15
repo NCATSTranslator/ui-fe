@@ -177,16 +177,7 @@ export type Filter = {
   value: string;
   negated: boolean;
 }
-export type QueryType = {
-  filterType: string;
-}
+
 export type PathFilterState = {
   [pid: string]: boolean;
-}
-
-export type AutocompleteItem = {
-  id:string,
-  label: string,
-  match: string,
-  types: Array<string>
 }

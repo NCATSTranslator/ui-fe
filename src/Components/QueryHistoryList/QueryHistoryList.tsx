@@ -66,8 +66,9 @@ const QueryHistoryList = () => {
       })
     );
     setIsLoading(false);
-  }, []);
+  }, [queryHistoryState]);
 
+  // eslint-disable-next-line
   const delayedSearch = useCallback(debounce((value, setIsLoading, setFilteredQueryHistoryState)=>handleSearch(value, setIsLoading, setFilteredQueryHistoryState), 750), [handleSearch]);
 
   const handleSearchBarItemChange = (value:string) => {

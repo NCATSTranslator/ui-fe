@@ -18,15 +18,22 @@
   align-items: center;
   transition: all .35s ease;
   margin: 0 $s $s 0;
+  span {
+    padding: 0 $xxs;
+    font-size: $buttonSize;
+  }
   &.smallFont {
-    font-size: 12px;
-    padding: 8.5px 8px;
+    font-size: $captionSize;
+    padding: $xxs $xs;
+    span {
+      font-size: $captionSize;
+    }
   }
   svg, svg path {
     transition: all .35s ease;
   }
   svg {
-    margin-right: 4px;
+    margin-right: $xxs;
   }
   &.secondary {
     color: $black;
@@ -43,7 +50,7 @@
     }
   }
   &.iconOnly {
-    padding: 8px;
+    padding: $xs;
     svg {
       margin-right: 0;
     }

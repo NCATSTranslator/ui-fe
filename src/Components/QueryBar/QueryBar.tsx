@@ -6,12 +6,8 @@ import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
 import QueryTypeIcon from "../QueryTypeIcon/QueryTypeIcon";
 import Button from "../Core/Button";
 import { cloneDeep } from 'lodash';
-import { AutocompleteItem } from '../../Types/results';
+import { AutocompleteItem, QueryType } from '../../Types/querySubmission';
 
-export type QueryType = {
-  placeholder?: string; 
-  searchTypeString: string;
-}
 export type QueryItem = {
   type: QueryType; 
   node: { id: string; label: string; match: string; types: Array<string> } | null; 
@@ -23,7 +19,7 @@ type QueryBarProps = {
   queryType?: QueryType;
   queryItem?: QueryItem;
   value?: string;
-  autocompleteItems: Array<AutocompleteItem>;
+  autocompleteItems: AutocompleteItem[] | null;
   autocompleteLoading: boolean;
   handleItemClick: (item: AutocompleteItem) => void;
   disabled?: boolean;
@@ -53,7 +49,7 @@ const QueryBar: FC<QueryBarProps> = ({
           return;
         }
 
-        if(queryItem.node === null && autocompleteItems.length > 0) {
+        if(queryItem.node === null && !!autocompleteItems &&autocompleteItems.length > 0) {
           handleItemClick(autocompleteItems[0]);
           let newQueryItem = cloneDeep(queryItem);
           newQueryItem.node = autocompleteItems[0];

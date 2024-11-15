@@ -2,8 +2,8 @@ import {useState, useEffect, useRef} from "react";
 import AnimateHeight from "react-animate-height";
 import styles from './QuerySelect.module.scss';
 
-const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stayExpanded = false,
-  errorText = "Error Message", handleChange = () => {}, handleToggle = () => {}, noanimate, children, testId, className, iconClass}) => {
+const QuerySelect = ({label = "", subtitle = "", value, error = false, startExpanded = false, stayExpanded = false,
+  errorText = "Error Message", handleChange = (val) => {}, handleToggle = () => {}, noanimate, children, className = "", iconClass = ""}) => {
 
   value = (value === null || isNaN(value)) ? 0 : parseInt(value);
   const [selectedItem, setSelectedItem] = useState(value);
@@ -75,6 +75,10 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
     };
   }, [startExpanded, handleToggle]);
 
+const getModifiedName = (children, selectedItem) => {
+  return children.find((option) => option.props.value === selectedItem)?.props?.children?.props['data-modified-name'];
+};
+
   return (
     <>
       <label 
@@ -89,7 +93,7 @@ const QuerySelect = ({label, subtitle, value, error, startExpanded = false, stay
             onMouseDown={handleSelectClick} 
             >
             {
-              children.find((option) => option.props.value === selectedItem).props.children.props.modifiedName
+              getModifiedName(children, selectedItem)
             }
           </div>
           <div className={styles.iconContainer}>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
-import { QueryType } from './queryTypes';
+import { QueryType } from '../Types/querySubmission';
 import { ResultItem } from '../Types/results';
 import { PreferencesContainer, SessionStatus } from '../Types/global';
 import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '../Redux/rootSlice';
@@ -670,6 +670,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean,  setGaID: (id: string
       if(config?.gtmID) {
         setGtmID(config.gtmID);
       }
+      config.buildInfo = import.meta.env.VITE_BUILD_INFO;
 
       console.log("setting config", config);
       dispatch(setCurrentConfig(config));

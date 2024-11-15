@@ -6,7 +6,7 @@ import styles from './QueryPathfinder.module.scss';
 import Autocomplete from '../Autocomplete/Autocomplete';
 import TextInput from '../Core/TextInput';
 import Button from '../Core/Button';
-import { AutocompleteItem } from '../../Types/results';
+import { AutocompleteItem } from '../../Types/querySubmission';
 import { getAutocompleteTerms } from '../../Utilities/autocompleteFunctions';
 import { debounce } from 'lodash';
 import { QueryTypeFunctions } from "../../Utilities/queryTypes";
@@ -30,13 +30,18 @@ import SubtractIcon from '../../Icons/Buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import Select from '../Core/Select';
 import Tooltip from '../Tooltip/Tooltip';
+import ResultsSummaryButton from "../ResultsSummaryButton/ResultsSummaryButton";
+import { ResultItem } from "../../Types/results";
 
 type QueryPathfinderProps = {
-  results?: boolean;
+  loading?: boolean;
+  isResults?: boolean;
+  results?: ResultItem[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
+  handleResultMatchClick?: Function;
 }
 
-const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareModalFunction = ()=>{} }) => {
+const QueryPathfinder: FC<QueryPathfinderProps> = ({ loading = false, results = [], isResults = false, setShareModalFunction = ()=>{}, handleResultMatchClick = ()=>{} }) => {
 
   const config = useSelector(currentConfig);
   const navigate = useNavigate();
@@ -56,6 +61,8 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
   const idOne = getDataFromQueryVar("ione");
   const idTwo = getDataFromQueryVar("itwo");
   const constraintText = getDataFromQueryVar("c");
+
+  const resultsPaneQuestionText = `What paths begin with ${labelOne} and end with ${labelTwo}?`;
 
   // Array, List of items to display in the autocomplete window
   const [autocompleteItemsOne, setAutoCompleteItemsOne] = useState<Array<AutocompleteItem> | null>(null);
@@ -223,7 +230,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
   }
 
   return (
-    <div className={`${styles.queryPathfinder} ${results && styles.results}`}>
+    <div className={`${styles.queryPathfinder} ${isResults && styles.results}`}>
       <ToastContainer
         position="top-center"
         autoClose={3000}
@@ -236,7 +243,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
         closeButton={false}
       />
       <div className={`container ${styles.container}`}>
-        { results 
+        { isResults 
           ?
             <>
               <div className={styles.resultsHeader}>
@@ -268,6 +275,14 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ results = false, setShareMo
                   >
                     <ShareIcon/>Share Result Set
                   </Button>
+                  {
+                    !loading &&
+                    <ResultsSummaryButton
+                      results={results}
+                      queryString={`${resultsPaneQuestionText}`}
+                      handleResultMatchClick={handleResultMatchClick}
+                    />
+                  }
                 </div>
               </div>
             </>
