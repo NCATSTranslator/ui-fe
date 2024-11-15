@@ -920,8 +920,11 @@ const ResultsList = ({loading}) => {
           isPathfinder
           ?
             <QueryPathfinder
-              results
+              isResults
+              loading={isLoading}
               setShareModalFunction={setShareModalOpen}
+              results={formattedResults}
+              handleResultMatchClick={handleResultMatchClick}
             />
           :
             <Query
