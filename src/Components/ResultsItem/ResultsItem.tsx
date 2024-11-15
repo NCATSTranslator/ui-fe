@@ -21,7 +21,7 @@ import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../.
 import { useSelector } from 'react-redux';
 import { currentUser } from '../../Redux/rootSlice';
 import { displayScore } from '../../Utilities/scoring';
-import { QueryType } from '../../Utilities/queryTypes';
+import { QueryType } from '../../Types/querySubmission';
 import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject, PathFilterState } from '../../Types/results';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
 import { isEqual } from 'lodash';

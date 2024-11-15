@@ -1,0 +1,19 @@
+@import "../../Assets/Styles/variables";
+
+.summaryButton {
+  margin-right: 0;
+  .summaryLoadingIcon {
+    margin-right: $xxs;
+    width: $m;
+    height: $m;
+  }
+  .infoIcon {
+    margin-left: $xxs;
+    margin-right: 0;
+  }
+  &button {
+    margin: 0 $s 0 0;
+    font-size: $captionSize;
+    font-weight: 800;
+  }
+}

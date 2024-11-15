@@ -5,17 +5,10 @@ import { queryTypes } from '../../Utilities/queryTypes';
 import AnimateHeight from 'react-animate-height';
 import Button from '../Core/Button';
 import ChevDown from '../../Icons/Directional/Chevron/Chevron Down.svg?react';
-
-type Example = {
-  id: string;
-  name: string;
-  type: string;
-  direction: string;
-  uuid: string;
-};
+import { Example } from '../../Types/querySubmission';
 
 type ExampleQueryListProps = {
-  examples: Example[];
+  examples: Example[] | null;
   setPresetURL: (url: string) => void;
   className?: string;
 };
@@ -43,7 +36,7 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
   return (
     <div className={`${styles.examplesContainer} ${className} ${isExpanded && styles.expanded}`}>
       {
-        (examples?.length > 0 && examples[0].type === "drug") &&
+        (!!examples && examples?.length > 0 && examples[0].type === "drug") &&
         <Button handleClick={handleToggle} className={styles.expandButton} iconOnly><ChevDown/></Button>
       }
       <div className="top">

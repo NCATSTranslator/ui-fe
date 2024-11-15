@@ -3,7 +3,7 @@ import styles from './Autocomplete.module.scss';
 import { getMoreInfoLink, getIcon, formatBiolinkEntity } from '../../Utilities/utilities';
 import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import Tooltip from '../Tooltip/Tooltip';
-import { AutocompleteItem } from '../../Types/results';
+import { AutocompleteItem } from '../../Types/querySubmission';
 
 type AutocompleteProps = {
   isLoading: boolean;

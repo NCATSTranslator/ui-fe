@@ -49,7 +49,7 @@ const ResultsList = ({loading}) => {
 
   const initNodeLabelParam = getDataFromQueryVar("l");
   const initNodeIdParam = getDataFromQueryVar("i");
-  const initResultIdParam = getDataFromQueryVar("r");
+  const [resultIdParam, setResultIdParam] = useState(getDataFromQueryVar("r"));
   const firstLoad = useRef(true);
   const [nodeDescription, setNodeDescription] = useState();
   const shareResultID = useRef(null);
@@ -274,8 +274,8 @@ const ResultsList = ({loading}) => {
 
     if(firstLoad.current && newFormattedResults.length > 0) {
       firstLoad.current = false;
-      if (initResultIdParam !== '0') {
-        let sharedItemIndex = newFormattedResults.findIndex(result => result.id === initResultIdParam);
+      if (resultIdParam !== '0') {
+        let sharedItemIndex = newFormattedResults.findIndex(result => result.id === resultIdParam);
         if (sharedItemIndex !== -1) {
           setSharedItem({
             index: sharedItemIndex,
@@ -868,6 +868,27 @@ const ResultsList = ({loading}) => {
 
   },[formattedResults, initNodeIdParam]);
 
+  const handleResultMatchClick = useCallback((match) => {
+    if(!match)
+      return;
+
+    let sharedItemIndex = formattedResults.findIndex(result => result.id === match.id);
+    if(sharedItemIndex === -1)
+      return;
+
+    setResultIdParam(match.id);
+    const newPage = Math.floor(sharedItemIndex / itemsPerPage);
+    setSharedItem({
+      index: sharedItemIndex,
+      page: newPage,
+      name: formattedResults[sharedItemIndex].name,
+      type: formattedResults[sharedItemIndex].type
+    });
+    handlePageClick({selected: newPage}, false, formattedResults.length);
+    setExpandSharedResult(true);
+    setAutoScrollToResult(true);
+  }, [formattedResults, itemsPerPage, handlePageClick]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ResultsListModals
@@ -899,19 +920,23 @@ const ResultsList = ({loading}) => {
           isPathfinder
           ?
             <QueryPathfinder
-              results
+              isResults
+              loading={isLoading}
               setShareModalFunction={setShareModalOpen}
+              results={formattedResults}
+              handleResultMatchClick={handleResultMatchClick}
             />
           :
             <Query
-              results
+              isResults
               loading={isLoading}
-              initPresetTypeID={initPresetTypeID}
               initPresetTypeObject={initPresetTypeObject}
               initNodeIdParam={initNodeIdParam}
               initNodeLabelParam={initNodeLabelParam}
               nodeDescription={nodeDescription}
               setShareModalFunction={setShareModalOpen}
+              results={formattedResults}
+              handleResultMatchClick={handleResultMatchClick}
             />
         }
         <div className={`${styles.resultsContainer} container`}>
@@ -1016,8 +1041,8 @@ const ResultsList = ({loading}) => {
                               availableTags={availableTags}
                               handleFilter={handleFilter}
                               activeFilters={activeFilters}
-                              sharedItemRef={item.id === initResultIdParam ? sharedItemRef : null}
-                              startExpanded={item.id === initResultIdParam && expandSharedResult}
+                              sharedItemRef={item.id === resultIdParam ? sharedItemRef : null}
+                              startExpanded={item.id === resultIdParam && expandSharedResult}
                               setExpandSharedResult={setExpandSharedResult}
                               setShareModalOpen={setShareModalOpen}
                               setShareResultID={setShareResultID}
