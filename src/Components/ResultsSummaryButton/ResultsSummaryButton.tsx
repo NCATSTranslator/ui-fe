@@ -11,6 +11,8 @@ import { ResultItem } from "../../Types/results";
 import { ResultContextObject } from "../../Utilities/llm";
 import { useTextStream } from "../../Utilities/customHooks";
 import { isEqual } from "lodash";
+import { currentConfig } from "../../Redux/rootSlice";
+import { useSelector } from "react-redux";
 
 interface ResultsSummaryButtonProps {
   results: ResultItem[];
@@ -19,6 +21,8 @@ interface ResultsSummaryButtonProps {
 }
 
 const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryString, handleResultMatchClick }) => {
+
+  const config = useSelector(currentConfig);
 
   const isSummaryAvailable = useRef<boolean>(false);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState<boolean>(false);
@@ -80,6 +84,9 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryStr
 
     lastResults.current = results;
   }, [results, resetSummary, isStreaming]);
+
+  if(!config?.include_summarization)
+    return null;
 
   return(
     <>

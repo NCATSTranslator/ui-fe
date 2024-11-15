@@ -53,6 +53,7 @@ export type Config = {
   name_resolver: string;
   social_providers: any;
   include_pathfinder: boolean;
+  include_summarization: boolean;
 }
 
 export type RootState = {
