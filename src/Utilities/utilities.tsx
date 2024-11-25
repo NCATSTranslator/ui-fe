@@ -14,9 +14,10 @@ import ExternalLink from '../Icons/Buttons/External Link.svg?react';
 import { QueryType } from '../Types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
-import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer } from '../Types/results';
+import { FormattedEdgeObject, FormattedNodeObject, isResultEdge, Path, ResultSet, ResultEdge, RawPathObject, RawEdge } from '../Types/results.d';
 import { PublicationObject, PublicationsList } from '../Types/evidence';
 import { Location } from 'react-router-dom';
+import { getEdgeById, getPathById } from '../Redux/resultsSlice';
 
 export const getIcon = (category: string): JSX.Element => {
   var icon = <Chemical/>;
@@ -509,17 +510,61 @@ export const intToChar = (num: number): string => {
 /**
  * Calculates the total number of paths for a provided array of PathObjectContainer objects.
  *
- * @param {PathObjectContainer[]} paths - An array of paths to count.
+ * @param {string[]} paths - An array of paths to count.
  * @returns {number} - The total number of paths, including support paths.
  *
  */
-export const getPathsCount = (paths: PathObjectContainer[]): number => {
+export const getPathsCount = (resultSet: ResultSet, paths: string[]): number => {
   let count = paths.length;
-  for(const path of paths) {
-    for(const subgraphItem of path.path.subgraph) {
-      if('support' in subgraphItem && subgraphItem.support !== undefined)
-        count += subgraphItem.support.length;
+  for(const pathID of paths) {
+    const path = getPathById(resultSet, pathID);
+    if(!path)
+      continue;
+    for(const subgraphItem of path.subgraph) {
+      if(isResultEdge(subgraphItem) && subgraphItem.support.length > 0) {
+        count += getPathsCount(resultSet, subgraphItem.support);
+      }
     }
   }
   return count;
+}
+
+export const isPathInferred = (resultSet: ResultSet, path: Path) => {
+  if(!path || path == null)
+    return false;
+
+  for(const [i, itemID] of path.subgraph.entries()) {
+    if(i % 2 === 0) 
+      continue;
+
+    const edge = getEdgeById(resultSet, itemID);
+    if(!isResultEdge(edge))
+      continue;
+    
+    if(edge.support.length > 0)
+      return true;
+  }
+  return false;
+}
+
+export const hasSupport = (item: ResultEdge | RawPathObject | FormattedEdgeObject | RawEdge | null): boolean => {
+  return !!item && Array.isArray(item.support) && item.support.length > 0;
+};
+
+export const getPathsWithSelectionsSet = (paths: Path[] | undefined, selectedPaths: Set<Path> | null) => {
+  if(!paths) 
+    return [];
+  
+  if(selectedPaths!== null && selectedPaths.size > 0) {
+    let newPaths = cloneDeep(paths);
+    for(const path of newPaths) {
+      for(const selPath of selectedPaths) {
+        if(selPath?.id && path?.id && selPath.id === path.id)
+          path.highlighted = true;
+      }
+    }
+    return newPaths.sort((a: Path, b: Path) => (b.highlighted === a.highlighted ? 0 : b.highlighted ? -1 : 1));
+  } else {
+    return paths;
+  }
 }

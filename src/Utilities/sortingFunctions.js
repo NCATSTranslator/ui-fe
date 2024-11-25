@@ -1,6 +1,5 @@
 import { equal } from 'mathjs';
-import { getPathsCount } from './utilities';
-import { hasSupport } from './resultsFormattingFunctions';
+import { getPathsCount, hasSupport} from './utilities';
 
 // alphabetical order
 export const sortNameLowHigh = (items, isEvidence) => {

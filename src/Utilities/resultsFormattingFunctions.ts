@@ -1,14 +1,12 @@
 import { capitalizeAllWords, formatBiolinkEntity, isClinicalTrial, isFormattedEdgeObject,
   isPublication, isPublicationObjectArray, mergeObjectArrays, combineObjectArrays } from './utilities';
 import { cloneDeep } from "lodash";
-import { score } from "./scoring";
-import { RawResultsContainer, FormattedPathObject, PathObjectContainer, RawPathObject, SubgraphObject, FormattedNodeObject,
+import { generateScore } from "./scoring";
+import { RawResultsContainer, FormattedPathObject, PathObjectContainer, SubgraphObject, FormattedNodeObject,
   FormattedEdgeObject, EdgePredicateObject, RawEdge, RawNode } from '../Types/results';
 import { rawAttachedPublications, PublicationObject, EvidenceCountsContainer } from '../Types/evidence';
+import { hasSupport } from './utilities';
 
-export const hasSupport = (item: RawPathObject | FormattedEdgeObject | RawEdge | null): boolean => {
-  return !!item && Array.isArray(item.support) && item.support.length > 0;
-};
 
 /**
  * Retrieves a publication from the results object based on its ID and returns a new publication object.
@@ -550,7 +548,7 @@ export const getSummarizedResults = (results: RawResultsContainer, confidenceWei
       evidenceCounts: evidenceCounts,
       fdaInfo: fdaInfo,
       scores: item.scores,
-      score: score(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
+      score: generateScore(item.scores, confidenceWeight, noveltyWeight, clinicalWeight),
       tags: tags,
       species: species,
       rawResult: item,

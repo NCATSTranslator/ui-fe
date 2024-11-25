@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
 import { QueryType } from '../Types/querySubmission';
-import { ResultItem } from '../Types/results';
+import { ResultBookmark } from '../Types/results';
 import { PreferencesContainer, SessionStatus } from '../Types/global';
 import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '../Redux/rootSlice';
 import { handleFetchErrors, isPreferencesContainer } from './utilities';
@@ -98,13 +98,13 @@ export interface Save {
   time_created: string | null;
   time_updated: string | null;
   data?: {
-    item?: ResultItem;
+    item?: ResultBookmark;
     type?: string;
     query?: QueryObject;
   };
 }
 
-interface SaveGroup {
+export interface SaveGroup {
   saves: Set<Save>;
   query: QueryObject;
 }
@@ -173,7 +173,7 @@ const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
  * @param {Object} typeObject - The type object associated with the bookmark.
  * @param {Object} saveItem - The item to be saved.
  * @param {string} pk - The primary key associated with the save.
- * @returns {Object} The formatted bookmark object.
+ * @returns {Save} The formatted bookmark object.
  */
 export const getFormattedBookmarkObject = (
     bookmarkType: string = "result",
@@ -183,12 +183,10 @@ export const getFormattedBookmarkObject = (
     queryNodeLabel: string = "",
     queryNodeDescription: string = "",
     typeObject: QueryType,
-    saveItem: any,
+    saveItem: ResultBookmark,
     pk: string
-  ): any => { 
+  ): Save => { 
 
-    let newSaveItem = cloneDeep(saveItem);
-    // delete newSaveItem.evidence.publications;
 
     let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
     return { 
@@ -196,11 +194,15 @@ export const getFormattedBookmarkObject = (
       label: bookmarkName, 
       notes: notes, 
       ars_pkey: pk, 
-      object_ref: newSaveItem.id, 
+      object_ref: saveItem.id, 
+      id: "",
+      user_id: "",
+      time_created: "",
+      time_updated: "",
       data: {
         type: bookmarkType,
         query: queryObject,
-        item: newSaveItem
+        item: saveItem
       }
     }
 }

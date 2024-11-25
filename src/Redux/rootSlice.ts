@@ -32,7 +32,6 @@ export const rootSlice = createSlice({
 
 export const { setCurrentRoot, setCurrentUser, setCurrentPrefs, setCurrentConfig } = rootSlice.actions;
 
-// Selector types will be automatically inferred but can be explicitly set for clarity
 export const currentRoot = (state: { root: RootState }) => state.root.currentRoot;
 export const currentUser = (state: { root: RootState }) => state.root.currentUser;
 export const currentPrefs = (state: { root: RootState }) => state.root.currentPrefs;
