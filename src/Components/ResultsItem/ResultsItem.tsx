@@ -17,7 +17,7 @@ import BookmarkConfirmationModal from '../Modals/BookmarkConfirmationModal';
 import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '../../Utilities/csvGeneration';
-import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
+import { deleteUserSave, createUserResultBookmark } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
 import { currentUser } from '../../Redux/rootSlice';
 import { displayScore } from '../../Utilities/scoring';
@@ -283,13 +283,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
     } else {
       item.graph = itemGraph;
       delete item.paths;
-      let bookmarkObject = getFormattedBookmarkObject("result", item.name, "", queryNodeID,
-        queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
-
-      console.log(bookmarkObject);
-
-      let bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
-      console.log(bookmarkedItem);
+      let bookmarkedItem = await createUserResultBookmark(item.name, queryNodeID, queryNodeLabel,
+        queryNodeDescription, type, item, currentQueryID, handleBookmarkError, handleBookmarkError);
       if(bookmarkedItem) {
         let newBookmarkedItem = bookmarkedItem as any;
         setIsBookmarked(true);
