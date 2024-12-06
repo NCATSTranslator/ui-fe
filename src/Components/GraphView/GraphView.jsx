@@ -42,7 +42,7 @@ cytoscape.use(navigator);
 cytoscape.use(popper);
 cytoscape.warnings(false);
 
-const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active, zoomKeyDown, updateGraphFunction, prebuiltGraph}) => {
+const GraphView = ({result, resultSet, onNodeClick, clearSelectedPaths, active, zoomKeyDown, updateGraphFunction, prebuiltGraph}) => {
 
   const prefs = useSelector(currentPrefs);
 
@@ -55,15 +55,15 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
     if(prebuiltGraph)
       return prebuiltGraph;
 
-    if(rawResults) {
-      let temp = resultToCytoscape(result.rawResult, rawResults.data);
+    if(resultSet) {
+      let temp = resultToCytoscape(result, resultSet.data);
       updateGraphFunction(temp);
       return temp;
     }
 
     return null;
 
-  },[result, rawResults, prebuiltGraph, updateGraphFunction])
+  },[result, resultSet, prebuiltGraph, updateGraphFunction])
 
   const selectedNodes = useRef(new Set());
   const excludedNodes = useRef(new Set());
@@ -71,8 +71,8 @@ const GraphView = ({result, rawResults, onNodeClick, clearSelectedPaths, active,
   const hideClass = 'hide';
   const excludedClass = 'excluded';
   
-  const subjectId = useRef(result.rawResult.subject);
-  const objectId = useRef(result.rawResult.object);
+  const subjectId = useRef(result.subject);
+  const objectId = useRef(result.object);
 
   const calculatedPaths = useRef(null);
   const cyNav = useRef(null);
