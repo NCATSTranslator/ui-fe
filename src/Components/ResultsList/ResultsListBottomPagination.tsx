@@ -9,7 +9,7 @@ interface ResultsListBottomPaginationProps {
   itemsPerPage: number;
   setItemsPerPage: Dispatch<SetStateAction<number>>;
   handlePageReset: (newItemsPerPage: number, resultsLength: number) => void;
-  handlePageClick: (event: any, newItemsPerPage?: boolean, resultsLength?: number, currentNumItemsPerPage?: number) => void;
+  handlePageClick: (event: { selected: number}, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   formattedResultsLength: number;
   pageCount: number;
   currentPage: number;

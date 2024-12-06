@@ -7,7 +7,6 @@ import { ToastContainer, Slide } from 'react-toastify';
 import { handleEvidenceModalClose } from "../../Utilities/resultsInteractionFunctions";
 
 interface ResultsListModalsProps {
-  parentStyles: {[key: string]: string};
   shareModalOpen: boolean;
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
   currentQueryID: string;
@@ -27,7 +26,7 @@ interface ResultsListModalsProps {
   sharedItem: any; 
   formattedResultsLength: number;
   presetTypeID: string;
-  handlePageClick: (event: any, newItemsPerPage?: boolean, resultsLength?: number, currentNumItemsPerPage?: number) => void;
+  handlePageClick: (event: any, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   setExpandSharedResult: Dispatch<SetStateAction<boolean>>;
   setAutoScrollToResult: Dispatch<SetStateAction<boolean>>;
 }
