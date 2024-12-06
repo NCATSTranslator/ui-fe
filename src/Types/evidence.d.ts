@@ -1,3 +1,5 @@
+import { PublicationSupport } from "./results";
+
 export type EvidenceItem = {
   edges: EdgeList;
   id: string;
@@ -15,8 +17,9 @@ export type PublicationObject = {
   id: string;
   journal: string;
   knowledgeLevel: string;
-  source: object;
-  support: object | null;
+  pubdate?: string;
+  source: SourceObject;
+  support: PublicationSupport | null;
   title: string;
   type: string;
   url: string;
@@ -48,3 +51,17 @@ export type OldEvidence = {
   publications: {[key: string]: PublicationObject};
   sources: any[];
 }
+
+export type Provenance = {
+  knowledge_level: KnowledgeLevel;
+  name: string;
+  url: string;
+}
+
+export type PublicationSupport = {
+  object: number[];
+  subject: number[];
+  text: string;
+}
+
+export type KnowledgeLevel = "trusted" | "ml" | "unknown" | "";
