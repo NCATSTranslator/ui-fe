@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ResultNode, ResultEdge, Path, Publication, ResultSet, Result } from "../Types/results";
+import { ResultNode, ResultEdge, Path, ResultSet, Result } from "../Types/results";
+import { PublicationObject } from "../Types/evidence";
 import { cloneDeep } from "lodash";
 
 type ResultState = {
@@ -39,12 +40,10 @@ export const getPathsByIds = (resultSet: ResultSet | undefined | null, pathIDs: 
     return [];
 
   return pathIDs.map(pathID => getPathById(resultSet, pathID)).filter((path): path is Path => path !== undefined)
-  // let paths = pathIDs.map(pathID => getPathById(resultSet, pathID)).filter((path): path is Path => path !== undefined);
-  // return (paths) ? paths : [];
 }
 export const getNodeById = (resultSet: ResultSet | null, id:string): ResultNode | undefined => (resultSet === null) ? undefined : resultSet.data.nodes[id];
 export const getEdgeById = (resultSet: ResultSet | null, id:string): ResultEdge | undefined => (resultSet === null) ? undefined : resultSet.data.edges[id];
-export const getPubById = (resultSet: ResultSet | null, id:string): Publication | undefined => (resultSet === null) ? undefined : resultSet.data.publications[id];
+export const getPubById = (resultSet: ResultSet | null, id:string): PublicationObject | undefined => (resultSet === null) ? undefined : resultSet.data.publications[id];
 
 export const currentResultSet = (state: { resultSet: ResultState }) => state.resultSet.resultSet;
 
