@@ -1,4 +1,4 @@
-import { useState, useEffect, FC, useRef } from 'react';
+import { useState, useEffect, FC, useRef, useMemo } from 'react';
 import styles from './SupportPathGroup.module.scss';
 import SupportPath from '../SupportPath/SupportPath';
 import AnimateHeight from '../AnimateHeight/AnimateHeight';
@@ -6,22 +6,41 @@ import ReactPaginate from 'react-paginate';
 import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import { sortSupportByEntityStrings, sortSupportByLength } from '../../Utilities/sortingFunctions';
-import { FormattedEdgeObject, FormattedNodeObject, SupportDataObject, PathFilterState } from '../../Types/results';
-import { intToChar, isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
-import { cloneDeep } from 'lodash';
+import { Filter, Path, PathFilterState, ResultNode } from '../../Types/results';
+import { intToChar, getPathsWithSelectionsSet, isStringArray } from '../../Utilities/utilities';
+import { useSelector } from 'react-redux';
+import { currentResultSet, getPathsByIds } from '../../Redux/resultsSlice';
 
 interface SupportPathGroupProps {
-  dataObj: SupportDataObject;
+  activeFilters: Filter[];
+  activeEntityFilters: string[];
+  handleActivateEvidence: (pathID: string) => void;
+  handleEdgeClick: (edgeID: string, pathID: string) => void;
+  handleNodeClick: (name: ResultNode) => void;
   isExpanded: boolean;
   pathFilterState: PathFilterState;
+  pathArray: string[] | Path[];
+  pathViewStyles: {[key: string]: string;} | null;
+  selectedPaths: Set<Path> | null;
 }
 
-const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded, pathFilterState }) => {
+const SupportPathGroup: FC<SupportPathGroupProps> = ({ 
+  activeFilters, 
+  activeEntityFilters, 
+  handleActivateEvidence, 
+  handleEdgeClick, 
+  handleNodeClick, 
+  isExpanded, 
+  pathFilterState, 
+  pathArray, 
+  pathViewStyles, 
+  selectedPaths }) => {
 
-  const pathItem = dataObj.pathItem as FormattedEdgeObject;
-  const pathViewStyles = dataObj.pathViewStyles;
-  const key = dataObj.key;
-  const activeEntityFilters = dataObj.activeEntityFilters;
+  const resultSet = useSelector(currentResultSet);
+  const paths = isStringArray(pathArray) ? getPathsByIds(resultSet, pathArray) : pathArray;
+
+  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
+
   const initHeight = (isExpanded) ? 'auto' : 0;
   const [height, setHeight] = useState<number | string>(initHeight);
 
@@ -31,7 +50,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded, path
   const endResultIndex = useRef<number>(itemsPerPage);
   
   const handlePageClick = (event: {selected: number} ) => {
-    let pathsLength = pathItem.support?.length;
+    let pathsLength = pathArray.length;
     if(!pathsLength)
       return;
     currentPage.current = event.selected;
@@ -43,17 +62,11 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded, path
     endResultIndex.current = endOffset;
   }
 
-  const displayedPaths = (!!pathItem.support) 
-    ? pathItem.support.sort((a, b) => Number(b.highlighted) - Number(a.highlighted)).slice(itemOffset, endResultIndex.current)
-    : null;
+  const displayedPaths = (!!formattedPaths) 
+    ? formattedPaths.sort((a, b) => Number(b?.highlighted) - Number(a?.highlighted)).slice(itemOffset, endResultIndex.current)
+    : [];
 
-  // const displayedPaths = useMemo(()=> {
-  //   if(!!pathItem.support) 
-  //     return pathItem.support.sort((a, b) => Number(b.highlighted) - Number(a.highlighted)).slice(itemOffset, endResultIndex.current);
-  //   else
-  //     return null;
-  // }, [pathItem, itemOffset, endResultIndex, pathFilterState]);
-  const pageCount = (!!pathItem.support) ? Math.ceil(pathItem.support.length / itemsPerPage) : 0;
+  const pageCount = (!!formattedPaths) ? Math.ceil(formattedPaths.length / itemsPerPage) : 0;
 
   useEffect(() => {
     if(isExpanded === false)
@@ -63,28 +76,26 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded, path
   }, [isExpanded])
 
   useEffect(() => {
-    if(isFormattedEdgeObject(pathItem)) {
-      // if there are any active string filters, sort by those
-      if(activeEntityFilters.length > 0 && pathItem.support) {
-        sortSupportByEntityStrings(pathItem.support, activeEntityFilters);
-      // otherwise sort by shortest path length first
-      } else {
-        sortSupportByLength(pathItem.support);
-      }
+    // if there are any active string filters, sort by those
+    if(activeEntityFilters.length > 0 && !!formattedPaths && !!resultSet) {
+      sortSupportByEntityStrings(resultSet, formattedPaths, activeEntityFilters);
+    // otherwise sort by shortest path length first
+    } else {
+      sortSupportByLength(formattedPaths);
     }
-  }, [pathItem, activeEntityFilters]);
+  }, [pathArray, activeEntityFilters, formattedPaths, resultSet]);
 
-  const generateTooltipID = (subgraph: (FormattedNodeObject | FormattedEdgeObject)[]) => {
-    return subgraph.map((sub) => {
-      if(isFormattedEdgeObject(sub)) {
-        return !!sub.predicates && sub.predicates[0].predicate;
-      }
-      if(isFormattedNodeObject(sub)) {
-        return sub.name;
-      }
-      return "";
-    }).join("-");
-  }
+  // const generateTooltipID = (subgraph: (FormattedNodeObject | FormattedEdgeObject)[]) => {
+  //   return subgraph.map((sub) => {
+  //     if(isFormattedEdgeObject(sub)) {
+  //       return !!sub.predicates && sub.predicates[0].predicate;
+  //     }
+  //     if(isFormattedNodeObject(sub)) {
+  //       return sub.name;
+  //     }
+  //     return "";
+  //   }).join("-");
+  // }
 
   return(
     <AnimateHeight
@@ -96,21 +107,25 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({ dataObj, isExpanded, path
         <p className={styles.supportLabel}>Supporting Paths</p>
         {
           !!displayedPaths && 
-          displayedPaths.map((supportPath) => {
-            let pathKey = `${key}_${supportPath.id}`;
-            const tooltipID = generateTooltipID(supportPath.path.subgraph);
-            let newDataObj = cloneDeep(dataObj);
-            newDataObj.tooltipID = tooltipID;
-            newDataObj.supportPath = supportPath;
-            newDataObj.key = pathKey;
-            const indexInFullCollection = (!!pathItem.support) ? pathItem.support.findIndex(item => item.id === supportPath.id) : -1;
+          displayedPaths.map((supportPath, i) => {
+            if(!supportPath)
+              return null;
+            // const indexInFullCollection = (!!pathArray) ? pathArray.findIndex(id => id === supportPath.id) : -1;
+            const indexInFullCollection = itemOffset + i;
             const character = intToChar(indexInFullCollection + 1);
             return (
               <SupportPath
                 key={supportPath.id}
-                dataObj={newDataObj}
                 character={character}
                 pathFilterState={pathFilterState}
+                path={supportPath}
+                handleEdgeClick={handleEdgeClick}
+                handleNodeClick={handleNodeClick}
+                handleActivateEvidence={handleActivateEvidence}
+                selectedPaths={selectedPaths}
+                pathViewStyles={pathViewStyles}
+                activeEntityFilters={activeEntityFilters}
+                activeFilters={activeFilters}
               />
             );
           })
