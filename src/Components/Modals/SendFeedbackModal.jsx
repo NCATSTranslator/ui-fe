@@ -7,8 +7,6 @@ import FileInput from "../Core/FileInput";
 import Select from "../Core/Select";
 import { Fade } from "react-awesome-reveal";
 import Info from '../../Icons/Status/Alerts/Info.svg?react';
-import { currentQueryResultsID } from "../../Redux/resultsSlice";
-import { useSelector } from 'react-redux';
 import { getDataFromQueryVar } from "../../Utilities/utilities";
 
 const SendFeedbackModal = ({isOpen, onClose}) => {
@@ -27,7 +25,7 @@ const SendFeedbackModal = ({isOpen, onClose}) => {
 
   const [currentScreenshots, setCurrentScreenshots] = useState([]);
   const [base64Screenshots, setBase64Screenshots] = useState([]);
-  const currentARSpk = useSelector(currentQueryResultsID);
+  const currentARSpk = getDataFromQueryVar("q");
   
   const [submit, setSubmit] = useState(false);
   const [errorActive, setErrorActive] = useState(false);
