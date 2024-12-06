@@ -5,7 +5,7 @@ export const generateScore = (scoreComponents, confidenceWeight, noveltyWeight, 
 }
 
 export const displayScore = (score, decimalPlaces = 2) => {
-  return format(score, {notation: 'fixed', precision: decimalPlaces});
+  return format(score.main, {notation: 'fixed', precision: decimalPlaces});
 }
 
 export const maxNormalizedScore = (scoreComponents) => {
