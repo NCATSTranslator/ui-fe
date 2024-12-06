@@ -12,129 +12,170 @@ import ConnectorDottedEnd from '../../Icons/Connectors/inferred-line-end.svg?rea
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import Up from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Highlighter from 'react-highlight-words';
-import { capitalizeAllWords, formatBiolinkEntity } from '../../Utilities/utilities';
+import { capitalizeAllWords } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
-import { SupportDataObject, FormattedEdgeObject, PathObjectContainer, PathFilterState } from '../../Types/results';
-import { isFormattedEdgeObject } from '../../Utilities/utilities';
+import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Types/results';
 
 interface PredicateProps {
-  pathObject: FormattedEdgeObject;
-  pathObjectContainer: PathObjectContainer;
-  selected?: boolean;
   activeEntityFilters: string[];
-  uid: string;
-  parentClass?: string;
-  handleEdgeClick: (edge: FormattedEdgeObject, path: PathObjectContainer) => void;
-  hasSupport: boolean;
-  supportDataObject: SupportDataObject | null;
-  inModal?: boolean | null;
+  activeFilters: Filter[];
   className?: string;
+  handleActivateEvidence: (pathID: string) => void;
+  handleEdgeClick: (edgeID: string, pathID: string) => void;
+  handleNodeClick: (name: ResultNode) => void;
+  edge: ResultEdge;
+  edgeID: string;
+  inModal?: boolean | null;
+  parentClass?: string;
   pathFilterState: PathFilterState;
+  pathID: string;
   pathViewStyles?: {[key: string]: string;} | null;
+  selected?: boolean;
+  selectedPaths: Set<Path> | null;
+  uid: string;
 }
 
-const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, selected = false, activeEntityFilters, uid, parentClass = '', handleEdgeClick, pathFilterState,
-   hasSupport, supportDataObject = null, inModal = false, className = "", pathViewStyles = null }) => {
+const Predicate: FC<PredicateProps> = ({ 
+  activeEntityFilters, 
+  activeFilters,
+  className = "", 
+  edge, 
+  edgeID, 
+  handleActivateEvidence, 
+  handleEdgeClick, 
+  handleNodeClick, 
+  inModal = false, 
+  parentClass = '', 
+  pathFilterState,
+  pathID, 
+  pathViewStyles = null, 
+  selected = false, 
+  selectedPaths, 
+  uid }) => {
 
-  const checkForProvenanceType = (pathObject: FormattedEdgeObject, type: string) => {
-    if(!pathObject?.provenance || !Array.isArray(pathObject.provenance))
+  const checkForProvenanceType = (edge: ResultEdge, type: string) => {
+    if(!edge?.provenance || !Array.isArray(edge.provenance))
       return false;
 
     if(type === "ml") {
-      if(pathObject.provenance.some(item => item.knowledge_level === "ml"))
+      if(edge.provenance.some(item => item.knowledge_level === "ml"))
         return true;
     }
     if(type === "trusted") {
-      if(pathObject.provenance.some(item => item.knowledge_level === "trusted"))
+      if(edge.provenance.some(item => item.knowledge_level === "trusted"))
         return true;
     }
     return false;
   }
 
-  pathObject.predicate = (pathObject.predicates)
-    ? (typeof pathObject.predicates[0] == "string")
-      ? formatBiolinkEntity(pathObject.predicates[0])
-      : formatBiolinkEntity(pathObject.predicates[0].predicate)
-    : "";
-  const pubCount = (Array.isArray(pathObject.publications)) ? pathObject.publications.length : 0;
-  const [isSupportExpanded, setIsSupportExpanded] = useState(pathObject.is_root);
-  const isMachineLearned = checkForProvenanceType(pathObject, "ml");
-  const isTrusted = checkForProvenanceType(pathObject, "trusted");
-  const hasMore = (pathObject.predicates && pathObject.predicates.length > 1);
+  const pubCount = (Array.isArray(edge.publications)) ? edge.publications.length : 0;
+  const [isSupportExpanded, setIsSupportExpanded] = useState(edge.is_root);
+  const isMachineLearned = checkForProvenanceType(edge, "ml");
+  const isTrusted = checkForProvenanceType(edge, "trusted");
+  // const hasMore = (edge.predicates && edge.predicates.length > 1);
+  const hasMore = false;
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setIsSupportExpanded(prev=>!prev);
   }
 
+  let hasSupport = edge.support.length > 0 ? true : false;
+
   return (
     <>
       <Tooltip
-        id={`${pathObject.predicate}${uid}-ML`}
+        id={`${edge.predicate}${uid}-ML`}
         place="top"
         className={styles.mlTooltip}
       >
         <span>This relationship was provided by a text-mining algorithm. Click on the relationship and view its knowledge sources to learn more.</span>
       </Tooltip>
       <Tooltip
-        id={`${pathObject.predicate}${uid}-TR`}
+        id={`${edge.predicate}${uid}-TR`}
         place="top"
         className={styles.mlTooltip}
       >
         <span>This relationship was generated using information found in a database that includes human curation. Click on the relationship and view its knowledge sources to learn more.</span>
       </Tooltip>
       <Tooltip
-        id={`${pathObject.predicate}${uid}`}
+        id={`${edge.predicate}${uid}`}
         place={`${inModal ? 'left' : 'top' }`}
         >
         {
-          pathObject.predicates &&
           <div className={styles.predicatesList}>
+            <p
+              className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
+              onClick={(e)=> {
+                e.stopPropagation();
+                handleEdgeClick(edgeID, pathID);
+              }}
+              >
+              <Highlighter
+                highlightClassName="highlight"
+                searchWords={activeEntityFilters}
+                autoEscape={true}
+                textToHighlight={capitalizeAllWords(edge.predicate)}
+              />
+              {
+                edge.predicate_url &&
+                <a
+                  href={edge.predicate_url}
+                  onClick={(e)=> {
+                    e.stopPropagation();
+                  }}
+                  target="_blank"
+                  rel='noreferrer'>
+                    <ExternalLink/>
+                </a>
+              }
+            </p>
             {
-              pathObject.predicates.map((predicate, i)=> {
-                let formattedPredicate = (predicate?.predicate) ? predicate.predicate : "No Predicate Available";
-                return (
-                  <p
-                    key={`${formattedPredicate}${uid}${i}`}
-                    className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-                    onClick={(e)=> {
-                      e.stopPropagation();
-                      if(i > 0) {
-                        handleEdgeClick(pathObject.compressedEdges[i-1], pathObjectContainer);
-                      } else {
-                        handleEdgeClick(pathObject, pathObjectContainer);
-                      }
-                    }}
-                    >
-                    <Highlighter
-                      highlightClassName="highlight"
-                      searchWords={activeEntityFilters}
-                      autoEscape={true}
-                      textToHighlight={capitalizeAllWords(formattedPredicate)}
-                    />
-                    {
-                      predicate?.url &&
-                      <a
-                        href={predicate.url}
-                        onClick={(e)=> {
-                          e.stopPropagation();
-                        }}
-                        target="_blank"
-                        rel='noreferrer'>
-                          <ExternalLink/>
-                      </a>
-                    }
-                  </p>
-                )
-              })
+              // pathObject.predicates &&
+              // pathObject.predicates.map((predicate, i)=> {
+              //   let formattedPredicate = (predicate?.predicate) ? predicate.predicate : "No Predicate Available";
+              //   return (
+              //     <p
+              //       key={`${formattedPredicate}${uid}${i}`}
+              //       className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
+              //       onClick={(e)=> {
+              //         e.stopPropagation();
+              //         if(i > 0) {
+              //           handleEdgeClick(pathObject.compressedEdges[i-1], pathObjectContainer);
+              //         } else {
+              //           handleEdgeClick(pathObject, pathObjectContainer);
+              //         }
+              //       }}
+              //       >
+              //       <Highlighter
+              //         highlightClassName="highlight"
+              //         searchWords={activeEntityFilters}
+              //         autoEscape={true}
+              //         textToHighlight={capitalizeAllWords(formattedPredicate)}
+              //       />
+              //       {
+              //         predicate?.url &&
+              //         <a
+              //           href={predicate.url}
+              //           onClick={(e)=> {
+              //             e.stopPropagation();
+              //           }}
+              //           target="_blank"
+              //           rel='noreferrer'>
+              //             <ExternalLink/>
+              //         </a>
+              //       }
+              //     </p>
+              //   )
+              // })
             }
           </div>
         }
       </Tooltip>
       <span
         className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior}`}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(pathObject, pathObjectContainer);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeID, pathID);}}
         >
           {
             hasSupport 
@@ -155,38 +196,38 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
           <div className={styles.badges}>
             {
               isTrusted
-              ? <img src={selected ? BadgeSelected : Badge} alt="" className={styles.robot} data-tooltip-id={`${pathObject.predicate}${uid}-TR`} />
+              ? <img src={selected ? BadgeSelected : Badge} alt="" className={styles.robot} data-tooltip-id={`${edge.predicate}${uid}-TR`} />
               : null
             }
             {
               isMachineLearned
-              ? <img src={selected ? RobotSelected : Robot} alt="" className={styles.robot} data-tooltip-id={`${pathObject.predicate}${uid}-ML`} />
+              ? <img src={selected ? RobotSelected : Robot} alt="" className={styles.robot} data-tooltip-id={`${edge.predicate}${uid}-ML`} />
               : null
             }
           </div>
           {
-            (pubCount >= 1 && pathObject.provenance?.length > 0)
+            (pubCount >= 1 && edge.provenance?.length > 0)
             ? <ResearchMultiple className={styles.evidenceIcon} />
             : ''
           }
-          <span data-tooltip-id={`${pathObject.predicate}${uid}`} className={styles.pathLabel}>
+          <span data-tooltip-id={`${edge.predicate}${uid}`} className={styles.pathLabel}>
             <Highlighter
               highlightClassName="highlight"
               searchWords={activeEntityFilters}
               autoEscape={true}
-              textToHighlight={capitalizeAllWords(pathObject.predicate)}
+              textToHighlight={capitalizeAllWords(edge.predicate)}
             />
             {
-              !!pathObject.predicates &&
-              hasMore &&
-              <span className={styles.more}>
-                + {pathObject.predicates.length - 1} More
-              </span>
+              // !!pathObject.predicates &&
+              // hasMore &&
+              // <span className={styles.more}>
+              //   + {pathObject.predicates.length - 1} More
+              // </span>
             }
           </span>
         </span>
         {
-          hasSupport && isFormattedEdgeObject(supportDataObject?.pathItem) && supportDataObject?.pathItem?.support &&
+          hasSupport &&
           <button
             onClick={handleSupportExpansion}
             className={`support-button ${styles.supportExpansionButton} ${isSupportExpanded ? styles.expanded : ''}`}>
@@ -198,11 +239,18 @@ const Predicate: FC<PredicateProps> = ({ pathObject, pathObjectContainer, select
         }
       </span>
       {
-        hasSupport && supportDataObject && isFormattedEdgeObject(supportDataObject?.pathItem) && supportDataObject?.pathItem?.support &&
+        hasSupport && 
         <SupportPathGroup
-          dataObj={supportDataObject}
+          pathArray={edge.support}
           isExpanded={isSupportExpanded}
           pathFilterState={pathFilterState}
+          pathViewStyles={pathViewStyles}
+          handleActivateEvidence={handleActivateEvidence}
+          handleEdgeClick={handleEdgeClick}
+          handleNodeClick={handleNodeClick}
+          selectedPaths={selectedPaths}
+          activeEntityFilters={activeEntityFilters}
+          activeFilters={activeFilters}
         />
       }
     </>
