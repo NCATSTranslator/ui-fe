@@ -14,10 +14,10 @@ import ExternalLink from '../Icons/Buttons/External Link.svg?react';
 import { QueryType } from '../Types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
-import { FormattedEdgeObject, FormattedNodeObject, isResultEdge, Path, ResultSet, ResultEdge, RawPathObject, RawEdge } from '../Types/results.d';
-import { PublicationObject, PublicationsList } from '../Types/evidence';
+import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState } from '../Types/results.d';
+import { EvidenceCountsContainer, PublicationObject, PublicationsList } from '../Types/evidence';
 import { Location } from 'react-router-dom';
-import { getEdgeById, getPathById } from '../Redux/resultsSlice';
+import { getEdgeById, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
 
 export const getIcon = (category: string): JSX.Element => {
   var icon = <Chemical/>;
@@ -338,22 +338,11 @@ export const isMiscPublication = (publication: PublicationObject) => {
   return false
 }
 
-export const isFormattedEdgeObject = (pathItem: any): pathItem is FormattedEdgeObject => {
-  return !!pathItem && 'edges' in pathItem;
-}
-export const isFormattedNodeObject = (pathItem: any): pathItem is FormattedNodeObject => {
-  return !!pathItem && 'type' in pathItem && 'name' in pathItem;
-}
-
-export const isPublicationObjectArray = (publications: any): publications is PublicationObject[] => {
-  return Array.isArray(publications) && publications.every(pub => typeof pub === 'object' && 'type' in pub);
-}
-
 export const isPublicationDictionary = (publications: any): publications is {[key: string]: string[]} => {
   return typeof publications === 'object' && !Array.isArray(publications) && Object.values(publications).every(value => Array.isArray(value) && value.every(item => typeof item === 'string'));
 }
 
-export const checkPublicationsType = (edgeObject: FormattedEdgeObject): string => {
+export const checkPublicationsType = (edgeObject: ResultEdge): string => {
   if (isPublicationObjectArray(edgeObject.publications)) {
     return "PublicationObject[]";
   } else if (isPublicationDictionary(edgeObject.publications)) {
@@ -369,7 +358,7 @@ export const checkPublicationsType = (edgeObject: FormattedEdgeObject): string =
  * @param obj - The object to check.
  * @returns {boolean} True if the object is a PublicationObject, otherwise false.
  */
-const isPublicationObject = (obj: any): obj is PublicationObject => {
+export const isPublicationObject = (obj: any): obj is PublicationObject => {
   return (
     typeof obj === 'object' &&
     obj !== null &&
@@ -382,6 +371,18 @@ const isPublicationObject = (obj: any): obj is PublicationObject => {
     typeof obj.type === 'string' &&
     typeof obj.url === 'string'
   );
+}
+
+/**
+ * Type guard to check if an object is an array of PublicationObjects.
+ *
+ * @param obj - The object to check.
+ * @returns {boolean} True if the object is a PublicationsList, otherwise false.
+ */
+export const isPublicationObjectArray = (arr: any): arr is PublicationObject[] => {
+
+  return Array.isArray(arr) && 
+    arr.every(item => isPublicationObject(item));
 }
 
 /**
@@ -514,15 +515,18 @@ export const intToChar = (num: number): string => {
  * @returns {number} - The total number of paths, including support paths.
  *
  */
-export const getPathsCount = (resultSet: ResultSet, paths: string[]): number => {
+export const getPathCount = (resultSet: ResultSet, paths: string[] | Path[]): number => {
   let count = paths.length;
-  for(const pathID of paths) {
-    const path = getPathById(resultSet, pathID);
+  for(const p of paths) {
+    const path = (typeof p === "string") ? getPathById(resultSet, p) : p;
     if(!path)
       continue;
-    for(const subgraphItem of path.subgraph) {
-      if(isResultEdge(subgraphItem) && subgraphItem.support.length > 0) {
-        count += getPathsCount(resultSet, subgraphItem.support);
+    for(const [i, subgraphItemID] of path.subgraph.entries()) {
+      if(i % 2 === 0)
+        continue;
+      const edge = getEdgeById(resultSet, subgraphItemID);
+      if(isResultEdge(edge) && edge.support.length > 0) {
+        count += getPathCount(resultSet, edge.support);
       }
     }
   }
@@ -547,24 +551,227 @@ export const isPathInferred = (resultSet: ResultSet, path: Path) => {
   return false;
 }
 
-export const hasSupport = (item: ResultEdge | RawPathObject | FormattedEdgeObject | RawEdge | null): boolean => {
+export const hasSupport = (item: ResultEdge | null): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;
 };
 
-export const getPathsWithSelectionsSet = (paths: Path[] | undefined, selectedPaths: Set<Path> | null) => {
-  if(!paths) 
+export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: Path[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null) => {
+  if(!paths || !resultSet) 
     return [];
-  
+
+  let newPaths = cloneDeep(paths);
+  newPaths.sort((a: Path, b: Path) => {
+    if(b?.id && pathFilterState[b.id] === true)
+      return -1;
+    else
+      return 1;
+  });
+
   if(selectedPaths!== null && selectedPaths.size > 0) {
-    let newPaths = cloneDeep(paths);
-    for(const path of newPaths) {
-      for(const selPath of selectedPaths) {
+    for(const selPath of selectedPaths) {
+      for(const path of newPaths) {
         if(selPath?.id && path?.id && selPath.id === path.id)
           path.highlighted = true;
       }
     }
-    return newPaths.sort((a: Path, b: Path) => (b.highlighted === a.highlighted ? 0 : b.highlighted ? -1 : 1));
-  } else {
-    return paths;
+    newPaths.sort((a: Path, b: Path) => (b.highlighted === a.highlighted ? 0 : b.highlighted ? -1 : 1));
+  } 
+  return newPaths;
+}
+
+export const getFormattedEdgeLabel = (subjectName: string, predicateName: string, objectName: string): string => {
+  return `${subjectName}|${predicateName}|${objectName}`;
+}
+
+export const getUrlByType = (publicationID: string, type: string): string | null => {
+  let url = null;
+  switch (type) {
+    case "PMID":
+      url = `http://www.ncbi.nlm.nih.gov/pubmed/${publicationID.replace("PMID:", "")}`;
+      break;
+    case "PMC":
+      url = `https://www.ncbi.nlm.nih.gov/pmc/articles/${publicationID.replace(":", "")}`;
+      break;
+    case "NCT":
+      url = `https://clinicaltrials.gov/ct2/show/${publicationID.replace("clinicaltrials", "").replace(":", "")}`
+      break;
+    default:
+      url = publicationID;
+      break;
   }
+  return url;
+}
+
+export const getTypeFromPub = (publicationID: string): string => {
+  if(publicationID.toLowerCase().includes("pmid"))
+    return "PMID";
+  if(publicationID.toLowerCase().includes("pmc"))
+    return "PMC";
+  if(publicationID.toLowerCase().includes("clinicaltrials"))
+    return "NCT";
+  return "other";
+}
+
+export const formatPublicationSourceName = (sourceName: string): string => {
+  let newSourceName = sourceName;
+  if(typeof sourceName === 'string')
+  switch (sourceName.toLowerCase()) {
+    case "semantic medline database":
+      newSourceName = "SemMedDB"
+      break;
+
+    default:
+      break;
+  }
+  return newSourceName;
+}
+
+export const getFormattedPathfinderName = (name: string) => {
+  const formattedName = name.replace(/([A-Z])/g, ' $1').trim()
+  return formattedName;
+}
+
+/**
+ * Checks if the given itemID exists in the bookmarks set and returns its ID if found.
+ *
+ * @param {string} itemID - The ID of the item to check.
+ * @param {any} bookmarksSet - The set of bookmark objects to search in.
+ * @returns {string|null} Returns the ID of the matching item if found in bookmarksSet, otherwise returns false.
+ */
+export const checkBookmarksForItem = (itemID: string, bookmarksSet: any): string | null => {
+  if(bookmarksSet && bookmarksSet.size > 0) {
+    for(let val of bookmarksSet) {
+      if(val.object_ref === itemID) {
+        return val.id;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Checks if the given bookmarkID exists in the bookmarks set and if it has notes attached.
+ *
+ * @param {string} itemID - The ID of the item to check.
+ * @param {any} bookmarksSet - The set of bookmark objects to search in.
+ * @returns {boolean} Returns true if the matching item is found in bookmarksSet and has notes, otherwise returns false.
+ */
+export const checkBookmarkForNotes = (bookmarkID: string | null, bookmarksSet: any): boolean => {
+  if(bookmarkID === null)
+    return false;
+  if(bookmarksSet && bookmarksSet.size > 0) {
+    for(let val of bookmarksSet) {
+      if(val.id === bookmarkID) {
+        return (val.notes.length > 0) ? true : false;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Generates evidence counts for a provided list of paths
+ *
+ * @param {Path[]} paths - Array of paths to generate counts for.
+ * @returns {EvidenceCountsContainer} Returns an EvidenceCountsContainer object with the requested counts.
+ */
+const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): EvidenceCountsContainer => {
+  const allPubs = new Set<string>();
+  const allCTs = new Set<string>();
+  const allSources = new Set<string>();
+  const allMisc = new Set<string>();
+
+  const processEdge = (edge: ResultEdge) => {
+    // Process publications
+    for (const key in edge.publications) {
+      const pubArray = edge.publications[key];
+      for (const pubData of pubArray) {
+        const pub = getPubById(resultSet, pubData.id);
+        if (!pub) continue;
+        const url = pub.url;
+        if (isPublication(pub)) allPubs.add(url);
+        else if (isClinicalTrial(pub)) allCTs.add(url);
+        else allMisc.add(url);
+      }
+    }
+
+    // Process sources
+    if (edge.provenance) {
+      for (const source of edge.provenance) {
+        allSources.add(source.name);
+      }
+    }
+  };
+
+  const processPathEdges = (path: Path) => {
+    for (let i = 1; i < path.subgraph.length; i += 2) {
+      const edge = getEdgeById(resultSet, path.subgraph[i]);
+      if (isResultEdge(edge)) {
+        processEdge(edge);
+        if (hasSupport(edge) && edge.support) {
+          for (const sp of edge.support) {
+            const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
+            if (!supportPath) continue;
+            for (let j = 1; j < supportPath.subgraph.length; j += 2) {
+              const supportEdge = getEdgeById(resultSet, supportPath.subgraph[j]);
+              if (isResultEdge(supportEdge)) processEdge(supportEdge);
+            }
+          }
+        }
+      }
+    }
+  };
+
+  // Process all paths
+  for (const path of paths) {
+    processPathEdges(path);
+  }
+
+  return {
+    clinicalTrialCount: allCTs.size,
+    miscCount: allMisc.size,
+    publicationCount: allPubs.size,
+    sourceCount: allSources.size,
+  };
+};
+
+export const calculateEvidenceCounts = (resultSet: ResultSet | null, result: Result | undefined): EvidenceCountsContainer => {
+  if (!resultSet || !result) {
+    return { publicationCount: 0, sourceCount: 0, clinicalTrialCount: 0, miscCount: 0 };
+  }
+
+  const paths: Path[] = [];
+  for (const p of result.paths) {
+    const path = (typeof p === "string") ? getPathById(resultSet, p) : p;
+    if (path) paths.push(path);
+  }
+
+  return getEvidenceCountsFromPaths(resultSet, paths);
+};
+
+export const calculateTotalEvidence = (countObj: EvidenceCountsContainer): number => {
+  return (
+    countObj.clinicalTrialCount +
+    countObj.miscCount +
+    countObj.publicationCount +
+    countObj.sourceCount
+  );
+}
+
+export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string => {
+  let stringName = "";
+  for(const [i, id] of path.subgraph.entries()) {
+    if(i % 2 !== 0) {
+      const node = getNodeById(resultSet, id);
+      stringName += node?.names[0];
+    } else {
+      const edge = getEdgeById(resultSet, id);
+      stringName += edge?.predicate;
+    }
+  }
+  return stringName.trimEnd();
+}
+
+export const isStringArray = (value: any): value is string[] => {
+  return Array.isArray(value) && value.every(item => typeof item === "string");
 }
