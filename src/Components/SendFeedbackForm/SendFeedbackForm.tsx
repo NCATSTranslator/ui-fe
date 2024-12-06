@@ -5,8 +5,6 @@ import TextInput from "../Core/TextInput";
 import FileInput from "../Core/FileInput";
 import Select from "../Core/Select";
 import { Fade } from "react-awesome-reveal";
-import { currentQueryResultsID } from "../../Redux/resultsSlice";
-import { useSelector } from 'react-redux';
 import { getDataFromQueryVar } from "../../Utilities/utilities";
 import { CustomFile } from '../../Types/global';
 
@@ -25,7 +23,7 @@ const SendFeedbackForm = () => {
 
   const [currentScreenshots, setCurrentScreenshots] = useState<CustomFile[]>([]);
   const [base64Screenshots, setBase64Screenshots] = useState<string[]>([]);
-  const currentARSpk = useSelector(currentQueryResultsID);
+  const currentARSpk = getDataFromQueryVar("q");
   
   const [submit, setSubmit] = useState<boolean>(false);
   const [errorActive, setErrorActive] = useState<boolean>(false);
