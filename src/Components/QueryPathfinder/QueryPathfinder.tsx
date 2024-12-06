@@ -16,8 +16,7 @@ import { defaultQueryFormatter } from '../../Utilities/queryTypeFormatters';
 import { API_PATH_PREFIX } from "../../Utilities/userApi";
 import { getPathfinderResultsShareURLPath } from '../../Utilities/resultsInteractionFunctions';
 import { ToastContainer, toast, Slide } from 'react-toastify';
-import { generateEntityLink, getDataFromQueryVar, getIcon } from '../../Utilities/utilities';
-import { getFormattedPathfinderName } from '../../Utilities/resultsFormattingFunctions';
+import { generateEntityLink, getDataFromQueryVar, getIcon, getFormattedPathfinderName } from '../../Utilities/utilities';
 import QuestionIcon from '../../Icons/Buttons/Search.svg?react';
 import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "../../Icons/Queries/PathfinderDivider.svg?react";
@@ -31,12 +30,12 @@ import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import Select from '../Core/Select';
 import Tooltip from '../Tooltip/Tooltip';
 import ResultsSummaryButton from "../ResultsSummaryButton/ResultsSummaryButton";
-import { ResultItem } from "../../Types/results";
+import { Result } from "../../Types/results";
 
 type QueryPathfinderProps = {
   loading?: boolean;
   isResults?: boolean;
-  results?: ResultItem[];
+  results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   handleResultMatchClick?: Function;
 }
