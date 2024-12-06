@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, FC } from 'react';
 import styles from './ResultsFilter.module.scss';
-import { Filter, Tag, GroupedTags } from '../../Types/results';
+import { Filter, GroupedFilters } from '../../Types/results';
 import { cloneDeep } from 'lodash';
 import FacetGroup from '../FacetGroup/FacetGroup';
 import EntitySearch from '../EntitySearch/EntitySearch';
@@ -11,15 +11,15 @@ import * as filtering from '../../Utilities/filterFunctions';
 
 interface ResultsFilterProps {
   activeFilters: Filter[];
-  onFilter: (arg0: Tag) => void;
+  onFilter: (arg0: Filter) => void;
   onClearAll: () => void;
   expanded?: boolean;
   isPathfinder?: boolean;
   setExpanded?: (arg0:boolean) => void
-  availableTags: {[key: string]: Tag};
+  availableFilters: {[key: string]: Filter};
 }
 
-const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, expanded = false, isPathfinder = false, setExpanded = (arg0: boolean)=>{}, availableTags}) => {
+const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, expanded = false, isPathfinder = false, setExpanded = (arg0: boolean)=>{}, availableFilters}) => {
 
   const [isExpanded, setIsExpanded] = useState(expanded);
   const toggleIsExpanded = () => {
@@ -30,36 +30,36 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
   }
 
   // returns a new object with each tag grouped by its type
-  const groupTags = (tags: {[key: string]: Tag}, type: string): GroupedTags => {
-    const newGroupedTags: GroupedTags = {};
+  const groupFilters = (filters: {[key: string]: Filter}, type: string): GroupedFilters => {
+    const newGroupedFilters: GroupedFilters = {};
     for (let family of filtering.getFamiliesByType(type)) {
-      newGroupedTags[family] = {};
+      newGroupedFilters[family] = {};
     }
 
-    for (let [id, description] of Object.entries(cloneDeep(tags))) {
+    for (let [id, description] of Object.entries(cloneDeep(filters))) {
       if (filtering.getTagType(id) === type) {
         const family = filtering.getTagFamily(id);
-        newGroupedTags[family][id] = description;
+        newGroupedFilters[family][id] = description;
       }
     }
 
-    return newGroupedTags;
+    return newGroupedFilters;
   }
 
-  const groupHasTags = (tagGroup: GroupedTags): boolean => {
-    for (let categoryTags of Object.values(tagGroup)) {
-      if (Object.keys(categoryTags).length > 0) return true;
+  const groupHasFilters = (filterGroup: GroupedFilters): boolean => {
+    for (let categoryFilters of Object.values(filterGroup)) {
+      if (Object.keys(categoryFilters).length > 0) return true;
     }
 
     return false;
   }
 
-  const resultTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.RESULT), [availableTags]);
-  const pathTags = useMemo(() => groupTags(availableTags, filtering.CONSTANTS.PATH), [availableTags]);
+  const resultFilters = useMemo(() => groupFilters(availableFilters, filtering.CONSTANTS.RESULT), [availableFilters]);
+  const pathFilters = useMemo(() => groupFilters(availableFilters, filtering.CONSTANTS.PATH), [availableFilters]);
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
-  const filterCompare: {[key: string]: (a: [string, Tag], b: [string, Tag]) => number} = {
-    pt: (a: [string, Tag], b: [string, Tag]) => -(a[1].name.localeCompare(b[1].name))
+  const filterCompare: {[key: string]: (a: [string, Filter], b: [string, Filter]) => number} = {
+    pt: (a: [string, Filter], b: [string, Filter]) => -(a[1].name.localeCompare(b[1].name))
   };
 
   useEffect(() => { 
@@ -82,18 +82,18 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
         />
         <div>
           {
-            groupHasTags(resultTags) && !isPathfinder && 
+            groupHasFilters(resultFilters) && !isPathfinder && 
             <>
               <h5 className={styles.typeHeading}> Results </h5>
               {
-                Object.keys(resultTags).map((tagFamily) => {
+                Object.keys(resultFilters).map((filterFamily) => {
                   return (
                     <FacetGroup
-                      tagFamily={tagFamily}
+                      filterFamily={filterFamily}
                       activeFilters={activeFilters}
-                      facetCompare={filterCompare[tagFamily]}
-                      groupedTags={resultTags}
-                      availableTags={availableTags}
+                      facetCompare={filterCompare[filterFamily]}
+                      groupedFilters={resultFilters}
+                      availableFilters={availableFilters}
                       onFilter={onFilter}
                     />
                   )
@@ -104,18 +104,18 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
         </div>
         <div>
           {
-            groupHasTags(pathTags) &&
+            groupHasFilters(pathFilters) &&
             <>
               <h5 className={styles.typeHeading}> Paths </h5>
               {
-                Object.keys(pathTags).map((tagFamily) => {
+                Object.keys(pathFilters).map((tagFamily) => {
                   return (
                     <FacetGroup
-                      tagFamily={tagFamily}
+                      filterFamily={tagFamily}
                       activeFilters={activeFilters}
                       facetCompare={filterCompare[tagFamily]}
-                      groupedTags={pathTags}
-                      availableTags={availableTags}
+                      groupedFilters={pathFilters}
+                      availableFilters={availableFilters}
                       onFilter={onFilter}
                     />
                   )
