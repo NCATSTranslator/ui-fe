@@ -8,28 +8,46 @@ import { getEdgeById, getNodeById, getPathById } from '../Redux/resultsSlice';
 
 // alphabetical order
 export const sortNameLowHigh = (items: Result[] | PublicationObject[]) => {
-  if(isPublicationObjectArray(items))
-    return items.sort((a: PublicationObject, b: PublicationObject) => a.title.localeCompare(b.title));
-  else
+  if(isPublicationObjectArray(items)) {
+    return items.sort((a: PublicationObject, b: PublicationObject) => {
+      const aTitle = (a?.title) ? a.title : "";
+      const bTitle = (b?.title) ? b.title : "";
+      return aTitle.localeCompare(bTitle);
+    });
+  } else {
     return items.sort((a: Result, b: Result) => a.drug_name.localeCompare(b.drug_name));
+  }
 }
 
 // reverse alphabetical order
 export const sortNameHighLow = (items: Result[] | PublicationObject[]) => {
-  if(isPublicationObjectArray(items))
-    return items.sort((a: PublicationObject, b: PublicationObject) => -a.title.localeCompare(b.title));
-  else
+  if(isPublicationObjectArray(items)) {
+    return items.sort((a: PublicationObject, b: PublicationObject) => {
+      const aTitle = (a?.title) ? a.title : "";
+      const bTitle = (b?.title) ? b.title : "";
+      return -aTitle.localeCompare(bTitle);
+    });
+  } else {
     return items.sort((a: Result, b: Result) => -a.drug_name.localeCompare(b.drug_name));
+  }
 }
 
 // alphabetical order
 export const sortJournalLowHigh = (items: PublicationObject[]) => {
-  return items.sort((a: PublicationObject, b: PublicationObject) => a.journal.localeCompare(b.journal));
+  return items.sort((a: PublicationObject, b: PublicationObject) => {
+    const aJournal = (a?.journal) ? a.journal : "";
+    const bJournal = (b?.journal) ? b.journal : "";
+    return aJournal.localeCompare(bJournal);
+  });
 }
 
 // reverse alphabetical order
 export const sortJournalHighLow = (items: PublicationObject[]) => {
-  return items.sort((a: PublicationObject, b: PublicationObject) => -a.journal.localeCompare(b.journal));
+  return items.sort((a: PublicationObject, b: PublicationObject) => {
+    const aJournal = (a?.journal) ? a.journal : "";
+    const bJournal = (b?.journal) ? b.journal : "";
+    return -aJournal.localeCompare(bJournal);
+  });
 }
 
 export const sortEvidenceLowHigh = (resultSet: ResultSet, items: Result[]) => {
