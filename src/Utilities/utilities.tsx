@@ -15,7 +15,7 @@ import { QueryType } from '../Types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
 import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState } from '../Types/results.d';
-import { EvidenceCountsContainer, PublicationObject, PublicationsList } from '../Types/evidence';
+import { EvidenceCountsContainer, PublicationObject, PublicationsList, RawPublicationList } from '../Types/evidence';
 import { Location } from 'react-router-dom';
 import { getEdgeById, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
 
@@ -362,12 +362,8 @@ export const isPublicationObject = (obj: any): obj is PublicationObject => {
   return (
     typeof obj === 'object' &&
     obj !== null &&
-    typeof obj.id === 'string' &&
-    typeof obj.journal === 'string' &&
-    typeof obj.knowledgeLevel === 'string' &&
     typeof obj.source === 'object' &&
     (typeof obj.support === 'object' || obj.support === null) &&
-    typeof obj.title === 'string' &&
     typeof obj.type === 'string' &&
     typeof obj.url === 'string'
   );
@@ -579,8 +575,13 @@ export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: Pa
   return newPaths;
 }
 
-export const getFormattedEdgeLabel = (subjectName: string, predicateName: string, objectName: string): string => {
-  return `${subjectName}|${predicateName}|${objectName}`;
+export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): string => {
+  const subjectNode = getNodeById(resultSet, edge.subject);
+  const subjectNodeName = (!!subjectNode) ? subjectNode.names[0] : "";
+  const objectNode = getNodeById(resultSet, edge.object);
+  const objectNodeName = (!!objectNode) ? objectNode.names[0] : "";
+
+  return `${subjectNodeName}|${edge.predicate}|${objectNodeName}`;
 }
 
 export const getUrlByType = (publicationID: string, type: string): string | null => {
