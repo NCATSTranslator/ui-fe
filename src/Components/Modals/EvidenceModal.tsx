@@ -169,7 +169,6 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                   selectedEdge={selectedEdge}
                   pubmedEvidence={pubmedEvidence}
                   setPubmedEvidence={setPubmedEvidence}
-                  item={result}
                   prefs={prefs}
                   isOpen={isOpen}
                 />
