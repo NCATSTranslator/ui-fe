@@ -14,13 +14,14 @@ export type EvidenceContainer = {
   sources: any;
 }
 export type PublicationObject = {
-  id: string;
-  journal: string;
-  knowledgeLevel: string;
+  id?: string;
+  journal?: string;
+  knowledgeLevel?: string;
   pubdate?: string;
   source: SourceObject;
+  snippet?: string;
   support: PublicationSupport | null;
-  title: string;
+  title?: string;
   type: string;
   url: string;
 }
@@ -32,12 +33,12 @@ export type SourceObject = {
   name: string;
   url: string;
 }
-type rawAttachedPublication = {
+type RawPublicationObject = {
   id: string;
-  support: object | null;
+  support: PublicationSupport | null;
 }
-export type rawAttachedPublications = {
-  [key: string]: rawAttachedPublication[];
+export type RawPublicationList = {
+  [key: string]: RawPublication[];
 }
 export type EvidenceCountsContainer = {
   clinicalTrialCount: number;
@@ -65,3 +66,9 @@ export type PublicationSupport = {
 }
 
 export type KnowledgeLevel = "trusted" | "ml" | "unknown" | "";
+
+export type EvidenceSortState = {
+  date: null | boolean;
+  journal: null | boolean;
+  title: null | boolean;
+}
