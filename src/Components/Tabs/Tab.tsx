@@ -8,18 +8,19 @@ export interface TabProps {
   tooltipIcon?: ReactNode;
   dataTooltipId?: string;
   children?: ReactNode;
+  className?: string;
 }
 
-const Tab: FC<TabProps> = ({ heading, onClick = ()=>{}, activeTabHeading = "", tooltipIcon, dataTooltipId = "" }) => {
+const Tab: FC<TabProps> = ({ heading, onClick = ()=>{}, activeTabHeading = "", tooltipIcon, dataTooltipId = "", className = "" }) => {
 
-  let className = `${styles.tabListItem}`;
+  let classes = `${className} ${styles.tabListItem}`;
 
   if (activeTabHeading === heading) {
-    className += ` ${styles.active}`;
+    classes += ` ${styles.active}`;
   }
 
   return (
-    <div className={className} onClick={() => onClick(heading)} >
+    <div className={classes} onClick={() => onClick(heading)} >
       <span className={styles.heading}>{heading}</span>
       {tooltipIcon &&
         <span data-tooltip-id={dataTooltipId} className={styles.iconContainer}>{tooltipIcon}</span>
