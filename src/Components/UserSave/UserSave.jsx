@@ -159,7 +159,7 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
               <ResultsItem
                 rawResults={null}
                 key={queryItem.id}
-                type={queryType}
+                queryType={queryType}
                 item={queryItem}
                 activateEvidence={activateEvidence}
                 activateNotes={activateNotes}

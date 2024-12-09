@@ -20,9 +20,9 @@ interface ResultsListModalsProps {
   currentBookmarkID: string | null | undefined;
   evidenceModalOpen: boolean;
   setEvidenceModalOpen: Dispatch<SetStateAction<boolean>>;
-  selectedItem: any; 
   selectedEdge: any; 
   selectedPath: any; 
+  selectedResult: any; 
   sharedItem: any; 
   formattedResultsLength: number;
   presetTypeID: string;
@@ -46,7 +46,7 @@ const ResultsListModals: FC<ResultsListModalsProps> = ({
   evidenceModalOpen, 
   setEvidenceModalOpen, 
   selectedEdge, 
-  selectedItem, 
+  selectedResult, 
   selectedPath, 
   sharedItem, 
   formattedResultsLength, 
@@ -84,8 +84,8 @@ const ResultsListModals: FC<ResultsListModalsProps> = ({
       <EvidenceModal
         isOpen={evidenceModalOpen}
         onClose={()=>handleEvidenceModalClose(setEvidenceModalOpen)}
-        item={selectedItem}
-        edgeGroup={selectedEdge}
+        result={selectedResult}
+        edge={selectedEdge}
         path={selectedPath}
       />
       <ResultFocusModal

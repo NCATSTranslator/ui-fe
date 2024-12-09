@@ -99,7 +99,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   const noteLabel = useRef("");
   const currentBookmarkID = useRef<string | null>(null);
   // Result, the currently selected item
-  const [selectedItem, setSelectedItem] = useState<Result | {}>({});
+  const [selectedResult, setSelectedResult] = useState<Result | {}>({});
 
   const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
   // Path, path represented in current evidence
@@ -618,7 +618,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     const edge = getEdgeById(resultSet, edgeID);
     const path = getPathById(resultSet, pathID);
     if(!!edge && !!path) {
-      setSelectedItem(item);
+      setSelectedResult(item);
       setSelectedEdge(edge);
       setSelectedPath(path);
       setEvidenceModalOpen(true);
@@ -925,7 +925,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
         evidenceModalOpen={evidenceModalOpen}
         setEvidenceModalOpen={setEvidenceModalOpen}
         selectedEdge={selectedEdge}
-        selectedItem={selectedItem}
+        selectedResult={selectedResult}
         selectedPath={selectedPath}
         sharedItem={sharedItem}
         formattedResultsLength={formattedResults.length} 
