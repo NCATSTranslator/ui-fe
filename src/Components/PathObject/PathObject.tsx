@@ -13,7 +13,7 @@ interface PathObjectProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence: (pathID: string) => void;
+  handleActivateEvidence?: (pathID: string) => void;
   handleEdgeClick: (edgeID: string, pathID: string) => void;
   handleNodeClick: (name: ResultNode) => void;
   id: string;
@@ -31,7 +31,7 @@ const PathObject: FC<PathObjectProps> = ({
   activeEntityFilters, 
   activeFilters,
   className = "", 
-  handleActivateEvidence,
+  handleActivateEvidence = ()=>{},
   handleNodeClick, 
   handleEdgeClick, 
   id, 
