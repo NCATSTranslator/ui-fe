@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
-import { formatBiolinkEntity, formatBiolinkNode, getPathCount, calculateEvidenceCounts } from '../../Utilities/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react";
@@ -118,12 +118,12 @@ const ResultsItem: FC<ResultsItemProps> = ({
 
   const resultSet = useSelector(currentResultSet);
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
-  const score = generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
+  const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
   const user = useSelector(currentUser);
 
   let roleCount: number = (!!result && !result.tags) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
-  const evidenceCounts = calculateEvidenceCounts(resultSet, result);
+  const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
   const itemBookmarkID = useRef<string | null>(bookmarkID);
   const [itemHasNotes, setItemHasNotes] = useState<boolean>(hasNotes);

@@ -1,4 +1,4 @@
-import { PublicationObject, KnowledgeLevel } from "./evidence";
+import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer } from "./evidence";
 // type RawNode = {
 //   aras: string[];
 //   curies: string[];
@@ -180,13 +180,14 @@ export type ResultSet = {
 
 export interface Result {
   drug_name: string;
+  evidenceCount?: EvidenceCountsContainer;
   id: string;
   // node ID
   object: string;
   pathCount?: number;
   // array of path IDs
   paths: string[] | Path[];
-  score?: number;
+  score?: { main: number, secondary: number };
   scores: Score[];
   // node ID
   subject: string;

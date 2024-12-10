@@ -18,7 +18,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHigh
   filterCompare, makePathRank, updatePathRanks, pathRankSort } from "../../Utilities/sortingFunctions";
 import { findStringMatch, handleResultsError, handleResultsRefresh } from "../../Utilities/resultsInteractionFunctions";
 import * as filtering from '../../Utilities/filterFunctions';
-import { checkBookmarkForNotes, checkBookmarksForItem, getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
+import { getEvidenceCounts, checkBookmarkForNotes, checkBookmarksForItem, getDataFromQueryVar, getPathCount, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { API_PATH_PREFIX, getSaves, SaveGroup } from "../../Utilities/userApi";
 import { toast } from 'react-toastify';
@@ -29,6 +29,7 @@ import ResultsListTableHead from "./ResultsListTableHead";
 import ResultsListModals from "./ResultsListModals";
 import ResultsListBottomPagination from "./ResultsListBottomPagination";
 import { ResultSet, Result, ResultEdge, Path, Filter, PathFilterState, PathRank, SharedItem } from "../../Types/results.d";
+import { generateScore } from "../../Utilities/scoring";
 
 interface ResultsListProps {
   loading: boolean;
@@ -269,6 +270,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     // filter
     if (!justSort) {
       [newFormattedResults, newPathFilterState] = applyFilters(filters, asFilters, newFormattedResults, newOriginalResults, summary, newPathFilterState);
+      originalResults.current = newOriginalResults;
     }
 
     // sort
@@ -297,10 +299,6 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
       }
     }
 
-    if (!justSort) {
-      originalResults.current = newOriginalResults;
-    }
-
     rawResults.current = summary;
     return newFormattedResults;
   }
@@ -315,15 +313,22 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
       return;
 
     // if rawResults are new, set prevRawResults for future comparison
-    prevRawResults.current = resultSet;
-    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, resultSet, [], false, currentSortString.current);
+    let newResultSet = cloneDeep(resultSet);
+    prevRawResults.current = newResultSet;
+    // precalculate evidence and path counts
+    for(const result of newResultSet.data.results) {
+      result.evidenceCount = getEvidenceCounts(newResultSet, result);
+      result.pathCount = getPathCount(newResultSet, result.paths);
+      result.score = generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
+    }
+    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current);
 
     // we have results to show, set isLoading to false
     if (newFormattedResults.length > 0)
       setIsLoading(false);
 
     // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
-    if(resultSet && resultSet.data.results && resultSet.data.results.length === 0 && !isFetchingARAStatus.current)
+    if(newResultSet && newResultSet.data.results && newResultSet.data.results.length === 0 && !isFetchingARAStatus.current)
       setIsLoading(false);
   }
 

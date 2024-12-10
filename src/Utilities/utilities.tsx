@@ -15,7 +15,7 @@ import { QueryType } from '../Types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
 import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState } from '../Types/results.d';
-import { EvidenceCountsContainer, PublicationObject, PublicationsList, RawPublicationList } from '../Types/evidence';
+import { EvidenceCountsContainer, PublicationObject, PublicationsList } from '../Types/evidence';
 import { Location } from 'react-router-dom';
 import { getEdgeById, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
 
@@ -736,7 +736,7 @@ const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): Eviden
   };
 };
 
-export const calculateEvidenceCounts = (resultSet: ResultSet | null, result: Result | undefined): EvidenceCountsContainer => {
+export const getEvidenceCounts = (resultSet: ResultSet | null, result: Result | undefined): EvidenceCountsContainer => {
   if (!resultSet || !result) {
     return { publicationCount: 0, sourceCount: 0, clinicalTrialCount: 0, miscCount: 0 };
   }
