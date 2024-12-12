@@ -153,6 +153,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                         activeEntityFilters={[]}
                         selected={isSelected}
                         selectedPaths={null}
+                        inModal={true}
                       />
                     )
                   })

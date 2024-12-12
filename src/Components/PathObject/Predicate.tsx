@@ -227,7 +227,7 @@ const Predicate: FC<PredicateProps> = ({
           </span>
         </span>
         {
-          hasSupport &&
+          hasSupport && !inModal &&
           <button
             onClick={handleSupportExpansion}
             className={`support-button ${styles.supportExpansionButton} ${isSupportExpanded ? styles.expanded : ''}`}>
@@ -239,7 +239,7 @@ const Predicate: FC<PredicateProps> = ({
         }
       </span>
       {
-        hasSupport && 
+        hasSupport && !inModal &&
         <SupportPathGroup
           pathArray={edge.support}
           isExpanded={isSupportExpanded}
