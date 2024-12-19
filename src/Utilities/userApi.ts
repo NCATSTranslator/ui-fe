@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from './web';
 import { QueryType } from '../Types/querySubmission';
-import { ResultBookmark } from '../Types/results';
+import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '../Types/results';
 import { PreferencesContainer, SessionStatus } from '../Types/global';
 import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '../Redux/rootSlice';
 import { handleFetchErrors, isPreferencesContainer } from './utilities';
@@ -10,6 +10,8 @@ import { useDispatch } from 'react-redux';
 import { User } from '../Types/global';
 import { useSelector } from 'react-redux';
 import { currentUser } from "../Redux/rootSlice";
+import { getEdgeById, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
+import { PublicationObject } from '../Types/evidence';
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';
@@ -84,7 +86,8 @@ interface QueryObject {
   nodeLabel: string;
   nodeDescription: string;
   pk: string;
-  submitted_time: Date; 
+  submitted_time: string; 
+  resultSet: ResultSet;
 }
 
 export interface Save {
@@ -97,10 +100,10 @@ export interface Save {
   object_ref: string;
   time_created: string | null;
   time_updated: string | null;
-  data?: {
-    item?: ResultBookmark;
-    type?: string;
-    query?: QueryObject;
+  data: {
+    item: ResultBookmark;
+    type: string;
+    query: QueryObject;
   };
 }
 
@@ -184,11 +187,11 @@ export const getFormattedBookmarkObject = (
     queryNodeDescription: string = "",
     typeObject: QueryType,
     saveItem: ResultBookmark,
-    pk: string
+    pk: string,
+    resultSet: ResultSet
   ): Save => { 
 
-
-    let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk);
+    let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk, resultSet);
     return { 
       save_type: "bookmark", 
       label: bookmarkName, 
@@ -222,7 +225,8 @@ export const getQueryObjectForSave = (
     nodeLabel: string = "", 
     nodeDescription: string = "", 
     typeObject: QueryType, 
-    pk: string
+    pk: string,
+    resultSet: ResultSet
   ): QueryObject => {
     return {
       type: typeObject, 
@@ -230,7 +234,8 @@ export const getQueryObjectForSave = (
       nodeLabel: nodeLabel,
       nodeDescription: nodeDescription,
       pk: pk, 
-      submitted_time: new Date() 
+      submitted_time: new Date().toDateString(),
+      resultSet: resultSet
     }
 }
 
@@ -702,3 +707,129 @@ export const useUser = (): [ user: User | null | undefined, loading: boolean ] =
 
   return [ user, loading ];
 };
+
+const getAllPathsFromResult = (resultSet: ResultSet, result: Result) => {
+  let paths: {[key: string]: Path} = {};
+
+  for(const pathID of result.paths) {
+    let path;
+    let tempPathID = "";
+    if(typeof pathID === "string") {
+      path = getPathById(resultSet, pathID);
+      tempPathID = pathID;
+    } else {
+      path = pathID;
+      tempPathID = (!!path?.id) ? path.id : "";
+    } 
+
+    if(!!path) 
+      paths[tempPathID] = path;
+  }
+  return paths;
+}
+
+
+
+const getAllNodesFromPath = (resultSet: ResultSet, path: Path, nodes: {[key: string]: ResultNode}) => {
+  for (let i = 0; i < path.subgraph.length; i += 2) {
+    const node = getNodeById(resultSet, path.subgraph[i]); 
+    if(!!node)
+      nodes[path.subgraph[i]] = node;
+    else 
+      console.warn(`Node with ID ${path.subgraph[i]} not found in resultSet.`);
+    
+  }
+}
+const getAllEdgesFromPath = (resultSet: ResultSet, path: Path, paths: {[key: string]: Path}, edges: {[key: string]: ResultEdge}, nodes: {[key: string]: ResultNode}) => {
+  for (let i = 1; i < path.subgraph.length; i += 2) {
+    const edge = getEdgeById(resultSet, path.subgraph[i]); 
+    if(!!edge)
+      edges[path.subgraph[i]] = edge;
+
+    if(!!edge?.support) {
+      for(const supPathID of edge.support) {
+        const supPath = (typeof supPathID === "string") ? getPathById(resultSet, supPathID) : supPathID; 
+        if(!!supPath) {
+          const tempSupPathID = (typeof supPathID === "string") ? supPathID : (supPath.id) ? supPath.id : "";
+          paths[tempSupPathID] = supPath;
+          getAllEdgesFromPath(resultSet, supPath, paths, edges, nodes);
+          getAllNodesFromPath(resultSet, supPath, nodes);
+        }
+      }
+    }
+  }
+}
+const getAllNodesAndEdgesFromPaths = (resultSet: ResultSet, paths: {[key: string]: Path}) => {
+  let edges: {[key: string]: ResultEdge} = {};
+  let nodes: {[key: string]: ResultNode} = {};
+
+  for(const path of Object.values(paths)) {
+    getAllEdgesFromPath(resultSet, path, paths, edges, nodes);
+    getAllNodesFromPath(resultSet, path, nodes);
+  }
+
+  return {nodes: nodes, edges: edges};
+}
+const getAllPubsFromEdges = (resultSet: ResultSet, edges: ResultEdge[]) => {
+  let pubs: {[key:string]: PublicationObject} = {};
+  let resultPubIDs: Set<string> = new Set<string>();
+  for(const edge of edges) 
+    Object.values(edge.publications).map(pubArray => pubArray.map(pub => pub.id)).flat().forEach(id=>resultPubIDs.add(id));
+  
+  for(const pubID of resultPubIDs) {
+    let pub = getPubById(resultSet, pubID);
+    if(!!pub)
+      pubs[pubID] = pub;
+  }
+  return pubs;
+}
+
+export const generateSafeResultSet = (resultSet: ResultSet, result: Result): ResultSet => {
+  const allPaths = getAllPathsFromResult(resultSet, result);
+  const allSubgraphItems = getAllNodesAndEdgesFromPaths(resultSet, allPaths);
+  const allPubs = getAllPubsFromEdges(resultSet, Object.values(allSubgraphItems.edges));
+  let newSave: ResultSet = {
+    status: resultSet.status,
+    data: {
+      edges: allSubgraphItems.edges,
+      errors: resultSet.data.errors,
+      meta: resultSet.data.meta,
+      nodes: allSubgraphItems.nodes,
+      paths: allPaths,
+      publications: allPubs,
+      results: [result],
+      tags: resultSet.data.tags
+    }
+  }
+
+  return newSave;
+}
+
+export const mergeResultSets = (resultSetOne: ResultSet, resultSetTwo: ResultSet) => {
+  return {
+    status: resultSetTwo.status,
+    data: {
+      edges: { ...resultSetOne.data.edges, ...resultSetTwo.data.edges },
+      errors: {
+        "biothings-annotator": [
+          ...(resultSetOne.data.errors["biothings-annotator"] || []),
+          ...(resultSetTwo.data.errors["biothings-annotator"] || []),
+        ],
+        unknown: [
+          ...(resultSetOne.data.errors.unknown || []),
+          ...(resultSetTwo.data.errors.unknown || []),
+        ],
+      },
+      meta: {
+        aras: [...new Set([...(resultSetOne.data.meta.aras || []), ...(resultSetTwo.data.meta.aras || [])])],
+        qid: resultSetTwo.data.meta.qid || resultSetOne.data.meta.qid,
+        timestamp: resultSetTwo.data.meta.timestamp || resultSetOne.data.meta.timestamp,
+      },
+      nodes: { ...resultSetOne.data.nodes, ...resultSetTwo.data.nodes },
+      paths: { ...resultSetOne.data.paths, ...resultSetTwo.data.paths },
+      publications: { ...resultSetOne.data.publications, ...resultSetTwo.data.publications },
+      results: [...resultSetOne.data.results, ...resultSetTwo.data.results],
+      tags: { ...resultSetOne.data.tags, ...resultSetTwo.data.tags },
+    },
+  };
+}
