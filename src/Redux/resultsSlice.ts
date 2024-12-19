@@ -4,32 +4,33 @@ import { PublicationObject } from "../Types/evidence";
 import { cloneDeep } from "lodash";
 
 type ResultState = {
-  resultSet: ResultSet | null;
+  [key: string]: ResultSet
 };
 
-const initialState: ResultState = {
-  resultSet: null,
-};
+const initialState: ResultState = {};
 
-const resultSetSlice = createSlice({
-  name: "resultSet",
+const resultSetsSlice = createSlice({
+  name: "resultSets",
   initialState,
   reducers: {
-    setResultSet(state, action: PayloadAction<ResultSet>) {
-      state.resultSet = action.payload;
+    setResultSet(state, action: PayloadAction<{ pk: string; resultSet: ResultSet }>) {
+      state[action.payload.pk] = action.payload.resultSet;
+    },
+    setResultSets(state, action: PayloadAction<{[key:string]: ResultSet}>) {
+      Object.assign(state, action.payload);
     },
   },
 });
 
-export const { setResultSet } = resultSetSlice.actions;
+export const { setResultSet, setResultSets } = resultSetsSlice.actions;
 
 export const getResultById = (resultSet: ResultSet | null, id:string): Result | undefined => (resultSet === null) ? undefined : resultSet.data.results.find((result)=> result.id === id);
-export const getPathById = (resultSet: ResultSet | null, id:string): Path | undefined => {
+export const getPathById = (resultSet: ResultSet | null, id:string): Path | null => {
   if(resultSet === null)
-    return undefined;
+    return null;
   if(!resultSet.data.paths[id]) {
-    console.warn(`Unable to find path with id ${id} within result set.`);
-    return undefined;
+    console.warn(`Unable to find path with id: ${id} within result set.`);
+    return null;
   }
   let path = cloneDeep(resultSet.data.paths[id]);
   path.id = id;
@@ -44,7 +45,28 @@ export const getPathsByIds = (resultSet: ResultSet | undefined | null, pathIDs: 
 export const getNodeById = (resultSet: ResultSet | null, id:string): ResultNode | undefined => (resultSet === null) ? undefined : resultSet.data.nodes[id];
 export const getEdgeById = (resultSet: ResultSet | null, id:string): ResultEdge | undefined => (resultSet === null) ? undefined : resultSet.data.edges[id];
 export const getPubById = (resultSet: ResultSet | null, id:string): PublicationObject | undefined => (resultSet === null) ? undefined : resultSet.data.publications[id];
+export const getResultSetById = (id: string | null | undefined) => (state: {resultSets: ResultState}) => {
+  // if no result sets have been added, return null with no console warning
+  if(!!state?.resultSets && Object.keys(state?.resultSets).length === 0)
+    return null;
 
-export const currentResultSet = (state: { resultSet: ResultState }) => state.resultSet.resultSet;
+  // "-1" is the explicit, 'i dont have the pk yet' marker
+  if(id === "-1")
+    return null;
 
-export default resultSetSlice.reducer;
+  if(!id) {
+    console.warn(`No pk provided to retrieve result set.`);
+    return null;
+  }
+  if(!state?.resultSets[id]) {
+    console.warn(`Unable to find result set with pk: ${id}.`);
+    return null;
+  }
+  return state.resultSets[id];
+}
+
+export const removeResultSetById = (id: string | null | undefined) => (state: {resultSets: ResultState}) => {
+
+}
+
+export default resultSetsSlice.reducer;
