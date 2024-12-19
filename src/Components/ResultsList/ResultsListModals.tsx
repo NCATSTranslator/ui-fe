@@ -7,53 +7,54 @@ import { ToastContainer, Slide } from 'react-toastify';
 import { handleEvidenceModalClose } from "../../Utilities/resultsInteractionFunctions";
 
 interface ResultsListModalsProps {
-  shareModalOpen: boolean;
-  setShareModalOpen: Dispatch<SetStateAction<boolean>>;
-  currentQueryID: string;
-  shareResultID: string;
-  notesModalOpen: boolean;
-  setNotesModalOpen: Dispatch<SetStateAction<boolean>>;
-  handleClearNotesEditor: () => Promise<void>;
-  focusModalOpen: boolean;
-  setFocusModalOpen: Dispatch<SetStateAction<boolean>>;
-  noteLabel: string;
   currentBookmarkID: string | null | undefined;
   evidenceModalOpen: boolean;
-  setEvidenceModalOpen: Dispatch<SetStateAction<boolean>>;
+  focusModalOpen: boolean;
+  formattedResultsLength: number;
+  handleClearNotesEditor: () => Promise<void>;
+  handlePageClick: (event: any, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
+  noteLabel: string;
+  notesModalOpen: boolean;
+  pk: string;
+  presetTypeID: string;
   selectedEdge: any; 
   selectedPath: any; 
   selectedResult: any; 
-  sharedItem: any; 
-  formattedResultsLength: number;
-  presetTypeID: string;
-  handlePageClick: (event: any, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
-  setExpandSharedResult: Dispatch<SetStateAction<boolean>>;
   setAutoScrollToResult: Dispatch<SetStateAction<boolean>>;
+  setExpandSharedResult: Dispatch<SetStateAction<boolean>>;
+  setEvidenceModalOpen: Dispatch<SetStateAction<boolean>>;
+  setFocusModalOpen: Dispatch<SetStateAction<boolean>>;
+  setNotesModalOpen: Dispatch<SetStateAction<boolean>>;
+  setShareModalOpen: Dispatch<SetStateAction<boolean>>;
+  sharedItem: any; 
+  shareModalOpen: boolean;
+  shareResultID: string;
 }
 
 const ResultsListModals: FC<ResultsListModalsProps> = ({
-  shareModalOpen, 
-  setShareModalOpen, 
-  notesModalOpen, 
-  setNotesModalOpen, 
-  handleClearNotesEditor, 
-  noteLabel, 
-  currentBookmarkID, 
-  currentQueryID, 
-  shareResultID, 
-  focusModalOpen, 
-  setFocusModalOpen, 
-  evidenceModalOpen, 
-  setEvidenceModalOpen, 
-  selectedEdge, 
-  selectedResult, 
-  selectedPath, 
-  sharedItem, 
-  formattedResultsLength, 
-  presetTypeID, 
-  handlePageClick, 
-  setExpandSharedResult, 
-  setAutoScrollToResult }) => {
+  currentBookmarkID,
+  evidenceModalOpen,
+  focusModalOpen,
+  formattedResultsLength,
+  handleClearNotesEditor,
+  handlePageClick,
+  noteLabel,
+  notesModalOpen,
+  pk,
+  presetTypeID,
+  selectedEdge,
+  selectedPath,
+  selectedResult,
+  setAutoScrollToResult,
+  setExpandSharedResult,
+  setEvidenceModalOpen,
+  setFocusModalOpen,
+  setNotesModalOpen,
+  setShareModalOpen,
+  sharedItem,
+  shareModalOpen,
+  shareResultID,
+}) => {
 
   return (
     <>
@@ -71,7 +72,7 @@ const ResultsListModals: FC<ResultsListModalsProps> = ({
       <ShareModal
         isOpen={shareModalOpen}
         onClose={()=>setShareModalOpen(false)}
-        qid={currentQueryID}
+        qid={pk}
         shareResultID={shareResultID}
       />
       <NotesModal
@@ -87,6 +88,7 @@ const ResultsListModals: FC<ResultsListModalsProps> = ({
         result={selectedResult}
         edge={selectedEdge}
         path={selectedPath}
+        pk={pk}
       />
       <ResultFocusModal
         isOpen={focusModalOpen}

@@ -9,7 +9,7 @@ import { sortSupportByEntityStrings, sortSupportByLength } from '../../Utilities
 import { Filter, Path, PathFilterState, ResultNode } from '../../Types/results';
 import { intToChar, getPathsWithSelectionsSet, isStringArray } from '../../Utilities/utilities';
 import { useSelector } from 'react-redux';
-import { currentResultSet, getPathsByIds } from '../../Redux/resultsSlice';
+import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 
 interface SupportPathGroupProps {
   activeFilters: Filter[];
@@ -21,6 +21,7 @@ interface SupportPathGroupProps {
   pathFilterState: PathFilterState;
   pathArray: string[] | Path[];
   pathViewStyles: {[key: string]: string;} | null;
+  pk: string;
   selectedPaths: Set<Path> | null;
 }
 
@@ -34,9 +35,10 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   pathFilterState, 
   pathArray, 
   pathViewStyles, 
+  pk,
   selectedPaths }) => {
 
-  const resultSet = useSelector(currentResultSet);
+  const resultSet = useSelector(getResultSetById(pk));
   const paths = isStringArray(pathArray) ? getPathsByIds(resultSet, pathArray) : pathArray;
 
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
@@ -126,6 +128,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                 pathViewStyles={pathViewStyles}
                 activeEntityFilters={activeEntityFilters}
                 activeFilters={activeFilters}
+                pk={pk}
               />
             );
           })

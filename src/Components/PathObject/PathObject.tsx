@@ -7,7 +7,7 @@ import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
 import { Path, PathFilterState, isResultNode, ResultNode, Filter } from '../../Types/results.d';
 import { useSelector } from 'react-redux';
-import { currentResultSet } from '../../Redux/resultsSlice';
+import { getResultSetById } from '../../Redux/resultsSlice';
 
 interface PathObjectProps {
   activeEntityFilters: string[];
@@ -23,6 +23,7 @@ interface PathObjectProps {
   pathID: string;
   pathFilterState: PathFilterState;
   pathViewStyles?: {[key: string]: string;} | null;
+  pk: string;
   selected?: boolean;
   selectedPaths: Set<Path> | null;
 }
@@ -41,10 +42,11 @@ const PathObject: FC<PathObjectProps> = ({
   pathFilterState, 
   pathID, 
   pathViewStyles = null, 
+  pk,
   selected, 
   selectedPaths }) => {
 
-  const resultSet = useSelector(currentResultSet);
+  const resultSet = useSelector(getResultSetById(pk));
 
   const pathObject = (index % 2 === 0) ? resultSet?.data.nodes[id] : resultSet?.data.edges[id];
   const isNode = isResultNode(pathObject);
@@ -113,6 +115,7 @@ const PathObject: FC<PathObjectProps> = ({
               pathFilterState={pathFilterState}
               pathViewStyles={pathViewStyles}
               selectedPaths={selectedPaths}
+              pk={pk}
             />
       }
     </>

@@ -10,7 +10,7 @@ import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
 import { PathFilterState, ResultNode, Path, ResultSet, Filter } from '../../Types/results';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
-import { currentResultSet, getPathsByIds } from '../../Redux/resultsSlice';
+import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
@@ -35,6 +35,7 @@ interface PathViewProps {
   handleActivateEvidence: (pathID: string) => void;
   activeEntityFilters: string[];
   pathFilterState: PathFilterState;
+  pk: string;
 }
 
 const PathView: FC<PathViewProps> = ({ 
@@ -46,9 +47,10 @@ const PathView: FC<PathViewProps> = ({
   handleEdgeSpecificEvidence, 
   handleActivateEvidence, 
   activeEntityFilters, 
-  pathFilterState }) => {
+  pathFilterState,
+  pk }) => {
 
-  const resultSet = useSelector(currentResultSet);
+  const resultSet = useSelector(getResultSetById(pk));
   const paths = isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray;
   const itemsPerPage: number = 10;
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
@@ -185,6 +187,7 @@ const PathView: FC<PathViewProps> = ({
                                   selectedPaths={selectedPaths}
                                   pathFilterState={pathFilterState}
                                   activeFilters={activeFilters}
+                                  pk={pk}
                                 />
                               </>
                             )

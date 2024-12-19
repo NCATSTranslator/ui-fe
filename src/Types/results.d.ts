@@ -201,7 +201,7 @@ export type SharedItem = {
   type: string;
 }
 
-export interface ResultBookmark extends Result{ 
+export interface ResultBookmark extends Result { 
   graph?: ResultGraph;
   description?: string;
   bookmarkID?: number | boolean;
@@ -320,7 +320,7 @@ export type Meta = {
 }
 
 export type Errors = {
-  "biothings-annotator":  string[];
+  "biothings-annotator": string[];
   unknown: string[];
 }
 

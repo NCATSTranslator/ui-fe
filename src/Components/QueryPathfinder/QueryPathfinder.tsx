@@ -33,14 +33,21 @@ import ResultsSummaryButton from "../ResultsSummaryButton/ResultsSummaryButton";
 import { Result } from "../../Types/results";
 
 type QueryPathfinderProps = {
-  loading?: boolean;
+  handleResultMatchClick?: Function;
   isResults?: boolean;
+  loading?: boolean;
+  pk?: string;
   results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
-  handleResultMatchClick?: Function;
 }
 
-const QueryPathfinder: FC<QueryPathfinderProps> = ({ loading = false, results = [], isResults = false, setShareModalFunction = ()=>{}, handleResultMatchClick = ()=>{} }) => {
+const QueryPathfinder: FC<QueryPathfinderProps> = ({ 
+  loading = false,
+  handleResultMatchClick = ()=>{},
+  isResults = false,
+  pk,
+  results = [],
+  setShareModalFunction = ()=>{} }) => {
 
   const config = useSelector(currentConfig);
   const navigate = useNavigate();
@@ -280,6 +287,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({ loading = false, results = 
                       results={results}
                       queryString={`${resultsPaneQuestionText}`}
                       handleResultMatchClick={handleResultMatchClick}
+                      pk={!!pk ? pk : ""}
                     />
                   }
                 </div>

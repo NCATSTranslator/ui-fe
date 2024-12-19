@@ -31,6 +31,7 @@ interface PredicateProps {
   pathFilterState: PathFilterState;
   pathID: string;
   pathViewStyles?: {[key: string]: string;} | null;
+  pk: string;
   selected?: boolean;
   selectedPaths: Set<Path> | null;
   uid: string;
@@ -50,6 +51,7 @@ const Predicate: FC<PredicateProps> = ({
   pathFilterState,
   pathID, 
   pathViewStyles = null, 
+  pk,
   selected = false, 
   selectedPaths, 
   uid }) => {
@@ -251,6 +253,7 @@ const Predicate: FC<PredicateProps> = ({
           selectedPaths={selectedPaths}
           activeEntityFilters={activeEntityFilters}
           activeFilters={activeFilters}
+          pk={pk}
         />
       }
     </>

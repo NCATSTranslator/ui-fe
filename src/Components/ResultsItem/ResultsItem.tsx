@@ -16,13 +16,13 @@ import BookmarkConfirmationModal from '../Modals/BookmarkConfirmationModal';
 import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '../../Utilities/csvGeneration';
-import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
+import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
-import { currentResultSet, getNodeById } from '../../Redux/resultsSlice';
+import { getResultSetById, getNodeById } from '../../Redux/resultsSlice';
 import { currentUser } from '../../Redux/rootSlice';
 import { displayScore, generateScore } from '../../Utilities/scoring';
 import { QueryType } from '../../Types/querySubmission';
-import { Result, Filter, PathFilterState, Path, isResultNode, ResultBookmark } from '../../Types/results.d';
+import { Result, Filter, PathFilterState, Path, isResultNode, ResultBookmark, ResultSet } from '../../Types/results.d';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
 import Tabs from '../Tabs/Tabs';
 import Tab from '../Tabs/Tab';
@@ -58,7 +58,6 @@ type ResultsItemProps = {
   bookmarkRemovedToast?: () => void;
   bookmarked?: boolean;
   bookmarkID?: string | null;
-  currentQueryID: string | null;
   handleBookmarkError?: () => void;
   handleFilter: (filter: Filter) => void;
   hasNotes: boolean;
@@ -67,11 +66,12 @@ type ResultsItemProps = {
   isPathfinder?: boolean;
   key: string;
   pathFilterState: PathFilterState;
+  pk: string | null;
   queryNodeDescription: string | null;
   queryNodeID: string | null;
   queryNodeLabel: string | null;
   queryType: QueryType;
-  result: Result;
+  result: Result | ResultBookmark;
   resultsComplete: boolean;
   scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number };
   setExpandSharedResult: (state: boolean) => void;
@@ -85,38 +85,39 @@ type ResultsItemProps = {
 const ResultsItem: FC<ResultsItemProps> = ({
     activateEvidence = () => {},
     activateNotes = () => {},
-    activeFilters,
     activeEntityFilters,
+    activeFilters,
     availableFilters: availableTags,
     bookmarkAddedToast = () => {},
     bookmarkRemovedToast = () => {},
     bookmarked = false,
     bookmarkID = null,
-    currentQueryID,
-    sharedItemRef,
-    startExpanded = false,
-    setExpandSharedResult = () => {},
-    setShareModalOpen = () => {},
-    setShareResultID = () => {},
+    pk: currentQueryID,
     handleBookmarkError = () => {},
     handleFilter = () => {},
     hasNotes = false,
     key,
-    queryNodeID,
+    isEven = false,
+    isInUserSave = false,
+    isPathfinder = false,
     queryNodeDescription,
+    queryNodeID,
     queryNodeLabel,
     queryType,
     pathFilterState,
-    zoomKeyDown,
-    isInUserSave = false,
-    isEven = false,
-    isPathfinder = false,
-    resultsComplete = false,
+    pk,
     result,
-    scoreWeights
+    resultsComplete = false,
+    scoreWeights,
+    setExpandSharedResult = () => {},
+    setShareModalOpen = () => {},
+    setShareResultID = () => {},
+    sharedItemRef,
+    startExpanded = false,
+    zoomKeyDown
   }) => {
 
-  const resultSet = useSelector(currentResultSet);
+  let resultSet = useSelector(getResultSetById(pk));
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
   const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
   const user = useSelector(currentUser);
@@ -250,7 +251,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
   },[]);
 
   const handleBookmarkClick = async () => {
-    console.log("bookmark click");
     if(isBookmarked) {
       if(bookmarkRemovalApproved.current && itemBookmarkID.current) {
         console.log("remove bookmark");
@@ -261,11 +261,14 @@ const ResultsItem: FC<ResultsItemProps> = ({
         bookmarkRemovedToast();
       }
       if(!bookmarkRemovalApproved.current) {
-        console.log("open conf modal");
         setBookmarkRemovalConfirmationModalOpen(true);
       }
       return false;
     } else {
+      if(!resultSet) {
+        console.warn("Unable to create bookmark, no resultSet available");
+        return false;
+      }
       let bookmarkResult: ResultBookmark = cloneDeep(result);
       bookmarkResult.graph = (!!itemGraph) ? itemGraph : undefined;
       // delete result.paths;
@@ -273,8 +276,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
       const safeQueryNodeLabel = (!!queryNodeLabel) ? queryNodeLabel : "";
       const safeQueryNodeDescription = (!!queryNodeDescription) ? queryNodeDescription : "";
       const safeCurrentQueryID = (!!currentQueryID) ? currentQueryID : "";
+      const safeResultSet: ResultSet = generateSafeResultSet(resultSet, bookmarkResult);
       let bookmarkObject = getFormattedBookmarkObject("result", bookmarkResult.drug_name, "", safeQueryNodeID,
-        safeQueryNodeLabel, safeQueryNodeDescription, queryType, result, safeCurrentQueryID);
+        safeQueryNodeLabel, safeQueryNodeDescription, queryType, result, safeCurrentQueryID, safeResultSet);
       
       bookmarkObject.user_id = (user?.id) ? user.id : null;
       bookmarkObject.time_created = new Date().toDateString();
@@ -318,7 +322,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }
 
   const handleBookmarkRemovalApproval = () => {
-    console.log("removal approved");
     bookmarkRemovalApproved.current = true;
     handleBookmarkClick();
   }
@@ -390,22 +393,22 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span className={styles.evidenceLink}>
           <div>
-              {
-                evidenceCounts.publicationCount > 0  &&
-                <span className={styles.info}>Publications ({evidenceCounts.publicationCount})</span>
-              }
-              {
-                evidenceCounts.clinicalTrialCount > 0  &&
-                <span className={styles.info}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
-              }
-              {
-                evidenceCounts.miscCount > 0  &&
-                <span className={styles.info}>Misc ({evidenceCounts.miscCount})</span>
-              }
-              {
-                evidenceCounts.sourceCount > 0  &&
-                <span className={styles.info}>Sources ({evidenceCounts.sourceCount})</span>
-              }
+            {
+              evidenceCounts.publicationCount > 0  &&
+              <span className={styles.info}>Publications ({evidenceCounts.publicationCount})</span>
+            }
+            {
+              evidenceCounts.clinicalTrialCount > 0  &&
+              <span className={styles.info}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
+            }
+            {
+              evidenceCounts.miscCount > 0  &&
+              <span className={styles.info}>Misc ({evidenceCounts.miscCount})</span>
+            }
+            {
+              evidenceCounts.sourceCount > 0  &&
+              <span className={styles.info}>Sources ({evidenceCounts.sourceCount})</span>
+            }
           </div>
         </span>
       </div>
@@ -497,6 +500,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 isEven={isEven}
                 active={isExpanded}
                 activeFilters={activeFilters}
+                pk={pk ? pk : ""}
               />
             </Tab>
             <Tab heading="Graph">

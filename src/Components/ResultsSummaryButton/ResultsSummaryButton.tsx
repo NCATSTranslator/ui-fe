@@ -12,19 +12,24 @@ import { ResultContextObject } from "../../Utilities/llm";
 import { useTextStream } from "../../Utilities/customHooks";
 import { isEqual } from "lodash";
 import { currentConfig } from "../../Redux/rootSlice";
-import { currentResultSet } from "../../Redux/resultsSlice";
+import { getResultSetById } from "../../Redux/resultsSlice";
 import { useSelector } from "react-redux";
 
 interface ResultsSummaryButtonProps {
   results: Result[];
   queryString: string;
   handleResultMatchClick: Function;
+  pk: string;
 }
 
-const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryString, handleResultMatchClick }) => {
+const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ 
+  handleResultMatchClick,
+  queryString,
+  pk,
+  results }) => {
 
   const config = useSelector(currentConfig);
-  const resultSet = useSelector(currentResultSet);
+  const resultSet = useSelector(getResultSetById(pk));
 
   const isSummaryAvailable = useRef<boolean>(false);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState<boolean>(false);

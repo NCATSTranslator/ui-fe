@@ -18,6 +18,7 @@ interface SupportPathProps {
   path: Path;
   pathFilterState: PathFilterState;
   pathViewStyles: {[key: string]: string;} | null;
+  pk: string;
   selectedPaths: Set<Path> | null;
 }
 
@@ -31,6 +32,7 @@ const SupportPath: FC<SupportPathProps> = ({
   path, 
   pathFilterState, 
   pathViewStyles, 
+  pk,
   selectedPaths }) => {
 
   const { lastViewedPathID } = useLastViewedPath(); 
@@ -85,6 +87,7 @@ const SupportPath: FC<SupportPathProps> = ({
                     activeFilters={activeFilters}
                     pathFilterState={pathFilterState}
                     selectedPaths={selectedPaths}
+                    pk={pk}
                   />
                 );
               })

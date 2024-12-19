@@ -20,14 +20,15 @@ import PublicationsTable from "../EvidenceTables/PublicationsTable";
 import Button from "../Core/Button";
 import { isResultEdge, Path, Result, ResultEdge, ResultSet } from "../../Types/results.d";
 import { Provenance, PublicationObject } from "../../Types/evidence.d";
-import { currentResultSet, getEdgeById, getNodeById } from "../../Redux/resultsSlice";
+import { getResultSetById, getEdgeById, getNodeById } from "../../Redux/resultsSlice";
 
 interface EvidenceModalProps {
   isOpen: boolean;
   onClose: Function;
   path?: Path | null;
-  result: Result;
+  result?: Result;
   edge?: ResultEdge;
+  pk: string;
 }
 
 const EvidenceModal: FC<EvidenceModalProps> = ({
@@ -35,10 +36,11 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   isOpen, 
   onClose, 
   result, 
+  pk,
   edge = null}) => {
 
   const prefs = useSelector(currentPrefs);
-  const resultSet = useSelector(currentResultSet);
+  const resultSet = useSelector(getResultSetById(pk));
 
   const [pubmedEvidence, setPubmedEvidence] = useState<PublicationObject[]>([]);
   const [sources, setSources] = useState<Provenance[]>([]);
@@ -108,7 +110,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer}`}>
-      {result.drug_name &&
+      {result?.drug_name &&
         <div className={styles.top}>
           <h5 className={styles.title}>Evidence for:</h5>
           {
@@ -154,6 +156,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                         selected={isSelected}
                         selectedPaths={null}
                         inModal={true}
+                        pk={pk}
                       />
                     )
                   })

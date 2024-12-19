@@ -10,7 +10,7 @@ import StickyToolbar from "../StickyToolbar/StickyToolbar";
 import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
 import { useSelector, useDispatch } from 'react-redux';
-import { setResultSet, currentResultSet, getResultById, getNodeById, getEdgeById, getPathById }from "../../Redux/resultsSlice";
+import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById, getPathById }from "../../Redux/resultsSlice";
 import { currentPrefs, currentUser }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
@@ -62,7 +62,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
-  let resultSet = useSelector(currentResultSet);
+  let resultSet = useSelector(getResultSetById(currentQueryID));
   // Bool, did the results return an error
   const [isError, setIsError] = useState(false);
   // Bool, are the results still loading
@@ -421,7 +421,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
       .then(response => response.json())
       .then(data => {
         console.log('New results:', data);
-        dispatch(setResultSet(data));
+        dispatch(setResultSet({pk: currentQueryID, resultSet: data}));
         // if we've already gotten results before, set freshRawResults instead to
         // prevent original results from being overwritten
         if(formattedResults.length > 0) {
@@ -924,7 +924,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
         handleClearNotesEditor={handleClearNotesEditor}
         noteLabel={noteLabel.current}
         currentBookmarkID={currentBookmarkID.current}
-        currentQueryID={currentQueryID ? currentQueryID : ""}
+        pk={currentQueryID ? currentQueryID : ""}
         focusModalOpen={focusModalOpen}
         setFocusModalOpen={setFocusModalOpen}
         evidenceModalOpen={evidenceModalOpen}
@@ -947,6 +947,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
               setShareModalFunction={setShareModalOpen}
               results={formattedResults}
               handleResultMatchClick={handleResultMatchClick}
+              pk={!!currentQueryID ? currentQueryID : ""}
             />
           :
             <Query
@@ -959,6 +960,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
               setShareModalFunction={setShareModalOpen}
               results={formattedResults}
               handleResultMatchClick={handleResultMatchClick}
+              pk={!!currentQueryID ? currentQueryID : ""}
             />
         }
         <div className={`${styles.resultsContainer} container`}>
@@ -1055,7 +1057,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
                               activateNotes={activateNotes}
                               activeEntityFilters={activeEntityFilters}
                               zoomKeyDown={zoomKeyDown}
-                              currentQueryID={currentQueryID}
+                              pk={currentQueryID}
                               queryNodeID={nodeIdParam}
                               queryNodeLabel={nodeLabelParam}
                               queryNodeDescription={nodeDescription}

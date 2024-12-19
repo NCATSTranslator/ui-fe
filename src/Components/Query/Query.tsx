@@ -38,6 +38,7 @@ interface QueryProps {
   setShareModalFunction: Dispatch<SetStateAction<boolean>>;
   results: Result[];
   handleResultMatchClick: Function;
+  pk: string;
 }
 
 const Query: FC<QueryProps> = ({
@@ -49,7 +50,8 @@ const Query: FC<QueryProps> = ({
   nodeDescription,
   setShareModalFunction,
   results,
-  handleResultMatchClick
+  handleResultMatchClick,
+  pk
 }) => {
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
@@ -344,6 +346,7 @@ const Query: FC<QueryProps> = ({
                       results={results}
                       queryString={`${resultsPaneQuestionText}${queryItem.node?.label || ""}`}
                       handleResultMatchClick={handleResultMatchClick}
+                      pk={pk}
                     />
                   }
                 </div>
