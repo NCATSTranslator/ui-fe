@@ -1,27 +1,57 @@
 import styles from './UserSave.module.scss';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, MutableRefObject, Dispatch, SetStateAction, FC, useCallback } from 'react';
 import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';
 import ResultsItem from '../ResultsItem/ResultsItem';
-import { emptyEditor } from '../../Utilities/userApi';
+import { emptyEditor, SaveGroup } from '../../Utilities/userApi';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { getFormattedDate } from '../../Utilities/utilities';
+import { Path, Result, ResultEdge } from '../../Types/results';
 import AnimateHeight from 'react-animate-height';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
 import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
+import { getEdgeById, getPathById, getResultSetById } from '../../Redux/resultsSlice';
+import { useSelector } from 'react-redux';
 
-const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, activateNotes,
-  handleBookmarkError, bookmarkAddedToast, bookmarkRemovedToast, setShareModalOpen, setShareResultID}) => {
+interface UserSaveProps {
+  save: [string, SaveGroup];
+  currentSearchString: MutableRefObject<string>;
+  zoomKeyDown: boolean;
+  activateEvidence?: (item: Result, edge: ResultEdge, path: Path, pk: string) => void;
+  activateNotes?: (nameString: string, id: string) => void;
+  handleBookmarkError?: () => void;
+  bookmarkAddedToast?: () => void;
+  bookmarkRemovedToast?: () => void;
+  setShareModalOpen: Dispatch<SetStateAction<boolean>>;
+  setShareResultID: (state: string) => void;
+  scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number}
+}
 
+const UserSave: FC<UserSaveProps> = ({
+  save, 
+  currentSearchString, 
+  zoomKeyDown, 
+  activateEvidence, 
+  activateNotes,
+  handleBookmarkError, 
+  bookmarkAddedToast, 
+  bookmarkRemovedToast, 
+  setShareModalOpen, 
+  setShareResultID,
+  scoreWeights }) => {
+
+    
   let key = save[0];
   let queryObject = save[1];
+  const arspk = queryObject.query.pk;
+  const resultSet = useSelector(getResultSetById(key));
   let typeString = `What ${queryObject.query.type.targetType}s ${queryObject.query.type.pathString}`;
   let queryNodeString = queryObject.query.nodeLabel;
   let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, '0', queryObject.query.type.id, key);
   let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
   const [isExpanded, setIsExpanded] = useState(false);
-  const [height, setHeight] = useState(0);
+  const [height, setHeight] = useState<number | "auto">(0);
 
   useEffect(() => {
     if(isExpanded === false)
@@ -33,11 +63,18 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   }
+
+  const handleActivateEvidence = useCallback((item: Result, edgeID: string, pathID: string) => {
+    const edge = getEdgeById(resultSet, edgeID);
+    const path = getPathById(resultSet, pathID);
+    if(!!path && !!edge && !!activateEvidence)
+      activateEvidence(item, edge, path, arspk);
+  }, [resultSet]);
   return (
     <div key={key} className={styles.query}>
       <div className={styles.topBar}>
         <div className={styles.headingContainer}>
-          <span onClick={handleToggle} target="_blank" rel="noreferrer">
+          <span onClick={handleToggle}>
             <h4 className={styles.heading}>{typeString}
               <Highlighter
                 highlightClassName="highlight"
@@ -146,31 +183,34 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
           </div>
           <div></div>
         </div>
-        {queryObject.saves && Array.from(queryObject.saves).sort((a, b) => a.label.localeCompare(b.label)).map((save) => {
-          let queryType = save.data.query.type;
-          let queryItem = save.data.item;
-          let arspk = save.data.query.pk;
-          let queryNodeID = save.data.query.nodeId;
-          let queryNodeLabel = save.data.query.nodeLabel;
-          let queryNodeDescription = save.data.query.nodeDescription;
+        {queryObject.saves && Array.from(queryObject.saves).sort((a, b) => a.label.localeCompare(b.label)).map((save, i) => {
+          const queryType = save.data.query.type;
+          const queryItem = save.data.item;
+          const queryNodeID = save.data.query.nodeId;
+          const queryNodeLabel = save.data.query.nodeLabel;
+          const queryNodeDescription = save.data.query.nodeDescription;
           queryItem.hasNotes = (save.notes.length === 0 || JSON.stringify(save.notes) === emptyEditor) ? false : true;
+          // console.log(save);
+          if ('compressedPaths' in (save?.data?.item || {})) {
+            // console.warn('old format bookmark');
+            return null;
+          }
           return (
             <div key={save.id} className={styles.result}>
               <ResultsItem
-                rawResults={null}
+                isEven={i % 2 !== 0}
                 key={queryItem.id}
                 queryType={queryType}
-                item={queryItem}
-                activateEvidence={activateEvidence}
+                activateEvidence={handleActivateEvidence}
                 activateNotes={activateNotes}
                 activeEntityFilters={[currentSearchString.current]}
                 zoomKeyDown={zoomKeyDown}
-                currentQueryID={arspk}
-                queryNodeID={queryNodeID}
+                pk={arspk}
+                queryNodeID={(typeof queryNodeID === "string") ? queryNodeID : queryNodeID.toString()}
                 queryNodeLabel={queryNodeLabel}
                 queryNodeDescription={queryNodeDescription}
                 bookmarked={true}
-                bookmarkID={save.id}
+                bookmarkID={(typeof save.id === "string") ? save.id : (save.id === null) ? "" : save.id.toString()}
                 hasNotes={queryItem.hasNotes}
                 handleBookmarkError={handleBookmarkError}
                 bookmarkAddedToast={bookmarkAddedToast}
@@ -179,6 +219,16 @@ const UserSave = ({save, currentSearchString, zoomKeyDown, activateEvidence, act
                 setShareResultID={setShareResultID}
                 isInUserSave={true}
                 resultsComplete={true}
+                isPathfinder={false}
+                result={queryItem}
+                pathFilterState={{}}
+                availableFilters={{}}
+                handleFilter={()=>{}}
+                activeFilters={[]}
+                sharedItemRef={ null}
+                startExpanded={false}
+                setExpandSharedResult={()=>{}}
+                scoreWeights={scoreWeights}
               />
             </div>
           )
