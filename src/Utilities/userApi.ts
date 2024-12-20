@@ -670,6 +670,8 @@ export const useFetchConfigAndPrefs = (userFound: boolean,  setGaID: (id: string
       if(config?.gtmID) {
         setGtmID(config.gtmID);
       }
+      let foo = import.meta.env.VITE_BUILD_INFO;
+      console.log(`hellooo: ${foo}`);
       config.buildInfo = import.meta.env.VITE_BUILD_INFO;
 
       console.log("setting config", config);
