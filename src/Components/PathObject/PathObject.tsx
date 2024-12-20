@@ -7,16 +7,16 @@ import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
 import { Path, PathFilterState, isResultNode, ResultNode, Filter } from '../../Types/results.d';
 import { useSelector } from 'react-redux';
-import { getResultSetById } from '../../Redux/resultsSlice';
+import { getEdgeById, getNodeById, getResultSetById } from '../../Redux/resultsSlice';
 
-interface PathObjectProps {
+export interface PathObjectProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
   handleActivateEvidence?: (pathID: string) => void;
-  handleEdgeClick: (edgeID: string, pathID: string) => void;
+  handleEdgeClick: (edgeID: string | string[], pathID: string) => void;
   handleNodeClick: (name: ResultNode) => void;
-  id: string;
+  id: string | string[];
   index: number;
   inModal?: boolean;
   isEven?: boolean;
@@ -48,7 +48,9 @@ const PathObject: FC<PathObjectProps> = ({
 
   const resultSet = useSelector(getResultSetById(pk));
 
-  const pathObject = (index % 2 === 0) ? resultSet?.data.nodes[id] : resultSet?.data.edges[id];
+  // ID of the main element (in the case of a compressed edge)
+  const itemID = (Array.isArray(id)) ? id[0] : id; 
+  const pathObject = (index % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
   const isNode = isResultNode(pathObject);
   const type = isNode ? pathObject?.types[0].replace("biolink:", ""): '';
   const uid = `${pathID}-${index}-${id}`;

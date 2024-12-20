@@ -14,10 +14,11 @@ import ExternalLink from '../Icons/Buttons/External Link.svg?react';
 import { QueryType } from '../Types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
-import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState } from '../Types/results.d';
+import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState, Tags } from '../Types/results.d';
 import { EvidenceCountsContainer, PublicationObject, PublicationsList } from '../Types/evidence';
 import { Location } from 'react-router-dom';
 import { getEdgeById, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
+import PathObject, { PathObjectProps } from '../Components/PathObject/PathObject';
 
 export const getIcon = (category: string): JSX.Element => {
   var icon = <Chemical/>;
@@ -511,7 +512,7 @@ export const intToChar = (num: number): string => {
  * @returns {number} - The total number of paths, including support paths.
  *
  */
-export const getPathCount = (resultSet: ResultSet, paths: string[] | Path[]): number => {
+export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): number => {
   let count = paths.length;
   for(const p of paths) {
     const path = (typeof p === "string") ? getPathById(resultSet, p) : p;
@@ -551,11 +552,118 @@ export const hasSupport = (item: ResultEdge | null): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;
 };
 
-export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: Path[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null) => {
+export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[]): Path[] => {
+  // Helper function to extract the node sequence from a subgraph
+  const extractNodeSequence = (subgraph: string[]): string[] => {
+    // Even-indexed items are nodes
+    return subgraph.filter((_, index) => index % 2 === 0);
+  };
+
+  // Helper function to merge tags
+  const mergeTags = (tags1: Tags, tags2: Tags): Tags => {
+    const mergedTags: Tags = { ...tags1 };
+  
+    for (const key in tags2) {
+      const tag1 = tags1[key];
+      const tag2 = tags2[key];
+  
+      // If the tag exists in both tags1 and tags2, ensure no duplicates
+      if (tag1 && tag2) {
+        // Check if the tag is the same by comparing name and value
+        if (tag1.name === tag2.name && tag1.value === tag2.value) {
+          // Use the existing tag
+          mergedTags[key] = tag1;
+        } else {
+          // If different, prioritize tag2 or handle conflicts as needed
+          mergedTags[key] = tag2;
+        }
+      } else {
+        // Add the tag from tags2 if it doesn't exist in tags1
+        mergedTags[key] = tag2;
+      }
+    }
+  
+    return mergedTags;
+  };
+
+  // Map to group paths by their node sequences
+  const groupedPaths = new Map<string, Path>();
+
+  for (const path of paths) {
+    const checkedPath = (typeof path === "string") ? getPathById(resultSet, path) : path;
+    if(!checkedPath)
+      continue;
+    // Use nodes as the key
+    const nodeSequence = extractNodeSequence(checkedPath.subgraph).join(",");
+    const existingPath = groupedPaths.get(nodeSequence);
+
+    if (existingPath) {
+      // Create a compressedSubgraph if it doesn't exist yet
+      if (!existingPath.compressedSubgraph) {
+        existingPath.compressedSubgraph = existingPath.subgraph.map((value, index) => {
+          // Convert edge to array
+          if (index % 2 === 1) 
+            return [value];
+          // Keep node as is
+          return value;
+        }) as (string | string[])[];
+      }
+
+      // Merge subgraphs into compressedSubgraph
+      for (let i = 1; i < checkedPath.subgraph.length; i += 2) {
+        const edgeID = checkedPath.subgraph[i];
+        const compressedEdgeArray = existingPath.compressedSubgraph[i] as string[];
+
+        if (Array.isArray(compressedEdgeArray)) {
+          // Add edge to existing array
+          compressedEdgeArray.push(edgeID);
+        }
+      }
+
+      // Merge tags
+      existingPath.tags = mergeTags(existingPath.tags, checkedPath.tags);
+
+      // Merge aras
+      existingPath.aras = Array.from(new Set([...existingPath.aras, ...checkedPath.aras]));
+
+      // Update compressedIDs with all IDs
+      existingPath.compressedIDs = Array.from(
+        new Set(
+          [
+            ...(existingPath.compressedIDs || []), 
+            existingPath.id, 
+            checkedPath.id
+          ].filter((id): id is string => id !== undefined)
+        )
+      );
+
+      // Merge highlighted
+      if (checkedPath.highlighted) {
+        existingPath.highlighted = true;
+      }
+    } else {
+      // Add the current path to the map
+      groupedPaths.set(nodeSequence, {
+        ...checkedPath,
+        // Initially no compressed subgraph
+        compressedSubgraph: null,
+        // Start with the current ID
+        compressedIDs: checkedPath.id ? [checkedPath.id] : [],
+      });
+    }
+  }
+
+  // Return the compressed paths as an array
+  return Array.from(groupedPaths.values());
+}
+
+
+export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null) => {
   if(!paths || !resultSet) 
     return [];
 
-  let newPaths = cloneDeep(paths);
+  let newPaths = getCompressedPaths(resultSet, paths);
+
   newPaths.sort((a: Path, b: Path) => {
     if(b?.id && pathFilterState[b.id] === true)
       return -1;
@@ -574,6 +682,126 @@ export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: Pa
   } 
   return newPaths;
 }
+
+export const pathObjectOutput = (data: PathObjectProps) => {
+  let key = (Array.isArray(data.id)) ? data.id[0] : data.id;
+  
+  if(data.pathID === undefined)
+    return null;
+  return (
+    <>
+      <PathObject
+        pathViewStyles={data.pathViewStyles}
+        index={data.index}
+        isEven={data.isEven}
+        pathID={data.pathID}
+        id={data.id}
+        key={key}
+        handleActivateEvidence={data.handleActivateEvidence}
+        handleEdgeClick={data.handleEdgeClick}
+        handleNodeClick={data.handleNodeClick}
+        activeEntityFilters={data.activeEntityFilters}
+        selectedPaths={data.selectedPaths}
+        pathFilterState={data.pathFilterState}
+        activeFilters={data.activeFilters}
+        pk={data.pk}
+      />
+    </>
+  )
+}
+
+export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): ResultEdge => {
+  const edges = edgeIDs.map(edgeID => getEdgeById(resultSet, edgeID)).filter(edge => !!edge);
+
+  const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
+    aras: edge?.aras || [],
+    is_root: edge?.is_root || false,
+    compressed_edges: edge?.compressed_edges || [],
+    knowledge_level: edge?.knowledge_level || "unknown",
+    object: edge?.object || "",
+    predicate: edge?.predicate || "",
+    predicate_url: edge?.predicate_url || "",
+    provenance: edge?.provenance || [],
+    publications: edge?.publications || {},
+    subject: edge?.subject || "",
+    support: edge?.support || [],
+  });
+
+  if (edges.length === 0 || !edges[0]) {
+    console.warn("No valid edges found for the provided edgeIDs.");
+    return getDefaultEdge(undefined);
+  }
+
+  // Function to merge arrays while avoiding duplicates
+  const mergeArrays = <T extends unknown>(arr1: T[], arr2: T[]): T[] => Array.from(new Set([...arr1, ...arr2]));
+
+  const mergeSupport = (baseEdge: ResultEdge, edge: ResultEdge) => {
+    if (Array.isArray(baseEdge.support) && Array.isArray(edge.support))
+      baseEdge.support = mergeArrays(baseEdge.support as string[], edge.support as string[]);
+  };
+
+  const emptyCompressedEdgesArray: ResultEdge[] = [];
+
+  // Initialize the resulting edge based on the first edge in the list
+  const baseEdge: ResultEdge = { ...getDefaultEdge(edges[0]), compressed_edges: emptyCompressedEdgesArray };
+
+  for (const edge of edges.slice(1)) {
+    if (!edge) continue; // Guard clause for safety
+    const currentEdge = getDefaultEdge(edge);
+
+    if (currentEdge.predicate === baseEdge.predicate) {
+      // Merge properties for edges with the same predicate
+      baseEdge.aras = mergeArrays(baseEdge.aras, currentEdge.aras);
+      baseEdge.provenance = mergeArrays(baseEdge.provenance, currentEdge.provenance);
+      mergeSupport(baseEdge, currentEdge);
+
+      // Merge publications by combining keys
+      for (const [key, value] of Object.entries(currentEdge.publications)) {
+        if (!baseEdge.publications[key]) {
+          baseEdge.publications = {
+            ...baseEdge.publications,
+            [key]: value,
+          };
+        } else {
+          baseEdge.publications = {
+            ...baseEdge.publications,
+            [key]: mergeArrays(baseEdge.publications[key], value),
+          };
+        }
+      }
+    } else {
+      // Handle edges with different predicates
+      const compressedEdge = baseEdge.compressed_edges?.find(e => e.predicate === currentEdge.predicate);
+      if (compressedEdge) {
+        // Merge into existing compressed_edge with the same predicate
+        compressedEdge.aras = mergeArrays(compressedEdge.aras, currentEdge.aras);
+        compressedEdge.provenance = mergeArrays(compressedEdge.provenance, currentEdge.provenance);
+        mergeSupport(baseEdge, currentEdge);
+
+        // Merge publications into the compressed edge
+        for (const [key, value] of Object.entries(currentEdge.publications)) {
+          if (!compressedEdge.publications[key]) {
+            compressedEdge.publications = {
+              ...compressedEdge.publications,
+              [key]: value,
+            };
+          } else {
+            compressedEdge.publications = {
+              ...compressedEdge.publications,
+              [key]: mergeArrays(compressedEdge.publications[key], value),
+            };
+          }
+        }
+      } else {
+        // Add as a new compressed edge
+        baseEdge.compressed_edges?.push({ ...currentEdge, compressed_edges: emptyCompressedEdgesArray });
+      }
+    }
+  }
+
+  return baseEdge;
+};
+
 
 export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): string => {
   const subjectNode = getNodeById(resultSet, edge.subject);

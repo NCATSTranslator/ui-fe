@@ -12,20 +12,22 @@ import ConnectorDottedEnd from '../../Icons/Connectors/inferred-line-end.svg?rea
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import Up from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Highlighter from 'react-highlight-words';
-import { capitalizeAllWords } from '../../Utilities/utilities';
+import { capitalizeAllWords, getCompressedEdge } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Types/results';
+import { getResultSetById } from '../../Redux/resultsSlice';
+import { useSelector } from 'react-redux';
 
 interface PredicateProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
   handleActivateEvidence: (pathID: string) => void;
-  handleEdgeClick: (edgeID: string, pathID: string) => void;
+  handleEdgeClick: (edgeID: string | string[], pathID: string) => void;
   handleNodeClick: (name: ResultNode) => void;
   edge: ResultEdge;
-  edgeID: string;
+  edgeID: string | string[];
   inModal?: boolean | null;
   parentClass?: string;
   pathFilterState: PathFilterState;
@@ -71,12 +73,13 @@ const Predicate: FC<PredicateProps> = ({
     return false;
   }
 
-  const pubCount = (Array.isArray(edge.publications)) ? edge.publications.length : 0;
-  const [isSupportExpanded, setIsSupportExpanded] = useState(edge.is_root);
-  const isMachineLearned = checkForProvenanceType(edge, "ml");
-  const isTrusted = checkForProvenanceType(edge, "trusted");
-  // const hasMore = (edge.predicates && edge.predicates.length > 1);
-  const hasMore = false;
+  let resultSet = useSelector(getResultSetById(pk));
+  const formattedEdge = (!!resultSet && Array.isArray(edgeID) && edgeID.length > 1) ? getCompressedEdge(resultSet, edgeID) : edge;
+  const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
+  const pubCount = (Array.isArray(formattedEdge.publications)) ? formattedEdge.publications.length : 0;
+  const [isSupportExpanded, setIsSupportExpanded] = useState(formattedEdge.is_root);
+  const isMachineLearned = checkForProvenanceType(formattedEdge, "ml");
+  const isTrusted = checkForProvenanceType(formattedEdge, "trusted");
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -88,21 +91,21 @@ const Predicate: FC<PredicateProps> = ({
   return (
     <>
       <Tooltip
-        id={`${edge.predicate}${uid}-ML`}
+        id={`${formattedEdge.predicate}${uid}-ML`}
         place="top"
         className={styles.mlTooltip}
       >
         <span>This relationship was provided by a text-mining algorithm. Click on the relationship and view its knowledge sources to learn more.</span>
       </Tooltip>
       <Tooltip
-        id={`${edge.predicate}${uid}-TR`}
+        id={`${formattedEdge.predicate}${uid}-TR`}
         place="top"
         className={styles.mlTooltip}
       >
         <span>This relationship was generated using information found in a database that includes human curation. Click on the relationship and view its knowledge sources to learn more.</span>
       </Tooltip>
       <Tooltip
-        id={`${edge.predicate}${uid}`}
+        id={`${formattedEdge.predicate}${uid}`}
         place={`${inModal ? 'left' : 'top' }`}
         >
         {
@@ -118,12 +121,12 @@ const Predicate: FC<PredicateProps> = ({
                 highlightClassName="highlight"
                 searchWords={activeEntityFilters}
                 autoEscape={true}
-                textToHighlight={capitalizeAllWords(edge.predicate)}
+                textToHighlight={capitalizeAllWords(formattedEdge.predicate)}
               />
               {
-                edge.predicate_url &&
+                formattedEdge.predicate_url &&
                 <a
-                  href={edge.predicate_url}
+                  href={formattedEdge.predicate_url}
                   onClick={(e)=> {
                     e.stopPropagation();
                   }}
@@ -134,6 +137,44 @@ const Predicate: FC<PredicateProps> = ({
               }
             </p>
             {
+              !!formattedEdge?.compressed_edges &&
+              formattedEdge.compressed_edges.map((edge) => {
+                if(!edge)
+                  return null;
+                return (
+                  <p
+                    key={`${edge.predicate}`}
+                    className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
+                    onClick={(e)=> {
+                      e.stopPropagation();
+                      // if(i > 0) {
+                      //   handleEdgeClick(pathObject.compressedEdges[i-1], pathObjectContainer);
+                      // } else {
+                      //   handleEdgeClick(pathObject, pathObjectContainer);
+                      // }
+                    }}
+                    >
+                    <Highlighter
+                      highlightClassName="highlight"
+                      searchWords={activeEntityFilters}
+                      autoEscape={true}
+                      textToHighlight={capitalizeAllWords(edge.predicate)}
+                    />
+                    {
+                      edge.predicate_url &&
+                      <a
+                        href={edge.predicate_url }
+                        onClick={(e)=> {
+                          e.stopPropagation();
+                        }}
+                        target="_blank"
+                        rel='noreferrer'>
+                          <ExternalLink/>
+                      </a>
+                    }
+                  </p>
+                );
+              })
               // pathObject.predicates &&
               // pathObject.predicates.map((predicate, i)=> {
               //   let formattedPredicate = (predicate?.predicate) ? predicate.predicate : "No Predicate Available";
@@ -198,33 +239,32 @@ const Predicate: FC<PredicateProps> = ({
           <div className={styles.badges}>
             {
               isTrusted
-              ? <img src={selected ? BadgeSelected : Badge} alt="" className={styles.robot} data-tooltip-id={`${edge.predicate}${uid}-TR`} />
+              ? <img src={selected ? BadgeSelected : Badge} alt="" className={styles.robot} data-tooltip-id={`${formattedEdge.predicate}${uid}-TR`} />
               : null
             }
             {
               isMachineLearned
-              ? <img src={selected ? RobotSelected : Robot} alt="" className={styles.robot} data-tooltip-id={`${edge.predicate}${uid}-ML`} />
+              ? <img src={selected ? RobotSelected : Robot} alt="" className={styles.robot} data-tooltip-id={`${formattedEdge.predicate}${uid}-ML`} />
               : null
             }
           </div>
           {
-            (pubCount >= 1 && edge.provenance?.length > 0)
+            (pubCount >= 1 && formattedEdge.provenance?.length > 0)
             ? <ResearchMultiple className={styles.evidenceIcon} />
             : ''
           }
-          <span data-tooltip-id={`${edge.predicate}${uid}`} className={styles.pathLabel}>
+          <span data-tooltip-id={`${formattedEdge.predicate}${uid}`} className={styles.pathLabel}>
             <Highlighter
               highlightClassName="highlight"
               searchWords={activeEntityFilters}
               autoEscape={true}
-              textToHighlight={capitalizeAllWords(edge.predicate)}
+              textToHighlight={capitalizeAllWords(formattedEdge.predicate)}
             />
             {
-              // !!pathObject.predicates &&
-              // hasMore &&
-              // <span className={styles.more}>
-              //   + {pathObject.predicates.length - 1} More
-              // </span>
+              !!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0 &&
+              <span className={styles.more}>
+                + {formattedEdge.compressed_edges.length} More
+              </span>
             }
           </span>
         </span>

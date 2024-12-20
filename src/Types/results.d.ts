@@ -213,10 +213,15 @@ export interface Path {
   aras: string[];
   highlighted?: boolean;
   id?: string;
-  // array of nodes and edges in order
+  // Original subgraph
   subgraph: string[];
+  // Compressed subgraph with edges as arrays
+  compressedSubgraph?: (string | string[])[] | null;
   tags: Tags;
+  // Array of all IDs from original and compressed paths
+  compressedIDs?: string[];
 }
+
 export interface RankedPath extends Path {
   // array of nodes and edges in order
   subgraph: (RankedEdge | ResultNode)[];
@@ -232,17 +237,18 @@ export interface ResultEdge {
   // array of ARA names
   aras: string[];
   "is_root": boolean;
+  compressed_edges?: ResultEdge[];
   knowledge_level: KnowledgeLevel;
   // nodeID
   object: string;
   predicate: string;
   predicate_url: string;
   provenance: Provenance[];
-  publications: {[key: string]: [{id: string; support: PublicationSupport}]};
+  publications: {[key: string]: {id: string; support: PublicationSupport}[]};
   // nodeID
   subject: string;
   // array of path ids or Path objects
-  support: string[] | Path[];
+  support: (string | Path)[];
 }
 
 export interface RankedEdge extends ResultEdge {
@@ -290,6 +296,9 @@ export type ResultGraph = {
   }[];
 }
 
+export type Tags = {
+  [key:string]: {name: string, value: string}
+}
 export type Filter = {
   count?: number
   name: string;

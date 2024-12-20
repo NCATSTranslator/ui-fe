@@ -15,11 +15,11 @@ interface SupportPathGroupProps {
   activeFilters: Filter[];
   activeEntityFilters: string[];
   handleActivateEvidence: (pathID: string) => void;
-  handleEdgeClick: (edgeID: string, pathID: string) => void;
+  handleEdgeClick: (edgeID: string | string[], pathID: string) => void;
   handleNodeClick: (name: ResultNode) => void;
   isExpanded: boolean;
   pathFilterState: PathFilterState;
-  pathArray: string[] | Path[];
+  pathArray: (string | Path)[];
   pathViewStyles: {[key: string]: string;} | null;
   pk: string;
   selectedPaths: Set<Path> | null;
@@ -87,18 +87,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
     }
   }, [pathArray, activeEntityFilters, formattedPaths, resultSet]);
 
-  // const generateTooltipID = (subgraph: (FormattedNodeObject | FormattedEdgeObject)[]) => {
-  //   return subgraph.map((sub) => {
-  //     if(isFormattedEdgeObject(sub)) {
-  //       return !!sub.predicates && sub.predicates[0].predicate;
-  //     }
-  //     if(isFormattedNodeObject(sub)) {
-  //       return sub.name;
-  //     }
-  //     return "";
-  //   }).join("-");
-  // }
-
   return(
     <AnimateHeight
       className={`${!!pathViewStyles && pathViewStyles.support} ${styles.support} ${isExpanded ? styles.open : styles.closed }`}
@@ -112,7 +100,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
           displayedPaths.map((supportPath, i) => {
             if(!supportPath)
               return null;
-            // const indexInFullCollection = (!!pathArray) ? pathArray.findIndex(id => id === supportPath.id) : -1;
             const indexInFullCollection = itemOffset + i;
             const character = intToChar(indexInFullCollection + 1);
             return (

@@ -255,9 +255,9 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
       }
     } else {
       for (let ftr of pathFilters) {
-        if (ftr.negated && path.tags[ftr.id] !== undefined) {
+        if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
           pathRank.rank = excludeRank;
-        } else if (!ftr.negated && path.tags[ftr.id] !== undefined) {
+        } else if (!ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
           pathRank.rank += includeRank;
         }
       }
@@ -280,7 +280,7 @@ const pathRankCompare = (a: PathRank, b: PathRank) => {
 }
 
 export const convertResultEdgeToRankedEdge = (resultSet: ResultSet, edge: ResultEdge): RankedEdge => {
-  const convertSupportToRankedPaths = (support: string[] | Path[]): RankedPath[] => {
+  const convertSupportToRankedPaths = (support: (string | Path)[]): RankedPath[] => {
     return support.map((item) => {
       const path = typeof item === "string" ? getPathById(resultSet, item) : item;
       if (!path) {

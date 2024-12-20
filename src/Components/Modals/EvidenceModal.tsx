@@ -100,12 +100,16 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     setSources(displayedSources);
   }
 
-  const handleEdgeClick = (edgeID: string, pathID: string) => {
-    const edge = getEdgeById(resultSet, edgeID);
-    if(!edge || !selectedEdge || checkForEdgeMatch(edge, selectedEdge) === true || !resultSet)
-      return;
-    handleSelectedEdge(resultSet, edge)
-    setEdgeSelectedTrigger(prev=>!prev);
+  const handleEdgeClick = (edgeID: string | string[], pathID: string) => {
+    if(!Array.isArray(edgeID)) {
+      const edge = getEdgeById(resultSet, edgeID);
+      if(!edge || !selectedEdge || checkForEdgeMatch(edge, selectedEdge) === true || !resultSet)
+        return;
+      handleSelectedEdge(resultSet, edge)
+      setEdgeSelectedTrigger(prev=>!prev);
+    } else {
+      // handle compressed edge
+    }
   }
 
   return (

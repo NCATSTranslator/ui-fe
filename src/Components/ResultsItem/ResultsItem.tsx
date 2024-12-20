@@ -174,9 +174,14 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setIsExpanded(prev => !prev);
   }
 
-  const handleEdgeSpecificEvidence = useCallback((edgeID: string, pathID: string) => {
-    if(!!result)
+  const handleEdgeSpecificEvidence = useCallback((edgeID: string | string[], pathID: string) => {
+    if(!result)
+      return;
+    if(!Array.isArray(edgeID)) 
       activateEvidence(result, edgeID, pathID);
+    // else 
+      // handle compressed edge
+
   }, [result, activateEvidence])
 
   const handleActivateEvidence = useCallback((pathID: string) => {

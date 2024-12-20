@@ -1,13 +1,12 @@
 import styles from './PathView.module.scss';
 import { useState, useMemo, useCallback, useRef, createContext, FC } from "react";
-import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import ReactPaginate from 'react-paginate';
 import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
-import { getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
+import { getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords, pathObjectOutput } from '../../Utilities/utilities';
 import { PathFilterState, ResultNode, Path, ResultSet, Filter } from '../../Types/results';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
@@ -31,7 +30,7 @@ interface PathViewProps {
   isEven: boolean;
   pathArray: string[] | Path[];
   selectedPaths: Set<Path> | null;
-  handleEdgeSpecificEvidence:(edgeID: string, pathID: string) => void;
+  handleEdgeSpecificEvidence:(edgeID: string | string[], pathID: string) => void;
   handleActivateEvidence: (pathID: string) => void;
   activeEntityFilters: string[];
   pathFilterState: PathFilterState;
@@ -85,7 +84,7 @@ const PathView: FC<PathViewProps> = ({
       window.open(name.provenance[0], '_blank');
   },[]);
 
-  const handleEdgeClick = useCallback((edgeID: string, pathID: string) => {
+  const handleEdgeClick = useCallback((edgeID: string | string[], pathID: string) => {
     setLastViewedPathID(pathID);
     handleEdgeSpecificEvidence(edgeID, pathID);
   }, [handleEdgeSpecificEvidence]);
@@ -166,32 +165,43 @@ const PathView: FC<PathViewProps> = ({
                       </Tooltip>
                       <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''}`} >
                         {
-                          pathToDisplay.subgraph.map((subgraphItemID: string, j: number) => {
-                            let key = `${subgraphItemID}`;
-
-                            if(pathToDisplay.id === undefined)
-                              return null;
-                            return (
-                              <>
-                                <PathObject
-                                  pathViewStyles={styles}
-                                  index={j}
-                                  isEven={isEven}
-                                  pathID={pathToDisplay.id}
-                                  id={subgraphItemID}
-                                  key={key}
-                                  handleActivateEvidence={handleActivateEvidence}
-                                  handleEdgeClick={handleEdgeClick}
-                                  handleNodeClick={handleNodeClick}
-                                  activeEntityFilters={activeEntityFilters}
-                                  selectedPaths={selectedPaths}
-                                  pathFilterState={pathFilterState}
-                                  activeFilters={activeFilters}
-                                  pk={pk}
-                                />
-                              </>
+                          !!pathToDisplay?.compressedSubgraph
+                          ?
+                            pathToDisplay.compressedSubgraph.map((subgraphItemID, i) => pathObjectOutput(
+                              {
+                                pathViewStyles:styles,
+                                isEven: isEven,
+                                index: i,
+                                pathID: pathToDisplay.id || "",
+                                id: subgraphItemID,
+                                handleActivateEvidence: handleActivateEvidence,
+                                handleEdgeClick: handleEdgeClick,
+                                handleNodeClick: handleNodeClick,
+                                activeEntityFilters: activeEntityFilters,
+                                selectedPaths: selectedPaths,
+                                pathFilterState: pathFilterState,
+                                activeFilters: activeFilters,
+                                pk:pk
+                              })
                             )
-                          })
+                          :
+                            pathToDisplay.subgraph.map((subgraphItemID, i) => pathObjectOutput(
+                              {
+                                pathViewStyles:styles,
+                                isEven: isEven,
+                                index: i,
+                                pathID: pathToDisplay.id || "",
+                                id: subgraphItemID,
+                                handleActivateEvidence: handleActivateEvidence,
+                                handleEdgeClick: handleEdgeClick,
+                                handleNodeClick: handleNodeClick,
+                                activeEntityFilters: activeEntityFilters,
+                                selectedPaths: selectedPaths,
+                                pathFilterState: pathFilterState,
+                                activeFilters: activeFilters,
+                                pk:pk
+                              })
+                            )
                         }
                       </div>
                     </div>

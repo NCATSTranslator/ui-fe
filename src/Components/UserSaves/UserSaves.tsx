@@ -98,7 +98,6 @@ const UserSaves = () => {
     for(const saveGroupKey of saveGroupsToRemove)
       delete newSaves[saveGroupKey];
 
-    console.log("merged result sets: ", resultSetsToAdd);
     dispatch(setResultSets(resultSetsToAdd))
     setSavesLoaded(true);
     setFilteredUserSaves(cloneDeep(newSaves));
