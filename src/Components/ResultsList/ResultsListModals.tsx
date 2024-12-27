@@ -5,6 +5,7 @@ import ShareModal from "../Modals/ShareModal";
 import ResultFocusModal from "../Modals/ResultFocusModal";
 import { ToastContainer, Slide } from 'react-toastify';
 import { handleEvidenceModalClose } from "../../Utilities/resultsInteractionFunctions";
+import { Path, ResultEdge } from "../../Types/results";
 
 interface ResultsListModalsProps {
   currentBookmarkID: string | null | undefined;
@@ -17,8 +18,8 @@ interface ResultsListModalsProps {
   notesModalOpen: boolean;
   pk: string;
   presetTypeID: string;
-  selectedEdge: any; 
-  selectedPath: any; 
+  selectedEdge: ResultEdge | null; 
+  selectedPath: Path | null; 
   selectedResult: any; 
   setAutoScrollToResult: Dispatch<SetStateAction<boolean>>;
   setExpandSharedResult: Dispatch<SetStateAction<boolean>>;

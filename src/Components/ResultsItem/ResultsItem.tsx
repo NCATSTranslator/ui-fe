@@ -49,7 +49,7 @@ const sortTagsBySelected = (
 };
 
 type ResultsItemProps = {
-  activateEvidence?: (item: Result, edgeID: string, pathID: string) => void;
+  activateEvidence?: (item: Result, edgeID: string, path: Path) => void;
   activateNotes?: (nameString: string, id: string) => void;
   activeEntityFilters: string[];
   activeFilters: Filter[];
@@ -174,17 +174,14 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setIsExpanded(prev => !prev);
   }
 
-  const handleEdgeSpecificEvidence = useCallback((edgeID: string | string[], pathID: string) => {
+  const handleEdgeSpecificEvidence = useCallback((edgeID: string, path: Path) => {
     if(!result)
       return;
-    if(!Array.isArray(edgeID)) 
-      activateEvidence(result, edgeID, pathID);
-    // else 
-      // handle compressed edge
 
+    activateEvidence(result, edgeID, path);
   }, [result, activateEvidence])
 
-  const handleActivateEvidence = useCallback((pathID: string) => {
+  const handleActivateEvidence = useCallback((path: Path) => {
     // if(path.path.subgraph[1] !== null && isFormattedEdgeObject(path.path.subgraph[1]))
       // activateEvidence(item, path.path.subgraph[1], path);
   }, [result, activateEvidence])

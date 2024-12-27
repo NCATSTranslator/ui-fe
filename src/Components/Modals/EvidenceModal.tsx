@@ -27,7 +27,7 @@ interface EvidenceModalProps {
   onClose: Function;
   path?: Path | null;
   result?: Result;
-  edge?: ResultEdge;
+  edge: ResultEdge | null;
   pk: string;
 }
 
@@ -100,16 +100,12 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     setSources(displayedSources);
   }
 
-  const handleEdgeClick = (edgeID: string | string[], pathID: string) => {
-    if(!Array.isArray(edgeID)) {
-      const edge = getEdgeById(resultSet, edgeID);
-      if(!edge || !selectedEdge || checkForEdgeMatch(edge, selectedEdge) === true || !resultSet)
-        return;
-      handleSelectedEdge(resultSet, edge)
-      setEdgeSelectedTrigger(prev=>!prev);
-    } else {
-      // handle compressed edge
-    }
+  const handleEdgeClick = (edgeID: string, path: Path) => {
+    const edge = getEdgeById(resultSet, edgeID);
+    if(!edge || !selectedEdge || !resultSet)
+      return;
+    handleSelectedEdge(resultSet, edge)
+    setEdgeSelectedTrigger(prev=>!prev);
   }
 
   return (
@@ -136,34 +132,104 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
               </Button>
               <div className={`${styles.pathView} scrollable-support path ${numberToWords(pathLength)}`}>
                 {
-                  path.subgraph.map((itemID, i) => {
-                    const pathItem = (i % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
-                    if(!pathItem)
-                      return null;
+                  !!path?.compressedSubgraph
+                  ?
+                    path.compressedSubgraph.map((itemID, i) => {
+                      if(!Array.isArray(itemID)) {
+                        const pathItem = (i % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
+                        if(!pathItem)
+                          return null;
+  
+                        let key = `${itemID}-${i}`;
+                        const isEdge = isResultEdge(pathItem);
+                        let isSelected = (isEdge && checkForEdgeMatch(selectedEdge, pathItem));
+                        return (
+                          <PathObject
+                            pathViewStyles={styles}
+                            index={i}
+                            isEven={false}
+                            path={path}
+                            id={itemID}
+                            key={key}
+                            handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
+                            handleEdgeClick={handleEdgeClick}
+                            pathFilterState={{}}
+                            activeFilters={[]}
+                            activeEntityFilters={[]}
+                            selected={isSelected}
+                            selectedPaths={null}
+                            inModal={true}
+                            pk={pk}
+                          />
+                        )
+                      } else {
+                        console.log(itemID);
+                        return(
+                          <div className="grouped-preds">
+                            {
+                              itemID.map((id, j)=> {
+                                let key = `${edge}-${j}`;
+                                const pathItem = getEdgeById(resultSet, id);
+                                // console.log(id, pathItem);
+                                if(!pathItem)
+                                  return null;
+          
+                                const isEdge = isResultEdge(pathItem);
+                                let isSelected = (isEdge && checkForEdgeMatch(selectedEdge, pathItem));
+                                return (
+                                  <PathObject
+                                    pathViewStyles={styles}
+                                    index={i}
+                                    isEven={false}
+                                    path={path}
+                                    id={id}
+                                    key={key}
+                                    handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
+                                    handleEdgeClick={handleEdgeClick}
+                                    pathFilterState={{}}
+                                    activeFilters={[]}
+                                    activeEntityFilters={[]}
+                                    selected={isSelected}
+                                    selectedPaths={null}
+                                    inModal={true}
+                                    pk={pk}
+                                  />
+                                )
+                              })
+                            }
+                          </div>
+                        )
+                      }
+                    })
+                  :
+                    path.subgraph.map((itemID, i) => {
+                      const pathItem = (i % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
+                      if(!pathItem)
+                        return null;
 
-                    let key = `${itemID}-${i}`;
-                    const isEdge = isResultEdge(pathItem);
-                    let isSelected = (isEdge && checkForEdgeMatch(selectedEdge, pathItem));
-                    return (
-                      <PathObject
-                        pathViewStyles={styles}
-                        index={i}
-                        isEven={false}
-                        pathID={path.id ?? "0"}
-                        id={itemID}
-                        key={key}
-                        handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
-                        handleEdgeClick={handleEdgeClick}
-                        pathFilterState={{}}
-                        activeFilters={[]}
-                        activeEntityFilters={[]}
-                        selected={isSelected}
-                        selectedPaths={null}
-                        inModal={true}
-                        pk={pk}
-                      />
-                    )
-                  })
+                      let key = `${itemID}-${i}`;
+                      const isEdge = isResultEdge(pathItem);
+                      let isSelected = (isEdge && checkForEdgeMatch(selectedEdge, pathItem));
+                      return (
+                        <PathObject
+                          pathViewStyles={styles}
+                          index={i}
+                          isEven={false}
+                          path={path}
+                          id={itemID}
+                          key={key}
+                          handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
+                          handleEdgeClick={handleEdgeClick}
+                          pathFilterState={{}}
+                          activeFilters={[]}
+                          activeEntityFilters={[]}
+                          selected={isSelected}
+                          selectedPaths={null}
+                          inModal={true}
+                          pk={pk}
+                        />
+                      )
+                    })
                 }
               </div>
             </div>

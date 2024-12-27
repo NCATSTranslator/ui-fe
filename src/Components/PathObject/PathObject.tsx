@@ -13,14 +13,14 @@ export interface PathObjectProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence?: (pathID: string) => void;
-  handleEdgeClick: (edgeID: string | string[], pathID: string) => void;
+  handleActivateEvidence?: (path: Path) => void;
+  handleEdgeClick: (edgeID: string, path: Path) => void;
   handleNodeClick: (name: ResultNode) => void;
   id: string | string[];
   index: number;
   inModal?: boolean;
   isEven?: boolean;
-  pathID: string;
+  path: Path;
   pathFilterState: PathFilterState;
   pathViewStyles?: {[key: string]: string;} | null;
   pk: string;
@@ -40,7 +40,7 @@ const PathObject: FC<PathObjectProps> = ({
   inModal = false, 
   isEven = false, 
   pathFilterState, 
-  pathID, 
+  path, 
   pathViewStyles = null, 
   pk,
   selected, 
@@ -53,7 +53,7 @@ const PathObject: FC<PathObjectProps> = ({
   const pathObject = (index % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
   const isNode = isResultNode(pathObject);
   const type = isNode ? pathObject?.types[0].replace("biolink:", ""): '';
-  const uid = `${pathID}-${index}-${id}`;
+  const uid = `${path?.id || ""}-${index}-${id}`;
   let nameString = '';
   let typeString = '';
   if(isNode) {
@@ -101,9 +101,9 @@ const PathObject: FC<PathObjectProps> = ({
             </span>
           :
             <Predicate
-              pathID={pathID}
+              path={path}
               edge={pathObject}
-              edgeID={id}
+              edgeIDs={(Array.isArray(id)) ? id : [id]}
               selected={selected}
               activeEntityFilters={activeEntityFilters}
               activeFilters={activeFilters}

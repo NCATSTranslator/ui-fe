@@ -34,7 +34,7 @@ const UserSaves = () => {
   const currentSearchString = useRef("");
   const [evidenceModalOpen, setEvidenceModalOpen] = useState(false);
   const [selectedResult, setSelectedResult] = useState<Result | undefined>(undefined);
-  const [selectedEdge, setSelectedEdge] = useState<ResultEdge | undefined>(undefined);
+  const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
   const [selectedPath, setSelectedPath] = useState<Path | undefined>(undefined);
   const [selectedPK, setSelectedPK] = useState<string | undefined>(undefined);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);

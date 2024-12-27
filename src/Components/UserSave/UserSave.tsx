@@ -64,10 +64,9 @@ const UserSave: FC<UserSaveProps> = ({
     setIsExpanded(!isExpanded);
   }
 
-  const handleActivateEvidence = useCallback((item: Result, edgeID: string, pathID: string) => {
+  const handleActivateEvidence = useCallback((item: Result, edgeID: string, path: Path) => {
     const edge = getEdgeById(resultSet, edgeID);
-    const path = getPathById(resultSet, pathID);
-    if(!!path && !!edge && !!activateEvidence)
+    if(!!edge && !!activateEvidence)
       activateEvidence(item, edge, path, arspk);
   }, [resultSet]);
   return (

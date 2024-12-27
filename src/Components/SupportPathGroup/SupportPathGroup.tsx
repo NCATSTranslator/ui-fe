@@ -14,8 +14,8 @@ import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 interface SupportPathGroupProps {
   activeFilters: Filter[];
   activeEntityFilters: string[];
-  handleActivateEvidence: (pathID: string) => void;
-  handleEdgeClick: (edgeID: string | string[], pathID: string) => void;
+  handleActivateEvidence: (path: Path) => void;
+  handleEdgeClick: (edgeID: string, path: Path) => void;
   handleNodeClick: (name: ResultNode) => void;
   isExpanded: boolean;
   pathFilterState: PathFilterState;

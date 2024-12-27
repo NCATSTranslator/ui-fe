@@ -321,6 +321,13 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
       result.pathCount = getPathCount(newResultSet, result.paths);
       result.score = generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
     }
+    // assign ids to edges
+    for(const [id, edge] of Object.entries(newResultSet.data.edges)) {
+      edge.id = id;
+    }
+
+    dispatch(setResultSet({pk: currentQueryID || "", resultSet: newResultSet}));
+
     const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current);
 
     // we have results to show, set isLoading to false
@@ -421,7 +428,6 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
       .then(response => response.json())
       .then(data => {
         console.log('New results:', data);
-        dispatch(setResultSet({pk: currentQueryID, resultSet: data}));
         // if we've already gotten results before, set freshRawResults instead to
         // prevent original results from being overwritten
         if(formattedResults.length > 0) {
@@ -619,10 +625,9 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   /**
    * Activates sets the evidence and opens the evidence modal.
    */
-  const activateEvidence = useCallback((item: Result, edgeID: string, pathID: string) => {
+  const activateEvidence = useCallback((item: Result, edgeID: string, path: Path) => {
     const edge = getEdgeById(resultSet, edgeID);
-    const path = getPathById(resultSet, pathID);
-    if(!!edge && !!path) {
+    if(!!edge) {
       setSelectedResult(item);
       setSelectedEdge(edge);
       setSelectedPath(path);

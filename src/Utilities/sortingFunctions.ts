@@ -1,5 +1,5 @@
 import { equal } from 'mathjs';
-import { getEvidenceCounts, getPathCount, hasSupport, isPublicationObjectArray, calculateTotalEvidence, getStringNameFromPath } from './utilities';
+import { getEvidenceCounts, getPathCount, hasSupport, isPublicationObjectArray, calculateTotalEvidence, getStringNameFromPath, getDefaultEdge } from './utilities';
 import { Filter, Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet } from '../Types/results.d';
 import { PublicationObject } from '../Types/evidence.d';
 import { generateScore } from './scoring';
@@ -311,25 +311,12 @@ export const convertPathToRankedPath = (resultSet: ResultSet, path: Path): Ranke
     types: [],
   };
 
-  const defaultEdge: ResultEdge = {
-    aras: [],
-    "is_root": false,
-    knowledge_level: "unknown",
-    object: "",
-    predicate: "",
-    predicate_url: "",
-    provenance: [],
-    publications: {},
-    subject: "",
-    support: [],
-  };
-
   const transformedSubgraph = path.subgraph.map((id, i) => {
     if(i % 2 === 0) {
       const node = getNodeById(resultSet, id);
       return node || defaultNode; 
     } else {
-      const edge = getEdgeById(resultSet, id) || defaultEdge;
+      const edge = getEdgeById(resultSet, id) || getDefaultEdge(undefined);
       return convertResultEdgeToRankedEdge(resultSet, edge);
     }
   });

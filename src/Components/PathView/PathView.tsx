@@ -6,11 +6,12 @@ import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
-import { getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords, pathObjectOutput } from '../../Utilities/utilities';
+import { getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
 import { PathFilterState, ResultNode, Path, ResultSet, Filter } from '../../Types/results';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
+import PathObject from '../PathObject/PathObject';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 
@@ -30,8 +31,8 @@ interface PathViewProps {
   isEven: boolean;
   pathArray: string[] | Path[];
   selectedPaths: Set<Path> | null;
-  handleEdgeSpecificEvidence:(edgeID: string | string[], pathID: string) => void;
-  handleActivateEvidence: (pathID: string) => void;
+  handleEdgeSpecificEvidence:(edgeID: string, path: Path) => void;
+  handleActivateEvidence: (path: Path) => void;
   activeEntityFilters: string[];
   pathFilterState: PathFilterState;
   pk: string;
@@ -84,9 +85,9 @@ const PathView: FC<PathViewProps> = ({
       window.open(name.provenance[0], '_blank');
   },[]);
 
-  const handleEdgeClick = useCallback((edgeID: string | string[], pathID: string) => {
-    setLastViewedPathID(pathID);
-    handleEdgeSpecificEvidence(edgeID, pathID);
+  const handleEdgeClick = useCallback((edgeID: string, path: Path) => {
+    setLastViewedPathID(path?.id || null);
+    handleEdgeSpecificEvidence(edgeID, path);
   }, [handleEdgeSpecificEvidence]);
 
   if(!resultSet)
@@ -152,7 +153,7 @@ const PathView: FC<PathViewProps> = ({
                         { indexInFullCollection + 1 }
                       </span>
                       <button
-                        onClick={()=>(pathToDisplay.id) ? handleActivateEvidence(pathToDisplay.id) : null}
+                        onClick={()=>(pathToDisplay.id) ? handleActivateEvidence(pathToDisplay) : null}
                         className={styles.pathEvidenceButton}
                         data-tooltip-id={tooltipID}
                         >
@@ -167,41 +168,56 @@ const PathView: FC<PathViewProps> = ({
                         {
                           !!pathToDisplay?.compressedSubgraph
                           ?
-                            pathToDisplay.compressedSubgraph.map((subgraphItemID, i) => pathObjectOutput(
-                              {
-                                pathViewStyles:styles,
-                                isEven: isEven,
-                                index: i,
-                                pathID: pathToDisplay.id || "",
-                                id: subgraphItemID,
-                                handleActivateEvidence: handleActivateEvidence,
-                                handleEdgeClick: handleEdgeClick,
-                                handleNodeClick: handleNodeClick,
-                                activeEntityFilters: activeEntityFilters,
-                                selectedPaths: selectedPaths,
-                                pathFilterState: pathFilterState,
-                                activeFilters: activeFilters,
-                                pk:pk
-                              })
-                            )
+                            pathToDisplay.compressedSubgraph.map((subgraphItemID, i) => {
+                              let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
+                              if(pathToDisplay.id === undefined)
+                                return null;
+                              return (
+                                <>
+                                  <PathObject
+                                    pathViewStyles={styles}
+                                    index={i}
+                                    isEven={isEven}
+                                    path={pathToDisplay}
+                                    id={subgraphItemID}
+                                    key={key}
+                                    handleActivateEvidence={handleActivateEvidence}
+                                    handleEdgeClick={handleEdgeClick}
+                                    handleNodeClick={handleNodeClick}
+                                    activeEntityFilters={activeEntityFilters}
+                                    selectedPaths={selectedPaths}
+                                    pathFilterState={pathFilterState}
+                                    activeFilters={activeFilters}
+                                    pk={pk}
+                                  />
+                                </>
+                              )
+                            }) 
                           :
-                            pathToDisplay.subgraph.map((subgraphItemID, i) => pathObjectOutput(
-                              {
-                                pathViewStyles:styles,
-                                isEven: isEven,
-                                index: i,
-                                pathID: pathToDisplay.id || "",
-                                id: subgraphItemID,
-                                handleActivateEvidence: handleActivateEvidence,
-                                handleEdgeClick: handleEdgeClick,
-                                handleNodeClick: handleNodeClick,
-                                activeEntityFilters: activeEntityFilters,
-                                selectedPaths: selectedPaths,
-                                pathFilterState: pathFilterState,
-                                activeFilters: activeFilters,
-                                pk:pk
-                              })
-                            )
+                            pathToDisplay.subgraph.map((subgraphItemID, i) => {
+                              if(pathToDisplay.id === undefined)
+                                return null;
+                              return (
+                                <>
+                                  <PathObject
+                                    pathViewStyles={styles}
+                                    index={i}
+                                    isEven={isEven}
+                                    path={pathToDisplay}
+                                    id={subgraphItemID}
+                                    key={subgraphItemID}
+                                    handleActivateEvidence={handleActivateEvidence}
+                                    handleEdgeClick={handleEdgeClick}
+                                    handleNodeClick={handleNodeClick}
+                                    activeEntityFilters={activeEntityFilters}
+                                    selectedPaths={selectedPaths}
+                                    pathFilterState={pathFilterState}
+                                    activeFilters={activeFilters}
+                                    pk={pk}
+                                  />
+                                </>
+                              )
+                            })
                         }
                       </div>
                     </div>

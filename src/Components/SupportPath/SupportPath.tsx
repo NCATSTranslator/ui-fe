@@ -12,9 +12,9 @@ interface SupportPathProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   character: string;
-  handleEdgeClick: (edgeID: string | string[], pathID: string) => void;
+  handleEdgeClick: (edgeID: string, path: Path) => void;
   handleNodeClick: (name: ResultNode) => void;
-  handleActivateEvidence: (pathID: string) => void;
+  handleActivateEvidence: (path: Path) => void;
   path: Path;
   pathFilterState: PathFilterState;
   pathViewStyles: {[key: string]: string;} | null;
@@ -52,7 +52,7 @@ const SupportPath: FC<SupportPathProps> = ({
             { character }
           </span>
           <button
-            onClick={()=>(path?.id) && handleActivateEvidence(path.id)}
+            onClick={()=>handleActivateEvidence(path)}
             className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
             data-tooltip-id={`${tooltipID}`}
             >
@@ -70,27 +70,58 @@ const SupportPath: FC<SupportPathProps> = ({
             ${!!pathFilterState && !!path?.id && pathFilterState[path.id] ? !!pathViewStyles && pathViewStyles.filtered : ''}`}
             >
             {
-              path.subgraph.map((supportItemID, i) => {
-                let pathKey = `${supportItemID}_${i}`;
-                return (
-                  <PathObject
-                    pathViewStyles={pathViewStyles}
-                    index={i}
-                    pathID={(!!path?.id) ? path.id : ""}
-                    id={supportItemID}
-                    key={pathKey}
-                    handleNodeClick={handleNodeClick}
-                    // handleEdgeClick={(edgeID)=>handleEdgeClick(edgeID, supportItemID)}
-                    handleEdgeClick={handleEdgeClick}
-                    handleActivateEvidence={handleActivateEvidence}
-                    activeEntityFilters={activeEntityFilters}
-                    activeFilters={activeFilters}
-                    pathFilterState={pathFilterState}
-                    selectedPaths={selectedPaths}
-                    pk={pk}
-                  />
-                );
-              })
+              !!path?.compressedSubgraph
+              ?
+                path.compressedSubgraph.map((subgraphItemID, i) => {
+                  let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
+                  if(path.id === undefined)
+                    return null;
+                  return (
+                    <>
+                      <PathObject
+                        pathViewStyles={pathViewStyles}
+                        index={i}
+                        isEven={false}
+                        path={path}
+                        id={subgraphItemID}
+                        key={key}
+                        handleActivateEvidence={handleActivateEvidence}
+                        handleEdgeClick={handleEdgeClick}
+                        handleNodeClick={handleNodeClick}
+                        activeEntityFilters={activeEntityFilters}
+                        selectedPaths={selectedPaths}
+                        pathFilterState={pathFilterState}
+                        activeFilters={activeFilters}
+                        pk={pk}
+                      />
+                    </>
+                  )
+                }) 
+              :
+                path.subgraph.map((subgraphItemID, i) => {
+                  if(path.id === undefined)
+                    return null;
+                  return (
+                    <>
+                      <PathObject
+                        pathViewStyles={pathViewStyles}
+                        index={i}
+                        isEven={false}
+                        path={path}
+                        id={subgraphItemID}
+                        key={subgraphItemID}
+                        handleActivateEvidence={handleActivateEvidence}
+                        handleEdgeClick={handleEdgeClick}
+                        handleNodeClick={handleNodeClick}
+                        activeEntityFilters={activeEntityFilters}
+                        selectedPaths={selectedPaths}
+                        pathFilterState={pathFilterState}
+                        activeFilters={activeFilters}
+                        pk={pk}
+                      />
+                    </>
+                  )
+                })
             }
           </div>
         </div>

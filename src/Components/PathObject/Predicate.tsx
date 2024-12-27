@@ -23,15 +23,15 @@ interface PredicateProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence: (pathID: string) => void;
-  handleEdgeClick: (edgeID: string | string[], pathID: string) => void;
+  handleActivateEvidence: (path: Path) => void;
+  handleEdgeClick: (edgeID: string, path: Path) => void;
   handleNodeClick: (name: ResultNode) => void;
   edge: ResultEdge;
-  edgeID: string | string[];
+  edgeIDs: string[];
   inModal?: boolean | null;
   parentClass?: string;
   pathFilterState: PathFilterState;
-  pathID: string;
+  path: Path;
   pathViewStyles?: {[key: string]: string;} | null;
   pk: string;
   selected?: boolean;
@@ -44,14 +44,14 @@ const Predicate: FC<PredicateProps> = ({
   activeFilters,
   className = "", 
   edge, 
-  edgeID, 
+  edgeIDs, 
   handleActivateEvidence, 
   handleEdgeClick, 
   handleNodeClick, 
   inModal = false, 
   parentClass = '', 
   pathFilterState,
-  pathID, 
+  path, 
   pathViewStyles = null, 
   pk,
   selected = false, 
@@ -74,7 +74,7 @@ const Predicate: FC<PredicateProps> = ({
   }
 
   let resultSet = useSelector(getResultSetById(pk));
-  const formattedEdge = (!!resultSet && Array.isArray(edgeID) && edgeID.length > 1) ? getCompressedEdge(resultSet, edgeID) : edge;
+  const formattedEdge = (!!resultSet && Array.isArray(edgeIDs) && edgeIDs.length > 1) ? getCompressedEdge(resultSet, edgeIDs) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
   const pubCount = (Array.isArray(formattedEdge.publications)) ? formattedEdge.publications.length : 0;
   const [isSupportExpanded, setIsSupportExpanded] = useState(formattedEdge.is_root);
@@ -114,7 +114,7 @@ const Predicate: FC<PredicateProps> = ({
               className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
               onClick={(e)=> {
                 e.stopPropagation();
-                handleEdgeClick(edgeID, pathID);
+                handleEdgeClick(edgeIDs[0], path);
               }}
               >
               <Highlighter
@@ -138,7 +138,7 @@ const Predicate: FC<PredicateProps> = ({
             </p>
             {
               !!formattedEdge?.compressed_edges &&
-              formattedEdge.compressed_edges.map((edge) => {
+              formattedEdge.compressed_edges.map((edge, i) => {
                 if(!edge)
                   return null;
                 return (
@@ -147,11 +147,7 @@ const Predicate: FC<PredicateProps> = ({
                     className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
                     onClick={(e)=> {
                       e.stopPropagation();
-                      // if(i > 0) {
-                      //   handleEdgeClick(pathObject.compressedEdges[i-1], pathObjectContainer);
-                      // } else {
-                      //   handleEdgeClick(pathObject, pathObjectContainer);
-                      // }
+                      handleEdgeClick(edge.id, path);
                     }}
                     >
                     <Highlighter
@@ -218,7 +214,7 @@ const Predicate: FC<PredicateProps> = ({
       </Tooltip>
       <span
         className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior}`}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeID, pathID);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs[0], path);}}
         >
           {
             hasSupport 
