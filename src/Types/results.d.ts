@@ -238,6 +238,7 @@ export interface ResultEdge {
   aras: string[];
   "is_root": boolean;
   compressed_edges?: ResultEdge[];
+  id: string;
   knowledge_level: KnowledgeLevel;
   // nodeID
   object: string;
