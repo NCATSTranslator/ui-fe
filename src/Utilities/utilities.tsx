@@ -593,19 +593,19 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
     const checkedPath = (typeof path === "string") ? getPathById(resultSet, path) : path;
     if(!checkedPath)
       continue;
-    // Use nodes as the key
+    // Use the node sequence as the key
     const nodeSequence = extractNodeSequence(checkedPath.subgraph).join(",");
     const existingPath = groupedPaths.get(nodeSequence);
 
     if (existingPath) {
       // Create a compressedSubgraph if it doesn't exist yet
       if (!existingPath.compressedSubgraph) {
-        existingPath.compressedSubgraph = existingPath.subgraph.map((value, index) => {
+        existingPath.compressedSubgraph = existingPath.subgraph.map((id, index) => {
           // Convert edge to array
           if (index % 2 === 1) 
-            return [value];
+            return [id];
           // Keep node as is
-          return value;
+          return id;
         }) as (string | string[])[];
       }
 
@@ -614,7 +614,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
         const edgeID = checkedPath.subgraph[i];
         const compressedEdgeArray = existingPath.compressedSubgraph[i] as string[];
 
-        if (Array.isArray(compressedEdgeArray)) {
+        if (Array.isArray(compressedEdgeArray) && !compressedEdgeArray.includes(edgeID)) {
           // Add edge to existing array
           compressedEdgeArray.push(edgeID);
         }
@@ -683,49 +683,8 @@ export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (s
   return newPaths;
 }
 
-export const pathObjectOutput = (data: PathObjectProps) => {
-  let key = (Array.isArray(data.id)) ? data.id[0] : data.id;
-  
-  if(data.pathID === undefined)
-    return null;
-  return (
-    <>
-      <PathObject
-        pathViewStyles={data.pathViewStyles}
-        index={data.index}
-        isEven={data.isEven}
-        pathID={data.pathID}
-        id={data.id}
-        key={key}
-        handleActivateEvidence={data.handleActivateEvidence}
-        handleEdgeClick={data.handleEdgeClick}
-        handleNodeClick={data.handleNodeClick}
-        activeEntityFilters={data.activeEntityFilters}
-        selectedPaths={data.selectedPaths}
-        pathFilterState={data.pathFilterState}
-        activeFilters={data.activeFilters}
-        pk={data.pk}
-      />
-    </>
-  )
-}
-
 export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): ResultEdge => {
   const edges = edgeIDs.map(edgeID => getEdgeById(resultSet, edgeID)).filter(edge => !!edge);
-
-  const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
-    aras: edge?.aras || [],
-    is_root: edge?.is_root || false,
-    compressed_edges: edge?.compressed_edges || [],
-    knowledge_level: edge?.knowledge_level || "unknown",
-    object: edge?.object || "",
-    predicate: edge?.predicate || "",
-    predicate_url: edge?.predicate_url || "",
-    provenance: edge?.provenance || [],
-    publications: edge?.publications || {},
-    subject: edge?.subject || "",
-    support: edge?.support || [],
-  });
 
   if (edges.length === 0 || !edges[0]) {
     console.warn("No valid edges found for the provided edgeIDs.");
@@ -746,7 +705,7 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
   const baseEdge: ResultEdge = { ...getDefaultEdge(edges[0]), compressed_edges: emptyCompressedEdgesArray };
 
   for (const edge of edges.slice(1)) {
-    if (!edge) continue; // Guard clause for safety
+    if (!edge) continue;
     const currentEdge = getDefaultEdge(edge);
 
     if (currentEdge.predicate === baseEdge.predicate) {
@@ -1004,3 +963,18 @@ export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string 
 export const isStringArray = (value: any): value is string[] => {
   return Array.isArray(value) && value.every(item => typeof item === "string");
 }
+
+export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
+  aras: edge?.aras || [],
+  id: edge?.id || "",
+  is_root: edge?.is_root || false,
+  compressed_edges: edge?.compressed_edges || [],
+  knowledge_level: edge?.knowledge_level || "unknown",
+  object: edge?.object || "",
+  predicate: edge?.predicate || "",
+  predicate_url: edge?.predicate_url || "",
+  provenance: edge?.provenance || [],
+  publications: edge?.publications || {},
+  subject: edge?.subject || "",
+  support: edge?.support || [],
+});
