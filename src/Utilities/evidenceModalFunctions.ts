@@ -61,12 +61,7 @@ export const handleEvidenceSort = (sortName: string, pubmedEvidence: Publication
 }
 
 export const checkForEdgeMatch = (edgeOne: ResultEdge | null, edgeTwo: ResultEdge | null) => {
-  return (!edgeOne || !edgeTwo ||
-    edgeOne.subject !== edgeTwo.subject ||
-    edgeOne.predicate !== edgeTwo.predicate || 
-    edgeOne.object !== edgeTwo.object) 
-    ? false
-    : true;
+  return (!!edgeOne && !!edgeTwo &&  edgeOne.id === edgeTwo?.id);
 }
 
 export const updateJournal = (element: PublicationObject, data: any) => {
