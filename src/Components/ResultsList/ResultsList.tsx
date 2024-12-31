@@ -325,6 +325,10 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     for(const [id, edge] of Object.entries(newResultSet.data.edges)) {
       edge.id = id;
     }
+    // assign ids to nodes
+    for(const [id, node] of Object.entries(newResultSet.data.nodes)) {
+      node.id = id;
+    }
 
     dispatch(setResultSet({pk: currentQueryID || "", resultSet: newResultSet}));
 

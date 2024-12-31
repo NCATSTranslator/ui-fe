@@ -303,6 +303,7 @@ export const convertPathToRankedPath = (resultSet: ResultSet, path: Path): Ranke
     aras: [],
     curies: [],
     descriptions: [],
+    id: "",
     names: [],
     other_names: {},
     provenance: "",

@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef, FC} from "react";
+import {useState, useEffect, useRef, FC, useMemo} from "react";
 import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
 import Tab from "../Tabs/Tab";
@@ -6,7 +6,9 @@ import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { capitalizeAllWords, isClinicalTrial, isPublication, numberToWords, getFormattedEdgeLabel, 
-  getUrlByType,  } from "../../Utilities/utilities";
+  getUrlByType,
+  hasSupport,
+  getCompressedEdge,  } from "../../Utilities/utilities";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { checkForEdgeMatch, flattenPublicationsObject } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
@@ -18,7 +20,7 @@ import MinusIcon from '../../Icons/Buttons/Subtract/Subtract.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 import Button from "../Core/Button";
-import { isResultEdge, Path, Result, ResultEdge, ResultSet } from "../../Types/results.d";
+import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
 import { Provenance, PublicationObject } from "../../Types/evidence.d";
 import { getResultSetById, getEdgeById, getNodeById } from "../../Redux/resultsSlice";
 
@@ -29,6 +31,59 @@ interface EvidenceModalProps {
   result?: Result;
   edge: ResultEdge | null;
   pk: string;
+}
+
+const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | string[])[]): (ResultNode | ResultEdge | ResultEdge[])[] => {
+  const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] = [];
+  for(const [i, ID] of subgraph.entries()) {
+    if(i % 2 === 0) {
+      if(Array.isArray(ID))
+        continue;
+      const node = getNodeById(resultSet, ID);
+      if(!!node)
+        compressedSubgraph.push(node);
+    } else {
+      if(Array.isArray(ID)) {
+        const edges: ResultEdge[] = []; 
+        const compressedEdges: ResultEdge[] = []; 
+        for(const edgeID of ID) {
+          const edge = getEdgeById(resultSet, edgeID)
+          if(!!edge)
+            edges.push(edge);
+        }
+        edges.sort((a,b)=> a.predicate.localeCompare(b.predicate));
+        let edgeIDsToCompress: Set<string> = new Set<string>([]);
+        for(let i = 0; i < edges.length; i++) {
+          let edge = edges[i];
+          let nextEdge: undefined | ResultEdge = edges[i+1];
+          // compress edges if predicates match and support status is the same
+          if(!!nextEdge 
+            && nextEdge.predicate === edge.predicate
+            && hasSupport(nextEdge) === hasSupport(edge)
+          ) {
+            if(!edgeIDsToCompress.has(edge.id))
+              edgeIDsToCompress.add(edge.id);
+            edgeIDsToCompress.add(nextEdge.id);
+          } else {
+            // we've reached the end of a series of matching edges, and we have some matching edges to add
+            if(edgeIDsToCompress.size > 0) {
+              let compressedEdge = getCompressedEdge(resultSet, Array.from(edgeIDsToCompress));
+              edgeIDsToCompress.clear();
+              compressedEdges.push(compressedEdge);
+            } else {
+              compressedEdges.push(edge);
+            }
+          }
+        }
+        compressedSubgraph.push(compressedEdges);
+      } else {
+        const edge = getEdgeById(resultSet, ID);
+        if(!!edge)
+          compressedSubgraph.push(edge);
+      }
+    }
+  }
+  return compressedSubgraph;
 }
 
 const EvidenceModal: FC<EvidenceModalProps> = ({
@@ -53,6 +108,9 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   const [isPathViewMinimized, setIsPathViewMinimized] = useState(false);
 
   const pathLength = (path) ? path.subgraph.length : 0;
+  const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false = useMemo(()=>{
+    return path?.compressedSubgraph && !!resultSet ? getCompressedSubgraph(resultSet, path.compressedSubgraph) : false; 
+  }, [path, resultSet]);
 
   const handleClose = () => {
     onClose();
@@ -101,8 +159,24 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   }
 
   const handleEdgeClick = (edgeID: string, path: Path) => {
-    const edge = getEdgeById(resultSet, edgeID);
-    if(!edge || !selectedEdge || !resultSet)
+    const getEdgeFromSubgraph = (edgeID: string, subgraph: (ResultEdge | ResultNode | ResultEdge[])[]) => {
+      for(let i = 1; i < subgraph.length; i + 2) {
+        const edgeItem = subgraph[i];
+        if(Array.isArray(edgeItem)) {
+          let edge = edgeItem.find(edge => edge.id === edgeID);
+          if(!!edge)
+            return edge;
+        } else {
+          if(edgeItem.id === edgeID)
+            return subgraph[i];
+        }
+      }
+    }
+
+    const edge = compressedSubgraph 
+      ? getEdgeFromSubgraph(edgeID, compressedSubgraph)
+      : getEdgeById(resultSet, edgeID);
+    if(!isResultEdge(edge) || !selectedEdge || !resultSet)
       return;
     handleSelectedEdge(resultSet, edge)
     setEdgeSelectedTrigger(prev=>!prev);
@@ -132,14 +206,13 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
               </Button>
               <div className={`${styles.pathView} scrollable-support path ${numberToWords(pathLength)}`}>
                 {
-                  !!path?.compressedSubgraph
+                  !!compressedSubgraph
                   ?
-                    path.compressedSubgraph.map((itemID, i) => {
-                      if(!Array.isArray(itemID)) {
-                        const pathItem = (i % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
+                    compressedSubgraph.map((pathItem, i) => {
+                      if(!Array.isArray(pathItem)) {
                         if(!pathItem)
                           return null;
-  
+                        const itemID = pathItem.id;
                         let key = `${itemID}-${i}`;
                         const isEdge = isResultEdge(pathItem);
                         let isSelected = (isEdge && checkForEdgeMatch(selectedEdge, pathItem));
@@ -163,26 +236,22 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                           />
                         )
                       } else {
-                        console.log(itemID);
                         return(
                           <div className="grouped-preds">
                             {
-                              itemID.map((id, j)=> {
-                                let key = `${edge}-${j}`;
-                                const pathItem = getEdgeById(resultSet, id);
-                                // console.log(id, pathItem);
-                                if(!pathItem)
+                              pathItem.map((edge, j)=> {
+                                let key = `${edge.predicate}-${j}`;
+                                if(!edge)
                                   return null;
           
-                                const isEdge = isResultEdge(pathItem);
-                                let isSelected = (isEdge && checkForEdgeMatch(selectedEdge, pathItem));
+                                let isSelected = (checkForEdgeMatch(selectedEdge, edge));
                                 return (
                                   <PathObject
                                     pathViewStyles={styles}
                                     index={i}
                                     isEven={false}
                                     path={path}
-                                    id={id}
+                                    id={edge.id}
                                     key={key}
                                     handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
                                     handleEdgeClick={handleEdgeClick}

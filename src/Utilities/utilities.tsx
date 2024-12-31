@@ -548,18 +548,25 @@ export const isPathInferred = (resultSet: ResultSet, path: Path) => {
   return false;
 }
 
-export const hasSupport = (item: ResultEdge | null): boolean => {
+export const hasSupport = (item: ResultEdge | null | undefined): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;
 };
 
 export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[]): Path[] => {
-  // Helper function to extract the node sequence from a subgraph
-  const extractNodeSequence = (subgraph: string[]): string[] => {
-    // Even-indexed items are nodes
-    return subgraph.filter((_, index) => index % 2 === 0);
+  // Helper function to extract the path sequence from a subgraph
+  const extractPathSequence = (resultSet: ResultSet, subgraph: string[]): string[] => {
+    return subgraph.map((item, i) => {
+      if(i % 2 === 0) {
+        // even indexed items are nodes
+        return item;
+      } else {
+        const edge = getEdgeById(resultSet, item);
+        // edges return 'indirect' or 'direct' based on presence of support 
+        return (hasSupport(edge)) ? "indirect" : "direct";
+      }
+    })
   };
 
-  // Helper function to merge tags
   const mergeTags = (tags1: Tags, tags2: Tags): Tags => {
     const mergedTags: Tags = { ...tags1 };
   
@@ -593,10 +600,26 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
     const checkedPath = (typeof path === "string") ? getPathById(resultSet, path) : path;
     if(!checkedPath)
       continue;
-    // Use the node sequence as the key
-    const nodeSequence = extractNodeSequence(checkedPath.subgraph).join(",");
-    const existingPath = groupedPaths.get(nodeSequence);
+    // Use the path sequence as the key
+    const pathSequence = extractPathSequence(resultSet, checkedPath.subgraph).join(",");
+    const existingPath = groupedPaths.get(pathSequence);
 
+    // const checkForSupportMatch = (pathOne: Path | undefined, pathTwo: Path | undefined) => {
+    //   if(!pathOne || !pathTwo)
+    //     return false;
+    //   if(pathOne.subgraph.length !== pathTwo.subgraph.length)
+    //     return false;
+    //   for(let i = 1; i < pathOne.subgraph.length; i += 2) {
+    //     const pathOneEdge = getEdgeById(resultSet, pathOne.subgraph[i]);
+    //     const pathTwoEdge = getEdgeById(resultSet, pathTwo.subgraph[i]);
+    //     if(hasSupport(pathOneEdge) !== hasSupport(pathTwoEdge))
+    //       return false;
+    //   }
+    //   return true;
+    // }
+
+    // check for existing path AND matching hasSupport status
+    // if (existingPath && checkForSupportMatch(checkedPath, existingPath)) {
     if (existingPath) {
       // Create a compressedSubgraph if it doesn't exist yet
       if (!existingPath.compressedSubgraph) {
@@ -643,7 +666,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
       }
     } else {
       // Add the current path to the map
-      groupedPaths.set(nodeSequence, {
+      groupedPaths.set(pathSequence, {
         ...checkedPath,
         // Initially no compressed subgraph
         compressedSubgraph: null,
@@ -687,7 +710,7 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
   const edges = edgeIDs.map(edgeID => getEdgeById(resultSet, edgeID)).filter(edge => !!edge);
 
   if (edges.length === 0 || !edges[0]) {
-    console.warn("No valid edges found for the provided edgeIDs.");
+    console.warn("No valid edges found for the provided edgeIDs.", edges);
     return getDefaultEdge(undefined);
   }
 

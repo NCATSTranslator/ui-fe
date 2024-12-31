@@ -261,6 +261,7 @@ export type ResultNode = {
   aras: string[];
   curies: string[];
   descriptions: string[];
+  id: string;
   names: string[];
   other_names: {[key: string]: string[]};
   // link to relevant info about node
