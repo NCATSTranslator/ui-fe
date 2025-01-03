@@ -14,10 +14,10 @@ import ExternalLink from '../Icons/Buttons/External Link.svg?react';
 import { QueryType } from '../Types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
-import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState, Tags } from '../Types/results.d';
+import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState, Tags, ResultNode } from '../Types/results.d';
 import { EvidenceCountsContainer, PublicationObject, PublicationsList } from '../Types/evidence';
 import { Location } from 'react-router-dom';
-import { getEdgeById, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
+import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
 import PathObject, { PathObjectProps } from '../Components/PathObject/PathObject';
 
 export const getIcon = (category: string): JSX.Element => {
@@ -339,6 +339,12 @@ export const isMiscPublication = (publication: PublicationObject) => {
   return false
 }
 
+/**
+ * Type guard to check if an object is a PublicationDictionary.
+ *
+ * @param obj - The object to check.
+ * @returns {boolean} True if the object is a PublicationDictionary, otherwise false.
+ */
 export const isPublicationDictionary = (publications: any): publications is {[key: string]: string[]} => {
   return typeof publications === 'object' && !Array.isArray(publications) && Object.values(publications).every(value => Array.isArray(value) && value.every(item => typeof item === 'string'));
 }
@@ -530,6 +536,13 @@ export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): nu
   return count;
 }
 
+/**
+ * Takes a Path object and returns a boolean value based on whether any of its edges have support paths.
+ * 
+ * @param {ResultSet} resultSet - ResultSet Object.
+ * @param {Path} path - Path Object.
+ * @returns {boolean} - Does the path have any edges with support paths attached. 
+ */
 export const isPathInferred = (resultSet: ResultSet, path: Path) => {
   if(!path || path == null)
     return false;
@@ -542,16 +555,30 @@ export const isPathInferred = (resultSet: ResultSet, path: Path) => {
     if(!isResultEdge(edge))
       continue;
     
-    if(edge.support.length > 0)
+    if(hasSupport(edge))
       return true;
   }
   return false;
 }
 
+/**
+ * Takes a ResultEdge object and returns a boolean value based on whether the edge has any support paths.
+ * 
+ * @param {ResultEdge | null | undefined} item - ResultEdge Object.
+ * @returns {boolean} - Does the edge have support paths attached. 
+ */
 export const hasSupport = (item: ResultEdge | null | undefined): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;
 };
 
+/**
+ * Takes a list of paths/path IDs and compresses them if any paths have the same nodes and their edges have 
+ * the same support status (provided by the extractPathSequence helper function).
+ * 
+ * @param {ResultSet} resultSet - ResultSet Object.
+ * @param {(string|Path)[]} paths - An array of paths or path IDs
+ * @returns {Path[]} - The array of compressed paths. 
+ */
 export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[]): Path[] => {
   // Helper function to extract the path sequence from a subgraph
   const extractPathSequence = (resultSet: ResultSet, subgraph: string[]): string[] => {
@@ -604,22 +631,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
     const pathSequence = extractPathSequence(resultSet, checkedPath.subgraph).join(",");
     const existingPath = groupedPaths.get(pathSequence);
 
-    // const checkForSupportMatch = (pathOne: Path | undefined, pathTwo: Path | undefined) => {
-    //   if(!pathOne || !pathTwo)
-    //     return false;
-    //   if(pathOne.subgraph.length !== pathTwo.subgraph.length)
-    //     return false;
-    //   for(let i = 1; i < pathOne.subgraph.length; i += 2) {
-    //     const pathOneEdge = getEdgeById(resultSet, pathOne.subgraph[i]);
-    //     const pathTwoEdge = getEdgeById(resultSet, pathTwo.subgraph[i]);
-    //     if(hasSupport(pathOneEdge) !== hasSupport(pathTwoEdge))
-    //       return false;
-    //   }
-    //   return true;
-    // }
-
-    // check for existing path AND matching hasSupport status
-    // if (existingPath && checkForSupportMatch(checkedPath, existingPath)) {
+    // check for existing path in groupedPaths
     if (existingPath) {
       // Create a compressedSubgraph if it doesn't exist yet
       if (!existingPath.compressedSubgraph) {
@@ -680,7 +692,17 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
   return Array.from(groupedPaths.values());
 }
 
-
+/**
+ * Takes a list of paths/path IDs along with a PathFilterState object and a set of selected paths, then compresses them. 
+ * The compressed paths are sorted by the PathFilterState, then have their highlighted status set according to the active
+ * selected paths. The paths are then sorted by highlighted status and returned. 
+ * 
+ * @param {ResultSet} resultSet - ResultSet Object.
+ * @param {(string|Path)[]} paths - An array of paths or path IDs
+ * @param {PathFilterState} pathFilterState - The current Path Filter State
+ * @param {Set<Path> | null} pathFilterState - The current Path Filter State
+ * @returns {Path[]} - The array of properly formatted paths. 
+ */
 export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null) => {
   if(!paths || !resultSet) 
     return [];
@@ -706,6 +728,13 @@ export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (s
   return newPaths;
 }
 
+/**
+ * Generates a single compressed edge based on a provided list of edge IDs.
+ * 
+ * @param {ResultSet} resultSet - ResultSet Object.
+ * @param {string[]} edgeIDs - An array of edge IDs.
+ * @returns {ResultEdge} - A compressed edge. 
+ */
 export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): ResultEdge => {
   const edges = edgeIDs.map(edgeID => getEdgeById(resultSet, edgeID)).filter(edge => !!edge);
 
@@ -784,7 +813,92 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
   return baseEdge;
 };
 
+/**
+ * Generates an array of compressed edges based on a provided array of edges.
+ * 
+ * For use primarily in the evidence modal.
+ *
+ * @param {ResultSet} resultSet - ResultSet Object.
+ * @param {ResultEdge[]} edges - An array of edges.
+ * @returns {ResultEdge[]} - An array of compressed edges. 
+ */
+export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): ResultEdge[] => {
+  const compressedEdges: ResultEdge[] = []; 
+  // sort edges by predicate alphabetically
+  edges.sort((a,b)=> a.predicate.localeCompare(b.predicate));
+  let edgeIDsToCompress: Set<string> = new Set<string>([]);
+  for(let i = 0; i < edges.length; i++) {
+    let edge = edges[i];
+    let nextEdge: undefined | ResultEdge = edges[i+1];
+    // compress edges if predicates match and support status is the same
+    if(!!nextEdge 
+      && nextEdge.predicate === edge.predicate
+      && hasSupport(nextEdge) === hasSupport(edge)
+    ) {
+      if(!edgeIDsToCompress.has(edge.id))
+        edgeIDsToCompress.add(edge.id);
+      edgeIDsToCompress.add(nextEdge.id);
+    } else {
+      // we've reached the end of a series of matching edges and we have some matching edges to add
+      if(edgeIDsToCompress.size > 0) {
+        let compressedEdge = getCompressedEdge(resultSet, Array.from(edgeIDsToCompress));
+        edgeIDsToCompress.clear();
+        compressedEdges.push(compressedEdge);
+      // if there are no edges to compress, add the current edge to the list
+      } else {
+        compressedEdges.push(edge);
+      }
+    }
+  }
+  return compressedEdges;
+}
 
+/**
+ * Generates a compressed subgraph based on a provided subgraph.
+ * 
+ * For use primarily in the evidence modal.
+ *
+ * @param {ResultSet} resultSet - ResultSet Object.
+ * @param {(string | string)[]} subgraph - The initial subgraph (an array of node/edge ids).
+ * @returns {(ResultNode | ResultEdge | ResultEdge[])[]} - The compressed subgraph with nodes and edges fetched from the ResultSet. 
+ */
+export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | string[])[]): (ResultNode | ResultEdge | ResultEdge[])[] => {
+  const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] = [];
+  for(const [i, ID] of subgraph.entries()) {
+    // handle nodes
+    if(i % 2 === 0) {
+      if(Array.isArray(ID))
+        continue;
+      const node = getNodeById(resultSet, ID);
+      if(!!node)
+        compressedSubgraph.push(node);
+    // handle edges
+    } else {
+      // normal edges
+      if(!Array.isArray(ID)) {
+        const edge = getEdgeById(resultSet, ID);
+        if(!!edge)
+          compressedSubgraph.push(edge);
+      // compressed edges
+      } else {
+        const edges: ResultEdge[] = getEdgesByIds(resultSet, ID); 
+        const compressedEdges = getCompressedEdges(resultSet, edges);
+        // add the compressed edges to the subgraph
+        compressedSubgraph.push(compressedEdges);
+      }
+    }
+  }
+  return compressedSubgraph;
+}
+
+/**
+ * Returns a string label that represents the provided ResultEdge object.  
+ *
+ * @param {ResultSet} resultSet - ResultSet object.
+ * @param {ResultEdge} edge - The edge to generate a label for.
+ * @returns {string} - A label containing the subject node name, predicate, and object node name
+ * separated by pipe characters. 
+ */
 export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): string => {
   const subjectNode = getNodeById(resultSet, edge.subject);
   const subjectNodeName = (!!subjectNode) ? subjectNode.names[0] : "";
@@ -794,8 +908,15 @@ export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): s
   return `${subjectNodeName}|${edge.predicate}|${objectNodeName}`;
 }
 
-export const getUrlByType = (publicationID: string, type: string): string | null => {
-  let url = null;
+/**
+ * Returns url that based on the type of the provided publication ID. 
+ *
+ * @param {string} publicationID - The publication id.
+ * @param {string} type - The publication's type.
+ * @returns {string} - The formatted url (or the provided id if the type is not recognized). 
+ */
+export const getUrlByType = (publicationID: string, type: string): string => {
+  let url;
   switch (type) {
     case "PMID":
       url = `http://www.ncbi.nlm.nih.gov/pubmed/${publicationID.replace("PMID:", "")}`;
@@ -813,6 +934,12 @@ export const getUrlByType = (publicationID: string, type: string): string | null
   return url;
 }
 
+/**
+ * Returns a formatted string based on the type of the provided publication ID. 
+ *
+ * @param {string} publicationID - The publication id.
+ * @returns {string} - The formatted type string. 
+ */
 export const getTypeFromPub = (publicationID: string): string => {
   if(publicationID.toLowerCase().includes("pmid"))
     return "PMID";
@@ -823,6 +950,12 @@ export const getTypeFromPub = (publicationID: string): string => {
   return "other";
 }
 
+/**
+ * Returns a formatted name for a publication source based on a provided string.
+ *
+ * @param {string} sourceName - The publication source name to format.
+ * @returns {string} - The formatted source name. 
+ */
 export const formatPublicationSourceName = (sourceName: string): string => {
   let newSourceName = sourceName;
   if(typeof sourceName === 'string')
@@ -837,6 +970,12 @@ export const formatPublicationSourceName = (sourceName: string): string => {
   return newSourceName;
 }
 
+/**
+ * Returns a formatted name for pathfinder results based on a provided string.
+ *
+ * @param {string} name - The pathfinder result name to format
+ * @returns {string} - The formatted result name. 
+ */
 export const getFormattedPathfinderName = (name: string) => {
   const formattedName = name.replace(/([A-Z])/g, ' $1').trim()
   return formattedName;
@@ -847,7 +986,7 @@ export const getFormattedPathfinderName = (name: string) => {
  *
  * @param {string} itemID - The ID of the item to check.
  * @param {any} bookmarksSet - The set of bookmark objects to search in.
- * @returns {string|null} Returns the ID of the matching item if found in bookmarksSet, otherwise returns false.
+ * @returns {string|null} Returns the ID of the matching item if found in bookmarksSet, otherwise returns null.
  */
 export const checkBookmarksForItem = (itemID: string, bookmarksSet: any): string | null => {
   if(bookmarksSet && bookmarksSet.size > 0) {
@@ -946,6 +1085,14 @@ const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): Eviden
   };
 };
 
+/**
+ * Calculates the evidence counts from all paths on a single provided result.
+ *
+ * @param {ResultSet | null} resultSet - ResultSet object.
+ * @param {Result | undefined} resultSet - Result object.
+ * @returns {EvidenceCountsContainer} - EvidenceCountsContainer object. 
+ *
+ */
 export const getEvidenceCounts = (resultSet: ResultSet | null, result: Result | undefined): EvidenceCountsContainer => {
   if (!resultSet || !result) {
     return { publicationCount: 0, sourceCount: 0, clinicalTrialCount: 0, miscCount: 0 };
@@ -960,6 +1107,13 @@ export const getEvidenceCounts = (resultSet: ResultSet | null, result: Result | 
   return getEvidenceCountsFromPaths(resultSet, paths);
 };
 
+/**
+ * Sums the evidence counts from a provided EvidenceCountsContainer object.
+ *
+ * @param {EvidenceCountsContainer} countObj - EvidenceCountsContainer object.
+ * @returns {number} - Sum of all evidence counts. 
+ *
+ */
 export const calculateTotalEvidence = (countObj: EvidenceCountsContainer): number => {
   return (
     countObj.clinicalTrialCount +
@@ -969,6 +1123,14 @@ export const calculateTotalEvidence = (countObj: EvidenceCountsContainer): numbe
   );
 }
 
+/**
+ * Turns a provided path into a string value.
+ *
+ * @param {ResultSet} resultSet - ResultSet object.
+ * @param {Path} path - Path object.
+ * @returns {string} - Represents a user-readable version of the path. 
+ *
+ */
 export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string => {
   let stringName = "";
   for(const [i, id] of path.subgraph.entries()) {
@@ -983,10 +1145,25 @@ export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string 
   return stringName.trimEnd();
 }
 
+/**
+ * Type guard to check if a provided value is a string array
+ *
+ * @param {any} value - Arbitrary value.
+ * @returns {boolean} - True if the value is a string array, otherwise false. 
+ *
+ */
 export const isStringArray = (value: any): value is string[] => {
   return Array.isArray(value) && value.every(item => typeof item === "string");
 }
 
+/**
+ * Returns a result edge object with either the properties of an optionally provided result edge object, or
+ * a blank result edge object. 
+ *
+ * @param {ResultEdge | undefined} edge - An optional edge object used to fill out the returned default edge.
+ * @returns {ResultEdge} - The default result edge object. 
+ *
+ */
 export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   aras: edge?.aras || [],
   id: edge?.id || "",
