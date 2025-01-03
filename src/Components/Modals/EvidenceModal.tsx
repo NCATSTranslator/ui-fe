@@ -6,9 +6,10 @@ import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { capitalizeAllWords, isClinicalTrial, isPublication, numberToWords, getFormattedEdgeLabel, 
-  getUrlByType,
-  hasSupport,
-  getCompressedEdge,  } from "../../Utilities/utilities";
+  getUrlByType, getCompressedSubgraph } from "../../Utilities/utilities";
+import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
+import { Provenance, PublicationObject } from "../../Types/evidence.d";
+import { getResultSetById, getEdgeById, getNodeById } from "../../Redux/resultsSlice";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { checkForEdgeMatch, flattenPublicationsObject } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
@@ -20,9 +21,6 @@ import MinusIcon from '../../Icons/Buttons/Subtract/Subtract.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 import Button from "../Core/Button";
-import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
-import { Provenance, PublicationObject } from "../../Types/evidence.d";
-import { getResultSetById, getEdgeById, getNodeById } from "../../Redux/resultsSlice";
 
 interface EvidenceModalProps {
   isOpen: boolean;
@@ -31,59 +29,6 @@ interface EvidenceModalProps {
   result?: Result;
   edge: ResultEdge | null;
   pk: string;
-}
-
-const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | string[])[]): (ResultNode | ResultEdge | ResultEdge[])[] => {
-  const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] = [];
-  for(const [i, ID] of subgraph.entries()) {
-    if(i % 2 === 0) {
-      if(Array.isArray(ID))
-        continue;
-      const node = getNodeById(resultSet, ID);
-      if(!!node)
-        compressedSubgraph.push(node);
-    } else {
-      if(Array.isArray(ID)) {
-        const edges: ResultEdge[] = []; 
-        const compressedEdges: ResultEdge[] = []; 
-        for(const edgeID of ID) {
-          const edge = getEdgeById(resultSet, edgeID)
-          if(!!edge)
-            edges.push(edge);
-        }
-        edges.sort((a,b)=> a.predicate.localeCompare(b.predicate));
-        let edgeIDsToCompress: Set<string> = new Set<string>([]);
-        for(let i = 0; i < edges.length; i++) {
-          let edge = edges[i];
-          let nextEdge: undefined | ResultEdge = edges[i+1];
-          // compress edges if predicates match and support status is the same
-          if(!!nextEdge 
-            && nextEdge.predicate === edge.predicate
-            && hasSupport(nextEdge) === hasSupport(edge)
-          ) {
-            if(!edgeIDsToCompress.has(edge.id))
-              edgeIDsToCompress.add(edge.id);
-            edgeIDsToCompress.add(nextEdge.id);
-          } else {
-            // we've reached the end of a series of matching edges, and we have some matching edges to add
-            if(edgeIDsToCompress.size > 0) {
-              let compressedEdge = getCompressedEdge(resultSet, Array.from(edgeIDsToCompress));
-              edgeIDsToCompress.clear();
-              compressedEdges.push(compressedEdge);
-            } else {
-              compressedEdges.push(edge);
-            }
-          }
-        }
-        compressedSubgraph.push(compressedEdges);
-      } else {
-        const edge = getEdgeById(resultSet, ID);
-        if(!!edge)
-          compressedSubgraph.push(edge);
-      }
-    }
-  }
-  return compressedSubgraph;
 }
 
 const EvidenceModal: FC<EvidenceModalProps> = ({
@@ -278,7 +223,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
                       let key = `${itemID}-${i}`;
                       const isEdge = isResultEdge(pathItem);
-                      let isSelected = (isEdge && checkForEdgeMatch(selectedEdge, pathItem));
+                      let isSelected = (isEdge && !!selectedEdge && selectedEdge.id === itemID);
                       return (
                         <PathObject
                           pathViewStyles={styles}
