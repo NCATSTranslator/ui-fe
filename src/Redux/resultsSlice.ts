@@ -44,6 +44,17 @@ export const getPathsByIds = (resultSet: ResultSet | undefined | null, pathIDs: 
 }
 export const getNodeById = (resultSet: ResultSet | null, id:string): ResultNode | undefined => (resultSet === null) ? undefined : resultSet.data.nodes[id];
 export const getEdgeById = (resultSet: ResultSet | null, id:string): ResultEdge | undefined => (resultSet === null) ? undefined : resultSet.data.edges[id];
+export const getEdgesByIds = (resultSet: ResultSet | null, ids:string[]): ResultEdge[] => {
+  if(!resultSet)
+    return [];
+  const edges: ResultEdge[] = []; 
+  for(const edgeID of ids) {
+    const edge = getEdgeById(resultSet, edgeID)
+    if(!!edge)
+      edges.push(edge);
+  }
+  return edges;
+}
 export const getPubById = (resultSet: ResultSet | null, id:string): PublicationObject | undefined => (resultSet === null) ? undefined : resultSet.data.publications[id];
 export const getResultSetById = (id: string | null | undefined) => (state: {resultSets: ResultState}) => {
   // if no result sets have been added, return null with no console warning
