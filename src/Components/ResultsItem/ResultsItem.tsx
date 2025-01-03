@@ -182,8 +182,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }, [result, activateEvidence])
 
   const handleActivateEvidence = useCallback((path: Path) => {
-    // if(path.path.subgraph[1] !== null && isFormattedEdgeObject(path.path.subgraph[1]))
-      // activateEvidence(item, path.path.subgraph[1], path);
+    if(!!path.subgraph[1])
+      activateEvidence(result, path.subgraph[1], path);
   }, [result, activateEvidence])
 
   useEffect(() => {
