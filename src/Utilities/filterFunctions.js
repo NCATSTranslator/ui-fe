@@ -100,18 +100,15 @@ export const hasFilterFamily = (filter, family) => {
 
 export const getFilterLabel = (filter) => {
   const defaultLabel = "Tag";
-  if(!filter.family) {
-    return defaultLabel;
-  }
 
-  switch(filterFamily(filter)){
-    case "cc":   return "Chemical Category";
+  switch(filterFamily(filter)) {
+    case "cc":   return "Chemical Classification";
     case "pc":   return "Object Type";
     case "di":   return "Drug Indication";
     case "ara":  return "Reasoning Agent";
     case "role": return "ChEBI Role";
     case "pt":   return "Relationship Type";
-    case "otc":  return "Over the Counter Status";
+    case "otc":  return "Availability";
     default: return defaultLabel;
   }
 }

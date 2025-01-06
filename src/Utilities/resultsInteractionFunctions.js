@@ -1,4 +1,4 @@
-import { hasSupport } from "./resultsFormattingFunctions";
+import { hasSupport } from "./utilities";
 
 /**
  * Finds a string match in the given element by comparing the value with the element's name, description,

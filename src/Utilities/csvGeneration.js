@@ -1,4 +1,4 @@
-import { getTypeFromPub, getUrlByType } from "./resultsFormattingFunctions";
+import { getTypeFromPub, getUrlByType } from "./utilities";
 
 const getUrlArrayFromPubIDs = (ids) => {
   let urlsFromIds = [];

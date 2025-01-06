@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo, FC } from "react";
 import styles from './ResultsList.module.scss';
 import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
@@ -10,18 +10,17 @@ import StickyToolbar from "../StickyToolbar/StickyToolbar";
 import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
 import { useSelector, useDispatch } from 'react-redux';
-import { currentQueryResultsID, currentResults, setCurrentQueryTimestamp }from "../../Redux/resultsSlice";
+import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById, getPathById }from "../../Redux/resultsSlice";
 import { currentPrefs, currentUser }from "../../Redux/rootSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
   sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow,
-  filterCompare, makePathRank, updatePathRanks, pathRankSort, } from "../../Utilities/sortingFunctions";
-import { getSummarizedResults, hasSupport } from "../../Utilities/resultsFormattingFunctions";
+  filterCompare, makePathRank, updatePathRanks, pathRankSort } from "../../Utilities/sortingFunctions";
 import { findStringMatch, handleResultsError, handleResultsRefresh } from "../../Utilities/resultsInteractionFunctions";
 import * as filtering from '../../Utilities/filterFunctions';
-import { getDataFromQueryVar, handleFetchErrors } from "../../Utilities/utilities";
+import { getEvidenceCounts, checkBookmarkForNotes, checkBookmarksForItem, getDataFromQueryVar, getPathCount, handleFetchErrors } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
-import { API_PATH_PREFIX, getSaves } from "../../Utilities/userApi";
+import { API_PATH_PREFIX, getSaves, SaveGroup } from "../../Utilities/userApi";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "../BookmarkToasts/BookmarkToasts";
@@ -29,8 +28,14 @@ import QueryPathfinder from "../QueryPathfinder/QueryPathfinder";
 import ResultsListTableHead from "./ResultsListTableHead";
 import ResultsListModals from "./ResultsListModals";
 import ResultsListBottomPagination from "./ResultsListBottomPagination";
+import { ResultSet, Result, ResultEdge, Path, Filter, PathFilterState, PathRank, SharedItem } from "../../Types/results.d";
+import { generateScore } from "../../Utilities/scoring";
 
-const ResultsList = ({loading}) => {
+interface ResultsListProps {
+  loading: boolean;
+}
+
+const ResultsList: FC<ResultsListProps> = ({ loading }) => {
 
   const user = useSelector(currentUser);
   const prefs = useSelector(currentPrefs);
@@ -39,39 +44,33 @@ const ResultsList = ({loading}) => {
 
   // URL search params
   const loadingParam = getDataFromQueryVar("loading");
-  const queryIDParam = getDataFromQueryVar("q");
-  const initPresetTypeID = getDataFromQueryVar("t");
-  const initPresetTypeObject = (initPresetTypeID)
-    ? queryTypes.find(type => type.id === parseInt(initPresetTypeID))
+  const currentQueryID = getDataFromQueryVar("q");
+  const presetTypeID = getDataFromQueryVar("t");
+  const presetTypeObject = (presetTypeID)
+    ? queryTypes.find(type => type.id === parseInt(presetTypeID))
     : null;
 
-  const isPathfinder = (initPresetTypeID === "p");
+  const isPathfinder = (presetTypeID === "p");
 
-  const initNodeLabelParam = getDataFromQueryVar("l");
-  const initNodeIdParam = getDataFromQueryVar("i");
+  const nodeLabelParam = getDataFromQueryVar("l");
+  const nodeIdParam = getDataFromQueryVar("i");
   const [resultIdParam, setResultIdParam] = useState(getDataFromQueryVar("r"));
   const firstLoad = useRef(true);
-  const [nodeDescription, setNodeDescription] = useState();
-  const shareResultID = useRef(null);
-  const setShareResultID = (newID) => shareResultID.current = newID;
+  const [nodeDescription, setNodeDescription] = useState("");
+  const shareResultID = useRef<string | null>(null);
+  const setShareResultID = (newID: string | null) => shareResultID.current = newID;
 
   loading = (loading) ? loading : false;
   loading = (loadingParam === 'true') ? true : loading;
-  let resultsState = useSelector(currentResults);
-  resultsState = (resultsState !== undefined && Object.keys(resultsState).length === 0) ? null : resultsState;
-
+  let resultSet = useSelector(getResultSetById(currentQueryID));
   // Bool, did the results return an error
   const [isError, setIsError] = useState(false);
-  // Int, current query id from state
-  const currentQueryResultsIDFromState = useSelector(currentQueryResultsID);
-  // Int, current query id based on whether url param exists
-  const currentQueryID = (queryIDParam) ? queryIDParam : currentQueryResultsIDFromState;
   // Bool, are the results still loading
-  const presetIsLoading = (queryIDParam) ? true : loading;
+  const presetIsLoading = (currentQueryID) ? true : loading;
   const [isLoading, setIsLoading] = useState(presetIsLoading);
-  // Bool, should ara status be fetched
+  // Bool/null , should ara status be fetched
   // const [isFetchingARAStatus, setIsFetchingARAStatus] = useState(presetIsLoading);
-  const isFetchingARAStatus = useRef(presetIsLoading);
+  const isFetchingARAStatus = useRef<boolean | null>(presetIsLoading);
   // Bool, should results be fetched
   // const [isFetchingResults, setIsFetchingResults] = useState(false);
   const isFetchingResults = useRef(false);
@@ -82,66 +81,68 @@ const ResultsList = ({loading}) => {
   const initSortByName = (isPathfinder) ? true : null;
   // ALSO REQUIRED TO SET INITSORTSTRING BELOW, along with useEffect for catching changes to prefs
 
-
   // Bool, are the results currently sorted by name (true/false for asc/desc, null for not set)
-  const [isSortedByName, setIsSortedByName] = useState(initSortByName);
+  const [isSortedByName, setIsSortedByName] = useState<boolean | null>(initSortByName);
   // Bool, are the results currently sorted by evidence count (true/false for asc/desc, null for not set)
-  const [isSortedByEvidence, setIsSortedByEvidence] = useState(null);
+  const [isSortedByEvidence, setIsSortedByEvidence] = useState<boolean | null>(null);
   // Bool, are the results currently sorted by path count (true/false for asc/desc, null for not set)
-  const [isSortedByPaths, setIsSortedByPaths] = useState(null);
+  const [isSortedByPaths, setIsSortedByPaths] = useState<boolean | null>(null);
   // Bool, are the results currently sorted by score
-  const [isSortedByScore, setIsSortedByScore] = useState(initSortByScore);
+  const [isSortedByScore, setIsSortedByScore] = useState<boolean | null>(initSortByScore);
   // Bool, is evidence modal open?
   const [evidenceModalOpen, setEvidenceModalOpen] = useState(false);
   const [notesModalOpen, setNotesModalOpen] = useState(false);
   const [focusModalOpen, setFocusModalOpen] = useState(false);
-  const [sharedItem, setSharedItem] = useState({index: 0, page: 0, name: ''});
+  const [sharedItem, setSharedItem] = useState<SharedItem>({index: 0, page: 0, name: '', type: ''});
   const [autoScrollToResult, setAutoScrollToResult] = useState(false);
   const [expandSharedResult, setExpandSharedResult] = useState(false);
-  const sharedItemRef = useRef(null);
+  const sharedItemRef = useRef<HTMLDivElement | null>(null);
   const noteLabel = useRef("");
-  const currentBookmarkID = useRef(null);
-  // Object, the currently selected item
-  const [selectedItem, setSelectedItem] = useState({});
-  // Array, edges represented in current evidence
-  const [selectedEdge, setSelectedEdge] = useState(null);
-  // Obj, path represented in current evidence
-  const [selectedPath, setSelectedPath] = useState(null);
+  const currentBookmarkID = useRef<string | null>(null);
+  // Result, the currently selected item
+  const [selectedResult, setSelectedResult] = useState<Result | {}>({});
+
+  const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
+  // Path, path represented in current evidence
+  const [selectedPath, setSelectedPath] = useState<Path | null>(null);
   // Obj, represets the filter state of all paths
-  const [pathFilterState, setPathFilterState] = useState(null);
-  // Int, current page
+  const [pathFilterState, setPathFilterState] = useState<PathFilterState | null>(null);
+  // number, current page
   const currentPage = useRef(0);
-  // Int, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
+  // number, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
-  // Int, how many items per page
-  const initItemsPerPage = (prefs?.result_per_screen?.pref_value) ? parseInt(prefs.result_per_screen.pref_value) : 10;
-  const [itemsPerPage, setItemsPerPage] = useState(initItemsPerPage);
-  // Int, last result item index
-  const [endResultIndex, setEndResultIndex] = useState(itemsPerPage);
-  // Obj, original raw results from the BE
-  const rawResults = useRef(resultsState);
+
+  const calculateItemsPerPage = (prefValue: string | number): number => {
+    return ((!!prefValue) ? (typeof prefValue === "string") ? parseInt(prefValue) : prefs.result_per_screen.pref_value : 10) as number;
+  }
+  // number, how many items per page
+  const [itemsPerPage, setItemsPerPage] = useState<number>(calculateItemsPerPage(prefs.result_per_screen.pref_value));
+  // number, last result item index
+  const [endResultIndex, setEndResultIndex] = useState<number>(itemsPerPage);
+  // ResultSet, original raw result set from the BE
+  const rawResults = useRef<ResultSet | null>(resultSet);
   // Obj, original, unfiltered results from the BE
-  const originalResults = useRef([]);
+  const originalResults = useRef<Result[]>([]);
   // Obj, fresh results from the BE to replace existing rawResults
-  const [freshRawResults, setFreshRawResults] = useState(null);
-  // Ref, used to track changes in results
-  const prevRawResults = useRef(rawResults);
+  const [freshRawResults, setFreshRawResults] = useState<ResultSet | null>(null);
+  // ResultSet Ref, used to track changes in results
+  const prevRawResults = useRef<ResultSet | null>(resultSet);
   // Array, results formatted by any active filters, sorted by any active sorting
-  const [formattedResults, setFormattedResults] = useState([]);
+  const [formattedResults, setFormattedResults] = useState<Result[]>([]);
   // Array, results meant to display based on the pagination
-  const displayedResults = useMemo(()=>formattedResults.slice(itemOffset, endResultIndex), [formattedResults, itemOffset, endResultIndex]);
-  const initSortString = (isPathfinder)
+  const displayedResults: Result[] = useMemo(()=>formattedResults.slice(itemOffset, endResultIndex), [formattedResults, itemOffset, endResultIndex]);
+  const initSortString: string = (isPathfinder)
     ? 'nameLowHigh'
-    : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
+    : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
   const currentSortString = useRef(initSortString);
   // Int, number of pages
   const pageCount = Math.ceil(formattedResults.length / itemsPerPage);
   // Array, currently active filters
-  const [activeFilters, setActiveFilters] = useState([]);
-  // Array, currently active filters
-  const [availableTags, setAvailableTags] = useState([]);
+  const [activeFilters, setActiveFilters] = useState<Filter[]>([]);
+
+  const [availableTags, setAvailableFilters] = useState<{[key: string]: Filter}>({});
   // Array, currently active string filters
-  const [activeEntityFilters, setActiveEntityFilters] = useState([]);
+  const [activeEntityFilters, setActiveEntityFilters] = useState<string[]>([]);
   // Array, aras that have returned data
   const returnedARAs = useRef({aras: [], status: ''});
   // Bool, is share modal open
@@ -149,18 +150,17 @@ const ResultsList = ({loading}) => {
   // Bool, is the shift key being held down
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
   // Float, weight for confidence score
-  // eslint-disable-next-line
-  const [confidenceWeight, setConfidenceWeight] = useState(1.0);
+  const [confidenceWeight] = useState(1.0);
   // Float, weight for novelty score
-  // eslint-disable-next-line
-  const [noveltyWeight, setNoveltyWeight] = useState(0.1);
+  const [noveltyWeight] = useState(0.1);
   // Float, weight for clinical score
-  // eslint-disable-next-line
-  const [clinicalWeight, setClinicalWeight] = useState(1.0);
+  const [clinicalWeight] = useState(1.0);
+
+  const scoreWeights = useMemo(()=> { return {confidenceWeight: confidenceWeight, noveltyWeight: noveltyWeight, clinicalWeight: clinicalWeight}}, [confidenceWeight, noveltyWeight, clinicalWeight]);
 
   const [filtersExpanded, setFiltersExpanded] = useState(false);
 
-  const [userSaves, setUserSaves] = useState(null);
+  const [userSaves, setUserSaves] = useState<SaveGroup | null>(null);
   const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
   const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
@@ -168,21 +168,21 @@ const ResultsList = ({loading}) => {
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
   useEffect(() => {
-    currentSortString.current = (isPathfinder) ? 'nameLowHigh' : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value : 'scoreHighLow';
-    const tempItemsPerPage = (prefs?.result_per_screen?.pref_value) ? parseInt(prefs.result_per_screen.pref_value) : 10;
+    currentSortString.current = (isPathfinder) ? 'nameLowHigh' : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
+    const tempItemsPerPage = calculateItemsPerPage(prefs.result_per_screen.pref_value);
     setItemsPerPage(tempItemsPerPage);
     setEndResultIndex(tempItemsPerPage);
   }, [prefs, isPathfinder]);
 
   useEffect(() => {
-    const handleKeyDown = (ev) => {
-      if (ev.keyCode === 90) {
+    const handleKeyDown = (ev: KeyboardEvent) => {
+      if (ev.key === "z") {
         setZoomKeyDown(true);
       }
     };
 
-    const handleKeyUp = (ev) => {
-      if (ev.keyCode === 90) {
+    const handleKeyUp = (ev: KeyboardEvent) => {
+      if (ev.key === "z") {
         setZoomKeyDown(false);
       }
     };
@@ -207,6 +207,7 @@ const ResultsList = ({loading}) => {
 
   const handleClearNotesEditor = async () => {
     await getUserSaves();
+    if(prevRawResults.current)
     handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current);
   }
 
@@ -218,14 +219,15 @@ const ResultsList = ({loading}) => {
   }, [user, getUserSaves]);
 
   useEffect(() => {
-    if (!autoScrollToResult) {
+    if (!autoScrollToResult)
       return;
-    }
 
     const yOffset = -40;
-    const y = sharedItemRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-    window.scrollTo({top: y, behavior: 'smooth'});
-    setAutoScrollToResult(false);
+    if(!!sharedItemRef.current) {
+      const y = sharedItemRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({top: y, behavior: 'smooth'});
+      setAutoScrollToResult(false);
+    }
   }, [autoScrollToResult]);
 
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
@@ -234,27 +236,32 @@ const ResultsList = ({loading}) => {
   const queryClient = new QueryClient();
 
   // Handles direct page click
-  const handlePageClick = useCallback((event, newItemsPerPage = false, resultsLength = formattedResults.length, currentNumItemsPerPage = itemsPerPage ) => {
-    let perPageNum = (newItemsPerPage) ? parseInt(newItemsPerPage) : currentNumItemsPerPage;
+  const handlePageClick = useCallback((event: { selected: number}, newItemsPerPage: number | false = false, resultsLength = formattedResults.length, currentNumItemsPerPage = itemsPerPage ) => {
+    let perPageNum = (newItemsPerPage) ? newItemsPerPage : currentNumItemsPerPage;
     currentPage.current = event.selected;
     const newOffset = isNaN((event.selected * perPageNum) % resultsLength) ? 0 : (event.selected * perPageNum) % resultsLength;
-    const endOffset = (parseInt(newOffset + perPageNum) > resultsLength)
+    const endOffset = (newOffset + perPageNum > resultsLength)
       ? resultsLength
-      : parseInt(newOffset + perPageNum);
+      : newOffset + perPageNum;
     setItemOffset(newOffset);
     setEndResultIndex(endOffset);
   }, [formattedResults.length, itemsPerPage]);
 
-  const handleUpdateResults = (filters, asFilters, summary, or = [], justSort = false, sortType, fr = []) => {
-    let newFormattedResults = [];
-    let newOriginalResults = [];
-    let newPathFilterState = cloneDeep(pathFilterState);
-    let saves = (userSaves) ? userSaves.saves: null;
+  const handleUpdateResults = (filters: Filter[], asFilters: string[], summary: ResultSet | null, or: Result[] = [], justSort = false, sortType: string, pfState: PathFilterState | null = null, fr: Result[] = []) => {
+    if(!summary)
+      return [];
 
+    let newFormattedResults: Result[] = [];
+    let newOriginalResults: Result[] = [];
+    let newPathFilterState = (!!pfState) ? cloneDeep(pfState) : {};
+    // let saves = (userSaves) ? userSaves.saves: null;
+
+    // initial results
     if(or.length === 0) {
-      newFormattedResults = (justSort) ? fr : getSummarizedResults(summary.data, confidenceWeight, noveltyWeight, clinicalWeight, saves);
+      newFormattedResults = summary.data.results;
       newOriginalResults = cloneDeep(newFormattedResults);
-      newPathFilterState = genPathFilterState(summary.data);
+      newPathFilterState = genPathFilterState(summary);
+    // updating existing results
     } else {
       newFormattedResults = (justSort) ? cloneDeep(fr) : or;
       newOriginalResults = or;
@@ -263,10 +270,11 @@ const ResultsList = ({loading}) => {
     // filter
     if (!justSort) {
       [newFormattedResults, newPathFilterState] = applyFilters(filters, asFilters, newFormattedResults, newOriginalResults, summary, newPathFilterState);
+      originalResults.current = newOriginalResults;
     }
 
     // sort
-    newFormattedResults = getSortedResults(newFormattedResults, sortType);
+    newFormattedResults = getSortedResults(summary, newFormattedResults, sortType);
 
     // set results
     setFormattedResults(newFormattedResults);
@@ -277,11 +285,13 @@ const ResultsList = ({loading}) => {
       if (resultIdParam !== '0') {
         let sharedItemIndex = newFormattedResults.findIndex(result => result.id === resultIdParam);
         if (sharedItemIndex !== -1) {
+          const sharedItemNode = getNodeById(summary, newFormattedResults[sharedItemIndex].subject);
+          const sharedItemType = (sharedItemNode) ? sharedItemNode.types[0] : "";
           setSharedItem({
             index: sharedItemIndex,
             page: Math.floor(sharedItemIndex / itemsPerPage),
-            name: newFormattedResults[sharedItemIndex].name,
-            type: newFormattedResults[sharedItemIndex].type
+            name: newFormattedResults[sharedItemIndex].drug_name,
+            type: sharedItemType
           });
 
           setFocusModalOpen(true);
@@ -289,34 +299,47 @@ const ResultsList = ({loading}) => {
       }
     }
 
-    if (!justSort) {
-      originalResults.current = newOriginalResults;
-    }
-
     rawResults.current = summary;
     return newFormattedResults;
   }
 
-  const handleNewResults = (data) => {
-    let rr = data;
+  const handleNewResults = (resultSet: ResultSet) => {
     // if we have no results, or the results aren't actually new, return
-    if(rr == null || isEqual(rr, prevRawResults.current))
+    if(resultSet == null || isEqual(resultSet, prevRawResults.current))
       return;
 
     // if the results status is error, or there is no results property in the data obj, return
-    if(rr.status === 'error' || rr.data.results === undefined)
+    if(resultSet.status === 'error' || resultSet.data.results === undefined)
       return;
 
     // if rawResults are new, set prevRawResults for future comparison
-    prevRawResults.current = rr;
-    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, rr, [], false, currentSortString.current);
+    let newResultSet = cloneDeep(resultSet);
+    prevRawResults.current = newResultSet;
+    // precalculate evidence and path counts
+    for(const result of newResultSet.data.results) {
+      result.evidenceCount = getEvidenceCounts(newResultSet, result);
+      result.pathCount = getPathCount(newResultSet, result.paths);
+      result.score = generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
+    }
+    // assign ids to edges
+    for(const [id, edge] of Object.entries(newResultSet.data.edges)) {
+      edge.id = id;
+    }
+    // assign ids to nodes
+    for(const [id, node] of Object.entries(newResultSet.data.nodes)) {
+      node.id = id;
+    }
+
+    dispatch(setResultSet({pk: currentQueryID || "", resultSet: newResultSet}));
+
+    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current);
 
     // we have results to show, set isLoading to false
     if (newFormattedResults.length > 0)
       setIsLoading(false);
 
     // If no results have returned from any ARAs, and ARA status is complete, set isLoading to false
-    if(rr && rr.data.results && rr.data.results.length === 0 && !isFetchingARAStatus.current)
+    if(newResultSet && newResultSet.data.results && newResultSet.data.results.length === 0 && !isFetchingARAStatus.current)
       setIsLoading(false);
   }
 
@@ -342,7 +365,6 @@ const ResultsList = ({loading}) => {
         // increment the number of status checks
         numberOfStatusChecks.current++;
         console.log("ARA status:", data);
-        dispatch(setCurrentQueryTimestamp(new Date(data.data.timestamp)));
 
         let fetchResults = false;
 
@@ -434,60 +456,65 @@ const ResultsList = ({loading}) => {
   });
 
   // Handle the sorting
-  const getSortedResults = useCallback((resultsToSort, sortName) => {
-    let newSortedResults = resultsToSort;
+  const getSortedResults = useCallback((summary: ResultSet, resultsToSort: Result[], sortName: string) => {
+    if(!summary) {
+      console.warn("No result set provided to getSortedResults");
+      return summary;
+    }
+
+    let newSortedResults = cloneDeep(resultsToSort);
     switch (sortName) {
       case 'nameLowHigh':
-        newSortedResults = (isPathfinder) ? sortByNamePathfinderLowHigh(newSortedResults) : sortNameLowHigh(newSortedResults);
+        newSortedResults = (isPathfinder) ? sortByNamePathfinderLowHigh(newSortedResults) as Result[] : sortNameLowHigh(newSortedResults) as Result[];
         setIsSortedByName(true);
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
         setIsSortedByPaths(null);
         break;
       case 'nameHighLow':
-        newSortedResults = (isPathfinder) ? sortByNamePathfinderHighLow(newSortedResults) : sortNameHighLow(newSortedResults);
+        newSortedResults = (isPathfinder) ? sortByNamePathfinderHighLow(newSortedResults) as Result[] : sortNameHighLow(newSortedResults) as Result[];
         setIsSortedByName(false);
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
         setIsSortedByPaths(null);
         break;
       case 'evidenceLowHigh':
-        newSortedResults = sortEvidenceLowHigh(newSortedResults);
+        newSortedResults = sortEvidenceLowHigh(summary, newSortedResults);
         setIsSortedByEvidence(true);
         setIsSortedByScore(null)
         setIsSortedByName(null);
         setIsSortedByPaths(null);
         break;
       case 'evidenceHighLow':
-        newSortedResults = sortEvidenceHighLow(newSortedResults);
+        newSortedResults = sortEvidenceHighLow(summary, newSortedResults);
         setIsSortedByEvidence(false);
         setIsSortedByScore(null)
         setIsSortedByName(null);
         setIsSortedByPaths(null);
         break;
       case 'scoreLowHigh':
-        newSortedResults = sortScoreLowHigh(newSortedResults);
+        newSortedResults = sortScoreLowHigh(newSortedResults, scoreWeights);
         setIsSortedByScore(true)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         setIsSortedByPaths(null);
         break;
       case 'scoreHighLow':
-        newSortedResults = sortScoreHighLow(newSortedResults);
+        newSortedResults = sortScoreHighLow(newSortedResults, scoreWeights);
         setIsSortedByScore(false)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         setIsSortedByPaths(null);
         break;
       case 'pathsLowHigh':
-        newSortedResults = sortPathsLowHigh(newSortedResults);
+        newSortedResults = sortPathsLowHigh(summary, newSortedResults);
         setIsSortedByPaths(true)
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         break;
       case 'pathsHighLow':
-        newSortedResults = sortPathsHighLow(newSortedResults);
+        newSortedResults = sortPathsHighLow(summary, newSortedResults);
         setIsSortedByPaths(false)
         setIsSortedByScore(null)
         setIsSortedByEvidence(null);
@@ -504,26 +531,30 @@ const ResultsList = ({loading}) => {
     }
 
     return newSortedResults;
-  }, [activeEntityFilters, isPathfinder]);
+  }, [activeEntityFilters, isPathfinder, scoreWeights]);
 
-  const genPathFilterState = (summary) => {
-    const filterState = {};
-    for (let pid of Object.keys(summary.paths)) {
+  const genPathFilterState = (summary: ResultSet): {[key: string]: boolean} => {
+    const filterState: {[key: string]: boolean} = {};
+    for (let pid of Object.keys(summary.data.paths)) {
       filterState[pid] = false;
     }
 
     return filterState;
   }
 
-  const updatePathFilterState = (pathFilterState, pathRanks, unrankedIsFiltered) => {
+  const updatePathFilterState = (pathFilterState: {[key: string]: boolean}, pathRanks: PathRank[], unrankedIsFiltered: boolean) => {
     for (let pathRank of pathRanks) {
       const pid = pathRank.path.id;
+      if(!pid)
+        continue;
+
       if (pathRank.support.length !== 0) {
         updatePathFilterState(pathFilterState, pathRank.support, unrankedIsFiltered);
         let filterIndirect = true;
         for (let supportRank of pathRank.support) {
           const supportPid = supportRank.path.id;
-          filterIndirect = filterIndirect && pathFilterState[supportPid];
+          if(!!supportPid)
+            filterIndirect = filterIndirect && pathFilterState[supportPid];
         }
         pathFilterState[pid] = filterIndirect;
       } else {
@@ -532,21 +563,17 @@ const ResultsList = ({loading}) => {
     }
   }
 
-  const calculateFacetCounts = (filteredResults, summary, negatedResults, activeFacets, negatedFacets, tagSetterMethod) => {
+  const calculateFacetCounts = (filteredResults: Result[], summary: ResultSet, negatedResults: Result[], activeFacets: Filter[], negatedFacets: Filter[], filterSetterMethod: Function) => {
     // Function that adds the tag counts when a certain condition (predicate) is met
-    const addTagCountsWhen = (countedTags, result, predicate) => {
-      for(const tag of result.tags) {
+    const addTagCountsWhen = (countedTags: {[key: string]: Filter}, result: Result, predicate: (tag: string)=>boolean) => {
+      for(const tag of Object.keys(result.tags)) {
         // If the tag exists on the list, either increment it or initialize its count
         if (predicate(tag)) {
-          if (countedTags.hasOwnProperty(tag)){
-            if (!countedTags[tag].count) {
-              countedTags[tag].count = 0;
-            }
-
-            countedTags[tag].count++;
-          // If it doesn't exist on the current list of tags, add it and initialize its count
+          if (countedTags.hasOwnProperty(tag)) {
+            countedTags[tag].count = (countedTags[tag].count ?? 0) + 1;
           } else {
-            countedTags[tag] = {name: tag, value: '', count: 1};
+            // If it doesn't exist on the current list of tags, add it and initialize its count
+            countedTags[tag] = { name: tag, value: '', count: 1 };
           }
         }
       }
@@ -559,7 +586,7 @@ const ResultsList = ({loading}) => {
       // Determine the distance between a result's facets and the facet selection
       const resultFamilies = new Set();
       for (const facet of activeFacets) {
-        if (result.tags.includes(facet.id)) {
+        if (!!facet.id && Object.keys(result.tags).includes(facet.id)) {
           resultFamilies.add(filtering.filterFamily(facet));
         }
       }
@@ -596,31 +623,36 @@ const ResultsList = ({loading}) => {
         delete countedTags[tag[0]];
     })
 
-    tagSetterMethod(countedTags);
+    filterSetterMethod(countedTags);
   }
 
   /**
    * Activates sets the evidence and opens the evidence modal.
    */
-  const activateEvidence = useCallback((item, edgeGroup, path) => {
-    setSelectedItem(item);
-    setSelectedEdge(edgeGroup);
-    setSelectedPath(path);
-    setEvidenceModalOpen(true);
-  },[])
+  const activateEvidence = useCallback((item: Result, edgeID: string, path: Path) => {
+    const edge = getEdgeById(resultSet, edgeID);
+    if(!!edge) {
+      setSelectedResult(item);
+      setSelectedEdge(edge);
+      setSelectedPath(path);
+      setEvidenceModalOpen(true);
+    }
+  },[resultSet])
 
-  const activateNotes = (label, bookmarkID, item) => {
+  const activateNotes = (label: string, bookmarkID: string) => {
     noteLabel.current = label;
     currentBookmarkID.current = bookmarkID;
     setNotesModalOpen(true);
   }
 
-  const handlePageReset = (newItemsPerPage, resultsLength) => {
+  const handlePageReset = (newItemsPerPage: number | false, resultsLength: number) => {
     handlePageClick({selected: 0}, newItemsPerPage, resultsLength);
   }
 
-  const applyFilters = (filters, entityFilters, filteredResults, originalResults, summary, pathFilterState) => {
-    const filterResults = (filters, entityFilters, originalResults, resultPathRanks) => {
+  const applyFilters = (filters: Filter[], entityFilters: string[], filteredResults: Result[], 
+    originalResults: Result[], summary: ResultSet, pathFilterState: PathFilterState): [Result[], PathFilterState] => {
+      
+    const filterResults = (filters: Filter[], entityFilters: string[], originalResults: Result[], resultPathRanks: PathRank[][]) => {
       const filteredResults = [];
       const negatedResults = [];
       /*
@@ -628,7 +660,11 @@ const ResultsList = ({loading}) => {
         skip that result.
       */
       for (let result of originalResults) {
-        const pathRanks = result.compressedPaths.map((p) => makePathRank(p));
+        const pathRanks: PathRank[] = resultSet 
+          ? result.paths.map((p) => typeof p === "string" ? getPathById(resultSet, p) : p)
+            .filter((path): path is Path => path !== undefined)
+            .map((path) => makePathRank(resultSet, path))
+          : [];
         let addResult = true;
         for (const filter of filters) {
           if (filtering.isEntityFilter(filter) &&
@@ -639,7 +675,7 @@ const ResultsList = ({loading}) => {
           }
 
           if (filtering.isResultFilter(filter) &&
-              filtering.isExclusion(filter) === result.tags.includes(filter.id)) {
+              filtering.isExclusion(filter) === Object.values(result.tags).includes((tag: Filter) => tag.id === filter.id)) {
             addResult = false;
             negatedResults.push(result);
             break;
@@ -656,7 +692,7 @@ const ResultsList = ({loading}) => {
       for (const filter of filters) {
         // String filters with identical values shouldn't be added to the activeFilters array,
         // so we don't have to check for duplicate values here, just for the str tag.
-        if (filtering.isEntityFilter(filter)) {
+        if (filtering.isEntityFilter(filter) && !!filter.value) {
           newEntityFilters.push(filter.value);
         }
       }
@@ -671,9 +707,9 @@ const ResultsList = ({loading}) => {
       return [filteredResults, negatedResults];
     }
 
-    const facetResults = (resultFacets, pathFilters, filteredResults, resultPathRanks) => {
-      const intersect = (a, b) => { return a && b; };
-      const union = (a, b) => { return a || b; };
+    const facetResults = (resultFacets: Filter[], pathFilters: Filter[], filteredResults: Result[], resultPathRanks: PathRank[][]) => {
+      const intersect = (a: any, b: any) => { return a && b; };
+      const union = (a: any, b: any) => { return a || b; };
       const facetedResults = [];
       let resultIndex = 0;
       for (const result of filteredResults) {
@@ -691,21 +727,22 @@ const ResultsList = ({loading}) => {
             combine = union;
           }
 
-          addResult = combine(addResult, result.tags.includes(resFacet.id));
+          addResult = combine(addResult, !!resFacet.id && Object.keys(result.tags).includes(resFacet.id));
         }
 
         if (addResult) {
           const pathRanks = resultPathRanks[resultIndex];
-          for (let i = 0; i < result.compressedPaths.length; i++) {
-            const path = result.compressedPaths[i];
+          for (let i = 0; i < result.paths.length; i++) {
+            const path = (typeof result.paths[i] === 'string') ? getPathById(resultSet, result.paths[i] as string) : result.paths[i];
             const pathRank = pathRanks[i];
-            updatePathRanks(path, pathRank, pathFilters);
+            if(!!resultSet && !!path)
+              updatePathRanks(resultSet, path as Path, pathRank, pathFilters);
           }
 
-          const newResult = cloneDeep(result);
+          // const newResult = cloneDeep(result);
           pathRankSort(pathRanks);
-          newResult.compressedPaths = genRankedPaths(pathRanks);
-          facetedResults.push(newResult);
+          // newResult.paths = genRankedPaths(resultSet, pathRanks);
+          facetedResults.push(result);
         }
 
         resultIndex++;
@@ -714,18 +751,19 @@ const ResultsList = ({loading}) => {
       return facetedResults;
     }
 
-    const filterResultsByPathFilterState = (results, pathFilterState) => {
+    const filterResultsByPathFilterState = (results: Result[], pathFilterState: PathFilterState) => {
       let anyFilteredPaths = false;
-      for (let filterState of Object.values(pathFilterState)) {
+      for (const filterState of Object.values(pathFilterState)) {
         anyFilteredPaths = anyFilteredPaths || filterState;
       }
 
       if (!anyFilteredPaths) return results;
       const filteredResults = [];
-      for (let result of results) {
+      for (const result of results) {
         let filterResult = true;
-        for (let path of result.compressedPaths) {
-          filterResult = filterResult && pathFilterState[path.id];
+        for (const path of result.paths) {
+          const pathID = (typeof path === "string") ? path : path.id;
+          filterResult = filterResult && !!pathID && pathFilterState[pathID];
         }
 
         if (!filterResult) {
@@ -736,29 +774,14 @@ const ResultsList = ({loading}) => {
       return filteredResults;
     }
 
-    const genRankedPaths = (pathRanks) => {
-      return pathRanks.map((pr) => {
-        if (pr.support.length > 1) {
-          const path = pr.path.path;
-          for (const item of path.subgraph) {
-            if (hasSupport(item)) {
-              item.support = genRankedPaths(pr.support);
-            }
-          }
-        }
-
-        return pr.path;
-      });
-    }
-
     // If there are no active filters or facets, get the full result set and reset the activeEntityFilters
     if (filters.length === 0) {
       if (entityFilters.length > 0) {
         setActiveEntityFilters([]);
       }
 
-      pathFilterState = genPathFilterState(summary.data);
-      calculateFacetCounts(filteredResults, summary, [], [], [], setAvailableTags);
+      pathFilterState = genPathFilterState(summary);
+      calculateFacetCounts(filteredResults, summary, [], [], [], setAvailableFilters);
       return [filteredResults, pathFilterState];
     }
 
@@ -766,9 +789,9 @@ const ResultsList = ({loading}) => {
     const resultFacets = resultFilters.filter((f) => !filtering.isExclusion(f));
     const negatedResultFacets = resultFilters.filter((f) => filtering.isExclusion(f));
     resultFilters = negatedResultFacets.concat(globalFilters);
-    const resultPathRanks = [];
+    const resultPathRanks: PathRank[][] = [];
     let [results, negatedResults] = filterResults(resultFilters, entityFilters, originalResults, resultPathRanks);
-    calculateFacetCounts(results, summary, negatedResults, resultFacets, negatedResultFacets, setAvailableTags);
+    calculateFacetCounts(results, summary, negatedResults, resultFacets, negatedResultFacets, setAvailableFilters);
     results = facetResults(resultFacets, pathFilters, results, resultPathRanks);
     let unrankedIsFiltered = false;
     for (let pathRanks of resultPathRanks) {
@@ -782,7 +805,7 @@ const ResultsList = ({loading}) => {
     }
 
     results = filterResultsByPathFilterState(results, pathFilterState);
-    if(currentPage !== 0) {
+    if(currentPage.current !== 0) {
       handlePageReset(false, results.length);
     }
 
@@ -791,7 +814,7 @@ const ResultsList = ({loading}) => {
 
   // Handle the addition and removal of individual filters. Keep the invariant that
   // filters of the same type are grouped together.
-  const handleFilter = (filter) => {
+  const handleFilter = (filter: Filter) => {
     let indexes = [];
     for(const [i, activeFilter] of activeFilters.entries()) {
       if (activeFilter.id === filter.id) {
@@ -814,7 +837,7 @@ const ResultsList = ({loading}) => {
       // If we get the same filter, we want to toggle it off
       if (activeFilters[index].value === filter.value &&
           activeFilters[index].negated === filter.negated) {
-        newActiveFilters = activeFilters.reduce((newFilters, oldFilter, i) => {
+        newActiveFilters = activeFilters.reduce((newFilters: Filter[], oldFilter, i) => {
           if(i !== index) {
             newFilters.push(oldFilter);
           }
@@ -848,7 +871,10 @@ const ResultsList = ({loading}) => {
     handleApplyFilterAndCleanup(newActiveFilters, activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current);
   }
 
-  const handleApplyFilterAndCleanup = (filtersToActivate, activeEntityFilters, rawResults, originalResults, sortString) => {
+  const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string) => {
+    if(!rawResults)
+      return;
+
     setActiveFilters(filtersToActivate);
     let newFormattedResults = handleUpdateResults(filtersToActivate, activeEntityFilters, rawResults, originalResults, false, sortString);
     handlePageReset(false, newFormattedResults.length);
@@ -859,16 +885,19 @@ const ResultsList = ({loading}) => {
   }
 
   useEffect(() => {
-    let node = rawResults.current?.data?.nodes[initNodeIdParam];
+    if(!nodeIdParam)
+      return;
+
+    let node = rawResults.current?.data?.nodes[nodeIdParam];
     if(rawResults.current && node) {
       if(node.descriptions.length > 0) {
         setNodeDescription(node.descriptions[0].replaceAll('"', ''));
       }
     }
 
-  },[formattedResults, initNodeIdParam]);
+  },[formattedResults, nodeIdParam]);
 
-  const handleResultMatchClick = useCallback((match) => {
+  const handleResultMatchClick = useCallback((match: Result) => {
     if(!match)
       return;
 
@@ -878,22 +907,24 @@ const ResultsList = ({loading}) => {
 
     setResultIdParam(match.id);
     const newPage = Math.floor(sharedItemIndex / itemsPerPage);
+    const resultSubjectNode = getNodeById(resultSet, formattedResults[sharedItemIndex].id);
+    const resultSubjectType = (resultSubjectNode?.types[0]) ? resultSubjectNode?.types[0] : "";
     setSharedItem({
       index: sharedItemIndex,
       page: newPage,
-      name: formattedResults[sharedItemIndex].name,
-      type: formattedResults[sharedItemIndex].type
+      name: formattedResults[sharedItemIndex].drug_name,
+      type: resultSubjectType
     });
     handlePageClick({selected: newPage}, false, formattedResults.length);
     setExpandSharedResult(true);
     setAutoScrollToResult(true);
-  }, [formattedResults, itemsPerPage, handlePageClick]);
+  }, [formattedResults, itemsPerPage, handlePageClick, resultSet]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <ResultsListModals
-        shareResultID={shareResultID.current}
-        presetTypeID={initPresetTypeID}
+        shareResultID={shareResultID.current ? shareResultID.current : ""}
+        presetTypeID={presetTypeID ? presetTypeID : ""}
         handlePageClick={handlePageClick}
         shareModalOpen={shareModalOpen}
         setShareModalOpen={setShareModalOpen}
@@ -902,13 +933,13 @@ const ResultsList = ({loading}) => {
         handleClearNotesEditor={handleClearNotesEditor}
         noteLabel={noteLabel.current}
         currentBookmarkID={currentBookmarkID.current}
-        currentQueryID={currentQueryID}
+        pk={currentQueryID ? currentQueryID : ""}
         focusModalOpen={focusModalOpen}
         setFocusModalOpen={setFocusModalOpen}
         evidenceModalOpen={evidenceModalOpen}
         setEvidenceModalOpen={setEvidenceModalOpen}
         selectedEdge={selectedEdge}
-        selectedItem={selectedItem}
+        selectedResult={selectedResult}
         selectedPath={selectedPath}
         sharedItem={sharedItem}
         formattedResultsLength={formattedResults.length} 
@@ -925,25 +956,26 @@ const ResultsList = ({loading}) => {
               setShareModalFunction={setShareModalOpen}
               results={formattedResults}
               handleResultMatchClick={handleResultMatchClick}
+              pk={!!currentQueryID ? currentQueryID : ""}
             />
           :
             <Query
               isResults
               loading={isLoading}
-              initPresetTypeObject={initPresetTypeObject}
-              initNodeIdParam={initNodeIdParam}
-              initNodeLabelParam={initNodeLabelParam}
+              initPresetTypeObject={presetTypeObject}
+              initNodeIdParam={nodeIdParam}
+              initNodeLabelParam={nodeLabelParam}
               nodeDescription={nodeDescription}
               setShareModalFunction={setShareModalOpen}
               results={formattedResults}
               handleResultMatchClick={handleResultMatchClick}
+              pk={!!currentQueryID ? currentQueryID : ""}
             />
         }
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
             <LoadingBar
-              loading={isLoading}
               useIcon
               disclaimerText={<>
                 <p className={styles.loadingText}>We will start showing you results as soon as we have them. You'll be prompted to refresh the page as we load more results. <strong>Please note that refreshing the results page may cause the order of answers to change.</strong></p>
@@ -960,7 +992,7 @@ const ResultsList = ({loading}) => {
                 onClearAll={handleClearAllFilters}
                 expanded={filtersExpanded}
                 setExpanded={setFiltersExpanded}
-                availableTags={availableTags}
+                availableFilters={availableTags}
                 isPathfinder={isPathfinder}
               />
               <div>
@@ -998,7 +1030,7 @@ const ResultsList = ({loading}) => {
                         isSortedByName={isSortedByName}
                         isSortedByPaths={isSortedByPaths}
                         isSortedByScore={isSortedByScore}
-                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current, originalResults.current, true, currentSortString.current, formattedResults)}
+                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current as ResultSet, originalResults.current, true, currentSortString.current, pathFilterState, formattedResults)}
                       />
                       {
                         isError &&
@@ -1015,30 +1047,36 @@ const ResultsList = ({loading}) => {
                         !isError &&
                         displayedResults.length > 0 &&
                         displayedResults.map((item, i) => {
+                          const result = getResultById(resultSet, item.id);
+                          if(!result || !presetTypeObject || !pathFilterState)
+                            return null;
+
+                          let bookmarkID = (userSaves === null) ? null : checkBookmarksForItem(item.id, userSaves);
+                          let bookmarked = (!bookmarkID) ? false : true;
+                          let hasNotes =  checkBookmarkForNotes(bookmarkID, userSaves);
                           return (
                             <ResultsItem
                               isEven={i % 2 !== 0}
                               isPathfinder={isPathfinder}
-                              rawResults={rawResults.current}
                               key={item.id}
-                              type={initPresetTypeObject}
-                              item={item}
+                              queryType={presetTypeObject}
+                              result={result}
                               pathFilterState={pathFilterState}
                               activateEvidence={activateEvidence}
                               activateNotes={activateNotes}
                               activeEntityFilters={activeEntityFilters}
                               zoomKeyDown={zoomKeyDown}
-                              currentQueryID={currentQueryID}
-                              queryNodeID={initNodeIdParam}
-                              queryNodeLabel={initNodeLabelParam}
+                              pk={currentQueryID}
+                              queryNodeID={nodeIdParam}
+                              queryNodeLabel={nodeLabelParam}
                               queryNodeDescription={nodeDescription}
-                              bookmarked={item.bookmarked}
-                              bookmarkID={item.bookmarkID}
-                              hasNotes={item.hasNotes}
+                              bookmarked={bookmarked}
+                              bookmarkID={bookmarkID}
+                              hasNotes={hasNotes}
                               handleBookmarkError={handleBookmarkError}
                               bookmarkAddedToast={bookmarkAddedToast}
                               bookmarkRemovedToast={bookmarkRemovedToast}
-                              availableTags={availableTags}
+                              availableFilters={availableTags}
                               handleFilter={handleFilter}
                               activeFilters={activeFilters}
                               sharedItemRef={item.id === resultIdParam ? sharedItemRef : null}
@@ -1047,6 +1085,7 @@ const ResultsList = ({loading}) => {
                               setShareModalOpen={setShareModalOpen}
                               setShareResultID={setShareResultID}
                               resultsComplete={(!isError && freshRawResults === null && !isFetchingARAStatus.current && !isFetchingResults.current)}
+                              scoreWeights={scoreWeights}
                             />
                           )
                         })
@@ -1089,7 +1128,6 @@ const ResultsList = ({loading}) => {
             }}
             isError={isError}
             returnedARAs={returnedARAs.current}
-            setShareModalFunction={setShareModalOpen}
           />
         }
       </div>

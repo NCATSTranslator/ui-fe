@@ -1,5 +1,5 @@
 import { FC, useState, useEffect, Dispatch, SetStateAction } from "react";
-import { Filter, GroupedTags, Tag } from "../../Types/results";
+import { Filter, GroupedFilters } from "../../Types/results";
 import styles from './FacetGroup.module.scss';
 import AnimateHeight from "react-animate-height";
 import Checkbox from '../Core/Checkbox';
@@ -125,24 +125,24 @@ const getRoleLinkout = (tagKey: string): string => {
 }
 
 type FacetGroupProps = {
-  tagFamily: string;
+  filterFamily: string;
   activeFilters: Filter[];
-  facetCompare: ((a: [string, Tag], b: [string, Tag]) => number) | undefined;
-  groupedTags: GroupedTags;
-  availableTags: {[key: string]: Tag};
-  onFilter: (arg0: Tag) => void;
+  facetCompare: ((a: [string, Filter], b: [string, Filter]) => number) | undefined;
+  groupedFilters: GroupedFilters;
+  availableFilters: {[key: string]: Filter};
+  onFilter: (arg0: Filter) => void;
 }
 
-const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompare, groupedTags, availableTags, onFilter }) => {
+const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCompare, groupedFilters, availableFilters, onFilter }) => {
 
-  const [tagObject, setTagObject] = useState<Tag>({
+  const [filterObject, setFilterObject] = useState<Filter>({
     name: "",
     negated: false,
     id: "",
     value: ""
   });
 
-  const handleFacetChange = (filterID: string, tag: Tag, setterFunction: (tag: Tag)=>void, negated: boolean = false, label: string = '') => {
+  const handleFacetChange = (filterID: string, tag: Filter, setterFunction: (tag: Filter)=>void, negated: boolean = false, label: string = '') => {
     if (tag.id === filterID) {
       return;
     }
@@ -155,7 +155,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
     onFilter(newTag);
   }
 
-  const tagDisplay = (tag: [string, Tag], family: string, tagObjectState: Tag, setTagObjectFunc: (arg0:Tag)=>void, availableTags: {[key: string]: Tag}, activeFilters: Filter[]): JSX.Element => {
+  const tagDisplay = (tag: [string, Filter], family: string, tagObjectState: Filter, setTagObjectFunc: (arg0: Filter)=>void, availableTags: {[key: string]: Filter}, activeFilters: Filter[]): JSX.Element => {
     let tagKey = tag[0];
     let object = tag[1];
     let tagName = '';
@@ -203,11 +203,11 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
     )
   }
 
-  const displayFacets = (family: string, activeFilters: Filter[], facetCompare: ((a: [string, Tag], b: [string, Tag]) => number) | undefined, groupedTags: GroupedTags, tagObject: Tag, tagObjectSetter: Dispatch<SetStateAction<Tag>>, availableTags: {[key: string]: Tag}) => {
+  const displayFacets = (family: string, activeFilters: Filter[], facetCompare: ((a: [string, Filter], b: [string, Filter]) => number) | undefined, groupedFilters: GroupedFilters, filterObject: Filter, filterObjectSetter: Dispatch<SetStateAction<Filter>>, availableFilters: {[key: string]: Filter}) => {
 
     // The selected set of filters for the current facet family
-    const selectedFacetSet = activeFilters.reduce<Record<string, null>>((acc, filter, index) => {
-      if (filtering.hasFilterFamily(filter, family)) {
+    const selectedFacetSet = activeFilters.reduce<Record<string, null>>((acc, filter) => {
+      if (filtering.hasFilterFamily(filter, family) && !!filter.id) {
         acc[filter.id] = null;
       }
 
@@ -226,7 +226,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
       return nameA.localeCompare(nameB);
     };
 
-    const defaultCompare = (a: [string, Tag], b: [string, Tag]) => {
+    const defaultCompare = (a: [string, Filter], b: [string, Filter]) => {
       const isFacetASelected = isSelected(a[0], selectedFacetSet);
       const isFacetBSelected = isSelected(b[0], selectedFacetSet);
       if (isFacetASelected && !isFacetBSelected) return -1;
@@ -239,7 +239,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
     };
 
     // Ensures that selected facets come first
-    let sortedFacets = Object.entries(groupedTags[family]).sort(defaultCompare);
+    let sortedFacets = Object.entries(groupedFilters[family]).sort(defaultCompare);
 
     // When there is a custom facet compare for this facet family, we want to sort selected and
     // unselected facets independently while preserving that selected facets come first
@@ -252,15 +252,15 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
       <div className={`${styles.section} ${Object.keys(sortedFacets).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
           sortedFacets.map((tag) => {
-            return tagDisplay(tag, family, tagObject, tagObjectSetter, availableTags, activeFilters);
+            return tagDisplay(tag, family, filterObject, filterObjectSetter, availableFilters, activeFilters);
           })
         }
       </div>
     )
   }
 
-  const familyHeadingMarkup = getTagHeadingMarkup(tagFamily, activeFilters);
-  const familyCaptionMarkup = getTagCaptionMarkup(tagFamily);
+  const familyHeadingMarkup = getTagHeadingMarkup(filterFamily, activeFilters);
+  const familyCaptionMarkup = getTagCaptionMarkup(filterFamily);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [height, setHeight] = useState<number | string>(0);
 
@@ -272,7 +272,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
   }, [isExpanded])
 
   return (
-    (Object.keys(groupedTags[tagFamily]).length > 0 && familyHeadingMarkup !== null )
+    (Object.keys(groupedFilters[filterFamily]).length > 0 && familyHeadingMarkup !== null )
       ?
         <div className={styles.facetGroup}>
             <button
@@ -292,7 +292,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ tagFamily, activeFilters, facetCompar
               familyCaptionMarkup
             }
             {
-              displayFacets(tagFamily, activeFilters, facetCompare, groupedTags, tagObject, setTagObject, availableTags)
+              displayFacets(filterFamily, activeFilters, facetCompare, groupedFilters, filterObject, setFilterObject, availableFilters)
             }
           </AnimateHeight>
         </div>

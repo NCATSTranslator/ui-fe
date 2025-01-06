@@ -211,10 +211,10 @@ export type LastViewedPathIDContextType = {
 };
 export const useLastViewedPath = () => {
   const context = useContext(LastViewedPathIDContext);
-  if (!context) {
-    throw new Error('useLastViewedPath must be used within a LastViewedPathProvider');
-  }
-  return context;
+  if (!context)
+    console.warn(context, 'useLastViewedPath must be used within a LastViewedPathIDContext.Provider');
+  
+  return !!context ? context : { lastViewedPathID: -1 } ;
 };
 
 interface TextStreamHookResult {

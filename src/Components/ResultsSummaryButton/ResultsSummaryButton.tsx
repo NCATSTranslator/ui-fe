@@ -7,31 +7,41 @@ import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import Tooltip from "../Tooltip/Tooltip";
 import ResultsSummaryModal from "../Modals/ResultsSummaryModal";
 import { genTopNResultsContext } from "../../Utilities/llm";
-import { ResultItem } from "../../Types/results";
+import { Result } from "../../Types/results";
 import { ResultContextObject } from "../../Utilities/llm";
 import { useTextStream } from "../../Utilities/customHooks";
 import { isEqual } from "lodash";
 import { currentConfig } from "../../Redux/rootSlice";
+import { getResultSetById } from "../../Redux/resultsSlice";
 import { useSelector } from "react-redux";
 
 interface ResultsSummaryButtonProps {
-  results: ResultItem[];
+  results: Result[];
   queryString: string;
   handleResultMatchClick: Function;
+  pk: string;
 }
 
-const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ results, queryString, handleResultMatchClick }) => {
+const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({ 
+  handleResultMatchClick,
+  queryString,
+  pk,
+  results }) => {
 
   const config = useSelector(currentConfig);
+  const resultSet = useSelector(getResultSetById(pk));
 
   const isSummaryAvailable = useRef<boolean>(false);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState<boolean>(false);
 
   const resultContext = useRef<ResultContextObject[]>([]);
-  const lastResults = useRef<ResultItem[]>([]);
+  const lastResults = useRef<Result[]>([]);
 
   const generateNewSummary = async () => {
-    const newContext = genTopNResultsContext(results, 50);
+    if(!resultSet)
+      return;
+    
+    const newContext = genTopNResultsContext(resultSet, results, 50);
     resultContext.current = newContext;
     startStream();
   }

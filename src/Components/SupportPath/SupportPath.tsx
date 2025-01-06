@@ -1,97 +1,127 @@
-import { memo, FC } from 'react';
+import { FC } from 'react';
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
-import { SupportDataObject, PathFilterState } from '../../Types/results';
-import { isFormattedEdgeObject, numberToWords } from '../../Utilities/utilities';
+import { PathFilterState, Path, ResultNode, Filter } from '../../Types/results';
+import { numberToWords } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
 import { useLastViewedPath } from '../../Utilities/customHooks';
 
+
 interface SupportPathProps {
-  dataObj: SupportDataObject;
+  activeEntityFilters: string[];
+  activeFilters: Filter[];
   character: string;
-  pathFilterState: PathFilterState
+  handleEdgeClick: (edgeID: string, path: Path) => void;
+  handleNodeClick: (name: ResultNode) => void;
+  handleActivateEvidence: (path: Path) => void;
+  path: Path;
+  pathFilterState: PathFilterState;
+  pathViewStyles: {[key: string]: string;} | null;
+  pk: string;
+  selectedPaths: Set<Path> | null;
 }
 
-const SupportPath: FC<SupportPathProps> = ({ dataObj, character, pathFilterState }) => {
+const SupportPath: FC<SupportPathProps> = ({ 
+  activeEntityFilters, 
+  activeFilters, 
+  character, 
+  handleEdgeClick, 
+  handleNodeClick, 
+  handleActivateEvidence, 
+  path, 
+  pathFilterState, 
+  pathViewStyles, 
+  pk,
+  selectedPaths }) => {
 
-  const pathViewStyles = dataObj.pathViewStyles;
-  const tooltipID = dataObj.tooltipID;
-  const key = dataObj.key;
-  const supportPath = dataObj.supportPath;
-  const selectedPaths = dataObj.selectedPaths;
-  const handleActivateEvidence = (!!supportPath) ? ()=>dataObj.handleActivateEvidence(supportPath): ()=>console.warn("no support path provided");
-  const handleNameClick = dataObj.handleNameClick;
-  const handleEdgeClick = dataObj.handleEdgeClick;
-  const handleTargetClick = dataObj.handleTargetClick;
-  const activeEntityFilters = dataObj.activeEntityFilters;
-  const { lastViewedPathID } = useLastViewedPath();
+  const { lastViewedPathID } = useLastViewedPath(); 
+
+  const tooltipID = path.id;
 
   return (
     <>
       {
-        supportPath !== null &&
-        <div className={`${!!pathViewStyles && pathViewStyles.formattedPath} ${!!pathViewStyles && pathViewStyles.supportPath}`} key={key}>
+        path !== null &&
+        <div className={`${!!pathViewStyles && pathViewStyles.formattedPath} ${!!pathViewStyles && pathViewStyles.supportPath}`} key={path.id}>
           {
-            lastViewedPathID === supportPath.id &&
+            lastViewedPathID === path.id &&
             <LastViewedTag/>
           }
           <span className={`${!!pathViewStyles &&pathViewStyles.num}`}>
             { character }
           </span>
           <button
-            onClick={handleActivateEvidence}
+            onClick={()=>handleActivateEvidence(path)}
             className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
-            data-tooltip-id={`${tooltipID}-${key}`}
+            data-tooltip-id={`${tooltipID}`}
             >
               <ResearchMultiple />
           </button>
           <Tooltip
-            id={`${tooltipID}-${key}`}
+            id={`${tooltipID}`}
             >
               <span>View evidence for this path.</span>
           </Tooltip>
           <div
-            className={`path ${numberToWords(supportPath.path.subgraph.length)}  ${!!pathViewStyles && pathViewStyles.tableItem} ${selectedPaths !== null && selectedPaths.size > 0 && !supportPath.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''} ${!!pathFilterState && pathFilterState[supportPath.id] ? !!pathViewStyles && pathViewStyles.filtered : ''}`}
-            key={key}
+            className={`path ${numberToWords(path.subgraph.length)}  
+            ${!!pathViewStyles && pathViewStyles.tableItem} 
+            ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''} 
+            ${!!pathFilterState && !!path?.id && pathFilterState[path.id] ? !!pathViewStyles && pathViewStyles.filtered : ''}`}
             >
             {
-              supportPath.path.subgraph.map((supportItem, i) => {
-                let pathKey = `${key}_${i}`;
-                let supportItemHasSupport = (isFormattedEdgeObject(supportItem))? supportItem.inferred : false;
-                let supportDataObject: SupportDataObject | null = (supportItemHasSupport)
-                ? {
-                    key: key,
-                    pathItem: supportItem,
-                    pathViewStyles: pathViewStyles,
-                    selectedPaths: selectedPaths,
-                    pathToDisplay: supportPath,
-                    handleActivateEvidence: handleActivateEvidence,
-                    handleNameClick: handleNameClick,
-                    handleEdgeClick: handleEdgeClick,
-                    handleTargetClick: handleTargetClick,
-                    activeEntityFilters: activeEntityFilters,
-                    tooltipID: null,
-                    supportPath: null
-                  }
-                : null;
-                return (
-                  <PathObject
-                    pathObjectContainer={supportPath}
-                    pathObject={supportItem}
-                    id={pathKey}
-                    key={pathKey}
-                    handleNameClick={handleNameClick}
-                    handleEdgeClick={(edge)=>handleEdgeClick(edge, supportPath)}
-                    handleTargetClick={handleTargetClick}
-                    activeEntityFilters={activeEntityFilters}
-                    hasSupport={supportItemHasSupport}
-                    supportDataObject={supportDataObject}
-                    pathFilterState={pathFilterState}
-                    pathViewStyles={pathViewStyles}
-                  />
-                );
-              })
+              !!path?.compressedSubgraph
+              ?
+                path.compressedSubgraph.map((subgraphItemID, i) => {
+                  let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
+                  if(path.id === undefined)
+                    return null;
+                  return (
+                    <>
+                      <PathObject
+                        pathViewStyles={pathViewStyles}
+                        index={i}
+                        isEven={false}
+                        path={path}
+                        id={subgraphItemID}
+                        key={key}
+                        handleActivateEvidence={handleActivateEvidence}
+                        handleEdgeClick={handleEdgeClick}
+                        handleNodeClick={handleNodeClick}
+                        activeEntityFilters={activeEntityFilters}
+                        selectedPaths={selectedPaths}
+                        pathFilterState={pathFilterState}
+                        activeFilters={activeFilters}
+                        pk={pk}
+                      />
+                    </>
+                  )
+                }) 
+              :
+                path.subgraph.map((subgraphItemID, i) => {
+                  if(path.id === undefined)
+                    return null;
+                  return (
+                    <>
+                      <PathObject
+                        pathViewStyles={pathViewStyles}
+                        index={i}
+                        isEven={false}
+                        path={path}
+                        id={subgraphItemID}
+                        key={subgraphItemID}
+                        handleActivateEvidence={handleActivateEvidence}
+                        handleEdgeClick={handleEdgeClick}
+                        handleNodeClick={handleNodeClick}
+                        activeEntityFilters={activeEntityFilters}
+                        selectedPaths={selectedPaths}
+                        pathFilterState={pathFilterState}
+                        activeFilters={activeFilters}
+                        pk={pk}
+                      />
+                    </>
+                  )
+                })
             }
           </div>
         </div>
@@ -100,23 +130,4 @@ const SupportPath: FC<SupportPathProps> = ({ dataObj, character, pathFilterState
   );
 }
 
-const areEqualProps = (prevProps: any, nextProps: any) => {
-  const prevDataKeys = Object.keys(prevProps.dataObj);
-  const nextDataKeys = Object.keys(nextProps.dataObj);
-
-  if (prevDataKeys.length !== nextDataKeys.length) {
-    return false;
-  }
-
-  for (const key of prevDataKeys) {
-    if (prevProps.dataObj[key] !== nextProps.dataObj[key]) {
-      return false;
-    }
-  }
-
-  // If none of the above conditions are met, props are equal
-  return true;
-};
-
-export default memo(SupportPath, areEqualProps);
-// export default SupportPath;
+export default SupportPath;

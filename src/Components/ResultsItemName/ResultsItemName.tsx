@@ -1,27 +1,33 @@
 import { FC } from "react";
 import styles from './ResultsItemName.module.scss';
-import { RawNode, ResultItem } from "../../Types/results";
-import { formatBiolinkNode, getIcon } from "../../Utilities/utilities";
+import { Result, ResultNode } from "../../Types/results";
+import { formatBiolinkNode, getIcon, getFormattedPathfinderName } from "../../Utilities/utilities";
 import Highlighter from "react-highlight-words";
 import ArrowIcon from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
-import { getFormattedPathfinderName } from "../../Utilities/resultsFormattingFunctions";
 
 type ResultsItemNameProps = {
   isPathfinder?: boolean;
-  item: ResultItem;
+  subjectNode?: ResultNode;
+  objectNode?: ResultNode;
+  item: Result;
   activeEntityFilters: string[];
   nameString: string;
   resultsItemStyles: { [key: string]: string;};
 }
 
-const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, item, activeEntityFilters, nameString, resultsItemStyles }) => {
+const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, subjectNode, objectNode, item, activeEntityFilters, nameString, resultsItemStyles }) => {
 
-  const icon: JSX.Element = getIcon(item.type);
-  const pathfinderNameArray = (isPathfinder) ? item.name.split("/") : null;
-  const subjectIcon: JSX.Element | null = item.subjectNode?.types.length > 0 ? getIcon(item.subjectNode.types[0]) : null;
-  const objectIcon: JSX.Element | null = item.objectNode?.types.length > 0 ? getIcon(item.objectNode.types[0]) : null;
+  if(!subjectNode || !objectNode) {
+    console.warn("Cannot generate result item name, subject or object node prop is missing."); 
+    return null;
+  }
 
-  const getPFNameString = (index: number, isNotLastItem: boolean, name: string, subject: RawNode, object: RawNode ) => {
+  const icon: JSX.Element = getIcon(subjectNode.types[0]);
+  const pathfinderNameArray = (isPathfinder) ? item.drug_name.split("/") : null;
+  const subjectIcon: JSX.Element | null = subjectNode?.types.length > 0 ? icon : null;
+  const objectIcon: JSX.Element | null = objectNode?.types.length > 0 ? getIcon(objectNode.types[0]) : null;
+
+  const getPFNameString = (index: number, isNotLastItem: boolean, name: string, subject: ResultNode, object: ResultNode ) => {
     let pfNameString = "";
     if(index === 0 || !isNotLastItem) {
       let type = (index === 0) ? subject.types[0]: object.types[0];
@@ -41,7 +47,7 @@ const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, item,
             {
               pathfinderNameArray?.map( (name, i) => {
                 const isNotLastItem = (i < pathfinderNameArray.length - 1);
-                const pfNameString = getPFNameString(i, isNotLastItem, name, item.subjectNode, item.objectNode);
+                const pfNameString = getPFNameString(i, isNotLastItem, name, subjectNode, objectNode);
                 const originalBiolinkName = `biolink:${pfNameString.replaceAll(" ", "_")}`;
                 return (
                   <span className={styles.nameContainer}>
