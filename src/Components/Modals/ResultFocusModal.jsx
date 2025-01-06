@@ -1,8 +1,7 @@
 import Modal from './Modal';
 import styles from './ResultFocusModal.module.scss';
 import Button from '../Core/Button';
-import { truncateStringIfTooLong } from '../../Utilities/utilities';
-import { getFormattedPathfinderName } from '../../Utilities/resultsFormattingFunctions';
+import { truncateStringIfTooLong, getFormattedPathfinderName } from '../../Utilities/utilities';
 
 const ResultFocusModal = ({isOpen, onAccept, onReject, sharedItem, queryType}) => {
 

@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback, useRef, memo, FC, RefObject, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
-import { formatBiolinkEntity, formatBiolinkNode, isFormattedEdgeObject,
-  isPublication, isClinicalTrial, isMiscPublication, getPathsCount } from '../../Utilities/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react";
@@ -17,19 +16,20 @@ import BookmarkConfirmationModal from '../Modals/BookmarkConfirmationModal';
 import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '../../Utilities/csvGeneration';
-import { createUserSave, deleteUserSave, getFormattedBookmarkObject } from '../../Utilities/userApi';
+import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
+import { getResultSetById, getNodeById } from '../../Redux/resultsSlice';
 import { currentUser } from '../../Redux/rootSlice';
-import { displayScore } from '../../Utilities/scoring';
+import { displayScore, generateScore } from '../../Utilities/scoring';
 import { QueryType } from '../../Types/querySubmission';
-import { ResultItem, RawResult, PathObjectContainer, Tag, Filter, FormattedEdgeObject, PathFilterState } from '../../Types/results';
+import { Result, Filter, PathFilterState, Path, isResultNode, ResultBookmark, ResultSet } from '../../Types/results.d';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
-import { isEqual } from 'lodash';
 import Tabs from '../Tabs/Tabs';
 import Tab from '../Tabs/Tab';
 import * as filtering from '../../Utilities/filterFunctions';
 import ResultsItemName from '../ResultsItemName/ResultsItemName';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
+import { cloneDeep } from 'lodash';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -49,108 +49,90 @@ const sortTagsBySelected = (
 };
 
 type ResultsItemProps = {
-  activateEvidence?: (item: ResultItem, edgeGroup: FormattedEdgeObject | null, path: PathObjectContainer) => void;
-  activateNotes?: (nameString: string, id: string | number, item: ResultItem) => void;
-  activeFilters: Filter[];
+  activateEvidence?: (item: Result, edgeID: string, path: Path) => void;
+  activateNotes?: (nameString: string, id: string) => void;
   activeEntityFilters: string[];
-  availableTags: {[key: string]: Tag};
+  activeFilters: Filter[];
+  availableFilters: {[key: string]: Filter};
   bookmarkAddedToast?: () => void;
   bookmarkRemovedToast?: () => void;
   bookmarked?: boolean;
   bookmarkID?: string | null;
-  currentQueryID: string;
-  sharedItemRef: RefObject<HTMLDivElement>;
-  startExpanded: boolean;
+  handleBookmarkError?: () => void;
+  handleFilter: (filter: Filter) => void;
+  hasNotes: boolean;
+  isEven: boolean;
+  isInUserSave?: boolean;
+  isPathfinder?: boolean;
+  key: string;
+  pathFilterState: PathFilterState;
+  pk: string | null;
+  queryNodeDescription: string | null;
+  queryNodeID: string | null;
+  queryNodeLabel: string | null;
+  queryType: QueryType;
+  result: Result | ResultBookmark;
+  resultsComplete: boolean;
+  scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number };
   setExpandSharedResult: (state: boolean) => void;
   setShareModalOpen: (state: boolean) => void;
   setShareResultID: (state: string) => void;
-  handleBookmarkError?: () => void;
-  handleFilter: (tag: Tag) => void;
-  hasNotes: boolean;
-  item: ResultItem;
-  key: string;
-  queryNodeDescription: string;
-  queryNodeID: string;
-  queryNodeLabel: string;
-  rawResults: RawResult[];
-  type: QueryType;
-  pathFilterState: PathFilterState;
+  sharedItemRef: RefObject<HTMLDivElement> | null;
+  startExpanded: boolean;
   zoomKeyDown: boolean;
-  isInUserSave?: boolean;
-  isEven: boolean;
-  isPathfinder?: boolean;
-  resultsComplete: boolean;
 }
 
 const ResultsItem: FC<ResultsItemProps> = ({
     activateEvidence = () => {},
     activateNotes = () => {},
-    activeFilters,
     activeEntityFilters,
-    availableTags,
+    activeFilters,
+    availableFilters: availableTags,
     bookmarkAddedToast = () => {},
     bookmarkRemovedToast = () => {},
     bookmarked = false,
     bookmarkID = null,
-    currentQueryID,
-    sharedItemRef,
-    startExpanded = false,
-    setExpandSharedResult = () => {},
-    setShareModalOpen = () => {},
-    setShareResultID = () => {},
+    pk: currentQueryID,
     handleBookmarkError = () => {},
     handleFilter = () => {},
     hasNotes = false,
-    item,
     key,
-    queryNodeID,
-    queryNodeDescription,
-    queryNodeLabel,
-    rawResults,
-    type,
-    pathFilterState,
-    zoomKeyDown,
-    isInUserSave = false,
     isEven = false,
+    isInUserSave = false,
     isPathfinder = false,
-    resultsComplete = false
+    queryNodeDescription,
+    queryNodeID,
+    queryNodeLabel,
+    queryType,
+    pathFilterState,
+    pk,
+    result,
+    resultsComplete = false,
+    scoreWeights,
+    setExpandSharedResult = () => {},
+    setShareModalOpen = () => {},
+    setShareResultID = () => {},
+    sharedItemRef,
+    startExpanded = false,
+    zoomKeyDown
   }) => {
+
+  let resultSet = useSelector(getResultSetById(pk));
+  const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
+  const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
   const user = useSelector(currentUser);
 
-  let roleCount: number = (item.tags)
-    ? item.tags.filter(tag => tag.includes("role")).length
-    : 0;
+  let roleCount: number = (!!result && !result.tags) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
-  const publicationCount = (!!item.evidenceCounts)
-    ? item.evidenceCounts.publicationCount
-    : (!!item.evidence && !!item.evidence.publications)
-      ? Object.values(item.evidence.publications).filter(item => isPublication(item)).length
-      : 0;
-  const clinicalTrialCount = (!!item.evidenceCounts)
-    ? item.evidenceCounts.clinicalTrialCount
-    : (!!item.evidence && !!item.evidence.publications)
-      ? Object.values(item.evidence.publications).filter(item => isClinicalTrial(item)).length
-      : 0;
-  const miscCount = (!!item.evidenceCounts)
-    ? item.evidenceCounts.miscCount
-    : (!!item.evidence && !!item.evidence.publications)
-      ? Object.values(item.evidence.publications).filter(item => isMiscPublication(item)).length
-      : 0;
-  const sourceCount = (!!item.evidenceCounts)
-    ? item.evidenceCounts.sourceCount
-    : (!!item.evidence && !!item.evidence.distinctSources)
-      ? item.evidence.distinctSources.length
-      : 0;
-
+  const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
   const itemBookmarkID = useRef<string | null>(bookmarkID);
   const [itemHasNotes, setItemHasNotes] = useState<boolean>(hasNotes);
   const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
   const [graphActive, setGraphActive] = useState<boolean>(false);
   const [height, setHeight] = useState<number | string>(0);
-  const formattedPaths = useRef<PathObjectContainer[]>(item.compressedPaths);
-  // selectedPaths include the node ids of a path in a string array
-  const [selectedPaths, setSelectedPaths] = useState<Set<PathObjectContainer> | null>(null);
+  const newPaths = (!!result) ? result.paths: [];
+  const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
   // const [csvData, setCsvData] = useState([]);
   const bookmarkRemovalApproved = useRef<boolean>(false);
   const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState<boolean>(false);
@@ -179,24 +161,30 @@ const ResultsItem: FC<ResultsItemProps> = ({
     };
   },[]);
 
-  const pathsCount: number = getPathsCount(formattedPaths.current);
-  const typeString: string = (item.type !== null) ? formatBiolinkEntity(item.type) : '';
-  const nameString: string = (item.name !== null) ? formatBiolinkNode(item.name, typeString, item.species) : '';
+  const pathCount: number = (!!resultSet) ? getPathCount(resultSet, newPaths) : 0;
+  const subjectNode = (!!result) ? getNodeById(resultSet, result.subject) : undefined;
+  const objectNode = (!!result) ? getNodeById(resultSet, result.object) : undefined;
+  const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
+  const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, subjectNode.species) : '';
+  const resultDescription = subjectNode?.descriptions[0];
 
   const [itemGraph, setItemGraph] = useState(null);
 
   const handleToggle = () => {
-    setIsExpanded(!isExpanded);
+    setIsExpanded(prev => !prev);
   }
 
-  const handleEdgeSpecificEvidence = useCallback((edgeGroup: FormattedEdgeObject, path: PathObjectContainer) => {
-    activateEvidence(item, edgeGroup, path);
-  }, [item, activateEvidence])
+  const handleEdgeSpecificEvidence = useCallback((edgeID: string, path: Path) => {
+    if(!result)
+      return;
 
-  const handleActivateEvidence = useCallback((path: PathObjectContainer) => {
-    if(path.path.subgraph[1] !== null && isFormattedEdgeObject(path.path.subgraph[1]))
-      activateEvidence(item, path.path.subgraph[1], path);
-  }, [item, activateEvidence])
+    activateEvidence(result, edgeID, path);
+  }, [result, activateEvidence])
+
+  const handleActivateEvidence = useCallback((path: Path) => {
+    if(!!path.subgraph[1])
+      activateEvidence(result, path.subgraph[1], path);
+  }, [result, activateEvidence])
 
   useEffect(() => {
     if(isExpanded === false)
@@ -213,13 +201,13 @@ const ResultsItem: FC<ResultsItemProps> = ({
     if(!selectedPaths)
       return;
 
-    let newSelectedPaths: Set<PathObjectContainer> = new Set();
+    let newSelectedPaths: Set<Path> = new Set();
 
-    const checkForNodeMatches = (nodeList: string[], path: PathObjectContainer) => {
+    const checkForNodeMatches = (nodeList: string[], path: Path) => {
       let currentNodeIndex = 0;
       let numMatches = 0;
-      for(const el of path.path.subgraph) {
-        if(!('curies' in el))
+      for(const el of path.subgraph) {
+        if(!isResultNode(el))
           continue;
 
         if(nodeList[currentNodeIndex] && el.curies.includes(nodeList[currentNodeIndex])) {
@@ -234,38 +222,37 @@ const ResultsItem: FC<ResultsItemProps> = ({
       return false;
     }
 
-    for(const selPath of selectedPaths) {
-      for(const path of formattedPaths.current) {
-        if(path.path.subgraph.length === 3) {
-          const firstNode = path.path.subgraph[0];
-          const lastNode = path.path.subgraph[path.path.subgraph.length - 1];
-          if('curies' in firstNode && firstNode.curies.includes(selPath[0]) &&
-          'curies' in lastNode && lastNode.curies.includes(selPath[selPath.length - 1])) {
-            newSelectedPaths.add(path);
-          }
-        }
-        if(path.path.inferred) {
-          for(const [i, item] of path.path.subgraph.entries()) {
-            if(i % 2 === 0)
-              continue;
-            if('support' in item && item.support) {
-              for(const supportPath of item.support){
-                if(checkForNodeMatches(selPath, supportPath))
-                  newSelectedPaths.add(supportPath);
-              }
-            }
-          }
-        }
-        if(checkForNodeMatches(selPath, path))
-          newSelectedPaths.add(path);
-      }
-    }
-    setSelectedPaths(newSelectedPaths)
+    // for(const selPath of selectedPaths) {
+    //   for(const path of formattedPaths.current) {
+    //     if(path.path.subgraph.length === 3) {
+    //       const firstNode = path.path.subgraph[0];
+    //       const lastNode = path.path.subgraph[path.path.subgraph.length - 1];
+    //       if('curies' in firstNode && firstNode.curies.includes(selPath[0]) &&
+    //       'curies' in lastNode && lastNode.curies.includes(selPath[selPath.length - 1])) {
+    //         newSelectedPaths.add(path);
+    //       }
+    //     }
+    //     if(path.path.inferred) {
+    //       for(const [i, item] of path.path.subgraph.entries()) {
+    //         if(i % 2 === 0)
+    //           continue;
+    //         if('support' in item && item.support) {
+    //           for(const supportPath of item.support){
+    //             if(checkForNodeMatches(selPath, supportPath))
+    //               newSelectedPaths.add(supportPath);
+    //           }
+    //         }
+    //       }
+    //     }
+    //     if(checkForNodeMatches(selPath, path))
+    //       newSelectedPaths.add(path);
+    //   }
+    // }
+    // setSelectedPaths(newSelectedPaths)
 
-  },[formattedPaths]);
+  },[]);
 
   const handleBookmarkClick = async () => {
-    console.log("bookmark click");
     if(isBookmarked) {
       if(bookmarkRemovalApproved.current && itemBookmarkID.current) {
         console.log("remove bookmark");
@@ -276,17 +263,28 @@ const ResultsItem: FC<ResultsItemProps> = ({
         bookmarkRemovedToast();
       }
       if(!bookmarkRemovalApproved.current) {
-        console.log("open conf modal");
         setBookmarkRemovalConfirmationModalOpen(true);
       }
       return false;
     } else {
-      item.graph = itemGraph;
-      delete item.paths;
-      let bookmarkObject = getFormattedBookmarkObject("result", item.name, "", queryNodeID,
-        queryNodeLabel, queryNodeDescription, type, item, currentQueryID);
-
-      console.log(bookmarkObject);
+      if(!resultSet) {
+        console.warn("Unable to create bookmark, no resultSet available");
+        return false;
+      }
+      let bookmarkResult: ResultBookmark = cloneDeep(result);
+      bookmarkResult.graph = (!!itemGraph) ? itemGraph : undefined;
+      // delete result.paths;
+      const safeQueryNodeID = (!!queryNodeID) ? queryNodeID : "";
+      const safeQueryNodeLabel = (!!queryNodeLabel) ? queryNodeLabel : "";
+      const safeQueryNodeDescription = (!!queryNodeDescription) ? queryNodeDescription : "";
+      const safeCurrentQueryID = (!!currentQueryID) ? currentQueryID : "";
+      const safeResultSet: ResultSet = generateSafeResultSet(resultSet, bookmarkResult);
+      let bookmarkObject = getFormattedBookmarkObject("result", bookmarkResult.drug_name, "", safeQueryNodeID,
+        safeQueryNodeLabel, safeQueryNodeDescription, queryType, result, safeCurrentQueryID, safeResultSet);
+      
+      bookmarkObject.user_id = (user?.id) ? user.id : null;
+      bookmarkObject.time_created = new Date().toDateString();
+      bookmarkObject.time_updated = new Date().toDateString();
 
       let bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
       console.log(bookmarkedItem);
@@ -302,7 +300,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }
 
   const handleNotesClick = async () => {
-    let tempBookmarkID: string | number | null = itemBookmarkID.current;
+    let tempBookmarkID: string | null = itemBookmarkID.current;
     if(!isBookmarked) {
       console.log("no bookmark exists for this item, creating one...")
       let replacementID = await handleBookmarkClick();
@@ -310,29 +308,28 @@ const ResultsItem: FC<ResultsItemProps> = ({
       tempBookmarkID = (replacementID) ? replacementID : tempBookmarkID;
     }
     if(tempBookmarkID) {
-      activateNotes(nameString, tempBookmarkID, item);
+      activateNotes(nameString, tempBookmarkID);
       setItemHasNotes(true);
     }
   }
 
-  const handleTagClick = (tagID: string, tag: Tag) => {
-    let newObj: Tag = {
-      name: tag.name,
+  const handleTagClick = (filterID: string, filter: Filter) => {
+    let newObj: Filter = {
+      name: filter.name,
       negated: false,
-      id: tagID,
-      value: tag.name
+      id: filterID,
+      value: filter.name
     };
     handleFilter(newObj);
   }
 
   const handleBookmarkRemovalApproval = () => {
-    console.log("removal approved");
     bookmarkRemovalApproved.current = true;
     handleBookmarkClick();
   }
 
   const handleOpenResultShare = () => {
-    setShareResultID(item.id);
+    setShareResultID(result.id);
     setShareModalOpen(true);
   }
 
@@ -342,15 +339,16 @@ const ResultsItem: FC<ResultsItemProps> = ({
 
   useEffect(() => {
     setItemHasNotes(hasNotes);
-    formattedPaths.current = item.compressedPaths;
-  }, [item, hasNotes]);
+  }, [result, hasNotes]);
 
   return (
-    <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-resultcurie={JSON.stringify(item.subjectNode.curies.slice(0, 5))} ref={sharedItemRef} data-result-name={nameString}>
+    <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-resultcurie={result.subject} ref={sharedItemRef} data-result-name={nameString}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <ResultsItemName
           isPathfinder={isPathfinder}
-          item={item}
+          subjectNode={subjectNode}
+          objectNode={objectNode}
+          item={result}
           activeEntityFilters={activeEntityFilters}
           nameString={nameString}
           resultsItemStyles={styles}
@@ -397,35 +395,35 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span className={styles.evidenceLink}>
           <div>
-              {
-                publicationCount > 0  &&
-                <span className={styles.info}>Publications ({publicationCount})</span>
-              }
-              {
-                clinicalTrialCount > 0  &&
-                <span className={styles.info}>Clinical Trials ({clinicalTrialCount})</span>
-              }
-              {
-                miscCount > 0  &&
-                <span className={styles.info}>Misc ({miscCount})</span>
-              }
-              {
-                sourceCount > 0  &&
-                <span className={styles.info}>Sources ({sourceCount})</span>
-              }
+            {
+              evidenceCounts.publicationCount > 0  &&
+              <span className={styles.info}>Publications ({evidenceCounts.publicationCount})</span>
+            }
+            {
+              evidenceCounts.clinicalTrialCount > 0  &&
+              <span className={styles.info}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
+            }
+            {
+              evidenceCounts.miscCount > 0  &&
+              <span className={styles.info}>Misc ({evidenceCounts.miscCount})</span>
+            }
+            {
+              evidenceCounts.sourceCount > 0  &&
+              <span className={styles.info}>Sources ({evidenceCounts.sourceCount})</span>
+            }
           </div>
         </span>
       </div>
       <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
         <span className={styles.paths}>
-          <span className={styles.pathsNum}>{ pathsCount } {pathsCount > 1 ? "Paths" : "Path"}</span>
+          <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
         </span>
       </div>
       {
         !isPathfinder &&
         <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
           <span className={styles.score}>
-            <span className={styles.scoreNum}>{resultsComplete ? item.score === null ? '0.00' : displayScore(item.score.main) : "Processing..." }</span>
+            <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score) : "Processing..." }</span>
           </span>
         </div>
       }
@@ -445,8 +443,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <AnimateHeight
         className={`${styles.accordionPanel}
           ${isExpanded ? styles.open : styles.closed }
-          ${(item.tags.some(item=>item.includes("role")) && !isInUserSave) ? styles.hasTags : ''}
-          ${(item.description && !isPathfinder) ? styles.hasDescription : '' }
+          ${(Object.entries(result.tags).some(item=>item.includes("role")) && !isInUserSave) ? styles.hasTags : ''}
+          ${(!!resultDescription && !isPathfinder) ? styles.hasDescription : '' }
         `}
         duration={500}
         height={height}
@@ -454,10 +452,10 @@ const ResultsItem: FC<ResultsItemProps> = ({
         <div className={styles.container}>
           <div>
             {
-              item.tags && roleCount > 0 && availableTags &&
+              result.tags && roleCount > 0 && availableTags &&
               <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
                 {
-                  item.tags.toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((fid, i) => {
+                  Object.keys(result.tags).toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((fid) => {
                     if (!(filtering.getTagFamily(fid) === filtering.CONSTANTS.FAMILIES.ROLE)) return null;
                     const tag = availableTags[fid];
                     const activeClass = (activeFilters.some((filter)=> filter.id === fid && filter.value === tag.name))
@@ -471,13 +469,13 @@ const ResultsItem: FC<ResultsItemProps> = ({
               </div>
             }
             {
-              item.description && !isPathfinder &&
+              !!resultDescription && !isPathfinder &&
               <p className={styles.description}>
                 <Highlighter
                   highlightClassName="highlight"
                   searchWords={activeEntityFilters}
                   autoEscape={true}
-                  textToHighlight={item.description}
+                  textToHighlight={resultDescription}
                 />
               </p>
             }
@@ -495,24 +493,25 @@ const ResultsItem: FC<ResultsItemProps> = ({
           >
             <Tab heading="Paths">
               <PathView
-                paths={formattedPaths.current}
+                pathArray={result?.paths}
                 selectedPaths={selectedPaths}
-                isPathfinder={isPathfinder}
                 handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
                 handleActivateEvidence={handleActivateEvidence}
                 activeEntityFilters={activeEntityFilters}
                 pathFilterState={pathFilterState}
                 isEven={isEven}
                 active={isExpanded}
+                activeFilters={activeFilters}
+                pk={pk ? pk : ""}
               />
             </Tab>
             <Tab heading="Graph">
               <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
                 <GraphView
-                  result={item}
+                  result={result}
                   updateGraphFunction={setItemGraph}
-                  prebuiltGraph={(item.graph)? item.graph: null}
-                  rawResults={rawResults}
+                  prebuiltGraph={(!!itemGraph)? itemGraph: null}
+                  resultSet={resultSet}
                   onNodeClick={handleNodeClick}
                   clearSelectedPaths={handleClearSelectedPaths}
                   active={graphActive}
@@ -538,18 +537,4 @@ const ResultsItem: FC<ResultsItemProps> = ({
   );
 }
 
-// check if certain props are really different before rerendering
-const areEqualProps = (prevProps: any, nextProps: any) => {
-  // Check for deep equality of the item object
-  if (!isEqual(prevProps.item, nextProps.item)) return false;
-  // Check other properties
-  if (!isEqual(prevProps.zoomKeyDown, nextProps.zoomKeyDown)) return false;
-  if (!isEqual(prevProps.startExpanded, nextProps.startExpanded)) return false;
-  if (!isEqual(prevProps.activeFilters, nextProps.activeFilters)) return false;
-  if (!isEqual(prevProps.activeEntityFilters, nextProps.activeEntityFilters)) return false;
-  if (!isEqual(prevProps.resultsComplete, nextProps.resultsComplete)) return false;
-  // If none of the conditions are met, props are equal
-  return true;
-};
-
-export default memo(ResultsItem, areEqualProps);
+export default ResultsItem;

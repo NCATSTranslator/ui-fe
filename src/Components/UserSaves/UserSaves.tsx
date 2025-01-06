@@ -1,11 +1,10 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { getSaves } from '../../Utilities/userApi';
+import { useEffect, useState, useRef, useCallback, useMemo, Dispatch, SetStateAction, FormEvent } from 'react';
+import { getSaves, mergeResultSets, SaveGroup } from '../../Utilities/userApi';
 import { handleEvidenceModalClose } from "../../Utilities/resultsInteractionFunctions";
 import styles from './UserSaves.module.scss';
 import EvidenceModal from '../Modals/EvidenceModal';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';
-// import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import RefreshIcon from '../../Icons/Buttons/Refresh.svg?react';
 import CloseIcon from '../../Icons/Buttons/Close/Close.svg?react';
 import { getFormattedDate } from '../../Utilities/utilities';
@@ -20,30 +19,40 @@ import LoginWarning from '../LoginWarning/LoginWarning';
 import LoadingWrapper from '../LoadingWrapper/LoadingWrapper'
 import { useUser } from '../../Utilities/userApi';
 import { debounce } from 'lodash';
-// import Button from '../Core/Button';
+import { Path, Result, ResultEdge, ResultSet } from '../../Types/results';
+import { useDispatch } from 'react-redux';
+import { setResultSets } from '../../Redux/resultsSlice';
 
 const UserSaves = () => {
 
+  const dispatch = useDispatch();
   const [user, loading] = useUser();
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [savesLoaded, setSavesLoaded] = useState(false);
-  const [userSaves, setUserSaves] = useState(null);
-  const [filteredUserSaves, setFilteredUserSaves] = useState(null)
+  const [userSaves, setUserSaves] = useState<{[key: string]: SaveGroup;} | null>(null);
+  const [filteredUserSaves, setFilteredUserSaves] = useState<{[key: string]: SaveGroup;} | null>(null);
   const currentSearchString = useRef("");
-  const [evidenceOpen, setEvidenceOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState({});
-  const [selectedEdge, setSelectedEdge] = useState(null);
-  const [selectedPath, setSelectedPath] = useState(null);
+  const [evidenceModalOpen, setEvidenceModalOpen] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<Result | undefined>(undefined);
+  const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
+  const [selectedPath, setSelectedPath] = useState<Path | undefined>(undefined);
+  const [selectedPK, setSelectedPK] = useState<string | undefined>(undefined);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   // eslint-disable-next-line
   const [shareModalOpen, setShareModalOpen] = useState(false);
-  const shareResultID = useRef(null);
-  const setShareResultID = (newID) => shareResultID.current = newID;
+  const shareResultID = useRef<null | string>(null);
+  const setShareResultID = (newID: string) => shareResultID.current = newID;
+
+  const [confidenceWeight] = useState(1.0);
+  const [noveltyWeight] = useState(0.1);
+  const [clinicalWeight] = useState(1.0);
+
+  const scoreWeights = useMemo(()=> { return {confidenceWeight: confidenceWeight, noveltyWeight: noveltyWeight, clinicalWeight: clinicalWeight}}, [confidenceWeight, noveltyWeight, clinicalWeight]);
   
   const noteLabel = useRef("");
-  const currentBookmarkID = useRef(null);
-  const formRef = useRef(null);
+  const currentBookmarkID = useRef<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
@@ -51,33 +60,64 @@ const UserSaves = () => {
 
   const queryClient = new QueryClient();
 
-  const activateEvidence = useCallback((item, edgeGroup, path) => {
-    setSelectedItem(item);
-    setSelectedEdge(edgeGroup);
-    setSelectedPath(path);
-    setEvidenceOpen(true);
-  },[])
+  const activateEvidence = (item: Result, edge: ResultEdge, path: Path, pk: string) => {
+    if(!!edge && !!path) {
+      setSelectedPK(pk);
+      setSelectedResult(item);
+      setSelectedEdge(edge);
+      setSelectedPath(path);
+      setEvidenceModalOpen(true);
+    }
+  }
 
-  const activateNotes = (label, bookmarkID) => {
+  const activateNotes = (label: string, bookmarkID: string) => {
     noteLabel.current = label;
     currentBookmarkID.current = bookmarkID;
     setNotesOpen(true);
   }
 
   const initSaves = async () => {
+    let resultSetsToAdd: {[key:string]: ResultSet} = {};
     let newSaves = await getSaves(setUserSaves);
+    // list of obsolete saves 
+    let saveGroupsToRemove = new Set<string>();
+    for(const [key, saveGroup] of Object.entries(newSaves)) {
+      let newResultSet;
+      for(const save of saveGroup.saves) {
+        if(newResultSet === undefined)
+          newResultSet = save.data.query.resultSet;
+        else 
+          newResultSet = mergeResultSets(newResultSet, save.data.query.resultSet);
+      }
+      if(!!newResultSet)
+        resultSetsToAdd[saveGroup.query.pk] = newResultSet;
+      else
+        saveGroupsToRemove.add(key);
+    }
+    // remove obsolete saves
+    for(const saveGroupKey of saveGroupsToRemove)
+      delete newSaves[saveGroupKey];
+
+    dispatch(setResultSets(resultSetsToAdd))
     setSavesLoaded(true);
     setFilteredUserSaves(cloneDeep(newSaves));
   }
 
-  const handleSearch = useCallback((value = false, userSaves, setFilteredUserSaves) => {
+  const handleSearch = useCallback((
+    value: string | false = false,
+    userSaves: {[key: string]: SaveGroup;},
+    setFilteredUserSaves: Dispatch<SetStateAction<{[key: string]: SaveGroup;} | null>>
+  ) => {
     if(!value) {
       setFilteredUserSaves(cloneDeep(userSaves));
       currentSearchString.current = "";
       return;
     }
 
-    setFilteredUserSaves(Object.values(userSaves).filter((item) => {
+    let newFilteredUserSaves: {[key: string]: SaveGroup;} = {};
+    for(const save of Object.entries(userSaves)) {
+      const key = save[0];
+      let item = save[1];
       let include = false;
       let tempValue = value.toLowerCase();
       currentSearchString.current = value;
@@ -86,8 +126,8 @@ const UserSaves = () => {
       // check for match in query info
       if(
         item.query.nodeLabel.toLowerCase().includes(tempValue) ||
-        item.query.nodeId.toLowerCase().includes(tempValue) || 
-        submittedDate.toLowerCase().includes(tempValue) || 
+        (typeof item.query.nodeId === "string" && item.query.nodeId.toLowerCase().includes(tempValue)) || 
+        (typeof submittedDate === "string" && submittedDate.toLowerCase().includes(tempValue)) || 
         item.query.nodeDescription.toLowerCase().includes(tempValue) || 
         item.query.type.label.toLowerCase().includes(tempValue) || 
         item.query.type.filterType.toLowerCase().includes(tempValue) 
@@ -101,48 +141,53 @@ const UserSaves = () => {
           save.notes.toLowerCase().includes(tempValue) ||
           save.object_ref.toLowerCase().includes(tempValue) ||
           save.data.item.id.toLowerCase().includes(tempValue) ||
-          save.data.item.name.toLowerCase().includes(tempValue) ||
-          save.data.item.type.toLowerCase().includes(tempValue) ||
+          save.data.item.drug_name.toLowerCase().includes(tempValue) ||
           save.data.item.object.toLowerCase().includes(tempValue) 
         )
           include = true;
       }
 
-      return include;
-    }))
+      if(include)
+        newFilteredUserSaves[key] = item;
+    }
+    setFilteredUserSaves(newFilteredUserSaves);
     setIsSearchLoading(false);
   }, []);
 
   // eslint-disable-next-line
   const delayedSearch = useCallback(debounce((value, userSaves, setFilteredUserSaves)=>handleSearch(value, userSaves, setFilteredUserSaves), 750), [handleSearch]);
 
-  const handleSearchBarItemChange = (value) => {
+  const handleSearchBarItemChange = (value: string) => {
     if(!isSearchLoading)
       setIsSearchLoading(true);
     delayedSearch(value, userSaves, setFilteredUserSaves);
   }
 
   const clearSearchBar = () => {
-    formRef.current.reset();
-    handleSearch(false, userSaves, setFilteredUserSaves);
+    if(!!formRef.current && !!userSaves) {
+      formRef.current.reset();
+      handleSearch(false, userSaves, setFilteredUserSaves);
+    }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    formRef.current.reset();
-    clearSearchBar();
+    if(!!formRef.current) {
+      formRef.current.reset();
+      clearSearchBar();
+    }
   }
 
   useEffect(() => {
     initSaves();
 
-    const handleKeyDown = (ev) => {
+    const handleKeyDown = (ev: KeyboardEvent) => {
       if (ev.keyCode === 90) {
         setZoomKeyDown(true);
       }
     };
   
-    const handleKeyUp = (ev) => {
+    const handleKeyUp = (ev: KeyboardEvent) => {
       if (ev.keyCode === 90) {
         setZoomKeyDown(false);
       }
@@ -187,10 +232,11 @@ const UserSaves = () => {
                 bookmarkID={currentBookmarkID.current}
               />
               <EvidenceModal
-                isOpen={evidenceOpen}
-                onClose={()=>handleEvidenceModalClose(setEvidenceOpen)}
-                item={selectedItem}
-                edgeGroup={selectedEdge}
+                isOpen={evidenceModalOpen}
+                onClose={()=>handleEvidenceModalClose(setEvidenceModalOpen)}
+                result={selectedResult}
+                pk={(!!selectedPK) ? selectedPK : "-1"}
+                edge={selectedEdge}
                 path={selectedPath}
               />
               <div className="page-header">
@@ -232,6 +278,7 @@ const UserSaves = () => {
                     : <>
                         <div className={styles.saves}>
                           {
+                            filteredUserSaves &&
                             Object.entries(filteredUserSaves).sort((a, b)=> -a[1].query.submitted_time.localeCompare(b[1].query.submitted_time)).map((item) => {
                               return(
                                 <UserSave
@@ -245,6 +292,7 @@ const UserSaves = () => {
                                   bookmarkRemovedToast={bookmarkRemovedToast}
                                   setShareModalOpen={setShareModalOpen}
                                   setShareResultID={setShareResultID}
+                                  scoreWeights={scoreWeights}
                                 />
                               );
                             })

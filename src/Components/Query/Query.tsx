@@ -11,7 +11,6 @@ import { queryTypes } from "../../Utilities/queryTypes";
 import { incrementHistory } from "../../Redux/historySlice";
 import { currentConfig, currentUser } from "../../Redux/rootSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
-import { setCurrentQueryResultsID, setCurrentResults } from "../../Redux/resultsSlice";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
@@ -27,7 +26,7 @@ import { API_PATH_PREFIX } from "../../Utilities/userApi";
 import Tooltip from "../Tooltip/Tooltip";
 import EntityLink from "../EntityLink/EntityLink";
 import ResultsSummaryButton from "../ResultsSummaryButton/ResultsSummaryButton";
-import { ResultItem } from "../../Types/results";
+import { Result } from "../../Types/results";
 
 interface QueryProps {
   isResults: boolean;
@@ -37,8 +36,9 @@ interface QueryProps {
   initNodeIdParam: string | null;
   nodeDescription: string | null;
   setShareModalFunction: Dispatch<SetStateAction<boolean>>;
-  results: ResultItem[];
+  results: Result[];
   handleResultMatchClick: Function;
+  pk: string;
 }
 
 const Query: FC<QueryProps> = ({
@@ -50,7 +50,8 @@ const Query: FC<QueryProps> = ({
   nodeDescription,
   setShareModalFunction,
   results,
-  handleResultMatchClick
+  handleResultMatchClick,
+  pk
 }) => {
   // Utilities for navigation and application state dispatch
   const navigate = useNavigate();
@@ -123,7 +124,6 @@ const Query: FC<QueryProps> = ({
     };
 
     let timestamp = new Date();
-    dispatch(setCurrentResults({}));
     setIsLoading(true);
 
     if(!item?.node) {
@@ -147,7 +147,6 @@ const Query: FC<QueryProps> = ({
       .then((response) => response.json())
       .then((data) => {
         if (data.data && data.status === 'success') {
-          dispatch(setCurrentQueryResultsID(data.data));
           dispatch(
             incrementHistory({
               item: item,
@@ -347,6 +346,7 @@ const Query: FC<QueryProps> = ({
                       results={results}
                       queryString={`${resultsPaneQuestionText}${queryItem.node?.label || ""}`}
                       handleResultMatchClick={handleResultMatchClick}
+                      pk={pk}
                     />
                   }
                 </div>

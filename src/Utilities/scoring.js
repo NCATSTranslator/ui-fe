@@ -1,14 +1,14 @@
 import { equal, larger, format, polynomialRoot, largerEq, min, max, round, Complex } from 'mathjs';
 
-export const score = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
+export const generateScore = (scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) => {
   return maxSugenoScore(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight);
 }
 
-export const displayScore = function(score, decimalPlaces=2) {
-  return format(score, {notation: 'fixed', precision: decimalPlaces});
+export const displayScore = (score, decimalPlaces = 2) => {
+  return format(score.main, {notation: 'fixed', precision: decimalPlaces});
 }
 
-export const maxNormalizedScore = function(scoreComponents) {
+export const maxNormalizedScore = (scoreComponents) => {
   const normalizedScorePairs = scoreComponents.map((s) => {
     const scaledNormalizedScore = 5 * s.normalized_score / 100;
     return {
@@ -20,7 +20,7 @@ export const maxNormalizedScore = function(scoreComponents) {
   return maxScorePair(normalizedScorePairs);
 }
 
-const maxSugenoScore = function(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) {
+const maxSugenoScore = (scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) => {
   const sugenoPairs = scoreComponents.map((s) => {
     const scaledSugenoScore = 5 * computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
       confidenceWeight, noveltyWeight, clinicalWeight);
@@ -34,7 +34,7 @@ const maxSugenoScore = function(scoreComponents, confidenceWeight, noveltyWeight
   return maxScorePair(sugenoPairs);
 }
 
-const maxScorePair = function (scorePairs) {
+const maxScorePair = (scorePairs) => {
   let maxScore = scorePairs[0];
   for (let i = 1; i < scorePairs.length; i++) {
     if (larger(scorePairs[i].main, maxScore.main) ||
@@ -47,8 +47,8 @@ const maxScorePair = function (scorePairs) {
   return maxScore;
 }
 
-const computeSugeno = function(confidence, novelty, clinical,
-    confidenceWeight, noveltyWeight, clinicalWeight) {
+const computeSugeno = (confidence, novelty, clinical,
+    confidenceWeight, noveltyWeight, clinicalWeight) => {
   const a = confidenceWeight;
   const b = noveltyWeight;
   const c = clinicalWeight;
@@ -92,11 +92,11 @@ const computeSugeno = function(confidence, novelty, clinical,
   return max(...mins);
 }
 
-const isComplex = function(x) {
+const isComplex = (x) => {
   return (x instanceof Complex);
 }
 
-const computeWeightSets = function(lambda, confidenceWeight, noveltyWeight, clinicalWeight, n=2) {
+const computeWeightSets = (lambda, confidenceWeight, noveltyWeight, clinicalWeight, n=2) => {
   const ws = {
     'co': confidenceWeight,
     'no': noveltyWeight,
@@ -126,7 +126,7 @@ const computeWeightSets = function(lambda, confidenceWeight, noveltyWeight, clin
   return ws;
 }
 
-const getPermutations = function(array, n) {
+const getPermutations = (array, n) => {
   const permutations = [];
   const ss = subsets(array, n);
   for (const subset of ss) {
@@ -136,7 +136,7 @@ const getPermutations = function(array, n) {
 }
 
 // Get all subsets of length n from array
-const subsets = function(array, n) {
+const subsets = (array, n) => {
   const m = array.length;
   const totalSubsets = 1 << m;
   const subsets = [];
@@ -164,7 +164,7 @@ const subsets = function(array, n) {
 }
 
 // Heap's algorithm
-const permute = function(array) {
+const permute = (array) => {
   const permutations = [];
   const arr = [...array];
   const n = array.length;
@@ -192,13 +192,13 @@ const permute = function(array) {
   return permutations;
 }
 
-const swap = function(array, i, j) {
+const swap = (array, i, j) => {
   const temp = array[i];
   array[i] = array[j];
   array[j] = temp;
 }
 
-const computeWeightedMean = function(confidence, novelty, clinical,
-    confidenceWeight, noveltyWeight, clinicalWeight) {
+const computeWeightedMean = (confidence, novelty, clinical,
+    confidenceWeight, noveltyWeight, clinicalWeight) => {
   return (confidence * confidenceWeight) + (novelty * noveltyWeight) + (clinical * clinicalWeight);
 }

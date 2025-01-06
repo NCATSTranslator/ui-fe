@@ -1,9 +1,8 @@
 import ReactDOM from 'react-dom';
 import cytoscape from 'cytoscape';
 import { debounce, cloneDeep } from 'lodash';
-import { capitalizeFirstLetter } from './utilities';
+import { capitalizeFirstLetter, hasSupport } from './utilities';
 import ExternalLink from '../Icons/Buttons/External Link.svg?react';
-import { hasSupport } from './resultsFormattingFunctions';
 
 export const layoutList = {
   klay: {
@@ -29,6 +28,20 @@ export const layoutList = {
 export const resultToCytoscape = (result, summary) => {
   const makeNode = (n, nodes) =>
   {
+    if(!nodes[n]) {
+      return {
+        data: {
+          id: n,
+          label: "unknown node",
+          type: "",
+          provenance: null,
+          isTargetCount: 0,
+          isSourceCount: 0,
+          isTargetEdges: [],
+          isSourceEdges: []
+        }
+      };
+    }
     const name = nodes[n].names[0];
     const type = nodes[n].types[0];
     const provenance = nodes[n].provenance[0];
@@ -57,8 +70,8 @@ export const resultToCytoscape = (result, summary) => {
     let src = edge.subject;
     let tgt = edge.object;
     let pred = edge.predicate;
-    let srcLbl = nodes[src].names[0];
-    let tgtLbl = nodes[tgt].names[0];
+    let srcLbl = (!!nodes[src]) ? nodes[src].names[0] : "unknown node";
+    let tgtLbl = (!!nodes[tgt]) ? nodes[tgt].names[0] : "unknown node";
     return {
       data: {
         id: eid,

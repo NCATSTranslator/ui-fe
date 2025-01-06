@@ -15,7 +15,7 @@ import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Tooltip from '../Tooltip/Tooltip';
 import EmphasizeWord from '../EmphasizeWord/EmphasizeWord';
 
-const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, setPubmedEvidence, item, prefs = null, isOpen }) => {
+const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, setPubmedEvidence, prefs, isOpen }) => {
 
   const availableKnowledgeLevels = useMemo(() => {
     return new Set(pubmedEvidence.map(pub => pub.knowledgeLevel));

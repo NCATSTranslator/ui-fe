@@ -5,121 +5,120 @@ import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
-import { FormattedEdgeObject, FormattedNodeObject, PathObjectContainer, SupportDataObject, PathFilterState } from '../../Types/results';
-import { isFormattedEdgeObject, isFormattedNodeObject } from '../../Utilities/utilities';
+import { Path, PathFilterState, isResultNode, ResultNode, Filter } from '../../Types/results.d';
+import { useSelector } from 'react-redux';
+import { getEdgeById, getNodeById, getResultSetById } from '../../Redux/resultsSlice';
 
-interface PathObjectProps {
-  pathObject: FormattedEdgeObject | FormattedNodeObject;
-  pathObjectContainer: PathObjectContainer;
-  id: string;
-  handleNameClick: (name: FormattedNodeObject) => void;
-  handleEdgeClick: (edge: FormattedEdgeObject, path: PathObjectContainer) => void;
-  handleTargetClick: (target: FormattedNodeObject) => void;
-  hasSupport: boolean;
+export interface PathObjectProps {
   activeEntityFilters: string[];
-  selected?: boolean;
-  supportDataObject: SupportDataObject | null;
+  activeFilters: Filter[];
+  className?: string;
+  handleActivateEvidence?: (path: Path) => void;
+  handleEdgeClick: (edgeID: string, path: Path) => void;
+  handleNodeClick: (name: ResultNode) => void;
+  id: string | string[];
+  index: number;
   inModal?: boolean;
   isEven?: boolean;
-  className?: string;
+  path: Path;
   pathFilterState: PathFilterState;
   pathViewStyles?: {[key: string]: string;} | null;
+  pk: string;
+  selected?: boolean;
+  selectedPaths: Set<Path> | null;
 }
 
-const PathObject: FC<PathObjectProps> = ({ pathObject, pathObjectContainer, id, handleNameClick, handleEdgeClick, handleTargetClick, hasSupport = false,
-  activeEntityFilters, selected, pathFilterState, supportDataObject = null, inModal = false, isEven = false, className = "", pathViewStyles = null }) => {
+const PathObject: FC<PathObjectProps> = ({ 
+  activeEntityFilters, 
+  activeFilters,
+  className = "", 
+  handleActivateEvidence = ()=>{},
+  handleNodeClick, 
+  handleEdgeClick, 
+  id, 
+  index, 
+  inModal = false, 
+  isEven = false, 
+  pathFilterState, 
+  path, 
+  pathViewStyles = null, 
+  pk,
+  selected, 
+  selectedPaths }) => {
 
-  const provenance = (!!pathObject.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
-  const isNode = isFormattedNodeObject(pathObject);
-  const type = (isNode && pathObject?.type) ? pathObject.type.replace("biolink:", ""): '';
-  const uid = `${type}${id}`;
+  const resultSet = useSelector(getResultSetById(pk));
+
+  // ID of the main element (in the case of a compressed edge)
+  const itemID = (Array.isArray(id)) ? id[0] : id; 
+  const pathObject = (index % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
+  const isNode = isResultNode(pathObject);
+  const type = isNode ? pathObject?.types[0].replace("biolink:", ""): '';
+  const uid = `${path?.id || ""}-${index}-${id}`;
   let nameString = '';
   let typeString = '';
   if(isNode) {
-    nameString = formatBiolinkNode(pathObject.name, type, pathObject.species);
-    typeString = formatBiolinkEntity(pathObject.type)
+    nameString = formatBiolinkNode(pathObject.names[0], type, pathObject.species);
+    typeString = formatBiolinkEntity(type);
   }
+
+  const provenance = (!!pathObject?.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
+  const description = (isNode && !!pathObject?.descriptions[0]) ? pathObject.descriptions[0] : '';
+
+  if(!pathObject)
+    return null;
 
   return (
     <>
       {
-        pathObject.category === 'object' && isNode &&
-        <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
-          onClick={(e)=> {e.stopPropagation(); handleNameClick(pathObject);}}
-          data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
-          >
-          <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
-            {getIcon(pathObject.type)}
-            <span className={styles.text}>
-              <Highlighter
-                highlightClassName="highlight"
-                searchWords={activeEntityFilters}
-                autoEscape={true}
-                textToHighlight={nameString}
-              />
+        isNode 
+          ?
+            <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
+              onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
+              data-tooltip-id={`${uid}`}
+              >
+              <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
+                {getIcon(pathObject?.types[0])}
+                <span className={styles.text}>
+                  <Highlighter
+                    highlightClassName="highlight"
+                    searchWords={activeEntityFilters}
+                    autoEscape={true}
+                    textToHighlight={nameString}
+                  />
+                </span>
+              </span>
+              <Tooltip id={`${uid}`}>
+                <span><strong>{nameString}</strong> ({typeString})</span>
+                <span className={styles.description}>{description}</span>
+                {
+                  provenance && typeof provenance === "string" &&
+                  <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
+                    <ExternalLink/>
+                    <span>{provenance}</span>
+                  </a>
+                }
+              </Tooltip>
             </span>
-          </span>
-          <Tooltip id={`${nameString.replaceAll("'", "")}${uid}`}>
-            <span><strong>{nameString}</strong> ({typeString})</span>
-            <span className={styles.description}>{pathObject.description}</span>
-            {
-              provenance && typeof provenance === "string" &&
-              <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
-                <ExternalLink/>
-                <span>{provenance}</span>
-              </a>
-            }
-          </Tooltip>
-        </span>
-      }
-      {
-        pathObject.category === 'predicate' && isFormattedEdgeObject(pathObject) &&
-        <Predicate
-          pathObject={pathObject}
-          pathObjectContainer={pathObjectContainer}
-          selected={selected}
-          activeEntityFilters={activeEntityFilters}
-          uid={uid}
-          handleEdgeClick={handleEdgeClick}
-          parentClass={styles.pathContainer}
-          inModal={inModal}
-          hasSupport={hasSupport}
-          supportDataObject={supportDataObject}
-          className={className}
-          pathFilterState={pathFilterState}
-          pathViewStyles={pathViewStyles}
-        />
-      }
-      {
-        pathObject.category === 'target' && isNode &&
-        <span
-          className={`${styles.targetContainer} ${className}`}
-          data-tooltip-id={`${nameString.replaceAll("'", "")}${uid}`}
-          onClick={(e)=> {e.stopPropagation(); handleTargetClick(pathObject);}}
-          >
-          <span className={`${!!pathViewStyles && pathViewStyles.targetInterior} ${styles.target}`}>
-            {getIcon(pathObject.type)}
-            <span className={styles.text}>
-              <Highlighter
-                highlightClassName="highlight"
-                searchWords={activeEntityFilters}
-                autoEscape={true}
-                textToHighlight={nameString}
-              />
-            </span>
-          </span>
-          <Tooltip id={`${nameString.replaceAll("'", "")}${uid}`}>
-            <span><strong>{nameString}</strong> ({typeString})</span>
-            <span className={styles.description}>{pathObject.description}</span>
-            {
-              provenance && typeof provenance === "string" &&
-              <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
-                <ExternalLink/>
-                <span>{provenance}</span>
-              </a>
-            }
-          </Tooltip>
-        </span>
+          :
+            <Predicate
+              path={path}
+              edge={pathObject}
+              edgeIDs={(Array.isArray(id)) ? id : [id]}
+              selected={selected}
+              activeEntityFilters={activeEntityFilters}
+              activeFilters={activeFilters}
+              uid={uid}
+              handleActivateEvidence={handleActivateEvidence}
+              handleEdgeClick={handleEdgeClick}
+              handleNodeClick={handleNodeClick}
+              parentClass={styles.pathContainer}
+              inModal={inModal}
+              className={className}
+              pathFilterState={pathFilterState}
+              pathViewStyles={pathViewStyles}
+              selectedPaths={selectedPaths}
+              pk={pk}
+            />
       }
     </>
   )

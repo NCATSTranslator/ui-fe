@@ -1,5 +1,5 @@
-import { ResultItem, FormattedEdgeObject, FormattedNodeObject } from "../Types/results";
-import { isFormattedNodeObject } from "./utilities";
+import { getEdgeById, getNodeById, getPathById } from "../Redux/resultsSlice";
+import { ResultEdge, ResultNode, ResultSet, Result, isResultNode, isResultEdge } from "../Types/results.d";
 
 export type ResultContextObject = {
   id: string;
@@ -7,40 +7,42 @@ export type ResultContextObject = {
   paths: string[];
 }
 
-export const genTopNResultsContext = (results: ResultItem[], n: number) => {
+export const genTopNResultsContext = (resultSet: ResultSet, results: Result[], n: number) => {
   n = Math.min(n, results.length);
   const resultContexts = [];
   for (let i = 0; i < n; i++) {
-    resultContexts.push(genResultContext(results[i]));
+    resultContexts.push(genResultContext(resultSet, results[i]));
   }
   return resultContexts;
 }
 
-export const genResultContext = (result: ResultItem): ResultContextObject => {
-  const name = result.name;
+export const genResultContext = (resultSet: ResultSet, result: Result): ResultContextObject => {
+  const name = result.drug_name;
   const seenPids = new Set();
   const pathStrings = new Set<string>();
   const pathsLeft = !!result.paths ?[...result.paths] : false;
   while (!!pathsLeft && pathsLeft.length !== 0) {
-    const path = pathsLeft.pop();
+    const p = pathsLeft.pop();
+    if(!p)
+      break;
+    const path = (typeof p === "string") ? getPathById(resultSet, p) : p;
+    const pathID = (typeof p === "string") ? p : p.id;
     if(!path)
       break;
-    const pid = path.id;
-    seenPids.add(pid);
-    const subgraph = path.path.subgraph;
-    const pathString = genPathString(subgraph);
+    seenPids.add(pathID);
+    const subgraph = path.subgraph;
+    const pathString = genPathString(resultSet, subgraph);
     if (!pathString) {
-      console.error(`Unexpected missing path in summary: ${pid}`);
+      console.error(`Unexpected missing path in summary: ${pathID}`);
       continue;
     }
     pathStrings.add(pathString);
     for (let i = 1; i < subgraph.length; i+=2) {
-      const nextEdgeItem = subgraph[i] as FormattedEdgeObject;
-      if(!!nextEdgeItem.support) {
-        for (let supPath of nextEdgeItem.support) {
-          const spid = supPath.id;
-          if (!seenPids.has(spid)) {
-            pathsLeft.push(supPath);
+      const nextEdgeItem = getEdgeById(resultSet, subgraph[i]);
+      if(!!nextEdgeItem?.support) {
+        for (let supPathID of nextEdgeItem.support) {
+          if (!seenPids.has(supPathID)) {
+            pathsLeft.push(supPathID);
           }
         }
       }
@@ -53,26 +55,35 @@ export const genResultContext = (result: ResultItem): ResultContextObject => {
   };
 }
 
-const genPathString = (subgraph: (FormattedEdgeObject | FormattedNodeObject)[]) => {
+const genPathString = (resultSet: ResultSet, subgraph: string[]) => {
   if (subgraph === undefined) {
     return false;
   }
-  const pathNames = subgraph.map((obj) => {
-    if (isFormattedNodeObject(obj)) 
+  const pathNames = subgraph.map((id, i) => {
+    let obj;
+    if(i % 2 === 0)
+      obj = getNodeById(resultSet, id);
+    else 
+      obj = getEdgeById(resultSet, id);
+
+    if(isResultNode(obj)) 
       return getNodeName(obj);
 
-    return `[${getPredicateName(obj)}]`;
+    if(isResultEdge(obj))
+      return `[${getPredicateName(obj)}]`;
+
+    return "";
   });
   return pathNames.join('-');
 }
 
-const getNodeName = (node: FormattedNodeObject) => {
-  return node.name;
+const getNodeName = (node: ResultNode) => {
+  return node.names[0];
 }
 
-const getPredicateName = (edge: FormattedEdgeObject) => {
-  if(edge.predicates)
-    return edge.predicates[0].predicate;
+const getPredicateName = (edge: ResultEdge) => {
+  if(edge.predicate)
+    return edge.predicate;
 
   console.warn(`No predicate found for edge: ${edge} when generating result context for summarization.`);
   return "";

@@ -14,7 +14,15 @@ interface ResultsListTableHeadProps {
   handleUpdateResults: () => any
 }
 
-const ResultsListTableHead: FC<ResultsListTableHeadProps> = ({ parentStyles, currentSortString, isSortedByName, isSortedByEvidence, isSortedByPaths, isSortedByScore, isPathfinder, handleUpdateResults }) => {
+const ResultsListTableHead: FC<ResultsListTableHeadProps> = ({ 
+  currentSortString, 
+  handleUpdateResults,
+  isPathfinder, 
+  isSortedByName, 
+  isSortedByEvidence, 
+  isSortedByPaths, 
+  isSortedByScore,
+  parentStyles }) => {
 
   return(
     <div className={`${parentStyles.tableHead}`}>
