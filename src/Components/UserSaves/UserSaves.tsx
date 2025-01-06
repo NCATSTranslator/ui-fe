@@ -60,7 +60,7 @@ const UserSaves = () => {
 
   const queryClient = new QueryClient();
 
-  const activateEvidence = (item: Result, edge: ResultEdge, path: Path, pk: string) => {
+  const activateEvidence = useCallback((item: Result, edge: ResultEdge, path: Path, pk: string) => {
     if(!!edge && !!path) {
       setSelectedPK(pk);
       setSelectedResult(item);
@@ -68,7 +68,7 @@ const UserSaves = () => {
       setSelectedPath(path);
       setEvidenceModalOpen(true);
     }
-  }
+  }, []);
 
   const activateNotes = (label: string, bookmarkID: string) => {
     noteLabel.current = label;
@@ -76,7 +76,7 @@ const UserSaves = () => {
     setNotesOpen(true);
   }
 
-  const initSaves = async () => {
+  const initSaves = useCallback( async () => {
     let resultSetsToAdd: {[key:string]: ResultSet} = {};
     let newSaves = await getSaves(setUserSaves);
     // list of obsolete saves 
@@ -101,7 +101,7 @@ const UserSaves = () => {
     dispatch(setResultSets(resultSetsToAdd))
     setSavesLoaded(true);
     setFilteredUserSaves(cloneDeep(newSaves));
-  }
+  }, [dispatch])
 
   const handleSearch = useCallback((
     value: string | false = false,
@@ -200,7 +200,7 @@ const UserSaves = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [initSaves]);
 
   const handleClearNotesEditor = () => {
     initSaves();

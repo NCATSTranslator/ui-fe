@@ -112,9 +112,9 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   // number, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
 
-  const calculateItemsPerPage = (prefValue: string | number): number => {
-    return ((!!prefValue) ? (typeof prefValue === "string") ? parseInt(prefValue) : prefs.result_per_screen.pref_value : 10) as number;
-  }
+  const calculateItemsPerPage = useCallback((prefValue: string | number): number => {
+    return ((!!prefValue) ? (typeof prefValue === "string") ? parseInt(prefValue) : prefValue : 10) as number;
+  }, []);
   // number, how many items per page
   const [itemsPerPage, setItemsPerPage] = useState<number>(calculateItemsPerPage(prefs.result_per_screen.pref_value));
   // number, last result item index
@@ -172,7 +172,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     const tempItemsPerPage = calculateItemsPerPage(prefs.result_per_screen.pref_value);
     setItemsPerPage(tempItemsPerPage);
     setEndResultIndex(tempItemsPerPage);
-  }, [prefs, isPathfinder]);
+  }, [prefs, isPathfinder, calculateItemsPerPage]);
 
   useEffect(() => {
     const handleKeyDown = (ev: KeyboardEvent) => {
