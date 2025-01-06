@@ -1177,4 +1177,5 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   publications: edge?.publications || {},
   subject: edge?.subject || "",
   support: edge?.support || [],
+  trials: edge?.trials || [],
 });

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ResultNode, ResultEdge, Path, ResultSet, Result } from "../Types/results";
-import { PublicationObject } from "../Types/evidence";
+import { PublicationObject, TrialObject } from "../Types/evidence";
 import { cloneDeep } from "lodash";
 
 type ResultState = {
@@ -56,6 +56,7 @@ export const getEdgesByIds = (resultSet: ResultSet | null, ids:string[]): Result
   return edges;
 }
 export const getPubById = (resultSet: ResultSet | null, id:string): PublicationObject | undefined => (resultSet === null) ? undefined : resultSet.data.publications[id];
+export const getTrialById = (resultSet: ResultSet | null, id:string): TrialObject | undefined => (resultSet === null) ? undefined : resultSet.data.trials[id];
 export const getResultSetById = (id: string | null | undefined) => (state: {resultSets: ResultState}) => {
   // if no result sets have been added, return null with no console warning
   if(!!state?.resultSets && Object.keys(state?.resultSets).length === 0)

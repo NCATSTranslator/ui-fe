@@ -798,7 +798,8 @@ export const generateSafeResultSet = (resultSet: ResultSet, result: Result): Res
       paths: allPaths,
       publications: allPubs,
       results: [result],
-      tags: resultSet.data.tags
+      tags: resultSet.data.tags,
+      trials: resultSet.data.trials
     }
   }
 
@@ -830,6 +831,7 @@ export const mergeResultSets = (resultSetOne: ResultSet, resultSetTwo: ResultSet
       publications: { ...resultSetOne.data.publications, ...resultSetTwo.data.publications },
       results: [...resultSetOne.data.results, ...resultSetTwo.data.results],
       tags: { ...resultSetOne.data.tags, ...resultSetTwo.data.tags },
+      trials: { ...resultSetOne.data.trials, ...resultSetTwo.data.trials },
     },
   };
 }

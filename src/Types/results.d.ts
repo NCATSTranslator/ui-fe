@@ -174,7 +174,8 @@ export type ResultSet = {
     paths: {[key: string]: Path},
     publications: {[key: string]: PublicationObject},
     results: Result[],
-    tags: Filters
+    tags: Filters,
+    trials: {[key: string]: TrialObject}
   }
 }
 
@@ -250,6 +251,7 @@ export interface ResultEdge {
   subject: string;
   // array of path ids or Path objects
   support: (string | Path)[];
+  trials: string[];
 }
 
 export interface RankedEdge extends ResultEdge {

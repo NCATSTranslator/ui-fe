@@ -3,9 +3,9 @@ import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHig
   sortDateYearHighLow, sortDateYearLowHigh } from './sortingFunctions';
 import { cloneDeep } from 'lodash';
 import { capitalizeAllWords } from "./utilities";
-import { EvidenceSortState, PublicationObject, RawPublicationList } from '../Types/evidence';
+import { EvidenceSortState, PublicationObject, RawPublicationList, TrialObject } from '../Types/evidence';
 import { ResultEdge, ResultSet } from '../Types/results';
-import { getPubById } from '../Redux/resultsSlice';
+import { getPubById, getTrialById } from '../Redux/resultsSlice';
 
 export const handleEvidenceSort = (sortName: string, pubmedEvidence: PublicationObject[], handlePageClick: (event: any) => void, 
   sortingStateSetter: Dispatch<SetStateAction<EvidenceSortState>>, setPubmedEvidence: Dispatch<SetStateAction<PublicationObject[]>>) => {
@@ -108,7 +108,7 @@ export const generatePubmedURL = (id: string): string => {
   return "";
 }
 
-export const flattenPublicationsObject = (resultSet: ResultSet | null, pubs: RawPublicationList): PublicationObject[] => {
+export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawPublicationList): PublicationObject[] => {
   const pubArray: PublicationObject[] = [];
   if(!resultSet)
     return pubArray;
@@ -130,4 +130,15 @@ export const flattenPublicationsObject = (resultSet: ResultSet | null, pubs: Raw
     }
   }
   return pubArray;
+}
+
+export const flattenTrialObject = (resultSet: ResultSet | null, trialIDs: string[]): TrialObject[] => {
+  const trialArray: TrialObject[] = [];
+  for (const id of trialIDs) {
+    const trial = getTrialById(resultSet, id);
+    if(!!trial) 
+      trialArray.push(trial);
+  }
+
+  return trialArray;
 }

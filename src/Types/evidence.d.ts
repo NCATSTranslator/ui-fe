@@ -72,3 +72,14 @@ export type EvidenceSortState = {
   journal: null | boolean;
   title: null | boolean;
 }
+
+export type TrialObject = {
+  child: boolean;
+  id?: string;
+  phase: number;
+  size: number;
+  start_date: string;
+  status: 'COMPLETED' | 'TERMINATED' | 'WITHDRAWN' | 'UNKNOWN';
+  type: 'enrolled' | 'anticipated';
+  url: string;
+}

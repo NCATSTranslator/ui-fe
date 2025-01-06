@@ -8,10 +8,10 @@ import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { capitalizeAllWords, isClinicalTrial, isPublication, numberToWords, getFormattedEdgeLabel, 
   getUrlByType, getCompressedSubgraph } from "../../Utilities/utilities";
 import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
-import { Provenance, PublicationObject } from "../../Types/evidence.d";
+import { Provenance, PublicationObject, TrialObject } from "../../Types/evidence.d";
 import { getResultSetById, getEdgeById, getNodeById } from "../../Redux/resultsSlice";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
-import { checkForEdgeMatch, flattenPublicationsObject } from "../../Utilities/evidenceModalFunctions";
+import { checkForEdgeMatch, flattenPublicationObject, flattenTrialObject } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
@@ -83,9 +83,11 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
     let filteredEvidence = {
       publications: new Set<PublicationObject>(),
-      sources: new Set<Provenance>()
+      sources: new Set<Provenance>(),
+      trials: new Set<TrialObject>()
     };
-    filteredEvidence.publications = new Set(flattenPublicationsObject(resultSet, selEdge.publications));
+    filteredEvidence.publications = new Set(flattenPublicationObject(resultSet, selEdge.publications));
+    filteredEvidence.trials = new Set(flattenTrialObject(resultSet, selEdge.trials));
     filteredEvidence.sources = new Set(selEdge.provenance);
     setSelectedEdge(selEdge);
     const formatted = getFormattedEdgeLabel(resultSet, selEdge).replaceAll("|", " ");
@@ -93,9 +95,9 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     distributeEvidence(filteredEvidence);
   }
 
-  const distributeEvidence = (evidence: {publications: Set<PublicationObject>, sources: Set<Provenance> }) => {
+  const distributeEvidence = (evidence: {publications: Set<PublicationObject>, sources: Set<Provenance>, trials: Set<TrialObject> }) => {
     setPubmedEvidence(cloneDeep([...evidence.publications].filter(item => isPublication(item))));
-    clinicalTrials.current = cloneDeep([...evidence.publications].filter(item => isClinicalTrial(item)));
+    clinicalTrials.current = cloneDeep([...evidence.trials]);
     miscEvidence.current = cloneDeep([...evidence.publications].filter(item => !isPublication(item) && !isClinicalTrial(item)))
       .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
     let displayedSources = [...evidence.sources];
