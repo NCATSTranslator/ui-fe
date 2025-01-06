@@ -19,6 +19,7 @@ import { EvidenceCountsContainer, PublicationObject, PublicationsList } from '..
 import { Location } from 'react-router-dom';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
 import PathObject, { PathObjectProps } from '../Components/PathObject/PathObject';
+import { SaveGroup } from './userApi';
 
 export const getIcon = (category: string): JSX.Element => {
   var icon = <Chemical/>;
@@ -988,11 +989,12 @@ export const getFormattedPathfinderName = (name: string) => {
  * @param {any} bookmarksSet - The set of bookmark objects to search in.
  * @returns {string|null} Returns the ID of the matching item if found in bookmarksSet, otherwise returns null.
  */
-export const checkBookmarksForItem = (itemID: string, bookmarksSet: any): string | null => {
-  if(bookmarksSet && bookmarksSet.size > 0) {
-    for(let val of bookmarksSet) {
-      if(val.object_ref === itemID) {
-        return val.id;
+export const checkBookmarksForItem = (itemID: string, bookmarksSet: SaveGroup): string | null => {
+  if(bookmarksSet && bookmarksSet.saves.size > 0) {
+    for(let save of bookmarksSet.saves) {
+      if(save.object_ref === itemID) {
+        let bookmarkID = (typeof save.id === "string") ? save.id : (!!save.id) ? save.id.toString() : null;
+        return bookmarkID;
       }
     }
   }

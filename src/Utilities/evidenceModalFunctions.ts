@@ -134,6 +134,8 @@ export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawP
 
 export const flattenTrialObject = (resultSet: ResultSet | null, trialIDs: string[]): TrialObject[] => {
   const trialArray: TrialObject[] = [];
+  if(!trialIDs)
+    return trialArray;
   for (const id of trialIDs) {
     const trial = getTrialById(resultSet, id);
     if(!!trial) 
