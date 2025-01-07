@@ -46,11 +46,10 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   const loadingParam = getDataFromQueryVar("loading");
   const currentQueryID = getDataFromQueryVar("q");
   const presetTypeID = getDataFromQueryVar("t");
-  const presetTypeObject = (presetTypeID)
-    ? queryTypes.find(type => type.id === parseInt(presetTypeID))
-    : null;
-
   const isPathfinder = (presetTypeID === "p");
+  let presetTypeObject = (!!presetTypeID)
+    ? queryTypes.find(type => type.id === parseInt(presetTypeID)) ?? null
+    : null;
 
   const nodeLabelParam = getDataFromQueryVar("l");
   const nodeIdParam = getDataFromQueryVar("i");
@@ -1048,7 +1047,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
                         displayedResults.length > 0 &&
                         displayedResults.map((item, i) => {
                           const result = getResultById(resultSet, item.id);
-                          if(!result || !presetTypeObject || !pathFilterState)
+                          if(!result || !pathFilterState)
                             return null;
 
                           let bookmarkID = (userSaves === null) ? null : checkBookmarksForItem(item.id, userSaves);

@@ -122,6 +122,8 @@ const UserSaves = () => {
       let tempValue = value.toLowerCase();
       currentSearchString.current = value;
       let submittedDate = (item?.query?.submitted_time) ? getFormattedDate(new Date(item.query.submitted_time)) : '';
+      let typeLabel = (!!item.query.type) ? item.query.type.label : "";
+      let filterType = (!!item.query.type) ? item.query.type.filterType : "";
 
       // check for match in query info
       if(
@@ -129,8 +131,8 @@ const UserSaves = () => {
         (typeof item.query.nodeId === "string" && item.query.nodeId.toLowerCase().includes(tempValue)) || 
         (typeof submittedDate === "string" && submittedDate.toLowerCase().includes(tempValue)) || 
         item.query.nodeDescription.toLowerCase().includes(tempValue) || 
-        item.query.type.label.toLowerCase().includes(tempValue) || 
-        item.query.type.filterType.toLowerCase().includes(tempValue) 
+        typeLabel.toLowerCase().includes(tempValue) || 
+        filterType.toLowerCase().includes(tempValue) 
       )
         include = true;
       

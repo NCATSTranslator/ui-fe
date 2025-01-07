@@ -81,7 +81,7 @@ export const prefKeyToString = (prefKey: string): string => {
 export const emptyEditor = '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
 
 interface QueryObject {
-  type: QueryType; 
+  type: QueryType | null; 
   nodeId: number | string;
   nodeLabel: string;
   nodeDescription: string;
@@ -185,7 +185,7 @@ export const getFormattedBookmarkObject = (
     queryNodeID: number | string | undefined,
     queryNodeLabel: string = "",
     queryNodeDescription: string = "",
-    typeObject: QueryType,
+    typeObject: QueryType | null,
     saveItem: ResultBookmark,
     pk: string,
     resultSet: ResultSet
@@ -224,7 +224,7 @@ export const getQueryObjectForSave = (
     nodeID: number | string = 0, 
     nodeLabel: string = "", 
     nodeDescription: string = "", 
-    typeObject: QueryType, 
+    typeObject: QueryType | null, 
     pk: string,
     resultSet: ResultSet
   ): QueryObject => {
