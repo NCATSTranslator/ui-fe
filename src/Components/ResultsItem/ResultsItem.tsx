@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense } from 'react';
 import styles from './ResultsItem.module.scss';
-import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts } from '../../Utilities/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts, isStringArray } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react";
@@ -18,11 +18,11 @@ import { Link } from 'react-router-dom';
 // import { generateCsvFromItem } from '../../Utilities/csvGeneration';
 import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
-import { getResultSetById, getNodeById } from '../../Redux/resultsSlice';
+import { getResultSetById, getNodeById, getPathById, getPathsByIds, getEdgeById } from '../../Redux/resultsSlice';
 import { currentUser } from '../../Redux/rootSlice';
 import { displayScore, generateScore } from '../../Utilities/scoring';
 import { QueryType } from '../../Types/querySubmission';
-import { Result, Filter, PathFilterState, Path, isResultNode, ResultBookmark, ResultSet } from '../../Types/results.d';
+import { Result, Filter, PathFilterState, Path, ResultBookmark, ResultSet } from '../../Types/results.d';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
 import Tabs from '../Tabs/Tabs';
 import Tab from '../Tabs/Tab';
@@ -70,7 +70,7 @@ type ResultsItemProps = {
   queryNodeDescription: string | null;
   queryNodeID: string | null;
   queryNodeLabel: string | null;
-  queryType: QueryType;
+  queryType: QueryType | null;
   result: Result | ResultBookmark;
   resultsComplete: boolean;
   scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number };
@@ -197,60 +197,56 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setSelectedPaths(null);
   },[]);
 
-  const handleNodeClick = useCallback((selectedPaths: Set<string[]>) => {
-    if(!selectedPaths)
+  const handleNodeClick = useCallback((nodeSequences: Set<string[]>) => {
+    console.log(nodeSequences);
+    if(!nodeSequences)
       return;
 
     let newSelectedPaths: Set<Path> = new Set();
+    let paths = (isStringArray(newPaths)) ? getPathsByIds(resultSet, newPaths) : newPaths;
 
-    const checkForNodeMatches = (nodeList: string[], path: Path) => {
-      let currentNodeIndex = 0;
-      let numMatches = 0;
-      for(const el of path.subgraph) {
-        if(!isResultNode(el))
-          continue;
+    const extractNodeSequence = (subgraph: string[]): string[] => {
+      let nodeSequence: string[] = [];
+      for(let i = 0; i < subgraph.length; i+=2)
+        nodeSequence.push(subgraph[i]);
 
-        if(nodeList[currentNodeIndex] && el.curies.includes(nodeList[currentNodeIndex])) {
-          numMatches++;
-        }
-        currentNodeIndex++;
-      }
-      if(numMatches === nodeList.length) {
-        newSelectedPaths.add(path);
-        return true;
-      }
-      return false;
+      return nodeSequence;
+    };
+
+    const checkForNodeMatches = (nodeSequence: string[], path: Path) => {
+      let pathNodeSequence = extractNodeSequence(path.subgraph);
+      return pathNodeSequence === nodeSequence;
     }
 
-    // for(const selPath of selectedPaths) {
-    //   for(const path of formattedPaths.current) {
-    //     if(path.path.subgraph.length === 3) {
-    //       const firstNode = path.path.subgraph[0];
-    //       const lastNode = path.path.subgraph[path.path.subgraph.length - 1];
-    //       if('curies' in firstNode && firstNode.curies.includes(selPath[0]) &&
-    //       'curies' in lastNode && lastNode.curies.includes(selPath[selPath.length - 1])) {
-    //         newSelectedPaths.add(path);
-    //       }
-    //     }
-    //     if(path.path.inferred) {
-    //       for(const [i, item] of path.path.subgraph.entries()) {
-    //         if(i % 2 === 0)
-    //           continue;
-    //         if('support' in item && item.support) {
-    //           for(const supportPath of item.support){
-    //             if(checkForNodeMatches(selPath, supportPath))
-    //               newSelectedPaths.add(supportPath);
-    //           }
-    //         }
-    //       }
-    //     }
-    //     if(checkForNodeMatches(selPath, path))
-    //       newSelectedPaths.add(path);
-    //   }
-    // }
-    // setSelectedPaths(newSelectedPaths)
+    for(const sequence of nodeSequences) {
+      for(const path of paths) {
+        // check edges for support
+        for(let i = 1; i < path.subgraph.length; i+=2) {
+          let edge = getEdgeById(resultSet, path.subgraph[i]);
+          // check support for matches
+          if(!!edge && edge.support.length > 0) {
+            for(const pathID of edge.support) {
+              let supportPath = (typeof pathID === "string") ? getPathById(resultSet, pathID) : pathID;
+              if(!!supportPath && checkForNodeMatches(sequence, supportPath))
+                newSelectedPaths.add(supportPath);
+            }
+          }
+        }
 
-  },[]);
+        // include all 1 hops, bc they're unselectable otherwise
+        if(path.subgraph.length === 3) {
+          newSelectedPaths.add(path);
+          continue;
+        }
+
+        // check base path for matches
+        if(checkForNodeMatches(sequence, path))
+          newSelectedPaths.add(path);
+      }
+    }
+    setSelectedPaths(newSelectedPaths)
+
+  },[newPaths, resultSet]);
 
   const handleBookmarkClick = async () => {
     if(isBookmarked) {

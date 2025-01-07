@@ -46,11 +46,10 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   const loadingParam = getDataFromQueryVar("loading");
   const currentQueryID = getDataFromQueryVar("q");
   const presetTypeID = getDataFromQueryVar("t");
-  const presetTypeObject = (presetTypeID)
-    ? queryTypes.find(type => type.id === parseInt(presetTypeID))
-    : null;
-
   const isPathfinder = (presetTypeID === "p");
+  let presetTypeObject = (!!presetTypeID)
+    ? queryTypes.find(type => type.id === parseInt(presetTypeID)) ?? null
+    : null;
 
   const nodeLabelParam = getDataFromQueryVar("l");
   const nodeIdParam = getDataFromQueryVar("i");
@@ -112,9 +111,9 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   // number, current item offset (ex: on page 3, offset would be 30 based on itemsPerPage of 10)
   const [itemOffset, setItemOffset] = useState(0);
 
-  const calculateItemsPerPage = (prefValue: string | number): number => {
-    return ((!!prefValue) ? (typeof prefValue === "string") ? parseInt(prefValue) : prefs.result_per_screen.pref_value : 10) as number;
-  }
+  const calculateItemsPerPage = useCallback((prefValue: string | number): number => {
+    return ((!!prefValue) ? (typeof prefValue === "string") ? parseInt(prefValue) : prefValue : 10) as number;
+  }, []);
   // number, how many items per page
   const [itemsPerPage, setItemsPerPage] = useState<number>(calculateItemsPerPage(prefs.result_per_screen.pref_value));
   // number, last result item index
@@ -172,7 +171,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     const tempItemsPerPage = calculateItemsPerPage(prefs.result_per_screen.pref_value);
     setItemsPerPage(tempItemsPerPage);
     setEndResultIndex(tempItemsPerPage);
-  }, [prefs, isPathfinder]);
+  }, [prefs, isPathfinder, calculateItemsPerPage]);
 
   useEffect(() => {
     const handleKeyDown = (ev: KeyboardEvent) => {
@@ -1048,7 +1047,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
                         displayedResults.length > 0 &&
                         displayedResults.map((item, i) => {
                           const result = getResultById(resultSet, item.id);
-                          if(!result || !presetTypeObject || !pathFilterState)
+                          if(!result || !pathFilterState)
                             return null;
 
                           let bookmarkID = (userSaves === null) ? null : checkBookmarksForItem(item.id, userSaves);
