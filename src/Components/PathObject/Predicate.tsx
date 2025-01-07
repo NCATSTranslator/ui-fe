@@ -138,7 +138,7 @@ const Predicate: FC<PredicateProps> = ({
             </p>
             {
               !!formattedEdge?.compressed_edges &&
-              formattedEdge.compressed_edges.map((edge, i) => {
+              formattedEdge.compressed_edges.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
                 if(!edge)
                   return null;
                 return (
