@@ -107,7 +107,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
   const handleEdgeClick = (edgeID: string, path: Path) => {
     const getEdgeFromSubgraph = (edgeID: string, subgraph: (ResultEdge | ResultNode | ResultEdge[])[]) => {
-      for(let i = 1; i < subgraph.length; i + 2) {
+      for(let i = 1; i < subgraph.length; i+=2) {
         const edgeItem = subgraph[i];
         if(Array.isArray(edgeItem)) {
           let edge = edgeItem.find(edge => edge.id === edgeID);
@@ -118,13 +118,15 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
             return subgraph[i];
         }
       }
+      return false;
     }
-
     const edge = compressedSubgraph 
       ? getEdgeFromSubgraph(edgeID, compressedSubgraph)
       : getEdgeById(resultSet, edgeID);
+      
     if(!isResultEdge(edge) || !selectedEdge || !resultSet)
       return;
+
     handleSelectedEdge(resultSet, edge)
     setEdgeSelectedTrigger(prev=>!prev);
   }
