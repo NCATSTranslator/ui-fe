@@ -60,7 +60,7 @@ const UserSaves = () => {
 
   const queryClient = new QueryClient();
 
-  const activateEvidence = (item: Result, edge: ResultEdge, path: Path, pk: string) => {
+  const activateEvidence = useCallback((item: Result, edge: ResultEdge, path: Path, pk: string) => {
     if(!!edge && !!path) {
       setSelectedPK(pk);
       setSelectedResult(item);
@@ -68,7 +68,7 @@ const UserSaves = () => {
       setSelectedPath(path);
       setEvidenceModalOpen(true);
     }
-  }
+  }, []);
 
   const activateNotes = (label: string, bookmarkID: string) => {
     noteLabel.current = label;
@@ -76,7 +76,7 @@ const UserSaves = () => {
     setNotesOpen(true);
   }
 
-  const initSaves = async () => {
+  const initSaves = useCallback( async () => {
     let resultSetsToAdd: {[key:string]: ResultSet} = {};
     let newSaves = await getSaves(setUserSaves);
     // list of obsolete saves 
@@ -101,7 +101,7 @@ const UserSaves = () => {
     dispatch(setResultSets(resultSetsToAdd))
     setSavesLoaded(true);
     setFilteredUserSaves(cloneDeep(newSaves));
-  }
+  }, [dispatch])
 
   const handleSearch = useCallback((
     value: string | false = false,
@@ -122,6 +122,8 @@ const UserSaves = () => {
       let tempValue = value.toLowerCase();
       currentSearchString.current = value;
       let submittedDate = (item?.query?.submitted_time) ? getFormattedDate(new Date(item.query.submitted_time)) : '';
+      let typeLabel = (!!item.query.type) ? item.query.type.label : "";
+      let filterType = (!!item.query.type) ? item.query.type.filterType : "";
 
       // check for match in query info
       if(
@@ -129,8 +131,8 @@ const UserSaves = () => {
         (typeof item.query.nodeId === "string" && item.query.nodeId.toLowerCase().includes(tempValue)) || 
         (typeof submittedDate === "string" && submittedDate.toLowerCase().includes(tempValue)) || 
         item.query.nodeDescription.toLowerCase().includes(tempValue) || 
-        item.query.type.label.toLowerCase().includes(tempValue) || 
-        item.query.type.filterType.toLowerCase().includes(tempValue) 
+        typeLabel.toLowerCase().includes(tempValue) || 
+        filterType.toLowerCase().includes(tempValue) 
       )
         include = true;
       
@@ -200,7 +202,7 @@ const UserSaves = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [initSaves]);
 
   const handleClearNotesEditor = () => {
     initSaves();

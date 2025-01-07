@@ -18,7 +18,6 @@ import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState, Tag
 import { EvidenceCountsContainer, PublicationObject, PublicationsList } from '../Types/evidence';
 import { Location } from 'react-router-dom';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
-import PathObject, { PathObjectProps } from '../Components/PathObject/PathObject';
 import { SaveGroup } from './userApi';
 
 export const getIcon = (category: string): JSX.Element => {

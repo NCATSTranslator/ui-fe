@@ -1,5 +1,5 @@
 import styles from './UserSave.module.scss';
-import { useState, useEffect, MutableRefObject, Dispatch, SetStateAction, FC, useCallback } from 'react';
+import { useState, useEffect, MutableRefObject, Dispatch, SetStateAction, FC, useCallback, useMemo } from 'react';
 import Highlighter from 'react-highlight-words';
 import Tooltip from '../Tooltip/Tooltip';
 import ResultsItem from '../ResultsItem/ResultsItem';
@@ -11,7 +11,7 @@ import AnimateHeight from 'react-animate-height';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
 import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
-import { getEdgeById, getPathById, getResultSetById } from '../../Redux/resultsSlice';
+import { getEdgeById, getResultSetById } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 
 interface UserSaveProps {
@@ -44,11 +44,12 @@ const UserSave: FC<UserSaveProps> = ({
     
   let key = save[0];
   let queryObject = save[1];
-  const arspk = queryObject.query.pk;
+  const arspk = useMemo(() => save[1].query.pk, [save]);
   const resultSet = useSelector(getResultSetById(key));
-  let typeString = `What ${queryObject.query.type.targetType}s ${queryObject.query.type.pathString}`;
+  let typeString = (!!queryObject.query.type) ? `What ${queryObject.query.type.targetType}s ${queryObject.query.type.pathString}` : "";
   let queryNodeString = queryObject.query.nodeLabel;
-  let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, '0', queryObject.query.type.id, key);
+  let queryTypeID = (!!queryObject.query.type) ? queryObject.query.type.id : 'p';
+  let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, '0', queryTypeID, key);
   let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState<number | "auto">(0);
@@ -68,7 +69,7 @@ const UserSave: FC<UserSaveProps> = ({
     const edge = getEdgeById(resultSet, edgeID);
     if(!!edge && !!activateEvidence)
       activateEvidence(item, edge, path, arspk);
-  }, [resultSet]);
+  }, [resultSet, arspk, activateEvidence]);
   return (
     <div key={key} className={styles.query}>
       <div className={styles.topBar}>
