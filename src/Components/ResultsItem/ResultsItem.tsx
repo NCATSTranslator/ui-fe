@@ -197,8 +197,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setSelectedPaths(null);
   },[]);
 
-  const handleNodeClick = useCallback((nodeSequences: Set<string[]>) => {
-    console.log(nodeSequences);
+  const handleGraphNodeClick = useCallback((nodeSequences: Set<string[]>) => {
     if(!nodeSequences)
       return;
 
@@ -508,7 +507,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                   updateGraphFunction={setItemGraph}
                   prebuiltGraph={(!!itemGraph)? itemGraph: null}
                   resultSet={resultSet}
-                  onNodeClick={handleNodeClick}
+                  onNodeClick={handleGraphNodeClick}
                   clearSelectedPaths={handleClearSelectedPaths}
                   active={graphActive}
                   zoomKeyDown={zoomKeyDown}
