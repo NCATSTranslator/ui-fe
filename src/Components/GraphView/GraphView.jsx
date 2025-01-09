@@ -1,6 +1,6 @@
 import styles from './GraphView.module.scss';
 import {useState, useMemo, useRef, useCallback, useEffect} from 'react';
-import { resultToCytoscape, findPaths, layoutList, handleResetView, handleDeselectAllNodes,
+import { resultToCytoscape, findNodeSequences, layoutList, handleResetView, handleDeselectAllNodes,
   initCytoscapeInstance, getGraphWithoutExtraneousPaths, handleZoomByInterval } from '../../Utilities/graphFunctions';
 import Plus from '../../Icons/Buttons/Add/Add.svg?react';
 import Minus from '../../Icons/Buttons/Subtract/Subtract.svg?react';
@@ -74,7 +74,7 @@ const GraphView = ({result, resultSet, onNodeClick, clearSelectedPaths, active, 
   const subjectId = useRef(result.subject);
   const objectId = useRef(result.object);
 
-  const calculatedPaths = useRef(null);
+  const calculatedNodeSequences = useRef(null);
   const cyNav = useRef(null);
 
   const graphId = useRef(uuidv4());
@@ -106,83 +106,83 @@ const GraphView = ({result, resultSet, onNodeClick, clearSelectedPaths, active, 
   }
 
   /**
-  * Handles a node click event and calls the onNodeClick callback function with an array of paths and formatted paths.
+  * ~~~~PENDING REWRITE~~~~
+  * Handles a node click event and calls the onNodeClick callback function with an array of node sequences
   * @param {Object} ev - The event object.
   * @param {Array} formattedPaths - An array of formatted paths.
   * @param {Object} graph - The graph object.
   * @returns {void}
   */
   const handleNodeClick = useCallback((ev, formattedPaths, graph) => {
-    const targetId = ev.target.id();
+    // const targetId = ev.target.id();
 
-    if(selectedNodes.current.has(targetId)) {
-      selectedNodes.current.delete(targetId);
-      excludedNodes.current.add(targetId);
-    } else if(excludedNodes.current.has(targetId)) {
-      selectedNodes.current.add(targetId);
-      excludedNodes.current.delete(targetId);
-    } else if(ev.target.hasClass(highlightClass)) {
-      excludedNodes.current.add(targetId);
-    } else if (ev.target.hasClass(hideClass)){
-      selectedNodes.current.add(targetId);
-    } else {
-      selectedNodes.current.add(targetId);
-    } 
+    // if(selectedNodes.current.has(targetId)) {
+    //   selectedNodes.current.delete(targetId);
+    //   excludedNodes.current.add(targetId);
+    // } else if(excludedNodes.current.has(targetId)) {
+    //   selectedNodes.current.add(targetId);
+    //   excludedNodes.current.delete(targetId);
+    // } else if(ev.target.hasClass(highlightClass)) {
+    //   excludedNodes.current.add(targetId);
+    // } else if (ev.target.hasClass(hideClass)){
+    //   selectedNodes.current.add(targetId);
+    // } else {
+    //   selectedNodes.current.add(targetId);
+    // } 
 
-    // init graph by hiding all elements
-    ev.cy.elements().removeClass(excludedClass)
-    hideElement(ev.cy.elements());
+    // // init graph by hiding all elements
+    // ev.cy.elements().removeClass(excludedClass)
+    // hideElement(ev.cy.elements());
 
-    const objectIds = new Set();
-    for(const node of ev.cy.elements('node')) {
-      if(node.data('isSourceCount') === 0) {
-        objectIds.add(node.data('id'));
-      }
-    }
+    // const objectIds = new Set();
+    // for(const node of ev.cy.elements('node')) {
+    //   if(node.data('isSourceCount') === 0) {
+    //     objectIds.add(node.data('id'));
+    //   }
+    // }
 
-    // Only calculate paths once
-    let paths = new Set();
-    if(calculatedPaths.current) {
-      paths = cloneDeep(calculatedPaths.current);
-    } else {
-      let newGraph = getGraphWithoutExtraneousPaths(graph);
-      calculatedPaths.current = findPaths(subjectId.current, objectIds, newGraph);
-      paths = cloneDeep(calculatedPaths.current);
-    }
-    
-    // Handle excluded nodes and a lack of selected nodes in a path
-    for(const path of paths) {
-      let hasSelectedNode = false;
-      let hasExcludedNode = false;
-      for(const nodeId of selectedNodes.current) {
-        if(path.includes(nodeId))
-          hasSelectedNode = true;
-      }
-      for(const nodeId of excludedNodes.current) {
-        if(path.includes(nodeId))
-          hasExcludedNode = true;
-      }
-      // If a path has no selected nodes, or has an excluded node, 
-      // remove it from the list and move on to the next path
-      if(!hasSelectedNode || hasExcludedNode) {
-        paths.delete(path);
-        continue;
-      }
-      for(const nodeId of path) {
-        let node = ev.cy.getElementById(nodeId)
-        highlightElement(node)
-        for(const edge of node.connectedEdges()) {
-          if(path.includes(edge.source().id()) && path.includes(edge.target().id()))
-            highlightElement(edge)
-        }
-      }
-    }
+    // // Only calculate nodeSequences once
+    // let nodeSequences = new Set();
+    // if(calculatedNodeSequences.current) {
+    //   nodeSequences = cloneDeep(calculatedNodeSequences.current);
+    // } else {
+    //   let newGraph = getGraphWithoutExtraneousPaths(graph);
+    //   calculatedNodeSequences.current = findNodeSequences(subjectId.current, objectIds, newGraph);
+    //   nodeSequences = cloneDeep(calculatedNodeSequences.current);
+    // }
+    // // Handle excluded nodes and a lack of selected nodes in a node sequence
+    // for(const sequence of nodeSequences) {
+    //   let hasSelectedNode = false;
+    //   let hasExcludedNode = false;
+    //   for(const nodeId of selectedNodes.current) {
+    //     if(sequence.includes(nodeId))
+    //       hasSelectedNode = true;
+    //   }
+    //   for(const nodeId of excludedNodes.current) {
+    //     if(sequence.includes(nodeId))
+    //       hasExcludedNode = true;
+    //   }
+    //   // If a path has no selected nodes, or has an excluded node, 
+    //   // remove it from the list and move on to the next path
+    //   if(!hasSelectedNode || hasExcludedNode) {
+    //     nodeSequences.delete(sequence);
+    //     continue;
+    //   }
+    //   for(const nodeId of sequence) {
+    //     let node = ev.cy.getElementById(nodeId)
+    //     highlightElement(node)
+    //     for(const edge of node.connectedEdges()) {
+    //       if(sequence.includes(edge.source().id()) && sequence.includes(edge.target().id()))
+    //         highlightElement(edge)
+    //     }
+    //   }
+    // }
 
-    for(const nodeId of excludedNodes.current) {
-      ev.cy.getElementById(nodeId).addClass('excluded');
-    }
+    // for(const nodeId of excludedNodes.current) {
+    //   ev.cy.getElementById(nodeId).addClass('excluded');
+    // }
 
-    onNodeClick(paths, formattedPaths);
+    // onNodeClick(nodeSequences);
 
   }, [onNodeClick])
 
