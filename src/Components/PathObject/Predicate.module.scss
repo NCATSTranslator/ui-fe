@@ -51,20 +51,20 @@
   }
 }
 .tooltipPredicate {
-  margin-bottom: 5px;
+  margin-bottom: $xxs;
   display: flex;
   align-items: center;
   justify-content: space-between;
   svg {
-    margin-left: 5px;
+    margin-left: $xxs;
     path {
       fill: $white;
     }
   } 
   span {
-    font-size: 16px;
+    font-size: $s;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin-bottom: $xxs;
     color: $white;
     cursor: pointer;
     &:hover {

@@ -171,43 +171,6 @@ const Predicate: FC<PredicateProps> = ({
                   </p>
                 );
               })
-              // pathObject.predicates &&
-              // pathObject.predicates.map((predicate, i)=> {
-              //   let formattedPredicate = (predicate?.predicate) ? predicate.predicate : "No Predicate Available";
-              //   return (
-              //     <p
-              //       key={`${formattedPredicate}${uid}${i}`}
-              //       className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-              //       onClick={(e)=> {
-              //         e.stopPropagation();
-              //         if(i > 0) {
-              //           handleEdgeClick(pathObject.compressedEdges[i-1], pathObjectContainer);
-              //         } else {
-              //           handleEdgeClick(pathObject, pathObjectContainer);
-              //         }
-              //       }}
-              //       >
-              //       <Highlighter
-              //         highlightClassName="highlight"
-              //         searchWords={activeEntityFilters}
-              //         autoEscape={true}
-              //         textToHighlight={capitalizeAllWords(formattedPredicate)}
-              //       />
-              //       {
-              //         predicate?.url &&
-              //         <a
-              //           href={predicate.url}
-              //           onClick={(e)=> {
-              //             e.stopPropagation();
-              //           }}
-              //           target="_blank"
-              //           rel='noreferrer'>
-              //             <ExternalLink/>
-              //         </a>
-              //       }
-              //     </p>
-              //   )
-              // })
             }
           </div>
         }
