@@ -33,7 +33,7 @@ const Autocomplete: FC<AutocompleteProps> = ({isLoading, items, handleItemClick}
         <div>
           {
             items.map((item, i) => {
-              const type = item.types[0];
+              const type = (item?.types) ? item.types[0] : "";
               const typeString = formatBiolinkEntity(type);
               const icon = getIcon(type);
               return (

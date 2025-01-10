@@ -10,7 +10,7 @@ import { AutocompleteItem, QueryType } from '../../Types/querySubmission';
 
 export type QueryItem = {
   type: QueryType; 
-  node: { id: string; label: string; match: string; types: Array<string> } | null; 
+  node: AutocompleteItem | null; 
 }
 
 type QueryBarProps = {

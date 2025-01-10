@@ -46,7 +46,10 @@ const QueryHistoryList = () => {
   }, [queryHistoryState]);
 
   const handleClick = (query: QueryHistoryItem) => {
-    navigate(`/${getResultsShareURLPath(query.item?.node?.label, query.item?.node?.id, query.item?.type?.id, '0', query.id)}`);
+    const nodeLabel = (!!query.item?.node) ? query.item.node.label : "";
+    const nodeID = (!!query.item?.node) ? query.item.node.label : "";
+    const typeID = (!!query.item?.type) ?  query.item?.type.id : "";
+    navigate(`/${getResultsShareURLPath(nodeLabel, nodeID, typeID, '0', query.id)}`);
   };
 
   const handleSearch = useCallback((value: string, setIsLoading: Dispatch<SetStateAction<boolean>>, setFilteredQueryHistoryState: Dispatch<SetStateAction<QueryHistoryItem[]>>) => {

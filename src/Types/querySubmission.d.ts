@@ -23,8 +23,8 @@ export type QueryType = {
 export type AutocompleteItem = {
   id:string,
   label: string,
-  match: string,
-  types: Array<string>
+  match?: string,
+  types?: string[]
 }
 
 export type AutocompleteFunctions = {
