@@ -155,43 +155,38 @@ export const resultToCytoscape = (result, summary) => {
 }
 
 /**
- * Finds all paths in a graph from a start node to any node in a set of end nodes.
- * The paths are restricted to a maximum length of 5 nodes.
+ * Finds all node sequences in a graph from a start node to any node in a set of end nodes.
  *
  * @param {string} start - The starting node identifier.
  * @param {Set} ends - A Set of end node identifiers.
  * @param {Object} graph - The graph object, expected to have an 'edges' property,
  *                         which is an array of objects each having 'data' property
  *                         that includes 'source' and 'target' properties.
- * @returns {Set} A set of all paths from the start node to any of the nodes in the 'ends' set.
- *                  Each path is represented as an array of node identifiers.
+ * @returns {Set<string[]>} A set of all node sequences from the start node to any of the nodes in the 'ends' set.
+ *                  Each node sequence is represented as an array of node identifiers.
  * @example
- * const paths = findPaths('node1', new Set(['node3', 'node4']), graph);
+ * const nodeSequences = findNodeSequences('node1', new Set(['node3', 'node4']), graph);
  */
-export const findPaths = (start, ends, graph) => {
+export const findNodeSequences = (start, ends, graph) => {
 
-  let paths = {};
+  let nodeSequences = {};
   let stack = [[start, [start]]];
 
   while (stack.length > 0) {
     let [node, path] = stack.pop();
 
     if (ends.has(node)) {
-      if (!paths[node]) paths[node] = [];
-      paths[node].push(path);
+      if (!nodeSequences[node]) nodeSequences[node] = [];
+      nodeSequences[node].push(path);
     }
-    // limit path length to 5 nodes
-    if(path.length < 5) {
-      for (let edge of graph.edges) {
-        if (edge.data.source === node && !path.includes(edge.data.target)) {
-          stack.push([edge.data.target, [...path, edge.data.target]]);
-        }
+    for (let edge of graph.edges) {
+      if (edge.data.source === node && !path.includes(edge.data.target)) {
+        stack.push([edge.data.target, [...path, edge.data.target]]);
       }
     }
   }
-
   // flattens the arrays in the paths object (which are associated with each end node) into a single array
-  return new Set(Object.values(paths).flat());
+  return new Set(Object.values(nodeSequences).flat());
 }
 
 /**

@@ -6,6 +6,7 @@ import { currentQuery} from "../../Redux/querySlice";
 import { useSelector } from 'react-redux';
 import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { getDataFromQueryVar } from "../../Utilities/utilities";
+import { AutocompleteItem } from "../../Types/querySubmission";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -52,15 +53,15 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
   const isPathfinder = sharedQueryType === 'p';
   let qidPath = null;  
   if(isPathfinder) {
-    const itemOne = {
-      id: getDataFromQueryVar('ione'),
-      label: getDataFromQueryVar('lone')
+    const itemOne: AutocompleteItem = {
+      id: getDataFromQueryVar('ione') || "",
+      label: getDataFromQueryVar('lone') || ""
     }
     const itemTwo = {
-      id: getDataFromQueryVar('itwo'),
-      label: getDataFromQueryVar('ltwo')
+      id: getDataFromQueryVar('itwo') || "",
+      label: getDataFromQueryVar('ltwo') || ""
     }
-    const constraint = getDataFromQueryVar('c');
+    const constraint = getDataFromQueryVar('c') || "";
     qidPath = `pathfinder/${getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid)}`;
   } else {
     qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);

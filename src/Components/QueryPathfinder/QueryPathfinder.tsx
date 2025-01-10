@@ -166,10 +166,12 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     // Set isLoading to true
     setIsLoading(true);
 
+    let subjectType = (!!itemOne?.types) ? itemOne.types[0] : "";
+    let objectType = (!!itemTwo?.types) ? itemTwo.types[0] : "";
     let queryObject: {type: string, subject: {id: string, category: string}, object: {id: string, category: string}, constraint?: string} = {
       type: 'pathfinder',
-      subject: {id: itemOne.id, category: itemOne.types[0]},
-      object: {id: itemTwo.id, category: itemTwo.types[0]},
+      subject: {id: itemOne.id, category: subjectType},
+      object: {id: itemTwo.id, category: objectType},
     }
     if(hasMiddleType && !!middleType)
       queryObject.constraint = middleType;
@@ -323,8 +325,8 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                     handleChange={(e) => handleQueryItemChange(e, true)} 
                     className={`${styles.input} ${!!queryItemOne && styles.selected}`}
                     value={inputOneText}
-                    iconLeft={!!queryItemOne ? getIcon(queryItemOne.types[0]) : <QuestionIcon/>}
-                    iconRight={!!queryItemOne ? <button className={styles.close} onClick={()=>clearItem(1)}><CloseIcon/></button> : false}
+                    iconLeft={!!queryItemOne?.types ? getIcon(queryItemOne.types[0]) : <QuestionIcon/>}
+                    iconRight={!!queryItemOne?.types ? <button className={styles.close} onClick={()=>clearItem(1)}><CloseIcon/></button> : false}
                   />
                   <Autocomplete 
                     isLoading={autocompleteLoadingOne}
@@ -361,8 +363,8 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                     handleChange={(e) => handleQueryItemChange(e, false)} 
                     className={`${styles.input} ${!!queryItemTwo && styles.selected}`}
                     value={inputTwoText}
-                    iconLeft={!!queryItemTwo ? getIcon(queryItemTwo.types[0]) : <QuestionIcon/>}
-                    iconRight={!!queryItemTwo ? <button className={styles.close} onClick={()=>clearItem(2)}><CloseIcon/></button> : false}
+                    iconLeft={!!queryItemTwo?.types ? getIcon(queryItemTwo.types[0]) : <QuestionIcon/>}
+                    iconRight={!!queryItemTwo?.types ? <button className={styles.close} onClick={()=>clearItem(2)}><CloseIcon/></button> : false}
                   />
                   <Autocomplete 
                     isLoading={autocompleteLoadingTwo}

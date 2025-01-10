@@ -1034,38 +1034,44 @@ const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): Eviden
 
   const processEdge = (edge: ResultEdge) => {
     // Process publications
-    for (const key in edge.publications) {
+    for(const key in edge.publications) {
       const pubArray = edge.publications[key];
-      for (const pubData of pubArray) {
+      for(const pubData of pubArray) {
         const pub = getPubById(resultSet, pubData.id);
-        if (!pub) continue;
+        if(!pub) 
+          continue;
         const url = pub.url;
-        if (isPublication(pub)) allPubs.add(url);
-        else if (isClinicalTrial(pub)) allCTs.add(url);
-        else allMisc.add(url);
+        if(isPublication(pub)) 
+          allPubs.add(url);
+        else 
+          allMisc.add(url);
       }
     }
 
+    for(const trial in edge.trials) 
+      allCTs.add(trial);
+
     // Process sources
-    if (edge.provenance) {
-      for (const source of edge.provenance) {
+    if(edge.provenance) {
+      for(const source of edge.provenance)
         allSources.add(source.name);
-      }
     }
   };
 
   const processPathEdges = (path: Path) => {
-    for (let i = 1; i < path.subgraph.length; i += 2) {
+    for(let i = 1; i < path.subgraph.length; i += 2) {
       const edge = getEdgeById(resultSet, path.subgraph[i]);
-      if (isResultEdge(edge)) {
+      if(isResultEdge(edge)) {
         processEdge(edge);
-        if (hasSupport(edge) && edge.support) {
-          for (const sp of edge.support) {
+        if(hasSupport(edge) && edge.support) {
+          for(const sp of edge.support) {
             const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
-            if (!supportPath) continue;
-            for (let j = 1; j < supportPath.subgraph.length; j += 2) {
+            if(!supportPath) 
+              continue;
+            for(let j = 1; j < supportPath.subgraph.length; j += 2) {
               const supportEdge = getEdgeById(resultSet, supportPath.subgraph[j]);
-              if (isResultEdge(supportEdge)) processEdge(supportEdge);
+              if(isResultEdge(supportEdge)) 
+                processEdge(supportEdge);
             }
           }
         }
