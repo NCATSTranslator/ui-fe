@@ -65,7 +65,6 @@ const TextEditor = ({bookmarkID, handleSave, shouldClearEditor, onClearEditorCom
         return;
         
       newSave.notes = newNotes;
-      console.log(newSave);
       updateUserSave(bookmarkID, newSave);
       handleSave();
     }
