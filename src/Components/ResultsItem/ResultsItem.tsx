@@ -282,7 +282,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
       bookmarkObject.time_updated = new Date().toDateString();
 
       let bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
-      console.log(bookmarkedItem);
       if(bookmarkedItem) {
         let newBookmarkedItem = bookmarkedItem as any;
         setIsBookmarked(true);

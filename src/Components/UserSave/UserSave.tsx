@@ -190,11 +190,9 @@ const UserSave: FC<UserSaveProps> = ({
           const queryNodeLabel = save.data.query.nodeLabel;
           const queryNodeDescription = save.data.query.nodeDescription;
           queryItem.hasNotes = (save.notes.length === 0 || JSON.stringify(save.notes) === emptyEditor) ? false : true;
-          // console.log(save);
-          if ('compressedPaths' in (save?.data?.item || {})) {
-            // console.warn('old format bookmark');
+          if ('compressedPaths' in (save?.data?.item || {}))
             return null;
-          }
+          
           return (
             <div key={save.id} className={styles.result}>
               <ResultsItem

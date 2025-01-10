@@ -252,7 +252,6 @@ const Query: FC<QueryProps> = ({
       return;
     }
     if (!item.type) {
-      console.log(item.type);
       setIsError(true);
       setErrorText("No query type selected, please select a valid query type.");
       return;
