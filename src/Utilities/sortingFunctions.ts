@@ -244,10 +244,8 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
       for (const [j, sp] of edge.support.entries()) {
         const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;
         const supportRank = pathRank.support[j];
-        // console.log(pathRank, i);
         if(!!supportPath) {
           updatePathRanks(resultSet, supportPath, supportRank, pathFilters);
-          // console.log(supportRank);
           if (supportRank?.rank && supportRank.rank < 0) {
             pathRank.rank += supportRank.rank;
           }
