@@ -651,7 +651,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   const applyFilters = (filters: Filter[], entityFilters: string[], filteredResults: Result[], 
     originalResults: Result[], summary: ResultSet, pathFilterState: PathFilterState): [Result[], PathFilterState] => {
       
-    const filterResults = (filters: Filter[], entityFilters: string[], originalResults: Result[], resultPathRanks: PathRank[][]) => {
+    const filterResults = (resultSet: ResultSet, filters: Filter[], entityFilters: string[], originalResults: Result[], resultPathRanks: PathRank[][]) => {
       const filteredResults = [];
       const negatedResults = [];
       /*
@@ -666,8 +666,9 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
           : [];
         let addResult = true;
         for (const filter of filters) {
+          if(filtering.isEntityFilter(filter))
           if (filtering.isEntityFilter(filter) &&
-              filtering.isExclusion(filter) === findStringMatch(result, filter.value, pathRanks)) {
+              filtering.isExclusion(filter) === findStringMatch(resultSet, result, filter.value || "", pathRanks)) {
             addResult = false;
             negatedResults.push(result);
             break;
@@ -789,7 +790,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     const negatedResultFacets = resultFilters.filter((f) => filtering.isExclusion(f));
     resultFilters = negatedResultFacets.concat(globalFilters);
     const resultPathRanks: PathRank[][] = [];
-    let [results, negatedResults] = filterResults(resultFilters, entityFilters, originalResults, resultPathRanks);
+    let [results, negatedResults] = filterResults(summary, resultFilters, entityFilters, originalResults, resultPathRanks);
     calculateFacetCounts(results, summary, negatedResults, resultFacets, negatedResultFacets, setAvailableFilters);
     results = facetResults(resultFacets, pathFilters, results, resultPathRanks);
     let unrankedIsFiltered = false;

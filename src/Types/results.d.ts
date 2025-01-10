@@ -212,15 +212,15 @@ export interface ResultBookmark extends Result {
 
 export interface Path {
   aras: string[];
+  // Array of all IDs from original and compressed paths
+  compressedIDs?: string[];
+  // Compressed subgraph with edges as arrays
+  compressedSubgraph?: (string | string[])[] | null;
   highlighted?: boolean;
   id?: string;
   // Original subgraph
   subgraph: string[];
-  // Compressed subgraph with edges as arrays
-  compressedSubgraph?: (string | string[])[] | null;
   tags: Tags;
-  // Array of all IDs from original and compressed paths
-  compressedIDs?: string[];
 }
 
 export interface RankedPath extends Path {
@@ -379,3 +379,37 @@ export const isResultNode = (obj: any): obj is ResultNode => {
     obj.types.every((type: any) => typeof type === "string")
   );
 }
+
+export const isPath = (obj: any): obj is Path => {
+  return (
+    obj &&
+    Array.isArray(obj.aras) &&
+    Array.isArray(obj.compressedIDs) &&
+    obj.compressedIDs.every((item: any) => typeof item === "string") &&
+    Array.isArray(obj.compressedSubgraph) &&
+    obj.compressedSubgraph.every((item: any) => typeof item === "string" || (Array.isArray(item) && item.every(subItem => typeof subItem === "string"))) &&
+    typeof obj.highlighted === "boolean" &&
+    typeof obj.id === "string" &&
+    Array.isArray(obj.subgraph) &&
+    obj.subgraph.every((item: any) => typeof item === "string") &&
+    isTags(obj.tags)
+  );
+}
+
+export const isTags = (obj: any): obj is Tags => {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  for (const key in obj) {
+    const tag = (obj as Tags)[key];
+    if (
+      typeof tag !== "object" ||
+      tag === null ||
+      typeof tag.name !== "string" ||
+      typeof tag.value !== "string"
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+};
