@@ -176,6 +176,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
           checkedClassName={positiveChecked ? styles.positiveChecked : ""}
           icon={<Include/>}
           labelLeft
+          title="Include"
           >
           <span className={styles.tagName} title={tagName}>
             {tagName}
@@ -197,6 +198,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
           checkedClassName={negativeChecked ? styles.negativeChecked : ""}
           icon={<Exclude/>}
           labelLeft
+          title="Exclude"
         ></Checkbox>
       </div>
     )

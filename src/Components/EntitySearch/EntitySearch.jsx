@@ -58,12 +58,16 @@ const EntitySearch = ({ onFilter, className }) => {
           <span
             onClick={() => handleActivateFilter(false)}
             className={`${styles.checkbox} ${styles.positive}`}
+            title="Include"
+            aria-label="Include"
             >
             <Include/>
           </span>
           <span
             onClick={() => handleActivateFilter(true)}
             className={`${styles.checkbox} ${styles.negative}`}
+            title="Exclude"
+            aria-label="Exclude"
             >
             <Exclude/>
           </span>
