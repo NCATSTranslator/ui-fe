@@ -168,7 +168,6 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
     let negativeChecked = (activeFilters.some(filter => filtering.isTagFilter(filter) && filter.id === tagKey && filter.negated)) ? true: false;
 
     return (
-      // availableTags[tagKey] && availableTags[tagKey].count &&
       <div className={`facet-container ${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey} data-facet-name={tagName}>
         <Checkbox
           handleClick={() => handleFacetChange(tagKey, tagObjectState, setTagObjectFunc, false, tagName)}
@@ -227,11 +226,6 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
     };
 
     const defaultCompare = (a: [string, Filter], b: [string, Filter]) => {
-      const isFacetASelected = isSelected(a[0], selectedFacetSet);
-      const isFacetBSelected = isSelected(b[0], selectedFacetSet);
-      if (isFacetASelected && !isFacetBSelected) return -1;
-      if (!isFacetASelected && isFacetBSelected) return 1;
-
       const nameA = a[1].name.toLowerCase();
       const nameB = b[1].name.toLowerCase();
 
