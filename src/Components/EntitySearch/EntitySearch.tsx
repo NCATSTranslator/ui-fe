@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {FC, useState, KeyboardEvent} from 'react';
 import styles from './EntitySearch.module.scss';
 import Tooltip from '../Tooltip/Tooltip';
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
@@ -6,12 +6,19 @@ import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import { cloneDeep } from 'lodash';
 import { makeEntitySearch } from '../../Utilities/filterFunctions';
+import { Filter } from '../../Types/results';
 
-const EntitySearch = ({ onFilter, className }) => {
+interface EntitySearchProps {
+  onFilter: (filter: Filter) => void;
+  className?: string;
+}
 
-  const [entitySearch, setEntitySearch] = useState(makeEntitySearch());
 
-  const handleEntitySearchChange = (value) => {
+const EntitySearch: FC<EntitySearchProps> = ({ onFilter, className = "" }) => {
+
+  const [entitySearch, setEntitySearch] = useState<Filter>(makeEntitySearch());
+
+  const handleEntitySearchChange = (value: string) => {
     if (entitySearch.value !== value) {
       const newEntitySearch = cloneDeep(entitySearch);
       newEntitySearch.value = value;
@@ -19,16 +26,14 @@ const EntitySearch = ({ onFilter, className }) => {
     }
   }
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleActivateFilter(false);
     }
   }
 
-  const handleActivateFilter = (negated) => {
+  const handleActivateFilter = (negated: boolean) => {
     if (entitySearch.value === '') return;
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ event: 'textFilterInputEnabled', inputValue: entitySearch.value, });
     const newEntitySearch = cloneDeep(entitySearch);
     newEntitySearch.negated = negated;
     onFilter(newEntitySearch);
