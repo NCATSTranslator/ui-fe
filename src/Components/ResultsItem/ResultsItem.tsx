@@ -503,6 +503,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 pk={pk ? pk : ""}
                 showHiddenPaths={showHiddenPaths}
                 setShowHiddenPaths={setShowHiddenPaths}
+                resultID={result.id}
               />
             </Tab>
             <Tab heading="Graph">
