@@ -20,6 +20,7 @@ interface SupportPathProps {
   pathViewStyles: {[key: string]: string;} | null;
   pk: string;
   selectedPaths: Set<Path> | null;
+  showHiddenPaths: boolean;
 }
 
 const SupportPath: FC<SupportPathProps> = ({ 
@@ -33,11 +34,16 @@ const SupportPath: FC<SupportPathProps> = ({
   pathFilterState, 
   pathViewStyles, 
   pk,
-  selectedPaths }) => {
+  selectedPaths,
+  showHiddenPaths }) => {
 
   const { lastViewedPathID } = useLastViewedPath(); 
 
   const tooltipID = path.id;
+
+  const isPathFiltered = (!!pathFilterState && path?.id) ? pathFilterState[path.id] : false;
+  if(!path.id || (isPathFiltered && !showHiddenPaths)) 
+    return null;
 
   return (
     <>
@@ -67,7 +73,7 @@ const SupportPath: FC<SupportPathProps> = ({
             className={`path ${numberToWords(path.subgraph.length)}  
             ${!!pathViewStyles && pathViewStyles.tableItem} 
             ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''} 
-            ${!!pathFilterState && !!path?.id && pathFilterState[path.id] ? !!pathViewStyles && pathViewStyles.filtered : ''}`}
+            ${(isPathFiltered && !!pathViewStyles) ? pathViewStyles.filtered : ''}`}
             >
             {
               !!path?.compressedSubgraph
@@ -93,6 +99,7 @@ const SupportPath: FC<SupportPathProps> = ({
                         pathFilterState={pathFilterState}
                         activeFilters={activeFilters}
                         pk={pk}
+                        showHiddenPaths={showHiddenPaths}
                       />
                     </>
                   )

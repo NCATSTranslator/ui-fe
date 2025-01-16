@@ -164,6 +164,8 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
   const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
 
+  const [showHiddenPaths, setShowHiddenPaths] = useState(false);
+
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
   useEffect(() => {
@@ -1086,6 +1088,8 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
                               setShareResultID={setShareResultID}
                               resultsComplete={(!isError && freshRawResults === null && !isFetchingARAStatus.current && !isFetchingResults.current)}
                               scoreWeights={scoreWeights}
+                              showHiddenPaths={showHiddenPaths}
+                              setShowHiddenPaths={setShowHiddenPaths}
                             />
                           )
                         })

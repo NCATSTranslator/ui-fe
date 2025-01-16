@@ -8,7 +8,7 @@ export const CONSTANTS = {
 }
 
 export const makeEntitySearch = () => {
-  return { id: 'g/str', value: '', negated: false };
+  return { id: 'g/str', value: '', negated: false, name: '' };
 }
 
 export const getFamiliesByType = (type) => {
