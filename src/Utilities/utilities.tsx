@@ -693,6 +693,24 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
 }
 
 /**
+ * Takes a list of paths along with a PathFilterState object and calculates and returns the total number of filtered paths.
+ * 
+ * @param {Path[]} paths - An array of paths or path IDs
+ * @param {PathFilterState} pathFilterState - The current Path Filter State
+ * @returns {number} - The number of filtered paths.
+ */
+export const getFilteredPathCount = (paths: Path[], pathFilterState: PathFilterState) => {
+  let count = 0;
+  for(const path of paths) {
+    const isPathFiltered = (path?.id) ? pathFilterState[path.id] : false;
+    if(isPathFiltered) {
+      count++;
+    }
+  }
+  return count;
+}
+
+/**
  * Takes a list of paths/path IDs along with a PathFilterState object and a set of selected paths, then compresses them. 
  * The compressed paths are sorted by the PathFilterState, then have their highlighted status set according to the active
  * selected paths. The paths are then sorted by highlighted status and returned. 
@@ -700,7 +718,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string|Path)[]} paths - An array of paths or path IDs
  * @param {PathFilterState} pathFilterState - The current Path Filter State
- * @param {Set<Path> | null} pathFilterState - The current Path Filter State
+ * @param {Set<Path> | null} pathFilterState - The currently selected paths
  * @returns {Path[]} - The array of properly formatted paths. 
  */
 export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null) => {

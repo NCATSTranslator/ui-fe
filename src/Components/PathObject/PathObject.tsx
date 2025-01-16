@@ -26,6 +26,7 @@ export interface PathObjectProps {
   pk: string;
   selected?: boolean;
   selectedPaths: Set<Path> | null;
+  showHiddenPaths?: boolean;
 }
 
 const PathObject: FC<PathObjectProps> = ({ 
@@ -44,7 +45,8 @@ const PathObject: FC<PathObjectProps> = ({
   pathViewStyles = null, 
   pk,
   selected, 
-  selectedPaths }) => {
+  selectedPaths,
+  showHiddenPaths = true}) => {
 
   const resultSet = useSelector(getResultSetById(pk));
 
@@ -118,6 +120,7 @@ const PathObject: FC<PathObjectProps> = ({
               pathViewStyles={pathViewStyles}
               selectedPaths={selectedPaths}
               pk={pk}
+              showHiddenPaths={showHiddenPaths}
             />
       }
     </>

@@ -3,21 +3,23 @@
 .entitySearch {
   display: block;
   border-bottom: 1px solid $midGray;
-  padding: 0 $s $s 0;
+  padding: 0 0 $s 0;
   min-width: calc(300px - 16px);
   .labelContainer {
     padding: $s 0 0;
   }
   .textInput {
-    width: calc(100% - 83px);
+    width: calc(100% - 105px);
     color: $black;
     font-size: 12px;
     font-weight: 700;
-    padding: 10px 65px 10px $s;
+    padding: 10px 86px 10px $s;
     border-radius: $largeBorderRadius;
     border: 1px solid $midGray;
     text-overflow: ellipsis;
     overflow: hidden;
+    outline-width: 0px;
+    outline-style: solid;
     &::placeholder {
       color: $placeholderGray;
     }
