@@ -1,17 +1,18 @@
 import styles from './PathView.module.scss';
-import { useState, useMemo, useCallback, useRef, createContext, FC } from "react";
+import { useState, useMemo, useCallback, useRef, createContext, FC, Dispatch, SetStateAction } from "react";
 import Tooltip from '../Tooltip/Tooltip';
 import ReactPaginate from 'react-paginate';
 import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
-import { getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
+import { getFilteredPathCount, getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
 import { PathFilterState, ResultNode, Path, ResultSet, Filter } from '../../Types/results';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 import PathObject from '../PathObject/PathObject';
+import Button from '../Core/Button';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 
@@ -27,37 +28,42 @@ const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[]) => {
 
 interface PathViewProps {
   active: boolean;
+  activeEntityFilters: string[];
   activeFilters: Filter[];
   isEven: boolean;
-  pathArray: string[] | Path[];
-  selectedPaths: Set<Path> | null;
-  handleEdgeSpecificEvidence:(edgeID: string, path: Path) => void;
   handleActivateEvidence: (path: Path) => void;
-  activeEntityFilters: string[];
+  handleEdgeSpecificEvidence:(edgeID: string, path: Path) => void;
+  pathArray: string[] | Path[];
   pathFilterState: PathFilterState;
   pk: string;
+  selectedPaths: Set<Path> | null;
+  setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
+  showHiddenPaths: boolean;
 }
 
 const PathView: FC<PathViewProps> = ({ 
   active, 
+  activeEntityFilters, 
   activeFilters, 
+  handleActivateEvidence, 
+  handleEdgeSpecificEvidence, 
   isEven, 
   pathArray, 
-  selectedPaths, 
-  handleEdgeSpecificEvidence, 
-  handleActivateEvidence, 
-  activeEntityFilters, 
   pathFilterState,
-  pk }) => {
+  pk,
+  selectedPaths, 
+  setShowHiddenPaths,
+  showHiddenPaths }) => {
 
   const resultSet = useSelector(getResultSetById(pk));
   const paths = isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray;
   const itemsPerPage: number = 10;
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
+  const filteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const currentPage = useRef<number>(0);
   const endResultIndex = useRef<number>(itemsPerPage);
-  const pageCount = (!!formattedPaths) ? Math.ceil(formattedPaths.length / itemsPerPage) : 0;
+  const pageCount = (!!formattedPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / itemsPerPage) : 0;
   
   const handlePageClick = (event: {selected: number} ) => {
     let pathsLength = formattedPaths.length;
@@ -115,6 +121,9 @@ const PathView: FC<PathViewProps> = ({
           <div className={styles.paths}>
             {
               displayedPaths.map((pathToDisplay: Path, i: number)=> {
+                const isPathFiltered = (!!pathFilterState && pathToDisplay?.id) ? pathFilterState[pathToDisplay.id] : false;
+                if(!pathToDisplay.id || (isPathFiltered && !showHiddenPaths)) 
+                  return null;
                 const displayIndirectLabel = isPathInferred(resultSet, pathToDisplay) && !inferredLabelDisplayed;
                   if(displayIndirectLabel)
                     inferredLabelDisplayed = true;
@@ -122,10 +131,7 @@ const PathView: FC<PathViewProps> = ({
                   if(displayDirectLabel)
                     directLabelDisplayed = true;
                 const tooltipID: string = (!!pathToDisplay?.id) ? pathToDisplay.id : i.toString();
-                const isPathFiltered = (!!pathFilterState && pathToDisplay?.id) ? pathFilterState[pathToDisplay.id] : false;
                 const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === pathToDisplay.id) : -1;
-                if(!pathToDisplay.id) 
-                  return null;
 
                 return (
                   <div key={tooltipID}>
@@ -189,6 +195,7 @@ const PathView: FC<PathViewProps> = ({
                                     pathFilterState={pathFilterState}
                                     activeFilters={activeFilters}
                                     pk={pk}
+                                    showHiddenPaths={showHiddenPaths}
                                   />
                                 </>
                               )
@@ -214,6 +221,7 @@ const PathView: FC<PathViewProps> = ({
                                     pathFilterState={pathFilterState}
                                     activeFilters={activeFilters}
                                     pk={pk}
+                                    showHiddenPaths={showHiddenPaths}
                                   />
                                 </>
                               )
@@ -226,6 +234,10 @@ const PathView: FC<PathViewProps> = ({
               })
             }
           </div>
+          {
+            Object.keys(activeFilters).length > 0 &&
+            <Button handleClick={()=>setShowHiddenPaths(prev=>!prev)}>{showHiddenPaths ? "Hide Excluded Paths" : "Show Excluded Paths"}</Button>
+          }
         </LastViewedPathIDContext.Provider>
       }
       {

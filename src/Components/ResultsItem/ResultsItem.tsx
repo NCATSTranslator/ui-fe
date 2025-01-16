@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction } from 'react';
 import styles from './ResultsItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts, isStringArray } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
@@ -77,7 +77,9 @@ type ResultsItemProps = {
   setExpandSharedResult: (state: boolean) => void;
   setShareModalOpen: (state: boolean) => void;
   setShareResultID: (state: string) => void;
+  setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   sharedItemRef: RefObject<HTMLDivElement> | null;
+  showHiddenPaths: boolean;
   startExpanded: boolean;
   zoomKeyDown: boolean;
 }
@@ -112,7 +114,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setExpandSharedResult = () => {},
     setShareModalOpen = () => {},
     setShareResultID = () => {},
+    setShowHiddenPaths,
     sharedItemRef,
+    showHiddenPaths,
     startExpanded = false,
     zoomKeyDown
   }) => {
@@ -497,6 +501,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 active={isExpanded}
                 activeFilters={activeFilters}
                 pk={pk ? pk : ""}
+                showHiddenPaths={showHiddenPaths}
+                setShowHiddenPaths={setShowHiddenPaths}
               />
             </Tab>
             <Tab heading="Graph">

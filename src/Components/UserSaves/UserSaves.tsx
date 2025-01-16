@@ -58,6 +58,8 @@ const UserSaves = () => {
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
   const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
 
+  const [showHiddenPaths, setShowHiddenPaths] = useState(false);
+
   const queryClient = new QueryClient();
 
   const activateEvidence = useCallback((item: Result, edge: ResultEdge, path: Path, pk: string) => {
@@ -295,6 +297,8 @@ const UserSaves = () => {
                                   setShareModalOpen={setShareModalOpen}
                                   setShareResultID={setShareResultID}
                                   scoreWeights={scoreWeights}
+                                  showHiddenPaths={showHiddenPaths}
+                                  setShowHiddenPaths={setShowHiddenPaths}
                                 />
                               );
                             })

@@ -36,6 +36,7 @@ interface PredicateProps {
   pk: string;
   selected?: boolean;
   selectedPaths: Set<Path> | null;
+  showHiddenPaths: boolean;
   uid: string;
 }
 
@@ -55,7 +56,8 @@ const Predicate: FC<PredicateProps> = ({
   pathViewStyles = null, 
   pk,
   selected = false, 
-  selectedPaths, 
+  selectedPaths,
+  showHiddenPaths,
   uid }) => {
 
   const checkForProvenanceType = (edge: ResultEdge, type: string) => {
@@ -86,7 +88,7 @@ const Predicate: FC<PredicateProps> = ({
     setIsSupportExpanded(prev=>!prev);
   }
 
-  let hasSupport = edge.support.length > 0 ? true : false;
+  let hasSupport = formattedEdge.support.length > 0 ? true : false;
 
   return (
     <>
@@ -242,7 +244,7 @@ const Predicate: FC<PredicateProps> = ({
       {
         hasSupport && !inModal &&
         <SupportPathGroup
-          pathArray={edge.support}
+          pathArray={formattedEdge.support}
           isExpanded={isSupportExpanded}
           pathFilterState={pathFilterState}
           pathViewStyles={pathViewStyles}
@@ -253,6 +255,7 @@ const Predicate: FC<PredicateProps> = ({
           activeEntityFilters={activeEntityFilters}
           activeFilters={activeFilters}
           pk={pk}
+          showHiddenPaths={showHiddenPaths}
         />
       }
     </>

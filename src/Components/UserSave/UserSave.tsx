@@ -15,31 +15,35 @@ import { getEdgeById, getResultSetById } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 
 interface UserSaveProps {
-  save: [string, SaveGroup];
-  currentSearchString: MutableRefObject<string>;
-  zoomKeyDown: boolean;
   activateEvidence?: (item: Result, edge: ResultEdge, path: Path, pk: string) => void;
   activateNotes?: (nameString: string, id: string) => void;
-  handleBookmarkError?: () => void;
   bookmarkAddedToast?: () => void;
   bookmarkRemovedToast?: () => void;
+  currentSearchString: MutableRefObject<string>;
+  handleBookmarkError?: () => void;
+  save: [string, SaveGroup];
+  scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number}
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
   setShareResultID: (state: string) => void;
-  scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number}
+  setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
+  showHiddenPaths: boolean;
+  zoomKeyDown: boolean;
 }
 
 const UserSave: FC<UserSaveProps> = ({
-  save, 
-  currentSearchString, 
-  zoomKeyDown, 
-  activateEvidence, 
+  activateEvidence,
   activateNotes,
-  handleBookmarkError, 
-  bookmarkAddedToast, 
-  bookmarkRemovedToast, 
+  bookmarkAddedToast,
+  bookmarkRemovedToast,
+  currentSearchString,
+  handleBookmarkError,
+  save,
+  scoreWeights,
   setShareModalOpen, 
   setShareResultID,
-  scoreWeights }) => {
+  setShowHiddenPaths,
+  showHiddenPaths,
+  zoomKeyDown }) => {
 
     
   let key = save[0];
@@ -192,7 +196,7 @@ const UserSave: FC<UserSaveProps> = ({
           queryItem.hasNotes = (save.notes.length === 0 || JSON.stringify(save.notes) === emptyEditor) ? false : true;
           if ('compressedPaths' in (save?.data?.item || {}))
             return null;
-          
+
           return (
             <div key={save.id} className={styles.result}>
               <ResultsItem
@@ -227,6 +231,8 @@ const UserSave: FC<UserSaveProps> = ({
                 startExpanded={false}
                 setExpandSharedResult={()=>{}}
                 scoreWeights={scoreWeights}
+                showHiddenPaths={showHiddenPaths}
+                setShowHiddenPaths={setShowHiddenPaths}
               />
             </div>
           )
