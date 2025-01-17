@@ -695,7 +695,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
 /**
  * Takes a list of paths along with a PathFilterState object and calculates and returns the total number of filtered paths.
  * 
- * @param {Path[]} paths - An array of paths or path IDs
+ * @param {Path[]} paths - An array of Path objects
  * @param {PathFilterState} pathFilterState - The current Path Filter State
  * @returns {number} - The number of filtered paths.
  */
@@ -708,6 +708,29 @@ export const getFilteredPathCount = (paths: Path[], pathFilterState: PathFilterS
     }
   }
   return count;
+}
+
+/**
+ * Takes a path along with a PathFilterState object and determines if that path is filtered or not based on its compressed IDs (if any)
+ * and the provided PathFilter State
+ * 
+ * @param {Path} paths - A Path object
+ * @param {PathFilterState} pathFilterState - The current Path Filter State
+ * @returns {boolean} - Is the path filtered
+ */
+export const getIsPathFiltered = (path: Path, pathFilterState: PathFilterState) => {
+  let isPathFiltered = false;
+  if(!!path?.compressedIDs && path.compressedIDs.length > 1) {
+    let filteredStatus: boolean[] = [];
+    for(const id of path.compressedIDs)
+      filteredStatus.push(pathFilterState[id]);
+    if(filteredStatus.every(status => !!status))
+      isPathFiltered = true;
+  } else {
+    isPathFiltered = (!!pathFilterState && path?.id) ? pathFilterState[path.id] : false;
+  }
+
+  return isPathFiltered;
 }
 
 /**

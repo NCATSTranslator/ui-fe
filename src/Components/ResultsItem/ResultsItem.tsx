@@ -29,7 +29,9 @@ import Tab from '../Tabs/Tab';
 import * as filtering from '../../Utilities/filterFunctions';
 import ResultsItemName from '../ResultsItemName/ResultsItemName';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
+import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import { cloneDeep } from 'lodash';
+import Button from '../Core/Button';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -501,8 +503,8 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 active={isExpanded}
                 activeFilters={activeFilters}
                 pk={pk ? pk : ""}
-                showHiddenPaths={showHiddenPaths}
                 setShowHiddenPaths={setShowHiddenPaths}
+                showHiddenPaths={showHiddenPaths}
                 resultID={result.id}
               />
             </Tab>
