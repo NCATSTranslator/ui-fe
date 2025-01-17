@@ -6,13 +6,14 @@ import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
-import { getFilteredPathCount, getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
+import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
 import { PathFilterState, ResultNode, Path, ResultSet, Filter } from '../../Types/results';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 import PathObject from '../PathObject/PathObject';
 import Button from '../Core/Button';
+import { cloneDeep } from 'lodash';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 
@@ -59,13 +60,13 @@ const PathView: FC<PathViewProps> = ({
 
   const resultSet = useSelector(getResultSetById(pk));
   const paths = isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray;
-  const itemsPerPage: number = 5;
+  const itemsPerPage: number = 10;
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
   const filteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const currentPage = useRef<number>(0);
   const endResultIndex = useRef<number>(itemsPerPage);
-  const pageCount = (!!formattedPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / itemsPerPage) : 0;
+  const pageCount = (!showHiddenPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / itemsPerPage) : Math.ceil((formattedPaths.length) / itemsPerPage);
   
   const handlePageClick = (event: {selected: number} ) => {
     let pathsLength = formattedPaths.length;
@@ -79,8 +80,8 @@ const PathView: FC<PathViewProps> = ({
     setItemOffset(newOffset);
     endResultIndex.current = endOffset;
   }
-
-  const displayedPaths = sortArrayByIndirect(resultSet, formattedPaths).slice(itemOffset, endResultIndex.current);
+  const formattedPathsToSort = (showHiddenPaths) ? formattedPaths : formattedPaths.filter(path => !getIsPathFiltered(path, pathFilterState));
+  const displayedPaths = sortArrayByIndirect(resultSet, formattedPathsToSort).slice(itemOffset, endResultIndex.current);
   // Create the context with a default value of null
   const [lastViewedPathID, setLastViewedPathID] = useState<string|null>(null);
 
@@ -122,19 +123,19 @@ const PathView: FC<PathViewProps> = ({
         <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
           <div className={styles.paths}>
             {
-              displayedPaths.map((pathToDisplay: Path, i: number)=> {
-                const isPathFiltered = (!!pathFilterState && pathToDisplay?.id) ? pathFilterState[pathToDisplay.id] : false;
-                if(!pathToDisplay.id || (isPathFiltered && !showHiddenPaths)) 
+              displayedPaths.map((path: Path, i: number)=> {
+                const isPathFiltered = getIsPathFiltered(path, pathFilterState);
+                if(!path.id || (isPathFiltered && !showHiddenPaths)) 
                   return null;
-                const displayIndirectLabel = isPathInferred(resultSet, pathToDisplay) && !inferredLabelDisplayed;
+                const displayIndirectLabel = isPathInferred(resultSet, path) && !inferredLabelDisplayed;
                   if(displayIndirectLabel)
                     inferredLabelDisplayed = true;
-                const displayDirectLabel = !isPathInferred(resultSet, pathToDisplay) && !directLabelDisplayed;
+                const displayDirectLabel = !isPathInferred(resultSet, path) && !directLabelDisplayed;
                   if(displayDirectLabel)
                     directLabelDisplayed = true;
-                const tooltipID: string = (!!pathToDisplay?.id) ? pathToDisplay.id : i.toString();
-                const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === pathToDisplay.id) : -1;
-
+                const tooltipID: string = (!!path?.id) ? path.id : i.toString();
+                const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
+                console.log(indexInFullCollection, formattedPaths);
                 return (
                   <div key={tooltipID}>
                     {
@@ -161,7 +162,7 @@ const PathView: FC<PathViewProps> = ({
                         { indexInFullCollection + 1 }
                       </span>
                       <button
-                        onClick={()=>(pathToDisplay.id) ? handleActivateEvidence(pathToDisplay) : null}
+                        onClick={()=>(path.id) ? handleActivateEvidence(path) : null}
                         className={styles.pathEvidenceButton}
                         data-tooltip-id={tooltipID}
                         >
@@ -172,13 +173,13 @@ const PathView: FC<PathViewProps> = ({
                         >
                           <span>View evidence for this path.</span>
                       </Tooltip>
-                      <div className={`${styles.tableItem} path ${numberToWords(pathToDisplay.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !pathToDisplay.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''}`} >
+                      <div data-path-id={`${path.id || ""}`} className={`${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''}`} >
                         {
-                          !!pathToDisplay?.compressedSubgraph
+                          !!path?.compressedSubgraph
                           ?
-                            pathToDisplay.compressedSubgraph.map((subgraphItemID, i) => {
+                            path.compressedSubgraph.map((subgraphItemID, i) => {
                               let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
-                              if(pathToDisplay.id === undefined)
+                              if(path.id === undefined)
                                 return null;
                               return (
                                 <>
@@ -186,7 +187,7 @@ const PathView: FC<PathViewProps> = ({
                                     pathViewStyles={styles}
                                     index={i}
                                     isEven={isEven}
-                                    path={pathToDisplay}
+                                    path={path}
                                     id={subgraphItemID}
                                     key={key}
                                     handleActivateEvidence={handleActivateEvidence}
@@ -203,8 +204,8 @@ const PathView: FC<PathViewProps> = ({
                               )
                             }) 
                           :
-                            pathToDisplay.subgraph.map((subgraphItemID, i) => {
-                              if(pathToDisplay.id === undefined)
+                            path.subgraph.map((subgraphItemID, i) => {
+                              if(path.id === undefined)
                                 return null;
                               return (
                                 <>
@@ -212,7 +213,7 @@ const PathView: FC<PathViewProps> = ({
                                     pathViewStyles={styles}
                                     index={i}
                                     isEven={isEven}
-                                    path={pathToDisplay}
+                                    path={path}
                                     id={subgraphItemID}
                                     key={subgraphItemID}
                                     handleActivateEvidence={handleActivateEvidence}
@@ -239,11 +240,14 @@ const PathView: FC<PathViewProps> = ({
           {
             Object.keys(activeFilters).length > 0 &&
             <Button 
-              handleClick={()=>setShowHiddenPaths(prev=>!prev)}
+              handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
               isSecondary
+              smallFont
+              dataTooltipId={`${resultID}-excluded-paths-toggle`}
+              className={`${!!isEven && styles.evenButton}`}
               >
               {showHiddenPaths ? "Hide Excluded Paths" : "Show Excluded Paths"}
-              <Information data-tooltip-id={`${resultID}-excluded-paths-toggle`}/>
+              <Information/>
               <Tooltip id={`${resultID}-excluded-paths-toggle`}>
                 {
                   showHiddenPaths 
