@@ -3,7 +3,7 @@ import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { PathFilterState, Path, ResultNode, Filter } from '../../Types/results';
-import { numberToWords } from '../../Utilities/utilities';
+import { getIsPathFiltered, numberToWords } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
 import { useLastViewedPath } from '../../Utilities/customHooks';
 
@@ -41,7 +41,7 @@ const SupportPath: FC<SupportPathProps> = ({
 
   const tooltipID = path.id;
 
-  const isPathFiltered = (!!pathFilterState && path?.id) ? pathFilterState[path.id] : false;
+  const isPathFiltered = getIsPathFiltered(path, pathFilterState);
   if(!path.id || (isPathFiltered && !showHiddenPaths)) 
     return null;
 
@@ -49,7 +49,7 @@ const SupportPath: FC<SupportPathProps> = ({
     <>
       {
         path !== null &&
-        <div className={`${!!pathViewStyles && pathViewStyles.formattedPath} ${!!pathViewStyles && pathViewStyles.supportPath}`} key={path.id}>
+        <div className={`${!!pathViewStyles && pathViewStyles.formattedPath}`} key={path.id}>
           {
             lastViewedPathID === path.id &&
             <LastViewedTag/>
@@ -70,6 +70,7 @@ const SupportPath: FC<SupportPathProps> = ({
               <span>View evidence for this path.</span>
           </Tooltip>
           <div
+            data-path-id={`${path.id || ""}`}
             className={`path ${numberToWords(path.subgraph.length)}  
             ${!!pathViewStyles && pathViewStyles.tableItem} 
             ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''} 
