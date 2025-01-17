@@ -12,7 +12,6 @@ import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 import PathObject from '../PathObject/PathObject';
-import Button from '../Core/Button';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 
@@ -36,9 +35,7 @@ interface PathViewProps {
   pathArray: string[] | Path[];
   pathFilterState: PathFilterState;
   pk: string;
-  resultID: string;
   selectedPaths: Set<Path> | null;
-  setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   showHiddenPaths: boolean;
 }
 
@@ -52,9 +49,7 @@ const PathView: FC<PathViewProps> = ({
   pathArray, 
   pathFilterState,
   pk,
-  resultID,
   selectedPaths, 
-  setShowHiddenPaths,
   showHiddenPaths }) => {
 
   const resultSet = useSelector(getResultSetById(pk));
@@ -236,23 +231,6 @@ const PathView: FC<PathViewProps> = ({
               })
             }
           </div>
-          {
-            Object.keys(activeFilters).length > 0 &&
-            <Button 
-              handleClick={()=>setShowHiddenPaths(prev=>!prev)}
-              isSecondary
-              >
-              {showHiddenPaths ? "Hide Excluded Paths" : "Show Excluded Paths"}
-              <Information data-tooltip-id={`${resultID}-excluded-paths-toggle`}/>
-              <Tooltip id={`${resultID}-excluded-paths-toggle`}>
-                {
-                  showHiddenPaths 
-                  ? <span>Click "Hide Excluded Paths” to hide any paths excluded by the currently applied filters.</span>
-                  : <span>Some paths that are a part of this result may be excluded from this list due to applied filters. Click “Show Excluded Paths” to view them.</span>
-                }
-              </Tooltip>
-            </Button>
-          }
         </LastViewedPathIDContext.Provider>
       }
       {

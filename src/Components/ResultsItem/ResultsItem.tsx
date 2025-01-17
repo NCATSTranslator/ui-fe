@@ -29,7 +29,9 @@ import Tab from '../Tabs/Tab';
 import * as filtering from '../../Utilities/filterFunctions';
 import ResultsItemName from '../ResultsItemName/ResultsItemName';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
+import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import { cloneDeep } from 'lodash';
+import Button from '../Core/Button';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -502,9 +504,27 @@ const ResultsItem: FC<ResultsItemProps> = ({
                 activeFilters={activeFilters}
                 pk={pk ? pk : ""}
                 showHiddenPaths={showHiddenPaths}
-                setShowHiddenPaths={setShowHiddenPaths}
-                resultID={result.id}
               />
+          {
+            Object.keys(activeFilters).length > 0 &&
+            <Button 
+              handleClick={()=>setShowHiddenPaths(prev=>!prev)}
+              isSecondary
+              smallFont
+              dataTooltipId={`${result.id}-excluded-paths-toggle`}
+              className={`${!!isEven && styles.evenButton}`}
+              >
+              {showHiddenPaths ? "Hide Excluded Paths" : "Show Excluded Paths"}
+              <Information/>
+              <Tooltip id={`${result.id}-excluded-paths-toggle`}>
+                {
+                  showHiddenPaths 
+                  ? <span>Click "Hide Excluded Paths” to hide any paths excluded by the currently applied filters.</span>
+                  : <span>Some paths that are a part of this result may be excluded from this list due to applied filters. Click “Show Excluded Paths” to view them.</span>
+                }
+              </Tooltip>
+            </Button>
+          }
             </Tab>
             <Tab heading="Graph">
               <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
