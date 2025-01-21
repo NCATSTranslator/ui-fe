@@ -18,13 +18,14 @@ import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Types/results';
 import { getResultSetById } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
+import { cloneDeep } from 'lodash';
 
 interface PredicateProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
   handleActivateEvidence: (path: Path) => void;
-  handleEdgeClick: (edgeID: string, path: Path) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
   handleNodeClick: (name: ResultNode) => void;
   edge: ResultEdge;
   edgeIDs: string[];
@@ -88,6 +89,16 @@ const Predicate: FC<PredicateProps> = ({
     setIsSupportExpanded(prev=>!prev);
   }
 
+  const pushAndReturn = (arr: any[], element: any) => {
+    let newArr = cloneDeep(arr);
+    newArr.push(element);
+    return newArr;
+  }
+  
+  const edgesToDisplay = (!!formattedEdge?.compressed_edges) 
+  ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
+  : [formattedEdge];
+
   let hasSupport = formattedEdge.support.length > 0 ? true : false;
 
   return (
@@ -112,35 +123,8 @@ const Predicate: FC<PredicateProps> = ({
         >
         {
           <div className={styles.predicatesList}>
-            <p
-              className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-              onClick={(e)=> {
-                e.stopPropagation();
-                handleEdgeClick(edgeIDs[0], path);
-              }}
-              >
-              <Highlighter
-                highlightClassName="highlight"
-                searchWords={activeEntityFilters}
-                autoEscape={true}
-                textToHighlight={capitalizeAllWords(formattedEdge.predicate)}
-              />
-              {
-                formattedEdge.predicate_url &&
-                <a
-                  href={formattedEdge.predicate_url}
-                  onClick={(e)=> {
-                    e.stopPropagation();
-                  }}
-                  target="_blank"
-                  rel='noreferrer'>
-                    <ExternalLink/>
-                </a>
-              }
-            </p>
             {
-              !!formattedEdge?.compressed_edges &&
-              formattedEdge.compressed_edges.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
+              edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
                 if(!edge)
                   return null;
                 return (
@@ -149,7 +133,7 @@ const Predicate: FC<PredicateProps> = ({
                     className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
                     onClick={(e)=> {
                       e.stopPropagation();
-                      handleEdgeClick(edge.id, path);
+                      handleEdgeClick([edge.id], path);
                     }}
                     >
                     <Highlighter
@@ -179,7 +163,7 @@ const Predicate: FC<PredicateProps> = ({
       </Tooltip>
       <span
         className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior}`}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs[0], path);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path);}}
         >
           {
             hasSupport 

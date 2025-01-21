@@ -14,7 +14,7 @@ export interface PathObjectProps {
   activeFilters: Filter[];
   className?: string;
   handleActivateEvidence?: (path: Path) => void;
-  handleEdgeClick: (edgeID: string, path: Path) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
   handleNodeClick: (name: ResultNode) => void;
   id: string | string[];
   index: number;

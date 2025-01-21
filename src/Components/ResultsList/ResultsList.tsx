@@ -18,7 +18,7 @@ import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHigh
   filterCompare, makePathRank, updatePathRanks, pathRankSort } from "../../Utilities/sortingFunctions";
 import { findStringMatch, handleResultsError, handleResultsRefresh } from "../../Utilities/resultsInteractionFunctions";
 import * as filtering from '../../Utilities/filterFunctions';
-import { getEvidenceCounts, checkBookmarkForNotes, checkBookmarksForItem, getDataFromQueryVar, getPathCount, handleFetchErrors } from "../../Utilities/utilities";
+import { getEvidenceCounts, checkBookmarkForNotes, checkBookmarksForItem, getDataFromQueryVar, getPathCount, handleFetchErrors, getCompressedEdge } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { API_PATH_PREFIX, getSaves, SaveGroup } from "../../Utilities/userApi";
 import { toast } from 'react-toastify';
@@ -630,8 +630,15 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   /**
    * Activates sets the evidence and opens the evidence modal.
    */
-  const activateEvidence = useCallback((item: Result, edgeID: string, path: Path) => {
-    const edge = getEdgeById(resultSet, edgeID);
+  const activateEvidence = useCallback((item: Result, edgeID: string | string[], path: Path) => {
+    if(!resultSet)
+      return;
+    let edge;
+    if(!Array.isArray(edgeID))
+      edge = getEdgeById(resultSet, edgeID);
+    else 
+      edge = getCompressedEdge(resultSet, edgeID);
+
     if(!!edge) {
       setSelectedResult(item);
       setSelectedEdge(edge);
