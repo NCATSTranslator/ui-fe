@@ -331,15 +331,32 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                 <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head}`}>Source</div>
-                    <div className={`head ${styles.head}`}>Link</div>
+                    <div className={`head ${styles.head}`}>Rationale</div>
                   </div>
                   <div className={`table-items ${styles.tableItems} scrollable`}>
                     {
                       sources.map((src, i) => {
+                        const sourceKey = `${src.url}-${i}`;
+                        const tooltipId = `source-tooltip-${sourceKey}`;
                         return(
-                          <div className={`table-item ${styles.tableItem}`} key={`${src.url}-${i}`}>
+                          <div className={`table-item ${styles.tableItem}`} key={sourceKey}>
+                            <Tooltip id={tooltipId}>
+                              <span>
+                                Why do we use this source?
+                                <a href={src?.wiki} target="_blank" rel="noreferrer" className={styles.tooltipLink}>
+                                  <ExternalLink/>
+                                </a>
+                              </span>
+                            </Tooltip>
                             <span className={`table-cell ${styles.cell} ${styles.source} ${styles.sourceItem}`}>
-                              <span className={styles.sourceEdge} key={i}>{src.name}</span>
+                              <span className={styles.sourceEdge} key={i}>
+                                {src.name}
+                                {
+                                  src?.wiki
+                                  ? <InfoIcon className={styles.infoIcon} data-tooltip-id={tooltipId} />
+                                  : <></>
+                                }
+                              </span>
                             </span>
                             <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
                               {
@@ -350,7 +367,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                                     <ExternalLink/>
                                   </a>
                                 :
-                                  <span>Link Unavailable</span>
+                                  <span>No link available</span>
                               }
                             </span>
                           </div>

@@ -57,6 +57,7 @@ export type Provenance = {
   knowledge_level: KnowledgeLevel;
   name: string;
   url: string;
+  wiki: string;
 }
 
 export type PublicationSupport = {

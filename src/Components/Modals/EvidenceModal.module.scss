@@ -34,22 +34,22 @@
     .tableItems {
       display: flex;
       flex-direction: column;
-      overflow-y: auto; 
+      overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: $midGray $lightGray;
       &::-webkit-scrollbar {
         width: 10px;
       }
-      
+
       &::-webkit-scrollbar-track {
         background-color: $lightGray;
       }
-      
+
       &::-webkit-scrollbar-thumb {
         background-color: $midGray;
         border-radius: 10px;
       }
-      
+
       &::-webkit-scrollbar-thumb:hover {
         background-color: $darkGray;
       }
@@ -178,10 +178,10 @@
 .groupedPreds {
   font-weight: 500;
   &>span {
-    margin-bottom: 10px; 
+    margin-bottom: 10px;
   }
   &>span:last-child {
-    margin-bottom: 0; 
+    margin-bottom: 0;
   }
   .pathContainer {
     &>svg {
@@ -228,4 +228,20 @@
 
 .infoIcon {
   margin-left: 4px;
+}
+
+.tooltipLink {
+  margin: 0 2px;
+  font-size: 12px;
+  color: $white;
+  display: inline-flex;
+  align-items: center;
+  svg {
+    width: 16px;
+    margin-left: 0;
+    transform: none !important;
+    path {
+      fill: $white !important;
+    }
+  }
 }
