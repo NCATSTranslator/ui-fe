@@ -18,6 +18,7 @@ import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Types/results';
 import { getResultSetById } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
+import { cloneDeep } from 'lodash';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -88,6 +89,16 @@ const Predicate: FC<PredicateProps> = ({
     setIsSupportExpanded(prev=>!prev);
   }
 
+  const pushAndReturn = (arr: any[], element: any) => {
+    let newArr = cloneDeep(arr);
+    newArr.push(element);
+    return newArr;
+  }
+  
+  const edgesToDisplay = (!!formattedEdge?.compressed_edges) 
+  ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
+  : [formattedEdge];
+  
   let hasSupport = formattedEdge.support.length > 0 ? true : false;
 
   return (
@@ -112,7 +123,7 @@ const Predicate: FC<PredicateProps> = ({
         >
         {
           <div className={styles.predicatesList}>
-            <p
+            {/* <p
               className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
               onClick={(e)=> {
                 e.stopPropagation();
@@ -137,10 +148,9 @@ const Predicate: FC<PredicateProps> = ({
                     <ExternalLink/>
                 </a>
               }
-            </p>
+            </p> */}
             {
-              !!formattedEdge?.compressed_edges &&
-              formattedEdge.compressed_edges.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
+              edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
                 if(!edge)
                   return null;
                 return (
