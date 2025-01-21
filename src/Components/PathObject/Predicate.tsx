@@ -24,7 +24,7 @@ interface PredicateProps {
   activeFilters: Filter[];
   className?: string;
   handleActivateEvidence: (path: Path) => void;
-  handleEdgeClick: (edgeID: string, path: Path) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
   handleNodeClick: (name: ResultNode) => void;
   edge: ResultEdge;
   edgeIDs: string[];
@@ -116,7 +116,7 @@ const Predicate: FC<PredicateProps> = ({
               className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
               onClick={(e)=> {
                 e.stopPropagation();
-                handleEdgeClick(edgeIDs[0], path);
+                handleEdgeClick(edgeIDs, path);
               }}
               >
               <Highlighter
@@ -149,7 +149,7 @@ const Predicate: FC<PredicateProps> = ({
                     className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
                     onClick={(e)=> {
                       e.stopPropagation();
-                      handleEdgeClick(edge.id, path);
+                      handleEdgeClick([edge.id], path);
                     }}
                     >
                     <Highlighter
@@ -179,7 +179,7 @@ const Predicate: FC<PredicateProps> = ({
       </Tooltip>
       <span
         className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior}`}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs[0], path);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path);}}
         >
           {
             hasSupport 

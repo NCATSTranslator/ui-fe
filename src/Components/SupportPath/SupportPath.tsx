@@ -12,7 +12,7 @@ interface SupportPathProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   character: string;
-  handleEdgeClick: (edgeID: string, path: Path) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
   handleNodeClick: (name: ResultNode) => void;
   handleActivateEvidence: (path: Path) => void;
   path: Path;

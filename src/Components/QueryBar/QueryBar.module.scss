@@ -54,8 +54,11 @@
       border-color: $lightGray;
       cursor: default;
       pointer-events: none;
-      svg path {
-        stroke: $midGray;
+      svg {
+        margin-left: 0;
+        path {
+          stroke: $midGray;
+        }
       }
     }
   }

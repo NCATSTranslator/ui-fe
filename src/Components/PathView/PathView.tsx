@@ -33,7 +33,7 @@ interface PathViewProps {
   activeFilters: Filter[];
   isEven: boolean;
   handleActivateEvidence: (path: Path) => void;
-  handleEdgeSpecificEvidence:(edgeID: string, path: Path) => void;
+  handleEdgeSpecificEvidence:(edgeIDs: string[], path: Path) => void;
   pathArray: string[] | Path[];
   pathFilterState: PathFilterState;
   pk: string;
@@ -94,9 +94,9 @@ const PathView: FC<PathViewProps> = ({
       window.open(name.provenance[0], '_blank');
   },[]);
 
-  const handleEdgeClick = useCallback((edgeID: string, path: Path) => {
+  const handleEdgeClick = useCallback((edgeIDs: string[], path: Path) => {
     setLastViewedPathID(path?.id || null);
-    handleEdgeSpecificEvidence(edgeID, path);
+    handleEdgeSpecificEvidence(edgeIDs, path);
   }, [handleEdgeSpecificEvidence]);
 
   if(!resultSet)
@@ -135,7 +135,6 @@ const PathView: FC<PathViewProps> = ({
                     directLabelDisplayed = true;
                 const tooltipID: string = (!!path?.id) ? path.id : i.toString();
                 const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
-                console.log(indexInFullCollection, formattedPaths);
                 return (
                   <div key={tooltipID}>
                     {

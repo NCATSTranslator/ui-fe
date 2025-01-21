@@ -15,7 +15,7 @@ interface SupportPathGroupProps {
   activeFilters: Filter[];
   activeEntityFilters: string[];
   handleActivateEvidence: (path: Path) => void;
-  handleEdgeClick: (edgeID: string, path: Path) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
   handleNodeClick: (name: ResultNode) => void;
   isExpanded: boolean;
   pathFilterState: PathFilterState;
