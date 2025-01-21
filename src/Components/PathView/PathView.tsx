@@ -7,25 +7,14 @@ import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
-import { PathFilterState, ResultNode, Path, ResultSet, Filter } from '../../Types/results';
+import { PathFilterState, ResultNode, Path, Filter } from '../../Types/results';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 import PathObject from '../PathObject/PathObject';
 import Button from '../Core/Button';
-import { cloneDeep } from 'lodash';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
-
-const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[]) => {
-  if(!resultSet)
-    return paths;
-  return paths.sort((a, b) => {
-      let inferredA =  isPathInferred(resultSet, a) ? 1 : 0;
-      let inferredB = isPathInferred(resultSet, b) ? 1 : 0;
-      return inferredA - inferredB;
-  });
-}
 
 interface PathViewProps {
   active: boolean;
@@ -80,8 +69,8 @@ const PathView: FC<PathViewProps> = ({
     setItemOffset(newOffset);
     endResultIndex.current = endOffset;
   }
-  const formattedPathsToSort = (showHiddenPaths) ? formattedPaths : formattedPaths.filter(path => !getIsPathFiltered(path, pathFilterState));
-  const displayedPaths = sortArrayByIndirect(resultSet, formattedPathsToSort).slice(itemOffset, endResultIndex.current);
+  const formattedPathsToDisplay = (showHiddenPaths) ? formattedPaths : formattedPaths.filter(path => !getIsPathFiltered(path, pathFilterState));
+  const displayedPaths = formattedPathsToDisplay.slice(itemOffset, endResultIndex.current);
   // Create the context with a default value of null
   const [lastViewedPathID, setLastViewedPathID] = useState<string|null>(null);
 

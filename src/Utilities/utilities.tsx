@@ -734,6 +734,24 @@ export const getIsPathFiltered = (path: Path, pathFilterState: PathFilterState) 
 }
 
 /**
+ * Takes a ResultSet and an array of paths and sorts them by whether they contain any inferred edges.
+ * Paths with inferred edges are sorted to the bottom of the array.
+ * 
+ * @param {ResultSet} resultSet - ResultSet Object.
+ * @param {(Path)[]} paths - An array of paths or path IDs
+ * @returns {Path[]} - The array of sorted paths. 
+ */
+export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[]) => {
+  if(!resultSet)
+    return paths;
+  return cloneDeep(paths).sort((a, b) => {
+      let inferredA = isPathInferred(resultSet, a) ? 1 : 0;
+      let inferredB = isPathInferred(resultSet, b) ? 1 : 0;
+      return inferredA - inferredB;
+  });
+}
+
+/**
  * Takes a list of paths/path IDs along with a PathFilterState object and a set of selected paths, then compresses them. 
  * The compressed paths are sorted by the PathFilterState, then have their highlighted status set according to the active
  * selected paths. The paths are then sorted by highlighted status and returned. 
@@ -766,7 +784,7 @@ export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (s
     }
     newPaths.sort((a: Path, b: Path) => (b.highlighted === a.highlighted ? 0 : b.highlighted ? -1 : 1));
   } 
-  return newPaths;
+  return sortArrayByIndirect(resultSet, newPaths);
 }
 
 /**
