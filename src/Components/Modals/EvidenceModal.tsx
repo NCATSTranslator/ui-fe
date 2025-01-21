@@ -341,22 +341,20 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                         return(
                           <div className={`table-item ${styles.tableItem}`} key={sourceKey}>
                             <Tooltip id={tooltipId}>
-                              <span>
+                              <span className={styles.tooltipSpan}>
                                 Why do we use this source?
-                                <a href={src?.wiki} target="_blank" rel="noreferrer" className={styles.tooltipLink}>
+                                <a href={src?.wiki} target="_blank" rel="noreferrer">
                                   <ExternalLink/>
                                 </a>
                               </span>
                             </Tooltip>
                             <span className={`table-cell ${styles.cell} ${styles.source} ${styles.sourceItem}`}>
-                              <span className={styles.sourceEdge} key={i}>
-                                {src.name}
-                                {
-                                  src?.wiki
-                                  ? <InfoIcon className={styles.infoIcon} data-tooltip-id={tooltipId} />
-                                  : <></>
-                                }
-                              </span>
+                              {src.name}
+                              {
+                                src?.wiki
+                                ? <InfoIcon className={styles.infoIcon} data-tooltip-id={tooltipId} />
+                                : <></>
+                              }
                             </span>
                             <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
                               {
