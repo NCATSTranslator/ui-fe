@@ -5,7 +5,7 @@ import Tab from "../Tabs/Tab";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
-import { capitalizeAllWords, isClinicalTrial, isPublication, numberToWords, getFormattedEdgeLabel, 
+import { capitalizeAllWords, isClinicalTrial, isPublication, numberToWords, getFormattedEdgeLabel,
   getUrlByType, getCompressedSubgraph } from "../../Utilities/utilities";
 import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
 import { Provenance, PublicationObject, TrialObject } from "../../Types/evidence.d";
@@ -32,10 +32,10 @@ interface EvidenceModalProps {
 }
 
 const EvidenceModal: FC<EvidenceModalProps> = ({
-  path = null, 
-  isOpen, 
-  onClose, 
-  result, 
+  path = null,
+  isOpen,
+  onClose,
+  result,
   pk,
   edge = null}) => {
 
@@ -54,7 +54,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
   const pathLength = (path) ? path.subgraph.length : 0;
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false = useMemo(()=>{
-    return path?.compressedSubgraph && !!resultSet ? getCompressedSubgraph(resultSet, path.compressedSubgraph) : false; 
+    return path?.compressedSubgraph && !!resultSet ? getCompressedSubgraph(resultSet, path.compressedSubgraph) : false;
   }, [path, resultSet]);
 
   const handleClose = () => {
@@ -120,10 +120,10 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
       }
       return false;
     }
-    const edge = compressedSubgraph 
+    const edge = compressedSubgraph
       ? getEdgeFromSubgraph(edgeID, compressedSubgraph)
       : getEdgeById(resultSet, edgeID);
-      
+
     if(!isResultEdge(edge) || !selectedEdge || !resultSet)
       return;
 
@@ -148,7 +148,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
             <div className={`${styles.pathViewContainer} ${isPathViewMinimized && styles.minimized}`}>
               <Button iconOnly isSecondary handleClick={()=>setIsPathViewMinimized(prev=>!prev)} className={styles.togglePathView}>
                 {
-                  isPathViewMinimized 
+                  isPathViewMinimized
                   ? <PlusIcon />
                   : <MinusIcon />
                 }
@@ -192,7 +192,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                                 let key = `${edge.predicate}-${j}`;
                                 if(!edge)
                                   return null;
-          
+
                                 let isSelected = (checkForEdgeMatch(selectedEdge, edge));
                                 return (
                                   <PathObject
@@ -331,15 +331,30 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                 <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
                   <div className={`table-head ${styles.tableHead}`}>
                     <div className={`head ${styles.head}`}>Source</div>
-                    <div className={`head ${styles.head}`}>Link</div>
+                    <div className={`head ${styles.head}`}>Rationale</div>
                   </div>
                   <div className={`table-items ${styles.tableItems} scrollable`}>
                     {
                       sources.map((src, i) => {
+                        const sourceKey = `${src.url}-${i}`;
+                        const tooltipId = `source-tooltip-${sourceKey}`;
                         return(
-                          <div className={`table-item ${styles.tableItem}`} key={`${src.url}-${i}`}>
+                          <div className={`table-item ${styles.tableItem}`} key={sourceKey}>
+                            <Tooltip id={tooltipId}>
+                              <span className={styles.tooltipSpan}>
+                                Why do we use this source?
+                                <a href={src?.wiki} target="_blank" rel="noreferrer">
+                                  <ExternalLink/>
+                                </a>
+                              </span>
+                            </Tooltip>
                             <span className={`table-cell ${styles.cell} ${styles.source} ${styles.sourceItem}`}>
-                              <span className={styles.sourceEdge} key={i}>{src.name}</span>
+                              {src.name}
+                              {
+                                src?.wiki
+                                ? <InfoIcon className={styles.infoIcon} data-tooltip-id={tooltipId} />
+                                : <></>
+                              }
                             </span>
                             <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
                               {
@@ -350,7 +365,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                                     <ExternalLink/>
                                   </a>
                                 :
-                                  <span>Link Unavailable</span>
+                                  <span>No link available</span>
                               }
                             </span>
                           </div>
