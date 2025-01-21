@@ -98,7 +98,7 @@ const Predicate: FC<PredicateProps> = ({
   const edgesToDisplay = (!!formattedEdge?.compressed_edges) 
   ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
   : [formattedEdge];
-  
+
   let hasSupport = formattedEdge.support.length > 0 ? true : false;
 
   return (
@@ -123,32 +123,6 @@ const Predicate: FC<PredicateProps> = ({
         >
         {
           <div className={styles.predicatesList}>
-            {/* <p
-              className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-              onClick={(e)=> {
-                e.stopPropagation();
-                handleEdgeClick(edgeIDs, path);
-              }}
-              >
-              <Highlighter
-                highlightClassName="highlight"
-                searchWords={activeEntityFilters}
-                autoEscape={true}
-                textToHighlight={capitalizeAllWords(formattedEdge.predicate)}
-              />
-              {
-                formattedEdge.predicate_url &&
-                <a
-                  href={formattedEdge.predicate_url}
-                  onClick={(e)=> {
-                    e.stopPropagation();
-                  }}
-                  target="_blank"
-                  rel='noreferrer'>
-                    <ExternalLink/>
-                </a>
-              }
-            </p> */}
             {
               edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
                 if(!edge)
