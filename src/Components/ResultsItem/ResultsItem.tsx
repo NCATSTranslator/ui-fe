@@ -51,7 +51,7 @@ const sortTagsBySelected = (
 };
 
 type ResultsItemProps = {
-  activateEvidence?: (item: Result, edgeID: string, path: Path) => void;
+  activateEvidence?: (item: Result, edgeIDs: string[], path: Path) => void;
   activateNotes?: (nameString: string, id: string) => void;
   activeEntityFilters: string[];
   activeFilters: Filter[];
@@ -180,16 +180,16 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setIsExpanded(prev => !prev);
   }
 
-  const handleEdgeSpecificEvidence = useCallback((edgeID: string, path: Path) => {
+  const handleEdgeSpecificEvidence = useCallback((edgeIDs: string[], path: Path) => {
     if(!result)
       return;
 
-    activateEvidence(result, edgeID, path);
+    activateEvidence(result, edgeIDs, path);
   }, [result, activateEvidence])
 
   const handleActivateEvidence = useCallback((path: Path) => {
     if(!!path.subgraph[1])
-      activateEvidence(result, path.subgraph[1], path);
+      activateEvidence(result, [path.subgraph[1]], path);
   }, [result, activateEvidence])
 
   useEffect(() => {

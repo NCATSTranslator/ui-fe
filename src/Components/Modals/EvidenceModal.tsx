@@ -5,8 +5,9 @@ import Tab from "../Tabs/Tab";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
-import { capitalizeAllWords, isClinicalTrial, isPublication, numberToWords, getFormattedEdgeLabel,
-  getUrlByType, getCompressedSubgraph } from "../../Utilities/utilities";
+import { capitalizeAllWords, isClinicalTrial, isPublication, numberToWords, getFormattedEdgeLabel, 
+  getUrlByType, getCompressedSubgraph, 
+  getCompressedEdge} from "../../Utilities/utilities";
 import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
 import { Provenance, PublicationObject, TrialObject } from "../../Types/evidence.d";
 import { getResultSetById, getEdgeById, getNodeById } from "../../Redux/resultsSlice";
@@ -105,7 +106,9 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     setSources(displayedSources);
   }
 
-  const handleEdgeClick = (edgeID: string, path: Path) => {
+  const handleEdgeClick = (edgeIDs: string[], path: Path) => {
+    if(!resultSet)
+      return;
     const getEdgeFromSubgraph = (edgeID: string, subgraph: (ResultEdge | ResultNode | ResultEdge[])[]) => {
       for(let i = 1; i < subgraph.length; i+=2) {
         const edgeItem = subgraph[i];
@@ -120,10 +123,12 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
       }
       return false;
     }
-    const edge = compressedSubgraph
-      ? getEdgeFromSubgraph(edgeID, compressedSubgraph)
-      : getEdgeById(resultSet, edgeID);
-
+    let edge;
+    if(compressedSubgraph) 
+      edge = getEdgeFromSubgraph(edgeIDs[0], compressedSubgraph)
+    else
+      edge = getCompressedEdge(resultSet, edgeIDs);
+      
     if(!isResultEdge(edge) || !selectedEdge || !resultSet)
       return;
 

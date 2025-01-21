@@ -5,7 +5,7 @@ import Tooltip from '../Tooltip/Tooltip';
 import ResultsItem from '../ResultsItem/ResultsItem';
 import { emptyEditor, SaveGroup } from '../../Utilities/userApi';
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
-import { getFormattedDate } from '../../Utilities/utilities';
+import { getCompressedEdge, getFormattedDate } from '../../Utilities/utilities';
 import { Path, Result, ResultEdge } from '../../Types/results';
 import AnimateHeight from 'react-animate-height';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
@@ -69,8 +69,15 @@ const UserSave: FC<UserSaveProps> = ({
     setIsExpanded(!isExpanded);
   }
 
-  const handleActivateEvidence = useCallback((item: Result, edgeID: string, path: Path) => {
-    const edge = getEdgeById(resultSet, edgeID);
+  const handleActivateEvidence = useCallback((item: Result, edgeIDs: string[], path: Path) => {
+    if(!resultSet)
+      return;
+    let edge;
+    if(edgeIDs.length > 1)
+      edge = getEdgeById(resultSet, edgeIDs[0]);
+    else 
+      edge = getCompressedEdge(resultSet, edgeIDs);
+
     if(!!edge && !!activateEvidence)
       activateEvidence(item, edge, path, arspk);
   }, [resultSet, arspk, activateEvidence]);
