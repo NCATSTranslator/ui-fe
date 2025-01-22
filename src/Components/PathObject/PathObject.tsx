@@ -1,5 +1,5 @@
 import styles from './PathObject.module.scss';
-import { FC } from 'react';
+import { FC, useId } from 'react';
 import Tooltip from '../Tooltip/Tooltip';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
@@ -55,7 +55,7 @@ const PathObject: FC<PathObjectProps> = ({
   const pathObject = (index % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
   const isNode = isResultNode(pathObject);
   const type = isNode ? pathObject?.types[0].replace("biolink:", ""): '';
-  const uid = `${path?.id || ""}-${index}-${id}`;
+  const uid = useId();
   let nameString = '';
   let typeString = '';
   if(isNode) {
