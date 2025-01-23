@@ -34,7 +34,10 @@ const FacetHeading: FC<FacetHeadingProps> = ({ title, tagFamily, activeFilters, 
             }
           </Tooltip>
         </div>
-        <ChevDown className={styles.expansionSVG}/>
+        {
+          tagFamily !== "str" &&
+          <ChevDown className={styles.expansionSVG}/>
+        }
       </div>
     </div>
   );

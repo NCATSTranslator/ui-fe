@@ -2,15 +2,11 @@ import { FC, useState, useEffect, Dispatch, SetStateAction } from "react";
 import { Filter, GroupedFilters } from "../../Types/results";
 import styles from './FacetGroup.module.scss';
 import AnimateHeight from "react-animate-height";
-import Checkbox from '../Core/Checkbox';
-import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
-import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
-import { formatBiolinkEntity } from '../../Utilities/utilities';
 import { pivotSort } from '../../Utilities/sortingFunctions';
-import { cloneDeep } from "lodash";
 import FacetHeading from "../FacetHeading/FacetHeading";
 import * as filtering from "../../Utilities/filterFunctions";
+import FacetTag from "../FacetTag/FacetTag";
 
 const getRoleCaption = (): JSX.Element => {
   return (
@@ -119,21 +115,15 @@ const getTagCaptionMarkup = (tagFamily: string): JSX.Element | null => {
   return captionToReturn;
 }
 
-const getRoleLinkout = (tagKey: string): string => {
-  const id = tagKey.split(':').slice(1,).join('%3A');
-  return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${id}`;
-}
-
 type FacetGroupProps = {
   filterFamily: string;
   activeFilters: Filter[];
   facetCompare: ((a: [string, Filter], b: [string, Filter]) => number) | undefined;
   groupedFilters: GroupedFilters;
-  availableFilters: {[key: string]: Filter};
   onFilter: (arg0: Filter) => void;
 }
 
-const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCompare, groupedFilters, availableFilters, onFilter }) => {
+const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCompare, groupedFilters, onFilter }) => {
 
   const [filterObject, setFilterObject] = useState<Filter>({
     name: "",
@@ -142,69 +132,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
     value: ""
   });
 
-  const handleFacetChange = (filterID: string, tag: Filter, setterFunction: (tag: Filter)=>void, negated: boolean = false, label: string = '') => {
-    if (tag.id === filterID) {
-      return;
-    }
-
-    const newTag = cloneDeep(tag);
-    newTag.id = filterID;
-    newTag.value = label;
-    newTag.negated = negated;
-    setterFunction(tag);
-    onFilter(newTag);
-  }
-
-  const tagDisplay = (tag: [string, Filter], family: string, tagObjectState: Filter, setTagObjectFunc: (arg0: Filter)=>void, availableTags: {[key: string]: Filter}, activeFilters: Filter[]): JSX.Element => {
-    let tagKey = tag[0];
-    let object = tag[1];
-    let tagName = '';
-    if (family === 'pc') {
-      tagName = formatBiolinkEntity(object.name);
-    } else {
-      tagName = object.name;
-    }
-    let positiveChecked = (activeFilters.some(filter => filtering.isTagFilter(filter) && filter.id === tagKey && !filter.negated)) ? true: false;
-    let negativeChecked = (activeFilters.some(filter => filtering.isTagFilter(filter) && filter.id === tagKey && filter.negated)) ? true: false;
-
-    return (
-      <div className={`facet-container ${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey} data-facet-name={tagName}>
-        <Checkbox
-          handleClick={() => handleFacetChange(tagKey, tagObjectState, setTagObjectFunc, false, tagName)}
-          checked={positiveChecked}
-          className={`${styles.checkbox} ${styles.positive}`}
-          checkedClassName={positiveChecked ? styles.positiveChecked : ""}
-          icon={<Include/>}
-          labelLeft
-          title="Include"
-          >
-          <span className={styles.tagName} title={tagName}>
-            {tagName}
-          </span>
-          <span className={styles.facetCount}>
-            {(object.count) ? object.count : 0}
-            {
-            (family === "role") &&
-              <a href={getRoleLinkout(tagKey)} rel="noreferrer" target="_blank">
-                <ExternalLink className={styles.extLinkIcon}/>
-              </a>
-            }
-          </span>
-        </Checkbox>
-        <Checkbox
-          handleClick={() => handleFacetChange(tagKey, tagObjectState, setTagObjectFunc, true, tagName)}
-          checked={activeFilters.some(filter => filtering.isTagFilter(filter) && filter.id === tagKey && filter.negated)}
-          className={`${styles.checkbox} ${styles.negative}`}
-          checkedClassName={negativeChecked ? styles.negativeChecked : ""}
-          icon={<Exclude/>}
-          labelLeft
-          title="Exclude"
-        ></Checkbox>
-      </div>
-    )
-  }
-
-  const displayFacets = (family: string, activeFilters: Filter[], facetCompare: ((a: [string, Filter], b: [string, Filter]) => number) | undefined, groupedFilters: GroupedFilters, filterObject: Filter, filterObjectSetter: Dispatch<SetStateAction<Filter>>, availableFilters: {[key: string]: Filter}) => {
+  const displayFacets = (family: string, activeFilters: Filter[], facetCompare: ((a: [string, Filter], b: [string, Filter]) => number) | undefined, groupedFilters: GroupedFilters, filterObject: Filter, filterObjectSetter: Dispatch<SetStateAction<Filter>>) => {
 
     // The selected set of filters for the current facet family
     const selectedFacetSet = activeFilters.reduce<Record<string, null>>((acc, filter) => {
@@ -248,7 +176,15 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
       <div className={`${styles.section} ${Object.keys(sortedFacets).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
         { // Sort each set of tags, then map them to return each facet
           sortedFacets.map((tag) => {
-            return tagDisplay(tag, family, filterObject, filterObjectSetter, availableFilters, activeFilters);
+            return(
+              <FacetTag 
+                activeFilters={activeFilters}
+                family={family}
+                onFilter={onFilter}
+                setFilterObjectFunc={filterObjectSetter}
+                filterObject={tag}
+              />
+            )
           })
         }
       </div>
@@ -288,7 +224,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
               familyCaptionMarkup
             }
             {
-              displayFacets(filterFamily, activeFilters, facetCompare, groupedFilters, filterObject, setFilterObject, availableFilters)
+              displayFacets(filterFamily, activeFilters, facetCompare, groupedFilters, filterObject, setFilterObject)
             }
           </AnimateHeight>
         </div>

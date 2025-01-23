@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, FC } from 'react';
+import { useState, useEffect, useMemo, FC, SetStateAction, Dispatch } from 'react';
 import styles from './ResultsFilter.module.scss';
 import { Filter, GroupedFilters } from '../../Types/results';
 import { cloneDeep } from 'lodash';
@@ -11,15 +11,24 @@ import * as filtering from '../../Utilities/filterFunctions';
 
 interface ResultsFilterProps {
   activeFilters: Filter[];
-  onFilter: (arg0: Filter) => void;
-  onClearAll: () => void;
+  activeEntityFilters: string[];
+  availableFilters: {[key: string]: Filter};
   expanded?: boolean;
   isPathfinder?: boolean;
-  setExpanded?: (arg0:boolean) => void
-  availableFilters: {[key: string]: Filter};
+  onFilter: (arg0: Filter) => void;
+  onClearAll: () => void;
+  setExpanded?: Dispatch<SetStateAction<boolean>>;
 }
 
-const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClearAll, expanded = false, isPathfinder = false, setExpanded = (arg0: boolean)=>{}, availableFilters}) => {
+const ResultsFilter: FC<ResultsFilterProps> = ({
+  activeFilters, 
+  activeEntityFilters, 
+  availableFilters,
+  expanded = false, 
+  isPathfinder = false, 
+  onFilter, 
+  onClearAll, 
+  setExpanded = (arg0: boolean)=>{} }) => {
 
   const [isExpanded, setIsExpanded] = useState(expanded);
   const toggleIsExpanded = () => {
@@ -77,8 +86,9 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
       </div>
       <div className={styles.bottom}>
         <EntitySearch
-          onFilter={onFilter}
+          activeFilters={activeFilters}
           className={styles.entitySearch}
+          onFilter={onFilter}
         />
         <div>
           {
@@ -93,7 +103,6 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
                       activeFilters={activeFilters}
                       facetCompare={filterCompare[filterFamily]}
                       groupedFilters={resultFilters}
-                      availableFilters={availableFilters}
                       onFilter={onFilter}
                     />
                   )
@@ -115,7 +124,6 @@ const ResultsFilter: FC<ResultsFilterProps> = ({activeFilters, onFilter, onClear
                       activeFilters={activeFilters}
                       facetCompare={filterCompare[tagFamily]}
                       groupedFilters={pathFilters}
-                      availableFilters={availableFilters}
                       onFilter={onFilter}
                     />
                   )

@@ -824,6 +824,20 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   // Handle the addition and removal of individual filters. Keep the invariant that
   // filters of the same type are grouped together.
   const handleFilter = (filter: Filter) => {
+
+    const loopFiltersAndUpdate = (filters: Filter[], index: number) => {
+      filters.map((activeFilter, i) => {
+        if(i === index) {
+          activeFilter.value = filter.value;
+          activeFilter.negated = filter.negated;
+        }
+
+        return activeFilter;
+      });
+
+      return filters;
+    }
+
     let indexes = [];
     for(const [i, activeFilter] of activeFilters.entries()) {
       if (activeFilter.id === filter.id) {
@@ -847,26 +861,27 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
       if (activeFilters[index].value === filter.value &&
           activeFilters[index].negated === filter.negated) {
         newActiveFilters = activeFilters.reduce((newFilters: Filter[], oldFilter, i) => {
-          if(i !== index) {
+          if(i !== index)
             newFilters.push(oldFilter);
-          }
 
           return newFilters;
         }, []);
 
         addFilter = false;
         break;
-      // If the values don't match and it's not a string search, update the value
-      } else if (!filtering.isEntityFilter(filter)) {
-        newActiveFilters = newActiveFilters.map((activeFilter, i) => {
-          if(i === index) {
-            activeFilter.value = filter.value;
-            activeFilter.negated = filter.negated;
-          }
-
-          return activeFilter;
-        });
-
+      } else if(filtering.isEntityFilter(filter)) {
+        // adding new
+        if(activeFilters[index].value != filter.value) {
+          continue;
+        // updating old
+        } else {
+          newActiveFilters = loopFiltersAndUpdate(newActiveFilters, index);
+          addFilter = false;
+          break;
+        }
+        // If the values don't match and it's not a string search, update the value
+      } else {
+        newActiveFilters = loopFiltersAndUpdate(newActiveFilters, index);
         addFilter = false;
         break;
       }
@@ -997,6 +1012,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
             <>
               <ResultsFilter
                 activeFilters={activeFilters}
+                activeEntityFilters={activeEntityFilters}
                 onFilter={handleFilter}
                 onClearAll={handleClearAllFilters}
                 expanded={filtersExpanded}
