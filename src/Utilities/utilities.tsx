@@ -1062,19 +1062,27 @@ export const checkBookmarksForItem = (itemID: string, bookmarksSet: SaveGroup): 
 /**
  * Checks if the given bookmarkID exists in the bookmarks set and if it has notes attached.
  *
- * @param {string} itemID - The ID of the item to check.
- * @param {any} bookmarksSet - The set of bookmark objects to search in.
+ * @param {string | null} itemID - The ID of the item to check.
+ * @param {SaveGroup | null} bookmarkSet - The set of bookmark objects to search in.
  * @returns {boolean} Returns true if the matching item is found in bookmarksSet and has notes, otherwise returns false.
  */
-export const checkBookmarkForNotes = (bookmarkID: string | null, bookmarksSet: any): boolean => {
+export const checkBookmarkForNotes = (bookmarkID: string | null, bookmarkSet: SaveGroup | null): boolean => {
   if(bookmarkID === null)
     return false;
-  if(bookmarksSet && bookmarksSet.size > 0) {
-    for(let val of bookmarksSet) {
-      if(val.id === bookmarkID) {
-        return (val.notes.length > 0) ? true : false;
+
+  const findInSet = (set: Set<any>, predicate: (obj: any)=>boolean) => {
+    for (const item of set) {
+      if(predicate(item)) {
+        return item;
       }
     }
+    return undefined;
+  }
+
+  if(!!bookmarkSet && bookmarkSet.saves.size > 0) {
+    let save = findInSet(bookmarkSet.saves, save => String(save.id) === bookmarkID);
+    if(!!save)
+      return (save.notes.length > 0) ? true : false;
   }
   return false;
 }

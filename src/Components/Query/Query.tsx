@@ -336,7 +336,7 @@ const Query: FC<QueryProps> = ({
                     handleClick={() => setShareModalFunction(true)}
                     smallFont
                   >
-                    <ShareIcon />
+                    <ShareIcon className={styles.shareIcon} />
                     <span>Share Result Set</span>
                   </Button>
                   {
