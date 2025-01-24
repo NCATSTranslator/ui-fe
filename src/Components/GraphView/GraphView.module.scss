@@ -64,7 +64,7 @@
   top: $s;
   right: $s;
   left: $s;
-  z-index: 100;
+  z-index: 10000;
   border-radius: $defaultBorderRadius;
   .topBar {
     display: grid;

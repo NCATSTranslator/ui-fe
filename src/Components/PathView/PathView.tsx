@@ -239,8 +239,8 @@ const PathView: FC<PathViewProps> = ({
               <Tooltip id={`${resultID}-excluded-paths-toggle`}>
                 {
                   showHiddenPaths 
-                  ? <span>Click "Hide Excluded Paths” to hide any paths excluded by the currently applied filters.</span>
-                  : <span>Some paths that are a part of this result may be excluded from this list due to applied filters. Click “Show Excluded Paths” to view them.</span>
+                  ? <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to hide these excluded paths.</span>
+                  : <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to view these excluded paths.</span>
                 }
               </Tooltip>
             </Button>

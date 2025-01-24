@@ -61,139 +61,6 @@
   label {
     margin: 0;
   }
-  .evidenceCheckbox {
-    margin-bottom: $s;
-  }
-  .facetContainer {
-    margin-bottom: 4px;
-    background-color: $white;
-    border: 1px solid $midGray;
-    border-radius: 8px;
-    display: flex;
-    justify-content: flex-end;
-    transition: $defaultAnim;
-    input {
-      margin: 0;
-    }
-    svg path {
-      stroke: transparent !important;
-      fill: $midGray;
-    }
-    .negative {
-      &:hover {
-        input + span {
-          &+span {
-            background-color: $white;
-            svg path {
-              fill: $red;
-            }
-          }
-        }
-      }
-    }
-    .positive {
-      &:hover {
-      input + span {
-          &+span {
-            background-color: $white;
-            svg path {
-              fill: $green;
-            }
-            &:hover {
-              background-color: $white;
-              svg path {
-                fill: $green;
-              }
-            }
-          }
-        }
-      }
-    } 
-    .positiveChecked, .negativeChecked {
-      svg {
-        path {
-          fill: $white !important;
-        }
-      }
-      &:hover {
-        svg {
-          path {
-            fill: $white !important;
-          }
-        }
-      }
-    }
-    .positiveChecked {
-      background-color: $green !important;
-      border-right-color: $green;
-    }
-    .negativeChecked {
-      background-color: $red !important;
-    }
-    input + span span, .facetCount {
-      color: $black;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    input + span {
-      position: relative;
-      width: 100%;
-      padding: 12px 45px 12px 12px;
-      margin-right: 6px;
-    }
-    label {
-      width: 100%;
-    }
-    label span + span {
-      height: 100%;
-      min-width: 40px;
-      border-top: none;
-      border-right: 1px solid $midGray;
-      border-bottom: none;
-      border-left: 1px solid $midGray;
-      border-radius: 0px;
-    }
-    .negative {
-      width: min-content;
-      input {
-        display: none;
-        &+span {
-          display: none;
-        }
-      }
-      span + span {
-        border: none;
-        border-top-right-radius: 7px;
-        border-bottom-right-radius: 7px;
-      }
-    }
-  }
-  .tagName {
-    line-height: 15px;
-    max-width: 140px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-  }
-  .facetCount {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    border: none !important;
-    color: $darkGray !important;
-    a {
-      margin-left: 2px;
-      display: flex;
-    }
-    svg path {
-      fill: $black;
-    }
-  }
   .roleSpan, .fdaSpan {
     font-size: 12px; 
   }
@@ -220,23 +87,6 @@
       }
     }
   }
-  .checkbox {
-    margin-bottom: 0;
-  }
-  .showButtonsContainer {
-    display: flex;
-    justify-content: center;
-  }
-  .showButton {
-    color: #606368;
-    font-size: 12px;
-    font-weight: 700;
-    background-color: transparent;
-    box-shadow: none;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
   .section {
     &::-webkit-scrollbar-track {
       background-color: $white;
@@ -245,9 +95,5 @@
       max-height: 250px;
       overflow-y: auto;
     }
-  }
-  .extLinkIcon {
-    width: 16px;
-    height: 16px;
   }
 }
