@@ -99,8 +99,7 @@ const Predicate: FC<PredicateProps> = ({
   ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
   : [formattedEdge];
 
-  let hasSupport = formattedEdge.support.length > 0 ? true : false;
-
+  let hasSupport = (formattedEdge?.support && formattedEdge.support.length) > 0 ? true : false;
   return (
     <>
       <Tooltip
