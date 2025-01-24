@@ -871,7 +871,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
         break;
       } else if(filtering.isEntityFilter(filter)) {
         // adding new
-        if(activeFilters[index].value != filter.value) {
+        if(activeFilters[index].value !== filter.value) {
           continue;
         // updating old
         } else {

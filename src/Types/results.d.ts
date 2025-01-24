@@ -203,7 +203,8 @@ export const isResultNode = (obj: any): obj is ResultNode => {
     obj.descriptions.every((item: any) => typeof item === "string") &&
     Array.isArray(obj.names) &&
     obj.names.every((item: any) => typeof item === "string") &&
-    typeof obj.other_names === "object" &&
+    Array.isArray(obj.other_names) &&
+    obj.other_names.every((item: any) => typeof item === "string") &&
     Array.isArray(obj.provenance) &&
     obj.provenance.every((item: any) => typeof item === "string") &&
     (obj.species === "Zebrafish" ||

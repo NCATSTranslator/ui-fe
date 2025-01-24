@@ -5,7 +5,7 @@ import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from './Predicate';
-import { Path, PathFilterState, isResultNode, ResultNode, Filter } from '../../Types/results.d';
+import { Path, PathFilterState, isResultNode, ResultNode, Filter, isResultEdge } from '../../Types/results.d';
 import { useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getResultSetById } from '../../Redux/resultsSlice';
 
@@ -54,6 +54,7 @@ const PathObject: FC<PathObjectProps> = ({
   const itemID = (Array.isArray(id)) ? id[0] : id; 
   const pathObject = (index % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
   const isNode = isResultNode(pathObject);
+  const isEdge = isResultEdge(pathObject);
   const type = isNode ? pathObject?.types[0].replace("biolink:", ""): '';
   const uid = useId();
   let nameString = '';
@@ -102,26 +103,30 @@ const PathObject: FC<PathObjectProps> = ({
               </Tooltip>
             </span>
           :
-            <Predicate
-              path={path}
-              edge={pathObject}
-              edgeIDs={(Array.isArray(id)) ? id : [id]}
-              selected={selected}
-              activeEntityFilters={activeEntityFilters}
-              activeFilters={activeFilters}
-              uid={uid}
-              handleActivateEvidence={handleActivateEvidence}
-              handleEdgeClick={handleEdgeClick}
-              handleNodeClick={handleNodeClick}
-              parentClass={styles.pathContainer}
-              inModal={inModal}
-              className={className}
-              pathFilterState={pathFilterState}
-              pathViewStyles={pathViewStyles}
-              selectedPaths={selectedPaths}
-              pk={pk}
-              showHiddenPaths={showHiddenPaths}
-            />
+            isEdge 
+              ?
+                <Predicate
+                  path={path}
+                  edge={pathObject}
+                  edgeIDs={(Array.isArray(id)) ? id : [id]}
+                  selected={selected}
+                  activeEntityFilters={activeEntityFilters}
+                  activeFilters={activeFilters}
+                  uid={uid}
+                  handleActivateEvidence={handleActivateEvidence}
+                  handleEdgeClick={handleEdgeClick}
+                  handleNodeClick={handleNodeClick}
+                  parentClass={styles.pathContainer}
+                  inModal={inModal}
+                  className={className}
+                  pathFilterState={pathFilterState}
+                  pathViewStyles={pathViewStyles}
+                  selectedPaths={selectedPaths}
+                  pk={pk}
+                  showHiddenPaths={showHiddenPaths}
+                />
+              :
+                null
       }
     </>
   )
