@@ -15,10 +15,9 @@ interface FacetTagProps {
   handleInteractExistingEntity?: (filter: Filter, currentChecked: boolean, currentClicked: boolean) => void;
   isEntitySearch?: boolean;
   onFilter: (arg: Filter) => void;
-  setFilterObjectFunc: Dispatch<SetStateAction<Filter>>;
 }
 
-const handleFacetChange = (onFilter: (arg: Filter) => void, filterID: string, filter: Filter, setterFunction: Dispatch<SetStateAction<Filter>>, negated: boolean = false, label: string = '') => {
+const handleFacetChange = (onFilter: (arg: Filter) => void, filterID: string, filter: Filter, negated: boolean = false, label: string = '') => {
   if (filter.id === filterID) {
     return;
   }
@@ -27,7 +26,6 @@ const handleFacetChange = (onFilter: (arg: Filter) => void, filterID: string, fi
   newTag.id = filterID;
   newTag.value = label;
   newTag.negated = negated;
-  setterFunction(filter);
   onFilter(newTag);
 }
 
@@ -62,8 +60,7 @@ const FacetTag: FC<FacetTagProps> = ({
   filterObject,
   handleInteractExistingEntity,
   isEntitySearch = false,
-  onFilter,
-  setFilterObjectFunc}) => {
+  onFilter}) => {
 
   let tagKey = filterObject[0];
   let filter = filterObject[1];
@@ -77,7 +74,7 @@ const FacetTag: FC<FacetTagProps> = ({
         handleClick={
           isEntitySearch && !!handleInteractExistingEntity
           ? () => handleInteractExistingEntity(filter, positiveChecked, true)
-          : () => handleFacetChange(onFilter, tagKey, filter, setFilterObjectFunc, false, tagName)
+          : () => handleFacetChange(onFilter, tagKey, filter, false, tagName)
         }
         checked={positiveChecked}
         className={`${styles.checkbox} ${styles.positive}`}
@@ -106,7 +103,7 @@ const FacetTag: FC<FacetTagProps> = ({
         handleClick={
           isEntitySearch && !!handleInteractExistingEntity
           ? () => handleInteractExistingEntity(filter, negativeChecked, true)
-          : () => handleFacetChange(onFilter, tagKey, filter, setFilterObjectFunc, true, tagName)
+          : () => handleFacetChange(onFilter, tagKey, filter, true, tagName)
         }
         checked={negativeChecked}
         className={`${styles.checkbox} ${styles.negative}`}

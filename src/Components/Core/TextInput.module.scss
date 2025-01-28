@@ -27,6 +27,10 @@
       outline-color: $purpleOne;
       outline-width: 1px;
     }
+    &::placeholder {
+      color: $midGray;
+      font-weight: 400;
+    }
   }
   &.hasIconLeft {
     input, textarea {
