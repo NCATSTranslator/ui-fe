@@ -7,10 +7,13 @@ import { pivotSort } from '../../Utilities/sortingFunctions';
 import FacetHeading from "../FacetHeading/FacetHeading";
 import * as filtering from "../../Utilities/filterFunctions";
 import FacetTag from "../FacetTag/FacetTag";
+import TextInput from "../Core/TextInput";
+import { debounce } from "lodash";
+import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 
 const getRoleCaption = (): JSX.Element => {
   return (
-    <p className={styles.caption}>Show only results that match a particular chemical role.</p>
+    <p className={styles.caption}>Include or exclude results according to their biological or chemical role or application</p>
   )
 }
 const getChemicalTypeCaption = (): JSX.Element => {
@@ -20,27 +23,27 @@ const getChemicalTypeCaption = (): JSX.Element => {
 }
 const getObjectTypeCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Show only results that include an object of a particular type (Drug, Chemical Entity, Small Molecule, etc.)</p>
+    <p className={styles.caption}>Include or exclude paths from results that contain a particular type of object</p>
   )
 }
 const getAraCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Filter on specific reasoning agents used to calculate the results.</p>
+    <p className={styles.caption}>Include or exclude reasoning agents used to return results</p>
   )
 }
 const getDrugIndicationsCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Filter on if the drug is indicated for the given disease.</p>
+    <p className={styles.caption}>Include or exclude results based on whether they have been tested in clinical trials for treatment of the indicated disease</p>
   )
 }
 const getPathTypeCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Filter by path type (lookup or inferred) and/or by number of connections.</p>
+    <p className={styles.caption}>Include or exclude paths from results that contain a set number of connections</p>
   )
 }
 const getOtcCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Show only results that meet the selected availability.</p>
+    <p className={styles.caption}>Include or exclude results in various development stages and with desired availability</p>
   )
 }
 
@@ -49,7 +52,7 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.El
   switch(tagFamily) {
     case 'cc':
       headingToReturn =
-        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Chemical Categories">
+        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Development Stage">
           <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
           <p className={styles.tooltipParagraph}>Phase 1-3 Drugs are chemicals that are part of a clinical trial and do not yet have FDA approval.</p>
           <p className={styles.tooltipParagraph}>Other includes all other chemicals.</p>
@@ -57,7 +60,7 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.El
       break;
     case 'pc':
       headingToReturn =
-        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Object Type">
+        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Objects within Paths">
           <span className={styles.fdaSpan}>Click <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}> here <ExternalLink/></a> to learn more about the Biolink Model.</span>
         </FacetHeading>;
       break;
@@ -71,10 +74,10 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.El
       headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Reasoning Agent" />;
       break;
     case 'di':
-      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Drug Indications" />;
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Clinical Trial Indications" />;
       break;
     case 'pt':
-      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Path Type" />;
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Path Length" />;
       break;
     case 'otc':
       headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Availability" />;
@@ -119,7 +122,8 @@ const getSortedFacets = (
   family: string,
   activeFilters: Filter[],
   facetCompare: ((a: [string, Filter], b: [string, Filter]) => number) | undefined,
-  groupedFilters: GroupedFilters) => {
+  groupedFilters: GroupedFilters,
+  searchTerm: string) => {
 
   const isOther = (name: string): boolean => name.toLowerCase() === 'other';
 
@@ -154,7 +158,10 @@ const getSortedFacets = (
     sortedFacets = pivotSort(sortedFacets, pivot, facetCompare);
   }
 
-  return sortedFacets;
+  if(!!searchTerm)
+    return sortedFacets.filter(facet => facet[1].name.toLowerCase().includes(searchTerm.toLowerCase()));
+  else
+    return sortedFacets;
 }
 
 type FacetGroupProps = {
@@ -171,9 +178,10 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
   const familyCaptionMarkup = getTagCaptionMarkup(filterFamily);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [height, setHeight] = useState<number | string>(0);
+  const [chemicalCategorySearchTerm, setChemicalCategorySearchTerm] = useState("");
 
   // Ensures that selected facets come first
-  let sortedFacets = useMemo(() => getSortedFacets(filterFamily, activeFilters, facetCompare, groupedFilters), [filterFamily, activeFilters, facetCompare, groupedFilters]);
+  let sortedFacets = useMemo(() => getSortedFacets(filterFamily, activeFilters, facetCompare, groupedFilters, chemicalCategorySearchTerm), [filterFamily, activeFilters, facetCompare, groupedFilters, chemicalCategorySearchTerm]);
 
   useEffect(() => {
     if(isExpanded === false)
@@ -181,6 +189,8 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
     else
       setHeight('auto');
   }, [isExpanded])
+
+  const handleChemicalCategorySearch = useMemo(() =>debounce((value: string) => { setChemicalCategorySearchTerm(value) }, 500),[]);
 
   return (
     (Object.keys(groupedFilters[filterFamily]).length > 0 && familyHeadingMarkup !== null )
@@ -201,6 +211,15 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
           >
             {
               familyCaptionMarkup
+            }
+            {
+              filterFamily === "role" && 
+              <TextInput
+                iconLeft={<SearchIcon/>}
+                placeholder="Search"
+                handleChange={(val)=> handleChemicalCategorySearch(val)}
+                className={styles.roleFilter}
+              />
             }
             {
               <div className={`${styles.section} ${Object.keys(sortedFacets).length > 5 ? styles['role'] + ' scrollable' : ''}`}>

@@ -1,7 +1,5 @@
 import {FC, useState, KeyboardEvent, useMemo} from 'react';
 import styles from './EntitySearch.module.scss';
-import Tooltip from '../Tooltip/Tooltip';
-import Alert from '../../Icons/Status/Alerts/Info.svg?react';
 import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import { cloneDeep } from 'lodash';
@@ -9,6 +7,7 @@ import { isEntityFilter, makeEntitySearch } from '../../Utilities/filterFunction
 import { Filter } from '../../Types/results';
 import FacetTag from '../FacetTag/FacetTag';
 import FacetHeading from '../FacetHeading/FacetHeading';
+import SearchIcon from '../../Icons/Buttons/Search.svg?react';
 
 interface EntitySearchProps {
   activeFilters: Filter[];
@@ -68,7 +67,7 @@ const EntitySearch: FC<EntitySearchProps> = ({
       >
         <span className={styles.tooltip}>Search all textual elements (result name, description, node names, edge names) for a given string.</span>
       </FacetHeading>
-      <p className={`${styles.caption} caption`}>Include or exclude results or paths containing a word or phrase in the result name, description, or paths.</p>
+      <p className={`${styles.caption} caption`}>Include or exclude results or paths containing a word or phrase in the result name, description, or paths</p>
       <span className={styles.inputContainer}>
         <input
           type="text"
@@ -79,6 +78,7 @@ const EntitySearch: FC<EntitySearchProps> = ({
           onKeyDown={handleKeyDown}
           className={styles.textInput}
         />
+        <SearchIcon className={styles.searchIcon}/>
         <div className={styles.checkboxContainer}>
           <span
             onClick={() => handleActivateFilter(false)}
@@ -101,9 +101,12 @@ const EntitySearch: FC<EntitySearchProps> = ({
       <div className={styles.activeFilters}>
         {
           activeEntityFilters.length > 0 &&
-          activeEntityFilters.map((filter, i) => {
+          activeEntityFilters.map((filter) => {
+            if(!!filter?.value && filter.value.length > 0 && filter.value[0] !== "\"" && filter.value[filter.value.length - 1] !== "\"")
+              filter.value = `"${filter.value}"`;
             return (
               <FacetTag 
+                key={filter.value}
                 activeFilters={activeEntityFilters}
                 family="str"
                 onFilter={onFilter}
