@@ -167,13 +167,6 @@ type FacetGroupProps = {
 
 const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCompare, groupedFilters, onFilter }) => {
 
-  const [filterObject, setFilterObject] = useState<Filter>({
-    name: "",
-    negated: false,
-    id: "",
-    value: ""
-  });
-
   const familyHeadingMarkup = getTagHeadingMarkup(filterFamily, activeFilters);
   const familyCaptionMarkup = getTagCaptionMarkup(filterFamily);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
@@ -219,7 +212,6 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
                         activeFilters={activeFilters}
                         family={filterFamily}
                         onFilter={onFilter}
-                        setFilterObjectFunc={setFilterObject}
                         filterObject={tag}
                       />
                     )

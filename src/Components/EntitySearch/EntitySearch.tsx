@@ -108,7 +108,6 @@ const EntitySearch: FC<EntitySearchProps> = ({
                 family="str"
                 onFilter={onFilter}
                 filterObject={["g/str", filter]}
-                setFilterObjectFunc={setEntitySearch}
                 isEntitySearch={true}
                 handleInteractExistingEntity={handleInteractExistingEntity}
               />
