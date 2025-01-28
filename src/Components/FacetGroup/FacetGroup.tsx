@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, Dispatch, SetStateAction } from "react";
+import { FC, useState, useEffect, Dispatch, SetStateAction, useMemo } from "react";
 import { Filter, GroupedFilters } from "../../Types/results";
 import styles from './FacetGroup.module.scss';
 import AnimateHeight from "react-animate-height";
@@ -115,6 +115,48 @@ const getTagCaptionMarkup = (tagFamily: string): JSX.Element | null => {
   return captionToReturn;
 }
 
+const getSortedFacets = (
+  family: string,
+  activeFilters: Filter[],
+  facetCompare: ((a: [string, Filter], b: [string, Filter]) => number) | undefined,
+  groupedFilters: GroupedFilters) => {
+
+  const isOther = (name: string): boolean => name.toLowerCase() === 'other';
+
+  const compareNames = (nameA: string, nameB: string): number => {
+    if (isOther(nameA) && isOther(nameB)) return 0;
+    if (isOther(nameA)) return 1;
+    if (isOther(nameB)) return -1;
+    return nameA.localeCompare(nameB);
+  };
+
+  const defaultCompare = (a: [string, Filter], b: [string, Filter]) => {
+    const nameA = a[1].name.toLowerCase();
+    const nameB = b[1].name.toLowerCase();
+
+    return compareNames(nameA, nameB);
+  };
+
+  const selectedFacetSet = activeFilters.reduce<Record<string, null>>((acc, filter) => {
+    if (filtering.hasFilterFamily(filter, family) && !!filter.id) {
+      acc[filter.id] = null;
+    }
+
+    return acc;
+  }, {});
+
+  let sortedFacets = Object.entries(groupedFilters[family]).sort(defaultCompare);
+
+  // When there is a custom facet compare for this facet family, we want to sort selected and
+  // unselected facets independently while preserving that selected facets come first
+  if (facetCompare) {
+    const pivot = Object.keys(selectedFacetSet).length
+    sortedFacets = pivotSort(sortedFacets, pivot, facetCompare);
+  }
+
+  return sortedFacets;
+}
+
 type FacetGroupProps = {
   filterFamily: string;
   activeFilters: Filter[];
@@ -132,69 +174,13 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
     value: ""
   });
 
-  const displayFacets = (family: string, activeFilters: Filter[], facetCompare: ((a: [string, Filter], b: [string, Filter]) => number) | undefined, groupedFilters: GroupedFilters, filterObject: Filter, filterObjectSetter: Dispatch<SetStateAction<Filter>>) => {
-
-    // The selected set of filters for the current facet family
-    const selectedFacetSet = activeFilters.reduce<Record<string, null>>((acc, filter) => {
-      if (filtering.hasFilterFamily(filter, family) && !!filter.id) {
-        acc[filter.id] = null;
-      }
-
-      return acc;
-    }, {});
-
-    const isOther = (name: string): boolean => name.toLowerCase() === 'other';
-    const isSelected = (key: string, selectedFacetSet: {[key: string]: null}): boolean => {
-      return selectedFacetSet[key] !== undefined;
-    }
-
-    const compareNames = (nameA: string, nameB: string): number => {
-      if (isOther(nameA) && isOther(nameB)) return 0;
-      if (isOther(nameA)) return 1;
-      if (isOther(nameB)) return -1;
-      return nameA.localeCompare(nameB);
-    };
-
-    const defaultCompare = (a: [string, Filter], b: [string, Filter]) => {
-      const nameA = a[1].name.toLowerCase();
-      const nameB = b[1].name.toLowerCase();
-
-      return compareNames(nameA, nameB);
-    };
-
-    // Ensures that selected facets come first
-    let sortedFacets = Object.entries(groupedFilters[family]).sort(defaultCompare);
-
-    // When there is a custom facet compare for this facet family, we want to sort selected and
-    // unselected facets independently while preserving that selected facets come first
-    if (facetCompare) {
-      const pivot = Object.keys(selectedFacetSet).length
-      sortedFacets = pivotSort(sortedFacets, pivot, facetCompare);
-    }
-
-    return (
-      <div className={`${styles.section} ${Object.keys(sortedFacets).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
-        { // Sort each set of tags, then map them to return each facet
-          sortedFacets.map((tag) => {
-            return(
-              <FacetTag 
-                activeFilters={activeFilters}
-                family={family}
-                onFilter={onFilter}
-                setFilterObjectFunc={filterObjectSetter}
-                filterObject={tag}
-              />
-            )
-          })
-        }
-      </div>
-    )
-  }
-
   const familyHeadingMarkup = getTagHeadingMarkup(filterFamily, activeFilters);
   const familyCaptionMarkup = getTagCaptionMarkup(filterFamily);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [height, setHeight] = useState<number | string>(0);
+
+  // Ensures that selected facets come first
+  let sortedFacets = useMemo(() => getSortedFacets(filterFamily, activeFilters, facetCompare, groupedFilters), [filterFamily, activeFilters, facetCompare, groupedFilters]);
 
   useEffect(() => {
     if(isExpanded === false)
@@ -224,7 +210,22 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
               familyCaptionMarkup
             }
             {
-              displayFacets(filterFamily, activeFilters, facetCompare, groupedFilters, filterObject, setFilterObject)
+              <div className={`${styles.section} ${Object.keys(sortedFacets).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
+                {
+                  sortedFacets.map((tag: [string, Filter]) => {
+                    return(
+                      <FacetTag 
+                        key={tag[1].id}
+                        activeFilters={activeFilters}
+                        family={filterFamily}
+                        onFilter={onFilter}
+                        setFilterObjectFunc={setFilterObject}
+                        filterObject={tag}
+                      />
+                    )
+                  })
+                }
+              </div>
             }
           </AnimateHeight>
         </div>
