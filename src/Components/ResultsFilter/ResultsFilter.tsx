@@ -68,7 +68,8 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
 
   onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
   const filterCompare: {[key: string]: (a: [string, Filter], b: [string, Filter]) => number} = {
-    pt: (a: [string, Filter], b: [string, Filter]) => -(a[1].name.localeCompare(b[1].name))
+    // add custom filterCompare functions for a given family here, like so:
+    // pt: (a: [string, Filter], b: [string, Filter]) => -(a[1].name.localeCompare(b[1].name))
   };
 
   useEffect(() => { 

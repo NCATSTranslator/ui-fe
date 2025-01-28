@@ -8,12 +8,18 @@
   .activeFilters {
     padding: $xs 0 0 0;
   }
+  .searchIcon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 8px;
+  }
   .textInput {
-    width: calc(100% - 105px);
+    width: calc(100% - 58px);
     color: $black;
     font-size: 12px;
     font-weight: 700;
-    padding: 10px 86px 10px $s;
+    padding: 9px 12px 9px 44px;
     border-radius: $largeBorderRadius;
     border: 1px solid $midGray;
     text-overflow: ellipsis;
@@ -21,7 +27,8 @@
     outline-width: 0px;
     outline-style: solid;
     &::placeholder {
-      color: $placeholderGray;
+      color: $midGray;
+      font-weight: 400;
     }
   }
   .subTwo {
