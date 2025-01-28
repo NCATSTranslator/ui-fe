@@ -44,6 +44,12 @@ const getOtcCaption = (): JSX.Element => {
   )
 }
 
+const getTdlCaption = (): JSX.Element => {
+  return(
+    <p className={styles.caption}>Show only results that are part of the selected target development level.</p>
+  )
+}
+
 const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.Element | null => {
   let headingToReturn;
   switch(tagFamily) {
@@ -79,6 +85,9 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.El
     case 'otc':
       headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Availability" />;
       break;
+    case 'tdl':
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Target Development Level" />
+      break;
     default:
       headingToReturn = null;
   }
@@ -108,6 +117,9 @@ const getTagCaptionMarkup = (tagFamily: string): JSX.Element | null => {
       break;
     case 'otc':
       captionToReturn = getOtcCaption();
+      break;
+    case 'tdl':
+      captionToReturn = getTdlCaption();
       break;
     default:
       captionToReturn = null;
@@ -177,7 +189,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
         { // Sort each set of tags, then map them to return each facet
           sortedFacets.map((tag) => {
             return(
-              <FacetTag 
+              <FacetTag
                 activeFilters={activeFilters}
                 family={family}
                 onFilter={onFilter}
