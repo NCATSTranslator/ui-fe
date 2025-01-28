@@ -50,6 +50,7 @@ const GraphView = ({result, resultSet, onNodeClick, clearSelectedPaths, active, 
   let graphViewRef = useRef(null);
   let graphLayoutPref = getInitialGraphLayoutFromPrefs(prefs, layoutList);
   const [currentLayout, setCurrentLayout] = useState(graphLayoutPref);
+  const lastLayout = useRef(graphLayoutPref);
   const [cyInstance, setCyInstance] = useState(null);
   const graph = useMemo(() => {
     if(prebuiltGraph)
@@ -190,10 +191,11 @@ const GraphView = ({result, resultSet, onNodeClick, clearSelectedPaths, active, 
   useEffect(() => {
     if (!active || !graphRef.current || graph === null) 
       return;
-    if (cyInstance !== null) 
+    if (cyInstance !== null && currentLayout === lastLayout.current) 
       return;
 
-    // Use a timeout to defer the graph initialization
+    lastLayout.current = currentLayout;
+    // Using a timeout defers the graph initialization
     const timeoutId = setTimeout(() => {
       let cytoReqDataObject = {
         graphRef: graphRef, 
@@ -234,7 +236,7 @@ const GraphView = ({result, resultSet, onNodeClick, clearSelectedPaths, active, 
       }
 
       setCyInstance(cyInstanceAndNav.cy);
-    // Set timeout to 0 to defer execution
+    // Setting timeout to 0 to defer execution
     }, 0); 
 
     return () => clearTimeout(timeoutId);
