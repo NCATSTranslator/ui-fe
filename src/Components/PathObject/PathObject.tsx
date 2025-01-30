@@ -4,7 +4,7 @@ import Tooltip from '../Tooltip/Tooltip';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
-import Predicate from './Predicate';
+import Predicate from '../Predicate/Predicate';
 import { Path, PathFilterState, isResultNode, ResultNode, Filter, isResultEdge } from '../../Types/results.d';
 import { useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getResultSetById } from '../../Redux/resultsSlice';
