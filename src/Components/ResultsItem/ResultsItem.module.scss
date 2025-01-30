@@ -196,10 +196,10 @@
     grid-column: 1/7;
     grid-row: 2;
     &.hasDescription, &.hasTags {
-      min-height: 40px;
+      min-height: 41px;
     }
     &.hasDescription.hasTags {
-      min-height: 80px;
+      min-height: 81px;
     }
     &>div {
       display: block !important;

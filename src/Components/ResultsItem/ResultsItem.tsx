@@ -126,7 +126,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
   const user = useSelector(currentUser);
 
-  let roleCount: number = (!!result && !result.tags) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
+  let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
@@ -441,7 +441,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <AnimateHeight
         className={`${styles.accordionPanel}
           ${isExpanded ? styles.open : styles.closed }
-          ${(Object.entries(result.tags).some(item=>item.includes("role")) && !isInUserSave) ? styles.hasTags : ''}
+          ${(roleCount > 0 && !isInUserSave) ? styles.hasTags : ''}
           ${(!!resultDescription && !isPathfinder) ? styles.hasDescription : '' }
         `}
         duration={500}
