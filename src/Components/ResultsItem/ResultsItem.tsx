@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction, useMemo } from 'react';
 import styles from './ResultsItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts, isStringArray } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
@@ -29,9 +29,7 @@ import Tab from '../Tabs/Tab';
 import * as filtering from '../../Utilities/filterFunctions';
 import ResultsItemName from '../ResultsItemName/ResultsItemName';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
-import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import { cloneDeep } from 'lodash';
-import Button from '../Core/Button';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -137,7 +135,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
   const [graphActive, setGraphActive] = useState<boolean>(false);
   const [height, setHeight] = useState<number | string>(0);
-  const newPaths = (!!result) ? result.paths: [];
+  const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
   const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
   // const [csvData, setCsvData] = useState([]);
   const bookmarkRemovalApproved = useRef<boolean>(false);
