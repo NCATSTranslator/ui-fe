@@ -40,6 +40,9 @@
       background-color: $lightGray;
       height: 28px;
     }
+    .predicateInterior.isInferred {
+      border-style: dashed;
+    }
     &.isEven {
       .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
         background-color: $white;
@@ -140,7 +143,7 @@
     }
   }
   .formattedPath {
-    display: grid;
+    display: inline-grid;
     grid-template-columns: min-content min-content min-content 1fr;
     align-items: center;
     margin-bottom: $m;
@@ -203,6 +206,30 @@
         }
       }
     }
+    // &:hover {
+    //   &:before,
+    //   &:after {
+    //     content: "";
+    //     position: absolute;
+    //     left: 0;
+    //     right: 0;
+    //     height: 4px; /* Adjust height for the shadow effect */
+    //     pointer-events: none; /* Allows clicks to pass through */
+    //     z-index: 10;
+    //   }
+      
+    //   &:before {
+    //     top: 0; /* Position above the element */
+    //     transform: rotate(180deg);
+    //     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5);
+    //   }
+      
+    //   &:after {
+    //     top: 28px; /* Position below the element */
+    //     transform: rotate(180deg);
+    //     box-shadow: 0 -4px 4px rgba(0, 0, 0, 0.5);
+    //   }
+    // }
   }
   .show {
     margin: 0;

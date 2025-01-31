@@ -15,7 +15,7 @@ import { QueryType } from '../Types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
 import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState, Tags, ResultNode } from '../Types/results.d';
-import { EvidenceCountsContainer, PublicationObject, PublicationsList } from '../Types/evidence';
+import { EvidenceCountsContainer, PublicationObject, PublicationsList, RawPublicationObject } from '../Types/evidence';
 import { Location } from 'react-router-dom';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
 import { SaveGroup } from './userApi';
@@ -320,23 +320,49 @@ export const combineObjectArrays = (arr1: any[] | undefined | null, arr2: any[] 
   return combinedArray;
 }
 
-export const isClinicalTrial = (publication: PublicationObject) => {
-  if(publication.type === "NCT")
+/**
+ * Returns a boolean based on if the provided PublicationObject or RawPublicationObject is categorized as a publication
+ *
+ * @param {PublicationObject | RawPublicationObject} publication - The object to check.
+ * @returns {boolean} True if the object is a publication, false otherwise
+ */
+export const isPublication = (publication: PublicationObject | RawPublicationObject) => {
+  if(isPublicationObject(publication) && (publication.type === "PMID" || publication.type === "PMC"))
     return true;
+  else if(publication.id?.includes("PMID") || publication.id?.includes("PMC"))  {
+    console.log(publication.id, publication.id?.includes("PMID") || publication.id?.includes("PMC"));
+    return true;
+  }
 
   return false
 }
-export const isPublication = (publication: PublicationObject) => {
-  if(publication.type === "PMID" || publication.type === "PMC")
-    return true;
 
-  return false
+/**
+ * Returns a boolean indicating whether an edge has any publications attached
+ *
+ * @param {ResultEdge} edge - The edge in question
+ * @returns {boolean} - Returns true if the edge has any publications, otherwise false.  
+ */
+export const checkEdgesForPubs = (edges: ResultEdge[]): boolean => {
+  for(const edge of edges) {
+    if(Object.values(edge.publications).length > 0)
+      return true;
+  }
+  return false;
 }
-export const isMiscPublication = (publication: PublicationObject) => {
-  if(publication.type !== "PMID" && publication.type !== "PMC" && publication.type !== "NCT")
-    return true;
 
-  return false
+/**
+ * Returns a boolean indicating whether an edge has any clinical trials attached
+ *
+ * @param {ResultEdge} edge - The edge in question
+ * @returns {boolean} - Returns true if the edge has any clinical trials, otherwise false. 
+ */
+export const checkEdgesForClinicalTrials = (edges: ResultEdge[]): boolean => {
+  for(const edge of edges) {
+    if(edge.trials.length > 0)
+      return true;
+  }
+  return false;
 }
 
 /**
@@ -370,7 +396,6 @@ export const isPublicationObject = (obj: any): obj is PublicationObject => {
     typeof obj === 'object' &&
     obj !== null &&
     typeof obj.source === 'object' &&
-    (typeof obj.support === 'object' || obj.support === null) &&
     typeof obj.type === 'string' &&
     typeof obj.url === 'string'
   );

@@ -5,9 +5,8 @@ import Tab from "../Tabs/Tab";
 import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
-import { capitalizeAllWords, isClinicalTrial, isPublication, numberToWords, getFormattedEdgeLabel, 
-  getUrlByType, getCompressedSubgraph, 
-  getCompressedEdge} from "../../Utilities/utilities";
+import { capitalizeAllWords, isPublication, numberToWords, getFormattedEdgeLabel, 
+  getUrlByType, getCompressedSubgraph, getCompressedEdge} from "../../Utilities/utilities";
 import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
 import { Provenance, PublicationObject, TrialObject } from "../../Types/evidence.d";
 import { getResultSetById, getEdgeById, getNodeById } from "../../Redux/resultsSlice";
@@ -99,7 +98,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   const distributeEvidence = (evidence: {publications: Set<PublicationObject>, sources: Set<Provenance>, trials: Set<TrialObject> }) => {
     setPubmedEvidence(cloneDeep([...evidence.publications].filter(item => isPublication(item))));
     clinicalTrials.current = cloneDeep([...evidence.trials]);
-    miscEvidence.current = cloneDeep([...evidence.publications].filter(item => !isPublication(item) && !isClinicalTrial(item)))
+    miscEvidence.current = cloneDeep([...evidence.publications].filter(item => !isPublication(item)))
       .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
     let displayedSources = [...evidence.sources];
     displayedSources.sort(compareByKeyLexographic('name'));
