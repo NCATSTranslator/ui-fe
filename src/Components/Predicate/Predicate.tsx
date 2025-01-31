@@ -6,7 +6,7 @@ import PubIcon from '../../Icons/Status/HasPub.svg?react';
 import CTIcon from '../../Icons/Status/HasCT.svg?react';
 import Up from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Highlighter from 'react-highlight-words';
-import { getCompressedEdge } from '../../Utilities/utilities';
+import { checkEdgesForClinicalTrials, checkEdgesForPubs, getCompressedEdge, hasSupport } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Types/results';
@@ -73,12 +73,11 @@ const Predicate: FC<PredicateProps> = ({
   let resultSet = useSelector(getResultSetById(pk));
   const formattedEdge = (!!resultSet && Array.isArray(edgeIDs) && edgeIDs.length > 1) ? getCompressedEdge(resultSet, edgeIDs) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
-  const pubCount = (Array.isArray(formattedEdge.publications)) ? formattedEdge.publications.length : 0;
   const [isSupportExpanded, setIsSupportExpanded] = useState(formattedEdge.is_root);
-  const hasPubs = true;
-  const hasCTs = true;
-  // const isMachineLearned = checkForProvenanceType(formattedEdge, "ml");
-  // const isTrusted = checkForProvenanceType(formattedEdge, "trusted");
+  const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0) ? [...formattedEdge.compressed_edges, formattedEdge] : [formattedEdge];
+  const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
+  const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
+  const isInferred = hasSupport(formattedEdge);
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -95,7 +94,7 @@ const Predicate: FC<PredicateProps> = ({
   ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
   : [formattedEdge];
 
-  let hasSupport = (formattedEdge?.support && formattedEdge.support.length) > 0 ? true : false;
+  // let hasSupport = (formattedEdge?.support && formattedEdge.support.length) > 0 ? true : false;
   return (
     <>
       <Tooltip
@@ -143,17 +142,12 @@ const Predicate: FC<PredicateProps> = ({
         }
       </Tooltip>
       <span
-        className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior}`}
+        className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && pathViewStyles && pathViewStyles.isInferred}`}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path);}}
         >
         <span
           className={`${styles.pred} pred ${hasMore ? styles.hasMore : ''}`}
           >
-          {
-            (pubCount >= 1 && formattedEdge.provenance?.length > 0)
-            ? <ResearchMultiple className={styles.evidenceIcon} />
-            : ''
-          }
           <span data-tooltip-id={`${formattedEdge.predicate}${uid}`} className={styles.predLabel}>
             <Highlighter
               highlightClassName="highlight"
@@ -176,7 +170,7 @@ const Predicate: FC<PredicateProps> = ({
           </div>
         </span>
         {
-          hasSupport && !inModal &&
+          isInferred && !inModal &&
           <button
             onClick={handleSupportExpansion}
             className={`support-button ${styles.supportExpansionButton} ${isSupportExpanded ? styles.expanded : ''}`}>
@@ -188,7 +182,7 @@ const Predicate: FC<PredicateProps> = ({
         }
       </span>
       {
-        hasSupport && !inModal &&
+        isInferred && !inModal &&
         <SupportPathGroup
           pathArray={formattedEdge.support}
           isExpanded={isSupportExpanded}
