@@ -49,21 +49,26 @@ const SupportPath: FC<SupportPathProps> = ({
     <>
       {
         path !== null &&
-        <div className={`${!!pathViewStyles && pathViewStyles.formattedPath}`} key={path.id}>
+        <div 
+          className={`${!!pathViewStyles && pathViewStyles.formattedPath} ${lastViewedPathID && lastViewedPathID === path.id && !!pathViewStyles && pathViewStyles.isLastViewed}`} 
+          key={path.id}
+          >
           {
-            lastViewedPathID === path.id &&
+            !!lastViewedPathID && lastViewedPathID === path.id &&
             <LastViewedTag/>
           }
-          <span className={`${!!pathViewStyles &&pathViewStyles.num}`}>
-            { character }
-          </span>
           <button
             onClick={()=>handleActivateEvidence(path)}
             className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
             data-tooltip-id={`${tooltipID}`}
             >
-              <ResearchMultiple />
+              <div className={`${!!pathViewStyles && pathViewStyles.icon}`}>
+                <ResearchMultiple />
+              </div>
           </button>
+          <span className={`${!!pathViewStyles && pathViewStyles.num}`}>
+            { character }
+          </span>
           <Tooltip
             id={`${tooltipID}`}
             >

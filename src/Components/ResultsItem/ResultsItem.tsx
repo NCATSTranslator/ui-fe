@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction, useMemo } from 'react';
 import styles from './ResultsItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts, isStringArray } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
@@ -29,9 +29,7 @@ import Tab from '../Tabs/Tab';
 import * as filtering from '../../Utilities/filterFunctions';
 import ResultsItemName from '../ResultsItemName/ResultsItemName';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
-import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import { cloneDeep } from 'lodash';
-import Button from '../Core/Button';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -128,7 +126,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
   const user = useSelector(currentUser);
 
-  let roleCount: number = (!!result && !result.tags) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
+  let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
@@ -137,7 +135,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
   const [graphActive, setGraphActive] = useState<boolean>(false);
   const [height, setHeight] = useState<number | string>(0);
-  const newPaths = (!!result) ? result.paths: [];
+  const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
   const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
   // const [csvData, setCsvData] = useState([]);
   const bookmarkRemovalApproved = useRef<boolean>(false);
@@ -443,7 +441,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
       <AnimateHeight
         className={`${styles.accordionPanel}
           ${isExpanded ? styles.open : styles.closed }
-          ${(Object.entries(result.tags).some(item=>item.includes("role")) && !isInUserSave) ? styles.hasTags : ''}
+          ${(roleCount > 0 && !isInUserSave) ? styles.hasTags : ''}
           ${(!!resultDescription && !isPathfinder) ? styles.hasDescription : '' }
         `}
         duration={500}

@@ -5,14 +5,13 @@
   position: relative;
   .tableHead, .tableItem {
     display: grid;
-    gap: 5px;
     justify-content: flex-start;
     align-items: center;
     .name, .target {
       font-size: 14px;
       font-weight: 700;
     }
-    .path {
+    .pred {
       font-size: 12px;
       font-weight: 400;
     }
@@ -34,14 +33,57 @@
   }
   .tableItem {
     position: relative;
+    .nameContainer, .predicateInterior {
+      border-color: $purpleTwo;
+      border-width: 2px 0;
+      border-style: solid;
+      background-color: $lightGray;
+      height: 28px;
+    }
+    &.isEven {
+      .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+        background-color: $white;
+      }
+      .nameContainer {
+        .nameInterior {
+          background-color: $white;
+          border: 1px solid $white;
+          border-bottom-right-radius: $defaultBorderRadius;
+          border-top-right-radius: $defaultBorderRadius;
+          margin-right: -1px;
+        }
+        &:last-child {
+          .nameInterior {
+            background-color: $white;
+            border: 1px solid $white;
+          }
+        }
+      }
+    }
+    .nameContainer {
+      // &:first-child {
+      //   border-left-width: 8px;
+      //   border-bottom-left-radius: $defaultBorderRadius;
+      //   border-top-left-radius: $defaultBorderRadius;
+      // }
+      &:last-child {
+        border-right-width: 13px;
+        border-bottom-right-radius: $defaultBorderRadius;
+        border-top-right-radius: $defaultBorderRadius;
+        .nameInterior {
+          background-color: $lightGray;
+          border: 1px solid $lightGray;
+          border-bottom-right-radius: $defaultBorderRadius;
+          border-top-right-radius: $defaultBorderRadius;
+          height: 16px;
+          margin-right: -5px;
+        }
+      }
+    }
     .pathContainer, .name, .target {
       line-height: 17.5px;
       border-radius: $defaultBorderRadius;
       padding: 7px 0;
-      &:first-child {
-        background-color: $yellow;
-        padding: 7px 0;
-      }
     }
     .pathContainer {
       position: relative;
@@ -99,50 +141,64 @@
   }
   .formattedPath {
     display: grid;
-    grid-template-columns: min-content min-content 1fr;
+    grid-template-columns: min-content min-content min-content 1fr;
     align-items: center;
-    gap: 8px;
     margin-bottom: $m;
     padding-left: $m;
     position: relative;
-    .formattedPath {
-      padding-left: 0;
-    }
+    transition: padding .5s ease;
     .num {
-      width: 32px;
-      height: 32px;
+      width: 20px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 12px;
       line-height: 1.25;
-      color: $darkGray;
+      color: $black;
       align-self: flex-start;
+      border-width: 2px 0;
+      border-style: solid;
+      border-color: $purpleTwo;
+      background-color: $lightGray;
+      padding-right: $xxs;
+      cursor: default;
     }
     .pathEvidenceButton {
+      height: $l;
       display: flex;
-      background-color: $white;
-      border: 1px solid $darkGray;
-      padding: 4px;
-      border-radius: $defaultBorderRadius;
+      background-color: $purpleTwo;
+      border-width: 2px 0 2px 8px;
+      border-style: solid;
+      border-color: $purpleTwo;
+      padding: 0;
+      border-bottom-left-radius: $defaultBorderRadius;
+      border-top-left-radius: $defaultBorderRadius;
       margin: 0;
       transition: all .25s ease;
       align-self: start;
-      svg {
-        width: 24px;
-        height: 24px;
-        margin-right: 0;
-        path, line, circle {
-          transition: all .25s ease;
-          fill: $darkGray;
+      z-index: 10;
+      .icon {
+        border: 1px solid $lightGray;
+        border-bottom-left-radius: $defaultBorderRadius;
+        border-top-left-radius: $defaultBorderRadius;
+        background-color: $lightGray;
+        padding: 3px $xxs;
+        svg {
+          width: 20px;
+          height: 20px;
+          margin-right: 0;
+          path, line, circle {
+            transition: all .25s ease;
+            fill: $purpleTwo;
+          }
         }
       }
       &:hover {
-        background-color: $darkGray;
         svg {
           path, line, circle {
-            fill: $white;
+            fill: $black;
           }
         }
       }
@@ -182,10 +238,10 @@
     grid-column: 1/8;
     grid-row: 2;
     background-color: $palePurple;
-    border: 1px solid $midPurpleTwo;
+    border: 1px solid $lightPurpleTwo;
     border-radius: $defaultBorderRadius;
-    padding: $s $s 0;
-    margin: $m 0 0 0;
+    padding: $s $s 0 $xxs;
+    margin: $s 0 0 0;
     position: relative;
     left: -42px;
     overflow: hidden visible !important;

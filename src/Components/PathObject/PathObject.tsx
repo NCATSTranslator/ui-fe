@@ -4,7 +4,7 @@ import Tooltip from '../Tooltip/Tooltip';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
-import Predicate from './Predicate';
+import Predicate from '../Predicate/Predicate';
 import { Path, PathFilterState, isResultNode, ResultNode, Filter, isResultEdge } from '../../Types/results.d';
 import { useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getResultSetById } from '../../Redux/resultsSlice';
@@ -75,7 +75,7 @@ const PathObject: FC<PathObjectProps> = ({
       {
         isNode 
           ?
-            <span className={`${styles.nameContainer} ${className} ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
+            <span className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer} ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               data-tooltip-id={`${uid}`}
               >
@@ -116,7 +116,7 @@ const PathObject: FC<PathObjectProps> = ({
                   handleActivateEvidence={handleActivateEvidence}
                   handleEdgeClick={handleEdgeClick}
                   handleNodeClick={handleNodeClick}
-                  parentClass={styles.pathContainer}
+                  parentClass={styles.predicateContainer}
                   inModal={inModal}
                   className={className}
                   pathFilterState={pathFilterState}

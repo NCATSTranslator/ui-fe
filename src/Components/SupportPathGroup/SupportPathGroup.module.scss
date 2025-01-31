@@ -9,10 +9,11 @@
     margin: 0;
   }
   .supportLabel {
-    font-size: 12px;
+    font-size: 14px;
     color: $purpleTwo;
-    font-weight: 700;
-    margin-bottom: $xs
+    font-weight: 800;
+    margin-bottom: $s;
+    padding-left: 12px;
   }
 }
 .paginationContainer {
