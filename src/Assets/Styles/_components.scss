@@ -898,8 +898,8 @@ button {
   }
 }
 
-$nodeWidth: 170px;
-$predWidth: 170px;
+$nodeWidth: 178px;
+$predWidth: 178px;
 .path {
   &.three {
     grid-template-columns: $nodeWidth $predWidth $nodeWidth;

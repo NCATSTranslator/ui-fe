@@ -75,8 +75,6 @@ const PathView: FC<PathViewProps> = ({
   // Create the context with a default value of null
   const [lastViewedPathID, setLastViewedPathID] = useState<string|null>(null);
 
-  console.log(lastViewedPathID);
-
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
 

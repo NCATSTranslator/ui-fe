@@ -10,23 +10,20 @@
   transition: all .25s ease;
   box-shadow: none;
   cursor: pointer;
-  // svg, svg path, svg circle, svg line {
-  //   transition: all .25s ease;
-  //   fill: $white;
-  //   margin-right: 0;
-  // }
+  width: 165px !important;
+  padding: 0 0 0 5px !important;
   &.hasMore {
     .more {
-      font-size: 8px;
+      font-size: 10px;
       display: flex;
       font-weight: 800;
       border-radius: 50%;
       background-color: purple;
       color: white;
-      width: 16px;
-      height: 16px;
-      min-width: 16px;
-      min-height: 16px;
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      min-height: 20px;
       align-items: center;
       justify-content: center;
     }
@@ -35,6 +32,7 @@
     padding: 0 4px;
     display: flex;
     align-items: center;
+    width: 135px;
   }
   span {
     cursor: pointer; 
@@ -98,10 +96,10 @@
   display: flex;
   align-items: center;
   svg {
-    width: $s;
-    height: $s;
-    min-width: $s;
-    min-height: $s;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
   }
 }
 .supportExpansionButton {
@@ -130,10 +128,10 @@
     border-radius: 50%;
     transition: $defaultAnim;
     svg {
-      width: 16px;
-      min-width: 16px;
-      height: 16px;
-      min-height: 16px;
+      width: 20px;
+      min-width: 20px;
+      height: 20px;
+      min-height: 20px;
     }
   }
   &.expanded {

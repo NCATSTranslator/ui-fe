@@ -70,9 +70,12 @@
   .submitButton {
     margin: 0 8px;
     background-color: $purpleOne;
-    svg path {
-      stroke: $white;
-    }
+    svg {
+      margin-left: 0;
+      path {
+        stroke: $white;
+      }
+    } 
   }
 }
 .input {
