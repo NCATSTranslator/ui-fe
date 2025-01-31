@@ -1,8 +1,7 @@
 @import "../../Assets/Styles/variables";
 
 
-.nameContainer,.pathContainer,.targetContainer {
-  border-radius: $defaultBorderRadius;
+.nameContainer,.predicateContainer,.targetContainer {
   svg {
     width: 24px;
     height: 24px;
@@ -45,7 +44,7 @@
     }
   }
 }
-.name,.pathContainer,.target {
+.name,.predicateContainer,.target {
   display: flex;
   align-items: center;
 }
@@ -58,15 +57,11 @@
 .nameContainer {
   position: relative;
   background-color: $lightGray;
-  border-radius: $defaultBorderRadius;
-  border: 1px solid transparent;
+  // border-radius: $defaultBorderRadius;
+  // border: 1px solid transparent;
   box-shadow: none;
   &.even {
     background-color: $white;
-  }
-  &:first-child {
-    border: none;
-    background-color: $yellow;
   }
   svg {
     margin-right: 0;
@@ -76,19 +71,30 @@
   }
 }
 
-.pathContainer {
+.predicateContainer {
   padding: 0;
   position: relative;
   cursor: pointer;
-  min-width: 220px;
-  justify-content: center;
+  // min-width: 220px;
+  justify-content: space-between;
 }
-.pathContainer, .nameContainer, .targetContainer {
+.predicateContainer, .nameContainer, .targetContainer {
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  &:before {
+    content: '';
+    background-image: url('../../Icons/Connectors/PathArrow.svg');
+    width: 8px;
+    height: 28px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
   &>span {
-    padding: 4px;
-    min-height: 22px;
-    width: 140px;
+    padding: 5px;
+    height: 16px;
+    width: 150px;
   }
   span, mark {
     font-size: 12px;
@@ -116,18 +122,6 @@
 
 .nameContainer, .targetContainer {
   transition: all .25s ease;
-}
-.targetContainer {
-  background-color: $blueOne;
-  color: $white;
-  position: relative;
-  box-shadow: none;
-  svg {
-    margin-right: 0;
-    path {
-      fill: $white;
-    }
-  }
 }
 
 .edgeLabel {

@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, Dispatch, SetStateAction, useMemo } from "react";
+import { FC, useState, useEffect, useMemo } from "react";
 import { Filter, GroupedFilters } from "../../Types/results";
 import styles from './FacetGroup.module.scss';
 import AnimateHeight from "react-animate-height";

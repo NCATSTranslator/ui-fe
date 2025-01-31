@@ -1,36 +1,40 @@
 @import "../../Assets/Styles/variables";
 
-.path {
+.pred {
   display: flex;
   align-items: center;
-  width: auto;
-  max-width: 65%;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background-color: $purpleEdgeBG;
   z-index: 10;
-  color: $white;
   margin-right: 0;
   transition: all .25s ease;
-  border-radius: $defaultBorderRadius;
   box-shadow: none;
-  border: 1px solid $purpleEdgeBG;
   cursor: pointer;
-  svg, svg path, svg circle, svg line {
-    transition: all .25s ease;
-    fill: $white;
-    margin-right: 0;
-  }
+  // svg, svg path, svg circle, svg line {
+  //   transition: all .25s ease;
+  //   fill: $white;
+  //   margin-right: 0;
+  // }
   &.hasMore {
     .more {
-      font-size: 12px;
-      color: $lightGray;
-      display: block;
-      font-weight: 700;
+      font-size: 8px;
+      display: flex;
+      font-weight: 800;
+      border-radius: 50%;
+      background-color: purple;
+      color: white;
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      min-height: 16px;
+      align-items: center;
+      justify-content: center;
     }
   }
-  .pathLabel {
+  .predLabel {
     padding: 0 4px;
+    display: flex;
+    align-items: center;
   }
   span {
     cursor: pointer; 
@@ -44,9 +48,6 @@
     transition: all .25s ease;
   }
   &:hover {
-    // color: $black;
-    // box-shadow: $dropShadowHover;
-    background-color: $purpleEdgeBGHover;
     text-decoration: underline;
   }
 }
@@ -82,7 +83,7 @@
   }
 }
 .selected {
-  span.path {
+  span.pred {
     border: 1px solid $purpleEdgeBGSelected;
     background-color: $purpleEdgeBGSelected;
     color: $white;
@@ -93,87 +94,32 @@
     list-style-type: none;
   }
 }
-.ml .path, .trusted .path {
-  position: relative;
-  .mlTooltip {    
-    span {
-      max-width: none;
-      font-size: 12px;
-      line-height: 1.1;
-      font-weight: 400;
-      cursor: default;
-      white-space: wrap;
-      &:hover {
-        text-decoration: none;
-      }
-    }
-  }  
-}
 .badges {
-  position: absolute;
-  top: -13px;
-  right: -16px;
   display: flex;
-  img {
-    box-shadow: $dropShadow;
-  }
-}
-.robot {
-  width: 18px;
-  height: 18px;
-  border-radius: 20px;
-  background-color: $white;
-  padding: 3px;
-  z-index: 10;
-  margin-right: 3px;
-  transition: all .25s ease;
+  align-items: center;
   svg {
-    width: 18px;
-    height: 18px;
-    min-width: auto;
-    path {
-      fill: $purpleEdgeBG;
-      stroke: $purpleEdgeBG;
-    }
-  }
-  &.selected svg {
-    path {
-      fill: $purpleEdgeBGSelected;
-      stroke: $purpleEdgeBGSelected !important;
-    }
+    width: $s;
+    height: $s;
+    min-width: $s;
+    min-height: $s;
   }
 }
-
-svg.connector {
-  width: 30px;
-  position: absolute;
-  top: 50%;
-  bottom: 0;
-  transform: translateY(-50%);
-  height: auto;
-  &.start {
-    left: 0;
-  }
-  &.end {
-    right: 0;
-  }
-}
-
 .supportExpansionButton {
-  position: absolute;
-  bottom: -15px;
   margin: 0;
   border-radius: 50%;
-  background-color: $white;
-  color: $purpleEdgeBG;
-  box-shadow: $dropShadow;
+  background-color: $purpleTwo;
+  color: $white;
   z-index: 100;
   display: grid;
   justify-content: center;
   align-items: center;
   padding: 0;
+  position: relative;
   svg {
     margin: 0;
+    path {
+      stroke: $white;
+    }
   }
   .supportButtonIcon {
     display: flex;
@@ -181,35 +127,32 @@ svg.connector {
     transform: rotate(180deg);
     z-index: 10;
     position: relative;
-    background-color: $white;
     border-radius: 50%;
-    padding: 3px;
     transition: $defaultAnim;
     svg {
-      width: 17px;
-      min-width: 17px;
-      height: 17px;
-      min-height: 17px;
+      width: 16px;
+      min-width: 16px;
+      height: 16px;
+      min-height: 16px;
     }
   }
   &.expanded {
     border-radius: 50%;
-    background-color: $white;
     .supportButtonIcon {
       transform: rotate(0);
     }
     .supportConnector {
       opacity: 1;
-      height: 18px;
+      height: 25px;
     }
   }
   .supportConnector {
     opacity: 0;
     transition: all .35s ease;
     height: 0;
-    top: 20px;
-    background-color: $purpleEdgeBG;
-    width: 1px;
+    top: 100%;
+    background-color: $lightPurpleTwo;
+    width: 2px;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);

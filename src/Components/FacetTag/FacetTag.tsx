@@ -1,5 +1,5 @@
 import styles from './FacetTag.module.scss';
-import { Dispatch, FC, SetStateAction } from "react";
+import { FC } from "react";
 import { Filter } from "../../Types/results";
 import Checkbox from "../Core/Checkbox";
 import { formatBiolinkEntity } from "../../Utilities/utilities";
