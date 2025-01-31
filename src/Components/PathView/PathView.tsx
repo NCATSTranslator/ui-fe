@@ -13,6 +13,7 @@ import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 import PathObject from '../PathObject/PathObject';
 import Button from '../Core/Button';
+import LastViewedTag from '../LastViewedTag/LastViewedTag';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 
@@ -73,6 +74,8 @@ const PathView: FC<PathViewProps> = ({
   const displayedPaths = formattedPathsToDisplay.slice(itemOffset, endResultIndex.current);
   // Create the context with a default value of null
   const [lastViewedPathID, setLastViewedPathID] = useState<string|null>(null);
+
+  console.log(lastViewedPathID);
 
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
@@ -145,23 +148,37 @@ const PathView: FC<PathViewProps> = ({
                           </>
                         : null
                       }
-                    <div className={styles.formattedPath} >
-                      <span className={styles.num}>
-                        { indexInFullCollection + 1 }
-                      </span>
+                    <div className={`${styles.formattedPath}`}>
+                      {
+                        !!lastViewedPathID && lastViewedPathID === path.id &&
+                        <LastViewedTag/>
+                      }
                       <button
-                        onClick={()=>(path.id) ? handleActivateEvidence(path) : null}
+                        onClick={()=>{
+                          if(!!path?.id) {
+                            setLastViewedPathID(path.id);
+                            handleActivateEvidence(path);
+                          }
+                        }}
                         className={styles.pathEvidenceButton}
                         data-tooltip-id={tooltipID}
                         >
-                          <ResearchMultiple />
+                          <div className={styles.icon}>
+                            <ResearchMultiple />
+                          </div>
                       </button>
+                      <span className={styles.num}>
+                        { indexInFullCollection + 1 }
+                      </span>
                       <Tooltip
                         id={tooltipID}
                         >
                           <span>View evidence for this path.</span>
                       </Tooltip>
-                      <div data-path-id={`${path.id || ""}`} className={`${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''}`} >
+                      <div 
+                        data-path-id={`${path.id || ""}`} 
+                        className={`${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''} ${isEven && styles.isEven}`}
+                        >
                         {
                           !!path?.compressedSubgraph
                           ?

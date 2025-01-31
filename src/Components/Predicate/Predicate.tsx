@@ -1,18 +1,12 @@
 import { useState, FC, MouseEvent } from 'react';
 import styles from './Predicate.module.scss';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
-import Robot from '../../Icons/DEP/robot-purple.png';
-import RobotSelected from '../../Icons/DEP/robot-darkpurple.png';
-import Badge from '../../Icons/DEP/badge-purple.png';
-import BadgeSelected from '../../Icons/DEP/badge-darkpurple.png';
-import ConnectorStart from '../../Icons/Connectors/direct-line-start.svg?react';
-import ConnectorEnd from '../../Icons/Connectors/direct-line-end.svg?react';
-import ConnectorDottedStart from '../../Icons/Connectors/inferred-line-start.svg?react';
-import ConnectorDottedEnd from '../../Icons/Connectors/inferred-line-end.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
+import PubIcon from '../../Icons/Status/HasPub.svg?react';
+import CTIcon from '../../Icons/Status/HasCT.svg?react';
 import Up from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Highlighter from 'react-highlight-words';
-import { capitalizeAllWords, getCompressedEdge } from '../../Utilities/utilities';
+import { getCompressedEdge } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Types/results';
@@ -81,8 +75,10 @@ const Predicate: FC<PredicateProps> = ({
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
   const pubCount = (Array.isArray(formattedEdge.publications)) ? formattedEdge.publications.length : 0;
   const [isSupportExpanded, setIsSupportExpanded] = useState(formattedEdge.is_root);
-  const isMachineLearned = checkForProvenanceType(formattedEdge, "ml");
-  const isTrusted = checkForProvenanceType(formattedEdge, "trusted");
+  const hasPubs = true;
+  const hasCTs = true;
+  // const isMachineLearned = checkForProvenanceType(formattedEdge, "ml");
+  // const isTrusted = checkForProvenanceType(formattedEdge, "trusted");
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -102,20 +98,6 @@ const Predicate: FC<PredicateProps> = ({
   let hasSupport = (formattedEdge?.support && formattedEdge.support.length) > 0 ? true : false;
   return (
     <>
-      <Tooltip
-        id={`${formattedEdge.predicate}${uid}-ML`}
-        place="top"
-        className={styles.mlTooltip}
-      >
-        <span>This relationship was provided by a text-mining algorithm. Click on the relationship and view its knowledge sources to learn more.</span>
-      </Tooltip>
-      <Tooltip
-        id={`${formattedEdge.predicate}${uid}-TR`}
-        place="top"
-        className={styles.mlTooltip}
-      >
-        <span>This relationship was generated using information found in a database that includes human curation. Click on the relationship and view its knowledge sources to learn more.</span>
-      </Tooltip>
       <Tooltip
         id={`${formattedEdge.predicate}${uid}`}
         place={`${inModal ? 'left' : 'top' }`}
@@ -139,7 +121,7 @@ const Predicate: FC<PredicateProps> = ({
                       highlightClassName="highlight"
                       searchWords={activeEntityFilters}
                       autoEscape={true}
-                      textToHighlight={capitalizeAllWords(edge.predicate)}
+                      textToHighlight={edge.predicate}
                     />
                     {
                       edge.predicate_url &&
@@ -161,56 +143,37 @@ const Predicate: FC<PredicateProps> = ({
         }
       </Tooltip>
       <span
-        className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${isMachineLearned ? styles.ml : ''} ${isTrusted ? styles.trusted : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior}`}
+        className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior}`}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path);}}
         >
-          {
-            hasSupport 
-              ?
-                <>
-                  <ConnectorDottedStart className={`connector ${styles.connector} ${styles.start}`}/>
-                  <ConnectorDottedEnd className={`connector ${styles.connector} ${styles.end}`}/>
-                </>
-              :
-                <>
-                  <ConnectorStart className={`connector ${styles.connector} ${styles.start}`}/> 
-                  <ConnectorEnd className={`connector ${styles.connector} ${styles.end}`}/>
-                </>
-          }
         <span
-          className={`${styles.path} path ${hasMore ? styles.hasMore : ''}`}
+          className={`${styles.pred} pred ${hasMore ? styles.hasMore : ''}`}
           >
-          <div className={styles.badges}>
-            {
-              isTrusted
-              ? <img src={selected ? BadgeSelected : Badge} alt="" className={styles.robot} data-tooltip-id={`${formattedEdge.predicate}${uid}-TR`} />
-              : null
-            }
-            {
-              isMachineLearned
-              ? <img src={selected ? RobotSelected : Robot} alt="" className={styles.robot} data-tooltip-id={`${formattedEdge.predicate}${uid}-ML`} />
-              : null
-            }
-          </div>
           {
             (pubCount >= 1 && formattedEdge.provenance?.length > 0)
             ? <ResearchMultiple className={styles.evidenceIcon} />
             : ''
           }
-          <span data-tooltip-id={`${formattedEdge.predicate}${uid}`} className={styles.pathLabel}>
+          <span data-tooltip-id={`${formattedEdge.predicate}${uid}`} className={styles.predLabel}>
             <Highlighter
               highlightClassName="highlight"
               searchWords={activeEntityFilters}
               autoEscape={true}
-              textToHighlight={capitalizeAllWords(formattedEdge.predicate)}
+              textToHighlight={formattedEdge.predicate}
             />
             {
               !!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0 &&
-              <span className={styles.more}>
-                + {formattedEdge.compressed_edges.length} More
-              </span>
+              <span className={styles.more}>+{formattedEdge.compressed_edges.length}</span>
             }
           </span>
+          <div className={styles.badges}>
+            {
+              hasPubs && <PubIcon/>
+            }
+            {
+              hasCTs && <CTIcon/>
+            }
+          </div>
         </span>
         {
           hasSupport && !inModal &&

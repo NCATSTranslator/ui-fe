@@ -1,20 +1,25 @@
 @import "../../Assets/Styles/variables";
 
 .lastViewedTag {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: calc(100% + 10px);
-  color: $white;
-  background-color: $purpleEdgeBG;
-  clip-path: polygon(15% 0, 100% 0%, 100% 100%, 0 100%, 7.5% 50%);
-  white-space: nowrap;
-  height: 22px;
-  padding: 0 4px 0 12px;
+  align-self: flex-start;
+  background-color: $purpleTwo;
   display: flex;
+  height: 32px;
+  padding: 0 0 0 5px;
   align-items: center;
-  justify-content: center;
-  .text {
-    font-size: 12px;
+  clip-path: polygon(100% 0, 100% 50%, 100% 100%, 0% 100%, 15% 50%, 0% 0%);
+  border-top-left-radius: $defaultBorderRadius;
+  border-bottom-left-radius: $defaultBorderRadius;
+  transition: left .5s ease;
+  z-index: 0;
+  position: absolute;
+  left: 29px;
+  svg path {
+    fill: $white;
+    width: 20px;
+    height: 20px;
+  }
+  &.visible {
+    left: 0px;
   }
 }
