@@ -147,9 +147,10 @@
     grid-template-columns: min-content min-content min-content 1fr;
     align-items: center;
     margin-bottom: $m;
-    padding-left: $m;
+    padding-left: $l;
     position: relative;
     transition: padding .5s ease;
+    z-index: 10;
     .num {
       width: 20px;
       height: 28px;
@@ -181,7 +182,6 @@
       margin: 0;
       transition: all .25s ease;
       align-self: start;
-      z-index: 10;
       .icon {
         border: 1px solid $lightGray;
         border-bottom-left-radius: $defaultBorderRadius;
@@ -206,30 +206,90 @@
         }
       }
     }
-    // &:hover {
-    //   &:before,
-    //   &:after {
-    //     content: "";
-    //     position: absolute;
-    //     left: 0;
-    //     right: 0;
-    //     height: 4px; /* Adjust height for the shadow effect */
-    //     pointer-events: none; /* Allows clicks to pass through */
-    //     z-index: 10;
-    //   }
+    &.lastViewed {
+      .pathEvidenceButton {
+        &:after {
+          left: -30px;
+        }
+      }
+      .formattedPath {
+        .pathEvidenceButton {
+          &:after {
+            left: 0;
+          }
+        }
+      }
       
-    //   &:before {
-    //     top: 0; /* Position above the element */
-    //     transform: rotate(180deg);
-    //     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5);
-    //   }
-      
-    //   &:after {
-    //     top: 28px; /* Position below the element */
-    //     transform: rotate(180deg);
-    //     box-shadow: 0 -4px 4px rgba(0, 0, 0, 0.5);
+    }
+    .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+      position: relative;
+      &:after {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: 0;
+        right: 0px;
+        height: 31px;
+        pointer-events: none;
+        z-index: -1;
+        border-radius: 4px;
+        box-shadow: 0 3px 10px transparent;
+        transition: all .25s ease;
+      }
+    }
+    .tableItem span:last-child {
+      &:after {
+        right: -13px;
+      }
+    }
+    .pathEvidenceButton {
+      &:after {
+        left: -8px;
+      }
+    }
+    // .formattedPath {
+    //   background-color: black;
+    //   .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+    //     &:after {
+    //       box-shadow: $dropShadowHover;
+    //     }
     //   }
     // }
+    &:hover {
+      .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+        &:after {
+          box-shadow: $dropShadowHover;
+        }
+      }
+      .formattedPath {
+        .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+          &:after {
+            box-shadow: 0 3px 10px transparent;
+          }
+        }
+        &:hover {
+          .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+            &:after {
+              box-shadow: $dropShadowHover;
+            }
+          }
+          .formattedPath {
+            .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+              &:after {
+                box-shadow: 0 3px 10px transparent;
+              }
+            }
+            &:hover {
+              .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+                &:after {
+                  box-shadow: $dropShadowHover;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
   .show {
     margin: 0;

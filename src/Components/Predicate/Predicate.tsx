@@ -1,6 +1,5 @@
 import { useState, FC, MouseEvent } from 'react';
 import styles from './Predicate.module.scss';
-import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import PubIcon from '../../Icons/Status/HasPub.svg?react';
 import CTIcon from '../../Icons/Status/HasCT.svg?react';
@@ -54,21 +53,6 @@ const Predicate: FC<PredicateProps> = ({
   selectedPaths,
   showHiddenPaths,
   uid }) => {
-
-  const checkForProvenanceType = (edge: ResultEdge, type: string) => {
-    if(!edge?.provenance || !Array.isArray(edge.provenance))
-      return false;
-
-    if(type === "ml") {
-      if(edge.provenance.some(item => item.knowledge_level === "ml"))
-        return true;
-    }
-    if(type === "trusted") {
-      if(edge.provenance.some(item => item.knowledge_level === "trusted"))
-        return true;
-    }
-    return false;
-  }
 
   let resultSet = useSelector(getResultSetById(pk));
   const formattedEdge = (!!resultSet && Array.isArray(edgeIDs) && edgeIDs.length > 1) ? getCompressedEdge(resultSet, edgeIDs) : edge;

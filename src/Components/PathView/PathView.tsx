@@ -146,7 +146,7 @@ const PathView: FC<PathViewProps> = ({
                           </>
                         : null
                       }
-                    <div className={`${styles.formattedPath}`}>
+                    <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed}`}>
                       {
                         !!lastViewedPathID && lastViewedPathID === path.id &&
                         <LastViewedTag/>

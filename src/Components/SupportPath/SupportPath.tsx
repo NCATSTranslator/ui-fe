@@ -50,7 +50,7 @@ const SupportPath: FC<SupportPathProps> = ({
       {
         path !== null &&
         <div 
-          className={`${!!pathViewStyles && pathViewStyles.formattedPath} ${lastViewedPathID && lastViewedPathID === path.id && !!pathViewStyles && pathViewStyles.isLastViewed}`} 
+          className={`${!!pathViewStyles && pathViewStyles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && pathViewStyles && pathViewStyles.lastViewed}`} 
           key={path.id}
           >
           {
