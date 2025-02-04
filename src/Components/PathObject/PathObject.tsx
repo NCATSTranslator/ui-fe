@@ -79,6 +79,7 @@ const PathObject: FC<PathObjectProps> = ({
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               data-tooltip-id={`${uid}`}
               >
+              <div className={`${styles.nameShape}`}></div>
               <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
                 {getIcon(pathObject?.types[0])}
                 <span className={styles.text}>
@@ -121,6 +122,7 @@ const PathObject: FC<PathObjectProps> = ({
                   className={className}
                   pathFilterState={pathFilterState}
                   pathViewStyles={pathViewStyles}
+                  parentStyles={styles}
                   selectedPaths={selectedPaths}
                   pk={pk}
                   showHiddenPaths={showHiddenPaths}

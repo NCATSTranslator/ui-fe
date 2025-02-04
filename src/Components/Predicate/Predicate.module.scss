@@ -135,13 +135,12 @@
     }
   }
   &.expanded {
-    border-radius: 50%;
     .supportButtonIcon {
       transform: rotate(0);
     }
     .supportConnector {
       opacity: 1;
-      height: 25px;
+      height: 22px;
     }
   }
   .supportConnector {

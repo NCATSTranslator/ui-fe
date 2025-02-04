@@ -73,6 +73,13 @@
         border-right-width: 13px;
         border-bottom-right-radius: $defaultBorderRadius;
         border-top-right-radius: $defaultBorderRadius;
+        div:first-child {
+          clip-path: polygon(100% -50.00%, 100% 50%, 100% 150%, 0% 150%, 5% 50%, 0% -50%);
+          &:after {
+            clip-path: none;
+            opacity: 0;
+          }
+        }
         .nameInterior {
           background-color: $lightGray;
           border: 1px solid $lightGray;

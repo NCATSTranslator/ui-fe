@@ -24,6 +24,7 @@ interface PredicateProps {
   edgeIDs: string[];
   inModal?: boolean | null;
   parentClass?: string;
+  parentStyles?: {[key: string]: string;} | null;
   pathFilterState: PathFilterState;
   path: Path;
   pathViewStyles?: {[key: string]: string;} | null;
@@ -44,7 +45,8 @@ const Predicate: FC<PredicateProps> = ({
   handleEdgeClick, 
   handleNodeClick, 
   inModal = false, 
-  parentClass = '', 
+  parentClass = '',
+  parentStyles,
   pathFilterState,
   path, 
   pathViewStyles = null, 
@@ -78,57 +80,57 @@ const Predicate: FC<PredicateProps> = ({
   ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
   : [formattedEdge];
 
-  // let hasSupport = (formattedEdge?.support && formattedEdge.support.length) > 0 ? true : false;
   return (
     <>
-      <Tooltip
-        id={`${formattedEdge.predicate}${uid}`}
-        place={`${inModal ? 'left' : 'top' }`}
-        >
-        {
-          <div className={styles.predicatesList}>
-            {
-              edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
-                if(!edge)
-                  return null;
-                return (
-                  <p
-                    key={`${edge.predicate}`}
-                    className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-                    onClick={(e)=> {
-                      e.stopPropagation();
-                      handleEdgeClick([edge.id], path);
-                    }}
-                    >
-                    <Highlighter
-                      highlightClassName="highlight"
-                      searchWords={activeEntityFilters}
-                      autoEscape={true}
-                      textToHighlight={edge.predicate}
-                    />
-                    {
-                      edge.predicate_url &&
-                      <a
-                        href={edge.predicate_url }
-                        onClick={(e)=> {
-                          e.stopPropagation();
-                        }}
-                        target="_blank"
-                        rel='noreferrer'>
-                          <ExternalLink/>
-                      </a>
-                    }
-                  </p>
-                );
-              })
-            }
-          </div>
-        }
-      </Tooltip>
       <span
         className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && pathViewStyles && pathViewStyles.isInferred}`}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path);}}
         >
+        <Tooltip
+          id={`${formattedEdge.predicate}${uid}`}
+          place={`${inModal ? 'left' : 'top' }`}
+          >
+          {
+            <div className={styles.predicatesList}>
+              {
+                edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
+                  if(!edge)
+                    return null;
+                  return (
+                    <p
+                      key={`${edge.predicate}`}
+                      className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
+                      onClick={(e)=> {
+                        e.stopPropagation();
+                        handleEdgeClick([edge.id], path);
+                      }}
+                      >
+                      <Highlighter
+                        highlightClassName="highlight"
+                        searchWords={activeEntityFilters}
+                        autoEscape={true}
+                        textToHighlight={edge.predicate}
+                      />
+                      {
+                        edge.predicate_url &&
+                        <a
+                          href={edge.predicate_url }
+                          onClick={(e)=> {
+                            e.stopPropagation();
+                          }}
+                          target="_blank"
+                          rel='noreferrer'>
+                            <ExternalLink/>
+                        </a>
+                      }
+                    </p>
+                  );
+                })
+              }
+            </div>
+          }
+        </Tooltip>
+        <div className={`${parentStyles && parentStyles.nameShape}`}></div>
         <span
           className={`${styles.pred} pred ${hasMore ? styles.hasMore : ''}`}
           >
@@ -152,18 +154,18 @@ const Predicate: FC<PredicateProps> = ({
               hasCTs && <CTIcon/>
             }
           </div>
+          {
+            isInferred && !inModal &&
+            <button
+              onClick={handleSupportExpansion}
+              className={`support-button ${styles.supportExpansionButton} ${isSupportExpanded ? styles.expanded : ''}`}>
+              <div className={styles.supportConnector}></div>
+              <span className={styles.supportButtonIcon}>
+                <Up/>
+              </span>
+            </button>
+          }
         </span>
-        {
-          isInferred && !inModal &&
-          <button
-            onClick={handleSupportExpansion}
-            className={`support-button ${styles.supportExpansionButton} ${isSupportExpanded ? styles.expanded : ''}`}>
-            <div className={styles.supportConnector}></div>
-            <span className={styles.supportButtonIcon}>
-              <Up/>
-            </span>
-          </button>
-        }
       </span>
       {
         isInferred && !inModal &&
