@@ -49,7 +49,7 @@ const getOtcCaption = (): JSX.Element => {
 
 const getTdlCaption = (): JSX.Element => {
   return(
-    <p className={styles.caption}>Show only results that are part of the selected target development level.</p>
+    <p className={styles.caption}>Include or exclude results that are part of the selected target development level</p>
   )
 }
 
