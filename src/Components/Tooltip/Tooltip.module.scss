@@ -4,7 +4,7 @@
   background-color: $darkGray; 
   color: $white;
   border-radius: $defaultBorderRadius;
-  padding: $xs;
+  padding: 12px !important;
   max-width: 335px !important;
   z-index: 150;
   text-align: left;
@@ -24,6 +24,7 @@
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 12;
+    line-clamp: 12;
     -webkit-box-orient: vertical;
     color: $white;
   }

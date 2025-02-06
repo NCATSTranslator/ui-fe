@@ -2,6 +2,7 @@
 
 .support {
   transition: all .35s ease !important;
+  display: inline-table;
   &.closed {
     border: 0px solid transparent;
     padding-top: 0;

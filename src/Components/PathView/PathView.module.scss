@@ -190,11 +190,14 @@
       transition: all .25s ease;
       align-self: start;
       .icon {
-        border: 1px solid $lightGray;
+        // border: 1px solid $lightGray;
         border-bottom-left-radius: $defaultBorderRadius;
         border-top-left-radius: $defaultBorderRadius;
         background-color: $lightGray;
-        padding: 3px $xxs;
+        padding: 0 $xxs;
+        height: 28px;
+        display: flex;
+        align-items: center;
         svg {
           width: 20px;
           height: 20px;

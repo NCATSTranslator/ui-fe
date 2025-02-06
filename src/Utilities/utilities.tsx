@@ -1113,61 +1113,106 @@ export const checkBookmarkForNotes = (bookmarkID: string | null, bookmarkSet: Sa
 }
 
 /**
- * Generates evidence counts for a provided list of paths
+ * Generates evidence ids for a provided edge NOT INCLUDING any attached support edges 
  *
- * @param {Path[]} paths - Array of paths to generate counts for.
- * @returns {EvidenceCountsContainer} Returns an EvidenceCountsContainer object with the requested counts.
+ * @param {ResultSet} resultSet - Result Set to fetch data from.
+ * @param {ResultEdge | string} edge - Edge or edge ID to generate counts for.
+ * @returns {void} Adds the ids to the provided Sets
  */
-const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): EvidenceCountsContainer => {
+export const getEvidenceFromEdge = (resultSet: ResultSet, edge: ResultEdge, allPubs: Set<string>, allCTs: Set<string>, allSources?: Set<string>, allMisc?: Set<string>) => {
+  // Process publications
+  for(const key in edge.publications) {
+    const pubArray = edge.publications[key];
+    for(const pubData of pubArray) {
+      const pub = getPubById(resultSet, pubData.id);
+      if(!pub) 
+        continue;
+      const url = pub.url;
+      if(isPublication(pub)) 
+        allPubs.add(url);
+      else if(!!allMisc)
+        allMisc.add(url);
+    }
+  }
+
+  for(const trial in edge.trials) 
+    allCTs.add(trial);
+
+  // Process sources
+  if(edge.provenance && !!allSources) {
+    for(const source of edge.provenance)
+      allSources.add(source.name);
+  }
+  return {
+    pubs: allPubs,
+    cts: allCTs,
+    sources: allSources,
+    misc: allMisc
+  }
+}
+
+/**
+ * Generates evidence ids for a provided edge and any attached support edges 
+ *
+ * @param {ResultSet} resultSet - Result Set to fetch data from.
+ * @param {ResultEdge | string} edge - Edge or edge ID to generate counts for.
+ * @returns {{pubs: string[], cts: string[], sources: string[], misc: string[]}} Returns an object with the requested evidence IDs.
+ */
+export const getEvidenceFromEdgeRecursive = (resultSet: ResultSet, edge: ResultEdge | string ) => {
   const allPubs = new Set<string>();
   const allCTs = new Set<string>();
   const allSources = new Set<string>();
   const allMisc = new Set<string>();
 
-  const processEdge = (edge: ResultEdge) => {
-    // Process publications
-    for(const key in edge.publications) {
-      const pubArray = edge.publications[key];
-      for(const pubData of pubArray) {
-        const pub = getPubById(resultSet, pubData.id);
-        if(!pub) 
+  let resultEdge = (isResultEdge(edge)) ? edge : getEdgeById(resultSet, edge);
+  if(!!resultEdge) {
+    getEvidenceFromEdge(resultSet, resultEdge, allPubs, allCTs, allSources, allMisc);
+    if(hasSupport(resultEdge) && resultEdge.support) {
+      for(const sp of resultEdge.support) {
+        const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
+        if(!supportPath) 
           continue;
-        const url = pub.url;
-        if(isPublication(pub)) 
-          allPubs.add(url);
-        else 
-          allMisc.add(url);
+        for(let j = 1; j < supportPath.subgraph.length; j += 2) {
+          const supportEdge = getEdgeById(resultSet, supportPath.subgraph[j]);
+          if(isResultEdge(supportEdge)) 
+            getEvidenceFromEdge(resultSet, supportEdge, allPubs, allCTs, allSources, allMisc);
+        }
       }
     }
+  }
 
-    for(const trial in edge.trials) 
-      allCTs.add(trial);
+  return {
+    pubs: allPubs,
+    cts: allCTs,
+    sources: allSources,
+    misc: allMisc
+  }
+};
 
-    // Process sources
-    if(edge.provenance) {
-      for(const source of edge.provenance)
-        allSources.add(source.name);
-    }
-  };
+/**
+ * Generates evidence counts for a provided list of paths
+ *
+ * @param {ResultSet} resultSet - Result Set to fetch data from.
+ * @param {Path[]} paths - Array of paths to generate counts for.
+ * @returns {EvidenceCountsContainer} Returns an EvidenceCountsContainer object with the requested counts.
+ */
+const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): EvidenceCountsContainer => {
+  let allPubs = new Set<string>();
+  let allCTs = new Set<string>();
+  let allSources = new Set<string>();
+  let allMisc = new Set<string>();
 
   const processPathEdges = (path: Path) => {
     for(let i = 1; i < path.subgraph.length; i += 2) {
-      const edge = getEdgeById(resultSet, path.subgraph[i]);
-      if(isResultEdge(edge)) {
-        processEdge(edge);
-        if(hasSupport(edge) && edge.support) {
-          for(const sp of edge.support) {
-            const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
-            if(!supportPath) 
-              continue;
-            for(let j = 1; j < supportPath.subgraph.length; j += 2) {
-              const supportEdge = getEdgeById(resultSet, supportPath.subgraph[j]);
-              if(isResultEdge(supportEdge)) 
-                processEdge(supportEdge);
-            }
-          }
-        }
-      }
+      let edgeEvidence = getEvidenceFromEdgeRecursive(resultSet, path.subgraph[i]);
+      if(edgeEvidence.pubs.size > 0)
+        allPubs = allPubs.union(edgeEvidence.pubs);
+      if(edgeEvidence.cts.size > 0)
+        allCTs = allCTs.union(edgeEvidence.cts);
+      if(edgeEvidence.sources.size > 0)
+        allSources = allSources.union(edgeEvidence.sources);
+      if(edgeEvidence.misc.size > 0)
+        allMisc = allMisc.union(edgeEvidence.misc);
     }
   };
 

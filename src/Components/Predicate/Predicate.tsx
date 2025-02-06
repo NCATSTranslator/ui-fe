@@ -5,7 +5,7 @@ import PubIcon from '../../Icons/Status/HasPub.svg?react';
 import CTIcon from '../../Icons/Status/HasCT.svg?react';
 import Up from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Highlighter from 'react-highlight-words';
-import { checkEdgesForClinicalTrials, checkEdgesForPubs, getCompressedEdge, hasSupport } from '../../Utilities/utilities';
+import { checkEdgesForClinicalTrials, checkEdgesForPubs, getCompressedEdge, getEvidenceFromEdge, hasSupport } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Types/results';
@@ -76,7 +76,7 @@ const Predicate: FC<PredicateProps> = ({
     return newArr;
   }
   
-  const edgesToDisplay = (!!formattedEdge?.compressed_edges) 
+  const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges) 
   ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
   : [formattedEdge];
 
@@ -85,6 +85,7 @@ const Predicate: FC<PredicateProps> = ({
       <span
         className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && pathViewStyles && pathViewStyles.isInferred}`}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path);}}
+        data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         >
         <Tooltip
           id={`${formattedEdge.predicate}${uid}`}
@@ -94,36 +95,53 @@ const Predicate: FC<PredicateProps> = ({
             <div className={styles.predicatesList}>
               {
                 edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
-                  if(!edge)
+                  if(!edge || !resultSet)
                     return null;
+                  // not optimal to create 2 new empty sets on each render, but it prevents having to write an additional evidence counting function
+                  const edgeEvidence = getEvidenceFromEdge(resultSet, edge, new Set<string>(), new Set<string>());
                   return (
-                    <p
-                      key={`${edge.predicate}`}
-                      className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-                      onClick={(e)=> {
-                        e.stopPropagation();
-                        handleEdgeClick([edge.id], path);
-                      }}
-                      >
-                      <Highlighter
-                        highlightClassName="highlight"
-                        searchWords={activeEntityFilters}
-                        autoEscape={true}
-                        textToHighlight={edge.predicate}
-                      />
+                    <div className={styles.tooltipPredicateContainer}>
+                      <p
+                        key={`${edge.predicate}`}
+                        className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
+                        onClick={(e)=> {
+                          e.stopPropagation();
+                          handleEdgeClick([edge.id], path);
+                        }}
+                        >
+                        <Highlighter
+                          highlightClassName="highlight"
+                          searchWords={activeEntityFilters}
+                          autoEscape={true}
+                          textToHighlight={edge.predicate}
+                        />
+                        {
+                          edge.predicate_url &&
+                          <a
+                            href={edge.predicate_url }
+                            onClick={(e)=> {
+                              e.stopPropagation();
+                            }}
+                            target="_blank"
+                            rel='noreferrer'>
+                              <ExternalLink/>
+                          </a>
+                        }
+                      </p>
                       {
-                        edge.predicate_url &&
-                        <a
-                          href={edge.predicate_url }
-                          onClick={(e)=> {
-                            e.stopPropagation();
-                          }}
-                          target="_blank"
-                          rel='noreferrer'>
-                            <ExternalLink/>
-                        </a>
+                        (edgeEvidence.pubs.size > 0 || edgeEvidence.cts.size > 0) &&
+                        <div className={styles.tooltipEvidenceCounts}>
+                          {
+                            (edgeEvidence.pubs.size > 0) && 
+                            <span className={styles.count}><PubIcon/>{edgeEvidence.pubs.size} Publication{edgeEvidence.pubs.size > 1 && "s"}</span>
+                          }
+                          {
+                            (edgeEvidence.cts.size > 0) && 
+                            <span className={styles.count}><CTIcon/>{edgeEvidence.cts.size} Clinical Trial{edgeEvidence.cts.size > 1 && "s"}</span>
+                          }
+                        </div>
                       }
-                    </p>
+                    </div>
                   );
                 })
               }
@@ -134,7 +152,7 @@ const Predicate: FC<PredicateProps> = ({
         <span
           className={`${styles.pred} pred ${hasMore ? styles.hasMore : ''}`}
           >
-          <span data-tooltip-id={`${formattedEdge.predicate}${uid}`} className={styles.predLabel}>
+          <span className={styles.predLabel}>
             <Highlighter
               highlightClassName="highlight"
               searchWords={activeEntityFilters}
