@@ -21,6 +21,7 @@ interface PathViewProps {
   active: boolean;
   activeEntityFilters: string[];
   activeFilters: Filter[];
+  inModal?: boolean;
   isEven: boolean;
   handleActivateEvidence: (path: Path) => void;
   handleEdgeSpecificEvidence:(edgeIDs: string[], path: Path) => void;
@@ -34,17 +35,18 @@ interface PathViewProps {
 }
 
 const PathView: FC<PathViewProps> = ({ 
-  active, 
-  activeEntityFilters, 
-  activeFilters, 
-  handleActivateEvidence, 
-  handleEdgeSpecificEvidence, 
-  isEven, 
-  pathArray, 
+  active,
+  activeEntityFilters,
+  activeFilters,
+  handleActivateEvidence,
+  handleEdgeSpecificEvidence,
+  inModal = false, 
+  isEven,
+  pathArray,
   pathFilterState,
   pk,
   resultID,
-  selectedPaths, 
+  selectedPaths,
   setShowHiddenPaths,
   showHiddenPaths }) => {
 
@@ -103,15 +105,18 @@ const PathView: FC<PathViewProps> = ({
       <Tooltip id='inferred-label-tooltip'>
         <span className={styles.inferredLabelTooltip}>Deduced from patterns in Translator's knowledge graphs that suggest relationships which are not explicitly stated. The paths shown below them support the inferred relationship.</span>
       </Tooltip>
-      <div className={styles.header}>
-        <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
-      </div>
+      {
+        !inModal && 
+        <div className={styles.header}>
+          <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
+        </div>
+      }
       {
         (!active)
         ? <></>
         :
         <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
-          <div className={styles.paths}>
+          <div className={`${styles.paths} ${inModal && styles.inModal}`}>
             {
               displayedPaths.map((path: Path, i: number)=> {
                 const isPathFiltered = getIsPathFiltered(path, pathFilterState);
@@ -128,7 +133,7 @@ const PathView: FC<PathViewProps> = ({
                 return (
                   <div key={tooltipID}>
                     {
-                      displayDirectLabel
+                      displayDirectLabel && !inModal
                         ?
                           <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
                             Direct <Information className={styles.infoIcon} />
@@ -137,7 +142,7 @@ const PathView: FC<PathViewProps> = ({
                           null
                     }
                     {
-                      displayIndirectLabel
+                      displayIndirectLabel && !inModal
                         ?
                           <>
                             <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
@@ -148,8 +153,8 @@ const PathView: FC<PathViewProps> = ({
                       }
                     <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed}`}>
                       {
-                        !!lastViewedPathID && lastViewedPathID === path.id &&
-                        <LastViewedTag/>
+                        ((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) &&
+                        <LastViewedTag inModal={inModal}/>
                       }
                       <button
                         onClick={()=>{
@@ -190,6 +195,7 @@ const PathView: FC<PathViewProps> = ({
                                     pathViewStyles={styles}
                                     index={i}
                                     isEven={isEven}
+                                    inModal={inModal}
                                     path={path}
                                     id={subgraphItemID}
                                     key={key}
@@ -216,6 +222,7 @@ const PathView: FC<PathViewProps> = ({
                                     pathViewStyles={styles}
                                     index={i}
                                     isEven={isEven}
+                                    inModal={inModal}
                                     path={path}
                                     id={subgraphItemID}
                                     key={subgraphItemID}

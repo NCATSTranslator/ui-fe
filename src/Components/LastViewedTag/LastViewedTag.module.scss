@@ -22,4 +22,7 @@
   &.visible {
     left: 6px;
   }
+  &.inModal {
+    top: $s;
+  }
 }

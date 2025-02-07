@@ -3,6 +3,22 @@
 .pathView {
   padding: 0;
   position: relative;
+  .paths {
+    &.inModal {
+      .formattedPath {
+        margin: 0;
+        padding-top: $s;
+        padding-bottom: $s;
+        .lastViewedTag {
+          top: 16px;
+        }
+      }
+      & > div {
+        display: grid;
+        align-items: center;
+      }
+    }
+  }
   .tableHead, .tableItem {
     display: grid;
     justify-content: flex-start;
@@ -33,16 +49,6 @@
   }
   .tableItem {
     position: relative;
-    .nameContainer, .predicateInterior {
-      border-color: $purpleTwo;
-      border-width: 2px 0;
-      border-style: solid;
-      background-color: $lightGray;
-      height: 28px;
-    }
-    .predicateInterior.isInferred {
-      border-style: dashed;
-    }
     &.isEven {
       .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
         background-color: $white;
@@ -64,11 +70,6 @@
       }
     }
     .nameContainer {
-      // &:first-child {
-      //   border-left-width: 8px;
-      //   border-bottom-left-radius: $defaultBorderRadius;
-      //   border-top-left-radius: $defaultBorderRadius;
-      // }
       &:last-child {
         border-right-width: 13px;
         border-bottom-right-radius: $defaultBorderRadius;
@@ -190,7 +191,6 @@
       transition: all .25s ease;
       align-self: start;
       .icon {
-        // border: 1px solid $lightGray;
         border-bottom-left-radius: $defaultBorderRadius;
         border-top-left-radius: $defaultBorderRadius;
         background-color: $lightGray;
@@ -257,14 +257,6 @@
         left: -8px;
       }
     }
-    // .formattedPath {
-    //   background-color: black;
-    //   .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
-    //     &:after {
-    //       box-shadow: $dropShadowHover;
-    //     }
-    //   }
-    // }
     &:hover {
       .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
         &:after {

@@ -160,6 +160,7 @@
   max-height: 175px;
   transition: all .4s ease;
   position: relative;
+  justify-content: center;
   .togglePathView {
     position: absolute;
     top: $xs;
@@ -188,6 +189,28 @@
       padding: 4px 8px 4px 4px;
       min-height: 22px;
       width: 136px;
+    }
+  }
+  .nameContainer {
+    &:last-child {
+      border-right-width: 13px;
+      border-bottom-right-radius: $defaultBorderRadius;
+      border-top-right-radius: $defaultBorderRadius;
+      div:first-child {
+        clip-path: polygon(100% -50.00%, 100% 50%, 100% 150%, 0% 150%, 5% 50%, 0% -50%);
+        &:after {
+          clip-path: none;
+          opacity: 0;
+        }
+      }
+      .nameInterior {
+        background-color: $lightGray;
+        border: 1px solid $lightGray;
+        border-bottom-right-radius: $defaultBorderRadius;
+        border-top-right-radius: $defaultBorderRadius;
+        height: 16px;
+        margin-right: -5px;
+      }
     }
   }
 }

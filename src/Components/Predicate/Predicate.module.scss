@@ -1,5 +1,16 @@
 @import "../../Assets/Styles/variables";
 
+
+.edge {
+  border-color: $purpleTwo;
+  border-width: 2px 0;
+  border-style: solid;
+  background-color: $lightGray;
+  height: 28px;
+  &.isInferred {
+    border-style: dashed;
+  }
+}
 .pred {
   display: flex;
   align-items: center;

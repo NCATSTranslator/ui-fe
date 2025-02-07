@@ -21,6 +21,7 @@ import MinusIcon from '../../Icons/Buttons/Subtract/Subtract.svg?react';
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 import Button from "../Core/Button";
+import PathView from "../PathView/PathView";
 
 interface EvidenceModalProps {
   isOpen: boolean;
@@ -157,7 +158,23 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                   : <MinusIcon />
                 }
               </Button>
-              <div className={`${styles.pathView} scrollable-support path ${numberToWords(pathLength)}`}>
+              <PathView
+                pathArray={[path]}
+                selectedPaths={new Set()}
+                handleEdgeSpecificEvidence={handleEdgeClick}
+                handleActivateEvidence={(path)=> console.log(path)}
+                activeEntityFilters={[]}
+                pathFilterState={{}}
+                isEven={false}
+                active={isOpen}
+                activeFilters={[]}
+                pk={pk ? pk : ""}
+                setShowHiddenPaths={()=>{}}
+                showHiddenPaths={true}
+                resultID={result.id}
+                inModal={true}
+              />
+              {/* <div className={`${styles.pathView} scrollable-support path ${numberToWords(pathLength)}`}>
                 {
                   !!compressedSubgraph
                   ?
@@ -253,7 +270,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                       )
                     })
                 }
-              </div>
+              </div> */}
             </div>
           }
           <Tabs isOpen={isOpen} className={styles.tabs}>
