@@ -12,6 +12,16 @@
         .lastViewedTag {
           top: 16px;
         }
+        .pathEvidenceButton, .num {
+          display: none;
+        }
+        .tableItem > span:first-child {
+          border-width: 2px 0 2px 8px;
+          border-style: solid;
+          border-color: $purpleTwo;
+          border-bottom-left-radius: $defaultBorderRadius;
+          border-top-left-radius: $defaultBorderRadius;
+        }
       }
       & > div {
         display: grid;
@@ -74,8 +84,14 @@
         border-right-width: 13px;
         border-bottom-right-radius: $defaultBorderRadius;
         border-top-right-radius: $defaultBorderRadius;
+        background-color: $purpleTwo;
         div:first-child {
           clip-path: polygon(100% -50.00%, 100% 50%, 100% 150%, 0% 150%, 5% 50%, 0% -50%);
+          border: 1px solid $purpleTwo;
+          border-bottom-right-radius: 8px;
+          border-top-right-radius: 8px;
+          right: -2px;
+          border-left: none;
           &:after {
             clip-path: none;
             opacity: 0;
