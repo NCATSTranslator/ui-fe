@@ -1,6 +1,7 @@
 import { useState, FC, MouseEvent } from 'react';
 import styles from './Predicate.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
+import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 import PubIcon from '../../Icons/Status/HasPub.svg?react';
 import CTIcon from '../../Icons/Status/HasCT.svg?react';
 import Up from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
@@ -148,7 +149,9 @@ const Predicate: FC<PredicateProps> = ({
             </div>
           }
         </Tooltip>
-        <div className={`${parentStyles && parentStyles.nameShape}`}></div>
+        <div className={`${parentStyles && parentStyles.nameShape}`}>
+          <PathArrow/>
+        </div>
         <span
           className={`${styles.pred} pred ${hasMore ? styles.hasMore : ''}`}
           >

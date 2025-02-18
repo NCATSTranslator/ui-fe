@@ -151,7 +151,7 @@ const PathView: FC<PathViewProps> = ({
                           </>
                         : null
                       }
-                    <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed}`}>
+                    <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed} ${isEven && styles.isEven}`}>
                       {
                         ((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) &&
                         <LastViewedTag inModal={inModal}/>
@@ -180,7 +180,7 @@ const PathView: FC<PathViewProps> = ({
                       </Tooltip>
                       <div 
                         data-path-id={`${path.id || ""}`} 
-                        className={`${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''} ${isEven && styles.isEven}`}
+                        className={`${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''} `}
                         >
                         {
                           !!path?.compressedSubgraph

@@ -2,6 +2,7 @@ import styles from './PathObject.module.scss';
 import { FC, useId } from 'react';
 import Tooltip from '../Tooltip/Tooltip';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
+import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from '../Predicate/Predicate';
@@ -79,7 +80,9 @@ const PathObject: FC<PathObjectProps> = ({
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               data-tooltip-id={`${uid}`}
               >
-              <div className={`${styles.nameShape}`}></div>
+              <div className={`${styles.nameShape}`}>
+                <PathArrow/>
+              </div>
               <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
                 {getIcon(pathObject?.types[0])}
                 <span className={styles.text}>

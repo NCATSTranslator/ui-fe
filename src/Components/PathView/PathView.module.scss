@@ -59,24 +59,13 @@
   }
   .tableItem {
     position: relative;
-    &.isEven {
-      .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
-        background-color: $white;
-      }
-      .nameContainer {
-        .nameInterior {
-          background-color: $white;
-          border: 1px solid $white;
-          border-bottom-right-radius: $defaultBorderRadius;
-          border-top-right-radius: $defaultBorderRadius;
-          margin-right: -1px;
-        }
-        &:last-child {
-          .nameInterior {
-            background-color: $white;
-            border: 1px solid $white;
-          }
-        }
+    .nameContainer {
+      .nameInterior {
+        background-color: $lightGray;
+        border-bottom-right-radius: $defaultBorderRadius;
+        border-top-right-radius: $defaultBorderRadius;
+        margin-right: -1px;
+        z-index: 10;
       }
     }
     .nameContainer {
@@ -84,25 +73,21 @@
         border-right-width: 13px;
         border-bottom-right-radius: $defaultBorderRadius;
         border-top-right-radius: $defaultBorderRadius;
-        background-color: $purpleTwo;
         div:first-child {
-          clip-path: polygon(100% -50.00%, 100% 50%, 100% 150%, 0% 150%, 5% 50%, 0% -50%);
-          border: 1px solid $purpleTwo;
+          clip-path: polygon(188px -16px,188px 16px,188px 48px,-5% 48px,8px 16px, -8px -16px);
+          border: 2px solid $purpleTwo;
           border-bottom-right-radius: 8px;
           border-top-right-radius: 8px;
-          right: -2px;
+          right: -10px;
           border-left: none;
-          &:after {
-            clip-path: none;
-            opacity: 0;
+          svg {
+            display: none;
           }
         }
         .nameInterior {
-          background-color: $lightGray;
-          border: 1px solid $lightGray;
           border-bottom-right-radius: $defaultBorderRadius;
           border-top-right-radius: $defaultBorderRadius;
-          height: 16px;
+          height: 19px;
           margin-right: -5px;
         }
       }
@@ -175,6 +160,15 @@
     position: relative;
     transition: padding .5s ease;
     z-index: 10;
+    &.isEven {
+      .nameContainer, .nameInterior, .predicateInterior, .num, .pathEvidenceButton .icon {
+        background-color: $white;
+      }
+      .nameInterior {
+        border-color: $white;
+        background-color: $white;
+      }
+    }
     .num {
       width: 20px;
       height: 28px;
@@ -192,6 +186,7 @@
       background-color: $lightGray;
       padding-right: $xxs;
       cursor: default;
+      transition: $defaultAnim;
     }
     .pathEvidenceButton {
       height: $l;
@@ -214,10 +209,14 @@
         height: 28px;
         display: flex;
         align-items: center;
+        transition: $defaultAnim;
+        position: relative;
+        z-index: 10;
         svg {
           width: 20px;
           height: 20px;
           margin-right: 0;
+          z-index: 10;
           path, line, circle {
             transition: all .25s ease;
             fill: $purpleTwo;
@@ -225,11 +224,20 @@
         }
       }
       &:hover {
-        svg {
-          path, line, circle {
-            fill: $black;
-          }
+        .icon {
+          background-color: #d8d4e0;
         }
+        // svg {
+        //   path, line, circle {
+        //     fill: $black;
+        //   }
+        // }
+        // & + .num, & ~ .tableItem span:nth-child(1) > div, & ~ .tableItem span:nth-child(2) > div {
+        //   background-color: #d8d4e0;
+        // }
+        // & ~ .tableItem span:nth-child(1) > div, & ~ .tableItem span:nth-child(2) > div, & ~ .tableItem span:nth-child(3) > div {
+        //   background-color: rgba(61, 43, 100, .2);
+        // }
       }
     }
     &.lastViewed {
