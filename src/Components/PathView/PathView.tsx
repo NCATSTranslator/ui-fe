@@ -6,6 +6,7 @@ import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
+import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
 import { PathFilterState, ResultNode, Path, Filter } from '../../Types/results';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
@@ -172,6 +173,7 @@ const PathView: FC<PathViewProps> = ({
                       </button>
                       <span className={styles.num}>
                         { indexInFullCollection + 1 }
+                        <PathArrow/>
                       </span>
                       <Tooltip
                         id={tooltipID}

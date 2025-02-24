@@ -29,6 +29,12 @@
       }
     }
   }
+  .num {
+    svg {
+      position: relative;
+      right: -5px;
+    }
+  }
   .tableHead, .tableItem {
     display: grid;
     justify-content: flex-start;
