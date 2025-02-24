@@ -24,5 +24,7 @@
   }
   &.inModal {
     top: $s;
+    left: -2px;
+    padding-right: 8px;
   }
 }
