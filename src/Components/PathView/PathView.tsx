@@ -8,7 +8,7 @@ import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
-import { PathFilterState, ResultNode, Path, Filter } from '../../Types/results';
+import { PathFilterState, ResultNode, Path, Filter, ResultEdge } from '../../Types/results';
 import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
@@ -30,6 +30,7 @@ interface PathViewProps {
   pathFilterState: PathFilterState;
   pk: string;
   resultID: string;
+  selectedEdge?: ResultEdge | null;
   selectedPaths: Set<Path> | null;
   setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   showHiddenPaths: boolean;
@@ -47,6 +48,7 @@ const PathView: FC<PathViewProps> = ({
   pathFilterState,
   pk,
   resultID,
+  selectedEdge,
   selectedPaths,
   setShowHiddenPaths,
   showHiddenPaths }) => {
@@ -189,6 +191,7 @@ const PathView: FC<PathViewProps> = ({
                           ?
                             path.compressedSubgraph.map((subgraphItemID, i) => {
                               let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
+                              let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false; 
                               if(path.id === undefined)
                                 return null;
                               return (
@@ -210,12 +213,14 @@ const PathView: FC<PathViewProps> = ({
                                     activeFilters={activeFilters}
                                     pk={pk}
                                     showHiddenPaths={showHiddenPaths}
+                                    selected={selected}
                                   />
                                 </>
                               )
                             }) 
                           :
                             path.subgraph.map((subgraphItemID, i) => {
+                              let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false; 
                               if(path.id === undefined)
                                 return null;
                               return (
@@ -237,6 +242,7 @@ const PathView: FC<PathViewProps> = ({
                                     activeFilters={activeFilters}
                                     pk={pk}
                                     showHiddenPaths={showHiddenPaths}
+                                    selected={selected}
                                   />
                                 </>
                               )

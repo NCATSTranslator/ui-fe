@@ -105,18 +105,6 @@
     }
   }
 }
-.selected {
-  span.pred {
-    border: 1px solid $purpleEdgeBGSelected;
-    background-color: $purpleEdgeBGSelected;
-    color: $white;
-  }
-
-  .predicatesList {
-    margin: 0;
-    list-style-type: none;
-  }
-}
 .badges {
   display: flex;
   align-items: center;

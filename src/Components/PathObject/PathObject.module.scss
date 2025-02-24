@@ -143,11 +143,11 @@
     font-weight: 400;
   }
 }
-.predicateContainer:hover, 
+.predicateContainer:hover, .predicateContainer.selected,
 .nameContainer:hover, 
-.nameContainer:has(+ .predicateContainer:hover), 
-.predicateContainer:hover + .nameContainer,
-.predicateContainer:hover + div + .nameContainer {
+.nameContainer:has(+ .predicateContainer:hover), .nameContainer:has(+ .predicateContainer.selected),
+.predicateContainer:hover + .nameContainer, .predicateContainer.selected + .nameContainer,
+.predicateContainer:hover + div + .nameContainer, .predicateContainer.selected + div + .nameContainer {
   .nameShape {
     background-color: rgba(61, 43, 100, .2);
   }

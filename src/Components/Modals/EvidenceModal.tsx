@@ -173,6 +173,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                 showHiddenPaths={true}
                 resultID={result.id}
                 inModal={true}
+                selectedEdge={selectedEdge}
               />
               {/* <div className={`${styles.pathView} scrollable-support path ${numberToWords(pathLength)}`}>
                 {
