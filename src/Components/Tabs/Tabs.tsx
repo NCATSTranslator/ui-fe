@@ -94,7 +94,7 @@ const Tabs: FC<TabsProps> = ({ children, className, isOpen, handleTabSelection =
         if (!isValidElement(child)) return null;
         return (
           <Fade key={i} className={styles.fade}>
-            <div className={`${styles.tabContent} ${activeTabHeading !== child.props.heading ? styles.inactive : activeTabHeading}`}>{child.props.children}</div>
+            <div className={`${styles.tabContent} ${child.props.className ? child.props.className : ""} ${activeTabHeading !== child.props.heading ? styles.inactive : activeTabHeading}`}>{child.props.children}</div>
           </Fade>
         );
       })}

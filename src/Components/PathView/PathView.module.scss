@@ -158,6 +158,30 @@
         margin-right: 8px;
       }
     }
+    &.compressedTableItem {
+      grid-auto-columns: 178px;
+      grid-template-rows: 1fr;
+      grid-auto-flow: column;
+      .groupedPreds {
+        position: relative;
+        right: -10px;
+        &.hasSelected {
+          position: relative;
+          + svg + .nameContainer > div:first-child {
+            background-color: $lightPurpleTwo !important;
+          }
+        }
+      }
+      .connectors {
+        path {
+          transition: stroke .5s ease;
+        }
+        & + .nameContainer > div svg {
+          display: block !important;
+        } 
+      }
+
+    }
   }
   .formattedPath {
     display: inline-grid;

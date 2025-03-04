@@ -3,9 +3,10 @@ import History from '../../Icons/Navigation/History.svg?react';
 import { useEffect, useState, FC } from 'react';
 
 interface LastViewedTagProps {
+  inGroup?: boolean;
   inModal?: boolean;
 }
-const LastViewedTag: FC<LastViewedTagProps> = ({ inModal = false }) => {
+const LastViewedTag: FC<LastViewedTagProps> = ({ inGroup = false, inModal = false }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -13,7 +14,7 @@ const LastViewedTag: FC<LastViewedTagProps> = ({ inModal = false }) => {
   }, []);
 
   return (
-    <div className={`${styles.lastViewedTag} ${inModal && styles.inModal} ${isVisible && styles.visible}`}>
+    <div className={`${styles.lastViewedTag} ${inModal && styles.inModal} ${inGroup && styles.inGroup} ${isVisible && styles.visible}`}>
       <History/>
     </div>
   );

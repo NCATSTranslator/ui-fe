@@ -195,3 +195,32 @@
     }
   }
 }
+.inModal.inGroup {
+  &.edge {
+    background-color: transparent !important;
+    border: none;
+    height: 32px;
+    margin-bottom: $xs;
+    &:after {
+      display: none !important;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .nameShape {
+    background-color: $lightGray;
+    border-top: 2px solid $purpleTwo;
+    border-bottom: 2px solid $purpleTwo;
+    top: 0;
+    bottom: 0;
+    svg {
+      display: none;
+    }
+  }
+  &.selected, &:hover {
+    .nameShape {
+      background-color: $lightPurpleTwo;
+    }
+  }
+}

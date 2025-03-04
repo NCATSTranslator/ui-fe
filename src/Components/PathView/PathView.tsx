@@ -22,10 +22,11 @@ interface PathViewProps {
   active: boolean;
   activeEntityFilters: string[];
   activeFilters: Filter[];
-  inModal?: boolean;
-  isEven: boolean;
+  compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
   handleActivateEvidence: (path: Path) => void;
   handleEdgeSpecificEvidence:(edgeIDs: string[], path: Path) => void;
+  inModal?: boolean;
+  isEven: boolean;
   pathArray: string[] | Path[];
   pathFilterState: PathFilterState;
   pk: string;
@@ -40,6 +41,7 @@ const PathView: FC<PathViewProps> = ({
   active,
   activeEntityFilters,
   activeFilters,
+  compressedSubgraph,
   handleActivateEvidence,
   handleEdgeSpecificEvidence,
   inModal = false, 
@@ -93,6 +95,47 @@ const PathView: FC<PathViewProps> = ({
     setLastViewedPathID(path?.id || null);
     handleEdgeSpecificEvidence(edgeIDs, path);
   }, [handleEdgeSpecificEvidence]);
+
+
+  const edgeHeight = 32;
+  const svgWidth = 188;
+  const curveOffset = 50;
+  const straightSegmentLength = 20;
+  const pathColor = "#8C8C8C26";
+  const selectedPathColor = "#3D2B6466";
+  const pathThickness = 32;
+  
+  const generatePathD = (
+    index: number,
+    svgHeight: number,
+    svgWidth: number,
+    edgeHeight: number,
+    enter: boolean,
+    curveOffset = 50,
+    straightSegment = 10
+  ): string => {
+    const startX = 0; 
+    const startY = svgHeight * 0.5;
+    const endX = svgWidth; 
+    // Center of stacked edge
+    const endY = index * (edgeHeight + 8) + edgeHeight / 2; 
+    // Adjust straight segment positions
+    const midStartX = startX + straightSegment;
+    const midEndX = endX - straightSegment;
+    // Control points for smooth curves
+    const controlX1 = midStartX + curveOffset;
+    const controlX2 = midEndX - curveOffset;
+  
+    return enter 
+      ? `M ${startX} ${startY} 
+         L ${midStartX} ${startY} 
+         C ${controlX1} ${startY}, ${controlX2} ${endY}, ${midEndX} ${endY} 
+         L ${endX} ${endY}`
+      : `M ${startX} ${endY} 
+         L ${midStartX} ${endY} 
+         C ${controlX1} ${endY}, ${controlX2} ${startY}, ${midEndX} ${startY} 
+         L ${endX} ${startY}`;
+  };
 
   if(!resultSet)
     return null;
@@ -157,7 +200,7 @@ const PathView: FC<PathViewProps> = ({
                     <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed} ${isEven && styles.isEven}`}>
                       {
                         ((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) &&
-                        <LastViewedTag inModal={inModal}/>
+                        <LastViewedTag inModal={inModal} inGroup={!!(inModal && compressedSubgraph)}/>
                       }
                       <button
                         onClick={()=>{
@@ -184,39 +227,101 @@ const PathView: FC<PathViewProps> = ({
                       </Tooltip>
                       <div 
                         data-path-id={`${path.id || ""}`} 
-                        className={`${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''} `}
+                        className={` ${inModal && compressedSubgraph && styles.compressedTableItem} ${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''} `}
                         >
                         {
-                          !!path?.compressedSubgraph
+                          inModal && compressedSubgraph
                           ?
-                            path.compressedSubgraph.map((subgraphItemID, i) => {
-                              let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
-                              let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false; 
-                              if(path.id === undefined)
-                                return null;
-                              return (
-                                <>
+                            compressedSubgraph.map((subgraphItem, i) => {
+                              if(Array.isArray(subgraphItem) && subgraphItem.length > 1) {
+                                const svgHeight = (subgraphItem.length * (edgeHeight + 8)) - 8;
+                                let hasSelected = (!!selectedEdge && subgraphItem.find(edge => edge.id === selectedEdge.id)) ? true : false; 
+                                return(
+                                  <>
+                                    <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
+                                      {/* Render node → edge connections */}
+                                      {subgraphItem.map((edge, index) => {
+                                        let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
+                                        return (
+                                          <path
+                                            key={`node-to-edge-${edge.id}`}
+                                            d={generatePathD(index, svgHeight, svgWidth, edgeHeight, true, curveOffset, straightSegmentLength)}
+                                            stroke={selected ? selectedPathColor : pathColor}
+                                            fill="transparent"
+                                            strokeWidth={pathThickness}
+                                          />
+                                        );
+                                      })}
+                                    </svg>
+                                    <div className={`${styles.groupedPreds} ${hasSelected && styles.hasSelected}`}>
+                                      {
+                                        subgraphItem.map((edge)=> {
+                                          let key = `${edge.id}`;
+                                          let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
+                                          return (
+                                            <PathObject
+                                              pathViewStyles={styles}
+                                              index={i}
+                                              isEven={false}
+                                              path={path}
+                                              id={edge.id}
+                                              key={key}
+                                              handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
+                                              handleEdgeClick={handleEdgeClick}
+                                              pathFilterState={{}}
+                                              activeFilters={[]}
+                                              activeEntityFilters={[]}
+                                              selected={selected}
+                                              selectedPaths={null}
+                                              inGroup={true}
+                                              inModal={true}
+                                              pk={pk}
+                                            />
+                                          )
+                                        })
+                                      }
+                                    </div>
+                                    <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
+                                      {/* Render edge → node connections */}
+                                      {subgraphItem.map((edge, index) => {
+                                        let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
+                                        return (
+                                          <path
+                                            key={`edge-to-node-${edge.id}`}
+                                            d={generatePathD(index, svgHeight, svgWidth, edgeHeight, false, curveOffset, straightSegmentLength)}
+                                            stroke={selected ? selectedPathColor : pathColor}
+                                            fill="transparent"
+                                            strokeWidth={pathThickness}
+                                          />
+                                        );
+                                      })}
+                                    </svg>
+                                  </>
+                                )
+                              } else {
+                                let key = (Array.isArray(subgraphItem)) ? subgraphItem[0].id : subgraphItem.id;
+                                let selected = (!!selectedEdge && selectedEdge.id === key) ? true : false; 
+                                return (
                                   <PathObject
                                     pathViewStyles={styles}
                                     index={i}
-                                    isEven={isEven}
-                                    inModal={inModal}
+                                    isEven={false}
                                     path={path}
-                                    id={subgraphItemID}
+                                    id={key}
                                     key={key}
-                                    handleActivateEvidence={handleActivateEvidence}
+                                    handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
                                     handleEdgeClick={handleEdgeClick}
-                                    handleNodeClick={handleNodeClick}
-                                    activeEntityFilters={activeEntityFilters}
-                                    selectedPaths={selectedPaths}
-                                    pathFilterState={pathFilterState}
-                                    activeFilters={activeFilters}
-                                    pk={pk}
-                                    showHiddenPaths={showHiddenPaths}
+                                    pathFilterState={{}}
+                                    activeFilters={[]}
+                                    activeEntityFilters={[]}
                                     selected={selected}
+                                    selectedPaths={null}
+                                    inGroup={(Array.isArray(subgraphItem)) ? false : true}
+                                    inModal={true}
+                                    pk={pk}
                                   />
-                                </>
-                              )
+                                )
+                              }
                             }) 
                           :
                             path.subgraph.map((subgraphItemID, i) => {

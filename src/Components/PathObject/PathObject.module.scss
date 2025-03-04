@@ -77,11 +77,7 @@
   padding: 0;
   position: relative;
   cursor: pointer;
-  // min-width: 220px;
   justify-content: space-between;
-  .nameShape {
-
-  }
 }
 .predicateContainer, .nameContainer, .targetContainer {
   cursor: pointer;
@@ -185,3 +181,74 @@
   text-decoration: underline;
 }
 
+
+.inModal {
+  &.predicateContainer:hover, &.predicateContainer.selected,
+  &.nameContainer:hover, 
+  &.nameContainer:has(+ .predicateContainer:hover), &.nameContainer:has(+ .predicateContainer.selected),
+  &.predicateContainer:hover + .nameContainer, &.predicateContainer.selected + .nameContainer,
+  &.predicateContainer:hover + div + .nameContainer, &.predicateContainer.selected + div + .nameContainer {
+    .nameShape {
+      background-color: $lightPurpleTwo !important;
+    }
+  }
+  &:after {
+    display: none !important;
+  }
+}
+.inModal.inGroup {
+  background-color: transparent;
+  border: none;
+  &:first-child {
+    right: -9px;
+    .nameShape {
+      clip-path: polygon(160px -16px,178px 16px,160px 48px,0% 48px,0 16px,0 -16px);
+      left: 0;
+    }
+  }
+  &:last-child {
+    border-color: $purpleTwo;
+    border-width: 2px 0;
+    border-style: solid;
+  }
+  &:before {
+    background-color: $lightGray !important;
+    left: 0;
+    transition: $defaultAnim;
+  }
+  &:hover {
+    &:before {
+      background-color: $lightPurpleTwo !important;
+    }
+  }
+  .nameShape {
+    background-color: $lightGray;
+    border-top: 2px solid $purpleTwo;
+    border-bottom: 2px solid $purpleTwo;
+    svg {
+      display: none;
+    }
+  }
+  .name {
+    background-color: transparent !important;
+    z-index: 50 !important;
+  }
+  &.selected,
+  &:hover,
+  &:has(+ svg + div > .predicateContainer.selected),
+  &.selected + svg + .nameContainer {
+    .nameShape, &:before {
+      background-color: $lightPurpleTwo !important;
+    }
+  }
+}
+
+// .predicateContainer:hover, .predicateContainer.selected,
+// .nameContainer:hover, 
+// .nameContainer:has(+ svg + .predicateContainer:hover), .nameContainer:has(+ .predicateContainer.selected),
+// .predicateContainer:hover + .nameContainer, .predicateContainer.selected + .nameContainer,
+// .predicateContainer:hover + div + .nameContainer, .predicateContainer.selected + div + .nameContainer {
+//   .nameShape {
+//     background-color: rgba(61, 43, 100, .2);
+//   }
+// }

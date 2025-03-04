@@ -23,8 +23,12 @@
     left: 6px;
   }
   &.inModal {
-    top: $s;
     left: -2px;
     padding-right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    &.inGroup {
+      left: 8px;
+    }
   }
 }

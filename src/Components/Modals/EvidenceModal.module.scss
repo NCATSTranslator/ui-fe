@@ -21,7 +21,7 @@
   .tab {
     display: grid;
     grid-template-rows: auto 1fr;
-    overflow-y: hidden;
+    overflow-y: scroll;
   }
   .tableBody {
     box-shadow: $dropShadow;
@@ -153,25 +153,40 @@
   background-color: $palePurple;
   border-radius: $largeBorderRadius;
   border: 1px solid $lightPurpleTwo;
-  margin: $s auto $s;
+  margin: $s auto 0;
   width: calc(100% - 2px);
-  overflow: hidden;
-  display: flex;
-  max-height: 175px;
+  overflow: scroll hidden;
   transition: all .4s ease;
   position: relative;
-  justify-content: center;
+  max-height: 100%;
+  padding: 18px 0;
   .togglePathView {
-    position: absolute;
-    top: $xs;
-    right: $xs;
+    position: fixed;
+    top: 102px;
+    right: 30px;
     margin: 0;
-    padding: 0;
+    padding: 7px 8px;
     z-index: 100;
+    font-size: 12px;
+    color: $black;
+    box-shadow: $dropShadow;
+    transition: $defaultAnim;
+    svg {
+      width: 18px;
+      height: 18px;
+      path {
+        stroke: $black;
+      }
+    }
+    &:hover {
+      box-shadow: $dropShadowColorHover;
+    }
   }
   &.minimized {
-    max-height: 42px;
-    margin-bottom: 0;
+    max-height: 30px;
+    .togglePathView svg {
+      transform: rotate(180deg);
+    }
   }
 }
 .pathView {
