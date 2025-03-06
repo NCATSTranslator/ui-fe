@@ -5,10 +5,14 @@
   position: relative;
   .paths {
     &.inModal {
+      padding: 0 $l;
       .formattedPath {
-        margin: 0;
+        margin: 0 auto;
         padding-top: $s;
         padding-bottom: $s;
+        padding-right: $l;
+        display: block;
+        width: min-content;
         .pathEvidenceButton, .num {
           display: none;
         }
@@ -24,10 +28,6 @@
             left: -2px;
           }
         }
-      }
-      & > div {
-        display: grid;
-        align-items: center;
       }
     }
   }
@@ -89,7 +89,7 @@
           right: -10px;
           border-left: none;
           svg {
-            display: none;
+            display: none !important;
           }
         }
         .nameInterior {
@@ -171,13 +171,22 @@
             background-color: $lightPurpleTwo !important;
           }
         }
+        .predicateInterior {
+          margin-bottom: 8px;
+          &>div>svg {
+            display: none;
+          }
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
       }
       .connectors {
         path {
           transition: stroke .5s ease;
         }
         & + .nameContainer > div svg {
-          display: block !important;
+          display: block;
         } 
       }
 
@@ -191,7 +200,7 @@
     padding-left: $l;
     position: relative;
     transition: padding .5s ease;
-    z-index: 10;
+    z-index: 50;
     &.isEven {
       .nameContainer, .nameInterior, .predicateInterior, .num, .pathEvidenceButton .icon {
         background-color: $white;
@@ -259,17 +268,6 @@
         .icon {
           background-color: #d8d4e0;
         }
-        // svg {
-        //   path, line, circle {
-        //     fill: $black;
-        //   }
-        // }
-        // & + .num, & ~ .tableItem span:nth-child(1) > div, & ~ .tableItem span:nth-child(2) > div {
-        //   background-color: #d8d4e0;
-        // }
-        // & ~ .tableItem span:nth-child(1) > div, & ~ .tableItem span:nth-child(2) > div, & ~ .tableItem span:nth-child(3) > div {
-        //   background-color: rgba(61, 43, 100, .2);
-        // }
       }
     }
     &.lastViewed {

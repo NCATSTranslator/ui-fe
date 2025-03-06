@@ -195,17 +195,13 @@
     }
   }
 }
-.inModal.inGroup {
+.inModal {
   &.edge {
     background-color: transparent !important;
     border: none;
     height: 32px;
-    margin-bottom: $xs;
     &:after {
       display: none !important;
-    }
-    &:last-child {
-      margin-bottom: 0;
     }
   }
   .nameShape {
@@ -214,12 +210,22 @@
     border-bottom: 2px solid $purpleTwo;
     top: 0;
     bottom: 0;
+    clip-path: polygon(171px -16px ,186px 16px, 171px 48px, -5% 48px, 8px 16px, -8px -16px);
     svg {
-      display: none;
+      top: 0px;
+      right: 3px;
     }
   }
-  &.selected, &:hover {
+  &.selected.edge, &.edge:hover {
     .nameShape {
+      background-color: $lightPurpleTwo !important;
+    }
+  }
+  &.selected.edge + span, &.edge:hover + span {
+    &.edge > div:first-child {
+      background-color: $lightGray;
+    }
+    & > div:first-child {
       background-color: $lightPurpleTwo;
     }
   }

@@ -23,7 +23,6 @@ interface PredicateProps {
   handleNodeClick: (name: ResultNode) => void;
   edge: ResultEdge;
   edgeIDs: string[];
-  inGroup?: boolean | null;
   inModal?: boolean | null;
   parentClass?: string;
   parentStyles?: {[key: string]: string;} | null;
@@ -46,7 +45,6 @@ const Predicate: FC<PredicateProps> = ({
   handleActivateEvidence, 
   handleEdgeClick, 
   handleNodeClick, 
-  inGroup = false, 
   inModal = false, 
   parentClass = '',
   parentStyles,
@@ -86,10 +84,13 @@ const Predicate: FC<PredicateProps> = ({
   return (
     <>
       <span
-        className={`${selected && styles.selected} ${selected && parentStyles ? parentStyles.selected : ''} ${styles.edge} ${inModal && styles.inModal} ${inGroup ? styles.inGroup : ''} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && styles.isInferred}`}
+        className={`${selected && styles.selected} ${selected && parentStyles ? parentStyles.selected : ''} ${styles.edge} ${inModal && styles.inModal} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && styles.isInferred}`}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path);}}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         >
+        <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
+          <PathArrow/>
+        </div>
         <Tooltip
           id={`${formattedEdge.predicate}${uid}`}
           place={`${inModal ? 'left' : 'top' }`}
@@ -151,9 +152,6 @@ const Predicate: FC<PredicateProps> = ({
             </div>
           }
         </Tooltip>
-        <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
-          <PathArrow/>
-        </div>
         <span
           className={`${styles.pred} pred ${hasMore ? styles.hasMore : ''}`}
           >

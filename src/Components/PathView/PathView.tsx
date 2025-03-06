@@ -273,7 +273,6 @@ const PathView: FC<PathViewProps> = ({
                                               activeEntityFilters={[]}
                                               selected={selected}
                                               selectedPaths={null}
-                                              inGroup={true}
                                               inModal={true}
                                               pk={pk}
                                             />
@@ -316,7 +315,6 @@ const PathView: FC<PathViewProps> = ({
                                     activeEntityFilters={[]}
                                     selected={selected}
                                     selectedPaths={null}
-                                    inGroup={(Array.isArray(subgraphItem)) ? false : true}
                                     inModal={true}
                                     pk={pk}
                                   />

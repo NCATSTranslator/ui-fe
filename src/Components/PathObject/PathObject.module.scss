@@ -2,6 +2,11 @@
 
 
 .nameContainer,.predicateContainer,.targetContainer {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
   svg {
     width: 24px;
     height: 24px;
@@ -43,55 +48,13 @@
       }
     }
   }
-}
-.name,.predicateContainer,.target {
-  display: flex;
-  align-items: center;
-}
-.text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 0 4px;
-}
-.nameContainer {
-  position: relative;
-  box-shadow: none;
-  border-color: $purpleTwo;
-  border-width: 2px 0;
-  border-style: solid;
-  background-color: $lightGray;
-  height: 28px;
-  &.even {
-    background-color: $white;
-  }
-  svg {
-    margin-right: 0;
-    path {
-      fill: $black;
-    }
-  }
-}
-
-.predicateContainer {
-  padding: 0;
-  position: relative;
-  cursor: pointer;
-  justify-content: space-between;
-}
-.predicateContainer, .nameContainer, .targetContainer {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  position: relative;
   .nameShape {
     position: absolute;
     top: -2px;
     right: 0px;
     bottom: -2px;
     left: -10px;
-    clip-path: polygon(170px -16px,188px 16px,170px 48px,-5% 48px,8px 16px, -8px -16px);
+    clip-path: polygon(170px -16px ,188px 16px, 170px 48px, -5% 48px, 8px 16px, -8px -16px);
     transition: $defaultAnim;
     z-index: 20;
     & > span {
@@ -107,7 +70,7 @@
       min-width: auto;
       min-height: auto;
       path {
-        fill: $midGray;
+        fill: $midPurpleTwo;
       }
     }
   }
@@ -138,6 +101,40 @@
     margin: 3px 0 8px;
     font-weight: 400;
   }
+}
+.name,.predicateContainer,.target {
+  display: flex;
+  align-items: center;
+}
+.text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+.nameContainer {
+  position: relative;
+  box-shadow: none;
+  border-color: $purpleTwo;
+  border-width: 2px 0;
+  border-style: solid;
+  background-color: $lightGray;
+  height: 28px;
+  &.even {
+    background-color: $white;
+  }
+  svg {
+    margin-right: 0;
+    path {
+      fill: $black;
+    }
+  }
+}
+.predicateContainer {
+  padding: 0;
+  position: relative;
+  cursor: pointer;
+  justify-content: space-between;
 }
 .predicateContainer:hover, .predicateContainer.selected,
 .nameContainer:hover, 
@@ -181,29 +178,17 @@
   text-decoration: underline;
 }
 
-
 .inModal {
-  &.predicateContainer:hover, &.predicateContainer.selected,
-  &.nameContainer:hover, 
-  &.nameContainer:has(+ .predicateContainer:hover), &.nameContainer:has(+ .predicateContainer.selected),
-  &.predicateContainer:hover + .nameContainer, &.predicateContainer.selected + .nameContainer,
-  &.predicateContainer:hover + div + .nameContainer, &.predicateContainer.selected + div + .nameContainer {
-    .nameShape {
-      background-color: $lightPurpleTwo !important;
-    }
-  }
-  &:after {
-    display: none !important;
-  }
-}
-.inModal.inGroup {
   background-color: transparent;
   border: none;
   &:first-child {
     right: -9px;
     .nameShape {
-      clip-path: polygon(160px -16px,178px 16px,160px 48px,0% 48px,0 16px,0 -16px);
+      clip-path: polygon(170px -16px,188px 16px,170px 48px,0% 48px,0 16px,0 -16px);
       left: 0;
+      svg {
+        right: 12px;
+      }
     }
   }
   &:last-child {
@@ -216,6 +201,9 @@
     left: 0;
     transition: $defaultAnim;
   }
+  &:after {
+    display: none !important;
+  }
   &:hover {
     &:before {
       background-color: $lightPurpleTwo !important;
@@ -226,29 +214,35 @@
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
     svg {
-      display: none;
+      top: 0px;
+      right: 3px;
+    }
+  }
+  &:has(+ svg) {
+    .nameShape {
+      clip-path: polygon(160px -16px,178px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
+      svg {
+        display: none;
+      }
     }
   }
   .name {
     background-color: transparent !important;
     z-index: 50 !important;
   }
-  &.selected,
   &:hover,
-  &:has(+ svg + div > .predicateContainer.selected),
-  &.selected + svg + .nameContainer {
-    .nameShape, &:before {
+  &:hover + .nameContainer,
+  &.selected,
+  &.selected + .nameContainer,
+  &.nameContainer:has(+ svg + div .predicateContainer:hover),
+  &.nameContainer:has(+ svg + div .predicateContainer.selected),
+  &.nameContainer:has(+ .predicateContainer.selected),
+  &.nameContainer:has(+ .predicateContainer:hover){
+    .nameShape {
+      background-color: $lightPurpleTwo !important;
+    }
+    &:before {
       background-color: $lightPurpleTwo !important;
     }
   }
 }
-
-// .predicateContainer:hover, .predicateContainer.selected,
-// .nameContainer:hover, 
-// .nameContainer:has(+ svg + .predicateContainer:hover), .nameContainer:has(+ .predicateContainer.selected),
-// .predicateContainer:hover + .nameContainer, .predicateContainer.selected + .nameContainer,
-// .predicateContainer:hover + div + .nameContainer, .predicateContainer.selected + div + .nameContainer {
-//   .nameShape {
-//     background-color: rgba(61, 43, 100, .2);
-//   }
-// }

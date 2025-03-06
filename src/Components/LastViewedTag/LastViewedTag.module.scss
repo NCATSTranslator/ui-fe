@@ -23,12 +23,9 @@
     left: 6px;
   }
   &.inModal {
-    left: -2px;
+    left: 6px;
     padding-right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    &.inGroup {
-      left: 8px;
-    }
   }
 }

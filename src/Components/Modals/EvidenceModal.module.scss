@@ -155,7 +155,7 @@
   border: 1px solid $lightPurpleTwo;
   margin: $s auto 0;
   width: calc(100% - 2px);
-  overflow: scroll hidden;
+  overflow: auto hidden;
   transition: all .4s ease;
   position: relative;
   max-height: 100%;

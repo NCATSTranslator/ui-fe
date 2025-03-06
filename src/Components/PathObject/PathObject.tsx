@@ -19,7 +19,6 @@ export interface PathObjectProps {
   handleNodeClick: (name: ResultNode) => void;
   id: string | string[];
   index: number;
-  inGroup?: boolean;
   inModal?: boolean;
   isEven?: boolean;
   path: Path;
@@ -40,7 +39,6 @@ const PathObject: FC<PathObjectProps> = ({
   handleEdgeClick,
   id,
   index,
-  inGroup = false,
   inModal = false,
   isEven = false,
   pathFilterState,
@@ -78,7 +76,7 @@ const PathObject: FC<PathObjectProps> = ({
       {
         isNode 
           ?
-            <span className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer}  ${inModal ? styles.inModal : ''} ${inGroup ? styles.inGroup : ''} ${isEven && styles.even}`}
+            <span className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer}  ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               data-tooltip-id={`${uid}`}
               >
@@ -123,7 +121,6 @@ const PathObject: FC<PathObjectProps> = ({
                   handleEdgeClick={handleEdgeClick}
                   handleNodeClick={handleNodeClick}
                   parentClass={styles.predicateContainer}
-                  inGroup={inGroup}
                   inModal={inModal}
                   className={className}
                   pathFilterState={pathFilterState}
