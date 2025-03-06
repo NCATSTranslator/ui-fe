@@ -150,14 +150,17 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
           {
             path &&
             <div className={`${styles.pathViewContainer} ${isPathViewMinimized && styles.minimized}`}>
-              <Button isSecondary handleClick={()=>setIsPathViewMinimized(prev=>!prev)} className={styles.togglePathView}>
-                {
-                  isPathViewMinimized
-                  ? "Expand"
-                  : "Collapse"
-                }
-                <ChevDown/>
-              </Button>
+              {
+                compressedSubgraph && 
+                <Button isSecondary handleClick={()=>setIsPathViewMinimized(prev=>!prev)} className={styles.togglePathView}>
+                  {
+                    isPathViewMinimized
+                    ? "Expand"
+                    : "Collapse"
+                  }
+                  <ChevDown/>
+                </Button>
+              }
               <PathView
                 pathArray={[path]}
                 selectedPaths={new Set()}
