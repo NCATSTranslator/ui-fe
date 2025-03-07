@@ -8,7 +8,8 @@
   background-color: $lightGray;
   height: 28px;
   &.isInferred {
-    border-style: dashed;
+    border-top-style: dashed;
+    border-bottom-style: dashed;
   }
 }
 .pred {
@@ -202,6 +203,10 @@
     height: 32px;
     &:after {
       display: none !important;
+    }
+    &.isInferred .nameShape {
+      border-top-style: dashed;
+      border-bottom-style: dashed;
     }
   }
   .nameShape {
