@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useContext } from 'react';
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
@@ -6,6 +6,7 @@ import { PathFilterState, Path, ResultNode, Filter } from '../../Types/results';
 import { getIsPathFiltered, numberToWords } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
 import { useLastViewedPath } from '../../Utilities/customHooks';
+import { LastViewedPathIDContext } from '../PathView/PathView';
 
 
 interface SupportPathProps {
@@ -37,7 +38,7 @@ const SupportPath: FC<SupportPathProps> = ({
   selectedPaths,
   showHiddenPaths }) => {
 
-  const { lastViewedPathID } = useLastViewedPath(); 
+  const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath(); 
 
   const tooltipID = path.id;
 
@@ -58,7 +59,12 @@ const SupportPath: FC<SupportPathProps> = ({
             <LastViewedTag/>
           }
           <button
-            onClick={()=>handleActivateEvidence(path)}
+            onClick={()=>{
+              if(!!path?.id) {
+                setLastViewedPathID(path.id);
+                handleActivateEvidence(path);
+              }
+            }}
             className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
             data-tooltip-id={`${tooltipID}`}
             >

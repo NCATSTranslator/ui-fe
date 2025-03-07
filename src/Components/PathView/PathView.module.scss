@@ -242,6 +242,7 @@
       margin: 0;
       transition: all .25s ease;
       align-self: start;
+      outline: none !important;
       .icon {
         border-bottom-left-radius: $defaultBorderRadius;
         border-top-left-radius: $defaultBorderRadius;
