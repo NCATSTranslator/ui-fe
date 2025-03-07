@@ -6,8 +6,7 @@ import { PathFilterState, Path, ResultNode, Filter } from '../../Types/results';
 import { getIsPathFiltered, numberToWords } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
 import { useLastViewedPath } from '../../Utilities/customHooks';
-import { LastViewedPathIDContext } from '../PathView/PathView';
-
+import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 
 interface SupportPathProps {
   activeEntityFilters: string[];
@@ -74,6 +73,7 @@ const SupportPath: FC<SupportPathProps> = ({
           </button>
           <span className={`${!!pathViewStyles && pathViewStyles.num}`}>
             { character }
+            <PathArrow/>
           </span>
           <Tooltip
             id={`${tooltipID}`}
