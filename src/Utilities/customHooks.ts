@@ -209,12 +209,13 @@ export type LastViewedPathIDContextType = {
   lastViewedPathID: string | null;
   setLastViewedPathID: Dispatch<SetStateAction<string | null>>;
 };
-export const useLastViewedPath = () => {
+export const useLastViewedPath = (): LastViewedPathIDContextType => {
   const context = useContext(LastViewedPathIDContext);
-  if (!context)
-    console.warn(context, 'useLastViewedPath must be used within a LastViewedPathIDContext.Provider');
-  
-  return !!context ? context : { lastViewedPathID: -1 } ;
+  if (!context) {
+    console.warn("useLastViewedPath must be used within a LastViewedPathIDContext.Provider");
+    return { lastViewedPathID: null, setLastViewedPathID: () => {} };
+  }
+  return context;
 };
 
 interface TextStreamHookResult {
