@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } from 'react';
-import { LastViewedPathIDContext } from '../Components/PathView/PathView';
+import { LastViewedPathIDContext, SupportPathDepthContext } from '../Components/PathView/PathView';
 import { isEqual } from 'lodash';
 import { useQuery } from 'react-query';
 
@@ -350,4 +350,12 @@ export const useTextStream = (
     startStream,
     cancelStream
   };
+};
+
+/**
+ * Custom hook to get the current depth level in the path hierarchy.
+ * @returns {number} The current depth level.
+ */
+export const useSupportPathDepth = (): number => {
+  return useContext(SupportPathDepthContext);
 };
