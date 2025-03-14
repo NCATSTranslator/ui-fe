@@ -537,6 +537,35 @@ export const intToChar = (num: number): string => {
 }
 
 /**
+ * Converts an integer into its corresponding Roman numeral representation.
+ *
+ * @param {number} num - The integer to convert (1 = I, 2 = II, ..., 1000 = M).
+ * @returns {string} - The corresponding Roman numeral.
+ */
+export const intToNumeral = (num: number): string => {
+  if (num < 1 || num > 1000) {
+    console.warn("Number supplied to intToNumeral function out of range, must be between 1 & 1000. Number provided:", num);
+    return "--";
+  }
+
+  const romanMap: [number, string][] = [
+    [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+    [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]
+  ];
+
+  let result = "";
+  for (const [value, numeral] of romanMap) {
+    while (num >= value) {
+      result += numeral;
+      num -= value;
+    }
+  }
+  
+  return result.toLowerCase();
+};
+
+/**
  * Calculates the total number of paths for a provided array of PathObjectContainer objects.
  *
  * @param {string[]} paths - An array of paths to count.
@@ -784,10 +813,10 @@ export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[]) 
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string|Path)[]} paths - An array of paths or path IDs
  * @param {PathFilterState} pathFilterState - The current Path Filter State
- * @param {Set<Path> | null} pathFilterState - The currently selected paths
+ * @param {Set<Path> | null} selectedPaths - The currently selected paths
  * @returns {Path[]} - The array of properly formatted paths. 
  */
-export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null) => {
+export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null, isTopLevel: boolean = false) => {
   if(!paths || !resultSet) 
     return [];
 
@@ -809,7 +838,11 @@ export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (s
     }
     newPaths.sort((a: Path, b: Path) => (b.highlighted === a.highlighted ? 0 : b.highlighted ? -1 : 1));
   } 
-  return sortArrayByIndirect(resultSet, newPaths);
+
+  if(isTopLevel)
+    return sortArrayByIndirect(resultSet, newPaths);
+  else
+    return newPaths
 }
 
 /**
