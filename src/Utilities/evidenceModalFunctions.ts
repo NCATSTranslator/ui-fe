@@ -250,8 +250,8 @@ export const createPathDictionaryAndLookup = (
           let supportPaths = getPathsWithSelectionsSet(resultSet, edge.support, pathFilterState ? pathFilterState : {}, null);
           for (const [supportIndex, supportPath] of supportPaths.entries()) {
             const suffix = (depth === 2)
-              ? intToChar(supportIndex + 1)  
-              : intToNumeral(supportIndex + 1);
+              ? intToNumeral(supportIndex + 1)  
+              : intToChar(supportIndex + 1);
             const supportKey = `${keyPrefix}.${suffix}`;
             processPath(supportPath, supportKey, depth + 1);
           }
