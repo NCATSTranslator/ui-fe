@@ -58,7 +58,7 @@ const PathView: FC<PathViewProps> = ({
   const resultSet = useSelector(getResultSetById(pk));
   const paths = isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray;
   const itemsPerPage: number = 10;
-  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
+  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths, true), [paths, selectedPaths, pathFilterState, resultSet]);
   const filteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const currentPage = useRef<number>(0);
@@ -95,7 +95,6 @@ const PathView: FC<PathViewProps> = ({
     setLastViewedPathID(path?.id || null);
     handleEdgeSpecificEvidence(edgeIDs, path);
   }, [handleEdgeSpecificEvidence]);
-
 
   const edgeHeight = 32;
   const svgWidth = 188;

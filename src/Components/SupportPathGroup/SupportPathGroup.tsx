@@ -42,7 +42,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
 
   const resultSet = useSelector(getResultSetById(pk));
   const paths = isStringArray(pathArray) ? getPathsByIds(resultSet, pathArray) : pathArray;
-
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
 
   const initHeight = (isExpanded) ? 'auto' : 0;
@@ -69,7 +68,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   }
 
   const displayedPaths = (!!formattedPaths) 
-    ? formattedPaths.sort((a, b) => Number(b?.highlighted) - Number(a?.highlighted)).slice(itemOffset, endResultIndex.current)
+    ? formattedPaths.slice(itemOffset, endResultIndex.current)
     : [];
 
   useEffect(() => {

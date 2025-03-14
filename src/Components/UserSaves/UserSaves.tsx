@@ -33,10 +33,10 @@ const UserSaves = () => {
   const [filteredUserSaves, setFilteredUserSaves] = useState<{[key: string]: SaveGroup;} | null>(null);
   const currentSearchString = useRef("");
   const [evidenceModalOpen, setEvidenceModalOpen] = useState(false);
-  const [selectedResult, setSelectedResult] = useState<Result | undefined>(undefined);
+  const [selectedResult, setSelectedResult] = useState<Result | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
-  const [selectedPath, setSelectedPath] = useState<Path | undefined>(undefined);
-  const [selectedPK, setSelectedPK] = useState<string | undefined>(undefined);
+  const [selectedPath, setSelectedPath] = useState<Path | null>(null);
+  const [selectedPK, setSelectedPK] = useState<string | null>(null);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   // eslint-disable-next-line
@@ -239,6 +239,7 @@ const UserSaves = () => {
                 isOpen={evidenceModalOpen}
                 onClose={()=>handleEvidenceModalClose(setEvidenceModalOpen)}
                 result={selectedResult}
+                pathFilterState={{}}
                 pk={(!!selectedPK) ? selectedPK : "-1"}
                 edge={selectedEdge}
                 path={selectedPath}

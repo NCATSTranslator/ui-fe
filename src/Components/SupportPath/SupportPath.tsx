@@ -1,4 +1,4 @@
-import { FC, useContext } from 'react';
+import { FC } from 'react';
 import PathObject from '../PathObject/PathObject';
 import Tooltip from '../Tooltip/Tooltip';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
@@ -37,10 +37,8 @@ const SupportPath: FC<SupportPathProps> = ({
   selectedPaths,
   showHiddenPaths }) => {
 
-  const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath(); 
-
+  const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const tooltipID = path.id;
-
   const isPathFiltered = getIsPathFiltered(path, pathFilterState);
   if(!path.id || (isPathFiltered && !showHiddenPaths)) 
     return null;

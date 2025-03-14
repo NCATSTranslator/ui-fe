@@ -2,16 +2,15 @@ import {useState, useEffect, useRef, FC, useMemo} from "react";
 import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
 import Tab from "../Tabs/Tab";
-import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
-import { capitalizeAllWords, isPublication, numberToWords, getFormattedEdgeLabel, 
-  getUrlByType, getCompressedSubgraph, getCompressedEdge} from "../../Utilities/utilities";
-import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
+import { capitalizeAllWords, isPublication, getFormattedEdgeLabel, getUrlByType, getCompressedSubgraph,
+  getCompressedEdge, hasSupport, getPathsWithSelectionsSet} from "../../Utilities/utilities";
+import { isResultEdge, Path, PathFilterState, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
 import { Provenance, PublicationObject, TrialObject } from "../../Types/evidence.d";
-import { getResultSetById, getEdgeById, getNodeById } from "../../Redux/resultsSlice";
+import { getResultSetById } from "../../Redux/resultsSlice";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
-import { checkForEdgeMatch, flattenPublicationObject, flattenTrialObject } from "../../Utilities/evidenceModalFunctions";
+import { flattenPublicationObject, flattenTrialObject, createPathDictionaryAndLookup, findPathInDictionary } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
@@ -23,21 +22,23 @@ import Button from "../Core/Button";
 import PathView from "../PathView/PathView";
 
 interface EvidenceModalProps {
+  edge: ResultEdge | null;
   isOpen: boolean;
   onClose: Function;
   path?: Path | null;
-  result?: Result;
-  edge: ResultEdge | null;
+  pathFilterState: PathFilterState | null;
   pk: string;
+  result: Result | null;
 }
 
 const EvidenceModal: FC<EvidenceModalProps> = ({
-  path = null,
+  edge = null,
   isOpen,
   onClose,
-  result,
+  path = null,
+  pathFilterState,
   pk,
-  edge = null}) => {
+  result }) => {
 
   const prefs = useSelector(currentPrefs);
   const resultSet = useSelector(getResultSetById(pk));
@@ -51,8 +52,15 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   const [selectedEdgeTrigger, setEdgeSelectedTrigger] = useState(false);
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
   const [isPathViewMinimized, setIsPathViewMinimized] = useState(false);
+  const isInferred = hasSupport(selectedEdge);
 
-  const pathLength = (path) ? path.subgraph.length : 0;
+  
+  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, result?.paths, pathFilterState ? pathFilterState : {}, new Set([]), true), [result, pathFilterState, resultSet]);
+  const { pathDictionary, pathIdLookup } = useMemo(()=>createPathDictionaryAndLookup(resultSet, formattedPaths, pathFilterState), [resultSet, formattedPaths, pathFilterState]);
+
+  const pathInDictionary = (!!path?.id) ? findPathInDictionary(pathDictionary, pathIdLookup, path.id) : null;
+  const pathKey = (!!pathInDictionary) ? pathInDictionary.key : null;
+
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false = useMemo(()=>{
     return path?.compressedSubgraph && !!resultSet ? getCompressedSubgraph(resultSet, path.compressedSubgraph) : false;
   }, [path, resultSet]);
@@ -139,10 +147,10 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer}`}>
       {result?.drug_name &&
         <div className={styles.top}>
-          <h5 className={styles.title}>Evidence for:</h5>
+          <h5 className={styles.title}>{isInferred ? "Indirect" : "Direct"} Path {pathKey} Evidence</h5>
           {
             edgeLabel &&
-            <h5 className={styles.subtitle}>{capitalizeAllWords(edgeLabel)}</h5>
+            <p className={styles.subtitle}>{capitalizeAllWords(edgeLabel)}</p>
           }
           <Tooltip id="knowledge-sources-tooltip" >
             <span>The resources that provided the information supporting the selected relationship.</span>
