@@ -7,9 +7,11 @@ import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import { sortSupportByEntityStrings, sortSupportByLength } from '../../Utilities/sortingFunctions';
 import { Filter, Path, PathFilterState, ResultNode } from '../../Types/results';
-import { intToChar, getPathsWithSelectionsSet, isStringArray, getFilteredPathCount } from '../../Utilities/utilities';
+import { intToChar, getPathsWithSelectionsSet, isStringArray, getFilteredPathCount, intToNumeral } from '../../Utilities/utilities';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
+import { useSupportPathDepth } from '../../Utilities/customHooks';
+import { SupportPathDepthContext } from '../PathView/PathView';
 
 interface SupportPathGroupProps {
   activeFilters: Filter[];
@@ -53,6 +55,9 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   const currentPage = useRef<number>(0);
   const endResultIndex = useRef<number>(itemsPerPage);
   const pageCount = (!!formattedPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / itemsPerPage) : 0;
+
+  const parentDepth = useSupportPathDepth();
+  const currentDepth = useMemo(() => parentDepth + 1, [parentDepth]);
   
   const handlePageClick = (event: {selected: number} ) => {
     let pathsLength = pathArray.length;
@@ -94,57 +99,60 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
       duration={500}
       height={typeof height === "number" ? height : 'auto'}
     >
-      <div className={`${!!pathViewStyles && pathViewStyles.supportGroupContainer} scrollable-support`}>
-        <p className={styles.supportLabel}>Supporting Paths</p>
-        {
-          !!displayedPaths && 
-          displayedPaths.map((supportPath, i) => {
-            if(!supportPath)
-              return null;
-            const indexInFullCollection = itemOffset + i;
-            const character = intToChar(indexInFullCollection + 1);
-            return (
-              <SupportPath
-                key={supportPath.id}
-                character={character}
-                pathFilterState={pathFilterState}
-                path={supportPath}
-                handleEdgeClick={handleEdgeClick}
-                handleNodeClick={handleNodeClick}
-                handleActivateEvidence={handleActivateEvidence}
-                selectedPaths={selectedPaths}
-                pathViewStyles={pathViewStyles}
-                activeEntityFilters={activeEntityFilters}
-                activeFilters={activeFilters}
-                pk={pk}
-                showHiddenPaths={showHiddenPaths}
-              />
-            );
-          })
-        }
-      </div>
-      {
-        pageCount > 1 &&
-        <div className={styles.paginationContainer}>
-          <ReactPaginate
-            breakLabel="..."
-            nextLabel={<ChevRight/>}
-            previousLabel={<ChevLeft/>}
-            onPageChange={handlePageClick}
-            pageRangeDisplayed={4}
-            marginPagesDisplayed={1}
-            pageCount={pageCount}
-            renderOnZeroPageCount={null}
-            className='pageNums'
-            pageClassName='pageNum'
-            activeClassName='current'
-            previousLinkClassName={`button ${styles.button}`}
-            nextLinkClassName={`button ${styles.button}`}
-            disabledLinkClassName={`disabled ${styles.disabled}`}
-            forcePage={currentPage.current}
-          />
+      <SupportPathDepthContext.Provider value={currentDepth}>
+
+        <div className={`${!!pathViewStyles && pathViewStyles.supportGroupContainer} scrollable-support`}>
+          <p className={styles.supportLabel}>Supporting Paths</p>
+          {
+            !!displayedPaths && 
+            displayedPaths.map((supportPath, i) => {
+              if(!supportPath)
+                return null;
+              const indexInFullCollection = itemOffset + i;
+              const character = currentDepth === 2 ? intToNumeral(indexInFullCollection + 1) : intToChar(indexInFullCollection + 1);
+              return (
+                <SupportPath
+                  key={supportPath.id}
+                  character={character}
+                  pathFilterState={pathFilterState}
+                  path={supportPath}
+                  handleEdgeClick={handleEdgeClick}
+                  handleNodeClick={handleNodeClick}
+                  handleActivateEvidence={handleActivateEvidence}
+                  selectedPaths={selectedPaths}
+                  pathViewStyles={pathViewStyles}
+                  activeEntityFilters={activeEntityFilters}
+                  activeFilters={activeFilters}
+                  pk={pk}
+                  showHiddenPaths={showHiddenPaths}
+                />
+              );
+            })
+          }
         </div>
-      }
+        {
+          pageCount > 1 &&
+          <div className={styles.paginationContainer}>
+            <ReactPaginate
+              breakLabel="..."
+              nextLabel={<ChevRight/>}
+              previousLabel={<ChevLeft/>}
+              onPageChange={handlePageClick}
+              pageRangeDisplayed={4}
+              marginPagesDisplayed={1}
+              pageCount={pageCount}
+              renderOnZeroPageCount={null}
+              className='pageNums'
+              pageClassName='pageNum'
+              activeClassName='current'
+              previousLinkClassName={`button ${styles.button}`}
+              nextLinkClassName={`button ${styles.button}`}
+              disabledLinkClassName={`disabled ${styles.disabled}`}
+              forcePage={currentPage.current}
+            />
+          </div>
+        }
+      </SupportPathDepthContext.Provider>
     </AnimateHeight>
   )
 }

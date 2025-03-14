@@ -53,7 +53,6 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
   const [isPathViewMinimized, setIsPathViewMinimized] = useState(false);
   const isInferred = hasSupport(selectedEdge);
-
   
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, result?.paths, pathFilterState ? pathFilterState : {}, new Set([]), true), [result, pathFilterState, resultSet]);
   const { pathDictionary, pathIdLookup } = useMemo(()=>createPathDictionaryAndLookup(resultSet, formattedPaths, pathFilterState), [resultSet, formattedPaths, pathFilterState]);

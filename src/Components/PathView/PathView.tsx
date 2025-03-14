@@ -17,6 +17,7 @@ import Button from '../Core/Button';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
+export const SupportPathDepthContext = createContext<number>(1);
 
 interface PathViewProps {
   active: boolean;
@@ -161,222 +162,224 @@ const PathView: FC<PathViewProps> = ({
         ? <></>
         :
         <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
-          <div className={`${styles.paths} ${inModal && styles.inModal}`}>
-            {
-              displayedPaths.map((path: Path, i: number)=> {
-                const isPathFiltered = getIsPathFiltered(path, pathFilterState);
-                if(!path.id || (isPathFiltered && !showHiddenPaths)) 
-                  return null;
-                const displayIndirectLabel = isPathInferred(resultSet, path) && !inferredLabelDisplayed;
-                  if(displayIndirectLabel)
-                    inferredLabelDisplayed = true;
-                const displayDirectLabel = !isPathInferred(resultSet, path) && !directLabelDisplayed;
-                  if(displayDirectLabel)
-                    directLabelDisplayed = true;
-                const tooltipID: string = (!!path?.id) ? path.id : i.toString();
-                const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
-                return (
-                  <div key={tooltipID}>
-                    {
-                      displayDirectLabel && !inModal
-                        ?
-                          <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
-                            Direct <Information className={styles.infoIcon} />
-                          </p>
-                        :
-                          null
-                    }
-                    {
-                      displayIndirectLabel && !inModal
-                        ?
-                          <>
-                            <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
-                              Indirect <Information className={styles.infoIcon} />
-                            </p>
-                          </>
-                        : null
-                      }
-                    <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed} ${isEven && styles.isEven}`}>
+          <SupportPathDepthContext.Provider value={0}>
+            <div className={`${styles.paths} ${inModal && styles.inModal}`}>
+              {
+                displayedPaths.map((path: Path, i: number)=> {
+                  const isPathFiltered = getIsPathFiltered(path, pathFilterState);
+                  if(!path.id || (isPathFiltered && !showHiddenPaths)) 
+                    return null;
+                  const displayIndirectLabel = isPathInferred(resultSet, path) && !inferredLabelDisplayed;
+                    if(displayIndirectLabel)
+                      inferredLabelDisplayed = true;
+                  const displayDirectLabel = !isPathInferred(resultSet, path) && !directLabelDisplayed;
+                    if(displayDirectLabel)
+                      directLabelDisplayed = true;
+                  const tooltipID: string = (!!path?.id) ? path.id : i.toString();
+                  const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
+                  return (
+                    <div key={tooltipID}>
                       {
-                        ((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) &&
-                        <LastViewedTag inModal={inModal} inGroup={!!(inModal && compressedSubgraph)}/>
-                      }
-                      <button
-                        onClick={()=>{
-                          if(!!path?.id) {
-                            setLastViewedPathID(path.id);
-                            handleActivateEvidence(path);
-                          }
-                        }}
-                        className={styles.pathEvidenceButton}
-                        data-tooltip-id={tooltipID}
-                        >
-                          <div className={styles.icon}>
-                            <ResearchMultiple />
-                          </div>
-                      </button>
-                      <span className={styles.num}>
-                        { indexInFullCollection + 1 }
-                        <PathArrow/>
-                      </span>
-                      <Tooltip
-                        id={tooltipID}
-                        >
-                          <span>View evidence for this path.</span>
-                      </Tooltip>
-                      <div 
-                        data-path-id={`${path.id || ""}`} 
-                        className={` ${inModal && compressedSubgraph && styles.compressedTableItem} ${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''} `}
-                        >
-                        {
-                          inModal && compressedSubgraph
+                        displayDirectLabel && !inModal
                           ?
-                            compressedSubgraph.map((subgraphItem, i) => {
-                              if(Array.isArray(subgraphItem) && subgraphItem.length > 1) {
-                                const svgHeight = (subgraphItem.length * (edgeHeight + 8)) - 8;
-                                let hasSelected = (!!selectedEdge && subgraphItem.find(edge => edge.id === selectedEdge.id)) ? true : false; 
-                                return(
-                                  <>
-                                    <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
-                                      {/* Render node → edge connections */}
-                                      {subgraphItem.map((edge, index) => {
-                                        let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
-                                        return (
-                                          <path
-                                            key={`node-to-edge-${edge.id}`}
-                                            d={generatePathD(index, svgHeight, svgWidth, edgeHeight, true, curveOffset, straightSegmentLength)}
-                                            stroke={selected ? selectedPathColor : pathColor}
-                                            fill="transparent"
-                                            strokeWidth={pathThickness}
-                                          />
-                                        );
-                                      })}
-                                    </svg>
-                                    <div className={`${styles.groupedPreds} ${hasSelected && styles.hasSelected}`}>
-                                      {
-                                        subgraphItem.map((edge)=> {
-                                          let key = `${edge.id}`;
+                            <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
+                              Direct <Information className={styles.infoIcon} />
+                            </p>
+                          :
+                            null
+                      }
+                      {
+                        displayIndirectLabel && !inModal
+                          ?
+                            <>
+                              <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
+                                Indirect <Information className={styles.infoIcon} />
+                              </p>
+                            </>
+                          : null
+                        }
+                      <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed} ${isEven && styles.isEven}`}>
+                        {
+                          ((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) &&
+                          <LastViewedTag inModal={inModal} inGroup={!!(inModal && compressedSubgraph)}/>
+                        }
+                        <button
+                          onClick={()=>{
+                            if(!!path?.id) {
+                              setLastViewedPathID(path.id);
+                              handleActivateEvidence(path);
+                            }
+                          }}
+                          className={styles.pathEvidenceButton}
+                          data-tooltip-id={tooltipID}
+                          >
+                            <div className={styles.icon}>
+                              <ResearchMultiple />
+                            </div>
+                        </button>
+                        <span className={styles.num}>
+                          { indexInFullCollection + 1 }
+                          <PathArrow/>
+                        </span>
+                        <Tooltip
+                          id={tooltipID}
+                          >
+                            <span>View evidence for this path.</span>
+                        </Tooltip>
+                        <div 
+                          data-path-id={`${path.id || ""}`} 
+                          className={` ${inModal && compressedSubgraph && styles.compressedTableItem} ${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''} `}
+                          >
+                          {
+                            inModal && compressedSubgraph
+                            ?
+                              compressedSubgraph.map((subgraphItem, i) => {
+                                if(Array.isArray(subgraphItem) && subgraphItem.length > 1) {
+                                  const svgHeight = (subgraphItem.length * (edgeHeight + 8)) - 8;
+                                  let hasSelected = (!!selectedEdge && subgraphItem.find(edge => edge.id === selectedEdge.id)) ? true : false; 
+                                  return(
+                                    <>
+                                      <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
+                                        {/* Render node → edge connections */}
+                                        {subgraphItem.map((edge, index) => {
                                           let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
                                           return (
-                                            <PathObject
-                                              pathViewStyles={styles}
-                                              index={i}
-                                              isEven={false}
-                                              path={path}
-                                              id={edge.id}
-                                              key={key}
-                                              handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
-                                              handleEdgeClick={handleEdgeClick}
-                                              pathFilterState={{}}
-                                              activeFilters={[]}
-                                              activeEntityFilters={[]}
-                                              selected={selected}
-                                              selectedPaths={null}
-                                              inModal={true}
-                                              pk={pk}
+                                            <path
+                                              key={`node-to-edge-${edge.id}`}
+                                              d={generatePathD(index, svgHeight, svgWidth, edgeHeight, true, curveOffset, straightSegmentLength)}
+                                              stroke={selected ? selectedPathColor : pathColor}
+                                              fill="transparent"
+                                              strokeWidth={pathThickness}
                                             />
-                                          )
-                                        })
-                                      }
-                                    </div>
-                                    <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
-                                      {/* Render edge → node connections */}
-                                      {subgraphItem.map((edge, index) => {
-                                        let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
-                                        return (
-                                          <path
-                                            key={`edge-to-node-${edge.id}`}
-                                            d={generatePathD(index, svgHeight, svgWidth, edgeHeight, false, curveOffset, straightSegmentLength)}
-                                            stroke={selected ? selectedPathColor : pathColor}
-                                            fill="transparent"
-                                            strokeWidth={pathThickness}
-                                          />
-                                        );
-                                      })}
-                                    </svg>
+                                          );
+                                        })}
+                                      </svg>
+                                      <div className={`${styles.groupedPreds} ${hasSelected && styles.hasSelected}`}>
+                                        {
+                                          subgraphItem.map((edge)=> {
+                                            let key = `${edge.id}`;
+                                            let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
+                                            return (
+                                              <PathObject
+                                                pathViewStyles={styles}
+                                                index={i}
+                                                isEven={false}
+                                                path={path}
+                                                id={edge.id}
+                                                key={key}
+                                                handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
+                                                handleEdgeClick={handleEdgeClick}
+                                                pathFilterState={{}}
+                                                activeFilters={[]}
+                                                activeEntityFilters={[]}
+                                                selected={selected}
+                                                selectedPaths={null}
+                                                inModal={true}
+                                                pk={pk}
+                                              />
+                                            )
+                                          })
+                                        }
+                                      </div>
+                                      <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
+                                        {/* Render edge → node connections */}
+                                        {subgraphItem.map((edge, index) => {
+                                          let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
+                                          return (
+                                            <path
+                                              key={`edge-to-node-${edge.id}`}
+                                              d={generatePathD(index, svgHeight, svgWidth, edgeHeight, false, curveOffset, straightSegmentLength)}
+                                              stroke={selected ? selectedPathColor : pathColor}
+                                              fill="transparent"
+                                              strokeWidth={pathThickness}
+                                            />
+                                          );
+                                        })}
+                                      </svg>
+                                    </>
+                                  )
+                                } else {
+                                  let key = (Array.isArray(subgraphItem)) ? subgraphItem[0].id : subgraphItem.id;
+                                  let selected = (!!selectedEdge && selectedEdge.id === key) ? true : false; 
+                                  return (
+                                    <PathObject
+                                      pathViewStyles={styles}
+                                      index={i}
+                                      isEven={false}
+                                      path={path}
+                                      id={key}
+                                      key={key}
+                                      handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
+                                      handleEdgeClick={handleEdgeClick}
+                                      pathFilterState={{}}
+                                      activeFilters={[]}
+                                      activeEntityFilters={[]}
+                                      selected={selected}
+                                      selectedPaths={null}
+                                      inModal={true}
+                                      pk={pk}
+                                    />
+                                  )
+                                }
+                              }) 
+                            :
+                              path.subgraph.map((subgraphItemID, i) => {
+                                let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false; 
+                                if(path.id === undefined)
+                                  return null;
+                                return (
+                                  <>
+                                    <PathObject
+                                      pathViewStyles={styles}
+                                      index={i}
+                                      isEven={isEven}
+                                      inModal={inModal}
+                                      path={path}
+                                      id={subgraphItemID}
+                                      key={subgraphItemID}
+                                      handleActivateEvidence={handleActivateEvidence}
+                                      handleEdgeClick={handleEdgeClick}
+                                      handleNodeClick={handleNodeClick}
+                                      activeEntityFilters={activeEntityFilters}
+                                      selectedPaths={selectedPaths}
+                                      pathFilterState={pathFilterState}
+                                      activeFilters={activeFilters}
+                                      pk={pk}
+                                      showHiddenPaths={showHiddenPaths}
+                                      selected={selected}
+                                    />
                                   </>
                                 )
-                              } else {
-                                let key = (Array.isArray(subgraphItem)) ? subgraphItem[0].id : subgraphItem.id;
-                                let selected = (!!selectedEdge && selectedEdge.id === key) ? true : false; 
-                                return (
-                                  <PathObject
-                                    pathViewStyles={styles}
-                                    index={i}
-                                    isEven={false}
-                                    path={path}
-                                    id={key}
-                                    key={key}
-                                    handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
-                                    handleEdgeClick={handleEdgeClick}
-                                    pathFilterState={{}}
-                                    activeFilters={[]}
-                                    activeEntityFilters={[]}
-                                    selected={selected}
-                                    selectedPaths={null}
-                                    inModal={true}
-                                    pk={pk}
-                                  />
-                                )
-                              }
-                            }) 
-                          :
-                            path.subgraph.map((subgraphItemID, i) => {
-                              let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false; 
-                              if(path.id === undefined)
-                                return null;
-                              return (
-                                <>
-                                  <PathObject
-                                    pathViewStyles={styles}
-                                    index={i}
-                                    isEven={isEven}
-                                    inModal={inModal}
-                                    path={path}
-                                    id={subgraphItemID}
-                                    key={subgraphItemID}
-                                    handleActivateEvidence={handleActivateEvidence}
-                                    handleEdgeClick={handleEdgeClick}
-                                    handleNodeClick={handleNodeClick}
-                                    activeEntityFilters={activeEntityFilters}
-                                    selectedPaths={selectedPaths}
-                                    pathFilterState={pathFilterState}
-                                    activeFilters={activeFilters}
-                                    pk={pk}
-                                    showHiddenPaths={showHiddenPaths}
-                                    selected={selected}
-                                  />
-                                </>
-                              )
-                            })
-                        }
+                              })
+                          }
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })
+                  )
+                })
+              }
+            </div>
+            {
+              Object.keys(activeFilters).length > 0 &&
+              <Button 
+                handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
+                isSecondary
+                smallFont
+                dataTooltipId={`${resultID}-excluded-paths-toggle`}
+                className={`${!!isEven && styles.evenButton}`}
+                >
+                {showHiddenPaths ? "Hide Excluded Paths" : "Show Excluded Paths"}
+                <Information/>
+                <Tooltip id={`${resultID}-excluded-paths-toggle`}>
+                  {
+                    showHiddenPaths 
+                    ? <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to hide these excluded paths.</span>
+                    : <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to view these excluded paths.</span>
+                  }
+                </Tooltip>
+              </Button>
             }
-          </div>
-          {
-            Object.keys(activeFilters).length > 0 &&
-            <Button 
-              handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
-              isSecondary
-              smallFont
-              dataTooltipId={`${resultID}-excluded-paths-toggle`}
-              className={`${!!isEven && styles.evenButton}`}
-              >
-              {showHiddenPaths ? "Hide Excluded Paths" : "Show Excluded Paths"}
-              <Information/>
-              <Tooltip id={`${resultID}-excluded-paths-toggle`}>
-                {
-                  showHiddenPaths 
-                  ? <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to hide these excluded paths.</span>
-                  : <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to view these excluded paths.</span>
-                }
-              </Tooltip>
-            </Button>
-          }
+          </SupportPathDepthContext.Provider>
         </LastViewedPathIDContext.Provider>
       }
       {
