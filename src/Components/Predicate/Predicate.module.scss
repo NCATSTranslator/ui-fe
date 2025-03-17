@@ -1,11 +1,23 @@
 @import "../../Assets/Styles/variables";
 
+
+.edge {
+  border-color: $purpleTwo;
+  border-width: 2px 0;
+  border-style: solid;
+  background-color: $lightGray;
+  height: 28px;
+  &.isInferred {
+    border-top-style: dashed;
+    border-bottom-style: dashed;
+  }
+}
 .pred {
   display: flex;
   align-items: center;
   text-overflow: ellipsis;
   white-space: nowrap;
-  z-index: 10;
+  z-index: 30;
   margin-right: 0;
   transition: all .25s ease;
   box-shadow: none;
@@ -18,7 +30,7 @@
       display: flex;
       font-weight: 800;
       border-radius: 50%;
-      background-color: purple;
+      background-color: $purpleTwo;
       color: white;
       width: 20px;
       height: 20px;
@@ -32,7 +44,8 @@
     padding: 0 4px;
     display: flex;
     align-items: center;
-    width: 135px;
+    justify-content: space-between;
+    width: 138px;
   }
   span {
     cursor: pointer; 
@@ -49,47 +62,48 @@
     text-decoration: underline;
   }
 }
-.tooltipPredicate {
-  margin-bottom: $xxs;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  svg {
-    margin-left: $xxs;
-    path {
-      fill: $white;
-    }
-  } 
-  span {
-    font-size: $s;
-    font-weight: 700;
-    margin-bottom: $xxs;
-    color: $white;
-    cursor: pointer;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-  &:last-child span {
+.tooltipPredicateContainer {
+  margin-bottom: $xs;
+  border-bottom: 1px solid $darkGray;
+  padding-bottom: 12px;
+  &:last-of-type {
     margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
   }
-  &.inModal span {
-    cursor: default;
-    &:hover {
-      text-decoration: none;
+  .tooltipPredicate {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    svg {
+      margin-left: $xxs;
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      min-height: 18px;
+      path {
+        fill: $white;
+      }
+    } 
+    span {
+      font-size: $subTwoSize;
+      font-weight: 700;
+      line-height: 1.25;
+      color: $white;
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
+      }
     }
-  }
-}
-.selected {
-  span.pred {
-    border: 1px solid $purpleEdgeBGSelected;
-    background-color: $purpleEdgeBGSelected;
-    color: $white;
-  }
-
-  .predicatesList {
-    margin: 0;
-    list-style-type: none;
+    &:last-child span {
+      margin-bottom: 0;
+    }
+    &.inModal span {
+      cursor: default;
+      &:hover {
+        text-decoration: none;
+      }
+    }
   }
 }
 .badges {
@@ -135,13 +149,12 @@
     }
   }
   &.expanded {
-    border-radius: 50%;
     .supportButtonIcon {
       transform: rotate(0);
     }
     .supportConnector {
       opacity: 1;
-      height: 25px;
+      height: 22px;
     }
   }
   .supportConnector {
@@ -159,4 +172,66 @@
 }
 .evidenceIcon {
   transform: none !important;
+}
+.tooltipEvidenceCounts {
+  display: flex;
+  margin-top: $xs;
+  .count {
+    background-color: $palePurple;
+    color: $black;
+    font-size: $captionSize;
+    font-weight: 400;
+    padding: $xxs;
+    border-radius: $defaultBorderRadius;
+    margin-right: $xs;
+    display: flex;
+    align-items: center;
+    &:last-of-type {
+      margin-right: 0;
+    }
+    svg {
+      width: 20px;
+      height: 20px;
+      margin: 0 2.5px 0 0;
+    }
+  }
+}
+.inModal {
+  &.edge {
+    background-color: transparent !important;
+    border: none;
+    height: 32px;
+    &:after {
+      display: none !important;
+    }
+    &.isInferred .nameShape {
+      border-top-style: dashed;
+      border-bottom-style: dashed;
+    }
+  }
+  .nameShape {
+    background-color: $lightGray;
+    border-top: 2px solid $purpleTwo;
+    border-bottom: 2px solid $purpleTwo;
+    top: 0;
+    bottom: 0;
+    clip-path: polygon(171px -16px ,186px 16px, 171px 48px, -5% 48px, 8px 16px, -8px -16px);
+    svg {
+      top: 0px;
+      right: 3px;
+    }
+  }
+  &.selected.edge, &.edge:hover {
+    .nameShape {
+      background-color: $lightPurpleTwo !important;
+    }
+  }
+  &.selected.edge + span, &.edge:hover + span {
+    &.edge > div:first-child {
+      background-color: $lightGray;
+    }
+    & > div:first-child {
+      background-color: $lightPurpleTwo;
+    }
+  }
 }

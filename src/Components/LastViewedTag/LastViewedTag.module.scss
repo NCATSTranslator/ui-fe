@@ -20,6 +20,12 @@
     height: 20px;
   }
   &.visible {
-    left: 0px;
+    left: 6px;
+  }
+  &.inModal {
+    left: 6px;
+    padding-right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }

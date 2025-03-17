@@ -5,7 +5,7 @@ import ShareModal from "../Modals/ShareModal";
 import ResultFocusModal from "../Modals/ResultFocusModal";
 import { ToastContainer, Slide } from 'react-toastify';
 import { handleEvidenceModalClose } from "../../Utilities/resultsInteractionFunctions";
-import { Path, ResultEdge } from "../../Types/results";
+import { Path, PathFilterState, ResultEdge } from "../../Types/results";
 
 interface ResultsListModalsProps {
   currentBookmarkID: string | null | undefined;
@@ -16,6 +16,7 @@ interface ResultsListModalsProps {
   handlePageClick: (event: any, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   noteLabel: string;
   notesModalOpen: boolean;
+  pathFilterState: PathFilterState | null;
   pk: string;
   presetTypeID: string;
   selectedEdge: ResultEdge | null; 
@@ -41,6 +42,7 @@ const ResultsListModals: FC<ResultsListModalsProps> = ({
   handlePageClick,
   noteLabel,
   notesModalOpen,
+  pathFilterState,
   pk,
   presetTypeID,
   selectedEdge,
@@ -89,6 +91,7 @@ const ResultsListModals: FC<ResultsListModalsProps> = ({
         result={selectedResult}
         edge={selectedEdge}
         path={selectedPath}
+        pathFilterState={pathFilterState}
         pk={pk}
       />
       <ResultFocusModal

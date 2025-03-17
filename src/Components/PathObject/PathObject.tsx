@@ -2,6 +2,7 @@ import styles from './PathObject.module.scss';
 import { FC, useId } from 'react';
 import Tooltip from '../Tooltip/Tooltip';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
+import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from '../Predicate/Predicate';
@@ -30,21 +31,21 @@ export interface PathObjectProps {
 }
 
 const PathObject: FC<PathObjectProps> = ({ 
-  activeEntityFilters, 
+  activeEntityFilters,
   activeFilters,
-  className = "", 
+  className = "",
   handleActivateEvidence = ()=>{},
-  handleNodeClick, 
-  handleEdgeClick, 
-  id, 
-  index, 
-  inModal = false, 
-  isEven = false, 
-  pathFilterState, 
-  path, 
-  pathViewStyles = null, 
+  handleNodeClick,
+  handleEdgeClick,
+  id,
+  index,
+  inModal = false,
+  isEven = false,
+  pathFilterState,
+  path,
+  pathViewStyles = null,
   pk,
-  selected, 
+  selected,
   selectedPaths,
   showHiddenPaths = true}) => {
 
@@ -75,10 +76,13 @@ const PathObject: FC<PathObjectProps> = ({
       {
         isNode 
           ?
-            <span className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer} ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
+            <span className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer}  ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               data-tooltip-id={`${uid}`}
               >
+              <div className={`${styles.nameShape}`}>
+                <PathArrow/>
+              </div>
               <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
                 {getIcon(pathObject?.types[0])}
                 <span className={styles.text}>
@@ -121,6 +125,7 @@ const PathObject: FC<PathObjectProps> = ({
                   className={className}
                   pathFilterState={pathFilterState}
                   pathViewStyles={pathViewStyles}
+                  parentStyles={styles}
                   selectedPaths={selectedPaths}
                   pk={pk}
                   showHiddenPaths={showHiddenPaths}
