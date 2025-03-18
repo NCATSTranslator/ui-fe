@@ -6,7 +6,7 @@ export const Help = () => {
 
   return (
     <>
-      <p className="caption">Last updated on September 26th, 2024</p>
+      <p className="caption">Last updated on March 18th, 2025</p>
       <h2 className="h6">How is this tool different from a search engine?</h2>
       <p>The Translator UI is a tool designed for the exploration of biomedical knowledge. Unlike search engines which provide an answer based on a topic search, Translator uses reasoning, based on biomedical knowledge, to provide probable answers supported by known evidence. This allows the user to explore the relationships between biomedical concepts.</p>
       <p>Given the complexity of the results and the different goals of users, the UI provides multiple ways to sort and filter results to identify those most relevant to a user.</p>
