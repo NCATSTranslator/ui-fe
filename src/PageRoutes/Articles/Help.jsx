@@ -19,12 +19,12 @@ export const Help = () => {
       <h2 className="h6">What is a result "path?"</h2>
       <p>Translator uses systems biology and knowledge graphs to surface knowledge that may be of interest to the researcher. Paths are individual routes through connecting pieces of data within the knowledge graph that go from the result to the targeted concept. Translator displays evidence (publications and sources) for each connection along the route. Publications are displayed in a table including the relationship that the paper supports. Other sources of evidence have links to wiki or other pages explaining the reasoning behind the connection it is associated with.</p>
 
-      <h2 className="h6">What are reasoning agents?</h2>
+      <h2 className="h6"><span className="hash-anchor" id="reasoner"></span>What are reasoning agents?</h2>
       <p>Reasoning agents are an automated reasoning system that apply logic and computational techniques to analyze the network of relationships found in our interconnected dataset. These systems evaluate existing connections and use predefined rules to infer new insights, often revealing relationships that have not yet been explicitly recorded in the data.</p>
       <p>For example, our knowledge sources might contain information that Drug A interacts with Protein B, and Protein B plays a role in Disease C. Reasoners can suggest a potential link between Drug A and Disease C, even if no direct connection is recorded in the dataset. By following these logical pathways, reasoners can uncover hidden patterns that may lead to new discoveries, allowing researchers to generate fresh hypotheses and explore potential breakthroughs from existing data.</p>
       <p>By systematically evaluating pathways and relationships, reasoners help transform known information into new knowledge, enhancing biomedical research and supporting scientific discovery.</p>
       
-      <h2 className="h6">What are indirect paths?</h2>
+      <h2 className="h6"><span className="hash-anchor" id="indirect"></span>What are indirect paths?</h2>
       <p>Indirect paths are identified by reasoning agents that use logic and pattern recognition to uncover inferred links between objects. When two pieces of information aren't directly connected in our database, also called a knowledge graph, these agents look at existing relationships and apply logical rules to suggest possible connections.</p>
       <p>For example, say Gene A affects Protein B, and Protein B is linked to Disease C. Translator reasoners can infer a possible connection between Gene A and Disease C even if no research paper directly states it. These connections are built step by step, and the supporting paths that follow them on the list of paths show the intermediary connections that explain why the objects in the indirect path are associated with each other.</p>
 

@@ -1,5 +1,11 @@
 @import "./variables";
 
+.hash-anchor {
+  position: relative;
+  top: -50px;
+  pointer-events: none;
+  opacity: 0;
+}
 
 .pane {
   &.actions {
