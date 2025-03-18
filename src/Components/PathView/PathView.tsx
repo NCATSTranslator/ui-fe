@@ -149,7 +149,7 @@ const PathView: FC<PathViewProps> = ({
         <span className={styles.inferredLabelTooltip}>Established from explicit evidence in external sources. Example: A research paper stating 'X is related to Y.'</span>
       </Tooltip>
       <Tooltip id='inferred-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>Indirect paths are identified by reasoning agents that use logic and pattern recognition to find connections between objects. The intermediary connections that explain these relationships can be found in the supporting paths below them.<a href="/help#indirect">Learn More about Indirect Paths</a></span>
+        <span className={styles.inferredLabelTooltip}>Indirect paths are identified by reasoning agents that use logic and pattern recognition to find connections between objects. The intermediary connections that explain these relationships can be found in the supporting paths below them.<a href="/help#indirect" target='_blank'>Learn More about Indirect Paths</a></span>
       </Tooltip>
       {
         !inModal && 
