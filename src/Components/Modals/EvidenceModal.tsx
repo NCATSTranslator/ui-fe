@@ -188,141 +188,151 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
               />
             </div>
           }
-          <Tabs isOpen={isOpen} className={styles.tabs}>
-            {
-              pubmedEvidence.length > 0 ?
-              <Tab heading="Publications" className={`${styles.tab} scrollable`}>
-                <PublicationsTable
-                  selectedEdgeTrigger={selectedEdgeTrigger}
-                  selectedEdge={selectedEdge}
-                  pubmedEvidence={pubmedEvidence}
-                  setPubmedEvidence={setPubmedEvidence}
-                  prefs={prefs}
-                  isOpen={isOpen}
-                />
-              </Tab>
-              : null
-            }
-            {
-              clinicalTrials.current.length > 0 ?
-              <Tab heading="Clinical Trials" className={`${styles.tab} scrollable`}>
-                <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
-                  <div className={`table-head ${styles.tableHead}`}>
-                    <div className={`head ${styles.head} ${styles.link}`}>Link</div>
-                  </div>
-                  <div className={`table-items ${styles.tableItems} scrollable`}>
-                    {
-                      clinicalTrials.current.map((item, i)=> {
-                        let url = item.url
-                        if(!item.url && !!item.id) {
-                          url = getUrlByType(item.id, item.type);
+          {
+            isInferred
+            ?
+              <div className={styles.inferredDisclaimer}>
+                <p>Supporting evidence for this relationship, including intermediary connections, can be found in the next path(s).</p>
+                <p>Reasoning agents that use logic and pattern recognition to find connections between objects identified this path as a possible connection between this result and your search term.</p>
+                <a href="/help#reasoner" target="_blank">Learn More about Reasoning Agents</a>
+              </div>
+            :
+              <Tabs isOpen={isOpen} className={styles.tabs}>
+                {
+                  pubmedEvidence.length > 0 ?
+                  <Tab heading="Publications" className={`${styles.tab} scrollable`}>
+                    <PublicationsTable
+                      selectedEdgeTrigger={selectedEdgeTrigger}
+                      selectedEdge={selectedEdge}
+                      pubmedEvidence={pubmedEvidence}
+                      setPubmedEvidence={setPubmedEvidence}
+                      prefs={prefs}
+                      isOpen={isOpen}
+                    />
+                  </Tab>
+                  : null
+                }
+                {
+                  clinicalTrials.current.length > 0 ?
+                  <Tab heading="Clinical Trials" className={`${styles.tab} scrollable`}>
+                    <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
+                      <div className={`table-head ${styles.tableHead}`}>
+                        <div className={`head ${styles.head} ${styles.link}`}>Link</div>
+                      </div>
+                      <div className={`table-items ${styles.tableItems} scrollable`}>
+                        {
+                          clinicalTrials.current.map((item, i)=> {
+                            let url = item.url
+                            if(!item.url && !!item.id) {
+                              url = getUrlByType(item.id, item.type);
+                            }
+                            return (
+                              <div className={styles.tableItem} key={i}>
+                                <div className={`table-cell ${styles.cell} ${styles.link} link`}>
+                                  {url && <a href={url} rel="noreferrer" target="_blank">{url} <ExternalLink/></a>}
+                                </div>
+                              </div>
+                            )
+                          })
                         }
-                        return (
-                          <div className={styles.tableItem} key={i}>
-                            <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-                              {url && <a href={url} rel="noreferrer" target="_blank">{url} <ExternalLink/></a>}
-                            </div>
-                          </div>
-                        )
-                      })
-                    }
-                  </div>
-                </div>
-              </Tab>
-              : null
-            }
-            {
-              miscEvidence.current.length > 0 ?
-              <Tab heading="Miscellaneous" className={`${styles.tab} scrollable`}>
-                <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
-                  <div className={`table-head ${styles.tableHead}`}>
-                    <div className={`head ${styles.head} ${styles.link}`}>Link</div>
-                  </div>
-                  <div className={`table-items ${styles.tableItems} scrollable`}>
-                    {
-                      miscEvidence.current.map((item, i) => {
-                        return (
-                          <div className={`table-item ${styles.tableItem}`} key={i}>
-                            <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-                              {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
-                            </div>
-                          </div>
-                        )
-                      })
-                    }
-                  </div>
-                </div>
-              </Tab>
-              : null
-            }
-            {
-              // Add sources modal for predicates
-              sources.length > 0 ?
-              <Tab
-                heading="Knowledge Sources"
-                tooltipIcon={<InfoIcon className={styles.infoIcon} />}
-                dataTooltipId="knowledge-sources-tooltip"
-                className={`${styles.tab} scrollable`}
-                >
-                <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
-                  <div className={`table-head ${styles.tableHead}`}>
-                    <div className={`head ${styles.head}`}>Source</div>
-                    <div className={`head ${styles.head}`}>Rationale</div>
-                  </div>
-                  <div className={`table-items ${styles.tableItems} scrollable`}>
-                    {
-                      sources.map((src, i) => {
-                        const sourceKey = `${src.url}-${i}`;
-                        const tooltipId = `source-tooltip-${sourceKey}`;
-                        return(
-                          <div className={`table-item ${styles.tableItem}`} key={sourceKey}>
-                            <Tooltip id={tooltipId}>
-                              <span className={styles.tooltipSpan}>
-                                Why do we use this source?
-                                <a href={src?.wiki} target="_blank" rel="noreferrer">
-                                  <ExternalLink/>
-                                </a>
-                              </span>
-                            </Tooltip>
-                            <span className={`table-cell ${styles.cell} ${styles.source} ${styles.sourceItem}`}>
-                              {src.name}
-                              {
-                                src?.wiki
-                                ? <InfoIcon className={styles.infoIcon} data-tooltip-id={tooltipId} />
-                                : <></>
-                              }
-                            </span>
-                            <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
-                              {
-                                src?.url
-                                ?
-                                  <a href={src?.url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
-                                    {src?.url}
-                                    <ExternalLink/>
-                                  </a>
-                                :
-                                  <span>No link available</span>
-                              }
-                            </span>
-                          </div>
-                        )
-                      })
-                    }
-                  </div>
-                </div>
-              </Tab>
-              : null
-            }
-            {
-              (clinicalTrials.current.length <= 0 &&
-              pubmedEvidence.length <= 0 &&
-              sources.length <= 0) ?
-              <Tab heading="No Evidence Available">
-                <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
-              </Tab>
-              : null
-            }
-          </Tabs>
+                      </div>
+                    </div>
+                  </Tab>
+                  : null
+                }
+                {
+                  miscEvidence.current.length > 0 ?
+                  <Tab heading="Miscellaneous" className={`${styles.tab} scrollable`}>
+                    <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
+                      <div className={`table-head ${styles.tableHead}`}>
+                        <div className={`head ${styles.head} ${styles.link}`}>Link</div>
+                      </div>
+                      <div className={`table-items ${styles.tableItems} scrollable`}>
+                        {
+                          miscEvidence.current.map((item, i) => {
+                            return (
+                              <div className={`table-item ${styles.tableItem}`} key={i}>
+                                <div className={`table-cell ${styles.cell} ${styles.link} link`}>
+                                  {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
+                                </div>
+                              </div>
+                            )
+                          })
+                        }
+                      </div>
+                    </div>
+                  </Tab>
+                  : null
+                }
+                {
+                  // Add sources modal for predicates
+                  sources.length > 0 ?
+                  <Tab
+                    heading="Knowledge Sources"
+                    tooltipIcon={<InfoIcon className={styles.infoIcon} />}
+                    dataTooltipId="knowledge-sources-tooltip"
+                    className={`${styles.tab} scrollable`}
+                    >
+                    <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
+                      <div className={`table-head ${styles.tableHead}`}>
+                        <div className={`head ${styles.head}`}>Source</div>
+                        <div className={`head ${styles.head}`}>Rationale</div>
+                      </div>
+                      <div className={`table-items ${styles.tableItems} scrollable`}>
+                        {
+                          sources.map((src, i) => {
+                            const sourceKey = `${src.url}-${i}`;
+                            const tooltipId = `source-tooltip-${sourceKey}`;
+                            return(
+                              <div className={`table-item ${styles.tableItem}`} key={sourceKey}>
+                                <Tooltip id={tooltipId}>
+                                  <span className={styles.tooltipSpan}>
+                                    Why do we use this source?
+                                    <a href={src?.wiki} target="_blank" rel="noreferrer">
+                                      <ExternalLink/>
+                                    </a>
+                                  </span>
+                                </Tooltip>
+                                <span className={`table-cell ${styles.cell} ${styles.source} ${styles.sourceItem}`}>
+                                  {src.name}
+                                  {
+                                    src?.wiki
+                                    ? <InfoIcon className={styles.infoIcon} data-tooltip-id={tooltipId} />
+                                    : <></>
+                                  }
+                                </span>
+                                <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
+                                  {
+                                    src?.url
+                                    ?
+                                      <a href={src?.url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
+                                        {src?.url}
+                                        <ExternalLink/>
+                                      </a>
+                                    :
+                                      <span>No link available</span>
+                                  }
+                                </span>
+                              </div>
+                            )
+                          })
+                        }
+                      </div>
+                    </div>
+                  </Tab>
+                  : null
+                }
+                {
+                  (clinicalTrials.current.length <= 0 &&
+                  pubmedEvidence.length <= 0 &&
+                  sources.length <= 0) ?
+                  <Tab heading="No Evidence Available">
+                    <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
+                  </Tab>
+                  : null
+                }
+              </Tabs>
+          }
         </div>
       }
     </Modal>
