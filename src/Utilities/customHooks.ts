@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } fro
 import { LastViewedPathIDContext, SupportPathDepthContext } from '../Components/PathView/PathView';
 import { isEqual } from 'lodash';
 import { useQuery } from 'react-query';
+import { useLocation } from 'react-router-dom';
 
 interface WindowSize {
   width: number | undefined;
@@ -359,3 +360,23 @@ export const useTextStream = (
 export const useSupportPathDepth = (): number => {
   return useContext(SupportPathDepthContext);
 };
+
+/**
+ * Custom hook to scroll to an element with an id provided as a hash in the url
+ */
+export const useScrollToHash = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const elementId = location.hash.substring(1); // Remove the '#' character
+      const element = document.getElementById(elementId);
+
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, [location]);
+};
+
+export default useScrollToHash;
