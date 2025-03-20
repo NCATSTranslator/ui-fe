@@ -1,7 +1,7 @@
 import { FC, MutableRefObject } from "react";
 import Tooltip from '../Tooltip/Tooltip';
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
-import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
+import ArrowUp from '../../Icons/Directional/Arrows/Arrow Up.svg?react';
 
 interface ResultsListTableHeadProps {
   parentStyles: {[key: string]: string};
@@ -35,7 +35,7 @@ const ResultsListTableHead: FC<ResultsListTableHeadProps> = ({
         }}
       >
         Name
-        <ChevUp className={parentStyles.chev}/>
+        <ArrowUp className={parentStyles.chev}/>
       </div>
       <div></div>
       <div
@@ -47,7 +47,7 @@ const ResultsListTableHead: FC<ResultsListTableHeadProps> = ({
         }}
       >
         Evidence
-        <ChevUp className={parentStyles.chev}/>
+        <ArrowUp className={parentStyles.chev}/>
       </div>
       <div
         className={`${parentStyles.head} ${parentStyles.pathsHead} ${isSortedByPaths ? parentStyles.true : (isSortedByPaths === null) ? '': parentStyles.false}`}
@@ -60,7 +60,7 @@ const ResultsListTableHead: FC<ResultsListTableHeadProps> = ({
       >
         Paths
         <Alert/>
-        <ChevUp className={parentStyles.chev}/>
+        <ArrowUp className={parentStyles.chev}/>
         <Tooltip id="paths-tooltip">
           <span className={parentStyles.scoreSpan}>Each path represents a discrete series of relationships that connect the result to the searched-for entity.</span>
         </Tooltip>
@@ -78,7 +78,7 @@ const ResultsListTableHead: FC<ResultsListTableHeadProps> = ({
         >
           Score
           <Alert/>
-          <ChevUp className={parentStyles.chev}/>
+          <ArrowUp className={parentStyles.chev}/>
           <Tooltip id="score-tooltip">
             <span className={parentStyles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
           </Tooltip>

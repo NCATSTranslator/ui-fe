@@ -20,7 +20,7 @@
     .resultsTable {
       box-shadow: $dropShadow;
       font-size: $bodyTwoSize;
-      border-radius: $defaultBorderRadius;
+      border-radius: $largeBorderRadius;
       .tableBody {
         &>div:nth-child(odd){
           background-color: $lightGray;
