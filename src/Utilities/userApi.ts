@@ -4,12 +4,12 @@ import { get, post, put, remove } from './web';
 import { QueryType } from '../Types/querySubmission';
 import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '../Types/results';
 import { PreferencesContainer, SessionStatus } from '../Types/global';
-import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '../Redux/rootSlice';
+import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '../Redux/userSlice';
 import { handleFetchErrors, isPreferencesContainer } from './utilities';
 import { useDispatch } from 'react-redux';
 import { User } from '../Types/global';
 import { useSelector } from 'react-redux';
-import { currentUser } from "../Redux/rootSlice";
+import { currentUser } from "../Redux/userSlice";
 import { getEdgeById, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
 import { PublicationObject } from '../Types/evidence';
 
