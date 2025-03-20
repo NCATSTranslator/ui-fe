@@ -957,6 +957,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
         handleClearNotesEditor={handleClearNotesEditor}
         noteLabel={noteLabel.current}
         currentBookmarkID={currentBookmarkID.current}
+        pathFilterState={pathFilterState}
         pk={currentQueryID ? currentQueryID : ""}
         focusModalOpen={focusModalOpen}
         setFocusModalOpen={setFocusModalOpen}
@@ -966,8 +967,8 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
         selectedResult={selectedResult}
         selectedPath={selectedPath}
         sharedItem={sharedItem}
-        formattedResultsLength={formattedResults.length} 
-        setExpandSharedResult={setExpandSharedResult} 
+        formattedResultsLength={formattedResults.length}
+        setExpandSharedResult={setExpandSharedResult}
         setAutoScrollToResult={setAutoScrollToResult}
       />
       <div className={styles.resultsList}>

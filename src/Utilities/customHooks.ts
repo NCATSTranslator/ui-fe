@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } from 'react';
-import { LastViewedPathIDContext } from '../Components/PathView/PathView';
+import { LastViewedPathIDContext, SupportPathDepthContext } from '../Components/PathView/PathView';
 import { isEqual } from 'lodash';
 import { useQuery } from 'react-query';
+import { useLocation } from 'react-router-dom';
 
 interface WindowSize {
   width: number | undefined;
@@ -209,12 +210,13 @@ export type LastViewedPathIDContextType = {
   lastViewedPathID: string | null;
   setLastViewedPathID: Dispatch<SetStateAction<string | null>>;
 };
-export const useLastViewedPath = () => {
+export const useLastViewedPath = (): LastViewedPathIDContextType => {
   const context = useContext(LastViewedPathIDContext);
-  if (!context)
-    console.warn(context, 'useLastViewedPath must be used within a LastViewedPathIDContext.Provider');
-  
-  return !!context ? context : { lastViewedPathID: -1 } ;
+  if (!context) {
+    console.warn("useLastViewedPath must be used within a LastViewedPathIDContext.Provider");
+    return { lastViewedPathID: null, setLastViewedPathID: () => {} };
+  }
+  return context;
 };
 
 interface TextStreamHookResult {
@@ -350,3 +352,31 @@ export const useTextStream = (
     cancelStream
   };
 };
+
+/**
+ * Custom hook to get the current depth level in the path hierarchy.
+ * @returns {number} The current depth level.
+ */
+export const useSupportPathDepth = (): number => {
+  return useContext(SupportPathDepthContext);
+};
+
+/**
+ * Custom hook to scroll to an element with an id provided as a hash in the url
+ */
+export const useScrollToHash = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const elementId = location.hash.substring(1); // Remove the '#' character
+      const element = document.getElementById(elementId);
+
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, [location]);
+};
+
+export default useScrollToHash;

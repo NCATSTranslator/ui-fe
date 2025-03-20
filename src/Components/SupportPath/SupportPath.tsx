@@ -6,7 +6,7 @@ import { PathFilterState, Path, ResultNode, Filter } from '../../Types/results';
 import { getIsPathFiltered, numberToWords } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
 import { useLastViewedPath } from '../../Utilities/customHooks';
-
+import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 
 interface SupportPathProps {
   activeEntityFilters: string[];
@@ -37,10 +37,8 @@ const SupportPath: FC<SupportPathProps> = ({
   selectedPaths,
   showHiddenPaths }) => {
 
-  const { lastViewedPathID } = useLastViewedPath(); 
-
+  const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const tooltipID = path.id;
-
   const isPathFiltered = getIsPathFiltered(path, pathFilterState);
   if(!path.id || (isPathFiltered && !showHiddenPaths)) 
     return null;
@@ -50,7 +48,7 @@ const SupportPath: FC<SupportPathProps> = ({
       {
         path !== null &&
         <div 
-          className={`${!!pathViewStyles && pathViewStyles.formattedPath} ${lastViewedPathID && lastViewedPathID === path.id && !!pathViewStyles && pathViewStyles.isLastViewed}`} 
+          className={`${!!pathViewStyles && pathViewStyles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && pathViewStyles && pathViewStyles.lastViewed}`} 
           key={path.id}
           >
           {
@@ -58,7 +56,12 @@ const SupportPath: FC<SupportPathProps> = ({
             <LastViewedTag/>
           }
           <button
-            onClick={()=>handleActivateEvidence(path)}
+            onClick={()=>{
+              if(!!path?.id) {
+                setLastViewedPathID(path.id);
+                handleActivateEvidence(path);
+              }
+            }}
             className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
             data-tooltip-id={`${tooltipID}`}
             >
@@ -68,6 +71,7 @@ const SupportPath: FC<SupportPathProps> = ({
           </button>
           <span className={`${!!pathViewStyles && pathViewStyles.num}`}>
             { character }
+            <PathArrow/>
           </span>
           <Tooltip
             id={`${tooltipID}`}

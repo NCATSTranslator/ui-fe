@@ -3,6 +3,40 @@
 .pathView {
   padding: 0;
   position: relative;
+  .paths {
+    &.inModal {
+      padding: 0 $l;
+      .formattedPath {
+        margin: 0 auto;
+        padding-top: $s;
+        padding-bottom: $s;
+        padding-right: $l;
+        display: block;
+        width: min-content;
+        .pathEvidenceButton, .num {
+          display: none;
+        }
+        .tableItem > span:first-child {
+          &:before {
+            content: "";
+            height: 28px;
+            width: 4px;
+            background-color: $white;
+            border-bottom-left-radius: 4px;
+            border-top-left-radius: 4px;
+            position: relative;
+            left: -2px;
+          }
+        }
+      }
+    }
+  }
+  .num {
+    svg {
+      position: relative;
+      right: -5px;
+    }
+  }
   .tableHead, .tableItem {
     display: grid;
     justify-content: flex-start;
@@ -33,52 +67,35 @@
   }
   .tableItem {
     position: relative;
-    .nameContainer, .predicateInterior {
-      border-color: $purpleTwo;
-      border-width: 2px 0;
-      border-style: solid;
-      background-color: $lightGray;
-      height: 28px;
-    }
-    .predicateInterior.isInferred {
-      border-style: dashed;
-    }
-    &.isEven {
-      .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
-        background-color: $white;
-      }
-      .nameContainer {
-        .nameInterior {
-          background-color: $white;
-          border: 1px solid $white;
-          border-bottom-right-radius: $defaultBorderRadius;
-          border-top-right-radius: $defaultBorderRadius;
-          margin-right: -1px;
-        }
-        &:last-child {
-          .nameInterior {
-            background-color: $white;
-            border: 1px solid $white;
-          }
-        }
+    .nameContainer {
+      .nameInterior {
+        background-color: $lightGray;
+        border-bottom-right-radius: $defaultBorderRadius;
+        border-top-right-radius: $defaultBorderRadius;
+        margin-right: -1px;
+        z-index: 10;
       }
     }
     .nameContainer {
-      // &:first-child {
-      //   border-left-width: 8px;
-      //   border-bottom-left-radius: $defaultBorderRadius;
-      //   border-top-left-radius: $defaultBorderRadius;
-      // }
       &:last-child {
         border-right-width: 13px;
         border-bottom-right-radius: $defaultBorderRadius;
         border-top-right-radius: $defaultBorderRadius;
+        div:first-child {
+          clip-path: polygon(188px -16px,188px 16px,188px 48px,-5% 48px,8px 16px, -8px -16px);
+          border: 2px solid $purpleTwo;
+          border-bottom-right-radius: 8px;
+          border-top-right-radius: 8px;
+          right: -10px;
+          border-left: none;
+          svg {
+            display: none !important;
+          }
+        }
         .nameInterior {
-          background-color: $lightGray;
-          border: 1px solid $lightGray;
           border-bottom-right-radius: $defaultBorderRadius;
           border-top-right-radius: $defaultBorderRadius;
-          height: 16px;
+          height: 19px;
           margin-right: -5px;
         }
       }
@@ -141,15 +158,58 @@
         margin-right: 8px;
       }
     }
+    &.compressedTableItem {
+      grid-auto-columns: 178px;
+      grid-template-rows: 1fr;
+      grid-auto-flow: column;
+      .groupedPreds {
+        position: relative;
+        right: -10px;
+        &.hasSelected {
+          position: relative;
+          + svg + .nameContainer > div:first-child {
+            background-color: $lightPurpleTwo !important;
+          }
+        }
+        .predicateInterior {
+          margin-bottom: 8px;
+          &>div>svg {
+            display: none;
+          }
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+      .connectors {
+        path {
+          transition: stroke .5s ease;
+        }
+        & + .nameContainer > div svg {
+          display: block;
+        } 
+      }
+
+    }
   }
   .formattedPath {
     display: inline-grid;
     grid-template-columns: min-content min-content min-content 1fr;
     align-items: center;
     margin-bottom: $m;
-    padding-left: $m;
+    padding-left: $l;
     position: relative;
     transition: padding .5s ease;
+    z-index: 50;
+    &.isEven {
+      .nameContainer, .nameInterior, .predicateInterior, .num, .pathEvidenceButton .icon {
+        background-color: $white;
+      }
+      .nameInterior {
+        border-color: $white;
+        background-color: $white;
+      }
+    }
     .num {
       width: 20px;
       height: 28px;
@@ -167,6 +227,7 @@
       background-color: $lightGray;
       padding-right: $xxs;
       cursor: default;
+      transition: $defaultAnim;
     }
     .pathEvidenceButton {
       height: $l;
@@ -181,17 +242,23 @@
       margin: 0;
       transition: all .25s ease;
       align-self: start;
-      z-index: 10;
+      outline: none !important;
       .icon {
-        border: 1px solid $lightGray;
         border-bottom-left-radius: $defaultBorderRadius;
         border-top-left-radius: $defaultBorderRadius;
         background-color: $lightGray;
-        padding: 3px $xxs;
+        padding: 0 $xxs;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        transition: $defaultAnim;
+        position: relative;
+        z-index: 10;
         svg {
           width: 20px;
           height: 20px;
           margin-right: 0;
+          z-index: 10;
           path, line, circle {
             transition: all .25s ease;
             fill: $purpleTwo;
@@ -199,37 +266,87 @@
         }
       }
       &:hover {
-        svg {
-          path, line, circle {
-            fill: $black;
+        .icon {
+          background-color: #d8d4e0;
+        }
+      }
+    }
+    &.lastViewed {
+      .pathEvidenceButton {
+        &:after {
+          left: -30px;
+        }
+      }
+      .formattedPath {
+        .pathEvidenceButton {
+          &:after {
+            left: 0;
+          }
+        }
+      }
+      
+    }
+    .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+      position: relative;
+      &:after {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: 0;
+        right: 0px;
+        height: 31px;
+        pointer-events: none;
+        z-index: -1;
+        border-radius: 4px;
+        box-shadow: 0 3px 10px transparent;
+        transition: all .25s ease;
+      }
+    }
+    .tableItem span:last-child {
+      &:after {
+        right: -13px;
+      }
+    }
+    .pathEvidenceButton {
+      &:after {
+        left: -8px;
+      }
+    }
+    &:hover {
+      .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+        &:after {
+          box-shadow: $dropShadowHover;
+        }
+      }
+      .formattedPath {
+        .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+          &:after {
+            box-shadow: 0 3px 10px transparent;
+          }
+        }
+        &:hover {
+          .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+            &:after {
+              box-shadow: $dropShadowHover;
+            }
+          }
+          .formattedPath {
+            .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+              &:after {
+                box-shadow: 0 3px 10px transparent;
+              }
+            }
+            &:hover {
+              .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+                &:after {
+                  box-shadow: $dropShadowHover;
+                }
+              }
+            }
           }
         }
       }
     }
-    // &:hover {
-    //   &:before,
-    //   &:after {
-    //     content: "";
-    //     position: absolute;
-    //     left: 0;
-    //     right: 0;
-    //     height: 4px; /* Adjust height for the shadow effect */
-    //     pointer-events: none; /* Allows clicks to pass through */
-    //     z-index: 10;
-    //   }
-      
-    //   &:before {
-    //     top: 0; /* Position above the element */
-    //     transform: rotate(180deg);
-    //     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5);
-    //   }
-      
-    //   &:after {
-    //     top: 28px; /* Position below the element */
-    //     transform: rotate(180deg);
-    //     box-shadow: 0 -4px 4px rgba(0, 0, 0, 0.5);
-    //   }
-    // }
   }
   .show {
     margin: 0;

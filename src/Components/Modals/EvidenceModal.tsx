@@ -2,42 +2,43 @@ import {useState, useEffect, useRef, FC, useMemo} from "react";
 import Modal from "./Modal";
 import Tabs from "../Tabs/Tabs";
 import Tab from "../Tabs/Tab";
-import PathObject from "../PathObject/PathObject";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
-import { capitalizeAllWords, isPublication, numberToWords, getFormattedEdgeLabel, 
-  getUrlByType, getCompressedSubgraph, getCompressedEdge} from "../../Utilities/utilities";
-import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
+import { capitalizeAllWords, isPublication, getFormattedEdgeLabel, getUrlByType, getCompressedSubgraph,
+  getCompressedEdge, hasSupport, getPathsWithSelectionsSet} from "../../Utilities/utilities";
+import { isResultEdge, Path, PathFilterState, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
 import { Provenance, PublicationObject, TrialObject } from "../../Types/evidence.d";
-import { getResultSetById, getEdgeById, getNodeById } from "../../Redux/resultsSlice";
+import { getResultSetById } from "../../Redux/resultsSlice";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
-import { checkForEdgeMatch, flattenPublicationObject, flattenTrialObject } from "../../Utilities/evidenceModalFunctions";
+import { flattenPublicationObject, flattenTrialObject, createPathDictionaryAndLookup, findPathInDictionary } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/rootSlice';
 import InfoIcon from '../../Icons/Status/Alerts/Info.svg?react';
-import PlusIcon from '../../Icons/Buttons/Add/Add.svg?react';
-import MinusIcon from '../../Icons/Buttons/Subtract/Subtract.svg?react';
+import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
 import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 import Button from "../Core/Button";
+import PathView from "../PathView/PathView";
 
 interface EvidenceModalProps {
+  edge: ResultEdge | null;
   isOpen: boolean;
   onClose: Function;
   path?: Path | null;
-  result?: Result;
-  edge: ResultEdge | null;
+  pathFilterState: PathFilterState | null;
   pk: string;
+  result: Result | null;
 }
 
 const EvidenceModal: FC<EvidenceModalProps> = ({
-  path = null,
+  edge = null,
   isOpen,
   onClose,
-  result,
+  path = null,
+  pathFilterState,
   pk,
-  edge = null}) => {
+  result }) => {
 
   const prefs = useSelector(currentPrefs);
   const resultSet = useSelector(getResultSetById(pk));
@@ -51,8 +52,14 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   const [selectedEdgeTrigger, setEdgeSelectedTrigger] = useState(false);
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
   const [isPathViewMinimized, setIsPathViewMinimized] = useState(false);
+  const isInferred = hasSupport(selectedEdge);
+  
+  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, result?.paths, pathFilterState ? pathFilterState : {}, new Set([]), true), [result, pathFilterState, resultSet]);
+  const { pathDictionary, pathIdLookup } = useMemo(()=>createPathDictionaryAndLookup(resultSet, formattedPaths, pathFilterState), [resultSet, formattedPaths, pathFilterState]);
 
-  const pathLength = (path) ? path.subgraph.length : 0;
+  const pathInDictionary = (!!path?.id) ? findPathInDictionary(pathDictionary, pathIdLookup, path.id) : null;
+  const pathKey = (!!pathInDictionary) ? pathInDictionary.key : null;
+
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false = useMemo(()=>{
     return path?.compressedSubgraph && !!resultSet ? getCompressedSubgraph(resultSet, path.compressedSubgraph) : false;
   }, [path, resultSet]);
@@ -139,10 +146,10 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer}`}>
       {result?.drug_name &&
         <div className={styles.top}>
-          <h5 className={styles.title}>Evidence for:</h5>
+          <h5 className={styles.title}>{isInferred ? "Indirect" : "Direct"} Path {pathKey} Evidence</h5>
           {
             edgeLabel &&
-            <h5 className={styles.subtitle}>{capitalizeAllWords(edgeLabel)}</h5>
+            <p className={styles.subtitle}>{capitalizeAllWords(edgeLabel)}</p>
           }
           <Tooltip id="knowledge-sources-tooltip" >
             <span>The resources that provided the information supporting the selected relationship.</span>
@@ -150,247 +157,182 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
           {
             path &&
             <div className={`${styles.pathViewContainer} ${isPathViewMinimized && styles.minimized}`}>
-              <Button iconOnly isSecondary handleClick={()=>setIsPathViewMinimized(prev=>!prev)} className={styles.togglePathView}>
-                {
-                  isPathViewMinimized
-                  ? <PlusIcon />
-                  : <MinusIcon />
-                }
-              </Button>
-              <div className={`${styles.pathView} scrollable-support path ${numberToWords(pathLength)}`}>
-                {
-                  !!compressedSubgraph
-                  ?
-                    compressedSubgraph.map((pathItem, i) => {
-                      if(!Array.isArray(pathItem)) {
-                        if(!pathItem)
-                          return null;
-                        const itemID = pathItem.id;
-                        let key = `${itemID}-${i}`;
-                        const isEdge = isResultEdge(pathItem);
-                        let isSelected = (isEdge && checkForEdgeMatch(selectedEdge, pathItem));
-                        return (
-                          <PathObject
-                            pathViewStyles={styles}
-                            index={i}
-                            isEven={false}
-                            path={path}
-                            id={itemID}
-                            key={key}
-                            handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
-                            handleEdgeClick={handleEdgeClick}
-                            pathFilterState={{}}
-                            activeFilters={[]}
-                            activeEntityFilters={[]}
-                            selected={isSelected}
-                            selectedPaths={null}
-                            inModal={true}
-                            pk={pk}
-                          />
-                        )
-                      } else {
-                        return(
-                          <div className="grouped-preds">
-                            {
-                              pathItem.map((edge, j)=> {
-                                let key = `${edge.predicate}-${j}`;
-                                if(!edge)
-                                  return null;
-
-                                let isSelected = (checkForEdgeMatch(selectedEdge, edge));
-                                return (
-                                  <PathObject
-                                    pathViewStyles={styles}
-                                    index={i}
-                                    isEven={false}
-                                    path={path}
-                                    id={edge.id}
-                                    key={key}
-                                    handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
-                                    handleEdgeClick={handleEdgeClick}
-                                    pathFilterState={{}}
-                                    activeFilters={[]}
-                                    activeEntityFilters={[]}
-                                    selected={isSelected}
-                                    selectedPaths={null}
-                                    inModal={true}
-                                    pk={pk}
-                                  />
-                                )
-                              })
-                            }
-                          </div>
-                        )
-                      }
-                    })
-                  :
-                    path.subgraph.map((itemID, i) => {
-                      const pathItem = (i % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
-                      if(!pathItem)
-                        return null;
-
-                      let key = `${itemID}-${i}`;
-                      const isEdge = isResultEdge(pathItem);
-                      let isSelected = (isEdge && !!selectedEdge && selectedEdge.id === itemID);
-                      return (
-                        <PathObject
-                          pathViewStyles={styles}
-                          index={i}
-                          isEven={false}
-                          path={path}
-                          id={itemID}
-                          key={key}
-                          handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
-                          handleEdgeClick={handleEdgeClick}
-                          pathFilterState={{}}
-                          activeFilters={[]}
-                          activeEntityFilters={[]}
-                          selected={isSelected}
-                          selectedPaths={null}
-                          inModal={true}
-                          pk={pk}
-                        />
-                      )
-                    })
-                }
-              </div>
+              {
+                compressedSubgraph && 
+                <Button isSecondary handleClick={()=>setIsPathViewMinimized(prev=>!prev)} className={styles.togglePathView}>
+                  {
+                    isPathViewMinimized
+                    ? "Expand"
+                    : "Collapse"
+                  }
+                  <ChevDown/>
+                </Button>
+              }
+              <PathView
+                pathArray={[path]}
+                selectedPaths={new Set()}
+                handleEdgeSpecificEvidence={handleEdgeClick}
+                handleActivateEvidence={(path)=> console.log(path)}
+                activeEntityFilters={[]}
+                pathFilterState={{}}
+                isEven={false}
+                active={isOpen}
+                activeFilters={[]}
+                pk={pk ? pk : ""}
+                setShowHiddenPaths={()=>{}}
+                showHiddenPaths={true}
+                resultID={result.id}
+                inModal={true}
+                compressedSubgraph={compressedSubgraph}
+                selectedEdge={selectedEdge}
+              />
             </div>
           }
-          <Tabs isOpen={isOpen} className={styles.tabs}>
-            {
-              pubmedEvidence.length > 0 ?
-              <Tab heading="Publications" className={styles.tab}>
-                <PublicationsTable
-                  selectedEdgeTrigger={selectedEdgeTrigger}
-                  selectedEdge={selectedEdge}
-                  pubmedEvidence={pubmedEvidence}
-                  setPubmedEvidence={setPubmedEvidence}
-                  prefs={prefs}
-                  isOpen={isOpen}
-                />
-              </Tab>
-              : null
-            }
-            {
-              clinicalTrials.current.length > 0 ?
-              <Tab heading="Clinical Trials" className={styles.tab}>
-                <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
-                  <div className={`table-head ${styles.tableHead}`}>
-                    <div className={`head ${styles.head} ${styles.link}`}>Link</div>
-                  </div>
-                  <div className={`table-items ${styles.tableItems} scrollable`}>
-                    {
-                      clinicalTrials.current.map((item, i)=> {
-                        let url = item.url
-                        if(!item.url && !!item.id) {
-                          url = getUrlByType(item.id, item.type);
+          {
+            isInferred
+            ?
+              <div className={styles.inferredDisclaimer}>
+                <p>Supporting evidence for this relationship, including intermediary connections, can be found in the next path(s).</p>
+                <p>Reasoning agents that use logic and pattern recognition to find connections between objects identified this path as a possible connection between this result and your search term.</p>
+                <a href="/help#reasoner" target="_blank">Learn More about Reasoning Agents</a>
+              </div>
+            :
+              <Tabs isOpen={isOpen} className={styles.tabs}>
+                {
+                  pubmedEvidence.length > 0 ?
+                  <Tab heading="Publications" className={`${styles.tab} scrollable`}>
+                    <PublicationsTable
+                      selectedEdgeTrigger={selectedEdgeTrigger}
+                      selectedEdge={selectedEdge}
+                      pubmedEvidence={pubmedEvidence}
+                      setPubmedEvidence={setPubmedEvidence}
+                      prefs={prefs}
+                      isOpen={isOpen}
+                    />
+                  </Tab>
+                  : null
+                }
+                {
+                  clinicalTrials.current.length > 0 ?
+                  <Tab heading="Clinical Trials" className={`${styles.tab} scrollable`}>
+                    <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
+                      <div className={`table-head ${styles.tableHead}`}>
+                        <div className={`head ${styles.head} ${styles.link}`}>Link</div>
+                      </div>
+                      <div className={`table-items ${styles.tableItems} scrollable`}>
+                        {
+                          clinicalTrials.current.map((item, i)=> {
+                            let url = item.url
+                            if(!item.url && !!item.id) {
+                              url = getUrlByType(item.id, item.type);
+                            }
+                            return (
+                              <div className={styles.tableItem} key={i}>
+                                <div className={`table-cell ${styles.cell} ${styles.link} link`}>
+                                  {url && <a href={url} rel="noreferrer" target="_blank">{url} <ExternalLink/></a>}
+                                </div>
+                              </div>
+                            )
+                          })
                         }
-                        return (
-                          <div className={styles.tableItem} key={i}>
-                            <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-                              {url && <a href={url} rel="noreferrer" target="_blank">{url} <ExternalLink/></a>}
-                            </div>
-                          </div>
-                        )
-                      })
-                    }
-                  </div>
-                </div>
-              </Tab>
-              : null
-            }
-            {
-              miscEvidence.current.length > 0 ?
-              <Tab heading="Miscellaneous" className={styles.tab}>
-                <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
-                  <div className={`table-head ${styles.tableHead}`}>
-                    <div className={`head ${styles.head} ${styles.link}`}>Link</div>
-                  </div>
-                  <div className={`table-items ${styles.tableItems} scrollable`}>
-                    {
-                      miscEvidence.current.map((item, i) => {
-                        return (
-                          <div className={`table-item ${styles.tableItem}`} key={i}>
-                            <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-                              {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
-                            </div>
-                          </div>
-                        )
-                      })
-                    }
-                  </div>
-                </div>
-              </Tab>
-              : null
-            }
-            {
-              // Add sources modal for predicates
-              sources.length > 0 ?
-              <Tab
-                heading="Knowledge Sources"
-                tooltipIcon={<InfoIcon className={styles.infoIcon} />}
-                dataTooltipId="knowledge-sources-tooltip"
-                className={styles.tab}
-                >
-                <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
-                  <div className={`table-head ${styles.tableHead}`}>
-                    <div className={`head ${styles.head}`}>Source</div>
-                    <div className={`head ${styles.head}`}>Rationale</div>
-                  </div>
-                  <div className={`table-items ${styles.tableItems} scrollable`}>
-                    {
-                      sources.map((src, i) => {
-                        const sourceKey = `${src.url}-${i}`;
-                        const tooltipId = `source-tooltip-${sourceKey}`;
-                        return(
-                          <div className={`table-item ${styles.tableItem}`} key={sourceKey}>
-                            <Tooltip id={tooltipId}>
-                              <span className={styles.tooltipSpan}>
-                                Why do we use this source?
-                                <a href={src?.wiki} target="_blank" rel="noreferrer">
-                                  <ExternalLink/>
-                                </a>
-                              </span>
-                            </Tooltip>
-                            <span className={`table-cell ${styles.cell} ${styles.source} ${styles.sourceItem}`}>
-                              {src.name}
-                              {
-                                src?.wiki
-                                ? <InfoIcon className={styles.infoIcon} data-tooltip-id={tooltipId} />
-                                : <></>
-                              }
-                            </span>
-                            <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
-                              {
-                                src?.url
-                                ?
-                                  <a href={src?.url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
-                                    {src?.url}
-                                    <ExternalLink/>
-                                  </a>
-                                :
-                                  <span>No link available</span>
-                              }
-                            </span>
-                          </div>
-                        )
-                      })
-                    }
-                  </div>
-                </div>
-              </Tab>
-              : null
-            }
-            {
-              (clinicalTrials.current.length <= 0 &&
-              pubmedEvidence.length <= 0 &&
-              sources.length <= 0) ?
-              <Tab heading="No Evidence Available">
-                <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
-              </Tab>
-              : null
-            }
-          </Tabs>
+                      </div>
+                    </div>
+                  </Tab>
+                  : null
+                }
+                {
+                  miscEvidence.current.length > 0 ?
+                  <Tab heading="Miscellaneous" className={`${styles.tab} scrollable`}>
+                    <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
+                      <div className={`table-head ${styles.tableHead}`}>
+                        <div className={`head ${styles.head} ${styles.link}`}>Link</div>
+                      </div>
+                      <div className={`table-items ${styles.tableItems} scrollable`}>
+                        {
+                          miscEvidence.current.map((item, i) => {
+                            return (
+                              <div className={`table-item ${styles.tableItem}`} key={i}>
+                                <div className={`table-cell ${styles.cell} ${styles.link} link`}>
+                                  {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
+                                </div>
+                              </div>
+                            )
+                          })
+                        }
+                      </div>
+                    </div>
+                  </Tab>
+                  : null
+                }
+                {
+                  // Add sources modal for predicates
+                  sources.length > 0 ?
+                  <Tab
+                    heading="Knowledge Sources"
+                    tooltipIcon={<InfoIcon className={styles.infoIcon} />}
+                    dataTooltipId="knowledge-sources-tooltip"
+                    className={`${styles.tab} scrollable`}
+                    >
+                    <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
+                      <div className={`table-head ${styles.tableHead}`}>
+                        <div className={`head ${styles.head}`}>Source</div>
+                        <div className={`head ${styles.head}`}>Rationale</div>
+                      </div>
+                      <div className={`table-items ${styles.tableItems} scrollable`}>
+                        {
+                          sources.map((src, i) => {
+                            const sourceKey = `${src.url}-${i}`;
+                            const tooltipId = `source-tooltip-${sourceKey}`;
+                            return(
+                              <div className={`table-item ${styles.tableItem}`} key={sourceKey}>
+                                <Tooltip id={tooltipId}>
+                                  <span className={styles.tooltipSpan}>
+                                    Why do we use this source?
+                                    <a href={src?.wiki} target="_blank" rel="noreferrer">
+                                      <ExternalLink/>
+                                    </a>
+                                  </span>
+                                </Tooltip>
+                                <span className={`table-cell ${styles.cell} ${styles.source} ${styles.sourceItem}`}>
+                                  {src.name}
+                                  {
+                                    src?.wiki
+                                    ? <InfoIcon className={styles.infoIcon} data-tooltip-id={tooltipId} />
+                                    : <></>
+                                  }
+                                </span>
+                                <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
+                                  {
+                                    src?.url
+                                    ?
+                                      <a href={src?.url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
+                                        {src?.url}
+                                        <ExternalLink/>
+                                      </a>
+                                    :
+                                      <span>No link available</span>
+                                  }
+                                </span>
+                              </div>
+                            )
+                          })
+                        }
+                      </div>
+                    </div>
+                  </Tab>
+                  : null
+                }
+                {
+                  (clinicalTrials.current.length <= 0 &&
+                  pubmedEvidence.length <= 0 &&
+                  sources.length <= 0) ?
+                  <Tab heading="No Evidence Available">
+                    <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
+                  </Tab>
+                  : null
+                }
+              </Tabs>
+          }
         </div>
       }
     </Modal>

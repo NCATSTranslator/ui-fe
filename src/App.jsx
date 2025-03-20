@@ -3,7 +3,7 @@ import Footer from './Components/Footer/Footer';
 import Header from './Components/Header/Header';
 import SmallScreenOverlay from './Components/SmallScreenOverlay/SmallScreenOverlay';
 import SendFeedbackModal from "./Components/Modals/SendFeedbackModal";
-import { useGoogleAnalytics, useGoogleTagManager, useWindowSize } from './Utilities/customHooks';
+import { useGoogleAnalytics, useGoogleTagManager, useWindowSize, useScrollToHash } from './Utilities/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import './App.scss';
 import { getDataFromQueryVar } from './Utilities/utilities';
@@ -32,6 +32,7 @@ const App = ({children}) => {
 
   const [sessionStatus] = useGetSessionStatus();
   useFetchConfigAndPrefs(sessionStatus?.user, setGaID, setGtmID);
+  useScrollToHash();
 
   return (
     <div className={`app ${pathnameClass}`}>

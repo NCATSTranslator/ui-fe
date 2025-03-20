@@ -901,21 +901,9 @@ button {
 $nodeWidth: 178px;
 $predWidth: 178px;
 .path {
-  &.three {
-    grid-template-columns: $nodeWidth $predWidth $nodeWidth;
-  }
-  &.five {
-    grid-template-columns: $nodeWidth repeat(2, $predWidth $nodeWidth);
-  }
-  &.seven {
-    grid-template-columns: $nodeWidth repeat(3, $predWidth $nodeWidth);
-  }
-  &.nine {
-    grid-template-columns: $nodeWidth repeat(4, $predWidth $nodeWidth);
-  }
-  &.eleven {
-    grid-template-columns: $nodeWidth repeat(5, $predWidth $nodeWidth);
-  }
+  grid-auto-columns: 178px;
+  grid-template-rows: 1fr;
+  grid-auto-flow: column;
 }
 
 .pageNums {

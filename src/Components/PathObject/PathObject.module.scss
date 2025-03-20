@@ -2,6 +2,11 @@
 
 
 .nameContainer,.predicateContainer,.targetContainer {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
   svg {
     width: 24px;
     height: 24px;
@@ -43,59 +48,36 @@
       }
     }
   }
-}
-.name,.predicateContainer,.target {
-  display: flex;
-  align-items: center;
-}
-.text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 0 4px;
-}
-.nameContainer {
-  position: relative;
-  background-color: $lightGray;
-  // border-radius: $defaultBorderRadius;
-  // border: 1px solid transparent;
-  box-shadow: none;
-  &.even {
-    background-color: $white;
-  }
-  svg {
-    margin-right: 0;
-    path {
-      fill: $black;
+  .nameShape {
+    position: absolute;
+    top: -2px;
+    right: 0px;
+    bottom: -2px;
+    left: -10px;
+    clip-path: polygon(170px -16px ,188px 16px, 170px 48px, -5% 48px, 8px 16px, -8px -16px);
+    transition: $defaultAnim;
+    z-index: 20;
+    & > span {
+      position: relative;
+      z-index: 10;
     }
-  }
-}
-
-.predicateContainer {
-  padding: 0;
-  position: relative;
-  cursor: pointer;
-  // min-width: 220px;
-  justify-content: space-between;
-}
-.predicateContainer, .nameContainer, .targetContainer {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  &:before {
-    content: '';
-    background-image: url('../../Icons/Connectors/PathArrow.svg');
-    width: 8px;
-    height: 28px;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
+    svg {
+      position: absolute;
+      width: 8px;
+      height: 28px;
+      right: 1px;
+      top: 2px;
+      min-width: auto;
+      min-height: auto;
+      path {
+        fill: $midPurpleTwo;
+      }
+    }
   }
   &>span {
     padding: 5px;
     height: 16px;
-    width: 150px;
+    width: 160px;
   }
   span, mark {
     font-size: 12px;
@@ -118,6 +100,49 @@
     font-size: 14px;
     margin: 3px 0 8px;
     font-weight: 400;
+  }
+}
+.name,.predicateContainer,.target {
+  display: flex;
+  align-items: center;
+}
+.text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+.nameContainer {
+  position: relative;
+  box-shadow: none;
+  border-color: $purpleTwo;
+  border-width: 2px 0;
+  border-style: solid;
+  background-color: $lightGray;
+  height: 28px;
+  &.even {
+    background-color: $white;
+  }
+  svg {
+    margin-right: 0;
+    path {
+      fill: $black;
+    }
+  }
+}
+.predicateContainer {
+  padding: 0;
+  position: relative;
+  cursor: pointer;
+  justify-content: space-between;
+}
+.predicateContainer:hover, .predicateContainer.selected,
+.nameContainer:hover, 
+.nameContainer:has(+ .predicateContainer:hover), .nameContainer:has(+ .predicateContainer.selected),
+.predicateContainer:hover + .nameContainer, .predicateContainer.selected + .nameContainer,
+.predicateContainer:hover + div + .nameContainer, .predicateContainer.selected + div + .nameContainer {
+  .nameShape {
+    background-color: rgba(61, 43, 100, .2);
   }
 }
 
@@ -153,3 +178,71 @@
   text-decoration: underline;
 }
 
+.inModal {
+  background-color: transparent;
+  border: none;
+  &:first-child {
+    right: -9px;
+    .nameShape {
+      clip-path: polygon(170px -16px,188px 16px,170px 48px,0% 48px,0 16px,0 -16px);
+      left: 0;
+      svg {
+        right: 12px;
+      }
+    }
+  }
+  &:last-child {
+    border-color: $purpleTwo;
+    border-width: 2px 0;
+    border-style: solid;
+  }
+  &:before {
+    background-color: $lightGray !important;
+    left: 0;
+    transition: $defaultAnim;
+  }
+  &:after {
+    display: none !important;
+  }
+  &:hover {
+    &:before {
+      background-color: $lightPurpleTwo !important;
+    }
+  }
+  .nameShape {
+    background-color: $lightGray;
+    border-top: 2px solid $purpleTwo;
+    border-bottom: 2px solid $purpleTwo;
+    svg {
+      top: 0px;
+      right: 3px;
+    }
+  }
+  &:has(+ svg) {
+    .nameShape {
+      clip-path: polygon(160px -16px,178px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
+      svg {
+        display: none;
+      }
+    }
+  }
+  .name {
+    background-color: transparent !important;
+    z-index: 50 !important;
+  }
+  &:hover,
+  &:hover + .nameContainer,
+  &.selected,
+  &.selected + .nameContainer,
+  &.nameContainer:has(+ svg + div .predicateContainer:hover),
+  &.nameContainer:has(+ svg + div .predicateContainer.selected),
+  &.nameContainer:has(+ .predicateContainer.selected),
+  &.nameContainer:has(+ .predicateContainer:hover){
+    .nameShape {
+      background-color: $lightPurpleTwo !important;
+    }
+    &:before {
+      background-color: $lightPurpleTwo !important;
+    }
+  }
+}

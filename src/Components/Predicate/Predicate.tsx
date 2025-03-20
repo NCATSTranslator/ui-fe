@@ -1,12 +1,12 @@
 import { useState, FC, MouseEvent } from 'react';
 import styles from './Predicate.module.scss';
-import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
+import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 import PubIcon from '../../Icons/Status/HasPub.svg?react';
 import CTIcon from '../../Icons/Status/HasCT.svg?react';
 import Up from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Highlighter from 'react-highlight-words';
-import { checkEdgesForClinicalTrials, checkEdgesForPubs, getCompressedEdge, hasSupport } from '../../Utilities/utilities';
+import { checkEdgesForClinicalTrials, checkEdgesForPubs, getCompressedEdge, getEvidenceFromEdge, hasSupport } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Types/results';
@@ -25,6 +25,7 @@ interface PredicateProps {
   edgeIDs: string[];
   inModal?: boolean | null;
   parentClass?: string;
+  parentStyles?: {[key: string]: string;} | null;
   pathFilterState: PathFilterState;
   path: Path;
   pathViewStyles?: {[key: string]: string;} | null;
@@ -45,7 +46,8 @@ const Predicate: FC<PredicateProps> = ({
   handleEdgeClick, 
   handleNodeClick, 
   inModal = false, 
-  parentClass = '', 
+  parentClass = '',
+  parentStyles,
   pathFilterState,
   path, 
   pathViewStyles = null, 
@@ -54,21 +56,6 @@ const Predicate: FC<PredicateProps> = ({
   selectedPaths,
   showHiddenPaths,
   uid }) => {
-
-  const checkForProvenanceType = (edge: ResultEdge, type: string) => {
-    if(!edge?.provenance || !Array.isArray(edge.provenance))
-      return false;
-
-    if(type === "ml") {
-      if(edge.provenance.some(item => item.knowledge_level === "ml"))
-        return true;
-    }
-    if(type === "trusted") {
-      if(edge.provenance.some(item => item.knowledge_level === "trusted"))
-        return true;
-    }
-    return false;
-  }
 
   let resultSet = useSelector(getResultSetById(pk));
   const formattedEdge = (!!resultSet && Array.isArray(edgeIDs) && edgeIDs.length > 1) ? getCompressedEdge(resultSet, edgeIDs) : edge;
@@ -90,65 +77,85 @@ const Predicate: FC<PredicateProps> = ({
     return newArr;
   }
   
-  const edgesToDisplay = (!!formattedEdge?.compressed_edges) 
+  const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges) 
   ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
   : [formattedEdge];
 
-  // let hasSupport = (formattedEdge?.support && formattedEdge.support.length) > 0 ? true : false;
   return (
     <>
-      <Tooltip
-        id={`${formattedEdge.predicate}${uid}`}
-        place={`${inModal ? 'left' : 'top' }`}
+      <span
+        className={`${selected && styles.selected} ${selected && parentStyles ? parentStyles.selected : ''} ${styles.edge} ${inModal && styles.inModal} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && styles.isInferred}`}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path);}}
+        data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         >
-        {
-          <div className={styles.predicatesList}>
-            {
-              edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
-                if(!edge)
-                  return null;
-                return (
-                  <p
-                    key={`${edge.predicate}`}
-                    className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-                    onClick={(e)=> {
-                      e.stopPropagation();
-                      handleEdgeClick([edge.id], path);
-                    }}
-                    >
-                    <Highlighter
-                      highlightClassName="highlight"
-                      searchWords={activeEntityFilters}
-                      autoEscape={true}
-                      textToHighlight={edge.predicate}
-                    />
-                    {
-                      edge.predicate_url &&
-                      <a
-                        href={edge.predicate_url }
+        <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
+          <PathArrow/>
+        </div>
+        <Tooltip
+          id={`${formattedEdge.predicate}${uid}`}
+          place={`${inModal ? 'left' : 'top' }`}
+          >
+          {
+            <div className={styles.predicatesList}>
+              {
+                edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
+                  if(!edge || !resultSet)
+                    return null;
+                  // not optimal to create 2 new empty sets on each render, but it prevents having to write an additional evidence counting function
+                  const edgeEvidence = getEvidenceFromEdge(resultSet, edge, new Set<string>(), new Set<string>());
+                  return (
+                    <div className={styles.tooltipPredicateContainer}>
+                      <p
+                        key={`${edge.predicate}`}
+                        className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
                         onClick={(e)=> {
                           e.stopPropagation();
+                          handleEdgeClick([edge.id], path);
                         }}
-                        target="_blank"
-                        rel='noreferrer'>
-                          <ExternalLink/>
-                      </a>
-                    }
-                  </p>
-                );
-              })
-            }
-          </div>
-        }
-      </Tooltip>
-      <span
-        className={`${selected ? styles.selected : ''} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && pathViewStyles && pathViewStyles.isInferred}`}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path);}}
-        >
+                        >
+                        <Highlighter
+                          highlightClassName="highlight"
+                          searchWords={activeEntityFilters}
+                          autoEscape={true}
+                          textToHighlight={edge.predicate}
+                        />
+                        {
+                          edge.predicate_url &&
+                          <a
+                            href={edge.predicate_url }
+                            onClick={(e)=> {
+                              e.stopPropagation();
+                            }}
+                            target="_blank"
+                            rel='noreferrer'>
+                              <ExternalLink/>
+                          </a>
+                        }
+                      </p>
+                      {
+                        (edgeEvidence.pubs.size > 0 || edgeEvidence.cts.size > 0) &&
+                        <div className={styles.tooltipEvidenceCounts}>
+                          {
+                            (edgeEvidence.pubs.size > 0) && 
+                            <span className={styles.count}><PubIcon/>{edgeEvidence.pubs.size} Publication{edgeEvidence.pubs.size > 1 && "s"}</span>
+                          }
+                          {
+                            (edgeEvidence.cts.size > 0) && 
+                            <span className={styles.count}><CTIcon/>{edgeEvidence.cts.size} Clinical Trial{edgeEvidence.cts.size > 1 && "s"}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  );
+                })
+              }
+            </div>
+          }
+        </Tooltip>
         <span
           className={`${styles.pred} pred ${hasMore ? styles.hasMore : ''}`}
           >
-          <span data-tooltip-id={`${formattedEdge.predicate}${uid}`} className={styles.predLabel}>
+          <span className={styles.predLabel}>
             <Highlighter
               highlightClassName="highlight"
               searchWords={activeEntityFilters}
@@ -168,18 +175,18 @@ const Predicate: FC<PredicateProps> = ({
               hasCTs && <CTIcon/>
             }
           </div>
+          {
+            isInferred && !inModal &&
+            <button
+              onClick={handleSupportExpansion}
+              className={`support-button ${styles.supportExpansionButton} ${isSupportExpanded ? styles.expanded : ''}`}>
+              <div className={styles.supportConnector}></div>
+              <span className={styles.supportButtonIcon}>
+                <Up/>
+              </span>
+            </button>
+          }
         </span>
-        {
-          isInferred && !inModal &&
-          <button
-            onClick={handleSupportExpansion}
-            className={`support-button ${styles.supportExpansionButton} ${isSupportExpanded ? styles.expanded : ''}`}>
-            <div className={styles.supportConnector}></div>
-            <span className={styles.supportButtonIcon}>
-              <Up/>
-            </span>
-          </button>
-        }
       </span>
       {
         isInferred && !inModal &&

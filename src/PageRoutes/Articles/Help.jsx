@@ -6,7 +6,7 @@ export const Help = () => {
 
   return (
     <>
-      <p className="caption">Last updated on September 26th, 2024</p>
+      <p className="caption">Last updated on March 18th, 2025</p>
       <h2 className="h6">How is this tool different from a search engine?</h2>
       <p>The Translator UI is a tool designed for the exploration of biomedical knowledge. Unlike search engines which provide an answer based on a topic search, Translator uses reasoning, based on biomedical knowledge, to provide probable answers supported by known evidence. This allows the user to explore the relationships between biomedical concepts.</p>
       <p>Given the complexity of the results and the different goals of users, the UI provides multiple ways to sort and filter results to identify those most relevant to a user.</p>
@@ -16,12 +16,22 @@ export const Help = () => {
       <h2 className="h6">What can I expect Translator to return?</h2>
       <p>Translator will return a network related to each answer to a query.  These are broken into paths representing the possible logical paths through the network from the result to the target. The relationships shown are always supported by evidence which can be accessed by clicking the lines connecting two concepts.  The interface is designed to enable the exploration of results and evidence in a systematic way.</p>
       
-      <h2 className="h6">What is a result "path"?</h2>
+      <h2 className="h6">What is a result "path?"</h2>
       <p>Translator uses systems biology and knowledge graphs to surface knowledge that may be of interest to the researcher. Paths are individual routes through connecting pieces of data within the knowledge graph that go from the result to the targeted concept. Translator displays evidence (publications and sources) for each connection along the route. Publications are displayed in a table including the relationship that the paper supports. Other sources of evidence have links to wiki or other pages explaining the reasoning behind the connection it is associated with.</p>
+
+      <h2 className="h6"><span className="hash-anchor" id="reasoner"></span>What are reasoning agents?</h2>
+      <p>Reasoning agents are an automated reasoning system that apply logic and computational techniques to analyze the network of relationships found in our interconnected dataset. These systems evaluate existing connections and use predefined rules to infer new insights, often revealing relationships that have not yet been explicitly recorded in the data.</p>
+      <p>For example, our knowledge sources might contain information that Drug A interacts with Protein B, and Protein B plays a role in Disease C. Reasoners can suggest a potential link between Drug A and Disease C, even if no direct connection is recorded in the dataset. By following these logical pathways, reasoners can uncover hidden patterns that may lead to new discoveries, allowing researchers to generate fresh hypotheses and explore potential breakthroughs from existing data.</p>
+      <p>By systematically evaluating pathways and relationships, reasoners help transform known information into new knowledge, enhancing biomedical research and supporting scientific discovery.</p>
+      
+      <h2 className="h6"><span className="hash-anchor" id="indirect"></span>What are indirect paths?</h2>
+      <p>Indirect paths are identified by reasoning agents that use logic and pattern recognition to uncover inferred links between objects. When two pieces of information aren't directly connected in our database, also called a knowledge graph, these agents look at existing relationships and apply logical rules to suggest possible connections.</p>
+      <p>For example, say Gene A affects Protein B, and Protein B is linked to Disease C. Translator reasoners can infer a possible connection between Gene A and Disease C even if no research paper directly states it. These connections are built step by step, and the supporting paths that follow them on the list of paths show the intermediary connections that explain why the objects in the indirect path are associated with each other.</p>
 
       <h2 className="h6">Is it possible to see the evidence supporting each result?</h2>
       <p>Yes, Translator provides evidence for every association between two concepts. At the moment Translator is able to distinguish two different types of evidence: publications and knowledge sources. </p>
-      
+      <p>Click on a relationship to view the evidence supporting it.</p>
+
       <h2 className="h6">Is it okay to take a commercially available drug that Translator returns as a possible treatment for my disease of interest?</h2>
       <p>No. Translator is designed for research, and the results are for research only.  Only physicians should guide medical care even for over-the-counter medicines.</p>
 
@@ -44,9 +54,6 @@ export const Help = () => {
       <p>Translator teams use the Mondo Disease Ontology to provide possible matches to disease names as they are entered. Mondo was developed to provide a harmonized hierarchical structure for diseases unifying and curating various disease resources. Results for the diseases higher in the hierarchy can include the children of those terms.  Multiple versions of the same disease mean there are likely similarly named variations of the disease. A list of results for the Alzheimer's example can be found here.</p>
       <p>It is generally a safe bet to choose the most general of entries provided.</p>
 
-      <h2 className="h6">How can I share my results?</h2>
-      <p>Click on the purple export icon to the top right of a result list to generate a shareable link to it. You can also generate this link by clicking the same icon next to a result set in your <a href="/history">search history</a>.</p>
-      
       <h2 className="h6">Why do I see a disease in my results that is different than the one I searched for?</h2>
       <p>Translator uses the <a href="http://obofoundry.org/ontology/mondo.html" target="_blank" rel="noreferrer">Mondo Disease Ontology</a> which has a hierarchical structure. This means that certain terms have a 'parent/child' relationship.  A parent term is more general, and a child term is more specific.  For example, 'diabetes mellitus' is a child (or subtype) of 'endocrine pancreas disease' and a parent of 'type 1 diabetes mellitus.' When working with diseases in Translator, it may be assumed that if there is a relationship with the parent term, then the relationship also exists with the children of that term.  As such, if a user selects 'diabetes mellitus' in the query, there will likely be results related to 'type 1 diabetes' as well as the other children of that term.  For more information on the disease terms and their hierarchy go to <a href="https://next.monarchinitiative.org/" target="_blank" rel="noreferrer">https://next.monarchinitiative.org/</a>.</p>
       

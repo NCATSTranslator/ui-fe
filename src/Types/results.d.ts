@@ -86,7 +86,7 @@ export interface ResultEdge {
   // nodeID
   subject: string;
   // array of path ids or Path objects
-  support: (string | Path)[];
+  support: string[] | Path[];
   trials: string[];
 }
 
