@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject } from '../../Utilities/userApi';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getPathById, getPathsByIds, getEdgeById } from '../../Redux/resultsSlice';
-import { currentUser } from '../../Redux/rootSlice';
+import { currentUser } from '../../Redux/userSlice';
 import { displayScore, generateScore } from '../../Utilities/scoring';
 import { QueryType } from '../../Types/querySubmission';
 import { Result, Filter, PathFilterState, Path, ResultBookmark, ResultSet } from '../../Types/results.d';

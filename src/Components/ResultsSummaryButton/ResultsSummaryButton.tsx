@@ -11,7 +11,7 @@ import { Result } from "../../Types/results";
 import { ResultContextObject } from "../../Utilities/llm";
 import { useTextStream } from "../../Utilities/customHooks";
 import { isEqual } from "lodash";
-import { currentConfig } from "../../Redux/rootSlice";
+import { currentConfig } from "../../Redux/userSlice";
 import { getResultSetById } from "../../Redux/resultsSlice";
 import { useSelector } from "react-redux";
 

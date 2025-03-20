@@ -53,7 +53,7 @@ export const getIcon = (category: string): JSX.Element => {
     case 'biolink:BiologicalEntity':
       icon = <BiologicalEntity/>;
       break;
-    case 'biolink:AnatomicalEntity':
+    case 'biolink:AnatomicalEntity': case 'biolink:GrossAnatomicalStructure':
       icon = <AnatomicalEntity/>;
       break;
     default:

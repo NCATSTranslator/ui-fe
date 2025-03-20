@@ -1,7 +1,7 @@
 import styles from './LoginComponent.module.scss'
 import loginImage from '../../Assets/Images/login.png';
 import { useSelector } from 'react-redux';
-import { currentConfig } from '../../Redux/rootSlice';
+import { currentConfig } from '../../Redux/userSlice';
 
 const LoginComponent = () => {
 

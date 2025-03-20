@@ -56,8 +56,7 @@ export type Config = {
   include_summarization: boolean;
 }
 
-export type RootState = {
-  currentRoot: string;
+export type UserState = {
   currentUser?: User | null; 
   currentPrefs: PreferencesContainer;
   currentConfig: Config | null;

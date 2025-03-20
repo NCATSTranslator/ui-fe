@@ -9,7 +9,7 @@ import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
 import AutoHeight from "../AutoHeight/AutoHeight";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { incrementHistory } from "../../Redux/historySlice";
-import { currentConfig, currentUser } from "../../Redux/rootSlice";
+import { currentConfig, currentUser } from "../../Redux/userSlice";
 import { setCurrentQuery } from "../../Redux/querySlice";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import cloneDeep from "lodash/cloneDeep";
