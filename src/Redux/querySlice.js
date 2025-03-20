@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-let savedState = JSON.parse(localStorage.getItem('reduxState'))
+let savedState = JSON.parse(localStorage.getItem('currentQueryState'))
 
 const persistedQuery = (savedState 
   && savedState.query !== undefined && savedState.query !== null 

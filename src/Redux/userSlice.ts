@@ -10,7 +10,7 @@ const initialState: UserState = {
   currentConfig: null
 };
 
-export const rootSlice = createSlice({
+export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
@@ -26,10 +26,10 @@ export const rootSlice = createSlice({
   }
 });
 
-export const { setCurrentUser, setCurrentPrefs, setCurrentConfig } = rootSlice.actions;
+export const { setCurrentUser, setCurrentPrefs, setCurrentConfig } = userSlice.actions;
 
-export const currentUser = (state: { root: UserState }) => state.root.currentUser;
-export const currentPrefs = (state: { root: UserState }) => state.root.currentPrefs;
-export const currentConfig = (state: { root: UserState }) => state.root.currentConfig;
+export const currentUser = (state: { user: UserState }) => state.user.currentUser;
+export const currentPrefs = (state: { user: UserState }) => state.user.currentPrefs;
+export const currentConfig = (state: { user: UserState }) => state.user.currentConfig;
 
-export default rootSlice.reducer;
+export default userSlice.reducer;
