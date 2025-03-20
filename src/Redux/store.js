@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import historyReducer from './historySlice';
 import queryReducer from './querySlice';
 import resultsReducer from './resultsSlice';
-import rootReducer from './rootSlice';
+import rootReducer from './userSlice';
 
 export const store = configureStore({
   reducer: {

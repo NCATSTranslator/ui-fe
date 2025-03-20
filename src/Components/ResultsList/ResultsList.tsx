@@ -11,7 +11,7 @@ import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
 import { useSelector, useDispatch } from 'react-redux';
 import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById, getPathById }from "../../Redux/resultsSlice";
-import { currentPrefs, currentUser }from "../../Redux/rootSlice";
+import { currentPrefs, currentUser }from "../../Redux/userSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
   sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow,
