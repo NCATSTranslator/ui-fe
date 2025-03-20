@@ -443,6 +443,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
           ${isExpanded ? styles.open : styles.closed }
           ${(roleCount > 0 && !isInUserSave) ? styles.hasTags : ''}
           ${(!!resultDescription && !isPathfinder) ? styles.hasDescription : '' }
+          ${!!isInUserSave && styles.inUserSave}
         `}
         duration={500}
         height={height}
@@ -459,6 +460,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
                     const activeClass = (activeFilters.some((filter)=> filter.id === fid && filter.value === tag.name))
                       ? styles.active
                       : styles.inactive;
+                      console.log(availableTags);
+                    if(!tag)
+                      return null;
                     return(
                       <button key={fid} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(fid, tag)}>{tag.name} ({tag.count})</button>
                     )
