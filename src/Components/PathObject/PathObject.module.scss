@@ -81,7 +81,7 @@
   }
   span, mark {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.25;
   }
   span.hasMore {
@@ -111,6 +111,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   padding: 0 4px;
+  color: $black;
 }
 .nameContainer {
   position: relative;
@@ -190,6 +191,14 @@
         right: 12px;
       }
     }
+    &:has(+ svg) {
+      .nameShape {
+        clip-path: polygon(160px -16px,178px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
+        svg {
+          display: none;
+        }
+      }
+    }
   }
   &:last-child {
     border-color: $purpleTwo;
@@ -220,9 +229,9 @@
   }
   &:has(+ svg) {
     .nameShape {
-      clip-path: polygon(160px -16px,178px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
+      // clip-path: polygon(160px -16px,178px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
       svg {
-        display: none;
+        display: none !important;
       }
     }
   }

@@ -98,7 +98,7 @@ const PathView: FC<PathViewProps> = ({
   }, [handleEdgeSpecificEvidence]);
 
   const edgeHeight = 32;
-  const svgWidth = 188;
+  const svgWidth = 198;
   const curveOffset = 50;
   const straightSegmentLength = 20;
   const pathColor = "#8C8C8C26";
