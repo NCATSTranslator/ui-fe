@@ -20,7 +20,11 @@
 .paginationContainer {
   display: grid;
   padding: 12px;
-  margin: 16px -16px 0 -16px;
+  margin: 16px -17px -1px -5px;
   background-color: $white;
-  border-top: 1px solid $midPurpleTwo;
+  border: 1px solid $lightPurpleTwo;
+  border-top-color: $midPurpleTwo;
+  border-radius: $defaultBorderRadius;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }

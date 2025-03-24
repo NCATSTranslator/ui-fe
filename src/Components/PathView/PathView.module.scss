@@ -182,6 +182,8 @@
         }
       }
       .connectors {
+        position: relative;
+        left: -10px;
         path {
           transition: stroke .5s ease;
         }
