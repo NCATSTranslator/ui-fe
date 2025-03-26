@@ -31,12 +31,6 @@
       }
     }
   }
-  .num {
-    svg {
-      position: relative;
-      right: -5px;
-    }
-  }
   .tableHead, .tableItem {
     display: grid;
     justify-content: flex-start;
@@ -213,15 +207,11 @@
       }
     }
     .num {
-      width: 20px;
+      width: 28px;
       height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 12px;
-      line-height: 1.25;
-      color: $black;
       align-self: flex-start;
       border-width: 2px 0;
       border-style: solid;
@@ -230,6 +220,18 @@
       padding-right: $xxs;
       cursor: default;
       transition: $defaultAnim;
+      .val {
+        font-weight: 800;
+        font-size: 12px;
+        line-height: 1.25;
+        color: $black;
+        width: 15px;
+        overflow: visible;
+      }
+      svg {
+        position: relative;
+        right: -5px;
+      }
     }
     .pathEvidenceButton {
       height: $l;
