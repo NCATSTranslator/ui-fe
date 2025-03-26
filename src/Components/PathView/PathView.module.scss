@@ -395,8 +395,10 @@
       margin-bottom: 0;
     }
     .supportGroupContainer {
+      display: grid;
       overflow-x: auto;
       outline: none;
+      width: fit-content;
     }
   }
 }
