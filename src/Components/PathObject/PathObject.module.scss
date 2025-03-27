@@ -50,13 +50,15 @@
   }
   .nameShape {
     position: absolute;
-    top: -2px;
+    top: 0;
     right: 0px;
-    bottom: -2px;
+    bottom: 0;
     left: -10px;
     clip-path: polygon(170px -16px ,188px 16px, 170px 48px, -5% 48px, 8px 16px, -8px -16px);
     transition: $defaultAnim;
     z-index: 20;
+    border-top: 2px solid $purpleTwo;
+    border-bottom: 2px solid $purpleTwo;
     & > span {
       position: relative;
       z-index: 10;
@@ -66,7 +68,7 @@
       width: 8px;
       height: 28px;
       right: 1px;
-      top: 2px;
+      top: 0;
       min-width: auto;
       min-height: auto;
       path {
@@ -116,11 +118,11 @@
 .nameContainer {
   position: relative;
   box-shadow: none;
-  border-color: $purpleTwo;
-  border-width: 2px 0;
-  border-style: solid;
+  // border-color: $purpleTwo;
+  // border-width: 2px 0;
+  // border-style: solid;
   background-color: $lightGray;
-  height: 28px;
+  height: 32px;
   &.even {
     background-color: $white;
   }

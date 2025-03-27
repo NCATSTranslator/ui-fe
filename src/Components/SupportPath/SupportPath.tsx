@@ -70,7 +70,9 @@ const SupportPath: FC<SupportPathProps> = ({
               </div>
           </button>
           <span className={`${!!pathViewStyles && pathViewStyles.num}`}>
-            { character }
+            <span className={`${!!pathViewStyles && pathViewStyles.val}`}>
+              { character }
+            </span>
             <PathArrow/>
           </span>
           <Tooltip

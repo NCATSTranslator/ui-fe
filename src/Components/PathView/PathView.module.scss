@@ -31,12 +31,6 @@
       }
     }
   }
-  .num {
-    svg {
-      position: relative;
-      right: -5px;
-    }
-  }
   .tableHead, .tableItem {
     display: grid;
     justify-content: flex-start;
@@ -78,15 +72,18 @@
     }
     .nameContainer {
       &:last-child {
+        border-width: 0;
         border-right-width: 13px;
         border-bottom-right-radius: $defaultBorderRadius;
         border-top-right-radius: $defaultBorderRadius;
+        border-style: solid;
+        border-color: $purpleTwo;
         div:first-child {
           clip-path: polygon(188px -16px,188px 16px,188px 48px,-5% 48px,8px 16px, -8px -16px);
           border: 2px solid $purpleTwo;
           border-bottom-right-radius: 8px;
           border-top-right-radius: 8px;
-          right: -10px;
+          right: -8px;
           border-left: none;
           svg {
             display: none !important;
@@ -213,15 +210,11 @@
       }
     }
     .num {
-      width: 20px;
+      width: 28px;
       height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 12px;
-      line-height: 1.25;
-      color: $black;
       align-self: flex-start;
       border-width: 2px 0;
       border-style: solid;
@@ -230,6 +223,18 @@
       padding-right: $xxs;
       cursor: default;
       transition: $defaultAnim;
+      .val {
+        font-weight: 800;
+        font-size: 12px;
+        line-height: 1.25;
+        color: $black;
+        width: 15px;
+        overflow: visible;
+      }
+      svg {
+        position: relative;
+        right: -5px;
+      }
     }
     .pathEvidenceButton {
       height: $l;
@@ -293,10 +298,10 @@
       &:after {
         content: "";
         position: absolute;
-        top: -2px;
+        top: 0;
         left: 0;
         right: 0px;
-        height: 31px;
+        height: 30px;
         pointer-events: none;
         z-index: -1;
         border-radius: 4px;
@@ -395,8 +400,10 @@
       margin-bottom: 0;
     }
     .supportGroupContainer {
+      display: grid;
       overflow-x: auto;
       outline: none;
+      width: fit-content;
     }
   }
 }
