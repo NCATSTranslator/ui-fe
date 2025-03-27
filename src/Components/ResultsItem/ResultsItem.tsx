@@ -4,14 +4,8 @@ import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react";
-import ShareIcon from '../../Icons/Buttons/Link.svg?react';
-import Bookmark from "../../Icons/Navigation/Bookmark/Bookmark.svg?react";
-import BookmarkFilled from "../../Icons/Navigation/Bookmark/Filled Bookmark.svg?react";
-import Notes from "../../Icons/Buttons/Notes/Notes.svg?react"
-import NotesFilled from "../../Icons/Buttons/Notes/Filled Notes.svg?react"
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
-import Tooltip from '../Tooltip/Tooltip';
 import BookmarkConfirmationModal from '../Modals/BookmarkConfirmationModal';
 import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
@@ -30,6 +24,7 @@ import * as filtering from '../../Utilities/filterFunctions';
 import ResultsItemName from '../ResultsItemName/ResultsItemName';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 import { cloneDeep } from 'lodash';
+import ResultsItemInteractables from '../ResultsItemInteractables/ResultsItemInteractables';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -352,44 +347,18 @@ const ResultsItem: FC<ResultsItemProps> = ({
           resultsItemStyles={styles}
         />
       </div>
-      <div className={`${styles.bookmarkContainer} ${styles.resultSub} ${!!isEven && styles.even}`}>
-        {
-          !!user && !isPathfinder
-            ? <>
-                <div className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}>
-                  <BookmarkFilled className={styles.bookmarkFilledSVG} data-result-name={nameString} onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
-                  <Bookmark data-result-name={nameString} onClick={handleBookmarkClick} data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} />
-                  <Tooltip id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`}>
-                    <span className={styles.tooltip}>
-                      {
-                        isBookmarked
-                        ? <>Remove this bookmark.</>
-                        : <>Bookmark this result to review it later in the <Link to="/workspace" target='_blank'>Workspace</Link>.</>
-                      }
-                    </span>
-                  </Tooltip>
-                </div>
-                <div className={`${styles.icon} ${styles.notesIcon} ${itemHasNotes ? styles.filled : ''}`}>
-                  <NotesFilled className={styles.notesFilledSVG} data-result-name={nameString} onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
-                  <Notes className='note-icon' data-result-name={nameString} onClick={handleNotesClick} data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`} aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`} />
-                  <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
-                    <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/workspace" target='_blank'>Workspace</Link>).</span>
-                  </Tooltip>
-                </div>
-              </>
-            : <></>
-        }
-        <button
-          className={`${styles.icon} ${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`}
-          onClick={handleOpenResultShare}
-          data-tooltip-id={`share-tooltip-${nameString.replaceAll("'", "")}`}
-          >
-          <ShareIcon/>
-          <Tooltip id={`share-tooltip-${nameString.replaceAll("'", "")}`}>
-            <span className={styles.tooltip}>Generate a sharable link for this result.</span>
-          </Tooltip>
-        </button>
-      </div>
+      <ResultsItemInteractables
+        handleBookmarkClick={handleBookmarkClick}
+        handleNotesClick={handleNotesClick}
+        handleOpenResultShare={handleOpenResultShare}
+        hasNotes={itemHasNotes}
+        hasUser={!!user}
+        isBookmarked={isBookmarked}
+        isEven={isEven}
+        isExpanded={isExpanded}
+        isPathfinder={isPathfinder}
+        nameString={nameString}
+      />
       <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
         <span className={styles.evidenceLink}>
           <div>
@@ -460,7 +429,6 @@ const ResultsItem: FC<ResultsItemProps> = ({
                     const activeClass = (activeFilters.some((filter)=> filter.id === fid && filter.value === tag.name))
                       ? styles.active
                       : styles.inactive;
-                      console.log(availableTags);
                     if(!tag)
                       return null;
                     return(

@@ -352,8 +352,6 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     if(!currentQueryID)
       return;
 
-    // let queryIDJson = JSON.stringify({qid: currentQueryID});
-
     const requestOptions = {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -413,12 +411,9 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     if(!currentQueryID)
       return;
 
-    // let queryIDJson = JSON.stringify({qid: currentQueryID});
-
     const requestOptions = {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      // body: queryIDJson
     };
     // eslint-disable-next-line
     const response = await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/result`, requestOptions)

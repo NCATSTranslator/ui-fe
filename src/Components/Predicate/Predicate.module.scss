@@ -2,12 +2,12 @@
 
 
 .edge {
-  border-color: $purpleTwo;
-  border-width: 2px 0;
-  border-style: solid;
+  // border-color: $purpleTwo;
+  // border-width: 2px 0;
+  // border-style: solid;
   background-color: $lightGray;
-  height: 28px;
-  &.isInferred {
+  height: 32px;
+  &.isInferred .nameShape {
     border-top-style: dashed;
     border-bottom-style: dashed;
   }
@@ -197,6 +197,10 @@
     }
   }
 }
+// &.isInferred .nameShape {
+//   border-top-style: dashed;
+//   border-bottom-style: dashed;
+// }
 .inModal {
   &.edge {
     background-color: transparent !important;
@@ -205,10 +209,7 @@
     &:after {
       display: none !important;
     }
-    &.isInferred .nameShape {
-      border-top-style: dashed;
-      border-bottom-style: dashed;
-    }
+
   }
   .nameShape {
     background-color: $lightGray;

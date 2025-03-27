@@ -218,7 +218,9 @@ const PathView: FC<PathViewProps> = ({
                             </div>
                         </button>
                         <span className={styles.num}>
-                          { indexInFullCollection + 1 }
+                          <span className={styles.val}>
+                            { indexInFullCollection + 1 }
+                          </span>
                           <PathArrow/>
                         </span>
                         <Tooltip

@@ -1,0 +1,62 @@
+@import "../../Assets/Styles/variables";
+
+.interactables {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 8px;
+  .icon, .notesIcon, .bookmarkIcon {
+    border-radius: $defaultBorderRadius;
+    background-color: $lightGray;
+    cursor: pointer;
+    position: relative;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: $defaultAnim;
+    svg {
+      opacity: 1;
+    }
+    .bookmarkFilledSVG, .notesFilledSVG {
+      opacity: 0;
+    }
+    &:hover {
+      background-color: $midGray;
+    }
+    &.filled {
+      svg {
+        opacity: 0;
+      }
+      .bookmarkFilledSVG, .notesFilledSVG {
+        opacity: 1;
+      }
+    }
+    svg {
+      height: 24px;
+      width: 24px;
+      transition: $defaultAnim;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate3d(-50%, -50%, 0);
+      path {
+        stroke-width: 0;
+        transition: all .25s ease;
+      }
+    } 
+  }
+  .bookmarkIcon {
+    svg path {
+      fill: $black;
+    }
+  }
+  &.even {
+    .icon, .notesIcon, .bookmarkIcon {
+      background-color: $white;
+      &:hover {
+        background-color: $midGray;
+      }
+    }
+  }
+}
