@@ -19,12 +19,12 @@
   .tabs {
     overflow-y: hidden;
     display: grid;
-    grid-template-rows: auto 1fr;
+    align-content: flex-start;
   }
   .tab {
     display: grid;
     grid-template-rows: auto 1fr;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
   .tableBody {
     box-shadow: $dropShadow;
