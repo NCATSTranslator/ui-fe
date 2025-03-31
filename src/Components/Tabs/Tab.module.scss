@@ -6,11 +6,17 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 800;
   padding: $xs $s;
   position: relative;
   color: $darkGray;
   transition: $defaultAnim;
+  font-size: $subTwoSize;
+  svg {
+    path {
+      fill: $darkGray;
+    }
+  }
   .underline {
     height: 2px;
     margin: 4px auto 0 auto;
@@ -24,6 +30,11 @@
   }
   &.active {
     color: $purpleOne;
+    svg {
+      path {
+        fill: $purpleOne;
+      }
+    }
     .underline {
       background: $purpleOne;
     }
