@@ -16,10 +16,6 @@
     box-shadow: $dropShadow;
     border-radius: $defaultBorderRadius;
     background-color: $lightGray;
-    &.isOpen {
-      opacity: 1;
-      pointer-events: all;
-    }
     .icon {
       height: auto;
       padding: 12px;
@@ -30,6 +26,7 @@
       border-radius: 0;
       .label {
         display: block;
+        opacity: 0;
         padding-left: 28px;
       }
       svg {
@@ -43,6 +40,13 @@
       &:last-child {
         border-bottom-left-radius: $defaultBorderRadius;
         border-bottom-right-radius: $defaultBorderRadius;
+      }
+    }
+    &.isOpen {
+      opacity: 1;
+      pointer-events: all;
+      .label {
+        opacity: 1;
       }
     }
   }
