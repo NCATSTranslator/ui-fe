@@ -214,7 +214,7 @@ const Query: FC<QueryProps> = ({
     [setLoadingAutocomplete, setAutoCompleteItems, setInputText, setIsError, delayedQuery, queryItem.type, nameResolverEndpoint]
   );
 
-  const clearAutocompleteItems = () => setAutoCompleteItems(null);
+  const clearAutocompleteItems = useCallback(() => setAutoCompleteItems(null),[]);
 
   const clearInputText = () => {
     setInputText("");
