@@ -1,10 +1,60 @@
 @import "../../Assets/Styles/variables";
 
-.interactables {
+.interactablesContainer {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  column-gap: 8px;
-  .icon, .notesIcon, .bookmarkIcon {
+  gap: 8px;
+  transition: $defaultAnim;
+  z-index: 10;
+  &.belowBreakpoint {
+    grid-template-columns: 1fr;
+    gap: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 34px;
+    box-shadow: $dropShadow;
+    border-radius: $defaultBorderRadius;
+    background-color: $lightGray;
+    &.isOpen {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .icon {
+      height: auto;
+      padding: 12px;
+      display: grid;
+      align-items: center;
+      justify-content: flex-start;
+      width: auto;
+      border-radius: 0;
+      .label {
+        display: block;
+        padding-left: 28px;
+      }
+      svg {
+        left: 12px;
+        transform: translateY(-50%);
+      }
+      &:first-child {
+        border-top-left-radius: $defaultBorderRadius;
+        border-top-right-radius: $defaultBorderRadius;
+      }
+      &:last-child {
+        border-bottom-left-radius: $defaultBorderRadius;
+        border-bottom-right-radius: $defaultBorderRadius;
+      }
+    }
+  }
+  &.even {
+    .icon {
+      background-color: $white;
+    }
+  }
+}
+.interactables {
+  position: relative;
+  .icon {
     border-radius: $defaultBorderRadius;
     background-color: $lightGray;
     cursor: pointer;
@@ -22,7 +72,11 @@
       opacity: 0;
     }
     &:hover {
-      background-color: $midGray;
+      background-color: $transparentPurpleHover !important;
+      color: $purpleOne;
+      svg path {
+        fill: $purpleOne;
+      }
     }
     &.filled {
       svg {
@@ -44,7 +98,10 @@
         stroke-width: 0;
         transition: all .25s ease;
       }
-    } 
+    }
+    .label {
+      display: none;
+    }
   }
   .bookmarkIcon {
     svg path {
@@ -52,11 +109,8 @@
     }
   }
   &.even {
-    .icon, .notesIcon, .bookmarkIcon {
+    .icon {
       background-color: $white;
-      &:hover {
-        background-color: $midGray;
-      }
     }
   }
 }
