@@ -19,12 +19,12 @@
   .tabs {
     overflow-y: hidden;
     display: grid;
-    grid-template-rows: auto 1fr;
+    align-content: flex-start;
   }
   .tab {
     display: grid;
     grid-template-rows: auto 1fr;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
   .tableBody {
     box-shadow: $dropShadow;
@@ -148,6 +148,7 @@
   }
   .title {
     margin-bottom: 0;
+    font-weight: 800;
   }
   .evidenceCount {
     margin-bottom: $m;
@@ -169,7 +170,6 @@
   transition: all .4s ease;
   position: relative;
   max-height: 100%;
-  padding: 18px 0;
   .togglePathView {
     position: fixed;
     top: 104px;
