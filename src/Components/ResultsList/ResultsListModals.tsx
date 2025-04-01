@@ -20,7 +20,8 @@ interface ResultsListModalsProps {
   pk: string;
   presetTypeID: string;
   selectedEdge: ResultEdge | null; 
-  selectedPath: Path | null; 
+  selectedPath: Path | null;
+  selectedPathAncestry: string[];
   selectedResult: any; 
   setAutoScrollToResult: Dispatch<SetStateAction<boolean>>;
   setExpandSharedResult: Dispatch<SetStateAction<boolean>>;
@@ -47,6 +48,7 @@ const ResultsListModals: FC<ResultsListModalsProps> = ({
   presetTypeID,
   selectedEdge,
   selectedPath,
+  selectedPathAncestry,
   selectedResult,
   setAutoScrollToResult,
   setExpandSharedResult,
@@ -91,6 +93,7 @@ const ResultsListModals: FC<ResultsListModalsProps> = ({
         result={selectedResult}
         edge={selectedEdge}
         path={selectedPath}
+        pathAncestry={selectedPathAncestry}
         pathFilterState={pathFilterState}
         pk={pk}
       />
