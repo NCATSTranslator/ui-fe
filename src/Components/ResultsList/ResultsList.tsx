@@ -104,7 +104,9 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
   // Path, path represented in current evidence
   const [selectedPath, setSelectedPath] = useState<Path | null>(null);
-  // Obj, represets the filter state of all paths
+  // Array of path IDs, represents the ancestor paths of the selected path
+  const [selectedPathAncestry, setSelectedPathAncestry] = useState<string[]>([]);
+  // Obj, represents the filter state of all paths
   const [pathFilterState, setPathFilterState] = useState<PathFilterState | null>(null);
   // number, current page
   const currentPage = useRef(0);
@@ -625,7 +627,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   /**
    * Activates sets the evidence and opens the evidence modal.
    */
-  const activateEvidence = useCallback((item: Result, edgeID: string | string[], path: Path) => {
+  const activateEvidence = useCallback((item: Result, edgeID: string | string[], path: Path, ancestry?: string[]) => {
     if(!resultSet)
       return;
     let edge;
@@ -638,6 +640,8 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
       setSelectedResult(item);
       setSelectedEdge(edge);
       setSelectedPath(path);
+      if(!!ancestry)
+        setSelectedPathAncestry(ancestry);
       setEvidenceModalOpen(true);
     }
   },[resultSet])
@@ -961,6 +965,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
         selectedEdge={selectedEdge}
         selectedResult={selectedResult}
         selectedPath={selectedPath}
+        selectedPathAncestry={selectedPathAncestry}
         sharedItem={sharedItem}
         formattedResultsLength={formattedResults.length}
         setExpandSharedResult={setExpandSharedResult}

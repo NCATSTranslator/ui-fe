@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from './sortingFunctions';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { capitalizeAllWords, getPathsWithSelectionsSet, hasSupport, intToChar, intToNumeral } from "./utilities";
 import { EvidenceSortState, PublicationObject, RawPublicationList, TrialObject } from '../Types/evidence';
 import { Path, PathFilterState, ResultEdge, ResultSet } from '../Types/results';
@@ -203,57 +203,74 @@ export const flattenTrialObject = (resultSet: ResultSet | null, trialIDs: string
 }
 
 /**
- * Generates a hierarchical path dictionary and an ID lookup map.
+ * Constructs a hierarchical dictionary of paths and a lookup map with full ancestry-based disambiguation.
  *
- * This function organizes paths into a structured dictionary with hierarchical keys 
- * (e.g., "1.a", "1.b.i") and creates a lookup map linking path IDs to their keys. 
- * It recursively processes support paths, applying filtering as needed.
+ * This function processes a list of paths (and their recursive support paths) to build:
+ * - A hierarchical `pathDictionary` using structured keys like "1.a.i"
+ * - A `pathIdLookup` that maps each Path.id to all of its hierarchical keys,
+ *   along with the full ancestry chain of path IDs from root to that node
  *
- * @param {ResultSet | null} resultSet - The dataset containing paths and edges. Returns an empty dictionary if null.
- * @param {Path[]} paths - The array of base paths to process.
- * @param {PathFilterState | null} pathFilterState - The filter state used to determine included support paths.
+ * This ensures each occurrence of a path is uniquely identified by its ancestry, 
+ * even when the same path ID appears multiple times under shared or repeated parents.
+ *
+ * @param {ResultSet | null} resultSet - The graph dataset containing edges and support path relationships.
+ * @param {Path[]} paths - The base set of top-level paths to process.
+ * @param {PathFilterState | null} pathFilterState - Optional filter criteria to apply when retrieving support paths.
+ *
  * @returns {{
-*   pathDictionary: Map<string, Path>,
-*   pathIdLookup: Map<string, string>
-* }} - An object containing:
-*   - `pathDictionary`: A hierarchical map of structured path keys to Path objects.
-*   - `pathIdLookup`: A map linking path IDs to their corresponding hierarchical keys.
-*
-* @example
-* const { pathDictionary, pathIdLookup } = createPathDictionaryAndLookup(resultSet, paths, filterState);
-* console.log(pathDictionary.get("1.a.i")); // Retrieves the nested support path.
-* console.log(pathIdLookup.get("P001")); // Retrieves the hierarchical key for path ID "P001".
+ *   pathDictionary: Map<string, Path>,
+ *   pathIdLookup: Map<string, { key: string, ancestry: string[] }[]>
+ * }} - An object containing:
+ *   - `pathDictionary`: A map of hierarchical keys (e.g., "1.a.i") to their corresponding `Path` objects
+ *   - `pathIdLookup`: A map of `Path.id` to all its hierarchical key instances and their ancestry chains
+ *
+ * @example
+ * const { pathDictionary, pathIdLookup } = createPathDictionaryAndLookup(resultSet, paths, filterState);
+ * const match = findPathByAncestry(pathDictionary, pathIdLookup, "P007", ["P001", "P002", "P007"]);
+ * console.log(match?.key); // e.g. "2.a.i"
 */
 export const createPathDictionaryAndLookup = (
   resultSet: ResultSet | null,
   paths: Path[],
   pathFilterState: PathFilterState | null
-): { pathDictionary: Map<string, Path>; pathIdLookup: Map<string, string> } => {
+): {
+  pathDictionary: Map<string, Path>;
+  pathIdLookup: Map<string, { key: string; ancestry: string[] }[]>;
+} => {
   const pathDictionary = new Map<string, Path>();
-  const pathIdLookup = new Map<string, string>();
+  const pathIdLookup = new Map<string, { key: string; ancestry: string[] }[]>();
 
-  if (!resultSet)
-    return { pathDictionary, pathIdLookup };
+  if (!resultSet) return { pathDictionary, pathIdLookup };
 
-  const processPath = (path: Path, keyPrefix: string, depth: number) => {
-    if (pathDictionary.has(keyPrefix)) 
-      return;
+  const processPath = (
+    path: Path,
+    keyPrefix: string,
+    depth: number,
+    ancestry: string[]
+  ) => {
+    if (pathDictionary.has(keyPrefix)) return;
     pathDictionary.set(keyPrefix, path);
-    if (path.id) 
-      pathIdLookup.set(path.id, keyPrefix);
+
+    if (path.id) {
+      const fullAncestry = [...ancestry, path.id];
+      const existing = pathIdLookup.get(path.id) || [];
+      existing.push({ key: keyPrefix, ancestry: fullAncestry });
+      pathIdLookup.set(path.id, existing);
+    }
 
     for (let i = 1; i < path.subgraph.length; i += 2) {
       const edgeID = path.subgraph[i];
       if (typeof edgeID === "string") {
         const edge = getEdgeById(resultSet, edgeID);
         if (!!edge && hasSupport(edge)) {
-          let supportPaths = getPathsWithSelectionsSet(resultSet, edge.support, pathFilterState ? pathFilterState : {}, null);
+          const supportPaths = getPathsWithSelectionsSet(resultSet, edge.support, pathFilterState ?? {}, null);
           for (const [supportIndex, supportPath] of supportPaths.entries()) {
             const suffix = (depth === 2)
-              ? intToNumeral(supportIndex + 1)  
+              ? intToNumeral(supportIndex + 1)
               : intToChar(supportIndex + 1);
             const supportKey = `${keyPrefix}.${suffix}`;
-            processPath(supportPath, supportKey, depth + 1);
+            if(!!path?.id)
+              processPath(supportPath, supportKey, depth + 1, [...ancestry, path.id]);
           }
         }
       }
@@ -261,30 +278,43 @@ export const createPathDictionaryAndLookup = (
   };
 
   for (const [pathIndex, path] of paths.entries()) {
-    processPath(path, (pathIndex + 1).toString(), 1);
+    const rootKey = (pathIndex + 1).toString();
+    processPath(path, rootKey, 1, []);
   }
+
   return { pathDictionary, pathIdLookup };
-}
+};
 
 /**
- * Finds a path in the dictionary by its path ID.
+ * Resolves a specific occurrence of a path by its ID and full ancestry chain.
  *
- * Uses a precomputed lookup map to efficiently retrieve the hierarchical key 
- * and corresponding path object from the path dictionary.
+ * This function uses a path's full ancestry (from root to target node) to 
+ * precisely locate a unique instance of a path in the dictionary, even if 
+ * the same path ID appears in multiple branches of the hierarchy.
  *
- * @param {Map<string, Path>} pathDict - The hierarchical dictionary of paths.
- * @param {Map<string, string>} pathIdLookup - A map linking path IDs to their hierarchical keys.
- * @param {string} pathID - The ID of the path to find.
- * @returns {{ key: string; path: Path } | null} - The matched path and its key, or null if not found.
+ * @param {Map<string, Path>} pathDict - The hierarchical dictionary of paths keyed by structured strings like "1.a.i".
+ * @param {Map<string, { key: string, ancestry: string[] }[]>} pathIdLookup - A map of path IDs to all known key/ancestry pairs.
+ * @param {string} pathID - The ID of the path to resolve.
+ * @param {string[]} fullAncestry - The full chain of path IDs from root to the target path (inclusive).
  *
+ * @returns {{ key: string, path: Path } | null} - The resolved path and its hierarchical key, or null if not found.
+ *
+ * @example
+ * const result = findPathByAncestry(pathDict, pathIdLookup, "P007", ["P001", "P002", "P007"]);
+ * console.log(result?.key); // → "2.a.i"
  */
-export const findPathInDictionary = (
+export const findPathByAncestry = (
   pathDict: Map<string, Path>,
-  pathIdLookup: Map<string, string>,
-  pathID: string
+  pathIdLookup: Map<string, { key: string; ancestry: string[] }[]>,
+  pathID: string,
+  fullAncestry: string[]
 ): { key: string; path: Path } | null => {
-  const key = pathIdLookup.get(pathID);
-  if (!key) return null;
-  const path = pathDict.get(key);
-  return path ? { key, path } : null;
+  const matches = pathIdLookup.get(pathID);
+  if (!matches) return null;
+
+  const match = matches.find(m =>  isEqual(m.ancestry, fullAncestry));
+  if (!match) return null;
+
+  const path = pathDict.get(match.key);
+  return path ? { key: match.key, path } : null;
 };

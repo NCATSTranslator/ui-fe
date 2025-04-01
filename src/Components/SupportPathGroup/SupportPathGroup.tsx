@@ -1,4 +1,4 @@
-import { useState, useEffect, FC, useRef, useMemo } from 'react';
+import { useState, useEffect, FC, useRef, useMemo, createContext } from 'react';
 import styles from './SupportPathGroup.module.scss';
 import SupportPath from '../SupportPath/SupportPath';
 import AnimateHeight from '../AnimateHeight/AnimateHeight';
@@ -10,16 +10,19 @@ import { Filter, Path, PathFilterState, ResultNode } from '../../Types/results';
 import { intToChar, getPathsWithSelectionsSet, isStringArray, getFilteredPathCount, intToNumeral } from '../../Utilities/utilities';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
-import { useSupportPathDepth } from '../../Utilities/customHooks';
+import { useSupportPathAncestry, useSupportPathDepth } from '../../Utilities/customHooks';
 import { SupportPathDepthContext } from '../PathView/PathView';
+
+export const SupportPathAncestryContext = createContext<string[]>([]);
 
 interface SupportPathGroupProps {
   activeFilters: Filter[];
   activeEntityFilters: string[];
-  handleActivateEvidence: (path: Path) => void;
+  handleActivateEvidence: (path: Path, ancestry?: string[]) => void;
   handleEdgeClick: (edgeIDs: string[], path: Path) => void;
   handleNodeClick: (name: ResultNode) => void;
   isExpanded: boolean;
+  parentPathID?: string;
   pathFilterState: PathFilterState;
   pathArray: (string | Path)[];
   pathViewStyles: {[key: string]: string;} | null;
@@ -34,7 +37,8 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   handleActivateEvidence, 
   handleEdgeClick, 
   handleNodeClick, 
-  isExpanded, 
+  isExpanded,
+  parentPathID,
   pathFilterState, 
   pathArray, 
   pathViewStyles, 
@@ -93,6 +97,15 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
     }
   }, [pathArray, activeEntityFilters, formattedPaths, resultSet]);
 
+
+  const parentAncestry = useSupportPathAncestry();
+  const currentAncestry = useMemo(() => {
+    if(!!parentPathID && !parentAncestry.includes(parentPathID))
+      return [...parentAncestry, parentPathID];
+    else 
+      return parentAncestry; 
+  }, [parentAncestry, parentPathID]);
+  
   return(
     <AnimateHeight
       className={`${!!pathViewStyles && pathViewStyles.support} ${styles.support} ${isExpanded ? styles.open : styles.closed }`}
@@ -100,58 +113,59 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
       height={typeof height === "number" ? height : 'auto'}
     >
       <SupportPathDepthContext.Provider value={currentDepth}>
-
-        <div className={`${!!pathViewStyles && pathViewStyles.supportGroupContainer} scrollable-support`}>
-          <p className={styles.supportLabel}>Supporting Paths</p>
-          {
-            !!displayedPaths && 
-            displayedPaths.map((supportPath, i) => {
-              if(!supportPath)
-                return null;
-              const indexInFullCollection = itemOffset + i;
-              const character = currentDepth === 2 ? intToNumeral(indexInFullCollection + 1) : intToChar(indexInFullCollection + 1);
-              return (
-                <SupportPath
-                  key={supportPath.id}
-                  character={character}
-                  pathFilterState={pathFilterState}
-                  path={supportPath}
-                  handleEdgeClick={handleEdgeClick}
-                  handleNodeClick={handleNodeClick}
-                  handleActivateEvidence={handleActivateEvidence}
-                  selectedPaths={selectedPaths}
-                  pathViewStyles={pathViewStyles}
-                  activeEntityFilters={activeEntityFilters}
-                  activeFilters={activeFilters}
-                  pk={pk}
-                  showHiddenPaths={showHiddenPaths}
-                />
-              );
-            })
-          }
-        </div>
-        {
-          pageCount > 1 &&
-          <div className={styles.paginationContainer}>
-            <ReactPaginate
-              breakLabel="..."
-              nextLabel={<ChevRight/>}
-              previousLabel={<ChevLeft/>}
-              onPageChange={handlePageClick}
-              pageRangeDisplayed={4}
-              marginPagesDisplayed={1}
-              pageCount={pageCount}
-              renderOnZeroPageCount={null}
-              className='pageNums'
-              pageClassName='pageNum'
-              activeClassName='current'
-              previousLinkClassName={`button ${styles.button}`}
-              nextLinkClassName={`button ${styles.button}`}
-              disabledLinkClassName={`disabled ${styles.disabled}`}
-              forcePage={currentPage.current}
-            />
+        <SupportPathAncestryContext.Provider value={currentAncestry}>
+          <div className={`${!!pathViewStyles && pathViewStyles.supportGroupContainer} scrollable-support`}>
+            <p className={styles.supportLabel}>Supporting Paths</p>
+            {
+              !!displayedPaths && 
+              displayedPaths.map((supportPath, i) => {
+                if(!supportPath)
+                  return null;
+                const indexInFullCollection = itemOffset + i;
+                const character = currentDepth === 2 ? intToNumeral(indexInFullCollection + 1) : intToChar(indexInFullCollection + 1);
+                return (
+                  <SupportPath
+                    key={supportPath.id}
+                    character={character}
+                    pathFilterState={pathFilterState}
+                    path={supportPath}
+                    handleEdgeClick={handleEdgeClick}
+                    handleNodeClick={handleNodeClick}
+                    handleActivateEvidence={()=>handleActivateEvidence(supportPath, currentAncestry)}
+                    selectedPaths={selectedPaths}
+                    pathViewStyles={pathViewStyles}
+                    activeEntityFilters={activeEntityFilters}
+                    activeFilters={activeFilters}
+                    pk={pk}
+                    showHiddenPaths={showHiddenPaths}
+                  />
+                );
+              })
+            }
           </div>
-        }
+          {
+            pageCount > 1 &&
+            <div className={styles.paginationContainer}>
+              <ReactPaginate
+                breakLabel="..."
+                nextLabel={<ChevRight/>}
+                previousLabel={<ChevLeft/>}
+                onPageChange={handlePageClick}
+                pageRangeDisplayed={4}
+                marginPagesDisplayed={1}
+                pageCount={pageCount}
+                renderOnZeroPageCount={null}
+                className='pageNums'
+                pageClassName='pageNum'
+                activeClassName='current'
+                previousLinkClassName={`button ${styles.button}`}
+                nextLinkClassName={`button ${styles.button}`}
+                disabledLinkClassName={`disabled ${styles.disabled}`}
+                forcePage={currentPage.current}
+              />
+            </div>
+          }
+        </SupportPathAncestryContext.Provider>
       </SupportPathDepthContext.Provider>
     </AnimateHeight>
   )

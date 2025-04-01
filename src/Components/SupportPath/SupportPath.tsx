@@ -5,16 +5,16 @@ import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { PathFilterState, Path, ResultNode, Filter } from '../../Types/results';
 import { getIsPathFiltered, numberToWords } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
-import { useLastViewedPath } from '../../Utilities/customHooks';
+import { useLastViewedPath, useSupportPathAncestry } from '../../Utilities/customHooks';
 import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 
 interface SupportPathProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   character: string;
-  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path, ancestry?: string[]) => void;
   handleNodeClick: (name: ResultNode) => void;
-  handleActivateEvidence: (path: Path) => void;
+  handleActivateEvidence: (path: Path, ancestry?: string[]) => void;
   path: Path;
   pathFilterState: PathFilterState;
   pathViewStyles: {[key: string]: string;} | null;
@@ -38,6 +38,7 @@ const SupportPath: FC<SupportPathProps> = ({
   showHiddenPaths }) => {
 
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
+  const ancestry = useSupportPathAncestry();
   const tooltipID = path.id;
   const isPathFiltered = getIsPathFiltered(path, pathFilterState);
   if(!path.id || (isPathFiltered && !showHiddenPaths)) 
@@ -59,7 +60,7 @@ const SupportPath: FC<SupportPathProps> = ({
             onClick={()=>{
               if(!!path?.id) {
                 setLastViewedPathID(path.id);
-                handleActivateEvidence(path);
+                handleActivateEvidence(path, ancestry);
               }
             }}
             className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
