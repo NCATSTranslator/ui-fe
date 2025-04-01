@@ -13,13 +13,14 @@ import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Typ
 import { getResultSetById } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
+import { useSupportPathAncestry } from '../../Utilities/customHooks';
 
 interface PredicateProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence: (path: Path) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
+  handleActivateEvidence: (path: Path, ancestry?: string[]) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path, ancestry?: string[]) => void;
   handleNodeClick: (name: ResultNode) => void;
   edge: ResultEdge;
   edgeIDs: string[];
@@ -58,6 +59,8 @@ const Predicate: FC<PredicateProps> = ({
   uid }) => {
 
   let resultSet = useSelector(getResultSetById(pk));
+  const parentPathID = (!!path?.id) ? path.id : undefined;
+  const parentAncestry = useSupportPathAncestry();
   const formattedEdge = (!!resultSet && Array.isArray(edgeIDs) && edgeIDs.length > 1) ? getCompressedEdge(resultSet, edgeIDs) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
   const [isSupportExpanded, setIsSupportExpanded] = useState(formattedEdge.is_root);
@@ -85,7 +88,7 @@ const Predicate: FC<PredicateProps> = ({
     <>
       <span
         className={`${selected && styles.selected} ${selected && parentStyles ? parentStyles.selected : ''} ${styles.edge} ${inModal && styles.inModal} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && styles.isInferred}`}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, parentAncestry);}}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         >
         <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
@@ -110,7 +113,7 @@ const Predicate: FC<PredicateProps> = ({
                         className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
                         onClick={(e)=> {
                           e.stopPropagation();
-                          handleEdgeClick([edge.id], path);
+                          handleEdgeClick([edge.id], path, parentAncestry);
                         }}
                         >
                         <Highlighter
@@ -203,6 +206,7 @@ const Predicate: FC<PredicateProps> = ({
           activeFilters={activeFilters}
           pk={pk}
           showHiddenPaths={showHiddenPaths}
+          parentPathID={parentPathID}
         />
       }
     </>
