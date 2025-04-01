@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } from 'react';
 import { LastViewedPathIDContext, SupportPathDepthContext } from '../Components/PathView/PathView';
+import { SupportPathAncestryContext } from '../Components/SupportPathGroup/SupportPathGroup';
 import { isEqual } from 'lodash';
 import { useQuery } from 'react-query';
 import { useLocation } from 'react-router-dom';
@@ -359,6 +360,14 @@ export const useTextStream = (
  */
 export const useSupportPathDepth = (): number => {
   return useContext(SupportPathDepthContext);
+};
+
+/**
+ * Custom hook to get the current ancestry of a support path in the path hierarchy.
+ * @returns {string[]} The ancestry expressed as an array of path IDs.
+ */
+export const useSupportPathAncestry = (): string[] => {
+  return useContext(SupportPathAncestryContext);
 };
 
 /**
