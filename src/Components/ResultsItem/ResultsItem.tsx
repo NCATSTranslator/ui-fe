@@ -335,7 +335,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }, [result, hasNotes]);
 
   return (
-    <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-resultcurie={result.subject} ref={sharedItemRef} data-result-name={nameString}>
+    <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-result-curie={result.subject} ref={sharedItemRef} data-result-name={nameString}>
       <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
         <ResultsItemName
           isPathfinder={isPathfinder}

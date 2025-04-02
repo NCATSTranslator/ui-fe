@@ -171,7 +171,7 @@ const Predicate: FC<PredicateProps> = ({
             }
           </span>
           {
-            hasPubs || hasCTs &&
+            (hasPubs || hasCTs) &&
             <div className={styles.badges}>
               {
                 hasPubs && <PubIcon/>
