@@ -190,10 +190,12 @@
     }
     &:hover {
       box-shadow: $dropShadowColorHover;
+      background-color: $grayHover;
+      border-color: $grayHover;
     }
   }
   &.minimized {
-    max-height: 30px;
+    max-height: 64px;
     .togglePathView svg {
       transform: rotate(180deg);
     }
