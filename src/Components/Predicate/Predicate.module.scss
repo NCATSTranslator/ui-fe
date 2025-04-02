@@ -110,6 +110,7 @@
 .badges {
   display: flex;
   align-items: center;
+  padding-right: 6px;
   svg {
     width: 20px;
     height: 20px;
@@ -142,6 +143,7 @@
     position: relative;
     border-radius: 50%;
     transition: $defaultAnim;
+    width: 20px;
     svg {
       width: 20px;
       min-width: 20px;

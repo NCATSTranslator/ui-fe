@@ -170,14 +170,17 @@ const Predicate: FC<PredicateProps> = ({
               <span className={styles.more}>+{formattedEdge.compressed_edges.length}</span>
             }
           </span>
-          <div className={styles.badges}>
-            {
-              hasPubs && <PubIcon/>
-            }
-            {
-              hasCTs && <CTIcon/>
-            }
-          </div>
+          {
+            hasPubs || hasCTs &&
+            <div className={styles.badges}>
+              {
+                hasPubs && <PubIcon/>
+              }
+              {
+                hasCTs && <CTIcon/>
+              }
+            </div>
+          }
           {
             isInferred && !inModal &&
             <button
