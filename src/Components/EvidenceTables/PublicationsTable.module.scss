@@ -35,7 +35,7 @@
   }
   .title {
     a {
-      font-weight: 700;
+      font-weight: 800;
       color: $purpleOne;
       font-size: 12px;
       -webkit-line-clamp: 4;
@@ -52,7 +52,7 @@
     }
   }
   .sourceName {
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
     &.noLink {
       cursor: default;
@@ -76,7 +76,7 @@
     .label {
       color: $darkGray;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
       margin: 0 $xs 0 0;
       padding: 15px 0;
     }
@@ -101,7 +101,7 @@
         border-radius: $defaultBorderRadius;
         color: $white;
         font-size: 16px;
-        font-weight: 700;
+        font-weight: 800;
         cursor: pointer;
         -moz-user-select: none; 
         -webkit-user-select: none; 
@@ -127,7 +127,7 @@
           border-radius: 5px;
           color: $darkGray;
           font-size: $bodyOneSize;
-          font-weight: 700;
+          font-weight: 800;
           -moz-user-select: none; 
           -webkit-user-select: none; 
           -ms-user-select: none; 
@@ -162,7 +162,7 @@
   justify-content: center;
   align-content: center;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
 }
 .top {
   display: flex;
@@ -185,7 +185,7 @@
 .knowledgeLevelLabel {
   color: $darkGray;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
   letter-spacing: 0.75px;
   margin-right: 20px;
@@ -220,6 +220,6 @@
   }
 }
 .knowledgeLevelSpan {
-  font-weight: 700;
+  font-weight: 800;
   display: block;
 }

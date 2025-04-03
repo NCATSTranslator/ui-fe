@@ -37,7 +37,7 @@
     align-items: center;
     .name, .target {
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
     }
     .pred {
       font-size: 12px;
@@ -369,7 +369,7 @@
     display: flex;
     justify-content: center;
     button {
-      font-weight: 700;
+      font-weight: 800;
     }
     button:last-child {
       margin-left: $s;
@@ -417,7 +417,7 @@
   fill: #000 !important;
 }
 .inferenceLabel {
-  font-weight: 700;
+  font-weight: 800;
   padding-left: 10px;
   margin-bottom: $s;
   width: fit-content;
