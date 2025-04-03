@@ -7,7 +7,7 @@
   justify-content: center;
   cursor: pointer;
   font-weight: 800;
-  padding: $xs $s;
+  padding: $xs $s !important;
   position: relative;
   color: $darkGray;
   transition: $defaultAnim;

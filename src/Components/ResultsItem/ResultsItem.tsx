@@ -335,78 +335,80 @@ const ResultsItem: FC<ResultsItemProps> = ({
   }, [result, hasNotes]);
 
   return (
-    <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-resultcurie={result.subject} ref={sharedItemRef} data-result-name={nameString}>
-      <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
-        <ResultsItemName
+    <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-result-curie={result.subject} ref={sharedItemRef} data-result-name={nameString}>
+      <div className={styles.top}>
+        <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
+          <ResultsItemName
+            isPathfinder={isPathfinder}
+            subjectNode={subjectNode}
+            objectNode={objectNode}
+            item={result}
+            activeEntityFilters={activeEntityFilters}
+            nameString={nameString}
+            resultsItemStyles={styles}
+          />
+        </div>
+        <ResultsItemInteractables
+          handleBookmarkClick={handleBookmarkClick}
+          handleNotesClick={handleNotesClick}
+          handleOpenResultShare={handleOpenResultShare}
+          hasNotes={itemHasNotes}
+          hasUser={!!user}
+          isBookmarked={isBookmarked}
+          isEven={isEven}
+          isExpanded={isExpanded}
           isPathfinder={isPathfinder}
-          subjectNode={subjectNode}
-          objectNode={objectNode}
-          item={result}
-          activeEntityFilters={activeEntityFilters}
           nameString={nameString}
-          resultsItemStyles={styles}
         />
-      </div>
-      <ResultsItemInteractables
-        handleBookmarkClick={handleBookmarkClick}
-        handleNotesClick={handleNotesClick}
-        handleOpenResultShare={handleOpenResultShare}
-        hasNotes={itemHasNotes}
-        hasUser={!!user}
-        isBookmarked={isBookmarked}
-        isEven={isEven}
-        isExpanded={isExpanded}
-        isPathfinder={isPathfinder}
-        nameString={nameString}
-      />
-      <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
-        <span className={styles.evidenceLink}>
-          <div>
-            {
-              evidenceCounts.publicationCount > 0  &&
-              <span className={styles.info}>Publications ({evidenceCounts.publicationCount})</span>
-            }
-            {
-              evidenceCounts.clinicalTrialCount > 0  &&
-              <span className={styles.info}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
-            }
-            {
-              evidenceCounts.miscCount > 0  &&
-              <span className={styles.info}>Misc ({evidenceCounts.miscCount})</span>
-            }
-            {
-              evidenceCounts.sourceCount > 0  &&
-              <span className={styles.info}>Sources ({evidenceCounts.sourceCount})</span>
-            }
-          </div>
-        </span>
-      </div>
-      <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
-        <span className={styles.paths}>
-          <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
-        </span>
-      </div>
-      {
-        !isPathfinder &&
-        <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-          <span className={styles.score}>
-            <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score) : "Processing..." }</span>
+        <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
+          <span className={styles.evidenceLink}>
+            <div>
+              {
+                evidenceCounts.publicationCount > 0  &&
+                <span className={styles.info}>Publications ({evidenceCounts.publicationCount})</span>
+              }
+              {
+                evidenceCounts.clinicalTrialCount > 0  &&
+                <span className={styles.info}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
+              }
+              {
+                evidenceCounts.miscCount > 0  &&
+                <span className={styles.info}>Misc ({evidenceCounts.miscCount})</span>
+              }
+              {
+                evidenceCounts.sourceCount > 0  &&
+                <span className={styles.info}>Sources ({evidenceCounts.sourceCount})</span>
+              }
+            </div>
           </span>
         </div>
-      }
-      {/* <CSVLink
-        className={styles.downloadButton}
-        data={csvData}
-        filename={`${item.name.toLowerCase()}.csv`}
-        onClick={generateCsvFromItem(item, setCsvData)}>
-          <Export data-tooltip-id={`csv-tooltip-${nameString}`} aria-describedby={`csv-tooltip-${nameString}`}/>
-          <Tooltip id={`csv-tooltip-${nameString}`}>
-            <span className={styles.tooltip}>Download a version of this result in CSV format.</span>
-          </Tooltip>
-      </CSVLink> */}
-      <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed } result-accordion-button`} onClick={handleToggle} data-result-name={nameString}>
-        <ChevDown/>
-      </button>
+        <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
+          <span className={styles.paths}>
+            <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
+          </span>
+        </div>
+        {
+          !isPathfinder &&
+          <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
+            <span className={styles.score}>
+              <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score) : "Processing..." }</span>
+            </span>
+          </div>
+        }
+        {/* <CSVLink
+          className={styles.downloadButton}
+          data={csvData}
+          filename={`${item.name.toLowerCase()}.csv`}
+          onClick={generateCsvFromItem(item, setCsvData)}>
+            <Export data-tooltip-id={`csv-tooltip-${nameString}`} aria-describedby={`csv-tooltip-${nameString}`}/>
+            <Tooltip id={`csv-tooltip-${nameString}`}>
+              <span className={styles.tooltip}>Download a version of this result in CSV format.</span>
+            </Tooltip>
+        </CSVLink> */}
+        <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed } result-accordion-button`} onClick={handleToggle} data-result-name={nameString}>
+          <ChevDown/>
+        </button>
+      </div>
       <AnimateHeight
         className={`${styles.accordionPanel}
           ${isExpanded ? styles.open : styles.closed }

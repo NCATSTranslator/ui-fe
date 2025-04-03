@@ -11,7 +11,7 @@ body {
   font-style: italic;
 }
 .bold {
-  font-weight: 700;
+  font-weight: 800;
 }
 
 // Colors
@@ -115,7 +115,7 @@ body {
   box-shadow: none;
   color: $purpleOne;
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 800;
   padding: 0;
   &:hover {
     text-decoration: underline;
@@ -155,7 +155,7 @@ img {
     justify-content: center;
     color: #fff;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     padding: 12px;
     -webkit-user-select: none;
@@ -210,7 +210,7 @@ img {
     .table-cell {
       padding: 12px;
       strong {
-        font-weight: 700;
+        font-weight: 800;
         font-size: 12px;
         display: inline;
       }
@@ -243,7 +243,7 @@ img {
   }
   .url {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     color: $purpleOne;
     margin-top: 4px;
   }
@@ -359,7 +359,7 @@ input {
 .input-label, .input-label span {
   font-size: $subTwoSize;
   margin-bottom: $xxs;
-  font-weight: 700;
+  font-weight: 800;
   color: $darkGray;
 }
 .input-subtitle {

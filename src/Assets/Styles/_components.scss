@@ -46,7 +46,7 @@ button {
   p {
     font-size: $m;
     color: $white;
-    font-weight: 700;
+    font-weight: 800;
     max-width: 200px;
     text-align: center;
   }
@@ -81,7 +81,7 @@ button {
       text-decoration: underline;
     }
     .label {
-      font-weight: 700;
+      font-weight: 800;
       margin: 0;
     }
     .type {
@@ -107,7 +107,7 @@ button {
 }
 
 .edge-label {
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .Toastify {
@@ -361,7 +361,7 @@ button {
     span, strong, em {
       font-size: 22px;
       color: rgb(101, 103, 107);
-      font-weight: 700;
+      font-weight: 800;
       margin: 0;
       margin-top: 10px;
       padding: 0;
@@ -925,7 +925,7 @@ $predWidth: 178px;
     border-radius: $defaultBorderRadius;
     color: $darkGray;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
     transition: $defaultAnim;
     &:hover {

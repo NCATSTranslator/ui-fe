@@ -1,5 +1,5 @@
 import styles from './LastViewedTag.module.scss';
-import History from '../../Icons/Navigation/History.svg?react';
+import History from '../../Icons/Navigation/Last Viewed Flag Icon.svg?react';
 import { useEffect, useState, FC } from 'react';
 
 interface LastViewedTagProps {

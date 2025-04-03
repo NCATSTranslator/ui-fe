@@ -1,10 +1,11 @@
 @import "../../Assets/Styles/variables";
 
 .result {
-  display: grid;
-  grid-template-columns: 1fr 112px 110px 90px 90px 24px;
-  padding: $m $s;
-  column-gap: $s;
+  // display: grid;
+  // grid-template-columns: 1fr 112px 110px 90px 90px 24px;
+  // padding: $m $s $m 0;
+  // column-gap: $s;
+  padding: 0 0 $m 0;
   &:nth-child(even) {
     &.highlighted {
       background-color: $lightYellow;
@@ -66,7 +67,7 @@
   .tag {
     font-size: 12px;
     line-height: 1.25;
-    font-weight: 700;
+    font-weight: 800;
     background-color: transparent;
     box-shadow: none;
     color: $purpleTwo;
@@ -139,7 +140,7 @@
       cursor: default;
       .viewAll {
         font-size: $bodyTwoSize;
-        font-weight: 700;
+        font-weight: 800;
         margin-bottom: 5px;
       }
       .info {
@@ -188,9 +189,19 @@
       }
     }
   }
+  .top {
+    display: grid;
+    grid-template-columns: 1fr 112px 110px 90px 90px 24px;
+    column-gap: $s;
+    padding: $m $s 0 $m;
+  }
   .accordionPanel {
     grid-column: 1/7;
     grid-row: 2;
+    padding: 0;
+    .container, .resultTabs > div > div {
+      padding: 0 $s;
+    } 
     &.hasDescription, &.hasTags {
       min-height: 41px;
     }
@@ -210,7 +221,6 @@
     }
     .container {
       max-width: calc(100% - 390px);
-      padding: 0;
       p, p span, p mark {
         font-size: 12px;
       }
@@ -234,7 +244,7 @@
       padding: 0;
       color: $purpleOne;
       text-decoration: none;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 12px;
       box-shadow: none;
       margin: 0 0 0 4px;
