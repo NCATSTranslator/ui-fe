@@ -9,7 +9,7 @@
   .tabList {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 0 $s;
+    margin: 0 $s $s;
     border-bottom: 1px solid $midGray;
   }
   .tabContent {

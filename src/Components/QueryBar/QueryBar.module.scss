@@ -30,23 +30,23 @@
     input {
       background-color: $white;
       color: $purpleOne;
-      font-weight: 700;
+      font-weight: 800;
     }
     input::-webkit-input-placeholder {
       color: $purpleOne;
-      font-weight: 700;
+      font-weight: 800;
     }
     input::-ms-input-placeholder{
       color: $purpleOne;
-      font-weight: 700;
+      font-weight: 800;
     }
     input::placeholder {
       color: $purpleOne;
-      font-weight: 700;
+      font-weight: 800;
     }
     input::-moz-placeholder {
       color: $purpleOne;
-      font-weight: 700;
+      font-weight: 800;
       opacity: 1;
     }
     .submitButton {
@@ -103,7 +103,7 @@
   span {
     color: $darkGray;
     font-size: $subOneSize;
-    font-weight: 700;
+    font-weight: 800;
     margin-right: $xs;
   }
   div {
@@ -113,7 +113,7 @@
     background-color: transparent;
     color: $darkGray;
     font-size: $subOneSize;
-    font-weight: 700;
+    font-weight: 800;
     margin-right: $xs;
     text-align: right;
   }

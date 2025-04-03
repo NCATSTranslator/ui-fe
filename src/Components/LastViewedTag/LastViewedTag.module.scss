@@ -11,21 +11,21 @@
   border-top-left-radius: $defaultBorderRadius;
   border-bottom-left-radius: $defaultBorderRadius;
   transition: left .5s ease;
-  z-index: 0;
+  z-index: 1;
   position: absolute;
-  left: 29px;
-  svg path {
-    fill: $white;
-    width: 20px;
-    height: 20px;
+  left: 4px;
+  svg {
+    path {
+      fill: $white;
+    }
   }
   &.visible {
-    left: 6px;
+    left: -12px;
   }
   &.inModal {
-    left: 6px;
     padding-right: 8px;
     top: 50%;
     transform: translateY(-50%);
+    z-index: 0;
   }
 }
