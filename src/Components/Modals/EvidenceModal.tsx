@@ -4,8 +4,8 @@ import Tabs from "../Tabs/Tabs";
 import Tab from "../Tabs/Tab";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
-import { capitalizeAllWords, isPublication, getFormattedEdgeLabel, getUrlByType, getCompressedSubgraph,
-  getCompressedEdge, hasSupport, getPathsWithSelectionsSet} from "../../Utilities/utilities";
+import { isPublication, getFormattedEdgeLabel, getUrlByType, getCompressedSubgraph, getCompressedEdge, hasSupport, 
+  getPathsWithSelectionsSet} from "../../Utilities/utilities";
 import { isResultEdge, Path, PathFilterState, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
 import { Provenance, PublicationObject, TrialObject } from "../../Types/evidence.d";
 import { getResultSetById } from "../../Redux/resultsSlice";
@@ -151,7 +151,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
           <h5 className={styles.title}>{isInferred ? "Indirect" : "Direct"} Path {pathKey} Evidence</h5>
           {
             edgeLabel &&
-            <p className={styles.subtitle}>{capitalizeAllWords(edgeLabel)}</p>
+            <p className={styles.subtitle}>{edgeLabel}</p>
           }
           <Tooltip id="knowledge-sources-tooltip" >
             <span>The resources that provided the information supporting the selected relationship.</span>

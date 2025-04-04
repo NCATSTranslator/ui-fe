@@ -1022,7 +1022,7 @@ export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): s
   const objectNode = getNodeById(resultSet, edge.object);
   const objectNodeName = (!!objectNode) ? objectNode.names[0] : "";
 
-  return `${subjectNodeName}|${edge.predicate}|${objectNodeName}`;
+  return `${capitalizeAllWords(subjectNodeName)}|${edge.predicate.toLowerCase()}|${capitalizeAllWords(objectNodeName)}`;
 }
 
 /**
