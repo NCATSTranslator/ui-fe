@@ -108,7 +108,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   
   return(
     <AnimateHeight
-      className={`${!!pathViewStyles && pathViewStyles.support} ${styles.support} ${isExpanded ? styles.open : styles.closed }`}
+      className={`${!!pathViewStyles && pathViewStyles.support} ${styles.support} ${!isExpanded && styles.closed } ${currentDepth > 1 && styles.nested}`}
       duration={500}
       height={typeof height === "number" ? height : 'auto'}
     >

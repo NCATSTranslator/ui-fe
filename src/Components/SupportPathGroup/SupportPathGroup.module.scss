@@ -9,6 +9,10 @@
     padding-bottom: 0;
     margin: 0;
   }
+  &.nested {
+    background-color: $lightPurpleTwo;
+    border-color: $midPurpleTwo;
+  }
   .supportLabel {
     font-size: 14px;
     color: $purpleTwo;
