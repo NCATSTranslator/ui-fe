@@ -196,7 +196,6 @@
     grid-template-columns: min-content min-content min-content 1fr;
     align-items: center;
     margin-bottom: $m;
-    // padding-left: $l;
     position: relative;
     transition: padding .5s ease;
     z-index: 50;
@@ -295,6 +294,7 @@
     }
     .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
       position: relative;
+      grid-row: 1;
       &:after {
         content: "";
         position: absolute;
@@ -386,7 +386,7 @@
     }
   }
   .support {
-    grid-column: 1/8;
+    grid-column: 1/-1;
     grid-row: 2;
     background-color: $palePurple;
     border: 1px solid $lightPurpleTwo;
@@ -402,8 +402,7 @@
       display: grid;
       overflow-x: auto;
       outline: none;
-      width: fit-content;
-      padding: $s $s 0 $s;
+      padding: $s $s;
     }
   }
 }
