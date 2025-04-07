@@ -405,6 +405,11 @@
       padding: $s $s;
     }
   }
+  button.evenButton {
+    background-color: $white;
+    border-color: $white;
+    margin-top: 28px;
+  }
 }
 
 .unhighlighted {
@@ -434,14 +439,8 @@
   background-color: $darkGray;
 }
 .filtered {
-  .predicateInterior, .nameInterior, .targetInterior {
-    opacity: 0.5;
-  }
+  opacity: 0.5;
 }
 .paginationContainer {
   display: grid;
-}
-.evenButton {
-  background-color: $white;
-  margin-top: 28px;
 }

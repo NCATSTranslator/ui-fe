@@ -198,7 +198,7 @@ const PathView: FC<PathViewProps> = ({
                             </>
                           : null
                         }
-                      <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed} ${isEven && styles.isEven}`}>
+                      <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed} ${isEven && styles.isEven} ${isPathFiltered && styles.filtered}`}>
                         {
                           ((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) &&
                           <LastViewedTag inModal={inModal} inGroup={!!(inModal && compressedSubgraph)}/>
@@ -230,7 +230,7 @@ const PathView: FC<PathViewProps> = ({
                         </Tooltip>
                         <div 
                           data-path-id={`${path.id || ""}`} 
-                          className={` ${inModal && compressedSubgraph && styles.compressedTableItem} ${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''} `}
+                          className={` ${inModal && compressedSubgraph && styles.compressedTableItem} ${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''}`}
                           >
                           {
                             inModal && compressedSubgraph

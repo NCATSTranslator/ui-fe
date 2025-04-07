@@ -49,7 +49,10 @@ const SupportPath: FC<SupportPathProps> = ({
       {
         path !== null &&
         <div 
-          className={`${!!pathViewStyles && pathViewStyles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && pathViewStyles && pathViewStyles.lastViewed}`} 
+          className={`
+            ${!!pathViewStyles && pathViewStyles.formattedPath}
+            ${!!lastViewedPathID && lastViewedPathID === path.id && pathViewStyles && pathViewStyles.lastViewed}
+            ${(isPathFiltered && !!pathViewStyles) ? pathViewStyles.filtered : ''}`} 
           key={path.id}
           >
           {
@@ -85,8 +88,7 @@ const SupportPath: FC<SupportPathProps> = ({
             data-path-id={`${path.id || ""}`}
             className={`path ${numberToWords(path.subgraph.length)}  
             ${!!pathViewStyles && pathViewStyles.tableItem} 
-            ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''} 
-            ${(isPathFiltered && !!pathViewStyles) ? pathViewStyles.filtered : ''}`}
+            ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''}`}
             >
             {
               !!path?.compressedSubgraph
