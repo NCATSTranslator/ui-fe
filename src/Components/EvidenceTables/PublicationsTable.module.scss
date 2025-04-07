@@ -53,6 +53,7 @@
   }
   .sourceName {
     font-weight: 800;
+    color: $purpleOne;
     cursor: pointer;
     &.noLink {
       cursor: default;
