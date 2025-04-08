@@ -177,6 +177,7 @@ const PathView: FC<PathViewProps> = ({
                       directLabelDisplayed = true;
                   const tooltipID: string = (!!path?.id) ? path.id : i.toString();
                   const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
+                  const subgraphToMap = (!!path.compressedSubgraph && path.compressedSubgraph.length > 0) ? path.compressedSubgraph : path.subgraph;
                   return (
                     <div key={tooltipID}>
                       {
@@ -325,8 +326,9 @@ const PathView: FC<PathViewProps> = ({
                                 }
                               }) 
                             :
-                              path.subgraph.map((subgraphItemID, i) => {
-                                let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false; 
+                              subgraphToMap.map((subgraphItemID, i) => {
+                                let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false;
+                                let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
                                 if(path.id === undefined)
                                   return null;
                                 return (
@@ -338,7 +340,7 @@ const PathView: FC<PathViewProps> = ({
                                       inModal={inModal}
                                       path={path}
                                       id={subgraphItemID}
-                                      key={subgraphItemID}
+                                      key={key}
                                       handleActivateEvidence={handleActivateEvidence}
                                       handleEdgeClick={handleEdgeClick}
                                       handleNodeClick={handleNodeClick}
