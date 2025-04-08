@@ -158,7 +158,6 @@ export const getUrlAndOrg = (id: string): (string | null)[] => {
     url = `https://www.ebi.ac.uk/chembl/compound_report_card/${id.replace(':', '')}/`;
     org = 'ChEMBL';
   } else if(formattedID.includes('MONDO')){
-    // id = id.replace(":", "_");
     url = `https://monarchinitiative.org/${id}`;
     org = 'Monarch Initiative';
   } else if(formattedID.includes('HP')) {
@@ -189,9 +188,12 @@ export const getUrlAndOrg = (id: string): (string | null)[] => {
     url = `https://pubchem.ncbi.nlm.nih.gov/compound/${id.replace('PUBCHEM.COMPOUND:', '')}`;
     org = 'PubChem';
   } else if(formattedID.includes('HMDB')) {
-  url = `https://hmdb.ca/metabolites/${id.replace('HMDB:', '')}`;
-  org = 'HMDB';
-}
+    url = `https://hmdb.ca/metabolites/${id.replace('HMDB:', '')}`;
+    org = 'HMDB';
+  } else if(formattedID.includes('UNII')) {
+    url = `https://precision.fda.gov/uniisearch/srs/unii/${id.replace('UNII:', '')}`;
+    org = 'UNII';
+  }
 
   return [url, org];
 }
@@ -258,7 +260,7 @@ export const generateEntityLink = (id: string, className: string, linkTextGenera
       </a>
     );
 
-  return null;
+  return <span className={className}>{linkText}</span>;
 }
 
 export const getLastItemInArray = (arr: any[]) => {
