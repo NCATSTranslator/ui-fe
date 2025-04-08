@@ -148,8 +148,8 @@ export const sortSupportByLength = (items: Path[]) => {
 export const sortDateYearLowHigh = (items: PublicationObject[]) => {
   const failYear = 3000; // Ensure all invalid dates are sent to the end
   return items.sort((a: PublicationObject, b: PublicationObject) => {
-    const aDate = (a.pubdate === null) ? failYear : Number(a.pubdate);
-    const bDate = (b.pubdate === null) ? failYear : Number(b.pubdate);
+    const aDate = (!a?.pubdate) ? failYear : Number(a.pubdate);
+    const bDate = (!b?.pubdate) ? failYear : Number(b.pubdate);
     return (aDate - bDate);
   });
 }
@@ -157,8 +157,8 @@ export const sortDateYearLowHigh = (items: PublicationObject[]) => {
 export const sortDateYearHighLow = (items: PublicationObject[]) => {
   const failYear = 0; // Ensure all invalid dates are sent to the end
   return items.sort((a: PublicationObject, b: PublicationObject) => {
-    const aDate = (a.pubdate === null) ? failYear : Number(a.pubdate);
-    const bDate = (b.pubdate === null) ? failYear : Number(b.pubdate);
+    const aDate = (!a?.pubdate) ? failYear : Number(a.pubdate);
+    const bDate = (!b?.pubdate) ? failYear : Number(b.pubdate);
     return (bDate - aDate);
   });
 }

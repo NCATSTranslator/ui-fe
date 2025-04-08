@@ -193,7 +193,7 @@
     display: grid;
     grid-template-columns: 1fr 112px 110px 90px 90px 24px;
     column-gap: $s;
-    padding: $m $s 0 $m;
+    padding: $m $s 0 $s;
   }
   .accordionPanel {
     grid-column: 1/7;
