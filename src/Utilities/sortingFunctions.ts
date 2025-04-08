@@ -6,49 +6,45 @@ import { generateScore } from './scoring';
 import { getTagFamily } from './filterFunctions';
 import { getEdgeById, getNodeById, getPathById } from '../Redux/resultsSlice';
 
-// alphabetical order
+const compareWithFallback = (
+  aValue: string | undefined | null,
+  bValue: string | undefined | null,
+  direction: 'asc' | 'desc'
+): number => {
+  const aText = aValue?.trim();
+  const bText = bValue?.trim();
+
+  const aHas = !!aText;
+  const bHas = !!bText;
+
+  if (!aHas && !bHas) return 0;
+  if (!aHas) return 1;
+  if (!bHas) return -1;
+
+  return direction === 'asc'
+    ? aText!.localeCompare(bText!)
+    : bText!.localeCompare(aText!);
+}
+
 export const sortNameLowHigh = (items: Result[] | PublicationObject[]) => {
-  if(isPublicationObjectArray(items)) {
-    return items.sort((a: PublicationObject, b: PublicationObject) => {
-      const aTitle = (a?.title) ? a.title : "";
-      const bTitle = (b?.title) ? b.title : "";
-      return aTitle.localeCompare(bTitle);
-    });
-  } else {
-    return items.sort((a: Result, b: Result) => a.drug_name.localeCompare(b.drug_name));
-  }
-}
+  return isPublicationObjectArray(items)
+    ? items.sort((a, b) => compareWithFallback(a.title, b.title, 'asc'))
+    : items.sort((a, b) => compareWithFallback(a.drug_name, b.drug_name, 'asc'));
+};
 
-// reverse alphabetical order
 export const sortNameHighLow = (items: Result[] | PublicationObject[]) => {
-  if(isPublicationObjectArray(items)) {
-    return items.sort((a: PublicationObject, b: PublicationObject) => {
-      const aTitle = (a?.title) ? a.title : "";
-      const bTitle = (b?.title) ? b.title : "";
-      return -aTitle.localeCompare(bTitle);
-    });
-  } else {
-    return items.sort((a: Result, b: Result) => -a.drug_name.localeCompare(b.drug_name));
-  }
-}
+  return isPublicationObjectArray(items)
+    ? items.sort((a, b) => compareWithFallback(a.title, b.title, 'desc'))
+    : items.sort((a, b) => compareWithFallback(a.drug_name, b.drug_name, 'desc'));
+};
 
-// alphabetical order
 export const sortJournalLowHigh = (items: PublicationObject[]) => {
-  return items.sort((a: PublicationObject, b: PublicationObject) => {
-    const aJournal = (a?.journal) ? a.journal : "";
-    const bJournal = (b?.journal) ? b.journal : "";
-    return aJournal.localeCompare(bJournal);
-  });
-}
+  return items.sort((a, b) => compareWithFallback(a.journal, b.journal, 'asc'));
+};
 
-// reverse alphabetical order
 export const sortJournalHighLow = (items: PublicationObject[]) => {
-  return items.sort((a: PublicationObject, b: PublicationObject) => {
-    const aJournal = (a?.journal) ? a.journal : "";
-    const bJournal = (b?.journal) ? b.journal : "";
-    return -aJournal.localeCompare(bJournal);
-  });
-}
+  return items.sort((a, b) => compareWithFallback(a.journal, b.journal, 'desc'));
+};
 
 export const sortEvidenceLowHigh = (resultSet: ResultSet, items: Result[]) => {
   return items.sort((a: Result, b: Result) => {
