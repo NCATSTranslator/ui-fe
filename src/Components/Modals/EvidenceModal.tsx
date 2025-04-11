@@ -10,7 +10,7 @@ import { isResultEdge, Path, PathFilterState, Result, ResultEdge, ResultNode, Re
 import { Provenance, PublicationObject, TrialObject } from "../../Types/evidence.d";
 import { getResultSetById } from "../../Redux/resultsSlice";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
-import { flattenPublicationObject, flattenTrialObject, createPathDictionaryAndLookup, findPathByAncestry } from "../../Utilities/evidenceModalFunctions";
+import { flattenPublicationObject, flattenTrialObject } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '../../Redux/userSlice';
@@ -26,8 +26,7 @@ interface EvidenceModalProps {
   isOpen: boolean;
   onClose: Function;
   path?: Path | null;
-  pathAncestry?: string[];
-  pathFilterState: PathFilterState | null;
+  pathKey: string
   pk: string;
   result: Result | null;
 }
@@ -37,8 +36,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   isOpen,
   onClose,
   path = null,
-  pathAncestry = [],
-  pathFilterState,
+  pathKey = "",
   pk,
   result }) => {
 
@@ -55,12 +53,6 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
   const [isPathViewMinimized, setIsPathViewMinimized] = useState(false);
   const isInferred = hasSupport(selectedEdge);
-  
-  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, result?.paths, pathFilterState ? pathFilterState : {}, new Set([]), true), [result, pathFilterState, resultSet]);
-  const { pathDictionary, pathIdLookup } = useMemo(()=>createPathDictionaryAndLookup(resultSet, formattedPaths, pathFilterState), [resultSet, formattedPaths, pathFilterState]);
-  const ancestry = (!!path?.id) ? [...pathAncestry, path.id] : pathAncestry;
-  const pathInDictionary = (!!path?.id) ? findPathByAncestry(pathDictionary, pathIdLookup, path.id, ancestry) : null;
-  const pathKey = (!!pathInDictionary) ? pathInDictionary.key : null;
 
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false = useMemo(()=>{
     return path?.compressedSubgraph && !!resultSet ? getCompressedSubgraph(resultSet, path.compressedSubgraph) : false;

@@ -923,6 +923,9 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
           }
         }
       } else {
+        // handle inferred edges that have different predicates 
+        if(currentEdge.support.length > 0 && baseEdge.support.length > 0)
+          mergeSupport(baseEdge, currentEdge);
         // Add as a new compressed edge
         baseEdge.compressed_edges?.push({ ...currentEdge, compressed_edges: emptyCompressedEdgesArray });
       }

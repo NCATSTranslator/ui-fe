@@ -14,13 +14,14 @@ export interface PathObjectProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence?: (path: Path, ancestry?: string[]) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path, ancestry?: string[]) => void;
+  handleActivateEvidence?: (path: Path, pathKey: string) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
   handleNodeClick: (name: ResultNode) => void;
   id: string | string[];
   index: number;
   inModal?: boolean;
   isEven?: boolean;
+  parentPathKey: string;
   path: Path;
   pathFilterState: PathFilterState;
   pathViewStyles?: {[key: string]: string;} | null;
@@ -42,6 +43,7 @@ const PathObject: FC<PathObjectProps> = ({
   inModal = false,
   isEven = false,
   pathFilterState,
+  parentPathKey,
   path,
   pathViewStyles = null,
   pk,
@@ -111,6 +113,7 @@ const PathObject: FC<PathObjectProps> = ({
               ?
                 <Predicate
                   path={path}
+                  parentPathKey={parentPathKey}
                   edge={pathObject}
                   edgeIDs={(Array.isArray(id)) ? id : [id]}
                   selected={selected}

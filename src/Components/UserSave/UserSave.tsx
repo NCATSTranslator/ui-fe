@@ -15,7 +15,7 @@ import { getEdgeById, getResultSetById } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 
 interface UserSaveProps {
-  activateEvidence?: (item: Result, edge: ResultEdge, path: Path, pk: string) => void;
+  activateEvidence?: (item: Result, edge: ResultEdge, path: Path, pathKey: string, pk: string) => void;
   activateNotes?: (nameString: string, id: string) => void;
   bookmarkAddedToast?: () => void;
   bookmarkRemovedToast?: () => void;
@@ -69,7 +69,7 @@ const UserSave: FC<UserSaveProps> = ({
     setIsExpanded(!isExpanded);
   }
 
-  const handleActivateEvidence = useCallback((item: Result, edgeIDs: string[], path: Path) => {
+  const handleActivateEvidence = useCallback((item: Result, edgeIDs: string[], path: Path, pathKey: string) => {
     if(!resultSet)
       return;
     let edge;
@@ -79,7 +79,7 @@ const UserSave: FC<UserSaveProps> = ({
       edge = getCompressedEdge(resultSet, edgeIDs);
 
     if(!!edge && !!activateEvidence)
-      activateEvidence(item, edge, path, arspk);
+      activateEvidence(item, edge, path, pathKey, arspk);
   }, [resultSet, arspk, activateEvidence]);
   return (
     <div key={key} className={styles.query}>
