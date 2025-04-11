@@ -5,16 +5,16 @@ import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import { PathFilterState, Path, ResultNode, Filter } from '../../Types/results';
 import { getIsPathFiltered, numberToWords } from '../../Utilities/utilities';
 import LastViewedTag from '../LastViewedTag/LastViewedTag';
-import { useLastViewedPath, useSupportPathAncestry } from '../../Utilities/customHooks';
+import { useLastViewedPath, useSupportPathKey } from '../../Utilities/customHooks';
 import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 
 interface SupportPathProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   character: string;
-  handleEdgeClick: (edgeIDs: string[], path: Path, ancestry?: string[]) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
   handleNodeClick: (name: ResultNode) => void;
-  handleActivateEvidence: (path: Path, ancestry?: string[]) => void;
+  handleActivateEvidence: (path: Path, pathKey: string) => void;
   path: Path;
   pathFilterState: PathFilterState;
   pathViewStyles: {[key: string]: string;} | null;
@@ -26,11 +26,11 @@ interface SupportPathProps {
 const SupportPath: FC<SupportPathProps> = ({ 
   activeEntityFilters, 
   activeFilters, 
-  character, 
+  character,
   handleEdgeClick, 
   handleNodeClick, 
   handleActivateEvidence, 
-  path, 
+  path,
   pathFilterState, 
   pathViewStyles, 
   pk,
@@ -38,7 +38,8 @@ const SupportPath: FC<SupportPathProps> = ({
   showHiddenPaths }) => {
 
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
-  const ancestry = useSupportPathAncestry();
+  const parentPathKey = useSupportPathKey();
+  const fullPathKey = `${parentPathKey}.${character}`;
   const tooltipID = path.id;
   const isPathFiltered = getIsPathFiltered(path, pathFilterState);
   if(!path.id || (isPathFiltered && !showHiddenPaths)) 
@@ -49,7 +50,10 @@ const SupportPath: FC<SupportPathProps> = ({
       {
         path !== null &&
         <div 
-          className={`${!!pathViewStyles && pathViewStyles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && pathViewStyles && pathViewStyles.lastViewed}`} 
+          className={`
+            ${!!pathViewStyles && pathViewStyles.formattedPath}
+            ${!!lastViewedPathID && lastViewedPathID === path.id && pathViewStyles && pathViewStyles.lastViewed}
+            ${(isPathFiltered && !!pathViewStyles) ? pathViewStyles.filtered : ''}`} 
           key={path.id}
           >
           {
@@ -60,7 +64,7 @@ const SupportPath: FC<SupportPathProps> = ({
             onClick={()=>{
               if(!!path?.id) {
                 setLastViewedPathID(path.id);
-                handleActivateEvidence(path, ancestry);
+                handleActivateEvidence(path, fullPathKey);
               }
             }}
             className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
@@ -85,8 +89,7 @@ const SupportPath: FC<SupportPathProps> = ({
             data-path-id={`${path.id || ""}`}
             className={`path ${numberToWords(path.subgraph.length)}  
             ${!!pathViewStyles && pathViewStyles.tableItem} 
-            ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''} 
-            ${(isPathFiltered && !!pathViewStyles) ? pathViewStyles.filtered : ''}`}
+            ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? !!pathViewStyles && pathViewStyles.unhighlighted : ''}`}
             >
             {
               !!path?.compressedSubgraph
@@ -102,6 +105,7 @@ const SupportPath: FC<SupportPathProps> = ({
                         index={i}
                         isEven={false}
                         path={path}
+                        parentPathKey={character}
                         id={subgraphItemID}
                         key={key}
                         handleActivateEvidence={handleActivateEvidence}
@@ -128,6 +132,7 @@ const SupportPath: FC<SupportPathProps> = ({
                         index={i}
                         isEven={false}
                         path={path}
+                        parentPathKey={character}
                         id={subgraphItemID}
                         key={subgraphItemID}
                         handleActivateEvidence={handleActivateEvidence}

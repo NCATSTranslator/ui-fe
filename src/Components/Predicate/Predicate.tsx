@@ -1,4 +1,4 @@
-import { useState, FC, MouseEvent } from 'react';
+import { useState, FC, MouseEvent, useMemo } from 'react';
 import styles from './Predicate.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
@@ -13,14 +13,14 @@ import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Typ
 import { getResultSetById } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
-import { useSupportPathAncestry } from '../../Utilities/customHooks';
+import { useSupportPathKey } from '../../Utilities/customHooks';
 
 interface PredicateProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence: (path: Path, ancestry?: string[]) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path, ancestry?: string[]) => void;
+  handleActivateEvidence: (path: Path, pathKey: string) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
   handleNodeClick: (name: ResultNode) => void;
   edge: ResultEdge;
   edgeIDs: string[];
@@ -29,6 +29,7 @@ interface PredicateProps {
   parentStyles?: {[key: string]: string;} | null;
   pathFilterState: PathFilterState;
   path: Path;
+  parentPathKey: string;
   pathViewStyles?: {[key: string]: string;} | null;
   pk: string;
   selected?: boolean;
@@ -50,7 +51,8 @@ const Predicate: FC<PredicateProps> = ({
   parentClass = '',
   parentStyles,
   pathFilterState,
-  path, 
+  path,
+  parentPathKey,
   pathViewStyles = null, 
   pk,
   selected = false, 
@@ -59,8 +61,6 @@ const Predicate: FC<PredicateProps> = ({
   uid }) => {
 
   let resultSet = useSelector(getResultSetById(pk));
-  const parentPathID = (!!path?.id) ? path.id : undefined;
-  const parentAncestry = useSupportPathAncestry();
   const formattedEdge = (!!resultSet && Array.isArray(edgeIDs) && edgeIDs.length > 1) ? getCompressedEdge(resultSet, edgeIDs) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
   const [isSupportExpanded, setIsSupportExpanded] = useState(formattedEdge.is_root);
@@ -68,6 +68,14 @@ const Predicate: FC<PredicateProps> = ({
   const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
   const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
   const isInferred = hasSupport(formattedEdge);
+
+  const ancestorsPathKey = useSupportPathKey();
+  const fullPathKey = useMemo(() => {
+    if(!!ancestorsPathKey)
+      return `${ancestorsPathKey}.${parentPathKey}`;
+    else
+      return parentPathKey;
+  }, [ancestorsPathKey, parentPathKey]);
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -88,7 +96,7 @@ const Predicate: FC<PredicateProps> = ({
     <>
       <span
         className={`${selected && styles.selected} ${selected && parentStyles ? parentStyles.selected : ''} ${styles.edge} ${inModal && styles.inModal} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && styles.isInferred}`}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, parentAncestry);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         >
         <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
@@ -113,7 +121,7 @@ const Predicate: FC<PredicateProps> = ({
                         className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
                         onClick={(e)=> {
                           e.stopPropagation();
-                          handleEdgeClick([edge.id], path, parentAncestry);
+                          handleEdgeClick([edge.id], path, fullPathKey);
                         }}
                         >
                         <Highlighter
@@ -209,7 +217,7 @@ const Predicate: FC<PredicateProps> = ({
           activeFilters={activeFilters}
           pk={pk}
           showHiddenPaths={showHiddenPaths}
-          parentPathID={parentPathID}
+          parentPathKey={parentPathKey}
         />
       }
     </>

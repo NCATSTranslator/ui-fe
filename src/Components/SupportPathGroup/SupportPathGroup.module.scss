@@ -9,18 +9,21 @@
     padding-bottom: 0;
     margin: 0;
   }
+  &.nested {
+    background-color: $lightPurpleTwo;
+    border-color: $midPurpleTwo;
+  }
   .supportLabel {
     font-size: 14px;
     color: $purpleTwo;
     font-weight: 800;
     margin-bottom: $s;
-    padding-left: 12px;
   }
 }
 .paginationContainer {
   display: grid;
   padding: 12px;
-  margin: 16px -17px -1px -5px;
+  margin: 16px -1px -1px -1px;
   background-color: $white;
   border: 1px solid $lightPurpleTwo;
   border-top-color: $midPurpleTwo;

@@ -899,11 +899,25 @@ button {
 }
 
 $nodeWidth: 178px;
-$predWidth: 178px;
-.path {
-  grid-auto-columns: 178px;
-  grid-template-rows: 1fr;
-  grid-auto-flow: column;
+$edgeWidth: 178px;
+.path.three {
+  grid-template-columns: $nodeWidth $edgeWidth $nodeWidth;
+}
+
+.path.five {
+  grid-template-columns: $nodeWidth repeat(2, $edgeWidth $nodeWidth);
+}
+
+.path.seven {
+  grid-template-columns: $nodeWidth repeat(3, $edgeWidth $nodeWidth);
+}
+
+.path.nine {
+  grid-template-columns: $nodeWidth repeat(4, $edgeWidth $nodeWidth);
+}
+
+.path.eleven {
+  grid-template-columns: $nodeWidth repeat(5, $edgeWidth $nodeWidth);
 }
 
 .pageNums {

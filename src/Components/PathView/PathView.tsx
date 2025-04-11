@@ -24,8 +24,8 @@ interface PathViewProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
-  handleActivateEvidence: (path: Path, ancestry?: string[]) => void;
-  handleEdgeSpecificEvidence:(edgeIDs: string[], path: Path, ancestry?: string[]) => void;
+  handleActivateEvidence: (path: Path, pathKey: string) => void;
+  handleEdgeSpecificEvidence:(edgeIDs: string[], path: Path, pathKey: string) => void;
   inModal?: boolean;
   isEven: boolean;
   pathArray: string[] | Path[];
@@ -92,9 +92,9 @@ const PathView: FC<PathViewProps> = ({
       window.open(name.provenance[0], '_blank');
   },[]);
 
-  const handleEdgeClick = useCallback((edgeIDs: string[], path: Path, ancestry?: string[]) => {
+  const handleEdgeClick = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
     setLastViewedPathID(path?.id || null);
-    handleEdgeSpecificEvidence(edgeIDs, path, ancestry);
+    handleEdgeSpecificEvidence(edgeIDs, path, pathKey);
   }, [handleEdgeSpecificEvidence]);
 
   const edgeHeight = 32;
@@ -177,6 +177,7 @@ const PathView: FC<PathViewProps> = ({
                       directLabelDisplayed = true;
                   const tooltipID: string = (!!path?.id) ? path.id : i.toString();
                   const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
+                  const subgraphToMap = (!!path.compressedSubgraph && path.compressedSubgraph.length > 0) ? path.compressedSubgraph : path.subgraph;
                   return (
                     <div key={tooltipID}>
                       {
@@ -198,7 +199,7 @@ const PathView: FC<PathViewProps> = ({
                             </>
                           : null
                         }
-                      <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed} ${isEven && styles.isEven}`}>
+                      <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed} ${isEven && styles.isEven} ${isPathFiltered && styles.filtered}`}>
                         {
                           ((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) &&
                           <LastViewedTag inModal={inModal} inGroup={!!(inModal && compressedSubgraph)}/>
@@ -207,7 +208,7 @@ const PathView: FC<PathViewProps> = ({
                           onClick={()=>{
                             if(!!path?.id) {
                               setLastViewedPathID(path.id);
-                              handleActivateEvidence(path);
+                              handleActivateEvidence(path, (indexInFullCollection + 1).toString());
                             }
                           }}
                           className={styles.pathEvidenceButton}
@@ -230,7 +231,7 @@ const PathView: FC<PathViewProps> = ({
                         </Tooltip>
                         <div 
                           data-path-id={`${path.id || ""}`} 
-                          className={` ${inModal && compressedSubgraph && styles.compressedTableItem} ${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''} ${isPathFiltered ? styles.filtered : ''} `}
+                          className={` ${inModal && compressedSubgraph && styles.compressedTableItem} ${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''}`}
                           >
                           {
                             inModal && compressedSubgraph
@@ -267,6 +268,7 @@ const PathView: FC<PathViewProps> = ({
                                                 index={i}
                                                 isEven={false}
                                                 path={path}
+                                                parentPathKey={(indexInFullCollection + 1).toString()}
                                                 id={edge.id}
                                                 key={key}
                                                 handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
@@ -309,6 +311,7 @@ const PathView: FC<PathViewProps> = ({
                                       index={i}
                                       isEven={false}
                                       path={path}
+                                      parentPathKey={(indexInFullCollection + 1).toString()}
                                       id={key}
                                       key={key}
                                       handleNodeClick={()=>{console.log("evidence modal node clicked!")}}
@@ -325,8 +328,9 @@ const PathView: FC<PathViewProps> = ({
                                 }
                               }) 
                             :
-                              path.subgraph.map((subgraphItemID, i) => {
-                                let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false; 
+                              subgraphToMap.map((subgraphItemID, i) => {
+                                let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false;
+                                let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
                                 if(path.id === undefined)
                                   return null;
                                 return (
@@ -337,8 +341,9 @@ const PathView: FC<PathViewProps> = ({
                                       isEven={isEven}
                                       inModal={inModal}
                                       path={path}
+                                      parentPathKey={(indexInFullCollection + 1).toString()}
                                       id={subgraphItemID}
-                                      key={subgraphItemID}
+                                      key={key}
                                       handleActivateEvidence={handleActivateEvidence}
                                       handleEdgeClick={handleEdgeClick}
                                       handleNodeClick={handleNodeClick}

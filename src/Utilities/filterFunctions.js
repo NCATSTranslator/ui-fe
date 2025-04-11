@@ -102,12 +102,12 @@ export const getFilterLabel = (filter) => {
   const defaultLabel = "Tag";
 
   switch(filterFamily(filter)) {
-    case "cc":   return "Chemical Classification";
-    case "pc":   return "Object Type";
-    case "di":   return "Drug Indication";
+    case "cc":   return "Development Stage";
+    case "pc":   return "Objects within Paths";
+    case "di":   return "CT Indications";
     case "ara":  return "Reasoning Agent";
-    case "role": return "ChEBI Role";
-    case "pt":   return "Relationship Type";
+    case "role": return "Chemical Classification";
+    case "pt":   return "Path Length";
     case "otc":  return "Availability";
     case "tdl":  return "Target Development Level";
     default: return defaultLabel;

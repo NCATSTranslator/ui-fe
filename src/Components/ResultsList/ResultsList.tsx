@@ -104,8 +104,8 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
   // Path, path represented in current evidence
   const [selectedPath, setSelectedPath] = useState<Path | null>(null);
-  // Array of path IDs, represents the ancestor paths of the selected path
-  const [selectedPathAncestry, setSelectedPathAncestry] = useState<string[]>([]);
+  // string, represents the selected path's key (1, 1.a, 1.a.i, etc.)
+  const [selectedPathKey, setSelectedPathKey] = useState<string>("");
   // Obj, represents the filter state of all paths
   const [pathFilterState, setPathFilterState] = useState<PathFilterState | null>(null);
   // number, current page
@@ -627,7 +627,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   /**
    * Activates sets the evidence and opens the evidence modal.
    */
-  const activateEvidence = useCallback((item: Result, edgeID: string | string[], path: Path, ancestry?: string[]) => {
+  const activateEvidence = useCallback((item: Result, edgeID: string | string[], path: Path, pathKey: string) => {
     if(!resultSet)
       return;
     let edge;
@@ -640,8 +640,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
       setSelectedResult(item);
       setSelectedEdge(edge);
       setSelectedPath(path);
-      if(!!ancestry)
-        setSelectedPathAncestry(ancestry);
+      setSelectedPathKey(pathKey);
       setEvidenceModalOpen(true);
     }
   },[resultSet])
@@ -956,7 +955,6 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
         handleClearNotesEditor={handleClearNotesEditor}
         noteLabel={noteLabel.current}
         currentBookmarkID={currentBookmarkID.current}
-        pathFilterState={pathFilterState}
         pk={currentQueryID ? currentQueryID : ""}
         focusModalOpen={focusModalOpen}
         setFocusModalOpen={setFocusModalOpen}
@@ -965,7 +963,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
         selectedEdge={selectedEdge}
         selectedResult={selectedResult}
         selectedPath={selectedPath}
-        selectedPathAncestry={selectedPathAncestry}
+        selectedPathKey={selectedPathKey}
         sharedItem={sharedItem}
         formattedResultsLength={formattedResults.length}
         setExpandSharedResult={setExpandSharedResult}
