@@ -44,7 +44,7 @@ const sortTagsBySelected = (
 };
 
 type ResultsItemProps = {
-  activateEvidence?: (item: Result, edgeIDs: string[], path: Path, ancestry?: string[]) => void;
+  activateEvidence?: (item: Result, edgeIDs: string[], path: Path, pathKey: string) => void;
   activateNotes?: (nameString: string, id: string) => void;
   activeEntityFilters: string[];
   activeFilters: Filter[];
@@ -173,16 +173,16 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setIsExpanded(prev => !prev);
   }
 
-  const handleEdgeSpecificEvidence = useCallback((edgeIDs: string[], path: Path, ancestry?: string[]) => {
+  const handleEdgeSpecificEvidence = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
     if(!result)
       return;
 
-    activateEvidence(result, edgeIDs, path, ancestry);
+    activateEvidence(result, edgeIDs, path, pathKey);
   }, [result, activateEvidence])
 
-  const handleActivateEvidence = useCallback((path: Path, ancestry?: string[]) => {
+  const handleActivateEvidence = useCallback((path: Path, pathKey: string) => {
     if(!!path.subgraph[1])
-      activateEvidence(result, [path.subgraph[1]], path, ancestry);
+      activateEvidence(result, [path.subgraph[1]], path, pathKey);
   }, [result, activateEvidence])
 
   useEffect(() => {
@@ -465,19 +465,19 @@ const ResultsItem: FC<ResultsItemProps> = ({
           >
             <Tab heading="Paths">
               <PathView
-                pathArray={result?.paths}
-                selectedPaths={selectedPaths}
+                active={isExpanded}
+                activeEntityFilters={activeEntityFilters}
+                activeFilters={activeFilters}
                 handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
                 handleActivateEvidence={handleActivateEvidence}
-                activeEntityFilters={activeEntityFilters}
-                pathFilterState={pathFilterState}
                 isEven={isEven}
-                active={isExpanded}
-                activeFilters={activeFilters}
+                pathArray={result?.paths}
+                pathFilterState={pathFilterState}
                 pk={pk ? pk : ""}
+                resultID={result.id}
+                selectedPaths={selectedPaths}
                 setShowHiddenPaths={setShowHiddenPaths}
                 showHiddenPaths={showHiddenPaths}
-                resultID={result.id}
               />
             </Tab>
             <Tab heading="Graph">

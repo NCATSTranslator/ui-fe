@@ -10,19 +10,19 @@ import { Filter, Path, PathFilterState, ResultNode } from '../../Types/results';
 import { intToChar, getPathsWithSelectionsSet, isStringArray, getFilteredPathCount, intToNumeral } from '../../Utilities/utilities';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
-import { useSupportPathAncestry, useSupportPathDepth } from '../../Utilities/customHooks';
+import { useSupportPathDepth, useSupportPathKey } from '../../Utilities/customHooks';
 import { SupportPathDepthContext } from '../PathView/PathView';
 
-export const SupportPathAncestryContext = createContext<string[]>([]);
+export const SupportPathKeyContext = createContext<string>("");
 
 interface SupportPathGroupProps {
   activeFilters: Filter[];
   activeEntityFilters: string[];
-  handleActivateEvidence: (path: Path, ancestry?: string[]) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
+  handleActivateEvidence: (path: Path, pathKey: string) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
   handleNodeClick: (name: ResultNode) => void;
   isExpanded: boolean;
-  parentPathID?: string;
+  parentPathKey: string;
   pathFilterState: PathFilterState;
   pathArray: (string | Path)[];
   pathViewStyles: {[key: string]: string;} | null;
@@ -38,10 +38,10 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   handleEdgeClick, 
   handleNodeClick, 
   isExpanded,
-  parentPathID,
-  pathFilterState, 
-  pathArray, 
-  pathViewStyles, 
+  parentPathKey,
+  pathFilterState,
+  pathArray,
+  pathViewStyles,
   pk,
   selectedPaths,
   showHiddenPaths }) => {
@@ -97,23 +97,22 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
     }
   }, [pathArray, activeEntityFilters, formattedPaths, resultSet]);
 
-
-  const parentAncestry = useSupportPathAncestry();
-  const currentAncestry = useMemo(() => {
-    if(!!parentPathID && !parentAncestry.includes(parentPathID))
-      return [...parentAncestry, parentPathID];
+  const parentKey = useSupportPathKey();
+  const currentKey = useMemo(() => {
+    if(!!parentPathKey && !!parentKey && !parentKey.includes(parentPathKey))
+      return `${parentKey}.${parentPathKey}`;
     else 
-      return parentAncestry; 
-  }, [parentAncestry, parentPathID]);
+      return parentPathKey; 
+  }, [parentKey, parentPathKey]);
   
   return(
     <AnimateHeight
-      className={`${!!pathViewStyles && pathViewStyles.support} ${styles.support} ${isExpanded ? styles.open : styles.closed }`}
+      className={`${!!pathViewStyles && pathViewStyles.support} ${styles.support} ${!isExpanded && styles.closed } ${currentDepth > 1 && styles.nested}`}
       duration={500}
       height={typeof height === "number" ? height : 'auto'}
     >
       <SupportPathDepthContext.Provider value={currentDepth}>
-        <SupportPathAncestryContext.Provider value={currentAncestry}>
+        <SupportPathKeyContext.Provider value={currentKey}>
           <div className={`${!!pathViewStyles && pathViewStyles.supportGroupContainer} scrollable-support`}>
             <p className={styles.supportLabel}>Supporting Paths</p>
             {
@@ -122,16 +121,17 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                 if(!supportPath)
                   return null;
                 const indexInFullCollection = itemOffset + i;
-                const character = currentDepth === 2 ? intToNumeral(indexInFullCollection + 1) : intToChar(indexInFullCollection + 1);
+                const pathKey = currentDepth === 2 ? intToNumeral(indexInFullCollection + 1) : intToChar(indexInFullCollection + 1);
+                const fullPathKey = `${parentKey}.${pathKey}`;
                 return (
                   <SupportPath
                     key={supportPath.id}
-                    character={character}
+                    character={pathKey}
                     pathFilterState={pathFilterState}
                     path={supportPath}
                     handleEdgeClick={handleEdgeClick}
                     handleNodeClick={handleNodeClick}
-                    handleActivateEvidence={()=>handleActivateEvidence(supportPath, currentAncestry)}
+                    handleActivateEvidence={()=>handleActivateEvidence(supportPath, fullPathKey)}
                     selectedPaths={selectedPaths}
                     pathViewStyles={pathViewStyles}
                     activeEntityFilters={activeEntityFilters}
@@ -165,7 +165,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
               />
             </div>
           }
-        </SupportPathAncestryContext.Provider>
+        </SupportPathKeyContext.Provider>
       </SupportPathDepthContext.Provider>
     </AnimateHeight>
   )

@@ -36,6 +36,7 @@ const UserSaves = () => {
   const [selectedResult, setSelectedResult] = useState<Result | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
   const [selectedPath, setSelectedPath] = useState<Path | null>(null);
+  const [selectedPathKey, setSelectedPathKey] = useState<string>("");
   const [selectedPK, setSelectedPK] = useState<string | null>(null);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
@@ -62,12 +63,13 @@ const UserSaves = () => {
 
   const queryClient = new QueryClient();
 
-  const activateEvidence = useCallback((item: Result, edge: ResultEdge, path: Path, pk: string) => {
+  const activateEvidence = useCallback((item: Result, edge: ResultEdge, path: Path, pathKey: string, pk: string) => {
     if(!!edge && !!path) {
       setSelectedPK(pk);
       setSelectedResult(item);
       setSelectedEdge(edge);
       setSelectedPath(path);
+      setSelectedPathKey(pathKey);
       setEvidenceModalOpen(true);
     }
   }, []);
@@ -239,10 +241,10 @@ const UserSaves = () => {
                 isOpen={evidenceModalOpen}
                 onClose={()=>handleEvidenceModalClose(setEvidenceModalOpen)}
                 result={selectedResult}
-                pathFilterState={{}}
                 pk={(!!selectedPK) ? selectedPK : "-1"}
                 edge={selectedEdge}
                 path={selectedPath}
+                pathKey={selectedPathKey}
               />
               <div className="page-header">
                 <div className="container">

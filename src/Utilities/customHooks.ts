@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } from 'react';
 import { LastViewedPathIDContext, SupportPathDepthContext } from '../Components/PathView/PathView';
-import { SupportPathAncestryContext } from '../Components/SupportPathGroup/SupportPathGroup';
+import { SupportPathKeyContext } from '../Components/SupportPathGroup/SupportPathGroup';
 import { isEqual } from 'lodash';
 import { useQuery } from 'react-query';
 import { useLocation } from 'react-router-dom';
@@ -363,12 +363,13 @@ export const useSupportPathDepth = (): number => {
 };
 
 /**
- * Custom hook to get the current ancestry of a support path in the path hierarchy.
- * @returns {string[]} The ancestry expressed as an array of path IDs.
+ * Custom hook to get the current key of a support path in the path hierarchy.
+ * @returns {string} The key expressed as a string (1, 1.a, 1.a.i, etc.)
  */
-export const useSupportPathAncestry = (): string[] => {
-  return useContext(SupportPathAncestryContext);
+export const useSupportPathKey = (): string => {
+  return useContext(SupportPathKeyContext);
 };
+
 
 /**
  * Custom hook to scroll to an element with an id provided as a hash in the url
