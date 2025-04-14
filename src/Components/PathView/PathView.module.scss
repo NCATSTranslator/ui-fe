@@ -28,6 +28,9 @@
             left: -2px;
           }
         }
+        &:hover {
+          z-index: 50;
+        }
       }
     }
   }
