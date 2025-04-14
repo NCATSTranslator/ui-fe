@@ -5,6 +5,9 @@
   height: 32px;
   &.isInferred .nameShape {
     border: none;
+    svg {
+      height: $l;
+    }
     .border {
       display: block !important;
       width: 100%;
@@ -203,10 +206,6 @@
     }
   }
 }
-// &.isInferred .nameShape {
-//   border-top-style: dashed;
-//   border-bottom-style: dashed;
-// }
 .inModal {
   &.edge {
     background-color: transparent !important;

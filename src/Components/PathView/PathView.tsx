@@ -367,8 +367,8 @@ const PathView: FC<PathViewProps> = ({
               }
             </div>
             {
-              Object.keys(activeFilters).length > 0 &&
-              <Button 
+              Object.keys(activeFilters).length > 0 && filteredPathCount > 0 && 
+              <Button
                 handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
                 isSecondary
                 smallFont
