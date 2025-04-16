@@ -62,7 +62,7 @@ const PathView: FC<PathViewProps> = ({
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths, true), [paths, selectedPaths, pathFilterState, resultSet]);
   const filteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState);
   const [itemOffset, setItemOffset] = useState<number>(0);
-  const currentPage = useRef<number>(0);
+  const [currentPage, setCurrentPage] = useState(0)
   const endResultIndex = useRef<number>(itemsPerPage);
   const pageCount = (!showHiddenPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / itemsPerPage) : Math.ceil((formattedPaths.length) / itemsPerPage);
   
@@ -70,7 +70,7 @@ const PathView: FC<PathViewProps> = ({
     let pathsLength = formattedPaths.length;
     if(!pathsLength)
       return;
-    currentPage.current = event.selected;
+    setCurrentPage(event.selected);
     const newOffset:number = isNaN((event.selected * itemsPerPage) % pathsLength) ? 0 : (event.selected * itemsPerPage) % pathsLength;
     const endOffset:number = (newOffset + itemsPerPage) > pathsLength
       ? pathsLength
@@ -407,7 +407,7 @@ const PathView: FC<PathViewProps> = ({
             previousLinkClassName={`button ${styles.button}`}
             nextLinkClassName={`button ${styles.button}`}
             disabledLinkClassName={`disabled ${styles.disabled}`}
-            forcePage={currentPage.current}
+            forcePage={currentPage}
           />
         </div>
       }
