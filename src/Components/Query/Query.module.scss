@@ -26,7 +26,7 @@
       }
     }
   }
-  .bottom { 
+  .bottom {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
@@ -108,7 +108,7 @@
     margin: 0 auto;
   }
   .resultsHeader, .bottom {
-    width: 640px;
+    width: 720px;
   }
   .buttons {
     display: flex;
@@ -260,8 +260,9 @@ button .dualArrows {
   svg {
     width: 20px;
     height: 20px;
+    vertical-align: -2px;
     path {
       fill: $purpleOne;
     }
-  } 
+  }
 }
