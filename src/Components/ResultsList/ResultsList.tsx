@@ -15,7 +15,7 @@ import { currentPrefs, currentUser }from "../../Redux/userSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
   sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow, filterCompare } from "../../Utilities/sortingFunctions";
-import { handleResultsError, handleResultsRefresh, applyFilters, genPathFilterState } from "../../Utilities/resultsInteractionFunctions";
+import { handleResultsError, handleResultsRefresh, applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts } from "../../Utilities/resultsInteractionFunctions";
 import * as filtering from '../../Utilities/filterFunctions';
 import { getEvidenceCounts, checkBookmarkForNotes, checkBookmarksForItem, getDataFromQueryVar, getPathCount, handleFetchErrors, getCompressedEdge } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
@@ -27,7 +27,7 @@ import QueryPathfinder from "../QueryPathfinder/QueryPathfinder";
 import ResultsListTableHead from "./ResultsListTableHead";
 import ResultsListModals from "./ResultsListModals";
 import ResultsListBottomPagination from "./ResultsListBottomPagination";
-import { ResultSet, Result, ResultEdge, Path, Filter, PathFilterState, PathRank, SharedItem } from "../../Types/results.d";
+import { ResultSet, Result, ResultEdge, Path, Filter, PathFilterState, SharedItem } from "../../Types/results.d";
 import { generateScore } from "../../Utilities/scoring";
 
 interface ResultsListProps {
@@ -139,7 +139,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   const pageCount = Math.ceil(formattedResults.length / itemsPerPage);
   // Array, currently active filters
   const [activeFilters, setActiveFilters] = useState<Filter[]>([]);
-  const [availableTags, setAvailableFilters] = useState<{[key: string]: Filter}>({});
+  const [availableFilters, setAvailableFilters] = useState<{[key: string]: Filter}>({});
   // Array, currently active string filters
   const [activeEntityFilters, setActiveEntityFilters] = useState<string[]>([]);
   // Array, aras that have returned data
@@ -244,61 +244,102 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     setEndResultIndex(endOffset);
   }, [formattedResults.length, itemsPerPage]);
 
-  const handleUpdateResults = (filters: Filter[], asFilters: string[], summary: ResultSet | null, or: Result[] = [], justSort = false, sortType: string, pfState: PathFilterState | null = null, fr: Result[] = []) => {
-    if(!summary)
-      return [];
-
+  const handleUpdateResults = (
+    filters: Filter[],
+    asFilters: string[],
+    summary: ResultSet | null,
+    or: Result[] = [],
+    justSort = false,
+    sortType: string,
+    pfState: PathFilterState | null = null,
+    fr: Result[] = []
+  ): Result[] => {
+    if (!summary) return [];
+  
     let newFormattedResults: Result[] = [];
     let newOriginalResults: Result[] = [];
-    let newPathFilterState = (!!pfState) ? cloneDeep(pfState) : {};
-    // let saves = (userSaves) ? userSaves.saves: null;
-
-    // initial results
-    if(or.length === 0) {
+    let newPathFilterState = pfState ? cloneDeep(pfState) : {};
+  
+    // Initial population of result state
+    if (or.length === 0) {
       newFormattedResults = summary.data.results;
       newOriginalResults = cloneDeep(newFormattedResults);
       newPathFilterState = genPathFilterState(summary);
-    // updating existing results
     } else {
-      newFormattedResults = (justSort) ? cloneDeep(fr) : or;
+      newFormattedResults = justSort ? cloneDeep(fr) : or;
       newOriginalResults = or;
     }
-
-    // filter
+  
+    // Filtering
     if (!justSort) {
-      [newFormattedResults, newPathFilterState] = applyFilters(filters, asFilters, newFormattedResults, newOriginalResults, summary, newPathFilterState, setActiveEntityFilters, setAvailableFilters, handlePageReset, currentPage);
+      const {
+        results,
+        updatedEntityFilters,
+        updatedPathFilterState,
+        facetCounts,
+        shouldResetPage
+      } = applyFilters(
+        filters,
+        newFormattedResults,
+        newOriginalResults,
+        summary,
+        newPathFilterState
+      );
+  
+      newFormattedResults = results;
+      newPathFilterState = updatedPathFilterState;
+  
+      // Update entity filters if changed
+      if (!areEntityFiltersEqual(updatedEntityFilters, asFilters))
+        setActiveEntityFilters(updatedEntityFilters);
+  
+      // Update available facet filters
+      const newFilters = calculateFacetCounts(
+        facetCounts.results,
+        summary,
+        facetCounts.negatedResults,
+        facetCounts.resultFacets,
+        facetCounts.negatedResultFacets
+      );
+      setAvailableFilters(newFilters);
+  
+      // Reset pagination if needed
+      if (shouldResetPage && currentPage.current !== 0)
+        handlePageReset(false, newFormattedResults.length);
+  
       originalResults.current = newOriginalResults;
     }
-
-    // sort
+  
+    // Sorting
     newFormattedResults = getSortedResults(summary, newFormattedResults, sortType);
-
-    // set results
+  
+    // State assignment
     setFormattedResults(newFormattedResults);
     setPathFilterState(newPathFilterState);
-
-    if(firstLoad.current && newFormattedResults.length > 0) {
+  
+    // First-load modal setup
+    if (firstLoad.current && newFormattedResults.length > 0) {
       firstLoad.current = false;
       if (resultIdParam !== '0') {
-        let sharedItemIndex = newFormattedResults.findIndex(result => result.id === resultIdParam);
+        const sharedItemIndex = newFormattedResults.findIndex(result => result.id === resultIdParam);
         if (sharedItemIndex !== -1) {
           const sharedItemNode = getNodeById(summary, newFormattedResults[sharedItemIndex].subject);
-          const sharedItemType = (sharedItemNode) ? sharedItemNode.types[0] : "";
+          const sharedItemType = sharedItemNode ? sharedItemNode.types[0] : "";
           setSharedItem({
             index: sharedItemIndex,
             page: Math.floor(sharedItemIndex / itemsPerPage),
             name: newFormattedResults[sharedItemIndex].drug_name,
             type: sharedItemType
           });
-
           setFocusModalOpen(true);
         }
       }
     }
-
+  
     rawResults.current = summary;
     return newFormattedResults;
-  }
+  };
+  
 
   const handleNewResults = (resultSet: ResultSet) => {
     // if we have no results, or the results aren't actually new, return
@@ -319,13 +360,11 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
       result.score = generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
     }
     // assign ids to edges
-    for(const [id, edge] of Object.entries(newResultSet.data.edges)) {
+    for(const [id, edge] of Object.entries(newResultSet.data.edges))
       edge.id = id;
-    }
     // assign ids to nodes
-    for(const [id, node] of Object.entries(newResultSet.data.nodes)) {
+    for(const [id, node] of Object.entries(newResultSet.data.nodes))
       node.id = id;
-    }
 
     dispatch(setResultSet({pk: currentQueryID || "", resultSet: newResultSet}));
 
@@ -753,7 +792,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
                 onClearAll={handleClearAllFilters}
                 expanded={filtersExpanded}
                 setExpanded={setFiltersExpanded}
-                availableFilters={availableTags}
+                availableFilters={availableFilters}
                 isPathfinder={isPathfinder}
               />
               <div>
@@ -837,7 +876,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
                               handleBookmarkError={handleBookmarkError}
                               bookmarkAddedToast={bookmarkAddedToast}
                               bookmarkRemovedToast={bookmarkRemovedToast}
-                              availableFilters={availableTags}
+                              availableFilters={availableFilters}
                               handleFilter={handleFilter}
                               activeFilters={activeFilters}
                               sharedItemRef={item.id === resultIdParam ? sharedItemRef : null}

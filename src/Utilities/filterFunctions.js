@@ -78,7 +78,7 @@ export const isGlobalFilter = (filter) => {
 }
 
 export const isExclusion = (filter) => {
-  return filter.negated
+  return filter.negated;
 }
 
 export const isEntityFilter = (filter) => {
