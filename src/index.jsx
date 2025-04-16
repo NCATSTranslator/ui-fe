@@ -5,7 +5,6 @@ import App from './App';
 import Page from './Components/Page/Page';
 import FAQPage from './Components/Page/FAQPage';
 import Home from './PageRoutes/Home/Home';
-import Four from './PageRoutes/404/404';
 import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
@@ -140,7 +139,6 @@ root.render(
   <Provider store={store}>
     <RouterProvider
       router={router}
-      fallbackElement={<Page title="404 - Page Not Found"><Four /></Page>}
     />
   </Provider>
 );
