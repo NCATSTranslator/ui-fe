@@ -844,7 +844,7 @@ export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (s
   if(isTopLevel)
     return sortArrayByIndirect(resultSet, newPaths);
   else
-    return newPaths
+    return newPaths;
 }
 
 /**

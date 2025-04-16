@@ -48,7 +48,15 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
 
   const resultSet = useSelector(getResultSetById(pk));
   const paths = isStringArray(pathArray) ? getPathsByIds(resultSet, pathArray) : pathArray;
-  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
+  const formattedPaths = useMemo(() => {
+    const newPaths = getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths);
+    if(activeEntityFilters.length > 0 && !!resultSet) {
+      return sortSupportByEntityStrings(resultSet, newPaths, activeEntityFilters);
+    // otherwise sort by shortest path length first
+    } else {
+      return sortSupportByLength(newPaths);
+    }
+  }, [paths, selectedPaths, pathFilterState, resultSet]);
 
   const initHeight = (isExpanded) ? 'auto' : 0;
   const [height, setHeight] = useState<number | string>(initHeight);
@@ -56,18 +64,20 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   const filteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState);
   const itemsPerPage: number = 10;
   const [itemOffset, setItemOffset] = useState<number>(0);
-  const currentPage = useRef<number>(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const endResultIndex = useRef<number>(itemsPerPage);
   const pageCount = (!!formattedPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / itemsPerPage) : 0;
 
   const parentDepth = useSupportPathDepth();
-  const currentDepth = useMemo(() => parentDepth + 1, [parentDepth]);
+  const currentDepth = parentDepth + 1;
+  const parentKey = useSupportPathKey();
+  const currentKey = (!!parentPathKey && !!parentKey && !parentKey.includes(parentPathKey)) ? `${parentKey}.${parentPathKey}`: parentPathKey;
   
   const handlePageClick = (event: {selected: number} ) => {
     let pathsLength = pathArray.length;
     if(!pathsLength)
       return;
-    currentPage.current = event.selected;
+    setCurrentPage(event.selected);
     const newOffset:number = isNaN((event.selected * itemsPerPage) % pathsLength) ? 0 : (event.selected * itemsPerPage) % pathsLength;
     const endOffset:number = (newOffset + itemsPerPage) > pathsLength
       ? pathsLength
@@ -87,24 +97,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
       setHeight('auto');
   }, [isExpanded])
 
-  useEffect(() => {
-    // if there are any active string filters, sort by those
-    if(activeEntityFilters.length > 0 && !!formattedPaths && !!resultSet) {
-      sortSupportByEntityStrings(resultSet, formattedPaths, activeEntityFilters);
-    // otherwise sort by shortest path length first
-    } else {
-      sortSupportByLength(formattedPaths);
-    }
-  }, [pathArray, activeEntityFilters, formattedPaths, resultSet]);
-
-  const parentKey = useSupportPathKey();
-  const currentKey = useMemo(() => {
-    if(!!parentPathKey && !!parentKey && !parentKey.includes(parentPathKey))
-      return `${parentKey}.${parentPathKey}`;
-    else 
-      return parentPathKey; 
-  }, [parentKey, parentPathKey]);
-  
   return(
     <AnimateHeight
       className={`${!!pathViewStyles && pathViewStyles.support} ${styles.support} ${!isExpanded && styles.closed } ${currentDepth > 1 && styles.nested}`}
@@ -116,7 +108,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
           <div className={`${!!pathViewStyles && pathViewStyles.supportGroupContainer} scrollable-support`}>
             <p className={styles.supportLabel}>Supporting Paths</p>
             {
-              !!displayedPaths && 
               displayedPaths.map((supportPath, i) => {
                 if(!supportPath)
                   return null;
@@ -161,7 +152,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                 previousLinkClassName={`button ${styles.button}`}
                 nextLinkClassName={`button ${styles.button}`}
                 disabledLinkClassName={`disabled ${styles.disabled}`}
-                forcePage={currentPage.current}
+                forcePage={currentPage}
               />
             </div>
           }

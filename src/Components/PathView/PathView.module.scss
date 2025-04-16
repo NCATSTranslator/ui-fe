@@ -28,6 +28,9 @@
             left: -2px;
           }
         }
+        &:hover {
+          z-index: 50;
+        }
       }
     }
   }
@@ -320,6 +323,7 @@
       }
     }
     &:hover {
+      z-index: 100;
       .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
         &:after {
           box-shadow: $dropShadowHover;
