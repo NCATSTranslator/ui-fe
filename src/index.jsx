@@ -1,5 +1,5 @@
 import {createRoot} from 'react-dom/client';
-import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import Page from './Components/Page/Page';
@@ -122,9 +122,9 @@ const routes = [
     path: "send-feedback",
     element: <Page title="Send Feedback"><SendFeedbackPage /></Page>
   },
-  { 
-    path: "*", 
-    element: <Page title="404 - Page Not Found"><Four /></Page>
+  {
+    path: "*",
+    element: <Navigate to="/" replace />
   },
 ]
 
