@@ -1,11 +1,10 @@
 import {createRoot} from 'react-dom/client';
-import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import Page from './Components/Page/Page';
 import FAQPage from './Components/Page/FAQPage';
 import Home from './PageRoutes/Home/Home';
-import Four from './PageRoutes/404/404';
 import Results from './PageRoutes/Results/Results';
 import History from './PageRoutes/History/History';
 import Terms from './PageRoutes/Terms/Terms';
@@ -122,9 +121,9 @@ const routes = [
     path: "send-feedback",
     element: <Page title="Send Feedback"><SendFeedbackPage /></Page>
   },
-  { 
-    path: "*", 
-    element: <Page title="404 - Page Not Found"><Four /></Page>
+  {
+    path: "*",
+    element: <Navigate to="/" replace />
   },
 ]
 
@@ -140,7 +139,6 @@ root.render(
   <Provider store={store}>
     <RouterProvider
       router={router}
-      fallbackElement={<Page title="404 - Page Not Found"><Four /></Page>}
     />
   </Provider>
 );
