@@ -4,9 +4,8 @@ import Tabs from "../Tabs/Tabs";
 import Tab from "../Tabs/Tab";
 import styles from './EvidenceModal.module.scss';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
-import { isPublication, getFormattedEdgeLabel, getUrlByType, getCompressedSubgraph, getCompressedEdge, hasSupport, 
-  getPathsWithSelectionsSet} from "../../Utilities/utilities";
-import { isResultEdge, Path, PathFilterState, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
+import { isPublication, getFormattedEdgeLabel, getUrlByType, getCompressedSubgraph, getCompressedEdge, hasSupport } from "../../Utilities/utilities";
+import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
 import { Provenance, PublicationObject, TrialObject } from "../../Types/evidence.d";
 import { getResultSetById } from "../../Redux/resultsSlice";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';

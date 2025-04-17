@@ -5,6 +5,7 @@ import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 import PubIcon from '../../Icons/Status/HasPub.svg?react';
 import CTIcon from '../../Icons/Status/HasCT.svg?react';
 import Up from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
+import InferredBorder from '../../Icons/Connectors/Double Lines.svg?react';
 import Highlighter from 'react-highlight-words';
 import { checkEdgesForClinicalTrials, checkEdgesForPubs, getCompressedEdge, getEvidenceFromEdge, hasSupport } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
@@ -101,6 +102,7 @@ const Predicate: FC<PredicateProps> = ({
         >
         <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
           <PathArrow/>
+          <InferredBorder className={styles.border}/>
         </div>
         <Tooltip
           id={`${formattedEdge.predicate}${uid}`}

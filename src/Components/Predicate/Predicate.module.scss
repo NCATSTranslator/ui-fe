@@ -4,8 +4,19 @@
   background-color: $lightGray;
   height: 32px;
   &.isInferred .nameShape {
-    border-top-style: dashed;
-    border-bottom-style: dashed;
+    border: none;
+    svg {
+      height: $l;
+    }
+    .border {
+      display: block !important;
+      width: 100%;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+    }
   }
 }
 .pred {
@@ -195,10 +206,6 @@
     }
   }
 }
-// &.isInferred .nameShape {
-//   border-top-style: dashed;
-//   border-bottom-style: dashed;
-// }
 .inModal {
   &.edge {
     background-color: transparent !important;
@@ -219,6 +226,11 @@
     svg {
       top: 0px;
       right: 3px;
+    }
+  }
+  &.isInferred .nameShape {
+    .border {
+      width: 182px;
     }
   }
   &.selected.edge, &.edge:hover {

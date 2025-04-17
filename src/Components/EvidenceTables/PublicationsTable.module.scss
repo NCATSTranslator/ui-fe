@@ -47,7 +47,6 @@
       transition: color .25s ease;
       &:hover {
         text-decoration: underline;
-        color: $purpleEdgeBGSelected;
       }
     }
   }
@@ -57,6 +56,7 @@
     cursor: pointer;
     &.noLink {
       cursor: default;
+      color: $black;
       &:hover {
         text-decoration: none;
       }
