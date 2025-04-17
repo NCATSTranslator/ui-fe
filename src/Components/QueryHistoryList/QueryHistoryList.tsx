@@ -47,8 +47,8 @@ const QueryHistoryList = () => {
 
   const handleClick = (query: QueryHistoryItem) => {
     const nodeLabel = (!!query.item?.node) ? query.item.node.label : "";
-    const nodeID = (!!query.item?.node) ? query.item.node.label : "";
-    const typeID = (!!query.item?.type) ?  query.item?.type.id : "";
+    const nodeID = (!!query.item?.node) ? query.item.node.id : "";
+    const typeID = (!!query.item?.type) ?  query.item.type.id : "";
     navigate(`/${getResultsShareURLPath(nodeLabel, nodeID, typeID, '0', query.id)}`);
   };
 
