@@ -76,7 +76,8 @@
     color: $black;
   }
   .searchedTerm {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     color: $purpleOne;
   }
   .nodeDescription, .nodeDescriptionHeading {
@@ -260,7 +261,6 @@ button .dualArrows {
   svg {
     width: 20px;
     height: 20px;
-    vertical-align: -2px;
     path {
       fill: $purpleOne;
     }
