@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useMemo, FC } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo, FC, Dispatch, SetStateAction } from "react";
 import styles from './ResultsList.module.scss';
 import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
@@ -15,7 +15,7 @@ import { currentPrefs, currentUser }from "../../Redux/userSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
   sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow, filterCompare } from "../../Utilities/sortingFunctions";
-import { handleResultsError, handleResultsRefresh, applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts } from "../../Utilities/resultsInteractionFunctions";
+import { handleResultsError, applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts } from "../../Utilities/resultsInteractionFunctions";
 import { getEvidenceCounts, checkBookmarkForNotes, checkBookmarksForItem, getDataFromQueryVar, getPathCount, handleFetchErrors, getCompressedEdge } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { API_PATH_PREFIX, getSaves, SaveGroup } from "../../Utilities/userApi";
@@ -699,6 +699,16 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     setAutoScrollToResult(true);
   }, [formattedResults, itemsPerPage, handlePageClick, resultSet]);
 
+  const handleResultsRefresh = (
+      freshRawResults: ResultSet | null,
+      handleNewResults: (resultSet: ResultSet) => void
+    ) => {
+    // Update rawResults with the fresh data
+    if(!!freshRawResults)
+      handleNewResults(freshRawResults);
+    setFreshRawResults(null);
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <ResultsListModals
@@ -897,10 +907,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
           formattedResults.length > 0 &&
           <StickyToolbar
             loadingButtonData={{
-              handleResultsRefresh: () =>
-                {
-                  handleResultsRefresh(freshRawResults, handleNewResults, setFreshRawResults);
-                },
+              handleResultsRefresh: handleResultsRefresh,
               isFetchingARAStatus: isFetchingARAStatus.current,
               isFetchingResults: isFetchingResults.current,
               showDisclaimer: true,

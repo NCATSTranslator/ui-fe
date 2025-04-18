@@ -120,19 +120,6 @@ export const handleEvidenceModalClose = (setEvidenceOpen: (value: boolean) => vo
   setEvidenceOpen(false);
 }
 
-export const handleResultsRefresh = (
-    freshRawResults: ResultSet | null,
-    handleNewResults: (resultSet: ResultSet) => void,
-    setFreshRawResults: Dispatch<SetStateAction<ResultSet | null>>
-  ) => {
-  // Update rawResults with the fresh data
-  if(!!freshRawResults)
-  handleNewResults(freshRawResults);
-
-  // Set freshRawResults back to null
-  setFreshRawResults(null)
-}
-
 export const getResultsShareURLPath = (label: string, nodeID: string | number, typeID: string | number, resultID: string | number, pk: string | number) => {
   return `results?l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`;
 }
