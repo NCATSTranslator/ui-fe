@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
 import { getEdgeById, getNodeById, getPathById } from "../Redux/resultsSlice";
 import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, Filter, PathFilterState, Filters } from "../Types/results.d";
 import { hasSupport } from "./utilities";
@@ -8,68 +7,108 @@ import * as filtering from "./filterFunctions";
 import { cloneDeep } from "lodash";
 
 /**
- * Finds a string match in the given element by comparing the value with the element's name, description,
- * and compressed paths. Updates the path ranks for more efficient searching.
- * @param {object} element - The element to search for a string match.
- * @param {string} value - The value to match against the element's properties.
- * @param {array} pathRanks - The ranks of the compressed paths for more efficient searching.
- * @returns {boolean} True if a match is found, false otherwise.
-*/
-export const findStringMatch = (resultSet: ResultSet, result: Result, searchTerm: string, pathRanks: PathRank[]) => {
-  const checkItemForMatch = (item: ResultNode | ResultEdge, searchTerm: string) => {
-    if(isResultEdge(item)) {
-      return (item?.predicate && item.predicate.toLowerCase().includes(searchTerm));
-    } else {
-      return (
-        !!item.names.find(name => name.toLowerCase().includes(searchTerm)) 
-        || !!item.curies.find(curie => curie.toLowerCase().includes(searchTerm))
-        || !!item.descriptions.find(description => description.toLowerCase().includes(searchTerm))
-      );
-    }
-  }
+ * Performs a case-insensitive string match against a result's name, description, and all associated paths.
+ * 
+ * This function checks the `Result` object for a match with the provided search term by:
+ * - Comparing the term against the `drug_name` and the primary description of the subject node
+ * - Recursively traversing all paths and their support subpaths
+ * - Matching the term against node names, curies, descriptions, and edge predicates
+ * 
+ * During traversal, the function also mutates the corresponding `PathRank` objects to influence relevance scoring:
+ * - Decreases rank when a direct match is found
+ * - Increases rank when a supporting subpath contains a match
+ * 
+ * @param resultSet - The full ResultSet containing all nodes, edges, and paths
+ * @param result - The individual result to check for a string match
+ * @param searchTerm - The lowercase search term to match against result content
+ * @param pathRanks - Mutable ranking data structure, updated based on path relevance
+ * @returns True if the search term is found in the result or any associated path; false otherwise
+ */
 
-  const checkPathForMatch = (resultSet: ResultSet, path: Path, searchTerm: string, pathRank: PathRank): boolean => {
-    let foundMatch = false;
+export const findStringMatch = (
+  resultSet: ResultSet,
+  result: Result,
+  searchTerm: string,
+  pathRanks: PathRank[]
+): boolean => {
+  const normalizedTerm = searchTerm.toLowerCase();
+
+  const checkItemForMatch = (item?: ResultNode | ResultEdge): boolean => {
+    if (!item) return false;
+
+    if (isResultEdge(item)) {
+      return !!item.predicate?.toLowerCase().includes(normalizedTerm);
+    }
+
+    return (
+      item.names.some(name => name.toLowerCase().includes(normalizedTerm)) ||
+      item.curies.some(curie => curie.toLowerCase().includes(normalizedTerm)) ||
+      item.descriptions.some(desc => desc.toLowerCase().includes(normalizedTerm))
+    );
+  };
+
+  const checkPathForMatch = (
+    resultSet: ResultSet,
+    path: Path,
+    pathRank: PathRank
+  ): boolean => {
+    let matched = false;
+
     for (let i = 0; i < path.subgraph.length; i++) {
-      let item = i % 2 === 0 ? getNodeById(resultSet, path.subgraph[i]): getEdgeById(resultSet, path.subgraph[i]);
+      const elementID = path.subgraph[i];
+      const isNode = i % 2 === 0;
+      const item = isNode ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
+
+      // Recursive support path checking
       if (isResultEdge(item) && hasSupport(item)) {
-        for (let i = 0; i < item.support.length; i++) {
-          const supportPath = (isPath(item.support[i])) ? item.support[i] : getPathById(resultSet, item.support[i] as string);
-          const supportRank = pathRank.support[i];
-          const supportMatch = !!supportPath && typeof supportPath !== "string" && checkPathForMatch(resultSet, supportPath, searchTerm, supportRank);
-          foundMatch = supportMatch || foundMatch;
-          if (supportMatch) {
-            pathRank.rank += supportRank.rank;
+        for (let j = 0; j < item.support.length; j++) {
+          const support = item.support[j];
+          const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
+          const supportRank = pathRank.support?.[j];
+
+          if (supportPath && typeof supportPath !== "string" && supportRank) {
+            const subMatch = checkPathForMatch(resultSet, supportPath, supportRank);
+            if (subMatch) {
+              pathRank.rank += supportRank.rank;
+              matched = true;
+            }
           }
         }
       }
 
-      if (!!item && checkItemForMatch(item, searchTerm)) {
-        // Its confusing to update the pathRanks here, but it is more efficient
+      // Direct match
+      if (checkItemForMatch(item)) {
         pathRank.rank -= 1;
-        foundMatch = true;
+        matched = true;
       }
     }
 
-    return foundMatch;
-  }
+    return matched;
+  };
 
-  searchTerm = searchTerm.toLowerCase();
-  let resultSubjectNode = getNodeById(resultSet, result.subject);
-  let description = resultSubjectNode?.descriptions[0] ? resultSubjectNode.descriptions[0] : "";
-  let name = result.drug_name;
-  let foundMatch = !searchTerm ||
-                   !result ||
-                   name.toLowerCase().includes(searchTerm) ||
-                   (description.toLowerCase().includes(searchTerm));
+  // Shallow properties: drug name and subject node description
+  const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
+  const subjectNode = getNodeById(resultSet, result.subject);
+  const descriptionMatch = subjectNode?.descriptions?.[0]?.toLowerCase().includes(normalizedTerm) ?? false;
+
+  let matched = !normalizedTerm || nameMatch || descriptionMatch;
+
   for (let i = 0; i < result.paths.length; i++) {
-    const path = (isPath(result.paths[i])) ? result.paths[i] : getPathById(resultSet, result.paths[i] as string);
+    const path = isPath(result.paths[i])
+      ? result.paths[i]
+      : getPathById(resultSet, result.paths[i] as string);
+
     const pathRank = pathRanks[i];
-    foundMatch = (!!path && typeof path !== "string" && checkPathForMatch(resultSet, path, searchTerm, pathRank)) || foundMatch;
+
+    if (path && pathRank && typeof path !== "string") {
+      const pathMatch = checkPathForMatch(resultSet, path, pathRank);
+      matched = matched || pathMatch;
+    }
   }
 
-  return !!foundMatch;
-}
+  return matched;
+};
+
 
 export const handleResultsError = (errorExists = true, setIsError: (value: boolean) => void, setIsLoading: (value: boolean) => void) => {
   setIsError(errorExists);
@@ -78,19 +117,6 @@ export const handleResultsError = (errorExists = true, setIsError: (value: boole
 
 export const handleEvidenceModalClose = (setEvidenceOpen: (value: boolean) => void) => {
   setEvidenceOpen(false);
-}
-
-export const handleResultsRefresh = (
-    freshRawResults: ResultSet | null,
-    handleNewResults: (resultSet: ResultSet) => void,
-    setFreshRawResults: Dispatch<SetStateAction<ResultSet | null>>
-  ) => {
-  // Update rawResults with the fresh data
-  if(!!freshRawResults)
-  handleNewResults(freshRawResults);
-
-  // Set freshRawResults back to null
-  setFreshRawResults(null)
 }
 
 export const getResultsShareURLPath = (label: string, nodeID: string | number, typeID: string | number, resultID: string | number, pk: string | number) => {
