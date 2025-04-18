@@ -16,7 +16,6 @@ import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
   sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow, filterCompare } from "../../Utilities/sortingFunctions";
 import { handleResultsError, handleResultsRefresh, applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts } from "../../Utilities/resultsInteractionFunctions";
-import * as filtering from '../../Utilities/filterFunctions';
 import { getEvidenceCounts, checkBookmarkForNotes, checkBookmarksForItem, getDataFromQueryVar, getPathCount, handleFetchErrors, getCompressedEdge } from "../../Utilities/utilities";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { API_PATH_PREFIX, getSaves, SaveGroup } from "../../Utilities/userApi";
@@ -598,76 +597,58 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
   // Handle the addition and removal of individual filters. Keep the invariant that
   // filters of the same type are grouped together.
   const handleFilter = (filter: Filter) => {
-
-    const loopFiltersAndUpdate = (filters: Filter[], index: number) => {
-      filters.map((activeFilter, i) => {
-        if(i === index) {
-          activeFilter.value = filter.value;
-          activeFilter.negated = filter.negated;
-        }
-
-        return activeFilter;
-      });
-
-      return filters;
-    }
-
-    let indexes = [];
-    for(const [i, activeFilter] of activeFilters.entries()) {
-      if (activeFilter.id === filter.id) {
-        indexes.push(i);
-      }
-    }
-
-    let newActiveFilters = cloneDeep(activeFilters);
-    // If we don't find any matches, push the filter and sort by filter family
-    if(indexes.length === 0) {
-      newActiveFilters.push(filter);
-      newActiveFilters.sort(filterCompare);
-      setActiveFilters(newActiveFilters);
-      handleUpdateResults(newActiveFilters, activeEntityFilters, rawResults.current, originalResults.current, false, currentSortString.current)
+    // Try to find a filter with same {id, value, negated} — for toggle-off
+    const exactMatchIndex = activeFilters.findIndex(
+      (f) =>
+        f.id === filter.id &&
+        f.value === filter.value &&
+        f.negated === filter.negated
+    );
+  
+    if (exactMatchIndex !== -1) {
+      // Exact match found → toggle off by removing it
+      const updatedFilters = activeFilters.filter((_, i) => i !== exactMatchIndex);
+      handleApplyFilterAndCleanup(
+        updatedFilters,
+        activeEntityFilters,
+        rawResults.current,
+        originalResults.current,
+        currentSortString.current
+      );
       return;
     }
-
-    let addFilter = true;
-    for(const index of indexes) {
-      // If we get the same filter, we want to toggle it off
-      if (activeFilters[index].value === filter.value &&
-          activeFilters[index].negated === filter.negated) {
-        newActiveFilters = activeFilters.reduce((newFilters: Filter[], oldFilter, i) => {
-          if(i !== index)
-            newFilters.push(oldFilter);
-
-          return newFilters;
-        }, []);
-
-        addFilter = false;
-        break;
-      } else if(filtering.isEntityFilter(filter)) {
-        // adding new
-        if(activeFilters[index].value !== filter.value) {
-          continue;
-        // updating old
-        } else {
-          newActiveFilters = loopFiltersAndUpdate(newActiveFilters, index);
-          addFilter = false;
-          break;
-        }
-        // If the values don't match and it's not a string search, update the value
-      } else {
-        newActiveFilters = loopFiltersAndUpdate(newActiveFilters, index);
-        addFilter = false;
-        break;
-      }
+  
+    // Try to find a filter with same {id, value} but different negated — for update
+    const sameIdValueIndex = activeFilters.findIndex(
+      (f) =>
+        f.id === filter.id &&
+        f.value === filter.value &&
+        f.negated !== filter.negated
+    );
+  
+    let updatedFilters: Filter[];
+    if (sameIdValueIndex !== -1) {
+      // Replace old filter with new one (different negated)
+      updatedFilters = activeFilters.map((f, i) =>
+        i === sameIdValueIndex ? { ...filter } : f
+      );
+    } else {
+      // Add new filter
+      updatedFilters = [...activeFilters, { ...filter }];
     }
-
-    if(addFilter) {
-      newActiveFilters.push(filter);
-      newActiveFilters.sort(filterCompare);
-    }
-    
-    handleApplyFilterAndCleanup(newActiveFilters, activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current);
-  }
+  
+    updatedFilters.sort(filterCompare);
+  
+    handleApplyFilterAndCleanup(
+      updatedFilters,
+      activeEntityFilters,
+      rawResults.current,
+      originalResults.current,
+      currentSortString.current
+    );
+  };
+  
+  
 
   const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string) => {
     if(!rawResults)
