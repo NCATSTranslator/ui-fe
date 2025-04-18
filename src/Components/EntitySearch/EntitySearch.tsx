@@ -102,8 +102,6 @@ const EntitySearch: FC<EntitySearchProps> = ({
         {
           activeEntityFilters.length > 0 &&
           activeEntityFilters.map((filter) => {
-            if(!!filter?.value && filter.value.length > 0 && filter.value[0] !== "\"" && filter.value[filter.value.length - 1] !== "\"")
-              filter.value = `"${filter.value}"`;
             return (
               <FacetTag 
                 key={filter.value}

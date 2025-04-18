@@ -37,7 +37,7 @@ const getRoleLinkout = (tagKey: string): string => {
 const generateTagName = (isEntitySearch: boolean, filter: Filter, family: string) => {
   let tagName = "";
   if(isEntitySearch)
-    tagName = (!!filter?.value) ? filter.value : filter.name;
+    tagName = (!!filter?.value) ? `"${filter.value}"` : filter.name;
   else
     tagName = (family === 'pc') ? formatBiolinkEntity(filter.name) : filter.name;
 
