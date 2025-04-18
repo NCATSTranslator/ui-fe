@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useMemo, FC, Dispatch, SetStateAction } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo, FC } from "react";
 import styles from './ResultsList.module.scss';
 import Query from "../Query/Query";
 import ResultsFilter from "../ResultsFilter/ResultsFilter";
