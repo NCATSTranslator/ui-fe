@@ -20,7 +20,7 @@ const SelectedFilterTag: FC<SelectedFilterTagProps> = ({
 
   let filterDisplay;
   if (isEntityFilter(filter)) {
-    filterDisplay = <div>Text Filter: <span>{filter.value}</span></div>;
+    filterDisplay = <div>Text Filter: <span>"{filter.value}"</span></div>;
   } else if (isTagFilter(filter)) {
     const filterLabel = getFilterLabel(filter);
     filterDisplay = <div>{filterLabel}:<span> {filter.value}</span></div>;

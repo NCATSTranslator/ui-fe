@@ -56,7 +56,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
     } else {
       return sortSupportByLength(newPaths);
     }
-  }, [paths, selectedPaths, pathFilterState, resultSet]);
+  }, [paths, selectedPaths, pathFilterState, resultSet, activeEntityFilters]);
 
   const initHeight = (isExpanded) ? 'auto' : 0;
   const [height, setHeight] = useState<number | string>(initHeight);

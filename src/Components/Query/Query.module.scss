@@ -26,7 +26,7 @@
       }
     }
   }
-  .bottom { 
+  .bottom {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
@@ -76,7 +76,8 @@
     color: $black;
   }
   .searchedTerm {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     color: $purpleOne;
   }
   .nodeDescription, .nodeDescriptionHeading {
@@ -108,7 +109,7 @@
     margin: 0 auto;
   }
   .resultsHeader, .bottom {
-    width: 640px;
+    width: 720px;
   }
   .buttons {
     display: flex;
@@ -263,5 +264,5 @@ button .dualArrows {
     path {
       fill: $purpleOne;
     }
-  } 
+  }
 }
