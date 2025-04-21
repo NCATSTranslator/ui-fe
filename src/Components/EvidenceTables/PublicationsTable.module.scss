@@ -195,6 +195,15 @@
   align-items: center;
   svg {
     margin-left: 4px;
+    path {
+      fill: $darkGray;
+      transition: $defaultAnim;
+    }
+    &:hover {
+      path {
+        fill: $purpleOne;
+      }
+    }
   }
 }
 .knowledgeLevelButton {
