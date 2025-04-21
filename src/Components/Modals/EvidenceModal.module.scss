@@ -20,7 +20,7 @@
     overflow-y: hidden;
     display: grid;
     align-content: flex-start;
-    margin: $xs auto 0;
+    margin: 0 auto;
   }
   .tab {
     display: grid;
@@ -165,7 +165,7 @@
   background-color: $palePurple;
   border-radius: $largeBorderRadius;
   border: 1px solid $lightPurpleTwo;
-  margin: $s auto 0;
+  margin: $s auto;
   width: calc(100% - 2px);
   overflow: auto hidden;
   transition: all .4s ease;
