@@ -21,7 +21,6 @@
             content: "";
             height: 28px;
             width: 4px;
-            background-color: $white;
             border-bottom-left-radius: 4px;
             border-top-left-radius: 4px;
             position: relative;
@@ -178,6 +177,11 @@
           }
           &:last-child {
             margin-bottom: 0;
+          }
+        }
+        &:hover {
+          + svg + .nameContainer > div:first-child {
+            background-color: $whiteHover !important;
           }
         }
       }

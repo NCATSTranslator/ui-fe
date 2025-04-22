@@ -13,7 +13,7 @@
       width: 100%;
       top: 0;
       bottom: 0;
-      left: 0;
+      left: -2px;
       right: 0;
       height: 100%;
     }
@@ -233,17 +233,30 @@
       width: 182px;
     }
   }
-  &.selected.edge, &.edge:hover {
+  &.selected.edge {
     .nameShape {
       background-color: $lightPurpleTwo !important;
     }
   }
-  &.selected.edge + span, &.edge:hover + span {
+  &.selected.edge + span {
     &.edge > div:first-child {
       background-color: $lightGray;
     }
     & > div:first-child {
       background-color: $lightPurpleTwo;
+    }
+  }
+  &.edge:hover {
+    .nameShape {
+      background-color: $whiteHover !important;
+    }
+  }
+  &.edge:hover + span {
+    &.edge > div:first-child {
+      background-color: $whiteHover !important;
+    }
+    & > div:first-child {
+      background-color: $whiteHover !important;
     }
   }
 }
