@@ -139,13 +139,23 @@
   cursor: pointer;
   justify-content: space-between;
 }
-.predicateContainer:hover, .predicateContainer.selected,
-.nameContainer:hover, 
-.nameContainer:has(+ .predicateContainer:hover), .nameContainer:has(+ .predicateContainer.selected),
-.predicateContainer:hover + .nameContainer, .predicateContainer.selected + .nameContainer,
-.predicateContainer:hover + div + .nameContainer, .predicateContainer.selected + div + .nameContainer {
+
+.predicateContainer.selected,
+.nameContainer:has(+ .predicateContainer.selected),
+.predicateContainer.selected + .nameContainer,
+.predicateContainer.selected + div + .nameContainer {
   .nameShape {
     background-color: rgba(61, 43, 100, .2);
+  }
+}
+
+.predicateContainer:hover
+.nameContainer:hover, 
+.nameContainer:has(+ .predicateContainer:hover)
+.predicateContainer:hover + .nameContainer
+.predicateContainer:hover + div + .nameContainer {
+  .nameShape {
+    background-color: rgba(58, 35, 107, .15);
   }
 }
 
@@ -208,17 +218,12 @@
     border-style: solid;
   }
   &:before {
-    background-color: $lightGray !important;
+    background-color: $lightGray;
     left: 0;
     transition: $defaultAnim;
   }
   &:after {
     display: none !important;
-  }
-  &:hover {
-    &:before {
-      background-color: $lightPurpleTwo !important;
-    }
   }
   .nameShape {
     background-color: $lightGray;
@@ -242,19 +247,26 @@
     background-color: transparent !important;
     z-index: 50 !important;
   }
-  &:hover,
-  &:hover + .nameContainer,
   &.selected,
   &.selected + .nameContainer,
-  &.nameContainer:has(+ svg + div .predicateContainer:hover),
   &.nameContainer:has(+ svg + div .predicateContainer.selected),
-  &.nameContainer:has(+ .predicateContainer.selected),
-  &.nameContainer:has(+ .predicateContainer:hover){
+  &.nameContainer:has(+ .predicateContainer.selected) {
     .nameShape {
-      background-color: $lightPurpleTwo !important;
+      background-color: $lightPurpleTwo;
     }
     &:before {
-      background-color: $lightPurpleTwo !important;
+      background-color: $lightPurpleTwo;
+    }
+  }
+  &:hover,
+  &:hover + .nameContainer,
+  &.nameContainer:has(+ svg + div .predicateContainer:hover),
+  &.nameContainer:has(+ .predicateContainer:hover){
+    .nameShape {
+      background-color: $whiteHover !important;
+    }
+    &:before {
+      background-color: $whiteHover !important;
     }
   }
 }
