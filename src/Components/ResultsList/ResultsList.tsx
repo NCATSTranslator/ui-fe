@@ -699,10 +699,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
     setAutoScrollToResult(true);
   }, [formattedResults, itemsPerPage, handlePageClick, resultSet]);
 
-  const handleResultsRefresh = (
-      freshRawResults: ResultSet | null,
-      handleNewResults: (resultSet: ResultSet) => void
-    ) => {
+  const handleResultsRefresh = () => {
     // Update rawResults with the fresh data
     if(!!freshRawResults)
       handleNewResults(freshRawResults);
@@ -913,8 +910,7 @@ const ResultsList: FC<ResultsListProps> = ({ loading }) => {
               showDisclaimer: true,
               containerClassName: styles.shareLoadingButtonContainer,
               buttonClassName: styles.loadingButton,
-              hasFreshResults: (freshRawResults !== null),
-              isSticky: true
+              hasFreshResults: (freshRawResults !== null)
             }}
             isError={isError}
             returnedARAs={returnedARAs.current}
