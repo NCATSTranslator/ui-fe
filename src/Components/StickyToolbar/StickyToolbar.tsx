@@ -1,8 +1,22 @@
-import { useState } from "react";
+import { FC, useState } from "react";
 import styles from './StickyToolbar.module.scss';
 import ResultsListLoadingBar from "../ResultsListLoadingBar/ResultsListLoadingBar";
 
-const StickyToolbar = ({ loadingButtonData, isError, returnedARAs }) => {
+interface StickyToolbarProps {
+  loadingButtonData: {
+    handleResultsRefresh: () => void;
+    isFetchingARAStatus: boolean | null;
+    isFetchingResults: boolean | null;
+    showDisclaimer: boolean;
+    containerClassName: string;
+    buttonClassName: string;
+    hasFreshResults: boolean;
+  }
+  isError: boolean;
+  returnedARAs: { aras: string[]; status: string; };
+}
+
+const StickyToolbar: FC<StickyToolbarProps> = ({ loadingButtonData, isError, returnedARAs }) => {
 
   const [isActive, setIsActive] = useState(true);
   const activeClassName = isActive ? styles.active : styles.inactive;
