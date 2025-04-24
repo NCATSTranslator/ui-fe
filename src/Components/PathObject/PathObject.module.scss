@@ -59,6 +59,19 @@
     z-index: 20;
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
+    &:before {
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 10px;
+      height: 28px;
+      background: url("/src/Icons/Connectors/PathArrow.svg") no-repeat center;
+      background-size: contain;
+      pointer-events: none;
+      z-index: 50;
+    }
     & > span {
       position: relative;
       z-index: 10;
@@ -118,13 +131,16 @@
 .nameContainer {
   position: relative;
   box-shadow: none;
-  // border-color: $purpleTwo;
-  // border-width: 2px 0;
-  // border-style: solid;
   background-color: $lightGray;
   height: 32px;
+  &:first-child::before {
+    background-color: $lightGray;
+  }
   &.even {
     background-color: $white;
+    &:first-child::before {
+      background-color: $white;
+    }
   }
   svg {
     margin-right: 0;
@@ -198,9 +214,12 @@
     right: -9px;
     .nameShape {
       clip-path: polygon(170px -16px,188px 16px,170px 48px,0% 48px,0 16px,0 -16px);
-      left: 0;
+      left: 2px;
       svg {
         right: 12px;
+      }
+      &:before {
+        background-image: none;
       }
     }
     &:has(+ svg) {
@@ -217,11 +236,6 @@
     border-width: 2px 0;
     border-style: solid;
   }
-  &:before {
-    background-color: $lightGray;
-    left: 0;
-    transition: $defaultAnim;
-  }
   &:after {
     display: none !important;
   }
@@ -229,7 +243,6 @@
     background-color: $lightGray;
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
-    clip-path: polygon(170px -16px ,188px 16px, 170px 48px, -8px 48px, 6px 16px, -8px -16px);
     svg {
       top: 0px;
       right: 3px;
@@ -237,7 +250,6 @@
   }
   &:has(+ svg) {
     .nameShape {
-      // clip-path: polygon(160px -16px,178px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
       svg {
         display: none !important;
       }

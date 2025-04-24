@@ -5,6 +5,9 @@
   height: 32px;
   &.isInferred .nameShape {
     border: none;
+    &:before {
+      top: 2px;
+    }
     svg {
       height: $l;
     }
@@ -220,9 +223,6 @@
     background-color: $lightGray;
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
-    top: 0;
-    bottom: 0;
-    clip-path: polygon(171px -16px ,186px 16px, 171px 48px, -5% 48px, 8px 16px, -8px -16px);
     svg {
       top: 0px;
       right: 3px;
@@ -230,7 +230,7 @@
   }
   &.isInferred .nameShape {
     .border {
-      width: 182px;
+      left: -3px;
     }
   }
   &.selected.edge {
@@ -251,9 +251,9 @@
       background-color: $whiteHover !important;
     }
   }
-  &.edge:hover + span {
+  &.edge:hover + span:not(.edge) {
     &.edge > div:first-child {
-      background-color: $whiteHover !important;
+      // background-color: $whiteHover !important;
     }
     & > div:first-child {
       background-color: $whiteHover !important;

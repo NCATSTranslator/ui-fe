@@ -101,7 +101,6 @@ const Predicate: FC<PredicateProps> = ({
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         >
         <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
-          <PathArrow/>
           <InferredBorder className={styles.border}/>
         </div>
         <Tooltip
