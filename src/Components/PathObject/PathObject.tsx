@@ -82,7 +82,9 @@ const PathObject: FC<PathObjectProps> = ({
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               data-tooltip-id={`${uid}`}
               >
-              <div className={`${styles.nameShape}`}></div>
+              <div className={`${styles.nameShape}`}>
+                <PathArrow className={styles.icon}/>
+              </div>
               <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
                 {getIcon(pathObject?.types[0])}
                 <span className={styles.text}>

@@ -59,12 +59,12 @@
     z-index: 20;
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
-    &:before {
+    .icon {
       content: "";
       display: block;
       position: absolute;
       top: 0;
-      left: 0;
+      right: 0;
       width: 10px;
       height: 28px;
       background: url("/src/Icons/Connectors/PathArrow.svg") no-repeat center;
@@ -216,7 +216,7 @@
       clip-path: polygon(170px -16px,188px 16px,170px 48px,0% 48px,0 16px,0 -16px);
       left: 2px;
       svg {
-        right: 12px;
+        right: 10px;
       }
       &:before {
         background-image: none;
@@ -243,14 +243,14 @@
     background-color: $lightGray;
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
-    svg {
+    .icon {
       top: 0px;
-      right: 3px;
+      right: 1px;
     }
   }
   &:has(+ svg) {
     .nameShape {
-      svg {
+      .icon {
         display: none !important;
       }
     }
