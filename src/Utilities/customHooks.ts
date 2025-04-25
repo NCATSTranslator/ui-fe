@@ -398,8 +398,7 @@ export const useHoveredIndex = () => {
 
   const getHoverHandlers = useCallback(
     (index: number) => ({
-      onMouseEnter: () => {      console.log('enter', index);
-        setHoveredIndex(index)},
+      onMouseEnter: () => setHoveredIndex(index),
       onMouseLeave: () => setHoveredIndex(null),
     }),
     []
