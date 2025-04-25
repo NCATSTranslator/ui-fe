@@ -23,8 +23,16 @@
             width: 4px;
             border-bottom-left-radius: 4px;
             border-top-left-radius: 4px;
+            border-bottom-right-radius: 0;
+            border-top-right-radius: 0;
             position: relative;
-            left: -2px;
+            top: 0;
+            left: 0;
+            display: block !important;
+            box-shadow: none;
+            z-index: 30;            
+            transition: $defaultAnim;
+            background-image: none;
           }
         }
         &:hover {

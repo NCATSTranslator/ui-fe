@@ -9,7 +9,7 @@ import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
 import { PathFilterState, ResultNode, Path, Filter, ResultEdge } from '../../Types/results';
-import { LastViewedPathIDContextType } from '../../Utilities/customHooks';
+import { LastViewedPathIDContextType, useHoveredIndex } from '../../Utilities/customHooks';
 import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
 import { useSelector } from 'react-redux';
 import PathObject from '../PathObject/PathObject';
@@ -82,6 +82,7 @@ const PathView: FC<PathViewProps> = ({
   const displayedPaths = formattedPathsToDisplay.slice(itemOffset, endResultIndex.current);
   // Create the context with a default value of null
   const [lastViewedPathID, setLastViewedPathID] = useState<string|null>(null);
+  const { hoveredIndex, getHoverHandlers } = useHoveredIndex();
 
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
@@ -103,6 +104,7 @@ const PathView: FC<PathViewProps> = ({
   const straightSegmentLength = 20;
   const pathColor = "#8C8C8C26";
   const selectedPathColor = "#3D2B6466";
+  const hoveredPathColor = "#00000026";
   const pathThickness = 32;
   
   const generatePathD = (
@@ -245,12 +247,13 @@ const PathView: FC<PathViewProps> = ({
                                       <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
                                         {/* Render node → edge connections */}
                                         {subgraphItem.map((edge, index) => {
-                                          let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
+                                          let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false;
+                                          let strokeColor = hoveredIndex === index ? hoveredPathColor : selected ? selectedPathColor : pathColor;
                                           return (
                                             <path
                                               key={`node-to-edge-${edge.id}`}
                                               d={generatePathD(index, svgHeight, svgWidth, edgeHeight, true, curveOffset, straightSegmentLength)}
-                                              stroke={selected ? selectedPathColor : pathColor}
+                                              stroke={strokeColor}
                                               fill="transparent"
                                               strokeWidth={pathThickness}
                                             />
@@ -259,9 +262,9 @@ const PathView: FC<PathViewProps> = ({
                                       </svg>
                                       <div className={`${styles.groupedPreds} ${hasSelected && styles.hasSelected}`}>
                                         {
-                                          subgraphItem.map((edge)=> {
+                                          subgraphItem.map((edge, j)=> {
                                             let key = `${edge.id}`;
-                                            let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
+                                            let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false;
                                             return (
                                               <PathObject
                                                 pathViewStyles={styles}
@@ -280,6 +283,7 @@ const PathView: FC<PathViewProps> = ({
                                                 selectedPaths={null}
                                                 inModal={true}
                                                 pk={pk}
+                                                hoverHandlers={getHoverHandlers(j)}
                                               />
                                             )
                                           })
@@ -289,11 +293,12 @@ const PathView: FC<PathViewProps> = ({
                                         {/* Render edge → node connections */}
                                         {subgraphItem.map((edge, index) => {
                                           let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
+                                          let strokeColor = hoveredIndex === index ? hoveredPathColor : selected ? selectedPathColor : pathColor;
                                           return (
                                             <path
                                               key={`edge-to-node-${edge.id}`}
                                               d={generatePathD(index, svgHeight, svgWidth, edgeHeight, false, curveOffset, straightSegmentLength)}
-                                              stroke={selected ? selectedPathColor : pathColor}
+                                              stroke={strokeColor}
                                               fill="transparent"
                                               strokeWidth={pathThickness}
                                             />

@@ -17,6 +17,10 @@ export interface PathObjectProps {
   handleActivateEvidence?: (path: Path, pathKey: string) => void;
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
   handleNodeClick: (name: ResultNode) => void;
+  hoverHandlers?: {
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+  };
   id: string | string[];
   index: number;
   inModal?: boolean;
@@ -36,8 +40,9 @@ const PathObject: FC<PathObjectProps> = ({
   activeFilters,
   className = "",
   handleActivateEvidence = ()=>{},
-  handleNodeClick,
   handleEdgeClick,
+  handleNodeClick,
+  hoverHandlers,
   id,
   index,
   inModal = false,
@@ -78,12 +83,13 @@ const PathObject: FC<PathObjectProps> = ({
       {
         isNode 
           ?
-            <span className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer}  ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
-              onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
+            <span 
+              className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer}  ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
               data-tooltip-id={`${uid}`}
+              onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               >
               <div className={`${styles.nameShape}`}>
-                <PathArrow/>
+                <PathArrow className={styles.icon}/>
               </div>
               <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
                 {getIcon(pathObject?.types[0])}
@@ -123,6 +129,7 @@ const PathObject: FC<PathObjectProps> = ({
                   handleActivateEvidence={handleActivateEvidence}
                   handleEdgeClick={handleEdgeClick}
                   handleNodeClick={handleNodeClick}
+                  hoverHandlers={hoverHandlers}
                   parentClass={styles.predicateContainer}
                   inModal={inModal}
                   className={className}
