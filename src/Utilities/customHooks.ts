@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction, useCallback } from 'react';
 import { LastViewedPathIDContext, SupportPathDepthContext } from '../Components/PathView/PathView';
 import { SupportPathKeyContext } from '../Components/SupportPathGroup/SupportPathGroup';
 import { isEqual } from 'lodash';
@@ -388,5 +388,26 @@ export const useScrollToHash = () => {
     }
   }, [location]);
 };
-
 export default useScrollToHash;
+
+/**
+ * Custom hook to track the index of hovered compressed edges in the evidence modal 
+ */
+export const useHoveredIndex = () => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const getHoverHandlers = useCallback(
+    (index: number) => ({
+      onMouseEnter: () => {      console.log('enter', index);
+        setHoveredIndex(index)},
+      onMouseLeave: () => setHoveredIndex(null),
+    }),
+    []
+  );
+
+  return {
+    hoveredIndex,
+    getHoverHandlers,
+    resetHoveredIndex: () => setHoveredIndex(null),
+  };
+};
