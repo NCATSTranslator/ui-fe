@@ -23,6 +23,10 @@ interface PredicateProps {
   handleActivateEvidence: (path: Path, pathKey: string) => void;
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
   handleNodeClick: (name: ResultNode) => void;
+  hoverHandlers?: {
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+  };
   edge: ResultEdge;
   edgeIDs: string[];
   inModal?: boolean | null;
@@ -40,23 +44,24 @@ interface PredicateProps {
 }
 
 const Predicate: FC<PredicateProps> = ({ 
-  activeEntityFilters, 
+  activeEntityFilters,
   activeFilters,
-  className = "", 
-  edge, 
-  edgeIDs, 
-  handleActivateEvidence, 
-  handleEdgeClick, 
-  handleNodeClick, 
-  inModal = false, 
+  className = "",
+  edge,
+  edgeIDs,
+  handleActivateEvidence,
+  handleEdgeClick,
+  handleNodeClick,
+  hoverHandlers,
+  inModal = false,
   parentClass = '',
   parentStyles,
   pathFilterState,
   path,
   parentPathKey,
-  pathViewStyles = null, 
+  pathViewStyles = null,
   pk,
-  selected = false, 
+  selected = false,
   selectedPaths,
   showHiddenPaths,
   uid }) => {
@@ -97,8 +102,9 @@ const Predicate: FC<PredicateProps> = ({
     <>
       <span
         className={`${selected && styles.selected} ${selected && parentStyles ? parentStyles.selected : ''} ${styles.edge} ${inModal && styles.inModal} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && styles.isInferred}`}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}
+        {...hoverHandlers}
         >
         <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
           <PathArrow/>
