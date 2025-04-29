@@ -63,6 +63,8 @@ p, .p {
 }
 .caption {
   font-size: $captionSize;
+  font-weight: 800;
+  color: $darkGray;
 }
 .overline {
   font-size: $overlineSize;

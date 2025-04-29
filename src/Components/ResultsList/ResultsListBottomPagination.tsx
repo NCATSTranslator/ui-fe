@@ -27,7 +27,8 @@ const ResultsListBottomPagination: FC<ResultsListBottomPaginationProps> = ({
 
   return(
     <div className={parentStyles.pagination}>
-      <div>
+      <div className={parentStyles.perPageContainer}>
+        <p className="caption">Results per Page</p>
         <Select
           label=""
           name="Results Per Page"

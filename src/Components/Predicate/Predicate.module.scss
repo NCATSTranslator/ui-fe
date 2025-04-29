@@ -249,9 +249,6 @@
     }
   }
   &.edge:hover + span:not(.edge) {
-    &.edge > div:first-child {
-      // background-color: $whiteHover !important;
-    }
     & > div:first-child {
       background-color: $whiteHover !important;
     }
