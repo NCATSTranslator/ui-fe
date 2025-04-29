@@ -147,12 +147,6 @@ const PathView: FC<PathViewProps> = ({
       <Tooltip id='paths-label-tooltip'>
         <span className={styles.inferredLabelTooltip}>Paths are composed of stepwise links for each result's key concepts. Select a path to explore publications and additional resources supporting each relationship.</span>
       </Tooltip>
-      <Tooltip id='direct-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>Established from explicit evidence in external sources. Example: A research paper stating 'X is related to Y.'</span>
-      </Tooltip>
-      <Tooltip id='inferred-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>Indirect paths are identified by reasoning agents that use logic and pattern recognition to find connections between objects. The intermediary connections that explain these relationships can be found in the supporting paths below them.<a href="/help#indirect" target='_blank'>Learn More about Indirect Paths</a></span>
-      </Tooltip>
       {
         !inModal && 
         <div className={styles.header}>
@@ -187,6 +181,9 @@ const PathView: FC<PathViewProps> = ({
                           ?
                             <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
                               Direct <Information className={styles.infoIcon} />
+                              <Tooltip id='direct-label-tooltip'>
+                                <span className={styles.inferredLabelTooltip}>Established from explicit evidence in external sources. Example: A research paper stating 'X is related to Y.'</span>
+                              </Tooltip>
                             </p>
                           :
                             null
@@ -197,6 +194,9 @@ const PathView: FC<PathViewProps> = ({
                             <>
                               <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip" >
                                 Indirect <Information className={styles.infoIcon} />
+                                <Tooltip id='inferred-label-tooltip'>
+                                  <span className={styles.inferredLabelTooltip}>Indirect paths are identified by reasoning agents that use logic and pattern recognition to find connections between objects. The intermediary connections that explain these relationships can be found in the supporting paths below them. <a href="/help#indirect" target='_blank'>Learn More about Indirect Paths</a></span>
+                                </Tooltip>
                               </p>
                             </>
                           : null

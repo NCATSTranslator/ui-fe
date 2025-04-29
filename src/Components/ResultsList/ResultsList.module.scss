@@ -124,6 +124,16 @@
   .perPage > div > div {
     z-index: 1000 !important;
   }
+  .perPageContainer {
+    display: flex;
+    align-items: center;
+    .perPage {
+      margin-left: $xs;
+      select {
+        width: 116px;
+      }
+    }
+  }
 }
 .pageNums {
   margin: 0 0 0 auto;
