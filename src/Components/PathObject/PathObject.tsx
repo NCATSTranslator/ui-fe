@@ -89,7 +89,8 @@ const PathObject: FC<PathObjectProps> = ({
               data-node-id={pathObject.id}
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               >
-              <div className={`${styles.nameShape}`}>
+              <div className={`${styles.nameShape} ${pathViewStyles && pathViewStyles.nameShape}`}>
+                <div className={`${styles.background} ${pathViewStyles && pathViewStyles.background}`}></div>
                 <PathArrow className={styles.icon}/>
               </div>
               <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >

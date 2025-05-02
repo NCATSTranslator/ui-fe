@@ -108,6 +108,7 @@ const Predicate: FC<PredicateProps> = ({
         {...hoverHandlers}
         >
         <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
+          <div className={`${parentStyles && parentStyles.background} ${styles.background}`}></div>
           <PathArrow/>
           <InferredBorder className={styles.border}/>
         </div>

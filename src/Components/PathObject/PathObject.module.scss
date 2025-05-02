@@ -54,11 +54,20 @@
     right: 0px;
     bottom: 0;
     left: -10px;
-    clip-path: polygon(170px -16px ,188px 16px, 170px 48px, -8px 48px, 8px 16px, -8px -16px);
+    clip-path: polygon(170px -16px,188px 16px,170px 48px,-6px 48px,8px 16px,-8px -16px);
     transition: $defaultAnim;
     z-index: 20;
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
+    overflow: hidden;
+    .background {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      bottom: -10px;
+      left: -10px;
+      transition: $defaultAnim;
+    }
     .icon {
       content: "";
       display: block;
@@ -160,7 +169,7 @@
 .nameContainer:has(+ .predicateContainer.selected),
 .predicateContainer.selected + .nameContainer,
 .predicateContainer.selected + div + .nameContainer {
-  .nameShape {
+  .nameShape .background {
     background-color: rgba(61, 43, 100, .2);
   }
 }
@@ -170,7 +179,7 @@
 .nameContainer:has(+ .predicateContainer:hover)
 .predicateContainer:hover + .nameContainer
 .predicateContainer:hover + div + .nameContainer {
-  .nameShape {
+  .nameShape .background {
     background-color: rgba(58, 35, 107, .15);
   }
 }
@@ -240,9 +249,11 @@
     display: none !important;
   }
   .nameShape {
-    background-color: $lightGray;
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
+    .background {
+      background-color: $lightGray;
+    }
     .icon {
       top: 0px;
       right: 1px;
@@ -263,7 +274,7 @@
   &.selected + .nameContainer,
   &.nameContainer:has(+ svg + div .predicateContainer.selected),
   &.nameContainer:has(+ .predicateContainer.selected) {
-    .nameShape {
+    .nameShape .background {
       background-color: $lightPurpleTwo;
     }
     &:before {
@@ -274,7 +285,7 @@
   &:hover + .nameContainer,
   &.nameContainer:has(+ svg + div .predicateContainer:hover),
   &.nameContainer:has(+ .predicateContainer:hover){
-    .nameShape {
+    .nameShape .background {
       background-color: $whiteHover !important;
     }
     &:before {

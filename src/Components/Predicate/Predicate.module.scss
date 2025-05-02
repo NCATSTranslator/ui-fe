@@ -217,9 +217,11 @@
 
   }
   .nameShape {
-    background-color: $lightGray;
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
+    .background {
+      background-color: $lightGray;
+    }
     svg {
       top: 0px;
       right: 2px;
@@ -231,7 +233,7 @@
     }
   }
   &.selected.edge {
-    .nameShape {
+    .nameShape .background {
       background-color: $lightPurpleTwo !important;
     }
   }
@@ -239,17 +241,17 @@
     &.edge > div:first-child {
       background-color: $lightGray;
     }
-    & > div:first-child {
+    & > div:first-child div:first-child {
       background-color: $lightPurpleTwo;
     }
   }
   &.edge:hover {
-    .nameShape {
+    .nameShape .background {
       background-color: $whiteHover !important;
     }
   }
   &.edge:hover + span:not(.edge) {
-    & > div:first-child {
+    & > div:first-child div:first-child {
       background-color: $whiteHover !important;
     }
   }

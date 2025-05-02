@@ -380,7 +380,7 @@ const PathView: FC<PathViewProps> = ({
                 dataTooltipId={`${resultID}-excluded-paths-toggle`}
                 className={`${!!isEven && styles.evenButton}`}
                 >
-                {showHiddenPaths ? "Hide Excluded Paths" : "Show Excluded Paths"}
+                {showHiddenPaths ? `Hide ${filteredPathCount} Excluded Paths` : `Show ${filteredPathCount} Excluded Paths`}
                 <Information/>
                 <Tooltip id={`${resultID}-excluded-paths-toggle`}>
                   {
