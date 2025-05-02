@@ -103,6 +103,7 @@ const Predicate: FC<PredicateProps> = ({
       <span
         className={`${selected && styles.selected} ${selected && parentStyles ? parentStyles.selected : ''} ${styles.edge} ${inModal && styles.inModal} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && styles.isInferred}`}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
+        data-edge-ids={edgeIDs.toString()}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}
         {...hoverHandlers}
         >
