@@ -280,8 +280,8 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                               <div className={`table-item ${styles.tableItem}`} key={sourceKey}>
                                 <Tooltip id={tooltipId}>
                                   <span className={styles.tooltipSpan}>
-                                    Why do we use this source?
                                     <a href={src?.wiki} target="_blank" rel="noreferrer">
+                                      Why do we use this source?
                                       <ExternalLink/>
                                     </a>
                                   </span>
