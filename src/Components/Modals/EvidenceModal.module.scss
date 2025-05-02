@@ -94,9 +94,12 @@
         color: $white;
         display: inline-flex;
         align-items: center;
+        a {
+          display: inline-flex;
+          align-items: flex-end;
+        }
         svg {
           width: 16px;
-          margin-top: 2px;
           margin-left: 4px;
           transform: none !important;
           path {

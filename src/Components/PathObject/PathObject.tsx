@@ -86,6 +86,7 @@ const PathObject: FC<PathObjectProps> = ({
             <span 
               className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer}  ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
               data-tooltip-id={`${uid}`}
+              data-node-id={pathObject.id}
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               >
               <div className={`${styles.nameShape}`}>
