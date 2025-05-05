@@ -1,6 +1,5 @@
 @import "../../Assets/Styles/variables";
 
-
 .accordion {
   svg {
     margin: 0;
@@ -32,30 +31,6 @@
     margin: 0;
     padding: 0;
   }
-
-
-
-  // .accordionPanel {
-
-  // }
-  // .titleLink {
-  //   display: flex;
-  //   justify-content: space-between;
-  //   align-items: center;
-  //   margin: 0;
-  //   background-color: transparent;
-  //   text-decoration: none;
-  //   color: $black;
-  //   font-size: 14px;
-  //   font-weight: 800;
-  //   &.active {
-  //     background-color: $palePurple;
-  //     color: $purpleOne;
-  //   }
-  //   a {
-  //     text-decoration: none;
-  //   }
-  // }
   .navLink, .extLink {
     display: flex;
     justify-content: space-between;
