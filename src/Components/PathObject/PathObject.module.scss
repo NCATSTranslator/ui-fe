@@ -7,6 +7,8 @@
   align-items: center;
   justify-content: flex-start;
   position: relative;
+  background-color: transparent;
+  border: none;
   svg {
     width: 24px;
     height: 24px;
@@ -54,12 +56,14 @@
     right: 0px;
     bottom: 0;
     left: -10px;
-    clip-path: polygon(170px -16px,188px 16px,170px 48px,-6px 48px,8px 16px,-8px -16px);
+    clip-path: polygon(170px -16px,188px 16px,170px 48px,-8px 48px,8px 16px,-8px -16px);
     transition: $defaultAnim;
     z-index: 20;
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
     overflow: hidden;
+    border-top: 2px solid $purpleTwo;
+    border-bottom: 2px solid $purpleTwo;
     .background {
       position: absolute;
       top: -10px;
@@ -67,13 +71,12 @@
       bottom: -10px;
       left: -10px;
       transition: $defaultAnim;
+      background-color: $lightGray;
     }
     .icon {
       content: "";
       display: block;
       position: absolute;
-      top: 0;
-      right: 0;
       width: 10px;
       height: 28px;
       background: url("/src/Icons/Connectors/PathArrow.svg") no-repeat center;
@@ -89,7 +92,7 @@
       position: absolute;
       width: 8px;
       height: 28px;
-      right: 1px;
+      right: 2px;
       top: 0;
       min-width: auto;
       min-height: auto;
@@ -98,9 +101,60 @@
       }
     }
   }
+
+  
+  &:last-child {
+    border-color: $purpleTwo;
+    border-width: 2px 0;
+    border-style: solid;
+  }
+  .nameShape {
+    border-top: 2px solid $purpleTwo;
+    border-bottom: 2px solid $purpleTwo;
+    .icon {
+      top: 0px;
+      right: 1px;
+    }
+  }
+  &:has(+ svg) {
+    .nameShape {
+      .icon {
+        display: none !important;
+      }
+    }
+  }
+  .name {
+    background-color: transparent !important;
+    z-index: 50 !important;
+  }
+  // hover states and selected states
+  &.selected,
+  &.selected + .nameContainer,
+  &.selected + div + .nameContainer,
+  &.nameContainer:has(+ svg + div .predicateContainer.selected),
+  &.nameContainer:has(+ .predicateContainer.selected) {
+    .nameShape .background {
+      background-color: $pathObjectSelected;
+    }
+    &:before {
+      background-color: $pathObjectSelected;
+    }
+  }
+  &:hover,
+  &:hover + .nameContainer,
+  &:hover + div + .nameContainer,
+  &.nameContainer:has(+ svg + div .predicateContainer:hover),
+  &.nameContainer:has(+ .predicateContainer:hover) {
+    .nameShape .background {
+      background-color: $pathObjectHover !important;
+    }
+    &:before {
+      background-color: $pathObjectHover !important;
+    }
+  }
+  
   &>span {
     padding: 5px;
-    height: 16px;
     width: 160px;
   }
   span, mark {
@@ -140,13 +194,19 @@
 .nameContainer {
   position: relative;
   box-shadow: none;
-  background-color: $lightGray;
   height: 32px;
+  &:has(+ svg) {
+    &:after {
+      right: 8px !important;
+    }
+  }
   &:first-child::before {
     background-color: $lightGray;
   }
-  &.even {
-    background-color: $white;
+  &.isEven {
+    .nameShape .background {
+      background-color: $white;
+    }
     &:first-child::before {
       background-color: $white;
     }
@@ -163,25 +223,6 @@
   position: relative;
   cursor: pointer;
   justify-content: space-between;
-}
-
-.predicateContainer.selected,
-.nameContainer:has(+ .predicateContainer.selected),
-.predicateContainer.selected + .nameContainer,
-.predicateContainer.selected + div + .nameContainer {
-  .nameShape .background {
-    background-color: rgba(61, 43, 100, .2);
-  }
-}
-
-.predicateContainer:hover
-.nameContainer:hover, 
-.nameContainer:has(+ .predicateContainer:hover)
-.predicateContainer:hover + .nameContainer
-.predicateContainer:hover + div + .nameContainer {
-  .nameShape .background {
-    background-color: rgba(58, 35, 107, .15);
-  }
 }
 
 .nameContainer, .targetContainer {
@@ -217,9 +258,14 @@
 }
 
 .inModal {
-  background-color: transparent;
-  border: none;
-  &:first-child {
+  .nameShape {
+    clip-path: polygon(170px -16px,188px 16px,170px 48px,-6px 48px,8px 16px,-8px -16px);
+    .icon {
+      top: 0px;
+      right: 1px;
+    }
+  }
+  &.nameContainer:first-child {
     right: -9px;
     .nameShape {
       clip-path: polygon(170px -16px,188px 16px,170px 48px,0% 48px,0 16px,0 -16px);
@@ -238,58 +284,6 @@
           display: none;
         }
       }
-    }
-  }
-  &:last-child {
-    border-color: $purpleTwo;
-    border-width: 2px 0;
-    border-style: solid;
-  }
-  &:after {
-    display: none !important;
-  }
-  .nameShape {
-    border-top: 2px solid $purpleTwo;
-    border-bottom: 2px solid $purpleTwo;
-    .background {
-      background-color: $lightGray;
-    }
-    .icon {
-      top: 0px;
-      right: 1px;
-    }
-  }
-  &:has(+ svg) {
-    .nameShape {
-      .icon {
-        display: none !important;
-      }
-    }
-  }
-  .name {
-    background-color: transparent !important;
-    z-index: 50 !important;
-  }
-  &.selected,
-  &.selected + .nameContainer,
-  &.nameContainer:has(+ svg + div .predicateContainer.selected),
-  &.nameContainer:has(+ .predicateContainer.selected) {
-    .nameShape .background {
-      background-color: $lightPurpleTwo;
-    }
-    &:before {
-      background-color: $lightPurpleTwo;
-    }
-  }
-  &:hover,
-  &:hover + .nameContainer,
-  &.nameContainer:has(+ svg + div .predicateContainer:hover),
-  &.nameContainer:has(+ .predicateContainer:hover){
-    .nameShape .background {
-      background-color: $whiteHover !important;
-    }
-    &:before {
-      background-color: $whiteHover !important;
     }
   }
 }

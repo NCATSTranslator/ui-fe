@@ -30,6 +30,7 @@ interface PredicateProps {
   edge: ResultEdge;
   edgeIDs: string[];
   inModal?: boolean | null;
+  isEven?: boolean;
   parentClass?: string;
   parentStyles?: {[key: string]: string;} | null;
   pathFilterState: PathFilterState;
@@ -54,6 +55,7 @@ const Predicate: FC<PredicateProps> = ({
   handleNodeClick,
   hoverHandlers,
   inModal = false,
+  isEven = false,
   parentClass = '',
   parentStyles,
   pathFilterState,
@@ -101,7 +103,7 @@ const Predicate: FC<PredicateProps> = ({
   return (
     <>
       <span
-        className={`${selected && styles.selected} ${selected && parentStyles ? parentStyles.selected : ''} ${styles.edge} ${inModal && styles.inModal} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && styles.isInferred}`}
+        className={`${selected && styles.selected} ${selected && parentStyles ? parentStyles.selected : ''} ${styles.edge} ${(inModal && parentStyles) && `${parentStyles.inModal} ${styles.inModal}`} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && styles.isInferred}  ${isEven && styles.isEven}`}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         data-edge-ids={edgeIDs.toString()}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}
@@ -217,6 +219,7 @@ const Predicate: FC<PredicateProps> = ({
         <SupportPathGroup
           pathArray={formattedEdge.support}
           isExpanded={isSupportExpanded}
+          isEven={isEven}
           pathFilterState={pathFilterState}
           pathViewStyles={pathViewStyles}
           handleActivateEvidence={handleActivateEvidence}

@@ -73,11 +73,10 @@
     position: relative;
     .nameContainer {
       .nameInterior {
-        background-color: $lightGray;
         border-bottom-right-radius: $defaultBorderRadius;
         border-top-right-radius: $defaultBorderRadius;
         margin-right: -1px;
-        z-index: 10;
+        z-index: 30;
       }
     }
     .nameContainer {
@@ -89,7 +88,7 @@
         border-style: solid;
         border-color: $purpleTwo;
         .nameShape {
-          clip-path: polygon(188px -16px,188px 16px,188px 48px,-6px 48px,8px 16px,-8px -16px);
+          clip-path: polygon(188px -16px,188px 16px,188px 48px,-8px 48px,8px 16px,-8px -16px);
           border: 2px solid $purpleTwo;
           border-bottom-right-radius: 8px;
           border-top-right-radius: 8px;
@@ -102,8 +101,9 @@
         .nameInterior {
           border-bottom-right-radius: $defaultBorderRadius;
           border-top-right-radius: $defaultBorderRadius;
-          height: 19px;
           margin-right: -5px;
+          background-color: $lightGray;
+          height: 18px;
         }
       }
     }
@@ -174,7 +174,7 @@
         right: -10px;
         &.hasSelected {
           position: relative;
-          + svg + .nameContainer > .nameShape .background{
+          + svg + .nameContainer > .nameShape .background {
             background-color: $lightPurpleTwo;
           }
         }
@@ -185,6 +185,10 @@
           }
           &:last-child {
             margin-bottom: 0;
+          }
+          &:after {
+            left: 0;
+            right: 8px;
           }
         }
         &:hover {
@@ -215,12 +219,11 @@
     transition: padding .5s ease;
     z-index: 50;
     &.isEven {
-      .nameContainer, .nameInterior, .predicateInterior, .num, .pathEvidenceButton .icon {
+      .nameContainer:last-child .nameInterior, .nameShape .background, .predicateInterior, .num, .pathEvidenceButton .icon {
         background-color: $white;
       }
       .nameInterior {
         border-color: $white;
-        background-color: $white;
       }
     }
     .num {
@@ -247,7 +250,10 @@
       }
       svg {
         position: relative;
-        right: -5px;
+        right: -4px;
+        path {
+          fill: $midPurpleTwo;
+        }
       }
     }
     .pathEvidenceButton {
@@ -288,7 +294,7 @@
       }
       &:hover {
         .icon {
-          background-color: #d8d4e0;
+          background-color: $pathObjectHover;
         }
       }
     }
