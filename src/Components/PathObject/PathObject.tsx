@@ -84,12 +84,13 @@ const PathObject: FC<PathObjectProps> = ({
         isNode 
           ?
             <span 
-              className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer}  ${inModal ? styles.inModal : ''} ${isEven && styles.even}`}
+              className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer}  ${inModal ? styles.inModal : ''} ${isEven && styles.isEven}`}
               data-tooltip-id={`${uid}`}
               data-node-id={pathObject.id}
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               >
-              <div className={`${styles.nameShape}`}>
+              <div className={`${styles.nameShape} ${pathViewStyles && pathViewStyles.nameShape}`}>
+                <div className={`${styles.background} ${pathViewStyles && pathViewStyles.background}`}></div>
                 <PathArrow className={styles.icon}/>
               </div>
               <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
@@ -133,6 +134,7 @@ const PathObject: FC<PathObjectProps> = ({
                   hoverHandlers={hoverHandlers}
                   parentClass={styles.predicateContainer}
                   inModal={inModal}
+                  isEven={isEven}
                   className={className}
                   pathFilterState={pathFilterState}
                   pathViewStyles={pathViewStyles}

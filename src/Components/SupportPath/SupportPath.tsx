@@ -15,6 +15,7 @@ interface SupportPathProps {
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
   handleNodeClick: (name: ResultNode) => void;
   handleActivateEvidence: (path: Path, pathKey: string) => void;
+  isEven: boolean;
   path: Path;
   pathFilterState: PathFilterState;
   pathViewStyles: {[key: string]: string;} | null;
@@ -29,7 +30,8 @@ const SupportPath: FC<SupportPathProps> = ({
   character,
   handleEdgeClick, 
   handleNodeClick, 
-  handleActivateEvidence, 
+  handleActivateEvidence,
+  isEven = false,
   path,
   pathFilterState, 
   pathViewStyles, 
@@ -103,7 +105,7 @@ const SupportPath: FC<SupportPathProps> = ({
                       <PathObject
                         pathViewStyles={pathViewStyles}
                         index={i}
-                        isEven={false}
+                        isEven={isEven}
                         path={path}
                         parentPathKey={character}
                         id={subgraphItemID}
@@ -130,7 +132,7 @@ const SupportPath: FC<SupportPathProps> = ({
                       <PathObject
                         pathViewStyles={pathViewStyles}
                         index={i}
-                        isEven={false}
+                        isEven={isEven}
                         path={path}
                         parentPathKey={character}
                         id={subgraphItemID}
