@@ -220,10 +220,15 @@
     z-index: 50;
     &.isEven {
       .nameContainer:last-child .nameInterior, .nameShape .background, .predicateInterior, .num, .pathEvidenceButton .icon {
-        background-color: $white;
+        background-color: $whitePathObject;
       }
       .nameInterior {
-        border-color: $white;
+        border-color: $whitePathObject;
+      }
+      .pathEvidenceButton:hover {
+        .icon {
+          background-color: $whitePathObjectHover;
+        }
       }
     }
     .num {
@@ -294,7 +299,7 @@
       }
       &:hover {
         .icon {
-          background-color: $pathObjectHover;
+          background-color: $grayPathObjectHover;
         }
       }
     }

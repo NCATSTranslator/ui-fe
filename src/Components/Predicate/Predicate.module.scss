@@ -18,10 +18,10 @@
     }
   }
   .nameShape .background {
-    background-color: $lightGray;
+    background-color: $grayPathObject;
   }
   &.isEven .nameShape .background {
-    background-color: $white;
+    background-color: $whitePathObject;
   }
 }
 .pred {

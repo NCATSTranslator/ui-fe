@@ -103,9 +103,22 @@ const PathView: FC<PathViewProps> = ({
   const curveOffset = 50;
   const straightSegmentLength = 20;
   const pathColor = "#8C8C8C26";
-  const selectedPathColor = "#3D2B6466";
-  const hoveredPathColor = "#00000026";
+  const hoveredPathColor = "#6A5C8259";
+  const selectedPathColor = "#5D4E778C";
+  const hoveredSelectedPathColor = "#3F2E5E59";
   const pathThickness = 32;
+
+  const getStrokeColor = (index: number, hoveredIndex: number | null, selected: boolean) => {
+    const hovered = !!hoveredIndex && hoveredIndex === index;
+    if(hovered && selected)
+      return hoveredSelectedPathColor;
+    if(hovered)
+      return hoveredPathColor;
+    if(selected)
+      return selectedPathColor;
+
+    return pathColor;
+  }
   
   const generatePathD = (
     index: number,
@@ -248,7 +261,7 @@ const PathView: FC<PathViewProps> = ({
                                         {/* Render node → edge connections */}
                                         {subgraphItem.map((edge, index) => {
                                           let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false;
-                                          let strokeColor = hoveredIndex === index ? hoveredPathColor : selected ? selectedPathColor : pathColor;
+                                          let strokeColor = getStrokeColor(index, hoveredIndex, selected);
                                           return (
                                             <path
                                               key={`node-to-edge-${edge.id}`}
@@ -293,7 +306,7 @@ const PathView: FC<PathViewProps> = ({
                                         {/* Render edge → node connections */}
                                         {subgraphItem.map((edge, index) => {
                                           let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false; 
-                                          let strokeColor = hoveredIndex === index ? hoveredPathColor : selected ? selectedPathColor : pathColor;
+                                          let strokeColor = getStrokeColor(index, hoveredIndex, selected);
                                           return (
                                             <path
                                               key={`edge-to-node-${edge.id}`}

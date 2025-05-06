@@ -71,7 +71,7 @@
       bottom: -10px;
       left: -10px;
       transition: $defaultAnim;
-      background-color: $lightGray;
+      background-color: $grayPathObject;
     }
     .icon {
       content: "";
@@ -101,8 +101,6 @@
       }
     }
   }
-
-  
   &:last-child {
     border-color: $purpleTwo;
     border-width: 2px 0;
@@ -145,11 +143,19 @@
   &:hover + div + .nameContainer,
   &.nameContainer:has(+ svg + div .predicateContainer:hover),
   &.nameContainer:has(+ .predicateContainer:hover) {
+    &.isEven {
+      .nameShape .background {
+        background-color: $whitePathObjectHover !important;
+      }
+      &:before {
+        background-color: $whitePathObjectHover !important;
+      }
+    }
     .nameShape .background {
-      background-color: $pathObjectHover !important;
+      background-color: $grayPathObjectHover !important;
     }
     &:before {
-      background-color: $pathObjectHover !important;
+      background-color: $grayPathObjectHover !important;
     }
   }
   
@@ -201,14 +207,14 @@
     }
   }
   &:first-child::before {
-    background-color: $lightGray;
+    background-color: $grayPathObject;
   }
   &.isEven {
     .nameShape .background {
-      background-color: $white;
+      background-color: $whitePathObject;
     }
     &:first-child::before {
-      background-color: $white;
+      background-color: $whitePathObject;
     }
   }
   svg {
