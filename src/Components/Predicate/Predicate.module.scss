@@ -1,7 +1,6 @@
 @import "../../Assets/Styles/variables";
 
 .edge {
-  background-color: $lightGray;
   height: 32px;
   &.isInferred .nameShape {
     border: none;
@@ -13,10 +12,16 @@
       width: 100%;
       top: 0;
       bottom: 0;
-      left: -2px;
+      left: -3px;
       right: 0;
       height: 100%;
     }
+  }
+  .nameShape .background {
+    background-color: $grayPathObject;
+  }
+  &.isEven .nameShape .background {
+    background-color: $whitePathObject;
   }
 }
 .pred {
@@ -211,15 +216,8 @@
     background-color: transparent !important;
     border: none;
     height: 32px;
-    &:after {
-      display: none !important;
-    }
-
   }
   .nameShape {
-    background-color: $lightGray;
-    border-top: 2px solid $purpleTwo;
-    border-bottom: 2px solid $purpleTwo;
     svg {
       top: 0px;
       right: 2px;
@@ -228,29 +226,6 @@
   &.isInferred .nameShape {
     .border {
       left: -3px;
-    }
-  }
-  &.selected.edge {
-    .nameShape {
-      background-color: $lightPurpleTwo !important;
-    }
-  }
-  &.selected.edge + span {
-    &.edge > div:first-child {
-      background-color: $lightGray;
-    }
-    & > div:first-child {
-      background-color: $lightPurpleTwo;
-    }
-  }
-  &.edge:hover {
-    .nameShape {
-      background-color: $whiteHover !important;
-    }
-  }
-  &.edge:hover + span:not(.edge) {
-    & > div:first-child {
-      background-color: $whiteHover !important;
     }
   }
 }

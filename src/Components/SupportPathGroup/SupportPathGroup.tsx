@@ -22,6 +22,7 @@ interface SupportPathGroupProps {
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
   handleNodeClick: (name: ResultNode) => void;
   isExpanded: boolean;
+  isEven: boolean;
   parentPathKey: string;
   pathFilterState: PathFilterState;
   pathArray: (string | Path)[];
@@ -38,6 +39,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   handleEdgeClick, 
   handleNodeClick, 
   isExpanded,
+  isEven = false,
   parentPathKey,
   pathFilterState,
   pathArray,
@@ -129,6 +131,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                     activeFilters={activeFilters}
                     pk={pk}
                     showHiddenPaths={showHiddenPaths}
+                    isEven={isEven}
                   />
                 );
               })
