@@ -126,11 +126,12 @@
     z-index: 50 !important;
   }
   // hover states and selected states
+  // Base style for selected
   &.selected,
-  &.selected + .nameContainer,
-  &.selected + div + .nameContainer,
+  &.nameContainer:has(+ .predicateContainer.selected),
   &.nameContainer:has(+ svg + div .predicateContainer.selected),
-  &.nameContainer:has(+ .predicateContainer.selected) {
+  &.selected + .nameContainer,
+  &.selected + div + .nameContainer {
     .nameShape .background {
       background-color: $pathObjectSelected;
     }
@@ -138,11 +139,31 @@
       background-color: $pathObjectSelected;
     }
   }
+
+  // Hover override when selected AND hovered
+  &.selected:hover,
+  &.nameContainer:has(+ .predicateContainer.selected:hover),
+  &.nameContainer:has(+ .predicateContainer.selected):hover,
+  &.nameContainer:has(+ svg + div .predicateContainer.selected:hover),
+  &.nameContainer:has(+ svg + div .predicateContainer.selected):hover,
+  &.selected:hover + .nameContainer,
+  &.selected:hover + div + .nameContainer,
+  &.selected + .nameContainer:hover,
+  &.selected + div + .nameContainer:hover {
+    .nameShape .background {
+      background-color: $pathObjectSelectedHover;
+    }
+    &:before {
+      background-color: $pathObjectSelectedHover;
+    }
+  }
+
+  // Generic hover state
   &:hover,
   &:hover + .nameContainer,
   &:hover + div + .nameContainer,
-  &.nameContainer:has(+ svg + div .predicateContainer:hover),
-  &.nameContainer:has(+ .predicateContainer:hover) {
+  &.nameContainer:has(+ .predicateContainer:hover),
+  &.nameContainer:has(+ svg + div .predicateContainer:hover) {
     &.isEven {
       .nameShape .background {
         background-color: $whitePathObjectHover !important;

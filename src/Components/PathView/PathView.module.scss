@@ -175,7 +175,12 @@
         &.hasSelected {
           position: relative;
           + svg + .nameContainer > .nameShape .background {
-            background-color: $lightPurpleTwo;
+            background-color: $pathObjectSelected;
+          }
+          &:hover {
+            + svg + .nameContainer > .nameShape .background {
+              background-color: $pathObjectSelectedHover;
+            }
           }
         }
         .predicateInterior {
