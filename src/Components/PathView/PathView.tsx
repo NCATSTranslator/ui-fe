@@ -88,9 +88,9 @@ const PathView: FC<PathViewProps> = ({
   let inferredLabelDisplayed = false;
 
   const handleNodeClick = useCallback((name: ResultNode ) => {
-    console.log("handle name click", name);
-    if(Array.isArray(name.provenance) && name.provenance[0].length > 0 && name.provenance[0].includes("http"))
-      window.open(name.provenance[0], '_blank');
+    // console.log("handle name click", name);
+    // if(Array.isArray(name.provenance) && name.provenance[0].length > 0 && name.provenance[0].includes("http"))
+    //   window.open(name.provenance[0], '_blank');
   },[]);
 
   const handleEdgeClick = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
@@ -109,7 +109,7 @@ const PathView: FC<PathViewProps> = ({
   const pathThickness = 32;
 
   const getStrokeColor = (index: number, hoveredIndex: number | null, selected: boolean) => {
-    const hovered = !!hoveredIndex && hoveredIndex === index;
+    const hovered = hoveredIndex !== null && hoveredIndex === index;
     if(hovered && selected)
       return hoveredSelectedPathColor;
     if(hovered)
@@ -232,13 +232,13 @@ const PathView: FC<PathViewProps> = ({
                             <div className={styles.icon}>
                               <ResearchMultiple />
                             </div>
+                            <span className={styles.num}>
+                              <span className={styles.val}>
+                                { indexInFullCollection + 1 }
+                              </span>
+                              <PathArrow/>
+                            </span>
                         </button>
-                        <span className={styles.num}>
-                          <span className={styles.val}>
-                            { indexInFullCollection + 1 }
-                          </span>
-                          <PathArrow/>
-                        </span>
                         <Tooltip
                           id={tooltipID}
                           >

@@ -119,7 +119,7 @@ const Predicate: FC<PredicateProps> = ({
           place={`${inModal ? 'left' : 'top' }`}
           >
           {
-            <div className={styles.predicatesList}>
+            <div className={styles.predicatesList} onClick={(e)=> e.stopPropagation()}>
               {
                 edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
                   if(!edge || !resultSet)

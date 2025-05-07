@@ -115,7 +115,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                   return null;
                 const indexInFullCollection = itemOffset + i;
                 const pathKey = currentDepth === 2 ? intToNumeral(indexInFullCollection + 1) : intToChar(indexInFullCollection + 1);
-                const fullPathKey = `${parentKey}.${pathKey}`;
                 return (
                   <SupportPath
                     key={supportPath.id}
@@ -124,7 +123,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                     path={supportPath}
                     handleEdgeClick={handleEdgeClick}
                     handleNodeClick={handleNodeClick}
-                    handleActivateEvidence={()=>handleActivateEvidence(supportPath, fullPathKey)}
+                    handleActivateEvidence={handleActivateEvidence}
                     selectedPaths={selectedPaths}
                     pathViewStyles={pathViewStyles}
                     activeEntityFilters={activeEntityFilters}

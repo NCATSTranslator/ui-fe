@@ -2,7 +2,7 @@
 
 
 .nameContainer,.predicateContainer,.targetContainer {
-  cursor: pointer;
+  cursor: default;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -55,7 +55,7 @@
     top: 0;
     right: 0px;
     bottom: 0;
-    left: -10px;
+    left: -10.3px;
     clip-path: polygon(170px -16px,188px 16px,170px 48px,-8px 48px,8px 16px,-8px -16px);
     transition: $defaultAnim;
     z-index: 20;
@@ -306,7 +306,7 @@
     }
     &:has(+ svg) {
       .nameShape {
-        clip-path: polygon(160px -16px,178px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
+        clip-path: polygon(160px -16px,176px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
         svg {
           display: none;
         }
