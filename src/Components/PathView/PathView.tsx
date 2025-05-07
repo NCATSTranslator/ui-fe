@@ -109,7 +109,7 @@ const PathView: FC<PathViewProps> = ({
   const pathThickness = 32;
 
   const getStrokeColor = (index: number, hoveredIndex: number | null, selected: boolean) => {
-    const hovered = !!hoveredIndex && hoveredIndex === index;
+    const hovered = hoveredIndex !== null && hoveredIndex === index;
     if(hovered && selected)
       return hoveredSelectedPathColor;
     if(hovered)
