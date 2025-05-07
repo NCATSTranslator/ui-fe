@@ -231,7 +231,7 @@
         border-color: $whitePathObject;
       }
       .pathEvidenceButton:hover {
-        .icon {
+        .icon, .num {
           background-color: $whitePathObjectHover;
         }
       }
@@ -243,12 +243,8 @@
       align-items: center;
       justify-content: center;
       align-self: flex-start;
-      border-width: 2px 0;
-      border-style: solid;
-      border-color: $purpleTwo;
       background-color: $lightGray;
       padding-right: $xxs;
-      cursor: default;
       transition: $defaultAnim;
       .val {
         font-weight: 800;
@@ -303,7 +299,7 @@
         }
       }
       &:hover {
-        .icon {
+        .icon, .num {
           background-color: $grayPathObjectHover;
         }
       }
@@ -323,7 +319,7 @@
       }
       
     }
-    .nameContainer, .predicateInterior, .num, .pathEvidenceButton {
+    .nameContainer, .predicateInterior, .pathEvidenceButton {
       position: relative;
       grid-row: 1;
       &:after {

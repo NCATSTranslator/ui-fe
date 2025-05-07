@@ -75,13 +75,13 @@ const SupportPath: FC<SupportPathProps> = ({
               <div className={`${!!pathViewStyles && pathViewStyles.icon}`}>
                 <ResearchMultiple />
               </div>
+              <span className={`${!!pathViewStyles && pathViewStyles.num}`}>
+                <span className={`${!!pathViewStyles && pathViewStyles.val}`}>
+                  { character }
+                </span>
+                <PathArrow/>
+              </span>
           </button>
-          <span className={`${!!pathViewStyles && pathViewStyles.num}`}>
-            <span className={`${!!pathViewStyles && pathViewStyles.val}`}>
-              { character }
-            </span>
-            <PathArrow/>
-          </span>
           <Tooltip
             id={`${tooltipID}`}
             >
