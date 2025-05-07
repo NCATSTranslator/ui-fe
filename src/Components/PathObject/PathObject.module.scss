@@ -306,7 +306,7 @@
     }
     &:has(+ svg) {
       .nameShape {
-        clip-path: polygon(160px -16px,178px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
+        clip-path: polygon(160px -16px,176px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
         svg {
           display: none;
         }
