@@ -232,13 +232,13 @@ const PathView: FC<PathViewProps> = ({
                             <div className={styles.icon}>
                               <ResearchMultiple />
                             </div>
+                            <span className={styles.num}>
+                              <span className={styles.val}>
+                                { indexInFullCollection + 1 }
+                              </span>
+                              <PathArrow/>
+                            </span>
                         </button>
-                        <span className={styles.num}>
-                          <span className={styles.val}>
-                            { indexInFullCollection + 1 }
-                          </span>
-                          <PathArrow/>
-                        </span>
                         <Tooltip
                           id={tooltipID}
                           >
