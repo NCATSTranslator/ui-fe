@@ -124,7 +124,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                     path={supportPath}
                     handleEdgeClick={handleEdgeClick}
                     handleNodeClick={handleNodeClick}
-                    handleActivateEvidence={()=>handleActivateEvidence(supportPath, fullPathKey)}
+                    handleActivateEvidence={handleActivateEvidence}
                     selectedPaths={selectedPaths}
                     pathViewStyles={pathViewStyles}
                     activeEntityFilters={activeEntityFilters}
