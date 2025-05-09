@@ -94,9 +94,9 @@
           border-top-right-radius: 8px;
           right: -8px;
           border-left: none;
-          svg {
-            display: none !important;
-          }
+        }
+        .icon {
+          display: none !important;
         }
         .nameInterior {
           border-bottom-right-radius: $defaultBorderRadius;
@@ -201,6 +201,9 @@
             background-color: $whiteHover;
           }
         }
+        .icon {
+          display: none;
+        }
       }
       .connectors {
         position: relative;
@@ -257,6 +260,7 @@
       svg {
         position: relative;
         right: -4px;
+        z-index: 100;
         path {
           fill: $midPurpleTwo;
         }

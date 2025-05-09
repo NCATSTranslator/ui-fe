@@ -91,7 +91,6 @@ const PathObject: FC<PathObjectProps> = ({
               >
               <div className={`${styles.nameShape} ${pathViewStyles && pathViewStyles.nameShape}`}>
                 <div className={`${styles.background} ${pathViewStyles && pathViewStyles.background}`}></div>
-                <PathArrow className={styles.icon}/>
               </div>
               <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
                 {getIcon(pathObject?.types[0])}
@@ -104,6 +103,7 @@ const PathObject: FC<PathObjectProps> = ({
                   />
                 </span>
               </span>
+              <PathArrow className={`${!!pathViewStyles && pathViewStyles.icon} ${styles.icon}`}/>
               <Tooltip id={`${uid}`}>
                 <span><strong>{nameString}</strong> ({typeString})</span>
                 <span className={styles.description}>{description}</span>

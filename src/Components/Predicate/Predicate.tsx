@@ -111,9 +111,9 @@ const Predicate: FC<PredicateProps> = ({
         >
         <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
           <div className={`${parentStyles && parentStyles.background} ${styles.background}`}></div>
-          <PathArrow/>
           <InferredBorder className={styles.border}/>
         </div>
+        <PathArrow className={`${parentStyles && parentStyles.icon} ${pathViewStyles && pathViewStyles.icon}`}/>
         <Tooltip
           id={`${formattedEdge.predicate}${uid}`}
           place={`${inModal ? 'left' : 'top' }`}

@@ -62,8 +62,6 @@
     border-top: 2px solid $purpleTwo;
     border-bottom: 2px solid $purpleTwo;
     overflow: hidden;
-    border-top: 2px solid $purpleTwo;
-    border-bottom: 2px solid $purpleTwo;
     .background {
       position: absolute;
       top: -10px;
@@ -73,46 +71,34 @@
       transition: $defaultAnim;
       background-color: $grayPathObject;
     }
-    .icon {
-      content: "";
-      display: block;
-      position: absolute;
-      width: 10px;
-      height: 28px;
-      background: url("/src/Icons/Connectors/PathArrow.svg") no-repeat center;
-      background-size: contain;
-      pointer-events: none;
-      z-index: 50;
-    }
+
     & > span {
       position: relative;
       z-index: 10;
     }
-    svg {
-      position: absolute;
-      width: 8px;
-      height: 28px;
-      right: 2px;
-      top: 0;
-      min-width: auto;
-      min-height: auto;
-      path {
-        fill: $midPurpleTwo;
-      }
+  }
+  .icon {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 8px;
+    height: 28px;
+    background: url("/src/Icons/Connectors/PathArrow.svg") no-repeat center;
+    background-size: contain;
+    pointer-events: none;
+    z-index: 50;
+    top: 2px;
+    right: 1px;
+    min-width: auto;
+    min-height: auto;
+    path {
+      fill: $midPurpleTwo;
     }
   }
   &:last-child {
     border-color: $purpleTwo;
     border-width: 2px 0;
     border-style: solid;
-  }
-  .nameShape {
-    border-top: 2px solid $purpleTwo;
-    border-bottom: 2px solid $purpleTwo;
-    .icon {
-      top: 0px;
-      right: 1px;
-    }
   }
   &:has(+ svg) {
     .nameShape {
@@ -227,8 +213,13 @@
       right: 8px !important;
     }
   }
-  &:first-child::before {
-    background-color: $grayPathObject;
+  &:first-child {
+    &:before {
+      background-color: $grayPathObject;
+    }
+    .nameShape {
+      left: -10.8px;
+    }
   }
   &.isEven {
     .nameShape .background {
@@ -297,19 +288,19 @@
     .nameShape {
       clip-path: polygon(170px -16px,188px 16px,170px 48px,0% 48px,0 16px,0 -16px);
       left: 2px;
-      svg {
-        right: 10px;
-      }
       &:before {
         background-image: none;
       }
     }
+    .icon {
+      right: 10px;
+    }
     &:has(+ svg) {
       .nameShape {
         clip-path: polygon(160px -16px,176px 16px,160px 48px,0% 48px,0 16px,0 -16px) !important;
-        svg {
-          display: none;
-        }
+      }
+      .icon {
+        display: none;
       }
     }
   }
