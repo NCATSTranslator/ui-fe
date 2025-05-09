@@ -257,6 +257,7 @@
       svg {
         position: relative;
         right: -4px;
+        z-index: 100;
         path {
           fill: $midPurpleTwo;
         }

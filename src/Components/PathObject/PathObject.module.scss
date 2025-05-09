@@ -227,8 +227,13 @@
       right: 8px !important;
     }
   }
-  &:first-child::before {
-    background-color: $grayPathObject;
+  &:first-child {
+    &:before {
+      background-color: $grayPathObject;
+    }
+    .nameShape {
+      left: -10.8px;
+    }
   }
   &.isEven {
     .nameShape .background {
