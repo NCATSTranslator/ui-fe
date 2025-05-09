@@ -94,9 +94,9 @@
           border-top-right-radius: 8px;
           right: -8px;
           border-left: none;
-          svg {
-            display: none !important;
-          }
+        }
+        .icon {
+          display: none !important;
         }
         .nameInterior {
           border-bottom-right-radius: $defaultBorderRadius;
@@ -200,6 +200,9 @@
           + svg + .nameContainer > .nameShape .background {
             background-color: $whiteHover;
           }
+        }
+        .icon {
+          display: none;
         }
       }
       .connectors {

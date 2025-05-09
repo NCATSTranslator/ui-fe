@@ -9,12 +9,18 @@
     }
     .border {
       display: block !important;
+      position: absolute;
       width: 100%;
       top: 0;
       bottom: 0;
       left: -3px;
       right: 0;
       height: 100%;
+      min-width: auto;
+      min-height: auto;
+      path {
+        fill: $midPurpleTwo;
+      }
     }
   }
   .nameShape .background {
