@@ -105,15 +105,17 @@ const PathObject: FC<PathObjectProps> = ({
               </span>
               <PathArrow className={`${!!pathViewStyles && pathViewStyles.icon} ${styles.icon}`}/>
               <Tooltip id={`${uid}`}>
-                <span><strong>{nameString}</strong> ({typeString})</span>
-                <span className={styles.description}>{description}</span>
-                {
-                  provenance && typeof provenance === "string" &&
-                  <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
-                    <ExternalLink/>
-                    <span>{provenance}</span>
-                  </a>
-                }
+                <div onClick={(e)=> e.stopPropagation()}>
+                  <span><strong>{nameString}</strong> ({typeString})</span>
+                  <span className={styles.description}>{description}</span>
+                  {
+                    provenance && typeof provenance === "string" &&
+                    <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
+                      <ExternalLink/>
+                      <span>{provenance}</span>
+                    </a>
+                  }
+                </div>
               </Tooltip>
             </span>
           :
