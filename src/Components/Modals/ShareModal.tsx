@@ -2,8 +2,6 @@ import { useEffect, useState, FC } from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "./Modal";
 import Button from "../Core/Button";
-import { currentQuery} from "../../Redux/querySlice";
-import { useSelector } from 'react-redux';
 import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { getDataFromQueryVar } from "../../Utilities/utilities";
 import { AutocompleteItem } from "../../Types/querySubmission";
@@ -18,12 +16,9 @@ interface ShareModalProps {
 }
 
 const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, typeID = null, shareResultID = null}) => {
-  let storedQuery = useSelector(currentQuery);
   const sharedQueryLabel = (label) ? label : getDataFromQueryVar("l");
   const sharedQueryType = (typeID) ? typeID : getDataFromQueryVar("t");
   const sharedQueryItemID = getDataFromQueryVar("i");
-  // const sharedQueryResultID = (shareResultID != null) ? shareResultID : new URLSearchParams(window.location.search).get("r");
-  // // if a result share ID is not explictly provided, don't generate a url that send the user directly to any result
   const initSharedQueryResultID = (shareResultID != null) ? shareResultID : getDataFromQueryVar("r");
   const [sharedQueryResultID, setSharedQueryResultID] = useState(initSharedQueryResultID);
 
@@ -33,19 +28,13 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, ty
 
   const queryLabel = (sharedQueryLabel) 
     ? sharedQueryLabel 
-    : (storedQuery && storedQuery.node !== undefined) 
-      ? encodeURIComponent(storedQuery.node.label) 
-      : '';
+    : '';
   const queryItemID = (sharedQueryItemID) 
     ? sharedQueryItemID 
-    : (storedQuery && storedQuery.node !== undefined) 
-      ? encodeURIComponent(storedQuery.node.id) 
-      : '';
+    : '';
   const queryTypeID = (sharedQueryType) 
     ? sharedQueryType 
-    : (storedQuery && storedQuery.type !== undefined) 
-      ? storedQuery.type.id 
-      : '';
+    : '';
   const queryResultID = sharedQueryResultID || '0';
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
