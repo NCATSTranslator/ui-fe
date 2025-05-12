@@ -10,7 +10,6 @@ import AutoHeight from "../AutoHeight/AutoHeight";
 import { queryTypes } from "../../Utilities/queryTypes";
 import { incrementHistory } from "../../Redux/historySlice";
 import { currentConfig, currentUser } from "../../Redux/userSlice";
-import { setCurrentQuery } from "../../Redux/querySlice";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import cloneDeep from "lodash/cloneDeep";
 import _ from "lodash";
@@ -119,7 +118,6 @@ const Query: FC<QueryProps> = ({
       if(!!item?.node) {
         setInputText(item.node.label);
         setQueryItem(item);
-        dispatch(setCurrentQuery(item));
       }
     };
 
@@ -193,7 +191,6 @@ const Query: FC<QueryProps> = ({
     setInputText(selectedNode.label);
     setQueryItem((prev) => {
       const newQueryItem = { type: prev.type, node: selectedNode };
-      dispatch(setCurrentQuery(newQueryItem));
       const newPrevItems = cloneDeep(prevQueryItems.current);
       newPrevItems.push(newQueryItem);
       prevQueryItems.current = newPrevItems;
