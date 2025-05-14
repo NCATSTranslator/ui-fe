@@ -1,3 +1,4 @@
+import { QueryItem } from "../Components/QueryBar/QueryBar";
 import { Example } from "./querySubmission";
 
 // User Prefs
@@ -63,16 +64,7 @@ export type UserState = {
 }
 
 export type QueryHistoryItem = {
-  item?: {
-    node?: {
-      id: string;
-      label: string;
-    };
-    type?: {
-      id: string;
-      label: string;
-    };
-  };
+  item?: QueryItem;
   date: string;
   id: string;
   time?: string;
