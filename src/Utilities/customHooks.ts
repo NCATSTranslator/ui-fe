@@ -415,6 +415,9 @@ export const useHoveredIndex = () => {
   };
 };
 
+/**
+ * Custom hook to handle seen/unseen status on edges and paths
+ */
 export const useSeenStatus = (pk: string) => {
   const dispatch: AppDispatch = useDispatch();
 
