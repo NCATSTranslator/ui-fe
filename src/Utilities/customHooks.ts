@@ -4,6 +4,10 @@ import { SupportPathKeyContext } from '../Components/SupportPathGroup/SupportPat
 import { isEqual } from 'lodash';
 import { useQuery } from 'react-query';
 import { useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../Redux/store';
+import { markEdgeSeen, markEdgeUnseen, markPathSeen, markPathUnseen, resetSeenStatus } from '../Redux/slices/seenStatusSlice';
+
 
 interface WindowSize {
   width: number | undefined;
@@ -408,5 +412,33 @@ export const useHoveredIndex = () => {
     hoveredIndex,
     getHoverHandlers,
     resetHoveredIndex: () => setHoveredIndex(null),
+  };
+};
+
+export const useSeenStatus = (pk: string) => {
+  const dispatch: AppDispatch = useDispatch();
+
+  const seenStatus = useSelector((state: RootState) =>
+    state.seenStatus[pk] || { seenEdges: [], seenPaths: [] }
+  );
+
+  const isEdgeSeen = (edgeId: string): boolean => seenStatus.seenEdges.includes(edgeId);
+  const isPathSeen = (pathId: string): boolean => seenStatus.seenPaths.includes(pathId);
+  const handleMarkEdgeSeen = (edgeId: string) => dispatch(markEdgeSeen({ pk, edgeId }));
+  const handleMarkEdgeUnseen = (edgeId: string) => dispatch(markEdgeUnseen({ pk, edgeId }));
+  const handleMarkPathSeen = (pathId: string) => dispatch(markPathSeen({ pk, pathId }));
+  const handleMarkPathUnseen = (pathId: string) => dispatch(markPathUnseen({ pk, pathId }));
+  const resetStatus = () => dispatch(resetSeenStatus({ pk }));
+
+  return {
+    seenEdges: seenStatus.seenEdges,
+    seenPaths: seenStatus.seenPaths,
+    isEdgeSeen,
+    isPathSeen,
+    markEdgeSeen: handleMarkEdgeSeen,
+    markEdgeUnseen: handleMarkEdgeUnseen,
+    markPathSeen: handleMarkPathSeen,
+    markPathUnseen: handleMarkPathUnseen,
+    resetStatus,
   };
 };
