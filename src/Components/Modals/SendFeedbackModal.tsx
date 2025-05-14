@@ -106,14 +106,14 @@ const SendFeedbackModal = ({ isOpen, onClose }: SendFeedbackModalProps) => {
     });
   };
 
-  const buildPayload = () => ({
+  const buildPayload = useCallback(() => ({
     url: encodeURI(decodeURIComponent(getDataFromQueryVar("link") || "")),
     ars_pk: getDataFromQueryVar("q"),
     description: form.comments,
     reproduction_steps: form.steps,
     type: form.category,
     screenshots: form.base64Screenshots,
-  });
+  }),[form]);
 
   const submitForm = useCallback(() => {
     fetch("https://issue-router.renci.org/create_issue", {
@@ -125,7 +125,7 @@ const SendFeedbackModal = ({ isOpen, onClose }: SendFeedbackModalProps) => {
       .then((data) => setCreatedIssueURL(data.url))
       .catch((error) => console.error("Error:", error));
     resetFormFields();
-  }, [form]);
+  }, [form, buildPayload]);
 
   useEffect(() => {
     if (submit) {
