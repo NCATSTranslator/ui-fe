@@ -11,14 +11,15 @@ interface ShareModalProps {
   onClose: () => void; 
   qid: string;
   label?: string | null; 
+  nodeID?: string | null; 
   typeID?: string | null; 
   shareResultID?: string;
 }
 
-const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, typeID = null, shareResultID = null}) => {
+const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, nodeID = null, typeID = null, shareResultID = null}) => {
   const sharedQueryLabel = (label) ? label : getDataFromQueryVar("l");
   const sharedQueryType = (typeID) ? typeID : getDataFromQueryVar("t");
-  const sharedQueryItemID = getDataFromQueryVar("i");
+  const sharedQueryItemID = (nodeID) ? nodeID : getDataFromQueryVar("i");
   const initSharedQueryResultID = (shareResultID != null) ? shareResultID : getDataFromQueryVar("r");
   const [sharedQueryResultID, setSharedQueryResultID] = useState(initSharedQueryResultID);
 

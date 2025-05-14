@@ -125,7 +125,7 @@ const SendFeedbackModal = ({ isOpen, onClose }: SendFeedbackModalProps) => {
       .then((data) => setCreatedIssueURL(data.url))
       .catch((error) => console.error("Error:", error));
     resetFormFields();
-  }, [form, buildPayload]);
+  }, [buildPayload]);
 
   useEffect(() => {
     if (submit) {
