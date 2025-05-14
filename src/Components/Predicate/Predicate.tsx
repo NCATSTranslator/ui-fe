@@ -11,7 +11,7 @@ import { checkEdgesForClinicalTrials, checkEdgesForPubs, getCompressedEdge, getE
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Types/results';
-import { getResultSetById } from '../../Redux/resultsSlice';
+import { getResultSetById } from '../../Redux/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { useSupportPathKey } from '../../Utilities/customHooks';

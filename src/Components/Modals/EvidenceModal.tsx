@@ -7,12 +7,12 @@ import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import { isPublication, getFormattedEdgeLabel, getUrlByType, getCompressedSubgraph, getCompressedEdge, hasSupport } from "../../Utilities/utilities";
 import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "../../Types/results.d";
 import { Provenance, PublicationObject, TrialObject } from "../../Types/evidence.d";
-import { getResultSetById } from "../../Redux/resultsSlice";
+import { getResultSetById } from "../../Redux/slices/resultsSlice";
 import { compareByKeyLexographic } from '../../Utilities/sortingFunctions';
 import { flattenPublicationObject, flattenTrialObject } from "../../Utilities/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
-import { currentPrefs } from '../../Redux/userSlice';
+import { currentPrefs } from '../../Redux/slices/userSlice';
 import InfoIcon from '../../Icons/Status/Alerts/Info.svg?react';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
 import Tooltip from "../Tooltip/Tooltip";

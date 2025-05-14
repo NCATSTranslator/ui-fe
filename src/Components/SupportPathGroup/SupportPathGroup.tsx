@@ -9,7 +9,7 @@ import { sortSupportByEntityStrings, sortSupportByLength } from '../../Utilities
 import { Filter, Path, PathFilterState, ResultNode } from '../../Types/results';
 import { intToChar, getPathsWithSelectionsSet, isStringArray, getFilteredPathCount, intToNumeral } from '../../Utilities/utilities';
 import { useSelector } from 'react-redux';
-import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
+import { getResultSetById, getPathsByIds } from '../../Redux/slices/resultsSlice';
 import { useSupportPathDepth, useSupportPathKey } from '../../Utilities/customHooks';
 import { SupportPathDepthContext } from '../PathView/PathView';
 

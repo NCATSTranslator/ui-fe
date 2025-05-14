@@ -3,7 +3,7 @@ import { useEffect, useState, Dispatch, SetStateAction, useCallback } from "reac
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "../../Utilities/utilities";
-import { pastQueryState, setHistory } from "../../Redux/historySlice";
+import { pastQueryState, setHistory } from "../../Redux/slices/historySlice";
 import { cloneDeep, debounce } from "lodash";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { QueryHistoryItem } from "../../Types/global";

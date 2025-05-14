@@ -11,7 +11,7 @@ import AnimateHeight from 'react-animate-height';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react"
 import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
-import { getEdgeById, getResultSetById } from '../../Redux/resultsSlice';
+import { getEdgeById, getResultSetById } from '../../Redux/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 
 interface UserSaveProps {

@@ -10,7 +10,7 @@ import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
 import { PathFilterState, ResultNode, Path, Filter, ResultEdge } from '../../Types/results';
 import { LastViewedPathIDContextType, useHoveredIndex } from '../../Utilities/customHooks';
-import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
+import { getResultSetById, getPathsByIds } from '../../Redux/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import PathObject from '../PathObject/PathObject';
 import Button from '../Core/Button';

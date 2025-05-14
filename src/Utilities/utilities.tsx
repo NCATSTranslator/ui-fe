@@ -17,7 +17,7 @@ import { PreferencesContainer, PrefObject } from '../Types/global';
 import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState, Tags, ResultNode } from '../Types/results.d';
 import { EvidenceCountsContainer, PublicationObject, PublicationsList, RawPublicationObject } from '../Types/evidence';
 import { Location } from 'react-router-dom';
-import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
+import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getPubById } from '../Redux/slices/resultsSlice';
 import { SaveGroup } from './userApi';
 
 export const getIcon = (category: string): JSX.Element => {

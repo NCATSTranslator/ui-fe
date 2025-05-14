@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import QueryPathfinder from "../../Components/QueryPathfinder/QueryPathfinder";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { currentConfig } from "../../Redux/userSlice";
+import { currentConfig } from "../../Redux/slices/userSlice";
 
 const Pathfinder = () => {
   const config = useSelector(currentConfig);

@@ -21,7 +21,7 @@ import { useUser } from '../../Utilities/userApi';
 import { debounce } from 'lodash';
 import { Path, Result, ResultEdge, ResultSet } from '../../Types/results';
 import { useDispatch } from 'react-redux';
-import { setResultSets } from '../../Redux/resultsSlice';
+import { setResultSets } from '../../Redux/slices/resultsSlice';
 
 const UserSaves = () => {
 

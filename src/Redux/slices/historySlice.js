@@ -1,6 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit';
+import { QUERY_HISTORY_STORAGE_KEY } from '../storageKeys';
 
-let savedState = JSON.parse(localStorage.getItem('queryHistoryState'))
+let savedState = JSON.parse(localStorage.getItem(QUERY_HISTORY_STORAGE_KEY))
 
 const initialState = (!!savedState) ? savedState : [];
 

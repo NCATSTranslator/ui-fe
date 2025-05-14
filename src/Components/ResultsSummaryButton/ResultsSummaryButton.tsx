@@ -11,8 +11,8 @@ import { Result } from "../../Types/results";
 import { ResultContextObject } from "../../Utilities/llm";
 import { useTextStream } from "../../Utilities/customHooks";
 import { isEqual } from "lodash";
-import { currentConfig } from "../../Redux/userSlice";
-import { getResultSetById } from "../../Redux/resultsSlice";
+import { currentConfig } from "../../Redux/slices/userSlice";
+import { getResultSetById } from "../../Redux/slices/resultsSlice";
 import { useSelector } from "react-redux";
 
 interface ResultsSummaryButtonProps {

@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef, FC, Dispatch, SetStateAction } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
-import { currentConfig } from "../../Redux/userSlice";
+import { currentConfig } from "../../Redux/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
 import Autocomplete from '../Autocomplete/Autocomplete';
 import TextInput from '../Core/TextInput';

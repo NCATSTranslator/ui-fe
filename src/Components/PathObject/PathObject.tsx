@@ -8,7 +8,7 @@ import Highlighter from 'react-highlight-words';
 import Predicate from '../Predicate/Predicate';
 import { Path, PathFilterState, isResultNode, ResultNode, Filter, isResultEdge } from '../../Types/results.d';
 import { useSelector } from 'react-redux';
-import { getEdgeById, getNodeById, getResultSetById } from '../../Redux/resultsSlice';
+import { getEdgeById, getNodeById, getResultSetById } from '../../Redux/slices/resultsSlice';
 
 export interface PathObjectProps {
   activeEntityFilters: string[];
