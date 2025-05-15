@@ -3,12 +3,13 @@ import { FC, useId } from 'react';
 import Tooltip from '../Tooltip/Tooltip';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
-import { formatBiolinkEntity, formatBiolinkNode, getIcon } from '../../Utilities/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getIcon, joinClasses } from '../../Utilities/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from '../Predicate/Predicate';
 import { Path, PathFilterState, isResultNode, ResultNode, Filter, isResultEdge } from '../../Types/results.d';
 import { useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getResultSetById } from '../../Redux/slices/resultsSlice';
+import { useSeenStatus } from '../../Utilities/customHooks';
 
 export interface PathObjectProps {
   activeEntityFilters: string[];
@@ -63,6 +64,8 @@ const PathObject: FC<PathObjectProps> = ({
   const pathObject = (index % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
   const isNode = isResultNode(pathObject);
   const isEdge = isResultEdge(pathObject);
+  const { isEdgeSeen } = useSeenStatus(pk);
+  const isSeen = isEdge && isEdgeSeen(pathObject.id);
   const type = isNode ? pathObject?.types[0].replace("biolink:", ""): '';
   const uid = useId();
   let nameString = '';
@@ -78,13 +81,22 @@ const PathObject: FC<PathObjectProps> = ({
   if(!pathObject)
     return null;
 
+  const nodeClass = joinClasses(
+    styles.nameContainer,
+    styles.pathObject,
+    className,
+    pathViewStyles && pathViewStyles.nameContainer,
+    inModal && styles.inModal,
+    isEven && styles.isEven
+  );
+
   return (
     <>
       {
         isNode 
           ?
             <span 
-              className={`${styles.nameContainer} ${className} ${pathViewStyles && pathViewStyles.nameContainer}  ${inModal ? styles.inModal : ''} ${isEven && styles.isEven}`}
+              className={nodeClass}
               data-tooltip-id={`${uid}`}
               data-node-id={pathObject.id}
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
@@ -137,6 +149,7 @@ const PathObject: FC<PathObjectProps> = ({
                   parentClass={styles.predicateContainer}
                   inModal={inModal}
                   isEven={isEven}
+                  isSeen={isSeen}
                   className={className}
                   pathFilterState={pathFilterState}
                   pathViewStyles={pathViewStyles}
