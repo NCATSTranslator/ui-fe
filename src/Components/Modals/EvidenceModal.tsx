@@ -20,6 +20,7 @@ import PublicationsTable from "../EvidenceTables/PublicationsTable";
 import Button from "../Core/Button";
 import PathView from "../PathView/PathView";
 import { useSeenStatus } from "../../Utilities/customHooks";
+import { markEdgeUnseen } from "../../Redux/slices/seenStatusSlice";
 
 interface EvidenceModalProps {
   edge: ResultEdge | null;
@@ -42,7 +43,6 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
   const prefs = useSelector(currentPrefs);
   const resultSet = useSelector(getResultSetById(pk));
-  const { markEdgeSeen } = useSeenStatus(pk);
 
   const [pubmedEvidence, setPubmedEvidence] = useState<PublicationObject[]>([]);
   const [sources, setSources] = useState<Provenance[]>([]);
@@ -54,6 +54,9 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
   const [isPathViewMinimized, setIsPathViewMinimized] = useState(false);
   const isInferred = hasSupport(selectedEdge);
+
+  const { isEdgeSeen, markEdgeSeen, markEdgeUnseen } = useSeenStatus(pk);
+  const edgeSeen = !!selectedEdge?.id && isEdgeSeen(selectedEdge.id);
 
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false = useMemo(()=>{
     return path?.compressedSubgraph && !!resultSet ? getCompressedSubgraph(resultSet, path.compressedSubgraph) : false;
@@ -138,15 +141,35 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     setEdgeSelectedTrigger(prev=>!prev);
   }
 
+  const handleToggleSeen = () => {
+    if(selectedEdge === null) {
+      console.warn("edge seen status cannot be toggled, selectedEdge is null."); 
+      return;
+    }
+    if(edgeSeen)
+      markEdgeUnseen(selectedEdge.id);
+    else
+      markEdgeSeen(selectedEdge.id);
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer}`}>
       {result?.drug_name &&
         <div className={styles.top}>
           <h5 className={styles.title}>{isInferred ? "Indirect" : "Direct"} Path {pathKey} Evidence</h5>
-          {
-            edgeLabel &&
-            <p className={styles.subtitle}>{edgeLabel}</p>
-          }
+          <div className={styles.labelContainer}>
+            {
+              edgeLabel &&
+              <p className={styles.subtitle}>{edgeLabel}</p>
+            }
+            <span className={styles.sep}>·</span>
+            <p 
+              className={styles.toggleSeen}
+              onClick={handleToggleSeen}
+              >
+              Mark as {edgeSeen ? "Unseen" : "Seen"}
+            </p>
+          </div>
           <Tooltip id="knowledge-sources-tooltip" >
             <span>The resources that provided the information supporting the selected relationship.</span>
           </Tooltip>
