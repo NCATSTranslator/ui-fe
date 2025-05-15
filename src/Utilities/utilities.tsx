@@ -1361,3 +1361,13 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   support: edge?.support || [],
   trials: edge?.trials || [],
 });
+
+/**
+ * Returns a space-separated string of class names, filtering out any falsy values such as
+ * false, null, undefined, or an empty string. Useful for conditionally applying CSS classes.
+ *
+ * @param {(string | false | null | undefined)[]} classes - A list of class names or falsy values.
+ * @returns {string} - A single string of valid class names joined by spaces.
+ */
+export const joinClasses = (...classes: (string | false | null | undefined)[]) =>
+  classes.filter(Boolean).join(' ');
