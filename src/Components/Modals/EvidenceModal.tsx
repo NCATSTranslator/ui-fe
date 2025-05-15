@@ -19,6 +19,7 @@ import Tooltip from "../Tooltip/Tooltip";
 import PublicationsTable from "../EvidenceTables/PublicationsTable";
 import Button from "../Core/Button";
 import PathView from "../PathView/PathView";
+import { useSeenStatus } from "../../Utilities/customHooks";
 
 interface EvidenceModalProps {
   edge: ResultEdge | null;
@@ -41,6 +42,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
   const prefs = useSelector(currentPrefs);
   const resultSet = useSelector(getResultSetById(pk));
+  const { markEdgeSeen } = useSeenStatus(pk);
 
   const [pubmedEvidence, setPubmedEvidence] = useState<PublicationObject[]>([]);
   const [sources, setSources] = useState<Provenance[]>([]);
@@ -93,6 +95,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     const formatted = getFormattedEdgeLabel(resultSet, selEdge).replaceAll("|", " ");
     setEdgeLabel(formatted);
     distributeEvidence(filteredEvidence);
+    markEdgeSeen(selEdge.id);
   }
 
   const distributeEvidence = (evidence: {publications: Set<PublicationObject>, sources: Set<Provenance>, trials: Set<TrialObject> }) => {
