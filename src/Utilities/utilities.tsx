@@ -1371,3 +1371,14 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
  */
 export const joinClasses = (...classes: (string | false | null | undefined)[]) =>
   classes.filter(Boolean).join(' ');
+
+
+/**
+ * Returns an array of edge IDs extracted from a subgraph sequence, which consists of alternating
+ * node and edge IDs, always starting and ending with a node ID.
+ *
+ * @param {string[]} subgraph - An array representing a path subgraph with alternating node and edge IDs.
+ * @returns {string[]} - An array containing only the edge IDs from the subgraph.
+ */
+export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
+  subgraph.filter((_, i) => i % 2 === 1);
