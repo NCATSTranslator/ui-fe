@@ -3,7 +3,6 @@ import { SEEN_STATUS_STORAGE_KEY } from '../storageKeys';
 
 export interface SeenStatus {
   seenEdges: string[];
-  seenPaths: string[];
 }
 
 export interface SeenStatusState {
@@ -28,7 +27,7 @@ const seenStatusSlice = createSlice({
     markEdgeSeen: (state, action: PayloadAction<{ pk: string; edgeId: string }>): void => {
       const { pk, edgeId } = action.payload;
       if (!state[pk]) {
-        state[pk] = { seenEdges: [], seenPaths: [] };
+        state[pk] = { seenEdges: []};
       }
       if (!state[pk].seenEdges.includes(edgeId)) {
         state[pk].seenEdges.push(edgeId);
@@ -38,21 +37,6 @@ const seenStatusSlice = createSlice({
       const { pk, edgeId } = action.payload;
       if (state[pk]) {
         state[pk].seenEdges = state[pk].seenEdges.filter(id => id !== edgeId);
-      }
-    },
-    markPathSeen: (state, action: PayloadAction<{ pk: string; pathId: string }>) => {
-      const { pk, pathId } = action.payload;
-      if (!state[pk]) {
-        state[pk] = { seenEdges: [], seenPaths: [] };
-      }
-      if (!state[pk].seenPaths.includes(pathId)) {
-        state[pk].seenPaths.push(pathId);
-      }
-    },
-    markPathUnseen: (state, action: PayloadAction<{ pk: string; pathId: string }>) => {
-      const { pk, pathId } = action.payload;
-      if (state[pk]) {
-        state[pk].seenPaths = state[pk].seenPaths.filter(id => id !== pathId);
       }
     },
     resetSeenStatus: (state, action: PayloadAction<{ pk: string }>) => {
@@ -65,8 +49,6 @@ const seenStatusSlice = createSlice({
 export const {
   markEdgeSeen,
   markEdgeUnseen,
-  markPathSeen,
-  markPathUnseen,
   resetSeenStatus,
 } = seenStatusSlice.actions;
 
