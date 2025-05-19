@@ -126,8 +126,14 @@
     .nameShape .background {
       background-color: $grayPathObjectSeen;
     }
+    &:before {
+      background-color: $grayPathObjectSeen;
+    }
     &.isEven {
       .nameShape .background {
+        background-color: $whitePathObjectSeen;
+      }
+      &:before {
         background-color: $whitePathObjectSeen;
       }
     }
@@ -146,8 +152,14 @@
     .nameShape .background {
       background-color: $grayPathObjectSeenHover !important;
     }
+    &:before {
+      background-color: $grayPathObjectSeenHover !important;
+    }
     &.isEven {
       .nameShape .background {
+        background-color: $whitePathObjectSeenHover !important;
+      }
+      &:before {
         background-color: $whitePathObjectSeenHover !important;
       }
     }
@@ -191,6 +203,12 @@
   &:hover + div + .nameContainer,
   &.nameContainer:has(+ .predicateContainer:hover),
   &.nameContainer:has(+ svg + div .predicateContainer:hover) {
+    .nameShape .background {
+      background-color: $grayPathObjectHover !important;
+    }
+    &:before {
+      background-color: $grayPathObjectHover !important;
+    }
     &.isEven {
       .nameShape .background {
         background-color: $whitePathObjectHover !important;
@@ -198,12 +216,6 @@
       &:before {
         background-color: $whitePathObjectHover !important;
       }
-    }
-    .nameShape .background {
-      background-color: $grayPathObjectHover !important;
-    }
-    &:before {
-      background-color: $grayPathObjectHover !important;
     }
   }
 
