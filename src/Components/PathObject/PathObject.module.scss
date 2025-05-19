@@ -130,7 +130,10 @@
       background-color: $grayPathObjectSeen;
     }
     &.isEven {
-      .nameShape .background, &:before {
+      .nameShape .background {
+        background-color: $whitePathObjectSeen;
+      }
+      &:before {
         background-color: $whitePathObjectSeen;
       }
     }
