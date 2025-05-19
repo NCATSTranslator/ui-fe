@@ -1,4 +1,4 @@
-import { getEdgeById, getNodeById, getPathById } from "../Redux/resultsSlice";
+import { getEdgeById, getNodeById, getPathById } from "../Redux/slices/resultsSlice";
 import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, Filter, PathFilterState, Filters } from "../Types/results.d";
 import { hasSupport } from "./utilities";
 import { AutocompleteItem } from "../Types/querySubmission";

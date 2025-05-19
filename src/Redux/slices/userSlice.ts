@@ -1,9 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { defaultPrefs } from '../Utilities/userApi';
-import { Config, UserState, PreferencesContainer, User } from '../Types/global';
+import { defaultPrefs } from '../../Utilities/userApi';
+import { Config, UserState, PreferencesContainer, User } from '../../Types/global';
 
-
-// Define initialState with the UserState type
 const initialState: UserState = {
   currentUser: undefined,
   currentPrefs: defaultPrefs,

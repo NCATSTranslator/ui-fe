@@ -111,13 +111,54 @@
     background-color: transparent !important;
     z-index: 50 !important;
   }
-  // hover states and selected states
+
+  // hover states, selected states, seen states
+
+  // Base style for seen
+  &.seen,
+  &.nameContainer:has(+ .predicateContainer.seen),
+  &.nameContainer:has(+ svg + div .predicateContainer.seen),
+  &.seen + .nameContainer.pathObject,
+  &.seen + div + .nameContainer.pathObject {
+    span {
+      font-weight: 400;
+    }
+    .nameShape .background {
+      background-color: $grayPathObjectSeen;
+    }
+    &.isEven {
+      .nameShape .background {
+        background-color: $whitePathObjectSeen;
+      }
+    }
+  }
+
+  // Hover override when seen AND hovered
+  &.seen:hover,
+  &.nameContainer:has(+ .predicateContainer.seen:hover),
+  &.nameContainer:has(+ .predicateContainer.seen):hover,
+  &.nameContainer:has(+ svg + div .predicateContainer.seen:hover),
+  &.nameContainer:has(+ svg + div .predicateContainer.seen):hover,
+  &.seen:hover + .nameContainer,
+  &.seen:hover + div + .nameContainer,
+  &.seen + .nameContainer:hover,
+  &.seen + div + .nameContainer:hover {
+    .nameShape .background {
+      background-color: $grayPathObjectSeenHover !important;
+    }
+    &.isEven {
+      .nameShape .background {
+        background-color: $whitePathObjectSeenHover !important;
+      }
+    }
+  }
+
   // Base style for selected
   &.selected,
   &.nameContainer:has(+ .predicateContainer.selected),
   &.nameContainer:has(+ svg + div .predicateContainer.selected),
-  &.selected + .nameContainer,
-  &.selected + div + .nameContainer {
+  &.selected + .nameContainer.pathObject,
+  &.selected + div + .nameContainer.pathObject {
     .nameShape .background {
       background-color: $pathObjectSelected;
     }
@@ -137,10 +178,10 @@
   &.selected + .nameContainer:hover,
   &.selected + div + .nameContainer:hover {
     .nameShape .background {
-      background-color: $pathObjectSelectedHover;
+      background-color: $pathObjectSelectedHover !important;
     }
     &:before {
-      background-color: $pathObjectSelectedHover;
+      background-color: $pathObjectSelectedHover !important;
     }
   }
 
@@ -165,7 +206,7 @@
       background-color: $grayPathObjectHover !important;
     }
   }
-  
+
   &>span {
     padding: 5px;
     width: 160px;
@@ -291,6 +332,9 @@
       &:before {
         background-image: none;
       }
+    }
+    &:after {
+      right: 10px;
     }
     .icon {
       right: 10px;

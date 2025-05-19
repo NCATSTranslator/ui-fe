@@ -1,6 +1,6 @@
 import styles from './History.module.scss';
 import { useState } from "react";
-import { pastQueryState, setHistory } from "../../Redux/historySlice";
+import { pastQueryState, setHistory } from "../../Redux/slices/historySlice";
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from "react-router-dom";
 import Modal from "../../Components/Modals/Modal";

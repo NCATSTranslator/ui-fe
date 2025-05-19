@@ -1,4 +1,4 @@
-import { getEdgeById, getNodeById, getPathById } from "../Redux/resultsSlice";
+import { getEdgeById, getNodeById, getPathById } from "../Redux/slices/resultsSlice";
 import { ResultEdge, ResultNode, ResultSet, Result, isResultNode, isResultEdge } from "../Types/results.d";
 
 export type ResultContextObject = {
