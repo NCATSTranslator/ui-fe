@@ -144,11 +144,31 @@
     width: 100%;
     text-align: center;
   }
+  .labelContainer {
+    display: flex;
+    align-items: center;
+  }
   .subtitle {
     font-size: 14px;
     font-weight: 400;
     color: $black;
     margin-bottom: 0;
+  }
+  .sep {
+    margin: 0 8px;
+    font-size: 14px;
+    color: $darkGray;
+    font-weight: 800;
+  }
+  .toggleSeen {
+    color: $purpleOne;
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 0;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
   }
   .title {
     margin-bottom: 0;

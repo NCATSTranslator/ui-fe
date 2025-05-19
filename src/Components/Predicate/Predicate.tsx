@@ -7,11 +7,11 @@ import CTIcon from '../../Icons/Status/HasCT.svg?react';
 import Up from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import InferredBorder from '../../Icons/Connectors/Double Lines.svg?react';
 import Highlighter from 'react-highlight-words';
-import { checkEdgesForClinicalTrials, checkEdgesForPubs, getCompressedEdge, getEvidenceFromEdge, hasSupport } from '../../Utilities/utilities';
+import { checkEdgesForClinicalTrials, checkEdgesForPubs, getCompressedEdge, getEvidenceFromEdge, hasSupport, joinClasses } from '../../Utilities/utilities';
 import Tooltip from '../Tooltip/Tooltip';
 import SupportPathGroup from '../SupportPathGroup/SupportPathGroup';
 import { Filter, Path, PathFilterState, ResultEdge, ResultNode } from '../../Types/results';
-import { getResultSetById } from '../../Redux/resultsSlice';
+import { getResultSetById } from '../../Redux/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { useSupportPathKey } from '../../Utilities/customHooks';
@@ -31,6 +31,7 @@ interface PredicateProps {
   edgeIDs: string[];
   inModal?: boolean | null;
   isEven?: boolean;
+  isSeen?: boolean;
   parentClass?: string;
   parentStyles?: {[key: string]: string;} | null;
   pathFilterState: PathFilterState;
@@ -56,6 +57,7 @@ const Predicate: FC<PredicateProps> = ({
   hoverHandlers,
   inModal = false,
   isEven = false,
+  isSeen = false,
   parentClass = '',
   parentStyles,
   pathFilterState,
@@ -100,10 +102,24 @@ const Predicate: FC<PredicateProps> = ({
   ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
   : [formattedEdge];
 
+  const edgeClass = joinClasses(
+    styles.edge,
+    className,
+    parentClass,
+    hasPubs && styles.hasPubs,
+    hasCTs && styles.hasCTs,
+    isInferred && styles.isInferred,
+    !!pathViewStyles && pathViewStyles.predicateInterior,
+    (isSeen && parentStyles) && `${parentStyles.seen}`,
+    (selected && parentStyles) && `${parentStyles.selected} ${styles.selected}`,
+    (inModal && parentStyles) && `${parentStyles.inModal} ${styles.inModal}`,
+    (isEven && parentStyles) && `${parentStyles.isEven} ${styles.isEven}`
+  )
+
   return (
     <>
       <span
-        className={`${selected && styles.selected} ${selected && parentStyles ? parentStyles.selected : ''} ${styles.edge} ${(inModal && parentStyles) && `${parentStyles.inModal} ${styles.inModal}`} ${parentClass} ${className} ${hasPubs ? styles.hasPubs : ''} ${hasCTs ? styles.hasCTs : ''} ${!!pathViewStyles && pathViewStyles.predicateInterior} ${isInferred && styles.isInferred}  ${isEven && parentStyles && `${parentStyles.isEven} ${styles.isEven}`}`}
+        className={edgeClass}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         data-edge-ids={edgeIDs.toString()}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}

@@ -3,7 +3,7 @@ import { useEffect, useState, Dispatch, SetStateAction, useCallback } from "reac
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "../../Utilities/utilities";
-import { pastQueryState, setHistory } from "../../Redux/historySlice";
+import { pastQueryState, setHistory } from "../../Redux/slices/historySlice";
 import { cloneDeep, debounce } from "lodash";
 import { getResultsShareURLPath } from "../../Utilities/resultsInteractionFunctions";
 import { QueryHistoryItem } from "../../Types/global";
@@ -30,6 +30,7 @@ const QueryHistoryList = () => {
 
   const [shareModalOpen, setShareModalOpen] = useState<boolean>(false);
   const [exportQueryID, setExportQueryID] = useState<string | null>(null);
+  const [exportNodeID, setExportNodeID] = useState<string | null>(null);
   const [exportLabel, setExportLabel] = useState<string | null>(null);
   const [exportTypeID, setExportTypeID] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -90,7 +91,8 @@ const QueryHistoryList = () => {
   const handleExportClick = (e: React.MouseEvent, query: QueryHistoryItem) => {
     e.stopPropagation();
     setExportLabel(query?.item?.node?.label ?? null);
-    setExportTypeID(query?.item?.type?.id ?? null);
+    setExportNodeID(query.item?.node?.id ?? null);
+    setExportTypeID(query?.item?.type?.id.toString() ?? null);
     setExportQueryID(query.id);
   };
 
@@ -112,6 +114,7 @@ const QueryHistoryList = () => {
         onClose={handleShareModalClose}
         qid={!!exportQueryID ? exportQueryID : ""}
         label={exportLabel}
+        nodeID={exportNodeID}
         typeID={exportTypeID}
       />
       <div className={styles.searchBarContainer}>

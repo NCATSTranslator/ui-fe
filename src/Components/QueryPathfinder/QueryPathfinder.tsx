@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef, FC, Dispatch, SetStateAction } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
-import { currentConfig } from "../../Redux/userSlice";
+import { currentConfig } from "../../Redux/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
 import Autocomplete from '../Autocomplete/Autocomplete';
 import TextInput from '../Core/TextInput';
@@ -60,7 +60,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   const [queryItemOne, setQueryItemOne] = useState<AutocompleteItem | null>(null);
   const [queryItemTwo, setQueryItemTwo] = useState<AutocompleteItem | null>(null);
   const [hasMiddleType, setHasMiddleType] = useState<boolean>(false);
-  const [middleType, setMiddleType] = useState<string | null>(null);
+  const [middleType, setMiddleType] = useState<string>("");
 
   const labelOne = getDataFromQueryVar("lone");
   const labelTwo = getDataFromQueryVar("ltwo");
@@ -161,8 +161,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
   const submitQuery = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem) => {
 
-    // let timestamp = new Date();
-
     // Set isLoading to true
     setIsLoading(true);
 
@@ -230,7 +228,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
   const handleMiddleTypeTrigger = () => {
     if(hasMiddleType) {
-      setMiddleType(null);
+      setMiddleType("");
     } else {
       setMiddleType("biolink:ChemicalEntity");
     }
@@ -344,7 +342,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                       handleChange={(value)=>{
                         setMiddleType(value.toString());
                       }}
-                      value={middleType}
+                      value={middleType ?? ""}
                       noanimate
                       className={styles.middleTypeSelector}
                       >

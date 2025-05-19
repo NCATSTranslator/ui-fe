@@ -15,7 +15,7 @@ import navigator from 'cytoscape-navigator';
 import popper from 'cytoscape-popper';
 import 'cytoscape-navigator/cytoscape.js-navigator.css';
 import { useSelector } from 'react-redux';
-import { currentPrefs } from '../../Redux/userSlice';
+import { currentPrefs } from '../../Redux/slices/userSlice';
 import Button from '../Core/Button';
 
 const getInitialGraphLayoutFromPrefs = (prefs, layoutList) => {

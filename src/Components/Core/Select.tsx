@@ -1,24 +1,30 @@
-import React, { useState, useEffect, useRef, isValidElement, Children, ReactNode, FC } from "react";
+import React, { useState, useEffect, useRef, ReactNode } from "react";
 import AnimateHeight from "react-animate-height";
 import styles from './Select.module.scss';
 
-type SelectProps = {
+// OptionProps for individual <option>
+export interface OptionProps<T extends string | number> {
+  value: T;
+  children: ReactNode;
+};
+
+interface SelectProps<T extends string | number> {
   label?: string;
   subtitle?: string;
-  value: string | number | null;
+  value: T;
   name?: string;
   size?: string;
   error?: boolean;
   errorText?: string;
-  handleChange?: (value: string | number) => void;
+  handleChange?: (value: T) => void;
   noanimate?: boolean;
-  children: ReactNode;
+  children: React.ReactElement<OptionProps<T>>[];
   testId?: string;
   className?: string;
   iconClass?: string;
 };
 
-const Select: FC<SelectProps> = ({
+const Select = <T extends string | number>({
   label,
   subtitle,
   value,
@@ -32,8 +38,8 @@ const Select: FC<SelectProps> = ({
   testId,
   className = '',
   iconClass
-}) => {
-  const [selectedItem, setSelectedItem] = useState<string | number | null>(value === null || isNaN(Number(value)) ? "" : value);
+}: SelectProps<T>) => {
+  const [selectedItem, setSelectedItem] = useState<T>(value);
   const [selectOpen, setSelectOpen] = useState(false);
   const [height, setHeight] = useState<0 | 'auto'>(0);
   const openClass = selectOpen ? styles.open : styles.closed;
@@ -44,22 +50,13 @@ const Select: FC<SelectProps> = ({
   const handleSelectClick = (e: React.MouseEvent<HTMLSelectElement | HTMLSpanElement>) => {
     e.preventDefault();
     setSelectOpen(!selectOpen);
-  }
+  };
 
-  const handleOptionClick = (e: React.MouseEvent<HTMLSpanElement>) => {
-    e.preventDefault();
-    const value = e.currentTarget.dataset.value || "";
-    setSelectedItem(value);
+  const handleOptionClick = (val: T) => {
+    setSelectedItem(val);
     setSelectOpen(false);
-    handleChange(value);
-  }
-
-  useEffect(() => {
-    if (selectOpen === false)
-      setHeight(0);
-    else
-      setHeight('auto');
-  }, [selectOpen]);
+    handleChange(val);
+  };
 
   useEffect(() => {
     setSelectedItem(value);
@@ -74,75 +71,71 @@ const Select: FC<SelectProps> = ({
     };
 
     document.addEventListener("click", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setHeight(selectOpen ? 'auto' : 0);
+  }, [selectOpen]);
+
   return (
-    <label className={`select ${styles.select} ${size} ${animateClass} ${className}`} ref={wrapperRef}> 
+    <label className={`select ${styles.select} ${size} ${animateClass} ${className}`} ref={wrapperRef}>
       {label && <span className="input-label">{label}</span>}
       {subtitle && <span className="input-subtitle">{subtitle}</span>}
+
       <div className={`${styles.selectContainer} ${openClass}`}>
-        <select 
-          name={name} 
-          onMouseDown={handleSelectClick} 
-          defaultValue={selectedItem || 0}
+        <select
+          name={name}
+          onMouseDown={handleSelectClick}
+          defaultValue={selectedItem}
           key={`${Math.floor(Math.random() * 1000)}-min`}
           data-testid={testId}
         >
           <option value="" disabled hidden>{name}</option>
-          {children}
+          {children.map((child) => (
+            <option key={String(child.props.value)} value={child.props.value}>
+              {child.props.children}
+            </option>
+          ))}
         </select>
+
         <span className={`${styles.icon} ${iconClass}`} onMouseDown={handleSelectClick}></span>
+
         {noanimate ? (
           <div className={`${styles.selectList} ${openClass}`}>
             <div>
-              {Children.map(children, (child, i) => {
-                if (isValidElement(child)) {
-                  return (
-                    <span 
-                      onClick={handleOptionClick} 
-                      key={i} 
-                      className={styles.option} 
-                      data-value={child.props.value}
-                      data-testid={child.props.value}
-                    >
-                      {child.props.children}
-                    </span>
-                  );
-                }
-                return null;
-              })}
+              {children.map((child, i) => (
+                <span
+                  key={i}
+                  onClick={() => handleOptionClick(child.props.value)}
+                  className={styles.option}
+                  data-value={child.props.value}
+                  data-testid={child.props.value}
+                >
+                  {child.props.children}
+                </span>
+              ))}
             </div>
           </div>
         ) : (
-          <AnimateHeight className={`${styles.selectList} ${openClass}`}
-            duration={250}
-            height={height}
-          >
-            {Children.map(children, (child, i) => {
-              if (isValidElement(child)) {
-                return (
-                  <span 
-                    onClick={handleOptionClick} 
-                    key={i} 
-                    className={styles.option} 
-                    data-value={child.props.value}
-                  >
-                    {child.props.children}
-                  </span>
-                );
-              }
-              return null;
-            })}
+          <AnimateHeight className={`${styles.selectList} ${openClass}`} duration={250} height={height}>
+            {children.map((child, i) => (
+              <span
+                key={i}
+                onClick={() => handleOptionClick(child.props.value)}
+                className={styles.option}
+                data-value={child.props.value}
+              >
+                {child.props.children}
+              </span>
+            ))}
           </AnimateHeight>
         )}
       </div>
+
       {error && <span className={styles.errorText}>{errorText}</span>}
     </label>
   );
-}
+};
 
 export default Select;

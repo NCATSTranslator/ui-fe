@@ -1,9 +1,13 @@
-import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction, useCallback } from 'react';
+import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction, useCallback, useMemo } from 'react';
 import { LastViewedPathIDContext, SupportPathDepthContext } from '../Components/PathView/PathView';
 import { SupportPathKeyContext } from '../Components/SupportPathGroup/SupportPathGroup';
 import { isEqual } from 'lodash';
 import { useQuery } from 'react-query';
 import { useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../Redux/store';
+import { markEdgeSeen, markEdgeUnseen, resetSeenStatus } from '../Redux/slices/seenStatusSlice';
+
 
 interface WindowSize {
   width: number | undefined;
@@ -408,5 +412,33 @@ export const useHoveredIndex = () => {
     hoveredIndex,
     getHoverHandlers,
     resetHoveredIndex: () => setHoveredIndex(null),
+  };
+};
+
+/**
+ * Custom hook to handle seen/unseen status on edges and paths
+ */
+export const useSeenStatus = (pk: string) => {
+  const dispatch: AppDispatch = useDispatch();
+
+  const seenStatus = useSelector((state: RootState) =>
+    state.seenStatus[pk] || { seenEdges: [], seenPaths: [] }
+  );
+
+  const isEdgeSeen = (edgeId: string): boolean => seenStatus.seenEdges.includes(edgeId);
+  const seenEdges = useSelector((state: RootState) => state.seenStatus[pk]?.seenEdges || []);
+  const seenEdgeSet = useMemo(() => new Set(seenEdges), [seenEdges]);
+  const isPathSeen = (edgeIds: string[]): boolean => edgeIds.every((id) => seenEdgeSet.has(id));
+  const handleMarkEdgeSeen = (edgeId: string) => dispatch(markEdgeSeen({ pk, edgeId }));
+  const handleMarkEdgeUnseen = (edgeId: string) => dispatch(markEdgeUnseen({ pk, edgeId }));
+  const resetStatus = () => dispatch(resetSeenStatus({ pk }));
+
+  return {
+    seenEdges: seenStatus.seenEdges,
+    isEdgeSeen,
+    isPathSeen,
+    markEdgeSeen: handleMarkEdgeSeen,
+    markEdgeUnseen: handleMarkEdgeUnseen,
+    resetStatus,
   };
 };

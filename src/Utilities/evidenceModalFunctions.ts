@@ -5,7 +5,7 @@ import { cloneDeep } from 'lodash';
 import { capitalizeAllWords } from "./utilities";
 import { EvidenceSortState, PublicationObject, RawPublicationList, TrialObject } from '../Types/evidence';
 import { ResultEdge, ResultSet } from '../Types/results';
-import { getPubById, getTrialById } from '../Redux/resultsSlice';
+import { getPubById, getTrialById } from '../Redux/slices/resultsSlice';
 
 /**
  * Sorts PubMed evidence based on the specified sorting criteria and updates the state.

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ResultNode, ResultEdge, Path, ResultSet, Result } from "../Types/results";
-import { PublicationObject, TrialObject } from "../Types/evidence";
+import { ResultNode, ResultEdge, Path, ResultSet, Result } from "../../Types/results";
+import { PublicationObject, TrialObject } from "../../Types/evidence";
 import { cloneDeep } from "lodash";
 
 type ResultState = {

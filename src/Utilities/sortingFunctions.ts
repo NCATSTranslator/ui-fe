@@ -4,7 +4,7 @@ import { Filter, Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, Res
 import { PublicationObject } from '../Types/evidence.d';
 import { generateScore } from './scoring';
 import { getTagFamily } from './filterFunctions';
-import { getEdgeById, getNodeById, getPathById } from '../Redux/resultsSlice';
+import { getEdgeById, getNodeById, getPathById } from '../Redux/slices/resultsSlice';
 
 const compareWithFallback = (
   aValue: string | undefined | null,

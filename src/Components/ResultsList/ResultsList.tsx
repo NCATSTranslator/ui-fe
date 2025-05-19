@@ -10,8 +10,8 @@ import StickyToolbar from "../StickyToolbar/StickyToolbar";
 import { cloneDeep, isEqual } from "lodash";
 import { unstable_useBlocker as useBlocker } from "react-router";
 import { useSelector, useDispatch } from 'react-redux';
-import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById }from "../../Redux/resultsSlice";
-import { currentPrefs, currentUser }from "../../Redux/userSlice";
+import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById }from "../../Redux/slices/resultsSlice";
+import { currentPrefs, currentUser }from "../../Redux/slices/userSlice";
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
   sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow, filterCompare } from "../../Utilities/sortingFunctions";

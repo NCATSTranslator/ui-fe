@@ -7,10 +7,10 @@ import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import Information from '../../Icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
-import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred, isStringArray, numberToWords } from '../../Utilities/utilities';
+import { extractEdgeIDsFromSubgraph, getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred, isStringArray, joinClasses, numberToWords } from '../../Utilities/utilities';
 import { PathFilterState, ResultNode, Path, Filter, ResultEdge } from '../../Types/results';
-import { LastViewedPathIDContextType, useHoveredIndex } from '../../Utilities/customHooks';
-import { getResultSetById, getPathsByIds } from '../../Redux/resultsSlice';
+import { LastViewedPathIDContextType, useHoveredIndex, useSeenStatus } from '../../Utilities/customHooks';
+import { getResultSetById, getPathsByIds } from '../../Redux/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import PathObject from '../PathObject/PathObject';
 import Button from '../Core/Button';
@@ -61,6 +61,7 @@ const PathView: FC<PathViewProps> = ({
   const itemsPerPage: number = 10;
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths, true), [paths, selectedPaths, pathFilterState, resultSet]);
   const filteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState);
+  const { isPathSeen } = useSeenStatus(pk);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0)
   const endResultIndex = useRef<number>(itemsPerPage);
@@ -176,6 +177,8 @@ const PathView: FC<PathViewProps> = ({
               {
                 displayedPaths.map((path: Path, i: number)=> {
                   const isPathFiltered = getIsPathFiltered(path, pathFilterState);
+                  const edgeIds = extractEdgeIDsFromSubgraph(path.subgraph);
+                  const isSeen = isPathSeen(edgeIds);
                   if(!path.id || (isPathFiltered && !showHiddenPaths)) 
                     return null;
                   const displayIndirectLabel = isPathInferred(resultSet, path) && !inferredLabelDisplayed;
@@ -187,6 +190,20 @@ const PathView: FC<PathViewProps> = ({
                   const tooltipID: string = (!!path?.id) ? path.id : i.toString();
                   const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
                   const subgraphToMap = (!!path.compressedSubgraph && path.compressedSubgraph.length > 0) ? path.compressedSubgraph : path.subgraph;
+                  const formattedPathClass = joinClasses(
+                    styles.formattedPath,
+                    (!!lastViewedPathID && lastViewedPathID === path.id) && styles.lastViewed,
+                    isEven && styles.isEven,
+                    isPathFiltered && styles.filtered,
+                    isSeen && styles.seenPath
+                  );
+                  const pathClass = joinClasses(
+                    (inModal && compressedSubgraph) && styles.compressedTableItem,
+                    styles.tableItem,
+                    'path',
+                    numberToWords(path.subgraph.length),
+                    (selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted) && styles.unhighlighted
+                  );
                   return (
                     <div key={tooltipID}>
                       {
@@ -214,7 +231,7 @@ const PathView: FC<PathViewProps> = ({
                             </>
                           : null
                         }
-                      <div className={`${styles.formattedPath} ${!!lastViewedPathID && lastViewedPathID === path.id && styles.lastViewed} ${isEven && styles.isEven} ${isPathFiltered && styles.filtered}`}>
+                      <div className={formattedPathClass}>
                         {
                           ((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) &&
                           <LastViewedTag inModal={inModal} inGroup={!!(inModal && compressedSubgraph)}/>
@@ -246,7 +263,7 @@ const PathView: FC<PathViewProps> = ({
                         </Tooltip>
                         <div 
                           data-path-id={`${path.id || ""}`} 
-                          className={` ${inModal && compressedSubgraph && styles.compressedTableItem} ${styles.tableItem} path ${numberToWords(path.subgraph.length)} ${selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted ? styles.unhighlighted : ''}`}
+                          className={pathClass}
                           >
                           {
                             inModal && compressedSubgraph

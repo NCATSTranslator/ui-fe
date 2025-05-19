@@ -239,6 +239,33 @@
         }
       }
     }
+    &.seenPath {
+      &>.pathEvidenceButton {
+        .num .val {
+          font-weight: 400;
+        }
+        .icon, .num {
+          background-color: $grayPathObjectSeen;
+        }
+        &:hover {
+          .icon, .num {
+            background-color: $grayPathObjectSeenHover;
+          }
+        }
+      }
+      &.isEven {
+        &>.pathEvidenceButton {
+          .icon, .num {
+            background-color: $whitePathObjectSeen;
+          }
+          &:hover {
+            .icon, .num {
+              background-color: $whitePathObjectSeenHover;
+            }
+          }
+        }
+      }
+    }
     .num {
       width: 28px;
       height: 28px;

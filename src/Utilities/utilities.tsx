@@ -17,7 +17,7 @@ import { PreferencesContainer, PrefObject } from '../Types/global';
 import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState, Tags, ResultNode } from '../Types/results.d';
 import { EvidenceCountsContainer, PublicationObject, PublicationsList, RawPublicationObject } from '../Types/evidence';
 import { Location } from 'react-router-dom';
-import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getPubById } from '../Redux/resultsSlice';
+import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getPubById } from '../Redux/slices/resultsSlice';
 import { SaveGroup } from './userApi';
 
 export const getIcon = (category: string): JSX.Element => {
@@ -1361,3 +1361,24 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   support: edge?.support || [],
   trials: edge?.trials || [],
 });
+
+/**
+ * Returns a space-separated string of class names, filtering out any falsy values such as
+ * false, null, undefined, or an empty string. Useful for conditionally applying CSS classes.
+ *
+ * @param {(string | false | null | undefined)[]} classes - A list of class names or falsy values.
+ * @returns {string} - A single string of valid class names joined by spaces.
+ */
+export const joinClasses = (...classes: (string | false | null | undefined)[]) =>
+  classes.filter(Boolean).join(' ');
+
+
+/**
+ * Returns an array of edge IDs extracted from a subgraph sequence, which consists of alternating
+ * node and edge IDs, always starting and ending with a node ID.
+ *
+ * @param {string[]} subgraph - An array representing a path subgraph with alternating node and edge IDs.
+ * @returns {string[]} - An array containing only the edge IDs from the subgraph.
+ */
+export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
+  subgraph.filter((_, i) => i % 2 === 1);
