@@ -442,3 +442,45 @@ export const useSeenStatus = (pk: string) => {
     resetStatus,
   };
 };
+
+/**
+ * Returns the current disclaimer approval status based on persistent localStorage values,
+ * and updates document title to include the provided title.
+ * Handles expiry logic for login disclaimers (1 year).
+ *
+ * @param {string} title - The base page title to append to the document title.
+ * @returns {[boolean, (value: boolean) => void]} - The current disclaimer approval status and a setter function.
+ */
+export const useDisclaimersApproved = (title: string): [boolean, (value: boolean) => void] => {
+  const [isDisclaimerApproved, setIsDisclaimerApproved] = useState<boolean>(false);
+
+  useEffect(() => {
+    const rawDisclaimer = localStorage.getItem('disclaimerApproved');
+    const disclaimerApproved = rawDisclaimer ? JSON.parse(rawDisclaimer) : false;
+
+    const loginDisclaimerRaw = localStorage.getItem('loginDisclaimerApproved');
+    let initDisclaimerApproval = disclaimerApproved;
+
+    if (window.location.pathname.includes('login') && loginDisclaimerRaw) {
+      try {
+        const { approved, timestamp } = JSON.parse(loginDisclaimerRaw);
+        const oneYear = 365 * 24 * 60 * 60 * 1000; // ms in one year
+        const isOlderThanOneYear = Date.now() - timestamp > oneYear;
+
+        if (isOlderThanOneYear) {
+          localStorage.removeItem('loginDisclaimerApproved');
+          initDisclaimerApproval = false;
+        } else {
+          initDisclaimerApproval = approved;
+        }
+      } catch {
+        initDisclaimerApproval = false;
+      }
+    }
+
+    setIsDisclaimerApproved(initDisclaimerApproval);
+    document.title = `${title} - NCATS Biomedical Data Translator`;
+  }, [title]);
+
+  return [isDisclaimerApproved, setIsDisclaimerApproved];
+};
