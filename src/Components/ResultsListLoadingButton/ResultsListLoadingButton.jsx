@@ -54,7 +54,6 @@ const ResultsListLoadingButton = ({ data = {}, currentPercentage }) => {
             {
               (data.isFetchingARAStatus || data.isFetchingResults) &&
               <ResultsAvailableIcon/>
-              // <img src={loadingIcon} className={styles.loadingButtonIcon} alt="results button loading icon"/>
             }
             {
               !(data.isFetchingARAStatus || data.isFetchingResults) &&
