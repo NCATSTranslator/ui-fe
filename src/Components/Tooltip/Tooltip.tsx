@@ -1,33 +1,36 @@
 import { ReactNode, FC} from 'react';
 import styles from './Tooltip.module.scss';
 import 'react-tooltip/dist/react-tooltip.css';
-import { Tooltip as ReactTooltip } from 'react-tooltip';
-import { PlacesType } from 'react-tooltip';
+import {PlacesType, PositionStrategy, Tooltip as ReactTooltip } from 'react-tooltip';
 
 interface TooltipProps {
-  onClose?: () => void;
-  children: ReactNode;
-  id: string;
   anchorSelect?: string;
-  offset?: number;
-  delayShow?: number;
-  delayHide?: number;
-  clickable?: boolean;
+  children: ReactNode;
   className?: string;
+  clickable?: boolean;
+  delayHide?: number;
+  delayShow?: number;
+  id: string;
+  isOpen?: boolean;
+  offset?: number;
+  onClose?: () => void;
   place?: PlacesType;
+  positionStrategy?: PositionStrategy;
 }
 
 const Tooltip: FC<TooltipProps> = ({
-  onClose = () => {},
-  children,
-  id,
   anchorSelect,
-  offset,
-  delayShow = 500,
-  delayHide = 100,
-  clickable = true,
+  children,
   className = '',
-  place = "top"
+  clickable = true,
+  delayHide = 100,
+  delayShow = 500,
+  id,
+  isOpen,
+  offset,
+  onClose = () => {},
+  place = "top",
+  positionStrategy = "fixed"
 }) => {
   return (
     <ReactTooltip
@@ -40,7 +43,8 @@ const Tooltip: FC<TooltipProps> = ({
       place={place}
       afterHide={onClose}
       offset={offset}
-      positionStrategy='fixed'
+      positionStrategy={positionStrategy}
+      {... isOpen !== undefined && {isOpen:isOpen}}
     >
       {children}
     </ReactTooltip>
