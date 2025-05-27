@@ -21,6 +21,30 @@
     display: flex;
     align-items: center;
   }
+  .tooltipInner {
+    white-space: normal;
+    .bold {
+      font-weight: 800;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+  }
+  .checkbox {
+    display: flex;
+    align-items: flex-start;
+    input {
+      margin: 0 $xxs 0 0;
+    }
+  }
+  .close {
+    position: absolute;
+    top: $xxs;
+    right: $xxs;
+    cursor: pointer;
+    path {
+      stroke: $white;
+    }
+  }
 }
 .loadPercentage {
   font-size: 12px;
@@ -67,6 +91,7 @@
   padding: 4px 8px;
   font-size: 12px;
   background-color: $purpleOne;
+  position: relative;
   &.active {
     cursor: pointer;
     pointer-events: all;
