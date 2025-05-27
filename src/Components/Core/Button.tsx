@@ -1,6 +1,7 @@
 import { FC, MouseEvent, ReactNode } from "react";
 import styles from './Button.module.scss';
 import { Link } from "react-router-dom";
+import { joinClasses } from "../../Utilities/utilities";
 
 interface ButtonProps {
   isSecondary?: boolean;
@@ -37,14 +38,15 @@ const Button: FC<ButtonProps> = ({
   className = "",
   dataTooltipId = ""
 }) => {
-  const buttonStyle = `
-    button 
-    ${styles.button} 
-    ${isTertiary ? styles.tertiary : isSecondary ? styles.secondary : ''}
-    ${iconOnly ? styles.iconOnly : ''}
-    ${smallFont ? styles.smallFont : ''}
-    ${className}
-  `.trim();
+  const buttonStyle = joinClasses(
+    'button',
+    styles.button,
+    isTertiary && styles.tertiary,
+    isSecondary && styles.secondary,
+    iconOnly && styles.iconOnly,
+    smallFont && styles.smallFont,
+    className
+  )
 
   const commonProps = {
     className: buttonStyle,
