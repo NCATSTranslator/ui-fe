@@ -115,12 +115,7 @@
 .pagination {
   display: grid;
   margin-top: $s;
-  @media screen and (min-width: $large) {
-    grid-column: 2/3;
-  }
-  @media screen and (min-width: $desktop) {
-    grid-template-columns: 1fr 1fr;
-  }
+  grid-template-columns: 1fr 1fr;
   .perPage > div > div {
     z-index: 1000 !important;
   }
