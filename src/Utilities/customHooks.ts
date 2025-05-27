@@ -449,9 +449,9 @@ export const useSeenStatus = (pk: string) => {
  * Handles expiry logic for login disclaimers (1 year).
  *
  * @param {string} title - The base page title to append to the document title.
- * @returns {[boolean, (value: boolean) => void]} - The current disclaimer approval status and a setter function.
+ * @returns {[boolean, Dispatch<SetStateAction<boolean>>]} - The current disclaimer approval status and a setter function.
  */
-export const useDisclaimersApproved = (title: string): [boolean, (value: boolean) => void] => {
+export const useDisclaimersApproved = (title: string): [boolean, Dispatch<SetStateAction<boolean>>] => {
   const [isDisclaimerApproved, setIsDisclaimerApproved] = useState<boolean>(false);
 
   useEffect(() => {
@@ -483,4 +483,38 @@ export const useDisclaimersApproved = (title: string): [boolean, (value: boolean
   }, [title]);
 
   return [isDisclaimerApproved, setIsDisclaimerApproved];
+};
+
+/**
+ * Returns the current New Results Available disclaimer status and a setter
+ * that also updates localStorage.
+ *
+ * @param {boolean} visible - Whether the disclaimer tooltip is visible.
+ * @returns {[boolean, Dispatch<SetStateAction<boolean>>]} - The disclaimer approval status and a setter.
+ */
+export const useNewResultsDisclaimerApproved = (
+  visible: boolean
+): [boolean, Dispatch<SetStateAction<boolean>>] => {
+  const STORAGE_KEY = 'newResultsDisclaimerApproved';
+
+  const [isNewResultsDisclaimerApproved, setIsNewResultsDisclaimerApproved] = useState<boolean>(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : false;
+  });
+
+  useEffect(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const stored = raw ? JSON.parse(raw) : false;
+    setIsNewResultsDisclaimerApproved(stored);
+  }, [visible]);
+
+  const setAndPersistNewResultsDisclaimerApproved: Dispatch<SetStateAction<boolean>> = (value) => {
+    setIsNewResultsDisclaimerApproved((prev) => {
+      const next = typeof value === 'function' ? (value as (prev: boolean) => boolean)(prev) : value;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  return [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved];
 };
