@@ -442,3 +442,79 @@ export const useSeenStatus = (pk: string) => {
     resetStatus,
   };
 };
+
+/**
+ * Returns the current disclaimer approval status based on persistent localStorage values,
+ * and updates document title to include the provided title.
+ * Handles expiry logic for login disclaimers (1 year).
+ *
+ * @param {string} title - The base page title to append to the document title.
+ * @returns {[boolean, Dispatch<SetStateAction<boolean>>]} - The current disclaimer approval status and a setter function.
+ */
+export const useDisclaimersApproved = (title: string): [boolean, Dispatch<SetStateAction<boolean>>] => {
+  const [isDisclaimerApproved, setIsDisclaimerApproved] = useState<boolean>(false);
+
+  useEffect(() => {
+    const rawDisclaimer = localStorage.getItem('disclaimerApproved');
+    const disclaimerApproved = rawDisclaimer ? JSON.parse(rawDisclaimer) : false;
+
+    const loginDisclaimerRaw = localStorage.getItem('loginDisclaimerApproved');
+    let initDisclaimerApproval = disclaimerApproved;
+
+    if (window.location.pathname.includes('login') && loginDisclaimerRaw) {
+      try {
+        const { approved, timestamp } = JSON.parse(loginDisclaimerRaw);
+        const oneYear = 365 * 24 * 60 * 60 * 1000; // ms in one year
+        const isOlderThanOneYear = Date.now() - timestamp > oneYear;
+
+        if (isOlderThanOneYear) {
+          localStorage.removeItem('loginDisclaimerApproved');
+          initDisclaimerApproval = false;
+        } else {
+          initDisclaimerApproval = approved;
+        }
+      } catch {
+        initDisclaimerApproval = false;
+      }
+    }
+
+    setIsDisclaimerApproved(initDisclaimerApproval);
+    document.title = `${title} - NCATS Biomedical Data Translator`;
+  }, [title]);
+
+  return [isDisclaimerApproved, setIsDisclaimerApproved];
+};
+
+/**
+ * Returns the current New Results Available disclaimer status and a setter
+ * that also updates localStorage.
+ *
+ * @param {boolean} visible - Whether the disclaimer tooltip is visible.
+ * @returns {[boolean, Dispatch<SetStateAction<boolean>>]} - The disclaimer approval status and a setter.
+ */
+export const useNewResultsDisclaimerApproved = (
+  visible: boolean
+): [boolean, Dispatch<SetStateAction<boolean>>] => {
+  const STORAGE_KEY = 'newResultsDisclaimerApproved';
+
+  const [isNewResultsDisclaimerApproved, setIsNewResultsDisclaimerApproved] = useState<boolean>(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : false;
+  });
+
+  useEffect(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const stored = raw ? JSON.parse(raw) : false;
+    setIsNewResultsDisclaimerApproved(stored);
+  }, [visible]);
+
+  const setAndPersistNewResultsDisclaimerApproved: Dispatch<SetStateAction<boolean>> = (value) => {
+    setIsNewResultsDisclaimerApproved((prev) => {
+      const next = typeof value === 'function' ? (value as (prev: boolean) => boolean)(prev) : value;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  return [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved];
+};

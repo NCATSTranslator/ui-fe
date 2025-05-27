@@ -303,7 +303,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 <Tooltip
                   id='middle-type-tooltip'
                   >
-                    <span>Specify an intermediate object type that must exist between the two terms.</span>
+                    <span>Pre-filter results by selecting a middle object type to be included within paths between the entered search terms. <br/><br/> Genes, diseases, phenotypes, and chemicals are currently supported.</span>
                 </Tooltip>
               </div>
               {

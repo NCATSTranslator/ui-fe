@@ -20,7 +20,6 @@ import PublicationsTable from "../EvidenceTables/PublicationsTable";
 import Button from "../Core/Button";
 import PathView from "../PathView/PathView";
 import { useSeenStatus } from "../../Utilities/customHooks";
-import { markEdgeUnseen } from "../../Redux/slices/seenStatusSlice";
 
 interface EvidenceModalProps {
   edge: ResultEdge | null;

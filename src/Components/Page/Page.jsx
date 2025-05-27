@@ -1,30 +1,9 @@
-import { useEffect, useState } from "react";
 import DisclaimerModal from "../Modals/DisclaimerModal";
+import { useDisclaimersApproved } from "../../Utilities/customHooks";
 
 const Page = ({ title, children }) => {
-  const [isDisclaimerApproved, setIsDisclaimerApproved] = useState(false);
 
-  useEffect(() => {
-    const disclaimerApproved = JSON.parse(localStorage.getItem('disclaimerApproved'));
-    const loginDisclaimer = localStorage.getItem('loginDisclaimerApproved');
-
-    let initDisclaimerApproval = disclaimerApproved;
-    if (window.location.pathname.includes('login') && loginDisclaimer) {
-      const { approved, timestamp } = JSON.parse(loginDisclaimer);
-      const oneYear = 365 * 24 * 60 * 60 * 1000; // one year in milliseconds
-      const isOlderThanOneYear = Date.now() - timestamp > oneYear;
-
-      if (isOlderThanOneYear) {
-        localStorage.removeItem('loginDisclaimerApproved');
-        initDisclaimerApproval = false;
-      } else {
-        initDisclaimerApproval = approved;
-      }
-    }
-
-    setIsDisclaimerApproved(initDisclaimerApproval);
-    document.title = `${title} - NCATS Biomedical Data Translator` || "";
-  }, [title]);
+  const [isDisclaimerApproved, setIsDisclaimerApproved] = useDisclaimersApproved(title);
 
   const handleDisclaimerClose = () => {
     const cookieName = window.location.pathname.includes("login") ? 'loginDisclaimerApproved' : 'disclaimerApproved';

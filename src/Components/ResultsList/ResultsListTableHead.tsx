@@ -62,7 +62,7 @@ const ResultsListTableHead: FC<ResultsListTableHeadProps> = ({
         <Alert/>
         <ArrowUp className={parentStyles.chev}/>
         <Tooltip id="paths-tooltip">
-          <span className={parentStyles.scoreSpan}>Each path represents a discrete series of relationships that connect the result to the searched-for entity.</span>
+          <span className={parentStyles.scoreSpan}>Number of paths that support the result.</span>
         </Tooltip>
       </div>
       {
@@ -80,7 +80,7 @@ const ResultsListTableHead: FC<ResultsListTableHeadProps> = ({
           <Alert/>
           <ArrowUp className={parentStyles.chev}/>
           <Tooltip id="score-tooltip">
-            <span className={parentStyles.scoreSpan}>Multimodal calculation considering strength of relationships supporting the result. Scores range from 0 to 5 and may change as new results are added. Scores will be displayed once all results have been loaded.</span>
+            <span className={parentStyles.scoreSpan}>A result's score is a multimodal calculation considering the strength of relationships supporting it. Scores range from 0 to 5 and are shown once all results are synced.</span>
           </Tooltip>
         </div>
       }
