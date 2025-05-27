@@ -116,7 +116,7 @@
         text-decoration: underline;
       }
     }
-    &:last-child span {
+    &:last-child, &:last-child span {
       margin-bottom: 0;
     }
     &.inModal span {
