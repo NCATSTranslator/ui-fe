@@ -32,7 +32,7 @@ export const isGlobalTag = (tagID) => {
 }
 
 export const getValidFamilies = () => {
-  return ['cc', 'di', 'pc', 'pt', 'ks', 'role', 'ara', 'otc', 'tdl'];
+  return ['cc', 'di', 'pc', 'pt', 'role', 'ara', 'otc', 'tdl'];
 }
 
 export const getResultFamilies = () => {
@@ -40,7 +40,7 @@ export const getResultFamilies = () => {
 }
 
 export const getPathFamilies = () => {
-  return ['pc', 'pt', 'ks'];
+  return ['pc', 'pt'];
 }
 
 export const isTagFilter = (filter) => {
@@ -110,7 +110,6 @@ export const getFilterLabel = (filter) => {
     case "pt":   return "Path Length";
     case "otc":  return "Availability";
     case "tdl":  return "Target Development Level";
-    case "ks":   return "Knowledge Source";
     default: return defaultLabel;
   }
 }
