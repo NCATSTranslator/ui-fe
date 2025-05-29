@@ -31,6 +31,7 @@ interface PredicateProps {
   edgeIDs: string[];
   inModal?: boolean | null;
   isEven?: boolean;
+  isHighlighted?: boolean;
   isSeen?: boolean;
   parentClass?: string;
   parentStyles?: {[key: string]: string;} | null;
@@ -57,6 +58,7 @@ const Predicate: FC<PredicateProps> = ({
   hoverHandlers,
   inModal = false,
   isEven = false,
+  isHighlighted = false,
   isSeen = false,
   parentClass = '',
   parentStyles,
@@ -113,7 +115,8 @@ const Predicate: FC<PredicateProps> = ({
     (isSeen && parentStyles) && `${parentStyles.seen}`,
     (selected && parentStyles) && `${parentStyles.selected} ${styles.selected}`,
     (inModal && parentStyles) && `${parentStyles.inModal} ${styles.inModal}`,
-    (isEven && parentStyles) && `${parentStyles.isEven} ${styles.isEven}`
+    (isEven && parentStyles) && `${parentStyles.isEven} ${styles.isEven}`,
+    (isHighlighted && parentStyles) && `${parentStyles.highlighted} ${styles.highlighted}`
   )
 
   return (

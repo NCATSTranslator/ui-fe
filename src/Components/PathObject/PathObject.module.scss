@@ -197,6 +197,28 @@
     }
   }
 
+    // Highlighted hover state
+    &.highlighted,
+    &.highlighted + .nameContainer,
+    &.highlighted + div + .nameContainer,
+    &.nameContainer:has(+ .predicateContainer.highlighted),
+    &.nameContainer:has(+ svg + div .predicateContainer.highlighted) {
+      .nameShape .background {
+        background-color: $grayPathObjectHover !important;
+      }
+      &:before {
+        background-color: $grayPathObjectHover !important;
+      }
+      &.isEven {
+        .nameShape .background {
+          background-color: $whitePathObjectHover !important;
+        }
+        &:before {
+          background-color: $whitePathObjectHover !important;
+        }
+      }
+    }
+
   // Generic hover state
   &:hover,
   &:hover + .nameContainer,
