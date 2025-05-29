@@ -53,6 +53,12 @@ const getTdlCaption = (): JSX.Element => {
   )
 }
 
+const getKsCaption = (): JSX.Element => {
+  return(
+    <p className={styles.caption}>Include or exclude paths that are part of the selected knowledge source</p>
+  )
+}
+
 const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.Element | null => {
   let headingToReturn;
   switch(tagFamily) {
@@ -91,6 +97,9 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.El
     case 'tdl':
       headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Target Development Level" />
       break;
+    case 'ks':
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Knowledge Source" />
+      break;
     default:
       headingToReturn = null;
   }
@@ -123,6 +132,9 @@ const getTagCaptionMarkup = (tagFamily: string): JSX.Element | null => {
       break;
     case 'tdl':
       captionToReturn = getTdlCaption();
+      break;
+    case 'ks':
+      captionToReturn = getKsCaption();
       break;
     default:
       captionToReturn = null;
