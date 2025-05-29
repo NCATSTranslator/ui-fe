@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../Redux/store';
 import { markEdgeSeen, markEdgeUnseen, resetSeenStatus } from '../Redux/slices/seenStatusSlice';
-
+import { HoverTarget } from '../Types/results';
 
 interface WindowSize {
   width: number | undefined;
@@ -397,15 +397,23 @@ export default useScrollToHash;
 /**
  * Custom hook to track the index of hovered compressed edges in the evidence modal 
  */
-export const useHoveredIndex = () => {
+export const useHoverPathObject = (setHoveredItem: (target: HoverTarget) => void) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const getHoverHandlers = useCallback(
-    (index: number) => ({
-      onMouseEnter: () => setHoveredIndex(index),
-      onMouseLeave: () => setHoveredIndex(null),
+    (isEdge: boolean, id: string, index?: number) => ({
+      onMouseEnter: () => {
+        const type = isEdge ? 'edge' : 'node';
+        setHoveredItem({ id: id, type: type});
+        if(typeof index === 'number')
+          setHoveredIndex(index);
+      },
+      onMouseLeave: () => {
+        setHoveredItem(null);
+        setHoveredIndex(null)
+      },
     }),
-    []
+    [setHoveredItem]
   );
 
   return {

@@ -173,6 +173,8 @@ export type Errors = {
   unknown: string[];
 }
 
+export type HoverTarget = { id: string; type: 'node' | 'edge' } | null;
+
 export const isResultEdge = (obj: any): obj is ResultEdge => {
   return (
     obj &&

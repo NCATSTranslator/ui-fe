@@ -1,5 +1,5 @@
 import styles from './PathObject.module.scss';
-import { FC, useId } from 'react';
+import { FC, useContext, useId } from 'react';
 import Tooltip from '../Tooltip/Tooltip';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
@@ -9,7 +9,8 @@ import Predicate from '../Predicate/Predicate';
 import { Path, PathFilterState, isResultNode, ResultNode, Filter, isResultEdge } from '../../Types/results.d';
 import { useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getResultSetById } from '../../Redux/slices/resultsSlice';
-import { useSeenStatus } from '../../Utilities/customHooks';
+import { useHoverPathObject, useSeenStatus } from '../../Utilities/customHooks';
+import { HoverContext } from '../PathView/PathView';
 
 export interface PathObjectProps {
   activeEntityFilters: string[];
@@ -18,10 +19,6 @@ export interface PathObjectProps {
   handleActivateEvidence?: (path: Path, pathKey: string) => void;
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
   handleNodeClick: (name: ResultNode) => void;
-  hoverHandlers?: {
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
-  };
   id: string | string[];
   index: number;
   inModal?: boolean;
@@ -43,7 +40,6 @@ const PathObject: FC<PathObjectProps> = ({
   handleActivateEvidence = ()=>{},
   handleEdgeClick,
   handleNodeClick,
-  hoverHandlers,
   id,
   index,
   inModal = false,
@@ -74,6 +70,12 @@ const PathObject: FC<PathObjectProps> = ({
     nameString = formatBiolinkNode(pathObject.names[0], type, pathObject.species);
     typeString = formatBiolinkEntity(type);
   }
+  const hoverContext = useContext(HoverContext);
+  if (!hoverContext) throw new Error('useHoverPathObject must be used within a HoverProvider');
+  const { hoveredItem, setHoveredItem } = hoverContext;
+  const isHighlighted = hoveredItem?.id === itemID;
+  const { getHoverHandlers } = useHoverPathObject(setHoveredItem);
+  const hoverHandlers = (isEdge) ? getHoverHandlers(true, itemID, index) : getHoverHandlers(false, itemID, index);
 
   const provenance = (!!pathObject?.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const description = (isNode && !!pathObject?.descriptions[0]) ? pathObject.descriptions[0] : '';
@@ -87,7 +89,8 @@ const PathObject: FC<PathObjectProps> = ({
     className,
     pathViewStyles && pathViewStyles.nameContainer,
     inModal && styles.inModal,
-    isEven && styles.isEven
+    isEven && styles.isEven,
+    isHighlighted && styles.highlighted
   );
 
   return (
@@ -100,6 +103,7 @@ const PathObject: FC<PathObjectProps> = ({
               data-tooltip-id={`${uid}`}
               data-node-id={pathObject.id}
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
+              {...hoverHandlers}
               >
               <div className={`${styles.nameShape} ${pathViewStyles && pathViewStyles.nameShape}`}>
                 <div className={`${styles.background} ${pathViewStyles && pathViewStyles.background}`}></div>
@@ -149,6 +153,7 @@ const PathObject: FC<PathObjectProps> = ({
                   parentClass={styles.predicateContainer}
                   inModal={inModal}
                   isEven={isEven}
+                  isHighlighted={isHighlighted}
                   isSeen={isSeen}
                   className={className}
                   pathFilterState={pathFilterState}
