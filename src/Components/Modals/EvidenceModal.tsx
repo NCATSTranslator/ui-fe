@@ -136,6 +136,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     if(!isResultEdge(edge) || !selectedEdge || !resultSet)
       return;
 
+    console.log(edge);
     handleSelectedEdge(resultSet, edge)
     setEdgeSelectedTrigger(prev=>!prev);
   }
@@ -224,6 +225,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                       selectedEdge={selectedEdge}
                       pubmedEvidence={pubmedEvidence}
                       setPubmedEvidence={setPubmedEvidence}
+                      pk={pk}
                       prefs={prefs}
                       isOpen={isOpen}
                     />
