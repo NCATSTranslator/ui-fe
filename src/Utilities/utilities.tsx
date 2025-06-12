@@ -749,22 +749,42 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
 }
 
 /**
- * Takes a list of paths along with a PathFilterState object and calculates and returns the total number of filtered paths.
- * 
- * @param {Path[]} paths - An array of Path objects
- * @param {PathFilterState} pathFilterState - The current Path Filter State
- * @returns {number} - The number of filtered paths.
+ * Counts how many of the provided paths are filtered, including their recursively supported paths if `full` is true.
+ *
+ * @param {Path[]} paths - The initial list of paths to check.
+ * @param {PathFilterState} pathFilterState - A mapping of path IDs to their filtered status.
+ * @param {boolean} full - If true, includes all recursively supported paths via edges.
+ * @param {ResultSet} [resultSet] - The result set used to resolve edge and path references when full is enabled.
+ * @returns {number} - The total count of filtered paths (initial + supported).
  */
-export const getFilteredPathCount = (paths: Path[], pathFilterState: PathFilterState) => {
-  let count = 0;
-  for(const path of paths) {
-    const isPathFiltered = (path?.id) ? pathFilterState[path.id] : false;
-    if(isPathFiltered) {
-      count++;
-    }
+export const getFilteredPathCount = (
+  paths: Path[],
+  pathFilterState: PathFilterState,
+  full: boolean = false,
+  resultSet?: ResultSet | null
+): number => {
+  const allPathIDs = new Set<string>();
+
+  for (const path of paths) {
+    if (path?.id)
+      allPathIDs.add(path.id);
   }
+
+  if (full && !!resultSet) {
+    const supportPathIDs = getAllSupportPathIDs(paths, resultSet);
+    for (const id of supportPathIDs)
+      allPathIDs.add(id);
+  }
+
+  let count = 0;
+  for (const id of allPathIDs) {
+    if (pathFilterState[id])
+      count++;
+  }
+
   return count;
-}
+};
+
 
 /**
  * Takes a path along with a PathFilterState object and determines if that path is filtered or not based on its compressed IDs (if any)
@@ -1382,3 +1402,75 @@ export const joinClasses = (...classes: (string | false | null | undefined)[]) =
  */
 export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
   subgraph.filter((_, i) => i % 2 === 1);
+
+/**
+ * Extracts all edge IDs from a Path's subgraph.
+ *
+ * This function returns the edge IDs from a Path object, whether it uses
+ * the compressed or standard subgraph format. Edges are assumed to reside
+ * at the odd-numbered indices of the subgraph array.
+ *
+ * @param {Path} path - The path object from which to extract edge IDs.
+ * @returns {string[]} - An array of edge ID strings.
+ */
+export const getEdgeIdsFromPath = (path: Path): string[] => {
+  const graph = path.compressedSubgraph ?? path.subgraph;
+  return graph.filter((_, i) => i % 2 === 1) as string[];
+};
+
+/**
+ * Recursively collects all support path IDs from a list of initial paths.
+ *
+ * @param {Path[]} paths - The initial paths to analyze.
+ * @param {ResultSet} resultSet - The result set used to resolve path and edge references.
+ * @param {Set<string>} [visited=new Set()] - Used internally to track visited path IDs and avoid infinite loops.
+ * @returns {string[]} - An array of all unique support path IDs reachable from the initial paths.
+ */
+export const getAllSupportPathIDs = (
+  paths: Path[],
+  resultSet: ResultSet,
+  visited: Set<string> = new Set()
+): string[] => {
+  const supportPathIDs: Set<string> = new Set();
+
+  const traverseSupportPaths = (edgeIds: string[]) => {
+    const edges = getEdgesByIds(resultSet, edgeIds);
+
+    for (const edge of edges) {
+      if (!edge.support) continue;
+
+      const supports = Array.isArray(edge.support)
+        ? edge.support
+        : [];
+
+      for (const support of supports) {
+        const pathID = typeof support === 'string'
+          ? support
+          : support.id;
+
+        if (!pathID || visited.has(pathID)) continue;
+        visited.add(pathID);
+        supportPathIDs.add(pathID);
+
+        const supportPath = typeof support === 'string'
+          ? getPathById(resultSet, pathID)
+          : support;
+
+        if (!supportPath) continue;
+
+        const nestedEdgeIds = getEdgeIdsFromPath(supportPath);
+        traverseSupportPaths(nestedEdgeIds);
+      }
+    }
+  };
+
+  for (const path of paths) {
+    if (!path?.id || visited.has(path.id)) continue;
+    visited.add(path.id);
+
+    const edgeIds = getEdgeIdsFromPath(path);
+    traverseSupportPaths(edgeIds);
+  }
+
+  return Array.from(supportPathIDs);
+};

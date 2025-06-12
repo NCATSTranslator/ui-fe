@@ -7,7 +7,7 @@ import ChevLeft from '../../Icons/Directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '../../Icons/Directional/Chevron/Chevron Right.svg?react';
 import { sortSupportByEntityStrings, sortSupportByLength } from '../../Utilities/sortingFunctions';
 import { Filter, Path, PathFilterState, ResultNode } from '../../Types/results';
-import { intToChar, getPathsWithSelectionsSet, isStringArray, getFilteredPathCount, intToNumeral } from '../../Utilities/utilities';
+import { intToChar, getPathsWithSelectionsSet, isStringArray, getFilteredPathCount, intToNumeral, getIsPathFiltered } from '../../Utilities/utilities';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '../../Redux/slices/resultsSlice';
 import { useSupportPathDepth, useSupportPathKey } from '../../Utilities/customHooks';
@@ -59,6 +59,11 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
       return sortSupportByLength(newPaths);
     }
   }, [paths, selectedPaths, pathFilterState, resultSet, activeEntityFilters]);
+  const filteredPaths = useMemo(() => {
+    return formattedPaths.filter((path) => {
+      return showHiddenPaths ? true : !getIsPathFiltered(path, pathFilterState);
+    })
+  }, [formattedPaths, pathFilterState, showHiddenPaths]);
 
   const initHeight = (isExpanded) ? 'auto' : 0;
   const [height, setHeight] = useState<number | string>(initHeight);
@@ -76,7 +81,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   const currentKey = (!!parentPathKey && !!parentKey && !parentKey.includes(parentPathKey)) ? `${parentKey}.${parentPathKey}`: parentPathKey;
   
   const handlePageClick = (event: {selected: number} ) => {
-    let pathsLength = pathArray.length;
+    let pathsLength = filteredPaths.length;
     if(!pathsLength)
       return;
     setCurrentPage(event.selected);
@@ -88,8 +93,8 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
     endResultIndex.current = endOffset;
   }
 
-  const displayedPaths = (!!formattedPaths) 
-    ? formattedPaths.slice(itemOffset, endResultIndex.current)
+  const displayedPaths = (!!filteredPaths) 
+    ? filteredPaths.slice(itemOffset, endResultIndex.current)
     : [];
 
   useEffect(() => {
@@ -113,7 +118,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
               displayedPaths.map((supportPath, i) => {
                 if(!supportPath)
                   return null;
-                const indexInFullCollection = itemOffset + i;
+                const indexInFullCollection = formattedPaths.findIndex((path)=>supportPath.id === path.id);;
                 const pathKey = currentDepth === 2 ? intToNumeral(indexInFullCollection + 1) : intToChar(indexInFullCollection + 1);
                 return (
                   <SupportPath
