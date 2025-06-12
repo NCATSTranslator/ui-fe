@@ -66,6 +66,7 @@ const PathView: FC<PathViewProps> = ({
   const itemsPerPage: number = 10;
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths, true), [paths, selectedPaths, pathFilterState, resultSet]);
   const filteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState);
+  const fullFilteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState, true, resultSet);
   const { isPathSeen } = useSeenStatus(pk);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0)
@@ -408,7 +409,7 @@ const PathView: FC<PathViewProps> = ({
                 }
               </div>
               {
-                Object.keys(activeFilters).length > 0 && filteredPathCount > 0 && 
+                Object.keys(activeFilters).length > 0 && fullFilteredPathCount > 0 && 
                 <Button
                   handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
                   isSecondary
@@ -416,7 +417,7 @@ const PathView: FC<PathViewProps> = ({
                   dataTooltipId={`${resultID}-excluded-paths-toggle`}
                   className={`${!!isEven && styles.evenButton}`}
                   >
-                  {showHiddenPaths ? `Hide ${filteredPathCount} Excluded Paths` : `Show ${filteredPathCount} Excluded Paths`}
+                  {showHiddenPaths ? `Hide ${fullFilteredPathCount} Excluded Paths` : `Show ${fullFilteredPathCount} Excluded Paths`}
                   <Information/>
                   <Tooltip id={`${resultID}-excluded-paths-toggle`}>
                     {
