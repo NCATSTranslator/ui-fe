@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo, FC, Dispatch, SetStateAction } from 'react';
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
 import LoadingBar from "../LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
@@ -14,17 +14,49 @@ import Info from '../../Icons/Status/Alerts/Info.svg?react';
 import ChevUp from '../../Icons/Directional/Chevron/Chevron Up.svg?react';
 import Tooltip from '../Tooltip/Tooltip';
 import EmphasizeWord from '../EmphasizeWord/EmphasizeWord';
+import { PreferencesContainer } from '../../Types/global';
+import { PublicationObject, PublicationSupport, PubmedMetadataMap, SortingState } from '../../Types/evidence';
+import { ResultEdge, ResultSet } from '../../Types/results';
+import { getNodeById, getResultSetById } from '../../Redux/slices/resultsSlice';
+import { useSelector } from 'react-redux';
 
-const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, setPubmedEvidence, prefs, isOpen }) => {
+interface PublicationsTableProps {
+  isOpen: boolean;
+  pk: string;
+  prefs: PreferencesContainer;
+  pubmedEvidence: PublicationObject[];
+  selectedEdge: ResultEdge | null;
+  selectedEdgeTrigger: boolean;
+  setPubmedEvidence: Dispatch<SetStateAction<PublicationObject[]>>
+}
+
+const getInitItemsPerPage = (prefs: PreferencesContainer) => {
+  if(!!prefs?.evidence_per_screen?.pref_value)
+    return typeof prefs?.evidence_per_screen?.pref_value === "string" ? parseInt(prefs?.evidence_per_screen?.pref_value) : prefs?.evidence_per_screen?.pref_value;
+  else
+    return 5;
+}
+
+const PublicationsTable: FC<PublicationsTableProps> = ({ 
+  isOpen,
+  pk,
+  prefs,
+  pubmedEvidence,
+  selectedEdge,
+  selectedEdgeTrigger,
+  setPubmedEvidence,
+  }) => {
 
   const availableKnowledgeLevels = useMemo(() => {
     return new Set(pubmedEvidence.map(pub => pub.knowledgeLevel));
-  }, [pubmedEvidence]);  
+  }, [pubmedEvidence]);
+
+  const resultSet = useSelector(getResultSetById(pk));
 
   const prevSelectedEdgeTrigger = useRef(selectedEdgeTrigger);
-  const [itemsPerPage, setItemsPerPage] = useState(parseInt(prefs?.evidence_per_screen?.pref_value) || 5);
-  const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState([]);
-  const [knowledgeLevelFilter, setKnowledgeLevelFilter] = useState('all');
+  const [itemsPerPage, setItemsPerPage] = useState<number>(getInitItemsPerPage(prefs));
+  const [displayedPubmedEvidence, setDisplayedPubmedEvidence] = useState<PublicationObject[]>([]);
+  const [knowledgeLevelFilter, setKnowledgeLevelFilter] = useState<'all' | 'trusted' | 'ml'>('all');
   const filteredEvidence = useMemo(() => {
     if (knowledgeLevelFilter === 'all') 
       return pubmedEvidence;
@@ -36,22 +68,22 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
   const endOffset = (itemOffset + itemsPerPage > filteredEvidence.length)
     ? filteredEvidence.length
     :  itemOffset + itemsPerPage;
-  const [sortingState, setSortingState] = useState({ title: null, journal: null, date: null });
+  const [sortingState, setSortingState] = useState<SortingState>({ title: null, journal: null, date: null });
   const [isLoading, setIsLoading] = useState(true);
   const didMountRef = useRef(false);
   const isFetchingPubmedData = useRef(false);
   const fetchedPubmedData = useRef(false);
   const queryAmount = 200;
-  const [processedEvidenceIDs, setProcessedEvidenceIDs] = useState([])
+  const [processedEvidenceIDs, setProcessedEvidenceIDs] = useState<string[][]>([])
   const amountOfIDsProcessed = useRef(0);
   const evidenceToUpdate = useRef(null);
 
   // Handles direct page click
-  const handlePageClick = useCallback((event) => {
+  const handlePageClick = useCallback((event: { selected: number }) => {
     const newOffset = (event.selected * itemsPerPage) % filteredEvidence.length;
     setCurrentPage(event.selected);
     setItemOffset(newOffset);
-  },[itemsPerPage, filteredEvidence]);
+  }, [itemsPerPage, filteredEvidence]);
 
   const handleClose = () => {
     setIsLoading(true);
@@ -65,26 +97,29 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
     isFetchingPubmedData.current = false;
   }
 
-  const insertAdditionalPubmedData = (data, pubmedEvidence) => {
-    let newPubmedEvidence = cloneDeep(pubmedEvidence)
-    for(const element of newPubmedEvidence) {
-      if(data[element.id] !== undefined) {
+  const insertAdditionalPubmedData = (data: PubmedMetadataMap, existing: PublicationObject[]): PublicationObject[] => {
+    const newEvidence = cloneDeep(existing);
+    newEvidence.forEach((element) => {
+      const md = element?.id ? data[element.id] : false;
+      if (md && element.id) {
         updateJournal(element, data);
         updateTitle(element, data);
         updateSnippet(element, data);
         updatePubdate(element, data);
-        if(!element?.url){
+        if (!element.url) {
           element.url = generatePubmedURL(element.id);
         }
       }
-      element.updated = true;
-    }
-    return newPubmedEvidence;
-  }
+    });
+    return newEvidence;
+  };
 
-  const insertAdditionalEvidenceAndSort = (prefs, insertAdditionalPubmedData) => {
+  const insertAdditionalEvidenceAndSort = (
+    prefs: PreferencesContainer,
+    insertFn: (data: PubmedMetadataMap, existing: PublicationObject[]) => PublicationObject[]
+  ) => {
     if(prefs?.evidence_sort?.pref_value) {
-      let dataToSort = insertAdditionalPubmedData(evidenceToUpdate.current, pubmedEvidence);
+      const dataToSort = insertFn(evidenceToUpdate.current || {}, pubmedEvidence);
       switch (prefs.evidence_sort.pref_value) {
         case "dateHighLow":
           setSortingState(prev => ({...prev, date: true}));
@@ -104,11 +139,11 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
           break;
         case "titleHighLow":
           setSortingState(prev => ({...prev, title: false}));
-          setPubmedEvidence(sortNameHighLow(dataToSort, true))
+          setPubmedEvidence(sortNameHighLow(dataToSort) as PublicationObject[])
           break;      
         case "titleLowHigh":
           setSortingState(prev => ({...prev, title: true}));
-          setPubmedEvidence(sortNameLowHigh(dataToSort, true))
+          setPubmedEvidence(sortNameLowHigh(dataToSort) as PublicationObject[])
           break;            
         default:
           break;
@@ -120,114 +155,131 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
 
   // retrieves pubmed metadata, then inserts it into the existing evidence and sorts
   // called in useQuery hook below, controlled by isFetchingPubmedData ref
-  const fetchPubmedData = async (processedEvidenceIDs, pubmedEvidenceLength, insertAndSortEvidence, prefs) => {
-    const metadata = processedEvidenceIDs.map(async (ids) => {
-      const response = await fetch(`https://docmetadata.transltr.io/publications?pubids=${ids}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`)
-        .then(response => response.json())
-        .then(data => {
-          // Early return in case the modal is closed before the fetch is complete
-          if (!isFetchingPubmedData.current || !isOpen) 
-            return;
-  
-          evidenceToUpdate.current = { ...evidenceToUpdate.current, ...data.results };
-          amountOfIDsProcessed.current = amountOfIDsProcessed.current + Object.keys(data.results).length;
-  
-          if (amountOfIDsProcessed.current >= pubmedEvidenceLength) {
-            console.log('metadata fetches complete, inserting additional evidence information');
-            insertAndSortEvidence(prefs, insertAdditionalPubmedData);
-            fetchedPubmedData.current = true;
-            isFetchingPubmedData.current = false;
-          }
-        })
-        .catch(error => {
-          console.warn('Error fetching PubMed data:', error);
+  const fetchPubmedData = async (
+    chunksArr: string[][],
+    totalItems: number,
+    insertFn: typeof insertAdditionalEvidenceAndSort,
+    prefs: PreferencesContainer
+  ): Promise<void[]> => {
+    const metadataPromises = chunksArr.map(async (ids) => {
+      try {
+        const res = await fetch(
+          `https://docmetadata.transltr.io/publications?pubids=${ids.join(
+            ','
+          )}&request_id=26394fad-bfd9-4e32-bb90-ef9d5044f593`
+        );
+        const data = await res.json();
+        if (!isFetchingPubmedData.current || !isOpen) return;
+
+        evidenceToUpdate.current = {
+          ...(evidenceToUpdate.current || {}),
+          ...data.results,
+        };
+        amountOfIDsProcessed.current += Object.keys(data.results).length;
+
+        if (amountOfIDsProcessed.current >= totalItems) {
+          insertFn(prefs, insertAdditionalPubmedData);
           fetchedPubmedData.current = true;
           isFetchingPubmedData.current = false;
           setIsLoading(false);
-        });
-  
-      return response;
+        }
+      } catch (error) {
+        console.warn('Error fetching PubMed data:', error);
+        fetchedPubmedData.current = true;
+        isFetchingPubmedData.current = false;
+        setIsLoading(false);
+      }
     });
-  
-    return Promise.all(metadata);
+    return Promise.all(metadataPromises);
   };
   
 
-  // eslint-disable-next-line
-  const pubMedMetadataQuery = useQuery({
-    queryKey: 'pubmedMetadata',
-    queryFn: () => fetchPubmedData(processedEvidenceIDs, pubmedEvidence.length, insertAdditionalEvidenceAndSort, prefs),
+  useQuery({
+    queryKey: ['pubmedMetadata', processedEvidenceIDs],
+    queryFn: () =>
+      fetchPubmedData(
+        processedEvidenceIDs,
+        pubmedEvidence.length,
+        insertAdditionalEvidenceAndSort,
+        prefs
+      ),
     refetchInterval: 1000,
-    enabled: isFetchingPubmedData.current
+    enabled: isFetchingPubmedData.current,
   });
 
-  const setupPubmedDataFetch = (evidence, processedIDsSetter) => {
-    let PMIDs = evidence.map(item => item.id);
-    processedIDsSetter(chunk(PMIDs, queryAmount));
+  const setupPubmedDataFetch = (
+    evidence: PublicationObject[],
+    setter: React.Dispatch<React.SetStateAction<string[][]>>
+  ) => {
+    const ids = evidence
+      .map((e) => e.id)
+      .filter((id): id is string => typeof id === 'string');
+
+    setter(chunk(ids, queryAmount));
     isFetchingPubmedData.current = true;
-  }
+  };
 
-  useEffect(()=> {
-    if(pubmedEvidence.length <= 0 && didMountRef.current) {
+  useEffect(() => {
+    if (pubmedEvidence.length === 0 && didMountRef.current) {
       setIsLoading(false);
       return;
     }
+
     didMountRef.current = true;
-    
-    if(pubmedEvidence.length <= 0) 
-      return;
 
-    if(fetchedPubmedData.current) 
-      setIsLoading(false);
-    else 
-      setupPubmedDataFetch(pubmedEvidence, setProcessedEvidenceIDs);
-    
-
-    const resetView = () => {
-      setIsLoading(true);
-      setCurrentPage(0);
-      setItemOffset(0);
-      setSortingState({ title: null, journal: null, date: true });
-      setKnowledgeLevelFilter('all')
-      amountOfIDsProcessed.current = 0;
-      evidenceToUpdate.current = null;
-      fetchedPubmedData.current = false;
-      setupPubmedDataFetch(pubmedEvidence, setProcessedEvidenceIDs);
+    if (pubmedEvidence.length > 0) {
+      if (fetchedPubmedData.current) {
+        setIsLoading(false);
+      } else {
+        setupPubmedDataFetch(pubmedEvidence, setProcessedEvidenceIDs);
+      }
     }
-    if(prevSelectedEdgeTrigger.current !== selectedEdgeTrigger) {
-      resetView();
+
+    if (prevSelectedEdgeTrigger.current !== selectedEdgeTrigger) {
+      handleClose();
+      setupPubmedDataFetch(pubmedEvidence, setProcessedEvidenceIDs);
       prevSelectedEdgeTrigger.current = selectedEdgeTrigger;
     }
-  }, [pubmedEvidence, selectedEdgeTrigger])
+  }, [pubmedEvidence, selectedEdgeTrigger, isOpen]);
 
-  const handleGetSupportTextOrSnippet = (pub, selectedEdge) => {
-    if(typeof pub.support === 'object' && pub.support !== null && !Array.isArray(pub.support)) {
-      let subjectName = 
-        (!!selectedEdge && selectedEdge.edges.length > 0 && !!selectedEdge.edges[0]?.subject?.name) 
-          ? selectedEdge.edges[0].subject.name 
-          : false;
-      let objectName = 
-        (!!selectedEdge && selectedEdge.edges.length > 0 && !!selectedEdge.edges[0]?.object?.name) 
-          ? selectedEdge.edges[0].object.name 
-          : false;
-      return (
-        <EmphasizeWord 
-          text={pub.support.text} 
-          objectName={objectName}
-          objectPos={pub.support.object}
-          subjectName={subjectName}
-          subjectPos={pub.support.subject}
-          className={styles.emphasizedSnippet}
-        />
-      )
-    } else {
-      return (pub.snippet)
-        ? pub.snippet
-        : "No snippet available."
+  const handleGetSupportTextOrSnippet = (
+    resultSet: ResultSet,
+    pub: PublicationObject,
+    selectedEdge: ResultEdge | null,
+  ): JSX.Element | string => {
+    console.log(pub, selectedEdge);
+
+    const checkEdgeForPub = (pubID: string, edge: ResultEdge): {id: string; support: PublicationSupport;} | false => {
+      for(const pubTypeArr of Object.values(edge.publications)) {
+        const match = pubTypeArr.find(publication => publication.id === pubID)
+        if(match)
+          return match;
+      }
+      return false;
     }
-  }
+    const matchingEdgePub = !!pub?.id && !!selectedEdge  ? checkEdgeForPub(pub.id, selectedEdge) : false;
+    if (!!matchingEdgePub && matchingEdgePub.support !== null) {
+      console.log(matchingEdgePub);
+      const objectNode = getNodeById(resultSet, selectedEdge?.object);
+      const objectName = objectNode?.names[0] || "";
+      const subjectNode = getNodeById(resultSet, selectedEdge?.subject);
+      const subjectName = subjectNode?.names[0] || "";
+      return (
+        <EmphasizeWord
+          text={matchingEdgePub.support.text}
+          objectName={objectName}
+          objectPos={matchingEdgePub.support.object}
+          subjectName={subjectName}
+          subjectPos={matchingEdgePub.support.subject}
+        />
+      );
+    } else {
+      return pub.snippet ?? 'No snippet available.';
+    }
+  };
 
-  const handleSetKnowledgeLevelFilter = (knowledgeLevel) => {
+
+  const handleSetKnowledgeLevelFilter = (knowledgeLevel: 'all' | 'trusted' | 'ml') => {
     setCurrentPage(0);
     setItemOffset(0);
     setKnowledgeLevelFilter(knowledgeLevel);
@@ -236,8 +288,10 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs  
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js 
   useEffect(() => {
-    const tempItemsPerPage = (prefs?.evidence_per_screen?.pref_value) ? parseInt(prefs.evidence_per_screen.pref_value) : 10;
-    setItemsPerPage(parseInt(tempItemsPerPage));
+    const value = prefs?.evidence_per_screen?.pref_value
+      ? typeof prefs.evidence_per_screen.pref_value === "string" ? parseInt(prefs.evidence_per_screen.pref_value) : prefs.evidence_per_screen.pref_value
+      : 10;
+    setItemsPerPage(value);
   }, [prefs]);
 
   useEffect(() => {
@@ -250,6 +304,11 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
     setDisplayedPubmedEvidence(filteredEvidence.slice(itemOffset, endOffset));
     setPageCount(Math.ceil(filteredEvidence.length / itemsPerPage));
   }, [itemOffset, itemsPerPage, filteredEvidence, endOffset]);
+
+  if(!resultSet) {
+    console.warn('Unable to display publications table, no result set available'); 
+    return;
+  }
 
   return(
     <div className={styles.publicationsTableContainer}>
@@ -323,7 +382,6 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
           isLoading
           ?
             <LoadingBar
-              loading={isLoading}
               useIcon
               className={styles.loadingBar}
               loadingText="Retrieving Evidence"
@@ -352,7 +410,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
                         <td className={`table-cell ${styles.tableCell} ${styles.snippet}`}>
                           <span>
                             {
-                              handleGetSupportTextOrSnippet(pub, selectedEdge)
+                              handleGetSupportTextOrSnippet(resultSet, pub, selectedEdge)
                             }
                           </span>
                             {pub.url && <a href={pub.url} className={`url ${styles.url}`} target="_blank" rel="noreferrer">Read More <ExternalLink/></a>}
@@ -362,7 +420,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
                           {
                             pub.source && pub.source?.url 
                             ? <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer'><span>{pub.source.name}</span></a>
-                            : <span className={`${styles.noLink} ${styles.sourceName}`}span>{(!!pub?.source?.name) ? pub.source.name : "Unknown"}</span>
+                            : <span className={`${styles.noLink} ${styles.sourceName}`}>{(!!pub?.source?.name) ? pub.source.name : "Unknown"}</span>
                           }
                         </td>
                       </tr>
@@ -379,7 +437,7 @@ const PublicationsTable = ({ selectedEdgeTrigger, selectedEdge, pubmedEvidence, 
             label=""
             name="Items Per Page"
             handleChange={(value)=>{
-              setItemsPerPage(parseInt(value));
+              setItemsPerPage(value);
               handlePageClick({selected: 0});
             }}
             value={itemsPerPage}
