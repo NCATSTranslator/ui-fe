@@ -1,5 +1,3 @@
-import { PublicationSupport } from "./results";
-
 export type EvidenceItem = {
   edges: EdgeList;
   id: string;
@@ -61,8 +59,8 @@ export type Provenance = {
 }
 
 export type PublicationSupport = {
-  object: number[];
-  subject: number[];
+  object: [number, number];
+  subject: [number, number];
   text: string;
 }
 
@@ -84,3 +82,25 @@ export type TrialObject = {
   type: 'enrolled' | 'anticipated';
   url: string;
 }
+
+export type PubmedMetadata = {
+  abstract: string;
+  article_title: string;
+  issue: string;
+  journal_abbrev: string;
+  journal_name: string;
+  pub_day: string;
+  pub_month: string;
+  pub_year: string;
+  volume: string;
+};
+
+export type PubmedMetadataMap = {
+  [id: string]: PubmedMetadata;
+};
+
+export type SortingState = {
+  title: boolean | null;
+  journal: boolean | null;
+  date: boolean | null;
+};

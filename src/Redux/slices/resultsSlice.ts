@@ -42,8 +42,8 @@ export const getPathsByIds = (resultSet: ResultSet | undefined | null, pathIDs: 
 
   return pathIDs.map(pathID => getPathById(resultSet, pathID)).filter((path): path is Path => path !== undefined)
 }
-export const getNodeById = (resultSet: ResultSet | null, id:string): ResultNode | undefined => (resultSet === null) ? undefined : resultSet.data.nodes[id];
-export const getEdgeById = (resultSet: ResultSet | null, id:string): ResultEdge | undefined => (resultSet === null) ? undefined : resultSet.data.edges[id];
+export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNode | undefined => (resultSet === null || !id) ? undefined : resultSet.data.nodes[id];
+export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
 export const getEdgesByIds = (resultSet: ResultSet | null, ids:string[]): ResultEdge[] => {
   if(!resultSet)
     return [];
