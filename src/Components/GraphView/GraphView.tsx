@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useId } from 'react';
+import { useEffect, useRef, useState, useId, useMemo } from 'react';
 import cytoscape, { ElementsDefinition } from 'cytoscape';
 import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
@@ -70,9 +70,9 @@ const GraphView = ({
   const zoomKeyDownRef = useRef(zoomKeyDown);
 
   const id = useId();
-  const edgeInfoId = `edgeInfoWindow-${id}`;
-  const tooltipId = `graphTooltip-${id}`;
-  const navId = `cy-nav-container-${id}`;
+  const edgeInfoId = useMemo(()=>`edgeInfoWindow-${id}`, [id]);
+  const tooltipId = useMemo(()=>`graphTooltip-${id}`, [id]);
+  const navId = useMemo(()=>`cy-nav-container-${id}`, [id]);
 
   const highlightClass = 'highlight';
   const hideClass = 'hide';
@@ -225,7 +225,7 @@ const GraphView = ({
       rerenderDelay: 100
     }
     cy.navigator(options);
-  }, [graph, layout, active]);
+  }, [graph, layout, active, clearSelectedPaths, navId, tooltipId, edgeInfoId]);
 
   useEffect(() => {
     const el = graphViewRef.current;
