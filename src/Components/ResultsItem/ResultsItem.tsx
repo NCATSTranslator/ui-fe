@@ -25,6 +25,7 @@ import ResultsItemName from '../ResultsItemName/ResultsItemName';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 import { cloneDeep } from 'lodash';
 import ResultsItemInteractables from '../ResultsItemInteractables/ResultsItemInteractables';
+import { resultToCytoscape } from '../../Utilities/graphFunctions';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
 
@@ -135,6 +136,11 @@ const ResultsItem: FC<ResultsItemProps> = ({
   // const [csvData, setCsvData] = useState([]);
   const bookmarkRemovalApproved = useRef<boolean>(false);
   const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState<boolean>(false);
+  const graph = useMemo(()=> {
+    if(!resultSet)
+      return {nodes:[], edges: []};
+    return resultToCytoscape(result, resultSet.data)
+  }, [result, resultSet]);
 
   const tagsRef = useRef<HTMLDivElement>(null);
   const [tagsHeight, setTagsHeight] = useState<number>(0);
@@ -334,6 +340,9 @@ const ResultsItem: FC<ResultsItemProps> = ({
     setItemHasNotes(hasNotes);
   }, [result, hasNotes]);
 
+  if(!resultSet)
+    return null;
+
   return (
     <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-result-curie={result.subject} ref={sharedItemRef} data-result-name={nameString}>
       <div className={styles.top}>
@@ -483,6 +492,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
             <Tab heading="Graph">
               <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
                 <GraphView
+                  graph={graph}
                   result={result}
                   updateGraphFunction={setItemGraph}
                   prebuiltGraph={(!!itemGraph)? itemGraph: null}
