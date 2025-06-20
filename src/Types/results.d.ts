@@ -10,7 +10,7 @@ export type ResultSet = {
     paths: {[key: string]: Path},
     publications: {[key: string]: PublicationObject},
     results: Result[],
-    tags: Filters,
+    tags: Tags,
     trials: {[key: string]: TrialObject}
   }
 }
@@ -28,7 +28,7 @@ export interface Result {
   scores: Score[];
   // node ID
   subject: string;
-  tags: Filters;
+  tags: Tags;
 }
 
 export type SharedItem = {
