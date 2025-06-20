@@ -1,100 +1,166 @@
-import { useState, useEffect, useRef, FC, ReactElement, Children, isValidElement } from "react";
+import { useState, useEffect, FC, ReactElement, Children, isValidElement, useMemo, useCallback, useRef } from "react";
 import Tab, { TabProps } from "./Tab";
 import { Fade } from 'react-awesome-reveal';
 import styles from './Tabs.module.scss';
-import { isEqual } from "lodash";
 
 interface TabsProps {
   children: (ReactElement<TabProps> | null)[];
   className?: string;
   isOpen: boolean;
   handleTabSelection?: (heading: string) => void;
+  defaultActiveTab?: string;
+  controlled?: boolean;
+  activeTab?: string;
 }
 
-const Tabs: FC<TabsProps> = ({ children, className, isOpen, handleTabSelection = ()=>{} }) => {
-  const firstElement = Children.toArray(children).find((child) => isValidElement(child)) as ReactElement<TabProps> | undefined;
-  const [activeTabHeading, setActiveTab] = useState(firstElement?.props.heading);
-  const tabClicked = useRef(false);
-  const prevChildrenRef = useRef<(ReactElement<TabProps> | null)[]>(children);
+const Tabs: FC<TabsProps> = ({ 
+  children, 
+  className, 
+  isOpen, 
+  handleTabSelection = () => {}, 
+  defaultActiveTab,
+  controlled = false,
+  activeTab: controlledActiveTab
+}) => {
+  // Memoize valid children to avoid recalculation
+  const validChildren = useMemo(() => 
+    Children.toArray(children).filter((child) => isValidElement(child)) as ReactElement<TabProps>[],
+    [children]
+  );
 
-  const handleTabClick = (heading: string) => {
+  const firstTabHeading = useMemo(() => 
+    validChildren[0]?.props.heading || defaultActiveTab,
+    [validChildren, defaultActiveTab]
+  );
+
+  // Use controlled or uncontrolled state
+  const [internalActiveTab, setInternalActiveTab] = useState<string | undefined>(firstTabHeading);
+  const activeTabHeading = controlled ? controlledActiveTab : internalActiveTab;
+
+  // Memoize tab headings for comparison
+  const tabHeadings = useMemo(() => 
+    validChildren.map(child => child.props.heading),
+    [validChildren]
+  );
+
+  // Check if active tab is still valid
+  const isValidActiveTab = useMemo(() => 
+    activeTabHeading && tabHeadings.includes(activeTabHeading),
+    [tabHeadings, activeTabHeading]
+  );
+
+  // Refs for focus management
+  const tabRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+
+  // Reset to first tab if current active tab is invalid
+  useEffect(() => {
+    if (!isValidActiveTab && firstTabHeading) {
+      if (!controlled) {
+        setInternalActiveTab(firstTabHeading);
+      }
+      handleTabSelection(firstTabHeading);
+    }
+  }, [isValidActiveTab, firstTabHeading, controlled, handleTabSelection]);
+
+  const handleTabClick = useCallback((heading: string) => {
+    if (!controlled) {
+      setInternalActiveTab(heading);
+    }
     handleTabSelection(heading);
-    setActiveTab(heading);
-    tabClicked.current = true;
-  };
+  }, [controlled, handleTabSelection]);
 
-  const isActiveHeadingWithinChildren = (children: (ReactElement<TabProps> | null)[], activeHeading: string | undefined) => {
-    if(!activeHeading)
-      return false;
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!activeTabHeading) return;
 
-    let headingIsPresent = false;
-    for(const child of children) {
-      if(!!child?.props?.heading && child.props.heading === activeHeading) {
-        headingIsPresent = true;
+    const currentIndex = tabHeadings.indexOf(activeTabHeading);
+    if (currentIndex === -1) return;
+
+    let nextIndex: number;
+
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        e.preventDefault();
+        nextIndex = (currentIndex + 1) % tabHeadings.length;
         break;
-      }
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        e.preventDefault();
+        nextIndex = (currentIndex - 1 + tabHeadings.length) % tabHeadings.length;
+        break;
+      case 'Home':
+        e.preventDefault();
+        nextIndex = 0;
+        break;
+      case 'End':
+        e.preventDefault();
+        nextIndex = tabHeadings.length - 1;
+        break;
+      default:
+        return;
     }
-    return headingIsPresent
-  }
 
-  const areChildrenHeadingsEqual = (children: (ReactElement<TabProps> | null)[], prevChildren: (ReactElement<TabProps> | null)[]) => {
-    if(children.length !== prevChildren.length)   
-      return false;
-    for(const [i, child] of children.entries()) {
-      if(!child?.props?.heading || !prevChildren[i]?.props?.heading || child?.props.heading !== prevChildren[i]?.props.heading) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  useEffect(() => {
-    if(isEqual(prevChildrenRef.current, children))
-      return;
-
-    if (!isActiveHeadingWithinChildren(children, activeTabHeading)) {
-      setActiveTab(firstElement?.props.heading);
-      prevChildrenRef.current = children;
-      return;
-    }
+    const nextHeading = tabHeadings[nextIndex];
+    handleTabClick(nextHeading);
     
-    if (!tabClicked.current || !areChildrenHeadingsEqual(prevChildrenRef.current, children)) {
-      setActiveTab(firstElement?.props.heading);
-      tabClicked.current = true;
-    }
-    prevChildrenRef.current = children;
-    // eslint-disable-next-line
-  }, [children]);
+    // Focus the next tab after a brief delay to ensure state update
+    setTimeout(() => {
+      const nextTabRef = tabRefs.current[nextHeading];
+      if (nextTabRef) {
+        nextTabRef.focus();
+      }
+    }, 0);
+  }, [activeTabHeading, tabHeadings, handleTabClick]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      tabClicked.current = false;
-    }
-  }, [isOpen]);
+  // Set tab ref
+  const setTabRef = useCallback((heading: string, element: HTMLDivElement | null) => {
+    tabRefs.current[heading] = element;
+  }, []);
+
+  if (!isOpen) return null;
 
   return (
-    <div className={`${styles.tabs} ${className || ''}`}>
+    <div 
+      className={`${styles.tabs} ${className || ''}`} 
+      role="tablist"
+      ref={tabsContainerRef}
+      onKeyDown={handleKeyDown}
+    >
       <div className={styles.tabList}>
-        {Children.map(children, (child, i) => {
-          if (!isValidElement(child)) return null;
-          const { heading, tooltipIcon = false, dataTooltipId = "" } = child.props;
+        {validChildren.map((child, i) => {
+          const { heading, tooltipIcon, dataTooltipId = "" } = child.props;
           return (
             <Tab
+              key={`${heading}-${i}`}
               activeTabHeading={activeTabHeading}
-              key={i}
               heading={heading}
               tooltipIcon={tooltipIcon}
               onClick={handleTabClick}
               dataTooltipId={dataTooltipId}
+              tabIndex={i}
+              totalTabs={validChildren.length}
+              setTabRef={setTabRef}
             />
           );
         })}
       </div>
-      {Children.map(children, (child, i) => {
-        if (!isValidElement(child)) return null;
+      
+      {validChildren.map((child, i) => {
+        const { heading, className: childClassName = "" } = child.props;
+        const isActive = activeTabHeading === heading;
+        
         return (
-          <Fade key={i} className={styles.fade}>
-            <div className={`${styles.tabContent} ${child.props.className ? child.props.className : ""} ${activeTabHeading !== child.props.heading ? styles.inactive : activeTabHeading}`}>{child.props.children}</div>
+          <Fade key={`${heading}-${i}`} className={styles.fade}>
+            <div 
+              className={`${styles.tabContent} ${childClassName} ${isActive ? '' : styles.inactive}`}
+              role="tabpanel"
+              aria-labelledby={`tab-${heading}`}
+              id={`tabpanel-${heading}`}
+            >
+              {child.props.children}
+            </div>
           </Fade>
         );
       })}

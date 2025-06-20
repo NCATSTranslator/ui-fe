@@ -9,16 +9,26 @@ import loadingIcon from '../../Assets/Images/Loading/loading-purple.png';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 
 interface ResultsSummaryModalProps {
+  handleResultMatchClick: Function;
   isError?: boolean;
   isOpen?: boolean;
   isSummaryLoading: boolean;
   onClose?: Function;
+  pk: string;
   resultContext: ResultContextObject[];
   streamedText: string;
-  handleResultMatchClick: Function;
 }
 
-const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({isError = false, isOpen = false, isSummaryLoading, onClose = ()=>{}, handleResultMatchClick, streamedText, resultContext}) => {
+const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({
+  handleResultMatchClick,
+  isError = false,
+  isOpen = false,
+  isSummaryLoading,
+  onClose = ()=>{},
+  pk,
+  streamedText,
+  resultContext
+}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
 
@@ -102,7 +112,7 @@ const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({isError = false, isO
           {
             !isSummaryLoading &&
             <div className={styles.linkContainer}>
-              <Link to={`/send-feedback`} className={styles.sendFeedbackLink} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
+              <Link to={`/send-feedback?q=${pk}`} className={styles.sendFeedbackLink} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
             </div>
           }
         </div>
