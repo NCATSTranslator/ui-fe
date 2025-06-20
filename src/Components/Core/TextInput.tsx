@@ -56,8 +56,10 @@ const TextInput: FC<TextInputProps> = ({
 
   return (
     <label className={inputStyle}>
-      {label && <span className="input-label">{label}</span>}
-      {subtitle && <span className="input-subtitle">{subtitle}</span>}
+      <span className="input-label-container">
+        {label && <span className="input-label">{label}</span>}
+        {subtitle && <span className="input-subtitle">{subtitle}</span>}
+      </span>
       {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
       {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
       {rows && rows > 1 ? (

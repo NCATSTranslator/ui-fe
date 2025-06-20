@@ -120,7 +120,9 @@ const FileInput: FC<FileDropInputProps> = ({
       data-testid={testId}
       htmlFor={`file-upload`}
       >
-      <span className='input-label'>{label}</span>
+      <span className="input-label-container">
+        {label && <span className="input-label">{label}</span>}
+      </span>
       <div className={styles.container}>
         <div className={styles.top}>
           <input

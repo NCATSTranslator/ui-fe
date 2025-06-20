@@ -3,9 +3,9 @@
 // Button
 .button {
   font-size: $buttonSize;
-  font-weight: bold;
+  font-weight: 800;
   line-height: 1;
-  padding: 10px $xs;
+  padding: 10px 12px;
   border-radius: $defaultBorderRadius;
   border: 1px solid $purpleTwo;
   cursor: pointer;
@@ -38,6 +38,8 @@
   }
   svg {
     margin-left: $xxs;
+    width: 20px;
+    height: 20px;
   }
   &.secondary {
     color: $black;
