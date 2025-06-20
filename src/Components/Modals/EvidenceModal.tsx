@@ -136,7 +136,6 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     if(!isResultEdge(edge) || !selectedEdge || !resultSet)
       return;
 
-    console.log(edge);
     handleSelectedEdge(resultSet, edge)
     setEdgeSelectedTrigger(prev=>!prev);
   }
