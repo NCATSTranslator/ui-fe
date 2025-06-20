@@ -403,7 +403,7 @@ export const calculateFacetCounts = (
   }
 
   // Create a list of tags from the master tag list provided by the backend
-  const countedTags = cloneDeep(summary.data.tags);
+  const countedTags = cloneDeep(summary.data.tags) as Filters;
   const activeFamilies = new Set(activeFacets.map(facet => filtering.filterFamily(facet)));
   for(const result of filteredResults) {
     // Determine the distance between a result's facets and the facet selection

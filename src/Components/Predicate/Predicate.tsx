@@ -125,6 +125,7 @@ const Predicate: FC<PredicateProps> = ({
         className={edgeClass}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         data-edge-ids={edgeIDs.toString()}
+        data-aras={edge.aras.toString()}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}
         {...hoverHandlers}
         >

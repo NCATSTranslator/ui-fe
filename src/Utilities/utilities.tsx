@@ -14,7 +14,7 @@ import ExternalLink from '../Icons/Buttons/External Link.svg?react';
 import { QueryType } from '../Types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { PreferencesContainer, PrefObject } from '../Types/global';
-import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState, Tags, ResultNode } from '../Types/results.d';
+import { isResultEdge, Path, ResultSet, ResultEdge, Result, PathFilterState, Tags, ResultNode, Filters } from '../Types/results.d';
 import { EvidenceCountsContainer, PublicationObject, PublicationsList, RawPublicationObject } from '../Types/evidence';
 import { Location } from 'react-router-dom';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getPubById } from '../Redux/slices/resultsSlice';
@@ -1473,4 +1473,31 @@ export const getAllSupportPathIDs = (
   }
 
   return Array.from(supportPathIDs);
+};
+
+/**
+ * Extracts ARA tag names from a ResultItem's tags object.
+ * 
+ * @param {Filters} tags - The tags object from a ResultItem.
+ * @returns {string[]} - An array of ARA names (the portion after "infores:").
+ */
+export const getARATagsFromResultTags = (tags: Filters): string[] => {
+  const araTags: string[] = [];
+  
+  if (!tags) return araTags;
+  
+  for (const [tagKey] of Object.entries(tags)) {
+    // Check if tagValue exists and has a value property
+    
+    // Check if this is an ARA tag by looking for the 'ara' family in the tag key
+    if (tagKey.includes('/ara/')) {
+      // Extract the portion after "infores:" from the tag value
+      const inforesMatch = tagKey.match(/infores:(.+)/);
+      if (inforesMatch && inforesMatch[1]) {
+        araTags.push(inforesMatch[1]);
+      }
+    }
+  }
+  
+  return araTags;
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction, useMemo } from 'react';
 import styles from './ResultsItem.module.scss';
-import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts, isStringArray } from '../../Utilities/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts, isStringArray, getARATagsFromResultTags } from '../../Utilities/utilities';
 import PathView from '../PathView/PathView';
 import LoadingBar from '../LoadingBar/LoadingBar';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react";
@@ -344,7 +344,13 @@ const ResultsItem: FC<ResultsItemProps> = ({
     return null;
 
   return (
-    <div key={key} className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} data-result-curie={result.subject} ref={sharedItemRef} data-result-name={nameString}>
+    <div 
+      key={key} 
+      className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} 
+      ref={sharedItemRef} 
+      data-result-curie={result.subject} 
+      data-result-name={nameString}
+      data-aras={result.tags ? getARATagsFromResultTags(result.tags).toString() : ''}>
       <div className={styles.top}>
         <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
           <ResultsItemName
