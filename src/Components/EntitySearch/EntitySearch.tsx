@@ -4,7 +4,7 @@ import Include from '../../Icons/Buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '../../Icons/Buttons/View & Exclude/Exclude.svg?react';
 import { cloneDeep } from 'lodash';
 import { isEntityFilter, makeEntitySearch } from '../../Utilities/filterFunctions';
-import { Filter } from '../../Types/results';
+import { Filter } from '../../Types/filters';
 import FacetTag from '../FacetTag/FacetTag';
 import FacetHeading from '../FacetHeading/FacetHeading';
 import SearchIcon from '../../Icons/Buttons/Search.svg?react';

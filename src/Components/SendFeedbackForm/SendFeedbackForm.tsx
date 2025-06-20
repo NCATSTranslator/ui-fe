@@ -8,6 +8,8 @@ import { Fade } from "react-awesome-reveal";
 import { getDataFromQueryVar } from "../../Utilities/utilities";
 import { useFeedbackForm } from "../../Utilities/customHooks";
 import { CustomFile } from '../../Types/global';
+import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
+import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 
 const SendFeedbackForm = () => {
   const {
@@ -130,9 +132,13 @@ const SendFeedbackForm = () => {
     <div className={styles.sendFeedbackFormContainer}>
       {createdIssueURL ? (
         <div className={styles.issueCreatedContainer}>
-          <p>Your feedback has been submitted.<br/>Please click the link below to view the status of your issue:</p>
-          <Button link href={createdIssueURL} _blank rel="noopener noreferrer" className={styles.viewIssue}>View Issue</Button>
-          <Button isSecondary handleClick={() => setCreatedIssueURL(null)} className={styles.newIssue}>Submit More Feedback</Button>
+          <h5 className={styles.title}>Thanks for your feedback!</h5>
+          <p>Comments like yours help us improve and further develop the Translator interface.</p>
+          <p>You can view this ticket on Github and subscribe to receive updates from our team. You may also leave additional comments or feedback on the ticket.</p>
+          <div className={styles.buttonContainer}>
+            <Button isSecondary handleClick={() => setCreatedIssueURL(null)} className={styles.newIssue}><Feedback/> Send More Feedback</Button>
+            <Button link href="#" _blank rel="noopener noreferrer" className={styles.viewIssue}>View Ticket on GitHub <ExternalLink/></Button>
+          </div>
         </div>
       ) : (
         <Fade>
@@ -179,6 +185,7 @@ const SendFeedbackForm = () => {
                 <>
                   <TextInput
                     label="Steps to Reproduce *"
+                    subtitle="Please be as detailed as you can to help us identify this bug."
                     rows={3}
                     maxLength={1500}
                     handleChange={(value) => {

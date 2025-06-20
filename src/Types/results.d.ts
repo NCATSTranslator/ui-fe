@@ -139,17 +139,6 @@ export type ResultGraph = {
 export type Tags = {
   [key:string]: {name: string, value: string}
 }
-export type Filter = {
-  count?: number
-  name: string;
-  negated?: boolean;
-  id?: string;
-  value?: string;
-}
-export type Filters =  {[key: string]: Filter};
-export type GroupedFilters = {
-  [key: string]: {[key: string]: Filter};
-}
 export type PathFilterState = {
   [pid: string]: boolean;
 }

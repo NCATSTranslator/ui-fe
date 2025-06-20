@@ -26,7 +26,8 @@ import QueryPathfinder from "../QueryPathfinder/QueryPathfinder";
 import ResultsListTableHead from "./ResultsListTableHead";
 import ResultsListModals from "./ResultsListModals";
 import ResultsListBottomPagination from "./ResultsListBottomPagination";
-import { ResultSet, Result, ResultEdge, Path, Filter, PathFilterState, SharedItem } from "../../Types/results.d";
+import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem } from "../../Types/results";
+import { Filter } from "../../Types/filters";
 import { generateScore } from "../../Utilities/scoring";
 
 interface ResultsListProps {

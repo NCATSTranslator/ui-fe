@@ -1,5 +1,6 @@
 import { getEdgeById, getNodeById, getPathById } from "../Redux/slices/resultsSlice";
-import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, Filter, PathFilterState, Filters } from "../Types/results.d";
+import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "../Types/results.d";
+import { Filter, Filters } from "../Types/filters";
 import { hasSupport } from "./utilities";
 import { AutocompleteItem } from "../Types/querySubmission";
 import { makePathRank, updatePathRanks, pathRankSort } from "./sortingFunctions";
