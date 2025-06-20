@@ -104,7 +104,7 @@ body {
 }
 
 .container {
-  padding: 72px 20px;
+  padding: 64px 20px;
   margin: 0 auto;
   max-width: $maxwidth;
   width: calc(100% - 40px);
@@ -400,4 +400,10 @@ input {
     color: $purpleTwo;
     margin-bottom: 8px;
   }
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
 }

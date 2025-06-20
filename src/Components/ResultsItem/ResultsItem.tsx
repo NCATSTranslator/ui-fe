@@ -507,7 +507,7 @@ const ResultsItem: FC<ResultsItemProps> = ({
         </Tabs>
         <p className={styles.needHelp}>
           <Feedback/>
-          <Link to={`/send-feedback`} target={'_blank'}>Send Feedback</Link>
+          <Link to={`/send-feedback?q=${pk}`} target={'_blank'}>Send Feedback</Link>
         </p>
       </AnimateHeight>
       <BookmarkConfirmationModal

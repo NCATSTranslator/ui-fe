@@ -124,13 +124,14 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({
         </Tooltip>
       </Button>
       <ResultsSummaryModal
-        streamedText={streamedText}
-        resultContext={resultContext.current}
+        handleResultMatchClick={handleResultMatchSelection}
+        isError={isError}
         isOpen={isSummaryModalOpen}
         isSummaryLoading={isStreaming}
         onClose={()=>setIsSummaryModalOpen(false)}
-        handleResultMatchClick={handleResultMatchSelection}
-        isError={isError}
+        pk={pk}
+        resultContext={resultContext.current}
+        streamedText={streamedText}
       />
     </>
   );

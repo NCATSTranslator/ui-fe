@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../Redux/store';
 import { markEdgeSeen, markEdgeUnseen, resetSeenStatus } from '../Redux/slices/seenStatusSlice';
 import { HoverTarget } from '../Types/results';
+import { FeedbackForm, FormErrors } from '../Types/global';
 
 interface WindowSize {
   width: number | undefined;
@@ -525,4 +526,95 @@ export const useNewResultsDisclaimerApproved = (
   };
 
   return [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved];
+};
+
+/**
+ * Custom hook for managing feedback form state and validation
+ */
+export const useFeedbackForm = () => {
+  const [form, setForm] = useState<FeedbackForm>({
+    category: 'Suggestion',
+    comments: '',
+    steps: '',
+    screenshots: [],
+    base64Screenshots: [],
+  });
+
+  const [errors, setErrors] = useState<FormErrors>({
+    category: false,
+    comments: false,
+    steps: false,
+  });
+
+  const [touched, setTouched] = useState<Record<keyof FormErrors, boolean>>({
+    category: false,
+    comments: false,
+    steps: false,
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const updateField = <K extends keyof FeedbackForm>(key: K, value: FeedbackForm[K]) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+    // Clear error when user starts typing
+    if (key in errors) {
+      setErrors(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
+  const handleFieldBlur = (field: keyof FormErrors) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+  };
+
+  const showFieldError = (field: keyof FormErrors) => {
+    return touched[field] && errors[field];
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {
+      category: !form.category,
+      comments: !form.comments.trim(),
+      steps: form.category === 'Bug Report' && !form.steps.trim(),
+    };
+    
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(Boolean);
+  };
+
+  const resetForm = () => {
+    setForm({
+      category: 'Suggestion',
+      comments: '',
+      steps: '',
+      screenshots: [],
+      base64Screenshots: [],
+    });
+    setErrors({
+      category: false,
+      comments: false,
+      steps: false,
+    });
+    setTouched({
+      category: false,
+      comments: false,
+      steps: false,
+    });
+    setSubmitError(null);
+  };
+
+  return {
+    form,
+    errors,
+    touched,
+    isSubmitting,
+    submitError,
+    updateField,
+    handleFieldBlur,
+    showFieldError,
+    validateForm,
+    resetForm,
+    setIsSubmitting,
+    setSubmitError,
+  };
 };

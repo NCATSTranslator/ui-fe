@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, FormEvent } from "react";
+import { useCallback, FormEvent, useState } from "react";
 import styles from "./SendFeedbackForm.module.scss";
 import Button from '../Core/Button';
 import TextInput from "../Core/TextInput";
@@ -6,39 +6,41 @@ import FileInput from "../Core/FileInput";
 import Select from "../Core/Select";
 import { Fade } from "react-awesome-reveal";
 import { getDataFromQueryVar } from "../../Utilities/utilities";
+import { useFeedbackForm } from "../../Utilities/customHooks";
 import { CustomFile } from '../../Types/global';
 
 const SendFeedbackForm = () => {
-  const categoryErrorText = "Please select a category.";
-  const [categoryError, setCategoryError] = useState<boolean>(false);
-  const [currentCategory, setCurrentCategory] = useState<string>('Suggestion');
-
-  const commentsErrorText = "Please provide a comment.";
-  const [commentsError, setCommentsError] = useState<boolean>(false);
-  const [currentComments, setCurrentComments] = useState<string>('');
-  
-  const stepsErrorText = "Please detail the steps you took to produce the error.";
-  const [stepsError, setStepsError] = useState<boolean>(false);
-  const [currentSteps, setCurrentSteps] = useState<string>('');
-
-  const [currentScreenshots, setCurrentScreenshots] = useState<CustomFile[]>([]);
-  const [base64Screenshots, setBase64Screenshots] = useState<string[]>([]);
-  const currentARSpk = getDataFromQueryVar("q");
-  
-  const [submit, setSubmit] = useState<boolean>(false);
-  const [errorActive, setErrorActive] = useState<boolean>(false);
+  const {
+    form,
+    errors,
+    isSubmitting,
+    submitError,
+    updateField,
+    handleFieldBlur,
+    showFieldError,
+    validateForm,
+    resetForm,
+    setIsSubmitting,
+    setSubmitError,
+  } = useFeedbackForm();
 
   const [createdIssueURL, setCreatedIssueURL] = useState<string | null>(null);
+  const currentARSpk = (getDataFromQueryVar("q") !== null) ? getDataFromQueryVar("q") : "";
+
+  const errorMessages = {
+    category: "Please select a category.",
+    comments: "Please provide a comment.",
+    steps: "Please detail the steps you took to produce the error.",
+  };
 
   const getBase64 = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      let reader = new FileReader();
+      const reader = new FileReader();
       reader.readAsDataURL(file);
       
       reader.onload = () => {
         if (reader.result) {
-          let baseString = (reader.result as string).replace(/^data:image\/(jpeg|png);base64,/, "");
-          setBase64Screenshots((state) => [...state, baseString]);
+          const baseString = (reader.result as string).replace(/^data:image\/(jpeg|png);base64,/, "");
           resolve(baseString);
         } else {
           reject('Failed to convert file to base64');
@@ -47,101 +49,82 @@ const SendFeedbackForm = () => {
       
       reader.onerror = (error) => reject(error);
     });
-  }
+  };
 
-  const handleError = (error: 'category' | 'comments' | 'steps') => {
-    switch (error) {
-      case 'category':
-        setCategoryError(true);
-        break;
-      case 'comments':
-        setCommentsError(true);
-        break;
-      case 'steps':
-        setStepsError(true);
-        break;
-    }
-    setErrorActive(true);
-  }
-
-  const handleSubmission = (e: FormEvent) => {
-    e.preventDefault();
-    if (!currentCategory) {
-      handleError('category');
-      return;
-    }
-    if (currentCategory === 'Bug Report' && !currentSteps) {
-      handleError('steps');
-      return;
-    }
-    if (!currentComments) {
-      handleError('comments');
-      return;
-    }
-    
-    setSubmit(true);
-  }
-
-  const resetFormFields = () => {
-    setCurrentCategory('');
-    setCurrentComments('');
-    setCurrentSteps('');
-    setCurrentScreenshots([]);
-    setBase64Screenshots([]);
-  }
-
-  const resetErrors = () => {
-    setCategoryError(false);
-    setStepsError(false);
-    setCommentsError(false);
-    setErrorActive(false);
-  }
-
-  useEffect(() => {
-    if (currentScreenshots.length) {
-      setBase64Screenshots([]);
-      for (const file of currentScreenshots) {
-        getBase64(file.file);
+  const processFiles = useCallback(async (files: CustomFile[]) => {
+    const base64Promises = files.map(async (file) => {
+      try {
+        return await getBase64(file.file);
+      } catch (error) {
+        console.error('Failed to process file:', error);
+        return null;
       }
-    }
-  }, [currentScreenshots]);
-
-  const submitForm = useCallback(() => {
-    const url = encodeURI(decodeURIComponent(getDataFromQueryVar("link") as string));
-    const feedbackJson = JSON.stringify({
-      url,
-      ars_pk: currentARSpk,
-      description: currentComments,
-      reproduction_steps: currentSteps,
-      type: currentCategory,
-      screenshots: base64Screenshots,
     });
 
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: feedbackJson,
-    };
+    const base64Results = await Promise.all(base64Promises);
+    const validBase64s = base64Results.filter(Boolean) as string[];
+    
+    updateField('base64Screenshots', validBase64s);
+  }, [updateField]);
 
-    fetch('https://issue-router.renci.org/create_issue', requestOptions)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setCreatedIssueURL(data.url);
-        resetFormFields();
-      })
-      .catch((error) => {
-        console.error('Error:', error);
+  const handleFileChange = useCallback((files: CustomFile[]) => {
+    updateField('screenshots', files);
+    if (files.length > 0) {
+      processFiles(files);
+    } else {
+      updateField('base64Screenshots', []);
+    }
+  }, [processFiles, updateField]);
+
+  const handleSubmission = async (e: FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const response = await fetch('https://issue-router.renci.org/create_issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: encodeURI(decodeURIComponent(getDataFromQueryVar("link") as string)),
+          ars_pk: currentARSpk,
+          description: form.comments,
+          reproduction_steps: form.steps,
+          type: form.category,
+          screenshots: form.base64Screenshots,
+        }),
       });
 
-  }, [currentARSpk, currentComments, currentSteps, base64Screenshots, currentCategory]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-  useEffect(() => {
-    if (submit) {
-      submitForm();
-      setSubmit(false);
+      const data = await response.json();
+      setCreatedIssueURL(data.url);
+      resetForm();
+    } catch (error) {
+      setSubmitError('Failed to submit feedback. Please try again.');
+      console.error('Error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [submit, submitForm]);
+  };
+
+  const ErrorDisplay = ({ errors, errorMessages }: { 
+    errors: { category: boolean; comments: boolean; steps: boolean }; 
+    errorMessages: Record<string, string> 
+  }) => (
+    <div className={styles.errorContainer}>
+      {errors.category && <p className={styles.errorText} role="alert">{errorMessages.category}</p>}
+      {errors.comments && <p className={styles.errorText} role="alert">{errorMessages.comments}</p>}
+      {errors.steps && <p className={styles.errorText} role="alert">{errorMessages.steps}</p>}
+    </div>
+  );
 
   return (
     <div className={styles.sendFeedbackFormContainer}>
@@ -153,57 +136,111 @@ const SendFeedbackForm = () => {
         </div>
       ) : (
         <Fade>
-          <form onSubmit={handleSubmission} name="send feedback form">
-            {errorActive && categoryError && <p className={styles.errorText}>{categoryErrorText}</p>}
-            {errorActive && stepsError && <p className={styles.errorText}>{stepsErrorText}</p>}
-            {errorActive && commentsError && <p className={styles.errorText}>{commentsErrorText}</p>}
-            <Select
-              label="Category *"
-              name="Select One"
-              handleChange={(value) => {
-                setCurrentCategory(value.toString());
-                resetErrors();
-              }}
-              value={currentCategory}
-              noanimate
-              testId="category-select"
-            >
-              <option value="Suggestion" key="0">Suggestion</option>
-              <option value="Bug Report" key="1">Bug Report</option>
-              <option value="Other Comment" key="2">Other Comment</option>
-            </Select>
-            {currentCategory === 'Bug Report' && (
+          <form 
+            onSubmit={handleSubmission} 
+            name="send feedback form"
+            aria-label="Feedback submission form"
+            noValidate
+          >
+            <fieldset>
+              {submitError && (
+                <div className={styles.errorContainer}>
+                  <p className={styles.errorText} role="alert">{submitError}</p>
+                </div>
+              )}
+              
+              <ErrorDisplay errors={errors} errorMessages={errorMessages} />
+              
+              <Select
+                label="Category *"
+                name="category"
+                handleChange={(value) => {
+                  updateField('category', value.toString());
+                  handleFieldBlur('category');
+                }}
+                value={form.category}
+                error={showFieldError('category')}
+                errorText={errorMessages.category}
+                testId="category-select"
+                noanimate
+              >
+                <option value="Suggestion" key="0">Suggestion</option>
+                <option value="Bug Report" key="1">Bug Report</option>
+                <option value="Other Comment" key="2">Other Comment</option>
+              </Select>
+              
+              {showFieldError('category') && (
+                <div id="category-error" className={styles.errorText} role="alert">
+                  {errorMessages.category}
+                </div>
+              )}
+              
+              {form.category === 'Bug Report' && (
+                <>
+                  <TextInput
+                    label="Steps to Reproduce *"
+                    rows={3}
+                    maxLength={1500}
+                    handleChange={(value) => {
+                      updateField('steps', value);
+                      handleFieldBlur('steps');
+                    }}
+                    value={form.steps}
+                    error={showFieldError('steps')}
+                    errorText={errorMessages.steps}
+                    testId="steps"
+                  />
+                  {showFieldError('steps') && (
+                    <div id="steps-error" className={styles.errorText} role="alert">
+                      {errorMessages.steps}
+                    </div>
+                  )}
+                </>
+              )}
+              
               <TextInput
-                label="Steps to Reproduce *"
-                rows={3}
+                label="Comments *"
+                rows={5}
                 maxLength={1500}
                 handleChange={(value) => {
-                  setCurrentSteps(value);
-                  resetErrors();
+                  updateField('comments', value);
+                  handleFieldBlur('comments');
                 }}
-                value={currentSteps}
-                testId="steps"
+                value={form.comments}
+                error={showFieldError('comments')}
+                errorText={errorMessages.comments}
+                testId="comments"
               />
-            )}
-            <TextInput
-              label="Comments *"
-              rows={5}
-              maxLength={1500}
-              handleChange={(value) => {
-                setCurrentComments(value);
-                resetErrors();
-              }}
-              value={currentComments}
-              testId="comments"
-            />
-            <FileInput
-              label={<>Add Files <span className="fw-normal">- Optional</span></>}
-              buttonLabel="Browse Files"
-              fileTypes=".png,.jpg,.jpeg"
-              handleChange={(files: CustomFile[]) => setCurrentScreenshots(Array.from(files))}
-              multiple
-            />
-            <Button type="submit" disabled={errorActive} className={styles.submitButton}>Submit</Button>
+              
+              {showFieldError('comments') && (
+                <div id="comments-error" className={styles.errorText} role="alert">
+                  {errorMessages.comments}
+                </div>
+              )}
+              
+              <FileInput
+                label={<>Add Files <span className="fw-normal">- Optional</span></>}
+                buttonLabel="Browse Files"
+                fileTypes=".png,.jpg,.jpeg"
+                handleChange={handleFileChange}
+                multiple
+              />
+              
+              <Button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className={styles.submitButton}
+                aria-describedby={isSubmitting ? 'submitting-status' : undefined}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </Button>
+              
+              {isSubmitting && (
+                <div id="submitting-status" className="sr-only" aria-live="polite">
+                  Submitting feedback, please wait...
+                </div>
+              )}
+            </fieldset>
           </form>
         </Fade>
       )}

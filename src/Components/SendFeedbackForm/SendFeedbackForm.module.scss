@@ -12,9 +12,42 @@
     width: 100%;
     margin: 0;
     background-color: $purpleOne;
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+  .errorContainer {
+    margin-bottom: $s;
   }
   .errorText {
     color: $red;
     font-style: italic;
+    margin: $xxs 0;
+    font-size: $subTwoSize;
+  }
+  .successMessage {
+    color: $purpleOne;
+    text-align: center;
+    margin-bottom: $s;
+  }
+  .fileUploadProgress {
+    margin-top: 8px;
+    font-size: $subTwoSize;
+    color: $placeholderGray;
+  }
+  .issueCreatedContainer {
+    text-align: center;
+    padding: $l;
+    
+    p {
+      margin-bottom: $m;
+      line-height: 1.6;
+    }
+    
+    .viewIssue {
+      margin-bottom: $s;
+    }
   }
 }
