@@ -3,7 +3,7 @@ import styles from "./FacetHeading.module.scss";
 import Tooltip from '../Tooltip/Tooltip';
 import Alert from '../../Icons/Status/Alerts/Info.svg?react';
 import ChevDown from "../../Icons/Directional/Chevron/Chevron Down.svg?react";
-import { Filter } from "../../Types/results";
+import { Filter } from "../../Types/filters";
 import { filterFamily } from "../../Utilities/filterFunctions";
 
 type FacetHeadingProps = {

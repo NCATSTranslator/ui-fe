@@ -16,7 +16,8 @@ import { getResultSetById, getNodeById, getPathById, getPathsByIds, getEdgeById 
 import { currentUser } from '../../Redux/slices/userSlice';
 import { displayScore, generateScore } from '../../Utilities/scoring';
 import { QueryType } from '../../Types/querySubmission';
-import { Result, Filter, PathFilterState, Path, ResultBookmark, ResultSet } from '../../Types/results.d';
+import { Result, PathFilterState, Path, ResultBookmark, ResultSet } from '../../Types/results.d';
+import { Filter } from '../../Types/filters';
 import { useTurnstileEffect } from '../../Utilities/customHooks';
 import Tabs from '../Tabs/Tabs';
 import Tab from '../Tabs/Tab';

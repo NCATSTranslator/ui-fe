@@ -9,7 +9,8 @@ import ResearchMultiple from '../../Icons/Queries/Evidence.svg?react';
 import PathArrow from '../../Icons/Connectors/PathArrow.svg?react';
 import { extractEdgeIDsFromSubgraph, getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, 
   isPathInferred, isStringArray, joinClasses, numberToWords } from '../../Utilities/utilities';
-import { PathFilterState, ResultNode, Path, Filter, ResultEdge, HoverTarget } from '../../Types/results';
+import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '../../Types/results';
+import { Filter } from '../../Types/filters';
 import { LastViewedPathIDContextType, useHoverPathObject, useSeenStatus } from '../../Utilities/customHooks';
 import { getResultSetById, getPathsByIds } from '../../Redux/slices/resultsSlice';
 import { useSelector } from 'react-redux';

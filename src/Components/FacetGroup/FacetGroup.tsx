@@ -1,5 +1,5 @@
 import { FC, useState, useEffect, useMemo } from "react";
-import { Filter, GroupedFilters } from "../../Types/results";
+import { Filter, GroupedFilters, FilterFamily } from "../../Types/filters";
 import styles from './FacetGroup.module.scss';
 import AnimateHeight from "react-animate-height";
 import ExternalLink from '../../Icons/Buttons/External Link.svg?react';
@@ -131,7 +131,7 @@ const getTagCaptionMarkup = (tagFamily: string): JSX.Element | null => {
 }
 
 const getSortedFacets = (
-  family: string,
+  family: FilterFamily,
   activeFilters: Filter[],
   facetCompare: ((a: [string, Filter], b: [string, Filter]) => number) | undefined,
   groupedFilters: GroupedFilters,
@@ -161,7 +161,12 @@ const getSortedFacets = (
     return acc;
   }, {});
 
-  let sortedFacets = Object.entries(groupedFilters[family]).sort(defaultCompare);
+  const familyFilters = groupedFilters[family];
+  if (!familyFilters) {
+    return [];
+  }
+
+  let sortedFacets = Object.entries(familyFilters).sort(defaultCompare);
 
   // When there is a custom facet compare for this facet family, we want to sort selected and
   // unselected facets independently while preserving that selected facets come first
@@ -177,7 +182,7 @@ const getSortedFacets = (
 }
 
 type FacetGroupProps = {
-  filterFamily: string;
+  filterFamily: FilterFamily;
   activeFilters: Filter[];
   facetCompare: ((a: [string, Filter], b: [string, Filter]) => number) | undefined;
   groupedFilters: GroupedFilters;
@@ -205,7 +210,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
   const handleChemicalCategorySearch = useMemo(() =>debounce((value: string) => { setChemicalCategorySearchTerm(value) }, 500),[]);
 
   return (
-    (Object.keys(groupedFilters[filterFamily]).length > 0 && familyHeadingMarkup !== null )
+    (groupedFilters[filterFamily] && Object.keys(groupedFilters[filterFamily]!).length > 0 && familyHeadingMarkup !== null )
       ?
         <div className={styles.facetGroup}>
             <button
