@@ -1,6 +1,7 @@
 import { equal } from 'mathjs';
 import { getEvidenceCounts, getPathCount, hasSupport, isPublicationObjectArray, calculateTotalEvidence, getStringNameFromPath, getDefaultEdge } from './utilities';
-import { Filter, Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet } from '../Types/results.d';
+import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet } from '../Types/results.d';
+import { Filter } from '../Types/filters';
 import { PublicationObject } from '../Types/evidence.d';
 import { generateScore } from './scoring';
 import { getTagFamily } from './filterFunctions';
@@ -198,8 +199,8 @@ export const sortByNamePathfinderHighLow = (items: Result[]) => {
 };
 
 export const filterCompare = (filter1: Filter, filter2: Filter) => {
-  const f1Family = getTagFamily(filter1.id);
-  const f2Family = getTagFamily(filter2.id);
+  const f1Family = getTagFamily(filter1.id || '');
+  const f2Family = getTagFamily(filter2.id || '');
   return f2Family.localeCompare(f1Family);
 }
 

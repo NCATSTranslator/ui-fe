@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, FC, SetStateAction, Dispatch } from 'react';
 import styles from './ResultsFilter.module.scss';
-import { Filter, GroupedFilters } from '../../Types/results';
+import { Filter, FilterType, GroupedFilters, FilterFamily } from '../../Types/filters';
 import { cloneDeep } from 'lodash';
 import FacetGroup from '../FacetGroup/FacetGroup';
 import EntitySearch from '../EntitySearch/EntitySearch';
@@ -39,7 +39,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
   }
 
   // returns a new object with each tag grouped by its type
-  const groupFilters = (filters: {[key: string]: Filter}, type: string): GroupedFilters => {
+  const groupFilters = (filters: {[key: string]: Filter}, type: FilterType): GroupedFilters => {
     const newGroupedFilters: GroupedFilters = {};
     for (let family of filtering.getFamiliesByType(type)) {
       newGroupedFilters[family] = {};
@@ -48,7 +48,9 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
     for (let [id, description] of Object.entries(cloneDeep(filters))) {
       if (filtering.getTagType(id) === type) {
         const family = filtering.getTagFamily(id);
-        newGroupedFilters[family][id] = description;
+        if (newGroupedFilters[family]) {
+          newGroupedFilters[family]![id] = description;
+        }
       }
     }
 
@@ -57,7 +59,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
 
   const groupHasFilters = (filterGroup: GroupedFilters): boolean => {
     for (let categoryFilters of Object.values(filterGroup)) {
-      if (Object.keys(categoryFilters).length > 0) return true;
+      if (categoryFilters && Object.keys(categoryFilters).length > 0) return true;
     }
 
     return false;
@@ -100,7 +102,8 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                 Object.keys(resultFilters).map((filterFamily) => {
                   return (
                     <FacetGroup
-                      filterFamily={filterFamily}
+                      key={filterFamily}
+                      filterFamily={filterFamily as FilterFamily}
                       activeFilters={activeFilters}
                       facetCompare={filterCompare[filterFamily]}
                       groupedFilters={resultFilters}
@@ -121,7 +124,8 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                 Object.keys(pathFilters).map((tagFamily) => {
                   return (
                     <FacetGroup
-                      filterFamily={tagFamily}
+                      key={tagFamily}
+                      filterFamily={tagFamily as FilterFamily}
                       activeFilters={activeFilters}
                       facetCompare={filterCompare[tagFamily]}
                       groupedFilters={pathFilters}
