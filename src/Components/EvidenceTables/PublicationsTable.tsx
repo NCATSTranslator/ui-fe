@@ -247,7 +247,6 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     pub: PublicationObject,
     selectedEdge: ResultEdge | null,
   ): JSX.Element | string => {
-    console.log(pub, selectedEdge);
 
     const checkEdgeForPub = (pubID: string, edge: ResultEdge): {id: string; support: PublicationSupport;} | false => {
       for(const pubTypeArr of Object.values(edge.publications)) {
@@ -259,7 +258,6 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     }
     const matchingEdgePub = !!pub?.id && !!selectedEdge  ? checkEdgeForPub(pub.id, selectedEdge) : false;
     if (!!matchingEdgePub && matchingEdgePub.support !== null) {
-      console.log(matchingEdgePub);
       const objectNode = getNodeById(resultSet, selectedEdge?.object);
       const objectName = objectNode?.names[0] || "";
       const subjectNode = getNodeById(resultSet, selectedEdge?.subject);
