@@ -18,6 +18,11 @@ export default defineConfig(() => {
     ],
     compilerOptions: {
       jsx: "react-jsx"
+    },
+    resolve: {
+      alias: {
+        '@': '/src'
+      }
     }
   };
 });
