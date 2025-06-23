@@ -1,4 +1,4 @@
-@import "../../Assets/Styles/variables";
+@import "@/Assets/Styles/variables";
 
 $querySelectPadding: 16px 20px;
 
@@ -57,7 +57,7 @@ $querySelectPadding: 16px 20px;
     margin: 0 8px;
   }
   .icon {
-    content: url('../../Icons/Directional/Chevron/Chevron\ Down.svg');
+    content: url('@/Icons/Directional/Chevron/Chevron\ Down.svg');
     order: 1;
     transition: $defaultTransformAnim;
     transform: rotate(360deg);

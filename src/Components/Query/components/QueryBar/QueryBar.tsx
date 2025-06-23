@@ -1,12 +1,12 @@
 import { FC } from 'react';
-import TextInput from "../../Core/TextInput";
-import Autocomplete from "../../Autocomplete/Autocomplete";
+import TextInput from "@/Components/Core/TextInput";
+import Autocomplete from "@/Components/Autocomplete/Autocomplete";
 import styles from './QueryBar.module.scss';
-import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
-import QueryTypeIcon from "../../QueryTypeIcon/QueryTypeIcon";
-import Button from "../../Core/Button";
+import ArrowRight from "@/Icons/Directional/Arrows/Arrow Right.svg?react";
+import QueryTypeIcon from '../QueryTypeIcon/QueryTypeIcon';
+import Button from "@/Components/Core/Button";
 import { cloneDeep } from 'lodash';
-import { AutocompleteItem, QueryItem, QueryType } from '../../../Types/querySubmission';
+import { AutocompleteItem, QueryItem, QueryType } from '@/Types/querySubmission';
 
 type QueryBarProps = {
   handleSubmission: (item: QueryItem | null) => void;

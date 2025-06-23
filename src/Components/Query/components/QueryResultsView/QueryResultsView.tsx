@@ -1,14 +1,14 @@
 import { FC } from 'react';
-import { QueryItem } from '../../../Types/querySubmission';
-import { Result } from '../../../Types/results';
-import EntityLink from '../../EntityLink/EntityLink';
-import Tooltip from '../../Tooltip/Tooltip';
-import Button from '../../Core/Button';
-import ResultsSummaryButton from '../../ResultsSummaryButton/ResultsSummaryButton';
-import ShareIcon from '../../../Icons/Buttons/Link.svg?react';
-import ExternalLink from '../../../Icons/Buttons/External Link.svg?react';
-import { getEntityLink } from '../../../Utilities/utilities';
-import styles from '../Query.module.scss';
+import { QueryItem } from '@/Types/querySubmission';
+import { Result } from '@/Types/results';
+import EntityLink from '@/Components/EntityLink/EntityLink';
+import Tooltip from '@/Components/Tooltip/Tooltip';
+import Button from '@/Components/Core/Button';
+import ResultsSummaryButton from '@/Components/ResultsSummaryButton/ResultsSummaryButton';
+import ShareIcon from '@/Icons/Buttons/Link.svg?react';
+import ExternalLink from '@/Icons/Buttons/External Link.svg?react';
+import { getEntityLink } from '@/Utilities/utilities';
+import styles from '@/Components/Query/Query.module.scss';
 
 interface QueryResultsViewProps {
   queryItem: QueryItem;

@@ -1,12 +1,12 @@
 import { FC } from 'react';
-import { QueryBar } from './QueryBar';
-import { AutocompleteItem, QueryItem } from '../../../Types/querySubmission';
-import QuerySelect from './QuerySelect';
-import ExampleQueryList from '../../ExampleQueryList/ExampleQueryList';
-import { queryTypes } from '../../../Utilities/queryTypes';
-import loadingIcon from '../../../Assets/Images/Loading/loading-purple.png';
-import styles from '../Query.module.scss';
-import OutsideClickHandler from '../../OutsideClickHandler/OutsideClickHandler';
+import { QueryBar } from '../QueryBar/QueryBar';
+import { AutocompleteItem, QueryItem } from '@/Types/querySubmission';
+import { QuerySelect } from '../QuerySelect/QuerySelect';
+import ExampleQueryList from '@/Components/ExampleQueryList/ExampleQueryList';
+import { queryTypes } from '@/Utilities/queryTypes';
+import loadingIcon from '@/Assets/Images/Loading/loading-purple.png';
+import styles from '@/Components/Query/Query.module.scss';
+import OutsideClickHandler from '@/Components/OutsideClickHandler/OutsideClickHandler';
 
 interface QueryInputViewProps {
   queryItem: QueryItem;
@@ -59,7 +59,7 @@ export const QueryInputView: FC<QueryInputViewProps> = ({
           label=""
           handleChange={(val: string) => onQueryTypeChange(val, true)}
           noanimate
-          value={queryItem.type.label}
+          value={queryItem.type.id}
         >
           {queryTypes.map((type) => (
             <option value={type.id} key={type.id}>
