@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { debounce } from 'lodash';
-import { QueryItem } from '../Components/QueryBar/QueryBar';
+import { QueryItem } from '../Types/querySubmission';
 import { incrementHistory } from '../Redux/slices/historySlice';
 import { filterAndSortExamples, getAutocompleteTerms } from './autocompleteFunctions';
 import { getResultsShareURLPath } from '../Utilities/resultsInteractionFunctions';

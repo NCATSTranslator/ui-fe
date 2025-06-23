@@ -20,6 +20,11 @@ export type QueryType = {
   iconString: string;
 }
 
+export type QueryItem = {
+  type: QueryType; 
+  node: AutocompleteItem | null; 
+}
+
 export type AutocompleteItem = {
   id:string,
   label: string,

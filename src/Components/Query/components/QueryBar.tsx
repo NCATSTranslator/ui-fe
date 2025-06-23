@@ -1,17 +1,12 @@
 import { FC } from 'react';
-import TextInput from "../Core/TextInput";
-import Autocomplete from "../Autocomplete/Autocomplete";
+import TextInput from "../../Core/TextInput";
+import Autocomplete from "../../Autocomplete/Autocomplete";
 import styles from './QueryBar.module.scss';
 import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
-import QueryTypeIcon from "../QueryTypeIcon/QueryTypeIcon";
-import Button from "../Core/Button";
+import QueryTypeIcon from "../../QueryTypeIcon/QueryTypeIcon";
+import Button from "../../Core/Button";
 import { cloneDeep } from 'lodash';
-import { AutocompleteItem, QueryType } from '../../Types/querySubmission';
-
-export type QueryItem = {
-  type: QueryType; 
-  node: AutocompleteItem | null; 
-}
+import { AutocompleteItem, QueryItem, QueryType } from '../../../Types/querySubmission';
 
 type QueryBarProps = {
   handleSubmission: (item: QueryItem | null) => void;
@@ -26,7 +21,7 @@ type QueryBarProps = {
   placeholderText?: string; 
 }
 
-const QueryBar: FC<QueryBarProps> = ({
+export const QueryBar: FC<QueryBarProps> = ({
   handleSubmission,
   handleChange,
   queryType,
@@ -83,5 +78,3 @@ const QueryBar: FC<QueryBarProps> = ({
     </form>
   );
 }
-
-export default QueryBar;
