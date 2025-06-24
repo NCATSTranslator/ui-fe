@@ -1,15 +1,15 @@
 import { FC, useCallback, useState } from "react";
 import styles from './ResultsItemInteractables.module.scss';
 import { Link } from 'react-router-dom';
-import ShareIcon from '../../Icons/Buttons/Link.svg?react';
-import Bookmark from "../../Icons/Navigation/Bookmark/Bookmark.svg?react";
-import BookmarkFilled from "../../Icons/Navigation/Bookmark/Filled Bookmark.svg?react";
-import Notes from "../../Icons/Buttons/Notes/Notes.svg?react"
-import NotesFilled from "../../Icons/Buttons/Notes/Filled Notes.svg?react"
-import Tooltip from '../Tooltip/Tooltip';
-import MenuIcon from '../../Icons/Buttons/Dot Menu/Horizontal Dot Menu.svg?react';
-import { useWindowSize } from "../../Utilities/customHooks";
-import OutsideClickHandler from "../OutsideClickHandler/OutsideClickHandler";
+import ShareIcon from '@/Icons/Buttons/Link.svg?react';
+import Bookmark from "@/Icons/Navigation/Bookmark/Bookmark.svg?react";
+import BookmarkFilled from "@/Icons/Navigation/Bookmark/Filled Bookmark.svg?react";
+import Notes from "@/Icons/Buttons/Notes/Notes.svg?react"
+import NotesFilled from "@/Icons/Buttons/Notes/Filled Notes.svg?react"
+import Tooltip from '@/Components/Tooltip/Tooltip';
+import MenuIcon from '@/Icons/Buttons/Dot Menu/Horizontal Dot Menu.svg?react';
+import { useWindowSize } from "@/Utilities/customHooks";
+import OutsideClickHandler from '@/Components/OutsideClickHandler/OutsideClickHandler';
 
 interface ResultsItemInteractablesProps {
   handleBookmarkClick: () => Promise<any>;
@@ -24,7 +24,7 @@ interface ResultsItemInteractablesProps {
   nameString: string;
 }
 
-const ResultsItemInteractables: FC<ResultsItemInteractablesProps> = ({
+export const ResultsItemInteractables: FC<ResultsItemInteractablesProps> = ({
   handleBookmarkClick,
   handleNotesClick,
   handleOpenResultShare,
@@ -126,5 +126,3 @@ const ResultsItemInteractables: FC<ResultsItemInteractablesProps> = ({
 
   )
 }
-
-export default ResultsItemInteractables;

@@ -1,9 +1,9 @@
 import { FC } from "react";
 import styles from './ResultsItemName.module.scss';
-import { Result, ResultNode } from "../../Types/results";
-import { formatBiolinkNode, getIcon, getFormattedPathfinderName } from "../../Utilities/utilities";
+import { Result, ResultNode } from "@/Types/results";
+import { formatBiolinkNode, getIcon, getFormattedPathfinderName } from "@/Utilities/utilities";
 import Highlighter from "react-highlight-words";
-import ArrowIcon from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
+import ArrowIcon from "@/Icons/Directional/Arrows/Arrow Right.svg?react";
 
 type ResultsItemNameProps = {
   isPathfinder?: boolean;
@@ -15,7 +15,7 @@ type ResultsItemNameProps = {
   resultsItemStyles: { [key: string]: string;};
 }
 
-const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, subjectNode, objectNode, item, activeEntityFilters, nameString, resultsItemStyles }) => {
+export const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, subjectNode, objectNode, item, activeEntityFilters, nameString, resultsItemStyles }) => {
 
   if(!subjectNode || !objectNode) {
     console.warn("Cannot generate result item name, subject or object node prop is missing."); 
@@ -95,5 +95,3 @@ const ResultsItemName: FC<ResultsItemNameProps> = ( {isPathfinder = false, subje
     </>
   )
 }
-
-export default ResultsItemName;

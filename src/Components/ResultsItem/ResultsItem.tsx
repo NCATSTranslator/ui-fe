@@ -22,10 +22,9 @@ import { useTurnstileEffect } from '../../Utilities/customHooks';
 import Tabs from '../Tabs/Tabs';
 import Tab from '../Tabs/Tab';
 import * as filtering from '../../Utilities/filterFunctions';
-import ResultsItemName from '../ResultsItemName/ResultsItemName';
 import Feedback from '../../Icons/Navigation/Feedback.svg?react';
 import { cloneDeep } from 'lodash';
-import ResultsItemInteractables from '../ResultsItemInteractables/ResultsItemInteractables';
+import { ResultsItemName, ResultsItemInteractables } from './components';
 import { resultToCytoscape } from '../../Utilities/graphFunctions';
 
 const GraphView = lazy(() => import("../GraphView/GraphView"));
