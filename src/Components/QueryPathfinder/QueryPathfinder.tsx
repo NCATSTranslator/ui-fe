@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef, FC, Dispatch, SetStateAction } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from "react-router-dom";
 import { currentConfig } from "../../Redux/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
 import Autocomplete from '../Autocomplete/Autocomplete';
@@ -11,9 +10,7 @@ import { AutocompleteFunctions } from "../../Types/querySubmission";
 import { defaultQueryFilterFactory } from '../../Utilities/queryTypeFilters';
 import { defaultQueryAnnotator } from '../../Utilities/queryTypeAnnotators';
 import { defaultQueryFormatter } from '../../Utilities/queryTypeFormatters';
-import { API_PATH_PREFIX } from "../../Utilities/userApi";
-import { getPathfinderResultsShareURLPath } from '../../Utilities/resultsInteractionFunctions';
-import { ToastContainer, toast, Slide } from 'react-toastify';
+import { ToastContainer, Slide } from 'react-toastify';
 import { generateEntityLink, getDataFromQueryVar, getIcon, getFormattedPathfinderName } from '../../Utilities/utilities';
 import QuestionIcon from '../../Icons/Buttons/Search.svg?react';
 import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
@@ -89,7 +86,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     clearAutocompleteItems: clearAutocompleteItemsTwo
   } = useAutocomplete(autocompleteFunctions, limitTypes, limitPrefixes, nameResolverEndpoint);
 
-  const { isLoading, setIsLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder');
+  const { isLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder');
 
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = useCallback((e: string, isFirstBar:boolean) => {
@@ -153,11 +150,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   // Event handler for form submission
   const handleSubmission = (itemOne: AutocompleteItem | null, itemTwo: AutocompleteItem | null) => {
     validateSubmission(itemOne, itemTwo);
-  }
-
-  const clearSelectedItems = () => {
-    clearItem(1);
-    clearItem(2);
   }
   
   const clearItem = (item: number) => {
