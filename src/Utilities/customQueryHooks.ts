@@ -1,12 +1,12 @@
-import { useMemo, useState, useCallback, useRef  } from 'react';
+import { useMemo, useState, useCallback, useRef, MutableRefObject  } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { debounce } from 'lodash';
-import { QueryItem } from '../Types/querySubmission';
+import { Example, QueryItem } from '../Types/querySubmission';
 import { incrementHistory } from '../Redux/slices/historySlice';
 import { filterAndSortExamples, getAutocompleteTerms } from './autocompleteFunctions';
-import { getResultsShareURLPath } from '../Utilities/resultsInteractionFunctions';
+import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '../Utilities/resultsInteractionFunctions';
 import { API_PATH_PREFIX } from '../Utilities/userApi';
 import { queryTypes } from '../Utilities/queryTypes';
 import { AutocompleteItem, AutocompleteFunctions, QueryType } from '../Types/querySubmission';
@@ -15,7 +15,7 @@ import { AutocompleteItem, AutocompleteFunctions, QueryType } from '../Types/que
  * Custom hook that filters and sorts cached queries into categorized example queries.
  * Memoizes the result to prevent unnecessary recalculations on re-renders.
  * 
- * @param cachedQueries - Array of cached query objects to filter and sort
+ * @param {Example[] | undefined} cachedQueries - Array of cached query objects to filter and sort
  * @returns Object containing categorized example queries:
  *   - exampleDiseases: Drug-related queries
  *   - exampleChemsUp: Gene queries with 'increased' direction
@@ -23,7 +23,7 @@ import { AutocompleteItem, AutocompleteFunctions, QueryType } from '../Types/que
  *   - exampleGenesUp: Chemical queries with 'increased' direction
  *   - exampleGenesDown: Chemical queries with 'decreased' direction
  */
-export const useExampleQueries = (cachedQueries: any[] | undefined) => {
+export const useExampleQueries = (cachedQueries: Example[] | undefined) => {
   return useMemo(() => {
     if (!cachedQueries) return {};
 
@@ -41,12 +41,14 @@ export const useExampleQueries = (cachedQueries: any[] | undefined) => {
  * Custom hook that manages query submission logic including API calls, error handling,
  * navigation, and Redux state updates. Provides loading state and submission function.
  * 
+ * @param {'single' | 'pathfinder'} queryType - Type of query: 'single' for regular queries, 'pathfinder' for dual-item queries
  * @returns Object containing:
  *   - isLoading: Boolean indicating if a query is currently being submitted
  *   - setIsLoading: Function to manually set loading state
  *   - submitQuery: Async function to submit a query item to the API
+ *   - submitPathfinderQuery: Async function to submit a pathfinder query with two items
  */
-export const useQuerySubmission = () => {
+export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single') => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -115,7 +117,59 @@ export const useQuerySubmission = () => {
     }
   }, [dispatch, navigate]);
 
-  return { isLoading, setIsLoading, submitQuery };
+  const submitPathfinderQuery = useCallback(async (
+    itemOne: AutocompleteItem, 
+    itemTwo: AutocompleteItem, 
+    middleType?: string
+  ) => {
+    setIsLoading(true);
+
+    try {
+      let subjectType = (!!itemOne?.types) ? itemOne.types[0] : "";
+      let objectType = (!!itemTwo?.types) ? itemTwo.types[0] : "";
+      let queryObject: {type: string, subject: {id: string, category: string}, object: {id: string, category: string}, constraint?: string} = {
+        type: 'pathfinder',
+        subject: {id: itemOne.id, category: subjectType},
+        object: {id: itemTwo.id, category: objectType},
+      }
+      if(middleType)
+        queryObject.constraint = middleType;
+
+      let queryJson = JSON.stringify(queryObject);
+
+      const response = await fetch(`${API_PATH_PREFIX}/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: queryJson
+      });
+
+      const data = await response.json();
+      console.log(data);
+      
+      let newQueryPath = getPathfinderResultsShareURLPath(
+        itemOne, 
+        itemTwo, 
+        '0', 
+        middleType?.replace("biolink:", ""), 
+        data.data
+      ); 
+      navigate(newQueryPath);
+    } catch (error) {
+      toast.error(
+        "We were unable to submit your query at this time. Please attempt to submit it again or try again later."
+      );
+      setIsLoading(false);
+      console.log(error);
+      throw error;
+    }
+  }, [navigate]);
+
+  return { 
+    isLoading, 
+    setIsLoading, 
+    submitQuery: queryType === 'single' ? submitQuery : undefined,
+    submitPathfinderQuery: queryType === 'pathfinder' ? submitPathfinderQuery : undefined
+  };
 }; 
 
 /**
@@ -123,10 +177,10 @@ export const useQuerySubmission = () => {
  * loading states, and autocomplete item management. Provides a 750ms debounced
  * query function to reduce API calls during user typing.
  * 
- * @param autocompleteFunctions - Mutable ref containing autocomplete filter functions
- * @param limitTypes - Mutable ref containing array of type filters for autocomplete
- * @param limitPrefixes - Mutable ref containing array of prefix filters for autocomplete
- * @param nameResolverEndpoint - API endpoint URL for name resolution
+ * @param {MutableRefObject<AutocompleteFunctions | null>} autocompleteFunctions - Mutable ref containing autocomplete filter functions
+ * @param {MutableRefObject<string[]>} limitTypes - Mutable ref containing array of type filters for autocomplete
+ * @param {MutableRefObject<string[] | null>} limitPrefixes - Mutable ref containing array of prefix filters for autocomplete
+ * @param {string} nameResolverEndpoint - API endpoint URL for name resolution
  * @returns Object containing:
  *   - autocompleteItems: Array of autocomplete suggestions or null
  *   - loadingAutocomplete: Boolean indicating if autocomplete is loading
@@ -134,9 +188,9 @@ export const useQuerySubmission = () => {
  *   - clearAutocompleteItems: Function to clear autocomplete suggestions
  */
 export const useAutocomplete = (
-  autocompleteFunctions: React.MutableRefObject<AutocompleteFunctions | null>,
-  limitTypes: React.MutableRefObject<string[]>,
-  limitPrefixes: React.MutableRefObject<string[] | null>,
+  autocompleteFunctions: MutableRefObject<AutocompleteFunctions | null>,
+  limitTypes: MutableRefObject<string[]>,
+  limitPrefixes: MutableRefObject<string[] | null>,
   nameResolverEndpoint: string
 ) => {
   const [autocompleteItems, setAutoCompleteItems] = useState<AutocompleteItem[] | null>(null);
@@ -177,9 +231,9 @@ export const useAutocomplete = (
  * and related configuration refs. Initializes state based on provided parameters
  * and maintains history of previous query items.
  * 
- * @param initPresetTypeObject - Initial query type object or null to use default
- * @param initNodeLabelParam - Initial node label parameter from URL or props
- * @param initNodeIdParam - Initial node ID parameter from URL or props
+ * @param {QueryType | null} initPresetTypeObject - Initial query type object or null to use default
+ * @param {string | null} initNodeLabelParam - Initial node label parameter from URL or props
+ * @param {string | null} initNodeIdParam - Initial node ID parameter from URL or props
  * @returns Object containing:
  *   - queryItem: Current query item with type and node information
  *   - setQueryItem: Function to update the current query item
