@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, FC, Dispatch, SetStateAction } from "react";
 import { useSelector } from 'react-redux';
 import { useLocation } from "react-router-dom";
-import { QueryType } from "../../Types/querySubmission";
+import { QueryItem, QueryType } from "../../Types/querySubmission";
 import { Result } from "../../Types/results";
 import { currentConfig, currentUser } from "../../Redux/slices/userSlice";
 import { ToastContainer, Slide } from 'react-toastify';
@@ -119,21 +119,23 @@ const Query: FC<QueryProps> = ({
     clearAutocompleteItems();
   }, [setInputText, setQueryItem, prevQueryItems, clearAutocompleteItems]);
 
-  const validateSubmission = useCallback((item: any) => {
-    if (!item.node || !item.node.id) {
+  const validateSubmission = useCallback((item: QueryItem | null) => {
+    if (!item?.node || !item.node.id) {
       setIsError(true);
       setErrorText("No term selected, please select a valid term.");
       return;
     }
-    if (!item.type) {
+    if (!item?.type) {
       setIsError(true);
       setErrorText("No query type selected, please select a valid query type.");
       return;
     }
+    if(!submitQuery)
+      return;
     submitQuery(item);
   }, [submitQuery]);
 
-  const handleSubmission = useCallback((item: any) => {
+  const handleSubmission = useCallback((item: QueryItem | null) => {
     validateSubmission(item || queryItem);
   }, [validateSubmission, queryItem]);
 

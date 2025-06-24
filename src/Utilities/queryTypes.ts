@@ -3,12 +3,6 @@ import { defaultQueryAnnotator, geneQueryAnnotator } from './queryTypeAnnotators
 import { defaultQueryFormatter, geneQueryFormatter, diseaseQueryFormatter } from './queryTypeFormatters';
 import { QueryType } from '../Types/querySubmission';
 
-export type QueryTypeFunctions = {
-  filter: (type: any) => (item: any) => any;
-  annotate: (normalizedNodes: any) => Promise<any>;
-  format: (items: any, formatData: any) => Promise<any[]>;
-}
-
 export const queryTypes: QueryType[] = [
   {
     id: 0,
