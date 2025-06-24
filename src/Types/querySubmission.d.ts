@@ -14,10 +14,15 @@ export type QueryType = {
   direction: string | null;
   filterType: string;
   limitPrefixes: string[];
-  functions: QueryTypeFunctions;
+  functions: AutocompleteFunctions;
   pathString: string;
   searchTypeString: string;
   iconString: string;
+}
+
+export type QueryItem = {
+  type: QueryType; 
+  node: AutocompleteItem | null; 
 }
 
 export type AutocompleteItem = {
@@ -28,6 +33,7 @@ export type AutocompleteItem = {
 }
 
 export type AutocompleteFunctions = {
-  annotate: (nodes: any[]) => Promise<any[]>;
-  format: (nodes: any[], formatData: any) => any[];
+  filter: (type: any) => (item: any) => any;
+  annotate: (normalizedNodes: any) => Promise<any>;
+  format: (items: any, formatData: any) => Promise<any[]>;
 }

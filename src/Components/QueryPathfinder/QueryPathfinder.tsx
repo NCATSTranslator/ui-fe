@@ -1,21 +1,16 @@
-import { useState, useMemo, useCallback, useRef, FC, Dispatch, SetStateAction } from 'react';
+import { useState, useCallback, useRef, FC, Dispatch, SetStateAction } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from "react-router-dom";
 import { currentConfig } from "../../Redux/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
 import Autocomplete from '../Autocomplete/Autocomplete';
 import TextInput from '../Core/TextInput';
 import Button from '../Core/Button';
 import { AutocompleteItem } from '../../Types/querySubmission';
-import { getAutocompleteTerms } from '../../Utilities/autocompleteFunctions';
-import { debounce } from 'lodash';
-import { QueryTypeFunctions } from "../../Utilities/queryTypes";
+import { AutocompleteFunctions } from "../../Types/querySubmission";
 import { defaultQueryFilterFactory } from '../../Utilities/queryTypeFilters';
 import { defaultQueryAnnotator } from '../../Utilities/queryTypeAnnotators';
 import { defaultQueryFormatter } from '../../Utilities/queryTypeFormatters';
-import { API_PATH_PREFIX } from "../../Utilities/userApi";
-import { getPathfinderResultsShareURLPath } from '../../Utilities/resultsInteractionFunctions';
-import { ToastContainer, toast, Slide } from 'react-toastify';
+import { ToastContainer, Slide } from 'react-toastify';
 import { generateEntityLink, getDataFromQueryVar, getIcon, getFormattedPathfinderName } from '../../Utilities/utilities';
 import QuestionIcon from '../../Icons/Buttons/Search.svg?react';
 import ArrowRight from "../../Icons/Directional/Arrows/Arrow Right.svg?react";
@@ -31,6 +26,7 @@ import Select from '../Core/Select';
 import Tooltip from '../Tooltip/Tooltip';
 import ResultsSummaryButton from "../ResultsSummaryButton/ResultsSummaryButton";
 import { Result } from "../../Types/results";
+import { useAutocomplete, useQuerySubmission } from '../../Utilities/customQueryHooks';
 
 type QueryPathfinderProps = {
   handleResultMatchClick?: Function;
@@ -50,9 +46,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   setShareModalFunction = ()=>{} }) => {
 
   const config = useSelector(currentConfig);
-  const navigate = useNavigate();
   const nameResolverEndpoint = (config?.name_resolver) ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
-  const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorText, setErrorText] = useState("");
   const [inputOneText, setInputOneText] = useState("");
@@ -70,14 +64,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
   const resultsPaneQuestionText = `What paths begin with ${labelOne} and end with ${labelTwo}?`;
 
-  // Array, List of items to display in the autocomplete window
-  const [autocompleteItemsOne, setAutoCompleteItemsOne] = useState<Array<AutocompleteItem> | null>(null);
-  const [autocompleteItemsTwo, setAutoCompleteItemsTwo] = useState<Array<AutocompleteItem> | null>(null);
-  // Bool, are autocomplete items loading
-  const [autocompleteLoadingOne, setAutocompleteLoadingOne] = useState(false);
-  const [autocompleteLoadingTwo, setAutocompleteLoadingTwo] = useState(false);
-
-  const autocompleteFunctions = useRef<QueryTypeFunctions>( {
+  const autocompleteFunctions = useRef<AutocompleteFunctions>( {
     filter: defaultQueryFilterFactory,
     annotate: defaultQueryAnnotator,
     format: defaultQueryFormatter
@@ -85,24 +72,34 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   const limitPrefixes = useRef([]);
   const limitTypes = useRef(["Drug", "ChemicalEntity", "Disease", "Gene", "SmallMolecule", "PhenotypicFeature"]);
 
-  const delayedQuery = useMemo(() => debounce(
-    (inputText, setLoadingAutocomplete, setAutoCompleteItems, autocompleteFunctions, limitType, limitPrefixes, endpoint) =>
-      getAutocompleteTerms(inputText, setLoadingAutocomplete, setAutoCompleteItems, 
-        autocompleteFunctions, limitType, limitPrefixes, endpoint), 750), []
-  );
+  const {
+    autocompleteItems: autocompleteItemsOne,
+    loadingAutocomplete: autocompleteLoadingOne,
+    delayedQuery: delayedQueryOne,
+    clearAutocompleteItems: clearAutocompleteItemsOne
+  } = useAutocomplete(autocompleteFunctions, limitTypes, limitPrefixes, nameResolverEndpoint);
+
+  const {
+    autocompleteItems: autocompleteItemsTwo,
+    loadingAutocomplete: autocompleteLoadingTwo,
+    delayedQuery: delayedQueryTwo,
+    clearAutocompleteItems: clearAutocompleteItemsTwo
+  } = useAutocomplete(autocompleteFunctions, limitTypes, limitPrefixes, nameResolverEndpoint);
+
+  const { isLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder');
 
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = useCallback((e: string, isFirstBar:boolean) => {
     if(isFirstBar) {
       setQueryItemOne(null);
       setInputOneText(e);
-      delayedQuery(e, setAutocompleteLoadingOne, setAutoCompleteItemsOne, autocompleteFunctions.current, limitTypes.current, limitPrefixes.current, nameResolverEndpoint);
+      delayedQueryOne(e);
     } else {
       setQueryItemTwo(null);
       setInputTwoText(e);
-      delayedQuery(e, setAutocompleteLoadingTwo, setAutoCompleteItemsTwo, autocompleteFunctions.current, limitTypes.current, limitPrefixes.current, nameResolverEndpoint);
+      delayedQueryTwo(e);
     }
-  },[setAutocompleteLoadingOne, setAutocompleteLoadingTwo, setAutoCompleteItemsOne, setAutoCompleteItemsTwo, setInputOneText, delayedQuery, nameResolverEndpoint]);
+  },[delayedQueryOne, delayedQueryTwo]);
   
   const updateQueryItem = (selectedNode: AutocompleteItem, isFirstBar: boolean) => {
     // add in match text for genes, which should be the species
@@ -123,17 +120,13 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     updateQueryItem(item, isFirstBar);
 
     if(autocompleteItemsOne || autocompleteItemsTwo) {
-      clearAutocompleteItems(isFirstBar);
+      if(isFirstBar) {
+        clearAutocompleteItemsOne();
+      } else {
+        clearAutocompleteItemsTwo();
+      }
     }
   }
-
-  const clearAutocompleteItems = (isFirstBar: boolean) => {
-    if(isFirstBar)
-      setAutoCompleteItemsOne(null);
-    else
-      setAutoCompleteItemsTwo(null);
-  } 
-
 
   const validateSubmission = (itemOne: AutocompleteItem | null, itemTwo: AutocompleteItem | null) => {
     if(!itemOne && !itemTwo) {
@@ -151,61 +144,14 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       setErrorText("Second search term is not selected, please select a valid term.");
       return;
     }
-    submitQuery(itemOne, itemTwo);
+    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined);
   }
 
   // Event handler for form submission
   const handleSubmission = (itemOne: AutocompleteItem | null, itemTwo: AutocompleteItem | null) => {
     validateSubmission(itemOne, itemTwo);
   }
-
-  const submitQuery = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem) => {
-
-    // Set isLoading to true
-    setIsLoading(true);
-
-    let subjectType = (!!itemOne?.types) ? itemOne.types[0] : "";
-    let objectType = (!!itemTwo?.types) ? itemTwo.types[0] : "";
-    let queryObject: {type: string, subject: {id: string, category: string}, object: {id: string, category: string}, constraint?: string} = {
-      type: 'pathfinder',
-      subject: {id: itemOne.id, category: subjectType},
-      object: {id: itemTwo.id, category: objectType},
-    }
-    if(hasMiddleType && !!middleType)
-      queryObject.constraint = middleType;
-
-    let queryJson = JSON.stringify(queryObject);
-
-    // submit query to /query
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: queryJson
-    };
-    fetch(`${API_PATH_PREFIX}/query`, requestOptions)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        let newQueryPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, '0', middleType?.replace("biolink:", ""), data.data); 
-        navigate(newQueryPath);
-      })
-      .catch((error) => {
-        toast.error(
-          <div>
-            <h5 className='heading'>Error</h5>
-            <p>We were unable to submit your query at this time. Please attempt to submit it again or try again later.</p>
-          </div>
-        );
-        setIsLoading(false);
-        clearSelectedItems();
-        console.log(error)
-      });
-  }
-
-  const clearSelectedItems = () => {
-    clearItem(1);
-    clearItem(2);
-  }
+  
   const clearItem = (item: number) => {
     if(item === 1) {
       setQueryItemOne(null);
