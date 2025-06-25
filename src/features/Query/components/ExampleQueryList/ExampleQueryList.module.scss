@@ -1,0 +1,72 @@
+@import "@/assets/styles/variables";
+
+.demoDisclaimer {
+  text-align: center;
+  font-weight: 800;
+  color: $darkGray;
+  margin: 0 0 35px;
+}
+.subTwo {
+  margin: 0 0 4px;
+  font-size: 14px;
+  display: flex;
+  font-weight: 800;
+  color: $black;
+}
+.expandButton {
+  transition: $defaultAnim;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  background-color: transparent;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+.expanded {
+  .expandButton {
+    rotate: 180deg;
+  }
+}
+.examplesContainer {
+  margin: 12px 0 0;
+  position: relative;
+  background-color: $lightPurpleTwo;
+  padding: $m;
+  border: 1px solid $midPurpleTwo;
+  border-radius: 8px;
+}
+.examples {
+  display: grid;
+  .subTwo {
+    white-space: nowrap;
+  }
+  .exampleList {
+    & > div {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .button {
+      color: $black;
+      align-items: center;
+      background-color: $lightGray;
+      border-color: $lightGray;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      font-size: 12px;
+      font-weight: 800;
+      justify-content: center;
+      line-height: 1;
+      padding: 10px 8px;
+      text-decoration: none;
+      transition: box-shadow .25s ease;
+      box-shadow: none;
+      margin: 0 $s $s 0;
+      white-space: nowrap;
+      &:hover {
+        box-shadow: none;
+      }
+    }
+  }
+}

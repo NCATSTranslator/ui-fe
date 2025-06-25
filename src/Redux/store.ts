@@ -1,9 +1,9 @@
 import { AnyAction, configureStore, ThunkDispatch } from '@reduxjs/toolkit';
-import historyReducer from './slices/historySlice';
-import resultsReducer from './slices/resultsSlice';
-import seenStatusReducer from './slices/seenStatusSlice';
-import userReducer from './slices/userSlice';
-import { createAppListenerMiddleware } from './listenerMiddleware';
+import historyReducer from '@/features/History/slices/historySlice';
+import resultsReducer from '@/features/ResultList/slices/resultsSlice';
+import seenStatusReducer from '@/features/ResultList/slices/seenStatusSlice';
+import userReducer from '@/features/User-Auth/slices/userSlice';
+import { createAppListenerMiddleware } from '@/redux/listenerMiddleware';
 
 export type RootState = {
   history: ReturnType<typeof historyReducer>;

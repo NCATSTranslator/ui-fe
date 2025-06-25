@@ -1,0 +1,59 @@
+@import "@/assets/styles/variables";
+
+.accordion {
+  svg {
+    margin: 0;
+    height: 24px;
+    width: 24px;
+    transition: all .25s ease;
+    path {
+      stroke: $darkGray;
+    }
+  }
+  .extLinkIcon {
+    height: 20px;
+    min-width: 20px;
+    width: 20px;
+    margin-left: 4px;
+    transform: none !important;
+    path {
+      stroke: transparent;
+    }
+  }
+  &.open {
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+  .accordionButton {
+    background-color: transparent;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+  }
+  .navLink, .extLink {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    background-color: transparent;
+    text-decoration: none;
+    color: $black;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 11px 8px;
+    span{
+      color: $black;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    &.active {
+      background-color: $palePurple;
+      color: $purpleOne;
+    }
+    span {
+      display: flex;
+      align-items: center;
+    }
+  }
+}

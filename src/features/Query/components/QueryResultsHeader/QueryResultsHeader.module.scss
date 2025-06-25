@@ -1,0 +1,38 @@
+@import '@/assets/styles/variables';
+
+.resultsHeader {
+  margin-bottom: 1rem;
+}
+
+.showingResultsContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.subHeading {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+  min-width: 0;
+}
+
+.searchedTerm {
+  font-weight: 600;
+  color: #007bff;
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.shareButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+} 

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import SendFeedbackModal from '../Components/Modals/SendFeedbackModal';
+import SendFeedbackModal from '@/features/Common/components/SendFeedbackModal';
 import {Provider} from 'react-redux';
-import {store} from '../Redux/store';
+import {store} from '@/redux/store';
 import userEvent from '@testing-library/user-event';
 
 describe('Send Feedback Modal', () => {

@@ -1,0 +1,235 @@
+@import "@/assets/styles/variables";
+
+.publicationsTableContainer {
+  display: grid;
+}
+.pubsTable {
+    display: flex;
+    flex-direction: column;
+    overflow-y: hidden;
+    margin: 0 10px;
+  .tableItems {
+    display: flex;
+    flex-direction: column;
+  }
+  .title, .snippet, .source, .pubdate, .pValue, .link, .location, .status, .knowledgeLevel {
+    text-align: left;
+    justify-content: flex-start;
+  }
+  .source.tableCell span {
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .snippet.tableCell span {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+  }
+  .emphasizedSnippet {
+    font-size: 12px;
+  }
+  .title {
+    a {
+      font-weight: 800;
+      color: $purpleOne;
+      font-size: 12px;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      -webkit-box-orient: vertical;
+      display: -webkit-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color .25s ease;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  .sourceName {
+    font-weight: 800;
+    color: $purpleOne;
+    cursor: pointer;
+    &.noLink {
+      cursor: default;
+      color: $black;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+      &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+.bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: $m;
+  padding-bottom: 24px;
+  .perPage {
+    display: flex;
+    .label {
+      color: $darkGray;
+      font-size: 14px;
+      font-weight: 800;
+      margin: 0 $xs 0 0;
+      padding: 15px 0;
+    }
+    label {
+      margin: 0;
+      width: 115px;
+    }
+  }
+  .pagination {
+    grid-column: 2/3;
+    .pageNums {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      list-style-type: none;
+      padding-left: 0;
+      margin: 0 0 0 auto;
+      .button {
+        margin-bottom: 0;
+        background-color: $purpleOne;
+        padding: 10px 25px;
+        border-radius: $defaultBorderRadius;
+        color: $white;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        -moz-user-select: none; 
+        -webkit-user-select: none; 
+        -ms-user-select: none; 
+        user-select: none;
+        -o-user-select: none;
+      }
+      .disabled {
+        background-color: transparent;
+        color: $midGray;
+        pointer-events: none;
+        cursor: default;
+      }
+      .pageNum {
+        a {
+          display: block;
+          cursor: pointer;
+          padding: 10px 15px;
+          line-height: 1;
+          margin: 8px;
+          transition: all .25s ease;
+          border: 1px solid transparent;
+          border-radius: 5px;
+          color: $darkGray;
+          font-size: $bodyOneSize;
+          font-weight: 800;
+          -moz-user-select: none; 
+          -webkit-user-select: none; 
+          -ms-user-select: none; 
+          user-select: none;
+          -o-user-select: none;
+          &:hover {
+            background-color: $palePurple;
+            color: $purpleOne;
+          }
+        }
+        &.current {
+          a {
+            background-color: $palePurple;
+            color: $purpleOne;
+          } 
+        }
+      }
+    }
+  }
+}
+.loadingBar {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  min-height: 100px;
+  padding: 20px 0;
+  grid-column: auto;
+}
+.noPubs {
+  padding: 100px 0;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  font-size: 18px;
+  font-weight: 800;
+}
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $xs 0 $s; 
+  margin: 0 $xs;
+  .evidenceCount {
+    margin: 0;
+    color: $darkGray;
+    font-size: 14px;
+    line-height: 1.25;
+    padding: 12px 0;
+  }
+}
+.knowledgeLevelOptions {
+  display: flex;
+  align-items: center;
+}
+.knowledgeLevelLabel {
+  color: $darkGray;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.75px;
+  margin-right: 20px;
+  margin: 0 20px 0 0;
+  display: flex;
+  align-items: center;
+  svg {
+    margin-left: 4px;
+    path {
+      fill: $darkGray;
+      transition: $defaultAnim;
+    }
+    &:hover {
+      path {
+        fill: $purpleOne;
+      }
+    }
+  }
+}
+.knowledgeLevelButton {
+  border-radius: 8px;
+  background-color: $white;
+  border: 1px solid $darkGray;
+  color: $purpleEdgeBGSelected;
+  transition: all .5s ease;
+  color: #514F7E;
+  font-family: $opensans;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1; 
+  letter-spacing: 0.75px;
+  padding: 8px 16px;
+  margin: 0 16px 0 0;
+  &.selected {
+    background-color: $palePurple;
+    border: 1px solid $purpleEdgeBGSelected;
+    box-shadow: $dropShadowTransparent;
+  }
+  &:last-of-type {
+    margin: 0;
+  }
+}
+.knowledgeLevelSpan {
+  font-weight: 800;
+  display: block;
+}

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import ResultsList from '../Components/ResultsList/ResultsList';
+import ResultList from '@/features/ResultList/components/ResultList/ResultList';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import {store} from '../Redux/store';
+import {store} from '@/redux/store';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import {Provider} from 'react-redux';
 
@@ -14,7 +14,7 @@ describe('Results List Test', () => {
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<ResultsList/>} ></Route>
+              <Route path="/" element={<ResultList/>} ></Route>
             </Routes>
           </BrowserRouter>
         </QueryClientProvider>

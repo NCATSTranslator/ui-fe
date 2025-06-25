@@ -1,0 +1,114 @@
+@import "@/assets/styles/variables";
+
+.entitySearch {
+  display: block;
+  border-bottom: 1px solid $midGray;
+  padding: $s 0 $s 0;
+  min-width: calc(300px - 16px);
+  .activeFilters {
+    padding: $xs 0 0 0;
+  }
+  .searchIcon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 8px;
+  }
+  .textInput {
+    width: calc(100% - 58px);
+    color: $black;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 9px 12px 9px 44px;
+    border-radius: $largeBorderRadius;
+    border: 1px solid $midGray;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    outline-width: 0px;
+    outline-style: solid;
+    &::placeholder {
+      color: $midGray;
+      font-weight: 400;
+    }
+  }
+  .subTwo {
+    align-items: center;
+    display: inline-flex;
+    position: relative;
+    margin: 0;
+    font-weight: 800;
+    font-size: 14px;
+    color: $black;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    svg {
+      margin-left: 4px;
+      path {
+        fill: $darkGray;
+      }
+    }
+  }
+  .caption {
+    font-size: $captionSize;
+    margin: 0 0 $s;
+    font-weight: 400;
+    color: $darkGray;
+  }
+  .tooltip {
+    font-size: 12px; 
+  }
+  .inputContainer {
+    position: relative;
+    display: block;
+  }
+  .checkboxContainer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+  }
+  .checkbox {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    transition: $defaultAnim;
+    svg {
+      height: 24px;
+      width: 24px;
+      path {
+        transition: $defaultAnim;
+        fill: $midGray;
+      }
+    }
+    &.positive {
+      height: 100%;
+      min-width: 40px;
+      border-top: none;
+      border-right: 1px solid #D6D6D6;
+      border-bottom: none;
+      border-left: 1px solid #D6D6D6;
+      border-radius: 0;
+      &:hover {
+        svg path {
+          fill: $green;
+        }
+      }
+    }
+    &.negative {
+      border: none;
+      border-top-right-radius: 7px;
+      border-bottom-right-radius: 7px;
+      &:hover {
+        svg path {
+          fill: $red;
+        }
+      }
+    }
+  }
+}

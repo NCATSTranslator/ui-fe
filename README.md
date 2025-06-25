@@ -76,7 +76,6 @@ The full feature set will not be accessible without a full docker setup in order
 - **GraphView**: initializes, displays, and controls a cytoscape graph element based on a provided result.
 - **Header**: contains the site header.
 - **LoadingBar**: a loading bar component with optional crossfaded text and icon props.
-- **LoginComponent**: provides a decorative login page along with a link to SSO login based on variables provided from the config endpoint. 
 - **Modals**: contains the various modal window components used on the site, each derived from a main Modal component.
 - **OutsideClickHandler**: a wrapper component that executes a callback when a click is detected outside of its child component's bounds.
 - **Page**: serves as a template wrapper for different page types.
@@ -87,10 +86,10 @@ The full feature set will not be accessible without a full docker setup in order
 - **QueryHistoryList**: manages a historical list of queries with functionality for search, export, and deletion.
 - **Range**: provides two adjustable sliders for numerical input within a defined range, displaying the selected value and allowing for a callback function to respond to changes.
 - **ResultsFilter**: displays a filtering UI component for a set of results, categorizing tags and managing states for user-defined filter criteria.
-- **ResultsItem**: displays the paths, graph and evidence for a given result, along with the various interactions associated with this element and its children.
-- **ResultsList**: displays and provides user interactions for a set of results.
-- **ResultsListHeader**: displays relevant information at the top of the ResultsList component such as result count, active filters/tags and loading state.
-- **ResultsListLoadingButton**: displays an intractable element containing the current status of results polling and a button the user can fetch new results with should some be available. 
+- **ResultItem**: displays the paths, graph and evidence for a given result, along with the various interactions associated with this element and its children.
+- **ResultList**: displays and provides user interactions for a set of results.
+- **ResultListHeader**: displays relevant information at the top of the ResultList component such as result count, active filters/tags and loading state.
+- **ResultListLoadingButton**: displays an intractable element containing the current status of results polling and a button the user can fetch new results with should some be available. 
 - **SmallScreenOverlay**: renders a styled overlay component with instructions for users to switch to a widescreen view for optimal use of the Translator app.
 - **Tabs**: contains components for custom tabular UI elements.
 - **StickyToolbar**: displays a sticky toolbar that toggles between expanded and collapsed states and includes a loading button, results sharing functionality, and tooltips.

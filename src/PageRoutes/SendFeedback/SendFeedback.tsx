@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import SendFeedbackForm from "../../Components/SendFeedbackForm/SendFeedbackForm";
+import SendFeedbackForm from "@/features/Page/components/SendFeedbackForm/SendFeedbackForm";
 
 const SendFeedbackPage = () => {
 

@@ -1,0 +1,87 @@
+@import "@/assets/styles/variables";
+
+.heading, .pageHeading {
+  color: $purpleTwo
+}
+.none {
+  p {
+    margin-bottom: 0;
+    &:first-of-type {
+      font-size: 20px;
+      font-weight: 800;
+    }
+  }
+}
+.prefs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 250px);
+  gap: $m;
+  justify-content: space-between;
+}
+.submit {
+  margin: $m 0 0 0;
+  background-color: $purpleTwo;
+}
+.saves {
+  margin: 24px 0 0;
+}
+.showingContainer {
+  text-align: center;
+  .showing {
+    text-align: center;
+    margin: 8px;
+  }
+  .showingButton {
+    padding: 0;
+    background-color: transparent;
+    color: $purpleOne;
+    font-size: 16px;
+    font-weight: 400;
+    margin: 0;
+    text-decoration: underline;
+    box-shadow: none;
+    &:hover {
+      box-shadow: none;
+    }
+  }
+}
+.searchBarContainer {
+  margin: 0 0 24px;
+  .form {
+    display: flex;
+    justify-content: space-between;
+    padding-top: $l;
+    background-color: $palePurple;
+    border-radius: $defaultBorderRadius;
+    label {
+      display: flex;
+      width: 100%;
+      margin: 0;
+      input {
+        width: -moz-available;
+        width: -webkit-fill-available;
+      }
+    }
+    button {
+      margin: 0 0 0 $s;
+      padding: 10px 20px;
+    }
+  }
+  .closeIcon {
+    stroke: $darkGray;
+    cursor: pointer;
+  }
+}
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $s;
+  h1 {
+    margin-bottom: 0;
+  }
+  .collapseButton {
+    margin: 0;
+    padding: 4px 8px;
+  }
+}

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import App from '../App';
-import {store} from '../Redux/store';
+import App from '@/App';
+import {store} from '@/redux/store';
 import {Provider} from 'react-redux';
 
 describe('App Test',  () => {

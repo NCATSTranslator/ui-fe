@@ -1,0 +1,197 @@
+@import "@/assets/styles/variables";
+
+@-moz-keyframes spin { 
+  100% { -moz-transform: rotate(360deg); } 
+}
+@-webkit-keyframes spin { 
+  100% { -webkit-transform: rotate(360deg); } 
+}
+@keyframes spin { 
+  100% { 
+      -webkit-transform: rotate(360deg); 
+      transform:rotate(360deg); 
+  } 
+}
+
+.autocompleteContainer {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  background-color: $white;
+  box-shadow: $dropShadowHover;
+  border-radius: $defaultBorderRadius;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+  z-index: 100;
+  max-height: 265px;
+  overflow-y: scroll;
+  scrollbar-color: $midGray transparent; 
+  scrollbar-width: none;
+  &.loading {
+    overflow-y: hidden;
+    min-height: 265px;
+    .iconContainer {
+      opacity: 1;
+    }
+  }
+  &.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .iconContainer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    transition: $defaultAnim;
+    opacity: 0;
+    .loadingIcon {
+      display: block;
+      width: auto;
+      margin: 0 auto;
+      height: 120px;
+      -webkit-animation:spin 1s linear infinite;
+      -moz-animation:spin 1s linear infinite;
+      animation:spin 1s linear infinite;
+    }
+  }
+  .item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 400;
+    color: $black;
+    margin-bottom: 0;
+    padding: 12px;
+    transition: background-color .2s ease;
+    .icon {
+      display: flex;
+      align-items: center;
+      margin-right: 4px;
+      svg {
+        width: 24px;
+        height: 24px;
+        path {
+          fill: $darkGray;
+        }
+      }
+    }
+    .link {
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      svg {
+        margin-left: 4px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+    .type {
+      font-size: 12px;
+      font-weight: 800;
+      color: $darkGray;
+      white-space: nowrap;
+    }
+    .term {
+      width: 95%;
+      display: block;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+      -webkit-box-orient: vertical;
+      display: -webkit-box;
+      margin-right: 10px;
+    }
+    &:first-child {
+      border-radius: $defaultBorderRadius $defaultBorderRadius 0 0;
+    }
+    &:last-child {
+      border-radius: 0 0 $defaultBorderRadius $defaultBorderRadius;
+    }
+    &:hover {
+      color: $purpleOne;
+      background-color: $palePurple;
+      .type {
+        color: $purpleOne;
+      }
+      svg path {
+        fill: $purpleOne;
+      }
+    }
+    .match {
+      color: $darkGray;
+      font-style: italic;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+  }
+  .sep {
+    margin: 0 4px;
+    border-bottom: 1px solid $midGray;
+  }
+  .buttonsContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+    .button {
+      position: relative;
+      padding: 0 0 4px;
+      margin: 0;
+      background-color: transparent;
+      color: $midGray;
+      border-radius: 0;
+      box-shadow: none;
+      &:after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 12px;
+        right: 12px;
+        border-bottom: 1px solid $midGray;
+        transition: all .25s ease;
+      }
+      &:hover {
+        box-shadow: none;
+        &:after {
+          right: 10px;
+          left: 10px;
+        }
+      }
+      &.active {
+        color: $darkGray;
+        &:after {
+          border-bottom: 1px solid $darkGray;
+        }
+      }
+    }
+    button:first-of-type {
+      margin-right: $m;
+    }
+  }
+  .submitButton {
+    grid-template-columns: auto;
+  }
+  .noResults, .nodeNormError {
+    font-size: 16px;
+    font-weight: 500;
+    color: $darkGray;
+    text-align: center;
+    padding: $l $s;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+  .nodeNormError a {
+    text-decoration: underline;
+  }
+}
