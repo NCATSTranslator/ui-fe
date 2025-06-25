@@ -1,13 +1,7 @@
-import { useState, useEffect, useRef, useContext, Dispatch, SetStateAction, useCallback, useMemo } from 'react';
-import { LastViewedPathIDContext, SupportPathDepthContext } from '@/features/ResultItem/components/PathView/PathView';
-import { SupportPathKeyContext } from '@/features/ResultItem/components/SupportPathGroup/SupportPathGroup';
+import { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import { isEqual } from 'lodash';
 import { useQuery } from 'react-query';
 import { useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/redux/store';
-import { markEdgeSeen, markEdgeUnseen, resetSeenStatus } from '@/features/ResultList/slices/seenStatusSlice';
-import { HoverTarget } from '@/features/ResultList/types/results';
 import { FeedbackForm, FormErrors } from '@/features/Common/types/global';
 
 interface WindowSize {
@@ -212,19 +206,6 @@ export const useWhyDidComponentUpdate = <T extends Record<string, any>>(name: st
   }, [props, name]); 
 }
 
-export type LastViewedPathIDContextType = {
-  lastViewedPathID: string | null;
-  setLastViewedPathID: Dispatch<SetStateAction<string | null>>;
-};
-export const useLastViewedPath = (): LastViewedPathIDContextType => {
-  const context = useContext(LastViewedPathIDContext);
-  if (!context) {
-    console.warn("useLastViewedPath must be used within a LastViewedPathIDContext.Provider");
-    return { lastViewedPathID: null, setLastViewedPathID: () => {} };
-  }
-  return context;
-};
-
 interface TextStreamHookResult {
   streamedText: string;
   isStreaming: boolean;
@@ -360,23 +341,6 @@ export const useTextStream = (
 };
 
 /**
- * Custom hook to get the current depth level in the path hierarchy.
- * @returns {number} The current depth level.
- */
-export const useSupportPathDepth = (): number => {
-  return useContext(SupportPathDepthContext);
-};
-
-/**
- * Custom hook to get the current key of a support path in the path hierarchy.
- * @returns {string} The key expressed as a string (1, 1.a, 1.a.i, etc.)
- */
-export const useSupportPathKey = (): string => {
-  return useContext(SupportPathKeyContext);
-};
-
-
-/**
  * Custom hook to scroll to an element with an id provided as a hash in the url
  */
 export const useScrollToHash = () => {
@@ -394,63 +358,6 @@ export const useScrollToHash = () => {
   }, [location]);
 };
 export default useScrollToHash;
-
-/**
- * Custom hook to track the index of hovered compressed edges in the evidence modal 
- */
-export const useHoverPathObject = (setHoveredItem: (target: HoverTarget) => void) => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-  const getHoverHandlers = useCallback(
-    (isEdge: boolean, id: string, index?: number) => ({
-      onMouseEnter: () => {
-        const type = isEdge ? 'edge' : 'node';
-        setHoveredItem({ id: id, type: type});
-        if(typeof index === 'number')
-          setHoveredIndex(index);
-      },
-      onMouseLeave: () => {
-        setHoveredItem(null);
-        setHoveredIndex(null)
-      },
-    }),
-    [setHoveredItem]
-  );
-
-  return {
-    hoveredIndex,
-    getHoverHandlers,
-    resetHoveredIndex: () => setHoveredIndex(null),
-  };
-};
-
-/**
- * Custom hook to handle seen/unseen status on edges and paths
- */
-export const useSeenStatus = (pk: string) => {
-  const dispatch: AppDispatch = useDispatch();
-
-  const seenStatus = useSelector((state: RootState) =>
-    state.seenStatus[pk] || { seenEdges: [], seenPaths: [] }
-  );
-
-  const isEdgeSeen = (edgeId: string): boolean => seenStatus.seenEdges.includes(edgeId);
-  const seenEdges = useSelector((state: RootState) => state.seenStatus[pk]?.seenEdges || []);
-  const seenEdgeSet = useMemo(() => new Set(seenEdges), [seenEdges]);
-  const isPathSeen = (edgeIds: string[]): boolean => edgeIds.every((id) => seenEdgeSet.has(id));
-  const handleMarkEdgeSeen = (edgeId: string) => dispatch(markEdgeSeen({ pk, edgeId }));
-  const handleMarkEdgeUnseen = (edgeId: string) => dispatch(markEdgeUnseen({ pk, edgeId }));
-  const resetStatus = () => dispatch(resetSeenStatus({ pk }));
-
-  return {
-    seenEdges: seenStatus.seenEdges,
-    isEdgeSeen,
-    isPathSeen,
-    markEdgeSeen: handleMarkEdgeSeen,
-    markEdgeUnseen: handleMarkEdgeUnseen,
-    resetStatus,
-  };
-};
 
 /**
  * Returns the current disclaimer approval status based on persistent localStorage values,
@@ -492,40 +399,6 @@ export const useDisclaimersApproved = (title: string): [boolean, Dispatch<SetSta
   }, [title]);
 
   return [isDisclaimerApproved, setIsDisclaimerApproved];
-};
-
-/**
- * Returns the current New Results Available disclaimer status and a setter
- * that also updates localStorage.
- *
- * @param {boolean} visible - Whether the disclaimer tooltip is visible.
- * @returns {[boolean, Dispatch<SetStateAction<boolean>>]} - The disclaimer approval status and a setter.
- */
-export const useNewResultsDisclaimerApproved = (
-  visible: boolean
-): [boolean, Dispatch<SetStateAction<boolean>>] => {
-  const STORAGE_KEY = 'newResultsDisclaimerApproved';
-
-  const [isNewResultsDisclaimerApproved, setIsNewResultsDisclaimerApproved] = useState<boolean>(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : false;
-  });
-
-  useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const stored = raw ? JSON.parse(raw) : false;
-    setIsNewResultsDisclaimerApproved(stored);
-  }, [visible]);
-
-  const setAndPersistNewResultsDisclaimerApproved: Dispatch<SetStateAction<boolean>> = (value) => {
-    setIsNewResultsDisclaimerApproved((prev) => {
-      const next = typeof value === 'function' ? (value as (prev: boolean) => boolean)(prev) : value;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  };
-
-  return [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved];
 };
 
 /**

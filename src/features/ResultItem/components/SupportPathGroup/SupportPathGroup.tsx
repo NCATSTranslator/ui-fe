@@ -11,7 +11,7 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { intToChar, getPathsWithSelectionsSet, isStringArray, getFilteredPathCount, intToNumeral, getIsPathFiltered } from '@/features/Common/utils/utilities';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
-import { useSupportPathDepth, useSupportPathKey } from '@/features/Common/utils/customHooks';
+import { useSupportPathDepth, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import { SupportPathDepthContext } from '@/features/ResultItem/components/PathView/PathView';
 
 export const SupportPathKeyContext = createContext<string>("");

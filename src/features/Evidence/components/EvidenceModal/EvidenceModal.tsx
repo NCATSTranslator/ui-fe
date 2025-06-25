@@ -19,7 +19,7 @@ import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import PublicationsTable from "@/features/Evidence/components/EvidenceTables/PublicationsTable";
 import Button from "@/features/Common/components/Button/Button";
 import PathView from "@/features/ResultItem/components/PathView/PathView";
-import { useSeenStatus } from "@/features/Common/utils/customHooks";
+import { useSeenStatus } from "@/features/ResultItem/hooks/resultHooks";
 
 interface EvidenceModalProps {
   edge: ResultEdge | null;

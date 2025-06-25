@@ -11,7 +11,8 @@ import { extractEdgeIDsFromSubgraph, getFilteredPathCount, getIsPathFiltered, ge
   isPathInferred, isStringArray, joinClasses, numberToWords } from '@/features/Common/utils/utilities';
 import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { LastViewedPathIDContextType, useHoverPathObject, useSeenStatus } from '@/features/Common/utils/customHooks';
+import { LastViewedPathIDContextType, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
+import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import PathObject from '@/features/ResultItem/components/PathObject/PathObject';

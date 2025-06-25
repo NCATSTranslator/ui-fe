@@ -10,7 +10,8 @@ import { Path, PathFilterState, isResultNode, ResultNode, isResultEdge } from '@
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
-import { useHoverPathObject, useSeenStatus } from '@/features/Common/utils/customHooks';
+import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
+import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { HoverContext } from '@/features/ResultItem/components/PathView/PathView';
 
 export interface PathObjectProps {

@@ -6,7 +6,7 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { PathFilterState, Path, ResultNode } from '@/features/ResultList/types/results.d';
 import { extractEdgeIDsFromSubgraph, getIsPathFiltered, joinClasses, numberToWords } from '@/features/Common/utils/utilities';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
-import { useLastViewedPath, useSeenStatus, useSupportPathKey } from '@/features/Common/utils/customHooks';
+import { useLastViewedPath, useSeenStatus, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import PathArrow from '@/assets/icons/Connectors/PathArrow.svg?react';
 
 interface SupportPathProps {

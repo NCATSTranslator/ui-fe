@@ -15,7 +15,7 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
-import { useSupportPathKey } from '@/features/Common/utils/customHooks';
+import { useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 
 interface PredicateProps {
   activeEntityFilters: string[];

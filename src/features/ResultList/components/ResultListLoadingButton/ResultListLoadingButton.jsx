@@ -6,7 +6,7 @@ import CompleteIcon from '@/assets/icons/Buttons/Checkmark/Circle Checkmark.svg?
 import AlertIcon from '@/assets/icons/Status/Alerts/Warning.svg?react';
 import Button from '@/features/Common/components/Button/Button';
 import CloseIcon from '@/assets/icons/Buttons/Close/Close.svg?react';
-import { useNewResultsDisclaimerApproved } from '@/features/Common/utils/customHooks';
+import { useNewResultsDisclaimerApproved } from '@/features/ResultList/hooks/resultListHooks';
 
 const ResultListLoadingButton = ({ data = {}, currentPercentage }) => {
 
