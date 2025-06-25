@@ -5,61 +5,69 @@ import { ResultSet, ResultEdge, Result, Path, isResultEdge } from "@/features/Re
 import { EvidenceCountsContainer } from "../types/evidence";
 
 /**
- * Generates evidence ids for a provided edge NOT INCLUDING any attached support edges 
+ * Generates evidence ids for a provided edge, optionally including support edges
  *
  * @param {ResultSet} resultSet - Result Set to fetch data from.
  * @param {ResultEdge | string} edge - Edge or edge ID to generate counts for.
- * @returns {void} Adds the ids to the provided Sets
+ * @param {boolean} includeSupport - Whether to include evidence from support edges (default: false).
+ * @param {Set<string>} allPubs - Optional Set to add publication URLs to (if not provided, creates new Set).
+ * @param {Set<string>} allCTs - Optional Set to add clinical trial IDs to (if not provided, creates new Set).
+ * @param {Set<string>} allSources - Optional Set to add source names to (if not provided, creates new Set).
+ * @param {Set<string>} allMisc - Optional Set to add miscellaneous URLs to (if not provided, creates new Set).
+ * @returns {{pubs: Set<string>, cts: Set<string>, sources: Set<string>, misc: Set<string>}} Returns an object with the evidence Sets.
  */
-export const getEvidenceFromEdge = (resultSet: ResultSet, edge: ResultEdge, allPubs: Set<string>, allCTs: Set<string>, allSources?: Set<string>, allMisc?: Set<string>) => {
-  // Process publications
-  for(const key in edge.publications) {
-    const pubArray = edge.publications[key];
-    for(const pubData of pubArray) {
-      const pub = getPubById(resultSet, pubData.id);
-      if(!pub) 
-        continue;
-      const url = pub.url;
-      if(isPublication(pub)) 
-        allPubs.add(url);
-      else if(!!allMisc)
-        allMisc.add(url);
+export const getEvidenceFromEdge = (
+  resultSet: ResultSet, 
+  edge: ResultEdge | string,
+  includeSupport: boolean = false,
+  allPubs?: Set<string>,
+  allCTs?: Set<string>,
+  allSources?: Set<string>,
+  allMisc?: Set<string>
+) => {
+  // Initialize Sets if not provided
+  const pubs = allPubs || new Set<string>();
+  const cts = allCTs || new Set<string>();
+  const sources = allSources || new Set<string>();
+  const misc = allMisc || new Set<string>();
+
+  // Helper function to process a single edge
+  const processEdge = (edgeToProcess: ResultEdge) => {
+    // Process publications
+    for(const key in edgeToProcess.publications) {
+      const pubArray = edgeToProcess.publications[key];
+      for(const pubData of pubArray) {
+        const pub = getPubById(resultSet, pubData.id);
+        if(!pub) 
+          continue;
+        const url = pub.url;
+        if(isPublication(pub)) 
+          pubs.add(url);
+        else 
+          misc.add(url);
+      }
     }
-  }
 
-  for(const trial in edge.trials) 
-    allCTs.add(trial);
+    // Process clinical trials
+    for(const trial in edgeToProcess.trials) 
+      cts.add(trial);
 
-  // Process sources
-  if(edge.provenance && !!allSources) {
-    for(const source of edge.provenance)
-      allSources.add(source.name);
-  }
-  return {
-    pubs: allPubs,
-    cts: allCTs,
-    sources: allSources,
-    misc: allMisc
-  }
-}
+    // Process sources
+    if(edgeToProcess.provenance) {
+      for(const source of edgeToProcess.provenance)
+        sources.add(source.name);
+    }
+  };
 
-/**
- * Generates evidence ids for a provided edge and any attached support edges 
- *
- * @param {ResultSet} resultSet - Result Set to fetch data from.
- * @param {ResultEdge | string} edge - Edge or edge ID to generate counts for.
- * @returns {{pubs: string[], cts: string[], sources: string[], misc: string[]}} Returns an object with the requested evidence IDs.
- */
-export const getEvidenceFromEdgeRecursive = (resultSet: ResultSet, edge: ResultEdge | string ) => {
-  const allPubs = new Set<string>();
-  const allCTs = new Set<string>();
-  const allSources = new Set<string>();
-  const allMisc = new Set<string>();
-
+  // Get the edge object
   let resultEdge = (isResultEdge(edge)) ? edge : getEdgeById(resultSet, edge);
+  
   if(!!resultEdge) {
-    getEvidenceFromEdge(resultSet, resultEdge, allPubs, allCTs, allSources, allMisc);
-    if(hasSupport(resultEdge) && resultEdge.support) {
+    // Process the main edge
+    processEdge(resultEdge);
+    
+    // Process support edges if requested
+    if(includeSupport && hasSupport(resultEdge) && resultEdge.support) {
       for(const sp of resultEdge.support) {
         const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
         if(!supportPath) 
@@ -67,18 +75,18 @@ export const getEvidenceFromEdgeRecursive = (resultSet: ResultSet, edge: ResultE
         for(let j = 1; j < supportPath.subgraph.length; j += 2) {
           const supportEdge = getEdgeById(resultSet, supportPath.subgraph[j]);
           if(isResultEdge(supportEdge)) 
-            getEvidenceFromEdge(resultSet, supportEdge, allPubs, allCTs, allSources, allMisc);
+            processEdge(supportEdge);
         }
       }
     }
   }
 
   return {
-    pubs: allPubs,
-    cts: allCTs,
-    sources: allSources,
-    misc: allMisc
-  }
+    pubs,
+    cts,
+    sources,
+    misc
+  };
 };
 
 /**
@@ -96,7 +104,7 @@ const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): Eviden
 
   const processPathEdges = (path: Path) => {
     for(let i = 1; i < path.subgraph.length; i += 2) {
-      let edgeEvidence = getEvidenceFromEdgeRecursive(resultSet, path.subgraph[i]);
+      let edgeEvidence = getEvidenceFromEdge(resultSet, path.subgraph[i], true);
       if(edgeEvidence.pubs.size > 0)
         allPubs = allPubs.union(edgeEvidence.pubs);
       if(edgeEvidence.cts.size > 0)

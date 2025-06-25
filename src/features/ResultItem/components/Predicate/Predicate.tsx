@@ -146,8 +146,7 @@ const Predicate: FC<PredicateProps> = ({
                 edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
                   if(!edge || !resultSet)
                     return null;
-                  // not optimal to create 2 new empty sets on each render, but it prevents having to write an additional evidence counting function
-                  const edgeEvidence = getEvidenceFromEdge(resultSet, edge, new Set<string>(), new Set<string>());
+                  const edgeEvidence = getEvidenceFromEdge(resultSet, edge);
                   return (
                     <div className={styles.tooltipPredicateContainer}>
                       <p
