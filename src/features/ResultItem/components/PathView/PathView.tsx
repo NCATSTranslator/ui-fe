@@ -7,8 +7,9 @@ import ChevRight from '@/assets/icons/Directional/Chevron/Chevron Right.svg?reac
 import Information from '@/assets/icons/Status/Alerts/Info.svg?react';
 import ResearchMultiple from '@/assets/icons/Queries/Evidence.svg?react';
 import PathArrow from '@/assets/icons/Connectors/PathArrow.svg?react';
+import { isStringArray, joinClasses, numberToWords } from '@/features/Common/utils/utilities';
 import { extractEdgeIDsFromSubgraph, getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, 
-  isPathInferred, isStringArray, joinClasses, numberToWords } from '@/features/Common/utils/utilities';
+  isPathInferred } from '@/features/ResultItem/utils/utilities';
 import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { LastViewedPathIDContextType, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';

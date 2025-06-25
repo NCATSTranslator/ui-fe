@@ -3,9 +3,9 @@ import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from '@/features/Common/utils/web';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
-import { PreferencesContainer, SessionStatus, User } from '@/features/User-Auth/types/user';
+import { PreferencesContainer, PrefObject, SessionStatus, User } from '@/features/User-Auth/types/user';
 import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '@/features/User-Auth/slices/userSlice';
-import { handleFetchErrors, isPreferencesContainer } from '@/features/Common/utils/utilities';
+import { handleFetchErrors } from '@/features/Common/utils/utilities';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { currentUser } from '@/features/User-Auth/slices/userSlice';
@@ -834,3 +834,52 @@ export const mergeResultSets = (resultSetOne: ResultSet, resultSetTwo: ResultSet
     },
   };
 }
+
+/**
+ * Type guard to check if an object is a PreferencesContainer.
+ *
+ * @param obj - The object to check.
+ * @returns {boolean} True if the object is a PreferencesContainer, otherwise false.
+ */
+export const isPreferencesContainer = (obj: any): obj is PreferencesContainer => {
+  let isPrefContainer;
+  if (typeof obj !== 'object' || obj === null) {
+    isPrefContainer = false;
+  } else {
+    const requiredKeys: Array<keyof PreferencesContainer> = [
+      'result_sort',
+      'result_per_screen',
+      'graph_visibility',
+      'graph_layout',
+      'path_show_count',
+      'evidence_sort',
+      'evidence_per_screen',
+    ];
+
+    isPrefContainer = requiredKeys.every(key => key in obj && isPrefObject(obj[key])) && Object.values(obj).every(isPrefObject);
+  }
+  if(!isPrefContainer)
+    console.warn(`The following object does not match the typing for a PreferencesContainer:`, obj);
+
+  return isPrefContainer;
+};
+
+/**
+ * Type guard to check if an object is a PrefObject.
+ *
+ * @param obj - The object to check.
+ * @returns {boolean} True if the object is a PrefObject, otherwise false.
+ */
+const isPrefObject = (obj: any): obj is PrefObject => {
+  const isAPrefObject =
+    (
+      typeof obj === 'object' &&
+      obj !== null &&
+      ('pref_value' in obj) &&
+      (typeof obj.pref_value === 'string' || typeof obj.pref_value === 'number')
+    );
+  if(!isAPrefObject)
+    console.warn(`The following object does not match the typing for PrefObject:`, obj);
+
+  return isAPrefObject;
+};

@@ -6,6 +6,7 @@ import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import { cloneDeep } from "lodash";
+import { SaveGroup } from "@/features/User-Auth/utils/userApi";
 
 /**
  * Performs a case-insensitive string match against a result's name, description, and all associated paths.
@@ -484,3 +485,50 @@ export const areEntityFiltersEqual = (a: string[], b: string[]): boolean => {
   const setA = new Set(a);
   return b.every((val) => setA.has(val));
 };
+
+/**
+ * Checks if the given bookmarkID exists in the bookmarks set and if it has notes attached.
+ *
+ * @param {string | null} itemID - The ID of the item to check.
+ * @param {SaveGroup | null} bookmarkSet - The set of bookmark objects to search in.
+ * @returns {boolean} Returns true if the matching item is found in bookmarksSet and has notes, otherwise returns false.
+ */
+export const checkBookmarkForNotes = (bookmarkID: string | null, bookmarkSet: SaveGroup | null): boolean => {
+  if(bookmarkID === null)
+    return false;
+
+  const findInSet = (set: Set<any>, predicate: (obj: any)=>boolean) => {
+    for (const item of set) {
+      if(predicate(item)) {
+        return item;
+      }
+    }
+    return undefined;
+  }
+
+  if(!!bookmarkSet && bookmarkSet.saves.size > 0) {
+    let save = findInSet(bookmarkSet.saves, save => String(save.id) === bookmarkID);
+    if(!!save)
+      return (save.notes.length > 0) ? true : false;
+  }
+  return false;
+}
+
+/**
+ * Checks if the given itemID exists in the bookmarks set and returns its ID if found.
+ *
+ * @param {string} itemID - The ID of the item to check.
+ * @param {any} bookmarksSet - The set of bookmark objects to search in.
+ * @returns {string|null} Returns the ID of the matching item if found in bookmarksSet, otherwise returns null.
+ */
+export const checkBookmarksForItem = (itemID: string, bookmarksSet: SaveGroup): string | null => {
+  if(bookmarksSet && bookmarksSet.saves.size > 0) {
+    for(let save of bookmarksSet.saves) {
+      if(save.object_ref === itemID) {
+        let bookmarkID = (typeof save.id === "string") ? save.id : (!!save.id) ? save.id.toString() : null;
+        return bookmarkID;
+      }
+    }
+  }
+  return null;
+}

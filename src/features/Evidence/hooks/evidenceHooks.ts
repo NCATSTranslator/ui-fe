@@ -1,4 +1,4 @@
-import { HoverTarget } from "@/features/ResultList/types/results";
+import { HoverTarget } from "@/features/ResultList/types/results.d";
 import { useCallback, useState } from "react";
 
 /**

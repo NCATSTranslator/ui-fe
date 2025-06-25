@@ -15,8 +15,9 @@ import { currentPrefs, currentUser }from "@/features/User-Auth/slices/userSlice"
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
   sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow, filterCompare } from "@/features/Common/utils/sortingFunctions";
-import { handleResultsError, applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { getEvidenceCounts, checkBookmarkForNotes, checkBookmarksForItem, getDataFromQueryVar, getPathCount, handleFetchErrors, getCompressedEdge } from "@/features/Common/utils/utilities";
+import { handleResultsError, applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts, checkBookmarkForNotes, checkBookmarksForItem } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { getDataFromQueryVar, getPathCount, handleFetchErrors, getCompressedEdge } from "@/features/Common/utils/utilities";
+import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import { API_PATH_PREFIX, getSaves, SaveGroup } from "@/features/User-Auth/utils/userApi";
 import { toast } from 'react-toastify';

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction, useMemo } from 'react';
 import styles from './ResultItem.module.scss';
-import { formatBiolinkEntity, formatBiolinkNode, getPathCount, getEvidenceCounts, isStringArray, getARATagsFromResultTags } from '@/features/Common/utils/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getPathCount, isStringArray } from '@/features/Common/utils/utilities';
+import { getARATagsFromResultTags } from '@/features/ResultItem/utils/utilities';
+import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import LoadingBar from '@/features/Common/components/LoadingBar/LoadingBar';
 import ChevDown from "@/assets/icons/Directional/Chevron/Chevron Down.svg?react";

@@ -1,8 +1,7 @@
 import { equal } from 'mathjs';
-import { getEvidenceCounts, getPathCount, hasSupport, isPublicationObjectArray, calculateTotalEvidence, 
-  getStringNameFromPath, getDefaultEdge } from '@/features/Common/utils/utilities';
-import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, 
-  ResultSet } from '@/features/ResultList/types/results';
+import { getPathCount, hasSupport, getStringNameFromPath, getDefaultEdge } from '@/features/Common/utils/utilities';
+import { getEvidenceCounts, isPublicationObjectArray, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
+import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore } from '@/features/ResultList/utils/scoring';

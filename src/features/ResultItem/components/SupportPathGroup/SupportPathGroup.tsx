@@ -8,7 +8,8 @@ import ChevRight from '@/assets/icons/Directional/Chevron/Chevron Right.svg?reac
 import { sortSupportByEntityStrings, sortSupportByLength } from '@/features/Common/utils/sortingFunctions';
 import { Path, PathFilterState, ResultNode } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { intToChar, getPathsWithSelectionsSet, isStringArray, getFilteredPathCount, intToNumeral, getIsPathFiltered } from '@/features/Common/utils/utilities';
+import { intToChar, isStringArray, intToNumeral } from '@/features/Common/utils/utilities';
+import { getPathsWithSelectionsSet, getFilteredPathCount, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSupportPathDepth, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
