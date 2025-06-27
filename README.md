@@ -180,4 +180,4 @@ The full feature set will not be accessible without a full docker setup in order
 
 ![Home Page](/src/assets/images/screenshot1.png?raw=true "Home Page")
 
-![Example Results](/src/assets/images/screenshot3.png?raw=true "Example Results")
+![Example Results](/src/assets/images/screenshot2.png?raw=true "Example Results")
