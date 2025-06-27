@@ -243,29 +243,37 @@ export const useAutocomplete = (
  *   - autocompleteFunctions: Ref containing current autocomplete functions
  *   - limitPrefixes: Ref containing current prefix limits
  *   - limitTypes: Ref containing current type limits
+ *   - clearQueryItem: Function to clear the query item back to initial state
  */
 export const useQueryState = (
   initPresetTypeObject: QueryType | null,
   initNodeLabelParam: string | null,
   initNodeIdParam: string | null
 ) => {
-  const initPresetType = initPresetTypeObject || queryTypes[0];
-  const initSelectedNode = initNodeIdParam && initNodeLabelParam 
-    ? { id: initNodeIdParam, label: initNodeLabelParam, match: "", types: [] } 
-    : null;
-  
-  const initQueryItem: QueryItem = {
-    type: initPresetType,
-    node: initSelectedNode
-  };
+  const initQueryItem = useMemo((): QueryItem => {
+    const initPresetType = initPresetTypeObject || queryTypes[0];
+    const initSelectedNode = initNodeIdParam && initNodeLabelParam 
+      ? { id: initNodeIdParam, label: initNodeLabelParam, match: "", types: [] } 
+      : null;
+    
+    return {
+      type: initPresetType,
+      node: initSelectedNode
+    };
+  }, [initPresetTypeObject, initNodeIdParam, initNodeLabelParam]);
 
   const [queryItem, setQueryItem] = useState<QueryItem>(initQueryItem);
   const [inputText, setInputText] = useState<string>(initNodeLabelParam || "");
   const prevQueryItems = useRef<QueryItem[]>([initQueryItem]);
 
-  const autocompleteFunctions = useRef(initPresetType.functions);
-  const limitPrefixes = useRef(initPresetType.limitPrefixes);
-  const limitTypes = useRef(initPresetType.filterType ? [initPresetType.filterType] : []);
+  const autocompleteFunctions = useRef(initQueryItem.type.functions);
+  const limitPrefixes = useRef(initQueryItem.type.limitPrefixes);
+  const limitTypes = useRef(initQueryItem.type.filterType ? [initQueryItem.type.filterType] : []);
+
+  const clearQueryItem = useCallback(() => {
+    setQueryItem(initQueryItem);
+    setInputText(initNodeLabelParam || "");
+  }, [initQueryItem, initNodeLabelParam]);
 
   return {
     queryItem,
@@ -275,6 +283,7 @@ export const useQueryState = (
     prevQueryItems,
     autocompleteFunctions,
     limitPrefixes,
-    limitTypes
+    limitTypes,
+    clearQueryItem
   };
 }; 
