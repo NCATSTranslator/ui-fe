@@ -9,13 +9,18 @@ This project is currently in development. Users can submit queries to the servic
 - What gene is upregulated by _____ (_chemical_)
 - What gene is downregulated by _____ (_chemical_)
 
-Results can be filtered and sorted according to several different critera, such as filtering by FDA Approval or sorting by evidence count. Each result consists of a graph and a list of paths, which are a discrete series of connected nodes and edges leading from the result item (e.g. a drug) to the object of the query (e.g. a disease). Selecting a node in the graph view highlights in the path view all paths that pass through any selected node(s), while deemphasizing the rest. 
+Or search for connections between two concepts using a Pathfinder Query.
+
+Results can be filtered and sorted according to several different criteria, such as filtering by FDA Approval or sorting by evidence count. Each result consists of a graph and a list of paths, which are a discrete series of connected nodes and edges leading from the result item (e.g. a drug) to the object of the query (e.g. a disease). Selecting a node in the graph view highlights in the path view all paths that pass through any selected node(s), while deemphasizing the rest. 
 
 ## Feature Roadmap
 
+- [ ] Project-based Workflow
+- [ ] Power Bar
 - [ ] Additional Query Types
 - [ ] Additional Facets
-- [ ] Typescript Conversion
+- [ ] Graph View Improvements
+- [x] Typescript Conversion
 - [x] Knowledge Type (Inferred vs Asserted) Edges Display Overhaul
 - [x] Facet Exclusion
 - [x] Evidence Modal Redesign
@@ -34,14 +39,124 @@ Results can be filtered and sorted according to several different critera, such 
 - [x] FAQs Page
 - [x] Feedback Form -> GH Issue
 
+## Technologies Used
 
-## Technologies used
+- **Frontend Framework**: React 18.2 with TypeScript
+- **Build Tool**: Vite
+- **State Management**: Redux Toolkit with React Redux
+- **Routing**: React Router DOM
+- **Styling**: Sass modules
+- **Graph Visualization**: Cytoscape.js with multiple layout extensions
+- **Rich Text Editing**: Lexical
+- **Testing**: Cypress for E2E testing, React Testing Library
+- **UI Components**: Custom component library with React Toastify, React Tooltip, React Range
+- **Data Handling**: React Query, React CSV for exports
 
-Redux/React Redux, React Router, Sass modules, Cytoscape, React Query, Cypress.
+## Project Architecture
+
+The project follows a feature-based architecture organized into the following main areas:
+
+### Core Features (`src/features/`)
+
+#### **Common** - Shared UI Components
+- **Accordion**: Toggle visibility of child content with animation
+- **Alert**: Contextual alerts with auto-dismiss and fading effects
+- **AnimateHeight/AutoHeight**: Dynamic height adjustment with animations
+- **Autocomplete**: Dynamic search suggestions with pagination
+- **Button**: Reusable button components with various styles
+- **Checkbox/Radio**: Form input components
+- **LoadingBar/LoadingIcon/LoadingWrapper**: Loading state components
+- **Modal**: Modal system with various specialized modals (Disclaimer, SendFeedback, NavConfirmation)
+- **Range**: Adjustable sliders for numerical input
+- **Select**: Dropdown selection component
+- **TextCrossfade**: Cycling text with crossfade effects
+- **TextEditor**: Rich text editor powered by Lexical
+- **TextInput**: Text input component
+- **Toggle**: Toggle switch component
+- **Tooltip**: Customized tooltip component
+
+#### **Query** - Query Interface Components
+- **AutocompleteInput**: Enhanced autocomplete for query terms
+- **CombinedQueryInterface**: Main query interface component
+- **ExampleQueryList**: Predefined example queries
+- **Query**: Core query submission logic
+- **QueryBar**: Search bar with autocomplete
+- **QueryInputView**: Query input display
+- **QueryPathfinder**: Query path visualization
+- **QueryResultsHeader**: Results header information
+- **QueryResultsView**: Results display view
+- **QuerySelect**: Query type selection
+- **QueryTypeIcon**: Icons for different query types
+
+#### **ResultItem** - Individual Result Display
+- **BookmarkConfirmationModal**: Bookmark confirmation dialog
+- **BookmarkToasts**: Toast notifications for bookmark actions
+- **GraphLayoutButtons**: Graph layout control buttons
+- **GraphView**: Cytoscape graph visualization
+- **LastViewedTag**: Tag for recently viewed items
+- **NotesModal**: Notes editing modal
+- **PathObject**: Individual path node/edge display
+- **PathView**: Path list visualization
+- **Predicate**: Predicate information display
+- **ResultItem**: Main result item container
+- **ResultItemInteractables**: Interactive elements for results
+- **ResultItemName**: Result name display
+- **SupportPath**: Support path visualization
+- **SupportPathGroup**: Grouped support paths
+
+#### **ResultList** - Results Management
+- **ResultFocusModal**: Focus modal for results
+- **ResultList**: Main results list component
+- **ResultListHeader**: Results list header
+- **ResultListLoadingBar**: Loading progress bar
+- **ResultListLoadingButton**: Loading state button
+- **ResultListBottomPagination**: Pagination controls
+- **ResultListTableHead**: Table header component
+- **ResultsSummaryButton**: Results summary button
+- **ResultsSummaryModal**: Results summary modal
+- **ShareModal**: Results sharing modal
+- **StickyToolbar**: Sticky toolbar with actions
+
+#### **ResultFiltering** - Filtering and Facets
+- **EntitySearch**: Entity search functionality
+- **FacetGroup**: Grouped facet filters
+- **FacetHeading**: Facet section headers
+- **FacetTag**: Individual facet tags
+- **ResultsFilter**: Main filtering interface
+- **SelectedFilterTag**: Selected filter display
+
+#### **Evidence** - Evidence Display
+- **EvidenceModal**: Evidence information modal
+- **EvidenceTables**: Evidence data tables
+
+#### **History** - Query History
+- **QueryHistoryList**: Historical query management
+
+#### **Page** - Page Layout Components
+- **FAQSidebar**: FAQ navigation sidebar
+- **Footer**: Site footer
+- **Header**: Site header
+- **Page**: Page template wrapper
+- **SendFeedbackForm**: Feedback submission form
+
+#### **User-Auth** - User Authentication
+- **LoginWarning**: Login requirement warnings
+- **UserPreferences**: User preference management
+
+#### **WorkspaceV1** - User Workspace
+- **UserSave**: Individual saved result
+- **UserSaves**: User's saved results management
+
+### Supporting Directories
+
+- **`src/pageRoutes/`**: Page-level components organized by route
+- **`src/redux/`**: Redux store configuration and middleware
+- **`src/assets/`**: Static assets including icons, images, and styles
+- **`src/testing/`**: Test files and testing utilities
 
 ## Installation and Setup Instructions
 
-#### Node v18.10.0, React v18.2
+#### Node v17.x, React v18.2
 
 Clone down this repository. You will need `node` and `npm` installed globally on your machine.  
 
@@ -54,48 +169,15 @@ The last step will be running the following command in the root directory of the
 
 The full feature set will not be accessible without a full docker setup in order to serve the database, which is required to facilitate user login and arbitrary query submission.
 
+## Development Scripts
+
+- `npm start` - Start development server with Vite
+- `npm run build` - Build for production
+- `npm run serve` - Preview production build
+- `npm run analyze` - Analyze bundle size
+
 ## Project Screen Shot(s)
 
-![Home Page](/src/Assets/Images/screenshot1.png?raw=true "Home Page")
+![Home Page](/src/assets/images/screenshot1.png?raw=true "Home Page")
 
-![Example Results](/src/Assets/Images/screenshot3.png?raw=true "Example Results")
-
-## Component Breakdown
-- **Accordion**: toggles visibility of child content with animation, containing optional navigational links.
-- **Alert**: displays contextual alerts with optional automatic dismissal and fading effects, along with customizable positioning, icons, and button text.
-- **AnimateHeight**: a wrapper element that adjusts its height with an animation based on a provided height prop.
-- **Autocomplete**: a dynamic search suggestion element that displays a list of items with pagination controls, showing more or fewer items as requested, and integrates loading states and error handling.
-- **AutoHeight**: a wrapper element that uses a ResizeObserver to dynamically adjust its height to the content's size, encapsulated by the AnimateHeight component for animated height transitions.
-- **BookmarkToasts**: provides markup for the various toasts that are shown to the user when they interact with a bookmark-able element.
-- **EntitySearch**: provides a search bar, then calls a provided onFilter function once the user presses the Enter key.
-- **ExampleQueryList**: displays a provided list of buttons to activate example queries.
-- **FAQSidebar**: a sidebar displaying a hierarchical list of provided articles with both internal and external links.
-- **Footer**: contains the site footer.
-- **FormFields**: provides a collection of stylized form elements such as checkboxes and radio buttons.
-- **GraphLayoutButtons**:  lists intractable buttons based on the graph layouts defined in /Utilities/graphFunctions.
-- **GraphView**: initializes, displays, and controls a cytoscape graph element based on a provided result.
-- **Header**: contains the site header.
-- **LoadingBar**: a loading bar component with optional crossfaded text and icon props.
-- **Modals**: contains the various modal window components used on the site, each derived from a main Modal component.
-- **OutsideClickHandler**: a wrapper component that executes a callback when a click is detected outside of its child component's bounds.
-- **Page**: serves as a template wrapper for different page types.
-- **PathObject**: contains the markup and logic to control individual path objects (nodes, edges, etc.) within the PathView component.
-- **PathView**: displays a list of paths with their respective PathObjects and facilitates interactions with those objects and their evidence/provenance.
-- **Query**: contains logic and markup for query submission, as well as display of information regarding the user’s currently submitted query if provided.
-- **QueryBar**: contains the Autocomplete search bar component that facilitates query submission.
-- **QueryHistoryList**: manages a historical list of queries with functionality for search, export, and deletion.
-- **Range**: provides two adjustable sliders for numerical input within a defined range, displaying the selected value and allowing for a callback function to respond to changes.
-- **ResultsFilter**: displays a filtering UI component for a set of results, categorizing tags and managing states for user-defined filter criteria.
-- **ResultItem**: displays the paths, graph and evidence for a given result, along with the various interactions associated with this element and its children.
-- **ResultList**: displays and provides user interactions for a set of results.
-- **ResultListHeader**: displays relevant information at the top of the ResultList component such as result count, active filters/tags and loading state.
-- **ResultListLoadingButton**: displays an intractable element containing the current status of results polling and a button the user can fetch new results with should some be available. 
-- **SmallScreenOverlay**: renders a styled overlay component with instructions for users to switch to a widescreen view for optimal use of the Translator app.
-- **Tabs**: contains components for custom tabular UI elements.
-- **StickyToolbar**: displays a sticky toolbar that toggles between expanded and collapsed states and includes a loading button, results sharing functionality, and tooltips.
-- **TextCrossfade**: cycles through a set of phrases with a crossfade effect at a specified interval.
-- **TextEditor**: a user-intractable text editor powered by Lexical that integrates a rich text editor with various plugins for editing features and auto-saving functionality.
-- **Tooltip**: a wrapped 'react-tooltip' component with customized appearance and behavior settings.
-- **UserPreferences**: manages and persists user preferences through a form interface with conditional rendering based on user state.
-- **UserSave**: displays a number of bookmarked results associated with a particular query.
-- **UserSaves**: displays and provides user interactions for a given user’s bookmarked results, grouped by query.
+![Example Results](/src/assets/images/screenshot3.png?raw=true "Example Results")

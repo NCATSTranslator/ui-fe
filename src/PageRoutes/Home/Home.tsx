@@ -24,7 +24,7 @@ const Home = () => {
             </div>
             <div className={styles.workflowHeadings}>
               <h6 className={styles.heading}>Select a relationship to explore</h6>
-              <h6 className={styles.heading}>Review and select your favorite results</h6>
+              <h6 className={styles.heading}>Discover results and add bookmarks</h6>
               <h6 className={styles.heading}>Analyze evidence in the workspace</h6>
             </div>
           </div>
