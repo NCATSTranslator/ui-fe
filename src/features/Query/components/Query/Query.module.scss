@@ -5,8 +5,11 @@
 }
 
 .query {
-  padding: $m;
   position: relative;
+  &.results {
+    padding: $l $m;
+    background-color: $palePurple;
+  }
   .subHeading {
     margin-bottom: $s;
   }
@@ -59,100 +62,10 @@
     line-height: 25px;
     text-align: center;
   }
-  .showingResultsContainer {
-    display: grid;
-  }
-  .showingResultsText {
-    color: $purpleTwo;
-    font-size: $s;
-    margin-bottom: 0;
-  }
-  .subHeading, .searchedTerm {
-    font-weight: 800;
-    font-size: 20px;
-    margin: 0;
-    color: $black;
-  }
-  .searchedTerm {
-    display: inline-flex;
-    align-items: center;
-    color: $purpleOne;
-  }
-  .nodeDescription, .nodeDescriptionHeading {
-    color: $black;
-    margin: 0;
-  }
-  .nodeDescriptionHeading {
-    margin-top: 10px;
-    font-weight: 800;
-    font-size: 12px;
-  }
-  .nodeDescription {
-    font-size: $bodyOneSize;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-  }
+
   .error {
     color: $red;
     text-align: center;
-  }
-  .nodeDescriptionContainer{
-    align-self: flex-end;
-  }
-  .resultsHeader {
-    margin: 0 auto;
-  }
-  .resultsHeader, .bottom {
-    width: 720px;
-  }
-  .buttons {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    .button {
-      padding: 4px 8px;
-      background-color: $white;
-      color: $blueOne;
-      transition: $defaultAnim;
-      border-radius: $defaultBorderRadius;
-      box-shadow: $dropShadow;
-      font-size: $captionSize;
-      margin-bottom: $s;
-      line-height: 1;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      border: none;
-      &:hover {
-        box-shadow: $dropShadowHover;
-      }
-      svg path {
-        stroke: $blueOne;
-      }
-      .svgFillWhite path {
-        fill: $blueOne;
-        stroke: none;
-      }
-    }
-    .buttonTwo {
-      background-color: $blueOne;
-      color: $white;
-      &:hover {
-        box-shadow: $dropShadowHover;
-        background-color: $blueOne;
-      }
-      svg path {
-        stroke: $white;
-      }
-      .svgFillWhite path {
-        fill: $white;
-        stroke: none;
-      }
-    }
   }
   .queryItems {
     display: grid;

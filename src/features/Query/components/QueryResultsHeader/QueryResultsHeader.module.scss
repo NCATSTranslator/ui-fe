@@ -1,38 +1,49 @@
 @import '@/assets/styles/variables';
 
 .resultsHeader {
-  margin-bottom: 1rem;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .showingResultsContainer {
-  display: flex;
+  display: grid;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: $s;
 }
 
 .subHeading {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #333;
-  flex: 1;
-  min-width: 0;
+  font-size: $h6Size;
+  font-weight: 800;
+  color: $black;
 }
 
 .searchedTerm {
-  font-weight: 600;
-  color: #007bff;
+  font-weight: 800;
+  color: $purpleOne;
   text-decoration: none;
-  
+  font-size: inherit;
+  display: inline-flex;
+  align-items: center;
+  svg {
+    height: 18px;
+    width: 18px;
+  }
   &:hover {
     text-decoration: underline;
   }
 }
 
-.shareButton {
+.buttons {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  white-space: nowrap;
-} 
+  justify-content: flex-start;
+  gap: $s;
+  button {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: $xxs;
+    white-space: nowrap;
+  }
+}

@@ -4,7 +4,6 @@ import { useLocation } from "react-router-dom";
 import { QueryItem, QueryType } from "@/features/Query/types/querySubmission";
 import { Result } from "@/features/ResultList/types/results.d";
 import { currentConfig, currentUser } from "@/features/User-Auth/slices/userSlice";
-import AutoHeight from "@/features/Common/components/AutoHeight/AutoHeight";
 import { useQueryState, useAutocomplete, useQuerySubmission, useExampleQueries } from "@/features/Query/hooks/customQueryHooks";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import cloneDeep from "lodash/cloneDeep";
@@ -152,41 +151,39 @@ const Query: FC<QueryProps> = ({
 
   return (
     <>
-      <div className={styles.query}>
+      <div className={`${styles.query} ${isResults ? styles.results : ''}`}>
         <AppToastContainer />
-        <AutoHeight className={styles.autoHeightContainer} duration={0}>
-          <div className={styles.container}>
-            {isResults ? (
-              <QueryResultsView
-                queryItem={queryItem}
-                nodeDescription={nodeDescription}
-                results={results}
-                loading={loading}
-                pk={pk}
-                setShareModalFunction={setShareModalFunction}
-                handleResultMatchClick={handleResultMatchClick}
-              />
-            ) : (
-              <QueryInputView
-                queryItem={queryItem}
-                inputText={inputText}
-                autocompleteItems={autocompleteItems}
-                loadingAutocomplete={loadingAutocomplete}
-                isLoading={isLoading}
-                isError={isError}
-                errorText={errorText}
-                user={user}
-                exampleQueries={exampleQueries}
-                onQueryTypeChange={handleQueryTypeChange}
-                onQueryItemChange={handleQueryItemChange}
-                onItemSelection={handleItemSelection}
-                onSubmission={handleSubmission}
-                onClearQueryItem={clearQueryItem}
-                onClearAutocomplete={clearAutocompleteItems}
-              />
-            )}
-          </div>
-        </AutoHeight>
+        <div className={styles.container}>
+          {isResults ? (
+            <QueryResultsView
+              queryItem={queryItem}
+              nodeDescription={nodeDescription}
+              results={results}
+              loading={loading}
+              pk={pk}
+              setShareModalFunction={setShareModalFunction}
+              handleResultMatchClick={handleResultMatchClick}
+            />
+          ) : (
+            <QueryInputView
+              queryItem={queryItem}
+              inputText={inputText}
+              autocompleteItems={autocompleteItems}
+              loadingAutocomplete={loadingAutocomplete}
+              isLoading={isLoading}
+              isError={isError}
+              errorText={errorText}
+              user={user}
+              exampleQueries={exampleQueries}
+              onQueryTypeChange={handleQueryTypeChange}
+              onQueryItemChange={handleQueryItemChange}
+              onItemSelection={handleItemSelection}
+              onSubmission={handleSubmission}
+              onClearQueryItem={clearQueryItem}
+              onClearAutocomplete={clearAutocompleteItems}
+            />
+          )}
+        </div>
       </div>
       <div className={styles.panels}>
         {isResults && isLoading && <div className="loading-results"></div>}

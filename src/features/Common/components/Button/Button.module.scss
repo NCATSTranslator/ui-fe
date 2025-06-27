@@ -24,22 +24,22 @@
   }
   &.smallFont {
     font-size: $captionSize;
-    padding: 8.5px 12px;
+    padding: 4px 8px;
     span {
       font-size: $captionSize;
+      padding: 0;
     }
     svg {
-      width: 18px;
-      height: 18px;
+      width: 24px;
+      height: 24px;
     }
   }
   svg, svg path {
     transition: all .35s ease;
   }
   svg {
-    margin-left: $xxs;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
   &.secondary {
     color: $black;

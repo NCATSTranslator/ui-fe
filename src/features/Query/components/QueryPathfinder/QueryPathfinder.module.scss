@@ -3,13 +3,12 @@
 .queryPathfinder {
   height: 100%;
   position: relative;
+  &.results {
+    padding: $l $m;
+    background-color: $palePurple;
+  }
   .blurb {
     margin-bottom: $xxs;
-  }
-  .container {
-    padding: $l $m $m;
-    max-width: 928px;
-    width: auto;
   }
   &.results {
     .container {
@@ -49,34 +48,6 @@
   .error {
     color: $red;
     text-align: center;
-  }
-  .showingResultsContainer {
-    max-width: 640px;
-    margin: 0 auto;
-    .subHeading {
-      color: $black;
-      font-weight: 800;
-      font-size: 20px;
-    }
-    .searchedTerm {
-      color: $purpleOne;
-      font-weight: 800;
-      font-size: 20px;
-      margin: 0 4px;
-      display: inline-flex;
-      align-items: center;
-      svg {
-        width: 20px;
-        height: 20px;
-        path {
-          fill: $purpleOne;
-        }
-      }
-    }
-    .shareButton {
-      font-size: 12px;
-      padding: 4px 8px;
-    }
   }
 }
 .container, .form {

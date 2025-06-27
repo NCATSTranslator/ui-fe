@@ -332,7 +332,6 @@ export const isPublication = (publication: PublicationObject | RawPublicationObj
   if(isPublicationObject(publication) && (publication.type === "PMID" || publication.type === "PMC"))
     return true;
   else if(publication.id?.includes("PMID") || publication.id?.includes("PMC"))  {
-    console.log(publication.id, publication.id?.includes("PMID") || publication.id?.includes("PMC"));
     return true;
   }
 

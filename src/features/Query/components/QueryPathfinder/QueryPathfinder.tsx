@@ -33,14 +33,6 @@ type QueryPathfinderProps = {
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
 }
 
-const generateResultsHeaderQuestionText = (labelOne: string, labelTwo: string, constraintText?: string) => {
-  if(!!constraintText) {
-    return `What paths begin with ${labelOne} and end with ${labelTwo} and include a ${constraintText}?`;
-  } else {
-    return `What paths begin with ${labelOne} and end with ${labelTwo}?`;
-  }
-}
-
 const QueryPathfinder: FC<QueryPathfinderProps> = ({ 
   loading = false,
   handleResultMatchClick = ()=>{},
@@ -66,8 +58,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   const idOne = getDataFromQueryVar("ione");
   const idTwo = getDataFromQueryVar("itwo");
   const constraintText = getDataFromQueryVar("c");
-
-  const resultsHeaderQuestionText = generateResultsHeaderQuestionText(labelOne || "", labelTwo || "", constraintText || undefined);
 
   const autocompleteFunctions = useRef<AutocompleteFunctions>( {
     filter: defaultQueryFilterFactory,
@@ -189,116 +179,116 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   return (
     <div className={`${styles.queryPathfinder} ${isResults && styles.results}`}>
       <AppToastContainer />
-      <div className={`container ${styles.container}`}>
-        { isResults 
-          ?
-            <QueryResultsHeader
-              questionText={resultsHeaderQuestionText}
-              entityId={idOne || undefined}
-              entityLabel={labelOne || undefined}
-              entityIdTwo={idTwo || undefined}
-              entityLabelTwo={labelTwo || undefined}
-              onShare={() => setShareModalFunction(true)}
-              results={results}
-              loading={loading}
-              onResultMatchClick={handleResultMatchClick}
-              pk={pk || ""}
-              className={styles.resultsHeader}
-              searchedTermClassName={styles.searchedTerm}
-              shareButtonClassName={styles.shareButton}
-            />
-          :
-            <>
-              <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
-              <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
-              <div className={styles.buttons}>
-                <Button handleClick={swapTerms} isSecondary className={`${styles.button}`}><SwapIcon/>Swap Terms</Button>
-                <Button handleClick={handleMiddleTypeTrigger} isSecondary className={`${styles.button} ${styles.middleTypeButton}`} dataTooltipId='middle-type-tooltip'>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon className={styles.infoIcon}/></Button>
-                <Tooltip
-                  id='middle-type-tooltip'
-                  >
-                    <span>Pre-filter results by selecting a middle object type to be included within paths between the entered search terms. <br/><br/> Genes, diseases, phenotypes, and chemicals are currently supported.</span>
-                </Tooltip>
-              </div>
+      { isResults 
+        ?
+          <QueryResultsHeader
+            questionText={""}
+            entityId={idOne || undefined}
+            entityLabel={labelOne || undefined}
+            entityIdTwo={idTwo || undefined}
+            entityLabelTwo={labelTwo || undefined}
+            onShare={() => setShareModalFunction(true)}
+            results={results}
+            loading={loading}
+            onResultMatchClick={handleResultMatchClick}
+            pk={pk || ""}
+            className={styles.resultsHeader}
+            searchedTermClassName={styles.searchedTerm}
+            shareButtonClassName={styles.shareButton}
+            isPathfinder
+            constraintText={constraintText || undefined}
+          />
+        :
+          <>
+            <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
+            <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
+            <div className={styles.buttons}>
+              <Button handleClick={swapTerms} isSecondary className={`${styles.button}`}><SwapIcon/>Swap Terms</Button>
+              <Button handleClick={handleMiddleTypeTrigger} isSecondary className={`${styles.button} ${styles.middleTypeButton}`} dataTooltipId='middle-type-tooltip'>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon className={styles.infoIcon}/></Button>
+              <Tooltip
+                id='middle-type-tooltip'
+                >
+                  <span>Pre-filter results by selecting a middle object type to be included within paths between the entered search terms. <br/><br/> Genes, diseases, phenotypes, and chemicals are currently supported.</span>
+              </Tooltip>
+            </div>
+            {
+              isError &&
+              <p className={styles.error}>{errorText}</p>
+            }
+            <form 
+              className={`${styles.form} ${hasMiddleType && styles.hasMiddleType}`}
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmission(queryItemOne, queryItemTwo);
+              }} 
+            >
+              <AutocompleteInput
+                placeholder="Enter First Search Term"
+                value={inputOneText}
+                onChange={(e) => handleQueryItemChange(e, true)}
+                onItemSelect={(item) => handleItemSelection(item, true)}
+                autocompleteItems={autocompleteItemsOne}
+                loadingAutocomplete={autocompleteLoadingOne}
+                selectedItem={queryItemOne}
+                onClear={() => clearItem(1)}
+                className={styles.inputContainer}
+                selectedClassName={styles.selected}
+                onClearAutocomplete={clearAutocompleteItemsOne}
+              />
+              <PathfinderDivider className={styles.dividerIcon}/>
               {
-                isError &&
-                <p className={styles.error}>{errorText}</p>
+                hasMiddleType &&
+                <>
+                  <Select
+                    label="" 
+                    name="Type"
+                    handleChange={(value)=>{
+                      setMiddleType(value.toString());
+                    }}
+                    value={middleType ?? ""}
+                    noanimate
+                    className={styles.middleTypeSelector}
+                    >
+                    <option value="biolink:ChemicalEntity">Chemical</option>
+                    <option value="biolink:Disease">Disease</option>
+                    <option value="biolink:Drug">Drug</option>
+                    <option value="biolink:Gene">Gene</option>
+                    <option value="biolink:PhenotypicFeature">Phenotype</option>
+                  </Select>
+                  <PathfinderDivider className={styles.dividerIcon}/>
+                </>
               }
-              <form 
-                className={`${styles.form} ${hasMiddleType && styles.hasMiddleType}`}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSubmission(queryItemOne, queryItemTwo);
-                }} 
-              >
-                <AutocompleteInput
-                  placeholder="Enter First Search Term"
-                  value={inputOneText}
-                  onChange={(e) => handleQueryItemChange(e, true)}
-                  onItemSelect={(item) => handleItemSelection(item, true)}
-                  autocompleteItems={autocompleteItemsOne}
-                  loadingAutocomplete={autocompleteLoadingOne}
-                  selectedItem={queryItemOne}
-                  onClear={() => clearItem(1)}
-                  className={styles.inputContainer}
-                  selectedClassName={styles.selected}
-                  onClearAutocomplete={clearAutocompleteItemsOne}
-                />
-                <PathfinderDivider className={styles.dividerIcon}/>
+              <AutocompleteInput
+                placeholder="Enter Second Search Term"
+                value={inputTwoText}
+                onChange={(e) => handleQueryItemChange(e, false)}
+                onItemSelect={(item) => handleItemSelection(item, false)}
+                autocompleteItems={autocompleteItemsTwo}
+                loadingAutocomplete={autocompleteLoadingTwo}
+                selectedItem={queryItemTwo}
+                onClear={() => clearItem(2)}
+                className={styles.inputContainer}
+                selectedClassName={styles.selected}
+                onClearAutocomplete={clearAutocompleteItemsTwo}
+              />
+              <Button type='submit' className={styles.submitButton} iconOnly>
                 {
-                  hasMiddleType &&
-                  <>
-                    <Select
-                      label="" 
-                      name="Type"
-                      handleChange={(value)=>{
-                        setMiddleType(value.toString());
-                      }}
-                      value={middleType ?? ""}
-                      noanimate
-                      className={styles.middleTypeSelector}
-                      >
-                      <option value="biolink:ChemicalEntity">Chemical</option>
-                      <option value="biolink:Disease">Disease</option>
-                      <option value="biolink:Drug">Drug</option>
-                      <option value="biolink:Gene">Gene</option>
-                      <option value="biolink:PhenotypicFeature">Phenotype</option>
-                    </Select>
-                    <PathfinderDivider className={styles.dividerIcon}/>
-                  </>
+                  isLoading
+                  ? 
+                    <img
+                      src={loadingIcon}
+                      className={`${styles.loadingIcon} ${
+                        isLoading ? styles.active : ""
+                      } loadingIcon`}
+                      alt="loading icon"
+                    />
+                  :
+                    <ArrowRight/>
                 }
-                <AutocompleteInput
-                  placeholder="Enter Second Search Term"
-                  value={inputTwoText}
-                  onChange={(e) => handleQueryItemChange(e, false)}
-                  onItemSelect={(item) => handleItemSelection(item, false)}
-                  autocompleteItems={autocompleteItemsTwo}
-                  loadingAutocomplete={autocompleteLoadingTwo}
-                  selectedItem={queryItemTwo}
-                  onClear={() => clearItem(2)}
-                  className={styles.inputContainer}
-                  selectedClassName={styles.selected}
-                  onClearAutocomplete={clearAutocompleteItemsTwo}
-                />
-                <Button type='submit' className={styles.submitButton} iconOnly>
-                  {
-                    isLoading
-                    ? 
-                      <img
-                        src={loadingIcon}
-                        className={`${styles.loadingIcon} ${
-                          isLoading ? styles.active : ""
-                        } loadingIcon`}
-                        alt="loading icon"
-                      />
-                    :
-                      <ArrowRight/>
-                  }
-                </Button>
-              </form>
-            </>
-        }
-      </div>
+              </Button>
+            </form>
+          </>
+      }
     </div>
   );
 }

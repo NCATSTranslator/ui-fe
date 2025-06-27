@@ -9,6 +9,9 @@ button {
     border: none;
     cursor: default;
   }
+  &:focus {
+    outline: none;
+  }
 }
 // Form Input Sizes
 .text-input, .select, .search-container, .file-input {
