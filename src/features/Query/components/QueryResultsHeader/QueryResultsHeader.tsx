@@ -80,8 +80,15 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
   constraintText
 }) => {
   const subHeading = isPathfinder 
-    ? generatePathfinderSubheading(entityId!, entityLabel!, entityIdTwo!, entityLabelTwo!, constraintText, searchedTermClassName)
-    : generateSmartQuerySubheading(questionText, entityId!, entityLabel!, searchedTermClassName);
+  ? generatePathfinderSubheading(
+      entityId || '', 
+      entityLabel || '', 
+      entityIdTwo || '', 
+      entityLabelTwo || '', 
+      constraintText, 
+      searchedTermClassName
+    )
+  : generateSmartQuerySubheading(questionText, entityId || '', entityLabel || '', searchedTermClassName);
   return(
     <div className={`${styles.resultsHeader} ${className}`}>
       <div className={styles.showingResultsContainer}>
