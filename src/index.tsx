@@ -10,7 +10,6 @@ import History from '@/pageRoutes/History/History';
 import Terms from '@/pageRoutes/Terms/Terms';
 import UserPrefs from '@/pageRoutes/UserPrefs/UserPrefs';
 import Workspace from '@/pageRoutes/Workspace/Workspace';
-import Pathfinder from '@/pageRoutes/Pathfinder/Pathfinder';
 import SendFeedbackPage from '@/pageRoutes/SendFeedback/SendFeedback';
 import { Help } from '@/pageRoutes/Articles/Help';
 import { LoggingIn } from '@/pageRoutes/Articles/LoggingIn';
@@ -36,20 +35,6 @@ const routes = [
   {
     path: "",
     element: <Page title="Home"><Home /></Page>
-  },
-  {
-    path: "pathfinder",
-    element: <Outlet/>,
-    children: [
-      {
-        index: true,
-        element: <Page title="Pathfinder"><Pathfinder /></Page>,
-      },
-      {
-        path: "results",
-        element: <Page title="Pathfinder Results"><Results /></Page>
-      }
-    ]
   },
   {
     path: "terms-of-use",
