@@ -1,0 +1,118 @@
+
+// Colors //
+$red: #CC2E46;
+$lightRed: #F5D5DA;
+
+$yellow: #EBA400;
+$lightYellow: #FFF2C2;
+
+$green: #669F38;
+
+$blueOne: #3562AC;
+$lightBlueOne: #84A3DC;
+
+$purpleOne: #662E6B;
+$lightPurpleOne: #C2ABC4;
+
+$purpleTwo: #524F81;
+$lightPurpleTwo: #BAB9CD;
+$midPurpleTwo: #9795B3;
+$palePurple: #DCDCE6;
+
+$transparentPurpleHover: #3A236B26;
+
+$purpleEdgeBG: #7271A4;
+$purpleEdgeBGSelected: #514F7E;
+$purpleEdgeBGHover: #7271A4;
+
+$darkGray: #606368;
+$midDarkGray: #919191;
+$placeholderGray: #A5A5A5;
+$midGray: #CED0D0;
+$hoverGray: #F5F4FF;
+$grayHover: #D8D5E0;
+$whiteHover: #E1DEE9;
+$lightGray: #F2F4F7;
+$transparentBlack: #202124CC; // Black 80% 
+$dropShadowColor: #20212433; // Black 20%
+$dropShadowColorHover: #20212480; // Black 50%
+$dropShadowColorTransparent: #20212400; // Black 0%
+$black: #202124;
+$white: #ffffff;
+
+$edgeConnectorDefault: #8C8C8C26;
+$edgeConnectorHover: #6A5C8259;
+$edgeConnectorSelected: #5D4E778C;
+$edgeConnectorSelectedHover: #3F2E5E59;
+
+$tooltipBackground: rgba(32, 33, 36, .8);
+
+$grayPathObject: $lightGray;
+$grayPathObjectHover: #CECCDA;
+$grayPathObjectSeen: $white;
+$grayPathObjectSeenHover: #E2DEE9;
+$whitePathObject: $white;
+$whitePathObjectHover: #E2DEE9;
+$whitePathObjectSeen: #F2F4F7;
+$whitePathObjectSeenHover: #CECCDA;
+$pathObjectSelected: $lightPurpleTwo;
+$pathObjectSelectedHover: #C4C4D5;
+
+$backgroundBlur: 3px;
+
+// Font //
+$h1Size: 80px;
+$h2Size: 64px; 
+$h3Size: 48px;
+$h4Size: 32px;
+$h5Size: 24px;
+$h6Size: 20px;
+$subOneSize: 16px;
+$subTwoSize: 14px;
+$bodyOneSize: 16px;
+$bodyTwoSize: 14px;
+$buttonSize: 16px;
+$captionSize: 12px;
+$overlineSize: 8px;
+
+$opensans: 'Open Sans', sans-serif;
+
+// Spacing //
+$xxs: 4px;
+$xs: 8px;
+$s: 16px;
+$m: 24px;
+$l: 32px;
+$xl: 48px;
+$xxl: 64px;
+$maxwidth: 1250px;
+
+// Screens //
+$small: 425px;
+$medium: 768px;
+$large: 1024px;
+$desktop: 1250px;
+
+$defaultBorderRadius: 4px;
+$largeBorderRadius: 8px;
+
+// Drop Shadow //
+$dropShadow: 0px 3px 10px  $dropShadowColor;
+$dropShadowTransparent: 0px 3px 10px $dropShadowColorTransparent;
+$dropShadowHover: 0px 3px 10px  $dropShadowColorHover;
+$dropShadowPressed: inset 0px 3px 10px $dropShadowColorHover;
+
+
+// Animations //
+$defaultAnim: all .25s ease;
+$defaultTransformAnim: transform .25s ease;
+$defaultBoxShadowAnim: box-shadow .25s ease;
+@keyframes clickedToggle {
+  from {
+    box-shadow: inset 0px 3px 10px rgba(32, 33, 36, .5);
+  }
+
+  to {
+    box-shadow:  0px 3px 10px rgba(136, 151, 196, 0);
+  }
+}
