@@ -1,5 +1,14 @@
 @import "@/assets/styles/variables";
 
+
+.pageHeading {
+  text-align: center;
+  margin: $xxl 0 $l 0;
+  font-size: $h3Size;
+  font-weight: 800;
+  color: $purpleTwo;
+}
+
 .homePageContent {
   .container {
     padding: 0;
@@ -8,14 +17,10 @@
   .noMargin {
     margin: 0;
   }
-  .heading {
-    text-align: center;
-    margin-bottom: $m;
-  }
   .section {
     padding: $xxl 0;
   }
-  .section:nth-of-type(even){
+  .section:nth-of-type(odd){
     background-color: $lightGray;
   }
   .images {

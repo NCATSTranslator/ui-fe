@@ -877,12 +877,11 @@ button {
 }
 
 .loadingIcon {
-  height: $xl;
-  width: $xl;
+  height: $m;
+  width: $m;
   -webkit-animation:spin 2s linear infinite;
   -moz-animation:spin 2s linear infinite;
   animation:spin 2s linear infinite;
-  margin-right: 10px;
 }
 
 @-moz-keyframes spin {

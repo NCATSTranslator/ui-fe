@@ -10,7 +10,7 @@ import { defaultQueryAnnotator } from '@/features/Query/utils/queryTypeAnnotator
 import { defaultQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import ArrowRight from "@/assets/icons/Directional/Arrows/Arrow Right.svg?react";
-import PathfinderDivider from "@/assets/icons/Queries/PathfinderDivider.svg?react";
+import PathfinderDivider from "@/assets/icons/directional/Pathfinder/Pathfinder.svg?react";
 import SwapIcon from '@/assets/icons/Buttons/Swap.svg?react';
 import InfoIcon from '@/assets/icons/Status/Alerts/Info.svg?react';
 import AddIcon from '@/assets/icons/Buttons/Add/Add.svg?react';
@@ -209,11 +209,11 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
             />
           :
             <>
-              <h3 className={styles.h3}>Pathfinder finds associations between genes, diseases, and chemicals</h3>
-              <h6 className={styles.h6}>Results will show paths beginning with the first search term and ending with the second</h6>
+              <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
+              <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
               <div className={styles.buttons}>
-                <Button handleClick={swapTerms} isSecondary><SwapIcon/>Swap Terms</Button>
-                <Button handleClick={handleMiddleTypeTrigger} isSecondary className={styles.middleTypeButton} dataTooltipId='middle-type-tooltip'>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon/></Button>
+                <Button handleClick={swapTerms} isSecondary className={`${styles.button}`}><SwapIcon/>Swap Terms</Button>
+                <Button handleClick={handleMiddleTypeTrigger} isSecondary className={`${styles.button} ${styles.middleTypeButton}`} dataTooltipId='middle-type-tooltip'>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon className={styles.infoIcon}/></Button>
                 <Tooltip
                   id='middle-type-tooltip'
                   >
@@ -242,8 +242,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                   onClear={() => clearItem(1)}
                   className={styles.inputContainer}
                   selectedClassName={styles.selected}
+                  onClearAutocomplete={clearAutocompleteItemsOne}
                 />
-                <PathfinderDivider/>
+                <PathfinderDivider className={styles.dividerIcon}/>
                 {
                   hasMiddleType &&
                   <>
@@ -263,7 +264,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                       <option value="biolink:Gene">Gene</option>
                       <option value="biolink:PhenotypicFeature">Phenotype</option>
                     </Select>
-                    <PathfinderDivider/>
+                    <PathfinderDivider className={styles.dividerIcon}/>
                   </>
                 }
                 <AutocompleteInput
@@ -277,11 +278,23 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                   onClear={() => clearItem(2)}
                   className={styles.inputContainer}
                   selectedClassName={styles.selected}
+                  onClearAutocomplete={clearAutocompleteItemsTwo}
                 />
                 <Button type='submit' className={styles.submitButton} iconOnly>
-                  <ArrowRight/>
+                  {
+                    isLoading
+                    ? 
+                      <img
+                        src={loadingIcon}
+                        className={`${styles.loadingIcon} ${
+                          isLoading ? styles.active : ""
+                        } loadingIcon`}
+                        alt="loading icon"
+                      />
+                    :
+                      <ArrowRight/>
+                  }
                 </Button>
-                <img src={loadingIcon} className={`${styles.loadingIcon} ${isLoading ? styles.active : ''} loadingIcon`} alt="loading icon"/>
               </form>
             </>
         }

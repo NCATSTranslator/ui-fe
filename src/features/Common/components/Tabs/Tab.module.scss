@@ -7,11 +7,14 @@
   justify-content: center;
   cursor: pointer;
   font-weight: 800;
-  padding: $xs $s !important;
+  padding: 10px $s !important;
   position: relative;
   color: $darkGray;
   transition: $defaultAnim;
   font-size: $subTwoSize;
+  .heading {
+    font-size: $subTwoSize;
+  }
   svg {
     path {
       fill: $darkGray;
@@ -23,13 +26,16 @@
     background-color: transparent;
     transition: background-color .5s ease;
     position: absolute;
-    bottom: 0;
+    bottom: 1px;
     left: 0;
     right: 0;
-    width: 85%;
+    width: 90%;
   }
   &.active {
     color: $purpleOne;
+    span {
+      color: $purpleOne;
+    }
     svg {
       path {
         fill: $purpleOne;

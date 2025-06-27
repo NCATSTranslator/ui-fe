@@ -5,9 +5,12 @@
 
 .input {
   width: 100%;
-  
-  &.selected {
-    // Add any selected state styles here if needed
+  margin: 0;
+  input {
+    border: none;
+    &:focus {
+      outline: none;
+    }
   }
 }
 

@@ -1,15 +1,16 @@
-import Query from "@/features/Query/components/Query/Query";
+import styles from "./Home.module.scss";
 import homeOne from "@/assets/images/Home/home1.svg";
 import homeTwo from "@/assets/images/Home/home2.svg";
 import homeThree from "@/assets/images/Home/home3.svg";
 import ArrowForward from "@/assets/icons/Directional/Arrows/Arrow Right.svg?react";
-import styles from "./Home.module.scss";
+import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
 
 const Home = () => {
 
   return (
     <div>
-      <Query />
+      <h1 className={styles.pageHeading}>Explore Translator</h1>
+      <CombinedQueryInterface />
       <div className={styles.homePageContent}>
         <div className={styles.section}>
           <div className={`${styles.container} container`}>

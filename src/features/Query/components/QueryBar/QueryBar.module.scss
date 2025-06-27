@@ -10,18 +10,6 @@
     width: 100%;
     margin: 0;
   }
-  button {
-    margin: 0 0 0 $m;
-    padding: 10px 20px;
-    line-height: 20px;
-  }
-  input {
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
-    border-top-right-radius: $largeBorderRadius;
-    border-bottom-right-radius: $largeBorderRadius;
-    border: none;
-  }
 }
 .inputContainer {
   display: flex;
@@ -56,6 +44,8 @@
       pointer-events: none;
       svg {
         margin-left: 0;
+        height: 24px;
+        width: 24px;
         path {
           stroke: $midGray;
         }
@@ -68,7 +58,7 @@
     margin: 0 8px 0 12px;
   }
   .submitButton {
-    margin: 0 8px;
+    margin: 0;
     background-color: $purpleOne;
     svg {
       margin-left: 0;

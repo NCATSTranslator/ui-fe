@@ -5,8 +5,7 @@
 }
 
 .query {
-  padding: $l 0;
-  background-color: $palePurple;
+  padding: $m;
   position: relative;
   .subHeading {
     margin-bottom: $s;
@@ -45,8 +44,7 @@
     }
   }
   .container {
-    padding: 0 20px 0;
-    max-width: 928px;
+    padding: 0;
     margin: 0 auto;
   }
   .h3 {
@@ -188,6 +186,10 @@
       font-size: 14px;
     }
   }
+  .icon {
+    display: flex;
+    margin-left: 12px;
+  }
 }
 
 .arrow, .dualArrows {
@@ -214,7 +216,6 @@ button .dualArrows {
 .queryBarContainer {
   position: relative;
   display: flex;
-  width: 100%;
   align-items: center;
   justify-content: center;
   margin: 0 0 35px;
@@ -222,6 +223,7 @@ button .dualArrows {
   height: fit-content;
   border-radius: $largeBorderRadius;
   background-color: $white;
+  padding: $xs;
 }
 .loadingIcon {
   opacity: 0;

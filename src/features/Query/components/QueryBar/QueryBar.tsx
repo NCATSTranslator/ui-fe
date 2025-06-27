@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import styles from './QueryBar.module.scss';
 import ArrowRight from "@/assets/icons/Directional/Arrows/Arrow Right.svg?react";
-import QueryTypeIcon from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
+import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Button from "@/features/Common/components/Button/Button";
 import { cloneDeep } from 'lodash';
 import { AutocompleteItem, QueryItem, QueryType } from '@/features/Query/types/querySubmission';
@@ -16,7 +16,10 @@ type QueryBarProps = {
   autocompleteItems: AutocompleteItem[] | null;
   autocompleteLoading: boolean;
   handleItemClick: (item: AutocompleteItem) => void;
+  onClearAutocomplete: () => void;
+  onClearQueryItem: () => void;
   disabled?: boolean;
+  isLoading?: boolean;
   placeholderText?: string; 
 }
 
@@ -30,6 +33,9 @@ const QueryBar: FC<QueryBarProps> = ({
   autocompleteLoading,
   handleItemClick,
   disabled = false,
+  isLoading = false,
+  onClearAutocomplete,
+  onClearQueryItem,
   placeholderText
 }) => {
   const placeholder = (!!placeholderText) ? placeholderText : (queryType) ? queryType.placeholder : '';
@@ -55,9 +61,6 @@ const QueryBar: FC<QueryBarProps> = ({
       className={styles.form}
     >
       <div className={`${disabled && styles.disabled} ${styles.inputContainer}`}>
-        <span className={styles.icon}>
-          <QueryTypeIcon type={queryType?.searchTypeString || ''} />
-        </span>
         <AutocompleteInput
           placeholder={placeholder}
           value={value}
@@ -67,9 +70,23 @@ const QueryBar: FC<QueryBarProps> = ({
           loadingAutocomplete={autocompleteLoading}
           selectedItem={queryItem?.node || null}
           className={styles.autocompleteInput}
+          onClearAutocomplete={onClearAutocomplete}
+          onClear={onClearQueryItem}
         />
-        <Button type='submit' className={styles.submitButton} iconOnly>
-          <ArrowRight/>
+        <Button type='submit' className={styles.submitButton} iconOnly disabled={isLoading}>
+          {
+            isLoading
+            ? 
+              <img
+                src={loadingIcon}
+                className={`${styles.loadingIcon} ${
+                  isLoading ? styles.active : ""
+                } loadingIcon`}
+                alt="loading icon"
+              />
+            :
+              <ArrowRight/>
+          }
         </Button>
       </div>
     </form>

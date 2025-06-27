@@ -49,6 +49,7 @@ const Query: FC<QueryProps> = ({
   const {
     queryItem,
     setQueryItem,
+    clearQueryItem,
     inputText,
     setInputText,
     prevQueryItems,
@@ -180,6 +181,7 @@ const Query: FC<QueryProps> = ({
                 onQueryItemChange={handleQueryItemChange}
                 onItemSelection={handleItemSelection}
                 onSubmission={handleSubmission}
+                onClearQueryItem={clearQueryItem}
                 onClearAutocomplete={clearAutocompleteItems}
               />
             )}

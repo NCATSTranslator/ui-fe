@@ -1,12 +1,15 @@
 @import "@/assets/styles/variables";
 
 .queryPathfinder {
-  background-color: $palePurple;
   height: 100%;
   position: relative;
+  .blurb {
+    margin-bottom: $xxs;
+  }
   .container {
-    padding: 80px 20px 0;
+    padding: $l $m $m;
     max-width: 928px;
+    width: auto;
   }
   &.results {
     .container {
@@ -14,14 +17,18 @@
     }
   }
   .buttons {
-    button {
-      font-size: 12px;
-      padding: 4px 8px;
+    .button {
+      font-size: $captionSize;
+      padding: $xxs $xs;
+      svg {
+        margin-left: 0;
+        margin-right: $xxs;
+      }
     }
     .middleTypeButton {
-      svg {
+      .infoIcon {
         margin-right: 0;
-        margin-left: 4px;
+        margin-left: $xxs;
       }
     }
   }
@@ -87,6 +94,10 @@
   line-height: 25px;
   text-align: center;
 }
+.dividerIcon {
+  height: 24px;
+  width: 24px;
+}
 .form {
   display: grid;
   grid-template-columns: 1fr 18px 1fr 40px;
@@ -94,9 +105,9 @@
   align-items: center;
   box-shadow: $dropShadow;
   border-radius: $largeBorderRadius;
-  padding: 0 $xs;
+  padding: $xs;
   background-color: $white;
-  margin-bottom: $l;
+  margin-bottom: 0;
   max-width: 910px;
   position: relative;
   &.hasMiddleType {
@@ -104,6 +115,9 @@
   }
   .middleTypeSelector {
     margin: 0;
+    select {
+      padding: $xs 12px;
+    }
     & > div {
       border: none;
       box-shadow: none !important;
@@ -139,8 +153,13 @@
   .submitButton {
     margin: 0;
     border: none;
-    svg path {
-      stroke: $white;
+    background-color: $purpleOne;
+    svg {
+      height: 24px;
+      width: 24px;
+      path {
+        stroke: $white;
+      }
     }
   }
   .close {

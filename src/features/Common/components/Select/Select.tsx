@@ -80,10 +80,14 @@ const Select = <T extends string | number>({
 
   return (
     <label className={`select ${styles.select} ${size} ${animateClass} ${className}`} ref={wrapperRef}>
-      <span className="input-label-container">
-        {label && <span className="input-label">{label}</span>}
-        {subtitle && <span className="input-subtitle">{subtitle}</span>}
-      </span>
+      {
+        (label || subtitle) && (
+          <span className="input-label-container">
+            {label && <span className="input-label">{label}</span>}
+            {subtitle && <span className="input-subtitle">{subtitle}</span>}
+          </span>
+        )
+      }
       <div className={`${styles.selectContainer} ${openClass}`}>
         <select
           name={name}

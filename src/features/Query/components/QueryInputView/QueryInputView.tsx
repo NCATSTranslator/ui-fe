@@ -1,12 +1,12 @@
 import { FC } from 'react';
+import styles from '@/features/Query/components/Query/Query.module.scss';
 import QueryBar from '@/features/Query/components/QueryBar/QueryBar';
 import { AutocompleteItem, QueryItem } from '@/features/Query/types/querySubmission';
 import { QuerySelect } from '@/features/Query/components/QuerySelect/QuerySelect';
 import ExampleQueryList from '@/features/Query/components/ExampleQueryList/ExampleQueryList';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
-import loadingIcon from '@/assets/images/loading/loading-purple.png';
-import styles from '@/features/Query/components/Query/Query.module.scss';
 import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
+import { QueryTypeIcon } from '../QueryTypeIcon/QueryTypeIcon';
 
 interface QueryInputViewProps {
   queryItem: QueryItem;
@@ -23,6 +23,7 @@ interface QueryInputViewProps {
   onItemSelection: (item: AutocompleteItem) => void;
   onSubmission: (item: QueryItem | null) => void;
   onClearAutocomplete: () => void;
+  onClearQueryItem: () => void;
 }
 
 const QueryInputView: FC<QueryInputViewProps> = ({
@@ -39,22 +40,20 @@ const QueryInputView: FC<QueryInputViewProps> = ({
   onQueryItemChange,
   onItemSelection,
   onSubmission,
-  onClearAutocomplete
+  onClearAutocomplete,
+  onClearQueryItem
 }) => {
   return (
     <>
-      <h3 className={styles.h3}>
-        Translator finds associations between drugs, genes, and diseases
-      </h3>
-      <h6 className={styles.h6}>
-        Select a question and enter a search term to get started
-      </h6>
+      <p className='blurb'>Select a question and enter a search term to find paths between biomedical entities</p>
       {isError && <p className={styles.error}>{errorText}</p>}
-      
       <OutsideClickHandler
         onOutsideClick={onClearAutocomplete}
         className={styles.queryBarContainer}
       >
+        <span className={styles.icon}>
+          <QueryTypeIcon type={queryItem.type.targetType || ''} />
+        </span>
         <QuerySelect
           label=""
           handleChange={(val: string) => onQueryTypeChange(val, true)}
@@ -88,14 +87,9 @@ const QueryInputView: FC<QueryInputViewProps> = ({
           placeholderText={
             user === null ? "Log In to Enter a Search Term" : undefined
           }
-        />
-        
-        <img
-          src={loadingIcon}
-          className={`${styles.loadingIcon} ${
-            isLoading ? styles.active : ""
-          } loadingIcon`}
-          alt="loading icon"
+          isLoading={isLoading}
+          onClearAutocomplete={onClearAutocomplete}
+          onClearQueryItem={onClearQueryItem}
         />
       </OutsideClickHandler>
 

@@ -1,4 +1,5 @@
-import { useState, useEffect, FC, ReactElement, Children, isValidElement, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, FC, ReactElement, Children, isValidElement,
+  useMemo, useCallback, useRef, KeyboardEvent } from "react";
 import Tab, { TabProps } from "./Tab";
 import { Fade } from 'react-awesome-reveal';
 import styles from './Tabs.module.scss';
@@ -6,6 +7,7 @@ import styles from './Tabs.module.scss';
 interface TabsProps {
   children: (ReactElement<TabProps> | null)[];
   className?: string;
+  tabListClassName?: string;
   isOpen: boolean;
   handleTabSelection?: (heading: string) => void;
   defaultActiveTab?: string;
@@ -16,6 +18,7 @@ interface TabsProps {
 const Tabs: FC<TabsProps> = ({ 
   children, 
   className, 
+  tabListClassName,
   isOpen, 
   handleTabSelection = () => {}, 
   defaultActiveTab,
@@ -71,7 +74,7 @@ const Tabs: FC<TabsProps> = ({
   }, [controlled, handleTabSelection]);
 
   // Keyboard navigation handler
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
     if (!activeTabHeading) return;
 
     const currentIndex = tabHeadings.indexOf(activeTabHeading);
@@ -81,12 +84,10 @@ const Tabs: FC<TabsProps> = ({
 
     switch (e.key) {
       case 'ArrowRight':
-      case 'ArrowDown':
         e.preventDefault();
         nextIndex = (currentIndex + 1) % tabHeadings.length;
         break;
       case 'ArrowLeft':
-      case 'ArrowUp':
         e.preventDefault();
         nextIndex = (currentIndex - 1 + tabHeadings.length) % tabHeadings.length;
         break;
@@ -128,14 +129,15 @@ const Tabs: FC<TabsProps> = ({
       ref={tabsContainerRef}
       onKeyDown={handleKeyDown}
     >
-      <div className={styles.tabList}>
+      <div className={`${styles.tabList} ${tabListClassName || ''}`}>
         {validChildren.map((child, i) => {
-          const { heading, tooltipIcon, dataTooltipId = "" } = child.props;
+          const { heading, headingOverride, tooltipIcon, dataTooltipId = "" } = child.props;
           return (
             <Tab
               key={`${heading}-${i}`}
               activeTabHeading={activeTabHeading}
               heading={heading}
+              headingOverride={headingOverride}
               tooltipIcon={tooltipIcon}
               onClick={handleTabClick}
               dataTooltipId={dataTooltipId}
@@ -152,7 +154,7 @@ const Tabs: FC<TabsProps> = ({
         const isActive = activeTabHeading === heading;
         
         return (
-          <Fade key={`${heading}-${i}`} className={styles.fade}>
+          <Fade key={`${heading}-${i}`} className={`${styles.fade} ${isActive ? '' : styles.inactive}`}>
             <div 
               className={`${styles.tabContent} ${childClassName} ${isActive ? '' : styles.inactive}`}
               role="tabpanel"

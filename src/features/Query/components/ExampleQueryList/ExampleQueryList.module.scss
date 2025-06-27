@@ -6,25 +6,39 @@
   color: $darkGray;
   margin: 0 0 35px;
 }
-.subTwo {
-  margin: 0 0 4px;
-  font-size: 14px;
-  display: flex;
+.exampleHeading {
+  margin: 0 0 $xxs;
+  padding: 3px 0 4px;
+  color: $purpleTwo;
+  font-size: $subTwoSize;
   font-weight: 800;
-  color: $black;
 }
 .expandButton {
   transition: $defaultAnim;
-  position: absolute;
-  right: 8px;
-  top: 8px;
   background-color: transparent;
   border: none;
-  margin: 0;
+  margin: 0 0 $xxs;
   padding: 0;
+  color: $purpleTwo;
+  font-size: $subTwoSize;
+  svg {
+    height: $m;
+    width: $m;
+    transition: $defaultAnim;
+    margin-left: 0;
+    margin-right: $xxs;
+    path {
+      stroke: $purpleTwo;
+    }
+  }
 }
+.caption {
+  font-weight: 400;
+  color: $black;
+}
+
 .expanded {
-  .expandButton {
+  .expandButton svg {
     rotate: 180deg;
   }
 }
@@ -32,9 +46,9 @@
   margin: 12px 0 0;
   position: relative;
   background-color: $lightPurpleTwo;
-  padding: $m;
+  padding: $s $m;
   border: 1px solid $midPurpleTwo;
-  border-radius: 8px;
+  border-radius: $largeBorderRadius;
 }
 .examples {
   display: grid;
@@ -51,19 +65,22 @@
       align-items: center;
       background-color: $lightGray;
       border-color: $lightGray;
-      border-radius: 5px;
+      border-radius: $defaultBorderRadius;
       cursor: pointer;
       display: inline-flex;
       font-size: 12px;
       font-weight: 800;
       justify-content: center;
       line-height: 1;
-      padding: 10px 8px;
+      padding: $xxs $xs;
       text-decoration: none;
       transition: box-shadow .25s ease;
       box-shadow: none;
       margin: 0 $s $s 0;
       white-space: nowrap;
+      svg {
+        margin-right: $xxs;
+      }
       &:hover {
         box-shadow: none;
       }

@@ -137,7 +137,7 @@ const SendFeedbackForm = () => {
           <p>You can view this ticket on Github and subscribe to receive updates from our team. You may also leave additional comments or feedback on the ticket.</p>
           <div className={styles.buttonContainer}>
             <Button isSecondary handleClick={() => setCreatedIssueURL(null)} className={styles.newIssue}><Feedback/> Send More Feedback</Button>
-            <Button link href="#" _blank rel="noopener noreferrer" className={styles.viewIssue}>View Ticket on GitHub <ExternalLink/></Button>
+            <Button link href={createdIssueURL} _blank rel="noopener noreferrer" className={styles.viewIssue}>View Ticket on GitHub <ExternalLink/></Button>
           </div>
         </div>
       ) : (

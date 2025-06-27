@@ -1,6 +1,5 @@
 @import "@/Assets/Styles/variables";
 
-$querySelectPadding: 16px 20px;
 
 // Select
 .querySelect {
@@ -22,7 +21,7 @@ $querySelectPadding: 16px 20px;
     -moz-appearance: none;
     appearance: none;
     cursor: pointer;
-    padding: $querySelectPadding;
+    padding: $xs;
     border-radius: $largeBorderRadius;
     color: $black;
     transition: $defaultAnim;
@@ -64,7 +63,6 @@ $querySelectPadding: 16px 20px;
     width: 24px;
     height: 24px;
     cursor: pointer;
-    margin-right: $querySelectPadding;
   }
   .selectContainer {
     border-top-left-radius: $largeBorderRadius;
@@ -130,8 +128,8 @@ $querySelectPadding: 16px 20px;
   &.noAnimate {
     .selectList {
       position: absolute;
-      top: calc(100% + 2px);
-      left: 0;
+      top: calc(100% + 12px);
+      left: -36px;
       right: 1px;
       background-color: $white;
       box-shadow: $dropShadowHover;

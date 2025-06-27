@@ -3,6 +3,7 @@ import styles from './Tab.module.scss';
 
 export interface TabProps {
   heading: string;
+  headingOverride?: ReactNode;
   onClick?: (heading: string) => void;
   activeTabHeading?: string;
   tooltipIcon?: ReactNode;
@@ -15,7 +16,8 @@ export interface TabProps {
 }
 
 const Tab = forwardRef<HTMLDivElement, TabProps>(({ 
-  heading, 
+  heading,
+  headingOverride,
   onClick = () => {}, 
   activeTabHeading = "", 
   tooltipIcon, 
@@ -76,7 +78,7 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(({
       tabIndex={isActive ? 0 : -1}
       id={`tab-${heading}`}
     >
-      <span className={styles.heading}>{heading}</span>
+      <span className={styles.heading}>{headingOverride || heading}</span>
       {tooltipIcon && (
         <span 
           data-tooltip-id={dataTooltipId} 

@@ -15,7 +15,8 @@ interface AutocompleteInputProps {
   autocompleteItems: AutocompleteItem[] | null;
   loadingAutocomplete: boolean;
   selectedItem?: AutocompleteItem | null;
-  onClear?: () => void;
+  onClear: () => void;
+  onClearAutocomplete: () => void;
   className?: string;
   selectedClassName?: string;
 }
@@ -29,27 +30,31 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
   loadingAutocomplete,
   selectedItem,
   onClear,
+  onClearAutocomplete,
   className = '',
   selectedClassName = ''
-}) => (
-  <div className={`${styles.inputContainer} ${className}`}>
-    <TextInput 
-      placeholder={placeholder} 
-      handleChange={onChange} 
-      className={`${styles.input} ${!!selectedItem && styles.selected} ${selectedClassName}`}
-      value={value}
-      iconLeft={!!selectedItem?.types ? getIcon(selectedItem.types[0]) : <QuestionIcon/>}
-      iconRight={!!selectedItem && onClear ? 
-        <button className={styles.close} onClick={onClear}><CloseIcon/></button> : 
-        false
-      }
-    />
-    <Autocomplete 
-      isLoading={loadingAutocomplete}
-      items={autocompleteItems}
-      handleItemClick={onItemSelect}
-    />
-  </div>
-); 
+}) => {
+  return (
+    <div className={`${styles.inputContainer} ${className}`}>
+      <TextInput 
+        placeholder={placeholder} 
+        handleChange={onChange} 
+        className={`${styles.input} ${!!selectedItem && styles.selected} ${selectedClassName}`}
+        value={value}
+        iconLeft={!!selectedItem?.types ? getIcon(selectedItem.types[0]) : <QuestionIcon/>}
+        iconRight={!!selectedItem && onClear ? 
+          <button className={styles.close} onClick={onClear}><CloseIcon/></button> : 
+          false
+        }
+      />
+      <Autocomplete 
+        isLoading={loadingAutocomplete}
+        items={autocompleteItems}
+        handleItemClick={onItemSelect}
+        onClearAutocomplete={onClearAutocomplete}
+      />
+    </div>
+  )
+}; 
 
 export default AutocompleteInput;

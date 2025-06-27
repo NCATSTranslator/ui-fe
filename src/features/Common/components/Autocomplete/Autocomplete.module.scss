@@ -15,7 +15,7 @@
 
 .autocompleteContainer {
   position: absolute;
-  top: calc(100% + 2px);
+  top: calc(100% + 12px);
   left: 0;
   right: 0;
   background-color: $white;
@@ -118,7 +118,7 @@
     &:last-child {
       border-radius: 0 0 $defaultBorderRadius $defaultBorderRadius;
     }
-    &:hover {
+    &:hover, &.selected {
       color: $purpleOne;
       background-color: $palePurple;
       .type {
