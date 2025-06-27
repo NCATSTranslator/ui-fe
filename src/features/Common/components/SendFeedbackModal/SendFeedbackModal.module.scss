@@ -1,0 +1,40 @@
+@import "@/assets/styles/variables";
+
+.feedbackModal {
+  .feedbackContainer {
+    width: calc(685px - ($xl * 2));
+    padding: $xl;
+  }
+  .disclaimer {
+    position: relative;
+    padding: 10px 12px;
+    background-color: $palePurple;
+    border-radius: $defaultBorderRadius;
+    padding-left: 42px;
+    svg {
+      position: absolute;
+      top: 50%;
+      left: 13px;
+      transform: translateY(-50%);
+    }
+  } 
+  .errorText {
+    color: $red;
+    font-weight: bold;
+  }
+  button:disabled, button[disabled] {
+    background-color: $lightGray;
+  }
+  .issueCreatedContainer {
+    text-align: center;
+  }
+  button.newIssue, a.viewIssue {
+    display: block;
+    margin: 0 auto;
+    width: 200px;
+  }
+  a.viewIssue {
+    margin: 0 auto $s;
+    box-sizing: border-box;
+  }
+}

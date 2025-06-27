@@ -1,0 +1,71 @@
+@import "@/assets/styles/variables";
+
+// Button
+.button {
+  font-size: $buttonSize;
+  font-weight: 800;
+  line-height: 1;
+  padding: 10px 12px;
+  border-radius: $defaultBorderRadius;
+  border: 1px solid $purpleTwo;
+  cursor: pointer;
+  color: $white;
+  background-color: $purpleTwo;
+  text-decoration: none;
+  display: inline-flex;
+  width: fit-content;
+  justify-content: center;
+  align-items: center;
+  transition: all .35s ease;
+  margin: 0 $s $s 0;
+  span {
+    padding: 0 $xxs;
+    font-size: $buttonSize;
+  }
+  &.smallFont {
+    font-size: $captionSize;
+    padding: 4px 8px;
+    span {
+      font-size: $captionSize;
+      padding: 0;
+    }
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+  svg, svg path {
+    transition: all .35s ease;
+  }
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+  &.secondary {
+    color: $black;
+    background-color: $lightGray;
+    border: 1px solid $lightGray;
+  }
+  &.tertiary {
+    color: $purpleTwo;
+    background-color: $white;
+    border: 1px solid $purpleTwo;
+    &:hover {
+      color: $white;
+      background-color: $purpleTwo;
+    }
+  }
+  &.iconOnly {
+    padding: $xs;
+    svg {
+      margin-right: 0;
+      margin-left: 0;
+    }
+  }
+  &:disabled, &[disabled] {
+    color: $midGray;
+    background-color: white;
+    border-color: $midGray;
+    cursor: default;
+  }
+}

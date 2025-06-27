@@ -1,0 +1,89 @@
+@import "@/assets/styles/variables";
+
+.demoDisclaimer {
+  text-align: center;
+  font-weight: 800;
+  color: $darkGray;
+  margin: 0 0 35px;
+}
+.exampleHeading {
+  margin: 0 0 $xxs;
+  padding: 3px 0 4px;
+  color: $purpleTwo;
+  font-size: $subTwoSize;
+  font-weight: 800;
+}
+.expandButton {
+  transition: $defaultAnim;
+  background-color: transparent;
+  border: none;
+  margin: 0 0 $xxs;
+  padding: 0;
+  color: $purpleTwo;
+  font-size: $subTwoSize;
+  svg {
+    height: $m;
+    width: $m;
+    transition: $defaultAnim;
+    margin-left: 0;
+    margin-right: $xxs;
+    path {
+      stroke: $purpleTwo;
+    }
+  }
+}
+.caption {
+  font-weight: 400;
+  color: $black;
+}
+
+.expanded {
+  .expandButton svg {
+    rotate: 180deg;
+  }
+}
+.examplesContainer {
+  margin: 12px 0 0;
+  position: relative;
+  background-color: $lightPurpleTwo;
+  padding: $s $m;
+  border: 1px solid $midPurpleTwo;
+  border-radius: $largeBorderRadius;
+}
+.examples {
+  display: grid;
+  .subTwo {
+    white-space: nowrap;
+  }
+  .exampleList {
+    & > div {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .button {
+      color: $black;
+      align-items: center;
+      background-color: $lightGray;
+      border-color: $lightGray;
+      border-radius: $defaultBorderRadius;
+      cursor: pointer;
+      display: inline-flex;
+      font-size: 12px;
+      font-weight: 800;
+      justify-content: center;
+      line-height: 1;
+      padding: $xxs $xs;
+      text-decoration: none;
+      transition: box-shadow .25s ease;
+      box-shadow: none;
+      margin: 0 $s $s 0;
+      white-space: nowrap;
+      svg {
+        margin-right: $xxs;
+      }
+      &:hover {
+        box-shadow: none;
+      }
+    }
+  }
+}

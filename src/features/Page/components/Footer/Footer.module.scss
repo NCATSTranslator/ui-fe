@@ -1,0 +1,22 @@
+@import "@/assets/styles/variables";
+
+.footer {
+  background-color: $palePurple;
+  .container {
+    max-width: $maxwidth;
+    margin: 0 auto;
+    nav {
+      display: flex;
+      justify-content: space-evenly;
+      a {
+        font-size: 14px;
+        font-weight: 800;
+        color: $darkGray;
+        text-decoration: none;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

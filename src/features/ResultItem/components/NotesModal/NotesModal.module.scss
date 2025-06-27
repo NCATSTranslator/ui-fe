@@ -1,0 +1,111 @@
+@import "@/assets/styles/variables";
+
+.notesModal {
+  .clearConfirmation {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transition: opacity .25s ease;
+    z-index: 100;
+    background-color: rgba(96, 99, 104, .5);
+    .clearConfirmationContainer {
+      position: absolute;
+      top: 50px;
+      right: 50px;
+      left: 50px;
+      background-color: white;
+      padding: $m;
+      text-align: center;
+    }
+    &.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    &.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+  .buttons {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 50px;
+    row-gap: 50px;
+    padding: 50px 0 0 0;
+    .button {
+      width: auto;
+      margin: 0;
+      &:last-child {
+        background-color: $red;
+      }
+    }
+  }
+  .bottomButtons {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .clearButton {
+    background-color: $red;
+    margin: 16px 0 0 0;
+    display: block;
+  }
+  .saveButton {
+    // background-color: $red;
+    margin: 16px 16px 0 0;
+    display: block;
+  }
+  .top {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    justify-content: space-between;
+    align-items: center;
+    width: 95%;
+    gap: 5px 0;
+    padding: 0 0 20px;
+    position: relative;
+    .heading, .item, .button {
+      margin-bottom: 0;
+    }
+    .heading {
+      font-weight: 400;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px 0;
+      align-items: center;
+      margin: 0 $xs 0 0;
+      .prefix {
+        white-space: nowrap;
+        word-break: keep-all;
+        font-size: 24px;
+      }
+      .item {
+        font-weight: 800;
+        font-size: 24px;
+        margin-left: 6px;
+        word-break: break-all;
+      }
+    }
+    .saved {
+      font-size: 14px;
+      font-weight: 800;
+      transition: all .5s ease;
+      font-style: italic;
+      color: $lightPurpleOne;
+      margin-left: -20px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      &.show {
+        opacity: 1;
+        margin-left: 0px;
+      }
+      &.hide {
+        opacity: 0;
+      }
+    }
+  }
+}

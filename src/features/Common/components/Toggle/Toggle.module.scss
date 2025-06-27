@@ -1,0 +1,71 @@
+@import "@/assets/styles/variables";
+
+$toggleTransition: all .25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+.toggle {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  width: fit-content;
+  input {
+    opacity: 0;
+    position: absolute;
+  }
+  .container {
+    background-color: white;
+    border: 1px solid $midGray;
+    border-radius: 30px;
+    cursor: pointer;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 40px;
+    height: 24px;
+    position: relative;
+    margin: 0 4px;
+    transition: $toggleTransition;
+    &.active {
+      background-color: $purpleOne;
+      .ball {
+        left: calc(100% - 20px);
+        background-color: $white;
+      }
+    }
+    &.inactive {
+      .ball {
+        left: 4px;
+      }
+    }
+  }
+  .ball {
+    transition: all .25s ease;
+    background-color: $purpleOne;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: $toggleTransition;
+  }
+  .label {
+    color: $darkGray;
+    font-weight: 800;
+    font-size: 10px;
+    text-transform: uppercase;
+    transition: $toggleTransition;
+    &.labelOne {
+      left: 0;
+      &.inactive {
+        color: $purpleOne;
+      }
+    }
+    &.labelTwo {
+      right: 0;
+      &.active {
+        color: $purpleOne;
+      }
+    }
+  }
+}

@@ -1,0 +1,51 @@
+@import "@/assets/styles/variables";
+
+.tabListItem {
+  margin: 0 0 -1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 10px $s !important;
+  position: relative;
+  color: $darkGray;
+  transition: $defaultAnim;
+  font-size: $subTwoSize;
+  .heading {
+    font-size: $subTwoSize;
+  }
+  svg {
+    path {
+      fill: $darkGray;
+    }
+  }
+  .underline {
+    height: 2px;
+    margin: 4px auto 0 auto;
+    background-color: transparent;
+    transition: background-color .5s ease;
+    position: absolute;
+    bottom: 1px;
+    left: 0;
+    right: 0;
+    width: 90%;
+  }
+  &.active {
+    color: $purpleOne;
+    span {
+      color: $purpleOne;
+    }
+    svg {
+      path {
+        fill: $purpleOne;
+      }
+    }
+    .underline {
+      background: $purpleOne;
+    }
+  }
+  .iconContainer {
+    display: flex;
+  }
+}

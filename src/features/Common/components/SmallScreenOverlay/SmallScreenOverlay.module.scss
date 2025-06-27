@@ -1,0 +1,23 @@
+@import "@/assets/styles/variables";
+
+.smallScreenOverlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10000;
+  background-color: $white;
+  .container {
+    text-align: center;
+    margin: 0 auto;
+    padding: $xl 20px $xl $s;
+    max-width: $maxwidth;
+    h4 {
+      font-size: 18px;
+      @media (min-width: $small) {
+        font-size: 24px;
+      }
+    }
+  }
+}

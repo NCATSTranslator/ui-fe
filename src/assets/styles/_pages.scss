@@ -1,0 +1,110 @@
+@import "./variables";
+
+.hash-anchor {
+  position: relative;
+  top: -50px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.pane {
+  &.actions {
+    a,button {
+      background-color: transparent;
+      display: flex;
+      align-items: center;
+      color: $black;
+      svg {
+        margin-right: $xs;
+      }
+      svg, svg path {
+        stroke: unset;
+        fill: unset;
+      }
+      &:hover {
+        box-shadow: none;
+      }
+    }
+  }
+}
+
+
+.home {
+  .page-title {
+    height: 0;
+    padding: 0;
+    margin: 0;
+    visibility: hidden;
+  }
+}
+
+.results {
+  .fda-head {
+    .tooltip-container {
+      right: -40px;
+    }
+    .tooltip:after {
+      right: 0px;
+    }
+  }
+  .fda-icon {
+    .tooltip-container {
+      right: -40px;
+      top: calc(100% + 10px);
+    }
+    .tooltip:after {
+      top: calc(100% + 3px);
+      right: 5px;
+    }
+  }
+}
+
+.terms-of-use h1.h5 {
+  margin: 0;
+}
+.faq-container {
+  .right {
+    h1.h5 {
+      margin: 0;
+    }
+    p.caption:first-of-type {
+      margin-bottom: $m;
+    }
+  } 
+}
+
+.main-logging-in, .demo-logging-in {
+  .faq-container {
+    .h6 {
+      margin-top: 40px;
+    }
+    img {
+      margin-bottom: 25px;
+    }
+  } 
+}
+
+.design-system {
+  .button-with-icon {
+    svg path {
+      fill: $white;
+    }
+  }
+}
+
+.pathfinder, .pathfinder- {
+  .body {
+    display: grid;
+    grid-template-rows: auto;
+  }
+  .footer {
+    background-color: $lightGray;
+  }
+} 
+
+.help {
+  .h6 {
+    margin-top: $m;
+    margin-bottom: $xs;
+  }
+}
