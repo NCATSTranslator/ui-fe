@@ -6,6 +6,8 @@ import Query from "@/features/Query/components/Query/Query";
 import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPathfinder";
 import styles from './CombinedQueryInterface.module.scss';
 import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
+import { useSelector } from "react-redux";
+import { currentConfig } from "@/features/User-Auth/slices/userSlice";
 
 interface CombinedQueryInterfaceProps {
   isResults?: boolean;
@@ -35,6 +37,8 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   nodeDescription = null,
 }) => {
   const [activeTab, setActiveTab] = useState<string>("Query");
+  const config = useSelector(currentConfig);
+  const isPathfinderEnabled = config?.include_pathfinder;
 
   const handleTabSelection = (tabName: string) => {
     setActiveTab(tabName);
@@ -45,7 +49,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
       <Tabs
         isOpen={true}
         handleTabSelection={handleTabSelection}
-        defaultActiveTab="Query"
+        defaultActiveTab="Smart Query"
         className={styles.tabsContainer}
         tabListClassName={styles.tabList}
       >
@@ -63,19 +67,22 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             pk={pk}
           />
         </Tab>
-        <Tab 
-          heading="Pathfinder Query"
-          headingOverride={<BetaTag heading="Pathfinder Query" />}
-          className={styles.pathfinderTab}>
-          <QueryPathfinder
-            isResults={isResults}
-            loading={loading}
-            results={results}
-            handleResultMatchClick={handleResultMatchClick}
-            setShareModalFunction={setShareModalFunction}
-            pk={pk}
-          />
-        </Tab>
+        { isPathfinderEnabled 
+        ? 
+          <Tab 
+            heading="Pathfinder Query"
+            headingOverride={<BetaTag heading="Pathfinder Query" />}
+            className={styles.pathfinderTab}>
+            <QueryPathfinder
+              isResults={isResults}
+              loading={loading}
+              results={results}
+              handleResultMatchClick={handleResultMatchClick}
+              setShareModalFunction={setShareModalFunction}
+              pk={pk}
+            />
+          </Tab>
+        : null}
       </Tabs>
     </div>
   );
