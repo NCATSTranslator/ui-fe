@@ -1,0 +1,115 @@
+@import "@/Assets/Styles/variables";
+
+.form {
+  max-width: 980px;
+  width: 100%;
+  margin: 0;
+  position: relative;
+  height: fit-content;
+  label {
+    width: 100%;
+    margin: 0;
+  }
+}
+.inputContainer {
+  display: flex;
+  align-items: center;
+  &.disabled {
+    input {
+      background-color: $white;
+      color: $purpleOne;
+      font-weight: 800;
+    }
+    input::-webkit-input-placeholder {
+      color: $purpleOne;
+      font-weight: 800;
+    }
+    input::-ms-input-placeholder{
+      color: $purpleOne;
+      font-weight: 800;
+    }
+    input::placeholder {
+      color: $purpleOne;
+      font-weight: 800;
+    }
+    input::-moz-placeholder {
+      color: $purpleOne;
+      font-weight: 800;
+      opacity: 1;
+    }
+    .submitButton {
+      background-color: $lightGray;
+      border-color: $lightGray;
+      cursor: default;
+      pointer-events: none;
+      svg {
+        margin-left: 0;
+        height: 24px;
+        width: 24px;
+        path {
+          stroke: $midGray;
+        }
+      }
+    }
+  }
+  .icon {
+    width: 24px;
+    height: 24px;    
+    margin: 0 8px 0 12px;
+  }
+  .submitButton {
+    margin: 0;
+    background-color: $purpleOne;
+    svg {
+      margin-left: 0;
+      path {
+        stroke: $white;
+      }
+    } 
+  }
+}
+
+.autocompleteInput {
+  flex: 1;
+  margin: 0;
+  
+  :global(.input) {
+    input {
+      padding: 16px 0 !important;
+      line-height: 22px;
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+}
+
+.prefix {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  width: auto !important;
+  flex-shrink: 0;
+  .prefixIcon {
+    width: 30px;
+    height: 30px;
+    margin-right: 0;
+  }
+  span {
+    color: $darkGray;
+    font-size: $subOneSize;
+    font-weight: 800;
+    margin-right: $xs;
+  }
+  div {
+    border: none !important;  
+  }
+  select {
+    background-color: transparent;
+    color: $darkGray;
+    font-size: $subOneSize;
+    font-weight: 800;
+    margin-right: $xs;
+    text-align: right;
+  }
+}

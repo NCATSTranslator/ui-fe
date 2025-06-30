@@ -1,0 +1,31 @@
+@import "@/assets/styles/variables";
+
+.combinedQueryInterface {
+  max-width: 928px;
+  margin: 0 auto;
+  padding: 0 $m;
+  
+  .tabsContainer {
+    margin: 0 auto $xxl;
+    border-radius: $largeBorderRadius;
+    border: 1px solid $lightPurpleTwo;
+    background-color: $palePurple;
+  }
+  
+  .queryTab,
+  .pathfinderTab {
+    overflow: visible;
+    padding: $m;
+  }
+  
+  .tabList {
+    margin: 0;
+    background-color: $lightPurpleTwo;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    padding: 0 12px;
+    & ~ div {
+      overflow-y: visible;
+    }
+  }
+}

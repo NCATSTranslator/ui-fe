@@ -1,0 +1,84 @@
+@import "./variables";
+
+* {
+  margin-top: 0;
+  font-family: $opensans;
+  font-size: $bodyOneSize;
+}
+
+h1, .h1 {
+  font-size: $h1Size;
+  margin-bottom: $s;
+  font-weight: 800;
+}
+h2, .h2 {
+  font-size: $h2Size;
+  margin-bottom: $s;
+  font-weight: 800;
+}
+h3, .h3 {
+  font-size: $h3Size;
+  margin-bottom: $s;
+  font-weight: 800;
+}
+h4, .h4 {
+  font-size: $h4Size;
+  margin-bottom: $s;
+  font-weight: 800;
+}
+h5, .h5 {
+  font-size: $h5Size;
+  margin-bottom: $s;
+  color: $purpleTwo;
+  font-weight: 800;
+}
+h6 , .h6 {
+  font-size: $h6Size;
+  margin-bottom: $s;
+  color: $darkGray;
+  font-weight: 800;
+}
+
+p, .p {
+  font-size: $bodyOneSize; 
+  margin-bottom: $s;
+  line-height: 1.25;
+}
+.body-one {
+  font-size: $bodyOneSize; 
+}
+.body-two {
+  font-size: $bodyTwoSize; 
+}
+.sub-one {
+  font-size: $subOneSize; 
+  font-weight: 800;
+}
+.sub-two {
+  font-size: $subTwoSize; 
+  font-weight: 800;
+}
+.button, button {
+  font-size: $buttonSize;
+}
+.caption {
+  font-size: $captionSize;
+  color: $darkGray;
+}
+.blurb {
+  font-weight: 800;
+  color: $black;
+  margin-bottom: $s;
+}
+.overline {
+  font-size: $overlineSize;
+}
+
+ol, ul {
+  margin-bottom: $s;
+  padding-left: $m;
+}
+
+.fw-normal {
+  font-weight: 400 !important;
+}

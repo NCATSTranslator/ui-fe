@@ -1,0 +1,105 @@
+@import "@/assets/styles/variables";
+
+.summaryModal {
+  .summaryModalContainer {
+    padding: $l;
+    height: 80%;
+    overflow: hidden;
+    max-width: 640px;
+    position: relative;
+    &>div {
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+  }
+  .top {
+    padding: 0 0 $s;
+    border-bottom: 1px solid $midGray;
+    .heading {
+      margin-bottom: $xxs;
+    }
+    .statusText {
+      display: flex;
+      align-items: center;
+      font-size: $subTwoSize;
+      color: $darkGray;
+      font-weight: 400;
+      margin: 0;
+    }
+  }
+  .bottom {
+    margin: $s 0 0 0;
+    display: grid;
+    align-content: flex-start;
+  }
+  .loadingArea {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+    transition: $defaultAnim;
+    padding: 0;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    background-color: $white;
+    &.active {
+      opacity: 1;
+    }
+    p, .top {
+      max-width: 480px;
+    }
+  }
+  .summaryMatch {
+    font-weight: 800;
+    color: $purpleOne;
+    cursor: pointer;
+  }
+  .summaryLoadingIcon {
+    display: flex;
+    margin-top: $m;
+    margin-right: auto;
+    margin-bottom: 0;
+    margin-left: auto;
+  }
+  .linkContainer {
+    display: flex;
+    justify-content: center;
+  }
+  .sendFeedbackLink {
+    display: inline-flex;
+    font-weight: 800;
+    color: $purpleOne;
+    justify-content: center;
+    margin-top: $xs;
+    svg {
+      margin-right: $xxs;
+      path {
+        fill: $purpleOne;
+      }
+    } 
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .cursor {
+    animation: cursor-fade 1s ease 0s infinite; 
+    margin: 0;
+  }
+}
+
+@keyframes cursor-fade {
+  0%{
+    opacity: 0.0;
+  }
+  50% {
+    opacity: 1.0;
+  }
+  100% {
+    opacity: 0.0;
+  }
+}

@@ -1,0 +1,17 @@
+@import "@/assets/styles/variables";
+
+.betaTag {
+  display: flex;
+  align-items: center;
+  font-size: inherit;
+  .tag {
+    background-color: $palePurple;
+    color: $darkGray;
+    font-size: $captionSize;
+    font-weight: 800;
+    padding: 3px $xs;
+    border-radius: $defaultBorderRadius;
+    margin-left: $xs;
+    text-transform: uppercase;
+  }
+}
