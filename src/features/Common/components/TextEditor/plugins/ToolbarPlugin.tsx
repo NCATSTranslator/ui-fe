@@ -11,7 +11,10 @@ import {
   $getSelection,
   $isRangeSelection,
   $createParagraphNode,
-  $getNodeByKey
+  $getNodeByKey,
+  LexicalEditor,
+  TextFormatType,
+  ElementFormatType
 } from "lexical";
 import {
   $wrapNodes
@@ -48,7 +51,7 @@ const supportedBlockTypes = new Set([
   "ol"
 ]);
 
-const blockTypeToBlockName = {
+const blockTypeToBlockName: Record<string, string> = {
   code: "Code Block",
   h1: "Large Heading",
   h2: "Small Heading",
@@ -61,11 +64,18 @@ const blockTypeToBlockName = {
   ul: "Bulleted List"
 };
 
-function Divider() {
+function Divider(): JSX.Element {
   return <div className="divider" />;
 }
 
-function Select({ onChange, className, options, value }) {
+interface SelectProps {
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  className: string;
+  options: string[];
+  value: string;
+}
+
+function Select({ onChange, className, options, value }: SelectProps): JSX.Element {
   return (
     <select className={className} onChange={onChange} value={value}>
       <option hidden={true} value="" />
@@ -78,13 +88,20 @@ function Select({ onChange, className, options, value }) {
   );
 }
 
+interface BlockOptionsDropdownListProps {
+  editor: LexicalEditor;
+  blockType: string;
+  toolbarRef: React.RefObject<HTMLDivElement>;
+  setShowBlockOptionsDropDown: (show: boolean) => void;
+}
+
 function BlockOptionsDropdownList({
   editor,
   blockType,
   toolbarRef,
   setShowBlockOptionsDropDown
-}) {
-  const dropDownRef = useRef(null);
+}: BlockOptionsDropdownListProps): JSX.Element {
+  const dropDownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const toolbar = toolbarRef.current;
@@ -102,8 +119,8 @@ function BlockOptionsDropdownList({
     const toolbar = toolbarRef.current;
 
     if (dropDown !== null && toolbar !== null) {
-      const handle = (event) => {
-        const target = event.target;
+      const handle = (event: MouseEvent) => {
+        const target = event.target as Node;
 
         if (!dropDown.contains(target) && !toolbar.contains(target)) {
           setShowBlockOptionsDropDown(false);
@@ -117,7 +134,7 @@ function BlockOptionsDropdownList({
     }
   }, [dropDownRef, setShowBlockOptionsDropDown, toolbarRef]);
 
-  const formatParagraph = () => {
+  const formatParagraph = (): void => {
     if (blockType !== "paragraph") {
       editor.update(() => {
         const selection = $getSelection();
@@ -130,7 +147,7 @@ function BlockOptionsDropdownList({
     setShowBlockOptionsDropDown(false);
   };
 
-  const formatLargeHeading = () => {
+  const formatLargeHeading = (): void => {
     if (blockType !== "h1") {
       editor.update(() => {
         const selection = $getSelection();
@@ -143,7 +160,7 @@ function BlockOptionsDropdownList({
     setShowBlockOptionsDropDown(false);
   };
 
-  const formatSmallHeading = () => {
+  const formatSmallHeading = (): void => {
     if (blockType !== "h2") {
       editor.update(() => {
         const selection = $getSelection();
@@ -156,25 +173,25 @@ function BlockOptionsDropdownList({
     setShowBlockOptionsDropDown(false);
   };
 
-  const formatBulletList = () => {
+  const formatBulletList = (): void => {
     if (blockType !== "ul") {
-      editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND);
+      editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
     } else {
-      editor.dispatchCommand(REMOVE_LIST_COMMAND);
+      editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
     }
     setShowBlockOptionsDropDown(false);
   };
 
-  const formatNumberedList = () => {
+  const formatNumberedList = (): void => {
     if (blockType !== "ol") {
-      editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND);
+      editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
     } else {
-      editor.dispatchCommand(REMOVE_LIST_COMMAND);
+      editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
     }
     setShowBlockOptionsDropDown(false);
   };
 
-  const formatQuote = () => {
+  const formatQuote = (): void => {
     if (blockType !== "quote") {
       editor.update(() => {
         const selection = $getSelection();
@@ -187,7 +204,7 @@ function BlockOptionsDropdownList({
     setShowBlockOptionsDropDown(false);
   };
 
-  const formatCode = () => {
+  const formatCode = (): void => {
     if (blockType !== "code") {
       editor.update(() => {
         const selection = $getSelection();
@@ -241,22 +258,22 @@ function BlockOptionsDropdownList({
   );
 }
 
-export default function ToolbarPlugin() {
+export default function ToolbarPlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext();
-  const toolbarRef = useRef(null);
-  const [canUndo, setCanUndo] = useState(false);
-  const [canRedo, setCanRedo] = useState(false);
-  const [blockType, setBlockType] = useState("paragraph");
-  const [selectedElementKey, setSelectedElementKey] = useState(null);
-  const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] = useState(false);
-  const [codeLanguage, setCodeLanguage] = useState("");
-  const [isBold, setIsBold] = useState(false);
-  const [isItalic, setIsItalic] = useState(false);
-  const [isUnderline, setIsUnderline] = useState(false);
-  const [isStrikethrough, setIsStrikethrough] = useState(false);
-  const [isCode, setIsCode] = useState(false);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const [canUndo, setCanUndo] = useState<boolean>(false);
+  const [canRedo, setCanRedo] = useState<boolean>(false);
+  const [blockType, setBlockType] = useState<string>("paragraph");
+  const [selectedElementKey, setSelectedElementKey] = useState<string | null>(null);
+  const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] = useState<boolean>(false);
+  const [codeLanguage, setCodeLanguage] = useState<string>("");
+  const [isBold, setIsBold] = useState<boolean>(false);
+  const [isItalic, setIsItalic] = useState<boolean>(false);
+  const [isUnderline, setIsUnderline] = useState<boolean>(false);
+  const [isStrikethrough, setIsStrikethrough] = useState<boolean>(false);
+  const [isCode, setIsCode] = useState<boolean>(false);
 
-  const updateToolbar = useCallback(() => {
+  const updateToolbar = useCallback((): void => {
     const selection = $getSelection();
     if ($isRangeSelection(selection)) {
       const anchorNode = selection.anchor.getNode();
@@ -328,7 +345,7 @@ export default function ToolbarPlugin() {
 
   const codeLanguges = useMemo(() => getCodeLanguages(), []);
   const onCodeLanguageSelect = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
       editor.update(() => {
         if (selectedElementKey !== null) {
           const node = $getNodeByKey(selectedElementKey);
@@ -346,7 +363,7 @@ export default function ToolbarPlugin() {
       <button
         disabled={!canUndo}
         onClick={() => {
-          editor.dispatchCommand(UNDO_COMMAND);
+          editor.dispatchCommand(UNDO_COMMAND, undefined);
         }}
         className="toolbar-item spaced"
         aria-label="Undo"
@@ -356,7 +373,7 @@ export default function ToolbarPlugin() {
       <button
         disabled={!canRedo}
         onClick={() => {
-          editor.dispatchCommand(REDO_COMMAND);
+          editor.dispatchCommand(REDO_COMMAND, undefined);
         }}
         className="toolbar-item"
         aria-label="Redo"
@@ -403,7 +420,7 @@ export default function ToolbarPlugin() {
         <>
           <button
             onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
+              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold" as TextFormatType);
             }}
             className={"toolbar-item spaced " + (isBold ? "active" : "")}
             aria-label="Format Bold"
@@ -412,7 +429,7 @@ export default function ToolbarPlugin() {
           </button>
           <button
             onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
+              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic" as TextFormatType);
             }}
             className={"toolbar-item spaced " + (isItalic ? "active" : "")}
             aria-label="Format Italics"
@@ -421,7 +438,7 @@ export default function ToolbarPlugin() {
           </button>
           <button
             onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
+              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline" as TextFormatType);
             }}
             className={"toolbar-item spaced " + (isUnderline ? "active" : "")}
             aria-label="Format Underline"
@@ -430,7 +447,7 @@ export default function ToolbarPlugin() {
           </button>
           <button
             onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
+              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough" as TextFormatType);
             }}
             className={
               "toolbar-item spaced " + (isStrikethrough ? "active" : "")
@@ -441,7 +458,7 @@ export default function ToolbarPlugin() {
           </button>
           <button
             onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
+              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code" as TextFormatType);
             }}
             className={"toolbar-item spaced " + (isCode ? "active" : "")}
             aria-label="Insert Code"
@@ -451,7 +468,7 @@ export default function ToolbarPlugin() {
           <Divider />
           <button
             onClick={() => {
-              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left");
+              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left" as ElementFormatType);
             }}
             className="toolbar-item spaced"
             aria-label="Left Align"
@@ -460,7 +477,7 @@ export default function ToolbarPlugin() {
           </button>
           <button
             onClick={() => {
-              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
+              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center" as ElementFormatType);
             }}
             className="toolbar-item spaced"
             aria-label="Center Align"
@@ -469,7 +486,7 @@ export default function ToolbarPlugin() {
           </button>
           <button
             onClick={() => {
-              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right");
+              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right" as ElementFormatType);
             }}
             className="toolbar-item spaced"
             aria-label="Right Align"
@@ -478,7 +495,7 @@ export default function ToolbarPlugin() {
           </button>
           <button
             onClick={() => {
-              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify");
+              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify" as ElementFormatType);
             }}
             className="toolbar-item"
             aria-label="Justify Align"
@@ -489,4 +506,4 @@ export default function ToolbarPlugin() {
       )}
     </div>
   );
-}
+} 

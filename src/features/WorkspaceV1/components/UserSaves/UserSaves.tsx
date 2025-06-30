@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback, useMemo, Dispatch, SetStateAction, FormEvent } from 'react';
-import { getSaves, mergeResultSets, SaveGroup } from '@/features/User-Auth/utils/userApi';
+import { getSaves, mergeResultSets, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { handleEvidenceModalClose } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import styles from './UserSaves.module.scss';
 import EvidenceModal from '@/features/Evidence/components/EvidenceModal/EvidenceModal';
@@ -15,9 +15,9 @@ import NotesModal from '@/features/ResultItem/components/NotesModal/NotesModal';
 import TextInput from '@/features/Common/components/TextInput/TextInput';
 import { cloneDeep } from 'lodash';
 import UserSave from '@/features/WorkspaceV1/components/UserSave/UserSave';
-import LoginWarning from '@/features/User-Auth/components/LoginWarning/LoginWarning';
+import LoginWarning from '@/features/UserAuth/components/LoginWarning/LoginWarning';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper'
-import { useUser } from '@/features/User-Auth/utils/userApi';
+import { useUser } from '@/features/UserAuth/utils/userApi';
 import { debounce } from 'lodash';
 import { Path, Result, ResultEdge, ResultSet } from '@/features/ResultList/types/results';
 import { useDispatch } from 'react-redux';

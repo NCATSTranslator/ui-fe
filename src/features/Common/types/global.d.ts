@@ -17,3 +17,14 @@ export type FormErrors = {
   comments: boolean;
   steps: boolean;
 }
+
+export interface Blocker {
+  state: 'blocked' | 'proceeding' | 'unblocked';
+  reset?: () => void;
+  proceed?: () => void;
+}
+
+export interface PhraseItem {
+  phrase: string;
+  verb: string;
+}

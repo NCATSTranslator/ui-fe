@@ -16,23 +16,40 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
-import _ from "lodash";
 import ToolbarPlugin from "./plugins/ToolbarPlugin";
 import ListMaxIndentLevelPlugin from "./plugins/ListMaxIndentLevelPlugin";
 import CodeHighlightPlugin from "./plugins/CodeHighlightPlugin";
 import CustomAutoLinkPlugin from "./plugins/CustomAutoLinkPlugin";
 import OnChangePlugin from "./plugins/OnChangePlugin";
-import { getUserSave, updateUserSave, emptyEditor } from "@/features/User-Auth/utils/userApi";
+import { getUserSave, updateUserSave, emptyEditor, Save } from "@/features/UserAuth/utils/userApi";
+import { debounce } from "lodash";
 
-const Placeholder = () => {
+interface TextEditorProps {
+  bookmarkID: string | null;
+  handleSave: () => void;
+  shouldClearEditor?: boolean;
+  onClearEditorComplete?: () => void;
+}
+
+interface EditorStateJSON {
+  [key: string]: any;
+}
+
+const Placeholder = (): JSX.Element => {
   return <div className="editor-placeholder">...</div>;
 }
 
-const TextEditor = ({bookmarkID, handleSave, shouldClearEditor, onClearEditorComplete}) => {
+const TextEditor = ({ 
+  bookmarkID, 
+  handleSave, 
+  shouldClearEditor, 
+  onClearEditorComplete 
+}: TextEditorProps): JSX.Element => {
 
   const editorConfig = {
+    namespace: 'TextEditor',
     theme: Theme,
-    onError(error) {
+    onError(error: Error): void {
       throw error;
     },
     nodes: [
@@ -50,7 +67,7 @@ const TextEditor = ({bookmarkID, handleSave, shouldClearEditor, onClearEditorCom
     ]
   };
 
-  const updateNote = useMemo(() => _.debounce(async (editorStateJSON, bookmarkID) => {
+  const updateNote = useMemo(() => debounce(async (editorStateJSON: EditorStateJSON, bookmarkID: string | null): Promise<void> => {
     let newNotes = JSON.stringify(editorStateJSON);
 
     if(newNotes === emptyEditor)
@@ -59,7 +76,7 @@ const TextEditor = ({bookmarkID, handleSave, shouldClearEditor, onClearEditorCom
     if(bookmarkID) {
       console.log("update bookmark of id:", bookmarkID);
       // update bookmark of given ID
-      let newSave = await getUserSave(bookmarkID);
+      let newSave: Save = await getUserSave(bookmarkID);
       if(newSave.notes === newNotes)
         return;
         
@@ -70,7 +87,7 @@ const TextEditor = ({bookmarkID, handleSave, shouldClearEditor, onClearEditorCom
 
   }, 750), [handleSave]);
 
-  const onChange = (editorStateJSON) => {
+  const onChange = (editorStateJSON: EditorStateJSON): void => {
     if(bookmarkID === null) 
       return;
     
@@ -108,4 +125,4 @@ const TextEditor = ({bookmarkID, handleSave, shouldClearEditor, onClearEditorCom
   );
 }
 
-export default TextEditor;
+export default TextEditor; 

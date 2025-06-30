@@ -1,4 +1,5 @@
 import { ResultEdge, ResultNode } from '@/features/Evidence/types/evidence';
+import { LayoutOptions, NodeSingular, EdgeSingular } from 'cytoscape';
 
 export interface GraphDataObject {
   graphRef: RefObject<HTMLDivElement>;
@@ -42,4 +43,19 @@ export interface RenderableEdge {
 export interface RenderableGraph {
   nodes: RenderableNode[];
   edges: RenderableEdge[];
+}
+
+export interface GraphLayout extends LayoutOptions {
+  label: string;
+  name: string;
+  spacingFactor?: number;
+  avoidOverlap?: boolean;
+  directed?: boolean;
+  edgeDistances?: string;
+  klay?: any;
+  ready?: (ev: any) => void;
+}
+
+export interface GraphLayoutList {
+  [key: string]: GraphLayout;
 }

@@ -5,8 +5,36 @@ import ChevLeft from '@/assets/icons/Directional/Chevron/Chevron Left.svg?react'
 import ChevRight from '@/assets/icons/Directional/Chevron/Chevron Right.svg?react';
 import FilterIcon from '@/assets/icons/Navigation/Filter.svg?react';
 import Button from '@/features/Common/components/Button/Button';
+import { Filter } from '@/features/ResultFiltering/types/filters';
+import { FC } from 'react';
 
-const ResultListHeader = ({ data }) => {
+interface ResultListHeaderData {
+  formattedResultsLength: number;
+  originalResultsLength: number;
+  itemOffset: number;
+  endResultIndex: number;
+  activeFilters: Filter[];
+  handleFilter: (filter: Filter) => void;
+  shareModalOpen: boolean;
+  setShareModalOpen: (open: boolean) => void;
+  shareResultID: string | null;
+  setShareResultID: (id: string | null) => void;
+  currentQueryID: string | null;
+  returnedARAs: any;
+  isError: boolean;
+  currentPage: number;
+  ResultListStyles: { [key: string]: string };
+  pageCount: number;
+  handlePageClick: (event: { selected: number }) => void;
+  filtersExpanded: boolean;
+  setFiltersExpanded: (expanded: boolean) => void;
+}
+
+interface ResultListHeaderProps {
+  data: ResultListHeaderData;
+}
+
+const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
 
   return(
     <div className={styles.resultsHeader}>
@@ -51,13 +79,13 @@ const ResultListHeader = ({ data }) => {
       <div className={styles.activeFilters}>
         {
           !data.filtersExpanded &&
-          <Button isSecondary handleClick={data.setFiltersExpanded} className={styles.filterButton}><FilterIcon/>Filters</Button>
+          <Button isSecondary handleClick={() => data.setFiltersExpanded(true)} className={styles.filterButton}><FilterIcon/>Filters</Button>
         }
         {
           data.activeFilters.length > 0 &&
           data.activeFilters.map((activeFilter, i)=> {
             return(
-              <SelectedFilterTag filter={activeFilter} handleFilter={data.handleFilter}/>
+              <SelectedFilterTag key={activeFilter?.id || i.toString()} filter={activeFilter} handleFilter={data.handleFilter}/>
             )
           })
         }

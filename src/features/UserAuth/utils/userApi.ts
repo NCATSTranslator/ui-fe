@@ -3,12 +3,12 @@ import { cloneDeep } from 'lodash';
 import { get, post, put, remove } from '@/features/Common/utils/web';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
-import { PreferencesContainer, PrefObject, SessionStatus, User } from '@/features/User-Auth/types/user';
-import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '@/features/User-Auth/slices/userSlice';
+import { PreferencesContainer, PrefObject, SessionStatus, User } from '@/features/UserAuth/types/user';
+import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { handleFetchErrors } from '@/features/Common/utils/utilities';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
-import { currentUser } from '@/features/User-Auth/slices/userSlice';
+import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { getEdgeById, getNodeById, getPathById, getPubById } from '@/features/ResultList/slices/resultsSlice';
 import { PublicationObject } from '@/features/Evidence/types/evidence';
 
@@ -233,7 +233,7 @@ export const getQueryObjectForSave = (
       nodeLabel: nodeLabel,
       nodeDescription: nodeDescription,
       pk: pk, 
-      submitted_time: new Date().toDateString(),
+      submitted_time: new Date().toString(),
       resultSet: resultSet
     }
 }
@@ -289,13 +289,13 @@ export const getAllUserSaves = async (
  * @param {string} saveId - The ID of the save to fetch.
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
- * @returns {Promise<Object>} The requested save data.
+ * @returns {Promise<Save>} The requested save data.
  */
 export const getUserSave = async (
     saveId: string,
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
-  ) => {
+  ): Promise<Save> => {
     return getUserData(`${userApiPath}/saves/${saveId}`, httpErrorHandler, fetchErrorHandler);
 }
 

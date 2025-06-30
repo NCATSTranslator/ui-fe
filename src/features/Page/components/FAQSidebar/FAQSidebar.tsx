@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import styles from './FAQSidebar.module.scss';
 import { NavLink, useLocation } from 'react-router-dom';
 import Accordion from '@/features/Common/components/Accordion/Accordion';
 import ExternalLink from '@/assets/icons/Buttons/External Link.svg?react';
+import { FAQArticle } from "@/features/Page/types/page";
 
-const FAQSidebar = ({articles}) => {
+interface FAQSidebarProps {
+  articles: FAQArticle[];
+}
+
+const FAQSidebar: FC<FAQSidebarProps> = ({ articles }) => {
 
   const location = useLocation();
-  const [activeSlug, setActiveSlug] = useState(location.pathname.replace('/', ''));
+  const [activeSlug, setActiveSlug] = useState<string>(location.pathname.replace('/', ''));
 
   useEffect(() => {
     setActiveSlug(location.pathname.replace('/', ''));
@@ -20,9 +25,9 @@ const FAQSidebar = ({articles}) => {
         <nav>
           <ul className={styles.links}>
             {
-              articles.map((article, i)=> {
-                let isExtLink = (article.link) ? true : false;
-                let link = (article.link) ? article.link : `/${article.slug}`;
+              articles.map((article, i) => {
+                const isExtLink = !!article.link;
+                const link = article.link ? article.link : `/${article.slug}`;
                 return (
                   <li key={i} className={(article.slug === activeSlug ? styles.active : '')}>
                     {
@@ -55,14 +60,14 @@ const FAQSidebar = ({articles}) => {
                         extLink={isExtLink}
                         accordionClass={styles.accordion}
                         panelClass={styles.accordionPanel}
-                        expanded={article.subArticles.find(subArticle => subArticle.slug === activeSlug)}
+                        expanded={!!article.subArticles?.find(subArticle => subArticle.slug === activeSlug)}
                         >
                         <ul className={`${styles.links} ${styles.subLinks}`}>
                           {
                             article.subArticles.map((subArticle, j) => {
-                              let key = `${i}_${j}`;
-                              let isExtLinkSub = (subArticle.link) ? true : false;
-                              let linkSub = (subArticle.link) ? subArticle.link : `/${subArticle.slug}`;
+                              const key = `${i}_${j}`;
+                              const isExtLinkSub = !!subArticle.link;
+                              const linkSub = subArticle.link ? subArticle.link : `/${subArticle.slug}`;
                               return (             
                                 <li key={key} className={(subArticle.slug === activeSlug ? styles.active : '')}>
                                   {isExtLinkSub && 
@@ -103,4 +108,4 @@ const FAQSidebar = ({articles}) => {
   )
 }
 
-export default FAQSidebar;
+export default FAQSidebar; 

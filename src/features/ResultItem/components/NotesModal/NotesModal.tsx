@@ -3,7 +3,7 @@ import styles from "./NotesModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import TextEditor from "@/features/Common/components/TextEditor/TextEditor";
 import Button from "@/features/Common/components/Button/Button";
-import { getUserSave, updateUserSave } from "@/features/User-Auth/utils/userApi";
+import { getUserSave, updateUserSave } from "@/features/UserAuth/utils/userApi";
 
 interface NotesModalProps {
   isOpen?: boolean;

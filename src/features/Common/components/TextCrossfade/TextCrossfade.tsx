@@ -1,7 +1,15 @@
-import {useEffect, useRef, useState} from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import styles from './TextCrossfade.module.scss';
+import { PhraseItem } from "@/features/Common/types/global";
 
-const defaultPhrases = [
+interface TextCrossfadeProps {
+  phrases?: PhraseItem[];
+  small?: boolean;
+  interval?: number;
+  centerText?: boolean;
+}
+
+const defaultPhrases: PhraseItem[] = [
   {phrase: "Processing Query", verb:"Processing"},
   {phrase: "Calculating Results", verb:"Calculating"},
   {phrase: "Reasoning", verb:"Reasoning"},
@@ -11,9 +19,14 @@ const defaultPhrases = [
   {phrase: "Formatting Results", verb:"Formatting"},
 ];
 
-const TextCrossfade = ({ phrases = defaultPhrases, small = false, interval = 5000, centerText = false }) => {
-  const [index, setIndex] = useState(0);
-  const hasStarted = useRef(false);
+const TextCrossfade: FC<TextCrossfadeProps> = ({ 
+  phrases = defaultPhrases, 
+  small = false, 
+  interval = 5000, 
+  centerText = false 
+}) => {
+  const [index, setIndex] = useState<number>(0);
+  const hasStarted = useRef<boolean>(false);
 
   useEffect(() => {
     if(hasStarted.current)

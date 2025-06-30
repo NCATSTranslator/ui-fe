@@ -239,3 +239,17 @@ export const isTags = (obj: any): obj is Tags => {
 
   return true;
 };
+
+export interface ResultListLoadingData {
+  handleResultsRefresh: () => void;
+  isFetchingARAStatus: boolean | null;
+  isFetchingResults: boolean | null;
+  showDisclaimer: boolean;
+  containerClassName: string;
+  buttonClassName: string;
+  hasFreshResults: boolean;
+  currentInterval?: number;
+  status?: string;
+  isError: boolean;
+  setIsActive: (active: boolean) => void;
+}

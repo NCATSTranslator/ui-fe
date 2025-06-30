@@ -7,17 +7,22 @@ import AlertIcon from '@/assets/icons/Status/Alerts/Warning.svg?react';
 import Button from '@/features/Common/components/Button/Button';
 import CloseIcon from '@/assets/icons/Buttons/Close/Close.svg?react';
 import { useNewResultsDisclaimerApproved } from '@/features/ResultList/hooks/resultListHooks';
+import { ResultListLoadingData } from '@/features/ResultList/types/results';
 
-const ResultListLoadingButton = ({ data = {}, currentPercentage }) => {
+interface ResultListLoadingButtonProps {
+  data?: Partial<ResultListLoadingData>;
+  currentPercentage: number;
+}
+
+const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoadingButtonProps) => {
 
   const containerClassName = (data.containerClassName) ? data.containerClassName : '';
   const buttonClassName = (data.buttonClassName) ? data.buttonClassName : '';
   const resultsAvailable = data.hasFreshResults;
-  const [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved] = useNewResultsDisclaimerApproved();
+  const [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved] = useNewResultsDisclaimerApproved(false);
   const [isTooltipOpen, setIsTooltipOpen] = useState(!isNewResultsDisclaimerApproved);
-  const handleCheckbox = () => {
-    setAndPersistNewResultsDisclaimerApproved(prev=>!prev);
-  }
+  
+  const handleCheckbox = (): void => setAndPersistNewResultsDisclaimerApproved(prev => !prev);
 
   return(
     <div 
@@ -72,7 +77,7 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }) => {
             <label htmlFor="checkbox-dont-show">Don't show again</label>
           </span>
           <CloseIcon
-            onClick={()=>setIsTooltipOpen(false)}
+            onClick={() => setIsTooltipOpen(false)}
             className={styles.close}
           />
         </span>
@@ -96,11 +101,11 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }) => {
       }
       {
         (!data.isError && !resultsAvailable && !data.isFetchingARAStatus && !data.isFetchingResults) &&
-        <Button iconOnly handleClick={()=>data.setIsActive(false)} isSecondary><CloseIcon/></Button>
+        <Button iconOnly handleClick={() => data.setIsActive?.(false)} isSecondary><CloseIcon/></Button>
       }
       </div>
     </div>
   )
 }
 
-export default ResultListLoadingButton;
+export default ResultListLoadingButton; 

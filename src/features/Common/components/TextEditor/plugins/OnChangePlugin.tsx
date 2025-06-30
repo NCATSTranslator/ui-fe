@@ -1,21 +1,28 @@
 import { useEffect } from "react";
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import { getUserSave } from "@/features/User-Auth/utils/userApi";
+import { getUserSave } from "@/features/UserAuth/utils/userApi";
 import { CLEAR_EDITOR_COMMAND } from "lexical";
 
-const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditorComplete }) => {
+interface OnChangePluginProps {
+  onChange: (editorStateJSON: any) => void;
+  bookmarkID: string | null;
+  shouldClearEditor?: boolean;
+  onClearEditorComplete?: () => void;
+}
+
+const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditorComplete }: OnChangePluginProps): JSX.Element | null => {
   const [editor] = useLexicalComposerContext();
 
-  const clearEditor = (editor) => {
+  const clearEditor = (editor: any) => {
     editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
   }
 
   useEffect(() => {
-    const getNotesFromBookmark = async (bookmarkID) => {
+    const getNotesFromBookmark = async (bookmarkID: string | null) => {
       let shouldClearEditor = false;
       if(bookmarkID) {
         let save = await getUserSave(bookmarkID, ()=>{ return false; });
-        let initialNotes = false;
+        let initialNotes: string | false = false;
 
         if(!save){
           shouldClearEditor = true;
@@ -55,10 +62,11 @@ const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditor
   useEffect(() => {
     if (shouldClearEditor) {
       clearEditor(editor);
-      onClearEditorComplete();
+      onClearEditorComplete?.();
     }
   }, [shouldClearEditor, onClearEditorComplete, editor]);
 
+  return null;
 }
 
-export default OnChangePlugin;
+export default OnChangePlugin; 

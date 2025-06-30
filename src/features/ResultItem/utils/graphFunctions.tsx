@@ -1,12 +1,12 @@
-import ReactDOM from 'react-dom';
+import { render } from 'react-dom';
 import { Core, EventObject } from 'cytoscape';
 import { debounce } from 'lodash';
 import { capitalizeFirstLetter, hasSupport } from '@/features/Common/utils/utilities';
 import ExternalLink from '@/assets/icons/Buttons/External Link.svg?react';
 import { Result, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
-import { RenderableGraph, RenderableNode, RenderableEdge } from '@/features/ResultItem/types/graph.d';
+import { GraphLayoutList, RenderableGraph, RenderableNode, RenderableEdge } from '@/features/ResultItem/types/graph.d';
 
-export const layoutList = {
+export const layoutList: GraphLayoutList = {
   klay: {
     label: 'vertical',
     name: 'klay',
@@ -19,7 +19,6 @@ export const layoutList = {
       }
     },
     edgeDistances: 'node-position',
-
   },
   breadthfirst: {
     label: 'horizontal',
@@ -204,7 +203,7 @@ export const handleEdgeMouseOver = (
     </>
   );
   if (edgeInfoWindow) {
-    ReactDOM.render(edgeInfoMarkup, edgeInfoWindow);
+    render(edgeInfoMarkup, edgeInfoWindow);
   }
 };
 
@@ -214,7 +213,7 @@ export const handleEdgeMouseOut = (
 ): void => {
   ev.target.removeClass('hover-highlight');
   const edgeInfoWindow = document.getElementById(edgeInfoWindowIdString);
-  if (edgeInfoWindow) ReactDOM.render(<></>, edgeInfoWindow);
+  if (edgeInfoWindow) render(<></>, edgeInfoWindow);
 };
 
 export const handleSetupAndUpdateGraphTooltip = debounce(
@@ -245,7 +244,7 @@ export const handleSetupAndUpdateGraphTooltip = debounce(
             )}
           </span>
         );
-        ReactDOM.render(tooltipMarkup, tooltipTextElement);
+        render(tooltipMarkup, tooltipTextElement);
         tooltipElement.classList.add('visible');
         return tooltipElement;
       },

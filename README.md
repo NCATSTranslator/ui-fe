@@ -61,13 +61,11 @@ The project follows a feature-based architecture organized into the following ma
 #### **Common** - Shared UI Components
 - **Accordion**: Toggle visibility of child content with animation
 - **Alert**: Contextual alerts with auto-dismiss and fading effects
-- **AnimateHeight/AutoHeight**: Dynamic height adjustment with animations
 - **Autocomplete**: Dynamic search suggestions with pagination
 - **Button**: Reusable button components with various styles
 - **Checkbox/Radio**: Form input components
 - **LoadingBar/LoadingIcon/LoadingWrapper**: Loading state components
 - **Modal**: Modal system with various specialized modals (Disclaimer, SendFeedback, NavConfirmation)
-- **Range**: Adjustable sliders for numerical input
 - **Select**: Dropdown selection component
 - **TextCrossfade**: Cycling text with crossfade effects
 - **TextEditor**: Rich text editor powered by Lexical

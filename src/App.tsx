@@ -7,7 +7,7 @@ import { useGoogleAnalytics, useGoogleTagManager, useWindowSize, useScrollToHash
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import './App.scss';
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
-import { useFetchConfigAndPrefs, useGetSessionStatus } from '@/features/User-Auth/utils/userApi';
+import { useFetchConfigAndPrefs, useGetSessionStatus } from '@/features/UserAuth/utils/userApi';
 
 const App = ({children}: {children?: ReactNode}) => {
 

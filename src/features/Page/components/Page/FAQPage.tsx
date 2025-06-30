@@ -1,11 +1,39 @@
-import React, { useEffect } from "react";
+import { FC, ReactNode, useEffect, useCallback } from "react";
 import FAQSidebar from "@/features/Page/components/FAQSidebar/FAQSidebar";
 import DisclaimerModal from "@/features/Common/components/DisclaimerModal/DisclaimerModal";
+import { useDisclaimersApproved } from "@/features/Common/utils/customHooks";
 import styles from './FAQPage.module.scss';
+import { FAQArticle } from "@/features/Page/types/page";
 
-const FAQPage = ({title, children}) => {
+export interface FAQPageProps {
+  title: string;
+  children: ReactNode;
+}
 
-  const articles = [
+const FAQPage: FC<FAQPageProps> = ({ title, children }) => {
+
+  const [isDisclaimerApproved, setIsDisclaimerApproved] = useDisclaimersApproved(title);
+
+  const handleDisclaimerClose = useCallback(() => {
+    try {
+      const cookieName = window.location.pathname.includes("login") 
+        ? 'loginDisclaimerApproved' 
+        : 'disclaimerApproved';
+      
+      const item = JSON.stringify({ 
+        approved: true, 
+        timestamp: Date.now() 
+      });
+      
+      localStorage.setItem(cookieName, item);
+      setIsDisclaimerApproved(true);
+    } catch (error) {
+      console.error('Error saving disclaimer approval:', error);
+      setIsDisclaimerApproved(true);
+    }
+  }, [setIsDisclaimerApproved]);
+
+  const articles: FAQArticle[] = [
     {
       title: 'About Translator', 
       link:'https://ncats.nih.gov/translator/about',
@@ -64,13 +92,11 @@ const FAQPage = ({title, children}) => {
       title: 'Security and Privacy', 
       link:'https://ncats.nih.gov/privacy'
     },
-  ]
+  ];
 
   useEffect(() => {
     document.title = title || "";
   }, [title]);
-
-
 
   return (
     <>
@@ -81,9 +107,12 @@ const FAQPage = ({title, children}) => {
           {children}
         </div>
       </div>
-      <DisclaimerModal></DisclaimerModal>
+      <DisclaimerModal
+        isOpen={!isDisclaimerApproved}
+        onClose={handleDisclaimerClose}
+      />
     </>
-  )
+  );
 };
 
-export default FAQPage;
+export default FAQPage; 

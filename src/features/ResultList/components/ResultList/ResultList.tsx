@@ -19,7 +19,7 @@ import { handleResultsError, applyFilters, genPathFilterState, areEntityFiltersE
 import { getDataFromQueryVar, getPathCount, handleFetchErrors, getCompressedEdge } from "@/features/Common/utils/utilities";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
-import { API_PATH_PREFIX, getSaves, SaveGroup } from "@/features/User-Auth/utils/userApi";
+import { API_PATH_PREFIX, getSaves, SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "@/features/ResultItem/components/BookmarkToasts/BookmarkToasts";
@@ -914,7 +914,23 @@ const ResultList = () => {
           />
         }
       </div>
-      {blocker ? <NavConfirmationPromptModal blocker={blocker} /> : null}
+      {
+        blocker && 
+        <NavConfirmationPromptModal 
+          blocker={blocker} 
+          title="Are you sure you want to leave this page?"
+          message="If you leave this page, you may lose your results and have to run this query again."
+          subtitle="Note: You can revisit this query later by visiting the Search History page." 
+          proceedButtonText="Navigate away from the results page"
+          stayButtonText="Stay on the results page"
+          onProceed={() => {
+            blocker.proceed?.();
+          }}
+          onStay={() => {
+            blocker.reset?.();
+          }}
+        />
+      }
     </QueryClientProvider>
   );
 }
