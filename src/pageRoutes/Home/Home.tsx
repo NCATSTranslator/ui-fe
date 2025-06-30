@@ -1,8 +1,7 @@
 import styles from "./Home.module.scss";
-import homeOne from "@/assets/images/Home/home1.svg";
-import homeTwo from "@/assets/images/Home/home2.svg";
-import homeThree from "@/assets/images/Home/home3.svg";
-import ArrowForward from "@/assets/icons/Directional/Arrows/Arrow Right.svg?react";
+import HomeOne from "@/assets/images/Home/home1.svg?react";
+import HomeTwo from "@/assets/images/Home/home2.svg?react";
+import HomeThree from "@/assets/images/Home/home3.svg?react";
 import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
 
 const Home = () => {
@@ -16,16 +15,9 @@ const Home = () => {
           <div className={`${styles.container} container`}>
             <h5 className={styles.heading}>Translator Workflow</h5>
             <div className={styles.images}>
-              <img className={styles.image} src={homeOne} alt="" />
-              <ArrowForward className={styles.arrow} />
-              <img className={styles.image} src={homeTwo} alt="" />
-              <ArrowForward className={styles.arrow} />
-              <img className={styles.image} src={homeThree} alt="" />
-            </div>
-            <div className={styles.workflowHeadings}>
-              <h6 className={styles.heading}>Select a relationship to explore</h6>
-              <h6 className={styles.heading}>Discover results and add bookmarks</h6>
-              <h6 className={styles.heading}>Analyze evidence in the workspace</h6>
+              <HomeOne className={styles.image}/>
+              <HomeTwo className={styles.image}/>
+              <HomeThree className={styles.image}/>
             </div>
           </div>
         </div>
@@ -47,89 +39,48 @@ const Home = () => {
               <div className={styles.colTwo}>
                 <h5>Articles and News</h5>
                 <p>Learn how the Biomedical Data Translator program aims to help researchers access and connect diverse data.</p>
-                <ul>
-                  <li>
-                    <a 
-                      href="https://tracs.unc.edu/index.php/news-articles/1947-use-cases-show-translators-potential-to-expedite-clinical-research" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      >
-                      Use Case Show Translator's Potential to Expedite Clinical Research
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="https://renci.org/blog/biomedical-data-translator-platform-moves-to-the-next-phase/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      >
-                      Biomedical Data Platform Moves to the Next Phase
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="https://renci.org/news/the-biomedical-data-translator-consortium-provides-progress-updates-in-latest-companion-publications/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      >
-                      The Biomedical Data Translator Consortium Provides Progress Updates in Latest Companion Publications
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="https://www.statnews.com/2019/07/31/nih-funded-project-aims-to-build-a-google-for-biomedical-data/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      >
-                      NIH-Funded Project Aims to Build a 'Google' for Biomedical Data
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="https://ascpt.onlinelibrary.wiley.com/doi/10.1111/cts.12595" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      >
-                      Deconstructing the Translational Tower of Babel
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="https://ascpt.onlinelibrary.wiley.com/doi/full/10.1111/cts.12591" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      >
-                      Toward A Universal Biomedical Data Translator 
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="https://ascpt.onlinelibrary.wiley.com/doi/full/10.1111/cts.12592" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      >
-                      The Biomedical Data Translator Program: Conception, Culture, and Community
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="https://ncats.nih.gov/pubs/features/translator" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      >
-                      NCATS Furthers Efforts to Create a Data Ecosystem to Explore Disease Connections
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="https://ascpt.onlinelibrary.wiley.com/doi/10.1111/cts.12638" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      >
-                      Clinical Data: Sources and Types, Regulatory Constraints, Applications
-                    </a>
-                  </li>
-                </ul>
+                <a 
+                  href="https://tracs.unc.edu/index.php/news-articles/1947-use-cases-show-translators-potential-to-expedite-clinical-research" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  >
+                  Use cases show Translator's potential to expedite clinical research
+                </a>
+                <a 
+                  href="https://www.statnews.com/2019/07/31/nih-funded-project-aims-to-build-a-google-for-biomedical-data/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  >
+                  NIH-Funded Project Aims to Build a 'Google' for Biomedical Data
+                </a>
+                <a 
+                  href="https://ascpt.onlinelibrary.wiley.com/doi/10.1111/cts.12595" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  >
+                  Deconstructing the Translational Tower of Babel
+                </a>
+                <a 
+                  href="https://ascpt.onlinelibrary.wiley.com/doi/full/10.1111/cts.12591" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  >
+                  Toward A Universal Biomedical Data Translator 
+                </a>
+                <a 
+                  href="https://ascpt.onlinelibrary.wiley.com/doi/full/10.1111/cts.12592" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  >
+                  The Biomedical Data Translator Program: Conception, Culture, and Community
+                </a>
+                <a 
+                  href="https://ascpt.onlinelibrary.wiley.com/doi/10.1111/cts.12638" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  >
+                  Clinical Data: Sources and Types, Regulatory Constraints, Applications
+                </a>
               </div>
             </div>
           </div>
