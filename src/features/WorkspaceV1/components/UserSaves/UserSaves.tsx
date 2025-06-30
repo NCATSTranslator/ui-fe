@@ -63,6 +63,20 @@ const UserSaves = () => {
 
   const queryClient = new QueryClient();
 
+  // Memoize sorted saves to avoid re-sorting on every render
+  const sortedUserSaves = useMemo(() => {
+    if (!filteredUserSaves) return [];
+    
+    return Object.entries(filteredUserSaves)
+      .map(([key, saveGroup]) => ({
+        key,
+        saveGroup,
+        timestamp: new Date(saveGroup.query.submitted_time).getTime()
+      }))
+      .sort((a, b) => b.timestamp - a.timestamp) // Most recent first
+      .map(({ key, saveGroup }) => [key, saveGroup] as [string, SaveGroup]);
+  }, [filteredUserSaves]);
+
   const activateEvidence = useCallback((item: Result, edge: ResultEdge, path: Path, pathKey: string, pk: string) => {
     if(!!edge && !!path) {
       setSelectedPK(pk);
@@ -285,26 +299,24 @@ const UserSaves = () => {
                     : <>
                         <div className={styles.saves}>
                           {
-                            filteredUserSaves &&
-                            Object.entries(filteredUserSaves).sort((a, b)=> -a[1].query.submitted_time.localeCompare(b[1].query.submitted_time)).map((item) => {
-                              return(
-                                <UserSave
-                                  save={item}
-                                  currentSearchString={currentSearchString}
-                                  zoomKeyDown={zoomKeyDown}
-                                  activateEvidence={activateEvidence}
-                                  activateNotes={activateNotes}
-                                  handleBookmarkError={handleBookmarkError}
-                                  bookmarkAddedToast={bookmarkAddedToast}
-                                  bookmarkRemovedToast={bookmarkRemovedToast}
-                                  setShareModalOpen={setShareModalOpen}
-                                  setShareResultID={setShareResultID}
-                                  scoreWeights={scoreWeights}
-                                  showHiddenPaths={showHiddenPaths}
-                                  setShowHiddenPaths={setShowHiddenPaths}
-                                />
-                              );
-                            })
+                            sortedUserSaves.map(([key, saveGroup]) => (
+                              <UserSave
+                                key={key}
+                                save={[key, saveGroup]}
+                                currentSearchString={currentSearchString}
+                                zoomKeyDown={zoomKeyDown}
+                                activateEvidence={activateEvidence}
+                                activateNotes={activateNotes}
+                                handleBookmarkError={handleBookmarkError}
+                                bookmarkAddedToast={bookmarkAddedToast}
+                                bookmarkRemovedToast={bookmarkRemovedToast}
+                                setShareModalOpen={setShareModalOpen}
+                                setShareResultID={setShareResultID}
+                                scoreWeights={scoreWeights}
+                                showHiddenPaths={showHiddenPaths}
+                                setShowHiddenPaths={setShowHiddenPaths}
+                              />
+                            ))
                           }
                         </div>
                       </>
