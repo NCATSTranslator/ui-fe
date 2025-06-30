@@ -14,7 +14,7 @@ import Info from '@/assets/icons/Status/Alerts/Info.svg?react';
 import ChevUp from '@/assets/icons/Directional/Chevron/Chevron Up.svg?react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import EmphasizeWord from '@/features/Common/components/EmphasizeWord/EmphasizeWord';
-import { PreferencesContainer } from '@/features/User-Auth/types/user';
+import { PreferencesContainer } from '@/features/UserAuth/types/user';
 import { PublicationObject, PublicationSupport, PubmedMetadataMap, SortingState } from '@/features/Evidence/types/evidence';
 import { ResultEdge, ResultSet } from '@/features/ResultList/types/results';
 import { getNodeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';

@@ -137,7 +137,7 @@ The project follows a feature-based architecture organized into the following ma
 - **Page**: Page template wrapper
 - **SendFeedbackForm**: Feedback submission form
 
-#### **User-Auth** - User Authentication
+#### **UserAuth** - User Authentication
 - **LoginWarning**: Login requirement warnings
 - **UserPreferences**: User preference management
 

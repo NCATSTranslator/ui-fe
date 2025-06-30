@@ -1,16 +1,16 @@
 import { useEffect, useState, FormEvent } from 'react';
-import { defaultPrefs, prefKeyToString, updateUserPreferences } from '@/features/User-Auth/utils/userApi';
+import { defaultPrefs, prefKeyToString, updateUserPreferences } from '@/features/UserAuth/utils/userApi';
 import { useSelector, useDispatch } from 'react-redux';
-import { currentPrefs, setCurrentPrefs } from '@/features/User-Auth/slices/userSlice';
+import { currentPrefs, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Button from '@/features/Common/components/Button/Button';
 import Select from 'react-select';
 import styles from './UserPreferences.module.scss';
 import { cloneDeep } from 'lodash';
-import { PreferencesContainer } from '@/features/User-Auth/types/user';
-import LoginWarning from '@/features/User-Auth/components/LoginWarning/LoginWarning';
-import { useUser } from '@/features/User-Auth/utils/userApi';
+import { PreferencesContainer } from '@/features/UserAuth/types/user';
+import LoginWarning from '@/features/UserAuth/components/LoginWarning/LoginWarning';
+import { useUser } from '@/features/UserAuth/utils/userApi';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 
 const UserPreferences = () => {

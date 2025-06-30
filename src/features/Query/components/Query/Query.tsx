@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useLocation } from "react-router-dom";
 import { QueryItem, QueryType } from "@/features/Query/types/querySubmission";
 import { Result } from "@/features/ResultList/types/results.d";
-import { currentConfig, currentUser } from "@/features/User-Auth/slices/userSlice";
+import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useQueryState, useAutocomplete, useQuerySubmission, useExampleQueries } from "@/features/Query/hooks/customQueryHooks";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import cloneDeep from "lodash/cloneDeep";

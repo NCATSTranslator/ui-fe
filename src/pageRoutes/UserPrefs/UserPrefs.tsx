@@ -1,4 +1,4 @@
-import UserPreferences from "@/features/User-Auth/components/UserPreferences/UserPreferences";
+import UserPreferences from "@/features/UserAuth/components/UserPreferences/UserPreferences";
 
 const UserPrefs = () => {
   return (

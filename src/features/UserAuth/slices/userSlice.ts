@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { defaultPrefs } from '@/features/User-Auth/utils/userApi';
-import { Config, UserState, PreferencesContainer, User } from '@/features/User-Auth/types/user';
+import { defaultPrefs } from '@/features/UserAuth/utils/userApi';
+import { Config, UserState, PreferencesContainer, User } from '@/features/UserAuth/types/user';
 
 const initialState: UserState = {
   currentUser: undefined,

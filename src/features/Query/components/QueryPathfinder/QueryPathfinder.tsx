@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, FC, Dispatch, SetStateAction } from 'react';
 import { useSelector } from 'react-redux';
-import { currentConfig } from "@/features/User-Auth/slices/userSlice";
+import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
 import Button from '@/features/Common/components/Button/Button';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';

@@ -7,7 +7,7 @@ import popper from 'cytoscape-popper';
 import navigator from 'cytoscape-navigator';
 import 'cytoscape-navigator/cytoscape.js-navigator.css';
 import { useSelector } from 'react-redux';
-import { currentPrefs } from '@/features/User-Auth/slices/userSlice';
+import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { handleResetView, handleDeselectAllNodes, handleZoomByInterval, handleSetupAndUpdateGraphTooltip, handleEdgeMouseOver,
   handleEdgeMouseOut, handleHideTooltip, layoutList } from '@/features/ResultItem/utils/graphFunctions';
 import { RenderableGraph, RenderableNode, RenderableEdge } from '@/features/ResultItem/types/graph';

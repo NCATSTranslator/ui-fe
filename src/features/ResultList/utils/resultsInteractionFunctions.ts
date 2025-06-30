@@ -6,7 +6,7 @@ import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import { cloneDeep } from "lodash";
-import { SaveGroup } from "@/features/User-Auth/utils/userApi";
+import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 
 /**
  * Performs a case-insensitive string match against a result's name, description, and all associated paths.

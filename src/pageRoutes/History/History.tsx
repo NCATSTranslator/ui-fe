@@ -8,8 +8,8 @@ import Button from "@/features/Common/components/Button/Button";
 import Warning from "@/assets/icons/Status/Alerts/Warning.svg?react";
 import CloseIcon from "@/assets/icons/Buttons/Close/Close.svg?react";
 import QueryHistoryList from "@/features/History/components/QueryHistoryList/QueryHistoryList";
-import LoginWarning from "@/features/User-Auth/components/LoginWarning/LoginWarning";
-import { useUser } from "@/features/User-Auth/utils/userApi";
+import LoginWarning from "@/features/UserAuth/components/LoginWarning/LoginWarning";
+import { useUser } from "@/features/UserAuth/utils/userApi";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 
 const History = () => {

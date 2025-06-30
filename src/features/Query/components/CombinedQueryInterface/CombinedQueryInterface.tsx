@@ -7,7 +7,7 @@ import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPa
 import styles from './CombinedQueryInterface.module.scss';
 import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
 import { useSelector } from "react-redux";
-import { currentConfig } from "@/features/User-Auth/slices/userSlice";
+import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 
 interface CombinedQueryInterfaceProps {
   isResults?: boolean;

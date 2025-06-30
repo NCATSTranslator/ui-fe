@@ -3,7 +3,7 @@ import { useState, useEffect, MutableRefObject, Dispatch, SetStateAction, FC, us
 import Highlighter from 'react-highlight-words';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultItem from '@/features/ResultItem/components/ResultItem/ResultItem';
-import { emptyEditor, SaveGroup } from '@/features/User-Auth/utils/userApi';
+import { emptyEditor, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { getCompressedEdge, getFormattedDate } from '@/features/Common/utils/utilities';
 import { Path, Result, ResultEdge } from '@/features/ResultList/types/results';

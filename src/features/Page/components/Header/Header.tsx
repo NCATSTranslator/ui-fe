@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 import { Link, useLocation, Location } from 'react-router-dom';
-import { currentConfig, currentUser } from "@/features/User-Auth/slices/userSlice";
+import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useSelector } from "react-redux";
 import { useWindowSize } from "@/features/Common/utils/customHooks";
 import History from '@/assets/icons/Navigation/History.svg?react';

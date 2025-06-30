@@ -2,7 +2,7 @@ import { AnyAction, configureStore, ThunkDispatch } from '@reduxjs/toolkit';
 import historyReducer from '@/features/History/slices/historySlice';
 import resultsReducer from '@/features/ResultList/slices/resultsSlice';
 import seenStatusReducer from '@/features/ResultList/slices/seenStatusSlice';
-import userReducer from '@/features/User-Auth/slices/userSlice';
+import userReducer from '@/features/UserAuth/slices/userSlice';
 import { createAppListenerMiddleware } from '@/redux/listenerMiddleware';
 
 export type RootState = {

@@ -13,7 +13,7 @@ import { compareByKeyLexographic } from "@/features/Common/utils/sortingFunction
 import { flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
-import { currentPrefs } from "@/features/User-Auth/slices/userSlice";
+import { currentPrefs } from "@/features/UserAuth/slices/userSlice";
 import InfoIcon from "@/assets/icons/Status/Alerts/Info.svg?react";
 import ChevDown from "@/assets/icons/Directional/Chevron/Chevron Down.svg?react";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";

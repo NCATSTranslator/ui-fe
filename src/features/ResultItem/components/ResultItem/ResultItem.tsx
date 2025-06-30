@@ -12,10 +12,10 @@ import BookmarkConfirmationModal from '@/features/ResultItem/components/Bookmark
 import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '@/features/ResultItem/utils/csvGeneration';
-import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject } from '@/features/User-Auth/utils/userApi';
+import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject } from '@/features/UserAuth/utils/userApi';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getPathById, getPathsByIds, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
-import { currentUser } from '@/features/User-Auth/slices/userSlice';
+import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { displayScore, generateScore } from '@/features/ResultList/utils/scoring';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Result, PathFilterState, Path, ResultBookmark, ResultSet } from '@/features/ResultList/types/results';
