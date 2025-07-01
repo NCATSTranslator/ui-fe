@@ -1,9 +1,9 @@
 import styles from './ResultListHeader.module.scss';
 import ReactPaginate from 'react-paginate';
 import SelectedFilterTag from '@/features/ResultFiltering/components/SelectedFilterTag/SelectedFilterTag';
-import ChevLeft from '@/assets/icons/Directional/Chevron/Chevron Left.svg?react';
-import ChevRight from '@/assets/icons/Directional/Chevron/Chevron Right.svg?react';
-import FilterIcon from '@/assets/icons/Navigation/Filter.svg?react';
+import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
+import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
+import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
 import Button from '@/features/Common/components/Button/Button';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { FC } from 'react';

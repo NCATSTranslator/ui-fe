@@ -8,9 +8,9 @@ import { getResultsShareURLPath } from "@/features/ResultList/utils/resultsInter
 import { getCompressedEdge, getFormattedDate } from '@/features/Common/utils/utilities';
 import { Path, Result, ResultEdge } from '@/features/ResultList/types/results';
 import AnimateHeight from 'react-animate-height';
-import ChevDown from "@/assets/icons/Directional/Chevron/Chevron Down.svg?react"
-import ChevUp from "@/assets/icons/Directional/Chevron/Chevron Up.svg?react";
-import Alert from "@/assets/icons/Status/Alerts/Info.svg?react";
+import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react"
+import ChevUp from "@/assets/icons/directional/Chevron/Chevron Up.svg?react";
+import Alert from "@/assets/icons/status/Alerts/Info.svg?react";
 import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 

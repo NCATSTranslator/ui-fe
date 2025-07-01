@@ -1,13 +1,13 @@
 import { FC, useCallback, useState } from "react";
 import styles from './ResultItemInteractables.module.scss';
 import { Link } from 'react-router-dom';
-import ShareIcon from '@/assets/icons/Buttons/Link.svg?react';
-import Bookmark from "@/assets/icons/Navigation/Bookmark/Bookmark.svg?react";
-import BookmarkFilled from "@/assets/icons/Navigation/Bookmark/Filled Bookmark.svg?react";
-import Notes from "@/assets/icons/Buttons/Notes/Notes.svg?react"
-import NotesFilled from "@/assets/icons/Buttons/Notes/Filled Notes.svg?react"
+import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
+import BookmarkFilled from "@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react";
+import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"
+import NotesFilled from "@/assets/icons/buttons/Notes/Filled Notes.svg?react"
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
-import MenuIcon from '@/assets/icons/Buttons/Dot Menu/Horizontal Dot Menu.svg?react';
+import MenuIcon from '@/assets/icons/buttons/Dot Menu/Horizontal Dot Menu.svg?react';
 import { useWindowSize } from "@/features/Common/utils/customHooks";
 import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 

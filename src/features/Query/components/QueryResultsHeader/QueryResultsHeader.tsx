@@ -3,7 +3,7 @@ import Button from '@/features/Common/components/Button/Button';
 import ResultsSummaryButton from '@/features/ResultList/components/ResultsSummaryButton/ResultsSummaryButton';
 import { Result } from '@/features/ResultList/types/results';
 import { generateEntityLink } from '@/features/Common/utils/utilities';
-import ShareIcon from '@/assets/icons/Buttons/Link.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
 import styles from './QueryResultsHeader.module.scss';
 
 const generatePathfinderQuestionText = (labelOne: string, labelTwo: string, constraintText?: string) => {

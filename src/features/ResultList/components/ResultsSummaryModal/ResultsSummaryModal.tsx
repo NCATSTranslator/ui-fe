@@ -5,8 +5,8 @@ import LoadingBar from "@/features/Common/components/LoadingBar/LoadingBar";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import { Link } from "react-router-dom";
-import loadingIcon from '@/assets/images/Loading/loading-purple.png';
-import Feedback from '@/assets/icons/Navigation/Feedback.svg?react';
+import loadingIcon from '@/assets/images/loading/loading-purple.png';
+import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
 
 interface ResultsSummaryModalProps {
   handleResultMatchClick: Function;

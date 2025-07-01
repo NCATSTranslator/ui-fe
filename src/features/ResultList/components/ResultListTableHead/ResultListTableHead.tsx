@@ -1,7 +1,7 @@
 import { FC, MutableRefObject } from "react";
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
-import Alert from '@/assets/icons/Status/Alerts/Info.svg?react';
-import ArrowUp from '@/assets/icons/Directional/Arrows/Arrow Up.svg?react';
+import Alert from '@/assets/icons/status/Alerts/Info.svg?react';
+import ArrowUp from '@/assets/icons/directional/Arrows/Arrow Up.svg?react';
 
 interface ResultListTableHeadProps {
   parentStyles: {[key: string]: string};

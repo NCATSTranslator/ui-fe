@@ -3,9 +3,9 @@ import { FC } from "react";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import Checkbox from "@/features/Common/components/Checkbox/Checkbox";
 import { formatBiolinkEntity } from "@/features/Common/utils/utilities";
-import Include from '@/assets/icons/Buttons/Checkmark/Circle Checkmark.svg?react';
-import Exclude from '@/assets/icons/Buttons/View & Exclude/Exclude.svg?react';
-import ExternalLink from '@/assets/icons/Buttons/External Link.svg?react';
+import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
+import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
+import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { cloneDeep } from 'lodash';
 
 interface FacetTagProps {

@@ -11,10 +11,10 @@ import ShareModal from "@/features/ResultList/components/ShareModal/ShareModal";
 import TextInput from "@/features/Common/components/TextInput/TextInput";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import Button from "@/features/Common/components/Button/Button";
-import Close from '@/assets/icons/Buttons/Close/Close.svg?react';
-import SearchIcon from '@/assets/icons/Buttons/Search.svg?react';
-import ShareIcon from '@/assets/icons/Buttons/Link.svg?react';
-import RefreshIcon from '@/assets/icons/Buttons/Refresh.svg?react';
+import Close from '@/assets/icons/buttons/Close/Close.svg?react';
+import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import RefreshIcon from '@/assets/icons/buttons/Refresh.svg?react';
 
 const QueryHistoryList = () => {
   let previousTimeName: string | undefined;

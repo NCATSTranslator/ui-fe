@@ -2,8 +2,8 @@ import styles from './SelectedFilterTag.module.scss';
 import { FC } from "react";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { getFilterLabel, isEntityFilter, isTagFilter } from "@/features/ResultFiltering/utils/filterFunctions";
-import ExcludeIcon from "@/assets/icons/Buttons/View & Exclude/Exclude.svg?react";
-import CloseIcon from "@/assets/icons/Buttons/Close/Close.svg?react";
+import ExcludeIcon from "@/assets/icons/buttons/View & Exclude/Exclude.svg?react";
+import CloseIcon from "@/assets/icons/buttons/Close/Close.svg?react";
 
 interface SelectedFilterTagProps {
   filter: Filter;

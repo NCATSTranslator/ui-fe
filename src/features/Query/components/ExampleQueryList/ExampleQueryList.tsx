@@ -4,7 +4,7 @@ import { getResultsShareURLPath } from '@/features/ResultList/utils/resultsInter
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import AnimateHeight from 'react-animate-height';
 import Button from '@/features/Common/components/Button/Button';
-import ChevDown from '@/assets/icons/Directional/Chevron/Chevron Down.svg?react';
+import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { Example } from '@/features/Query/types/querySubmission';
 import QueryTypeIcon from '../QueryTypeIcon/QueryTypeIcon';
 

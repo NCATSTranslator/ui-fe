@@ -1,5 +1,5 @@
 import { FC, ReactNode } from 'react';
-import loadingIcon from '@/assets/images/Loading/loading-purple.png';
+import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import TextCrossfade from '@/features/Common/components/TextCrossfade/TextCrossfade';
 import styles from './LoadingBar.module.scss';
 

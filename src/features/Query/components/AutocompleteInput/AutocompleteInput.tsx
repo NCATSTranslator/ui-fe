@@ -2,8 +2,8 @@ import { FC } from 'react';
 import TextInput from '@/features/Common/components/TextInput/TextInput';
 import Autocomplete from '@/features/Common/components/Autocomplete/Autocomplete';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
-import QuestionIcon from '@/assets/icons/Buttons/Search.svg?react';
-import CloseIcon from '@/assets/icons/Buttons/Close/Close.svg?react';
+import QuestionIcon from '@/assets/icons/buttons/Search.svg?react';
+import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { getIcon } from '@/features/Common/utils/utilities';
 import styles from './AutocompleteInput.module.scss';
 
