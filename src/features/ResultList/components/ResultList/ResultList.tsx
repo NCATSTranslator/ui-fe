@@ -923,12 +923,6 @@ const ResultList = () => {
           subtitle="Note: You can revisit this query later by visiting the Search History page." 
           proceedButtonText="Navigate away from the results page"
           stayButtonText="Stay on the results page"
-          onProceed={() => {
-            blocker.proceed?.();
-          }}
-          onStay={() => {
-            blocker.reset?.();
-          }}
         />
       }
     </QueryClientProvider>
