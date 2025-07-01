@@ -14,8 +14,8 @@ import { RenderableGraph, RenderableNode, RenderableEdge } from '@/features/Resu
 import { Result, ResultSet } from '@/features/ResultList/types/results';
 import GraphLayoutButtons from '@/features/ResultItem/components/GraphLayoutButtons/GraphLayoutButtons';
 import Button from '@/features/Common/components/Button/Button';
-import Plus from '@/assets/icons/Buttons/Add/Add.svg?react';
-import Minus from '@/assets/icons/Buttons/Subtract/Subtract.svg?react';
+import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
+import Minus from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import styles from './GraphView.module.scss';
 import { debounce } from 'lodash';
 

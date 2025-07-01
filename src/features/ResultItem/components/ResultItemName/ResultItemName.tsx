@@ -3,7 +3,7 @@ import styles from './ResultItemName.module.scss';
 import { Result, ResultNode } from "@/features/ResultList/types/results.d";
 import { formatBiolinkNode, getIcon, getFormattedPathfinderName } from "@/features/Common/utils/utilities";
 import Highlighter from "react-highlight-words";
-import ArrowIcon from "@/assets/icons/Directional/Arrows/Arrow Right.svg?react";
+import ArrowIcon from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 
 type ResultItemNameProps = {
   isPathfinder?: boolean;

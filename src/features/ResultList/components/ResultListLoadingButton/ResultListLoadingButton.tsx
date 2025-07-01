@@ -1,11 +1,11 @@
 import styles from './ResultListLoadingButton.module.scss';
 import { useState } from 'react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
-import ResultsAvailableIcon from '@/assets/icons/Buttons/Refresh.svg?react';
-import CompleteIcon from '@/assets/icons/Buttons/Checkmark/Circle Checkmark.svg?react';
-import AlertIcon from '@/assets/icons/Status/Alerts/Warning.svg?react';
+import ResultsAvailableIcon from '@/assets/icons/buttons/Refresh.svg?react';
+import CompleteIcon from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
+import AlertIcon from '@/assets/icons/status/Alerts/Warning.svg?react';
 import Button from '@/features/Common/components/Button/Button';
-import CloseIcon from '@/assets/icons/Buttons/Close/Close.svg?react';
+import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useNewResultsDisclaimerApproved } from '@/features/ResultList/hooks/resultListHooks';
 import { ResultListLoadingData } from '@/features/ResultList/types/results';
 

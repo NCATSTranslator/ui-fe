@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { getUrlAndOrg } from "@/features/Common/utils/utilities";
-import ExternalLink from '@/assets/icons/Buttons/External Link.svg?react';
+import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 
 interface EntityLinkProps {
   id: string;

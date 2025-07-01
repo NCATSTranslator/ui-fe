@@ -2,14 +2,14 @@ import { FC, useState, useEffect, useMemo } from "react";
 import { Filter, GroupedFilters, FilterFamily } from "@/features/ResultFiltering/types/filters";
 import styles from './FacetGroup.module.scss';
 import AnimateHeight from "react-animate-height";
-import ExternalLink from '@/assets/icons/Buttons/External Link.svg?react';
+import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { pivotSort } from '@/features/Common/utils/sortingFunctions';
 import FacetHeading from "@/features/ResultFiltering/components/FacetHeading/FacetHeading";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import FacetTag from "@/features/ResultFiltering/components/FacetTag/FacetTag";
 import TextInput from "@/features/Common/components/TextInput/TextInput";
 import { debounce } from "lodash";
-import SearchIcon from '@/assets/icons/Buttons/Search.svg?react';
+import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 
 const getRoleCaption = (): JSX.Element => {
   return (

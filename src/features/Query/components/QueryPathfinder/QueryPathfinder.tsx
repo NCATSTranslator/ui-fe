@@ -9,12 +9,12 @@ import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilte
 import { defaultQueryAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { defaultQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
-import ArrowRight from "@/assets/icons/Directional/Arrows/Arrow Right.svg?react";
+import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "@/assets/icons/directional/Pathfinder/Pathfinder.svg?react";
-import SwapIcon from '@/assets/icons/Buttons/Swap.svg?react';
-import InfoIcon from '@/assets/icons/Status/Alerts/Info.svg?react';
-import AddIcon from '@/assets/icons/Buttons/Add/Add.svg?react';
-import SubtractIcon from '@/assets/icons/Buttons/Subtract/Subtract.svg?react';
+import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
+import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
+import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
+import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import Select from '@/features/Common/components/Select/Select';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';

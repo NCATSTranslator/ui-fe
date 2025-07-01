@@ -5,8 +5,8 @@ import { cloneDeep } from 'lodash';
 import FacetGroup from '@/features/ResultFiltering/components/FacetGroup/FacetGroup';
 import EntitySearch from '@/features/ResultFiltering/components/EntitySearch/EntitySearch';
 import Button from '@/features/Common/components/Button/Button';
-import FilterIcon from '@/assets/icons/Navigation/Filter.svg?react';
-import CloseIcon from '@/assets/icons/Buttons/Close/Close.svg?react';
+import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
+import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
 
 interface ResultsFilterProps {

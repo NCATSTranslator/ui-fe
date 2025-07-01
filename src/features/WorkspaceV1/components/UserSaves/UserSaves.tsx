@@ -4,9 +4,9 @@ import { handleEvidenceModalClose } from '@/features/ResultList/utils/resultsInt
 import styles from './UserSaves.module.scss';
 import EvidenceModal from '@/features/Evidence/components/EvidenceModal/EvidenceModal';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import SearchIcon from '@/assets/icons/Buttons/Search.svg?react';
-import RefreshIcon from '@/assets/icons/Buttons/Refresh.svg?react';
-import CloseIcon from '@/assets/icons/Buttons/Close/Close.svg?react';
+import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
+import RefreshIcon from '@/assets/icons/buttons/Refresh.svg?react';
+import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { getFormattedDate } from '@/features/Common/utils/utilities';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

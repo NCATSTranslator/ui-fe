@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction, FC } from "react";
 import Select from "@/features/Common/components/Select/Select";
 import ReactPaginate from 'react-paginate';
-import ChevLeft from '@/assets/icons/Directional/Chevron/Chevron Left.svg?react';
-import ChevRight from '@/assets/icons/Directional/Chevron/Chevron Right.svg?react';
+import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
+import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 
 interface ResultListBottomPaginationProps {
   parentStyles: {[key: string]: string};

@@ -5,7 +5,7 @@ import { getARATagsFromResultTags } from '@/features/ResultItem/utils/utilities'
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import LoadingBar from '@/features/Common/components/LoadingBar/LoadingBar';
-import ChevDown from "@/assets/icons/Directional/Chevron/Chevron Down.svg?react";
+import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
@@ -24,7 +24,7 @@ import { useTurnstileEffect } from '@/features/Common/utils/customHooks';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
-import Feedback from '@/assets/icons/Navigation/Feedback.svg?react';
+import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
 import { cloneDeep } from 'lodash';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';

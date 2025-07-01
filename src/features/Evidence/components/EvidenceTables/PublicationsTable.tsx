@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback, useMemo, FC, Dispatch, SetStateAction } from 'react';
-import ExternalLink from '@/assets/icons/Buttons/External Link.svg?react';
+import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import LoadingBar from "@/features/Common/components/LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import Select from '@/features/Common/components/Select/Select';
@@ -10,8 +10,8 @@ import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHig
   sortDateYearHighLow, sortDateYearLowHigh } from '@/features/Common/utils/sortingFunctions';
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "react-query";
-import Info from '@/assets/icons/Status/Alerts/Info.svg?react';
-import ChevUp from '@/assets/icons/Directional/Chevron/Chevron Up.svg?react';
+import Info from '@/assets/icons/status/Alerts/Info.svg?react';
+import ChevUp from '@/assets/icons/directional/Chevron/Chevron Up.svg?react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import EmphasizeWord from '@/features/Common/components/EmphasizeWord/EmphasizeWord';
 import { PreferencesContainer } from '@/features/UserAuth/types/user';
