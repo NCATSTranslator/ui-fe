@@ -15,7 +15,7 @@ import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
-import loadingIcon from '@/assets/images/loading/loading-purple.png';
+import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Select from '@/features/Common/components/Select/Select';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import { Result } from "@/features/ResultList/types/results.d";
@@ -277,9 +277,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                   ? 
                     <img
                       src={loadingIcon}
-                      className={`${styles.loadingIcon} ${
-                        isLoading ? styles.active : ""
-                      } loadingIcon`}
+                      className={`loadingIcon`}
                       alt="loading icon"
                     />
                   :

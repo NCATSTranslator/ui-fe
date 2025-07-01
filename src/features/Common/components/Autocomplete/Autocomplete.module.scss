@@ -29,6 +29,9 @@
   overflow-y: scroll;
   scrollbar-color: $midGray transparent; 
   scrollbar-width: none;
+  &:focus {
+    outline: none;
+  }
   &.loading {
     overflow-y: hidden;
     min-height: 265px;

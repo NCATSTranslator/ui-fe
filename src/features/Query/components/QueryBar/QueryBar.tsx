@@ -79,9 +79,7 @@ const QueryBar: FC<QueryBarProps> = ({
             ? 
               <img
                 src={loadingIcon}
-                className={`${styles.loadingIcon} ${
-                  isLoading ? styles.active : ""
-                } loadingIcon`}
+                className={`loadingIcon`}
                 alt="loading icon"
               />
             :
