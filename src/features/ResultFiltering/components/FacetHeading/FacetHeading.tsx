@@ -1,8 +1,8 @@
 import { FC, ReactNode } from "react";
 import styles from "./FacetHeading.module.scss";
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
-import Alert from '@/assets/icons/Status/Alerts/Info.svg?react';
-import ChevDown from "@/assets/icons/Directional/Chevron/Chevron Down.svg?react";
+import Alert from '@/assets/icons/status/Alerts/Info.svg?react';
+import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { filterFamily } from "@/features/ResultFiltering/utils/filterFunctions";
 

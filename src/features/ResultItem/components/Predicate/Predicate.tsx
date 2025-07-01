@@ -1,11 +1,11 @@
 import { useState, FC, MouseEvent, useMemo } from 'react';
 import styles from './Predicate.module.scss';
-import ExternalLink from '@/assets/icons/Buttons/External Link.svg?react';
-import PathArrow from '@/assets/icons/Connectors/PathArrow.svg?react';
-import PubIcon from '@/assets/icons/Status/HasPub.svg?react';
-import CTIcon from '@/assets/icons/Status/HasCT.svg?react';
-import Up from '@/assets/icons/Directional/Chevron/Chevron Up.svg?react';
-import InferredBorder from '@/assets/icons/Connectors/Double Lines.svg?react';
+import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
+import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
+import PubIcon from '@/assets/icons/status/HasPub.svg?react';
+import CTIcon from '@/assets/icons/status/HasCT.svg?react';
+import Up from '@/assets/icons/directional/Chevron/Chevron Up.svg?react';
+import InferredBorder from '@/assets/icons/connectors/Double Lines.svg?react';
 import Highlighter from 'react-highlight-words';
 import { getCompressedEdge, hasSupport, joinClasses } from '@/features/Common/utils/utilities';
 import { checkEdgesForClinicalTrials, checkEdgesForPubs, getEvidenceFromEdge } from '@/features/Evidence/utils/utilities';

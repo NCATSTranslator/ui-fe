@@ -1,7 +1,7 @@
 import { FC, useState, useEffect, useCallback, KeyboardEvent, useRef } from 'react';
 import styles from './Autocomplete.module.scss';
 import { getMoreInfoLink, getIcon, formatBiolinkEntity } from '@/features/Common/utils/utilities';
-import loadingIcon from '@/assets/images/Loading/loading-purple.png';
+import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
 import OutsideClickHandler from '../OutsideClickHandler/OutsideClickHandler';

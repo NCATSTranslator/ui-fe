@@ -2,11 +2,11 @@ import styles from './PathView.module.scss';
 import { useState, useMemo, useCallback, useRef, createContext, FC, Dispatch, SetStateAction } from "react";
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ReactPaginate from 'react-paginate';
-import ChevLeft from '@/assets/icons/Directional/Chevron/Chevron Left.svg?react';
-import ChevRight from '@/assets/icons/Directional/Chevron/Chevron Right.svg?react';
-import Information from '@/assets/icons/Status/Alerts/Info.svg?react';
-import ResearchMultiple from '@/assets/icons/Queries/Evidence.svg?react';
-import PathArrow from '@/assets/icons/Connectors/PathArrow.svg?react';
+import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
+import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
+import Information from '@/assets/icons/status/Alerts/Info.svg?react';
+import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
+import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import { isStringArray, joinClasses, numberToWords } from '@/features/Common/utils/utilities';
 import { extractEdgeIDsFromSubgraph, getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, 
   isPathInferred } from '@/features/ResultItem/utils/utilities';

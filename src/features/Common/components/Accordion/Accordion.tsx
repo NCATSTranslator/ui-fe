@@ -2,8 +2,8 @@ import { FC, useState, useEffect, useCallback, ReactNode } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { NavLink } from 'react-router-dom';
 import styles from './Accordion.module.scss';
-import ChevDown from '@/assets/icons/Directional/Chevron/Chevron Down.svg?react';
-import ExternalLink from '@/assets/icons/Buttons/External Link.svg?react';
+import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
+import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 
 export interface AccordionProps {
   title: string;

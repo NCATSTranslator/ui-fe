@@ -1,6 +1,6 @@
 import { FC, ReactNode, useState, useEffect, useRef } from 'react';
-import ExportIcon from '@/assets/icons/Buttons/Export.svg?react';
-import CloseIcon from '@/assets/icons/Buttons/Close/Close.svg?react';
+import ExportIcon from '@/assets/icons/buttons/Export.svg?react';
+import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import styles from './FileInput.module.scss';
 import Button from '@/features/Common/components/Button/Button';
 import { CustomFile } from '@/features/Common/types/global';

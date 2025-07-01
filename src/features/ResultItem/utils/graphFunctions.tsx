@@ -2,7 +2,7 @@ import { render } from 'react-dom';
 import { Core, EventObject } from 'cytoscape';
 import { debounce } from 'lodash';
 import { capitalizeFirstLetter, hasSupport } from '@/features/Common/utils/utilities';
-import ExternalLink from '@/assets/icons/Buttons/External Link.svg?react';
+import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { Result, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import { GraphLayoutList, RenderableGraph, RenderableNode, RenderableEdge } from '@/features/ResultItem/types/graph.d';
 

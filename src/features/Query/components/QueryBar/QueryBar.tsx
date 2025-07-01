@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styles from './QueryBar.module.scss';
-import ArrowRight from "@/assets/icons/Directional/Arrows/Arrow Right.svg?react";
+import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Button from "@/features/Common/components/Button/Button";
 import { cloneDeep } from 'lodash';

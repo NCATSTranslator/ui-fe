@@ -3,7 +3,7 @@ import filterImage from "@/assets/images/filter.png";
 import bookmarkImage from "@/assets/images/bookmark.png";
 import pubsImage from "@/assets/images/pubs.png";
 import sourcesImage from "@/assets/images/sources.png";
-import Bookmark from "@/assets/icons/Navigation/Bookmark/Bookmark.svg?react";
+import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
 
 export const ReviewIdentify = () => {
 

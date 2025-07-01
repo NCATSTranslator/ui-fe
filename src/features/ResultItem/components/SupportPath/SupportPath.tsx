@@ -1,14 +1,14 @@
 import { FC } from 'react';
 import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
-import ResearchMultiple from '@/assets/icons/Queries/Evidence.svg?react';
+import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { PathFilterState, Path, ResultNode } from '@/features/ResultList/types/results.d';
 import { joinClasses, numberToWords } from '@/features/Common/utils/utilities';
 import { extractEdgeIDsFromSubgraph, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
 import { useLastViewedPath, useSeenStatus, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
-import PathArrow from '@/assets/icons/Connectors/PathArrow.svg?react';
+import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 
 interface SupportPathProps {
   activeEntityFilters: string[];

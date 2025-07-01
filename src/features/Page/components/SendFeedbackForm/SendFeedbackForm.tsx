@@ -8,8 +8,8 @@ import { Fade } from "react-awesome-reveal";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
 import { useFeedbackForm } from "@/features/Common/utils/customHooks";
 import { CustomFile } from "@/features/Common/types/global";
-import ExternalLink from "@/assets/icons/Buttons/External Link.svg?react";
-import Feedback from "@/assets/icons/Navigation/Feedback.svg?react";
+import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
+import Feedback from "@/assets/icons/navigation/Feedback.svg?react";
 
 const SendFeedbackForm = () => {
   const {

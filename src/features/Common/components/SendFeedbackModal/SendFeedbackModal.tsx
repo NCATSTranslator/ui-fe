@@ -6,7 +6,7 @@ import TextInput from "@/features/Common/components/TextInput/TextInput";
 import FileInput from "@/features/Common/components/FileInput/FileInput";
 import Select from "@/features/Common/components/Select/Select";
 import { Fade } from "react-awesome-reveal";
-import Info from "@/assets/icons/Status/Alerts/Info.svg?react";
+import Info from "@/assets/icons/status/Alerts/Info.svg?react";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
 import { CustomFile } from "@/features/Common/types/global";
 

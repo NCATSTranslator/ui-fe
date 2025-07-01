@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, FC, useCallback } from "react";
 import styles from './ResultsSummaryButton.module.scss';
 import Button from "@/features/Common/components/Button/Button";
-import SparkleIcon from '@/assets/icons/Buttons/Sparkles.svg?react';
-import InfoIcon from '@/assets/icons/Status/Alerts/Info.svg?react';
-import loadingIcon from '@/assets/images/Loading/loading-purple.png';
+import SparkleIcon from '@/assets/icons/buttons/Sparkles.svg?react';
+import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
+import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import ResultsSummaryModal from "@/features/ResultList/components/ResultsSummaryModal/ResultsSummaryModal";
 import { genTopNResultsContext } from "@/features/ResultList/utils/llm";

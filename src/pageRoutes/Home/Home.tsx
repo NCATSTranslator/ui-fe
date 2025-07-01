@@ -1,7 +1,7 @@
 import styles from "./Home.module.scss";
-import HomeOne from "@/assets/images/Home/home1.svg?react";
-import HomeTwo from "@/assets/images/Home/home2.svg?react";
-import HomeThree from "@/assets/images/Home/home3.svg?react";
+import HomeOne from "@/assets/images/home/home1.svg?react";
+import HomeTwo from "@/assets/images/home/home2.svg?react";
+import HomeThree from "@/assets/images/home/home3.svg?react";
 import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
 
 const Home = () => {

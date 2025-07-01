@@ -1,12 +1,12 @@
 import { FC } from 'react';
-import Chemical from '@/assets/icons/Queries/Chemical.svg?react';
-import Gene from '@/assets/icons/Queries/Gene.svg?react';
-import Disease from '@/assets/icons/Queries/Disease.svg?react';
-import Drug from '@/assets/icons/Queries/Drug.svg?react';
-import ChemUp from '@/assets/icons/Queries/Chemical.svg?react';
-import ChemDown from '@/assets/icons/Queries/Chemical.svg?react';
-import GeneUp from '@/assets/icons/Queries/Gene.svg?react';
-import GeneDown from '@/assets/icons/Queries/Gene.svg?react';
+import Chemical from '@/assets/icons/queries/Chemical.svg?react';
+import Gene from '@/assets/icons/queries/Gene.svg?react';
+import Disease from '@/assets/icons/queries/Disease.svg?react';
+import Drug from '@/assets/icons/queries/Drug.svg?react';
+import ChemUp from '@/assets/icons/queries/Chemical.svg?react';
+import ChemDown from '@/assets/icons/queries/Chemical.svg?react';
+import GeneUp from '@/assets/icons/queries/Gene.svg?react';
+import GeneDown from '@/assets/icons/queries/Gene.svg?react';
 
 interface QueryTypeIconProps {
   type: string;

@@ -1,6 +1,6 @@
 import styles from './LoadingIcon.module.scss';
 import { FC } from "react";
-import loadingIcon from '@/assets/images/Loading/loading-purple.png';
+import loadingIcon from '@/assets/images/loading/loading-purple.png';
 
 type LoadingIconProps = {
   className?: string;

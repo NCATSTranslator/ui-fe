@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from "react";
 import styles from './FAQSidebar.module.scss';
 import { NavLink, useLocation } from 'react-router-dom';
 import Accordion from '@/features/Common/components/Accordion/Accordion';
-import ExternalLink from '@/assets/icons/Buttons/External Link.svg?react';
+import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { FAQArticle } from "@/features/Page/types/page";
 
 interface FAQSidebarProps {

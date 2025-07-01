@@ -1,5 +1,5 @@
 import { useState, useEffect, FC, ReactNode } from "react";
-import DefaultIcon from '@/assets/icons/Buttons/Checkmark/Checkmark.svg?react';
+import DefaultIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import styles from './Checkbox.module.scss';
 
 interface CheckboxProps {
