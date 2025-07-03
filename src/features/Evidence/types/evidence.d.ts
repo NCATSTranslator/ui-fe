@@ -104,3 +104,16 @@ export type SortingState = {
   journal: boolean | null;
   date: boolean | null;
 };
+
+export type KnowledgeLevelFilterType = 'all' | 'trusted' | 'ml';
+
+export type SortPreference = 'dateHighLow' | 'dateLowHigh' | 'journalHighLow' | 'journalLowHigh' | 'titleHighLow' | 'titleLowHigh';
+
+export type TableState = {
+  itemsPerPage: number;
+  currentPage: number;
+  itemOffset: number;
+  knowledgeLevelFilter: KnowledgeLevelFilterType;
+  sortingState: SortingState;
+  isLoading: boolean;
+}
