@@ -578,9 +578,11 @@ const useSessionStatus = (method: 'GET' | 'POST', expire?: boolean, refresh?: bo
   const [error, setError] = useState<string | null>(null);
   const dispatch = useDispatch();
 
-  if(!!sessionStatus) {
-    dispatch(setCurrentUser(sessionStatus.user));
-  }
+  useEffect(() => {
+    if(!!sessionStatus) {
+      dispatch(setCurrentUser(sessionStatus.user));
+    }
+  }, [sessionStatus, dispatch]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -639,7 +641,7 @@ export const usePostSessionStatus = (expire?: boolean, refresh?: boolean): [Sess
  * @param {function} setGaID - Function to set the Google Analytics ID.
  * @param {function} setGtmID - Function to set the Google Tag Manager ID.
  */
-export const useFetchConfigAndPrefs = (userFound: boolean,  setGaID: (id: string) => void, setGtmID: (id: string) => void) => {
+export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID: (id: string) => void, setGtmID: (id: string) => void) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -682,7 +684,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean,  setGaID: (id: string
       dispatch(setCurrentConfig(config));
     };
 
-    if(userFound !== undefined) {
+    if(typeof userFound === 'boolean') {
       fetchConfig();
       fetchPrefs(userFound);
     }
