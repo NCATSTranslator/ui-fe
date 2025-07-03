@@ -267,15 +267,20 @@ export const isPublicationObject = (obj: any): obj is PublicationObject => {
 /**
  * Type guard to check if an object is an array of PublicationObjects.
  *
- * @param obj - The object to check.
+ * @param arr - The object to check.
  * @returns {boolean} True if the object is a PublicationsList, otherwise false.
  */
 export const isPublicationObjectArray = (arr: any): arr is PublicationObject[] => {
-
   return Array.isArray(arr) && 
     arr.every(item => isPublicationObject(item));
 }
 
+/**
+ * Determines the type of publications structure in a ResultEdge object.
+ *
+ * @param {ResultEdge} edgeObject - The edge object to check publications type for.
+ * @returns {string} - A string indicating the type of publications structure ("PublicationObject[]", "{[key: string]: string[]}", or "Unknown type").
+ */
 export const checkPublicationsType = (edgeObject: ResultEdge): string => {
   if (isPublicationObjectArray(edgeObject.publications)) {
     return "PublicationObject[]";
@@ -289,7 +294,7 @@ export const checkPublicationsType = (edgeObject: ResultEdge): string => {
 /**
  * Type guard to check if an object is a PublicationDictionary.
  *
- * @param obj - The object to check.
+ * @param publications - The object to check.
  * @returns {boolean} True if the object is a PublicationDictionary, otherwise false.
  */
 export const isPublicationDictionary = (publications: any): publications is {[key: string]: string[]} => {
@@ -297,10 +302,10 @@ export const isPublicationDictionary = (publications: any): publications is {[ke
 }
 
 /**
- * Returns a boolean indicating whether an edge has any clinical trials attached
+ * Checks if any edge in the provided array has clinical trials attached.
  *
- * @param {ResultEdge} edge - The edge in question
- * @returns {boolean} - Returns true if the edge has any clinical trials, otherwise false. 
+ * @param {ResultEdge[]} edges - Array of edges to check for clinical trials.
+ * @returns {boolean} - Returns true if any edge has clinical trials, otherwise false.
  */
 export const checkEdgesForClinicalTrials = (edges: ResultEdge[]): boolean => {
   for(const edge of edges) {
@@ -311,10 +316,10 @@ export const checkEdgesForClinicalTrials = (edges: ResultEdge[]): boolean => {
 }
 
 /**
- * Returns a boolean indicating whether an edge has any publications attached
+ * Checks if any edge in the provided array has publications attached.
  *
- * @param {ResultEdge} edge - The edge in question
- * @returns {boolean} - Returns true if the edge has any publications, otherwise false.  
+ * @param {ResultEdge[]} edges - Array of edges to check for publications.
+ * @returns {boolean} - Returns true if any edge has publications, otherwise false.
  */
 export const checkEdgesForPubs = (edges: ResultEdge[]): boolean => {
   for(const edge of edges) {
@@ -325,10 +330,10 @@ export const checkEdgesForPubs = (edges: ResultEdge[]): boolean => {
 }
 
 /**
- * Returns a boolean based on if the provided PublicationObject or RawPublicationObject is categorized as a publication
+ * Determines if a publication object is categorized as a publication based on its type or ID.
  *
- * @param {PublicationObject | RawPublicationObject} publication - The object to check.
- * @returns {boolean} True if the object is a publication, false otherwise
+ * @param {PublicationObject | RawPublicationObject} publication - The publication object to check.
+ * @returns {boolean} - True if the object is a publication (PMID or PMC), false otherwise.
  */
 export const isPublication = (publication: PublicationObject | RawPublicationObject) => {
   if(isPublicationObject(publication) && (publication.type === "PMID" || publication.type === "PMC"))
@@ -444,7 +449,6 @@ export const generatePubmedURL = (id: string): string => {
  * @param {ResultSet | null} resultSet - The dataset containing publication information.
  * @param {RawPublicationList} pubs - A structured object mapping knowledge levels to publication entries.
  * @returns {PublicationObject[]} - An array of publication objects with relevant metadata.
- *
  */
 export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawPublicationList): PublicationObject[] => {
   const pubArray: PublicationObject[] = [];
@@ -479,7 +483,7 @@ export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawP
  * @param {ResultSet | null} resultSet - The dataset containing trial information.
  * @param {string[]} trialIDs - An array of trial IDs to look up.
  * @returns {TrialObject[]} - An array of trial objects, excluding any missing trials.
- *
+
  */
 export const flattenTrialObject = (resultSet: ResultSet | null, trialIDs: string[]): TrialObject[] => {
   const trialArray: TrialObject[] = [];

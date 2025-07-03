@@ -15,7 +15,7 @@ import { PreferencesContainer } from '@/features/UserAuth/types/user';
  * @param {(event: any) => void} handlePageClick - Function to reset pagination to page one.
  * @param {Dispatch<SetStateAction<EvidenceSortState>>} sortingStateSetter - State setter for the sorting state.
  * @param {Dispatch<SetStateAction<PublicationObject[]>>} setPubmedEvidence - State setter for the sorted publication objects.
- *
+ * @returns {void} - This function does not return a value but updates the state directly.
  */
 export const handleEvidenceSort = (
   sortName: string,

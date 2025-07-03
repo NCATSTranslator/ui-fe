@@ -19,6 +19,9 @@ export const DEFAULT_ITEMS_PER_PAGE = 5;
 
 /**
  * Custom hook to track the index of hovered compressed edges in the evidence modal 
+ *
+ * @param {(target: HoverTarget) => void} setHoveredItem - Function to set the currently hovered item.
+ * @returns {{hoveredIndex: number | null, getHoverHandlers: Function, resetHoveredIndex: Function}} Returns an object containing the hovered index, hover handlers, and reset function.
  */
 export const useHoverPathObject = (setHoveredItem: (target: HoverTarget) => void) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -61,6 +64,17 @@ interface FetchResult {
   processedCount: number;
 }
 
+/**
+ * Custom hook to fetch and manage PubMed metadata for publications in the evidence modal.
+ *
+ * @param {boolean} isOpen - Whether the evidence modal is currently open.
+ * @param {PublicationObject[]} publications - Array of publication objects to fetch metadata for.
+ * @param {string | null} selectedEdgeId - ID of the currently selected edge.
+ * @param {PreferencesContainer} prefs - User preferences container.
+ * @param {Dispatch<SetStateAction<PublicationObject[]>>} setPublications - State setter for publications.
+ * @param {(updates: Partial<TableState>) => void} updateState - Function to update table state.
+ * @returns {void} - This function does not return a value but updates the state directly.
+ */
 export const usePubmedDataFetch = (
   isOpen: boolean,
   publications: PublicationObject[],
@@ -81,6 +95,13 @@ export const usePubmedDataFetch = (
   const didMountRef = useRef(false);
   const prevSelectedEdgeId = useRef<string | null>(null);
 
+  /**
+   * Inserts additional PubMed metadata into existing publication objects.
+   *
+   * @param {PubmedMetadataMap} data - PubMed metadata map containing publication information.
+   * @param {PublicationObject[]} existing - Array of existing publication objects to update.
+   * @returns {PublicationObject[]} Returns the updated array of publication objects with additional metadata.
+   */
   const insertAdditionalPubmedData = useCallback((data: PubmedMetadataMap, existing: PublicationObject[]): PublicationObject[] => {
     const newEvidence = cloneDeep(existing);
     newEvidence.forEach((element) => {
@@ -98,6 +119,13 @@ export const usePubmedDataFetch = (
     return newEvidence;
   }, []);
 
+  /**
+   * Applies sorting to publication data based on user preferences and updates the state.
+   *
+   * @param {PreferencesContainer} prefs - User preferences container containing sorting preferences.
+   * @param {PublicationObject[]} dataToSort - Array of publication objects to sort.
+   * @returns {void} - This function does not return a value but updates the state directly.
+   */
   const applySortingAndUpdate = useCallback((
     prefs: PreferencesContainer,
     dataToSort: PublicationObject[]
@@ -118,6 +146,13 @@ export const usePubmedDataFetch = (
     }
   }, [setPublications, updateState]);
 
+  /**
+   * Inserts additional evidence metadata and applies sorting to the publications.
+   *
+   * @param {PreferencesContainer} prefs - User preferences container containing sorting preferences.
+   * @param {PubmedMetadataMap} metadata - PubMed metadata map containing publication information.
+   * @returns {void} - This function does not return a value but updates the state directly.
+   */
   const insertAdditionalEvidenceAndSort = useCallback((
     prefs: PreferencesContainer,
     metadata: PubmedMetadataMap
@@ -126,7 +161,13 @@ export const usePubmedDataFetch = (
     applySortingAndUpdate(prefs, dataToSort);
   }, [publications, applySortingAndUpdate, insertAdditionalPubmedData]);
 
-  // Individual chunk fetch function with proper error handling
+  /**
+   * Fetches PubMed metadata for a chunk of publication IDs with proper error handling.
+   *
+   * @param {string[]} ids - Array of publication IDs to fetch metadata for.
+   * @param {AbortSignal} signal - Abort signal for cancelling the fetch request.
+   * @returns {Promise<FetchResult>} Returns a promise that resolves to a fetch result object containing success status, data, and processed count.
+   */
   const fetchChunk = useCallback(async (
     ids: string[],
     signal: AbortSignal
@@ -163,6 +204,13 @@ export const usePubmedDataFetch = (
     }
   }, []);
 
+  /**
+   * Fetches PubMed metadata for all publication chunks and updates the state accordingly.
+   *
+   * @param {string[][]} chunksArr - Array of publication ID chunks to fetch metadata for.
+   * @param {number} totalItems - Total number of items being processed.
+   * @returns {Promise<void>} Returns a promise that resolves when all chunks have been processed.
+   */
   const fetchPubmedData = useCallback(async (
     chunksArr: string[][],
     totalItems: number
@@ -233,6 +281,13 @@ export const usePubmedDataFetch = (
     }
   }, [isOpen, fetchChunk, insertAdditionalEvidenceAndSort, prefs, updateState]);
 
+  /**
+   * Sets up the PubMed data fetch by chunking publication IDs and initializing fetch state.
+   *
+   * @param {PublicationObject[]} evidence - Array of publication objects to process.
+   * @param {React.Dispatch<React.SetStateAction<string[][]>>} setter - State setter for processed evidence IDs.
+   * @returns {void} - This function does not return a value but updates the state directly.
+   */
   const setupPubmedDataFetch = useCallback((
     evidence: PublicationObject[],
     setter: React.Dispatch<React.SetStateAction<string[][]>>
@@ -245,6 +300,12 @@ export const usePubmedDataFetch = (
     setFetchState(prev => ({ ...prev, isFetching: true }));
   }, []);
 
+  /**
+   * Resets the fetch state and aborts any ongoing requests when the selected edge changes.
+   *
+   * @param {(updates: Partial<TableState>) => void} updateState - Function to update table state.
+   * @returns {void} - This function does not return a value but updates the state directly.
+   */
   const resetState = useCallback((updateState: (updates: Partial<TableState>) => void) => {
     // Abort any ongoing requests
     if (abortControllerRef.current) {
@@ -320,9 +381,14 @@ export const usePubmedDataFetch = (
     }
   }, [selectedEdgeId, publications, setupPubmedDataFetch, updateState, resetState]);
 
-  return {};
 };
 
+/**
+ * Custom hook to manage the publication table state including pagination, sorting, and filtering.
+ *
+ * @param {PreferencesContainer} prefs - User preferences container.
+ * @returns {[TableState, (updates: Partial<TableState>) => void]} Returns a tuple containing the current table state and a function to update it.
+ */
 export const usePubTableState = (prefs: PreferencesContainer): [TableState, (updates: Partial<TableState>) => void] => {
   const [state, setState] = useState<TableState>({
     itemsPerPage: getInitItemsPerPage(prefs, DEFAULT_ITEMS_PER_PAGE),
@@ -353,12 +419,27 @@ interface EvidenceData {
   miscEvidence: PublicationObject[];
 }
 
+/**
+ * Custom hook to manage evidence data including publications, sources, clinical trials, and miscellaneous evidence.
+ *
+ * @param {UseEvidenceDataProps} props - Object containing resultSet, selectedEdge, and setEdgeLabel function.
+ * @returns {EvidenceData & {handleSelectedEdge: Function, setPublications: Function}} Returns evidence data and utility functions.
+ */
 export const useEvidenceData = ({ resultSet, selectedEdge, setEdgeLabel }: UseEvidenceDataProps) => {
   const [publications, setPublications] = useState<PublicationObject[]>([]);
   const [sources, setSources] = useState<Provenance[]>([]);
   const [clinicalTrials, setClinicalTrials] = useState<TrialObject[]>([]);
   const [miscEvidence, setMiscEvidence] = useState<PublicationObject[]>([]);
 
+  /**
+   * Processes evidence data by filtering and sorting publications, trials, and sources.
+   *
+   * @param {Object} evidence - Object containing sets of publications, sources, and trials.
+   * @param {Set<PublicationObject>} evidence.publications - Set of publication objects.
+   * @param {Set<Provenance>} evidence.sources - Set of provenance objects.
+   * @param {Set<TrialObject>} evidence.trials - Set of trial objects.
+   * @returns {void} - This function does not return a value but updates the state directly.
+   */
   const processEvidence = useCallback((evidence: {
     publications: Set<PublicationObject>;
     sources: Set<Provenance>;
@@ -378,6 +459,13 @@ export const useEvidenceData = ({ resultSet, selectedEdge, setEdgeLabel }: UseEv
     setSources(sortedSources);
   }, []);
 
+  /**
+   * Handles the selection of an edge by processing its associated evidence data.
+   *
+   * @param {ResultSet} resultSet - Result set containing the edge data.
+   * @param {ResultEdge} selEdge - Selected edge object.
+   * @returns {void} - This function does not return a value but updates the state directly.
+   */
   const handleSelectedEdge = useCallback((resultSet: ResultSet, selEdge: ResultEdge) => {
     if (!selEdge) return;
 
@@ -417,6 +505,12 @@ interface UseEvidenceModalStateProps {
   pk: string;
 }
 
+/**
+ * Custom hook to manage the evidence modal state including selected edge, edge label, and seen status.
+ *
+ * @param {UseEvidenceModalStateProps} props - Object containing edge and pk (primary key).
+ * @returns {Object} Returns an object containing modal state and utility functions for managing edge selection and seen status.
+ */
 export const useEvidenceModalState = ({ edge, pk }: UseEvidenceModalStateProps) => {
   const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(edge);
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
@@ -430,6 +524,11 @@ export const useEvidenceModalState = ({ edge, pk }: UseEvidenceModalStateProps) 
     [selectedEdge?.id, isEdgeSeen]
   );
 
+  /**
+   * Toggles the seen status of the currently selected edge.
+   *
+   * @returns {void} - This function does not return a value but updates the seen status directly.
+   */
   const handleToggleSeen = useCallback(() => {
     if (!selectedEdge?.id) {
       console.warn("Edge seen status cannot be toggled, selectedEdge is null.");
