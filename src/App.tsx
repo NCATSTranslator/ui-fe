@@ -31,7 +31,7 @@ const App = ({children}: {children?: ReactNode}) => {
   }
 
   const [sessionStatus] = useGetSessionStatus();
-  useFetchConfigAndPrefs(!!sessionStatus?.user, setGaID, setGtmID);
+  useFetchConfigAndPrefs(sessionStatus ? !!sessionStatus.user : undefined, setGaID, setGtmID);
   useScrollToHash();
 
   return (
