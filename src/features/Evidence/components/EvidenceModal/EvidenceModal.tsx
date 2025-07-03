@@ -1,26 +1,19 @@
 import {useState, useEffect, useRef, FC, useMemo} from "react";
 import Modal from "@/features/Common/components/Modal/Modal";
-import Tabs from "@/features/Common/components/Tabs/Tabs";
-import Tab from "@/features/Common/components/Tabs/Tab";
 import styles from './EvidenceModal.module.scss';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { getCompressedSubgraph, getCompressedEdge, hasSupport } from "@/features/Common/utils/utilities";
-import { isPublication, getFormattedEdgeLabel, getUrlByType } from "@/features/Evidence/utils/utilities";
+import { isPublication, getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";
 import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "@/features/ResultList/types/results.d";
 import { Provenance, PublicationObject, TrialObject } from "@/features/Evidence/types/evidence.d";
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
 import { compareByKeyLexographic } from "@/features/Common/utils/sortingFunctions";
-import { flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from "@/features/UserAuth/slices/userSlice";
-import InfoIcon from "@/assets/icons/status/Alerts/Info.svg?react";
-import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
-import PublicationsTable from "@/features/Evidence/components/EvidenceTables/PublicationsTable";
-import Button from "@/features/Common/components/Button/Button";
-import PathView from "@/features/ResultItem/components/PathView/PathView";
 import { useSeenStatus } from "@/features/ResultItem/hooks/resultHooks";
+import PathViewSection from "../PathViewSection/PathViewSection";
+import EvidenceTabs from "../EvidenceTabs/EvidenceTabs";
 
 interface EvidenceModalProps {
   edge: ResultEdge | null;
@@ -50,7 +43,6 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   const miscEvidence = useRef<any[]>([]);
   const hasBeenOpened = useRef(false);
   const [selectedEdge, setSelectedEdge] = useState(edge);
-  const [selectedEdgeTrigger, setEdgeSelectedTrigger] = useState(false);
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
   const [isPathViewMinimized, setIsPathViewMinimized] = useState(false);
   const isInferred = hasSupport(selectedEdge);
@@ -64,12 +56,10 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
   const handleClose = () => {
     onClose();
-    setSelectedEdge(null);
     setIsPathViewMinimized(false);
     hasBeenOpened.current = false;
   }
 
-  // handles opening of modal by initializing state, called in useEffect tracking isOpen prop
   const handleModalOpen = (resultSet: ResultSet, selEdge: ResultEdge) => {
     handleSelectedEdge(resultSet, selEdge);
   }
@@ -138,7 +128,6 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
       return;
 
     handleSelectedEdge(resultSet, edge)
-    setEdgeSelectedTrigger(prev=>!prev);
   }
 
   const handleToggleSeen = () => {
@@ -175,37 +164,17 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
           </Tooltip>
           {
             path &&
-            <div className={`${styles.pathViewContainer} ${isPathViewMinimized && styles.minimized}`}>
-              {
-                compressedSubgraph && 
-                <Button isSecondary handleClick={()=>setIsPathViewMinimized(prev=>!prev)} className={styles.togglePathView}>
-                  {
-                    isPathViewMinimized
-                    ? "Expand"
-                    : "Collapse"
-                  }
-                  <ChevDown/>
-                </Button>
-              }
-              <PathView
-                pathArray={[path]}
-                selectedPaths={new Set()}
-                handleEdgeSpecificEvidence={handleEdgeClick}
-                handleActivateEvidence={(path)=> console.log(path)}
-                activeEntityFilters={[]}
-                pathFilterState={{}}
-                isEven={false}
-                active={isOpen}
-                activeFilters={[]}
-                pk={pk ? pk : ""}
-                setShowHiddenPaths={()=>{}}
-                showHiddenPaths={true}
-                resultID={result.id}
-                inModal={true}
-                compressedSubgraph={compressedSubgraph}
-                selectedEdge={selectedEdge}
-              />
-            </div>
+            <PathViewSection
+              path={path}
+              compressedSubgraph={compressedSubgraph}
+              isPathViewMinimized={isPathViewMinimized}
+              setIsPathViewMinimized={setIsPathViewMinimized}
+              handleEdgeClick={handleEdgeClick}
+              isOpen={isOpen}
+              pk={pk}
+              result={result}
+              selectedEdge={selectedEdge}
+            />
           }
           {
             isInferred
@@ -216,142 +185,17 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
                 <a href="/help#reasoner" target="_blank">Learn More about Reasoning Agents</a>
               </div>
             :
-              <Tabs isOpen={isOpen} className={styles.tabs}>
-                {
-                  pubmedEvidence.length > 0 ?
-                  <Tab heading="Publications" className={`${styles.tab} scrollable`}>
-                    <PublicationsTable
-                      selectedEdgeTrigger={selectedEdgeTrigger}
-                      selectedEdge={selectedEdge}
-                      pubmedEvidence={pubmedEvidence}
-                      setPubmedEvidence={setPubmedEvidence}
-                      pk={pk}
-                      prefs={prefs}
-                      isOpen={isOpen}
-                    />
-                  </Tab>
-                  : null
-                }
-                {
-                  clinicalTrials.current.length > 0 ?
-                  <Tab heading="Clinical Trials" className={`${styles.tab} scrollable`}>
-                    <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
-                      <div className={`table-head ${styles.tableHead}`}>
-                        <div className={`head ${styles.head} ${styles.link}`}>Link</div>
-                      </div>
-                      <div className={`table-items ${styles.tableItems} scrollable`}>
-                        {
-                          clinicalTrials.current.map((item, i)=> {
-                            let url = item.url
-                            if(!item.url && !!item.id) {
-                              url = getUrlByType(item.id, item.type);
-                            }
-                            return (
-                              <div className={styles.tableItem} key={i}>
-                                <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-                                  {url && <a href={url} rel="noreferrer" target="_blank">{url} <ExternalLink/></a>}
-                                </div>
-                              </div>
-                            )
-                          })
-                        }
-                      </div>
-                    </div>
-                  </Tab>
-                  : null
-                }
-                {
-                  miscEvidence.current.length > 0 ?
-                  <Tab heading="Miscellaneous" className={`${styles.tab} scrollable`}>
-                    <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
-                      <div className={`table-head ${styles.tableHead}`}>
-                        <div className={`head ${styles.head} ${styles.link}`}>Link</div>
-                      </div>
-                      <div className={`table-items ${styles.tableItems} scrollable`}>
-                        {
-                          miscEvidence.current.map((item, i) => {
-                            return (
-                              <div className={`table-item ${styles.tableItem}`} key={i}>
-                                <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-                                  {item.url && <a href={item.url} rel="noreferrer" target="_blank">{item.url} <ExternalLink/></a>}
-                                </div>
-                              </div>
-                            )
-                          })
-                        }
-                      </div>
-                    </div>
-                  </Tab>
-                  : null
-                }
-                {
-                  // Add sources modal for predicates
-                  sources.length > 0 ?
-                  <Tab
-                    heading="Knowledge Sources"
-                    tooltipIcon={<InfoIcon className={styles.infoIcon} />}
-                    dataTooltipId="knowledge-sources-tooltip"
-                    className={`${styles.tab} scrollable`}
-                    >
-                    <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
-                      <div className={`table-head ${styles.tableHead}`}>
-                        <div className={`head ${styles.head}`}>Source</div>
-                        <div className={`head ${styles.head}`}>Rationale</div>
-                      </div>
-                      <div className={`table-items ${styles.tableItems} scrollable`}>
-                        {
-                          sources.map((src, i) => {
-                            const sourceKey = `${src.url}-${i}`;
-                            const tooltipId = `source-tooltip-${sourceKey}`;
-                            return(
-                              <div className={`table-item ${styles.tableItem}`} key={sourceKey}>
-                                <Tooltip id={tooltipId}>
-                                  <span className={styles.tooltipSpan}>
-                                    <a href={src?.wiki} target="_blank" rel="noreferrer">
-                                      Why do we use this source?
-                                      <ExternalLink/>
-                                    </a>
-                                  </span>
-                                </Tooltip>
-                                <span className={`table-cell ${styles.cell} ${styles.source} ${styles.sourceItem}`}>
-                                  {src.name}
-                                  {
-                                    src?.wiki
-                                    ? <InfoIcon className={styles.infoIcon} data-tooltip-id={tooltipId} />
-                                    : <></>
-                                  }
-                                </span>
-                                <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
-                                  {
-                                    src?.url
-                                    ?
-                                      <a href={src?.url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
-                                        {src?.url}
-                                        <ExternalLink/>
-                                      </a>
-                                    :
-                                      <span>No link available</span>
-                                  }
-                                </span>
-                              </div>
-                            )
-                          })
-                        }
-                      </div>
-                    </div>
-                  </Tab>
-                  : null
-                }
-                {
-                  (clinicalTrials.current.length <= 0 &&
-                  pubmedEvidence.length <= 0 &&
-                  sources.length <= 0) ?
-                  <Tab heading="No Evidence Available">
-                    <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
-                  </Tab>
-                  : null
-                }
-              </Tabs>
+              <EvidenceTabs
+                isOpen={isOpen}
+                publications={pubmedEvidence}
+                setPublications={setPubmedEvidence}
+                clinicalTrials={clinicalTrials.current}
+                miscEvidence={miscEvidence.current}
+                sources={sources}
+                selectedEdge={selectedEdge}
+                pk={pk}
+                prefs={prefs}
+              />
           }
         </div>
       }
