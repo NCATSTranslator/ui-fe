@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, FC, Dispatch, SetStateAction } from 'react';
 import { useSelector } from 'react-redux';
-import { currentConfig } from "@/features/UserAuth/slices/userSlice";
+import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
 import Button from '@/features/Common/components/Button/Button';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
@@ -43,6 +43,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 }) => {
 
   const config = useSelector(currentConfig);
+  const user = useSelector(currentUser);
+  const isDisabled = user === null;
+
   const nameResolverEndpoint = (config?.name_resolver) ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
   const [isError, setIsError] = useState(false);
   const [errorText, setErrorText] = useState("");
@@ -177,7 +180,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   }
 
   return (
-    <div className={`${styles.queryPathfinder} ${isResults && styles.results}`}>
+    <div className={`${styles.queryPathfinder} ${isDisabled && styles.disabled} ${isResults && styles.results}`}>
       <AppToastContainer />
       { isResults 
         ?
@@ -223,7 +226,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
               }} 
             >
               <AutocompleteInput
-                placeholder="Enter First Search Term"
                 value={inputOneText}
                 onChange={(e) => handleQueryItemChange(e, true)}
                 onItemSelect={(item) => handleItemSelection(item, true)}
@@ -234,6 +236,10 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 className={styles.inputContainer}
                 selectedClassName={styles.selected}
                 onClearAutocomplete={clearAutocompleteItemsOne}
+                disabled={isDisabled}
+                placeholder={
+                  isDisabled ? "Log In to Enter a Search Term" : "Enter First Search Term"
+                }
               />
               <PathfinderDivider className={styles.dividerIcon}/>
               {
@@ -259,7 +265,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 </>
               }
               <AutocompleteInput
-                placeholder="Enter Second Search Term"
                 value={inputTwoText}
                 onChange={(e) => handleQueryItemChange(e, false)}
                 onItemSelect={(item) => handleItemSelection(item, false)}
@@ -270,6 +275,10 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 className={styles.inputContainer}
                 selectedClassName={styles.selected}
                 onClearAutocomplete={clearAutocompleteItemsTwo}
+                disabled={isDisabled}
+                placeholder={
+                  isDisabled ? "Log In to Enter a Search Term" : "Enter Second Search Term"
+                }
               />
               <Button type='submit' className={styles.submitButton} iconOnly>
                 {

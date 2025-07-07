@@ -7,6 +7,22 @@
     padding: $l $m;
     background-color: $palePurple;
   }
+  &.disabled {
+    .submitButton {
+      background-color: $lightGray;
+      border-color: $lightGray;
+      cursor: default;
+      pointer-events: none;
+      svg {
+        margin-left: 0;
+        height: 24px;
+        width: 24px;
+        path {
+          stroke: $midGray;
+        }
+      }
+    }
+  }
   .blurb {
     margin-bottom: $xxs;
   }

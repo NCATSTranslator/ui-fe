@@ -19,6 +19,7 @@ interface AutocompleteInputProps {
   onClearAutocomplete: () => void;
   className?: string;
   selectedClassName?: string;
+  disabled?: boolean;
 }
 
 const AutocompleteInput: FC<AutocompleteInputProps> = ({
@@ -32,10 +33,11 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
   onClear,
   onClearAutocomplete,
   className = '',
-  selectedClassName = ''
+  selectedClassName = '',
+  disabled = false
 }) => {
   return (
-    <div className={`${styles.inputContainer} ${className}`}>
+    <div className={`${styles.inputContainer} ${disabled && styles.disabled} ${className}`}>
       <TextInput 
         placeholder={placeholder} 
         handleChange={onChange} 
@@ -46,6 +48,7 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
           <button className={styles.close} onClick={onClear}><CloseIcon/></button> : 
           false
         }
+        disabled={disabled}
       />
       <Autocomplete 
         isLoading={loadingAutocomplete}

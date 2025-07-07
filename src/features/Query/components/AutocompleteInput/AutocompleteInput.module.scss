@@ -1,6 +1,32 @@
+@import "@/assets/styles/variables";
+
 .inputContainer {
   position: relative;
   width: 100%;
+  &.disabled {
+    input {
+      background-color: $white;
+      color: $purpleOne;
+      font-weight: 800;
+    }
+    input::-webkit-input-placeholder {
+      color: $purpleOne;
+      font-weight: 800;
+    }
+    input::-ms-input-placeholder{
+      color: $purpleOne;
+      font-weight: 800;
+    }
+    input::placeholder {
+      color: $purpleOne;
+      font-weight: 800;
+    }
+    input::-moz-placeholder {
+      color: $purpleOne;
+      font-weight: 800;
+      opacity: 1;
+    }
+  }
 }
 
 .input {
@@ -11,6 +37,7 @@
     &:focus {
       outline: none;
     }
+    
   }
 }
 
