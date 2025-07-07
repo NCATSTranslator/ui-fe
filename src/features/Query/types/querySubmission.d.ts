@@ -37,3 +37,30 @@ export type AutocompleteFunctions = {
   annotate: (normalizedNodes: any) => Promise<any>;
   format: (items: any, formatData: any) => Promise<any[]>;
 }
+
+export type GeneAnnotation = {
+  _id: string;
+  symbol: string;
+  taxid: number;
+}
+
+export type NormalizedNode = {
+  curie: string;
+  [key: string]: any;
+}
+
+export type FormatData = {
+  input: string;
+  resolved: Record<string, string[]>;
+}
+
+export type GeneItem = GenericItem & {
+  symbol: string;
+  species?: string;
+}
+
+export type GenericItem = {
+  curie: string;
+  label: string;
+  types: string[];
+}
