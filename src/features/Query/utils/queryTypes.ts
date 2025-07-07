@@ -1,6 +1,6 @@
 import { defaultQueryFilterFactory, drugTreatsQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
-import { defaultQueryAnnotator, geneQueryAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
-import { defaultQueryFormatter, geneQueryFormatter, diseaseQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
+import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
+import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { QueryType } from '@/features/Query/types/querySubmission';
 
 export const queryTypes: QueryType[] = [
@@ -14,8 +14,8 @@ export const queryTypes: QueryType[] = [
     limitPrefixes: ['MONDO','HP'],
     functions: {
       filter: drugTreatsQueryFilterFactory('Disease'),
-      annotate: defaultQueryAnnotator,
-      format: diseaseQueryFormatter
+      annotate: queryTypeAnnotator,
+      format: combinedQueryFormatter
     },
     pathString: 'may treat conditions related to',
     searchTypeString: 'disease',
@@ -31,8 +31,8 @@ export const queryTypes: QueryType[] = [
     limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('Gene'),
-      annotate: geneQueryAnnotator,
-      format: geneQueryFormatter
+      annotate: queryTypeAnnotator,
+      format: combinedQueryFormatter
     },
     pathString: 'may increase the activity of',
     searchTypeString: 'gene',
@@ -48,8 +48,8 @@ export const queryTypes: QueryType[] = [
     limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('Gene'),
-      annotate: geneQueryAnnotator,
-      format: geneQueryFormatter
+      annotate: queryTypeAnnotator,
+      format: combinedQueryFormatter
     },
     pathString: 'may decrease the activity of',
     searchTypeString: 'gene',
@@ -65,8 +65,8 @@ export const queryTypes: QueryType[] = [
     limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('SmallMolecule'),
-      annotate: defaultQueryAnnotator,
-      format: defaultQueryFormatter,
+      annotate: queryTypeAnnotator,
+      format: combinedQueryFormatter,
     },
     pathString: 'activity may be increased by',
     searchTypeString: 'chemical',
@@ -82,8 +82,8 @@ export const queryTypes: QueryType[] = [
     limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('SmallMolecule'),
-      annotate: defaultQueryAnnotator,
-      format: defaultQueryFormatter,
+      annotate: queryTypeAnnotator,
+      format: combinedQueryFormatter,
     },
     pathString: 'activity may be decreased by',
     searchTypeString: 'chemical',
