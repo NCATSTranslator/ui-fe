@@ -6,6 +6,7 @@ import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { getEntityLink } from '@/features/Common/utils/utilities';
 import styles from '@/features/Query/components/Query/Query.module.scss';
 import QueryResultsHeader from '@/features/Query/components/QueryResultsHeader/QueryResultsHeader';
+import { ResultContextObject } from '@/features/ResultList/utils/llm';
 
 interface QueryResultsViewProps {
   queryItem: QueryItem;
@@ -14,7 +15,7 @@ interface QueryResultsViewProps {
   loading: boolean;
   pk: string;
   setShareModalFunction: (value: boolean) => void;
-  handleResultMatchClick: Function;
+  handleResultMatchClick?: (match: ResultContextObject) => void;
 }
 
 const QueryResultsView: FC<QueryResultsViewProps> = ({
@@ -40,11 +41,11 @@ const QueryResultsView: FC<QueryResultsViewProps> = ({
         onShare={() => setShareModalFunction(true)}
         results={results}
         loading={loading}
-        onResultMatchClick={handleResultMatchClick}
         pk={pk}
         className={styles.resultsHeader}
         searchedTermClassName={styles.searchedTerm}
         shareButtonClassName={styles.shareButton}
+        onResultMatchClick={handleResultMatchClick}
       />
       {nodeDescription && (
         <Tooltip id="query-node-description-tooltip" place="bottom">

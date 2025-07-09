@@ -6,13 +6,13 @@ import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import LoadingBar from '@/features/Common/components/LoadingBar/LoadingBar';
 import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
-import AnimateHeight from "react-animate-height";
+import AnimateHeight, { Height } from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '@/features/ResultItem/utils/csvGeneration';
-import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject } from '@/features/UserAuth/utils/userApi';
+import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject, Save } from '@/features/UserAuth/utils/userApi';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getPathById, getPathsByIds, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
@@ -20,7 +20,7 @@ import { displayScore, generateScore } from '@/features/ResultList/utils/scoring
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Result, PathFilterState, Path, ResultBookmark, ResultSet } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { useTurnstileEffect } from '@/features/Common/utils/customHooks';
+import { useTurnstileEffect } from '@/features/Common/hooks/customHooks';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
@@ -133,7 +133,7 @@ const ResultItem: FC<ResultItemProps> = ({
   const [itemHasNotes, setItemHasNotes] = useState<boolean>(hasNotes);
   const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
   const [graphActive, setGraphActive] = useState<boolean>(false);
-  const [height, setHeight] = useState<number | string>(0);
+  const [height, setHeight] = useState<Height>(0);
   const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
   const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
   // const [csvData, setCsvData] = useState([]);
@@ -175,8 +175,6 @@ const ResultItem: FC<ResultItemProps> = ({
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, subjectNode.species) : '';
   const resultDescription = subjectNode?.descriptions[0];
-
-  const [itemGraph, setItemGraph] = useState(null);
 
   const handleToggle = () => {
     setIsExpanded(prev => !prev);
@@ -275,8 +273,6 @@ const ResultItem: FC<ResultItemProps> = ({
         return false;
       }
       let bookmarkResult: ResultBookmark = cloneDeep(result);
-      bookmarkResult.graph = (!!itemGraph) ? itemGraph : undefined;
-      // delete result.paths;
       const safeQueryNodeID = (!!queryNodeID) ? queryNodeID : "";
       const safeQueryNodeLabel = (!!queryNodeLabel) ? queryNodeLabel : "";
       const safeQueryNodeDescription = (!!queryNodeDescription) ? queryNodeDescription : "";
@@ -291,9 +287,9 @@ const ResultItem: FC<ResultItemProps> = ({
 
       let bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
       if(bookmarkedItem) {
-        let newBookmarkedItem = bookmarkedItem as any;
+        let newBookmarkedItem = bookmarkedItem as unknown as Save;
         setIsBookmarked(true);
-        itemBookmarkID.current = newBookmarkedItem.id.toString()
+        itemBookmarkID.current = newBookmarkedItem.id?.toString() || null;
         bookmarkAddedToast();
         return newBookmarkedItem.id;
       }
@@ -307,7 +303,7 @@ const ResultItem: FC<ResultItemProps> = ({
       console.log("no bookmark exists for this item, creating one...")
       let replacementID = await handleBookmarkClick();
       console.log("new id: ", replacementID);
-      tempBookmarkID = (replacementID) ? replacementID : tempBookmarkID;
+      tempBookmarkID = (replacementID) ? replacementID.toString() : tempBookmarkID;
     }
     if(tempBookmarkID) {
       activateNotes(nameString, tempBookmarkID);
@@ -503,8 +499,6 @@ const ResultItem: FC<ResultItemProps> = ({
                 <GraphView
                   graph={graph}
                   result={result}
-                  updateGraphFunction={setItemGraph}
-                  prebuiltGraph={(!!itemGraph)? itemGraph: null}
                   resultSet={resultSet}
                   onNodeClick={handleGraphNodeClick}
                   clearSelectedPaths={handleClearSelectedPaths}

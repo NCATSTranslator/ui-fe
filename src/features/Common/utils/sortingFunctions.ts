@@ -3,7 +3,7 @@ import { getPathCount, hasSupport, getStringNameFromPath, getDefaultEdge } from 
 import { getEvidenceCounts, isPublicationObjectArray, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
 import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { PublicationObject } from '@/features/Evidence/types/evidence';
+import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore } from '@/features/ResultList/utils/scoring';
 import { getTagFamily } from '@/features/ResultFiltering/utils/filterFunctions';
 import { getEdgeById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
@@ -101,9 +101,9 @@ export const sortScoreHighLow = (items: Result[], scoreWeights: {confidenceWeigh
   });
 }
 
-export const sortByEntityStrings = (items: any, strings: string[]) => {
-  return items.sort((a: any, b: any) => {
-    const nameA = a.name.toLowerCase();
+export const sortByEntityStrings = (items: Result[], strings: string[]) => {
+  return items.sort((a: Result) => {
+    const nameA = a.drug_name.toLowerCase();
     for(const string of strings) {
       if(nameA.includes(string.toLowerCase()))
         return -1;
@@ -205,12 +205,12 @@ export const filterCompare = (filter1: Filter, filter2: Filter) => {
   return f2Family.localeCompare(f1Family);
 }
 
-export const compareByKeyLexographic = (k: any) => {
-  return (a: any, b: any) => { return a[k].localeCompare(b[k]) };
+export const compareByKeyLexographic = (k: keyof Provenance) => {
+  return (a: Provenance, b: Provenance) => { return a[k].localeCompare(b[k]) };
 }
 
 // Returns a shallow copy of an array sorted independently on the left and right side of the pivot point
-export const pivotSort = (arr: any[], pivot: number, compare: (a: any, b: any) => number) => {
+export const pivotSort = <T>(arr: T[], pivot: number, compare: (a: T, b: T) => number): T[] => {
   const left = arr.slice(0, pivot).sort(compare);
   const right = arr.slice(pivot).sort(compare);
   return left.concat(right);

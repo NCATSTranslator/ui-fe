@@ -10,7 +10,7 @@ interface PathViewSectionProps {
   compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false;
   isPathViewMinimized: boolean;
   setIsPathViewMinimized: (value: boolean) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
+  handleEdgeClick: (edgeIDs: string[], path?: Path) => void;
   isOpen: boolean;
   pk: string;
   result: Result;

@@ -1,4 +1,4 @@
-import { ReactNode, KeyboardEvent, forwardRef, useImperativeHandle, useRef, MutableRefObject } from 'react';
+import { ReactNode, KeyboardEvent, forwardRef, useImperativeHandle, useRef, RefObject } from 'react';
 import styles from './Tab.module.scss';
 
 export interface TabProps {
@@ -10,8 +10,6 @@ export interface TabProps {
   dataTooltipId?: string;
   children?: ReactNode;
   className?: string;
-  tabIndex?: number;
-  totalTabs?: number;
   setTabRef?: (heading: string, element: HTMLDivElement | null) => void;
 }
 
@@ -23,11 +21,9 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(({
   tooltipIcon, 
   dataTooltipId = "", 
   className = "",
-  tabIndex = 0,
-  totalTabs = 1,
   setTabRef
 }, ref) => {
-  const tabRef = useRef<HTMLDivElement>(null) as MutableRefObject<HTMLDivElement | null>;
+  const tabRef = useRef<HTMLDivElement>(null) as RefObject<HTMLDivElement | null>;
   
   // Forward the ref
   useImperativeHandle(ref, () => tabRef.current!, []);

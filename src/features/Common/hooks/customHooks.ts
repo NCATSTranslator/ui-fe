@@ -1,12 +1,19 @@
-import { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, useRef, Dispatch, SetStateAction, RefObject } from 'react';
 import { isEqual } from 'lodash';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import { FeedbackForm, FormErrors } from '@/features/Common/types/global';
+import { ResultContextObject } from '@/features/ResultList/utils/llm';
 
 interface WindowSize {
   width: number | undefined;
   height: number | undefined;
+}
+
+interface DeepDifference {
+  path: string;
+  from: unknown;
+  to: unknown;
 }
 
 export const useWindowSize = (delay: number = 100): WindowSize => {
@@ -16,7 +23,7 @@ export const useWindowSize = (delay: number = 100): WindowSize => {
   });
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout | null = null;
+    let timeoutId: number | null = null;
 
     function handleResize() {
       if (timeoutId !== null) {
@@ -118,7 +125,7 @@ export const useGoogleTagManager = (gtmID: string | undefined): void => {
  * Custom React hook that executes a callback function at specified time intervals.
  *
  * @param {number} time - The interval time in milliseconds.
- * @param {Function} callback - The callback function to be executed.
+ * @param {() => void} callback - The callback function to be executed.
  */
 export const useInterval = (callback: () => void, time: number | null): void => {
   const callbackRef = useRef(callback);
@@ -171,9 +178,9 @@ export const useTurnstileEffect = ( checkOpen: () => boolean, effectBody: () => 
 }
 
 // Helper function to perform a deep comparison and log differences
-const logDeepDifferences = (obj1: any, obj2: any, name: string, path: string = '') => {
+const logDeepDifferences = (obj1: Record<string, unknown>, obj2: Record<string, unknown>, name: string, path: string = ''): DeepDifference[] => {
   const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
-  let changes: any = [];
+  let changes: DeepDifference[] = [];
 
   keys.forEach(key => {
       const newPath = path ? `${path}.${key}` : key;
@@ -181,7 +188,7 @@ const logDeepDifferences = (obj1: any, obj2: any, name: string, path: string = '
       const value2 = obj2[key];
 
       if (typeof value1 === 'object' && value1 != null && typeof value2 === 'object' && value2 != null) {
-          changes = changes.concat(logDeepDifferences(value1, value2, name, newPath));
+          changes = changes.concat(logDeepDifferences(value1 as Record<string, unknown>, value2 as Record<string, unknown>, name, newPath));
       } else if (!isEqual(value1, value2)) {
           changes.push({ path: newPath, from: value1, to: value2 });
       }
@@ -190,7 +197,7 @@ const logDeepDifferences = (obj1: any, obj2: any, name: string, path: string = '
   return changes;
 };
 
-export const useWhyDidComponentUpdate = <T extends Record<string, any>>(name: string, props: T) => {
+export const useWhyDidComponentUpdate = <T extends Record<string, unknown>>(name: string, props: T) => {
   const previousProps = useRef<T | undefined>(undefined);
 
   useEffect(() => {
@@ -217,9 +224,9 @@ interface TextStreamHookResult {
 export const useTextStream = (
   endpoint: string,
   queryString: string,
-  resultContext: React.RefObject<any>,
-  onComplete?: Function,
-  onCancel?: Function
+  resultContext: RefObject<ResultContextObject[] | null>,
+  onComplete?: () => void,
+  onCancel?: () => void
 ): TextStreamHookResult => {
   const [streamedText, setStreamedText] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -279,30 +286,34 @@ export const useTextStream = (
     }
   };
 
-  const { isError, refetch } = useQuery(
-    'textStream',
-    () => {
+  const { isError, refetch, data, error } = useQuery({
+    queryKey: ['textStream'],
+    queryFn: () => {
       abortControllerRef.current = new AbortController();
       return fetchTextStream(abortControllerRef.current.signal);
     },
-    {
-      enabled: false,
-      refetchOnWindowFocus: false,
-      retry: 3,
-      onSuccess: (data) => {
-        setIsStreaming(false);
-        if (!!onComplete && data !== null && !hasBeenCanceled.current) 
-          onComplete();
-        hasBeenCanceled.current = false;
-      },
-      onError: (error) => {
-        setIsStreaming(false);
-        if (!(error instanceof Error && error.name === 'AbortError')) {
-          console.error('Stream error:', error);
-        }
+    enabled: false,
+    refetchOnWindowFocus: false,
+    retry: 3
+  });
+
+  useEffect(() => {
+    if (data !== undefined) {
+      setIsStreaming(false);
+      if (!!onComplete && data !== null && !hasBeenCanceled.current) 
+        onComplete();
+      hasBeenCanceled.current = false;
+    }
+  }, [data, onComplete]);
+
+  useEffect(() => {
+    if (error) {
+      setIsStreaming(false);
+      if (!(error instanceof Error && error.name === 'AbortError')) {
+        console.error('Stream error:', error);
       }
     }
-  );
+  }, [error]);
 
   const startStream = async () => {
     setStreamedText('');

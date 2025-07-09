@@ -9,11 +9,11 @@ import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
 
 interface ResultsSummaryModalProps {
-  handleResultMatchClick: Function;
+  handleResultMatchClick: (match: ResultContextObject) => void;
   isError?: boolean;
   isOpen?: boolean;
   isSummaryLoading: boolean;
-  onClose?: Function;
+  onClose?: () => void;
   pk: string;
   resultContext: ResultContextObject[];
   streamedText: string;

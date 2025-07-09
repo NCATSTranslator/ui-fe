@@ -117,7 +117,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
           <div className={`${!!pathViewStyles && pathViewStyles.supportGroupContainer} scrollable-support`}>
             <p className={styles.supportLabel}>Supporting Paths</p>
             {
-              displayedPaths.map((supportPath, i) => {
+              displayedPaths.map((supportPath) => {
                 if(!supportPath)
                   return null;
                 const indexInFullCollection = formattedPaths.findIndex((path)=>supportPath.id === path.id);;

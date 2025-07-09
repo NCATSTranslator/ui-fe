@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, forwardRef, HTMLAttributes, RefObject, useEffect, useRef, useState } from 'react';
 
 // ------------------ Types
 
@@ -102,25 +102,25 @@ const propsToOmitFromDiv: (keyof AnimateHeightProps)[] = [
 type OmitCSSProperties = 'display' | 'height';
 
 export interface AnimateHeightProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+  extends HTMLAttributes<HTMLDivElement> {
   animateOpacity?: boolean;
   animationStateClasses?: AnimationStateClasses;
   applyInlineTransitions?: boolean;
   contentClassName?: string;
-  contentRef?: React.MutableRefObject<HTMLDivElement | null>;
+  contentRef?: RefObject<HTMLDivElement | null>;
   delay?: number;
   duration?: number;
   easing?: string;
   height: Height;
-  onHeightAnimationEnd?: (newHeight: Height) => any;
-  onHeightAnimationStart?: (newHeight: Height) => any;
+  onHeightAnimationEnd?: (newHeight: Height) => void;
+  onHeightAnimationStart?: (newHeight: Height) => void;
   style?: Omit<CSSProperties, OmitCSSProperties>;
 }
 
-const AnimateHeight = React.forwardRef<HTMLDivElement, AnimateHeightProps>(
+const AnimateHeight = forwardRef<HTMLDivElement, AnimateHeightProps>(
   (componentProps, ref) => {
     // const AnimateHeight = forwardRef((componentProps: AnimateHeightProps, ref) => {
-    // const AnimateHeight: React.FC<AnimateHeightProps> = (componentProps) => {
+    // const AnimateHeight: FC<AnimateHeightProps> = (componentProps) => {
     const {
       animateOpacity = false,
       animationStateClasses = {},
@@ -147,8 +147,8 @@ const AnimateHeight = React.forwardRef<HTMLDivElement, AnimateHeightProps>(
     const prevHeight = useRef<Height>(height);
     const contentElement = useRef<HTMLDivElement | null>(null);
 
-    const animationClassesTimeoutID = useRef<Timeout>();
-    const timeoutID = useRef<Timeout>();
+    const animationClassesTimeoutID = useRef<Timeout>(null);
+    const timeoutID = useRef<Timeout>(null);
 
     const stateClasses = useRef<AnimationStateClasses>({
       ...ANIMATION_STATE_CLASSES,
@@ -191,7 +191,6 @@ const AnimateHeight = React.forwardRef<HTMLDivElement, AnimateHeightProps>(
       hideContent(contentElement.current, currentHeight);
 
       // This should be explicitly run only on mount
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // ------------------ Height update
@@ -332,7 +331,6 @@ const AnimateHeight = React.forwardRef<HTMLDivElement, AnimateHeightProps>(
       };
 
       // This should be explicitly run only on height change
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [height]);
 
     // ------------------ Render

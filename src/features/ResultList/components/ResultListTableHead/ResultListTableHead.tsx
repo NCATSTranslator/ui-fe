@@ -1,17 +1,17 @@
-import { FC, MutableRefObject } from "react";
+import { FC, RefObject } from "react";
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import Alert from '@/assets/icons/status/Alerts/Info.svg?react';
 import ArrowUp from '@/assets/icons/directional/Arrows/Arrow Up.svg?react';
 
 interface ResultListTableHeadProps {
   parentStyles: {[key: string]: string};
-  currentSortString: MutableRefObject<string | number>;
+  currentSortString: RefObject<string | number>;
   isSortedByName: boolean | null;
   isSortedByEvidence: boolean | null;
   isSortedByPaths: boolean | null;
   isSortedByScore: boolean | null;
   isPathfinder: boolean;
-  handleUpdateResults: () => any
+  handleUpdateResults: () => void
 }
 
 const ResultListTableHead: FC<ResultListTableHeadProps> = ({ 

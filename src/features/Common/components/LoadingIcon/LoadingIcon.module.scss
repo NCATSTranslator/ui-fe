@@ -1,24 +1,28 @@
-@import "@/assets/styles/variables";
+@use "@/assets/styles/variables" as *;
 
-.iconContainer {
-  height: $xxl;
-  width: $xxl;
-  -webkit-animation:spin 2s linear infinite;
-  -moz-animation:spin 2s linear infinite;
-  animation:spin 2s linear infinite;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-@-moz-keyframes spin {
-  100% { -moz-transform: rotate(360deg); }
-}
-@-webkit-keyframes spin {
-  100% { -webkit-transform: rotate(360deg); }
-}
-@keyframes spin {
-  100% {
-    -webkit-transform: rotate(360deg);
-    transform:rotate(360deg);
+.spinner {
+  width: $l;
+  height: $l;
+  border: 3px solid $lightGray;
+  border-top: 3px solid $purpleOne;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: $m;
+  
+  &.small {
+    width: $m;
+    height: $m;
+    border-width: 2px;
   }
+  
+  &.large {
+    width: $xxl;
+    height: $xxl;
+    border-width: 4px;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

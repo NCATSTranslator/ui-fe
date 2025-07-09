@@ -10,7 +10,6 @@ import CloseIcon from "@/assets/icons/buttons/Close/Close.svg?react";
 import QueryHistoryList from "@/features/History/components/QueryHistoryList/QueryHistoryList";
 import LoginWarning from "@/features/UserAuth/components/LoginWarning/LoginWarning";
 import { useUser } from "@/features/UserAuth/utils/userApi";
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 
 const History = () => {
 
@@ -20,7 +19,7 @@ const History = () => {
   const [user, loading] = useUser();
 
   return (
-    <LoadingWrapper loading={loading}>
+    <>
       {
         !!user ?
           <div className={`container ${styles.historyInner}`}>
@@ -69,7 +68,7 @@ const History = () => {
             </Modal>
             {
               queryHistoryState.length > 0 &&
-              <QueryHistoryList />
+              <QueryHistoryList loading={loading} />
             }
             {
               queryHistoryState.length <= 0 && 
@@ -87,8 +86,8 @@ const History = () => {
             <LoginWarning text="Use the Log In link above in order to view and manage your search history."/>
           </div>
       }
-    </LoadingWrapper>
+    </>
   );
 }
 
-export default History;
+export default History;   

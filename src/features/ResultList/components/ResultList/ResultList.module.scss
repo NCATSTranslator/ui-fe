@@ -1,4 +1,4 @@
-@import "@/assets/styles/variables";
+   @use "@/assets/styles/variables" as *;
 
 .resultList {
   margin-bottom: $s;
@@ -14,7 +14,7 @@
     padding: $m;
     .resultsTableContainer.pathfinder {
       .tableHead {
-        grid-template-columns: 1fr 112px 110px 90px 24px;
+        grid-template-columns: 1fr 112px 110px 90px 90px 24px;
       }
     }
     .resultsTable {

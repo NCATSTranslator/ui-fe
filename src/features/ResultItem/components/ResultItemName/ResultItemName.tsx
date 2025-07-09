@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import styles from './ResultItemName.module.scss';
 import { Result, ResultNode } from "@/features/ResultList/types/results.d";
 import { formatBiolinkNode, getIcon, getFormattedPathfinderName } from "@/features/Common/utils/utilities";
@@ -22,10 +22,10 @@ const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subject
     return null;
   }
 
-  const icon: JSX.Element = getIcon(subjectNode.types[0]);
+  const icon: ReactNode = getIcon(subjectNode.types[0]);
   const pathfinderNameArray = (isPathfinder) ? item.drug_name.split("/") : null;
-  const subjectIcon: JSX.Element | null = subjectNode?.types.length > 0 ? icon : null;
-  const objectIcon: JSX.Element | null = objectNode?.types.length > 0 ? getIcon(objectNode.types[0]) : null;
+  const subjectIcon: ReactNode | null = subjectNode?.types.length > 0 ? icon : null;
+  const objectIcon: ReactNode | null = objectNode?.types.length > 0 ? getIcon(objectNode.types[0]) : null;
 
   const getPFNameString = (index: number, isNotLastItem: boolean, name: string, subject: ResultNode, object: ResultNode ) => {
     let pfNameString = "";

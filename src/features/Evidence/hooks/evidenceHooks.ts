@@ -4,7 +4,7 @@ import { PublicationObject, SortPreference, TableState, Provenance, TrialObject 
 import { PreferencesContainer } from "@/features/UserAuth/types/user";
 import { PubmedMetadataMap } from "@/features/Evidence/types/evidence";
 import { cloneDeep, chunk } from "lodash";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateTitle,
   isPublication, getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";
 import { getInitItemsPerPage, getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/utils/evidenceModalFunctions";
@@ -285,12 +285,12 @@ export const usePubmedDataFetch = (
    * Sets up the PubMed data fetch by chunking publication IDs and initializing fetch state.
    *
    * @param {PublicationObject[]} evidence - Array of publication objects to process.
-   * @param {React.Dispatch<React.SetStateAction<string[][]>>} setter - State setter for processed evidence IDs.
+   * @param {Dispatch<SetStateAction<string[][]>>} setter - State setter for processed evidence IDs.
    * @returns {void} - This function does not return a value but updates the state directly.
    */
   const setupPubmedDataFetch = useCallback((
     evidence: PublicationObject[],
-    setter: React.Dispatch<React.SetStateAction<string[][]>>
+    setter: Dispatch<SetStateAction<string[][]>>
   ) => {
     const ids = evidence
       .map((e) => e.id)
@@ -407,8 +407,6 @@ export const usePubTableState = (prefs: PreferencesContainer): [TableState, (upd
 };
 
 interface UseEvidenceDataProps {
-  resultSet: ResultSet | null;
-  selectedEdge: ResultEdge | null;
   setEdgeLabel: (label: string) => void;
 }
 
@@ -422,10 +420,10 @@ interface EvidenceData {
 /**
  * Custom hook to manage evidence data including publications, sources, clinical trials, and miscellaneous evidence.
  *
- * @param {UseEvidenceDataProps} props - Object containing resultSet, selectedEdge, and setEdgeLabel function.
+ * @param {UseEvidenceDataProps} props - Object containing setEdgeLabel function.
  * @returns {EvidenceData & {handleSelectedEdge: Function, setPublications: Function}} Returns evidence data and utility functions.
  */
-export const useEvidenceData = ({ resultSet, selectedEdge, setEdgeLabel }: UseEvidenceDataProps) => {
+export const useEvidenceData = ({ setEdgeLabel }: UseEvidenceDataProps) => {
   const [publications, setPublications] = useState<PublicationObject[]>([]);
   const [sources, setSources] = useState<Provenance[]>([]);
   const [clinicalTrials, setClinicalTrials] = useState<TrialObject[]>([]);

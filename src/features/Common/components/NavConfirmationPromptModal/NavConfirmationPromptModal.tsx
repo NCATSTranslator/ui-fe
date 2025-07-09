@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, FC } from "react";
+import { useEffect, useState, useCallback, FC, KeyboardEvent } from "react";
 import styles from './NavConfirmationPromptModal.module.scss';
 import Modal from '@/features/Common/components/Modal/Modal';
 import Button from '@/features/Common/components/Button/Button';
@@ -56,7 +56,7 @@ const NavConfirmationPromptModal: FC<NavConfirmationPromptModalProps> = ({
   }, [handleStay]);
 
   // Handle keyboard events
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       handleStay();
     } else if (event.key === 'Enter') {

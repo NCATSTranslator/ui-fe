@@ -8,13 +8,13 @@ import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"
 import NotesFilled from "@/assets/icons/buttons/Notes/Filled Notes.svg?react"
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import MenuIcon from '@/assets/icons/buttons/Dot Menu/Horizontal Dot Menu.svg?react';
-import { useWindowSize } from "@/features/Common/utils/customHooks";
+import { useWindowSize } from "@/features/Common/hooks/customHooks";
 import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 
 interface ResultItemInteractablesProps {
-  handleBookmarkClick: () => Promise<any>;
-  handleNotesClick: () => Promise<void>,
-  handleOpenResultShare: () => void,
+  handleBookmarkClick: () => Promise<string | number | false | null>;
+  handleNotesClick: () => Promise<void>;
+  handleOpenResultShare: () => void;
   hasNotes: boolean;
   hasUser: boolean;
   isBookmarked: boolean;

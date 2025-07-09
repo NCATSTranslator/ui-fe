@@ -1,11 +1,11 @@
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { Theme } from "./Theme";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
-import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { ListItemNode, ListNode } from "@lexical/list";
@@ -16,6 +16,7 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
+import { SerializedEditorState, SerializedLexicalNode } from "lexical";
 import ToolbarPlugin from "./plugins/ToolbarPlugin";
 import ListMaxIndentLevelPlugin from "./plugins/ListMaxIndentLevelPlugin";
 import CodeHighlightPlugin from "./plugins/CodeHighlightPlugin";
@@ -31,11 +32,7 @@ interface TextEditorProps {
   onClearEditorComplete?: () => void;
 }
 
-interface EditorStateJSON {
-  [key: string]: any;
-}
-
-const Placeholder = (): JSX.Element => {
+const Placeholder = (): ReactNode => {
   return <div className="editor-placeholder">...</div>;
 }
 
@@ -44,7 +41,7 @@ const TextEditor = ({
   handleSave, 
   shouldClearEditor, 
   onClearEditorComplete 
-}: TextEditorProps): JSX.Element => {
+}: TextEditorProps): ReactNode => {
 
   const editorConfig = {
     namespace: 'TextEditor',
@@ -67,7 +64,7 @@ const TextEditor = ({
     ]
   };
 
-  const updateNote = useMemo(() => debounce(async (editorStateJSON: EditorStateJSON, bookmarkID: string | null): Promise<void> => {
+  const updateNote = useMemo(() => debounce(async (editorStateJSON: SerializedEditorState<SerializedLexicalNode>, bookmarkID: string | null): Promise<void> => {
     let newNotes = JSON.stringify(editorStateJSON);
 
     if(newNotes === emptyEditor)
@@ -87,7 +84,7 @@ const TextEditor = ({
 
   }, 750), [handleSave]);
 
-  const onChange = (editorStateJSON: EditorStateJSON): void => {
+  const onChange = (editorStateJSON: SerializedEditorState<SerializedLexicalNode>): void => {
     if(bookmarkID === null) 
       return;
     
