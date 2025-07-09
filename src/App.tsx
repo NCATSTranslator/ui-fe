@@ -3,7 +3,7 @@ import Footer from '@/features/Page/components/Footer/Footer';
 import Header from '@/features/Page/components/Header/Header';
 import SmallScreenOverlay from '@/features/Common/components/SmallScreenOverlay/SmallScreenOverlay';
 import SendFeedbackModal from "@/features/Common/components/SendFeedbackModal/SendFeedbackModal";
-import { useGoogleAnalytics, useGoogleTagManager, useWindowSize, useScrollToHash } from '@/features/Common/utils/customHooks';
+import { useGoogleAnalytics, useGoogleTagManager, useWindowSize, useScrollToHash } from '@/features/Common/hooks/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import './App.scss';
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';

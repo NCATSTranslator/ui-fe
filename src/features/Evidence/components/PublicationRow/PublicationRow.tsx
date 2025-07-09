@@ -1,4 +1,4 @@
-import { FC, useCallback } from "react";
+import { FC, ReactNode, useCallback } from "react";
 import { PublicationObject, PublicationSupport } from "@/features/Evidence/types/evidence";
 import { ResultEdge, ResultSet } from "@/features/ResultList/types/results";
 import { getNodeById } from "@/features/ResultList/slices/resultsSlice";
@@ -11,7 +11,7 @@ const PublicationRow: FC<{
   resultSet: ResultSet;
   selectedEdge: ResultEdge | null;
 }> = ({ pub, resultSet, selectedEdge }) => {
-  const getSupportTextOrSnippet = useCallback((): JSX.Element | string => {
+  const getSupportTextOrSnippet = useCallback((): ReactNode | string => {
     const checkEdgeForPub = (pubID: string, edge: ResultEdge): {id: string; support: PublicationSupport;} | false => {
       for (const pubTypeArr of Object.values(edge.publications)) {
         const match = pubTypeArr.find(publication => publication.id === pubID);

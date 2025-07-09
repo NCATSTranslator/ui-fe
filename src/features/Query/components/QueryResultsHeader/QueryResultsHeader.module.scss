@@ -1,4 +1,4 @@
-@import '@/assets/styles/variables';
+@use "@/assets/styles/variables" as *;
 
 .resultsHeader {
   max-width: 720px;

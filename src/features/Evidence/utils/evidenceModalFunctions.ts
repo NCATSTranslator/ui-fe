@@ -12,7 +12,7 @@ import { PreferencesContainer } from '@/features/UserAuth/types/user';
  *
  * @param {string} sortName - The sorting criteria (e.g., "titleLowHigh", "dateHighLow").
  * @param {PublicationObject[]} pubmedEvidence - The current list of publication objects.
- * @param {(event: any) => void} handlePageClick - Function to reset pagination to page one.
+ * @param {(event: {selected: number}) => void} handlePageClick - Function to reset pagination to page one.
  * @param {Dispatch<SetStateAction<EvidenceSortState>>} sortingStateSetter - State setter for the sorting state.
  * @param {Dispatch<SetStateAction<PublicationObject[]>>} setPubmedEvidence - State setter for the sorted publication objects.
  * @returns {void} - This function does not return a value but updates the state directly.
@@ -20,7 +20,7 @@ import { PreferencesContainer } from '@/features/UserAuth/types/user';
 export const handleEvidenceSort = (
   sortName: string,
   pubmedEvidence: PublicationObject[],
-  handlePageClick: (event: any) => void, 
+  handlePageClick: (event: {selected: number}) => void, 
   sortingStateSetter: Dispatch<SetStateAction<EvidenceSortState>>,
   setPubmedEvidence: Dispatch<SetStateAction<PublicationObject[]>>
 ) => {

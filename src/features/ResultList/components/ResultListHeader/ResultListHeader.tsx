@@ -20,7 +20,6 @@ interface ResultListHeaderData {
   shareResultID: string | null;
   setShareResultID: (id: string | null) => void;
   currentQueryID: string | null;
-  returnedARAs: any;
   isError: boolean;
   currentPage: number;
   ResultListStyles: { [key: string]: string };

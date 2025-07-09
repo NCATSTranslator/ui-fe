@@ -3,7 +3,7 @@ import styles from './GraphLayoutButtons.module.scss';
 import { layoutList } from '@/features/ResultItem/utils/graphFunctions';
 import { capitalizeAllWords } from '@/features/Common/utils/utilities';
 import Button from '@/features/Common/components/Button/Button';
-import { GraphLayout } from '../../types/graph';
+import { GraphLayout } from '@/features/ResultItem/types/graph';
 
 interface GraphLayoutButtonsProps {
   setCurrentLayout: Dispatch<SetStateAction<GraphLayout>>;

@@ -4,7 +4,7 @@ import { getMoreInfoLink, getIcon, formatBiolinkEntity } from '@/features/Common
 import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
-import OutsideClickHandler from '../OutsideClickHandler/OutsideClickHandler';
+import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 
 type AutocompleteProps = {
   isLoading: boolean;

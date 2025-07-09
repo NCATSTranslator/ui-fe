@@ -1,5 +1,6 @@
 import { ResultEdge, ResultNode } from '@/features/Evidence/types/evidence';
-import { LayoutOptions, NodeSingular, EdgeSingular } from 'cytoscape';
+import { LayoutOptions, NodeSingular, EdgeSingular, Core } from 'cytoscape';
+import { RefObject } from 'react';
 
 export interface GraphDataObject {
   graphRef: RefObject<HTMLDivElement>;
@@ -7,12 +8,12 @@ export interface GraphDataObject {
   graphTooltipIdString: string;
   edgeInfoWindowIdString: string;
   graphScrollOverlayId: string;
-  graph: any;
+  graph: Core;
   layout: {
     label: string;
     name: string;
   };
-  handleNodeClick: (nodes: any) => void;
+  handleNodeClick: (nodes: NodeSingular | NodeSingular[]) => void;
   clearSelectedPaths: () => void;
   highlightClass: string;
   hideClass: string;
@@ -52,8 +53,12 @@ export interface GraphLayout extends LayoutOptions {
   avoidOverlap?: boolean;
   directed?: boolean;
   edgeDistances?: string;
-  klay?: any;
-  ready?: (ev: any) => void;
+  klay?: {
+    direction?: string;
+    edgeSpacingFactor?: number;
+    [key: string]: unknown;
+  };
+  ready?: (ev: { target: { options: { eles: unknown[] } }; cy: Core }) => void;
 }
 
 export interface GraphLayoutList {

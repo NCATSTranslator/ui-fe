@@ -1,10 +1,10 @@
 //  Focus: General evidence processing and data analysis
 
-import { PublicationObject, RawPublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap } from "../types/evidence";
+import { PublicationObject, RawPublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap } from "@/features/Evidence/types/evidence";
 import { capitalizeAllWords, hasSupport } from "@/features/Common/utils/utilities";
 import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById } from "@/features/ResultList/slices/resultsSlice";
 import { ResultSet, ResultEdge, Result, Path, isResultEdge } from "@/features/ResultList/types/results.d";
-import { EvidenceCountsContainer } from "../types/evidence";
+import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
 
 /**
  * Generates evidence ids for a provided edge, optionally including support edges
@@ -254,13 +254,13 @@ export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): s
  * @param obj - The object to check.
  * @returns {boolean} True if the object is a PublicationObject, otherwise false.
  */
-export const isPublicationObject = (obj: any): obj is PublicationObject => {
+export const isPublicationObject = (obj: unknown): obj is PublicationObject => {
   return (
     typeof obj === 'object' &&
     obj !== null &&
-    typeof obj.source === 'object' &&
-    typeof obj.type === 'string' &&
-    typeof obj.url === 'string'
+    typeof (obj as PublicationObject).source === 'object' &&
+    typeof (obj as PublicationObject).type === 'string' &&
+    typeof (obj as PublicationObject).url === 'string'
   );
 }
 
@@ -270,7 +270,7 @@ export const isPublicationObject = (obj: any): obj is PublicationObject => {
  * @param arr - The object to check.
  * @returns {boolean} True if the object is a PublicationsList, otherwise false.
  */
-export const isPublicationObjectArray = (arr: any): arr is PublicationObject[] => {
+export const isPublicationObjectArray = (arr: unknown): arr is PublicationObject[] => {
   return Array.isArray(arr) && 
     arr.every(item => isPublicationObject(item));
 }
@@ -297,8 +297,8 @@ export const checkPublicationsType = (edgeObject: ResultEdge): string => {
  * @param publications - The object to check.
  * @returns {boolean} True if the object is a PublicationDictionary, otherwise false.
  */
-export const isPublicationDictionary = (publications: any): publications is {[key: string]: string[]} => {
-  return typeof publications === 'object' && !Array.isArray(publications) && Object.values(publications).every(value => Array.isArray(value) && value.every(item => typeof item === 'string'));
+export const isPublicationDictionary = (publications: unknown): publications is {[key: string]: string[]} => {
+  return typeof publications === 'object' && publications !== null && !Array.isArray(publications) && Object.values(publications as Record<string, unknown>).every(value => Array.isArray(value) && value.every(item => typeof item === 'string'));
 }
 
 /**

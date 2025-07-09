@@ -96,7 +96,7 @@ const Predicate: FC<PredicateProps> = ({
     setIsSupportExpanded(prev=>!prev);
   }
 
-  const pushAndReturn = (arr: any[], element: any) => {
+  const pushAndReturn = (arr: ResultEdge[], element: ResultEdge) => {
     let newArr = cloneDeep(arr);
     newArr.push(element);
     return newArr;

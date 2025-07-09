@@ -1,7 +1,7 @@
-import { FC, useState, useEffect, useMemo } from "react";
+import { FC, useState, useEffect, useMemo, ReactNode } from "react";
 import { Filter, GroupedFilters, FilterFamily } from "@/features/ResultFiltering/types/filters";
 import styles from './FacetGroup.module.scss';
-import AnimateHeight from "react-animate-height";
+import AnimateHeight, { Height } from "react-animate-height";
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { pivotSort } from '@/features/Common/utils/sortingFunctions';
 import FacetHeading from "@/features/ResultFiltering/components/FacetHeading/FacetHeading";
@@ -11,49 +11,49 @@ import TextInput from "@/features/Common/components/TextInput/TextInput";
 import { debounce } from "lodash";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 
-const getRoleCaption = (): JSX.Element => {
+const getRoleCaption = (): ReactNode => {
   return (
     <p className={styles.caption}>Include or exclude results according to their biological or chemical role or application</p>
   )
 }
-const getChemicalTypeCaption = (): JSX.Element => {
+const getChemicalTypeCaption = (): ReactNode => {
   return(
     <p className={styles.caption}>Filter on different categories of chemicals.</p>
   )
 }
-const getObjectTypeCaption = (): JSX.Element => {
+const getObjectTypeCaption = (): ReactNode => {
   return(
     <p className={styles.caption}>Include or exclude paths from results that contain a particular type of object</p>
   )
 }
-const getAraCaption = (): JSX.Element => {
+const getAraCaption = (): ReactNode => {
   return(
     <p className={styles.caption}>Include or exclude reasoning agents used to return results</p>
   )
 }
-const getDrugIndicationsCaption = (): JSX.Element => {
+const getDrugIndicationsCaption = (): ReactNode => {
   return(
     <p className={styles.caption}>Include or exclude results based on whether they have been tested in clinical trials for treatment of the indicated disease</p>
   )
 }
-const getPathTypeCaption = (): JSX.Element => {
+const getPathTypeCaption = (): ReactNode => {
   return(
     <p className={styles.caption}>Include or exclude paths from results that contain a set number of connections</p>
   )
 }
-const getOtcCaption = (): JSX.Element => {
+const getOtcCaption = (): ReactNode => {
   return(
     <p className={styles.caption}>Include or exclude results in various development stages and with desired availability</p>
   )
 }
 
-const getTdlCaption = (): JSX.Element => {
+const getTdlCaption = (): ReactNode => {
   return(
     <p className={styles.caption}>Include or exclude results that are part of the selected target development level</p>
   )
 }
 
-const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.Element | null => {
+const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): ReactNode | null => {
   let headingToReturn;
   switch(tagFamily) {
     case 'cc':
@@ -97,7 +97,7 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): JSX.El
   return headingToReturn;
 }
 
-const getTagCaptionMarkup = (tagFamily: string): JSX.Element | null => {
+const getTagCaptionMarkup = (tagFamily: string): ReactNode | null => {
   let captionToReturn;
   switch(tagFamily) {
     case 'cc':
@@ -194,7 +194,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
   const familyHeadingMarkup = getTagHeadingMarkup(filterFamily, activeFilters);
   const familyCaptionMarkup = getTagCaptionMarkup(filterFamily);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [height, setHeight] = useState<number | string>(0);
+  const [height, setHeight] = useState<Height>(0);
   const [chemicalCategorySearchTerm, setChemicalCategorySearchTerm] = useState("");
 
   // Ensures that selected facets come first

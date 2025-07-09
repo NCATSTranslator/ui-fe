@@ -303,7 +303,7 @@ const PathView: FC<PathViewProps> = ({
                                         </svg>
                                         <div className={`${styles.groupedPreds} ${hasSelected && styles.hasSelected}`}>
                                           {
-                                            subgraphItem.map((edge, j)=> {
+                                            subgraphItem.map((edge)=> {
                                               let key = `${edge.id}`;
                                               let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false;
                                               return (

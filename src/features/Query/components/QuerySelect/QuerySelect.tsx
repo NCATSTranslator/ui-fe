@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useRef, ReactNode, isValidElement, Children } from "react";
+import { FC, useState, useEffect, useRef, ReactNode, isValidElement, Children, MouseEvent } from "react";
 import AnimateHeight from "react-animate-height";
 import styles from './QuerySelect.module.scss';
 
@@ -26,7 +26,7 @@ export const QuerySelect: FC<QuerySelectProps> = ({
   startExpanded = false, 
   stayExpanded = false,
   errorText = "Error Message", 
-  handleChange = (val: string) => {}, 
+  handleChange = () => {}, 
   handleToggle = () => {}, 
   noanimate, 
   children, 
@@ -45,7 +45,7 @@ export const QuerySelect: FC<QuerySelectProps> = ({
   const wrapperRef = useRef<HTMLLabelElement>(null);  
   const selectListContainerRef = useRef<HTMLDivElement>(null);  
 
-  const handleSelectClick = (e: React.MouseEvent) => {
+  const handleSelectClick = (e: MouseEvent) => {
     e.preventDefault();
     setSelectOpen(prev => {
       handleToggle(!prev);
@@ -53,7 +53,7 @@ export const QuerySelect: FC<QuerySelectProps> = ({
     });
   }
 
-  const handleOptionClick = (e: React.MouseEvent<HTMLSpanElement>) => {
+  const handleOptionClick = (e: MouseEvent<HTMLSpanElement>) => {
     e.preventDefault();
     const target = e.target as HTMLSpanElement;
     setSelectedItem(parseInt(target.dataset.value || '0'));
@@ -79,7 +79,7 @@ export const QuerySelect: FC<QuerySelectProps> = ({
   }, [normalizedValue])
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: globalThis.MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         handleToggle(false);
         setSelectOpen(false);
@@ -110,17 +110,31 @@ export const QuerySelect: FC<QuerySelectProps> = ({
 
   const getModifiedName = (children: ReactNode, selectedItem: number): string | undefined => {
     if (Array.isArray(children)) {
-      const option = children.find((child) => 
-        isValidElement(child) && (child.props as any)?.value === selectedItem
-      );
+      const option = children.find((child) => {
+        if (!isValidElement(child)) return false;
+        const childProps = child.props as { value?: number };
+        return childProps?.value === selectedItem;
+      });
+      
       if (option && isValidElement(option)) {
-        // Try to get the data-modified-name from the span inside the option
-        const optionChildren = (option.props as any)?.children;
-        if (isValidElement(optionChildren) && (optionChildren.props as any)?.['data-modified-name']) {
-          return (optionChildren.props as any)['data-modified-name'];
+        const optionProps = option.props as { children?: ReactNode };
+        const optionChildren = optionProps?.children;
+        
+        if (isValidElement(optionChildren)) {
+          const childrenProps = optionChildren.props as { 'data-modified-name'?: string };
+          if (childrenProps?.['data-modified-name']) {
+            return childrenProps['data-modified-name'];
+          }
+          const childrenContentProps = optionChildren.props as { children?: ReactNode };
+          const fallbackContent = childrenContentProps?.children;
+          
+          if (typeof fallbackContent === 'string') {
+            return fallbackContent;
+          } else if (isValidElement(fallbackContent)) {
+            const elementProps = fallbackContent.props as { children?: ReactNode };
+            return typeof elementProps?.children === 'string' ? elementProps.children : undefined;
+          }
         }
-        // Fallback to the regular children content
-        return optionChildren?.props?.children || optionChildren;
       }
     }
     return undefined;
@@ -160,7 +174,7 @@ export const QuerySelect: FC<QuerySelectProps> = ({
               <div ref={selectListContainerRef}>
                 {
                   Children.map(children, (child, i) => {
-                    if (isValidElement(child) && (child.props as any)?.value === selectedItem) {
+                    if (isValidElement(child) && (child.props as {value?: number})?.value === selectedItem) {
                       return null;
                     }
                     return (
@@ -168,10 +182,10 @@ export const QuerySelect: FC<QuerySelectProps> = ({
                         onClick={handleOptionClick} 
                         key={i} 
                         className={styles.option} 
-                        data-value={isValidElement(child) ? (child.props as any)?.value : undefined}
-                        data-testid={isValidElement(child) ? (child.props as any)?.value : undefined}
+                        data-value={isValidElement(child) ? (child.props as {value?: number})?.value : undefined}
+                        data-testid={isValidElement(child) ? (child.props as {value?: number})?.value : undefined}
                       >
-                        {isValidElement(child) ? (child.props as any)?.children : child}
+                        {isValidElement(child) ? (child.props as {children?: ReactNode})?.children : child}
                       </span>
                     );
                   })
@@ -192,9 +206,9 @@ export const QuerySelect: FC<QuerySelectProps> = ({
                       onClick={handleOptionClick} 
                       key={i} 
                       className={styles.option} 
-                      data-value={isValidElement(child) ? (child.props as any)?.value : undefined}
+                      data-value={isValidElement(child) ? (child.props as {value?: number})?.value : undefined}
                     >
-                      {isValidElement(child) ? (child.props as any)?.children : child}
+                      {isValidElement(child) ? (child.props as {children?: ReactNode})?.children : child}
                     </span>
                   );
                 })

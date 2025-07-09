@@ -1,4 +1,4 @@
-const buildOptions = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: any) => {
+const buildOptions = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: unknown) => {
   const headers = {
     'Content-Type': 'application/json'
   };
@@ -19,11 +19,11 @@ export const get = async (url: string): Promise<Response> => {
   return fetch(url, buildOptions('GET'));
 };
 
-export const post = async (url: string, body: any): Promise<Response> => {
+export const post = async (url: string, body: unknown): Promise<Response> => {
   return fetch(url, buildOptions('POST', body));
 };
 
-export const put = async (url: string, body: any): Promise<Response> => {
+export const put = async (url: string, body: unknown): Promise<Response> => {
   return fetch(url, buildOptions('PUT', body));
 };
 

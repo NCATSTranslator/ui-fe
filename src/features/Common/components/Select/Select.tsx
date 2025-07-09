@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, ReactNode } from "react";
+import { useState, useEffect, useRef, ReactNode, ReactElement, MouseEvent } from "react";
 import AnimateHeight from "react-animate-height";
 import styles from './Select.module.scss';
 
@@ -18,7 +18,7 @@ interface SelectProps<T extends string | number> {
   errorText?: string;
   handleChange?: (value: T) => void;
   noanimate?: boolean;
-  children: React.ReactElement<OptionProps<T>>[];
+  children: ReactElement<OptionProps<T>>[];
   testId?: string;
   className?: string;
   iconClass?: string;
@@ -47,7 +47,7 @@ const Select = <T extends string | number>({
 
   const wrapperRef = useRef<HTMLLabelElement>(null);
 
-  const handleSelectClick = (e: React.MouseEvent<HTMLSelectElement | HTMLSpanElement>) => {
+  const handleSelectClick = (e: MouseEvent<HTMLSelectElement | HTMLSpanElement>) => {
     e.preventDefault();
     setSelectOpen(!selectOpen);
   };
@@ -63,7 +63,7 @@ const Select = <T extends string | number>({
   }, [value]);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: globalThis.MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setSelectOpen(false);
         setHeight(0);

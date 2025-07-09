@@ -1,4 +1,5 @@
-import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
+import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject, 
+  Provenance, PublicationSupport } from "@/features/Evidence/types/evidence";
 
 export type ResultSet = {
   status: "error" | "running" | "success",
@@ -39,7 +40,6 @@ export type SharedItem = {
 }
 
 export interface ResultBookmark extends Result { 
-  graph?: ResultGraph;
   description?: string;
   bookmarkID?: number | boolean;
   bookmarked?: boolean;
@@ -115,8 +115,8 @@ export type ResultGraph = {
       data: {
           id: string;
           label: string;
-          type: any;
-          provenance: any;
+          type: string;
+          provenance: string;
           isTargetCount: number;
           isSourceCount: number;
           isTargetEdges: never[];
@@ -126,9 +126,9 @@ export type ResultGraph = {
   edges: {
       data: {
           id: string;
-          source: any;
+          source: string;
           sourceLabel: string;
-          target: any;
+          target: string;
           targetLabel: string;
           label: string;
           inferred: boolean;
@@ -164,65 +164,65 @@ export type Errors = {
 
 export type HoverTarget = { id: string; type: 'node' | 'edge' } | null;
 
-export const isResultEdge = (obj: any): obj is ResultEdge => {
+export const isResultEdge = (obj: unknown): obj is ResultEdge => {
   return (
     obj &&
     Array.isArray(obj.aras) &&
-    obj.aras.every((item: any) => typeof item === "string") &&
+    obj.aras.every((item: unknown) => typeof item === "string") &&
     typeof obj.is_root === "boolean" &&
     typeof obj.knowledge_level === "string" && 
     typeof obj.object === "string" &&
     typeof obj.predicate === "string" &&
     typeof obj.predicate_url === "string" &&
     Array.isArray(obj.provenance) &&
-    obj.provenance.every((prov: any) => typeof prov === "object") && 
+    obj.provenance.every((prov: unknown) => typeof prov === "object") && 
     typeof obj.publications === "object" &&
     typeof obj.subject === "string" &&
     Array.isArray(obj.support) &&
-    obj.support.every((item: any) => typeof item === "string")
+    obj.support.every((item: unknown) => typeof item === "string")
   );
 }
 
-export const isResultNode = (obj: any): obj is ResultNode => {
+export const isResultNode = (obj: unknown): obj is ResultNode => {
   return (
     obj &&
     Array.isArray(obj.aras) &&
-    obj.aras.every((item: any) => typeof item === "string") &&
+    obj.aras.every((item: unknown) => typeof item === "string") &&
     Array.isArray(obj.curies) &&
-    obj.curies.every((item: any) => typeof item === "string") &&
+    obj.curies.every((item: unknown) => typeof item === "string") &&
     Array.isArray(obj.descriptions) &&
-    obj.descriptions.every((item: any) => typeof item === "string") &&
+    obj.descriptions.every((item: unknown) => typeof item === "string") &&
     Array.isArray(obj.names) &&
-    obj.names.every((item: any) => typeof item === "string") &&
+    obj.names.every((item: unknown) => typeof item === "string") &&
     Array.isArray(obj.provenance) &&
-    obj.provenance.every((item: any) => typeof item === "string") &&
+    obj.provenance.every((item: unknown) => typeof item === "string") &&
     (obj.species === "Zebrafish" ||
       obj.species === "Mouse" ||
       obj.species === "Rat" ||
       obj.species === null) &&
     typeof obj.tags === "object" &&
     Array.isArray(obj.types) &&
-    obj.types.every((type: any) => typeof type === "string")
+    obj.types.every((type: unknown) => typeof type === "string")
   );
 }
 
-export const isPath = (obj: any): obj is Path => {
+export const isPath = (obj: unknown): obj is Path => {
   return (
     obj &&
     Array.isArray(obj.aras) &&
     Array.isArray(obj.compressedIDs) &&
-    obj.compressedIDs.every((item: any) => typeof item === "string") &&
+    obj.compressedIDs.every((item: unknown) => typeof item === "string") &&
     Array.isArray(obj.compressedSubgraph) &&
-    obj.compressedSubgraph.every((item: any) => typeof item === "string" || (Array.isArray(item) && item.every(subItem => typeof subItem === "string"))) &&
+    obj.compressedSubgraph.every((item: unknown) => typeof item === "string" || (Array.isArray(item) && item.every(subItem => typeof subItem === "string"))) &&
     typeof obj.highlighted === "boolean" &&
     typeof obj.id === "string" &&
     Array.isArray(obj.subgraph) &&
-    obj.subgraph.every((item: any) => typeof item === "string") &&
+    obj.subgraph.every((item: unknown) => typeof item === "string") &&
     isTags(obj.tags)
   );
 }
 
-export const isTags = (obj: any): obj is Tags => {
+export const isTags = (obj: unknown): obj is Tags => {
   if (typeof obj !== "object" || obj === null) return false;
 
   for (const key in obj) {

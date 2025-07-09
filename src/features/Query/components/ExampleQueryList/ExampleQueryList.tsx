@@ -2,11 +2,11 @@ import { FC, useState, useEffect } from 'react';
 import styles from './ExampleQueryList.module.scss';
 import { getResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
-import AnimateHeight from 'react-animate-height';
+import AnimateHeight, { Height } from 'react-animate-height';
 import Button from '@/features/Common/components/Button/Button';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { Example } from '@/features/Query/types/querySubmission';
-import QueryTypeIcon from '../QueryTypeIcon/QueryTypeIcon';
+import QueryTypeIcon from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
 
 type ExampleQueryListProps = {
   examples: Example[] | null;
@@ -20,7 +20,7 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
   className = ""
 }) => {
   const minHeight = 32;
-  const [height, setHeight] = useState<number | string>(minHeight);
+  const [height, setHeight] = useState<Height>(minHeight);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const handleToggle = () => {
@@ -54,7 +54,7 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
               duration={500}
               height={height}
             >
-              {examples.map((item, i) => {
+              {examples.map((item) => {
                 const typeID =
                   item.type === "drug"
                     ? 0

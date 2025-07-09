@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, FC, Dispatch, SetStateAction } from "react";
 import { useSelector } from 'react-redux';
 import { useLocation } from "react-router-dom";
-import { QueryItem, QueryType } from "@/features/Query/types/querySubmission";
+import { AutocompleteItem, QueryItem, QueryType } from "@/features/Query/types/querySubmission";
 import { Result } from "@/features/ResultList/types/results.d";
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useQueryState, useAutocomplete, useQuerySubmission, useExampleQueries } from "@/features/Query/hooks/customQueryHooks";
@@ -11,6 +11,8 @@ import styles from './Query.module.scss';
 import { AppToastContainer } from '@/features/Common/components/AppToastContainer/AppToastContainer';
 import QueryResultsView from '@/features/Query/components/QueryResultsView/QueryResultsView';
 import QueryInputView from '@/features/Query/components/QueryInputView/QueryInputView';
+import { ResultContextObject } from '@/features/ResultList/utils/llm';
+import { User } from "@/features/UserAuth/types/user";
 
 interface QueryProps {
   isResults?: boolean;
@@ -21,7 +23,7 @@ interface QueryProps {
   nodeDescription?: string | null;
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   results?: Result[];
-  handleResultMatchClick?: Function;
+  handleResultMatchClick?: (match: ResultContextObject) => void;
   pk?: string;
 }
 
@@ -34,12 +36,12 @@ const Query: FC<QueryProps> = ({
   nodeDescription = null,
   setShareModalFunction = () => {},
   results = [],
-  handleResultMatchClick = () => {},
+  handleResultMatchClick,
   pk = ""
 }) => {
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
-  const user = useSelector(currentUser);
+  const user = useSelector(currentUser) as User | null;
   
   const nameResolverEndpoint = config?.name_resolver 
     ? `${config.name_resolver}/lookup` 
@@ -104,7 +106,7 @@ const Query: FC<QueryProps> = ({
     }
   }, [autocompleteFunctions, limitTypes, limitPrefixes, clearAutocompleteItems, setQueryItem, setInputText]);
 
-  const handleItemSelection = useCallback((item: any) => {
+  const handleItemSelection = useCallback((item: AutocompleteItem) => {
     setIsError(false);
     if (item.id.includes("NCBIGene") && item?.match) {
       item.label += ` (${item.match})`;

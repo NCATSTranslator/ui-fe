@@ -77,8 +77,4 @@ export const getResultSetById = (id: string | null | undefined) => (state: {resu
   return state.resultSets[id];
 }
 
-export const removeResultSetById = (id: string | null | undefined) => (state: {resultSets: ResultState}) => {
-
-}
-
 export default resultSetsSlice.reducer;

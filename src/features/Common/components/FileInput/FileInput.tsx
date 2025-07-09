@@ -1,4 +1,4 @@
-import { FC, ReactNode, useState, useEffect, useRef } from 'react';
+import { FC, ReactNode, useState, useEffect, useRef, DragEvent, ChangeEvent } from 'react';
 import ExportIcon from '@/assets/icons/buttons/Export.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import styles from './FileInput.module.scss';
@@ -29,13 +29,13 @@ const FileInput: FC<FileDropInputProps> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [files, setFiles] = useState<CustomFile[] | null>(null);
 
-  const handleDragEnter = (e: React.DragEvent<HTMLElement>) => {
+  const handleDragEnter = (e: DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragging(true);
   }
 
-  const handleDragLeave = (e: React.DragEvent<HTMLElement>) => {
+  const handleDragLeave = (e: DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -46,12 +46,12 @@ const FileInput: FC<FileDropInputProps> = ({
     setDragging(false);
   }
 
-  const handleDragOver = (e: React.DragEvent<HTMLElement>) => {
+  const handleDragOver = (e: DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
   }
 
-  const handleDrop = (e: React.DragEvent<HTMLElement>) => {
+  const handleDrop = (e: DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragging(false);
@@ -78,7 +78,7 @@ const FileInput: FC<FileDropInputProps> = ({
     return newFiles;
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newFiles = getFileArrayFromFileList(e.target.files, files);
     setFilesAndHandleChange(newFiles);
   }
