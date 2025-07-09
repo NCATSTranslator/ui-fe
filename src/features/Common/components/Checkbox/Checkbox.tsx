@@ -8,7 +8,7 @@ interface CheckboxProps {
   children?: ReactNode;
   className?: string;
   handleClick: ()=>void;
-  icon?: any;
+  icon?: ReactNode;
   labelLeft?: boolean; 
   name?: string;
   title?: string; 

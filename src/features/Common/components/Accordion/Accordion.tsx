@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useCallback, ReactNode } from 'react';
+import { FC, useState, useEffect, useCallback, ReactNode, MouseEvent } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { NavLink } from 'react-router-dom';
 import styles from './Accordion.module.scss';
@@ -42,7 +42,7 @@ const Accordion: FC<AccordionProps> = ({
   const panelId = `${accordionId}-panel`;
   const buttonId = `${accordionId}-button`;
 
-  const handleToggle = useCallback((e?: React.MouseEvent) => {
+  const handleToggle = useCallback((e?: MouseEvent) => {
     if (e) {
       e.preventDefault();
     }

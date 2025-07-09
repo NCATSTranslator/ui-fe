@@ -1,4 +1,4 @@
-@import "@/assets/styles/variables";
+   @use "@/assets/styles/variables" as *;
 
 $toggleTransition: all .25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
 .toggle {

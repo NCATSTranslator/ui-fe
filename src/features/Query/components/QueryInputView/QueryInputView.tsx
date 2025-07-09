@@ -1,12 +1,13 @@
 import { FC } from 'react';
 import styles from '@/features/Query/components/Query/Query.module.scss';
 import QueryBar from '@/features/Query/components/QueryBar/QueryBar';
-import { AutocompleteItem, QueryItem } from '@/features/Query/types/querySubmission';
+import { AutocompleteItem, ExampleQueries, QueryItem } from '@/features/Query/types/querySubmission';
 import { QuerySelect } from '@/features/Query/components/QuerySelect/QuerySelect';
 import ExampleQueryList from '@/features/Query/components/ExampleQueryList/ExampleQueryList';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
-import { QueryTypeIcon } from '../QueryTypeIcon/QueryTypeIcon';
+import { QueryTypeIcon } from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
+import { User } from '@/features/UserAuth/types/user';
 
 interface QueryInputViewProps {
   queryItem: QueryItem;
@@ -16,8 +17,8 @@ interface QueryInputViewProps {
   isLoading: boolean;
   isError: boolean;
   errorText: string;
-  user: any;
-  exampleQueries: any;
+  user: User | null;
+  exampleQueries: ExampleQueries;
   onQueryTypeChange: (value: string, resetInputText?: boolean) => void;
   onQueryItemChange: (value: string) => void;
   onItemSelection: (item: AutocompleteItem) => void;

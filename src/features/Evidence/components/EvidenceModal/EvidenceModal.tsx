@@ -2,23 +2,20 @@ import {useState, useEffect, useRef, FC, useMemo} from "react";
 import Modal from "@/features/Common/components/Modal/Modal";
 import styles from './EvidenceModal.module.scss';
 import { getCompressedSubgraph, getCompressedEdge, hasSupport } from "@/features/Common/utils/utilities";
-import { isPublication, getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";
 import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "@/features/ResultList/types/results.d";
-import { Provenance, PublicationObject, TrialObject } from "@/features/Evidence/types/evidence.d";
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
-import { compareByKeyLexographic } from "@/features/Common/utils/sortingFunctions";
-import { cloneDeep } from "lodash";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from "@/features/UserAuth/slices/userSlice";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import { useSeenStatus } from "@/features/ResultItem/hooks/resultHooks";
-import PathViewSection from "../PathViewSection/PathViewSection";
-import EvidenceTabs from "../EvidenceTabs/EvidenceTabs";
+import { useEvidenceData } from "@/features/Evidence/hooks/evidenceHooks";
+import PathViewSection from "@/features/Evidence/components/PathViewSection/PathViewSection";
+import EvidenceTabs from "@/features/Evidence/components/EvidenceTabs/EvidenceTabs";
 
 interface EvidenceModalProps {
   edge: ResultEdge | null;
   isOpen: boolean;
-  onClose: Function;
+  onClose: () => void;
   path?: Path | null;
   pathKey: string
   pk: string;
@@ -37,10 +34,6 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
   const prefs = useSelector(currentPrefs);
   const resultSet = useSelector(getResultSetById(pk));
 
-  const [pubmedEvidence, setPubmedEvidence] = useState<PublicationObject[]>([]);
-  const [sources, setSources] = useState<Provenance[]>([]);
-  const clinicalTrials = useRef<any[]>([]);
-  const miscEvidence = useRef<any[]>([]);
   const hasBeenOpened = useRef(false);
   const [selectedEdge, setSelectedEdge] = useState(edge);
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
@@ -49,6 +42,15 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
   const { isEdgeSeen, markEdgeSeen, markEdgeUnseen } = useSeenStatus(pk);
   const edgeSeen = !!selectedEdge?.id && isEdgeSeen(selectedEdge.id);
+
+  const {
+    publications,
+    sources,
+    clinicalTrials,
+    miscEvidence,
+    handleSelectedEdge: handleEvidenceData,
+    setPublications
+  } = useEvidenceData({ setEdgeLabel });
 
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false = useMemo(()=>{
     return path?.compressedSubgraph && !!resultSet ? getCompressedSubgraph(resultSet, path.compressedSubgraph) : false;
@@ -71,37 +73,17 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     }
   })
 
-  // filters evidence based on provided selectedEdge
+  // Updated handleSelectedEdge to use the hook and mark edge as seen
   const handleSelectedEdge = (resultSet: ResultSet, selEdge: ResultEdge) => {
     if (selEdge === null || selEdge === undefined)
       return;
 
-    let filteredEvidence = {
-      publications: new Set<PublicationObject>(),
-      sources: new Set<Provenance>(),
-      trials: new Set<TrialObject>()
-    };
-    filteredEvidence.publications = new Set(flattenPublicationObject(resultSet, selEdge.publications));
-    filteredEvidence.trials = new Set(flattenTrialObject(resultSet, selEdge.trials));
-    filteredEvidence.sources = new Set(selEdge.provenance);
     setSelectedEdge(selEdge);
-    const formatted = getFormattedEdgeLabel(resultSet, selEdge).replaceAll("|", " ");
-    setEdgeLabel(formatted);
-    distributeEvidence(filteredEvidence);
+    handleEvidenceData(resultSet, selEdge);
     markEdgeSeen(selEdge.id);
   }
 
-  const distributeEvidence = (evidence: {publications: Set<PublicationObject>, sources: Set<Provenance>, trials: Set<TrialObject> }) => {
-    setPubmedEvidence(cloneDeep([...evidence.publications].filter(item => isPublication(item))));
-    clinicalTrials.current = cloneDeep([...evidence.trials]);
-    miscEvidence.current = cloneDeep([...evidence.publications].filter(item => !isPublication(item)))
-      .filter((v,i,a) => a.findIndex(v2 => (v2.id === v.id)) === i);
-    let displayedSources = [...evidence.sources];
-    displayedSources.sort(compareByKeyLexographic('name'));
-    setSources(displayedSources);
-  }
-
-  const handleEdgeClick = (edgeIDs: string[], path: Path) => {
+  const handleEdgeClick = (edgeIDs: string[]) => {
     if(!resultSet)
       return;
     const getEdgeFromSubgraph = (edgeID: string, subgraph: (ResultEdge | ResultNode | ResultEdge[])[]) => {
@@ -187,10 +169,10 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
             :
               <EvidenceTabs
                 isOpen={isOpen}
-                publications={pubmedEvidence}
-                setPublications={setPubmedEvidence}
-                clinicalTrials={clinicalTrials.current}
-                miscEvidence={miscEvidence.current}
+                publications={publications}
+                setPublications={setPublications}
+                clinicalTrials={clinicalTrials}
+                miscEvidence={miscEvidence}
                 sources={sources}
                 selectedEdge={selectedEdge}
                 pk={pk}

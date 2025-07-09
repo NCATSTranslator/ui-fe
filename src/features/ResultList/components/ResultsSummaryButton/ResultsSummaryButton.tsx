@@ -9,7 +9,7 @@ import ResultsSummaryModal from "@/features/ResultList/components/ResultsSummary
 import { genTopNResultsContext } from "@/features/ResultList/utils/llm";
 import { Result } from "@/features/ResultList/types/results.d";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
-import { useTextStream } from "@/features/Common/utils/customHooks";
+import { useTextStream } from "@/features/Common/hooks/customHooks";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
 import { isEqual } from "lodash";
@@ -18,7 +18,7 @@ import { useSelector } from "react-redux";
 interface ResultsSummaryButtonProps {
   results: Result[];
   queryString: string;
-  handleResultMatchClick: Function;
+  handleResultMatchClick: (match: ResultContextObject) => void;
   pk: string;
 }
 

@@ -1,6 +1,6 @@
 import { FC, ReactNode, useCallback } from "react";
 import DisclaimerModal from "@/features/Common/components/DisclaimerModal/DisclaimerModal";
-import { useDisclaimersApproved } from "@/features/Common/utils/customHooks";
+import { useDisclaimersApproved } from "@/features/Common/hooks/customHooks";
 
 export interface PageProps {
   title: string;

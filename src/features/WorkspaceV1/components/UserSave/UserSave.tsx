@@ -1,5 +1,5 @@
 import styles from './UserSave.module.scss';
-import { useState, useEffect, MutableRefObject, Dispatch, SetStateAction, FC, useCallback, useMemo } from 'react';
+import { useState, useEffect, RefObject, Dispatch, SetStateAction, FC, useCallback, useMemo } from 'react';
 import Highlighter from 'react-highlight-words';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultItem from '@/features/ResultItem/components/ResultItem/ResultItem';
@@ -19,7 +19,7 @@ interface UserSaveProps {
   activateNotes?: (nameString: string, id: string) => void;
   bookmarkAddedToast?: () => void;
   bookmarkRemovedToast?: () => void;
-  currentSearchString: MutableRefObject<string>;
+  currentSearchString: RefObject<string>;
   handleBookmarkError?: () => void;
   save: [string, SaveGroup];
   scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number}

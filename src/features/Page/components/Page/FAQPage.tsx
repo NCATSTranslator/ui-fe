@@ -1,7 +1,7 @@
 import { FC, ReactNode, useEffect, useCallback } from "react";
 import FAQSidebar from "@/features/Page/components/FAQSidebar/FAQSidebar";
 import DisclaimerModal from "@/features/Common/components/DisclaimerModal/DisclaimerModal";
-import { useDisclaimersApproved } from "@/features/Common/utils/customHooks";
+import { useDisclaimersApproved } from "@/features/Common/hooks/customHooks";
 import styles from './FAQPage.module.scss';
 import { FAQArticle } from "@/features/Page/types/page";
 

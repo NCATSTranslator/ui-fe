@@ -6,7 +6,7 @@ import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import { cloneDeep } from "lodash";
-import { SaveGroup } from "@/features/UserAuth/utils/userApi";
+import { Save, SaveGroup } from "@/features/UserAuth/utils/userApi";
 
 /**
  * Performs a case-insensitive string match against a result's name, description, and all associated paths.
@@ -263,7 +263,7 @@ export const applyFilters = (
 
     for (const result of filteredResults) {
       const include = Object.values(facetsByFamily).every(filters =>
-        filters.some(facet => facet.id && result.tags.hasOwnProperty(facet.id))
+        filters.some(facet => facet.id && Object.prototype.hasOwnProperty.call(result.tags, facet.id))
       );
 
       if (!include) continue;
@@ -394,7 +394,7 @@ export const calculateFacetCounts = (
     for(const tag of Object.keys(result.tags)) {
       // If the tag exists on the list, either increment it or initialize its count
       if (predicate(tag)) {
-        if (countedTags.hasOwnProperty(tag)) {
+        if (Object.prototype.hasOwnProperty.call(countedTags, tag)) {
           countedTags[tag].count = (countedTags[tag].count ?? 0) + 1;
         } else {
           // If it doesn't exist on the current list of tags, add it and initialize its count
@@ -419,7 +419,7 @@ export const calculateFacetCounts = (
     const missingFamiliesCount = activeFamilies.size - resultFamilies.size;
     // When the family counts are equal, add all the result's tags
     if (missingFamiliesCount === 0) {
-      addTagCountsWhen(countedTags, result, (tag) => { return true; });
+      addTagCountsWhen(countedTags, result, () => { return true; });
     // When the result is missing a single family, add all tags from only the missing family
     } else if (missingFamiliesCount === 1) {
       // Find the missing family
@@ -427,7 +427,7 @@ export const calculateFacetCounts = (
         return !resultFamilies.has(family);
       })[0];
 
-      addTagCountsWhen(countedTags, result, (tagID) => {
+      addTagCountsWhen(countedTags, result, (tagID: string) => {
         return filtering.getTagFamily(tagID) === missingFamily;
       });
     }
@@ -497,7 +497,7 @@ export const checkBookmarkForNotes = (bookmarkID: string | null, bookmarkSet: Sa
   if(bookmarkID === null)
     return false;
 
-  const findInSet = (set: Set<any>, predicate: (obj: any)=>boolean) => {
+  const findInSet = (set: Set<Save>, predicate: (obj: Save)=>boolean): Save | undefined => {
     for (const item of set) {
       if(predicate(item)) {
         return item;

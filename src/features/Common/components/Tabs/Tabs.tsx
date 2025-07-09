@@ -141,8 +141,6 @@ const Tabs: FC<TabsProps> = ({
               tooltipIcon={tooltipIcon}
               onClick={handleTabClick}
               dataTooltipId={dataTooltipId}
-              tabIndex={i}
-              totalTabs={validChildren.length}
               setTabRef={setTabRef}
             />
           );

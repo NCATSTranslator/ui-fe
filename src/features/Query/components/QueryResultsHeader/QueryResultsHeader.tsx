@@ -5,6 +5,7 @@ import { Result } from '@/features/ResultList/types/results';
 import { generateEntityLink } from '@/features/Common/utils/utilities';
 import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
 import styles from './QueryResultsHeader.module.scss';
+import { ResultContextObject } from '@/features/ResultList/utils/llm';
 
 const generatePathfinderQuestionText = (labelOne: string, labelTwo: string, constraintText?: string) => {
   if(!!constraintText) {
@@ -53,7 +54,7 @@ interface QueryResultsHeaderProps {
   onShare: () => void;
   results?: Result[];
   loading?: boolean;
-  onResultMatchClick?: Function;
+  onResultMatchClick?: (match: ResultContextObject) => void;
   pk?: string;
   className?: string;
   searchedTermClassName?: string;
@@ -89,6 +90,7 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
       searchedTermClassName
     )
   : generateSmartQuerySubheading(questionText, entityId || '', entityLabel || '', searchedTermClassName);
+
   return(
     <div className={`${styles.resultsHeader} ${className}`}>
       <div className={styles.showingResultsContainer}>

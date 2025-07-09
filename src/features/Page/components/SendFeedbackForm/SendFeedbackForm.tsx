@@ -6,7 +6,7 @@ import FileInput from "@/features/Common/components/FileInput/FileInput";
 import Select from "@/features/Common/components/Select/Select";
 import { Fade } from "react-awesome-reveal";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
-import { useFeedbackForm } from "@/features/Common/utils/customHooks";
+import { useFeedbackForm } from "@/features/Common/hooks/customHooks";
 import { CustomFile } from "@/features/Common/types/global";
 import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
 import Feedback from "@/assets/icons/navigation/Feedback.svg?react";

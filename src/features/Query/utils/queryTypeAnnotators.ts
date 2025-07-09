@@ -39,7 +39,7 @@ export const queryTypeAnnotator = async (normalizedNodes: NormalizedNode[]): Pro
     fields: [ 'symbol', 'taxid' ]
   };
 
-  const geneInfoRequestOptions: RequestInit = {
+  const geneInfoRequestOptions = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -71,6 +71,7 @@ export const queryTypeAnnotator = async (normalizedNodes: NormalizedNode[]): Pro
     const result = [...validGenes, ...nonGeneNodes];
     return Promise.resolve(result);
   } catch (err) {
+    console.error(err);
     // If gene annotation fails, return all nodes unchanged
     return Promise.resolve(normalizedNodes);
   }

@@ -64,3 +64,11 @@ export type GenericItem = {
   label: string;
   types: string[];
 }
+
+export type ExampleQueries = {
+  exampleDiseases: Example[];
+  exampleChemsUp: Example[];
+  exampleChemsDown: Example[];
+  exampleGenesUp: Example[];
+  exampleGenesDown: Example[];
+}

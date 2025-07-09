@@ -2,7 +2,7 @@ import { FC, ReactNode } from 'react';
 import { Link, useLocation, Location } from 'react-router-dom';
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useSelector } from "react-redux";
-import { useWindowSize } from "@/features/Common/utils/customHooks";
+import { useWindowSize } from "@/features/Common/hooks/customHooks";
 import History from '@/assets/icons/navigation/History.svg?react';
 import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
 import Workspace from '@/assets/icons/navigation/Workspace.svg?react';

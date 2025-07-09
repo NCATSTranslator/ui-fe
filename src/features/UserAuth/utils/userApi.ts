@@ -144,7 +144,7 @@ const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
     if(!save?.data?.query)
       continue;
 
-    if(!newSaves.hasOwnProperty(save.ars_pkey)) {
+    if(!Object.prototype.hasOwnProperty.call(newSaves, save.ars_pkey)) {
       newSaves[save.ars_pkey] = {
         saves: new Set([save]),
         query: save.data.query
@@ -156,7 +156,7 @@ const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
   // return only saves from after Jan 1, 2024
   const cutoffDate = new Date('2024-01-01');
   const filteredSaves = Object.fromEntries(
-    Object.entries(newSaves).filter(([key, value]) => {
+    Object.entries(newSaves).filter(([, value]) => {
       return new Date(value.query.submitted_time) >= cutoffDate;
     })
   );
@@ -262,7 +262,7 @@ export const getUserProfile = async (
 export const getUserPreferences = async (
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
-  ) => {
+  ): Promise<PreferencesContainer> => {
     return getUserData(`${userApiPath}/preferences`, httpErrorHandler, fetchErrorHandler);
 }
 
@@ -374,7 +374,7 @@ export const deleteUserSave = async (
  * @param {ErrorHandler} httpErrorHandler - Handles HTTP errors.
  * @param {ErrorHandler} fetchErrorHandler - Handles fetch errors.
  * @param {Function} successHandler - Processes successful responses, defaults to JSON parsing.
- * @returns {Promise<any>} Processed response data.
+ * @returns {Promise<T | void>} Processed response data.
  */
 const fetchUserData = async <T>(
     fetchMethod: () => Promise<Response>,
@@ -396,7 +396,7 @@ const fetchUserData = async <T>(
 
 
 
-type ErrorHandler = (error: Error) => void | any;
+type ErrorHandler = (error: Error) => void;
 type SuccessHandler<T> = (response: Response) => Promise<T>;
 /**
  * Default handler for HTTP errors. Logs a message for an HTTP error and throws an error with the response status text.
@@ -646,7 +646,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
 
   useEffect(() => {
     const fetchPrefs = async (hasUser: boolean) => {
-      let prefs: any;
+      let prefs: PreferencesContainer | undefined;
       if(!hasUser) {
         prefs = defaultPrefs;
         console.warn("no user available, setting to default prefs.");
@@ -659,7 +659,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
           prefs = defaultPrefs;
         }
       }
-      if(isPreferencesContainer(prefs.preferences)) 
+      if(isPreferencesContainer(prefs?.preferences)) 
         dispatch(setCurrentPrefs(prefs.preferences));
     };
 
@@ -843,7 +843,7 @@ export const mergeResultSets = (resultSetOne: ResultSet, resultSetTwo: ResultSet
  * @param obj - The object to check.
  * @returns {boolean} True if the object is a PreferencesContainer, otherwise false.
  */
-export const isPreferencesContainer = (obj: any): obj is PreferencesContainer => {
+export const isPreferencesContainer = (obj: unknown): obj is PreferencesContainer => {
   let isPrefContainer;
   if (typeof obj !== 'object' || obj === null) {
     isPrefContainer = false;
@@ -858,7 +858,7 @@ export const isPreferencesContainer = (obj: any): obj is PreferencesContainer =>
       'evidence_per_screen',
     ];
 
-    isPrefContainer = requiredKeys.every(key => key in obj && isPrefObject(obj[key])) && Object.values(obj).every(isPrefObject);
+    isPrefContainer = requiredKeys.every(key => key in obj && isPrefObject((obj as unknown as Record<string, unknown>)[key])) && Object.values(obj).every(isPrefObject);
   }
   if(!isPrefContainer)
     console.warn(`The following object does not match the typing for a PreferencesContainer:`, obj);
@@ -872,7 +872,7 @@ export const isPreferencesContainer = (obj: any): obj is PreferencesContainer =>
  * @param obj - The object to check.
  * @returns {boolean} True if the object is a PrefObject, otherwise false.
  */
-const isPrefObject = (obj: any): obj is PrefObject => {
+const isPrefObject = (obj: unknown): obj is PrefObject => {
   const isAPrefObject =
     (
       typeof obj === 'object' &&

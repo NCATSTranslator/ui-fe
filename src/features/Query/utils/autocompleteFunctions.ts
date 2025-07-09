@@ -62,7 +62,7 @@ const newFetchNodesFromInputText = async (
   }
   const typesString = types.length > 0 ? `&biolink_type=${types.join('&biolink_type=')}` : "";
 
-  const nameResolverRequestOptions: RequestInit = {
+  const nameResolverRequestOptions = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   };

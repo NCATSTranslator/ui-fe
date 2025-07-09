@@ -8,16 +8,16 @@ import styles from './CombinedQueryInterface.module.scss';
 import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
 import { useSelector } from "react-redux";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
+import { QueryType } from "@/features/Query/types/querySubmission";
 
 interface CombinedQueryInterfaceProps {
   isResults?: boolean;
   loading?: boolean;
   results?: Result[];
-  handleResultMatchClick?: Function;
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   pk?: string;
   // Query-specific props
-  initPresetTypeObject?: any;
+  initPresetTypeObject?: QueryType | null;
   initNodeLabelParam?: string | null;
   initNodeIdParam?: string | null;
   nodeDescription?: string | null;
@@ -27,7 +27,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   isResults = false,
   loading = false,
   results = [],
-  handleResultMatchClick = () => {},
   setShareModalFunction = () => {},
   pk = "",
   // Query-specific props
@@ -63,7 +62,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             nodeDescription={nodeDescription}
             setShareModalFunction={setShareModalFunction}
             results={results}
-            handleResultMatchClick={handleResultMatchClick}
             pk={pk}
           />
         </Tab>
@@ -77,7 +75,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
               isResults={isResults}
               loading={loading}
               results={results}
-              handleResultMatchClick={handleResultMatchClick}
               setShareModalFunction={setShareModalFunction}
               pk={pk}
             />

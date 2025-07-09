@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, ReactNode, RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CAN_REDO_COMMAND,
   CAN_UNDO_COMMAND,
@@ -64,18 +64,18 @@ const blockTypeToBlockName: Record<string, string> = {
   ul: "Bulleted List"
 };
 
-function Divider(): JSX.Element {
+function Divider(): ReactNode {
   return <div className="divider" />;
 }
 
 interface SelectProps {
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   className: string;
   options: string[];
   value: string;
 }
 
-function Select({ onChange, className, options, value }: SelectProps): JSX.Element {
+function Select({ onChange, className, options, value }: SelectProps): ReactNode {
   return (
     <select className={className} onChange={onChange} value={value}>
       <option hidden={true} value="" />
@@ -91,7 +91,7 @@ function Select({ onChange, className, options, value }: SelectProps): JSX.Eleme
 interface BlockOptionsDropdownListProps {
   editor: LexicalEditor;
   blockType: string;
-  toolbarRef: React.RefObject<HTMLDivElement>;
+  toolbarRef: RefObject<HTMLDivElement>;
   setShowBlockOptionsDropDown: (show: boolean) => void;
 }
 
@@ -100,7 +100,7 @@ function BlockOptionsDropdownList({
   blockType,
   toolbarRef,
   setShowBlockOptionsDropDown
-}: BlockOptionsDropdownListProps): JSX.Element {
+}: BlockOptionsDropdownListProps): ReactNode {
   const dropDownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -258,7 +258,7 @@ function BlockOptionsDropdownList({
   );
 }
 
-export default function ToolbarPlugin(): JSX.Element {
+export default function ToolbarPlugin(): ReactNode {
   const [editor] = useLexicalComposerContext();
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [canUndo, setCanUndo] = useState<boolean>(false);
@@ -318,7 +318,7 @@ export default function ToolbarPlugin(): JSX.Element {
       }),
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
-        (_payload, newEditor) => {
+        () => {
           updateToolbar();
           return false;
         },
@@ -326,7 +326,7 @@ export default function ToolbarPlugin(): JSX.Element {
       ),
       editor.registerCommand(
         CAN_UNDO_COMMAND,
-        (payload) => {
+        (payload: boolean) => {
           setCanUndo(payload);
           return false;
         },
@@ -334,7 +334,7 @@ export default function ToolbarPlugin(): JSX.Element {
       ),
       editor.registerCommand(
         CAN_REDO_COMMAND,
-        (payload) => {
+        (payload: boolean) => {
           setCanRedo(payload);
           return false;
         },
@@ -345,7 +345,7 @@ export default function ToolbarPlugin(): JSX.Element {
 
   const codeLanguges = useMemo(() => getCodeLanguages(), []);
   const onCodeLanguageSelect = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
+    (e: ChangeEvent<HTMLSelectElement>) => {
       editor.update(() => {
         if (selectedElementKey !== null) {
           const node = $getNodeByKey(selectedElementKey);
@@ -393,12 +393,12 @@ export default function ToolbarPlugin(): JSX.Element {
             <span className={"icon block-type " + blockType} />
             <span className="text">{blockTypeToBlockName[blockType]}</span>
             <i className="chevron-down" />
-            {showBlockOptionsDropDown &&
+            {showBlockOptionsDropDown && toolbarRef.current !== null &&
               
                 <BlockOptionsDropdownList
                   editor={editor}
                   blockType={blockType}
-                  toolbarRef={toolbarRef}
+                  toolbarRef={toolbarRef as RefObject<HTMLDivElement>}
                   setShowBlockOptionsDropDown={setShowBlockOptionsDropDown}
                 />
               }

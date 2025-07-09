@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactElement } from 'react';
 import Chemical from '@/assets/icons/queries/Chemical.svg?react';
 import Gene from '@/assets/icons/queries/Gene.svg?react';
 import Disease from '@/assets/icons/queries/Disease.svg?react';
@@ -13,7 +13,7 @@ interface QueryTypeIconProps {
 }
 
 export const QueryTypeIcon: FC<QueryTypeIconProps> = ({ type }) => {
-  let icon: React.ReactElement | null = null;
+  let icon: ReactElement | null = null;
   
   switch (type.toLowerCase()) {
     case 'disease':

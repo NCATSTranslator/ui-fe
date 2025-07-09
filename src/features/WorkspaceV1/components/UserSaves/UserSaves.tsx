@@ -3,7 +3,7 @@ import { getSaves, mergeResultSets, SaveGroup } from '@/features/UserAuth/utils/
 import { handleEvidenceModalClose } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import styles from './UserSaves.module.scss';
 import EvidenceModal from '@/features/Evidence/components/EvidenceModal/EvidenceModal';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import RefreshIcon from '@/assets/icons/buttons/Refresh.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
@@ -174,7 +174,6 @@ const UserSaves = () => {
     setIsSearchLoading(false);
   }, []);
 
-  // eslint-disable-next-line
   const delayedSearch = useCallback(debounce((value, userSaves, setFilteredUserSaves)=>handleSearch(value, userSaves, setFilteredUserSaves), 750), [handleSearch]);
 
   const handleSearchBarItemChange = (value: string) => {
@@ -228,106 +227,104 @@ const UserSaves = () => {
 
   return(
     <QueryClientProvider client={queryClient}>
-      <LoadingWrapper loading={loading}>
-        {
-          !!user
-          ?
-            <div>
-              <ToastContainer
-                position="top-center"
-                autoClose={3000}
-                theme="light"
-                transition={Slide}
-                pauseOnFocusLoss={false}
-                hideProgressBar
-                className="toastContainer"
-                closeOnClick={false}
-                closeButton={false}
-              />
-              <NotesModal
-                isOpen={notesOpen}
-                onClose={()=>(setNotesOpen(false))}
-                handleClearNotesEditor={handleClearNotesEditor}
-                noteLabel={noteLabel.current}
-                bookmarkID={currentBookmarkID.current}
-              />
-              <EvidenceModal
-                isOpen={evidenceModalOpen}
-                onClose={()=>handleEvidenceModalClose(setEvidenceModalOpen)}
-                result={selectedResult}
-                pk={(!!selectedPK) ? selectedPK : "-1"}
-                edge={selectedEdge}
-                path={selectedPath}
-                pathKey={selectedPathKey}
-              />
-              <div className="page-header">
-                <div className="container">
-                  <div className={styles.headerTop}>
-                    <h1 className="h4">Workspace</h1>
-                    {/* <Button
-                      isSecondary
-                      smallFont
-                      className={styles.collapseButton}
-                      >
-                      <ChevUp/> Collapse All
-                    </Button> */}
-                  </div>
-                  <p>Bookmarked results and any notes added to them are stored indefinitely.</p>
-                  <div className={styles.searchBarContainer}>
-                    <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form} ref={formRef}>
-                      <TextInput 
-                        placeholder="Search Saved Results" 
-                        handleChange={(e)=>handleSearchBarItemChange(e)} 
-                        className={styles.input}
-                        iconLeft={<SearchIcon/>}
-                        iconRight={!!isSearchLoading ? <RefreshIcon className={`loadingIcon ${styles.loadingIcon}`}/> : !!currentSearchString.current && <CloseIcon className={styles.closeIcon} onClick={clearSearchBar} />}
-                      />
-                    </form>
-                  </div>
+      {
+        !!user
+        ?
+          <div>
+            <ToastContainer
+              position="top-center"
+              autoClose={3000}
+              theme="light"
+              transition={Slide}
+              pauseOnFocusLoss={false}
+              hideProgressBar
+              className="toastContainer"
+              closeOnClick={false}
+              closeButton={false}
+            />
+            <NotesModal
+              isOpen={notesOpen}
+              onClose={()=>(setNotesOpen(false))}
+              handleClearNotesEditor={handleClearNotesEditor}
+              noteLabel={noteLabel.current}
+              bookmarkID={currentBookmarkID.current}
+            />
+            <EvidenceModal
+              isOpen={evidenceModalOpen}
+              onClose={()=>handleEvidenceModalClose(setEvidenceModalOpen)}
+              result={selectedResult}
+              pk={(!!selectedPK) ? selectedPK : "-1"}
+              edge={selectedEdge}
+              path={selectedPath}
+              pathKey={selectedPathKey}
+            />
+            <div className="page-header">
+              <div className="container">
+                <div className={styles.headerTop}>
+                  <h1 className="h4">Workspace</h1>
+                  {/* <Button
+                    isSecondary
+                    smallFont
+                    className={styles.collapseButton}
+                    >
+                    <ChevUp/> Collapse All
+                  </Button> */}
+                </div>
+                <p>Bookmarked results and any notes added to them are stored indefinitely.</p>
+                <div className={styles.searchBarContainer}>
+                  <form onSubmit={(e)=>{handleSubmit(e)}} className={styles.form} ref={formRef}>
+                    <TextInput 
+                      placeholder="Search Saved Results" 
+                      handleChange={(e)=>handleSearchBarItemChange(e)} 
+                      className={styles.input}
+                      iconLeft={<SearchIcon/>}
+                      iconRight={!!isSearchLoading ? <RefreshIcon className={`loadingIcon ${styles.loadingIcon}`}/> : !!currentSearchString.current && <CloseIcon className={styles.closeIcon} onClick={clearSearchBar} />}
+                    />
+                  </form>
                 </div>
               </div>
-              <div className='container'>
-                {
-                  savesLoaded
-                  ? 
-                    (userSaves == null || Object.entries(userSaves).length <= 0)
-                    ? 
-                      <div className={styles.none}>
-                        <p>You haven't saved any results yet!</p>
-                        <p>Submit a query, then click the bookmark icon on a result to save it for later. You can then view that result here.</p>
-                      </div>
-                    : <>
-                        <div className={styles.saves}>
-                          {
-                            sortedUserSaves.map(([key, saveGroup]) => (
-                              <UserSave
-                                key={key}
-                                save={[key, saveGroup]}
-                                currentSearchString={currentSearchString}
-                                zoomKeyDown={zoomKeyDown}
-                                activateEvidence={activateEvidence}
-                                activateNotes={activateNotes}
-                                handleBookmarkError={handleBookmarkError}
-                                bookmarkAddedToast={bookmarkAddedToast}
-                                bookmarkRemovedToast={bookmarkRemovedToast}
-                                setShareModalOpen={setShareModalOpen}
-                                setShareResultID={setShareResultID}
-                                scoreWeights={scoreWeights}
-                                showHiddenPaths={showHiddenPaths}
-                                setShowHiddenPaths={setShowHiddenPaths}
-                              />
-                            ))
-                          }
-                        </div>
-                      </>
-                  : <></>
-                }
-              </div>
             </div>
-          :
-            <LoginWarning text="Use the Log In link above in order to view and manage your saved results."/>
-        }
-      </LoadingWrapper>
+            <LoadingWrapper loading={loading} className="container">
+              {
+                savesLoaded
+                ? 
+                  (userSaves == null || Object.entries(userSaves).length <= 0)
+                  ? 
+                    <div className={styles.none}>
+                      <p>You haven't saved any results yet!</p>
+                      <p>Submit a query, then click the bookmark icon on a result to save it for later. You can then view that result here.</p>
+                    </div>
+                  : <>
+                      <div className={styles.saves}>
+                        {
+                          sortedUserSaves.map(([key, saveGroup]) => (
+                            <UserSave
+                              key={key}
+                              save={[key, saveGroup]}
+                              currentSearchString={currentSearchString}
+                              zoomKeyDown={zoomKeyDown}
+                              activateEvidence={activateEvidence}
+                              activateNotes={activateNotes}
+                              handleBookmarkError={handleBookmarkError}
+                              bookmarkAddedToast={bookmarkAddedToast}
+                              bookmarkRemovedToast={bookmarkRemovedToast}
+                              setShareModalOpen={setShareModalOpen}
+                              setShareResultID={setShareResultID}
+                              scoreWeights={scoreWeights}
+                              showHiddenPaths={showHiddenPaths}
+                              setShowHiddenPaths={setShowHiddenPaths}
+                            />
+                          ))
+                        }
+                      </div>
+                    </>
+                : <></>
+              }
+            </LoadingWrapper>
+          </div>
+        :
+          <LoginWarning text="Use the Log In link above in order to view and manage your saved results."/>
+      }
     </QueryClientProvider>
   )
 }

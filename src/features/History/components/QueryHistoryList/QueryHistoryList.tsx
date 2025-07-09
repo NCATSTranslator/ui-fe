@@ -1,5 +1,5 @@
 import styles from "./QueryHistoryList.module.scss";
-import { useEffect, useState, Dispatch, SetStateAction, useCallback } from "react";
+import { useEffect, useState, Dispatch, SetStateAction, useCallback, FormEvent, MouseEvent } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "@/features/Common/utils/utilities";
@@ -15,8 +15,9 @@ import Close from '@/assets/icons/buttons/Close/Close.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
 import RefreshIcon from '@/assets/icons/buttons/Refresh.svg?react';
+import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 
-const QueryHistoryList = () => {
+const QueryHistoryList = ({ loading }: { loading: boolean }) => {
   let previousTimeName: string | undefined;
 
   const dispatch = useDispatch();
@@ -72,7 +73,6 @@ const QueryHistoryList = () => {
     setIsLoading(false);
   }, [queryHistoryState]);
 
-  // eslint-disable-next-line
   const delayedSearch = useCallback(debounce((value, setIsLoading, setFilteredQueryHistoryState)=>handleSearch(value, setIsLoading, setFilteredQueryHistoryState), 750), [handleSearch]);
 
   const handleSearchBarItemChange = (value:string) => {
@@ -81,14 +81,14 @@ const QueryHistoryList = () => {
     delayedSearch(value, setIsLoading, setFilteredQueryHistoryState);
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const target = e.currentTarget[0] as HTMLInputElement;
     handleSearch(target.value, setIsLoading, setFilteredQueryHistoryState);
   };
   
 
-  const handleExportClick = (e: React.MouseEvent, query: QueryHistoryItem) => {
+  const handleExportClick = (e: MouseEvent, query: QueryHistoryItem) => {
     e.stopPropagation();
     setExportLabel(query?.item?.node?.label ?? null);
     setExportNodeID(query.item?.node?.id ?? null);
@@ -128,7 +128,7 @@ const QueryHistoryList = () => {
           />
         </form>
       </div>
-      <div className={`container ${styles.historyContainer}`}>
+      <LoadingWrapper loading={loading} className={`container ${styles.historyContainer}`}>
         <ul className={styles.historyList}>
           {filteredQueryHistoryState.map((query, i) => {
             // hide past queries with old formatting
@@ -193,7 +193,7 @@ const QueryHistoryList = () => {
             );
           })}
         </ul>
-      </div>
+      </LoadingWrapper>
     </div>
   );
 };

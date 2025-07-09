@@ -1,6 +1,6 @@
 import styles from './ResultListLoadingBar.module.scss';
 import { useEffect, useState, useRef, FC, useMemo, useCallback } from 'react';
-import { useInterval } from '@/features/Common/utils/customHooks';
+import { useInterval } from '@/features/Common/hooks/customHooks';
 import ResultListLoadingButton from '@/features/ResultList/components/ResultListLoadingButton/ResultListLoadingButton';
 import { ResultListLoadingData } from '@/features/ResultList/types/results';
 

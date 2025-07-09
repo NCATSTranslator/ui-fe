@@ -7,8 +7,47 @@ export default defineConfig(() => {
   return {
     build: {
       outDir: 'build',
-      chunkSizeWarningLimit: 1600,
-      sourcemap: true
+      chunkSizeWarningLimit: 1200,
+      sourcemap: true,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'cytoscape-vendor': [
+              'cytoscape',
+              'cytoscape-klay',
+              'cytoscape-dagre', 
+              'cytoscape-avsdf',
+              'cytoscape-popper',
+              'cytoscape-navigator',
+              '@popperjs/core'
+            ],
+            'ui-vendor': [
+              'react-select',
+              'react-paginate',
+              'react-range',
+              'react-tooltip',
+              'react-toastify',
+              'react-animate-height',
+              'react-awesome-reveal',
+              'react-responsive-carousel'
+            ],
+            'utils-vendor': [
+              'lodash',
+              'mathjs',
+              'fraction.js',
+              'fastest-levenshtein'
+            ],
+            'redux-vendor': [
+              'react-redux',
+              '@reduxjs/toolkit',
+              'redux'
+            ],
+            'query-vendor': [
+              '@tanstack/react-query'
+            ]
+          }
+        }
+      }
     },
     plugins: [
       react(),

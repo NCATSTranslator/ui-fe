@@ -1,5 +1,6 @@
 import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
 import type { LinkMatcher } from "@lexical/react/LexicalAutoLinkPlugin";
+import { ReactNode } from "react";
 
 const URL_MATCHER = /((https?:\/\/(www\.)?)|(www\.))[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 
@@ -30,6 +31,6 @@ const MATCHERS: LinkMatcher[] = [
   }
 ];
 
-export default function CustomAutoLinkPlugin(): JSX.Element {
+export default function CustomAutoLinkPlugin(): ReactNode {
   return <AutoLinkPlugin matchers={MATCHERS} />;
 }

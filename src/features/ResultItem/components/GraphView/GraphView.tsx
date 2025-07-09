@@ -3,8 +3,9 @@ import cytoscape, { ElementsDefinition } from 'cytoscape';
 import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
-import popper from 'cytoscape-popper';
+import cytoscapePopper from 'cytoscape-popper';
 import navigator from 'cytoscape-navigator';
+import { createPopper } from '@popperjs/core';
 import 'cytoscape-navigator/cytoscape.js-navigator.css';
 import { useSelector } from 'react-redux';
 import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
@@ -18,15 +19,16 @@ import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import Minus from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import styles from './GraphView.module.scss';
 import { debounce } from 'lodash';
+import { PreferencesContainer } from '@/features/UserAuth/types/user';
 
 cytoscape.use(klay);
 cytoscape.use(avsdf);
 cytoscape.use(dagre);
 cytoscape.use(navigator);
-cytoscape.use(popper);
+cytoscape.use(cytoscapePopper(createPopper));
 cytoscape.warnings(false);
 
-const getInitialLayout = (prefs: any) => {
+const getInitialLayout = (prefs: PreferencesContainer) => {
   const layoutPref = prefs?.graph_layout?.pref_value || 'vertical';
   switch (layoutPref) {
     case 'horizontal':
@@ -42,12 +44,10 @@ interface GraphViewProps {
   graph: RenderableGraph;
   result: Result;
   resultSet: ResultSet | null;
-  onNodeClick: (nodes: any) => void;
+  onNodeClick: (nodes: Set<string[]>) => void;
   clearSelectedPaths: () => void;
   active: boolean;
   zoomKeyDown: boolean;
-  updateGraphFunction: (graph: any) => void;
-  prebuiltGraph?: any;
 }
 
 const GraphView = ({
@@ -84,9 +84,11 @@ const GraphView = ({
     const elements: ElementsDefinition = {
       nodes: graph.nodes.map((node: RenderableNode) => ({
         data: { ...node },
+        group: 'nodes'
       })),
       edges: graph.edges.map((edge: RenderableEdge) => ({
         data: { ...edge },
+        group: 'edges'
       }))
     };
 

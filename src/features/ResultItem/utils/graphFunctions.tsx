@@ -1,10 +1,11 @@
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Core, EventObject } from 'cytoscape';
 import { debounce } from 'lodash';
 import { capitalizeFirstLetter, hasSupport } from '@/features/Common/utils/utilities';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { Result, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import { GraphLayoutList, RenderableGraph, RenderableNode, RenderableEdge } from '@/features/ResultItem/types/graph.d';
+import { RefObject } from 'react';
 
 export const layoutList: GraphLayoutList = {
   klay: {
@@ -12,9 +13,9 @@ export const layoutList: GraphLayoutList = {
     name: 'klay',
     spacingFactor: 1.3,
     klay: { direction: 'RIGHT', edgeSpacingFactor: 0.1 },
-    ready: (ev: any) => {
+    ready: (ev: { target: { options: { eles: unknown[] } }; cy: Core }) => {
       if (ev.target?.options?.eles?.length < 10) {
-        ev.cy.zoom({ level: 1.5 });
+        ev.cy.zoom({ level: 1.5, renderedPosition: { x: 0, y: 0 } });
         ev.cy.center();
       }
     },
@@ -149,8 +150,8 @@ export const handleDeselectAllNodes = (
   cyGraph: Core | null,
   clearSelectedPaths: () => void,
   classes: { highlightClass: string; hideClass: string; excludedClass: string },
-  selNodes?: React.MutableRefObject<Set<string>>,
-  excNodes?: React.MutableRefObject<Set<string>>
+  selNodes?: RefObject<Set<string>>,
+  excNodes?: RefObject<Set<string>>
 ): void => {
   if(!cyGraph) {
     console.warn('unable to deselect nodes, no cytoscape graph provided.');
@@ -203,7 +204,8 @@ export const handleEdgeMouseOver = (
     </>
   );
   if (edgeInfoWindow) {
-    render(edgeInfoMarkup, edgeInfoWindow);
+    const root = createRoot(edgeInfoWindow);
+    root.render(edgeInfoMarkup);
   }
 };
 
@@ -213,7 +215,10 @@ export const handleEdgeMouseOut = (
 ): void => {
   ev.target.removeClass('hover-highlight');
   const edgeInfoWindow = document.getElementById(edgeInfoWindowIdString);
-  if (edgeInfoWindow) render(<></>, edgeInfoWindow);
+  if (edgeInfoWindow) {
+    const root = createRoot(edgeInfoWindow);
+    root.render(<></>);
+  }
 };
 
 export const handleSetupAndUpdateGraphTooltip = debounce(
@@ -244,7 +249,8 @@ export const handleSetupAndUpdateGraphTooltip = debounce(
             )}
           </span>
         );
-        render(tooltipMarkup, tooltipTextElement);
+        const root = createRoot(tooltipTextElement);
+        root.render(tooltipMarkup);
         tooltipElement.classList.add('visible');
         return tooltipElement;
       },
@@ -270,19 +276,19 @@ export const handleSetupAndUpdateGraphTooltip = debounce(
 //     }
 //   });
 
-//   // cyGraph.on('vclick', 'node', (ev: any) =>
+//   // cyGraph.on('vclick', 'node', (ev: EventObject) =>
 //   //   dataObj.handleNodeClick(ev, dataObj.formattedResults, dataObj.graph)
 //   // );
-//   cyGraph.on('vclick', 'edge', (ev: any) => console.log(ev.target.data()));
+//   cyGraph.on('vclick', 'edge', (ev: EventObject) => console.log(ev.target.data()));
 
-//   cyGraph.on('mouseover', 'node', (ev: any) => {
+//   cyGraph.on('mouseover', 'node', (ev: EventObject) => {
 //     ev.target.style('border-width', '2px');
 //     handleSetupAndUpdateGraphTooltip(ev, dataObj.graphTooltipIdString);
 //   });
-//   cyGraph.on('mouseout', 'node', (ev: any) =>
+//   cyGraph.on('mouseout', 'node', (ev: EventObject) =>
 //     ev.target.style('border-width', '1px')
 //   );
-//   cyGraph.on('mousemove', (ev: any) => {
+//   cyGraph.on('mousemove', (ev: EventObject) => {
 //     if (ev.target === cyGraph || !ev.target.isNode()) {
 //       handleHideTooltip(dataObj.graphTooltipIdString);
 //     }
@@ -291,14 +297,14 @@ export const handleSetupAndUpdateGraphTooltip = debounce(
 //     handleHideTooltip(dataObj.graphTooltipIdString)
 //   );
 
-//   cyGraph.on('mouseover', 'edge', (ev: any) =>
+//   cyGraph.on('mouseover', 'edge', (ev: EventObject) =>
 //     handleEdgeMouseOver(ev, dataObj.edgeInfoWindowIdString)
 //   );
-//   cyGraph.on('mouseout', 'edge', (ev: any) =>
+//   cyGraph.on('mouseout', 'edge', (ev: EventObject) =>
 //     handleEdgeMouseOut(ev, dataObj.edgeInfoWindowIdString)
 //   );
 
-//   cyGraph.on('click', (ev: any) => {
+//   cyGraph.on('click', (ev: EventObject) => {
 //     if (ev.target === cyGraph) {
 //       handleDeselectAllNodes(
 //         ev.cy,

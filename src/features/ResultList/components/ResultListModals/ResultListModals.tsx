@@ -5,7 +5,7 @@ import ShareModal from "@/features/ResultList/components/ShareModal/ShareModal";
 import ResultFocusModal from "@/features/ResultList/components/ResultFocusModal/ResultFocusModal";
 import { ToastContainer, Slide } from 'react-toastify';
 import { handleEvidenceModalClose } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { Path, ResultEdge } from "@/features/ResultList/types/results.d";
+import { Path, Result, ResultEdge, SharedItem } from "@/features/ResultList/types/results.d";
 
 interface ResultListModalsProps {
   currentBookmarkID: string | null | undefined;
@@ -13,7 +13,7 @@ interface ResultListModalsProps {
   focusModalOpen: boolean;
   formattedResultsLength: number;
   handleClearNotesEditor: () => Promise<void>;
-  handlePageClick: (event: any, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
+  handlePageClick: (event: {selected: number}, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   noteLabel: string;
   notesModalOpen: boolean;
   pk: string;
@@ -21,14 +21,14 @@ interface ResultListModalsProps {
   selectedEdge: ResultEdge | null; 
   selectedPath: Path | null;
   selectedPathKey: string;
-  selectedResult: any; 
+  selectedResult: Result | null; 
   setAutoScrollToResult: Dispatch<SetStateAction<boolean>>;
   setExpandSharedResult: Dispatch<SetStateAction<boolean>>;
   setEvidenceModalOpen: Dispatch<SetStateAction<boolean>>;
   setFocusModalOpen: Dispatch<SetStateAction<boolean>>;
   setNotesModalOpen: Dispatch<SetStateAction<boolean>>;
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
-  sharedItem: any; 
+  sharedItem: SharedItem; 
   shareModalOpen: boolean;
   shareResultID: string;
 }

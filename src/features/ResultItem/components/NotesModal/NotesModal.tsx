@@ -3,14 +3,14 @@ import styles from "./NotesModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import TextEditor from "@/features/Common/components/TextEditor/TextEditor";
 import Button from "@/features/Common/components/Button/Button";
-import { getUserSave, updateUserSave } from "@/features/UserAuth/utils/userApi";
+import { getUserSave, Save, updateUserSave } from "@/features/UserAuth/utils/userApi";
 
 interface NotesModalProps {
   isOpen?: boolean;
-  onClose?: Function;
+  onClose?: () => void;
   noteLabel?: string;
   bookmarkID?: string | null;
-  handleClearNotesEditor: any;
+  handleClearNotesEditor: () => void;
 }
 
 const NotesModal: FC<NotesModalProps> = ({isOpen = false, onClose = ()=>{}, noteLabel = "", bookmarkID = null , handleClearNotesEditor = ()=>{}}) => {
@@ -37,7 +37,7 @@ const NotesModal: FC<NotesModalProps> = ({isOpen = false, onClose = ()=>{}, note
 
     console.log("Clear notes from: ", bookmarkID);
     // update bookmark of given ID
-    let newSave: any = await getUserSave(bookmarkID);
+    let newSave: Save = await getUserSave(bookmarkID);
     newSave.notes = "";
     await updateUserSave(bookmarkID, newSave);
     // clear text editor

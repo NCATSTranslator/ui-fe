@@ -1,4 +1,4 @@
-@import "./variables";
+@use "./variables" as *;
 
 button {
   border: none;
@@ -25,7 +25,7 @@ button {
     margin-top: 8px;
     font-size: $captionSize;
     &:before {
-      content: url('./assets/icons/status/Alerts/Info.svg');
+      content: url('@/assets/icons/status/Alerts/Info.svg');
       margin-right: 4px;
     }
   }
@@ -592,7 +592,7 @@ button {
     display: inline-block;
     height: 8px;
     width: 8px;
-    background-image: url("./assets/icons/textEditor/chevron-down.svg");
+          background-image: url("@/assets/icons/textEditor/chevron-down.svg");
   }
   
   #block-controls button:hover {
@@ -612,31 +612,31 @@ button {
   }
   
   #block-controls span.block-type.paragraph {
-    background-image: url("./assets/icons/textEditor/text-paragraph.svg");
+    background-image: url("@/assets/icons/textEditor/text-paragraph.svg");
   }
   
   #block-controls span.block-type.h1 {
-    background-image: url("./assets/icons/textEditor/type-h1.svg");
+    background-image: url("@/assets/icons/textEditor/type-h1.svg");
   }
   
   #block-controls span.block-type.h2 {
-    background-image: url("./assets/icons/textEditor/type-h2.svg");
+    background-image: url("@/assets/icons/textEditor/type-h2.svg");
   }
   
   #block-controls span.block-type.quote {
-    background-image: url("./assets/icons/textEditor/chat-square-quote.svg");
+    background-image: url("@/assets/icons/textEditor/chat-square-quote.svg");
   }
   
   #block-controls span.block-type.ul {
-    background-image: url("./assets/icons/textEditor/list-ul.svg");
+    background-image: url("@/assets/icons/textEditor/list-ul.svg");
   }
   
   #block-controls span.block-type.ol {
-    background-image: url("./assets/icons/textEditor/list-ol.svg");
+    background-image: url("@/assets/icons/textEditor/list-ol.svg");
   }
   
   #block-controls span.block-type.code {
-    background-image: url("./assets/icons/textEditor/code.svg");
+    background-image: url("@/assets/icons/textEditor/code.svg");
   }
   
   .dropdown {
@@ -744,7 +744,7 @@ button {
   }
   
   .link-editor div.link-edit {
-    background-image: url("./assets/icons/textEditor/pencil-fill.svg");
+    background-image: url("@/assets/icons/textEditor/pencil-fill.svg");
     background-size: 16px;
     background-position: center;
     background-repeat: no-repeat;
@@ -798,83 +798,83 @@ button {
   }
   
   i.undo {
-    background-image: url("./assets/icons/textEditor/arrow-counterclockwise.svg");
+    background-image: url("@/assets/icons/textEditor/arrow-counterclockwise.svg");
   }
   
   i.redo {
-    background-image: url("./assets/icons/textEditor/arrow-clockwise.svg");
+    background-image: url("@/assets/icons/textEditor/arrow-clockwise.svg");
   }
   
   .icon.paragraph {
-    background-image: url("./assets/icons/textEditor/text-paragraph.svg");
+    background-image: url("@/assets/icons/textEditor/text-paragraph.svg");
   }
   
   .icon.large-heading,
   .icon.h1 {
-    background-image: url("./assets/icons/textEditor/type-h1.svg");
+    background-image: url("@/assets/icons/textEditor/type-h1.svg");
   }
   
   .icon.small-heading,
   .icon.h2 {
-    background-image: url("./assets/icons/textEditor/type-h2.svg");
+    background-image: url("@/assets/icons/textEditor/type-h2.svg");
   }
   
   .icon.bullet-list,
   .icon.ul {
-    background-image: url("./assets/icons/textEditor/list-ul.svg");
+    background-image: url("@/assets/icons/textEditor/list-ul.svg");
   }
   
   .icon.numbered-list,
   .icon.ol {
-    background-image: url("./assets/icons/textEditor/list-ol.svg");
+    background-image: url("@/assets/icons/textEditor/list-ol.svg");
   }
   
   .icon.quote {
-    background-image: url("./assets/icons/textEditor/chat-square-quote.svg");
+    background-image: url("@/assets/icons/textEditor/chat-square-quote.svg");
   }
   
   .icon.code {
-    background-image: url("./assets/icons/textEditor/code.svg");
+    background-image: url("@/assets/icons/textEditor/code.svg");
   }
   
   i.bold {
-    background-image: url("./assets/icons/textEditor/type-bold.svg");
+    background-image: url("@/assets/icons/textEditor/type-bold.svg");
   }
   
   i.italic {
-    background-image: url("./assets/icons/textEditor/type-italic.svg");
+    background-image: url("@/assets/icons/textEditor/type-italic.svg");
   }
   
   i.underline {
-    background-image: url("./assets/icons/textEditor/type-underline.svg");
+    background-image: url("@/assets/icons/textEditor/type-underline.svg");
   }
   
   i.strikethrough {
-    background-image: url("./assets/icons/textEditor/type-strikethrough.svg");
+    background-image: url("@/assets/icons/textEditor/type-strikethrough.svg");
   }
   
   i.code {
-    background-image: url("./assets/icons/textEditor/code.svg");
+    background-image: url("@/assets/icons/textEditor/code.svg");
   }
   
   i.link {
-    background-image: url("./assets/icons/textEditor/link.svg");
+    background-image: url("@/assets/icons/textEditor/link.svg");
   }
   
   i.left-align {
-    background-image: url("./assets/icons/textEditor/text-left.svg");
+    background-image: url("@/assets/icons/textEditor/text-left.svg");
   }
   
   i.center-align {
-    background-image: url("./assets/icons/textEditor/text-center.svg");
+    background-image: url("@/assets/icons/textEditor/text-center.svg");
   }
   
   i.right-align {
-    background-image: url("./assets/icons/textEditor/text-right.svg");
+    background-image: url("@/assets/icons/textEditor/text-right.svg");
   }
   
   i.justify-align {
-    background-image: url("./assets/icons/textEditor/justify.svg");
+    background-image: url("@/assets/icons/textEditor/justify.svg");
   }
   
 }

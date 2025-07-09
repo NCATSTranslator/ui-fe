@@ -11,7 +11,6 @@ import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
 
 interface ResultsFilterProps {
   activeFilters: Filter[];
-  activeEntityFilters: string[];
   availableFilters: {[key: string]: Filter};
   expanded?: boolean;
   isPathfinder?: boolean;
@@ -21,14 +20,13 @@ interface ResultsFilterProps {
 }
 
 const ResultsFilter: FC<ResultsFilterProps> = ({
-  activeFilters, 
-  activeEntityFilters, 
+  activeFilters,
   availableFilters,
-  expanded = false, 
-  isPathfinder = false, 
-  onFilter, 
-  onClearAll, 
-  setExpanded = (arg0: boolean)=>{} }) => {
+  expanded = false,
+  isPathfinder = false,
+  onFilter,
+  onClearAll,
+  setExpanded = () => {} }) => {
 
   const [isExpanded, setIsExpanded] = useState(expanded);
   const toggleIsExpanded = () => {

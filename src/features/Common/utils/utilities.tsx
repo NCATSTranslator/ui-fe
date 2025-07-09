@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import Chemical from '@/assets/icons/queries/Chemical.svg?react';
 import Disease from '@/assets/icons/queries/Disease.svg?react';
 import Gene from '@/assets/icons/queries/Gene.svg?react';
@@ -17,7 +18,7 @@ import { isResultEdge, Path, ResultSet, ResultEdge, ResultNode } from '@/feature
 import { Location } from 'react-router-dom';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 
-export const getIcon = (category: string): JSX.Element => {
+export const getIcon = (category: string): ReactNode => {
   var icon = <Chemical/>;
   switch(category) {
     case 'biolink:Gene':
@@ -195,7 +196,7 @@ export const getUrlAndOrg = (id: string): (string | null)[] => {
   return [url, org];
 }
 
-export const getEntityLink = (id: string, className: string, queryType: QueryType): JSX.Element | null => {
+export const getEntityLink = (id: string, className: string, queryType: QueryType): ReactNode | null => {
   return generateEntityLink(id, className, (org) => {
     let linkType = (queryType !== undefined && queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
     if(linkType === "smallmolecule")
@@ -206,8 +207,8 @@ export const getEntityLink = (id: string, className: string, queryType: QueryTyp
   });
 }
 
-export const getMoreInfoLink = (id: string, className: string): JSX.Element | null => {
-  return generateEntityLink(id, className, (org) => { return ' '});
+export const getMoreInfoLink = (id: string, className: string): ReactNode | null => {
+  return generateEntityLink(id, className, () => { return ' '});
 }
 
 export const handleFetchErrors = (
@@ -228,8 +229,8 @@ export const getRandomIntInclusive = (min: number, max: number) => {
 }
 
 // Remove duplicate objects from an array and keep the relative ordering based on a supplied property
-export const removeDuplicateObjects = (arr: any[], propName: string): any[] => {
-  const unique: any[] = [];
+export const removeDuplicateObjects = <T extends Record<string, unknown>,>(arr: T[], propName: keyof T): T[] => {
+  const unique: T[] = [];
   const seenValues = new Set();
 
   arr.forEach(item => {
@@ -242,7 +243,7 @@ export const removeDuplicateObjects = (arr: any[], propName: string): any[] => {
   return unique;
 }
 
-export const generateEntityLink = (id: string, className: string, linkTextGenerator: (org: string | null) => string, useIcon = true): JSX.Element | null => {
+export const generateEntityLink = (id: string, className: string, linkTextGenerator: (org: string | null) => string, useIcon = true): ReactNode | null => {
   const [url, org] = getUrlAndOrg(id);
   const linkText = linkTextGenerator(org);
 
@@ -260,7 +261,7 @@ export const generateEntityLink = (id: string, className: string, linkTextGenera
   return <span className={className}>{linkText}</span>;
 }
 
-export const getLastItemInArray = (arr: any[]) => {
+export const getLastItemInArray = <T,>(arr: T[]): T | undefined => {
   return arr.at(-1);
 }
 
@@ -292,8 +293,8 @@ export const getGeneratedSendFeedbackLink = (openDefault: boolean = true): strin
   return `/?fm=${openDefault}&link=${link}`;
 }
 
-export const mergeObjectArrays = <T extends { [key: string]: any }>(array1: T[], array2: T[], uniqueProp: keyof T): T[] => {
-  const mergedMap = new Map<any, T>();
+export const mergeObjectArrays = <T extends { [key: string]: unknown },>(array1: T[], array2: T[], uniqueProp: keyof T): T[] => {
+  const mergedMap = new Map<unknown, T>();
 
   [...array1, ...array2].forEach(item => {
     const uniqueValue = item[uniqueProp];
@@ -305,8 +306,8 @@ export const mergeObjectArrays = <T extends { [key: string]: any }>(array1: T[],
   return Array.from(mergedMap.values());
 };
 
-export const combineObjectArrays = (arr1: any[] | undefined | null, arr2: any[] | undefined | null, duplicateRemovalProperty?: string): any[] => {
-  let combinedArray: any[] = [];
+export const combineObjectArrays = <T extends Record<string, unknown>,>(arr1: T[] | undefined | null, arr2: T[] | undefined | null, duplicateRemovalProperty?: keyof T): T[] => {
+  let combinedArray: T[] = [];
   if(!!arr1)
     combinedArray = combinedArray.concat(cloneDeep(arr1));
 
@@ -456,7 +457,7 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
   }
 
   // Function to merge arrays while avoiding duplicates
-  const mergeArrays = <T extends unknown>(arr1: T[], arr2: T[]): T[] => Array.from(new Set([...arr1, ...arr2]));
+  const mergeArrays = <T,>(arr1: T[], arr2: T[]): T[] => Array.from(new Set([...arr1, ...arr2]));
 
   const mergeSupport = (baseEdge: ResultEdge, edge: ResultEdge) => {
     if (Array.isArray(baseEdge.support) && Array.isArray(edge.support))
@@ -643,11 +644,11 @@ export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string 
 /**
  * Type guard to check if a provided value is a string array
  *
- * @param {any} value - Arbitrary value.
+ * @param {unknown} value - Arbitrary value.
  * @returns {boolean} - True if the value is a string array, otherwise false. 
  *
  */
-export const isStringArray = (value: any): value is string[] => {
+export const isStringArray = (value: unknown): value is string[] => {
   return Array.isArray(value) && value.every(item => typeof item === "string");
 }
 

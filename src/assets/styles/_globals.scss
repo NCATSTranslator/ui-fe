@@ -1,7 +1,7 @@
-@import "./variables";
-@import "./typography";
-@import "./pages";
-@import "./components";
+@use "./variables" as *;
+@use "./typography" as *;
+@use "./pages" as *;
+@use "./components" as *;
 
 body {
   overflow-x: hidden !important;

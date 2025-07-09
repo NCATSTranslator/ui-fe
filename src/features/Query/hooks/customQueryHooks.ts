@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useRef, MutableRefObject  } from 'react';
+import { useMemo, useState, useCallback, useRef, RefObject  } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -9,7 +9,7 @@ import { filterAndSortExamples, getAutocompleteTerms } from '@/features/Query/ut
 import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
-import { AutocompleteItem, AutocompleteFunctions, QueryType } from '@/features/Query/types/querySubmission';
+import { AutocompleteItem, AutocompleteFunctions, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
 
 /**
  * Custom hook that filters and sorts cached queries into categorized example queries.
@@ -23,9 +23,15 @@ import { AutocompleteItem, AutocompleteFunctions, QueryType } from '@/features/Q
  *   - exampleGenesUp: Chemical queries with 'increased' direction
  *   - exampleGenesDown: Chemical queries with 'decreased' direction
  */
-export const useExampleQueries = (cachedQueries: Example[] | undefined) => {
+export const useExampleQueries = (cachedQueries: Example[] | undefined): ExampleQueries  => {
   return useMemo(() => {
-    if (!cachedQueries) return {};
+    if (!cachedQueries) return {
+      exampleDiseases: [],
+      exampleChemsUp: [],
+      exampleChemsDown: [],
+      exampleGenesUp: [],
+      exampleGenesDown: []
+    };
 
     return {
       exampleDiseases: filterAndSortExamples(cachedQueries, 'drug'),
@@ -177,9 +183,9 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
  * loading states, and autocomplete item management. Provides a 750ms debounced
  * query function to reduce API calls during user typing.
  * 
- * @param {MutableRefObject<AutocompleteFunctions | null>} autocompleteFunctions - Mutable ref containing autocomplete filter functions
- * @param {MutableRefObject<string[]>} limitTypes - Mutable ref containing array of type filters for autocomplete
- * @param {MutableRefObject<string[] | null>} limitPrefixes - Mutable ref containing array of prefix filters for autocomplete
+ * @param {RefObject<AutocompleteFunctions | null>} autocompleteFunctions - Mutable ref containing autocomplete filter functions
+ * @param {RefObject<string[]>} limitTypes - Mutable ref containing array of type filters for autocomplete
+ * @param {RefObject<string[] | null>} limitPrefixes - Mutable ref containing array of prefix filters for autocomplete
  * @param {string} nameResolverEndpoint - API endpoint URL for name resolution
  * @returns Object containing:
  *   - autocompleteItems: Array of autocomplete suggestions or null
@@ -188,9 +194,9 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
  *   - clearAutocompleteItems: Function to clear autocomplete suggestions
  */
 export const useAutocomplete = (
-  autocompleteFunctions: MutableRefObject<AutocompleteFunctions | null>,
-  limitTypes: MutableRefObject<string[]>,
-  limitPrefixes: MutableRefObject<string[] | null>,
+  autocompleteFunctions: RefObject<AutocompleteFunctions | null>,
+  limitTypes: RefObject<string[]>,
+  limitPrefixes: RefObject<string[] | null>,
   nameResolverEndpoint: string
 ) => {
   const [autocompleteItems, setAutoCompleteItems] = useState<AutocompleteItem[] | null>(null);

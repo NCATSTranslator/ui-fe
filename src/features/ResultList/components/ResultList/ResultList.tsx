@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo, RefObject } from "react";
 import styles from './ResultList.module.scss';
 import Query from "@/features/Query/components/Query/Query";
 import ResultsFilter from "@/features/ResultFiltering/components/ResultsFilter/ResultsFilter";
@@ -8,11 +8,11 @@ import ResultListHeader from "@/features/ResultList/components/ResultListHeader/
 import NavConfirmationPromptModal from "@/features/Common/components/NavConfirmationPromptModal/NavConfirmationPromptModal";
 import StickyToolbar from "@/features/ResultList/components/StickyToolbar/StickyToolbar";
 import { cloneDeep, isEqual } from "lodash";
-import { unstable_useBlocker as useBlocker } from "react-router";
+import { useBlocker } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
-import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
   sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow, filterCompare } from "@/features/Common/utils/sortingFunctions";
 import { handleResultsError, applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts, checkBookmarkForNotes, checkBookmarksForItem } from "@/features/ResultList/utils/resultsInteractionFunctions";
@@ -30,6 +30,7 @@ import ResultListBottomPagination from "@/features/ResultList/components/ResultL
 import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem } from "@/features/ResultList/types/results.d";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { generateScore } from "@/features/ResultList/utils/scoring";
+import { ResultContextObject } from "@/features/ResultList/utils/llm";
 
 const ResultList = () => {
 
@@ -94,7 +95,7 @@ const ResultList = () => {
   const noteLabel = useRef("");
   const currentBookmarkID = useRef<string | null>(null);
   // Result, the currently selected item
-  const [selectedResult, setSelectedResult] = useState<Result | {}>({});
+  const [selectedResult, setSelectedResult] = useState<Result | null>(null);
 
   const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
   // Path, path represented in current evidence
@@ -139,7 +140,7 @@ const ResultList = () => {
   // Array, currently active string filters
   const [activeEntityFilters, setActiveEntityFilters] = useState<string[]>([]);
   // Array, aras that have returned data
-  const returnedARAs = useRef({aras: [], status: ''});
+  const returnedARAs = useRef<{aras: string[], status: string}>({aras: [], status: ''});
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
   // Bool, is the shift key being held down
@@ -376,108 +377,108 @@ const ResultList = () => {
   }
 
   // React Query call for status of results
-  // eslint-disable-next-line
-  const resultsStatus = useQuery('resultsStatus', async () => {
-    console.log("Fetching current ARA status...");
+  useQuery({
+    queryKey: ['resultsStatus'],
+    queryFn: async () => {
+      console.log("Fetching current ARA status...");
 
-    if(!currentQueryID)
-      return;
+      if(!currentQueryID)
+        return;
 
-    const requestOptions = {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    // eslint-disable-next-line
-    const response = await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/status`, requestOptions)
-      .then(response => handleFetchErrors(response))
-      .then(response => response.json())
-      .then(data => {
-        // increment the number of status checks
-        numberOfStatusChecks.current++;
-        console.log("ARA status:", data);
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      };
+      await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/status`, requestOptions)
+        .then(response => handleFetchErrors(response))
+        .then(response => response.json())
+        .then(data => {
+          // increment the number of status checks
+          numberOfStatusChecks.current++;
+          console.log("ARA status:", data);
 
-        let fetchResults = false;
+          let fetchResults = false;
 
-        if(data.data.aras.length > returnedARAs.current.aras.length) {
-          console.log(`Old ARAs: ${returnedARAs.current.aras}, New ARAs: ${data.data.aras}`);
-          let newReturnedARAs = {...data.data};
-          newReturnedARAs.status = data.status;
-          returnedARAs.current = newReturnedARAs;
-          fetchResults = true;
-        } else {
-          console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
-        }
-        /*
-        If status is success (meaning all ARAs have returned) or we've reached 120 status checks (meaning 20 min have elapsed)
-        stop fetching ARA status and move to fetching results.
-        */
-        if(data.status === 'success' || numberOfStatusChecks.current >= 120) {
-          isFetchingARAStatus.current = false;
-          fetchResults = true;
-        }
-        if(fetchResults)
-          isFetchingResults.current = true;
-      })
-      .catch((error) => {
-        if(formattedResults.length <= 0) {
-          handleResultsError(true, setIsError, setIsLoading);
-          isFetchingARAStatus.current = null;
-        }
-        if(formattedResults.length > 0) {
-          isFetchingARAStatus.current = null;
-        }
-        console.error(error)
-      });
-  }, {
+          if(data.data.aras.length > returnedARAs.current.aras.length) {
+            console.log(`Old ARAs: ${returnedARAs.current.aras}, New ARAs: ${data.data.aras}`);
+            let newReturnedARAs = {...data.data};
+            newReturnedARAs.status = data.status;
+            returnedARAs.current = newReturnedARAs;
+            fetchResults = true;
+          } else {
+            console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
+          }
+          /*
+          If status is success (meaning all ARAs have returned) or we've reached 120 status checks (meaning 20 min have elapsed)
+          stop fetching ARA status and move to fetching results.
+          */
+          if(data.status === 'success' || numberOfStatusChecks.current >= 120) {
+            isFetchingARAStatus.current = false;
+            fetchResults = true;
+          }
+          if(fetchResults)
+            isFetchingResults.current = true;
+        })
+        .catch((error) => {
+          if(formattedResults.length <= 0) {
+            handleResultsError(true, setIsError, setIsLoading);
+            isFetchingARAStatus.current = null;
+          }
+          if(formattedResults.length > 0) {
+            isFetchingARAStatus.current = null;
+          }
+          console.error(error)
+        });
+    },
     refetchInterval: 10000,
     enabled: isFetchingARAStatus.current === null ? false : isFetchingARAStatus.current,
     refetchOnWindowFocus: false
   });
 
   // React Query call for results
-  // eslint-disable-next-line
-  const resultsData = useQuery('resultsData', async () => {
-    console.log("Fetching new results...");
+  useQuery({
+    queryKey: ['resultsData'],
+    queryFn: async () => {
+      console.log("Fetching new results...");
 
-    if(!currentQueryID)
-      return;
+      if(!currentQueryID)
+        return;
 
-    const requestOptions = {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    // eslint-disable-next-line
-    const response = await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/result`, requestOptions)
-      .then(response => handleFetchErrors(response, () => {
-        console.log(response.json());
-        isFetchingARAStatus.current = false;
-        isFetchingResults.current = false;
-        if(formattedResults.length <= 0) {
-          handleResultsError(true, setIsError, setIsLoading);
-        }
-      }))
-      .then(response => response.json())
-      .then(data => {
-        console.log('New results:', data);
-        // if we've already gotten results before, set freshRawResults instead to
-        // prevent original results from being overwritten
-        if(formattedResults.length > 0) {
-          setFreshRawResults(data);
-        } else {
-          handleNewResults(data);
-        }
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      };
+      await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/result`, requestOptions)
+        .then(response => handleFetchErrors(response, () => {
+          console.log(response.json());
+          isFetchingARAStatus.current = false;
+          isFetchingResults.current = false;
+          if(formattedResults.length <= 0) {
+            handleResultsError(true, setIsError, setIsLoading);
+          }
+        }))
+        .then(response => response.json())
+        .then(data => {
+          console.log('New results:', data);
+          // if we've already gotten results before, set freshRawResults instead to
+          // prevent original results from being overwritten
+          if(formattedResults.length > 0) {
+            setFreshRawResults(data);
+          } else {
+            handleNewResults(data);
+          }
 
-        // The ARS can rarely report that it is done in the status check when it is not done
-        if (data.status === 'running' && numberOfStatusChecks.current < 120) {
-          isFetchingARAStatus.current = true;
-        }
+          // The ARS can rarely report that it is done in the status check when it is not done
+          if (data.status === 'running' && numberOfStatusChecks.current < 120) {
+            isFetchingARAStatus.current = true;
+          }
 
-        isFetchingResults.current = false;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, {
+          isFetchingResults.current = false;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
     enabled: isFetchingResults.current,
     refetchOnWindowFocus: false,
   });
@@ -673,7 +674,7 @@ const ResultList = () => {
 
   },[formattedResults, nodeIdParam]);
 
-  const handleResultMatchClick = useCallback((match: Result) => {
+  const handleResultMatchClick = useCallback((match: ResultContextObject) => {
     if(!match)
       return;
 
@@ -772,7 +773,6 @@ const ResultList = () => {
             <>
               <ResultsFilter
                 activeFilters={activeFilters}
-                activeEntityFilters={activeEntityFilters}
                 onFilter={handleFilter}
                 onClearAll={handleClearAllFilters}
                 expanded={filtersExpanded}
@@ -794,7 +794,6 @@ const ResultList = () => {
                     shareResultID: shareResultID.current,
                     setShareResultID: setShareResultID,
                     currentQueryID: currentQueryID,
-                    returnedARAs: returnedARAs.current,
                     isError: isError,
                     currentPage: currentPage.current,
                     ResultListStyles: styles,
@@ -864,7 +863,7 @@ const ResultList = () => {
                               availableFilters={availableFilters}
                               handleFilter={handleFilter}
                               activeFilters={activeFilters}
-                              sharedItemRef={item.id === resultIdParam ? sharedItemRef : null}
+                              sharedItemRef={item.id === resultIdParam ? sharedItemRef as RefObject<HTMLDivElement> : null}
                               startExpanded={item.id === resultIdParam && expandSharedResult}
                               setExpandSharedResult={setExpandSharedResult}
                               setShareModalOpen={setShareModalOpen}

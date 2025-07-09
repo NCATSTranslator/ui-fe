@@ -1,19 +1,19 @@
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import { getUserSave } from "@/features/UserAuth/utils/userApi";
-import { CLEAR_EDITOR_COMMAND } from "lexical";
+import { CLEAR_EDITOR_COMMAND, LexicalEditor, SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 interface OnChangePluginProps {
-  onChange: (editorStateJSON: any) => void;
+  onChange: (editorStateJSON: SerializedEditorState<SerializedLexicalNode>) => void;
   bookmarkID: string | null;
   shouldClearEditor?: boolean;
   onClearEditorComplete?: () => void;
 }
 
-const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditorComplete }: OnChangePluginProps): JSX.Element | null => {
+const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditorComplete }: OnChangePluginProps): ReactNode | null => {
   const [editor] = useLexicalComposerContext();
 
-  const clearEditor = (editor: any) => {
+  const clearEditor = (editor: LexicalEditor) => {
     editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
   }
 

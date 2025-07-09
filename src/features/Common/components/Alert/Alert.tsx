@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, ReactNode, FC } from "react";
+import { useState, useEffect, useCallback, useMemo, ReactNode, FC, KeyboardEvent } from "react";
 import Button from "@/features/Common/components/Button/Button";
 import Warning from '@/assets/icons/status/Alerts/Warning.svg?react';
 import Info from '@/assets/icons/status/Alerts/Info.svg?react';
@@ -109,7 +109,7 @@ const Alert: FC<AlertProps> = ({
     }
   }, [isActive, toggle, disabled, totalTimeout, fadeOut]);
 
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape' && toggle) {
       fadeOut();
     }
