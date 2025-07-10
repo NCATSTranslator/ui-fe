@@ -12,14 +12,16 @@ import { useBlocker } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
-  sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow, filterCompare } from "@/features/Common/utils/sortingFunctions";
-import { handleResultsError, applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts, checkBookmarkForNotes, checkBookmarksForItem } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { getDataFromQueryVar, getPathCount, handleFetchErrors, getCompressedEdge } from "@/features/Common/utils/utilities";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, 
+  sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, 
+  sortByNamePathfinderHighLow, filterCompare } from "@/features/Common/utils/sortingFunctions";
+import { applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts, checkBookmarkForNotes, 
+  checkBookmarksForItem } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { getDataFromQueryVar, getPathCount, getCompressedEdge } from "@/features/Common/utils/utilities";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
-import { API_PATH_PREFIX, getSaves, SaveGroup } from "@/features/UserAuth/utils/userApi";
+import { getSaves, SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "@/features/ResultItem/components/BookmarkToasts/BookmarkToasts";
@@ -31,6 +33,7 @@ import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem } from
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
+import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 
 const ResultList = () => {
 
@@ -377,111 +380,29 @@ const ResultList = () => {
   }
 
   // React Query call for status of results
-  useQuery({
-    queryKey: ['resultsStatus'],
-    queryFn: async () => {
-      console.log("Fetching current ARA status...");
-
-      if(!currentQueryID)
-        return;
-
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      };
-      await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/status`, requestOptions)
-        .then(response => handleFetchErrors(response))
-        .then(response => response.json())
-        .then(data => {
-          // increment the number of status checks
-          numberOfStatusChecks.current++;
-          console.log("ARA status:", data);
-
-          let fetchResults = false;
-
-          if(data.data.aras.length > returnedARAs.current.aras.length) {
-            console.log(`Old ARAs: ${returnedARAs.current.aras}, New ARAs: ${data.data.aras}`);
-            let newReturnedARAs = {...data.data};
-            newReturnedARAs.status = data.status;
-            returnedARAs.current = newReturnedARAs;
-            fetchResults = true;
-          } else {
-            console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
-          }
-          /*
-          If status is success (meaning all ARAs have returned) or we've reached 120 status checks (meaning 20 min have elapsed)
-          stop fetching ARA status and move to fetching results.
-          */
-          if(data.status === 'success' || numberOfStatusChecks.current >= 120) {
-            isFetchingARAStatus.current = false;
-            fetchResults = true;
-          }
-          if(fetchResults)
-            isFetchingResults.current = true;
-        })
-        .catch((error) => {
-          if(formattedResults.length <= 0) {
-            handleResultsError(true, setIsError, setIsLoading);
-            isFetchingARAStatus.current = null;
-          }
-          if(formattedResults.length > 0) {
-            isFetchingARAStatus.current = null;
-          }
-          console.error(error)
-        });
-    },
-    refetchInterval: 10000,
-    enabled: isFetchingARAStatus.current === null ? false : isFetchingARAStatus.current,
-    refetchOnWindowFocus: false
-  });
+  useResultsStatusQuery(
+    currentQueryID,
+    isFetchingARAStatus,
+    returnedARAs,
+    numberOfStatusChecks,
+    formattedResults,
+    setIsError,
+    setIsLoading,
+    isFetchingResults
+  );
 
   // React Query call for results
-  useQuery({
-    queryKey: ['resultsData'],
-    queryFn: async () => {
-      console.log("Fetching new results...");
-
-      if(!currentQueryID)
-        return;
-
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      };
-      await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/result`, requestOptions)
-        .then(response => handleFetchErrors(response, () => {
-          console.log(response.json());
-          isFetchingARAStatus.current = false;
-          isFetchingResults.current = false;
-          if(formattedResults.length <= 0) {
-            handleResultsError(true, setIsError, setIsLoading);
-          }
-        }))
-        .then(response => response.json())
-        .then(data => {
-          console.log('New results:', data);
-          // if we've already gotten results before, set freshRawResults instead to
-          // prevent original results from being overwritten
-          if(formattedResults.length > 0) {
-            setFreshRawResults(data);
-          } else {
-            handleNewResults(data);
-          }
-
-          // The ARS can rarely report that it is done in the status check when it is not done
-          if (data.status === 'running' && numberOfStatusChecks.current < 120) {
-            isFetchingARAStatus.current = true;
-          }
-
-          isFetchingResults.current = false;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-    enabled: isFetchingResults.current,
-    refetchOnWindowFocus: false,
-  });
+  useResultsDataQuery(
+    currentQueryID,
+    isFetchingResults,
+    formattedResults,
+    setFreshRawResults,
+    handleNewResults,
+    numberOfStatusChecks,
+    isFetchingARAStatus,
+    setIsError,
+    setIsLoading
+  );
 
   // Handle the sorting
   const getSortedResults = useCallback((summary: ResultSet, resultsToSort: Result[], sortName: string) => {
