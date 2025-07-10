@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
-import { get, post, put, remove } from '@/features/Common/utils/web';
+import { get, post, put, remove, fetchWithErrorHandling } from '@/features/Common/utils/web';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
-import { PreferencesContainer, PrefObject, SessionStatus, User } from '@/features/UserAuth/types/user';
+import { PreferencesContainer, PrefObject, SessionStatus, User, Config, isConfig } from '@/features/UserAuth/types/user.d';
 import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
-import { handleFetchErrors } from '@/features/Common/utils/utilities';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
@@ -664,24 +663,39 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
     };
 
     const fetchConfig = async () => {
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      };
-      let config = await fetch(`${API_PATH_PREFIX}/config`, requestOptions)
-        .then(response => handleFetchErrors(response))
-        .then(response => response.json());
+      try {
+        let config = await fetchWithErrorHandling<Config>(
+          () => fetch(`${API_PATH_PREFIX}/config`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          }),
+          (error: Error) => console.warn("Failed to fetch config:", error.message),
+          (error: Error) => console.warn("Fetch error while getting config:", error.message),
+          isConfig
+        );
 
-      if(config?.gaID) {
-        setGaID(config.gaID);
-      }
-      if(config?.gtmID) {
-        setGtmID(config.gtmID);
-      }
-      config.buildInfo = import.meta.env.VITE_BUILD_INFO;
+        if(config?.gaID)
+          setGaID(config.gaID);
 
-      console.log("setting config", config);
-      dispatch(setCurrentConfig(config));
+        const configWithBuildInfo = {
+          ...config,
+          buildInfo: import.meta.env.VITE_BUILD_INFO
+        };
+
+        console.log("setting config", configWithBuildInfo);
+        dispatch(setCurrentConfig(configWithBuildInfo as unknown as Config));
+      } catch {
+        console.warn("Config fetch failed, using default config");
+        const defaultConfig: Config = {
+          cached_queries: [],
+          gaID: '',
+          name_resolver: '',
+          social_providers: {},
+          include_pathfinder: false,
+          include_summarization: false
+        };
+        dispatch(setCurrentConfig(defaultConfig));
+      }
     };
 
     if(typeof userFound === 'boolean') {
