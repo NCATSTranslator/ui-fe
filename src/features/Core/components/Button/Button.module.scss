@@ -1,0 +1,60 @@
+@use "@/assets/styles/variables" as *;
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $white;
+  padding: $xs;
+  background-color: $purpleOne;
+  transition: $defaultAnim;
+  border-radius: $defaultBorderRadius;
+  cursor: pointer;
+  border: none;
+  &:hover {
+    background-color: $purpleTwo;
+  }
+  .label {
+    padding: $xxxs $xxs; 
+    font-size: $bodyOneSize;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+  svg {
+    height: $m;
+    width: $m;
+    path {
+      fill: $white;
+    }
+  }
+  &.secondary {
+    background-color: $lightGray;
+    color: $black;
+    svg {
+      path {
+        fill: $black;
+      }
+    }
+    &:hover {
+      background-color: $grayHover;
+    }
+  }
+  &:disabled {
+    background-color: $lightGray;
+    color: $midDarkGray;
+    cursor: default;
+  }
+  &.small {
+    padding: $xxs $xs;
+    .label {
+      font-size: $captionSize;
+      padding: 4.5px $xxs; 
+    }
+  }
+  &.iconOnly {
+    padding: $xxs;
+  }
+  .iconLeft, .iconRight {
+    display: flex;
+  }
+}
