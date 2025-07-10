@@ -211,17 +211,6 @@ export const getMoreInfoLink = (id: string, className: string): ReactNode | null
   return generateEntityLink(id, className, () => { return ' '});
 }
 
-export const handleFetchErrors = (
-    response: Response,
-    onErrorCallback: (res: Response) => void = () => console.log('No error callback function specified.')
-  ): Response => {
-    if(!response.ok) {
-      onErrorCallback(response);
-      throw Error(response.statusText);
-    }
-    return response
-}
-
 export const getRandomIntInclusive = (min: number, max: number) => {
   min = Math.ceil(min);
   max = Math.floor(max);
