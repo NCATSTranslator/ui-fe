@@ -1,7 +1,6 @@
 @use "./variables" as *;
 
 button {
-  border: none;
   cursor: pointer;
   &:disabled {
     background-color: $lightGray;
