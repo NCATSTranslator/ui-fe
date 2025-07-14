@@ -1,0 +1,12 @@
+@use '@/assets/styles/variables' as *;
+
+.projectListHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $m;
+
+  .searchInput {
+    width: 380px;
+  }
+}
