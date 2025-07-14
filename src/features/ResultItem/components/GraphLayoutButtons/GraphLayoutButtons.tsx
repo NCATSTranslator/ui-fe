@@ -15,6 +15,7 @@ const GraphLayoutButtons: FC<GraphLayoutButtonsProps> = ({setCurrentLayout, curr
   return (
     <div className={styles.layoutContainer}>
       <h4 className={styles.layoutHeader}>Layout Type:</h4>
+      <div className={styles.layoutButtonContainer}>
       {
         Object.keys(layoutList).map((key) => {
           const name = layoutList[key as keyof typeof layoutList].label;
@@ -23,12 +24,14 @@ const GraphLayoutButtons: FC<GraphLayoutButtonsProps> = ({setCurrentLayout, curr
               className={`${styles.layoutButton} ${(currentLayout.name === layoutList[key].name)? styles.active : ''}`} 
               handleClick={()=>setCurrentLayout(layoutList[key])}
               key={key}
+              variant="secondary"
               >
               {capitalizeAllWords(name)}
             </Button>
           )
         })
       }
+      </div>
     </div>
   )
 }
