@@ -13,10 +13,10 @@ const resultSetsSlice = createSlice({
   name: "resultSets",
   initialState,
   reducers: {
-    setResultSet(state, action: PayloadAction<{ pk: string; resultSet: ResultSet }>) {
+    setResultSet: (state, action: PayloadAction<{ pk: string; resultSet: ResultSet }>) => {
       state[action.payload.pk] = action.payload.resultSet;
     },
-    setResultSets(state, action: PayloadAction<{[key:string]: ResultSet}>) {
+    setResultSets: (state, action: PayloadAction<{[key:string]: ResultSet}>) => {
       Object.assign(state, action.payload);
     },
   },

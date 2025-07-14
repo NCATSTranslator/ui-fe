@@ -1,8 +1,8 @@
 @use "./variables" as *;
 
 button {
-  border: none;
   cursor: pointer;
+  border: none;
   &:disabled {
     background-color: $lightGray;
     color: $midGray;
