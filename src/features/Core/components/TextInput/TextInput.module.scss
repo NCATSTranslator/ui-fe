@@ -18,7 +18,8 @@
   }
 }
 .textInput {
-  position: relative; 
+  position: relative;
+  display: grid;
   &.disabled {
     input, textarea {
       background-color: $lightGray;

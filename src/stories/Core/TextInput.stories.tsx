@@ -57,11 +57,7 @@ const meta = {
     disabled: {
       control: { type: 'boolean' },
       description: 'Whether the input is disabled',
-    },
-    testId: {
-      control: { type: 'text' },
-      description: 'Test ID for testing purposes',
-    },
+    }
   },
   // Use `fn` to spy on the handleChange arg, which will appear in the actions panel once invoked: https://storybook.js.org/docs/essentials/actions#action-args
   args: { 
@@ -179,22 +175,6 @@ export const TextareaWithError: Story = {
     error: true,
     errorText: 'Description must be at least 50 characters long',
     rows: 3,
-  },
-};
-
-export const WithCustomClassName: Story = {
-  args: {
-    label: 'Custom Styled Input',
-    placeholder: 'This input has custom styling',
-    className: 'custom-input-class',
-  },
-};
-
-export const WithTestId: Story = {
-  args: {
-    label: 'Test Input',
-    placeholder: 'This input has a test ID',
-    testId: 'test-input-field',
   },
 };
 

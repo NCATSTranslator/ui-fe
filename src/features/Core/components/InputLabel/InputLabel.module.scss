@@ -10,6 +10,7 @@
     color: $darkGray;
   }
   .subtitle {
+    display: flex;
     font-size: $captionSize;
     margin-bottom: $xxs;
     font-weight: 400;
