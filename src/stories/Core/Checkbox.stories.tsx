@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
-import CheckmarkIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
-import StarIcon from '@/assets/icons/navigation/Star/Star.svg?react';
+import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
@@ -121,14 +120,14 @@ export const LabelLeftChecked: Story = {
 
 export const WithCustomIcon: Story = {
   args: {
-    icon: <StarIcon />,
+    icon: <CloseIcon />,
     children: 'Custom Icon Checkbox',
   },
 };
 
 export const WithCustomIconChecked: Story = {
   args: {
-    icon: <StarIcon />,
+    icon: <CloseIcon />,
     checked: true,
     children: 'Custom Icon Checkbox (Checked)',
   },
@@ -196,7 +195,7 @@ export const MultipleCheckboxes: Story = {
       <Checkbox handleClick={fn()} name="option3" value="3" disabled>
         Option 3 (Disabled)
       </Checkbox>
-      <Checkbox handleClick={fn()} name="option4" value="4" icon={<StarIcon />}>
+      <Checkbox handleClick={fn()} name="option4" value="4" icon={<CloseIcon />}>
         Option 4 (Custom Icon)
       </Checkbox>
     </div>
