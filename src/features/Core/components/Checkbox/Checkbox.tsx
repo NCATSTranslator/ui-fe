@@ -3,6 +3,7 @@ import DefaultIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import styles from './Checkbox.module.scss';
 import { joinClasses } from "@/features/Common/utils/utilities";
 import { uniqueId } from "lodash";
+import InputLabel from "../InputLabel/InputLabel";
 
 export interface CheckboxProps {
   checked?: boolean;
@@ -11,7 +12,8 @@ export interface CheckboxProps {
   className?: string;
   handleClick: () => void;
   icon?: ReactNode;
-  labelLeft?: boolean; 
+  label?: string;
+  subtitle?: string;
   name?: string;
   title?: string; 
   value?: string | number | undefined;
@@ -27,7 +29,8 @@ const Checkbox: FC<CheckboxProps> = ({
   className = "",
   handleClick,
   icon,
-  labelLeft = false,
+  label,
+  subtitle,
   name = "",
   title = "",
   value,
@@ -76,37 +79,23 @@ const Checkbox: FC<CheckboxProps> = ({
       htmlFor={checkboxId}
       aria-label={title}
     >
-      {labelLeft ? (
-        <>
-          <span>{children}</span>
-          <input 
-            type="checkbox" 
-            id={checkboxId}
-            checked={isChecked}
-            name={name} 
-            value={value} 
-            onChange={handleChange}
-            disabled={disabled}
-            aria-describedby={ariaDescribedby}
-          />
-          <span className={boxClass}>{iconToRender}</span>
-        </>
-      ) : (
-        <> 
-          <span className={boxClass}>{iconToRender}</span>
-          <input 
-            type="checkbox" 
-            id={checkboxId}
-            checked={isChecked}
-            name={name} 
-            value={value} 
-            onChange={handleChange}
-            disabled={disabled}
-            aria-describedby={ariaDescribedby}
-          />
-          <span className={styles.children}>{children}</span>
-        </>
-      )}
+      {
+        (label || subtitle) && (
+          <InputLabel label={label} subtitle={subtitle} />
+        )
+      }
+      <span className={boxClass}>{iconToRender}</span>
+      <input 
+        type="checkbox" 
+        id={checkboxId}
+        checked={isChecked}
+        name={name} 
+        value={value} 
+        onChange={handleChange}
+        disabled={disabled}
+        aria-describedby={ariaDescribedby}
+      />
+      <span className={styles.children}>{children}</span>
     </label>
   );
 };

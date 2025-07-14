@@ -1,10 +1,7 @@
 @use "@/assets/styles/variables" as *;
 
 label.checkbox {
-  display: flex;
-  align-items: center;
   margin-bottom: $s;
-  width: fit-content;
   &.disabled {
     opacity: 0.5;
     .box {

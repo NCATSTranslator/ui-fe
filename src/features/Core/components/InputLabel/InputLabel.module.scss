@@ -1,0 +1,18 @@
+@use "@/assets/styles/variables" as *;
+
+.inputLabel {
+  display: grid;
+  margin-bottom: $xxs;
+  .label {
+    font-size: $subTwoSize;
+    margin-bottom: 0;
+    font-weight: 800;
+    color: $darkGray;
+  }
+  .subtitle {
+    font-size: $captionSize;
+    margin-bottom: $xxs;
+    font-weight: 400;
+    color: $darkGray;
+  }
+}
