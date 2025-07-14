@@ -17,7 +17,7 @@ import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
@@ -415,8 +415,8 @@ const PathView: FC<PathViewProps> = ({
                 Object.keys(activeFilters).length > 0 && fullFilteredPathCount > 0 && 
                 <Button
                   handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
-                  isSecondary
-                  smallFont
+                  variant="secondary"
+                  small
                   dataTooltipId={`${resultID}-excluded-paths-toggle`}
                   className={`${!!isEven && styles.evenButton}`}
                   >

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { Path, Result, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
@@ -32,7 +32,7 @@ const PathViewSection: FC<PathViewSectionProps> = ({
     <div className={`${styles.pathViewContainer} ${isPathViewMinimized && styles.minimized}`}>
       {compressedSubgraph && (
         <Button 
-          isSecondary 
+          variant="secondary" 
           handleClick={() => setIsPathViewMinimized(!isPathViewMinimized)} 
           className={styles.togglePathView}
         >

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import ResultsSummaryButton from '@/features/ResultList/components/ResultsSummaryButton/ResultsSummaryButton';
 import { Result } from '@/features/ResultList/types/results';
 import { generateEntityLink } from '@/features/Common/utils/utilities';
@@ -99,10 +99,10 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
         </h2>
         <div className={styles.buttons}>
           <Button 
-            isSecondary
+            variant="secondary"
             handleClick={onShare}
             className={`${styles.shareButton} ${shareButtonClassName}`}
-            smallFont
+            small
           >
             <ShareIcon/>Share Result Set
           </Button>

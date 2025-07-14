@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, FC, useCallback } from "react";
 import styles from './ResultsSummaryButton.module.scss';
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import SparkleIcon from '@/assets/icons/buttons/Sparkles.svg?react';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-purple.png';
@@ -102,9 +102,9 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({
     <>
       <Button
         className={styles.summaryButton}
-        isSecondary
+        variant="secondary"
         handleClick={()=>handleSummaryButtonClick(isSummaryAvailable.current)}
-        smallFont
+        small
         >
         {
           !!isStreaming

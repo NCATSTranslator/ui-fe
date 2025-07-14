@@ -1,7 +1,7 @@
 import { useEffect, useState, FC } from "react";
 import styles from './BookmarkConfirmationModal.module.scss';
 import Modal from "@/features/Common/components/Modal/Modal";
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 
 interface BookmarkConfirmationModalProps {
   onClose?: () => void;
@@ -41,7 +41,7 @@ const BookmarkConfirmationModal: FC<BookmarkConfirmationModalProps> = ({ onClose
         </p>
       </div>
       <div className={styles.buttonsContainer}>
-        <Button handleClick={onClose} className={styles.button} isSecondary>Keep Bookmark</Button>
+        <Button handleClick={onClose} className={styles.button} variant="secondary">Keep Bookmark</Button>
         <Button handleClick={handleClick} className={styles.button}>Remove Bookmark</Button>
       </div>
     </Modal>

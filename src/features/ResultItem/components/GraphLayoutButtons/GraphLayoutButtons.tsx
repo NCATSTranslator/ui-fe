@@ -2,7 +2,7 @@ import { Dispatch, FC, SetStateAction } from 'react';
 import styles from './GraphLayoutButtons.module.scss';
 import { layoutList } from '@/features/ResultItem/utils/graphFunctions';
 import { capitalizeAllWords } from '@/features/Common/utils/utilities';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import { GraphLayout } from '@/features/ResultItem/types/graph';
 
 interface GraphLayoutButtonsProps {

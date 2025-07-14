@@ -3,7 +3,7 @@ import styles from './ExampleQueryList.module.scss';
 import { getResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import AnimateHeight, { Height } from 'react-animate-height';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { Example } from '@/features/Query/types/querySubmission';
 import QueryTypeIcon from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';

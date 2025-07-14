@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, FormEvent } from "react";
 import styles from "./SendFeedbackModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import TextInput from "@/features/Common/components/TextInput/TextInput";
 import FileInput from "@/features/Common/components/FileInput/FileInput";
 import Select from "@/features/Common/components/Select/Select";
@@ -140,7 +140,7 @@ const SendFeedbackModal = ({ isOpen, onClose }: SendFeedbackModalProps) => {
         <div className={styles.issueCreatedContainer}>
           <p>Your feedback has been submitted.<br />Please click the link below to view the status of your issue:</p>
           <Button href={createdIssueURL} _blank rel="noopener noreferrer" className={styles.viewIssue}>View Issue</Button>
-          <Button isSecondary handleClick={() => setCreatedIssueURL(null)} className={styles.newIssue}>Submit More Feedback</Button>
+          <Button variant="secondary" handleClick={() => setCreatedIssueURL(null)} className={styles.newIssue}>Submit More Feedback</Button>
         </div>
       </Modal>
     );

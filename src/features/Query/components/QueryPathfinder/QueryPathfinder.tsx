@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, FC, Dispatch, SetStateAction } from 'rea
 import { useSelector } from 'react-redux';
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
 import { AutocompleteFunctions } from "@/features/Query/types/querySubmission";
 import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
@@ -204,8 +204,8 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
             <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
             <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
             <div className={styles.buttons}>
-              <Button handleClick={swapTerms} isSecondary className={`${styles.button}`}><SwapIcon/>Swap Terms</Button>
-              <Button handleClick={handleMiddleTypeTrigger} isSecondary className={`${styles.button} ${styles.middleTypeButton}`} dataTooltipId='middle-type-tooltip'>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon className={styles.infoIcon}/></Button>
+              <Button handleClick={swapTerms} variant="secondary" className={`${styles.button}`}><SwapIcon/>Swap Terms</Button>
+              <Button handleClick={handleMiddleTypeTrigger} variant="secondary" className={`${styles.button} ${styles.middleTypeButton}`} dataTooltipId='middle-type-tooltip'>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon className={styles.infoIcon}/></Button>
               <Tooltip
                 id='middle-type-tooltip'
                 >

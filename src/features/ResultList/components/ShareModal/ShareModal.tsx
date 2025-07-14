@@ -1,7 +1,7 @@
 import { useEffect, useState, FC } from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";

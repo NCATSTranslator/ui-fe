@@ -4,7 +4,7 @@ import { pastQueryState, setHistory } from "@/features/History/slices/historySli
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from "react-router-dom";
 import Modal from "@/features/Common/components/Modal/Modal";
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import Warning from "@/assets/icons/status/Alerts/Warning.svg?react";
 import CloseIcon from "@/assets/icons/buttons/Close/Close.svg?react";
 import QueryHistoryList from "@/features/History/components/QueryHistoryList/QueryHistoryList";
@@ -29,7 +29,7 @@ const History = () => {
                 <Button 
                   handleClick={()=>setModalOpen(true)}
                   className={`${styles.button} ${styles.clearButton}`}
-                  isSecondary
+                  variant="secondary"
                   >
                   <CloseIcon/>
                   Clear All

@@ -1,7 +1,7 @@
 import styles from './FacetTag.module.scss';
 import { FC } from "react";
 import { Filter } from "@/features/ResultFiltering/types/filters";
-import Checkbox from "@/features/Common/components/Checkbox/Checkbox";
+import Checkbox from "@/features/Core/components/Checkbox/Checkbox";
 import { formatBiolinkEntity } from "@/features/Common/utils/utilities";
 import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
