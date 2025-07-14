@@ -145,8 +145,9 @@ const FileInput: FC<FileDropInputProps> = ({
                   handleClick={!disabled ? handleClick : undefined}
                   className={styles.buttonLabel}
                   variant="secondary"
+                  iconLeft={<ExportIcon/>}
                   >
-                  <ExportIcon/>{buttonLabel}
+                  {buttonLabel}
                 </Button>
               </>
           }

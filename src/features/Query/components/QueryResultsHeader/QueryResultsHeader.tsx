@@ -103,8 +103,9 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
             handleClick={onShare}
             className={`${styles.shareButton} ${shareButtonClassName}`}
             small
+            iconLeft={<ShareIcon/>}
           >
-            <ShareIcon/>Share Result Set
+            Share Result Set
           </Button>
           {!loading && results && onResultMatchClick && pk && (
             <ResultsSummaryButton

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, FormEvent } from "react";
 import styles from "./SendFeedbackModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import Button from "@/features/Core/components/Button/Button";
-import TextInput from "@/features/Common/components/TextInput/TextInput";
+import TextInput from "@/features/Core/components/TextInput/TextInput";
 import FileInput from "@/features/Common/components/FileInput/FileInput";
 import Select from "@/features/Common/components/Select/Select";
 import { Fade } from "react-awesome-reveal";

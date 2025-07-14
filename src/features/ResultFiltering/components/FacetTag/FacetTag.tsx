@@ -1,7 +1,7 @@
 import styles from './FacetTag.module.scss';
 import { FC } from "react";
 import { Filter } from "@/features/ResultFiltering/types/filters";
-import Checkbox from "@/features/Core/components/Checkbox/Checkbox";
+import FacetCheckbox from "@/features/ResultFiltering/components/FacetCheckbox/FacetCheckbox";
 import { formatBiolinkEntity } from "@/features/Common/utils/utilities";
 import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
@@ -70,7 +70,7 @@ const FacetTag: FC<FacetTagProps> = ({
 
   return (
     <div className={`facet-container ${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey} data-facet-name={tagName}>
-      <Checkbox
+      <FacetCheckbox
         handleClick={
           isEntitySearch && !!handleInteractExistingEntity
           ? () => handleInteractExistingEntity(filter, positiveChecked, true)
@@ -98,8 +98,8 @@ const FacetTag: FC<FacetTagProps> = ({
             }
           </span>
         }
-      </Checkbox>
-      <Checkbox
+      </FacetCheckbox>
+      <FacetCheckbox
         handleClick={
           isEntitySearch && !!handleInteractExistingEntity
           ? () => handleInteractExistingEntity(filter, negativeChecked, true)
@@ -111,7 +111,7 @@ const FacetTag: FC<FacetTagProps> = ({
         icon={<Exclude/>}
         labelLeft
         title="Exclude"
-      ></Checkbox>
+      ></FacetCheckbox>
     </div>
   )
 }

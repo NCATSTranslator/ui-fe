@@ -204,8 +204,26 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
             <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
             <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
             <div className={styles.buttons}>
-              <Button handleClick={swapTerms} variant="secondary" className={`${styles.button}`}><SwapIcon/>Swap Terms</Button>
-              <Button handleClick={handleMiddleTypeTrigger} variant="secondary" className={`${styles.button} ${styles.middleTypeButton}`} dataTooltipId='middle-type-tooltip'>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon className={styles.infoIcon}/></Button>
+              <Button 
+                handleClick={swapTerms} 
+                variant="secondary" 
+                className={`${styles.button}`}
+                iconLeft={<SwapIcon/>}
+                smallFont
+              >
+                Swap Terms
+              </Button>
+              <Button 
+                handleClick={handleMiddleTypeTrigger} 
+                variant="secondary"
+                className={`${styles.button} ${styles.middleTypeButton}`}
+                dataTooltipId='middle-type-tooltip'
+                iconLeft={hasMiddleType ? <SubtractIcon/> : <AddIcon/>}
+                iconRight={<InfoIcon className={styles.infoIcon}/>}
+                smallFont
+              >
+                Middle Object
+              </Button>
               <Tooltip
                 id='middle-type-tooltip'
                 >

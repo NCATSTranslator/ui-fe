@@ -35,9 +35,9 @@ const PathViewSection: FC<PathViewSectionProps> = ({
           variant="secondary" 
           handleClick={() => setIsPathViewMinimized(!isPathViewMinimized)} 
           className={styles.togglePathView}
+          iconRight={<ChevDown />}
         >
           {isPathViewMinimized ? "Expand" : "Collapse"}
-          <ChevDown />
         </Button>
       )}
       <PathView

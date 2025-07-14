@@ -30,8 +30,8 @@ const History = () => {
                   handleClick={()=>setModalOpen(true)}
                   className={`${styles.button} ${styles.clearButton}`}
                   variant="secondary"
+                  iconLeft={<CloseIcon/>}
                   >
-                  <CloseIcon/>
                   Clear All
                 </Button>
               </div>

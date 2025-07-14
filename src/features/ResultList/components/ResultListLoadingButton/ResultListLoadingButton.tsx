@@ -93,8 +93,8 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
             handleClick={data.handleResultsRefresh} 
             className={`${buttonClassName} ${styles.loadingButton} ${styles.active}`}
             dataTooltipId="sync-new-results-button"
+            iconLeft={<ResultsAvailableIcon/>}
             >
-            <ResultsAvailableIcon/>
             Sync New Results
           </Button>
         </>

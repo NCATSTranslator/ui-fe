@@ -78,7 +78,14 @@ const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
       <div className={styles.activeFilters}>
         {
           !data.filtersExpanded &&
-          <Button variant="secondary" handleClick={() => data.setFiltersExpanded(true)} className={styles.filterButton}><FilterIcon/>Filters</Button>
+          <Button 
+            variant="secondary"
+            handleClick={() => data.setFiltersExpanded(true)}
+            className={styles.filterButton}
+            iconLeft={<FilterIcon/>}
+          >
+            Filters
+          </Button>
         }
         {
           data.activeFilters.length > 0 &&

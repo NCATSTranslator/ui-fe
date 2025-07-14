@@ -105,20 +105,20 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({
         variant="secondary"
         handleClick={()=>handleSummaryButtonClick(isSummaryAvailable.current)}
         small
+        iconLeft={
+            !!isStreaming
+            ?                  
+              <img
+                src={loadingIcon}
+                className={`${styles.summaryLoadingIcon} loadingIcon`}
+                alt="loading icon"
+              />
+            : 
+              <SparkleIcon className={styles.summaryLoadingIcon} />
+          }
+        iconRight={<InfoIcon className={styles.infoIcon} data-tooltip-id="result-summary-tooltip" />}
         >
-        {
-          !!isStreaming
-          ?                  
-            <img
-              src={loadingIcon}
-              className={`${styles.summaryLoadingIcon} loadingIcon`}
-              alt="loading icon"
-            />
-          : 
-            <SparkleIcon className={styles.summaryLoadingIcon} />
-        }
         <span>View Results Summary</span>
-        <InfoIcon className={styles.infoIcon} data-tooltip-id="result-summary-tooltip" />
         <Tooltip id="result-summary-tooltip">
           <span>This AI-generated summary reviews the data returned by Translator and identifies interesting results, ChEBI roles, and objects found in paths. <br/><br/> This summary is not intended to be a replacement for medical advice.</span>
         </Tooltip>

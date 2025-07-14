@@ -8,7 +8,7 @@ import { cloneDeep, debounce } from "lodash";
 import { getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { QueryHistoryItem } from "@/features/History/types/history";
 import ShareModal from "@/features/ResultList/components/ShareModal/ShareModal";
-import TextInput from "@/features/Common/components/TextInput/TextInput";
+import TextInput from "@/features/Core/components/TextInput/TextInput";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import Button from "@/features/Core/components/Button/Button";
 import Close from '@/assets/icons/buttons/Close/Close.svg?react';
