@@ -2,6 +2,7 @@
 
 button {
   cursor: pointer;
+  border: none;
   &:disabled {
     background-color: $lightGray;
     color: $midGray;
