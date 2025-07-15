@@ -1,6 +1,6 @@
 import Button from '@/features/Core/components/Button/Button';
 import styles from './ProjectListHeader.module.scss';
-import Folder from '@/assets/icons/projects/folder.svg?react';
+import FolderPlus from '@/assets/icons/projects/folderplus.svg?react';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import Search from '@/assets/icons/buttons/search.svg?react';
 
@@ -10,7 +10,7 @@ const ProjectListHeader = () => {
       <div className={styles.left}>
         <h1 className={`h4`}>Projects</h1>
         <Button
-          iconLeft={<Folder />}
+          iconLeft={<FolderPlus />}
         >
           Create New
         </Button>

@@ -1,0 +1,19 @@
+@use '@/assets/styles/variables' as *;
+
+.cardWrapper {
+  background: $lightGray;
+  border: none;
+  border-radius: calc($defaultBorderRadius * 2);
+  display: grid;
+  grid-template-columns: $projectsTableGridColumns;
+  gap: $s;
+  padding: $m;
+  align-items: center;
+  cursor: pointer;
+  transition: $defaultAnim;
+  box-shadow: $dropShadow;
+  &:hover {
+    box-shadow: $dropShadowHover;
+    background-color: $grayHover;
+  } 
+}

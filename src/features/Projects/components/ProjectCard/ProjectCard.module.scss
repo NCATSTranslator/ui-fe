@@ -1,0 +1,67 @@
+@use '@/assets/styles/variables' as *;
+
+.projectCard {
+  .checkboxColumn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    label {
+      display: flex;
+      margin-bottom: 0;
+      width: $s;
+      height: $s;
+      padding: $xxs;
+    }
+  }
+  .actionsColumn {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+    button {
+      background-color: $white;
+      &:hover {
+        background-color: $lightGray;
+      }
+    }
+  }
+}
+
+.nameColumn {
+  .nameContent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .folderIcon {
+    width: 16px;
+    height: 16px;
+    color: $black;
+  }
+
+  .projectTitle {
+    font-weight: 500;
+    color: $black;
+    font-size: 14px;
+  }
+}
+
+.lastSeenColumn,
+.dateAddedColumn {
+  text-align: center;
+  font-size: 12px;
+  color: $black;
+}
+
+.bookmarksColumn,
+.notesColumn {
+  text-align: center;
+  font-size: 12px;
+  color: $black;
+}
+
+.statusColumn {
+  display: flex;
+  justify-content: center;
+}
+

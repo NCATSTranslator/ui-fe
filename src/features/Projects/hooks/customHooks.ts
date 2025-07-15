@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueryStatus, 
   restoreProjects, restoreQueries, updateProjects } from '@/features/Projects/utils/projectsApi';
-import { ProjectCreate, ProjectUpdate } from '@/features/Projects/types/projects';
+import { ProjectCreate, ProjectUpdate } from '@/features/Projects/types/projects.d';
 
 /**
  * Hook to fetch user projects with React Query
