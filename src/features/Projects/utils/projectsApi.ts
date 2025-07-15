@@ -1,6 +1,6 @@
 import { get, post, put, fetchWithErrorHandling, ErrorHandler } from '@/features/Common/utils/web';
 import { isProject, isProjectArray, isQueryStatusArray, isUserQueryObject, Project, 
-  ProjectCreate, ProjectUpdate, QueryStatusObject, UserQueryObject } from '@/features/Projects/types/projects';
+  ProjectCreate, ProjectUpdate, QueryStatusObject, UserQueryObject } from '@/features/Projects/types/projects.d';
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';
