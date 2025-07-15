@@ -19,16 +19,20 @@ export type Project = {
   deleted: boolean;
 }
 
+export type QueryStatus = 'success' | 'running' | 'error';
+
 export interface QueryStatusObject {
-  // save ID
-  sid:          string,
-  pk:           string,
-  time_created: Date,
-  time_updated: Date,
-  title:        string,
-  tag_ids:      string[],
-  bookmark_ids: string[],
-  deleted:      boolean
+  status: QueryStatus,
+  data: {
+    qid: string,
+    aras: string[],
+    title: string,
+    bookmark_count: number,
+    note_count: number,
+    time_created: Date, 
+    time_updated: Date, 
+    deleted: boolean
+  }
 }
 
 export interface UserQueryObject {
@@ -64,9 +68,16 @@ export const isQueryStatusArray = (obj: unknown): obj is QueryStatusObject[] => 
   return Array.isArray(obj) && obj.every(item => 
     typeof item === 'object' &&
     item !== null &&
-    'sid' in item &&
     'status' in item &&
-    'timestamp' in item
+    'data' in item &&
+    'qid' in item.data &&
+    'aras' in item.data &&
+    'title' in item.data &&
+    'bookmark_count' in item.data &&
+    'note_count' in item.data &&
+    'time_created' in item.data &&
+    'time_updated' in item.data &&
+    'deleted' in item.data
   );
 };
 
@@ -75,6 +86,6 @@ export const isUserQueryObject = (obj: unknown): obj is UserQueryObject => {
     typeof obj === 'object' &&
     obj !== null &&
     'queries' in obj &&
-    Array.isArray((obj as any).queries)
+    Array.isArray((obj as unknown).queries)
   );
 };
