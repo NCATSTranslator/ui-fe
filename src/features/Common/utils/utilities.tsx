@@ -265,7 +265,7 @@ export const isValidDate = (date: string | number | Date): boolean => {
   return !isNaN(parsedDate.getTime());
 };
 
-export const getFormattedDate = (date: Date): string | boolean => {
+export const getFormattedDate = (date: Date, includeTime: boolean = true): string | boolean => {
   if (!isValidDate(date))
     return false;
 
@@ -274,7 +274,7 @@ export const getFormattedDate = (date: Date): string | boolean => {
   const formattedDate = new Intl.DateTimeFormat('en-US', dateFormatOptions).format(date);
   const formattedTime = new Intl.DateTimeFormat('en-US', timeFormatOptions).format(date);
 
-  return `${formattedDate} (${formattedTime})`;
+  return `${formattedDate}${includeTime ? ` (${formattedTime})` : ''}`;
 };
 
 export const getGeneratedSendFeedbackLink = (openDefault: boolean = true): string => {

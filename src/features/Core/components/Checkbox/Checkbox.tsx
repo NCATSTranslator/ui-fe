@@ -95,7 +95,9 @@ const Checkbox: FC<CheckboxProps> = ({
         disabled={disabled}
         aria-describedby={ariaDescribedby}
       />
-      <span className={styles.children}>{children}</span>
+      {
+        children && <span className={styles.children}>{children}</span>
+      }
     </label>
   );
 };
