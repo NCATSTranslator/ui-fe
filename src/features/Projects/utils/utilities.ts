@@ -7,9 +7,7 @@ import { Project, QueryStatus, QueryStatusObject } from "@/features/Projects/typ
  * @returns The status of the project
  */
 export const getProjectStatus = (project: Project, queries: QueryStatusObject[]): QueryStatus => {
-  console.log('Project qids:', project.qids);
-  console.log('Available queries:', queries.map(q => ({ qid: q.data.qid, status: q.status, time_updated: q.data.time_updated })));
-  
+  // Get the most recent query's status
   const mostRecentQuery = project.qids.reduce((mostRecent: QueryStatusObject | null, qid) => {
     const query = queries.find((query) => query.data.qid === qid);
     
