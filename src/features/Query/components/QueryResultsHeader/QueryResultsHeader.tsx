@@ -3,7 +3,7 @@ import Button from '@/features/Core/components/Button/Button';
 import ResultsSummaryButton from '@/features/ResultList/components/ResultsSummaryButton/ResultsSummaryButton';
 import { Result } from '@/features/ResultList/types/results';
 import { generateEntityLink } from '@/features/Common/utils/utilities';
-import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import styles from './QueryResultsHeader.module.scss';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
 

@@ -13,7 +13,7 @@ import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import Button from "@/features/Core/components/Button/Button";
 import Close from '@/assets/icons/buttons/Close/Close.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
-import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import RefreshIcon from '@/assets/icons/buttons/Refresh.svg?react';
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 
