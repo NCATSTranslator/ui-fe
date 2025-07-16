@@ -14,6 +14,7 @@ import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSupportPathDepth, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import { SupportPathDepthContext } from '@/features/ResultItem/components/PathView/PathView';
+import { useWhyDidComponentUpdate } from '@/features/Common/hooks/customHooks';
 
 export const SupportPathKeyContext = createContext<string>("");
 
@@ -51,7 +52,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   showHiddenPaths }) => {
 
   const resultSet = useSelector(getResultSetById(pk));
-  const paths = isStringArray(pathArray) ? getPathsByIds(resultSet, pathArray) : pathArray;
+  const paths = useMemo(() => isStringArray(pathArray) ? getPathsByIds(resultSet, pathArray) : pathArray, [pathArray, resultSet]);
   const formattedPaths = useMemo(() => {
     const newPaths = getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths);
     if(activeEntityFilters.length > 0 && !!resultSet) {
@@ -70,7 +71,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   const initHeight = (isExpanded) ? 'auto' : 0;
   const [height, setHeight] = useState<number | string>(initHeight);
 
-  const filteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState);
+  const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
   const itemsPerPage: number = 10;
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0);
