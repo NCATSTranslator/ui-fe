@@ -6,7 +6,7 @@ export const Help = () => {
 
   return (
     <>
-      <p className="caption">Last updated on March 18th, 2025</p>
+      <p className="caption">Last updated on July 16th, 2025</p>
       <h2 className="h6">How is this tool different from a search engine?</h2>
       <p>The Translator UI is a tool designed for the exploration of biomedical knowledge. Unlike search engines which provide an answer based on a topic search, Translator uses reasoning, based on biomedical knowledge, to provide probable answers supported by known evidence. This allows the user to explore the relationships between biomedical concepts.</p>
       <p>Given the complexity of the results and the different goals of users, the UI provides multiple ways to sort and filter results to identify those most relevant to a user.</p>
@@ -32,7 +32,7 @@ export const Help = () => {
       <p>Yes, Translator provides evidence for every association between two concepts. At the moment Translator is able to distinguish two different types of evidence: publications and knowledge sources. </p>
       <p>Click on a relationship to view the evidence supporting it.</p>
 
-      <h2 className="h6">Is it okay to take a commercially available drug that Translator returns as a possible treatment for my disease of interest?</h2>
+      <h2 className="h6">Is it okay to take a commercially available drug that Translator returns as a possible impact for my disease of interest?</h2>
       <p>No. Translator is designed for research, and the results are for research only.  Only physicians should guide medical care even for over-the-counter medicines.</p>
 
       <h2 className="h6">Why do some results display first? When will I know I have all of the results?</h2>
@@ -41,8 +41,8 @@ export const Help = () => {
       <h2 className="h6">I ran the same query a second time, why am I seeing different results?</h2>
       <p>Translator is not deterministic, meaning there is some randomness in how a query is processed. Usually, similar results will be returned, although Translator is currently under development, and is continuing to integrate new algorithms and additional knowledge sources and evidence.</p>
      
-      <h2 className="h6">What does it mean if a drug "may treat" a disease?</h2>
-      <p>Translator is designed to help researchers who may be developing treatments for a disease. Different teams across Translator have optimized models for predicting what may treat a disease. For example, results can include those drugs that may treat a disease based on machine learning algorithms and knowledge graph modeling patterns of known treatments. This information can be helpful to researchers who study the disease or want to develop a treatment. It does not mean that the drug will definitely treat the disease. <strong>The results should be considered for research only.</strong></p>
+      <h2 className="h6">What does it mean if a drug "may impact" a disease?</h2>
+      <p>Translator is designed to help researchers who may be developing treatments for a disease. Different teams across Translator have optimized models for predicting what may impact a disease. For example, results can include those drugs that may impact a disease based on machine learning algorithms and knowledge graph modeling patterns of known treatments. This information can be helpful to researchers who study the disease or want to develop a treatment. It does not mean that the drug will definitely impact the disease. <strong>The results should be considered for research only.</strong></p>
 
       <h2 className="h6">Why can I only explore a few different kinds of relationships: drugs/disease, chemicals/genes, etc.?</h2>
       <p>During the alpha-phase testing, a few limited domains were selected for user exploration based on analysis of researchers' interests, including chemicals, drugs, genes, and diseases. Over time, more domains will be added. These relationships are expected to have broad interest and allow us to understand how people would like to interact with the Translator user interface and the results it returns. Future Translator updates will include additional relationships.</p>
@@ -57,7 +57,7 @@ export const Help = () => {
       <h2 className="h6">Why do I see a disease in my results that is different than the one I searched for?</h2>
       <p>Translator uses the <a href="http://obofoundry.org/ontology/mondo.html" target="_blank" rel="noreferrer">Mondo Disease Ontology</a> which has a hierarchical structure. This means that certain terms have a 'parent/child' relationship.  A parent term is more general, and a child term is more specific.  For example, 'diabetes mellitus' is a child (or subtype) of 'endocrine pancreas disease' and a parent of 'type 1 diabetes mellitus.' When working with diseases in Translator, it may be assumed that if there is a relationship with the parent term, then the relationship also exists with the children of that term.  As such, if a user selects 'diabetes mellitus' in the query, there will likely be results related to 'type 1 diabetes' as well as the other children of that term.  For more information on the disease terms and their hierarchy go to <a href="https://next.monarchinitiative.org/" target="_blank" rel="noreferrer">https://next.monarchinitiative.org/</a>.</p>
       
-      <h2 className="h6">What if I cannot find my disease of interest in order to search for drugs that may treat it?</h2>
+      <h2 className="h6">What if I cannot find my disease of interest in order to search for drugs that may impact it?</h2>
       <p>Make sure the disease name is spelled correctly. A Mondo identifier might not exist, or it may have an alias unknown to Translator. Consider exploring the <a href="https://monarchinitiative.org/" target="_blank" rel="noreferrer">Monarch Initiative</a> website to find alternate names for many diseases.</p>
       
       <h2 className="h6">What do different categories of drugs mean?</h2>
