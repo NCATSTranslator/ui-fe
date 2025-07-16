@@ -52,7 +52,7 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, no
       label: getDataFromQueryVar('ltwo') || ""
     }
     const constraint = getDataFromQueryVar('c') || "";
-    qidPath = `pathfinder/${getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid)}`;
+    qidPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid);
   } else {
     qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);
   }

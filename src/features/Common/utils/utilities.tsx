@@ -615,7 +615,7 @@ export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | 
  * @returns {string} - The formatted result name. 
  */
 export const getFormattedPathfinderName = (name: string) => {
-  const formattedName = name.replace(/([A-Z])/g, ' $1').trim()
+  const formattedName = name.replace(/([A-Z])/g, '$1').trim()
   return formattedName;
 }
 
