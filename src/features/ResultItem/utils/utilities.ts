@@ -43,7 +43,7 @@ export const getARATagsFromResultTags = (tags: Filters): string[] => {
  */
 export const getEdgeIdsFromPath = (path: Path): string[] => {
   const graph = path.compressedSubgraph ?? path.subgraph;
-  return graph.filter((_, i) => i % 2 === 1) as string[];
+  return graph.filter((_, i) => i % 2 === 1).flat();
 };
 
 /**
