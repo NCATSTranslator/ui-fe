@@ -8,6 +8,7 @@ type ResultState = {
 };
 
 const initialState: ResultState = {};
+const TREATS_REPLACEMENT = "impacts";
 
 const resultSetsSlice = createSlice({
   name: "resultSets",
@@ -43,7 +44,21 @@ export const getPathsByIds = (resultSet: ResultSet | undefined | null, pathIDs: 
   return pathIDs.map(pathID => getPathById(resultSet, pathID)).filter((path): path is Path => path !== undefined)
 }
 export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNode | undefined => (resultSet === null || !id) ? undefined : resultSet.data.nodes[id];
-export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
+export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
+  let edge: ResultEdge | undefined = (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
+  if(!edge) {
+    console.warn(`Unable to find edge with id: ${id} within result set.`);
+    return undefined;
+  }
+
+  // Temporary fix to not display the "treats" predicate in the UI
+  if(edge.predicate.includes("treat")) {
+    edge.predicate = TREATS_REPLACEMENT;
+    edge.predicate_url = "";
+  }
+
+  return edge;
+}
 export const getEdgesByIds = (resultSet: ResultSet | null, ids:string[]): ResultEdge[] => {
   if(!resultSet)
     return [];

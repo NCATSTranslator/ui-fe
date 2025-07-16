@@ -6,10 +6,10 @@ export const ExploringRelationships = () => {
 
   return (
     <>
-      <p className="caption">Last updated on September 25th, 2024</p>
+      <p className="caption">Last updated on July 16th, 2025</p>
       <p>Translator facilitates the exploration of 3 types of questions:</p>
       <ol>
-        <li>How chemicals are related to diseases and how they may treat them.</li>
+        <li>How chemicals are related to diseases and how they may impact them.</li>
         <li>Given a gene, find chemicals that impact its activity.</li>
         <li>Given a chemical, what genes' activity is affected by that chemical.</li>
       </ol>
