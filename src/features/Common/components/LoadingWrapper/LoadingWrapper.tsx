@@ -1,6 +1,7 @@
 import { FC, useEffect, useState, ReactNode } from 'react';
 import styles from './LoadingWrapper.module.scss';
 import LoadingIcon from '@/features/Common/components/LoadingIcon/LoadingIcon';
+import { Timeout } from '@/features/Common/types/global';
 
 interface LoadingWrapperProps {
   loading?: boolean;
@@ -20,7 +21,7 @@ const LoadingWrapper: FC<LoadingWrapperProps> = ({
   const showDelay = 350;
 
   useEffect(() => {
-    let timer: boolean | number = false;
+    let timer: Timeout | null = null;
     if (!loading) {
       timer = setTimeout(() => {setShowContent(true); setIsLoading(false);}, showDelay);
     }
