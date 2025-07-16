@@ -19,6 +19,7 @@ import { useSelector } from 'react-redux';
 import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
 import Button from '@/features/Common/components/Button/Button';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
+import { useWhyDidComponentUpdate } from '@/features/Common/hooks/customHooks';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 export const SupportPathDepthContext = createContext<number>(1);
@@ -65,11 +66,11 @@ const PathView: FC<PathViewProps> = ({
   showHiddenPaths }) => {
 
   const resultSet = useSelector(getResultSetById(pk));
-  const paths = isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray;
+  const paths = useMemo(() => isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray, [pathArray, resultSet]);
   const itemsPerPage: number = 10;
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths, true), [paths, selectedPaths, pathFilterState, resultSet]);
-  const filteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState);
-  const fullFilteredPathCount = getFilteredPathCount(formattedPaths, pathFilterState, true, resultSet);
+  const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
+  const fullFilteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState, true, resultSet), [formattedPaths, pathFilterState, resultSet]);
   const { isPathSeen } = useSeenStatus(pk);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0)
