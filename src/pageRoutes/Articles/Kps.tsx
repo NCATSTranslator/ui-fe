@@ -2,10 +2,10 @@
 export const Kps = () => {
   return (
     <>
-      <p className="caption">Last updated on September 6th, 2022</p>
+      <p className="caption">Last updated on July 16th, 2025</p>
       <p>Knowledge Providers (KPs) supply domain-specific information found from over 250 various knowledge sources, including curated biomedical databases, electronic health records, and machine learning predictions extracted from clinical data. There are eight primary knowledge service providers responsible for exposing several other KPs.</p>
       <h2 className="h6">Clinical Data Provider</h2>
-      <p>The Clinical Data Provider team provides access to clinical associations mined from observational EHR data, "drug treats disease" associations predicted from embeddings generated from clinical data, and clinical drug indications claims.</p>
+      <p>The Clinical Data Provider team provides access to clinical associations mined from observational EHR data, "drug impacts disease" associations predicted from embeddings generated from clinical data, and clinical drug indications claims.</p>
       <h2 className="h6">Connection Hypotheses Provider</h2>
       <p>The Connections Hypothesis Provider (CHP) aims to leverage clinical data and structured biochemical knowledge to derive a computational representation of pathway structures and molecular components. The goal of creating this representation is to support human and machine-driven interpretation, enable pathway-based biomarker discovery, and aid in the drug development process.</p>
       <h2 className="h6">Exposures Provider</h2>
