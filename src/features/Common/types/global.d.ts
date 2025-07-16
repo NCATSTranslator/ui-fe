@@ -28,3 +28,5 @@ export interface PhraseItem {
   phrase: string;
   verb: string;
 }
+
+export type Timeout = ReturnType<typeof setTimeout>;

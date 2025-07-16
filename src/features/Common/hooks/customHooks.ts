@@ -2,13 +2,15 @@ import { useState, useEffect, useRef, Dispatch, SetStateAction, RefObject } from
 import { isEqual } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import { FeedbackForm, FormErrors } from '@/features/Common/types/global';
+import { FeedbackForm, FormErrors, Timeout } from '@/features/Common/types/global';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
 
 interface WindowSize {
   width: number | undefined;
   height: number | undefined;
 }
+
+
 
 interface DeepDifference {
   path: string;
@@ -23,7 +25,7 @@ export const useWindowSize = (delay: number = 100): WindowSize => {
   });
 
   useEffect(() => {
-    let timeoutId: number | null = null;
+    let timeoutId: Timeout | null = null;
 
     function handleResize() {
       if (timeoutId !== null) {
