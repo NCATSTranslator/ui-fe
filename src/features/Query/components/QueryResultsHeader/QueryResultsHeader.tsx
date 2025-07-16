@@ -1,9 +1,9 @@
 import { FC } from 'react';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import ResultsSummaryButton from '@/features/ResultList/components/ResultsSummaryButton/ResultsSummaryButton';
 import { Result } from '@/features/ResultList/types/results';
 import { generateEntityLink } from '@/features/Common/utils/utilities';
-import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import styles from './QueryResultsHeader.module.scss';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
 
@@ -99,12 +99,13 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
         </h2>
         <div className={styles.buttons}>
           <Button 
-            isSecondary
+            variant="secondary"
             handleClick={onShare}
             className={`${styles.shareButton} ${shareButtonClassName}`}
-            smallFont
+            small
+            iconLeft={<ShareIcon/>}
           >
-            <ShareIcon/>Share Result Set
+            Share Result Set
           </Button>
           {!loading && results && onResultMatchClick && pk && (
             <ResultsSummaryButton

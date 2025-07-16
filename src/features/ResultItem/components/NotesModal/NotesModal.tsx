@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, FC } from "react";
 import styles from "./NotesModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import TextEditor from "@/features/Common/components/TextEditor/TextEditor";
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import { getUserSave, Save, updateUserSave } from "@/features/UserAuth/utils/userApi";
 
 interface NotesModalProps {
@@ -72,7 +72,7 @@ const NotesModal: FC<NotesModalProps> = ({isOpen = false, onClose = ()=>{}, note
             <h5>Are you sure you want to clear this note?</h5>
             <p className="bold ">This is permanent and cannot be undone.</p>
             <div className={styles.buttons}>
-              <Button handleClick={() => setConfirmClearNote(false)} className={styles.button} isSecondary>Keep Note</Button>
+              <Button handleClick={() => setConfirmClearNote(false)} className={styles.button} variant="secondary">Keep Note</Button>
               <Button handleClick={handleClearNote} className={styles.button} >Clear Note</Button>
             </div>
           </div>

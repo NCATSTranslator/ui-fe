@@ -1,17 +1,35 @@
 @use "@/assets/styles/variables" as *;
 
+.textInputContainer {
+  display: grid;
+}
+.errorText {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: $xxs;
+  color: $red;
+  margin: 0 0 $xs;
+  font-size: $captionSize;
+  &:before {
+    height: $m;
+    width: $m;
+    content: url('@/assets/icons/status/Alerts/Info.svg');
+  }
+}
 .textInput {
-  position: relative; 
-  .errorText {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    color: $red;
-    margin-top: 8px;
-    font-size: $captionSize;
-    &:before {
-      content: url('@/assets/icons/status/Alerts/Info.svg');
-      margin-right: 4px;
+  position: relative;
+  display: grid;
+  &.disabled {
+    input, textarea {
+      background-color: $lightGray;
+      color: $midGray;
+    }
+  }
+  &.error {
+    input, textarea {
+      border-color: $red;
+      background-color: $lightRed;
     }
   }
   input, textarea {

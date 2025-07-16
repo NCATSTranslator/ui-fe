@@ -32,6 +32,9 @@
     }
   }
   .buttons {
+    display: flex;
+    gap: $s;
+    margin-bottom: $s;
     .button {
       font-size: $captionSize;
       padding: $xxs $xs;
@@ -73,7 +76,7 @@
 }
 .form {
   display: grid;
-  grid-template-columns: 1fr 18px 1fr 40px;
+  grid-template-columns: 1fr 24px 1fr auto;
   column-gap: $xs;
   align-items: center;
   box-shadow: $dropShadow;
@@ -101,10 +104,6 @@
         scrollbar-width: none;
       }
     }
-  }
-  .inputContainer {
-    position: relative;
-    display: flex;
   }
   .input {
     margin: 0;

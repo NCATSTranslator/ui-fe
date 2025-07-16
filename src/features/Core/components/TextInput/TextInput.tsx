@@ -1,5 +1,7 @@
 import { ChangeEvent, FC, KeyboardEvent, ReactNode } from 'react';
 import styles from "./TextInput.module.scss";
+import { joinClasses } from '@/features/Common/utils/utilities';
+import InputLabel from '@/features/Core/components/InputLabel/InputLabel';
 
 type TextInputProps = {
   label?: string;
@@ -36,13 +38,15 @@ const TextInput: FC<TextInputProps> = ({
   testId,
   disabled = false
 }) => {
-  const inputStyle = `
-    text-input
-    ${styles.textInput}
-    ${iconLeft ? styles.hasIconLeft : styles.noIconLeft}
-    ${iconRight ? styles.hasIconRight : styles.noIconRight}
-    ${className}
-  `.trim();
+  const inputStyle = joinClasses(
+    'text-input',
+    styles.textInput,
+    iconLeft ? styles.hasIconLeft : styles.noIconLeft,
+    iconRight ? styles.hasIconRight : styles.noIconRight,
+    disabled && styles.disabled,
+    error && styles.error,
+    className
+  );
 
   const commonProps = {
     placeholder: placeholder,
@@ -55,30 +59,30 @@ const TextInput: FC<TextInputProps> = ({
   };
 
   return (
-    <label className={inputStyle}>
+    <div className={styles.textInputContainer}>
       {
         (label || subtitle) && (
-          <span className="input-label-container">
-            {label && <span className="input-label">{label}</span>}
-            {subtitle && <span className="input-subtitle">{subtitle}</span>}
-          </span>
+          <InputLabel label={label} subtitle={subtitle} />
         )
       }
-      {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
-      {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
-      {rows && rows > 1 ? (
-        <textarea
-          {...commonProps}
-          rows={rows}
-        />
-      ) : (
-        <input
-          {...commonProps}
-          type="text"
-        />
-      )}
       {error && <span className={styles.errorText}>{errorText}</span>}
-    </label>
+      <label className={inputStyle}>
+        {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
+        {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
+        {rows && rows > 1 ? (
+          <textarea
+            {...commonProps}
+            rows={rows}
+          />
+        ) : (
+          <input
+            {...commonProps}
+            type="text"
+          />
+        )}
+      </label>
+    </div>
+
   );
 };
 

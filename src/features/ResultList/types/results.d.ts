@@ -161,6 +161,13 @@ export type Errors = {
   "biothings-annotator": string[];
   unknown: string[];
 }
+export type ARAStatusResponse = {
+  status: string;
+  data: {
+    aras: string[];
+    status: string;
+  };
+}
 
 export type HoverTarget = { id: string; type: 'node' | 'edge' } | null;
 

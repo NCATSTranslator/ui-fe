@@ -211,17 +211,6 @@ export const getMoreInfoLink = (id: string, className: string): ReactNode | null
   return generateEntityLink(id, className, () => { return ' '});
 }
 
-export const handleFetchErrors = (
-    response: Response,
-    onErrorCallback: (res: Response) => void = () => console.log('No error callback function specified.')
-  ): Response => {
-    if(!response.ok) {
-      onErrorCallback(response);
-      throw Error(response.statusText);
-    }
-    return response
-}
-
 export const getRandomIntInclusive = (min: number, max: number) => {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -276,7 +265,7 @@ export const isValidDate = (date: string | number | Date): boolean => {
   return !isNaN(parsedDate.getTime());
 };
 
-export const getFormattedDate = (date: Date): string | boolean => {
+export const getFormattedDate = (date: Date, includeTime: boolean = true): string | boolean => {
   if (!isValidDate(date))
     return false;
 
@@ -285,7 +274,7 @@ export const getFormattedDate = (date: Date): string | boolean => {
   const formattedDate = new Intl.DateTimeFormat('en-US', dateFormatOptions).format(date);
   const formattedTime = new Intl.DateTimeFormat('en-US', timeFormatOptions).format(date);
 
-  return `${formattedDate} (${formattedTime})`;
+  return `${formattedDate}${includeTime ? ` (${formattedTime})` : ''}`;
 };
 
 export const getGeneratedSendFeedbackLink = (openDefault: boolean = true): string => {

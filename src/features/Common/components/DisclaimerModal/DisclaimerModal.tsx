@@ -1,5 +1,5 @@
 import { useState, useEffect, FC } from "react";
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import styles from './DisclaimerModal.module.scss';
 
 interface DisclaimerModalProps {
