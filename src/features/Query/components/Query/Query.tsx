@@ -64,7 +64,7 @@ const Query: FC<QueryProps> = ({
     loadingAutocomplete,
     delayedQuery,
     clearAutocompleteItems
-  } = useAutocomplete(autocompleteFunctions, limitTypes, limitPrefixes, nameResolverEndpoint);
+  } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes);
 
   const { isLoading, setIsLoading, submitQuery } = useQuerySubmission();
 

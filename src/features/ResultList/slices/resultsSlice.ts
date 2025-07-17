@@ -53,8 +53,10 @@ export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdg
 
   // Temporary fix to not display the "treats" predicate in the UI
   if(edge.predicate.includes("treat")) {
-    edge.predicate = TREATS_REPLACEMENT;
-    edge.predicate_url = "";
+    let newEdge = cloneDeep(edge);
+    newEdge.predicate = TREATS_REPLACEMENT;
+    newEdge.predicate_url = "";
+    return newEdge;
   }
 
   return edge;

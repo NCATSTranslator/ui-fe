@@ -67,20 +67,21 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   });
   const limitPrefixes = useRef([]);
   const limitTypes = useRef(["Drug", "ChemicalEntity", "Disease", "Gene", "SmallMolecule", "PhenotypicFeature"]);
+  const excludePrefixes = useRef(["UMLS"]);
 
   const {
     autocompleteItems: autocompleteItemsOne,
     loadingAutocomplete: autocompleteLoadingOne,
     delayedQuery: delayedQueryOne,
     clearAutocompleteItems: clearAutocompleteItemsOne
-  } = useAutocomplete(autocompleteFunctions, limitTypes, limitPrefixes, nameResolverEndpoint);
+  } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes, excludePrefixes);
 
   const {
     autocompleteItems: autocompleteItemsTwo,
     loadingAutocomplete: autocompleteLoadingTwo,
     delayedQuery: delayedQueryTwo,
     clearAutocompleteItems: clearAutocompleteItemsTwo
-  } = useAutocomplete(autocompleteFunctions, limitTypes, limitPrefixes, nameResolverEndpoint);
+  } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes, excludePrefixes);
 
   const { isLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder');
 

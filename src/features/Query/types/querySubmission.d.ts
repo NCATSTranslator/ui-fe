@@ -14,6 +14,7 @@ export type QueryType = {
   direction: string | null;
   filterType: string;
   limitPrefixes: string[];
+  excludePrefixes?: string[];
   functions: AutocompleteFunctions;
   pathString: string;
   searchTypeString: string;
