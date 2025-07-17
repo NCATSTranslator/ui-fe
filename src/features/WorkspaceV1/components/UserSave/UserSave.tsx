@@ -86,7 +86,8 @@ const UserSave: FC<UserSaveProps> = ({
       <div className={styles.topBar}>
         <div className={styles.headingContainer}>
           <span onClick={handleToggle}>
-            <h4 className={styles.heading}>{typeString}
+            {/* Temporary fix to not display the "treats" predicate in the UI */}
+            <h4 className={styles.heading}>{typeString.replaceAll("treat", "impact")}
               <Highlighter
                 highlightClassName="highlight"
                 searchWords={[currentSearchString.current]}
