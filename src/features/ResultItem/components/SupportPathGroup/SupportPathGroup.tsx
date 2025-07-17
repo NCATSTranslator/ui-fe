@@ -14,7 +14,6 @@ import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSupportPathDepth, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import { SupportPathDepthContext } from '@/features/ResultItem/components/PathView/PathView';
-import { useWhyDidComponentUpdate } from '@/features/Common/hooks/customHooks';
 
 export const SupportPathKeyContext = createContext<string>("");
 
