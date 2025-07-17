@@ -14,6 +14,7 @@ export const getAutocompleteTerms = (
   autocompleteFunctions: AutocompleteFunctions,
   limitTypes: string[] = [],
   limitPrefixes: string[] = [],
+  excludePrefixes: string[] = [],
   endpoint: string
 ) => {
   if (inputText) {
@@ -21,7 +22,7 @@ export const getAutocompleteTerms = (
     setLoadingAutocomplete(true);
     const formatData = { input: inputText.toLowerCase(), resolved: {} };
 
-    newFetchNodesFromInputText(inputText, limitTypes, limitPrefixes, endpoint)
+    newFetchNodesFromInputText(inputText, limitTypes, limitPrefixes, excludePrefixes, endpoint)
       .then((response) => response.json())
       .then((nodes: Node[]) => {
         let newNodes: { [key: string]: string[] } = {};
@@ -52,6 +53,7 @@ const newFetchNodesFromInputText = async (
   inputText: string,
   types: string[],
   prefixes: string[],
+  excludePrefixes: string[],
   endpoint: string
 ): Promise<Response> => {
   let prefixString = "&only_prefixes=";
@@ -59,6 +61,12 @@ const newFetchNodesFromInputText = async (
     prefixString = `${prefixString}${prefixes.join('|')}`;
   } else {
     prefixString = "";
+  }
+  let excludePrefixString = "&exclude_prefixes=";
+  if (excludePrefixes.length > 0) {
+    excludePrefixString = `${excludePrefixString}${excludePrefixes.join('|')}`;
+  } else {
+    excludePrefixString = "";
   }
   const typesString = types.length > 0 ? `&biolink_type=${types.join('&biolink_type=')}` : "";
 
@@ -68,7 +76,7 @@ const newFetchNodesFromInputText = async (
   };
 
   return fetch(
-    `${endpoint}?string=${inputText}&offset=0&limit=100${typesString}${prefixString}`,
+    `${endpoint}?string=${inputText}&offset=0&limit=100${typesString}${prefixString}${excludePrefixString}`,
     nameResolverRequestOptions
   );
 };
