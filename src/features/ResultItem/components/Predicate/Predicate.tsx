@@ -164,6 +164,10 @@ const Predicate: FC<PredicateProps> = ({
                           textToHighlight={edge.predicate}
                         />
                         {
+                          edge.predicate.includes("impacts") &&
+                          <span className={styles.predicateImpact}> (could be positive or negative)</span>
+                        }
+                        {
                           edge.predicate_url &&
                           <a
                             href={edge.predicate_url }
