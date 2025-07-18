@@ -4,7 +4,7 @@ import klay from 'cytoscape-klay';
 import dagre from 'cytoscape-dagre';
 import avsdf from 'cytoscape-avsdf';
 import cytoscapePopper from 'cytoscape-popper';
-import navigator from 'cytoscape-navigator';
+import navigator, { Nav } from 'cytoscape-navigator';
 import { createPopper } from '@popperjs/core';
 import 'cytoscape-navigator/cytoscape.js-navigator.css';
 import { useSelector } from 'react-redux';
@@ -63,6 +63,7 @@ const GraphView = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const graphViewRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
+  const navigatorRef = useRef<Nav | null>(null);
   const [layout, setLayout] = useState(() => getInitialLayout(prefs));
   const [scrollOverlayActive, setScrollOverlayActive] = useState(false);
   const subjectId = useRef(result.subject);
@@ -226,7 +227,13 @@ const GraphView = ({
       removeCustomContainer: false,
       rerenderDelay: 100
     }
-    cy.navigator(options);
+    
+    // Clean up any existing navigator before creating a new one
+    if (navigatorRef.current) {
+      navigatorRef.current.destroy();
+      navigatorRef.current = null;
+    }
+    navigatorRef.current = cy.navigator(options);
   }, [graph, layout, active, clearSelectedPaths, navId, tooltipId, edgeInfoId]);
 
   useEffect(() => {
@@ -248,6 +255,10 @@ const GraphView = ({
     return () => {
       el.removeEventListener('wheel', handleWheel);
       hideOverlay.cancel();
+      if (navigatorRef.current) {
+        navigatorRef.current.destroy();
+        navigatorRef.current = null;
+      }
     };
   }, []);
 
