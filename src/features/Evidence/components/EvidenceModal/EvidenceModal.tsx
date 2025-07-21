@@ -1,7 +1,7 @@
 import {useState, useEffect, useRef, FC, useMemo} from "react";
 import Modal from "@/features/Common/components/Modal/Modal";
 import styles from './EvidenceModal.module.scss';
-import { getCompressedSubgraph, getCompressedEdge, hasSupport } from "@/features/Common/utils/utilities";
+import { getCompressedSubgraph, getCompressedEdge, hasSupport, scrollToRef } from "@/features/Common/utils/utilities";
 import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "@/features/ResultList/types/results.d";
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
 import { useSelector } from 'react-redux';
@@ -33,6 +33,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
   const prefs = useSelector(currentPrefs);
   const resultSet = useSelector(getResultSetById(pk));
+  const selectedEdgeRef = useRef<HTMLElement | null>(null);
 
   const hasBeenOpened = useRef(false);
   const [selectedEdge, setSelectedEdge] = useState(edge);
@@ -81,6 +82,9 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     setSelectedEdge(selEdge);
     handleEvidenceData(resultSet, selEdge);
     markEdgeSeen(selEdge.id);
+    setTimeout(() => {
+      scrollToRef(selectedEdgeRef);
+    }, 100);
   }
 
   const handleEdgeClick = (edgeIDs: string[]) => {
@@ -156,6 +160,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
               pk={pk}
               result={result}
               selectedEdge={selectedEdge}
+              selectedEdgeRef={selectedEdgeRef}
             />
           }
           {

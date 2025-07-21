@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, RefObject } from 'react';
 import Chemical from '@/assets/icons/queries/Chemical.svg?react';
 import Disease from '@/assets/icons/queries/Disease.svg?react';
 import Gene from '@/assets/icons/queries/Gene.svg?react';
@@ -18,6 +18,12 @@ import { isResultEdge, Path, ResultSet, ResultEdge, ResultNode } from '@/feature
 import { Location } from 'react-router-dom';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 
+/**
+ * Retrieves an icon based on a category.
+ *
+ * @param {string} category - The category to retrieve an icon for.
+ * @returns {ReactNode} - The icon for the category.
+ */
 export const getIcon = (category: string): ReactNode => {
   var icon = <Chemical/>;
   switch(category) {
@@ -60,6 +66,13 @@ export const getIcon = (category: string): ReactNode => {
   return icon;
 }
 
+/**
+ * Calculates the difference in days between two dates.
+ *
+ * @param {Date} date2 - The second date.
+ * @param {Date} date1 - The first date.
+ * @returns {number} - The difference in days between the two dates.
+ */
 export const getDifferenceInDays = (date2: Date, date1: Date) => {
   const _MS_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -70,6 +83,12 @@ export const getDifferenceInDays = (date2: Date, date1: Date) => {
   return Math.round(Math.abs((utc2 - utc1) / _MS_PER_DAY));
 }
 
+/**
+ * Validates an email address.
+ *
+ * @param {string} email - The email address to validate.
+ * @returns {RegExpMatchArray | null} - The matched email address, or null if the email is invalid.
+ */
 export const validateEmail = (email: string): RegExpMatchArray | null => {
   return String(email)
     .toLowerCase()
@@ -78,6 +97,12 @@ export const validateEmail = (email: string): RegExpMatchArray | null => {
     );
 };
 
+/**
+ * Formats a string to be displayed as a biolink entity.
+ *
+ * @param {string} string - The string to format.
+ * @returns {string} - The formatted string.
+ */
 export const formatBiolinkEntity = (string: string): string => {
   if(!string)
     return "";
@@ -91,6 +116,12 @@ export const formatBiolinkEntity = (string: string): string => {
     .replaceAll('gene ', '').trim());
 }
 
+/**
+ * Capitalizes the first letter of a string.
+ *
+ * @param {string} string - The string to capitalize.
+ * @returns {string} - The capitalized string.
+ */
 export const capitalizeFirstLetter = (string: string): string => {
   if(!string)
     return '';
@@ -99,11 +130,23 @@ export const capitalizeFirstLetter = (string: string): string => {
   return newString.charAt(0).toUpperCase() + newString.slice(1);
 }
 
+/**
+ * Checks if a word is a Roman numeral.
+ *
+ * @param {string} word - The word to check.
+ * @returns {boolean} - True if the word is a Roman numeral, otherwise false.
+ */
 const isRomanNumeral = (word: string): boolean => {
   const romanNumeralPattern = /^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$/i;
   return romanNumeralPattern.test(word);
 }
 
+/**
+ * Capitalizes the first letter of a word.
+ *
+ * @param {string} word - The word to capitalize.
+ * @returns {string} - The capitalized word.
+ */
 export const capitalizeWord = (word: string): string => {
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
@@ -118,6 +161,14 @@ export const capitalizeAllWords = (str: string): string => {
   }).join(' ');
 }
 
+/**
+ * Formats a string to be displayed as a biolink node.
+ *
+ * @param {string} string - The string to format.
+ * @param {string | null} type - The type of the node.
+ * @param {string | null} species - The species of the node.
+ * @returns {string} - The formatted string.
+ */
 export const formatBiolinkNode = (string: string, type: string | null = null, species: string | null): string => {
   let newString = string;
   if(type !== null) {
@@ -139,12 +190,25 @@ export const formatBiolinkNode = (string: string, type: string | null = null, sp
   return newString;
 }
 
+/**
+ * Truncates a string if it is too long.
+ *
+ * @param {string} string - The string to truncate.
+ * @param {number} maxLength - The maximum length of the string.
+ * @returns {string} - The truncated string.
+ */
 export const truncateStringIfTooLong = (string: string, maxLength: number = 20): string => {
   if(string.length > maxLength)
     return string.substring(0, maxLength) + '...';
   return string;
 }
 
+/**
+ * Generates a link to more information about an entity.
+ *
+ * @param {string} id - The ID of the entity.
+ * @returns {string | null} - The URL of the entity, or null if no link is generated.
+ */
 export const getUrlAndOrg = (id: string): (string | null)[] => {
   let url = null;
   let org = null;
@@ -196,6 +260,14 @@ export const getUrlAndOrg = (id: string): (string | null)[] => {
   return [url, org];
 }
 
+/**
+ * Generates a link to more information about an entity.
+ *
+ * @param {string} id - The ID of the entity.
+ * @param {string} className - The class name to apply to the link.
+ * @param {QueryType} queryType - The type of query to use for the link.
+ * @returns {ReactNode | null} - The generated link, or null if no link is generated.
+ */
 export const getEntityLink = (id: string, className: string, queryType: QueryType): ReactNode | null => {
   return generateEntityLink(id, className, (org) => {
     let linkType = (queryType !== undefined && queryType.filterType) ? queryType.filterType.toLowerCase() : 'term';
@@ -207,10 +279,24 @@ export const getEntityLink = (id: string, className: string, queryType: QueryTyp
   });
 }
 
+/**
+ * Generates a link to more information about an entity.
+ *
+ * @param {string} id - The ID of the entity.
+ * @param {string} className - The class name to apply to the link.
+ * @returns {ReactNode | null} - The generated link, or null if no link is generated.
+ */
 export const getMoreInfoLink = (id: string, className: string): ReactNode | null => {
   return generateEntityLink(id, className, () => { return ' '});
 }
 
+/**
+ * Handles HTTP response errors and provides a callback function for error handling.
+ *
+ * @param {Response} response - The HTTP response to check.
+ * @param {function} onErrorCallback - A function to call if the response is not successful.
+ * @returns {Response} - The response object.
+ */
 export const handleFetchErrors = (
     response: Response,
     onErrorCallback: (res: Response) => void = () => console.log('No error callback function specified.')
@@ -222,13 +308,26 @@ export const handleFetchErrors = (
     return response
 }
 
+/**
+ * Generates a random integer between a minimum and maximum value, inclusive.
+ *
+ * @param {number} min - The minimum value.
+ * @param {number} max - The maximum value.
+ * @returns {number} - A random integer between the minimum and maximum values.
+ */
 export const getRandomIntInclusive = (min: number, max: number) => {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Remove duplicate objects from an array and keep the relative ordering based on a supplied property
+/**
+ * Removes duplicate objects from an array and keeps the relative ordering based on a supplied property.
+ *
+ * @param {T[]} arr - The array of objects to remove duplicates from.
+ * @param {keyof T} propName - The property to use for deduplication.
+ * @returns {T[]} - The array of objects with duplicates removed.
+ */
 export const removeDuplicateObjects = <T extends Record<string, unknown>,>(arr: T[], propName: keyof T): T[] => {
   const unique: T[] = [];
   const seenValues = new Set();
@@ -243,6 +342,15 @@ export const removeDuplicateObjects = <T extends Record<string, unknown>,>(arr: 
   return unique;
 }
 
+/**
+ * Generates a link to an entity with an optional icon.
+ *
+ * @param {string} id - The ID of the entity.
+ * @param {string} className - The class name to apply to the link.
+ * @param {function} linkTextGenerator - A function that generates the text for the link.
+ * @param {boolean} useIcon - Whether to use an icon in the link.
+ * @returns {ReactNode | null} - The generated link, or null if no link is generated.
+ */
 export const generateEntityLink = (id: string, className: string, linkTextGenerator: (org: string | null) => string, useIcon = true): ReactNode | null => {
   const [url, org] = getUrlAndOrg(id);
   const linkText = linkTextGenerator(org);
@@ -261,21 +369,45 @@ export const generateEntityLink = (id: string, className: string, linkTextGenera
   return <span className={className}>{linkText}</span>;
 }
 
+/**
+ * Retrieves the last item from an array.
+ *
+ * @param {T[]} arr - The array to retrieve the last item from.
+ * @returns {T | undefined} - The last item in the array, or undefined if the array is empty.
+ */
 export const getLastItemInArray = <T,>(arr: T[]): T | undefined => {
   return arr.at(-1);
 }
 
+/**
+ * Retrieves a data value from the query string.
+ *
+ * @param {string} varID - The ID of the query variable to retrieve.
+ * @returns {string | null} - The value of the query variable, or null if the variable is not found.
+ */
 export const getDataFromQueryVar = (varID: string) => {
   const dataValue = new URLSearchParams(window.location.search).get(varID);
   const valueToReturn = (dataValue) ? dataValue : null;
   return valueToReturn;
 }
 
+/**
+ * Checks if a provided date is valid.
+ *
+ * @param {string | number | Date} date - The date to check.
+ * @returns {boolean} - True if the date is valid, otherwise false.
+ */
 export const isValidDate = (date: string | number | Date): boolean => {
   const parsedDate = new Date(date);
   return !isNaN(parsedDate.getTime());
 };
 
+/**
+ * Formats a date object into a string with the date and time.
+ *
+ * @param {Date} date - The date object to format.
+ * @returns {string | boolean} - The formatted date string, or false if the date is invalid.
+ */
 export const getFormattedDate = (date: Date): string | boolean => {
   if (!isValidDate(date))
     return false;
@@ -288,11 +420,25 @@ export const getFormattedDate = (date: Date): string | boolean => {
   return `${formattedDate} (${formattedTime})`;
 };
 
+/**
+ * Generates a link to the feedback form with the current page URL encoded.
+ *
+ * @param {boolean} openDefault - Whether to open the feedback form by default.
+ * @returns {string} - The generated feedback link.
+ */
 export const getGeneratedSendFeedbackLink = (openDefault: boolean = true): string => {
   let link = encodeURIComponent(window.location.href);
   return `/?fm=${openDefault}&link=${link}`;
 }
 
+/**
+ * Merges two arrays of objects into a single array, removing duplicates based on a provided property.
+ *
+ * @param {T[]} array1 - The first array of objects to merge.
+ * @param {T[]} array2 - The second array of objects to merge.
+ * @param {keyof T} uniqueProp - The property to use for deduplication.
+ * @returns {T[]} - The merged array of objects.
+ */
 export const mergeObjectArrays = <T extends { [key: string]: unknown },>(array1: T[], array2: T[], uniqueProp: keyof T): T[] => {
   const mergedMap = new Map<unknown, T>();
 
@@ -686,3 +832,16 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
 export const joinClasses = (...classes: (string | false | null | undefined)[]) =>
   classes.filter(Boolean).join(' ');
 
+
+
+/**
+ * Scrolls to a provided element reference.
+ *
+ * @param {RefObject<HTMLElement | null>} elementRef - The element reference to scroll to.
+ */ 
+export const scrollToRef = (elementRef: RefObject<HTMLElement | null>) => {
+  if (elementRef.current)
+    elementRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  else
+    console.warn("Could not scroll to element, element ref is not set");
+};

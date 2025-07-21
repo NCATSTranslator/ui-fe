@@ -1,5 +1,5 @@
 import styles from './PathView.module.scss';
-import { useState, useMemo, useCallback, useRef, createContext, FC, Dispatch, SetStateAction } from "react";
+import { useState, useMemo, useCallback, useRef, createContext, FC, Dispatch, SetStateAction, RefObject } from "react";
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
@@ -41,6 +41,7 @@ interface PathViewProps {
   pk: string;
   resultID: string;
   selectedEdge?: ResultEdge | null;
+  selectedEdgeRef?: RefObject<HTMLElement | null>;
   selectedPaths: Set<Path> | null;
   setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   showHiddenPaths: boolean;
@@ -60,6 +61,7 @@ const PathView: FC<PathViewProps> = ({
   pk,
   resultID,
   selectedEdge,
+  selectedEdgeRef,
   selectedPaths,
   setShowHiddenPaths,
   showHiddenPaths }) => {
@@ -324,6 +326,7 @@ const PathView: FC<PathViewProps> = ({
                                                   selectedPaths={null}
                                                   inModal={true}
                                                   pk={pk}
+                                                  selectedEdgeRef={selectedEdgeRef}
                                                 />
                                               )
                                             })
@@ -368,6 +371,7 @@ const PathView: FC<PathViewProps> = ({
                                         selectedPaths={null}
                                         inModal={true}
                                         pk={pk}
+                                        selectedEdgeRef={selectedEdgeRef}
                                       />
                                     )
                                   }
@@ -399,6 +403,7 @@ const PathView: FC<PathViewProps> = ({
                                         pk={pk}
                                         showHiddenPaths={showHiddenPaths}
                                         selected={selected}
+                                        selectedEdgeRef={selectedEdgeRef}
                                       />
                                     </>
                                   )
