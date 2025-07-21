@@ -1,5 +1,5 @@
 import styles from './PathObject.module.scss';
-import { FC, useContext, useId } from 'react';
+import { FC, RefObject, useContext, useId } from 'react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
@@ -32,6 +32,7 @@ export interface PathObjectProps {
   pk: string;
   selected?: boolean;
   selectedPaths: Set<Path> | null;
+  selectedEdgeRef?: RefObject<HTMLElement | null>;
   showHiddenPaths?: boolean;
 }
 
@@ -53,6 +54,7 @@ const PathObject: FC<PathObjectProps> = ({
   pk,
   selected,
   selectedPaths,
+  selectedEdgeRef,
   showHiddenPaths = true}) => {
 
   const resultSet = useSelector(getResultSetById(pk));
@@ -164,6 +166,7 @@ const PathObject: FC<PathObjectProps> = ({
                   selectedPaths={selectedPaths}
                   pk={pk}
                   showHiddenPaths={showHiddenPaths}
+                  selectedEdgeRef={selectedEdgeRef}
                 />
               :
                 null

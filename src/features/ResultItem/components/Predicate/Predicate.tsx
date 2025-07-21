@@ -1,4 +1,4 @@
-import { useState, FC, MouseEvent, useMemo } from 'react';
+import { useState, FC, MouseEvent, useMemo, RefObject } from 'react';
 import styles from './Predicate.module.scss';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
@@ -43,6 +43,7 @@ interface PredicateProps {
   pathViewStyles?: {[key: string]: string;} | null;
   pk: string;
   selected?: boolean;
+  selectedEdgeRef?: RefObject<HTMLElement | null>;
   selectedPaths: Set<Path> | null;
   showHiddenPaths: boolean;
   uid: string;
@@ -70,6 +71,7 @@ const Predicate: FC<PredicateProps> = ({
   pathViewStyles = null,
   pk,
   selected = false,
+  selectedEdgeRef,
   selectedPaths,
   showHiddenPaths,
   uid }) => {
@@ -129,6 +131,7 @@ const Predicate: FC<PredicateProps> = ({
         data-edge-ids={edgeIDs.toString()}
         data-aras={edge.aras.toString()}
         onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}
+        ref={selected ? selectedEdgeRef : null}
         {...hoverHandlers}
         >
         <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
