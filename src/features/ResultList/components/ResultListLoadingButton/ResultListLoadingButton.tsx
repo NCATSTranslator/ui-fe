@@ -18,11 +18,15 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
 
   const containerClassName = (data.containerClassName) ? data.containerClassName : '';
   const buttonClassName = (data.buttonClassName) ? data.buttonClassName : '';
-  const resultsAvailable = data.hasFreshResults;
   const [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved] = useNewResultsDisclaimerApproved(false);
   const [isTooltipOpen, setIsTooltipOpen] = useState(!isNewResultsDisclaimerApproved);
   
   const handleCheckbox = (): void => setAndPersistNewResultsDisclaimerApproved(prev => !prev);
+
+  const isResultsAvailable = data.hasFreshResults;
+  const isResultsComplete = !isResultsAvailable && !data.isFetchingARAStatus && !data.isFetchingResults;
+  const displayCloseButton = !data.isError && !isResultsAvailable && !data.isFetchingARAStatus && !data.isFetchingResults;
+  const displayResultPercentage = (isResultsAvailable || currentPercentage < 100) && !isResultsComplete;
 
   return(
     <div 
@@ -39,20 +43,20 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
           : 
             <>
               {
-                (!resultsAvailable && !data.isFetchingARAStatus && !data.isFetchingResults) &&
+                (isResultsComplete) &&
                 <div className={styles.complete}>
                   <CompleteIcon/>
                   <span>All Results Shown</span>
                 </div>
               }
               {
-                (resultsAvailable) &&
+                (isResultsAvailable) &&
                 <span className={styles.resultsAvailable}>New Results Available</span>
               }
           </>
         }
         {
-          (resultsAvailable || currentPercentage < 100) &&
+          (displayResultPercentage) &&
           <span className={styles.loadPercentage}>{Math.round(currentPercentage)}% Loaded</span>
         }
       </div>
@@ -83,10 +87,10 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
         </span>
       </Tooltip>
       {
-        (resultsAvailable) &&
+        (isResultsAvailable) &&
         <>
           {
-            data.showDisclaimer &&
+            (data.showDisclaimer) &&
             <p className={styles.refreshDisclaimer}>Syncing may update and reorder previously viewed results.</p>
           }
           <Button 
@@ -100,7 +104,7 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
         </>
       }
       {
-        (!data.isError && !resultsAvailable && !data.isFetchingARAStatus && !data.isFetchingResults) &&
+        (displayCloseButton) &&
         <Button iconOnly handleClick={() => data.setIsActive?.(false)} isSecondary><CloseIcon/></Button>
       }
       </div>
