@@ -326,6 +326,7 @@ const PathView: FC<PathViewProps> = ({
                                                   selectedPaths={null}
                                                   inModal={true}
                                                   pk={pk}
+                                                  selectedEdgeRef={selectedEdgeRef}
                                                 />
                                               )
                                             })
@@ -402,6 +403,7 @@ const PathView: FC<PathViewProps> = ({
                                         pk={pk}
                                         showHiddenPaths={showHiddenPaths}
                                         selected={selected}
+                                        selectedEdgeRef={selectedEdgeRef}
                                       />
                                     </>
                                   )
