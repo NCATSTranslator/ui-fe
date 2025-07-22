@@ -24,7 +24,7 @@ const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
     >
-      <LoadingWrapper loading={isLoading && !isError} size="medium">
+      <LoadingWrapper loading={isLoading} size="medium">
         <div className={styles.content}>
           <div className={styles.header}>
             <h4 className={styles.title}>Result Summary</h4>
