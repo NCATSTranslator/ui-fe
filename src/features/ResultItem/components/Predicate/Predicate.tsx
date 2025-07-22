@@ -1,4 +1,4 @@
-import { useState, FC, MouseEvent, useMemo, RefObject } from 'react';
+import { useState, FC, MouseEvent, useMemo, RefObject, useEffect } from 'react';
 import styles from './Predicate.module.scss';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
@@ -16,7 +16,7 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
-import { useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
+import { useSupportPathKey, useExpandedPredicate } from '@/features/ResultItem/hooks/resultHooks';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -79,7 +79,23 @@ const Predicate: FC<PredicateProps> = ({
   let resultSet = useSelector(getResultSetById(pk));
   const formattedEdge = (!!resultSet && Array.isArray(edgeIDs) && edgeIDs.length > 1) ? getCompressedEdge(resultSet, edgeIDs) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
-  const [isSupportExpanded, setIsSupportExpanded] = useState(formattedEdge.is_root);
+  
+  // Use shared state for expansion instead of local state (only when not in modal)
+  const { expandedPredicateId, setExpandedPredicateId } = useExpandedPredicate();
+  
+  // Create a unique identifier for this predicate
+  const predicateId = useMemo(() => {
+    return `${path.id}-${edgeIDs.join('-')}`;
+  }, [path.id, edgeIDs]);
+  
+  // Use local state when in modal, shared state otherwise
+  const [localIsSupportExpanded, setLocalIsSupportExpanded] = useState(formattedEdge.is_root);
+  
+  // Determine if this predicate is expanded
+  const isSupportExpanded = inModal 
+    ? localIsSupportExpanded 
+    : (expandedPredicateId === predicateId || (!expandedPredicateId && formattedEdge.is_root));
+  
   const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0) ? [...formattedEdge.compressed_edges, formattedEdge] : [formattedEdge];
   const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
   const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
@@ -95,8 +111,26 @@ const Predicate: FC<PredicateProps> = ({
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    setIsSupportExpanded(prev=>!prev);
+    if (isSupportExpanded) {
+      setExpandedPredicateId(null);
+    } else {
+      setExpandedPredicateId(predicateId);
+    }
   }
+
+  // Set initial expanded state for root predicates (only when not in modal)
+  useEffect(() => {
+    if (!inModal && formattedEdge.is_root && !expandedPredicateId) {
+      setExpandedPredicateId(predicateId);
+    }
+  }, [inModal, formattedEdge.is_root, expandedPredicateId, predicateId, setExpandedPredicateId]);
+
+  // Reset expanded state when path changes (only when not in modal)
+  useEffect(() => {
+    if (!inModal && formattedEdge.is_root) {
+      setExpandedPredicateId(predicateId);
+    }
+  }, [inModal, path.id, predicateId, setExpandedPredicateId]);
 
   const pushAndReturn = (arr: ResultEdge[], element: ResultEdge) => {
     let newArr = cloneDeep(arr);
