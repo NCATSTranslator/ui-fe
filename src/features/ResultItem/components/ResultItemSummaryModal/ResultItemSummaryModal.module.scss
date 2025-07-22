@@ -1,0 +1,29 @@
+@use "@/assets/styles/variables" as *;
+
+.content {
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+.error {
+  color: $red;
+}
+
+.summary {
+  color: $black;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid $midGray;
+  margin-bottom: $s;
+  width: fit-content;
+  padding-right: $m;
+  .title {
+    margin: 0 0 $xs;
+    color: $purpleOne;
+  }
+}
