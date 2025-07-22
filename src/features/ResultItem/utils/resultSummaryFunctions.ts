@@ -50,11 +50,11 @@ export function resultToSummarySpec(resultSet: ResultSet, result: Result, diseas
   };
 
   // Build the paths object
-  const summaryPaths: Record<string, { subgraphs: string[] }> = {};
+  const summaryPaths: Record<string, { subgraph: string[] }> = {};
   allPathIDs.forEach(pid => {
     const path = getPathById(resultSet, pid);
     if (path) {
-      summaryPaths[pid] = { subgraphs: path.subgraph };
+      summaryPaths[pid] = { subgraph: path.subgraph };
     }
   });
 
