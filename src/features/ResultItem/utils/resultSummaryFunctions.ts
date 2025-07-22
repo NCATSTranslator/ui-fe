@@ -7,10 +7,12 @@ import { PublicationSupport } from "@/features/Evidence/types/evidence";
  * Converts a Result and its context into the summary endpoint spec.
  * @param result The Result object
  * @param resultSet The full ResultSet containing all nodes, edges, and paths
- * @param disease The disease curie string
+ * @param diseaseId The disease curie string
+ * @param diseaseName The disease name
+ * @param diseaseDescription The disease description
  * @returns The summary payload object
  */
-export function resultToSummarySpec(resultSet: ResultSet, result: Result, disease: string) {
+export function resultToSummarySpec(resultSet: ResultSet, result: Result, diseaseId: string, diseaseName: string, diseaseDescription: string) {
 
   // Get initial Path objects from result.paths
   const initialPaths: Path[] = result.paths
@@ -85,6 +87,8 @@ export function resultToSummarySpec(resultSet: ResultSet, result: Result, diseas
     paths: summaryPaths,
     nodes: summaryNodes,
     edges: summaryEdges,
-    disease,
+    disease: diseaseId,
+    disease_name: diseaseName,
+    disease_description: diseaseDescription,
   };
 }

@@ -33,7 +33,9 @@ interface ResultItemInteractablesProps {
   result: Result;
   hasSummary: boolean;
   pk: string | null;
-  disease: string;
+  diseaseId: string;
+  diseaseName: string;
+  diseaseDescription: string;
 }
 
 const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
@@ -50,12 +52,14 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
   result,
   hasSummary,
   pk,
-  disease,
+  diseaseId,
+  diseaseName,
+  diseaseDescription,
 }) => {
   const resultSet = useSelector(getResultSetById(pk));
   const queryClient = useQueryClient()
 
-  const { isLoading, error, refetch: fetchSummary } = useResultSummary(resultSet, result, disease);
+  const { isLoading, error, refetch: fetchSummary } = useResultSummary(resultSet, result, diseaseId, diseaseName, diseaseDescription);
 
   const screenWidth = useWindowSize();
   const breakpoint = 1240;

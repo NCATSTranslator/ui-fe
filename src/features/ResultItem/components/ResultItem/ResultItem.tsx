@@ -376,7 +376,9 @@ const ResultItem: FC<ResultItemProps> = ({
           result={result}
           hasSummary={queryType?.id === 0}
           pk={pk}
-          disease={result.object}
+          diseaseId={objectNode?.id || ""}
+          diseaseName={objectNode?.names[0] || ""}
+          diseaseDescription={objectNode?.descriptions[0] || ""}
         />
         <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
           <span className={styles.evidenceLink}>
