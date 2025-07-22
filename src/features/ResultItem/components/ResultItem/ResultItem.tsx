@@ -120,12 +120,12 @@ const ResultItem: FC<ResultItemProps> = ({
     zoomKeyDown
   }) => {
 
-  let resultSet = useSelector(getResultSetById(pk));
+  const resultSet = useSelector(getResultSetById(pk));
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
   const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
   const user = useSelector(currentUser);
 
-  let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
+  const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
@@ -373,6 +373,10 @@ const ResultItem: FC<ResultItemProps> = ({
           isExpanded={isExpanded}
           isPathfinder={isPathfinder}
           nameString={nameString}
+          result={result}
+          hasSummary={queryType?.id === 0}
+          pk={pk}
+          disease={result.object}
         />
         <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
           <span className={styles.evidenceLink}>
