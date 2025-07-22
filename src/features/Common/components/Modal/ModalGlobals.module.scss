@@ -24,7 +24,7 @@
     position: absolute;
     top: $m;
     right: $m;
-    z-index: 20;
+    z-index: 1001;
     .closeButton {
       background-color: transparent;
       margin: 0;
@@ -45,6 +45,7 @@
   }
   .inner {
     height: 100%;
+    position: relative;
   }
 }
 .modalContainer {
