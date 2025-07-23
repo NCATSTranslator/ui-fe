@@ -776,7 +776,7 @@ export const getFormattedPathfinderName = (name: string) => {
 export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string => {
   let stringName = "";
   for(const [i, id] of path.subgraph.entries()) {
-    if(i % 2 !== 0) {
+    if(i % 2 === 0) {
       const node = getNodeById(resultSet, id);
       stringName += node?.names[0];
     } else {
