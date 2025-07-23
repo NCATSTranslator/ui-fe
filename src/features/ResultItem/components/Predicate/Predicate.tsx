@@ -1,4 +1,4 @@
-import { useState, FC, MouseEvent, useMemo, RefObject, useEffect } from 'react';
+import { useState, FC, MouseEvent, useMemo, RefObject, useEffect, useRef } from 'react';
 import styles from './Predicate.module.scss';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
@@ -17,6 +17,7 @@ import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { useSupportPathKey, useExpandedPredicate } from '@/features/ResultItem/hooks/resultHooks';
+import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -30,7 +31,7 @@ interface PredicateProps {
     onMouseLeave: () => void;
   };
   edge: ResultEdge;
-  edgeIDs: string[];
+  edgeIds: string[];
   inModal?: boolean | null;
   isEven?: boolean;
   isHighlighted?: boolean;
@@ -54,7 +55,7 @@ const Predicate: FC<PredicateProps> = ({
   activeFilters,
   className = "",
   edge,
-  edgeIDs,
+  edgeIds,
   handleActivateEvidence,
   handleEdgeClick,
   handleNodeClick,
@@ -77,29 +78,24 @@ const Predicate: FC<PredicateProps> = ({
   uid }) => {
 
   let resultSet = useSelector(getResultSetById(pk));
-  const formattedEdge = (!!resultSet && Array.isArray(edgeIDs) && edgeIDs.length > 1) ? getCompressedEdge(resultSet, edgeIDs) : edge;
+  const formattedEdge = (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
   
-  // Use shared state for expansion instead of local state (only when not in modal)
   const { expandedPredicateId, setExpandedPredicateId } = useExpandedPredicate();
   
   // Create a unique identifier for this predicate
   const predicateId = useMemo(() => {
-    return `${path.id}-${edgeIDs.join('-')}`;
-  }, [path.id, edgeIDs]);
-  
-  // Use local state when in modal, shared state otherwise
-  const [localIsSupportExpanded, setLocalIsSupportExpanded] = useState(formattedEdge.is_root);
+    return generatePredicateId(path, edgeIds);
+  }, [path.id, edgeIds]);
   
   // Determine if this predicate is expanded
-  const isSupportExpanded = inModal 
-    ? localIsSupportExpanded 
-    : (expandedPredicateId === predicateId || (!expandedPredicateId && formattedEdge.is_root));
+  const isSupportExpanded = (expandedPredicateId === predicateId);
   
   const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0) ? [...formattedEdge.compressed_edges, formattedEdge] : [formattedEdge];
   const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
   const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
   const isInferred = hasSupport(formattedEdge);
+  const isFirstLoad = useRef(true);
 
   const ancestorsPathKey = useSupportPathKey();
   const fullPathKey = useMemo(() => {
@@ -111,26 +107,22 @@ const Predicate: FC<PredicateProps> = ({
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    if (isSupportExpanded) {
-      setExpandedPredicateId(null);
-    } else {
-      setExpandedPredicateId(predicateId);
-    }
+    setExpandedPredicateId(isSupportExpanded ? null : predicateId);
   }
 
-  // Set initial expanded state for root predicates (only when not in modal)
-  useEffect(() => {
-    if (!inModal && formattedEdge.is_root && !expandedPredicateId) {
-      setExpandedPredicateId(predicateId);
-    }
-  }, [inModal, formattedEdge.is_root, expandedPredicateId, predicateId, setExpandedPredicateId]);
+  // // Set initial expanded state
+  // useEffect(() => {
+  //   if (!isFirstLoad.current) {
+  //     return;
+  //   }
 
-  // Reset expanded state when path changes (only when not in modal)
-  useEffect(() => {
-    if (!inModal && formattedEdge.is_root) {
-      setExpandedPredicateId(predicateId);
-    }
-  }, [inModal, path.id, predicateId, setExpandedPredicateId]);
+  //   // Only set initial state if this is a root predicate that has support paths (isInferred) and no other predicate has been expanded
+  //   if (formattedEdge.is_root && isInferred && expandedPredicateId === null)
+  //     setExpandedPredicateId(predicateId);
+    
+  //   // Mark that we've processed the first load
+  //   isFirstLoad.current = false;
+  // }, [formattedEdge.is_root, isInferred, expandedPredicateId, predicateId, setExpandedPredicateId]);
 
   const pushAndReturn = (arr: ResultEdge[], element: ResultEdge) => {
     let newArr = cloneDeep(arr);
@@ -162,9 +154,9 @@ const Predicate: FC<PredicateProps> = ({
       <span
         className={edgeClass}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
-        data-edge-ids={edgeIDs.toString()}
+        data-edge-ids={edgeIds.toString()}
         data-aras={edge.aras.toString()}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIds, path, fullPathKey);}}
         ref={selected ? selectedEdgeRef : null}
         {...hoverHandlers}
         >

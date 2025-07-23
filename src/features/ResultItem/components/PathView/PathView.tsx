@@ -108,60 +108,6 @@ const PathView: FC<PathViewProps> = ({
     handleEdgeSpecificEvidence(edgeIDs, path, pathKey);
   }, [handleEdgeSpecificEvidence]);
 
-  const edgeHeight = 32;
-  const svgWidth = 198;
-  const curveOffset = 50;
-  const straightSegmentLength = 20;
-  const pathColor = "#8C8C8C26";
-  const hoveredPathColor = "#6A5C8259";
-  const selectedPathColor = "#5D4E778C";
-  const hoveredSelectedPathColor = "#3F2E5E59";
-  const pathThickness = 32;
-
-  const getStrokeColor = (index: number, hoveredIndex: number | null, selected: boolean) => {
-    const hovered = hoveredIndex !== null && hoveredIndex === index;
-    if(hovered && selected)
-      return hoveredSelectedPathColor;
-    if(hovered)
-      return hoveredPathColor;
-    if(selected)
-      return selectedPathColor;
-
-    return pathColor;
-  }
-  
-  const generatePathD = (
-    index: number,
-    svgHeight: number,
-    svgWidth: number,
-    edgeHeight: number,
-    enter: boolean,
-    curveOffset = 50,
-    straightSegment = 10
-  ): string => {
-    const startX = 0; 
-    const startY = svgHeight * 0.5;
-    const endX = svgWidth; 
-    // Center of stacked edge
-    const endY = index * (edgeHeight + 8) + edgeHeight / 2; 
-    // Adjust straight segment positions
-    const midStartX = startX + straightSegment;
-    const midEndX = endX - straightSegment;
-    // Control points for smooth curves
-    const controlX1 = midStartX + curveOffset;
-    const controlX2 = midEndX - curveOffset;
-  
-    return enter 
-      ? `M ${startX} ${startY} 
-         L ${midStartX} ${startY} 
-         C ${controlX1} ${startY}, ${controlX2} ${endY}, ${midEndX} ${endY} 
-         L ${endX} ${endY}`
-      : `M ${startX} ${endY} 
-         L ${midStartX} ${endY} 
-         C ${controlX1} ${endY}, ${controlX2} ${startY}, ${midEndX} ${startY} 
-         L ${endX} ${startY}`;
-  };
-
   if(!resultSet)
     return null;
 
@@ -186,10 +132,7 @@ const PathView: FC<PathViewProps> = ({
               <div className={`${styles.paths} ${inModal && styles.inModal}`}>
                 {
                   displayedPaths.map((path: Path, i: number)=> {
-                    const isPathFiltered = getIsPathFiltered(path, pathFilterState);
-                    const edgeIds = extractEdgeIDsFromSubgraph(path.subgraph);
-                    const isSeen = isPathSeen(edgeIds);
-                    if(!path.id || (isPathFiltered && !showHiddenPaths)) 
+                    if(!path.id) 
                       return null;
                     const displayIndirectLabel = isPathInferred(resultSet, path) && !inferredLabelDisplayed;
                       if(displayIndirectLabel)
@@ -197,25 +140,8 @@ const PathView: FC<PathViewProps> = ({
                     const displayDirectLabel = !isPathInferred(resultSet, path) && !directLabelDisplayed;
                       if(displayDirectLabel)
                         directLabelDisplayed = true;
-                    const tooltipID: string = (!!path?.id) ? path.id : i.toString();
-                    const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
-                    const subgraphToMap = (!!path.compressedSubgraph && path.compressedSubgraph.length > 0) ? path.compressedSubgraph : path.subgraph;
-                    const formattedPathClass = joinClasses(
-                      styles.formattedPath,
-                      (!!lastViewedPathID && lastViewedPathID === path.id) && styles.lastViewed,
-                      isEven && styles.isEven,
-                      isPathFiltered && styles.filtered,
-                      isSeen && styles.seenPath
-                    );
-                    const pathClass = joinClasses(
-                      (inModal && compressedSubgraph) && styles.compressedTableItem,
-                      styles.tableItem,
-                      'path',
-                      numberToWords(path.subgraph.length),
-                      (selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted) && styles.unhighlighted
-                    );
-                    return (
-                      <div key={tooltipID}>
+                                          return (
+                        <div key={path.id || i.toString()}>
                         { displayDirectLabel && !inModal && (
                           <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
                             Direct <Information className={styles.infoIcon} />
@@ -233,14 +159,12 @@ const PathView: FC<PathViewProps> = ({
                           </p>
                         )}
                         <PathContainer
-                          key={tooltipID}
-                          formattedPathClass={formattedPathClass}
+                          key={path.id}
                           lastViewedPathID={lastViewedPathID}
                           setLastViewedPathID={setLastViewedPathID}
                           path={path}
                           inModal={inModal}
                           compressedSubgraph={compressedSubgraph}
-                          indexInFullCollection={indexInFullCollection}
                           handleActivateEvidence={handleActivateEvidence}
                           handleEdgeClick={handleEdgeClick}
                           handleNodeClick={handleNodeClick}
@@ -250,24 +174,12 @@ const PathView: FC<PathViewProps> = ({
                           activeFilters={activeFilters}
                           pk={pk}
                           showHiddenPaths={showHiddenPaths}
-                          selected={false}
                           selectedEdgeRef={selectedEdgeRef}
                           selectedEdge={selectedEdge}
                           isEven={isEven}
                           hoveredIndex={hoveredIndex}
                           styles={styles}
-                          displayDirectLabel={displayDirectLabel}
-                          displayIndirectLabel={displayIndirectLabel}
-                          tooltipID={tooltipID}
-                          subgraphToMap={subgraphToMap}
-                          pathClass={pathClass}
-                          edgeHeight={edgeHeight}
-                          svgWidth={svgWidth}
-                          curveOffset={curveOffset}
-                          straightSegmentLength={straightSegmentLength}
-                          pathThickness={pathThickness}
-                          getStrokeColor={getStrokeColor}
-                          generatePathD={generatePathD}
+                          formattedPaths={formattedPaths}
                         />
                       </div>
                     )

@@ -1,13 +1,19 @@
-import { createContext, FC, useState } from 'react';
+import { createContext, FC, useId, useRef, useState } from 'react';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
-import { Path, ResultEdge } from '@/features/ResultList/types/results';
+import { isResultEdge, Path, ResultEdge } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { PathFilterState } from '@/features/ResultList/types/results';
 import { RefObject } from 'react';
+import { extractEdgeIDsFromSubgraph, generatePathD, generatePredicateId, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
+import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
+import { getCompressedEdge, hasSupport, joinClasses } from '@/features/Common/utils/utilities';
+import { numberToWords } from '@/features/Common/utils/utilities';
+import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
+import { useSelector } from 'react-redux';
 
 export const ExpandedPredicateContext = createContext<{
   expandedPredicateId: string | null;
@@ -15,13 +21,11 @@ export const ExpandedPredicateContext = createContext<{
 } | null>(null);
 
 interface PathContainerProps {
-  formattedPathClass: string;
   lastViewedPathID: string | null;
   setLastViewedPathID: (id: string | null) => void;
   path: Path;
   inModal: boolean;
   compressedSubgraph?: false | (ResultEdge | any | ResultEdge[])[];
-  indexInFullCollection: number;
   handleActivateEvidence: (path: Path, pathKey: string) => void;
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
   handleNodeClick: (name: any) => void;
@@ -31,34 +35,20 @@ interface PathContainerProps {
   activeFilters: Filter[];
   pk: string;
   showHiddenPaths: boolean;
-  selected: boolean;
   selectedEdgeRef?: RefObject<HTMLElement | null>;
   selectedEdge?: ResultEdge | null;
   isEven: boolean;
   hoveredIndex: number | null;
   styles: any;
-  displayDirectLabel: boolean;
-  displayIndirectLabel: boolean;
-  tooltipID: string;
-  subgraphToMap: (string | string[])[];
-  pathClass: string;
-  edgeHeight: number;
-  svgWidth: number;
-  curveOffset: number;
-  straightSegmentLength: number;
-  pathThickness: number;
-  getStrokeColor: (index: number, hoveredIndex: number | null, selected: boolean) => string;
-  generatePathD: (index: number, svgHeight: number, svgWidth: number, edgeHeight: number, enter: boolean, curveOffset?: number, straightSegment?: number) => string;
+  formattedPaths: Path[];
 }
 
 const PathContainer: FC<PathContainerProps> = ({
-  formattedPathClass,
   lastViewedPathID,
   setLastViewedPathID,
   path,
   inModal,
   compressedSubgraph,
-  indexInFullCollection,
   handleActivateEvidence,
   handleEdgeClick,
   handleNodeClick,
@@ -68,34 +58,73 @@ const PathContainer: FC<PathContainerProps> = ({
   activeFilters,
   pk,
   showHiddenPaths,
-  selected,
   selectedEdgeRef,
   selectedEdge,
   isEven,
   hoveredIndex,
   styles,
-  displayDirectLabel,
-  displayIndirectLabel,
-  tooltipID,
-  subgraphToMap,
-  pathClass,
-  edgeHeight,
-  svgWidth,
-  curveOffset,
-  straightSegmentLength,
-  pathThickness,
-  getStrokeColor,
-  generatePathD,
+  formattedPaths,
 }) => {
+  const resultSet = useSelector(getResultSetById(pk));
   const [expandedPredicateId, setExpandedPredicateId] = useState<string | null>(null);
+  const initialExpandedPredicateIdSet = useRef(false);
+
+  const isPathFiltered = getIsPathFiltered(path, pathFilterState);
+  const edgeIds = extractEdgeIDsFromSubgraph(path.subgraph);
+  const { isPathSeen } = useSeenStatus(pk);
+  const isSeen = isPathSeen(edgeIds);
+  const tooltipID: string = (!!path?.id) ? path.id : useId();
+  const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
+  const subgraphToMap = (!!path.compressedSubgraph && path.compressedSubgraph.length > 0) ? path.compressedSubgraph : path.subgraph;
+  
+  // Return null if path is filtered and hidden paths are not shown
+  if (isPathFiltered && !showHiddenPaths)
+    return null;
+  
+  const formattedPathClass = joinClasses(
+    styles.formattedPath,
+    (!!lastViewedPathID && lastViewedPathID === path.id) && styles.lastViewed,
+    isEven && styles.isEven,
+    isPathFiltered && styles.filtered,
+    isSeen && styles.seenPath
+  );
+  const pathClass = joinClasses(
+    (inModal && compressedSubgraph) && styles.compressedTableItem,
+    styles.tableItem,
+    'path',
+    numberToWords(path.subgraph.length),
+    (selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted) && styles.unhighlighted
+  );
+
+  const edgeHeight = 32;
+  const svgWidth = 198;
+  const curveOffset = 50;
+  const straightSegmentLength = 20;
+  const pathColor = "#8C8C8C26";
+  const hoveredPathColor = "#6A5C8259";
+  const selectedPathColor = "#5D4E778C";
+  const hoveredSelectedPathColor = "#3F2E5E59";
+  const pathThickness = 32;
+
+  const getStrokeColor = (index: number, hoveredIndex: number | null, selected: boolean) => {
+    const hovered = hoveredIndex !== null && hoveredIndex === index;
+    if(hovered && selected)
+      return hoveredSelectedPathColor;
+    if(hovered)
+      return hoveredPathColor;
+    if(selected)
+      return selectedPathColor;
+
+    return pathColor;
+  }
 
   return (
     <ExpandedPredicateContext.Provider value={{ expandedPredicateId, setExpandedPredicateId }}>
       <div className={formattedPathClass}>
-        
-        {((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) && (
+        {
+          ((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) && 
           <LastViewedTag inModal={inModal} inGroup={!!(inModal && compressedSubgraph)} />
-        )}
+        }
         <button
           onClick={() => {
             if (!!path?.id) {
@@ -213,9 +242,20 @@ const PathContainer: FC<PathContainerProps> = ({
               }
             })
           ) : (
-            subgraphToMap.map((subgraphItemID, i) => {
+            subgraphToMap.map((subgraphItemID: string | string[], i: number) => {
               let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false;
               let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
+              // check for inferred edges and set the expanded predicate id if it's the first one in the path
+              if(i % 2 !== 0) {
+                const formattedEdge = (i % 2 !== 0) && (!!resultSet && Array.isArray(subgraphItemID) && subgraphItemID.length > 1) ? getCompressedEdge(resultSet, subgraphItemID) : getEdgeById(resultSet, subgraphItemID as string);
+                const isInferred = hasSupport(formattedEdge);
+                if(isInferred && !initialExpandedPredicateIdSet.current) {
+                  const edgeIds = (Array.isArray(subgraphItemID)) ? subgraphItemID : [subgraphItemID];
+                  setExpandedPredicateId(generatePredicateId(path, edgeIds));  
+                  initialExpandedPredicateIdSet.current = true;
+                }
+              }
+
               if (path.id === undefined)
                 return null;
               return (
