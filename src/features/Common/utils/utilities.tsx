@@ -776,7 +776,7 @@ export const getFormattedPathfinderName = (name: string) => {
 export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string => {
   let stringName = "";
   for(const [i, id] of path.subgraph.entries()) {
-    if(i % 2 !== 0) {
+    if(i % 2 === 0) {
       const node = getNodeById(resultSet, id);
       stringName += node?.names[0];
     } else {
@@ -812,6 +812,11 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   is_root: edge?.is_root || false,
   compressed_edges: edge?.compressed_edges || [],
   knowledge_level: edge?.knowledge_level || "unknown",
+  metadata: edge?.metadata || {
+    edge_bindings: [],
+    inverted_id: null,
+    is_root: false,
+  },
   object: edge?.object || "",
   predicate: edge?.predicate || "",
   predicate_url: edge?.predicate_url || "",

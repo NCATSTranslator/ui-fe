@@ -1,4 +1,4 @@
-import { useState, FC, MouseEvent, useMemo, RefObject, useEffect, useRef } from 'react';
+import { FC, MouseEvent, useMemo, RefObject } from 'react';
 import styles from './Predicate.module.scss';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
@@ -95,7 +95,6 @@ const Predicate: FC<PredicateProps> = ({
   const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
   const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
   const isInferred = hasSupport(formattedEdge);
-  const isFirstLoad = useRef(true);
 
   const ancestorsPathKey = useSupportPathKey();
   const fullPathKey = useMemo(() => {
@@ -109,20 +108,6 @@ const Predicate: FC<PredicateProps> = ({
     e.stopPropagation();
     setExpandedPredicateId(isSupportExpanded ? null : predicateId);
   }
-
-  // // Set initial expanded state
-  // useEffect(() => {
-  //   if (!isFirstLoad.current) {
-  //     return;
-  //   }
-
-  //   // Only set initial state if this is a root predicate that has support paths (isInferred) and no other predicate has been expanded
-  //   if (formattedEdge.is_root && isInferred && expandedPredicateId === null)
-  //     setExpandedPredicateId(predicateId);
-    
-  //   // Mark that we've processed the first load
-  //   isFirstLoad.current = false;
-  // }, [formattedEdge.is_root, isInferred, expandedPredicateId, predicateId, setExpandedPredicateId]);
 
   const pushAndReturn = (arr: ResultEdge[], element: ResultEdge) => {
     let newArr = cloneDeep(arr);

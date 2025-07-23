@@ -4,7 +4,7 @@ import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
-import { isResultEdge, Path, ResultEdge } from '@/features/ResultList/types/results';
+import { Path, ResultEdge, ResultNode } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { PathFilterState } from '@/features/ResultList/types/results';
 import { RefObject } from 'react';
@@ -25,10 +25,10 @@ interface PathContainerProps {
   setLastViewedPathID: (id: string | null) => void;
   path: Path;
   inModal: boolean;
-  compressedSubgraph?: false | (ResultEdge | any | ResultEdge[])[];
+  compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
   handleActivateEvidence: (path: Path, pathKey: string) => void;
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleNodeClick: (name: any) => void;
+  handleNodeClick: (name: ResultNode) => void;
   activeEntityFilters: string[];
   selectedPaths: Set<Path> | null;
   pathFilterState: PathFilterState;
@@ -39,7 +39,7 @@ interface PathContainerProps {
   selectedEdge?: ResultEdge | null;
   isEven: boolean;
   hoveredIndex: number | null;
-  styles: any;
+  styles: { [key: string]: string;};
   formattedPaths: Path[];
 }
 
