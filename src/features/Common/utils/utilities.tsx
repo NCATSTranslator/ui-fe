@@ -812,6 +812,11 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   is_root: edge?.is_root || false,
   compressed_edges: edge?.compressed_edges || [],
   knowledge_level: edge?.knowledge_level || "unknown",
+  metadata: edge?.metadata || {
+    edge_bindings: [],
+    inverted_id: null,
+    is_root: false,
+  },
   object: edge?.object || "",
   predicate: edge?.predicate || "",
   predicate_url: edge?.predicate_url || "",
