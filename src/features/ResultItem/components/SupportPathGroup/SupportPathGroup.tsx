@@ -74,7 +74,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   const currentPathCount = useMemo(() => {
     return showHiddenPaths ? fullPathCount : fullPathCount - filteredPathCount;
   }, [filteredPathCount, formattedPaths, showHiddenPaths]);
-  console.log('all paths filtered:', filteredPathCount === currentPathCount, 'path count', formattedPaths.length, 'filteredPathCount', filteredPathCount);
 
   const itemsPerPage: number = 10;
   const [itemOffset, setItemOffset] = useState<number>(0);
