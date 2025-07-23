@@ -377,3 +377,58 @@ export const isPathInferred = (resultSet: ResultSet, path: Path) => {
   }
   return false;
 }
+
+/**
+ * Generates a path data string for a path in a graph visualization.
+ * 
+ * @param {number} index - The index of the path in the graph.
+ * @param {number} svgHeight - The height of the SVG container.
+ * @param {number} svgWidth - The width of the SVG container.
+ * @param {number} edgeHeight - The height of each edge.
+ * @param {boolean} enter - Whether the path is entering the graph.
+ * @param {number} curveOffset - The offset for the curve.
+ * @param {number} straightSegment - The length of the straight segment.
+ * @returns {string} - The path data string.
+ */
+export const generatePathD = (
+  index: number,
+  svgHeight: number,
+  svgWidth: number,
+  edgeHeight: number,
+  enter: boolean,
+  curveOffset = 50,
+  straightSegment = 10
+): string => {
+  const startX = 0; 
+  const startY = svgHeight * 0.5;
+  const endX = svgWidth; 
+  // Center of stacked edge
+  const endY = index * (edgeHeight + 8) + edgeHeight / 2; 
+  // Adjust straight segment positions
+  const midStartX = startX + straightSegment;
+  const midEndX = endX - straightSegment;
+  // Control points for smooth curves
+  const controlX1 = midStartX + curveOffset;
+  const controlX2 = midEndX - curveOffset;
+
+  return enter 
+    ? `M ${startX} ${startY} 
+       L ${midStartX} ${startY} 
+       C ${controlX1} ${startY}, ${controlX2} ${endY}, ${midEndX} ${endY} 
+       L ${endX} ${endY}`
+    : `M ${startX} ${endY} 
+       L ${midStartX} ${endY} 
+       C ${controlX1} ${endY}, ${controlX2} ${startY}, ${midEndX} ${startY} 
+       L ${endX} ${startY}`;
+};
+
+/**
+ * Generates a unique identifier for a predicate based on the path and edge IDs.
+ * 
+ * @param {Path} path - The path object.
+ * @param {string[]} edgeIds - The edge IDs.
+ * @returns {string} - The unique predicate ID.
+ */
+export const generatePredicateId = (path: Path, edgeIds: string[]) => {
+    return `${path.id}-${edgeIds.join('-')}`;
+}

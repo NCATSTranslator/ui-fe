@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useContext, useMemo } from "react";
 import { LastViewedPathIDContext, SupportPathDepthContext } from "@/features/ResultItem/components/PathView/PathView";
+import { ExpandedPredicateContext } from "@/features/ResultItem/components/PathContainer/PathContainer";
 import { SupportPathKeyContext } from "@/features/ResultItem/components/SupportPathGroup/SupportPathGroup";
 import { markEdgeSeen, markEdgeUnseen, resetSeenStatus } from "@/features/ResultList/slices/seenStatusSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -32,6 +33,20 @@ export const useSupportPathDepth = (): number => {
  */
 export const useSupportPathKey = (): string => {
   return useContext(SupportPathKeyContext);
+};
+
+/**
+ * Custom hook to manage which predicate is expanded within a path.
+ * Ensures only one predicate can be expanded at a time within each path.
+ * @returns {Object} Object containing expandedPredicateId and setExpandedPredicateId function
+ */
+export const useExpandedPredicate = () => {
+  const context = useContext(ExpandedPredicateContext);
+  if (!context) {
+    console.warn("useExpandedPredicate must be used within an ExpandedPredicateContext.Provider");
+    return { expandedPredicateId: null, setExpandedPredicateId: () => {} };
+  }
+  return context;
 };
 
 /**
