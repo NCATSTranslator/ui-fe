@@ -103,6 +103,32 @@ export const getAllSupportPathIDs = (
   return Array.from(supportPathIDs);
 };
 
+/**
+ * Returns a set of all path IDs from a list of paths, including their recursively supported paths if `full` is true and a resultSet is provided.
+ * 
+ * @param {Path[]} paths - The initial list of paths to check.
+ * @param {boolean} full - If true, includes all recursively supported paths via edges.
+ * @param {ResultSet} [resultSet] - The result set used to resolve edge and path references when full is enabled.
+ * @returns {Set<string>} - A set of all path IDs.
+ */
+export const getPathIdSet = (paths: Path[], full: boolean = false, resultSet?: ResultSet | null): Set<string> => {
+  const allPathIDs = new Set<string>();
+  if(full && !!resultSet) {
+    const supportPathIDs = getAllSupportPathIDs(paths, resultSet);
+    for (const id of supportPathIDs)
+      allPathIDs.add(id);
+  }
+  for(const path of paths) {
+    if(path.compressedIDs) {
+      for(const id of path.compressedIDs) {
+        allPathIDs.add(id);
+      }
+    } else if (path?.id) {
+      allPathIDs.add(path.id);
+    }
+  }
+  return allPathIDs;
+}
 
 /**
  * Counts how many of the provided paths are filtered, including their recursively supported paths if `full` is true.
@@ -119,18 +145,7 @@ export const getFilteredPathCount = (
   full: boolean = false,
   resultSet?: ResultSet | null
 ): number => {
-  const allPathIDs = new Set<string>();
-
-  for (const path of paths) {
-    if (path?.id)
-      allPathIDs.add(path.id);
-  }
-
-  if (full && !!resultSet) {
-    const supportPathIDs = getAllSupportPathIDs(paths, resultSet);
-    for (const id of supportPathIDs)
-      allPathIDs.add(id);
-  }
+  const allPathIDs = getPathIdSet(paths, full, resultSet);
 
   let count = 0;
   for (const id of allPathIDs) {

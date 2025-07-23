@@ -5,12 +5,11 @@ import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import Information from '@/assets/icons/status/Alerts/Info.svg?react';
-import { isStringArray, joinClasses, numberToWords } from '@/features/Common/utils/utilities';
-import { extractEdgeIDsFromSubgraph, getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, 
-  isPathInferred } from '@/features/ResultItem/utils/utilities';
+import { isStringArray } from '@/features/Common/utils/utilities';
+import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred } from '@/features/ResultItem/utils/utilities';
 import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { LastViewedPathIDContextType, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
+import { LastViewedPathIDContextType } from '@/features/ResultItem/hooks/resultHooks';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
@@ -69,7 +68,6 @@ const PathView: FC<PathViewProps> = ({
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths, true), [paths, selectedPaths, pathFilterState, resultSet]);
   const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
   const fullFilteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState, true, resultSet), [formattedPaths, pathFilterState, resultSet]);
-  const { isPathSeen } = useSeenStatus(pk);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0)
   const endResultIndex = useRef<number>(itemsPerPage);

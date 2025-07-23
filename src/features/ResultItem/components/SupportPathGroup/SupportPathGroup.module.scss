@@ -19,6 +19,14 @@
     color: $purpleTwo;
     font-weight: 800;
     margin-bottom: $s;
+    display: flex;
+    align-items: center;
+  }
+  .filteredDisclaimer {
+    font-size: $bodyTwoSize;
+    color: $black;
+    font-weight: 400;
+    margin: 0;
   }
 }
 .paginationContainer {
