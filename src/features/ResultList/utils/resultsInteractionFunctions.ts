@@ -58,8 +58,7 @@ export const findStringMatch = (
 
     for (let i = 0; i < path.subgraph.length; i++) {
       const elementID = path.subgraph[i];
-      const isNode = i % 2 === 0;
-      const item = isNode ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
+      const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
 
       // Recursive support path checking
       if (isResultEdge(item) && hasSupport(item)) {
@@ -531,4 +530,15 @@ export const checkBookmarksForItem = (itemID: string, bookmarksSet: SaveGroup): 
     }
   }
   return null;
+}
+
+/**
+ * Checks if the given index is for a node in a path.
+ * Nodes are represented by even indices, while edges are represented by odd indices.
+ * 
+ * @param {number} index - The index to check.
+ * @returns {boolean} Returns true if the index is for a node, otherwise returns false.
+ */
+export const isNodeIndex = (index: number): boolean => {
+  return index % 2 === 0;
 }

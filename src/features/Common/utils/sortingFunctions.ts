@@ -7,6 +7,7 @@ import { Provenance, PublicationObject } from '@/features/Evidence/types/evidenc
 import { generateScore } from '@/features/ResultList/utils/scoring';
 import { getTagFamily } from '@/features/ResultFiltering/utils/filterFunctions';
 import { getEdgeById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
+import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
 const compareWithFallback = (
   aValue: string | undefined | null,
@@ -309,7 +310,7 @@ export const convertPathToRankedPath = (resultSet: ResultSet, path: Path): Ranke
   };
 
   const transformedSubgraph = path.subgraph.map((id, i) => {
-    if(i % 2 === 0) {
+    if(isNodeIndex(i)) {
       const node = getNodeById(resultSet, id);
       return node || defaultNode; 
     } else {

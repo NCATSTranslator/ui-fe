@@ -114,6 +114,7 @@
       -webkit-box-orient: vertical;
       display: -webkit-box;
       margin-right: 10px;
+      white-space: nowrap;
     }
     &:first-child {
       border-radius: $defaultBorderRadius $defaultBorderRadius 0 0;
