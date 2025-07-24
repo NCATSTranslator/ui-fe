@@ -3,6 +3,7 @@ import { getEdgesByIds, getEdgeById, getPathById } from "@/features/ResultList/s
 import { Path, ResultSet, PathFilterState, isResultEdge, Tags } from "@/features/ResultList/types/results.d";
 import { cloneDeep } from "lodash";
 import { hasSupport } from "@/features/Common/utils/utilities";
+import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
 
 /**
  * Extracts ARA tag names from a ResultItem's tags object.
@@ -43,7 +44,7 @@ export const getARATagsFromResultTags = (tags: Filters): string[] => {
  */
 export const getEdgeIdsFromPath = (path: Path): string[] => {
   const graph = path.compressedSubgraph ?? path.subgraph;
-  return graph.filter((_, i) => i % 2 === 1).flat();
+  return graph.filter((_, i) => !isNodeIndex(i)).flat();
 };
 
 /**
@@ -164,7 +165,7 @@ export const getFilteredPathCount = (
  * @returns {string[]} - An array containing only the edge IDs from the subgraph.
  */
 export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
-  subgraph.filter((_, i) => i % 2 === 1);
+  subgraph.filter((_, i) => !isNodeIndex(i));
 
 /**
  * Takes a list of paths/path IDs along with a PathFilterState object and a set of selected paths, then compresses them. 
@@ -259,8 +260,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
   // Helper function to extract the path sequence from a subgraph
   const extractPathSequence = (resultSet: ResultSet, subgraph: string[]): string[] => {
     return subgraph.map((item, i) => {
-      if(i % 2 === 0) {
-        // even indexed items are nodes
+      if(isNodeIndex(i)) {
         return item;
       } else {
         const edge = getEdgeById(resultSet, item);
@@ -313,7 +313,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
       if (!existingPath.compressedSubgraph) {
         existingPath.compressedSubgraph = existingPath.subgraph.map((id, index) => {
           // Convert edge to array
-          if (index % 2 === 1) 
+          if (!isNodeIndex(index)) 
             return [id];
           // Keep node as is
           return id;
@@ -380,7 +380,7 @@ export const isPathInferred = (resultSet: ResultSet, path: Path) => {
     return false;
 
   for(const [i, itemID] of path.subgraph.entries()) {
-    if(i % 2 === 0) 
+    if(isNodeIndex(i)) 
       continue;
 
     const edge = getEdgeById(resultSet, itemID);

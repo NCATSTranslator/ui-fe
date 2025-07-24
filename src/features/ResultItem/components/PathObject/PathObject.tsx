@@ -13,6 +13,7 @@ import { getEdgeById, getNodeById, getResultSetById } from '@/features/ResultLis
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { HoverContext } from '@/features/ResultItem/components/PathView/PathView';
+import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
 export interface PathObjectProps {
   activeEntityFilters: string[];
@@ -61,7 +62,7 @@ const PathObject: FC<PathObjectProps> = ({
 
   // ID of the main element (in the case of a compressed edge)
   const itemID = (Array.isArray(id)) ? id[0] : id; 
-  const pathObject = (index % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
+  const pathObject = (isNodeIndex(index)) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
   const isNode = isResultNode(pathObject);
   const isEdge = isResultEdge(pathObject);
   const { isEdgeSeen } = useSeenStatus(pk);

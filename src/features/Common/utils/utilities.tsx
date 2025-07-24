@@ -17,6 +17,7 @@ import { cloneDeep } from 'lodash';
 import { isResultEdge, Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import { Location } from 'react-router-dom';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
+import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
 /**
  * Retrieves an icon based on a category.
@@ -566,7 +567,7 @@ export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): nu
     if(!path)
       continue;
     for(const [i, subgraphItemID] of path.subgraph.entries()) {
-      if(i % 2 === 0)
+      if(isNodeIndex(i))
         continue;
       const edge = getEdgeById(resultSet, subgraphItemID);
       if(isResultEdge(edge) && edge.support.length > 0) {
@@ -728,7 +729,7 @@ export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | 
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] = [];
   for(const [i, ID] of subgraph.entries()) {
     // handle nodes
-    if(i % 2 === 0) {
+    if(isNodeIndex(i)) {
       if(Array.isArray(ID))
         continue;
       const node = getNodeById(resultSet, ID);
@@ -776,7 +777,7 @@ export const getFormattedPathfinderName = (name: string) => {
 export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string => {
   let stringName = "";
   for(const [i, id] of path.subgraph.entries()) {
-    if(i % 2 === 0) {
+    if(isNodeIndex(i)) {
       const node = getNodeById(resultSet, id);
       stringName += node?.names[0];
     } else {
