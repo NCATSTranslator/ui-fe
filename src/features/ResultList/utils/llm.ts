@@ -1,5 +1,6 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
 import { ResultEdge, ResultNode, ResultSet, Result, isResultNode, isResultEdge } from "@/features/ResultList/types/results.d";
+import { isNodeIndex } from "./resultsInteractionFunctions";
 
 export type ResultContextObject = {
   id: string;
@@ -61,7 +62,7 @@ const genPathString = (resultSet: ResultSet, subgraph: string[]) => {
   }
   const pathNames = subgraph.map((id, i) => {
     let obj;
-    if(i % 2 === 0)
+    if(isNodeIndex(i))
       obj = getNodeById(resultSet, id);
     else 
       obj = getEdgeById(resultSet, id);
