@@ -22,11 +22,17 @@
     display: flex;
     align-items: center;
   }
+  .outOfText {
+    font-size: $captionSize;
+    color: $darkGray;
+    font-weight: 400;
+    margin: 0 0 0 $xxs;
+  }
   .filteredDisclaimer {
     font-size: $bodyTwoSize;
     color: $black;
     font-weight: 400;
-    margin: 0;
+    margin: -10px 0 0 0;
   }
 }
 .paginationContainer {
