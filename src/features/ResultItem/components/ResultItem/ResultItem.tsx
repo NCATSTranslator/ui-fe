@@ -12,7 +12,7 @@ import BookmarkConfirmationModal from '@/features/ResultItem/components/Bookmark
 import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '@/features/ResultItem/utils/csvGeneration';
-import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject, Save } from '@/features/UserAuth/utils/userApi';
+import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject, Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getPathById, getPathsByIds, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
@@ -80,6 +80,7 @@ type ResultItemProps = {
   sharedItemRef: RefObject<HTMLDivElement> | null;
   showHiddenPaths: boolean;
   startExpanded: boolean;
+  updateUserSaves?: Dispatch<SetStateAction<SaveGroup | null>>;
   zoomKeyDown: boolean;
 }
 
@@ -117,6 +118,7 @@ const ResultItem: FC<ResultItemProps> = ({
     sharedItemRef,
     showHiddenPaths,
     startExpanded = false,
+    updateUserSaves,
     zoomKeyDown
   }) => {
 
@@ -291,6 +293,20 @@ const ResultItem: FC<ResultItemProps> = ({
         setIsBookmarked(true);
         itemBookmarkID.current = newBookmarkedItem.id?.toString() || null;
         bookmarkAddedToast();
+
+        // update resultList userSaves
+        updateUserSaves?.((prev) => {
+          if(!prev) {
+            console.warn("No user saves found, unable to update userSaves");
+            return null;
+          }
+          const updatedSaves = cloneDeep(prev.saves);
+          updatedSaves.add(newBookmarkedItem);
+          return {
+            ...prev,
+            saves: updatedSaves
+          };
+        });
         return newBookmarkedItem.id;
       }
       return false;
