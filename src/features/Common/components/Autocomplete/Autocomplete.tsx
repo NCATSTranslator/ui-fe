@@ -38,12 +38,12 @@ const Autocomplete: FC<AutocompleteProps> = ({
   // Scroll selected item into view
   const scrollSelectedItemIntoView = useCallback((index: number) => {
     if (!itemsContainerRef.current || index < 0 || index >= (items?.length || 0)) return;
-    
+
     const itemElements = itemsContainerRef.current.children;
     if (itemElements[index]) {
       const selectedItem = itemElements[index] as HTMLElement;
       const container = containerRef.current;
-      
+
       if (container) {
         // Use scrollIntoView for better browser compatibility and smoother scrolling
         selectedItem.scrollIntoView({
@@ -123,8 +123,8 @@ const Autocomplete: FC<AutocompleteProps> = ({
               const icon = getIcon(type);
               const isSelected = i === selectedIndex;
               return (
-                  <div 
-                    key={i} 
+                  <div
+                    key={i}
                     className={`${styles.item} ${isSelected ? styles.selected : ''}`}
                     onMouseEnter={() => setSelectedIndex(i)}
                   >
@@ -134,11 +134,13 @@ const Autocomplete: FC<AutocompleteProps> = ({
                         <span className={styles.tooltip}>{typeString}</span>
                       </Tooltip>
                     </span>
-                    <span className={`${styles.term} autocomplete-item`} onClick={()=>handleItemClick(item)}>
+                    <span className={`${styles.term} autocomplete-item`}
+                          onClick={()=>handleItemClick(item)}
+                          title={item.match ? `${item.label} (${item.match})` : item.label}>
                       {item.label}{item.match && <span className={styles.match}>{` (${item.match})`}</span>}
                     </span>
                     {
-                      type && 
+                      type &&
                       <span className={styles.type}>{typeString}</span>
                     }
                     <span className={styles.link}>{getMoreInfoLink(item.id, styles.link)}</span>

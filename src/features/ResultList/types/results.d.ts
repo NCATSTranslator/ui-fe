@@ -77,6 +77,11 @@ export interface ResultEdge {
   compressed_edges?: ResultEdge[];
   id: string;
   knowledge_level: KnowledgeLevel;
+  metadata: { 
+    edge_bindings: string[],
+    inverted_id: string | null,
+    is_root: boolean,
+  };
   // nodeID
   object: string;
   predicate: string;
@@ -178,6 +183,11 @@ export const isResultEdge = (obj: unknown): obj is ResultEdge => {
     obj.aras.every((item: unknown) => typeof item === "string") &&
     typeof obj.is_root === "boolean" &&
     typeof obj.knowledge_level === "string" && 
+    typeof obj.metadata === "object" &&
+    Array.isArray(obj.metadata.edge_bindings) &&
+    obj.metadata.edge_bindings.every((item: unknown) => typeof item === "string") &&
+    (typeof obj.metadata.inverted_id === "string" || obj.metadata.inverted_id === null) &&
+    typeof obj.metadata.is_root === "boolean" &&
     typeof obj.object === "string" &&
     typeof obj.predicate === "string" &&
     typeof obj.predicate_url === "string" &&

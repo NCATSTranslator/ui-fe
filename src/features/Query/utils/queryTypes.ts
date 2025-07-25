@@ -6,7 +6,7 @@ import { QueryType } from '@/features/Query/types/querySubmission';
 export const queryTypes: QueryType[] = [
   {
     id: 0,
-    label: 'What drugs may treat conditions related to a disease?',
+    label: 'What drugs may impact conditions related to a disease?',
     placeholder: 'Enter a Disease or Phenotype',
     targetType: 'drug',
     direction: null,
@@ -17,7 +17,7 @@ export const queryTypes: QueryType[] = [
       annotate: queryTypeAnnotator,
       format: combinedQueryFormatter
     },
-    pathString: 'may treat conditions related to',
+    pathString: 'may impact conditions related to',
     searchTypeString: 'disease',
     iconString: 'drug'
   },

@@ -1,5 +1,5 @@
 import styles from './PathObject.module.scss';
-import { FC, useContext, useId } from 'react';
+import { FC, RefObject, useContext, useId } from 'react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
@@ -13,6 +13,7 @@ import { getEdgeById, getNodeById, getResultSetById } from '@/features/ResultLis
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { HoverContext } from '@/features/ResultItem/components/PathView/PathView';
+import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
 export interface PathObjectProps {
   activeEntityFilters: string[];
@@ -32,6 +33,7 @@ export interface PathObjectProps {
   pk: string;
   selected?: boolean;
   selectedPaths: Set<Path> | null;
+  selectedEdgeRef?: RefObject<HTMLElement | null>;
   showHiddenPaths?: boolean;
 }
 
@@ -53,13 +55,14 @@ const PathObject: FC<PathObjectProps> = ({
   pk,
   selected,
   selectedPaths,
+  selectedEdgeRef,
   showHiddenPaths = true}) => {
 
   const resultSet = useSelector(getResultSetById(pk));
 
   // ID of the main element (in the case of a compressed edge)
   const itemID = (Array.isArray(id)) ? id[0] : id; 
-  const pathObject = (index % 2 === 0) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
+  const pathObject = (isNodeIndex(index)) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
   const isNode = isResultNode(pathObject);
   const isEdge = isResultEdge(pathObject);
   const { isEdgeSeen } = useSeenStatus(pk);
@@ -143,7 +146,7 @@ const PathObject: FC<PathObjectProps> = ({
                   path={path}
                   parentPathKey={parentPathKey}
                   edge={pathObject}
-                  edgeIDs={(Array.isArray(id)) ? id : [id]}
+                  edgeIds={(Array.isArray(id)) ? id : [id]}
                   selected={selected}
                   activeEntityFilters={activeEntityFilters}
                   activeFilters={activeFilters}
@@ -164,6 +167,7 @@ const PathObject: FC<PathObjectProps> = ({
                   selectedPaths={selectedPaths}
                   pk={pk}
                   showHiddenPaths={showHiddenPaths}
+                  selectedEdgeRef={selectedEdgeRef}
                 />
               :
                 null

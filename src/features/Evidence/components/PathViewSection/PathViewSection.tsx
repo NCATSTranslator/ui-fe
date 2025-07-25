@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { FC } from 'react';
 import Button from '@/features/Core/components/Button/Button';
+=======
+import { FC, RefObject } from 'react';
+import Button from '@/features/Common/components/Button/Button';
+>>>>>>> develop
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { Path, Result, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
@@ -15,6 +20,7 @@ interface PathViewSectionProps {
   pk: string;
   result: Result;
   selectedEdge: ResultEdge | null;
+  selectedEdgeRef: RefObject<HTMLElement | null>;
 }
 
 const PathViewSection: FC<PathViewSectionProps> = ({
@@ -27,6 +33,7 @@ const PathViewSection: FC<PathViewSectionProps> = ({
   pk,
   result,
   selectedEdge,
+  selectedEdgeRef,
 }) => {
   return (
     <div className={`${styles.pathViewContainer} ${isPathViewMinimized && styles.minimized}`}>
@@ -57,6 +64,7 @@ const PathViewSection: FC<PathViewSectionProps> = ({
         inModal={true}
         compressedSubgraph={compressedSubgraph}
         selectedEdge={selectedEdge}
+        selectedEdgeRef={selectedEdgeRef}
       />
     </div>
   );

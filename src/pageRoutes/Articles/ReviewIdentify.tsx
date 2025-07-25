@@ -10,7 +10,7 @@ export const ReviewIdentify = () => {
   return (
     <>
       <p className="caption">Last updated on April 29th, 2025</p>
-      <p><strong>Explore the paths.</strong> Under the <i>Paths</i> tab each result is simplified into a list of paths that connect the result to the requested term. Each network is broken out into every path through the network to explore individually. Each concept is displayed with its relationship to another concept.  Selecting the connecting relationships (affects, treats, or contributes to below) will display the evidence supporting that relationship.</p>
+      <p><strong>Explore the paths.</strong> Under the <i>Paths</i> tab each result is simplified into a list of paths that connect the result to the requested term. Each network is broken out into every path through the network to explore individually. Each concept is displayed with its relationship to another concept.  Selecting the connecting relationships (affects, impacts, or contributes to below) will display the evidence supporting that relationship.</p>
       <p style={{textAlign: 'center'}}><img src={reviewImage} alt="example showing the paths from a result" /></p>
 
       <p><strong>Filtering results.</strong> Results can be filtered to identify the most valuable to users.</p>

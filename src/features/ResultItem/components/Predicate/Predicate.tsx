@@ -1,4 +1,4 @@
-import { useState, FC, MouseEvent, useMemo } from 'react';
+import { FC, MouseEvent, useMemo, RefObject } from 'react';
 import styles from './Predicate.module.scss';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
@@ -16,7 +16,8 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
-import { useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
+import { useSupportPathKey, useExpandedPredicate } from '@/features/ResultItem/hooks/resultHooks';
+import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -30,7 +31,7 @@ interface PredicateProps {
     onMouseLeave: () => void;
   };
   edge: ResultEdge;
-  edgeIDs: string[];
+  edgeIds: string[];
   inModal?: boolean | null;
   isEven?: boolean;
   isHighlighted?: boolean;
@@ -43,6 +44,7 @@ interface PredicateProps {
   pathViewStyles?: {[key: string]: string;} | null;
   pk: string;
   selected?: boolean;
+  selectedEdgeRef?: RefObject<HTMLElement | null>;
   selectedPaths: Set<Path> | null;
   showHiddenPaths: boolean;
   uid: string;
@@ -53,7 +55,7 @@ const Predicate: FC<PredicateProps> = ({
   activeFilters,
   className = "",
   edge,
-  edgeIDs,
+  edgeIds,
   handleActivateEvidence,
   handleEdgeClick,
   handleNodeClick,
@@ -70,14 +72,25 @@ const Predicate: FC<PredicateProps> = ({
   pathViewStyles = null,
   pk,
   selected = false,
+  selectedEdgeRef,
   selectedPaths,
   showHiddenPaths,
   uid }) => {
 
   let resultSet = useSelector(getResultSetById(pk));
-  const formattedEdge = (!!resultSet && Array.isArray(edgeIDs) && edgeIDs.length > 1) ? getCompressedEdge(resultSet, edgeIDs) : edge;
+  const formattedEdge = (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
-  const [isSupportExpanded, setIsSupportExpanded] = useState(formattedEdge.is_root);
+  
+  const { expandedPredicateId, setExpandedPredicateId } = useExpandedPredicate();
+  
+  // Create a unique identifier for this predicate
+  const predicateId = useMemo(() => {
+    return generatePredicateId(path, edgeIds);
+  }, [path.id, edgeIds]);
+  
+  // Determine if this predicate is expanded
+  const isSupportExpanded = (expandedPredicateId === predicateId);
+  
   const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0) ? [...formattedEdge.compressed_edges, formattedEdge] : [formattedEdge];
   const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
   const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
@@ -93,7 +106,7 @@ const Predicate: FC<PredicateProps> = ({
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    setIsSupportExpanded(prev=>!prev);
+    setExpandedPredicateId(isSupportExpanded ? null : predicateId);
   }
 
   const pushAndReturn = (arr: ResultEdge[], element: ResultEdge) => {
@@ -126,9 +139,10 @@ const Predicate: FC<PredicateProps> = ({
       <span
         className={edgeClass}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
-        data-edge-ids={edgeIDs.toString()}
+        data-edge-ids={edgeIds.toString()}
         data-aras={edge.aras.toString()}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIds, path, fullPathKey);}}
+        ref={selected ? selectedEdgeRef : null}
         {...hoverHandlers}
         >
         <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
@@ -163,6 +177,10 @@ const Predicate: FC<PredicateProps> = ({
                           autoEscape={true}
                           textToHighlight={edge.predicate}
                         />
+                        {
+                          edge.predicate.includes("impacts") &&
+                          <span className={styles.predicateImpact}> (either positively or negatively)</span>
+                        }
                         {
                           edge.predicate_url &&
                           <a

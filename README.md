@@ -3,7 +3,7 @@
 ## Project Status
 
 This project is currently in development. Users can submit queries to the services that power the NCATS Biomedical Data Translator using one of the following templates:
-- What drugs may treat _____ (_disease_)
+- What drugs may impact _____ (_disease_)
 - What chemicals upregulate _____ (_gene_)
 - What chemicals downregulate _____ (_gene_)
 - What gene is upregulated by _____ (_chemical_)

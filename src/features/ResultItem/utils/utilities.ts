@@ -3,6 +3,7 @@ import { getEdgesByIds, getEdgeById, getPathById } from "@/features/ResultList/s
 import { Path, ResultSet, PathFilterState, isResultEdge, Tags } from "@/features/ResultList/types/results.d";
 import { cloneDeep } from "lodash";
 import { hasSupport } from "@/features/Common/utils/utilities";
+import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
 
 /**
  * Extracts ARA tag names from a ResultItem's tags object.
@@ -43,7 +44,7 @@ export const getARATagsFromResultTags = (tags: Filters): string[] => {
  */
 export const getEdgeIdsFromPath = (path: Path): string[] => {
   const graph = path.compressedSubgraph ?? path.subgraph;
-  return graph.filter((_, i) => i % 2 === 1) as string[];
+  return graph.filter((_, i) => !isNodeIndex(i)).flat();
 };
 
 /**
@@ -103,6 +104,32 @@ export const getAllSupportPathIDs = (
   return Array.from(supportPathIDs);
 };
 
+/**
+ * Returns a set of all path IDs from a list of paths, including their recursively supported paths if `full` is true and a resultSet is provided.
+ * 
+ * @param {Path[]} paths - The initial list of paths to check.
+ * @param {boolean} full - If true, includes all recursively supported paths via edges.
+ * @param {ResultSet} [resultSet] - The result set used to resolve edge and path references when full is enabled.
+ * @returns {Set<string>} - A set of all path IDs.
+ */
+export const getPathIdSet = (paths: Path[], full: boolean = false, resultSet?: ResultSet | null): Set<string> => {
+  const allPathIDs = new Set<string>();
+  if(full && !!resultSet) {
+    const supportPathIDs = getAllSupportPathIDs(paths, resultSet);
+    for (const id of supportPathIDs)
+      allPathIDs.add(id);
+  }
+  for(const path of paths) {
+    if(path.compressedIDs) {
+      for(const id of path.compressedIDs) {
+        allPathIDs.add(id);
+      }
+    } else if (path?.id) {
+      allPathIDs.add(path.id);
+    }
+  }
+  return allPathIDs;
+}
 
 /**
  * Counts how many of the provided paths are filtered, including their recursively supported paths if `full` is true.
@@ -119,18 +146,7 @@ export const getFilteredPathCount = (
   full: boolean = false,
   resultSet?: ResultSet | null
 ): number => {
-  const allPathIDs = new Set<string>();
-
-  for (const path of paths) {
-    if (path?.id)
-      allPathIDs.add(path.id);
-  }
-
-  if (full && !!resultSet) {
-    const supportPathIDs = getAllSupportPathIDs(paths, resultSet);
-    for (const id of supportPathIDs)
-      allPathIDs.add(id);
-  }
+  const allPathIDs = getPathIdSet(paths, full, resultSet);
 
   let count = 0;
   for (const id of allPathIDs) {
@@ -149,7 +165,7 @@ export const getFilteredPathCount = (
  * @returns {string[]} - An array containing only the edge IDs from the subgraph.
  */
 export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
-  subgraph.filter((_, i) => i % 2 === 1);
+  subgraph.filter((_, i) => !isNodeIndex(i));
 
 /**
  * Takes a list of paths/path IDs along with a PathFilterState object and a set of selected paths, then compresses them. 
@@ -244,8 +260,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
   // Helper function to extract the path sequence from a subgraph
   const extractPathSequence = (resultSet: ResultSet, subgraph: string[]): string[] => {
     return subgraph.map((item, i) => {
-      if(i % 2 === 0) {
-        // even indexed items are nodes
+      if(isNodeIndex(i)) {
         return item;
       } else {
         const edge = getEdgeById(resultSet, item);
@@ -298,7 +313,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
       if (!existingPath.compressedSubgraph) {
         existingPath.compressedSubgraph = existingPath.subgraph.map((id, index) => {
           // Convert edge to array
-          if (index % 2 === 1) 
+          if (!isNodeIndex(index)) 
             return [id];
           // Keep node as is
           return id;
@@ -365,7 +380,7 @@ export const isPathInferred = (resultSet: ResultSet, path: Path) => {
     return false;
 
   for(const [i, itemID] of path.subgraph.entries()) {
-    if(i % 2 === 0) 
+    if(isNodeIndex(i)) 
       continue;
 
     const edge = getEdgeById(resultSet, itemID);
@@ -376,4 +391,59 @@ export const isPathInferred = (resultSet: ResultSet, path: Path) => {
       return true;
   }
   return false;
+}
+
+/**
+ * Generates a path data string for a path in a graph visualization.
+ * 
+ * @param {number} index - The index of the path in the graph.
+ * @param {number} svgHeight - The height of the SVG container.
+ * @param {number} svgWidth - The width of the SVG container.
+ * @param {number} edgeHeight - The height of each edge.
+ * @param {boolean} enter - Whether the path is entering the graph.
+ * @param {number} curveOffset - The offset for the curve.
+ * @param {number} straightSegment - The length of the straight segment.
+ * @returns {string} - The path data string.
+ */
+export const generatePathD = (
+  index: number,
+  svgHeight: number,
+  svgWidth: number,
+  edgeHeight: number,
+  enter: boolean,
+  curveOffset = 50,
+  straightSegment = 10
+): string => {
+  const startX = 0; 
+  const startY = svgHeight * 0.5;
+  const endX = svgWidth; 
+  // Center of stacked edge
+  const endY = index * (edgeHeight + 8) + edgeHeight / 2; 
+  // Adjust straight segment positions
+  const midStartX = startX + straightSegment;
+  const midEndX = endX - straightSegment;
+  // Control points for smooth curves
+  const controlX1 = midStartX + curveOffset;
+  const controlX2 = midEndX - curveOffset;
+
+  return enter 
+    ? `M ${startX} ${startY} 
+       L ${midStartX} ${startY} 
+       C ${controlX1} ${startY}, ${controlX2} ${endY}, ${midEndX} ${endY} 
+       L ${endX} ${endY}`
+    : `M ${startX} ${endY} 
+       L ${midStartX} ${endY} 
+       C ${controlX1} ${endY}, ${controlX2} ${startY}, ${midEndX} ${startY} 
+       L ${endX} ${startY}`;
+};
+
+/**
+ * Generates a unique identifier for a predicate based on the path and edge IDs.
+ * 
+ * @param {Path} path - The path object.
+ * @param {string[]} edgeIds - The edge IDs.
+ * @returns {string} - The unique predicate ID.
+ */
+export const generatePredicateId = (path: Path, edgeIds: string[]) => {
+    return `${path.id}-${edgeIds.join('-')}`;
 }

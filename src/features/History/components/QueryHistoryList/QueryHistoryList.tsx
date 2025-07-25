@@ -138,6 +138,8 @@ const QueryHistoryList = ({ loading }: { loading: boolean }) => {
             let timestampDiff = getDifferenceInDays(currentDate, itemTimestamp);
             let timeName = "";
             let showNewTimeName = false;
+            // Temporary fix to not display the "treats" predicate in the UI
+            let queryLabel = query.item.type.label.replaceAll("treat", "impact");
             switch (timestampDiff) {
               case 0:
                 timeName = "Today";
@@ -174,8 +176,8 @@ const QueryHistoryList = ({ loading }: { loading: boolean }) => {
                     </div>
                     <div className={styles.right}>
                       <div className={styles.top}>
-                        {query.item?.type?.label && (
-                          <span>{query.item.type.label.replaceAll("a disease?", "").replaceAll("a chemical?", "").replaceAll("a gene?", "")} </span>
+                        {queryLabel && (
+                          <span>{queryLabel.replaceAll("a disease?", "").replaceAll("a chemical?", "").replaceAll("a gene?", "")} </span>
                         )}
                         {query.item?.node?.label && <span className={styles.subject}>{query.item.node.label}</span>}?
                       </div>

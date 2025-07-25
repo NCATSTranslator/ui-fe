@@ -195,9 +195,10 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
  */
 export const useAutocomplete = (
   autocompleteFunctions: RefObject<AutocompleteFunctions | null>,
-  limitTypes: RefObject<string[]>,
-  limitPrefixes: RefObject<string[] | null>,
-  nameResolverEndpoint: string
+  nameResolverEndpoint: string,
+  limitTypes?: RefObject<string[]>,
+  limitPrefixes?: RefObject<string[] | null>,
+  excludePrefixes?: RefObject<string[] | null>
 ) => {
   const [autocompleteItems, setAutoCompleteItems] = useState<AutocompleteItem[] | null>(null);
   const [loadingAutocomplete, setLoadingAutocomplete] = useState<boolean>(false);
@@ -211,8 +212,9 @@ export const useAutocomplete = (
             setLoadingAutocomplete,
             setAutoCompleteItems,
             autocompleteFunctions.current,
-            limitTypes.current,
-            limitPrefixes.current || [],
+            limitTypes?.current || [],
+            limitPrefixes?.current || [],
+            excludePrefixes?.current || [],
             nameResolverEndpoint
           );
         }
