@@ -8,8 +8,9 @@ import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import ProjectsTableHeader from '@/features/Projects/components/TableHeader/ProjectsTableHeader/ProjectsTableHeader';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
 import { useUserProjects, useUserQueryStatus } from '@/features/Projects/hooks/customHooks';
-import { Project, QueryStatusObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { ProjectRaw, QueryStatusObject, SortField, SortDirection, Project } from '@/features/Projects/types/projects.d';
 import { sortProjects, sortQueries } from '@/features/Projects/utils/sortingFunctions';
+import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 
 export const ProjectListInner = () => {
@@ -17,13 +18,17 @@ export const ProjectListInner = () => {
   const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueryStatus();
   const [activeTab, setActiveTab] = useState<string>('Projects');
   
-  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortField, setSortField] = useState<SortField>('lastSeen');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-  const activeProjects = projects.filter((project: Project) => !project.deleted);
-  const deletedProjects = projects.filter((project: Project) => project.deleted);
+  const activeProjects = projects.filter((project: ProjectRaw) => !project.deleted);
+  const deletedProjects = projects.filter((project: ProjectRaw) => project.deleted);
   const activeQueries = queries.filter((query: QueryStatusObject) => !query.data.deleted);
   const deletedQueries = queries.filter((query: QueryStatusObject) => query.data.deleted);
+
+  // Format projects with calculated fields (bookmarks, notes, etc.)
+  const activeFormattedProjects = useFormattedProjects(activeProjects, queries);
+  const deletedFormattedProjects = useFormattedProjects(deletedProjects, queries);
 
   const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<QueryStatusObject[]>([]);
@@ -44,7 +49,7 @@ export const ProjectListInner = () => {
   const isLoading = projectsLoading || queriesLoading;
   const hasError = projectsError || queriesError;
 
-  const sortedActiveProjects = useMemo(() => sortProjects(activeProjects, sortField, sortDirection), [activeProjects, sortField, sortDirection]);
+  const sortedActiveProjects = useMemo(() => sortProjects(activeFormattedProjects, sortField, sortDirection), [activeFormattedProjects, sortField, sortDirection]);
   const sortedActiveQueries = useMemo(() => sortQueries(activeQueries, sortField, sortDirection), [activeQueries, sortField, sortDirection]);
 
   if (isLoading) {
@@ -81,7 +86,7 @@ export const ProjectListInner = () => {
             <ProjectsTableHeader 
               selectedProjects={selectedProjects}
               setSelectedProjects={setSelectedProjects}
-              activeProjects={activeProjects}
+              activeProjects={activeFormattedProjects}
               sortField={sortField}
               sortDirection={sortDirection}
               onSort={handleSort}
@@ -146,7 +151,7 @@ export const ProjectListInner = () => {
                 {deletedProjects.length > 0 && (
                   <div className={styles.deletedSection}>
                     <h4>Deleted Projects</h4>
-                    {deletedProjects.map((project: Project) => (
+                    {deletedFormattedProjects.map((project: Project) => (
                       <ProjectCard 
                         key={project.id}
                         queries={queries}

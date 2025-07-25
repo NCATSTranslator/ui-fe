@@ -75,9 +75,36 @@ const QueriesTableHeader = ({
             Date Added
           </SortableHeader>
         </div>
-        <div className={styles.bookmarksColumn}><BookmarkIcon /></div>
-        <div className={styles.notesColumn}><NoteIcon /></div>
-        <div className={styles.statusColumn}>Status</div>
+        <div className={styles.bookmarksColumn}>
+          <SortableHeader 
+            field="bookmarks" 
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={onSort}
+          >
+            <BookmarkIcon />
+          </SortableHeader>
+        </div>
+        <div className={styles.notesColumn}>
+          <SortableHeader 
+            field="notes" 
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={onSort}
+          >
+            <NoteIcon />
+          </SortableHeader>
+        </div>
+        <div className={styles.statusColumn}>
+          <SortableHeader 
+            field="status" 
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={onSort}
+          >
+            Status
+          </SortableHeader>
+        </div>
       </div>
     </div>
   );

@@ -73,6 +73,7 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
                     key={item.id}
                     iconLeft={<QueryTypeIcon type={queryTypes[typeID].searchTypeString}/>}
                     smallFont
+                    variant="secondary"
                   >
                     {item.name}
                   </Button>

@@ -1,4 +1,4 @@
-@use '@/assets/styles/variables.scss' as *;
+@use '@/assets/styles/variables' as *;
 
 .sortableHeader {
   display: inline-flex;
@@ -19,12 +19,11 @@
     color: $purpleTwo;
   }
 }
-
 .sortArrow {
   width: $m;
   height: $m;
   position: absolute;
-  right: -28px;
+  right: -22px;
   transition: $defaultTransformAnim;
 
   &.asc {

@@ -1,4 +1,4 @@
-import { Project, QueryStatusObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { QueryStatusObject, SortField, SortDirection, Project } from '@/features/Projects/types/projects.d';
 
 /**
  * Sorts projects based on the specified field and direction
@@ -9,8 +9,8 @@ import { Project, QueryStatusObject, SortField, SortDirection } from '@/features
  */
 export const sortProjects = (projects: Project[], sortField: SortField, sortDirection: SortDirection): Project[] => {
   return [...projects].sort((a, b) => {
-    let aValue: string | Date;
-    let bValue: string | Date;
+    let aValue: string | Date | number;
+    let bValue: string | Date | number;
 
     switch (sortField) {
       case 'name':
@@ -24,6 +24,18 @@ export const sortProjects = (projects: Project[], sortField: SortField, sortDire
       case 'dateAdded':
         aValue = a.time_created;
         bValue = b.time_created;
+        break;
+      case 'bookmarks':
+        aValue = a.bookmark_count;
+        bValue = b.bookmark_count;
+        break;
+      case 'notes':
+        aValue = a.note_count;
+        bValue = b.note_count;
+        break;
+      case 'status':
+        aValue = 0; // Projects don't have status in the current data structure
+        bValue = 0;
         break;
       default:
         return 0;
@@ -44,8 +56,8 @@ export const sortProjects = (projects: Project[], sortField: SortField, sortDire
 */
 export const sortQueries = (queries: QueryStatusObject[], sortField: SortField, sortDirection: SortDirection): QueryStatusObject[] => {
   return [...queries].sort((a, b) => {
-    let aValue: string | Date;
-    let bValue: string | Date;
+    let aValue: string | Date | number;
+    let bValue: string | Date | number;
 
     switch (sortField) {
       case 'name':
@@ -59,6 +71,18 @@ export const sortQueries = (queries: QueryStatusObject[], sortField: SortField, 
       case 'dateAdded':
         aValue = a.data.time_created;
         bValue = b.data.time_created;
+        break;
+      case 'bookmarks':
+        aValue = a.data.bookmark_count;
+        bValue = b.data.bookmark_count;
+        break;
+      case 'notes':
+        aValue = a.data.note_count;
+        bValue = b.data.note_count;
+        break;
+      case 'status':
+        aValue = a.status;
+        bValue = b.status;
         break;
       default:
         return 0;

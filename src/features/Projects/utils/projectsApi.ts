@@ -1,6 +1,6 @@
 import { get, post, put, fetchWithErrorHandling, ErrorHandler } from '@/features/Common/utils/web';
-import { isProject, isProjectArray, isQueryStatusArray, isUserQueryObject, Project, 
-  ProjectCreate, ProjectUpdate, QueryStatusObject, UserQueryObject } from '@/features/Projects/types/projects.d';
+import { isProjectRaw, isProjectRawArray, isQueryStatusArray, isUserQueryObject, ProjectCreate, ProjectUpdate, 
+  QueryStatusObject, UserQueryObject, ProjectRaw } from '@/features/Projects/types/projects.d';
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';
@@ -12,14 +12,14 @@ export const API_PATH_PREFIX = '/api/v1';
 export const getUserProjects = async (
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<Project[]> => {
+): Promise<ProjectRaw[]> => {
   const url = `${API_PATH_PREFIX}/users/me/projects`;
   
-  return fetchWithErrorHandling<Project[]>(
+  return fetchWithErrorHandling<ProjectRaw[]>(
     () => get(url),
     httpErrorHandler,
     fetchErrorHandler,
-    isProjectArray
+    isProjectRawArray
   );
 };
 
@@ -49,14 +49,14 @@ export const createProject = async (
   projectData: ProjectCreate,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<Project> => {
+): Promise<ProjectRaw> => {
   const url = `${API_PATH_PREFIX}/users/me/project`;
   
-  return fetchWithErrorHandling<Project>(
+  return fetchWithErrorHandling<ProjectRaw>(
     () => post(url, projectData),
     httpErrorHandler,
     fetchErrorHandler,
-    isProject
+    isProjectRaw
   );
 };
 
@@ -68,14 +68,14 @@ export const updateProjects = async (
   projects: ProjectUpdate[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<Project[]> => {
+): Promise<ProjectRaw[]> => {
   const url = `${API_PATH_PREFIX}/users/me/projects/update`;
   
-  return fetchWithErrorHandling<Project[]>(
+  return fetchWithErrorHandling<ProjectRaw[]>(
     () => put(url, projects),
     httpErrorHandler,
     fetchErrorHandler,
-    isProjectArray
+    isProjectRawArray
   );
 };
 
@@ -87,14 +87,14 @@ export const deleteProjects = async (
   projectIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<Project[]> => {
+): Promise<ProjectRaw[]> => {
   const url = `${API_PATH_PREFIX}/users/me/projects/delete`;
   
-  return fetchWithErrorHandling<Project[]>(
+  return fetchWithErrorHandling<ProjectRaw[]>(
     () => put(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    isProjectArray
+    isProjectRawArray
   );
 };
 
@@ -106,14 +106,14 @@ export const restoreProjects = async (
   projectIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<Project[]> => {
+): Promise<ProjectRaw[]> => {
   const url = `${API_PATH_PREFIX}/users/me/projects/restore`;
   
-  return fetchWithErrorHandling<Project[]>(
+  return fetchWithErrorHandling<ProjectRaw[]>(
     () => put(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    isProjectArray
+    isProjectRawArray
   );
 };
 

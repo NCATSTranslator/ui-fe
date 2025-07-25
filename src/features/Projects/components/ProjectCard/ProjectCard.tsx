@@ -63,10 +63,10 @@ const ProjectCard = ({
         {getFormattedDate(new Date(project.time_created), false)}
       </div>
       <div className={styles.bookmarksColumn}>
-        0
+        {project.bookmark_count}
       </div>
       <div className={styles.notesColumn}>
-        0
+        {project.note_count}
       </div>
       <div className={styles.statusColumn}>
         <StatusIndicator status={status} />

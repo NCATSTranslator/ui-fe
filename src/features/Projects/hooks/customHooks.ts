@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueryStatus, 
   restoreProjects, restoreQueries, updateProjects } from '@/features/Projects/utils/projectsApi';
-import { ProjectCreate, ProjectUpdate } from '@/features/Projects/types/projects.d';
+import { ProjectCreate, ProjectUpdate, ProjectRaw, QueryStatusObject, Project } from '@/features/Projects/types/projects.d';
 
 /**
  * Hook to fetch user projects with React Query
@@ -115,4 +116,53 @@ export const useRestoreQueries = () => {
       queryClient.invalidateQueries({ queryKey: ['userQueryStatus'] });
     },
   });
+};
+
+/**
+ * Generic hook that formats and enhances project data with various calculated fields.
+ * Currently includes bookmark and note counts, but can be extended for other formatting needs.
+ * Results are memoized to avoid recalculating on every render.
+ * @param {ProjectRaw[]} projects - The raw projects to format
+ * @param {QueryStatusObject[]} queries - The queries to use for calculations
+ * @returns {Project[]} The formatted projects with calculated fields
+ */
+export const useFormattedProjects = (
+  projects: ProjectRaw[], 
+  queries: QueryStatusObject[]
+): Project[] => {
+  return useMemo(() => {
+    return projects.map(project => {
+      // Find all queries that belong to this project
+      const projectQueries = queries.filter(q => project.qids.includes(q.data.qid));
+      
+      // Calculate total bookmark count
+      const bookmark_count = projectQueries.reduce(
+        (sum, q) => sum + q.data.bookmark_count, 
+        0
+      );
+      
+      // Calculate total note count
+      const note_count = projectQueries.reduce(
+        (sum, q) => sum + q.data.note_count, 
+        0
+      );
+      
+      // Return enhanced project with calculated fields
+      return {
+        ...project,
+        bookmark_count,
+        note_count
+      };
+    });
+  }, [projects, queries]);
+};
+
+/**
+ * @deprecated Use useFormattedProjects instead. This hook is kept for backward compatibility.
+ */
+export const useProjectCounts = (
+  projects: ProjectRaw[], 
+  queries: QueryStatusObject[]
+): Project[] => {
+  return useFormattedProjects(projects, queries);
 };

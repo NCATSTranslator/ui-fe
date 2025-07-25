@@ -10,13 +10,18 @@ export type ProjectUpdate = {
   pks: string[];
 }
 
-export type Project = {
+export type ProjectRaw = {
   id: string;
   title: string;
   qids: string[];
   time_created: Date;
   time_updated: Date;
   deleted: boolean;
+}
+
+export type Project = ProjectRaw & {
+  bookmark_count: number;
+  note_count: number;
 }
 
 export type QueryStatus = 'success' | 'running' | 'error';
@@ -47,11 +52,10 @@ export interface UserQueryObject {
   deleted:      boolean
 }
 
-// Sorting types
-export type SortField = 'name' | 'lastSeen' | 'dateAdded';
+export type SortField = 'name' | 'lastSeen' | 'dateAdded' | 'bookmarks' | 'notes' | 'status';
 export type SortDirection = 'asc' | 'desc';
 
-export const isProject = (obj: unknown): obj is Project => {
+export const isProjectRaw = (obj: unknown): obj is ProjectRaw => {
   return (
     typeof obj === 'object' &&
     obj !== null &&
@@ -64,8 +68,20 @@ export const isProject = (obj: unknown): obj is Project => {
   );
 };
 
+export const isProject = (obj: unknown): obj is Project => {
+  return (
+    isProjectRaw(obj) &&
+    'bookmark_count' in obj &&
+    'note_count' in obj
+  );
+};
+
 export const isProjectArray = (obj: unknown): obj is Project[] => {
   return Array.isArray(obj) && obj.every(isProject);
+};
+
+export const isProjectRawArray = (obj: unknown): obj is ProjectRaw[] => {
+  return Array.isArray(obj) && obj.every(isProjectRaw);
 };
 
 export const isQueryStatusArray = (obj: unknown): obj is QueryStatusObject[] => {
