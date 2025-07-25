@@ -14,7 +14,7 @@ import { AutocompleteItem, AutocompleteFunctions, ExampleQueries, QueryType } fr
 /**
  * Custom hook that filters and sorts cached queries into categorized example queries.
  * Memoizes the result to prevent unnecessary recalculations on re-renders.
- * 
+ *
  * @param {Example[] | undefined} cachedQueries - Array of cached query objects to filter and sort
  * @returns Object containing categorized example queries:
  *   - exampleDiseases: Drug-related queries
@@ -46,7 +46,7 @@ export const useExampleQueries = (cachedQueries: Example[] | undefined): Example
 /**
  * Custom hook that manages query submission logic including API calls, error handling,
  * navigation, and Redux state updates. Provides loading state and submission function.
- * 
+ *
  * @param {'single' | 'pathfinder'} queryType - Type of query: 'single' for regular queries, 'pathfinder' for dual-item queries
  * @returns Object containing:
  *   - isLoading: Boolean indicating if a query is currently being submitted
@@ -88,10 +88,10 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
           incrementHistory({
             item,
             date: timestamp.toDateString(),
-            time: timestamp.toLocaleTimeString([], { 
-              hour12: true, 
-              hour: 'numeric', 
-              minute: '2-digit' 
+            time: timestamp.toLocaleTimeString([], {
+              hour12: true,
+              hour: 'numeric',
+              minute: '2-digit'
             }),
             id: data.data,
           })
@@ -100,10 +100,10 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
         const nodeLabel = item.node?.label || "";
         const nodeID = item.node?.id || "";
         const newQueryPath = getResultsShareURLPath(
-          nodeLabel, 
-          nodeID, 
-          item.type.id, 
-          '0', 
+          nodeLabel,
+          nodeID,
+          item.type.id,
+          '0',
           data.data
         );
 
@@ -124,8 +124,8 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
   }, [dispatch, navigate]);
 
   const submitPathfinderQuery = useCallback(async (
-    itemOne: AutocompleteItem, 
-    itemTwo: AutocompleteItem, 
+    itemOne: AutocompleteItem,
+    itemTwo: AutocompleteItem,
     middleType?: string
   ) => {
     setIsLoading(true);
@@ -151,14 +151,14 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
 
       const data = await response.json();
       console.log(data);
-      
+
       let newQueryPath = getPathfinderResultsShareURLPath(
-        itemOne, 
-        itemTwo, 
-        '0', 
-        middleType?.replace("biolink:", ""), 
+        itemOne,
+        itemTwo,
+        '0',
+        middleType?.replace("biolink:", ""),
         data.data
-      ); 
+      );
       navigate(newQueryPath);
     } catch (error) {
       toast.error(
@@ -170,19 +170,19 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
     }
   }, [navigate]);
 
-  return { 
-    isLoading, 
-    setIsLoading, 
+  return {
+    isLoading,
+    setIsLoading,
     submitQuery: queryType === 'single' ? submitQuery : undefined,
     submitPathfinderQuery: queryType === 'pathfinder' ? submitPathfinderQuery : undefined
   };
-}; 
+};
 
 /**
  * Custom hook that manages autocomplete functionality including debounced API calls,
  * loading states, and autocomplete item management. Provides a 750ms debounced
  * query function to reduce API calls during user typing.
- * 
+ *
  * @param {RefObject<AutocompleteFunctions | null>} autocompleteFunctions - Mutable ref containing autocomplete filter functions
  * @param {RefObject<string[]>} limitTypes - Mutable ref containing array of type filters for autocomplete
  * @param {RefObject<string[] | null>} limitPrefixes - Mutable ref containing array of prefix filters for autocomplete
@@ -232,13 +232,13 @@ export const useAutocomplete = (
     delayedQuery,
     clearAutocompleteItems
   };
-}; 
+};
 
 /**
  * Custom hook that manages the main query state including query item, input text,
  * and related configuration refs. Initializes state based on provided parameters
  * and maintains history of previous query items.
- * 
+ *
  * @param {QueryType | null} initPresetTypeObject - Initial query type object or null to use default
  * @param {string | null} initNodeLabelParam - Initial node label parameter from URL or props
  * @param {string | null} initNodeIdParam - Initial node ID parameter from URL or props
@@ -260,10 +260,10 @@ export const useQueryState = (
 ) => {
   const initQueryItem = useMemo((): QueryItem => {
     const initPresetType = initPresetTypeObject || queryTypes[0];
-    const initSelectedNode = initNodeIdParam && initNodeLabelParam 
-      ? { id: initNodeIdParam, label: initNodeLabelParam, match: "", types: [] } 
+    const initSelectedNode = initNodeIdParam && initNodeLabelParam
+      ? { id: initNodeIdParam, label: initNodeLabelParam, match: "", isExact: false, score: Infinity, types: [] }
       : null;
-    
+
     return {
       type: initPresetType,
       node: initSelectedNode
@@ -294,4 +294,4 @@ export const useQueryState = (
     limitTypes,
     clearQueryItem
   };
-}; 
+};

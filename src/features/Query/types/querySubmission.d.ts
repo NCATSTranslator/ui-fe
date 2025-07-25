@@ -22,14 +22,16 @@ export type QueryType = {
 }
 
 export type QueryItem = {
-  type: QueryType; 
-  node: AutocompleteItem | null; 
+  type: QueryType;
+  node: AutocompleteItem | null;
 }
 
 export type AutocompleteItem = {
   id:string,
   label: string,
   match?: string,
+  isExact: boolean,
+  score: number,
   types?: string[]
 }
 
