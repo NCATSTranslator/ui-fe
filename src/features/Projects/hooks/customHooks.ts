@@ -156,13 +156,3 @@ export const useFormattedProjects = (
     });
   }, [projects, queries]);
 };
-
-/**
- * @deprecated Use useFormattedProjects instead. This hook is kept for backward compatibility.
- */
-export const useProjectCounts = (
-  projects: ProjectRaw[], 
-  queries: QueryStatusObject[]
-): Project[] => {
-  return useFormattedProjects(projects, queries);
-};
