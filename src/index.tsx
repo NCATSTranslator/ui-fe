@@ -15,7 +15,7 @@ const Terms = lazy(() => import('@/pageRoutes/Terms/Terms'));
 const UserPrefs = lazy(() => import('@/pageRoutes/UserPrefs/UserPrefs'));
 const Workspace = lazy(() => import('@/pageRoutes/Workspace/Workspace'));
 const SendFeedbackPage = lazy(() => import('@/pageRoutes/SendFeedback/SendFeedback'));
-
+const Projects = lazy(() => import('@/pageRoutes/Projects/Projects'));
 const Help = lazy(() => import('@/pageRoutes/Articles/Help').then(m => ({ default: m.Help })));
 const LoggingIn = lazy(() => import('@/pageRoutes/Articles/LoggingIn').then(m => ({ default: m.LoggingIn })));
 const WhatIs = lazy(() => import('@/pageRoutes/Articles/WhatIs').then(m => ({ default: m.WhatIs })));
@@ -106,6 +106,10 @@ const routes = [
   {
     path: "send-feedback",
     element: <Page title="Send Feedback"><Suspense fallback={<LoadingWrapper />}><SendFeedbackPage /></Suspense></Page>
+  },
+  {
+    path: "projects",
+    element: <Page title="Projects"><Suspense fallback={<LoadingWrapper />}><Projects /></Suspense></Page>
   },
   {
     path: "*",

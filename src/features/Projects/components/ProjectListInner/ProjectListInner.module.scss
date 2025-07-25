@@ -1,0 +1,74 @@
+@use '@/assets/styles/variables' as *;
+
+.projectList {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: calc($interiorContainerWidth + ($m * 2));
+  margin: 0 auto;
+  .projectTabContent {
+    padding: $s $m $m;
+  }
+}
+
+.projectTabs {
+  flex: 1;
+  margin-top: $m;
+}
+
+
+
+.projectGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $s;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: $black;
+  font-size: 14px;
+}
+
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: $red;
+  font-size: 14px;
+  text-align: center;
+}
+
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: $black;
+  font-size: 14px;
+  line-height: 1.5;
+
+  p {
+    margin: 0;
+    max-width: 300px;
+  }
+}
+
+.deletedSection {
+  margin-bottom: 24px;
+
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: $black;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+

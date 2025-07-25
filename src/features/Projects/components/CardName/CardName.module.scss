@@ -1,0 +1,31 @@
+@use '@/assets/styles/variables' as *;
+
+.cardName {
+  display: grid;
+  align-items: center;
+  gap: $xxs;
+  .icon {
+    display: flex;
+    align-items: center;
+    height: 18px;
+    svg {
+      height: 18px;
+      width: 18px;
+      margin-right: $xxs;
+    }
+    .iconText {
+      font-size: $overlineSize;
+      font-weight: 800;
+      color: $darkGray;
+      letter-spacing: 10%;
+      text-transform: uppercase;
+    }
+  }
+  .projectTitle {
+    font-size: $subOneSize;
+    font-weight: 800;
+  }
+  .itemCount {
+    font-size: $bodyTwoSize;
+  }
+}

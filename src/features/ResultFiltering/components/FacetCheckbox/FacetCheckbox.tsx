@@ -1,8 +1,8 @@
 import { useState, useEffect, FC, ReactNode } from "react";
 import DefaultIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
-import styles from './Checkbox.module.scss';
+import styles from './FacetCheckbox.module.scss';
 
-interface CheckboxProps {
+interface FacetCheckboxProps {
   checked?: boolean;
   checkedClassName?: string;
   children?: ReactNode;
@@ -15,7 +15,7 @@ interface CheckboxProps {
   value?: string | number | undefined;
 }
 
-const Checkbox: FC<CheckboxProps> = ({
+const FacetCheckbox: FC<FacetCheckboxProps> = ({
   checked,
   checkedClassName = "",
   children,
@@ -42,7 +42,7 @@ const Checkbox: FC<CheckboxProps> = ({
 
   return (
 
-    <label className={`${styles.checkbox} ${isCheckedClass} ${className}`} title={title} aria-label={title}>
+    <label className={`${styles.facetCheckbox} ${isCheckedClass} ${className}`} title={title} aria-label={title}>
       {
         labelLeft 
         ?
@@ -63,4 +63,4 @@ const Checkbox: FC<CheckboxProps> = ({
   );
 }
 
-export default Checkbox;
+export default FacetCheckbox;
