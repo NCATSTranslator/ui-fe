@@ -91,11 +91,11 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
         <>
           {
             (data.showDisclaimer) &&
-            <p className={styles.refreshDisclaimer}>Syncing may update and reorder previously viewed results.</p>
+            <p className={`${styles.refreshDisclaimer} ${isResultsAvailable && styles.active}`}>Syncing may update and reorder previously viewed results.</p>
           }
-          <Button 
-            handleClick={data.handleResultsRefresh} 
-            className={`${buttonClassName} ${styles.loadingButton} ${styles.active}`}
+          <Button
+            handleClick={data.handleResultsRefresh}
+            className={`${buttonClassName} ${styles.loadingButton} ${isResultsAvailable && styles.active}`}
             dataTooltipId="sync-new-results-button"
             iconLeft={<ResultsAvailableIcon/>}
             >
