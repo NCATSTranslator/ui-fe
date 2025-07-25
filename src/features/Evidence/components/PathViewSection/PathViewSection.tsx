@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import { FC } from 'react';
-import Button from '@/features/Core/components/Button/Button';
-=======
 import { FC, RefObject } from 'react';
-import Button from '@/features/Common/components/Button/Button';
->>>>>>> develop
+import Button from '@/features/Core/components/Button/Button';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { Path, Result, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';

@@ -104,13 +104,8 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
         </>
       }
       {
-<<<<<<< HEAD
-        (!data.isError && !resultsAvailable && !data.isFetchingARAStatus && !data.isFetchingResults) &&
-        <Button iconOnly handleClick={() => data.setIsActive?.(false)} variant="secondary"><CloseIcon/></Button>
-=======
         (displayCloseButton) &&
-        <Button iconOnly handleClick={() => data.setIsActive?.(false)} isSecondary><CloseIcon/></Button>
->>>>>>> develop
+        <Button iconOnly handleClick={() => data.setIsActive?.(false)} variant="secondary"><CloseIcon/></Button>
       }
       </div>
     </div>

@@ -13,14 +13,8 @@ import { LastViewedPathIDContextType } from '@/features/ResultItem/hooks/resultH
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
-<<<<<<< HEAD
-import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
 import Button from '@/features/Core/components/Button/Button';
-import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
-=======
-import Button from '@/features/Common/components/Button/Button';
 import PathContainer from '@/features/ResultItem/components/PathContainer/PathContainer';
->>>>>>> develop
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 export const SupportPathDepthContext = createContext<number>(1);
