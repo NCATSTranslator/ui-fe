@@ -872,6 +872,7 @@ const ResultList = () => {
                               scoreWeights={scoreWeights}
                               showHiddenPaths={showHiddenPaths}
                               setShowHiddenPaths={setShowHiddenPaths}
+                              updateUserSaves={setUserSaves}
                             />
                           )
                         })
