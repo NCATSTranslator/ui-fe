@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import styles from '@/features/Projects/components/ProjectListInner/ProjectListInner.module.scss';
 import ProjectListHeader from '@/features/Projects/components/ProjectListHeader/ProjectListHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
@@ -8,13 +8,17 @@ import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import ProjectsTableHeader from '@/features/Projects/components/TableHeader/ProjectsTableHeader/ProjectsTableHeader';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
 import { useUserProjects, useUserQueryStatus } from '@/features/Projects/hooks/customHooks';
-import { Project, QueryStatusObject } from '@/features/Projects/types/projects.d';
+import { Project, QueryStatusObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { sortProjects, sortQueries } from '@/features/Projects/utils/sortingFunctions';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 
 export const ProjectListInner = () => {
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
   const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueryStatus();
   const [activeTab, setActiveTab] = useState<string>('Projects');
+  
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   const activeProjects = projects.filter((project: Project) => !project.deleted);
   const deletedProjects = projects.filter((project: Project) => project.deleted);
@@ -24,12 +28,24 @@ export const ProjectListInner = () => {
   const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<QueryStatusObject[]>([]);
 
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
   const handleTabSelection = (tabName: string) => {
     setActiveTab(tabName);
   };
 
   const isLoading = projectsLoading || queriesLoading;
   const hasError = projectsError || queriesError;
+
+  const sortedActiveProjects = useMemo(() => sortProjects(activeProjects, sortField, sortDirection), [activeProjects, sortField, sortDirection]);
+  const sortedActiveQueries = useMemo(() => sortQueries(activeQueries, sortField, sortDirection), [activeQueries, sortField, sortDirection]);
 
   if (isLoading) {
     return (
@@ -66,6 +82,9 @@ export const ProjectListInner = () => {
               selectedProjects={selectedProjects}
               setSelectedProjects={setSelectedProjects}
               activeProjects={activeProjects}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={handleSort}
             />
           )}
           <div className={styles.projectGrid}>
@@ -74,7 +93,7 @@ export const ProjectListInner = () => {
                 <p>No projects found. Create your first project to get started.</p>
               </div>
             ) : (
-              activeProjects.map((project: Project) => (
+              sortedActiveProjects.map((project: Project) => (
                 <ProjectCard 
                   key={project.id}
                   queries={queries}
@@ -93,6 +112,9 @@ export const ProjectListInner = () => {
                 selectedQueries={selectedQueries}
                 setSelectedQueries={setSelectedQueries}
                 activeQueries={activeQueries}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
               />
             )
           }
@@ -102,7 +124,7 @@ export const ProjectListInner = () => {
                 <p>No queries found. Your saved queries will appear here.</p>
               </div>
             ) : (
-              activeQueries.map((query: QueryStatusObject) => (
+              sortedActiveQueries.map((query: QueryStatusObject) => (
                 <QueryCard 
                   key={query.data.qid}
                   query={query}

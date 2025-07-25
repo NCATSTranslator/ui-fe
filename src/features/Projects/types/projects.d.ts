@@ -47,6 +47,10 @@ export interface UserQueryObject {
   deleted:      boolean
 }
 
+// Sorting types
+export type SortField = 'name' | 'lastSeen' | 'dateAdded';
+export type SortDirection = 'asc' | 'desc';
+
 export const isProject = (obj: unknown): obj is Project => {
   return (
     typeof obj === 'object' &&
