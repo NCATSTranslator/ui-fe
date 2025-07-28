@@ -137,7 +137,7 @@ export const useFormattedProjects = (
       
       // Calculate total bookmark count
       const bookmark_count = projectQueries.reduce(
-        (sum, q) => sum + q.data.bookmark_count, 
+        (sum, q) => sum + q.data.bookmark_ids.length, 
         0
       );
       

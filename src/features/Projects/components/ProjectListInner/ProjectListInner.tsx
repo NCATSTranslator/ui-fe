@@ -83,6 +83,7 @@ export const ProjectListInner = () => {
   return (
     <div className={styles.projectList}>
       <ProjectListHeader
+        searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
       />
       {

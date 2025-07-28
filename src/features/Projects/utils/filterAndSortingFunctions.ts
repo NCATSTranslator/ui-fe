@@ -84,8 +84,8 @@ export const sortQueries = (queries: QueryStatusObject[], sortField: SortField, 
         bValue = b.data.time_created;
         break;
       case 'bookmarks':
-        aValue = a.data.bookmark_count;
-        bValue = b.data.bookmark_count;
+        aValue = a.data.bookmark_ids.length;
+        bValue = b.data.bookmark_ids.length;
         break;
       case 'notes':
         aValue = a.data.note_count;

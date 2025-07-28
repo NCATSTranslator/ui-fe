@@ -32,7 +32,7 @@ export interface QueryStatusObject {
     qid: string,
     aras: string[],
     title: string,
-    bookmark_count: number,
+    bookmark_ids: string[],
     note_count: number,
     time_created: Date, 
     time_updated: Date, 
@@ -93,7 +93,7 @@ export const isQueryStatusArray = (obj: unknown): obj is QueryStatusObject[] => 
     'qid' in item.data &&
     'aras' in item.data &&
     'title' in item.data &&
-    'bookmark_count' in item.data &&
+    'bookmark_ids' in item.data &&
     'note_count' in item.data &&
     'time_created' in item.data &&
     'time_updated' in item.data &&

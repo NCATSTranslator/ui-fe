@@ -7,11 +7,13 @@ import TextInput from '@/features/Core/components/TextInput/TextInput';
 import Search from '@/assets/icons/buttons/search.svg?react';
 import Close from '@/assets/icons/buttons/Close/Close.svg?react';
 
-interface ProjectListHeaderProps {  
+interface ProjectListHeaderProps {
+  searchTerm?: string;
   setSearchTerm?: (searchTerm: string) => void;
 }
 
 const ProjectListHeader: FC<ProjectListHeaderProps> = ({
+  searchTerm = "",
   setSearchTerm
 }) => {
 
@@ -45,10 +47,10 @@ const ProjectListHeader: FC<ProjectListHeaderProps> = ({
         <TextInput
           placeholder={placeholderText}
           iconLeft={<Search />}
-          iconRight={<Close />}
+          iconRight={searchTerm.length > 0 ? <Close /> : null}
           handleChange={handleSearch}
           className={styles.searchInput}
-          iconRightClickToReset={true}
+          iconRightClickToReset={searchTerm.length > 0}
         />
       </div>
     </div>

@@ -1,10 +1,19 @@
 @use '@/assets/styles/variables' as *;
 
-.queryCard {
+.dataCard {
   background-color: $white;
   &:hover {
     background-color: $whiteHover;
   }
+  
+  .column {
+    font-size: $captionSize;
+    color: $darkGray;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
   .checkboxColumn {
     display: flex;
     justify-content: center;
@@ -17,36 +26,33 @@
       padding: $xxs;
     }
   }
+  
   .nameColumn {
-    .queryTitle {
+    .queryTitle,
+    .projectTitle {
       font-weight: 500;
       color: $black;
       font-size: 14px;
     }
   }
   
-  .dateCreatedColumn,
-  .lastSeenColumn {
-    text-align: center;
-    font-size: 12px;
-    color: $black;
-  }
-  
   .bookmarksColumn,
   .notesColumn {
-    text-align: center;
-    font-size: 12px;
-    color: $black;
-  }
-  
-  .statusColumn {
-    display: flex;
-    justify-content: center;
+    gap: 2px;
+    svg {
+      path {
+        fill: $darkGray;
+      }
+    }
   }
   
   .actionsColumn {
-    display: flex;
     gap: 4px;
-    justify-content: flex-end;
-  } 
-}
+    button {
+      background-color: $white;
+      &:hover {
+        background-color: $lightGray;
+      }
+    }
+  }
+} 
