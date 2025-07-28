@@ -2,11 +2,13 @@ import { FC } from 'react';
 import styles from './CardName.module.scss';
 import { joinClasses } from '@/features/Common/utils/utilities';
 import Folder from '@/assets/icons/projects/folder.svg?react';
+import Highlighter from 'react-highlight-words';
 
 interface CardNameProps {
   className?: string;
   itemCount?: number;
   name: string;
+  searchTerm?: string;
   type: 'project' | 'smartQuery' | 'pathfinderQuery';
 }
 
@@ -14,6 +16,7 @@ const CardName: FC<CardNameProps> = ({
   className,
   itemCount = 0,
   name,
+  searchTerm,
   type,
 }) => {
   const icon = type === 'project' ? <Folder /> : null;
@@ -27,7 +30,14 @@ const CardName: FC<CardNameProps> = ({
         { type === 'smartQuery' && <span className={styles.iconText}>SMART QUERY</span>}
         { type === 'pathfinderQuery' && <span className={styles.iconText}>PATHFINDER QUERY</span>}
       </div>
-      <span className={styles.projectTitle}>{name}</span>
+      <span className={styles.projectTitle}>
+        <Highlighter
+          highlightClassName="highlight"
+          searchWords={searchTerm ? [searchTerm] : []}
+          autoEscape={true}
+          textToHighlight={name}
+        />
+      </span>
       { type === 'project' && 
         <span className={styles.itemCount}>{itemCount > 0 ? itemCount : '--' } Quer{itemCount === 1 ? 'y' : 'ies'}</span>
       }

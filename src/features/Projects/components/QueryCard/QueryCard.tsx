@@ -12,12 +12,14 @@ import CardName from '../CardName/CardName';
 
 interface QueryCardProps {
   query: QueryStatusObject;
+  searchTerm?: string;
   setSelectedQueries: Dispatch<SetStateAction<QueryStatusObject[]>>;
   selectedQueries?: QueryStatusObject[];
 }
 
 const QueryCard = ({ 
   query,
+  searchTerm,
   setSelectedQueries,
   selectedQueries = []
 }: QueryCardProps) => {
@@ -44,6 +46,7 @@ const QueryCard = ({
           name={title}
           // TODO: ask Gus to add result count to data object
           //itemCount={query.data.result_count}
+          searchTerm={searchTerm}
         />
       </div>
       <div className={styles.actionsColumn}>

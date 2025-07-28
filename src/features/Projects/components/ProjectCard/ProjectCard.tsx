@@ -14,6 +14,7 @@ import CardName from '../CardName/CardName';
 interface ProjectCardProps {
   queries: QueryStatusObject[];
   project: Project;
+  searchTerm?: string;
   setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
   selectedProjects: Project[];
 }
@@ -21,6 +22,7 @@ interface ProjectCardProps {
 const ProjectCard = ({ 
   queries,
   project,
+  searchTerm,
   setSelectedProjects,
   selectedProjects
 }: ProjectCardProps) => {
@@ -46,6 +48,7 @@ const ProjectCard = ({
           type="project"
           name={project.title}
           itemCount={project.qids.length}
+          searchTerm={searchTerm}
         />
       </div>
       <div className={styles.actionsColumn}>

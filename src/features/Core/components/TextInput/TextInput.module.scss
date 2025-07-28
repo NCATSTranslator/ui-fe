@@ -86,5 +86,12 @@
   }
   .iconContainerRight {
     right: 10px;
+    &.clickable {
+      cursor: pointer;
+      transition: $defaultAnim;
+      &:hover {
+        opacity: 0.7;
+      }
+    }
   }
 }

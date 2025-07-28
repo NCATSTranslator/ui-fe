@@ -1,9 +1,9 @@
-import { ChangeEvent, FC, KeyboardEvent, ReactNode } from 'react';
+import { ChangeEvent, FC, KeyboardEvent, ReactNode, useRef } from 'react';
 import styles from "./TextInput.module.scss";
 import { joinClasses } from '@/features/Common/utils/utilities';
 import InputLabel from '@/features/Core/components/InputLabel/InputLabel';
 
-type TextInputProps = {
+interface TextInputProps {
   label?: string;
   subtitle?: string;
   value?: string;
@@ -19,7 +19,8 @@ type TextInputProps = {
   handleKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => void;
   testId?: string;
   disabled?: boolean;
-};
+  iconRightClickToReset?: boolean;
+}
 
 const TextInput: FC<TextInputProps> = ({
   label,
@@ -36,8 +37,12 @@ const TextInput: FC<TextInputProps> = ({
   maxLength = -1,
   handleKeyDown = () => {},
   testId,
-  disabled = false
+  disabled = false,
+  iconRightClickToReset
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
   const inputStyle = joinClasses(
     'text-input',
     styles.textInput,
@@ -47,6 +52,22 @@ const TextInput: FC<TextInputProps> = ({
     error && styles.error,
     className
   );
+
+  const handleIconRightClick = () => {
+    if (iconRightClickToReset && !disabled) {
+      // Call the parent's handleChange to update their state
+      handleChange('');
+      
+      // Also directly reset the input/textarea as a fallback
+      // This ensures the input resets even if the parent doesn't update immediately, or isn't controlling the input value directly
+      const currentInput = inputRef.current || textareaRef.current;
+      if (currentInput) {
+        currentInput.value = '';
+        // Trigger the change event to ensure React knows the value changed
+        currentInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+  };
 
   const commonProps = {
     placeholder: placeholder,
@@ -68,16 +89,28 @@ const TextInput: FC<TextInputProps> = ({
       {error && <span className={styles.errorText}>{errorText}</span>}
       <label className={inputStyle}>
         {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
-        {iconRight && <div className={styles.iconContainerRight}>{iconRight}</div>}
+        {iconRight && (
+          <div 
+            className={joinClasses(
+              styles.iconContainerRight,
+              iconRightClickToReset && styles.clickable
+            )}
+            onClick={handleIconRightClick}
+          >
+            {iconRight}
+          </div>
+        )}
         {rows && rows > 1 ? (
           <textarea
             {...commonProps}
             rows={rows}
+            ref={textareaRef}
           />
         ) : (
           <input
             {...commonProps}
             type="text"
+            ref={inputRef}
           />
         )}
       </label>

@@ -48,6 +48,17 @@ export const sortProjects = (projects: Project[], sortField: SortField, sortDire
 };
 
 /**
+ * Filters and sorts projects based on the specified search terms
+ * @param {Project[]} projects - The projects to format
+ * @param {string} searchTerm - The search term to filter by
+ * @returns {Project[]} The formatted projects
+ */
+export const filterAndSortProjects = (projects: Project[], sortField: SortField, sortDirection: SortDirection, searchTerm: string): Project[] => {
+  const filteredProjects = projects.filter(project => project.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  return sortProjects(filteredProjects, sortField, sortDirection);
+};
+
+/**
  * Sorts queries based on the specified field and direction
  * @param {QueryStatusObject[]} queries - The queries to sort
  * @param {SortField} sortField - The field to sort by
@@ -92,4 +103,15 @@ export const sortQueries = (queries: QueryStatusObject[], sortField: SortField, 
     if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
+};
+
+/**
+ * Filters and sorts queries based on the specified search terms
+ * @param {QueryStatusObject[]} queries - The queries to format
+ * @param {string} searchTerm - The search term to filter by
+ * @returns {QueryStatusObject[]} The formatted queries
+ */
+export const filterAndSortQueries = (queries: QueryStatusObject[], sortField: SortField, sortDirection: SortDirection, searchTerm: string): QueryStatusObject[] => {
+  const filteredQueries = queries.filter(query => query.data.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  return sortQueries(filteredQueries, sortField, sortDirection);
 };

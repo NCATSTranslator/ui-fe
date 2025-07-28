@@ -9,7 +9,7 @@ import ProjectsTableHeader from '@/features/Projects/components/TableHeader/Proj
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
 import { useUserProjects, useUserQueryStatus } from '@/features/Projects/hooks/customHooks';
 import { ProjectRaw, QueryStatusObject, SortField, SortDirection, Project } from '@/features/Projects/types/projects.d';
-import { sortProjects, sortQueries } from '@/features/Projects/utils/sortingFunctions';
+import { filterAndSortProjects, filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 
@@ -48,9 +48,17 @@ export const ProjectListInner = () => {
 
   const isLoading = projectsLoading || queriesLoading;
   const hasError = projectsError || queriesError;
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const sortedActiveProjects = useMemo(() => sortProjects(activeFormattedProjects, sortField, sortDirection), [activeFormattedProjects, sortField, sortDirection]);
-  const sortedActiveQueries = useMemo(() => sortQueries(activeQueries, sortField, sortDirection), [activeQueries, sortField, sortDirection]);
+  const sortedActiveProjects = useMemo(() => filterAndSortProjects(activeFormattedProjects, sortField, sortDirection, searchTerm), [activeFormattedProjects, sortField, sortDirection, searchTerm]);
+  const sortedActiveQueries = useMemo(() => filterAndSortQueries(activeQueries, sortField, sortDirection, searchTerm), [activeQueries, sortField, sortDirection, searchTerm]);
+
+  const sortedDeletedProjects = useMemo(() => filterAndSortProjects(deletedFormattedProjects, sortField, sortDirection, searchTerm), [deletedFormattedProjects, sortField, sortDirection, searchTerm]);
+  const sortedDeletedQueries = useMemo(() => filterAndSortQueries(deletedQueries, sortField, sortDirection, searchTerm), [deletedQueries, sortField, sortDirection, searchTerm]);
+
+  const hideProjectsTab = searchTerm.length > 0 && sortedActiveProjects.length === 0;
+  const hideQueriesTab = searchTerm.length > 0 && sortedActiveQueries.length === 0;
+  const hideTrashTab = searchTerm.length > 0 && sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0;
 
   if (isLoading) {
     return (
@@ -74,112 +82,160 @@ export const ProjectListInner = () => {
 
   return (
     <div className={styles.projectList}>
-      <ProjectListHeader />
-      <Tabs 
-        isOpen={true}
-        handleTabSelection={handleTabSelection}
-        defaultActiveTab="Projects"
-        className={styles.projectTabs}
-      >
-        <Tab heading="Projects" className={styles.projectTabContent}>
-          {activeProjects.length > 0 && (
-            <ProjectsTableHeader 
-              selectedProjects={selectedProjects}
-              setSelectedProjects={setSelectedProjects}
-              activeProjects={activeFormattedProjects}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onSort={handleSort}
-            />
-          )}
-          <div className={styles.projectGrid}>
-            {activeProjects.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p>No projects found. Create your first project to get started.</p>
-              </div>
-            ) : (
-              sortedActiveProjects.map((project: Project) => (
-                <ProjectCard 
-                  key={project.id}
-                  queries={queries}
-                  project={project}
-                  setSelectedProjects={setSelectedProjects}
-                  selectedProjects={selectedProjects}
-                />
-              ))
-            )}
+      <ProjectListHeader
+        setSearchTerm={setSearchTerm}
+      />
+      {
+        hideProjectsTab && hideQueriesTab && hideTrashTab
+        ?
+          <div className={styles.emptyState}>
+            <p>No Matches Found</p>
           </div>
-        </Tab>
-        <Tab heading="Queries" className={styles.projectTabContent}>
-          {
-            activeQueries.length > 0 && (
-              <QueriesTableHeader 
-                selectedQueries={selectedQueries}
-                setSelectedQueries={setSelectedQueries}
-                activeQueries={activeQueries}
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-            )
-          }
-          <div className={styles.projectGrid}>
-            {activeQueries.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p>No queries found. Your saved queries will appear here.</p>
-              </div>
-            ) : (
-              sortedActiveQueries.map((query: QueryStatusObject) => (
-                <QueryCard 
-                  key={query.data.qid}
-                  query={query}
-                  setSelectedQueries={setSelectedQueries}
-                  selectedQueries={selectedQueries}
-                />
-              ))
-            )}
-          </div>
-        </Tab>
-        <Tab heading="Trash" className={styles.projectTabContent}>
-          <div className={styles.projectGrid}>
-            {deletedProjects.length === 0 && deletedQueries.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p>No deleted items found.</p>
-              </div>
-            ) : (
-              <>
-                {deletedProjects.length > 0 && (
-                  <div className={styles.deletedSection}>
-                    <h4>Deleted Projects</h4>
-                    {deletedFormattedProjects.map((project: Project) => (
-                      <ProjectCard 
-                        key={project.id}
-                        queries={queries}
-                        project={project}
-                        setSelectedProjects={setSelectedProjects}
-                        selectedProjects={selectedProjects}
-                      />
-                    ))}
+        :  <Tabs 
+            isOpen={true}
+            handleTabSelection={handleTabSelection}
+            defaultActiveTab="Projects"
+            className={styles.projectTabs}
+          >
+            {
+              !hideProjectsTab
+              ?
+                <Tab heading="Projects" className={styles.projectTabContent}>
+                  {activeProjects.length > 0 && (
+                    <ProjectsTableHeader 
+                      selectedProjects={selectedProjects}
+                      setSelectedProjects={setSelectedProjects}
+                      activeProjects={activeFormattedProjects}
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                  )}
+                  <div className={styles.projectGrid}>
+                    {sortedActiveProjects.length === 0 ? (
+                      <div className={styles.emptyState}>
+                        {
+                          searchTerm.length > 0 
+                          ? 
+                            (
+                              <p>No projects found matching your search.</p>
+                            )
+                          :
+                            (
+                              <p>No projects found. Create your first project to get started.</p>
+                            )
+                        }
+                      </div>
+                    ) : (
+                      sortedActiveProjects.map((project: Project) => (
+                        <ProjectCard 
+                          key={project.id}
+                          queries={queries}
+                          project={project}
+                          searchTerm={searchTerm}
+                          setSelectedProjects={setSelectedProjects}
+                          selectedProjects={selectedProjects}
+                        />
+                      ))
+                    )}
                   </div>
-                )}
-                {deletedQueries.length > 0 && (
-                  <div className={styles.deletedSection}>
-                    <h4>Deleted Queries</h4>
-                    {deletedQueries.map((query: QueryStatusObject) => (
-                      <QueryCard 
-                        key={query.data.qid}
-                        query={query}
-                        setSelectedQueries={setSelectedQueries}
+                </Tab>
+              : null
+            }
+            {
+              !hideQueriesTab
+              ?
+                <Tab heading="Queries" className={styles.projectTabContent}>
+                  {
+                    activeQueries.length > 0 && (
+                      <QueriesTableHeader 
+                        activeQueries={activeQueries}
+                        onSort={handleSort}
                         selectedQueries={selectedQueries}
+                        setSelectedQueries={setSelectedQueries}
+                        sortField={sortField}
+                        sortDirection={sortDirection}
                       />
-                    ))}
+                    )
+                  }
+                  <div className={styles.projectGrid}>
+                    {sortedActiveQueries.length === 0 ? (
+                      <div className={styles.emptyState}>
+                        {
+                          searchTerm.length > 0 
+                          ? 
+                            (
+                              <p>No queries found matching your search.</p>
+                            )
+                          :
+                            (
+                              <p>No queries found. Your saved queries will appear here.</p>
+                            )
+                        }
+                      </div>
+                    ) : (
+                      sortedActiveQueries.map((query: QueryStatusObject) => (
+                        <QueryCard 
+                          key={query.data.qid}
+                          query={query}
+                          searchTerm={searchTerm}
+                          setSelectedQueries={setSelectedQueries}
+                          selectedQueries={selectedQueries}
+                        />
+                      ))
+                    )}
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        </Tab>
-      </Tabs>
+                </Tab>
+              : null
+            }
+            {
+              !hideTrashTab
+              ?
+                <Tab heading="Trash" className={styles.projectTabContent}>
+                  <div className={styles.projectGrid}>
+                    {sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0 ? (
+                      <div className={styles.emptyState}>
+                        <p>No deleted items found.</p>
+                      </div>
+                    ) : (
+                      <>
+                        {sortedDeletedProjects.length > 0 && (
+                          <div className={styles.deletedSection}>
+                            <h4>Deleted Projects</h4>
+                            {deletedFormattedProjects.map((project: Project) => (
+                              <ProjectCard 
+                                key={project.id}
+                                queries={queries}
+                                project={project}
+                                searchTerm={searchTerm}
+                                setSelectedProjects={setSelectedProjects}
+                                selectedProjects={selectedProjects}
+                              />
+                            ))}
+                          </div>
+                        )}
+                        {sortedDeletedQueries.length > 0 && (
+                          <div className={styles.deletedSection}>
+                            <h4>Deleted Queries</h4>
+                            {deletedQueries.map((query: QueryStatusObject) => (
+                              <QueryCard 
+                                key={query.data.qid}
+                                query={query}
+                                searchTerm={searchTerm}
+                                setSelectedQueries={setSelectedQueries}
+                                selectedQueries={selectedQueries}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </Tab>
+              : null
+            }
+          </Tabs>
+      }
     </div>
   );
 };
