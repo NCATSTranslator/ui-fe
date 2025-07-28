@@ -3,6 +3,12 @@
 .textInputContainer {
   display: grid;
 }
+.errorBottom {
+  .errorText {
+    order: 100;
+    margin: $xs 0 0;
+  }
+}
 .errorText {
   display: flex;
   justify-content: flex-start;
@@ -11,10 +17,12 @@
   color: $red;
   margin: 0 0 $xs;
   font-size: $captionSize;
-  &:before {
-    height: $m;
+  svg {
     width: $m;
-    content: url('@/assets/icons/status/Alerts/Info.svg');
+    height: $m;
+    path {
+      fill: $red;
+    }
   }
 }
 .textInput {
@@ -30,6 +38,9 @@
     input, textarea {
       border-color: $red;
       background-color: $lightRed;
+      &::placeholder {
+        color: $red;
+      }
     }
   }
   input, textarea {

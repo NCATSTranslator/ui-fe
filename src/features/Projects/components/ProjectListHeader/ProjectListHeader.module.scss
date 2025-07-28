@@ -2,11 +2,52 @@
 
 .projectListHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: $m;
   margin-bottom: $m;
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
 
   .searchInput {
     width: 380px;
+  }
+
+  .editButtons {
+    display: flex;
+    gap: $s;
+    align-items: center;
+    .doneButton {
+      &:disabled {
+        svg path {
+          stroke: $midDarkGray;
+        }
+      }
+      svg path {
+        stroke: $white;
+        fill: transparent;
+      }
+    }
+  }
+
+  .editContainer {
+    display: flex;
+    flex-direction: column;
+    gap: $s;
+    min-width: 300px;
+    .projectNameInput {
+      margin: 0;
+    }
+    .editButtons {
+      display: flex;
+      gap: $xs;
+      align-items: center;
+      button {
+        flex: 1;
+      }
+    }
   }
 }

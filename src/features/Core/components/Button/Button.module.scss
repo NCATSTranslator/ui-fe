@@ -48,6 +48,11 @@
     background-color: $lightGray;
     color: $midDarkGray;
     cursor: default;
+    svg {
+      path {
+        stroke: $midDarkGray;
+      }
+    }
   }
   &.small {
     padding: $xxs $xs;

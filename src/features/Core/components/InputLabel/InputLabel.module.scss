@@ -16,4 +16,9 @@
     font-weight: 400;
     color: $darkGray;
   }
+  &.error {
+    .label, .subtitle {
+      color: $red;
+    }
+  }
 }

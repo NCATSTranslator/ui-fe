@@ -2,6 +2,7 @@ import { ChangeEvent, FC, KeyboardEvent, ReactNode, useRef } from 'react';
 import styles from "./TextInput.module.scss";
 import { joinClasses } from '@/features/Common/utils/utilities';
 import InputLabel from '@/features/Core/components/InputLabel/InputLabel';
+import Warning from '@/assets/icons/status/Alerts/Warning.svg?react';
 
 interface TextInputProps {
   label?: string;
@@ -10,6 +11,7 @@ interface TextInputProps {
   placeholder?: string;
   rows?: number;
   error?: boolean;
+  errorBottom?: boolean;
   errorText?: string;
   handleChange: (value: string) => void;
   className?: string;
@@ -29,6 +31,7 @@ const TextInput: FC<TextInputProps> = ({
   placeholder,
   rows,
   error = false,
+  errorBottom = false,
   errorText = "Error Message",
   handleChange,
   className = '',
@@ -42,6 +45,12 @@ const TextInput: FC<TextInputProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const containerStyle = joinClasses(
+    styles.textInputContainer,
+    error && styles.error,
+    errorBottom && styles.errorBottom
+  );
   
   const inputStyle = joinClasses(
     'text-input',
@@ -80,13 +89,17 @@ const TextInput: FC<TextInputProps> = ({
   };
 
   return (
-    <div className={styles.textInputContainer}>
+    <div className={containerStyle}>
       {
         (label || subtitle) && (
-          <InputLabel label={label} subtitle={subtitle} />
+          <InputLabel 
+            label={label}
+            subtitle={subtitle}
+            error={error}
+          />
         )
       }
-      {error && <span className={styles.errorText}>{errorText}</span>}
+      {error && <span className={styles.errorText}><Warning />{errorText}</span>}
       <label className={inputStyle}>
         {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
         {iconRight && (
