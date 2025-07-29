@@ -2,7 +2,7 @@ import { Result, ResultSet } from "@/features/ResultList/types/results";
 import { useQuery } from "@tanstack/react-query";
 import { resultToSummarySpec } from "@/features/ResultItem/utils/resultSummaryFunctions";
 
-const API_URL = `https://transltr-bma-ui-dev.ncats.io/api/summary`;
+const API_URL = `https://transltr-bma-ui-dev.ncats.io/summarizer/summary`;
 
 export const useResultSummary = (resultSet: ResultSet | null, result: Result, diseaseId: string, diseaseName: string, diseaseDescription: string) => {
   const { data, isLoading, error, refetch } = useQuery({
