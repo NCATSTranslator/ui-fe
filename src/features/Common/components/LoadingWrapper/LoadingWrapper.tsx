@@ -24,6 +24,8 @@ const LoadingWrapper: FC<LoadingWrapperProps> = ({
     let timer: Timeout | null = null;
     if (!loading) {
       timer = setTimeout(() => {setShowContent(true); setIsLoading(false);}, showDelay);
+    } else {
+      setIsLoading(true);
     }
     return () => {
       if(!!timer)
