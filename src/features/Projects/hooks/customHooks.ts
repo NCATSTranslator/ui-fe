@@ -12,7 +12,7 @@ export const useUserProjects = () => {
     queryKey: ['userProjects'],
     queryFn: () => getUserProjects(),
     staleTime: 5 * 60 * 1000, // 5m
-    retry: 3,
+    retry: false,
   });
 };
 
@@ -24,7 +24,7 @@ export const useUserQueryStatus = () => {
     queryKey: ['userQueryStatus'],
     queryFn: () => getUserQueryStatus(),
     staleTime: 30 * 1000, // 30s
-    retry: 3,
+    retry: false,
   });
 };
 

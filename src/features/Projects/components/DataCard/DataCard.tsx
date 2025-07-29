@@ -62,10 +62,8 @@ const DataCard = <T,>({
 
   const handleSelectItem = () => {
     setSelectedItems((prevItems) => {
-      if (prevItems.includes(item)) {
-        return prevItems.filter((i) => getItemId(i) !== getItemId(item));
-      }
-      return [...prevItems, item];
+      const isSelected = prevItems.some((i) => getItemId(i) === getItemId(item));
+      return isSelected ? prevItems.filter((i) => getItemId(i) !== getItemId(item)) : [...prevItems, item];
     });
   };
 
@@ -84,7 +82,7 @@ const DataCard = <T,>({
   return (
     <CardWrapper className={`${styles.dataCard} ${className || ''}`}>
       <div className={`${styles.checkboxColumn} ${styles.column}`}>
-        <Checkbox checked={selectedItems.includes(item)} handleClick={handleSelectItem} />
+        <Checkbox checked={selectedItems.some((i) => getItemId(i) === getItemId(item))} handleClick={handleSelectItem} />
       </div>
       <div className={`${styles.nameColumn} ${styles.column}`}>
         <CardName 

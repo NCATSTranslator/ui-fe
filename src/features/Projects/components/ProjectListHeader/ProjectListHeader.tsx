@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react';
+import { FC, FormEvent, useCallback, useState } from 'react';
 import { debounce } from 'lodash';
 import Button from '@/features/Core/components/Button/Button';
 import styles from './ProjectListHeader.module.scss';
@@ -38,6 +38,11 @@ const ProjectListHeader: FC<ProjectListHeaderProps> = ({
       debouncedSearch(e);
     else
       setSearchTerm?.('');
+  }
+
+  const handleProjectSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleCreateNewClick();
   }
 
   const handleCreateNewClick = () => {
@@ -140,17 +145,19 @@ const ProjectListHeader: FC<ProjectListHeaderProps> = ({
       {
         isEditing && (
           <div className={styles.editContainer}>
-            <TextInput
-              label="Project Name"
-              value={projectName}
-              handleChange={handleProjectNameChange}
-              error={!!projectNameError}
-              errorBottom
-              errorText={projectNameError}
-              className={styles.projectNameInput}
-              disabled={createProjectMutation.isPending}
-              placeholder="Unnamed Project"
-            />
+            <form onSubmit={handleProjectSubmit}>
+              <TextInput
+                label="Project Name"
+                value={projectName}
+                handleChange={handleProjectNameChange}
+                error={!!projectNameError}
+                errorBottom
+                errorText={projectNameError}
+                className={styles.projectNameInput}
+                disabled={createProjectMutation.isPending}
+                placeholder="Unnamed Project"
+              />
+            </form>
           </div>
         )
       }

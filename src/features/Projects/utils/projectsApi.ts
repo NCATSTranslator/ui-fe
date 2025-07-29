@@ -50,7 +50,7 @@ export const createProject = async (
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<ProjectRaw> => {
-  const url = `${API_PATH_PREFIX}/users/me/project`;
+  const url = `${API_PATH_PREFIX}/users/me/projects`;
   
   return fetchWithErrorHandling<ProjectRaw>(
     () => post(url, projectData),

@@ -104,9 +104,9 @@ export const ProjectListInner = () => {
                 <Tab heading="Projects" className={styles.projectTabContent}>
                   {activeProjects.length > 0 && (
                     <ProjectsTableHeader 
+                      activeProjects={sortedActiveProjects}
                       selectedProjects={selectedProjects}
                       setSelectedProjects={setSelectedProjects}
-                      activeProjects={activeFormattedProjects}
                       sortField={sortField}
                       sortDirection={sortDirection}
                       onSort={handleSort}
@@ -150,7 +150,7 @@ export const ProjectListInner = () => {
                   {
                     activeQueries.length > 0 && (
                       <QueriesTableHeader 
-                        activeQueries={activeQueries}
+                        activeQueries={sortedActiveQueries}
                         onSort={handleSort}
                         selectedQueries={selectedQueries}
                         setSelectedQueries={setSelectedQueries}

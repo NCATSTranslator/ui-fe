@@ -39,10 +39,7 @@ const CardName: FC<CardNameProps> = ({
         />
       </span>
       { type === 'project' && 
-        <span className={styles.itemCount}>{itemCount > 0 ? itemCount : '--' } Quer{itemCount === 1 ? 'y' : 'ies'}</span>
-      }
-      { (type === 'smartQuery' || type === 'pathfinderQuery') && 
-        <span className={styles.itemCount}>{itemCount > 0 ? itemCount : '--' } Result{itemCount === 1 ? '' : 's'}</span>
+        <span className={styles.itemCount}>{itemCount > 0 ? itemCount : '0' } Quer{itemCount === 1 ? 'y' : 'ies'}</span>
       }
     </div>
   )
