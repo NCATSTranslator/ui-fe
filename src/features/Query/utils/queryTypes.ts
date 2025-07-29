@@ -1,7 +1,7 @@
 import { defaultQueryFilterFactory, drugTreatsQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
 import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
-import { QueryType } from '@/features/Query/types/querySubmission';
+import { QueryType, QueryItem, AutocompleteItem } from '@/features/Query/types/querySubmission';
 
 export const queryTypes: QueryType[] = [
   {
@@ -90,3 +90,30 @@ export const queryTypes: QueryType[] = [
     iconString: 'genedown'
   }
 ]
+
+export const generatePathfinderQuestionText = (labelOne: string, labelTwo: string, constraintText?: string) => {
+  if(!labelOne || !labelTwo) {
+    return '';
+  }
+  if(!!constraintText) {
+    return `What paths begin with ${labelOne} and end with ${labelTwo} and include a ${constraintText}?`;
+  } else {
+    return `What paths begin with ${labelOne} and end with ${labelTwo}?`;
+  }
+}
+
+export const generateSmartQueryQuestionText = (label: string, item: AutocompleteItem) => {
+  const resultsPaneQuestionText = label
+    .replaceAll("a disease?", "")
+    .replaceAll("a chemical?", "")
+    .replaceAll("a gene?", "");
+  return `${resultsPaneQuestionText} ${item.label}?`;
+}
+export const getQueryTitle = (type: 'smart' | 'pathfinder', queryType: QueryType | null, itemOne: AutocompleteItem, itemTwo?: AutocompleteItem, constraintText?: string) => {
+  if(type === 'smart' && !!queryType) {
+    return generateSmartQueryQuestionText(queryType.label, itemOne);
+  } else if(type === 'pathfinder') {
+    return generatePathfinderQuestionText(itemOne?.label || '', itemTwo?.label || '', constraintText) || 'New Pathfinder Query';
+  }
+  return '';
+}

@@ -6,14 +6,7 @@ import { generateEntityLink } from '@/features/Common/utils/utilities';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import styles from './QueryResultsHeader.module.scss';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
-
-const generatePathfinderQuestionText = (labelOne: string, labelTwo: string, constraintText?: string) => {
-  if(!!constraintText) {
-    return `What paths begin with ${labelOne} and end with ${labelTwo} and include a ${constraintText}?`;
-  } else {
-    return `What paths begin with ${labelOne} and end with ${labelTwo}?`;
-  }
-}
+import { generatePathfinderQuestionText } from '@/features/Query/utils/queryTypes';
 
 const generatePathfinderSubheading = (idOne: string, labelOne: string, idTwo: string, labelTwo: string, constraintText?: string, searchedTermClassName?: string) => {
   const linkOne = generateEntityLink(idOne, `${styles.searchedTerm} ${searchedTermClassName || ""}`, () => labelOne, true);
