@@ -5,6 +5,7 @@ import { Timeout } from '@/features/Common/types/global';
 
 interface LoadingWrapperProps {
   loading?: boolean;
+  loadingText?: string;
   children?: ReactNode;
   className?: string;
   size?: 'small' | 'medium' | 'large';
@@ -12,6 +13,7 @@ interface LoadingWrapperProps {
 
 const LoadingWrapper: FC<LoadingWrapperProps> = ({ 
   loading = false,
+  loadingText,
   children,
   className = "",
   size = 'medium' 
@@ -37,6 +39,7 @@ const LoadingWrapper: FC<LoadingWrapperProps> = ({
     return (
       <div className={`${styles.loadingWrapper} ${styles[size]} ${className}`}>
         <LoadingIcon size={size} />
+        {loadingText && <div className={styles.loadingText}>{loadingText}</div>}
       </div>
     );
   }
@@ -45,6 +48,7 @@ const LoadingWrapper: FC<LoadingWrapperProps> = ({
     <div>
       <div className={`${styles.loadingContainer} ${isLoading ? styles.fadeEnterActive : styles.fadeExitActive}`}>
         <LoadingIcon size={size} />
+        {loadingText && <div className={styles.loadingText}>{loadingText}</div>}
       </div>
       <div className={`${styles.contentContainer} ${showContent ? styles.fadeEnterActive : styles.fadeExitActive} ${className}`}>
         {children}

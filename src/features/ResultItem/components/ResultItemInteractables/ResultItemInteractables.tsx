@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from "react";
+import { FC, ReactNode, useCallback, useState } from "react";
 import styles from './ResultItemInteractables.module.scss';
 import { Link } from 'react-router-dom';
 import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
@@ -68,7 +68,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
 
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [summary, setSummary] = useState<string | null>(null);
+  const [summary, setSummary] = useState<ReactNode | null>(null);
 
   const handleOutsideClick = useCallback(() => {
     if(isOpen)
@@ -77,7 +77,14 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
 
   const handleGenerateSummary = useCallback(() => {
     fetchSummary().then((res) => {
-      setSummary(res?.data?.response_text || null);
+      const responseText = res?.data?.response_text;
+      if (responseText) {
+        // Convert newlines to HTML line breaks
+        const htmlText = responseText.replace(/\n/g, '<br />');
+        setSummary(htmlText);
+      } else {
+        setSummary(null);
+      }
     });
     setIsModalOpen(true);
   }, [fetchSummary]);

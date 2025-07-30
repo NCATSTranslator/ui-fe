@@ -1,13 +1,13 @@
+import { FC, ReactNode } from "react";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import Modal from "@/features/Common/components/Modal/Modal";
-import { FC } from "react";
 import styles from "./ResultItemSummaryModal.module.scss";
 
 interface ResultItemSummaryModalProps {
   isOpen: boolean;
   isLoading: boolean;
   isError: boolean;
-  summary: string | null;
+  summary: ReactNode | null;
   onClose: () => void;
 }
 
@@ -24,7 +24,7 @@ const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
     >
-      <LoadingWrapper loading={isLoading} size="medium">
+      <LoadingWrapper loading={isLoading} size="medium" loadingText="Results may take up to a minute to generate.">
         <div className={styles.content}>
           <div className={styles.header}>
             <h4 className={styles.title}>Result Summary</h4>
@@ -36,9 +36,10 @@ const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({
                   <p>Error fetching summary</p>
                 </div>
               :
-                <div className={styles.summary}>
-                  {summary}
-                </div>
+                <div 
+                  className={styles.summary}
+                  dangerouslySetInnerHTML={{ __html: summary as string }}
+                />
           }
         </div>
       </LoadingWrapper>
