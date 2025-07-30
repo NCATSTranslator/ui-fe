@@ -11,7 +11,7 @@ interface LoadingWrapperProps {
   size?: 'small' | 'medium' | 'large';
 }
 
-const LoadingWrapper: FC<LoadingWrapperProps> = ({ 
+const LoadingWrapper: FC<LoadingWrapperProps> = ({
   loading = false,
   loadingText,
   children,
@@ -28,6 +28,7 @@ const LoadingWrapper: FC<LoadingWrapperProps> = ({
       timer = setTimeout(() => {setShowContent(true); setIsLoading(false);}, showDelay);
     } else {
       setIsLoading(true);
+      setShowContent(false);
     }
     return () => {
       if(!!timer)
@@ -50,7 +51,7 @@ const LoadingWrapper: FC<LoadingWrapperProps> = ({
         <LoadingIcon size={size} />
         {loadingText && <div className={styles.loadingText}>{loadingText}</div>}
       </div>
-      <div className={`${styles.contentContainer} ${showContent ? styles.fadeEnterActive : styles.fadeExitActive} ${className}`}>
+      <div className={`${styles.contentContainer} ${!isLoading && showContent ? styles.fadeEnterActive : styles.fadeExitActive} ${className}`}>
         {children}
       </div>
     </div>

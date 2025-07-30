@@ -22,6 +22,8 @@ export const useResultSummary = (resultSet: ResultSet | null, result: Result, di
     },
     enabled: false,
     retry: false,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   return { data, isLoading, error, refetch };

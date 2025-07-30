@@ -2,6 +2,7 @@ import { FC, ReactNode } from "react";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import Modal from "@/features/Common/components/Modal/Modal";
 import styles from "./ResultItemSummaryModal.module.scss";
+import Button from "@/features/Core/components/Button/Button";
 
 interface ResultItemSummaryModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface ResultItemSummaryModalProps {
   isError: boolean;
   summary: ReactNode | null;
   onClose: () => void;
+  onClearAndRefetchSummary: () => void;
 }
 
 const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({ 
@@ -17,6 +19,7 @@ const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({
   isError,
   summary,
   onClose,
+  onClearAndRefetchSummary,
 }) => {
 
   return (
@@ -25,22 +28,27 @@ const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({
       onClose={onClose}
     >
       <LoadingWrapper loading={isLoading} size="medium" loadingText="Results may take up to a minute to generate.">
-        <div className={styles.content}>
-          <div className={styles.header}>
-            <h4 className={styles.title}>Result Summary</h4>
+        <div>
+          <div className={styles.content}>
+            <div className={styles.header}>
+              <h4 className={styles.title}>Result Summary</h4>
+            </div>
+            {
+              isError
+                ?
+                  <div className={styles.error}>
+                    <p>Error fetching summary</p>
+                  </div>
+                :
+                  <div 
+                    className={styles.summary}
+                    dangerouslySetInnerHTML={{ __html: summary as string }}
+                  />
+            }
           </div>
-          {
-            isError
-              ?
-                <div className={styles.error}>
-                  <p>Error fetching summary</p>
-                </div>
-              :
-                <div 
-                  className={styles.summary}
-                  dangerouslySetInnerHTML={{ __html: summary as string }}
-                />
-          }
+          <Button handleClick={onClearAndRefetchSummary} variant="secondary" small className={styles.clearButton}>
+            Clear and Refetch
+          </Button>
         </div>
       </LoadingWrapper>
     </Modal>
