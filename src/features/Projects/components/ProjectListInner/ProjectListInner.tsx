@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import styles from '@/features/Projects/components/ProjectListInner/ProjectListInner.module.scss';
-import ProjectListHeader from '@/features/Projects/components/ProjectListHeader/ProjectListHeader';
+import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import ProjectCard from '@/features/Projects/components/ProjectCard/ProjectCard';
@@ -63,7 +63,14 @@ export const ProjectListInner = () => {
   if (isLoading) {
     return (
       <div className={styles.projectList}>
-        <ProjectListHeader />
+        <ProjectHeader
+          title="Projects"
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          searchPlaceholder="Search by Project or Query Name"
+          showCreateButton={true}
+          variant="list"
+        />
         <LoadingWrapper loading={isLoading} />
       </div>
     );
@@ -72,7 +79,14 @@ export const ProjectListInner = () => {
   if (hasError) {
     return (
       <div className={styles.projectList}>
-        <ProjectListHeader />
+        <ProjectHeader
+          title="Projects"
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          searchPlaceholder="Search by Project or Query Name"
+          showCreateButton={true}
+          variant="list"
+        />
         <LoadingWrapper loading={isLoading}>
           <div className={styles.error}>Error loading data. Please try again.</div>
         </LoadingWrapper>
@@ -82,9 +96,13 @@ export const ProjectListInner = () => {
 
   return (
     <div className={styles.projectList}>
-      <ProjectListHeader
+      <ProjectHeader
+        title="Projects"
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
+        searchPlaceholder="Search by Project or Query Name"
+        showCreateButton={true}
+        variant="list"
       />
       {
         hideProjectsTab && hideQueriesTab && hideTrashTab

@@ -1,7 +1,7 @@
 import { defaultQueryFilterFactory, drugTreatsQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
 import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
-import { QueryType, QueryItem, AutocompleteItem } from '@/features/Query/types/querySubmission';
+import { QueryType, AutocompleteItem } from '@/features/Query/types/querySubmission';
 
 export const queryTypes: QueryType[] = [
   {

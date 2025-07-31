@@ -1,0 +1,128 @@
+@use '@/assets/styles/variables' as *;
+
+.projectHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $m;
+  margin-bottom: $m;
+  .backButton {
+    flex-shrink: 0;
+    background: transparent;
+    color: $purpleOne;
+    border: none;
+    padding: 0;
+    margin-bottom: $s;
+    &:hover {
+      background: transparent;
+      svg {
+        left: -10px;
+      }
+    }
+    svg {
+      position: relative;
+      transition: $defaultAnim;
+      left: 0;
+      path {
+        fill: $purpleOne;
+      }
+    }
+  }
+  .titleSection {
+    flex: 1;
+    min-width: 0;
+    .subtitle {
+      margin: $xs 0 0 0;
+      color: $midGray;
+      font-size: $captionSize;
+    }
+  }
+  .searchSection {
+    flex-shrink: 0;
+    .searchInput {
+      width: 380px;
+    }
+  }
+  // List variant styles
+  .listLayout {
+    display: flex;
+    flex-direction: column;
+    gap: $m;
+    width: 100%;
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .left {
+      display: flex;
+      align-items: center;
+      gap: $m;
+    }
+    .right {
+      flex-shrink: 0;
+    }
+    .searchInput {
+      width: 380px;
+    }
+    .editButtons {
+      display: flex;
+      gap: $s;
+      align-items: center;
+      .doneButton {
+        &:disabled {
+          svg path {
+            stroke: $midDarkGray;
+          }
+        }
+        svg path {
+          stroke: $white;
+          fill: transparent;
+        }
+      }
+    }
+    .editContainer {
+      display: flex;
+      flex-direction: column;
+      gap: $s;
+      min-width: 300px;
+      .projectNameInput {
+        margin: 0;
+      }
+      .editButtons {
+        display: flex;
+        gap: $xs;
+        align-items: center;
+        button {
+          flex: 1;
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: $mediumLarge) {
+  .projectHeader {
+    flex-direction: column;
+    gap: $s;
+    .searchSection {
+      width: 100%;
+      .searchInput {
+        width: 100%;
+      }
+    }
+    .listLayout {
+      .top {
+        flex-direction: column;
+        gap: $s;
+      }
+      .right {
+        width: 100%;
+        .searchInput {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

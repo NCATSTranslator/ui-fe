@@ -1,4 +1,5 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, MouseEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './DataCard.module.scss';
 import { getFormattedDate } from '@/features/Common/utils/utilities';
 import Button from '@/features/Core/components/Button/Button';
@@ -22,7 +23,7 @@ interface DataCardProps<T> {
   onShare?: (item: T) => void;
   status?: string;
   className?: string;
-  getItemId: (item: T) => string;
+  getItemId: (item: T) => number | string;
   getItemTitle: (item: T) => string;
   getItemTimeCreated: (item: T) => string;
   getItemTimeUpdated: (item: T) => string;
@@ -51,6 +52,7 @@ const DataCard = <T,>({
   getItemStatus,
   getItemCount
 }: DataCardProps<T>) => {
+  const navigate = useNavigate();
   
   const title = getItemTitle(item);
   const time_created = getItemTimeCreated(item);
@@ -79,8 +81,19 @@ const DataCard = <T,>({
     }
   };
 
+  const handleCardClick = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const isInteractive = target.closest('button, input, a, [role="button"]');
+    
+    if (!isInteractive && type === 'project')
+      navigate(`/projects/${getItemId(item)}`);
+  };
+
   return (
-    <CardWrapper className={`${styles.dataCard} ${className || ''}`}>
+    <CardWrapper 
+      className={`${styles.dataCard} ${className || ''} ${type === 'project' && styles.projectWrapper}`}
+      onClick={handleCardClick}
+    >
       <div className={`${styles.checkboxColumn} ${styles.column}`}>
         <Checkbox checked={selectedItems.some((i) => getItemId(i) === getItemId(item))} handleClick={handleSelectItem} />
       </div>

@@ -1,0 +1,19 @@
+@use '@/assets/styles/variables' as *;
+
+.projectDetail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: calc($interiorContainerWidth + ($m * 2));
+  margin: 0 auto;
+  .queryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: $m;
+  }
+  .emptyState {
+    text-align: center;
+    padding: $xl;
+    color: $midGray;
+  }
+}

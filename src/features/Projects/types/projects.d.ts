@@ -5,13 +5,13 @@ export type ProjectCreate = {
 }
 
 export type ProjectUpdate = {
-  id: string;
+  id: number;
   title: string | null;
   pks: string[];
 }
 
 export type ProjectRaw = {
-  id: string;
+  id: number;
   title: string;
   qids: string[];
   time_created: Date;
