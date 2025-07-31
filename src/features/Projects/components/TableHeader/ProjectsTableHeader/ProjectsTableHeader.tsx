@@ -23,15 +23,17 @@ const ProjectsTableHeader = ({
   onSort
 }: ProjectsTableHeaderProps) => {
   const handleSelectAll = () => {
-    if (selectedProjects.length === activeProjects.length) {
+    // dont include unassigned project in the count
+    if (selectedProjects.length === activeProjects.length - 1) {
       setSelectedProjects([]);
     } else {
-      setSelectedProjects([...activeProjects]);
+      // dont include unassigned project in the selection
+      setSelectedProjects([...activeProjects.filter(project => project.id !== -1)]);
     }
   };
 
-  const allSelected = activeProjects.length > 0 && selectedProjects.length === activeProjects.length;
-  const someSelected = selectedProjects.length > 0 && selectedProjects.length < activeProjects.length;
+  const allSelected = activeProjects.length > 0 && selectedProjects.length === activeProjects.length - 1;
+  const someSelected = selectedProjects.length > 0 && selectedProjects.length < activeProjects.length - 1;
 
   return (
     <div className={styles.tableHeader}>

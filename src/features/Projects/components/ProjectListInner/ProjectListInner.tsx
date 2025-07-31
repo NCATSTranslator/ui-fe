@@ -53,7 +53,7 @@ export const ProjectListInner = () => {
   const sortedActiveProjects = useMemo(() => filterAndSortProjects(activeFormattedProjects, sortField, sortDirection, searchTerm), [activeFormattedProjects, sortField, sortDirection, searchTerm]);
   const sortedActiveQueries = useMemo(() => filterAndSortQueries(activeQueries, sortField, sortDirection, searchTerm), [activeQueries, sortField, sortDirection, searchTerm]);
 
-  const sortedDeletedProjects = useMemo(() => filterAndSortProjects(deletedFormattedProjects, sortField, sortDirection, searchTerm), [deletedFormattedProjects, sortField, sortDirection, searchTerm]);
+  const sortedDeletedProjects = useMemo(() => filterAndSortProjects(deletedFormattedProjects.filter(project => project.id !== -1), sortField, sortDirection, searchTerm), [deletedFormattedProjects, sortField, sortDirection, searchTerm]);
   const sortedDeletedQueries = useMemo(() => filterAndSortQueries(deletedQueries, sortField, sortDirection, searchTerm), [deletedQueries, sortField, sortDirection, searchTerm]);
 
   const hideProjectsTab = searchTerm.length > 0 && sortedActiveProjects.length === 0;
@@ -146,16 +146,24 @@ export const ProjectListInner = () => {
                         }
                       </div>
                     ) : (
-                      sortedActiveProjects.map((project: Project) => (
-                        <ProjectCard 
-                          key={project.id}
-                          queries={queries}
-                          project={project}
-                          searchTerm={searchTerm}
-                          setSelectedProjects={setSelectedProjects}
-                          selectedProjects={selectedProjects}
-                        />
-                      ))
+                      <>
+                        {sortedActiveProjects.map((project: Project, index: number) => (
+                          <>
+                            <ProjectCard 
+                              key={project.id}
+                              queries={queries}
+                              project={project}
+                              searchTerm={searchTerm}
+                              setSelectedProjects={setSelectedProjects}
+                              selectedProjects={selectedProjects}
+                            />
+                            {/* Add separator before the last project (Unassigned) */}
+                            {index === sortedActiveProjects.length - 2 && project.id !== -1 && (
+                              <div className={styles.separator} />
+                            )}
+                          </>
+                        ))}
+                      </>
                     )}
                   </div>
                 </Tab>

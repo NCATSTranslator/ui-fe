@@ -10,20 +10,21 @@
     padding: $s $m $m;
   }
 }
-
 .projectTabs {
   flex: 1;
   margin-top: $m;
 }
-
-
-
 .projectGrid {
   display: flex;
   flex-direction: column;
   gap: $s;
 }
-
+.separator {
+  height: 1px;
+  background-color: $midGray;
+  margin: $xs 0;
+  width: 100%;
+}
 .loading {
   display: flex;
   justify-content: center;
@@ -32,7 +33,6 @@
   color: $black;
   font-size: 14px;
 }
-
 .error {
   display: flex;
   justify-content: center;
@@ -42,7 +42,6 @@
   font-size: 14px;
   text-align: center;
 }
-
 .emptyState {
   display: flex;
   justify-content: center;
@@ -52,16 +51,13 @@
   color: $black;
   font-size: 14px;
   line-height: 1.5;
-
   p {
     margin: 0;
     max-width: 300px;
   }
 }
-
 .deletedSection {
   margin-bottom: 24px;
-
   h4 {
     margin: 0 0 12px 0;
     font-size: 14px;

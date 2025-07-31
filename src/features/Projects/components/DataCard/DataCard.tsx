@@ -53,13 +53,15 @@ const DataCard = <T,>({
   getItemCount
 }: DataCardProps<T>) => {
   const navigate = useNavigate();
+
+  const isUnassigned = getItemId(item) === -1;
   
   const title = getItemTitle(item);
   const time_created = getItemTimeCreated(item);
   const time_updated = getItemTimeUpdated(item);
-  const bookmark_count = getItemBookmarkCount(item);
-  const note_count = getItemNoteCount(item);
-  const itemCount = getItemCount?.(item);
+  const bookmark_count =  getItemBookmarkCount(item);
+  const note_count =  getItemNoteCount(item);
+  const itemCount =  getItemCount?.(item);
   const itemStatus = getItemStatus?.(item);
 
   const handleSelectItem = () => {
@@ -95,7 +97,11 @@ const DataCard = <T,>({
       onClick={handleCardClick}
     >
       <div className={`${styles.checkboxColumn} ${styles.column}`}>
-        <Checkbox checked={selectedItems.some((i) => getItemId(i) === getItemId(item))} handleClick={handleSelectItem} />
+        {
+          !isUnassigned && (
+            <Checkbox checked={selectedItems.some((i) => getItemId(i) === getItemId(item))} handleClick={handleSelectItem} />
+          )
+        }
       </div>
       <div className={`${styles.nameColumn} ${styles.column}`}>
         <CardName 
@@ -103,32 +109,71 @@ const DataCard = <T,>({
           name={title}
           itemCount={itemCount}
           searchTerm={searchTerm}
+          isUnassigned={isUnassigned}
         />
       </div>
       <div className={`${styles.actionsColumn} ${styles.column}`}>
-        <Button variant="secondary" iconOnly handleClick={handleEdit}>
-          <EditIcon/>
-        </Button>
-        <Button variant="secondary" iconOnly handleClick={handleShare}>
-          <ShareIcon/>
-        </Button>
+        {
+          !isUnassigned && (
+            <Button variant="secondary" iconOnly handleClick={handleEdit}>
+              <EditIcon/>
+            </Button>
+          )
+        }
+        {
+          !isUnassigned && (
+            <Button variant="secondary" iconOnly handleClick={handleShare}>
+              <ShareIcon/>
+            </Button>
+          )
+        }
       </div>
       <div className={`${styles.lastSeenColumn} ${styles.column}`}>
-        {getFormattedDate(new Date(time_updated), false)}
+        {
+          !isUnassigned && (
+            <>
+              {getFormattedDate(new Date(time_updated), false)}
+            </>
+          )
+        }
       </div>
       <div className={`${styles.dateCreatedColumn} ${styles.column}`}>
-        {getFormattedDate(new Date(time_created), false)}
+      {
+          !isUnassigned && (
+            <>
+              {getFormattedDate(new Date(time_created), false)}
+            </>
+          )
+        }
       </div>
       <div className={`${styles.bookmarksColumn} ${styles.column}`}>
-        <BookmarkIcon />
-        {bookmark_count}
+        {
+          !isUnassigned && (
+            <>
+              <BookmarkIcon />
+              {bookmark_count}
+            </>
+          )
+        }
       </div>
       <div className={`${styles.notesColumn} ${styles.column}`}>
-        <NoteIcon />
-        {note_count}
+        {
+          !isUnassigned && (
+            <>
+              <NoteIcon />
+              {note_count}
+            </>
+          )
+        }
       </div>
       <div className={`${styles.statusColumn} ${styles.column}`}>
-        <StatusIndicator status={(status || itemStatus) as QueryStatus} />
+        {
+          !isUnassigned && (
+            <>
+              <StatusIndicator status={(status || itemStatus) as QueryStatus} />
+            </>
+          )
+        }
       </div>
     </CardWrapper>
   );

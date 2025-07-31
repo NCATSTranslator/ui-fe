@@ -131,7 +131,36 @@ export const useFormattedProjects = (
   queries: QueryStatusObject[]
 ): Project[] => {
   return useMemo(() => {
-    return projects.map(project => {
+    // Get all query IDs that are assigned to projects
+    const assignedQueryIds = new Set(projects.flatMap(project => project.qids));
+    
+    // Find unassigned queries (queries that are not in any project)
+    const unassignedQueries = queries.filter(q => !assignedQueryIds.has(q.data.qid));
+    
+    // Calculate bookmark and note counts for unassigned queries
+    const unassignedBookmarkCount = unassignedQueries.reduce(
+      (sum, q) => sum + q.data.bookmark_ids.length, 
+      0
+    );
+    const unassignedNoteCount = unassignedQueries.reduce(
+      (sum, q) => sum + q.data.note_count, 
+      0
+    );
+    
+    // Create the unassigned project
+    const unassignedProject: Project = {
+      id: -1, // Special ID for unassigned project
+      title: 'Unassigned',
+      qids: unassignedQueries.map(q => q.data.qid),
+      time_created: new Date(0), // Use epoch time for unassigned
+      time_updated: new Date(0), // Use epoch time for unassigned
+      deleted: false,
+      bookmark_count: unassignedBookmarkCount,
+      note_count: unassignedNoteCount
+    };
+    
+    // Format regular projects
+    const formattedProjects = projects.map(project => {
       // Find all queries that belong to this project
       const projectQueries = queries.filter(q => project.qids.includes(q.data.qid));
       
@@ -154,5 +183,8 @@ export const useFormattedProjects = (
         note_count
       };
     });
+    
+    // Return formatted projects with unassigned project appended
+    return [...formattedProjects, unassignedProject];
   }, [projects, queries]);
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect, FC, ReactNode, useCallback, useMemo } from "react";
+import { useState, useEffect, FC, ReactNode, useCallback, useMemo, MouseEvent } from "react";
 import DefaultIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import styles from './Checkbox.module.scss';
 import { joinClasses } from "@/features/Common/utils/utilities";
@@ -64,6 +64,10 @@ const Checkbox: FC<CheckboxProps> = ({
     handleClick();
   }, [isChecked, handleClick, disabled]);
 
+  const handleLabelClick = useCallback((e: MouseEvent) => {
+    e.stopPropagation();
+  }, []);
+
   useEffect(() => {
     setIsChecked(checked);
   }, [checked]);
@@ -78,6 +82,7 @@ const Checkbox: FC<CheckboxProps> = ({
       title={title} 
       htmlFor={checkboxId}
       aria-label={title}
+      onClick={handleLabelClick}
     >
       {
         (label || subtitle) && (

@@ -7,9 +7,9 @@
   max-width: calc($interiorContainerWidth + ($m * 2));
   margin: 0 auto;
   .queryGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: $m;
+    display: flex;
+    flex-direction: column;
+    gap: $s;
   }
   .emptyState {
     text-align: center;
@@ -20,5 +20,8 @@
     text-align: center;
     padding: $xl;
     color: $red;
+  }
+  .projectTabContent {
+    padding: $s $m $m;
   }
 }
