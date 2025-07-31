@@ -128,8 +128,8 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
         // List variant layout
         <div className={styles.listLayout}>
           <div className={styles.top}>
-            <div className={styles.left}>
-              <h1 className="h4">{title}</h1>
+            <div className={styles.titleSection}>
+              <h1 className={styles.title}>{title}</h1>
               {showCreateButton && isEditing && (
                 <div className={styles.editButtons}>
                   <Button
@@ -203,7 +203,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                 {backButtonText}
               </Button>
             )}
-            <h1 className="h4">{title}</h1>
+            <h1 className={styles.title}>{title}</h1>
             {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
           </div>
           <div className={styles.searchSection}>

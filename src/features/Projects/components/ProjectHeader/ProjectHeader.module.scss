@@ -12,7 +12,7 @@
     color: $purpleOne;
     border: none;
     padding: 0;
-    margin-bottom: $s;
+    margin: 0;
     &:hover {
       background: transparent;
       svg {
@@ -28,14 +28,25 @@
       }
     }
   }
+  .title {
+    font-size: $h4Size;
+    color: $purpleTwo;
+    font-weight: 800;
+    margin: 0;
+  }
+  .subtitle {
+    margin: 0;
+    font-weight: 400;
+    color: $black;
+    font-size: $bodyTwoSize;
+  }
   .titleSection {
     flex: 1;
     min-width: 0;
-    .subtitle {
-      margin: $xs 0 0 0;
-      color: $midGray;
-      font-size: $captionSize;
-    }
+    display: flex;
+    align-items: flex-start;
+    gap: $xs;
+    flex-direction: column;
   }
   .searchSection {
     flex-shrink: 0;
@@ -49,15 +60,13 @@
     flex-direction: column;
     gap: $m;
     width: 100%;
+    .title {
+      font-size: $h5Size;
+    }
     .top {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-    }
-    .left {
-      display: flex;
-      align-items: center;
-      gap: $m;
     }
     .right {
       flex-shrink: 0;
