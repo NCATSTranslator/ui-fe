@@ -10,6 +10,7 @@ import { filterAndSortQueries } from '@/features/Projects/utils/filterAndSorting
 import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
+import { useEditProjectQueryState, useEditProjectQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
 
 const ProjectDetailInner = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -32,9 +33,27 @@ const ProjectDetailInner = () => {
   const [selectedQueries, setSelectedQueries] = useState<QueryStatusObject[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
+  const [editState, setEditState] = useEditProjectQueryState();
+  const editHandlers = useEditProjectQueryHandlers(
+    editState, 
+    setEditState, 
+    project ? [project] : [], 
+    projectQueries
+  );
+
+  const setIsEditing = (isEditing: boolean) => {
+    setEditState(prev => ({ ...prev, isEditing }));
+  };
+
+  const handleEditClick = () => {
+    if (project) {
+      editHandlers.handleEditProject(project);
+    }
+  };
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortDirection('desc');
@@ -67,8 +86,13 @@ const ProjectDetailInner = () => {
         searchPlaceholder="Search by Query Name"
         showBackButton={true}
         backButtonText="All Projects"
+        isEditing={editState.isEditing}
+        setIsEditing={setIsEditing}
+        editingItem={editState.editingItem}
+        onUpdateItem={editHandlers.handleUpdateItem}
+        onCancelEdit={editHandlers.handleCancelEdit}
+        onEditClick={handleEditClick}
       />
-
       <Tabs 
         isOpen={true}
         handleTabSelection={() => {}}
@@ -100,6 +124,7 @@ const ProjectDetailInner = () => {
                     searchTerm={searchTerm}
                     setSelectedQueries={setSelectedQueries}
                     selectedQueries={selectedQueries}
+                    onEdit={editHandlers.handleEditQuery}
                   />
                 ))
               )}

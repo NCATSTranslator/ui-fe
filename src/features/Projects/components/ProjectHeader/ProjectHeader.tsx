@@ -1,15 +1,15 @@
-import { FC, FormEvent, useCallback, useState } from 'react';
+import { FC, FormEvent, useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash';
 import Button from '@/features/Core/components/Button/Button';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
-import Close from '@/assets/icons/buttons/Close/Close.svg?react';
-import Checkmark from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import FolderPlus from '@/assets/icons/projects/folderplus.svg?react';
 import ArrowLeft from '@/assets/icons/directional/Arrows/Arrow Left.svg?react';
-import { useCreateProject } from '@/features/Projects/hooks/customHooks';
+import { useCreateProject, useUpdateProjects } from '@/features/Projects/hooks/customHooks';
 import styles from './ProjectHeader.module.scss';
 import ProjectSearchBar from '../ProjectSearchBar/ProjectSearchBar';
+import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
+import ProjectHeaderEditControlButtons from './ProjectHeaderEditControlButtons';
 
 interface ProjectHeaderProps {
   title: string;
@@ -23,6 +23,12 @@ interface ProjectHeaderProps {
   onCreateProject?: (projectName: string) => void;
   className?: string;
   variant?: 'detail' | 'list';
+  isEditing: boolean;
+  setIsEditing: (isEditing: boolean) => void;
+  editingItem?: { id: number | string; name: string; type: 'project' | 'query' };
+  onUpdateItem?: (id: number | string, newName: string, type: 'project' | 'query') => void;
+  onCancelEdit?: () => void;
+  onEditClick?: () => void;
 }
 
 const ProjectHeader: FC<ProjectHeaderProps> = ({
@@ -36,15 +42,32 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   showCreateButton = false,
   onCreateProject,
   className,
-  variant = 'detail'
+  variant = 'detail',
+  isEditing = false,
+  setIsEditing,
+  editingItem,
+  onUpdateItem,
+  onCancelEdit,
+  onEditClick
 }) => {
   const navigate = useNavigate();
   
-  const [isEditing, setIsEditing] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [projectNameError, setProjectNameError] = useState('');
   
   const createProjectMutation = useCreateProject();
+  const updateProjectsMutation = useUpdateProjects();
+
+  // Initialize project name when editing an existing item
+  useEffect(() => {
+    if (isEditing && editingItem) {
+      setProjectName(editingItem.name);
+      setProjectNameError('');
+    } else if (isEditing && !editingItem) {
+      setProjectName('');
+      setProjectNameError('');
+    }
+  }, [isEditing, editingItem]);
 
   const debouncedSearch = useCallback(
     debounce((searchTerm: string) => {
@@ -67,18 +90,25 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
 
   const handleProjectSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleCreateNewClick();
+    handleDoneClick();
   };
 
-  const handleCreateNewClick = () => {
+  const handleDoneClick = () => {
     if (isEditing) {
       // Handle Done Editing
       if (!projectName.trim()) {
-        setProjectNameError('Project name is required');
+        setProjectNameError('Name is required');
         return;
       }
       
-      if (onCreateProject) {
+      if (editingItem && onUpdateItem) {
+        // Update existing item
+        onUpdateItem(editingItem.id, projectName.trim(), editingItem.type);
+        setIsEditing(false);
+        setProjectName('');
+        setProjectNameError('');
+      } else if (onCreateProject) {
+        // Create new project
         onCreateProject(projectName.trim());
         setIsEditing(false);
         setProjectName('');
@@ -110,6 +140,9 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   };
 
   const handleCancelClick = () => {
+    if (onCancelEdit) {
+      onCancelEdit();
+    }
     setIsEditing(false);
     setProjectName('');
     setProjectNameError('');
@@ -122,6 +155,35 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
     }
   };
 
+  const getInputLabel = () => {
+    if (editingItem) {
+      return editingItem.type === 'project' ? 'Project Name' : 'Query Name';
+    }
+    return 'Project Name';
+  };
+
+  const getInputPlaceholder = () => {
+    if (editingItem) {
+      return editingItem.type === 'project' ? 'Unnamed Project' : 'Unnamed Query';
+    }
+    return 'Unnamed Project';
+  };
+
+  const handleEditClick = () => {
+    if (onEditClick) {
+      // Use the parent's edit handler if provided
+      console.log('edit handler provided');
+      onEditClick();
+    } else {
+      // Fallback to local edit handling
+      setIsEditing(true);
+      if (variant === 'detail' && title) {
+        // In detail view, we're editing the current project
+        // The editingItem will be set by the parent component when needed
+      }
+    }
+  };
+
   return (
     <div className={`${styles.projectHeader} ${className || ''}`}>
       {variant === 'list' ? (
@@ -131,31 +193,19 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
             <div className={styles.titleSection}>
               <h1 className={styles.title}>{title}</h1>
               {showCreateButton && isEditing && (
-                <div className={styles.editButtons}>
-                  <Button
-                    iconLeft={<Checkmark />}
-                    handleClick={handleCreateNewClick}
-                    disabled={createProjectMutation.isPending}
-                    small
-                    className={styles.doneButton}
-                  >
-                    {createProjectMutation.isPending ? 'Creating...' : 'Done Editing'}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    iconLeft={<Close />}
-                    handleClick={handleCancelClick}
-                    disabled={createProjectMutation.isPending}
-                    small
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
+                  <ProjectHeaderEditControlButtons
+                    createProjectMutation={createProjectMutation}
+                    updateProjectsMutation={updateProjectsMutation}
+                    handleDoneClick={handleDoneClick}
+                    handleCancelClick={handleCancelClick}
+                    styles={styles}
+                    type="create"
+                  />
+                )}
               {showCreateButton && !isEditing && (
                 <Button
                   iconLeft={<FolderPlus />}
-                  handleClick={handleCreateNewClick}
+                  handleClick={handleDoneClick}
                   small
                 >
                   Create New
@@ -175,7 +225,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
             <div className={styles.editContainer}>
               <form onSubmit={handleProjectSubmit}>
                 <TextInput
-                  label="Project Name"
+                  label={getInputLabel()}
                   value={projectName}
                   handleChange={handleProjectNameChange}
                   error={!!projectNameError}
@@ -183,7 +233,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                   errorText={projectNameError}
                   className={styles.projectNameInput}
                   disabled={createProjectMutation.isPending}
-                  placeholder="Unnamed Project"
+                  placeholder={getInputPlaceholder()}
                 />
               </form>
             </div>
@@ -205,6 +255,40 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
             )}
             <h1 className={styles.title}>{title}</h1>
             {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+            <Button
+              variant="secondary"
+              handleClick={handleEditClick}
+              className={styles.editButton}
+              iconLeft={<EditIcon />}
+              small
+            >
+              Edit
+            </Button>
+            {isEditing && (
+              <div className={styles.editContainer}>
+                <form onSubmit={handleProjectSubmit}>
+                  <TextInput
+                    label={getInputLabel()}
+                    value={projectName}
+                    handleChange={handleProjectNameChange}
+                    error={!!projectNameError}
+                    errorBottom
+                    errorText={projectNameError}
+                    className={styles.projectNameInput}
+                    disabled={createProjectMutation.isPending}
+                    placeholder={getInputPlaceholder()}
+                  />
+                </form>
+                <ProjectHeaderEditControlButtons
+                  createProjectMutation={createProjectMutation}
+                  handleDoneClick={handleDoneClick}
+                  handleCancelClick={handleCancelClick}
+                  type="update"
+                  styles={styles}
+                  updateProjectsMutation={updateProjectsMutation}
+                />
+              </div>
+            )}
           </div>
           <div className={styles.searchSection}>
             <ProjectSearchBar

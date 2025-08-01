@@ -1,6 +1,6 @@
 import { get, post, put, fetchWithErrorHandling, ErrorHandler } from '@/features/Common/utils/web';
 import { isProjectRaw, isProjectRawArray, isQueryStatusArray, isUserQueryObject, ProjectCreate, ProjectUpdate, 
-  QueryStatusObject, UserQueryObject, ProjectRaw } from '@/features/Projects/types/projects.d';
+  QueryStatusObject, UserQueryObject, ProjectRaw, QueryUpdate} from '@/features/Projects/types/projects.d';
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';
@@ -68,14 +68,14 @@ export const updateProjects = async (
   projects: ProjectUpdate[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<ProjectRaw[]> => {
+): Promise<ProjectRaw> => {
   const url = `${API_PATH_PREFIX}/users/me/projects/update`;
   
-  return fetchWithErrorHandling<ProjectRaw[]>(
+  return fetchWithErrorHandling<ProjectRaw>(
     () => put(url, projects),
     httpErrorHandler,
     fetchErrorHandler,
-    isProjectRawArray
+    isProjectRaw
   );
 };
 
@@ -149,6 +149,25 @@ export const restoreQueries = async (
   
   return fetchWithErrorHandling<UserQueryObject>(
     () => put(url, queryIds),
+    httpErrorHandler,
+    fetchErrorHandler,
+    isUserQueryObject
+  );
+};
+
+/**
+ * PUT /api/v1/users/me/queries/update
+ * Update the queries in the body of the message.
+ */
+export const updateQueries = async (
+  queries: QueryUpdate[],
+  httpErrorHandler?: ErrorHandler,
+  fetchErrorHandler?: ErrorHandler
+): Promise<UserQueryObject> => {
+  const url = `${API_PATH_PREFIX}/users/me/queries/update`;
+  
+  return fetchWithErrorHandling<UserQueryObject>(
+    () => put(url, queries),
     httpErrorHandler,
     fetchErrorHandler,
     isUserQueryObject

@@ -7,13 +7,15 @@ interface QueryCardProps {
   searchTerm?: string;
   setSelectedQueries: Dispatch<SetStateAction<QueryStatusObject[]>>;
   selectedQueries?: QueryStatusObject[];
+  onEdit?: (query: QueryStatusObject) => void;
 }
 
 const QueryCard = ({ 
   query,
   searchTerm,
   setSelectedQueries,
-  selectedQueries = []
+  selectedQueries = [],
+  onEdit
 }: QueryCardProps) => {
   
   return (
@@ -24,6 +26,7 @@ const QueryCard = ({
       selectedItems={selectedQueries}
       setSelectedItems={setSelectedQueries}
       status={query.status}
+      onEdit={onEdit}
       getItemId={(item: QueryStatusObject) => item.data.qid}
       getItemTitle={(item: QueryStatusObject) => item.data.title}
       getItemTimeCreated={(item: QueryStatusObject) => item.data.time_created.toString()}

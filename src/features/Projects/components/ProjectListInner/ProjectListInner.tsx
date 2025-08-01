@@ -12,6 +12,7 @@ import { ProjectRaw, QueryStatusObject, SortField, SortDirection, Project } from
 import { filterAndSortProjects, filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
+import { useEditProjectQueryState, useEditProjectQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
 
 export const ProjectListInner = () => {
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
@@ -33,9 +34,21 @@ export const ProjectListInner = () => {
   const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<QueryStatusObject[]>([]);
 
+  const [editState, setEditState] = useEditProjectQueryState();
+  const editHandlers = useEditProjectQueryHandlers(
+    editState, 
+    setEditState, 
+    activeFormattedProjects, 
+    activeQueries
+  );
+
+  const setIsEditing = (isEditing: boolean) => {
+    setEditState(prev => ({ ...prev, isEditing }));
+  };
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortDirection('desc');
@@ -70,6 +83,11 @@ export const ProjectListInner = () => {
           searchPlaceholder="Search by Project or Query Name"
           showCreateButton={true}
           variant="list"
+          isEditing={editState.isEditing}
+          setIsEditing={setIsEditing}
+          editingItem={editState.editingItem}
+          onUpdateItem={editHandlers.handleUpdateItem}
+          onCancelEdit={editHandlers.handleCancelEdit}
         />
         <LoadingWrapper loading={isLoading} />
       </div>
@@ -86,6 +104,11 @@ export const ProjectListInner = () => {
           searchPlaceholder="Search by Project or Query Name"
           showCreateButton={true}
           variant="list"
+          isEditing={editState.isEditing}
+          setIsEditing={setIsEditing}
+          editingItem={editState.editingItem}
+          onUpdateItem={editHandlers.handleUpdateItem}
+          onCancelEdit={editHandlers.handleCancelEdit}
         />
         <LoadingWrapper loading={isLoading}>
           <div className={styles.error}>Error loading data. Please try again.</div>
@@ -103,6 +126,11 @@ export const ProjectListInner = () => {
         searchPlaceholder="Search by Project or Query Name"
         showCreateButton={true}
         variant="list"
+        isEditing={editState.isEditing}
+        setIsEditing={setIsEditing}
+        editingItem={editState.editingItem}
+        onUpdateItem={editHandlers.handleUpdateItem}
+        onCancelEdit={editHandlers.handleCancelEdit}
       />
       {
         hideProjectsTab && hideQueriesTab && hideTrashTab
@@ -156,6 +184,7 @@ export const ProjectListInner = () => {
                               searchTerm={searchTerm}
                               setSelectedProjects={setSelectedProjects}
                               selectedProjects={selectedProjects}
+                              onEdit={editHandlers.handleEditProject}
                             />
                             {/* Add separator before the last project (Unassigned) */}
                             {index === sortedActiveProjects.length - 2 && project.id !== -1 && (
@@ -208,6 +237,7 @@ export const ProjectListInner = () => {
                           searchTerm={searchTerm}
                           setSelectedQueries={setSelectedQueries}
                           selectedQueries={selectedQueries}
+                          onEdit={editHandlers.handleEditQuery}
                         />
                       ))
                     )}

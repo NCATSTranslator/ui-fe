@@ -1,0 +1,142 @@
+import { Dispatch, SetStateAction, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Project, QueryStatusObject } from '@/features/Projects/types/projects.d';
+import { useUpdateProjects, useUpdateQueries } from '@/features/Projects/hooks/customHooks';
+
+export interface EditProjectQueryState {
+  isEditing: boolean;
+  editingItem?: { id: number | string; name: string; type: 'project' | 'query' };
+}
+
+export interface EditHandlers {
+  handleEditProject: (project: Project) => void;
+  handleEditQuery: (query: QueryStatusObject) => void;
+  handleUpdateItem: (id: number | string, newName: string, type: 'project' | 'query') => void;
+  handleCancelEdit: () => void;
+}
+
+export const useEditProjectQueryState = (): [EditProjectQueryState, Dispatch<SetStateAction<EditProjectQueryState>>] => {
+  const [editState, setEditState] = useState<EditProjectQueryState>({
+    isEditing: false,
+    editingItem: undefined
+  });
+
+  return [editState, setEditState];
+};
+
+export const useEditProjectQueryHandlers = (
+  editState: EditProjectQueryState,
+  setEditState: Dispatch<SetStateAction<EditProjectQueryState>>,
+  projects: Project[],
+  queries: QueryStatusObject[]
+): EditHandlers => {
+  const queryClient = useQueryClient();
+  const updateProjectsMutation = useUpdateProjects();
+  const updateQueriesMutation = useUpdateQueries();
+
+  const handleEditProject = (project: Project) => {
+    setEditState({
+      isEditing: true,
+      editingItem: { id: project.id, name: project.title, type: 'project' }
+    });
+  };
+
+  const handleEditQuery = (query: QueryStatusObject) => {
+    setEditState({
+      isEditing: true,
+      editingItem: { id: query.data.qid, name: query.data.title, type: 'query' }
+    });
+  };
+
+  const handleUpdateItem = (id: number | string, newName: string, type: 'project' | 'query') => {
+    if (type === 'project') {
+      // Find the project and update it
+      const projectToUpdate = projects.find(p => p.id === id);
+      if (projectToUpdate) {
+        // Optimistically update the React Query cache
+        queryClient.setQueryData(['userProjects'], (oldData: Project[]) => {
+          if (!oldData) return oldData;
+          return oldData.map((project: Project) => 
+            project.id === id 
+              ? { ...project, title: newName }
+              : project
+          );
+        });
+
+        updateProjectsMutation.mutate([{
+          id: projectToUpdate.id,
+          title: newName,
+          pks: projectToUpdate.qids
+        }], {
+          onSuccess: () => {
+            setEditState({ isEditing: false, editingItem: undefined });
+          },
+          onError: (error) => {
+            console.error('Failed to update project:', error);
+            // Revert optimistic update on error
+            queryClient.setQueryData(['userProjects'], (oldData: Project[]) => {
+              if (!oldData) return oldData;
+              return oldData.map((project: Project) => 
+                project.id === id 
+                  ? { ...project, title: projectToUpdate.title }
+                  : project
+              );
+            });
+          }
+        });
+      }
+    } else if (type === 'query') {
+      // Find the query and update it
+      const queryToUpdate = queries.find(q => q.data.qid === id);
+      if (queryToUpdate) {
+        // Optimistically update the React Query cache
+        queryClient.setQueryData(['userQueryStatus'], (oldData: QueryStatusObject[]) => {
+          if (!oldData) return oldData;
+          return oldData.map((query: QueryStatusObject) => 
+            query.data.qid === id 
+              ? { 
+                  ...query, 
+                  data: { ...query.data, title: newName }
+                }
+              : query
+          );
+        });
+
+        updateQueriesMutation.mutate([{
+          qid: queryToUpdate.data.qid,
+          title: newName
+        }], {
+          onSuccess: () => {
+            setEditState({ isEditing: false, editingItem: undefined });
+          },
+          onError: (error) => {
+            console.error('Failed to update query:', error);
+            // Revert optimistic update on error
+            queryClient.setQueryData(['userQueryStatus'], (oldData: QueryStatusObject[]) => {
+              if (!oldData) return oldData;
+              return oldData.map((query: QueryStatusObject) => 
+                query.data.qid === id 
+                  ? { 
+                      ...query, 
+                      data: { ...query.data, title: queryToUpdate.data.title }
+                    }
+                  : query
+              );
+            });
+          }
+        });
+      }
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditState({ isEditing: false, editingItem: undefined });
+  };
+
+  return {
+    handleEditProject,
+    handleEditQuery,
+    handleUpdateItem,
+    handleCancelEdit
+  };
+}; 

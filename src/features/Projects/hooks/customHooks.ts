@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueryStatus, 
-  restoreProjects, restoreQueries, updateProjects } from '@/features/Projects/utils/projectsApi';
-import { ProjectCreate, ProjectUpdate, ProjectRaw, QueryStatusObject, Project } from '@/features/Projects/types/projects.d';
+  restoreProjects, restoreQueries, updateProjects, updateQueries } from '@/features/Projects/utils/projectsApi';
+import { ProjectCreate, ProjectUpdate, ProjectRaw, QueryStatusObject, Project, QueryUpdate } from '@/features/Projects/types/projects.d';
 
 /**
  * Hook to fetch user projects with React Query
@@ -111,6 +111,21 @@ export const useRestoreQueries = () => {
   
   return useMutation({
     mutationFn: (queryIds: string[]) => restoreQueries(queryIds),
+    onSuccess: () => {
+      // Invalidate and refetch user query status
+      queryClient.invalidateQueries({ queryKey: ['userQueryStatus'] });
+    },
+  });
+};
+
+/**
+ * Hook to update queries with React Query
+ */
+export const useUpdateQueries = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (queries: QueryUpdate[]) => updateQueries(queries),
     onSuccess: () => {
       // Invalidate and refetch user query status
       queryClient.invalidateQueries({ queryKey: ['userQueryStatus'] });

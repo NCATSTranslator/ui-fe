@@ -10,6 +10,11 @@ export type ProjectUpdate = {
   pks: string[];
 }
 
+export type QueryUpdate = {
+  qid: string;
+  title: string;
+}
+
 export type ProjectRaw = {
   id: number;
   title: string;
@@ -235,3 +240,25 @@ export const isUserQueryObject = (obj: unknown): obj is UserQueryObject => {
   
   return true;
 };
+
+export const isProjectUpdate = (obj: unknown): obj is ProjectUpdate => {
+  if (typeof obj !== 'object' || obj === null) {
+    console.warn('isProjectUpdate: Object is not an object or is null', obj);
+    return false;
+  }
+  
+  if (!('id' in obj)) {
+    console.warn('isProjectUpdate: Missing "id" property', obj);
+    return false;
+  }
+
+  if (!('title' in obj)) {
+    console.warn('isProjectUpdate: Missing "title" property', obj);
+    return false;
+  }
+  
+  if (!('pks' in obj)) {
+    console.warn('isProjectUpdate: Missing "pks" property', obj);
+    return false;
+  }
+}

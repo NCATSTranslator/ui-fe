@@ -55,7 +55,15 @@ export const sortProjects = (projects: Project[], sortField: SortField, sortDire
  */
 export const filterAndSortProjects = (projects: Project[], sortField: SortField, sortDirection: SortDirection, searchTerm: string): Project[] => {
   const filteredProjects = projects.filter(project => project.title.toLowerCase().includes(searchTerm.toLowerCase()));
-  return sortProjects(filteredProjects, sortField, sortDirection);
+  const sortedProjects = sortProjects(filteredProjects, sortField, sortDirection);
+  
+  // make sure unassigned is always at bottom (has id of -1)
+  const unassignedProject = sortedProjects.find(project => project.id === -1);
+  if (unassignedProject) {
+    sortedProjects.splice(sortedProjects.indexOf(unassignedProject), 1);
+    sortedProjects.push(unassignedProject);
+  }
+  return sortedProjects;
 };
 
 /**

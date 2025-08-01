@@ -57,6 +57,8 @@ export const Default: Story = {
     title: 'My Projects',
     searchTerm: '',
     searchPlaceholder: 'Search by Query Name',
+    isEditing: false,
+    setIsEditing: fn(),
   },
 };
 
@@ -66,6 +68,8 @@ export const WithSubtitle: Story = {
     subtitle: 'Manage your research projects and queries',
     searchTerm: '',
     searchPlaceholder: 'Search by Query Name',
+    isEditing: false,
+    setIsEditing: fn(),
   },
 };
 
@@ -78,6 +82,8 @@ export const WithBackButton: Story = {
     showBackButton: true,
     backButtonText: 'All Projects',
     variant: 'detail',
+    isEditing: false,
+    setIsEditing: fn(),
   },
 };
 
@@ -88,6 +94,8 @@ export const WithCreateButton: Story = {
     searchPlaceholder: 'Search by Project orQuery Name',
     showCreateButton: true,
     variant: 'list',
+    isEditing: false,
+    setIsEditing: fn(),
   },
 };
 
@@ -98,6 +106,8 @@ export const DetailVariant: Story = {
     searchTerm: '',
     searchPlaceholder: 'Search by Query Name',
     variant: 'detail',
+    isEditing: false,
+    setIsEditing: fn(),
   },
 };
 
@@ -107,5 +117,7 @@ export const ListVariant: Story = {
     searchTerm: '',
     searchPlaceholder: 'Search by Project or Query Name',
     variant: 'list',
+    isEditing: false,
+    setIsEditing: fn(),
   },
 }; 

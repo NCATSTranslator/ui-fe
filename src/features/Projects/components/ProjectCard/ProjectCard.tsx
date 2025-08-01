@@ -9,6 +9,7 @@ interface ProjectCardProps {
   searchTerm?: string;
   setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
   selectedProjects: Project[];
+  onEdit?: (project: Project) => void;
 }
 
 const ProjectCard = ({ 
@@ -16,7 +17,8 @@ const ProjectCard = ({
   project,
   searchTerm,
   setSelectedProjects,
-  selectedProjects
+  selectedProjects,
+  onEdit
 }: ProjectCardProps) => {
 
   const status = useMemo(() => getProjectStatus(project, queries), [project, queries]);
@@ -29,6 +31,7 @@ const ProjectCard = ({
       selectedItems={selectedProjects}
       setSelectedItems={setSelectedProjects}
       status={status}
+      onEdit={onEdit}
       getItemId={(item: Project) => item.id}
       getItemTitle={(item: Project) => item.title}
       getItemTimeCreated={(item: Project) => item.time_created.toString()}
