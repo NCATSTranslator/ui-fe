@@ -4,7 +4,7 @@ import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultsAvailableIcon from '@/assets/icons/buttons/Refresh.svg?react';
 import CompleteIcon from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
 import AlertIcon from '@/assets/icons/status/Alerts/Warning.svg?react';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useNewResultsDisclaimerApproved } from '@/features/ResultList/hooks/resultListHooks';
 import { ResultListLoadingData } from '@/features/ResultList/types/results';
@@ -97,15 +97,15 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
             handleClick={data.handleResultsRefresh}
             className={`${buttonClassName} ${styles.loadingButton} ${isResultsAvailable && styles.active}`}
             dataTooltipId="sync-new-results-button"
+            iconLeft={<ResultsAvailableIcon/>}
             >
-            <ResultsAvailableIcon/>
             Sync New Results
           </Button>
         </>
       }
       {
         (displayCloseButton) &&
-        <Button iconOnly handleClick={() => data.setIsActive?.(false)} isSecondary><CloseIcon/></Button>
+        <Button iconOnly handleClick={() => data.setIsActive?.(false)} variant="secondary"><CloseIcon/></Button>
       }
       </div>
     </div>

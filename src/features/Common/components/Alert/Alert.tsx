@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, ReactNode, FC, KeyboardEvent } from "react";
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import Warning from '@/assets/icons/status/Alerts/Warning.svg?react';
 import Info from '@/assets/icons/status/Alerts/Info.svg?react';
 import Checkmark from '@/assets/icons/status/Alerts/Checkmark.svg?react';

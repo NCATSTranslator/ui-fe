@@ -8,7 +8,7 @@ import { incrementHistory } from '@/features/History/slices/historySlice';
 import { filterAndSortExamples, getAutocompleteTerms } from '@/features/Query/utils/autocompleteFunctions';
 import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
-import { queryTypes } from '@/features/Query/utils/queryTypes';
+import { getQueryTitle, queryTypes } from '@/features/Query/utils/queryTypes';
 import { AutocompleteItem, AutocompleteFunctions, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
 
 /**
@@ -59,7 +59,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const submitQuery = useCallback(async (item: QueryItem) => {
+  const submitQuery = useCallback(async (item: QueryItem, projectId?: string) => {
     if (!item?.node) {
       console.error("No node attached to query item, unable to submit");
       return;
@@ -67,12 +67,15 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
 
     setIsLoading(true);
     const timestamp = new Date();
+    const title = getQueryTitle('smart', item.type, item.node);
 
     try {
       const queryJson = JSON.stringify({
         curie: item.node.id,
         type: item.type.targetType,
         direction: item.type.direction,
+        pid: projectId || null,
+        title: title
       });
 
       const response = await fetch(`${API_PATH_PREFIX}/query`, {
@@ -126,22 +129,21 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
   const submitPathfinderQuery = useCallback(async (
     itemOne: AutocompleteItem, 
     itemTwo: AutocompleteItem, 
-    middleType?: string
+    middleType?: string, 
+    projectId?: string
   ) => {
     setIsLoading(true);
 
     try {
       let subjectType = (!!itemOne?.types) ? itemOne.types[0] : "";
       let objectType = (!!itemTwo?.types) ? itemTwo.types[0] : "";
-      let queryObject: {type: string, subject: {id: string, category: string}, object: {id: string, category: string}, constraint?: string} = {
+      let queryJson = JSON.stringify({
         type: 'pathfinder',
         subject: {id: itemOne.id, category: subjectType},
         object: {id: itemTwo.id, category: objectType},
-      }
-      if(middleType)
-        queryObject.constraint = middleType;
-
-      let queryJson = JSON.stringify(queryObject);
+        pid: projectId || null,
+        constraint: middleType || null
+      });
 
       const response = await fetch(`${API_PATH_PREFIX}/query`, {
         method: 'POST',

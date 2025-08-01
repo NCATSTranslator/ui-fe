@@ -4,7 +4,7 @@ import { Filter, FilterType, GroupedFilters, FilterFamily } from '@/features/Res
 import { cloneDeep } from 'lodash';
 import FacetGroup from '@/features/ResultFiltering/components/FacetGroup/FacetGroup';
 import EntitySearch from '@/features/ResultFiltering/components/EntitySearch/EntitySearch';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';

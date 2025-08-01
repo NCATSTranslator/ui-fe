@@ -356,23 +356,6 @@ input {
   cursor: default;
 }
 
-.input-label-container {
-  display: grid;
-  margin-bottom: $xxs;
-}
-.input-label, .input-label span {
-  font-size: $subTwoSize;
-  margin-bottom: 0;
-  font-weight: 800;
-  color: $darkGray;
-}
-.input-subtitle {
-  font-size: $captionSize;
-  margin-bottom: $xxs;
-  font-weight: 400;
-  color: $darkGray;
-}
-
 .input-row {
   display: grid;
   justify-content: space-between;

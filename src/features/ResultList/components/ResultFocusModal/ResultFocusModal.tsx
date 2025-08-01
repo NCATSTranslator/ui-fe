@@ -1,6 +1,6 @@
 import Modal from '@/features/Common/components/Modal/Modal';
 import styles from './ResultFocusModal.module.scss';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import { truncateStringIfTooLong, getFormattedPathfinderName } from '@/features/Common/utils/utilities';
 import { FC } from 'react';
 
@@ -37,7 +37,7 @@ const ResultFocusModal: FC<ResultFocusModalProps> = ({
         </p>
       </div>
       <div className={styles.buttonsContainer}>
-        <Button handleClick={onReject} className={styles.button} isSecondary>
+        <Button handleClick={onReject} className={styles.button} variant="secondary">
           Do not jump to the result
         </Button>
         <Button handleClick={onAccept} className={styles.button}>

@@ -2,7 +2,7 @@ import { FC, ReactNode, useState, useEffect, useRef, DragEvent, ChangeEvent } fr
 import ExportIcon from '@/assets/icons/buttons/Export.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import styles from './FileInput.module.scss';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import { CustomFile } from '@/features/Common/types/global';
 
 type FileDropInputProps = {
@@ -143,10 +143,11 @@ const FileInput: FC<FileDropInputProps> = ({
                 <span className={styles.dropText}>Drag & Drop to Upload or</span>
                 <Button 
                   handleClick={!disabled ? handleClick : undefined}
-                  className={styles.buttonLabel} 
-                  isSecondary
+                  className={styles.buttonLabel}
+                  variant="secondary"
+                  iconLeft={<ExportIcon/>}
                   >
-                  <ExportIcon/>{buttonLabel}
+                  {buttonLabel}
                 </Button>
               </>
           }

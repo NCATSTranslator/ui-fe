@@ -121,7 +121,7 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
         <SupportPathKeyContext.Provider value={currentKey}>
           <div className={`${!!pathViewStyles && pathViewStyles.supportGroupContainer} scrollable-support`}>
             <p className={styles.supportLabel}>
-              {currentPathCount} Supporting Path{fullPathCount === 1 ? '' : 's'} <span className={styles.outOfText}>{filteredPathCount > 0 && `(out of ${fullPathCount})`}</span>
+              {currentPathCount} Supporting Path{currentPathCount === 1 ? '' : 's'} <span className={styles.outOfText}>{filteredPathCount > 0 && `(out of ${fullPathCount})`}</span>
             </p>
             {
               (!showHiddenPaths && filteredPathCount >= fullPathCount) &&

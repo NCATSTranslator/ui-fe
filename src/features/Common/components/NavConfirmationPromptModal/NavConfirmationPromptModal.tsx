@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, FC, KeyboardEvent } from "react";
 import styles from './NavConfirmationPromptModal.module.scss';
 import Modal from '@/features/Common/components/Modal/Modal';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import { Blocker } from "@/features/Common/types/global";
 
 export interface NavConfirmationPromptModalProps {
@@ -102,7 +102,7 @@ const NavConfirmationPromptModal: FC<NavConfirmationPromptModalProps> = ({
         <Button 
           handleClick={handleProceed}
           className={styles.button}
-          isSecondary
+          variant="secondary"
           testId="nav-confirmation-proceed-button"
         >
           {proceedButtonText}
