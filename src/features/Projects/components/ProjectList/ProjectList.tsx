@@ -5,11 +5,11 @@ const projectsQueryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 2 * 60 * 1000, // 2 min
-      retry: 2,
+      retry: false,
       refetchOnWindowFocus: false,
     },
     mutations: {
-      retry: 1,
+      retry: false,
     },
   },
 });

@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueryStatus, 
   restoreProjects, restoreQueries, updateProjects, updateQueries } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, QueryStatusObject, Project, QueryUpdate } from '@/features/Projects/types/projects.d';
+import { handlePostProjectDeletion, handlePostQueryDeletion } from '../utils/editUpdateFunctions';
 
 /**
  * Hook to fetch user projects with React Query
@@ -202,4 +203,39 @@ export const useFormattedProjects = (
     // Return formatted projects with unassigned project appended
     return [...formattedProjects, unassignedProject];
   }, [projects, queries]);
+};
+
+/**
+ * Custom hook that returns a function that can be used to delete projects and queries.
+ * @returns A function that can be used to delete projects and queries.
+ */
+export const useDeleteProjectsAndQueries = () => {
+  const queryClient = useQueryClient();
+  const { mutate: deleteProjects } = useDeleteProjects();
+  const { mutate: deleteQueries } = useDeleteQueries();
+
+  return (selectedProjects: Project[], setSelectedProjects: (projects: Project[]) => void, selectedQueries: QueryStatusObject[], setSelectedQueries: (queries: QueryStatusObject[]) => void) => {
+    if(selectedProjects.length > 0) {
+      deleteProjects(selectedProjects.map(project => project.id.toString()), {
+        onSuccess: () => {
+          handlePostProjectDeletion(queryClient, selectedProjects, setSelectedProjects);
+        },
+        onError: (error) => { 
+          handlePostProjectDeletion(queryClient, selectedProjects, setSelectedProjects);
+          console.warn(error);
+        }
+      });
+    }
+    if(selectedQueries.length > 0) {  
+      deleteQueries(selectedQueries.map(query => query.data.qid.toString()), {
+        onSuccess: () => {
+          handlePostQueryDeletion(queryClient, selectedQueries, setSelectedQueries);
+        },
+        onError: (error) => {
+          handlePostQueryDeletion(queryClient, selectedQueries, setSelectedQueries); 
+          console.warn(error);
+        }
+      });
+    }
+  };
 };

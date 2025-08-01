@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { Project, QueryStatusObject } from '@/features/Projects/types/projects.d';
 import { useUpdateProjects, useUpdateQueries } from '@/features/Projects/hooks/customHooks';
 
@@ -140,3 +140,31 @@ export const useEditProjectQueryHandlers = (
     handleCancelEdit
   };
 }; 
+
+/**
+ * Handles the post-deletion of projects.
+ * @param queryClient - The query client.
+ * @param selectedProjects - The projects to delete.
+ * @param setSelectedProjects - The function to set the selected projects.
+ */
+export const handlePostProjectDeletion = (queryClient: QueryClient, selectedProjects: Project[], setSelectedProjects: (projects: Project[]) => void) => {
+  queryClient.setQueryData(['userProjects'], (oldData: Project[]) => {
+    if (!oldData) return oldData;
+    return oldData.filter((project: Project) => !selectedProjects.some(p => p.id === project.id));
+  });
+  setSelectedProjects([]);
+};
+
+/**
+ * Handles the post-deletion of queries.
+ * @param queryClient - The query client.
+ * @param selectedQueries - The queries to delete.
+ * @param setSelectedQueries - The function to set the selected queries.
+ */
+export const handlePostQueryDeletion = (queryClient: QueryClient, selectedQueries: QueryStatusObject[], setSelectedQueries: (queries: QueryStatusObject[]) => void) => {
+  queryClient.setQueryData(['userQueryStatus'], (oldData: QueryStatusObject[]) => {
+    if (!oldData) return oldData;
+    return oldData.filter((query: QueryStatusObject) => !selectedQueries.some(q => q.data.qid === query.data.qid));
+  });
+  setSelectedQueries([]);
+};
