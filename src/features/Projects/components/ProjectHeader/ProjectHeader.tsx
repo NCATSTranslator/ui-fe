@@ -5,50 +5,56 @@ import Button from '@/features/Core/components/Button/Button';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import FolderPlus from '@/assets/icons/projects/folderplus.svg?react';
 import ArrowLeft from '@/assets/icons/directional/Arrows/Arrow Left.svg?react';
+import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
+import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
+import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import { useCreateProject, useUpdateProjects } from '@/features/Projects/hooks/customHooks';
 import styles from './ProjectHeader.module.scss';
-import ProjectSearchBar from '../ProjectSearchBar/ProjectSearchBar';
-import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
+import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/ProjectSearchBar';
 import ProjectHeaderEditControlButtons from './ProjectHeaderEditControlButtons';
 
 interface ProjectHeaderProps {
-  title: string;
-  subtitle?: string;
+  backButtonText?: string;
+  bookmarkCount?: number;
+  className?: string;
+  editingItem?: { id: number | string; name: string; type: 'project' | 'query' };
+  isEditing: boolean;
+  noteCount?: number;
+  onCancelEdit?: () => void;
+  onCreateProject?: (projectName: string) => void;
+  onEditClick?: () => void;
+  onUpdateItem?: (id: number | string, newName: string, type: 'project' | 'query') => void;
+  searchPlaceholder?: string;
   searchTerm: string;
   setSearchTerm: (searchTerm: string) => void;
-  searchPlaceholder?: string;
-  showBackButton?: boolean;
-  backButtonText?: string;
-  showCreateButton?: boolean;
-  onCreateProject?: (projectName: string) => void;
-  className?: string;
-  variant?: 'detail' | 'list';
-  isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
-  editingItem?: { id: number | string; name: string; type: 'project' | 'query' };
-  onUpdateItem?: (id: number | string, newName: string, type: 'project' | 'query') => void;
-  onCancelEdit?: () => void;
-  onEditClick?: () => void;
+  showBackButton?: boolean;
+  showCreateButton?: boolean;
+  subtitle?: string;
+  title: string;
+  variant?: 'detail' | 'list';
 }
 
 const ProjectHeader: FC<ProjectHeaderProps> = ({
-  title,
-  subtitle,
+  backButtonText = 'All Projects',
+  bookmarkCount,
+  className,
+  editingItem,
+  isEditing = false,
+  noteCount,
+  onCancelEdit,
+  onCreateProject,
+  onEditClick,
+  onUpdateItem,
+  searchPlaceholder = 'Search by Query Name',
   searchTerm,
   setSearchTerm,
-  searchPlaceholder = 'Search by Query Name',
-  showBackButton = false,
-  backButtonText = 'All Projects',
-  showCreateButton = false,
-  onCreateProject,
-  className,
-  variant = 'detail',
-  isEditing = false,
   setIsEditing,
-  editingItem,
-  onUpdateItem,
-  onCancelEdit,
-  onEditClick
+  showBackButton = false,
+  showCreateButton = false,
+  subtitle,
+  title,
+  variant = 'detail'
 }) => {
   const navigate = useNavigate();
   
@@ -241,7 +247,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
         </div>
       ) : (
         // Detail variant layout
-        <>
+        <div className={styles.detailLayout}>
           <div className={styles.titleSection}>
             {showBackButton && (
               <Button 
@@ -254,41 +260,47 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
               </Button>
             )}
             <h1 className={styles.title}>{title}</h1>
-            {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-            <Button
-              variant="secondary"
-              handleClick={handleEditClick}
-              className={styles.editButton}
-              iconLeft={<EditIcon />}
-              small
-            >
-              Edit
-            </Button>
-            {isEditing && (
-              <div className={styles.editContainer}>
-                <form onSubmit={handleProjectSubmit}>
-                  <TextInput
-                    label={getInputLabel()}
-                    value={projectName}
-                    handleChange={handleProjectNameChange}
-                    error={!!projectNameError}
-                    errorBottom
-                    errorText={projectNameError}
-                    className={styles.projectNameInput}
-                    disabled={createProjectMutation.isPending}
-                    placeholder={getInputPlaceholder()}
+            <div className={styles.subtitleSection}>
+              {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+              {bookmarkCount !== undefined && <p className={styles.bookmarkCount}><BookmarkIcon />{bookmarkCount}</p>}
+              {noteCount !== undefined && <p className={styles.noteCount}><NoteIcon />{noteCount}</p>}
+            </div>
+            <div className={styles.editSection}>
+              <Button
+                variant="secondary"
+                handleClick={handleEditClick}
+                className={styles.editButton}
+                iconLeft={<EditIcon />}
+                small
+              >
+                Edit
+              </Button>
+              {isEditing && (
+                <div className={styles.editContainer}>
+                  <form onSubmit={handleProjectSubmit}>
+                    <TextInput
+                      label={getInputLabel()}
+                      value={projectName}
+                      handleChange={handleProjectNameChange}
+                      error={!!projectNameError}
+                      errorBottom
+                      errorText={projectNameError}
+                      className={styles.projectNameInput}
+                      disabled={createProjectMutation.isPending}
+                      placeholder={getInputPlaceholder()}
+                    />
+                  </form>
+                  <ProjectHeaderEditControlButtons
+                    createProjectMutation={createProjectMutation}
+                    handleDoneClick={handleDoneClick}
+                    handleCancelClick={handleCancelClick}
+                    type="update"
+                    styles={styles}
+                    updateProjectsMutation={updateProjectsMutation}
                   />
-                </form>
-                <ProjectHeaderEditControlButtons
-                  createProjectMutation={createProjectMutation}
-                  handleDoneClick={handleDoneClick}
-                  handleCancelClick={handleCancelClick}
-                  type="update"
-                  styles={styles}
-                  updateProjectsMutation={updateProjectsMutation}
-                />
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
           <div className={styles.searchSection}>
             <ProjectSearchBar
@@ -298,7 +310,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
               styles={styles}
             />
           </div>
-        </>
+        </div>
       )}
     </div>
   );

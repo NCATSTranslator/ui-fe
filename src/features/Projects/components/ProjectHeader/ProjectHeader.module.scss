@@ -34,12 +34,6 @@
     font-weight: 800;
     margin: 0;
   }
-  .subtitle {
-    margin: 0;
-    font-weight: 400;
-    color: $black;
-    font-size: $bodyTwoSize;
-  }
   .titleSection {
     flex: 1;
     min-width: 0;
@@ -104,6 +98,49 @@
         align-items: center;
         button {
           flex: 1;
+        }
+      }
+    }
+  }
+  // Detail variant styles
+  .detailLayout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $m;
+    width: 100%;
+    .editButton, .shareButton {
+      background-color: $white;
+      &:hover {
+        background-color: $midGray;
+      }
+    }
+  }
+  .editSection {
+    margin-top: $xs;
+  }
+  .subtitleSection {
+    display: flex;
+    gap: $s;
+    align-items: center;
+    font-size: $bodyTwoSize;
+    color: $black;
+    .subtitle {
+      margin: 0;
+      font-weight: 400;
+      color: $black;
+      font-size: $bodyTwoSize;
+    }
+    .bookmarkCount, .noteCount {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin: 0;
+      svg {
+        width: $m;
+        height: $m;
+        path {
+          fill: $darkGray;
         }
       }
     }

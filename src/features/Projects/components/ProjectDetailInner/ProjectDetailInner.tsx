@@ -92,6 +92,8 @@ const ProjectDetailInner = () => {
         onUpdateItem={editHandlers.handleUpdateItem}
         onCancelEdit={editHandlers.handleCancelEdit}
         onEditClick={handleEditClick}
+        bookmarkCount={project.bookmark_count}
+        noteCount={project.note_count}
       />
       <Tabs 
         isOpen={true}
