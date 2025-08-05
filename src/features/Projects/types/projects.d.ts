@@ -16,12 +16,20 @@ export type QueryUpdate = {
 }
 
 export type ProjectRaw = {
+  ars_pkey?: string | null;
+  data: {
+    pks: string[];
+    title: string;
+  }
+  deleted: boolean;
   id: number;
-  title: string;
-  qids: string[];
+  label?: string | null;
+  notes?: string | null;
+  object_ref?: string | null;
+  save_type: "project";
   time_created: Date;
   time_updated: Date;
-  deleted: boolean;
+  user_id?: string | null;
 }
 
 export type Project = ProjectRaw & {
@@ -71,13 +79,34 @@ export const isProjectRaw = (obj: unknown): obj is ProjectRaw => {
     return false;
   }
   
-  if (!('title' in obj)) {
-    console.warn('isProjectRaw: Missing "title" property', obj);
+  if (!('data' in obj)) {
+    console.warn('isProjectRaw: Missing "data" property', obj);
     return false;
   }
   
-  if (!('qids' in obj)) {
-    console.warn('isProjectRaw: Missing "qids" property', obj);
+  const data = (obj as unknown).data;
+  if (typeof data !== 'object' || data === null) {
+    console.warn('isProjectRaw: "data" property is not an object or is null', data);
+    return false;
+  }
+  
+  if (!('pks' in data)) {
+    console.warn('isProjectRaw: Missing "data.pks" property', data);
+    return false;
+  }
+  
+  if (!('title' in data)) {
+    console.warn('isProjectRaw: Missing "data.title" property', data);
+    return false;
+  }
+  
+  if (!('deleted' in obj)) {
+    console.warn('isProjectRaw: Missing "deleted" property', obj);
+    return false;
+  }
+  
+  if (!('save_type' in obj)) {
+    console.warn('isProjectRaw: Missing "save_type" property', obj);
     return false;
   }
   
@@ -88,11 +117,6 @@ export const isProjectRaw = (obj: unknown): obj is ProjectRaw => {
   
   if (!('time_updated' in obj)) {
     console.warn('isProjectRaw: Missing "time_updated" property', obj);
-    return false;
-  }
-  
-  if (!('deleted' in obj)) {
-    console.warn('isProjectRaw: Missing "deleted" property', obj);
     return false;
   }
   
@@ -228,13 +252,43 @@ export const isUserQueryObject = (obj: unknown): obj is UserQueryObject => {
     return false;
   }
   
-  if (!('queries' in obj)) {
-    console.warn('isUserQueryObject: Missing "queries" property', obj);
+  if (!('sid' in obj)) {
+    console.warn('isUserQueryObject: Missing "sid" property', obj);
     return false;
   }
   
-  if (!Array.isArray((obj as unknown).queries)) {
-    console.warn('isUserQueryObject: "queries" property is not an array', (obj as unknown).queries);
+  if (!('pk' in obj)) {
+    console.warn('isUserQueryObject: Missing "pk" property', obj);
+    return false;
+  }
+  
+  if (!('time_created' in obj)) {
+    console.warn('isUserQueryObject: Missing "time_created" property', obj);
+    return false;
+  }
+  
+  if (!('time_updated' in obj)) {
+    console.warn('isUserQueryObject: Missing "time_updated" property', obj);
+    return false;
+  }
+  
+  if (!('title' in obj)) {
+    console.warn('isUserQueryObject: Missing "title" property', obj);
+    return false;
+  }
+  
+  if (!('tag_ids' in obj)) {
+    console.warn('isUserQueryObject: Missing "tag_ids" property', obj);
+    return false;
+  }
+  
+  if (!('bookmark_ids' in obj)) {
+    console.warn('isUserQueryObject: Missing "bookmark_ids" property', obj);
+    return false;
+  }
+  
+  if (!('deleted' in obj)) {
+    console.warn('isUserQueryObject: Missing "deleted" property', obj);
     return false;
   }
   
@@ -261,4 +315,6 @@ export const isProjectUpdate = (obj: unknown): obj is ProjectUpdate => {
     console.warn('isProjectUpdate: Missing "pks" property', obj);
     return false;
   }
-}
+  
+  return true;
+};

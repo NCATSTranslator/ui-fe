@@ -13,7 +13,7 @@ export const getUserProjects = async (
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<ProjectRaw[]> => {
-  const url = `${API_PATH_PREFIX}/users/me/projects`;
+  const url = `${API_PATH_PREFIX}/users/me/projects?include_deleted=true`;
   
   return fetchWithErrorHandling<ProjectRaw[]>(
     () => get(url),
@@ -31,7 +31,7 @@ export const getUserQueryStatus = async (
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<QueryStatusObject[]> => {
-  const url = `${API_PATH_PREFIX}/users/me/queries/status`;
+  const url = `${API_PATH_PREFIX}/users/me/queries/status?include_deleted=true`;
   
   return fetchWithErrorHandling<QueryStatusObject[]>(
     () => get(url),

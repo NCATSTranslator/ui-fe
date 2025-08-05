@@ -5,16 +5,25 @@ import { useUpdateProjects, useUpdateQueries } from '@/features/Projects/hooks/c
 
 export interface EditProjectQueryState {
   isEditing: boolean;
-  editingItem?: { id: number | string; name: string; type: 'project' | 'query' };
+  editingItem?: { 
+    id: number | string; 
+    name: string; 
+    type: 'project' | 'query';
+    queryIds?: string[];
+  };
 }
 
 export interface EditHandlers {
   handleEditProject: (project: Project) => void;
   handleEditQuery: (query: QueryStatusObject) => void;
-  handleUpdateItem: (id: number | string, newName: string, type: 'project' | 'query') => void;
+  handleUpdateItem: (id: number | string, type: 'project' | 'query', newName?: string, newQids?: string[]) => void;
   handleCancelEdit: () => void;
 }
 
+/**
+ * Handles the edit state.
+ * @returns The edit state and the function to set the state.
+ */
 export const useEditProjectQueryState = (): [EditProjectQueryState, Dispatch<SetStateAction<EditProjectQueryState>>] => {
   const [editState, setEditState] = useState<EditProjectQueryState>({
     isEditing: false,
@@ -24,6 +33,13 @@ export const useEditProjectQueryState = (): [EditProjectQueryState, Dispatch<Set
   return [editState, setEditState];
 };
 
+/**
+ * Handles the editing of projects and queries.
+ * @param editState - The state of the edit.
+ * @param setEditState - The function to set the edit state.
+ * @param projects - The projects to edit.
+ * @param queries - The queries to edit.
+ */
 export const useEditProjectQueryHandlers = (
   editState: EditProjectQueryState,
   setEditState: Dispatch<SetStateAction<EditProjectQueryState>>,
@@ -37,7 +53,12 @@ export const useEditProjectQueryHandlers = (
   const handleEditProject = (project: Project) => {
     setEditState({
       isEditing: true,
-      editingItem: { id: project.id, name: project.title, type: 'project' }
+      editingItem: { 
+        id: project.id, 
+        name: project.data.title, 
+        type: 'project',
+        queryIds: project.data.pks
+      }
     });
   };
 
@@ -48,7 +69,7 @@ export const useEditProjectQueryHandlers = (
     });
   };
 
-  const handleUpdateItem = (id: number | string, newName: string, type: 'project' | 'query') => {
+  const handleUpdateItem = (id: number | string, type: 'project' | 'query', newName?: string, newQids?: string[]) => {
     if (type === 'project') {
       // Find the project and update it
       const projectToUpdate = projects.find(p => p.id === id);
@@ -58,15 +79,21 @@ export const useEditProjectQueryHandlers = (
           if (!oldData) return oldData;
           return oldData.map((project: Project) => 
             project.id === id 
-              ? { ...project, title: newName }
+              ? { 
+                  ...project, 
+                  data: {
+                    title: newName || project.data.title,
+                    pks: newQids || project.data.pks
+                  }
+                }
               : project
           );
         });
 
         updateProjectsMutation.mutate([{
           id: projectToUpdate.id,
-          title: newName,
-          pks: projectToUpdate.qids
+          title: newName || projectToUpdate.data.title,
+          pks: newQids || projectToUpdate.data.pks
         }], {
           onSuccess: () => {
             setEditState({ isEditing: false, editingItem: undefined });
@@ -78,7 +105,13 @@ export const useEditProjectQueryHandlers = (
               if (!oldData) return oldData;
               return oldData.map((project: Project) => 
                 project.id === id 
-                  ? { ...project, title: projectToUpdate.title }
+                  ? { 
+                      ...project,
+                      data: {
+                        title: projectToUpdate.data.title,
+                        pks: projectToUpdate.data.pks
+                      }
+                    }
                   : project
               );
             });
@@ -96,7 +129,7 @@ export const useEditProjectQueryHandlers = (
             query.data.qid === id 
               ? { 
                   ...query, 
-                  data: { ...query.data, title: newName }
+                  data: { ...query.data, title: newName || query.data.title }
                 }
               : query
           );
@@ -104,7 +137,7 @@ export const useEditProjectQueryHandlers = (
 
         updateQueriesMutation.mutate([{
           qid: queryToUpdate.data.qid,
-          title: newName
+          title: newName || queryToUpdate.data.title
         }], {
           onSuccess: () => {
             setEditState({ isEditing: false, editingItem: undefined });

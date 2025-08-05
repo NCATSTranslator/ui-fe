@@ -14,8 +14,8 @@ export const sortProjects = (projects: Project[], sortField: SortField, sortDire
 
     switch (sortField) {
       case 'name':
-        aValue = a.title.toLowerCase();
-        bValue = b.title.toLowerCase();
+        aValue = a.data.title.toLowerCase();
+        bValue = b.data.title.toLowerCase();
         break;
       case 'lastSeen':
         aValue = a.time_updated;
@@ -54,12 +54,11 @@ export const sortProjects = (projects: Project[], sortField: SortField, sortDire
  * @returns {Project[]} The formatted projects
  */
 export const filterAndSortProjects = (projects: Project[], sortField: SortField, sortDirection: SortDirection, searchTerm: string): Project[] => {
-  const filteredProjects = projects.filter(project => project.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredProjects = projects.filter(project => project.data.title.toLowerCase().includes(searchTerm.toLowerCase()));
   const sortedProjects = sortProjects(filteredProjects, sortField, sortDirection);
-  
   // make sure unassigned is always at bottom (has id of -1)
   const unassignedProject = sortedProjects.find(project => project.id === -1);
-  if (unassignedProject) {
+  if (unassignedProject && sortedProjects.length > 1) {
     sortedProjects.splice(sortedProjects.indexOf(unassignedProject), 1);
     sortedProjects.push(unassignedProject);
   }
