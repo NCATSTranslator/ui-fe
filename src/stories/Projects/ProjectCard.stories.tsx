@@ -6,13 +6,16 @@ import { Project, QueryStatusObject } from '@/features/Projects/types/projects';
 
 const mockProject: Project = {
   id: 1,
-  title: 'Cancer Research Project',
-  qids: ['qid1', 'qid2', 'qid3'],
+  data: {
+    title: 'Cancer Research Project',
+    pks: ['qid1', 'qid2', 'qid3'],
+  },
   time_created: new Date('2024-01-15'),
   time_updated: new Date('2024-01-20'),
   deleted: false,
   bookmark_count: 5,
   note_count: 3,
+  save_type: 'project',
 };
 
 const mockQueries: QueryStatusObject[] = [
@@ -118,8 +121,11 @@ export const EmptyProject: Story = {
     queries: [],
     project: {
       ...mockProject,
-      title: 'Empty Project',
-      qids: [],
+      data: {
+        ...mockProject.data,
+        title: 'Empty Project',
+        pks: [],
+      },
       bookmark_count: 0,
       note_count: 0,
     },
@@ -133,7 +139,10 @@ export const LongTitle: Story = {
     queries: mockQueries,
     project: {
       ...mockProject,
-      title: 'Very Long Project Title That Might Overflow and Need to be Handled Properly',
+      data: {
+        ...mockProject.data,
+        title: 'Very Long Project Title That Might Overflow and Need to be Handled Properly',
+      },
     },
     searchTerm: '',
     selectedProjects: [],

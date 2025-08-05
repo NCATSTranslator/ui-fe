@@ -27,7 +27,6 @@ const meta = {
   },
   args: {
     setSearchTerm: fn(),
-    onCreateProject: fn(),
   },
   decorators: [
     (Story) => {

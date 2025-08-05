@@ -8,33 +8,42 @@ import { Project, QueryStatusObject } from '@/features/Projects/types/projects';
 const mockProjects: Project[] = [
   {
     id: 1,
-    title: 'Cancer Research Project',
-    qids: ['qid1', 'qid2', 'qid3'],
+    data: {
+      pks: ['qid1', 'qid2', 'qid3'],
+      title: 'Cancer Research Project',
+    },
     time_created: new Date('2024-01-15'),
     time_updated: new Date('2024-01-20'),
     deleted: false,
     bookmark_count: 5,
     note_count: 3,
+    save_type: 'project',
   },
   {
     id: 2,
-    title: 'Diabetes Study',
-    qids: ['qid4', 'qid5'],
+    data: {
+      pks: ['qid4', 'qid5'],
+      title: 'Diabetes Study',
+    },
     time_created: new Date('2024-01-10'),
     time_updated: new Date('2024-01-18'),
     deleted: false,
     bookmark_count: 3,
     note_count: 1,
+    save_type: 'project',
   },
   {
     id: 3,
-    title: 'Heart Disease Analysis',
-    qids: ['qid6'],
+    data: {
+      pks: ['qid6'],
+      title: 'Heart Disease Analysis',
+    },
     time_created: new Date('2024-01-05'),
     time_updated: new Date('2024-01-15'),
     deleted: false,
     bookmark_count: 2,
     note_count: 0,
+    save_type: 'project',
   },
 ];
 
