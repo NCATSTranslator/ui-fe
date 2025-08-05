@@ -7,7 +7,7 @@ import ProjectCard from '@/features/Projects/components/ProjectCard/ProjectCard'
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import ProjectsTableHeader from '@/features/Projects/components/TableHeader/ProjectsTableHeader/ProjectsTableHeader';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
-import { useDeleteProjects, useDeleteProjectsAndQueries, useDeleteQueries, useUserProjects, useUserQueryStatus } from '@/features/Projects/hooks/customHooks';
+import { useDeleteProjectsAndQueries, useUserProjects, useUserQueryStatus } from '@/features/Projects/hooks/customHooks';
 import { ProjectRaw, QueryStatusObject, SortField, SortDirection, Project } from '@/features/Projects/types/projects.d';
 import { filterAndSortProjects, filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
@@ -16,7 +16,7 @@ import { useEditProjectQueryState, useEditProjectQueryHandlers } from '@/feature
 import Button from '@/features/Core/components/Button/Button';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
-import { useQueryClient } from '@tanstack/react-query';
+import DeletedTableHeader from '../TableHeader/DeletedTableHeader/DeletedTableHeader';
 
 export const ProjectListInner = () => {
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
@@ -273,6 +273,17 @@ export const ProjectListInner = () => {
                 !hideTrashTab
                 ?
                   <Tab heading="Trash" className={styles.projectTabContent}>
+                    <DeletedTableHeader
+                      activeProjects={sortedDeletedProjects}
+                      activeQueries={sortedDeletedQueries}
+                      onSort={handleSort}
+                      selectedProjects={selectedProjects}
+                      setSelectedProjects={setSelectedProjects}
+                      selectedQueries={selectedQueries}
+                      setSelectedQueries={setSelectedQueries}
+                      sortDirection={sortDirection}
+                      sortField={sortField}
+                    />
                     <div className={styles.projectGrid}>
                       {sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0 ? (
                         <div className={styles.emptyState}>
@@ -281,7 +292,7 @@ export const ProjectListInner = () => {
                       ) : (
                         <>
                           {sortedDeletedProjects.length > 0 && (
-                            deletedFormattedProjects.map((project: Project) => (
+                            sortedDeletedProjects.map((project: Project) => (
                               <ProjectCard 
                                 key={project.id}
                                 queries={queries}
@@ -293,7 +304,7 @@ export const ProjectListInner = () => {
                             ))
                           )}
                           {sortedDeletedQueries.length > 0 && (
-                            deletedQueries.map((query: QueryStatusObject) => (
+                            sortedDeletedQueries.map((query: QueryStatusObject) => (
                               <QueryCard 
                                 key={query.data.qid}
                                 query={query}
