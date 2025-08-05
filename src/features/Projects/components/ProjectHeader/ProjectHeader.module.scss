@@ -145,6 +145,17 @@
       }
     }
   }
+  .buttonContainer {
+    display: flex;
+    gap: $xs;
+    align-items: center;
+    .restoreButton {
+      svg path {
+        fill: transparent;
+        stroke: $black;
+      }
+    }
+  }
 }
 
 // Responsive adjustments

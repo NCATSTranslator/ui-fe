@@ -138,14 +138,14 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.actionsColumn} ${styles.column}`}>
         {
-          !isUnassigned && (
+          (!isUnassigned && !isDeleted) && (
             <Button variant="secondary" iconOnly handleClick={handleEdit}>
               <EditIcon/>
             </Button>
           )
         }
         {
-          !isUnassigned && (
+          (!isUnassigned && !isDeleted) && (
             <Button variant="secondary" iconOnly handleClick={handleShare}>
               <ShareIcon/>
             </Button>

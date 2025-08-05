@@ -8,11 +8,13 @@ import ArrowLeft from '@/assets/icons/directional/Arrows/Arrow Left.svg?react';
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
+import RestoreIcon from '@/assets/icons/directional/Undo & Redo/Undo.svg?react';
+import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
 import { useCreateProject, useUpdateProjects } from '@/features/Projects/hooks/customHooks';
 import styles from './ProjectHeader.module.scss';
 import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/ProjectSearchBar';
 import ProjectHeaderEditControlButtons from './ProjectHeaderEditControlButtons';
-import { QueryStatusObject } from '@/features/Projects/types/projects';
+import { QueryStatusObject, Project } from '@/features/Projects/types/projects';
 
 interface ProjectHeaderProps {
   backButtonText?: string;
@@ -24,6 +26,7 @@ interface ProjectHeaderProps {
   onCancelEdit?: () => void;
   onEditClick?: () => void;
   onUpdateItem?: (id: number | string, type: 'project' | 'query', newName?: string, newQids?: string[]) => void;
+  project?: Project;
   searchPlaceholder?: string;
   searchTerm: string;
   selectedQueries?: QueryStatusObject[];
@@ -46,6 +49,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   onCancelEdit,
   onEditClick,
   onUpdateItem,
+  project,
   searchPlaceholder = 'Search by Query Name',
   searchTerm,
   selectedQueries,
@@ -186,6 +190,14 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
     }
   };
 
+  const handleRestore = () => {
+    console.log('restore');
+  };
+
+  const handleDeletePermanently = () => {
+    console.log('delete permanently');
+  };
+
   return (
     <div className={`${styles.projectHeader} ${className || ''}`}>
       {variant === 'list' ? (
@@ -262,15 +274,46 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
               {noteCount !== undefined && <p className={styles.noteCount}><NoteIcon />{noteCount}</p>}
             </div>
             <div className={styles.editSection}>
-              <Button
-                variant="secondary"
-                handleClick={handleEditClick}
-                className={styles.editButton}
-                iconLeft={<EditIcon />}
-                small
-              >
-                Edit
-              </Button>
+              <div className={styles.buttonContainer}>
+              {
+                (project && project.deleted) 
+                ? 
+                  (
+                    <>
+                      <Button
+                        variant="secondary"
+                        handleClick={handleRestore}
+                        className={`${styles.editButton} ${styles.restoreButton}`}
+                        iconLeft={<RestoreIcon />}
+                        small
+                      >
+                        Restore Project
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        handleClick={handleDeletePermanently}
+                        className={styles.editButton}
+                        iconLeft={<TrashIcon />}
+                        small
+                      >
+                        Delete Permanently
+                      </Button>
+                    </>
+                  )
+                : 
+                  (
+                    <Button
+                      variant="secondary"
+                      handleClick={handleEditClick}
+                      className={styles.editButton}
+                      iconLeft={<EditIcon />}
+                      small
+                    >
+                      Edit
+                    </Button>
+                  )
+              }
+              </div>
               {isEditing && (
                 <div className={styles.editContainer}>
                   <form onSubmit={handleProjectSubmit}>
