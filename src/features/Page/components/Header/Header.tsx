@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import { useWindowSize } from "@/features/Common/hooks/customHooks";
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
-import Workspace from '@/assets/icons/navigation/Workspace.svg?react';
 import Question from '@/assets/icons/navigation/Help.svg?react';
 import Cog from '@/assets/icons/navigation/Settings.svg?react';
 import Logo from '@/assets/images/site-logo.png';
