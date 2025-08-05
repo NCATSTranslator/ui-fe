@@ -24,7 +24,7 @@ const ProjectDetailInner = () => {
 
   const projectQueries = useMemo(() => {
     if (!project) return [] as QueryStatusObject[];
-    return queries.filter((q: QueryStatusObject) => project.qids.includes(q.data.qid));
+    return queries.filter((q: QueryStatusObject) => project.data.pks.includes(q.data.qid));
   }, [project, queries]);
 
   // Sorting & searching state
@@ -79,7 +79,7 @@ const ProjectDetailInner = () => {
   return (
     <div className={styles.projectDetail}>
       <ProjectHeader
-        title={project.title}
+        title={project.data.title}
         subtitle={`${projectQueries.length} Quer${projectQueries.length === 1 ? 'y' : 'ies'}`}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}

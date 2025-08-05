@@ -11,17 +11,9 @@ import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
 import CardName from '@/features/Projects/components/CardName/CardName';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
-import { QueryStatus } from '@/features/Projects/types/projects';
+import { Project, QueryStatus, QueryStatusObject } from '@/features/Projects/types/projects';
 
 interface DataCardProps<T> {
-  item: T;
-  type: 'project' | 'smartQuery';
-  searchTerm?: string;
-  selectedItems: T[];
-  setSelectedItems: Dispatch<SetStateAction<T[]>>;
-  onEdit?: (item: T) => void;
-  onShare?: (item: T) => void;
-  status?: string;
   className?: string;
   getItemId: (item: T) => number | string;
   getItemTitle: (item: T) => string;
@@ -31,17 +23,17 @@ interface DataCardProps<T> {
   getItemNoteCount: (item: T) => number;
   getItemStatus?: (item: T) => string;
   getItemCount?: (item: T) => number;
+  item: T;
+  onEdit?: (item: T) => void;
+  onShare?: (item: T) => void;
+  searchTerm?: string;
+  selectedItems: T[];
+  setSelectedItems: Dispatch<SetStateAction<T[]>>;
+  status?: string;
+  type: 'project' | 'smartQuery';
 }
 
 const DataCard = <T,>({
-  item,
-  type,
-  searchTerm,
-  selectedItems,
-  setSelectedItems,
-  onEdit,
-  onShare,
-  status,
   className,
   getItemId,
   getItemTitle,
@@ -50,7 +42,15 @@ const DataCard = <T,>({
   getItemBookmarkCount,
   getItemNoteCount,
   getItemStatus,
-  getItemCount
+  getItemCount,
+  item,
+  onEdit,
+  onShare,
+  searchTerm,
+  selectedItems,
+  setSelectedItems,
+  status,
+  type
 }: DataCardProps<T>) => {
   const navigate = useNavigate();
 
@@ -63,6 +63,8 @@ const DataCard = <T,>({
   const note_count =  getItemNoteCount(item);
   const itemCount =  getItemCount?.(item);
   const itemStatus = getItemStatus?.(item);
+
+  const isDeleted = type === 'project' ? (item as Project).deleted : (item as QueryStatusObject).data.deleted;
 
   const handleSelectItem = () => {
     setSelectedItems((prevItems) => {
@@ -91,6 +93,16 @@ const DataCard = <T,>({
       navigate(`/projects/${getItemId(item)}`);
   };
 
+  const handleRestore = (e: MouseEvent) => {
+    e.stopPropagation();
+    console.log('restore');
+  };
+
+  const handleDelete = (e: MouseEvent) => {
+    e.stopPropagation();
+    console.log('delete');
+  };
+
   return (
     <CardWrapper 
       className={`${styles.dataCard} ${className || ''} ${type === 'project' && styles.projectWrapper}`}
@@ -104,13 +116,25 @@ const DataCard = <T,>({
         }
       </div>
       <div className={`${styles.nameColumn} ${styles.column}`}>
-        <CardName 
-          type={type}
-          name={title}
-          itemCount={itemCount}
-          searchTerm={searchTerm}
-          isUnassigned={isUnassigned}
-        />
+        <div className={styles.nameContainer}>
+          <CardName 
+            type={type}
+            name={title}
+            itemCount={itemCount}
+            searchTerm={searchTerm}
+            isUnassigned={isUnassigned}
+          />
+          {
+            isDeleted && (
+              <div className={styles.deletedInteractions}>
+                <span className={styles.interaction} onClick={handleRestore}>Restore Query</span>
+                <span className={styles.separator}>·</span>
+                <span className={styles.interaction} onClick={handleDelete}>Delete Now</span>
+              </div>
+            )
+          }
+        </div>
+
       </div>
       <div className={`${styles.actionsColumn} ${styles.column}`}>
         {

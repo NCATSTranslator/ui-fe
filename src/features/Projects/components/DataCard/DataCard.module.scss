@@ -58,4 +58,22 @@
       }
     }
   }
-} 
+
+  .deletedInteractions {
+    display: flex;
+    gap: $xxs;
+    align-items: center;
+    margin-top: $xxs;
+    span {
+      font-size: $captionSize;
+      font-weight: 800;
+      color: $purpleOne;
+    }
+    .interaction {
+      &:hover {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    }
+  }
+}

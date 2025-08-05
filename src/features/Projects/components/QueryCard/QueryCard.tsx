@@ -3,19 +3,19 @@ import { QueryStatusObject } from '@/features/Projects/types/projects.d';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
 
 interface QueryCardProps {
+  onEdit?: (query: QueryStatusObject) => void;
   query: QueryStatusObject;
   searchTerm?: string;
-  setSelectedQueries: Dispatch<SetStateAction<QueryStatusObject[]>>;
   selectedQueries?: QueryStatusObject[];
-  onEdit?: (query: QueryStatusObject) => void;
+  setSelectedQueries: Dispatch<SetStateAction<QueryStatusObject[]>>;
 }
 
 const QueryCard = ({ 
+  onEdit,
   query,
   searchTerm,
-  setSelectedQueries,
   selectedQueries = [],
-  onEdit
+  setSelectedQueries
 }: QueryCardProps) => {
   
   return (

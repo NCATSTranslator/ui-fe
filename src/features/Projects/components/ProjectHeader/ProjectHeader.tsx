@@ -12,20 +12,21 @@ import { useCreateProject, useUpdateProjects } from '@/features/Projects/hooks/c
 import styles from './ProjectHeader.module.scss';
 import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/ProjectSearchBar';
 import ProjectHeaderEditControlButtons from './ProjectHeaderEditControlButtons';
+import { QueryStatusObject } from '@/features/Projects/types/projects';
 
 interface ProjectHeaderProps {
   backButtonText?: string;
   bookmarkCount?: number;
   className?: string;
-  editingItem?: { id: number | string; name: string; type: 'project' | 'query' };
+  editingItem?: { id: number | string; type: 'project' | 'query'; name: string; queryIds?: string[] };
   isEditing: boolean;
   noteCount?: number;
   onCancelEdit?: () => void;
-  onCreateProject?: (projectName: string) => void;
   onEditClick?: () => void;
-  onUpdateItem?: (id: number | string, newName: string, type: 'project' | 'query') => void;
+  onUpdateItem?: (id: number | string, type: 'project' | 'query', newName?: string, newQids?: string[]) => void;
   searchPlaceholder?: string;
   searchTerm: string;
+  selectedQueries?: QueryStatusObject[];
   setSearchTerm: (searchTerm: string) => void;
   setIsEditing: (isEditing: boolean) => void;
   showBackButton?: boolean;
@@ -43,11 +44,11 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   isEditing = false,
   noteCount,
   onCancelEdit,
-  onCreateProject,
   onEditClick,
   onUpdateItem,
   searchPlaceholder = 'Search by Query Name',
   searchTerm,
+  selectedQueries,
   setSearchTerm,
   setIsEditing,
   showBackButton = false,
@@ -109,13 +110,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
       
       if (editingItem && onUpdateItem) {
         // Update existing item
-        onUpdateItem(editingItem.id, projectName.trim(), editingItem.type);
-        setIsEditing(false);
-        setProjectName('');
-        setProjectNameError('');
-      } else if (onCreateProject) {
-        // Create new project
-        onCreateProject(projectName.trim());
+        onUpdateItem(editingItem.id, editingItem.type, projectName.trim(), selectedQueries?.map(query => query.data.qid));
         setIsEditing(false);
         setProjectName('');
         setProjectNameError('');
@@ -123,13 +118,14 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
         // Create the project using the mutation
         createProjectMutation.mutate({
           title: projectName.trim(),
-          pks: [] // Empty array for now, can be extended later
+          pks: selectedQueries?.map(query => query.data.qid) || []
         }, {
-          onSuccess: () => {
+          onSuccess: (data) => {
             // Reset form on successful creation
             setIsEditing(false);
             setProjectName('');
             setProjectNameError('');
+            navigate(`/projects/${data.id}`);
           },
           onError: (error) => {
             console.error('Failed to create project:', error);
@@ -178,10 +174,10 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   const handleEditClick = () => {
     if (onEditClick) {
       // Use the parent's edit handler if provided
-      console.log('edit handler provided');
       onEditClick();
     } else {
       // Fallback to local edit handling
+      console.log('edit handler not provided');
       setIsEditing(true);
       if (variant === 'detail' && title) {
         // In detail view, we're editing the current project

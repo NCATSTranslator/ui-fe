@@ -34,11 +34,8 @@ export const ProjectListInner = () => {
 
   // Format projects with calculated fields (bookmarks, notes, etc.)
   const activeFormattedProjects = useFormattedProjects(activeProjects, queries);
-  const deletedFormattedProjects = useFormattedProjects(deletedProjects, queries);
+  const deletedFormattedProjects = useFormattedProjects(deletedProjects, queries, false);
 
-  const { mutate: deleteProjects } = useDeleteProjects();
-  const { mutate: deleteQueries } = useDeleteQueries();
-  const queryClient = useQueryClient();
   const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<QueryStatusObject[]>([]);
 
@@ -52,6 +49,13 @@ export const ProjectListInner = () => {
 
   const setIsEditing = (isEditing: boolean) => {
     setEditState(prev => ({ ...prev, isEditing }));
+    if(isEditing) {
+      const selectedQids = editState.editingItem?.queryIds || [];
+      const selectedQueries = activeQueries.filter(query => selectedQids.includes(query.data.qid));
+      setSelectedQueries(selectedQueries);
+    } else {
+      setSelectedQueries([]);
+    }
   };
 
   const handleSort = (field: SortField) => {
@@ -85,9 +89,9 @@ export const ProjectListInner = () => {
   const sortedDeletedProjects = useMemo(() => filterAndSortProjects(deletedFormattedProjects.filter(project => project.id !== -1), sortField, sortDirection, searchTerm), [deletedFormattedProjects, sortField, sortDirection, searchTerm]);
   const sortedDeletedQueries = useMemo(() => filterAndSortQueries(deletedQueries, sortField, sortDirection, searchTerm), [deletedQueries, sortField, sortDirection, searchTerm]);
 
-  const hideProjectsTab = searchTerm.length > 0 && sortedActiveProjects.length === 0;
-  const hideQueriesTab = searchTerm.length > 0 && sortedActiveQueries.length === 0;
-  const hideTrashTab = searchTerm.length > 0 && sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0;
+  const hideProjectsTab = (searchTerm.length > 0 && sortedActiveProjects.length === 0) || (editState.editingItem?.type === "project" && editState.isEditing);
+  const hideQueriesTab = (searchTerm.length > 0 && sortedActiveQueries.length === 0);
+  const hideTrashTab = (searchTerm.length > 0 && sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0) || (editState.editingItem?.type === "project" && editState.isEditing);
 
   if (isLoading) {
     return (
@@ -147,6 +151,7 @@ export const ProjectListInner = () => {
         editingItem={editState.editingItem}
         onUpdateItem={editHandlers.handleUpdateItem}
         onCancelEdit={editHandlers.handleCancelEdit}
+        selectedQueries={selectedQueries}
       />
       {
         hideProjectsTab && hideQueriesTab && hideTrashTab
@@ -276,33 +281,27 @@ export const ProjectListInner = () => {
                       ) : (
                         <>
                           {sortedDeletedProjects.length > 0 && (
-                            <div className={styles.deletedSection}>
-                              <h4>Deleted Projects</h4>
-                              {deletedFormattedProjects.map((project: Project) => (
-                                <ProjectCard 
-                                  key={project.id}
-                                  queries={queries}
-                                  project={project}
-                                  searchTerm={searchTerm}
-                                  setSelectedProjects={setSelectedProjects}
-                                  selectedProjects={selectedProjects}
-                                />
-                              ))}
-                            </div>
+                            deletedFormattedProjects.map((project: Project) => (
+                              <ProjectCard 
+                                key={project.id}
+                                queries={queries}
+                                project={project}
+                                searchTerm={searchTerm}
+                                setSelectedProjects={setSelectedProjects}
+                                selectedProjects={selectedProjects}
+                              />
+                            ))
                           )}
                           {sortedDeletedQueries.length > 0 && (
-                            <div className={styles.deletedSection}>
-                              <h4>Deleted Queries</h4>
-                              {deletedQueries.map((query: QueryStatusObject) => (
-                                <QueryCard 
-                                  key={query.data.qid}
-                                  query={query}
-                                  searchTerm={searchTerm}
-                                  setSelectedQueries={setSelectedQueries}
-                                  selectedQueries={selectedQueries}
-                                />
-                              ))}
-                            </div>
+                            deletedQueries.map((query: QueryStatusObject) => (
+                              <QueryCard 
+                                key={query.data.qid}
+                                query={query}
+                                searchTerm={searchTerm}
+                                setSelectedQueries={setSelectedQueries}
+                                selectedQueries={selectedQueries}
+                              />
+                            ))
                           )}
                         </>
                       )}
@@ -315,7 +314,7 @@ export const ProjectListInner = () => {
               {(selectedProjects.length > 0 || selectedQueries.length > 0) && (
                 <>
                   <span>{selectedProjects.length || selectedQueries.length} Selected</span>
-                  {selectedQueries.length > 0 && (
+                  {(selectedQueries.length > 0 && !editState.isEditing) && (
                     <Button
                       variant="secondary"
                       handleClick={() => {}}

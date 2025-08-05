@@ -4,21 +4,21 @@ import { getProjectStatus } from '@/features/Projects/utils/utilities';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
 
 interface ProjectCardProps {
-  queries: QueryStatusObject[];
-  project: Project;
-  searchTerm?: string;
-  setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
-  selectedProjects: Project[];
   onEdit?: (project: Project) => void;
+  project: Project;
+  queries: QueryStatusObject[];
+  searchTerm?: string;
+  selectedProjects: Project[];
+  setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
 }
 
-const ProjectCard = ({ 
-  queries,
+const ProjectCard = ({
+  onEdit,
   project,
+  queries,
   searchTerm,
-  setSelectedProjects,
   selectedProjects,
-  onEdit
+  setSelectedProjects
 }: ProjectCardProps) => {
 
   const status = useMemo(() => getProjectStatus(project, queries), [project, queries]);
@@ -33,12 +33,12 @@ const ProjectCard = ({
       status={status}
       onEdit={onEdit}
       getItemId={(item: Project) => item.id}
-      getItemTitle={(item: Project) => item.title}
+      getItemTitle={(item: Project) => item.data.title}
       getItemTimeCreated={(item: Project) => item.time_created.toString()}
       getItemTimeUpdated={(item: Project) => item.time_updated.toString()}
       getItemBookmarkCount={(item: Project) => item.bookmark_count}
       getItemNoteCount={(item: Project) => item.note_count}
-      getItemCount={(item: Project) => item.qids.length}
+      getItemCount={(item: Project) => item.data.pks.length}
     />
   );
 };
