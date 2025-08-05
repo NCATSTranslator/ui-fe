@@ -3,7 +3,7 @@ import { Link, useLocation, Location } from 'react-router-dom';
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useSelector } from "react-redux";
 import { useWindowSize } from "@/features/Common/hooks/customHooks";
-import History from '@/assets/icons/navigation/History.svg?react';
+import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
 import Workspace from '@/assets/icons/navigation/Workspace.svg?react';
 import Question from '@/assets/icons/navigation/Help.svg?react';
@@ -48,10 +48,7 @@ const Header: FC<HeaderProps> = ({children}) => {
           <div className={styles.right}>
             {
               !!user &&
-              <>
-                <Link to={`/workspace`} className={`${currentPage === '/workspace' && styles.active} ${styles.workspaceLink}`}><Workspace/><span className={styles.linkSpan}>Workspace</span></Link>
-                <Link to={`/history`} className={`${currentPage === '/history' && styles.active}`}><History/><span className={styles.linkSpan}>Search History</span></Link>
-              </>
+              <Link to={`/projects`} className={`${currentPage.includes("projects") && styles.active} ${styles.projectsLink}`}><FolderIcon/><span className={styles.linkSpan}>Projects</span></Link>
             }
             <Link to={`/send-feedback${!!currentARSpk ? `?q=${currentARSpk}` : ''}`} className={`${currentPage === '/send-feedback' && styles.active}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
             <Link to={`/help`}  className={`${currentPage === '/help' && styles.active} ${styles.helpLink}`} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
