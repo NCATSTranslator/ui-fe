@@ -63,6 +63,13 @@ export interface UserQueryObject {
 export type SortField = 'name' | 'lastSeen' | 'dateAdded' | 'bookmarks' | 'notes' | 'status';
 export type SortDirection = 'asc' | 'desc';
 
+export type EditingItem = {
+  id: number | string;
+  type: 'project' | 'query';
+  name: string;
+  queryIds?: string[];
+} | undefined;
+
 export const isProjectRaw = (obj: unknown): obj is ProjectRaw => {
   if (typeof obj !== 'object' || obj === null) {
     console.warn('isProjectRaw: Object is not an object or is null', obj);

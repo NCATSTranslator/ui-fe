@@ -10,21 +10,25 @@ import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import RestoreIcon from '@/assets/icons/directional/Undo & Redo/Undo.svg?react';
 import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
-import { useCreateProject, useRestoreProjects, useUpdateProjects } from '@/features/Projects/hooks/customHooks';
+import { useCreateProject, useUpdateProjects } from '@/features/Projects/hooks/customHooks';
 import styles from './ProjectHeader.module.scss';
 import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/ProjectSearchBar';
 import ProjectHeaderEditControlButtons from './ProjectHeaderEditControlButtons';
-import { UserQueryObject, Project } from '@/features/Projects/types/projects';
+import { UserQueryObject, Project, EditingItem } from '@/features/Projects/types/projects';
 
 interface ProjectHeaderProps {
   backButtonText?: string;
   bookmarkCount?: number;
   className?: string;
-  editingItem?: { id: number | string; type: 'project' | 'query'; name: string; queryIds?: string[] };
+  editingItem?: EditingItem;
   isEditing: boolean;
   noteCount?: number;
   onCancelEdit?: () => void;
   onEditClick?: () => void;
+  onRestoreProject?: (project: Project) => void;
+  onDeleteProject?: (project: Project) => void;
+  onRestoreQuery?: (query: UserQueryObject) => void;
+  onDeleteQuery?: (query: UserQueryObject) => void;
   onUpdateItem?: (id: number | string, type: 'project' | 'query', newName?: string, newQids?: string[]) => void;
   project?: Project;
   searchPlaceholder?: string;
@@ -48,6 +52,10 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   noteCount,
   onCancelEdit,
   onEditClick,
+  onRestoreProject,
+  onDeleteProject,
+  onRestoreQuery,
+  onDeleteQuery,
   onUpdateItem,
   project,
   searchPlaceholder = 'Search by Query Name',
@@ -68,7 +76,6 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   
   const createProjectMutation = useCreateProject();
   const updateProjectsMutation = useUpdateProjects();
-  const restoreProjectsMutation = useRestoreProjects();
 
   // Initialize project name when editing an existing item
   useEffect(() => {
@@ -105,6 +112,13 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
     handleDoneClick();
   };
 
+  const handleCreateNewClick = () => {
+      // Enter editing mode
+      setIsEditing(true);
+      setProjectName('');
+      setProjectNameError('');
+  };
+
   const handleDoneClick = () => {
     if (isEditing) {
       // Handle Done Editing
@@ -138,11 +152,6 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
           }
         });
       }
-    } else {
-      // Enter editing mode
-      setIsEditing(true);
-      setProjectName('');
-      setProjectNameError('');
     }
   };
 
@@ -191,12 +200,28 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
     }
   };
 
-  const handleRestore = () => {
-    console.log('restore');
+  const handleRestoreProject = () => {
+    if (onRestoreProject && project) {
+      onRestoreProject(project);
+    }
   };
 
-  const handleDeletePermanently = () => {
-    console.log('delete permanently');
+  const handleDeleteProjectPermanently = () => {
+    if (onDeleteProject && project) {
+      onDeleteProject(project);
+    }
+  };
+
+  const handleRestoreQuery = (query: UserQueryObject) => {
+    if (onRestoreQuery && query) {
+      onRestoreQuery(query);
+    }
+  };
+
+  const handleDeleteQuery = (query: UserQueryObject) => { 
+    if (onDeleteQuery && query) {
+      onDeleteQuery(query);
+    }
   };
 
   return (
@@ -220,7 +245,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
               {showCreateButton && !isEditing && (
                 <Button
                   iconLeft={<FolderPlus />}
-                  handleClick={handleDoneClick}
+                  handleClick={handleCreateNewClick}
                   small
                 >
                   Create New
@@ -283,7 +308,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                     <>
                       <Button
                         variant="secondary"
-                        handleClick={handleRestore}
+                        handleClick={handleRestoreProject}
                         className={`${styles.editButton} ${styles.restoreButton}`}
                         iconLeft={<RestoreIcon />}
                         small
@@ -292,7 +317,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                       </Button>
                       <Button
                         variant="secondary"
-                        handleClick={handleDeletePermanently}
+                        handleClick={handleDeleteProjectPermanently}
                         className={styles.editButton}
                         iconLeft={<TrashIcon />}
                         small

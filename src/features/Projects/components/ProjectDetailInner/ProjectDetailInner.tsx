@@ -5,7 +5,7 @@ import QueriesTableHeader from '@/features/Projects/components/TableHeader/Queri
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 import { useUserProjects, useFormattedProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
-import { UserQueryObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { UserQueryObject, SortField, SortDirection, EditingItem } from '@/features/Projects/types/projects.d';
 import { filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
@@ -33,17 +33,20 @@ const ProjectDetailInner = () => {
   const [selectedQueries, setSelectedQueries] = useState<UserQueryObject[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
+  const setIsEditing = (isEditing: boolean, editingItem?: EditingItem) => {
+    setEditState(prev => ({ 
+      ...prev, 
+      isEditing, 
+      ...(editingItem !== undefined && { editingItem })
+    }));
+  };
+
   const [editState, setEditState] = useEditProjectQueryState();
   const editHandlers = useEditProjectQueryHandlers(
-    editState, 
-    setEditState, 
+    setIsEditing, 
     project ? [project] : [], 
     projectQueries
   );
-
-  const setIsEditing = (isEditing: boolean) => {
-    setEditState(prev => ({ ...prev, isEditing }));
-  };
 
   const handleEditClick = () => {
     if (project) {
@@ -92,6 +95,10 @@ const ProjectDetailInner = () => {
         onUpdateItem={editHandlers.handleUpdateItem}
         onCancelEdit={editHandlers.handleCancelEdit}
         onEditClick={handleEditClick}
+        onRestoreProject={editHandlers.handleRestoreProject}
+        onDeleteProject={editHandlers.handleDeleteProject}
+        onRestoreQuery={editHandlers.handleRestoreQuery}
+        onDeleteQuery={editHandlers.handleDeleteQuery}
         bookmarkCount={project.bookmark_count}
         noteCount={project.note_count}
         project={project}

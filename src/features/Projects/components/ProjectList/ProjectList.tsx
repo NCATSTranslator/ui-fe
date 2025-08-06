@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ProjectListInner } from '@/features/Projects/components/ProjectListInner/ProjectListInner';
-import { AppToastContainer } from '@/features/Common/components/AppToastContainer/AppToastContainer';
 
 const projectsQueryClient = new QueryClient({
   defaultOptions: {

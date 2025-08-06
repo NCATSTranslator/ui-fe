@@ -8,7 +8,7 @@ import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import ProjectsTableHeader from '@/features/Projects/components/TableHeader/ProjectsTableHeader/ProjectsTableHeader';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
 import { useDeleteProjectsAndQueries, useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
-import { ProjectRaw, UserQueryObject, SortField, SortDirection, Project } from '@/features/Projects/types/projects.d';
+import { ProjectRaw, UserQueryObject, SortField, SortDirection, Project, EditingItem } from '@/features/Projects/types/projects.d';
 import { filterAndSortProjects, filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
@@ -39,24 +39,27 @@ export const ProjectListInner = () => {
   const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<UserQueryObject[]>([]);
 
-  const [editState, setEditState] = useEditProjectQueryState();
-  const editHandlers = useEditProjectQueryHandlers(
-    editState, 
-    setEditState, 
-    activeFormattedProjects, 
-    activeQueries
-  );
-
-  const setIsEditing = (isEditing: boolean) => {
-    setEditState(prev => ({ ...prev, isEditing }));
+  const handleSetIsEditing = (isEditing: boolean, editingItem?: EditingItem) => {
+    setEditState(prev => ({ 
+      ...prev, 
+      isEditing, 
+      ...(editingItem !== undefined && { editingItem })
+    }));
     if(isEditing) {
-      const selectedQids = editState.editingItem?.queryIds || [];
+      const selectedQids = editingItem?.queryIds || [];
       const selectedQueries = activeQueries.filter(query => selectedQids.includes(query.data.qid));
       setSelectedQueries(selectedQueries);
     } else {
       setSelectedQueries([]);
     }
   };
+
+  const [editState, setEditState] = useEditProjectQueryState();
+  const editHandlers = useEditProjectQueryHandlers(
+    handleSetIsEditing, 
+    activeFormattedProjects, 
+    activeQueries
+  );
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -70,8 +73,9 @@ export const ProjectListInner = () => {
   const handleTabSelection = (tabName: string) => {
     if(activeTab != tabName) {
       setActiveTab(tabName);
-      setSelectedProjects([]);
-      setSelectedQueries([]);
+      
+      // setSelectedProjects([]);
+      // setSelectedQueries([]);
     }
   };
 
@@ -111,10 +115,14 @@ export const ProjectListInner = () => {
           showCreateButton={true}
           variant="list"
           isEditing={editState.isEditing}
-          setIsEditing={setIsEditing}
+          setIsEditing={handleSetIsEditing}
           editingItem={editState.editingItem}
           onUpdateItem={editHandlers.handleUpdateItem}
           onCancelEdit={editHandlers.handleCancelEdit}
+          onRestoreProject={editHandlers.handleRestoreProject}
+          onDeleteProject={editHandlers.handleDeleteProject}
+          onRestoreQuery={editHandlers.handleRestoreQuery}
+          onDeleteQuery={editHandlers.handleDeleteQuery}
         />
         <LoadingWrapper loading={isLoading} />
       </div>
@@ -132,7 +140,7 @@ export const ProjectListInner = () => {
           showCreateButton={true}
           variant="list"
           isEditing={editState.isEditing}
-          setIsEditing={setIsEditing}
+          setIsEditing={handleSetIsEditing}
           editingItem={editState.editingItem}
           onUpdateItem={editHandlers.handleUpdateItem}
           onCancelEdit={editHandlers.handleCancelEdit}
@@ -154,7 +162,7 @@ export const ProjectListInner = () => {
         showCreateButton={true}
         variant="list"
         isEditing={editState.isEditing}
-        setIsEditing={setIsEditing}
+        setIsEditing={handleSetIsEditing}
         editingItem={editState.editingItem}
         onUpdateItem={editHandlers.handleUpdateItem}
         onCancelEdit={editHandlers.handleCancelEdit}

@@ -67,6 +67,7 @@ const DataCard = <T,>({
   const note_count =  getItemNoteCount(item);
   const itemCount =  getItemCount?.(item);
   const itemStatus = getItemStatus?.(item);
+  const isSelected = selectedItems.some((i) => getItemId(i) === getItemId(item));
 
   const isDeleted = type === 'project' ? (item as Project).deleted : (item as UserQueryObject).data.deleted;
 
@@ -117,7 +118,7 @@ const DataCard = <T,>({
       <div className={`${styles.checkboxColumn} ${styles.column}`}>
         {
           !isUnassigned && (
-            <Checkbox checked={selectedItems.some((i) => getItemId(i) === getItemId(item))} handleClick={handleSelectItem} />
+            <Checkbox checked={isSelected} handleClick={handleSelectItem} />
           )
         }
       </div>
@@ -133,7 +134,7 @@ const DataCard = <T,>({
           {
             isDeleted && (
               <div className={styles.deletedInteractions}>
-                <span className={styles.interaction} onClick={handleRestore}>Restore Query</span>
+                <span className={styles.interaction} onClick={handleRestore}>Restore {type === 'project' ? 'Project' : 'Query'}</span>
                 <span className={styles.separator}>·</span>
                 <span className={styles.interaction} onClick={handleDelete}>Delete Now</span>
               </div>

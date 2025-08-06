@@ -3,7 +3,7 @@ import { Project, UserQueryObject } from '@/features/Projects/types/projects';
 import { getProjectStatus } from '@/features/Projects/utils/utilities';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
 import { useRestoreProjects } from '@/features/Projects/hooks/customHooks';
-import { toast } from 'react-toastify';
+import { errorToast, projectRestoredToast } from '@/features/Projects/utils/toastMessages';
 
 interface ProjectCardProps {
   onEdit?: (project: Project) => void;
@@ -28,12 +28,11 @@ const ProjectCard = ({
   const onRestore = (project: Project) => {
     restoreProjectsMutation.mutate([project.id.toString()], { 
       onSuccess: () => {
-        console.log('project restored');
-        toast.success('Project restored');
+        projectRestoredToast();
       },
       onError: (error) => {
         console.error('Failed to restore project:', error);
-        toast.error('Failed to restore project');
+        errorToast('Failed to restore project');
       }
     });
   };

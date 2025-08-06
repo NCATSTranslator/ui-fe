@@ -1,7 +1,8 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { Project, UserQueryObject } from '@/features/Projects/types/projects.d';
-import { useUpdateProjects, useUpdateQueries } from '@/features/Projects/hooks/customHooks';
+import { EditingItem, Project, UserQueryObject } from '@/features/Projects/types/projects.d';
+import { useUpdateProjects, useUpdateQueries, useDeleteProjects, useRestoreProjects, useDeleteQueries, useRestoreQueries } from '@/features/Projects/hooks/customHooks';
+import { errorToast, projectUpdatedToast, queryUpdatedToast, projectRestoredToast, projectDeletedToast, queryRestoredToast, queryDeletedToast } from './toastMessages';
 
 export interface EditProjectQueryState {
   isEditing: boolean;
@@ -18,6 +19,10 @@ export interface EditHandlers {
   handleEditQuery: (query: UserQueryObject) => void;
   handleUpdateItem: (id: number | string, type: 'project' | 'query', newName?: string, newQids?: string[]) => void;
   handleCancelEdit: () => void;
+  handleRestoreProject: (project: Project) => void;
+  handleDeleteProject: (project: Project) => void;
+  handleRestoreQuery: (query: UserQueryObject) => void;
+  handleDeleteQuery: (query: UserQueryObject) => void;
 }
 
 /**
@@ -35,37 +40,37 @@ export const useEditProjectQueryState = (): [EditProjectQueryState, Dispatch<Set
 
 /**
  * Handles the editing of projects and queries.
- * @param editState - The state of the edit.
- * @param setEditState - The function to set the edit state.
+ * @param handleSetIsEditing - The function to handle setting the edit state.
  * @param projects - The projects to edit.
  * @param queries - The queries to edit.
  */
 export const useEditProjectQueryHandlers = (
-  editState: EditProjectQueryState,
-  setEditState: Dispatch<SetStateAction<EditProjectQueryState>>,
+  handleSetIsEditing: (isEditing: boolean, editingItem?: EditingItem) => void,
   projects: Project[],
   queries: UserQueryObject[]
 ): EditHandlers => {
   const queryClient = useQueryClient();
   const updateProjectsMutation = useUpdateProjects();
   const updateQueriesMutation = useUpdateQueries();
+  const deleteProjectsMutation = useDeleteProjects();
+  const restoreProjectsMutation = useRestoreProjects();
+  const deleteQueriesMutation = useDeleteQueries();
+  const restoreQueriesMutation = useRestoreQueries();
 
   const handleEditProject = (project: Project) => {
-    setEditState({
-      isEditing: true,
-      editingItem: { 
-        id: project.id, 
-        name: project.data.title, 
-        type: 'project',
-        queryIds: project.data.pks
-      }
+    handleSetIsEditing(true, {
+      id: project.id,
+      name: project.data.title,
+      type: 'project',
+      queryIds: project.data.pks
     });
   };
 
   const handleEditQuery = (query: UserQueryObject) => {
-    setEditState({
-      isEditing: true,
-      editingItem: { id: query.data.qid, name: query.data.title || '', type: 'query' }
+    handleSetIsEditing(true, {
+      id: query.data.qid,
+      name: query.data.title || '',
+      type: 'query'
     });
   };
 
@@ -96,10 +101,12 @@ export const useEditProjectQueryHandlers = (
           pks: newQids || projectToUpdate.data.pks
         }], {
           onSuccess: () => {
-            setEditState({ isEditing: false, editingItem: undefined });
+            handleSetIsEditing(false);
+            projectUpdatedToast();
           },
           onError: (error) => {
             console.error('Failed to update project:', error);
+            errorToast('Failed to update project');
             // Revert optimistic update on error
             queryClient.setQueryData(['userProjects'], (oldData: Project[]) => {
               if (!oldData) return oldData;
@@ -140,10 +147,12 @@ export const useEditProjectQueryHandlers = (
           title: newName || queryToUpdate.data.title || ''
         }], {
           onSuccess: () => {
-            setEditState({ isEditing: false, editingItem: undefined });
+            handleSetIsEditing(false);
+            queryUpdatedToast();
           },
           onError: (error) => {
             console.error('Failed to update query:', error);
+            errorToast('Failed to update query');
             // Revert optimistic update on error
             queryClient.setQueryData(['userQueries'], (oldData: UserQueryObject[]) => {
               if (!oldData) return oldData;
@@ -163,14 +172,66 @@ export const useEditProjectQueryHandlers = (
   };
 
   const handleCancelEdit = () => {
-    setEditState({ isEditing: false, editingItem: undefined });
+    handleSetIsEditing(false, undefined);
+  };
+
+  const handleRestoreProject = (project: Project) => {
+    restoreProjectsMutation.mutate([project.id.toString()], {
+      onSuccess: () => {
+        projectRestoredToast();
+      },
+      onError: (error) => {
+        console.error('Failed to restore project:', error);
+        errorToast('Failed to restore project');
+      }
+    });
+  };
+
+  const handleDeleteProject = (project: Project) => {
+    deleteProjectsMutation.mutate([project.id.toString()], {
+      onSuccess: () => {
+        projectDeletedToast();
+      },
+      onError: (error) => {
+        console.error('Failed to delete project:', error);
+        errorToast('Failed to delete project');
+      }
+    });
+  };
+
+  const handleRestoreQuery = (query: UserQueryObject) => {
+    restoreQueriesMutation.mutate([query.data.qid.toString()], {
+      onSuccess: () => {
+        queryRestoredToast();
+      },
+      onError: (error) => {
+        console.error('Failed to restore query:', error);
+        errorToast('Failed to restore query');
+      }
+    });
+  };
+
+  const handleDeleteQuery = (query: UserQueryObject) => {
+    deleteQueriesMutation.mutate([query.data.qid.toString()], {
+      onSuccess: () => {
+        queryDeletedToast();
+      },
+      onError: (error) => {
+        console.error('Failed to delete query:', error);
+        errorToast('Failed to delete query');
+      }
+    });
   };
 
   return {
     handleEditProject,
     handleEditQuery,
     handleUpdateItem,
-    handleCancelEdit
+    handleCancelEdit,
+    handleRestoreProject,
+    handleDeleteProject,
+    handleRestoreQuery,
+    handleDeleteQuery
   };
 }; 
 

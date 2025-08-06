@@ -5,6 +5,7 @@ import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQ
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate } from '@/features/Projects/types/projects.d';
 import { handlePostProjectDeletion, handlePostQueryDeletion } from '../utils/editUpdateFunctions';
 import { generateQueryTitle } from '@/features/Projects/utils/utilities';
+import { errorToast, projectDeletedToast, queryDeletedToast } from '../utils/toastMessages';
 
 /**
  * Hook to fetch user projects with React Query
@@ -252,10 +253,12 @@ export const useDeleteProjectsAndQueries = () => {
       deleteProjects(selectedProjects.map(project => project.id.toString()), {
         onSuccess: () => {
           handlePostProjectDeletion(queryClient, selectedProjects, setSelectedProjects);
+          projectDeletedToast();
         },
         onError: (error) => { 
           handlePostProjectDeletion(queryClient, selectedProjects, setSelectedProjects);
-          console.warn(error);
+          console.error(error);
+          errorToast('Failed to delete project');
         }
       });
     }
@@ -263,10 +266,12 @@ export const useDeleteProjectsAndQueries = () => {
       deleteQueries(selectedQueries.map(query => query.data.qid.toString()), {
         onSuccess: () => {
           handlePostQueryDeletion(queryClient, selectedQueries, setSelectedQueries);
+          queryDeletedToast();
         },
         onError: (error) => {
           handlePostQueryDeletion(queryClient, selectedQueries, setSelectedQueries); 
-          console.warn(error);
+          console.error(error);
+          errorToast('Failed to delete query');
         }
       });
     }
