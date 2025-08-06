@@ -39,23 +39,39 @@ const CardName: FC<CardNameProps> = ({
         )
       }
       <span className={styles.projectTitle}>
-      <Highlighter
-        highlightClassName="highlight"
-        searchWords={searchTerm ? [searchTerm] : []}
-        autoEscape={true}
-        textToHighlight={name}
-        data-tooltip-id="unassigned-project-tooltip"
-      />
-      {
-        isUnassigned && (
-          <>
-            <InfoIcon data-tooltip-id="unassigned-project-tooltip" className={styles.infoIcon}/>
-            <Tooltip id="unassigned-project-tooltip" place="top" >
-              <span>Queries that are not associated with any projects are automatically placed here.</span>
-            </Tooltip>
-          </>
-        )
-      }
+        <Highlighter
+          highlightClassName="highlight"
+          searchWords={searchTerm ? [searchTerm] : []}
+          autoEscape={true}
+          textToHighlight={name}
+          data-tooltip-id="unassigned-project-tooltip"
+        />
+        {
+          (searchTerm && !name.toLowerCase().includes(searchTerm.toLowerCase())) && (
+            <>
+              <Highlighter
+                highlightClassName="highlight"
+                searchWords={['*']}
+                autoEscape={true}
+                textToHighlight="*"
+                data-tooltip-id="found-match-in-pks-tooltip"
+              />
+              <Tooltip id="found-match-in-pks-tooltip" place="top" >
+                <span>This project contains a query that matches the search term.</span>
+              </Tooltip>
+            </>
+          )
+        }
+        {
+          isUnassigned && (
+            <>
+              <InfoIcon data-tooltip-id="unassigned-project-tooltip" className={styles.infoIcon}/>
+              <Tooltip id="unassigned-project-tooltip" place="top" >
+                <span>Queries that are not associated with any projects are automatically placed here.</span>
+              </Tooltip>
+            </>
+          )
+        }
       </span>
       {type === 'project' && (
         <span className={styles.itemCount}>{itemCount > 0 ? itemCount : '0'} Quer{itemCount === 1 ? 'y' : 'ies'}</span>

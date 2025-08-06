@@ -73,7 +73,7 @@ export const ProjectListInner = () => {
   const handleTabSelection = (tabName: string) => {
     if(activeTab != tabName) {
       setActiveTab(tabName);
-      
+      // TODO: reset selected items when tab is changed. The below doesn't work bc the active tab is changed when a project is edited.
       // setSelectedProjects([]);
       // setSelectedQueries([]);
     }
@@ -87,10 +87,10 @@ export const ProjectListInner = () => {
   const hasError = projectsError || queriesError;
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const sortedActiveProjects = useMemo(() => filterAndSortProjects(activeFormattedProjects, sortField, sortDirection, searchTerm), [activeFormattedProjects, sortField, sortDirection, searchTerm]);
+  const sortedActiveProjects = useMemo(() => filterAndSortProjects(activeFormattedProjects, activeQueries, sortField, sortDirection, searchTerm), [activeFormattedProjects, activeQueries, sortField, sortDirection, searchTerm]);
   const sortedActiveQueries = useMemo(() => filterAndSortQueries(activeQueries, sortField, sortDirection, searchTerm), [activeQueries, sortField, sortDirection, searchTerm]);
 
-  const sortedDeletedProjects = useMemo(() => filterAndSortProjects(deletedFormattedProjects.filter(project => project.id !== -1), sortField, sortDirection, searchTerm), [deletedFormattedProjects, sortField, sortDirection, searchTerm]);
+  const sortedDeletedProjects = useMemo(() => filterAndSortProjects(deletedFormattedProjects.filter(project => project.id !== -1), deletedQueries, sortField, sortDirection, searchTerm), [deletedFormattedProjects, deletedQueries, sortField, sortDirection, searchTerm]);
   const sortedDeletedQueries = useMemo(() => filterAndSortQueries(deletedQueries, sortField, sortDirection, searchTerm), [deletedQueries, sortField, sortDirection, searchTerm]);
 
   const hideProjectsTab = (searchTerm.length > 0 && sortedActiveProjects.length === 0) || (editState.editingItem?.type !== "query" && editState.isEditing);
