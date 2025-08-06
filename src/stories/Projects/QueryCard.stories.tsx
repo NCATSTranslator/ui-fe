@@ -2,10 +2,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { BrowserRouter } from 'react-router-dom';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
-import { QueryStatusObject } from '@/features/Projects/types/projects';
+import { UserQueryObject } from '@/features/Projects/types/projects';
 
-const mockQuerySuccess: QueryStatusObject = {
+const mockQuerySuccess: UserQueryObject = {
   status: 'success',
+  sid: 'sid1',
   data: {
     qid: 'qid1',
     aras: ['ara1', 'ara2', 'ara3'],
@@ -15,11 +16,17 @@ const mockQuerySuccess: QueryStatusObject = {
     time_created: new Date('2024-01-15'),
     time_updated: new Date('2024-01-20'),
     deleted: false,
+    query: {
+      type: 'query',
+      curie: 'curie1',
+      direction: 'direction1',
+    },
   },
 };
 
-const mockQueryRunning: QueryStatusObject = {
+const mockQueryRunning: UserQueryObject = {
   status: 'running',
+  sid: 'sid2',
   data: {
     qid: 'qid2',
     aras: ['ara4'],
@@ -29,11 +36,17 @@ const mockQueryRunning: QueryStatusObject = {
     time_created: new Date('2024-01-16'),
     time_updated: new Date('2024-01-19'),
     deleted: false,
+    query: {
+      type: 'query',
+      curie: 'curie2',
+      direction: 'direction2',
+    },
   },
 };
 
-const mockQueryError: QueryStatusObject = {
+const mockQueryError: UserQueryObject = {
   status: 'error',
+  sid: 'sid3',
   data: {
     qid: 'qid3',
     aras: [],
@@ -43,6 +56,11 @@ const mockQueryError: QueryStatusObject = {
     time_created: new Date('2024-01-17'),
     time_updated: new Date('2024-01-18'),
     deleted: false,
+    query: {
+      type: 'query',
+      curie: 'curie3',
+      direction: 'direction3',
+    },
   },
 };
 

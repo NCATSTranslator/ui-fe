@@ -1,12 +1,12 @@
 import { Dispatch, SetStateAction, useMemo } from 'react';
-import { Project, QueryStatusObject } from '@/features/Projects/types/projects';
+import { Project, UserQueryObject } from '@/features/Projects/types/projects';
 import { getProjectStatus } from '@/features/Projects/utils/utilities';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
 
 interface ProjectCardProps {
   onEdit?: (project: Project) => void;
   project: Project;
-  queries: QueryStatusObject[];
+  queries: UserQueryObject[];
   searchTerm?: string;
   selectedProjects: Project[];
   setSelectedProjects: Dispatch<SetStateAction<Project[]>>;

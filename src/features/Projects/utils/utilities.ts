@@ -1,4 +1,5 @@
-import { Project, QueryStatus, QueryStatusObject } from "@/features/Projects/types/projects.d";
+import { Project, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
+import { queryTypes } from "@/features/Query/utils/queryTypes";
 
 /**
  * Get the status of a project based on the most recent query's status
@@ -6,9 +7,9 @@ import { Project, QueryStatus, QueryStatusObject } from "@/features/Projects/typ
  * @param queries - The queries to get the status from
  * @returns The status of the project
  */
-export const getProjectStatus = (project: Project, queries: QueryStatusObject[]): QueryStatus => {
+export const getProjectStatus = (project: Project, queries: UserQueryObject[]): QueryStatus => {
   // Get the most recent query's status
-  const mostRecentQuery = project.data.pks.reduce((mostRecent: QueryStatusObject | null, qid) => {
+  const mostRecentQuery = project.data.pks.reduce((mostRecent: UserQueryObject | null, qid) => {
     const query = queries.find((query) => query.data.qid === qid);
     
     if (query?.status) {
@@ -23,3 +24,28 @@ export const getProjectStatus = (project: Project, queries: QueryStatusObject[])
 
   return mostRecentQuery?.status || 'error';
 } 
+
+export const generateQueryTitle = (query: UserQueryObject): string => {
+  if(query.data.title)
+    return query.data.title;
+
+  let title = 'No title available';
+
+  if(query.data.query.type === 'pathfinder') {
+    // TODO: add constraint and nodes to title when Gus adds them to the query object
+    const constraint = 'constraint'
+    const nodeOne = 'nodeOne';
+    const nodeTwo = 'nodeTwo';
+
+    title = `What paths begin with ${nodeOne} and end with ${nodeTwo} and include a ${constraint}?`;
+  } else {
+    const curie = query.data.query.curie;
+    const queryType = queryTypes.find(type => type.targetType === query.data.query.type);
+    if(queryType) {
+      // TODO: update curie to node label when Gus adds it to the query object
+      title = `${queryType.label.replaceAll("a disease?", "").replaceAll("a chemical?", "").replaceAll("a gene?", "")} ${curie}?`;
+    }
+  }
+
+  return title;
+}

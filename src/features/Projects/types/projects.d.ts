@@ -39,30 +39,25 @@ export type Project = ProjectRaw & {
 
 export type QueryStatus = 'success' | 'running' | 'error';
 
-export interface QueryStatusObject {
-  status: QueryStatus,
-  data: {
-    qid: string,
-    aras: string[],
-    title: string,
-    bookmark_ids: string[],
-    note_count: number,
-    time_created: Date, 
-    time_updated: Date, 
-    deleted: boolean
-  }
-}
-
 export interface UserQueryObject {
+  data: {
+    aras: string[],
+    bookmark_ids: string[],
+    deleted: boolean
+    note_count: number,
+    qid: string,
+    query: {
+      type: string,
+      curie: string,
+      direction: string | null
+    },
+    time_created: Date,
+    time_updated: Date,
+    title: string | null,
+  }
   // save ID
-  sid:          string,
-  pk:           string,
-  time_created: Date,
-  time_updated: Date,
-  title:        string,
-  tag_ids:      string[],
-  bookmark_ids: string[],
-  deleted:      boolean
+  sid: string,
+  status: QueryStatus,
 }
 
 export type SortField = 'name' | 'lastSeen' | 'dateAdded' | 'bookmarks' | 'notes' | 'status';
@@ -172,73 +167,15 @@ export const isProjectRawArray = (obj: unknown): obj is ProjectRaw[] => {
   return true;
 };
 
-export const isQueryStatusArray = (obj: unknown): obj is QueryStatusObject[] => {
+export const isUserQueryObjectArray = (obj: unknown): obj is UserQueryObject[] => {
   if (!Array.isArray(obj)) {
-    console.warn('isQueryStatusArray: Object is not an array', obj);
+    console.warn('isUserQueryObjectArray: Object is not an array', obj);
     return false;
   }
   
-  for (let i = 0; i < obj.length; i++) {
-    const item = obj[i];
-    
-    if (typeof item !== 'object' || item === null) {
-      console.warn(`isQueryStatusArray: Item at index ${i} is not an object or is null`, item);
-      return false;
-    }
-    
-    if (!('status' in item)) {
-      console.warn(`isQueryStatusArray: Item at index ${i} missing "status" property`, item);
-      return false;
-    }
-    
-    if (!('data' in item)) {
-      console.warn(`isQueryStatusArray: Item at index ${i} missing "data" property`, item);
-      return false;
-    }
-    
-    const data = (item as unknown).data;
-    if (typeof data !== 'object' || data === null) {
-      console.warn(`isQueryStatusArray: Item at index ${i} has invalid "data" property`, data);
-      return false;
-    }
-    
-    if (!('qid' in data)) {
-      console.warn(`isQueryStatusArray: Item at index ${i} missing "data.qid" property`, data);
-      return false;
-    }
-    
-    if (!('aras' in data)) {
-      console.warn(`isQueryStatusArray: Item at index ${i} missing "data.aras" property`, data);
-      return false;
-    }
-    
-    if (!('title' in data)) {
-      console.warn(`isQueryStatusArray: Item at index ${i} missing "data.title" property`, data);
-      return false;
-    }
-    
-    if (!('bookmark_ids' in data)) {
-      console.warn(`isQueryStatusArray: Item at index ${i} missing "data.bookmark_ids" property`, data);
-      return false;
-    }
-    
-    if (!('note_count' in data)) {
-      console.warn(`isQueryStatusArray: Item at index ${i} missing "data.note_count" property`, data);
-      return false;
-    }
-    
-    if (!('time_created' in data)) {
-      console.warn(`isQueryStatusArray: Item at index ${i} missing "data.time_created" property`, data);
-      return false;
-    }
-    
-    if (!('time_updated' in data)) {
-      console.warn(`isQueryStatusArray: Item at index ${i} missing "data.time_updated" property`, data);
-      return false;
-    }
-    
-    if (!('deleted' in data)) {
-      console.warn(`isQueryStatusArray: Item at index ${i} missing "data.deleted" property`, data);
+  for (const item of obj) {
+    if (!isUserQueryObject(item)) {
+      console.warn('isUserQueryObjectArray: Item failed UserQueryObject validation', item);
       return false;
     }
   }
@@ -256,39 +193,81 @@ export const isUserQueryObject = (obj: unknown): obj is UserQueryObject => {
     console.warn('isUserQueryObject: Missing "sid" property', obj);
     return false;
   }
-  
-  if (!('pk' in obj)) {
-    console.warn('isUserQueryObject: Missing "pk" property', obj);
+
+  if (!('status' in obj)) {
+    console.warn('isUserQueryObject: Missing "status" property', obj);
     return false;
   }
-  
-  if (!('time_created' in obj)) {
-    console.warn('isUserQueryObject: Missing "time_created" property', obj);
+
+  const data = (obj as unknown).data;
+  if (typeof data !== 'object' || data === null) {
+    console.warn('isUserQueryObject: "data" property is not an object or is null', data);
     return false;
   }
-  
-  if (!('time_updated' in obj)) {
-    console.warn('isUserQueryObject: Missing "time_updated" property', obj);
+
+  if (!('aras' in data)) {
+    console.warn('isUserQueryObject: Missing "data.aras" property', data);
     return false;
   }
-  
-  if (!('title' in obj)) {
-    console.warn('isUserQueryObject: Missing "title" property', obj);
+
+  if (!('bookmark_ids' in data)) {
+    console.warn('isUserQueryObject: Missing "data.bookmark_ids" property', data);
     return false;
   }
-  
-  if (!('tag_ids' in obj)) {
-    console.warn('isUserQueryObject: Missing "tag_ids" property', obj);
+
+  if (!('deleted' in data)) {
+    console.warn('isUserQueryObject: Missing "data.deleted" property', data);
     return false;
   }
-  
-  if (!('bookmark_ids' in obj)) {
-    console.warn('isUserQueryObject: Missing "bookmark_ids" property', obj);
+
+  if (!('note_count' in data)) {
+    console.warn('isUserQueryObject: Missing "data.note_count" property', data);
     return false;
   }
-  
-  if (!('deleted' in obj)) {
-    console.warn('isUserQueryObject: Missing "deleted" property', obj);
+
+  if (!('qid' in data)) {
+    console.warn('isUserQueryObject: Missing "data.qid" property', data);
+    return false;
+  }
+
+  if (!('query' in data)) {
+    console.warn('isUserQueryObject: Missing "data.query" property', data);
+    return false;
+  }
+
+  const query = data.query;
+  if (typeof query !== 'object' || query === null) {
+    console.warn('isUserQueryObject: "data.query" property is not an object or is null', query);
+    return false;
+  }
+
+  if (!('type' in query)) {
+    console.warn('isUserQueryObject: Missing "data.query.type" property', query);
+    return false;
+  }
+
+  if (!('curie' in query)) {
+    console.warn('isUserQueryObject: Missing "data.query.curie" property', query);
+    return false;
+  }
+
+  if (!('direction' in query)) {
+    console.warn('isUserQueryObject: Missing "data.query.direction" property', query);
+    return false;
+  }
+
+  if (!('time_created' in data)) {
+    console.warn('isUserQueryObject: Missing "data.time_created" property', data);
+    return false;
+  }
+
+  if (!('time_updated' in data)) {
+    console.warn('isUserQueryObject: Missing "data.time_updated" property', data);
+    return false;
+  }
+
+  if (!('title' in data)) {
+    console.warn('isUserQueryObject: Missing "data.title" property', data);
     return false;
   }
   

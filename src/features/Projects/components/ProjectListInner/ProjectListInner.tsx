@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import styles from '@/features/Projects/components/ProjectListInner/ProjectListInner.module.scss';
 import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
@@ -7,8 +7,8 @@ import ProjectCard from '@/features/Projects/components/ProjectCard/ProjectCard'
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import ProjectsTableHeader from '@/features/Projects/components/TableHeader/ProjectsTableHeader/ProjectsTableHeader';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
-import { useDeleteProjectsAndQueries, useUserProjects, useUserQueryStatus } from '@/features/Projects/hooks/customHooks';
-import { ProjectRaw, QueryStatusObject, SortField, SortDirection, Project } from '@/features/Projects/types/projects.d';
+import { useDeleteProjectsAndQueries, useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
+import { ProjectRaw, UserQueryObject, SortField, SortDirection, Project } from '@/features/Projects/types/projects.d';
 import { filterAndSortProjects, filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
@@ -20,7 +20,7 @@ import DeletedTableHeader from '../TableHeader/DeletedTableHeader/DeletedTableHe
 
 export const ProjectListInner = () => {
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
-  const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueryStatus();
+  const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueries();
   const deleteProjectsAndQueries = useDeleteProjectsAndQueries();
   const [activeTab, setActiveTab] = useState<string>('Projects');
   
@@ -29,15 +29,15 @@ export const ProjectListInner = () => {
 
   const activeProjects = projects.filter((project: ProjectRaw) => !project.deleted);
   const deletedProjects = projects.filter((project: ProjectRaw) => project.deleted);
-  const activeQueries = queries.filter((query: QueryStatusObject) => !query.data.deleted);
-  const deletedQueries = queries.filter((query: QueryStatusObject) => query.data.deleted);
+  const activeQueries = queries.filter((query: UserQueryObject) => !query.data.deleted);
+  const deletedQueries = queries.filter((query: UserQueryObject) => query.data.deleted);
 
   // Format projects with calculated fields (bookmarks, notes, etc.)
   const activeFormattedProjects = useFormattedProjects(activeProjects, queries);
   const deletedFormattedProjects = useFormattedProjects(deletedProjects, queries, false);
 
   const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
-  const [selectedQueries, setSelectedQueries] = useState<QueryStatusObject[]>([]);
+  const [selectedQueries, setSelectedQueries] = useState<UserQueryObject[]>([]);
 
   const [editState, setEditState] = useEditProjectQueryState();
   const editHandlers = useEditProjectQueryHandlers(
@@ -89,9 +89,19 @@ export const ProjectListInner = () => {
   const sortedDeletedProjects = useMemo(() => filterAndSortProjects(deletedFormattedProjects.filter(project => project.id !== -1), sortField, sortDirection, searchTerm), [deletedFormattedProjects, sortField, sortDirection, searchTerm]);
   const sortedDeletedQueries = useMemo(() => filterAndSortQueries(deletedQueries, sortField, sortDirection, searchTerm), [deletedQueries, sortField, sortDirection, searchTerm]);
 
-  const hideProjectsTab = (searchTerm.length > 0 && sortedActiveProjects.length === 0) || (editState.editingItem?.type === "project" && editState.isEditing);
+  const hideProjectsTab = (searchTerm.length > 0 && sortedActiveProjects.length === 0) || (editState.editingItem?.type !== "query" && editState.isEditing);
   const hideQueriesTab = (searchTerm.length > 0 && sortedActiveQueries.length === 0);
-  const hideTrashTab = (searchTerm.length > 0 && sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0) || (editState.editingItem?.type === "project" && editState.isEditing);
+  const hideTrashTab = (searchTerm.length > 0 && sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0) || (editState.editingItem?.type !== "query" && editState.isEditing);
+
+console.log( queries, activeQueries, sortedActiveQueries)
+
+  // doesnt work bc the tabs don't exist when editState.isEditing is changed
+  useEffect(() => {
+    if (!editState.isEditing) {
+      console.log("setting active tab to projects");
+      setActiveTab('Projects');
+    }
+  }, [editState.isEditing]);
 
   if (isLoading) {
     return (
@@ -254,7 +264,7 @@ export const ProjectListInner = () => {
                           }
                         </div>
                       ) : (
-                        sortedActiveQueries.map((query: QueryStatusObject) => (
+                        sortedActiveQueries.map((query: UserQueryObject) => (
                           <QueryCard 
                             key={query.data.qid}
                             query={query}
@@ -304,7 +314,7 @@ export const ProjectListInner = () => {
                             ))
                           )}
                           {sortedDeletedQueries.length > 0 && (
-                            sortedDeletedQueries.map((query: QueryStatusObject) => (
+                            sortedDeletedQueries.map((query: UserQueryObject) => (
                               <QueryCard 
                                 key={query.data.qid}
                                 query={query}

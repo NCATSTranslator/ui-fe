@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ProjectListInner } from '@/features/Projects/components/ProjectListInner/ProjectListInner';
-import { Project, QueryStatusObject } from '@/features/Projects/types/projects';
+import { Project, UserQueryObject } from '@/features/Projects/types/projects';
 
 // Mock data
 const mockProjects: Project[] = [
@@ -47,9 +47,10 @@ const mockProjects: Project[] = [
   },
 ];
 
-const mockQueries: QueryStatusObject[] = [
+const mockQueries: UserQueryObject[] = [
   {
     status: 'success',
+    sid: 'sid1',
     data: {
       qid: 'qid1',
       aras: ['ara1', 'ara2', 'ara3'],
@@ -59,10 +60,16 @@ const mockQueries: QueryStatusObject[] = [
       time_created: new Date('2024-01-15'),
       time_updated: new Date('2024-01-20'),
       deleted: false,
+      query: {
+        type: 'query',
+        curie: 'curie1',
+        direction: 'direction1',
+      },
     },
   },
   {
     status: 'running',
+    sid: 'sid2',
     data: {
       qid: 'qid2',
       aras: ['ara4'],
@@ -72,10 +79,16 @@ const mockQueries: QueryStatusObject[] = [
       time_created: new Date('2024-01-16'),
       time_updated: new Date('2024-01-19'),
       deleted: false,
+      query: {
+        type: 'query',
+        curie: 'curie2',
+        direction: 'direction2',
+      },
     },
   },
   {
     status: 'error',
+    sid: 'sid3',
     data: {
       qid: 'qid3',
       aras: [],
@@ -85,10 +98,16 @@ const mockQueries: QueryStatusObject[] = [
       time_created: new Date('2024-01-17'),
       time_updated: new Date('2024-01-18'),
       deleted: false,
+      query: {
+        type: 'query',
+        curie: 'curie3',
+        direction: 'direction3',
+      },
     },
   },
   {
     status: 'success',
+    sid: 'sid4',
     data: {
       qid: 'qid4',
       aras: ['ara5'],
@@ -98,10 +117,16 @@ const mockQueries: QueryStatusObject[] = [
       time_created: new Date('2024-01-12'),
       time_updated: new Date('2024-01-17'),
       deleted: false,
+      query: {
+        type: 'query',
+        curie: 'curie4',
+        direction: 'direction4',
+      },
     },
   },
   {
     status: 'success',
+    sid: 'sid5',
     data: {
       qid: 'qid5',
       aras: ['ara6'],
@@ -111,10 +136,16 @@ const mockQueries: QueryStatusObject[] = [
       time_created: new Date('2024-01-13'),
       time_updated: new Date('2024-01-16'),
       deleted: false,
+      query: {
+        type: 'query',
+        curie: 'curie5',
+        direction: 'direction5',
+      },
     },
   },
   {
     status: 'success',
+    sid: 'sid6',
     data: {
       qid: 'qid6',
       aras: ['ara7'],
@@ -124,6 +155,11 @@ const mockQueries: QueryStatusObject[] = [
       time_created: new Date('2024-01-08'),
       time_updated: new Date('2024-01-14'),
       deleted: false,
+      query: {
+        type: 'query',
+        curie: 'curie6',
+        direction: 'direction6',
+      },
     },
   },
 ];

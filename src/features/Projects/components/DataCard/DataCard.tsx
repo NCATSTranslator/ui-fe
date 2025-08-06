@@ -11,7 +11,7 @@ import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
 import CardName from '@/features/Projects/components/CardName/CardName';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
-import { Project, QueryStatus, QueryStatusObject } from '@/features/Projects/types/projects';
+import { Project, QueryStatus, UserQueryObject } from '@/features/Projects/types/projects';
 
 interface DataCardProps<T> {
   className?: string;
@@ -64,7 +64,7 @@ const DataCard = <T,>({
   const itemCount =  getItemCount?.(item);
   const itemStatus = getItemStatus?.(item);
 
-  const isDeleted = type === 'project' ? (item as Project).deleted : (item as QueryStatusObject).data.deleted;
+  const isDeleted = type === 'project' ? (item as Project).deleted : (item as UserQueryObject).data.deleted;
 
   const handleSelectItem = () => {
     setSelectedItems((prevItems) => {

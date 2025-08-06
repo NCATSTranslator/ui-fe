@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { Project, QueryStatusObject } from '@/features/Projects/types/projects.d';
+import { Project, UserQueryObject } from '@/features/Projects/types/projects.d';
 import { useUpdateProjects, useUpdateQueries } from '@/features/Projects/hooks/customHooks';
 
 export interface EditProjectQueryState {
@@ -15,7 +15,7 @@ export interface EditProjectQueryState {
 
 export interface EditHandlers {
   handleEditProject: (project: Project) => void;
-  handleEditQuery: (query: QueryStatusObject) => void;
+  handleEditQuery: (query: UserQueryObject) => void;
   handleUpdateItem: (id: number | string, type: 'project' | 'query', newName?: string, newQids?: string[]) => void;
   handleCancelEdit: () => void;
 }
@@ -44,7 +44,7 @@ export const useEditProjectQueryHandlers = (
   editState: EditProjectQueryState,
   setEditState: Dispatch<SetStateAction<EditProjectQueryState>>,
   projects: Project[],
-  queries: QueryStatusObject[]
+  queries: UserQueryObject[]
 ): EditHandlers => {
   const queryClient = useQueryClient();
   const updateProjectsMutation = useUpdateProjects();
@@ -62,10 +62,10 @@ export const useEditProjectQueryHandlers = (
     });
   };
 
-  const handleEditQuery = (query: QueryStatusObject) => {
+  const handleEditQuery = (query: UserQueryObject) => {
     setEditState({
       isEditing: true,
-      editingItem: { id: query.data.qid, name: query.data.title, type: 'query' }
+      editingItem: { id: query.data.qid, name: query.data.title || '', type: 'query' }
     });
   };
 
@@ -123,9 +123,9 @@ export const useEditProjectQueryHandlers = (
       const queryToUpdate = queries.find(q => q.data.qid === id);
       if (queryToUpdate) {
         // Optimistically update the React Query cache
-        queryClient.setQueryData(['userQueryStatus'], (oldData: QueryStatusObject[]) => {
+        queryClient.setQueryData(['userQueries'], (oldData: UserQueryObject[]) => {
           if (!oldData) return oldData;
-          return oldData.map((query: QueryStatusObject) => 
+          return oldData.map((query: UserQueryObject) => 
             query.data.qid === id 
               ? { 
                   ...query, 
@@ -137,7 +137,7 @@ export const useEditProjectQueryHandlers = (
 
         updateQueriesMutation.mutate([{
           qid: queryToUpdate.data.qid,
-          title: newName || queryToUpdate.data.title
+          title: newName || queryToUpdate.data.title || ''
         }], {
           onSuccess: () => {
             setEditState({ isEditing: false, editingItem: undefined });
@@ -145,9 +145,9 @@ export const useEditProjectQueryHandlers = (
           onError: (error) => {
             console.error('Failed to update query:', error);
             // Revert optimistic update on error
-            queryClient.setQueryData(['userQueryStatus'], (oldData: QueryStatusObject[]) => {
+            queryClient.setQueryData(['userQueries'], (oldData: UserQueryObject[]) => {
               if (!oldData) return oldData;
-              return oldData.map((query: QueryStatusObject) => 
+              return oldData.map((query: UserQueryObject) => 
                 query.data.qid === id 
                   ? { 
                       ...query, 
@@ -194,10 +194,10 @@ export const handlePostProjectDeletion = (queryClient: QueryClient, selectedProj
  * @param selectedQueries - The queries to delete.
  * @param setSelectedQueries - The function to set the selected queries.
  */
-export const handlePostQueryDeletion = (queryClient: QueryClient, selectedQueries: QueryStatusObject[], setSelectedQueries: (queries: QueryStatusObject[]) => void) => {
-  queryClient.setQueryData(['userQueryStatus'], (oldData: QueryStatusObject[]) => {
+export const handlePostQueryDeletion = (queryClient: QueryClient, selectedQueries: UserQueryObject[], setSelectedQueries: (queries: UserQueryObject[]) => void) => {
+  queryClient.setQueryData(['userQueries'], (oldData: UserQueryObject[]) => {
     if (!oldData) return oldData;
-    return oldData.filter((query: QueryStatusObject) => !selectedQueries.some(q => q.data.qid === query.data.qid));
+    return oldData.filter((query: UserQueryObject) => !selectedQueries.some(q => q.data.qid === query.data.qid));
   });
   setSelectedQueries([]);
 };

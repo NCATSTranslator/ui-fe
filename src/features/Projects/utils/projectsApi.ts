@@ -1,6 +1,6 @@
 import { get, post, put, fetchWithErrorHandling, ErrorHandler } from '@/features/Common/utils/web';
-import { isProjectRaw, isProjectRawArray, isQueryStatusArray, isUserQueryObject, ProjectCreate, ProjectUpdate, 
-  QueryStatusObject, UserQueryObject, ProjectRaw, QueryUpdate} from '@/features/Projects/types/projects.d';
+import { isProjectRaw, isProjectRawArray, isUserQueryObject, ProjectCreate, ProjectUpdate, 
+  UserQueryObject, ProjectRaw, QueryUpdate, isUserQueryObjectArray} from '@/features/Projects/types/projects.d';
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';
@@ -24,20 +24,20 @@ export const getUserProjects = async (
 };
 
 /**
- * GET /api/v1/users/me/queries/status
- * Get the query status for all queries associated with the current user.
+ * GET /api/v1/users/me/queries
+ * Get all queries associated with the current user.
  */
-export const getUserQueryStatus = async (
+export const getUserQueries = async (
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<QueryStatusObject[]> => {
-  const url = `${API_PATH_PREFIX}/users/me/queries/status?include_deleted=true`;
+): Promise<UserQueryObject[]> => {
+  const url = `${API_PATH_PREFIX}/users/me/queries?include_deleted=true`;
   
-  return fetchWithErrorHandling<QueryStatusObject[]>(
+  return fetchWithErrorHandling<UserQueryObject[]>(
     () => get(url),
     httpErrorHandler,
     fetchErrorHandler,
-    isQueryStatusArray
+    isUserQueryObjectArray
   );
 };
 

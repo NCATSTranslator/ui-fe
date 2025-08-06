@@ -1,13 +1,13 @@
 import { Dispatch, SetStateAction } from 'react';
-import { QueryStatusObject } from '@/features/Projects/types/projects.d';
+import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
 
 interface QueryCardProps {
-  onEdit?: (query: QueryStatusObject) => void;
-  query: QueryStatusObject;
+  onEdit?: (query: UserQueryObject) => void;
+  query: UserQueryObject;
   searchTerm?: string;
-  selectedQueries?: QueryStatusObject[];
-  setSelectedQueries: Dispatch<SetStateAction<QueryStatusObject[]>>;
+  selectedQueries?: UserQueryObject[];
+  setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
 }
 
 const QueryCard = ({ 
@@ -27,13 +27,13 @@ const QueryCard = ({
       setSelectedItems={setSelectedQueries}
       status={query.status}
       onEdit={onEdit}
-      getItemId={(item: QueryStatusObject) => item.data.qid}
-      getItemTitle={(item: QueryStatusObject) => item.data.title}
-      getItemTimeCreated={(item: QueryStatusObject) => item.data.time_created.toString()}
-      getItemTimeUpdated={(item: QueryStatusObject) => item.data.time_updated.toString()}
-      getItemBookmarkCount={(item: QueryStatusObject) => item.data.bookmark_ids.length}
-      getItemNoteCount={(item: QueryStatusObject) => item.data.note_count}
-      getItemStatus={(item: QueryStatusObject) => item.status}
+      getItemId={(item: UserQueryObject) => item.data.qid}
+      getItemTitle={(item: UserQueryObject) => item.data.title || ''}
+      getItemTimeCreated={(item: UserQueryObject) => item.data.time_created.toString()}
+      getItemTimeUpdated={(item: UserQueryObject) => item.data.time_updated.toString()}
+      getItemBookmarkCount={(item: UserQueryObject) => item.data.bookmark_ids.length}
+      getItemNoteCount={(item: UserQueryObject) => item.data.note_count}
+      getItemStatus={(item: UserQueryObject) => item.status}
     />
   );
 };

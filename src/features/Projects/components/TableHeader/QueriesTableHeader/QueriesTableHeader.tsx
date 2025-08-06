@@ -1,4 +1,4 @@
-import { QueryStatusObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { UserQueryObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
 import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
 import styles from '@/features/Projects/components/TableHeader/TableHeader.module.scss';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
@@ -6,9 +6,9 @@ import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import SortableHeader from '@/features/Projects/components/SortableHeader/SortableHeader';
 
 interface QueriesTableHeaderProps {
-  selectedQueries: QueryStatusObject[];
-  setSelectedQueries: (queries: QueryStatusObject[]) => void;
-  activeQueries: QueryStatusObject[];
+  selectedQueries: UserQueryObject[];
+  setSelectedQueries: (queries: UserQueryObject[]) => void;
+  activeQueries: UserQueryObject[];
   sortField: SortField;
   sortDirection: SortDirection;
   onSort: (field: SortField) => void;

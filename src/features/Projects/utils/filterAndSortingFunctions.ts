@@ -1,4 +1,4 @@
-import { QueryStatusObject, SortField, SortDirection, Project } from '@/features/Projects/types/projects.d';
+import { UserQueryObject, SortField, SortDirection, Project } from '@/features/Projects/types/projects.d';
 
 /**
  * Sorts projects based on the specified field and direction
@@ -67,20 +67,20 @@ export const filterAndSortProjects = (projects: Project[], sortField: SortField,
 
 /**
  * Sorts queries based on the specified field and direction
- * @param {QueryStatusObject[]} queries - The queries to sort
+ * @param {UserQueryObject[]} queries - The queries to sort
  * @param {SortField} sortField - The field to sort by
  * @param {SortDirection} sortDirection - The direction to sort in
- * @returns {QueryStatusObject[]} The sorted queries
+ * @returns {UserQueryObject[]} The sorted queries
 */
-export const sortQueries = (queries: QueryStatusObject[], sortField: SortField, sortDirection: SortDirection): QueryStatusObject[] => {
+export const sortQueries = (queries: UserQueryObject[], sortField: SortField, sortDirection: SortDirection): UserQueryObject[] => {
   return [...queries].sort((a, b) => {
     let aValue: string | Date | number;
     let bValue: string | Date | number;
 
     switch (sortField) {
       case 'name':
-        aValue = a.data.title.toLowerCase();
-        bValue = b.data.title.toLowerCase();
+        aValue = a.data.title?.toLowerCase() || '';
+        bValue = b.data.title?.toLowerCase() || '';
         break;
       case 'lastSeen':
         aValue = a.data.time_updated;
@@ -114,11 +114,11 @@ export const sortQueries = (queries: QueryStatusObject[], sortField: SortField, 
 
 /**
  * Filters and sorts queries based on the specified search terms
- * @param {QueryStatusObject[]} queries - The queries to format
+ * @param {UserQueryObject[]} queries - The queries to format
  * @param {string} searchTerm - The search term to filter by
- * @returns {QueryStatusObject[]} The formatted queries
+ * @returns {UserQueryObject[]} The formatted queries
  */
-export const filterAndSortQueries = (queries: QueryStatusObject[], sortField: SortField, sortDirection: SortDirection, searchTerm: string): QueryStatusObject[] => {
-  const filteredQueries = queries.filter(query => query.data.title.toLowerCase().includes(searchTerm.toLowerCase()));
+export const filterAndSortQueries = (queries: UserQueryObject[], sortField: SortField, sortDirection: SortDirection, searchTerm: string): UserQueryObject[] => {
+  const filteredQueries = queries.filter(query => query.data.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
   return sortQueries(filteredQueries, sortField, sortDirection);
 };

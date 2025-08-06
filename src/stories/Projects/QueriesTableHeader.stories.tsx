@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
-import { QueryStatusObject, SortField, SortDirection } from '@/features/Projects/types/projects';
+import { UserQueryObject } from '@/features/Projects/types/projects';
 
-const mockQueries: QueryStatusObject[] = [
+const mockQueries: UserQueryObject[] = [
   {
     status: 'success',
+    sid: 'sid1',
     data: {
       qid: 'qid1',
       aras: ['ara1', 'ara2', 'ara3'],
@@ -15,10 +16,16 @@ const mockQueries: QueryStatusObject[] = [
       time_created: new Date('2024-01-15'),
       time_updated: new Date('2024-01-20'),
       deleted: false,
+      query: {
+        type: 'query',
+        curie: 'curie1',
+        direction: 'direction1',
+      },
     },
   },
   {
     status: 'running',
+    sid: 'sid2',
     data: {
       qid: 'qid2',
       aras: ['ara4'],
@@ -28,10 +35,16 @@ const mockQueries: QueryStatusObject[] = [
       time_created: new Date('2024-01-16'),
       time_updated: new Date('2024-01-19'),
       deleted: false,
+      query: {
+        type: 'query',
+        curie: 'curie2',
+        direction: 'direction2',
+      },
     },
   },
   {
     status: 'error',
+    sid: 'sid3',
     data: {
       qid: 'qid3',
       aras: [],
@@ -41,6 +54,11 @@ const mockQueries: QueryStatusObject[] = [
       time_created: new Date('2024-01-17'),
       time_updated: new Date('2024-01-18'),
       deleted: false,
+      query: {
+        type: 'query',
+        curie: 'curie3',
+        direction: 'direction3',
+      },
     },
   },
 ];

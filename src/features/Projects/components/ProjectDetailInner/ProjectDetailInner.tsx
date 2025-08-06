@@ -4,8 +4,8 @@ import styles from './ProjectDetailInner.module.scss';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
-import { useUserProjects, useUserQueryStatus, useFormattedProjects } from '@/features/Projects/hooks/customHooks';
-import { QueryStatusObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { useUserProjects, useFormattedProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
+import { UserQueryObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
 import { filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
@@ -16,21 +16,21 @@ const ProjectDetailInner = () => {
   const { projectId } = useParams<{ projectId: string }>();
 
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
-  const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueryStatus();
+  const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueries();
   const formattedProjects = useFormattedProjects(projects, queries);
   const project = useMemo(() => {
     return formattedProjects.find((p) => p.id === Number(projectId));
   }, [formattedProjects, projectId]);
 
   const projectQueries = useMemo(() => {
-    if (!project) return [] as QueryStatusObject[];
-    return queries.filter((q: QueryStatusObject) => project.data.pks.includes(q.data.qid));
+    if (!project) return [] as UserQueryObject[];
+    return queries.filter((q: UserQueryObject) => project.data.pks.includes(q.data.qid));
   }, [project, queries]);
 
   // Sorting & searching state
   const [sortField, setSortField] = useState<SortField>('lastSeen');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [selectedQueries, setSelectedQueries] = useState<QueryStatusObject[]>([]);
+  const [selectedQueries, setSelectedQueries] = useState<UserQueryObject[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const [editState, setEditState] = useEditProjectQueryState();

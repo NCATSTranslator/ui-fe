@@ -14,7 +14,7 @@ import { useCreateProject, useUpdateProjects } from '@/features/Projects/hooks/c
 import styles from './ProjectHeader.module.scss';
 import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/ProjectSearchBar';
 import ProjectHeaderEditControlButtons from './ProjectHeaderEditControlButtons';
-import { QueryStatusObject, Project } from '@/features/Projects/types/projects';
+import { UserQueryObject, Project } from '@/features/Projects/types/projects';
 
 interface ProjectHeaderProps {
   backButtonText?: string;
@@ -29,7 +29,7 @@ interface ProjectHeaderProps {
   project?: Project;
   searchPlaceholder?: string;
   searchTerm: string;
-  selectedQueries?: QueryStatusObject[];
+  selectedQueries?: UserQueryObject[];
   setSearchTerm: (searchTerm: string) => void;
   setIsEditing: (isEditing: boolean) => void;
   showBackButton?: boolean;
@@ -146,9 +146,9 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   };
 
   const handleCancelClick = () => {
-    if (onCancelEdit) {
+    if (onCancelEdit)
       onCancelEdit();
-    }
+
     setIsEditing(false);
     setProjectName('');
     setProjectNameError('');

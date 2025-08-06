@@ -1,4 +1,4 @@
-import { Project, QueryStatusObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { Project, UserQueryObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
 import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
 import styles from '@/features/Projects/components/TableHeader/TableHeader.module.scss';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
@@ -8,11 +8,11 @@ import SortableHeader from '@/features/Projects/components/SortableHeader/Sortab
 
 interface DeletedTableHeaderProps {
   selectedProjects: Project[];
-  selectedQueries: QueryStatusObject[];
+  selectedQueries: UserQueryObject[];
   setSelectedProjects: (projects: Project[]) => void;
-  setSelectedQueries: (queries: QueryStatusObject[]) => void;
+  setSelectedQueries: (queries: UserQueryObject[]) => void;
   activeProjects: Project[];
-  activeQueries: QueryStatusObject[];
+  activeQueries: UserQueryObject[];
   sortField: SortField;
   sortDirection: SortDirection;
   onSort: (field: SortField) => void;

@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueryStatus, 
+import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
   restoreProjects, restoreQueries, updateProjects, updateQueries } from '@/features/Projects/utils/projectsApi';
-import { ProjectCreate, ProjectUpdate, ProjectRaw, QueryStatusObject, Project, QueryUpdate } from '@/features/Projects/types/projects.d';
+import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate } from '@/features/Projects/types/projects.d';
 import { handlePostProjectDeletion, handlePostQueryDeletion } from '../utils/editUpdateFunctions';
+import { generateQueryTitle } from '@/features/Projects/utils/utilities';
 
 /**
  * Hook to fetch user projects with React Query
@@ -18,15 +19,38 @@ export const useUserProjects = () => {
 };
 
 /**
- * Hook to fetch user query status with React Query
+ * Hook to fetch user queries with React Query
  */
-export const useUserQueryStatus = () => {
-  return useQuery({
-    queryKey: ['userQueryStatus'],
-    queryFn: () => getUserQueryStatus(),
+export const useUserQueries = () => {
+  const query = useQuery({
+    queryKey: ['userQueries'],
+    queryFn: () => getUserQueries(),
     staleTime: 30 * 1000, // 30s
     retry: false,
   });
+
+  // Process queries to replace null titles with generated titles
+  const processedData = useMemo(() => {
+    if (!query.data) return query.data;
+    
+    return query.data.map(query => {
+      if (query.data.title === null) {
+        return {
+          ...query,
+          data: {
+            ...query.data,
+            title: generateQueryTitle(query)
+          }
+        };
+      }
+      return query;
+    });
+  }, [query.data]);
+
+  return {
+    ...query,
+    data: processedData
+  };
 };
 
 /**
@@ -139,12 +163,12 @@ export const useUpdateQueries = () => {
  * Currently includes bookmark and note counts, but can be extended for other formatting needs.
  * Results are memoized to avoid recalculating on every render.
  * @param {ProjectRaw[]} projects - The raw projects to format
- * @param {QueryStatusObject[]} queries - The queries to use for calculations
+ * @param {UserQueryObject[]} queries - The queries to use for calculations
  * @returns {Project[]} The formatted projects with calculated fields
  */
 export const useFormattedProjects = (
   projects: ProjectRaw[], 
-  queries: QueryStatusObject[],
+  queries: UserQueryObject[],
   includeUnassigned: boolean = true
 ): Project[] => {
   return useMemo(() => {
@@ -223,7 +247,7 @@ export const useDeleteProjectsAndQueries = () => {
   const { mutate: deleteProjects } = useDeleteProjects();
   const { mutate: deleteQueries } = useDeleteQueries();
 
-  return (selectedProjects: Project[], setSelectedProjects: (projects: Project[]) => void, selectedQueries: QueryStatusObject[], setSelectedQueries: (queries: QueryStatusObject[]) => void) => {
+  return (selectedProjects: Project[], setSelectedProjects: (projects: Project[]) => void, selectedQueries: UserQueryObject[], setSelectedQueries: (queries: UserQueryObject[]) => void) => {
     if(selectedProjects.length > 0) {
       deleteProjects(selectedProjects.map(project => project.id.toString()), {
         onSuccess: () => {
