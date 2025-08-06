@@ -1,3 +1,5 @@
+import { toast } from "react-toastify";
+
 const buildOptions = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: unknown) => {
   const headers = {
     'Content-Type': 'application/json'
@@ -42,6 +44,20 @@ export type ErrorHandler = (error: Error) => void;
 
 export const defaultHttpErrorHandler: ErrorHandler = (error: Error): void => {
   console.error('HTTP Error:', error.message);
+  if (error.message.includes('401')) {
+    toast.error('Your login has expired or is invalid. Please try logging in again.');
+    // TODO: redirect to login page
+  }
+  if (error.message.includes('403')) {
+    toast.error('You do not have permission to access this resource. Please contact support if you believe this is an error.');
+    // TODO: redirect to login page
+  }
+  if (error.message.includes('404')) {
+    toast.error('The requested resource was not found. Please contact support if you believe this is an error.');
+  }
+  if (error.message.includes('500')) {
+    toast.error('An internal server error occurred. Please try again later or contact support if the problem persists.');
+  }
   throw error;
 };
 
@@ -77,6 +93,7 @@ export const fetchWithErrorHandling = async <T>(
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.log('fetching with error handling', errorData, response);
       if (isErrorObject(errorData)) {
         throw new Error(`${errorData.error}: ${errorData.message}`);
       } else {
