@@ -75,7 +75,8 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
         type: item.type.targetType,
         direction: item.type.direction,
         pid: projectId || null,
-        title: title
+        title: title,
+        node_one_label: item.node.label
       });
 
       const response = await fetch(`${API_PATH_PREFIX}/query`, {
@@ -142,7 +143,9 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
         subject: {id: itemOne.id, category: subjectType},
         object: {id: itemTwo.id, category: objectType},
         pid: projectId || null,
-        constraint: middleType || null
+        constraint: middleType || null,
+        node_one_label: itemOne.label,
+        node_two_label: itemTwo.label
       });
 
       const response = await fetch(`${API_PATH_PREFIX}/query`, {
