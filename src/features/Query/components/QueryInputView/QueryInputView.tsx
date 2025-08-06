@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import styles from '@/features/Query/components/Query/Query.module.scss';
 import QueryBar from '@/features/Query/components/QueryBar/QueryBar';
 import { AutocompleteItem, ExampleQueries, QueryItem } from '@/features/Query/types/querySubmission';
@@ -8,6 +8,7 @@ import { queryTypes } from '@/features/Query/utils/queryTypes';
 import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 import { QueryTypeIcon } from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
 import { User } from '@/features/UserAuth/types/user';
+import { useNavigate } from 'react-router-dom';
 
 interface QueryInputViewProps {
   queryItem: QueryItem;
@@ -44,6 +45,19 @@ const QueryInputView: FC<QueryInputViewProps> = ({
   onClearAutocomplete,
   onClearQueryItem
 }) => {
+  const navigate = useNavigate();
+  const [presetURL, setPresetURL] = useState<string | false>(false);
+
+  useEffect(() => {
+    if (presetURL) {
+      const timer = setTimeout(() => {
+        const cleanedURL = presetURL.replaceAll("//", "/");
+        navigate(cleanedURL);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [presetURL, navigate]);
+
   return (
     <>
       <p className='blurb'>Select a question and enter a search term to find paths between biomedical entities</p>
@@ -98,31 +112,31 @@ const QueryInputView: FC<QueryInputViewProps> = ({
       {queryItem.type.id === 0 && exampleQueries.exampleDiseases && (
         <ExampleQueryList
           examples={exampleQueries.exampleDiseases}
-          setPresetURL={() => {}}
+          setPresetURL={setPresetURL}
         />
       )}
       {queryItem.type.id === 1 && exampleQueries.exampleGenesUp && (
         <ExampleQueryList
           examples={exampleQueries.exampleGenesUp}
-          setPresetURL={() => {}}
+          setPresetURL={setPresetURL}
         />
       )}
       {queryItem.type.id === 2 && exampleQueries.exampleGenesDown && (
         <ExampleQueryList
           examples={exampleQueries.exampleGenesDown}
-          setPresetURL={() => {}}
+          setPresetURL={setPresetURL}
         />
       )}
       {queryItem.type.id === 3 && exampleQueries.exampleChemsUp && (
         <ExampleQueryList
           examples={exampleQueries.exampleChemsUp}
-          setPresetURL={() => {}}
+          setPresetURL={setPresetURL}
         />
       )}
       {queryItem.type.id === 4 && exampleQueries.exampleChemsDown && (
         <ExampleQueryList
           examples={exampleQueries.exampleChemsDown}
-          setPresetURL={() => {}}
+          setPresetURL={setPresetURL}
         />
       )}
     </>
