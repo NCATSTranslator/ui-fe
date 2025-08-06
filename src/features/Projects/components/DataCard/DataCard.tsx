@@ -26,6 +26,8 @@ interface DataCardProps<T> {
   item: T;
   onEdit?: (item: T) => void;
   onShare?: (item: T) => void;
+  onRestore?: (item: T) => void;
+  onDelete?: (item: T) => void;
   searchTerm?: string;
   selectedItems: T[];
   setSelectedItems: Dispatch<SetStateAction<T[]>>;
@@ -46,6 +48,8 @@ const DataCard = <T,>({
   item,
   onEdit,
   onShare,
+  onRestore,
+  onDelete,
   searchTerm,
   selectedItems,
   setSelectedItems,
@@ -95,12 +99,14 @@ const DataCard = <T,>({
 
   const handleRestore = (e: MouseEvent) => {
     e.stopPropagation();
-    console.log('restore');
+    if (onRestore)
+      onRestore(item);
   };
 
   const handleDelete = (e: MouseEvent) => {
-    e.stopPropagation();
-    console.log('delete');
+    e.stopPropagation(); 
+    if (onDelete)
+      onDelete(item);
   };
 
   return (

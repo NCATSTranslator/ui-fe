@@ -8,6 +8,7 @@ import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import './App.scss';
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import { useFetchConfigAndPrefs, useGetSessionStatus } from '@/features/UserAuth/utils/userApi';
+import { AppToastContainer } from '@/features/Common/components/AppToastContainer/AppToastContainer';
 
 const App = ({children}: {children?: ReactNode}) => {
 
@@ -40,6 +41,7 @@ const App = ({children}: {children?: ReactNode}) => {
 
   return (
     <div className={`app ${pathnameClass} ${additionalClasses}`}>
+      <AppToastContainer />
       <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />
       <div className='header-disclaimer'>
         <p>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>

@@ -8,7 +8,6 @@ import { useQueryState, useAutocomplete, useQuerySubmission, useExampleQueries }
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import cloneDeep from "lodash/cloneDeep";
 import styles from './Query.module.scss';
-import { AppToastContainer } from '@/features/Common/components/AppToastContainer/AppToastContainer';
 import QueryResultsView from '@/features/Query/components/QueryResultsView/QueryResultsView';
 import QueryInputView from '@/features/Query/components/QueryInputView/QueryInputView';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
@@ -154,7 +153,6 @@ const Query: FC<QueryProps> = ({
   return (
     <>
       <div className={`${styles.query} ${isResults ? styles.results : ''}`}>
-        <AppToastContainer />
         <div className={styles.container}>
           {isResults ? (
             <QueryResultsView

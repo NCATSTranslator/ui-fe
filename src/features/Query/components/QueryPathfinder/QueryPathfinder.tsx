@@ -18,7 +18,6 @@ import Select from '@/features/Common/components/Select/Select';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import { Result } from "@/features/ResultList/types/results.d";
 import { useAutocomplete, useQuerySubmission } from '@/features/Query/hooks/customQueryHooks';
-import { AppToastContainer } from '@/features/Common/components/AppToastContainer/AppToastContainer';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 import QueryResultsHeader from '@/features/Query/components/QueryResultsHeader/QueryResultsHeader';
 import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
@@ -180,7 +179,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
   return (
     <div className={`${styles.queryPathfinder} ${isResults && styles.results}`}>
-      <AppToastContainer />
       { isResults 
         ?
           <QueryResultsHeader

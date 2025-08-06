@@ -10,7 +10,7 @@ import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import RestoreIcon from '@/assets/icons/directional/Undo & Redo/Undo.svg?react';
 import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
-import { useCreateProject, useUpdateProjects } from '@/features/Projects/hooks/customHooks';
+import { useCreateProject, useRestoreProjects, useUpdateProjects } from '@/features/Projects/hooks/customHooks';
 import styles from './ProjectHeader.module.scss';
 import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/ProjectSearchBar';
 import ProjectHeaderEditControlButtons from './ProjectHeaderEditControlButtons';
@@ -68,6 +68,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   
   const createProjectMutation = useCreateProject();
   const updateProjectsMutation = useUpdateProjects();
+  const restoreProjectsMutation = useRestoreProjects();
 
   // Initialize project name when editing an existing item
   useEffect(() => {

@@ -2,6 +2,8 @@ import { Dispatch, SetStateAction, useMemo } from 'react';
 import { Project, UserQueryObject } from '@/features/Projects/types/projects';
 import { getProjectStatus } from '@/features/Projects/utils/utilities';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
+import { useRestoreProjects } from '@/features/Projects/hooks/customHooks';
+import { toast } from 'react-toastify';
 
 interface ProjectCardProps {
   onEdit?: (project: Project) => void;
@@ -22,6 +24,19 @@ const ProjectCard = ({
 }: ProjectCardProps) => {
 
   const status = useMemo(() => getProjectStatus(project, queries), [project, queries]);
+  const restoreProjectsMutation = useRestoreProjects();
+  const onRestore = (project: Project) => {
+    restoreProjectsMutation.mutate([project.id.toString()], { 
+      onSuccess: () => {
+        console.log('project restored');
+        toast.success('Project restored');
+      },
+      onError: (error) => {
+        console.error('Failed to restore project:', error);
+        toast.error('Failed to restore project');
+      }
+    });
+  };
 
   return (
     <DataCard
@@ -32,6 +47,7 @@ const ProjectCard = ({
       setSelectedItems={setSelectedProjects}
       status={status}
       onEdit={onEdit}
+      onRestore={onRestore}
       getItemId={(item: Project) => item.id}
       getItemTitle={(item: Project) => item.data.title}
       getItemTimeCreated={(item: Project) => item.time_created.toString()}

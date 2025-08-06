@@ -21,7 +21,7 @@ export interface EditHandlers {
 }
 
 /**
- * Handles the edit state.
+ * Handles the edit state of the project or query.
  * @returns The edit state and the function to set the state.
  */
 export const useEditProjectQueryState = (): [EditProjectQueryState, Dispatch<SetStateAction<EditProjectQueryState>>] => {
@@ -175,7 +175,7 @@ export const useEditProjectQueryHandlers = (
 }; 
 
 /**
- * Handles the post-deletion of projects.
+ * Handles the post-deletion of projects by removing them from the userProjects query.
  * @param queryClient - The query client.
  * @param selectedProjects - The projects to delete.
  * @param setSelectedProjects - The function to set the selected projects.
@@ -189,7 +189,7 @@ export const handlePostProjectDeletion = (queryClient: QueryClient, selectedProj
 };
 
 /**
- * Handles the post-deletion of queries.
+ * Handles the post-deletion of queries by removing them from the userQueries query.
  * @param queryClient - The query client.
  * @param selectedQueries - The queries to delete.
  * @param setSelectedQueries - The function to set the selected queries.
