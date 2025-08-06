@@ -93,12 +93,9 @@ export const ProjectListInner = () => {
   const hideQueriesTab = (searchTerm.length > 0 && sortedActiveQueries.length === 0);
   const hideTrashTab = (searchTerm.length > 0 && sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0) || (editState.editingItem?.type !== "query" && editState.isEditing);
 
-console.log( queries, activeQueries, sortedActiveQueries)
-
-  // doesnt work bc the tabs don't exist when editState.isEditing is changed
+  // reset active tab back to projects when editing is finished
   useEffect(() => {
     if (!editState.isEditing) {
-      console.log("setting active tab to projects");
       setActiveTab('Projects');
     }
   }, [editState.isEditing]);
@@ -177,6 +174,8 @@ console.log( queries, activeQueries, sortedActiveQueries)
               defaultActiveTab="Projects"
               className={styles.projectTabs}
               tabListClassName={styles.projectTabsList}
+              activeTab={activeTab}
+              controlled={true}
             >
               {
                 !hideProjectsTab
