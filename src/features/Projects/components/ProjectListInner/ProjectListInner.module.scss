@@ -12,6 +12,10 @@
       margin-top: calc($xl * 2);
     }
   }
+  .deletedWrapper {
+    min-height: calc(($xl * 4));
+    position: relative;
+  }
 }
 .projectList {
   display: flex;

@@ -286,45 +286,57 @@ export const ProjectListInner = () => {
                           sortDirection={sortDirection}
                           sortField={sortField}
                         />
-                        <LoadingWrapper
-                          loading={isLoading}
-                          wrapperClassName={styles.loadingWrapper}
-                          spinnerClassName={styles.loadingSpinner}
-                        >
-                          <div className={styles.projectGrid}>
-                            {sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0 ? (
-                              <div className={styles.emptyState}>
-                                <p>No deleted items found.</p>
-                              </div>
-                            ) : (
-                              <>
-                                {sortedDeletedProjects.length > 0 && (
-                                  sortedDeletedProjects.map((project: Project) => (
-                                    <ProjectCard 
-                                      key={project.id}
-                                      queries={queries}
-                                      project={project}
-                                      searchTerm={searchTerm}
-                                      setSelectedProjects={setSelectedProjects}
-                                      selectedProjects={selectedProjects}
-                                    />
-                                  ))
-                                )}
-                                {sortedDeletedQueries.length > 0 && (
-                                  sortedDeletedQueries.map((query: UserQueryObject) => (
-                                    <QueryCard 
-                                      key={query.data.qid}
-                                      query={query}
-                                      searchTerm={searchTerm}
-                                      setSelectedQueries={setSelectedQueries}
-                                      selectedQueries={selectedQueries}
-                                    />
-                                  ))
-                                )}
-                              </>
-                            )}
+                        {sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0 ? (
+                          <div className={styles.emptyState}>
+                            <p>No deleted items found.</p>
                           </div>
-                        </LoadingWrapper>
+                        ) : (
+                          <>
+                            <div className={styles.deletedWrapper}>
+                              <LoadingWrapper
+                                loading={projectsLoading}
+                                wrapperClassName={styles.loadingWrapper}
+                                spinnerClassName={styles.loadingSpinner}
+                              >
+                                <div className={styles.projectGrid}>
+                                  {sortedDeletedProjects.length > 0 && (
+                                    sortedDeletedProjects.map((project: Project) => (
+                                      <ProjectCard 
+                                        key={project.id}
+                                        queries={queries}
+                                        project={project}
+                                        searchTerm={searchTerm}
+                                        setSelectedProjects={setSelectedProjects}
+                                        selectedProjects={selectedProjects}
+                                      />
+                                    ))
+                                  )}
+                                </div>
+                              </LoadingWrapper>
+                            </div>
+                            <div className={styles.deletedWrapper}>
+                              <LoadingWrapper
+                                loading={queriesLoading}
+                                wrapperClassName={styles.loadingWrapper}
+                                spinnerClassName={styles.loadingSpinner}
+                              >
+                                <div className={styles.projectGrid}>
+                                  {sortedDeletedQueries.length > 0 && (
+                                    sortedDeletedQueries.map((query: UserQueryObject) => (
+                                      <QueryCard 
+                                        key={query.data.qid}
+                                        query={query}
+                                        searchTerm={searchTerm}
+                                        setSelectedQueries={setSelectedQueries}
+                                        selectedQueries={selectedQueries}
+                                      />
+                                    ))
+                                  )}
+                                </div>
+                              </LoadingWrapper>
+                            </div>
+                          </>
+                        )}
                       </Tab>
                     : null
                   }
