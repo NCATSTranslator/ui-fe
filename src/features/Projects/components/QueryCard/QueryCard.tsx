@@ -21,7 +21,7 @@ const QueryCard = ({
   return (
     <DataCard
       item={query}
-      type="smartQuery"
+      type={query.data.query.type === 'pathfinder' ? 'pathfinderQuery' : 'smartQuery'}
       searchTerm={searchTerm}
       selectedItems={selectedQueries}
       setSelectedItems={setSelectedQueries}
