@@ -12,6 +12,10 @@ import CardName from '@/features/Projects/components/CardName/CardName';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import { Project, QueryStatus, UserQueryObject } from '@/features/Projects/types/projects';
+import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { getTypeIDFromType } from '@/features/Projects/utils/utilities';
+import { AutocompleteItem } from '@/features/Query/types/querySubmission';
+import { unableToReachLinkToast } from '../../utils/toastMessages';
 
 interface DataCardProps<T> {
   className?: string;
@@ -32,7 +36,7 @@ interface DataCardProps<T> {
   selectedItems: T[];
   setSelectedItems: Dispatch<SetStateAction<T[]>>;
   status?: string;
-  type: 'project' | 'smartQuery';
+  type: 'project' | 'smartQuery' | 'pathfinderQuery';
 }
 
 const DataCard = <T,>({
@@ -94,8 +98,44 @@ const DataCard = <T,>({
     const target = e.target as HTMLElement;
     const isInteractive = target.closest('button, input, a, [role="button"]');
     
-    if (!isInteractive && type === 'project')
+    if (!isInteractive && type === 'project') {
       navigate(`/projects/${getItemId(item)}`);
+      return;
+    }
+
+    if(!isInteractive && type === 'smartQuery') {
+      const query = item as UserQueryObject;
+      const curie = query.data.query.curie || '';
+      const label = query.data.query.node_one_label || curie|| '';
+      const type = query.data.query.type;
+      const direction = query.data.query.direction || null;
+      const typeID = getTypeIDFromType(type, direction);
+      const qid = query.data.qid;
+      const url = getResultsShareURLPath(label, curie, typeID, "0", qid);
+      window.open(url, "_blank", "noopener");
+      return;
+    }
+
+    if(!isInteractive && type === 'pathfinderQuery') {
+      const query = item as UserQueryObject;
+      if(query.data.query.type === 'pathfinder' && query.data.query.subject && query.data.query.object) {
+        const itemOne: AutocompleteItem = {
+          id: query.data.query.subject.id,
+          label: query.data.query.node_one_label || query.data.query.subject.id,
+        }
+        const itemTwo: AutocompleteItem = {
+          id: query.data.query.object.id,
+          label: query.data.query.node_two_label || query.data.query.object.id,
+        }
+        const constraint = query.data.query.constraint || undefined;
+        const qid = query.data.qid;
+        const url = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
+        window.open(url, "_blank", "noopener");
+        return;
+      }
+      unableToReachLinkToast();
+      return;
+    }
   };
 
   const handleRestore = (e: MouseEvent) => {
