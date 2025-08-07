@@ -22,7 +22,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Success: Story = {
   args: {
-    status: 'success',
+    status: 'complete',
   },
 };
 
@@ -40,12 +40,12 @@ export const Error: Story = {
 
 export const AllStatuses: Story = {
   args: {
-    status: 'success',
+    status: 'complete',
   },
   render: (args) => (
     <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
       <div>
-        <div style={{ marginBottom: '8px', fontSize: '12px', color: '#666' }}>Success</div>
+        <div style={{ marginBottom: '8px', fontSize: '12px', color: '#666' }}>Complete</div>
         <StatusIndicator status={args.status} />
       </div>
       <div>

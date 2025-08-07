@@ -1,5 +1,18 @@
 @use '@/assets/styles/variables' as *;
 
+
+.projectListContainer {
+  background-color: $white;
+  &.isEditing {
+    background-color: $lightGray;
+  }
+  .loadingWrapper {
+    align-items: flex-start;
+    .loadingSpinner {
+      margin-top: calc($xl * 2);
+    }
+  }
+}
 .projectList {
   display: flex;
   flex-direction: column;
@@ -8,6 +21,7 @@
   margin: 0 auto;
   .projectTabContent {
     padding: $s $m $m;
+    position: relative;
   }
 }
 .projectListInner {

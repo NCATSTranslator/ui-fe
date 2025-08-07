@@ -284,7 +284,7 @@ const UserSaves = () => {
                 </div>
               </div>
             </div>
-            <LoadingWrapper loading={loading} className="container">
+            <LoadingWrapper loading={loading} contentClassName="container">
               {
                 savesLoaded
                 ? 

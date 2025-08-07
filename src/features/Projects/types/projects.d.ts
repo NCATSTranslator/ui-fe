@@ -37,7 +37,7 @@ export type Project = ProjectRaw & {
   note_count: number;
 }
 
-export type QueryStatus = 'success' | 'running' | 'error';
+export type QueryStatus = 'complete' | 'running' | 'error';
 
 export interface UserQueryObject {
   data: {
@@ -65,9 +65,10 @@ export type SortDirection = 'asc' | 'desc';
 
 export type EditingItem = {
   id: number | string;
-  type: 'project' | 'query';
   name: string;
   queryIds?: string[];
+  status?: 'new' | 'editing';
+  type: 'project' | 'query';
 } | undefined;
 
 export const isProjectRaw = (obj: unknown): obj is ProjectRaw => {

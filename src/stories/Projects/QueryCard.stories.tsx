@@ -5,7 +5,7 @@ import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import { UserQueryObject } from '@/features/Projects/types/projects';
 
 const mockQuerySuccess: UserQueryObject = {
-  status: 'success',
+  status: 'complete',
   sid: 'sid1',
   data: {
     qid: 'qid1',

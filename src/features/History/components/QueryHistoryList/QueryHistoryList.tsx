@@ -128,7 +128,7 @@ const QueryHistoryList = ({ loading }: { loading: boolean }) => {
           />
         </form>
       </div>
-      <LoadingWrapper loading={loading} className={`container ${styles.historyContainer}`}>
+      <LoadingWrapper loading={loading} contentClassName={`container ${styles.historyContainer}`}>
         <ul className={styles.historyList}>
           {filteredQueryHistoryState.map((query, i) => {
             // hide past queries with old formatting

@@ -110,5 +110,7 @@
 }
 
 .project-detail {
-  background-color: $lightGray;
+  body {
+    background-color: $lightGray;
+  }
 }

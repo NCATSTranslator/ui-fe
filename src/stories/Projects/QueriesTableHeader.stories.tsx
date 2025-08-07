@@ -5,7 +5,7 @@ import { UserQueryObject } from '@/features/Projects/types/projects';
 
 const mockQueries: UserQueryObject[] = [
   {
-    status: 'success',
+    status: 'complete',
     sid: 'sid1',
     data: {
       qid: 'qid1',

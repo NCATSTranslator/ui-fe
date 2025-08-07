@@ -104,31 +104,6 @@ export const ProjectListInner = () => {
     }
   }, [editState.isEditing]);
 
-  if (isLoading) {
-    return (
-      <div className={styles.projectList}>
-        <ProjectHeader
-          title="Projects"
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          searchPlaceholder="Search by Project or Query Name"
-          showCreateButton={true}
-          variant="list"
-          isEditing={editState.isEditing}
-          setIsEditing={handleSetIsEditing}
-          editingItem={editState.editingItem}
-          onUpdateItem={editHandlers.handleUpdateItem}
-          onCancelEdit={editHandlers.handleCancelEdit}
-          onRestoreProject={editHandlers.handleRestoreProject}
-          onDeleteProject={editHandlers.handleDeleteProject}
-          onRestoreQuery={editHandlers.handleRestoreQuery}
-          onDeleteQuery={editHandlers.handleDeleteQuery}
-        />
-        <LoadingWrapper loading={isLoading} />
-      </div>
-    );
-  }
-
   if (hasError) {
     return (
       <div className={styles.projectList}>
@@ -153,98 +128,102 @@ export const ProjectListInner = () => {
   }
 
   return (
-    <div className={styles.projectList}>
-      <ProjectHeader
-        title="Projects"
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        searchPlaceholder="Search by Project or Query Name"
-        showCreateButton={true}
-        variant="list"
-        isEditing={editState.isEditing}
-        setIsEditing={handleSetIsEditing}
-        editingItem={editState.editingItem}
-        onUpdateItem={editHandlers.handleUpdateItem}
-        onCancelEdit={editHandlers.handleCancelEdit}
-        selectedQueries={selectedQueries}
-      />
-      {
-        hideProjectsTab && hideQueriesTab && hideTrashTab
-        ?
-          <div className={styles.emptyState}>
-            <p>No Matches Found</p>
-          </div>
-        : 
-          <div className={styles.projectListInner}>
-            <Tabs 
-              isOpen={true}
-              handleTabSelection={handleTabSelection}
-              defaultActiveTab="Projects"
-              className={styles.projectTabs}
-              tabListClassName={styles.projectTabsList}
-              activeTab={activeTab}
-              controlled={true}
-            >
-              {
-                !hideProjectsTab
-                ?
-                  <Tab heading="Projects" className={styles.projectTabContent}>
-                    {activeProjects.length > 0 && (
-                      <ProjectsTableHeader 
-                        activeProjects={sortedActiveProjects}
-                        selectedProjects={selectedProjects}
-                        setSelectedProjects={setSelectedProjects}
-                        sortField={sortField}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                      />
-                    )}
-                    <div className={styles.projectGrid}>
-                      {sortedActiveProjects.length === 0 ? (
-                        <div className={styles.emptyState}>
-                          {
-                            searchTerm.length > 0 
-                            ? 
-                              (
-                                <p>No projects found matching your search.</p>
-                              )
-                            :
-                              (
-                                <p>No projects found. Create your first project to get started.</p>
-                              )
-                          }
-                        </div>
-                      ) : (
-                        <>
-                          {sortedActiveProjects.map((project: Project, index: number) => (
-                            <>
-                              <ProjectCard 
-                                key={project.id}
-                                queries={queries}
-                                project={project}
-                                searchTerm={searchTerm}
-                                setSelectedProjects={setSelectedProjects}
-                                selectedProjects={selectedProjects}
-                                onEdit={editHandlers.handleEditProject}
-                              />
-                              {/* Add separator before the last project (Unassigned) */}
-                              {index === sortedActiveProjects.length - 2 && project.id !== -1 && (
-                                <div className={styles.separator} />
-                              )}
-                            </>
-                          ))}
-                        </>
-                      )}
-                    </div>
-                  </Tab>
-                : null
-              }
-              {
-                !hideQueriesTab
-                ?
-                  <Tab heading="Queries" className={styles.projectTabContent}>
-                    {
-                      activeQueries.length > 0 && (
+    <div className={`${styles.projectListContainer} ${editState.isEditing ? styles.isEditing : ''}`}>
+      <div className="container">
+        <div className={styles.projectList}>
+          <ProjectHeader
+            title="Projects"
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            searchPlaceholder="Search by Project or Query Name"
+            showCreateButton={true}
+            variant="list"
+            isEditing={editState.isEditing}
+            setIsEditing={handleSetIsEditing}
+            editingItem={editState.editingItem}
+            onUpdateItem={editHandlers.handleUpdateItem}
+            onCancelEdit={editHandlers.handleCancelEdit}
+            selectedQueries={selectedQueries}
+          />
+          {
+            hideProjectsTab && hideQueriesTab && hideTrashTab
+            ?
+              <div className={styles.emptyState}>
+                <p>No Matches Found</p>
+              </div>
+            : 
+              <div className={styles.projectListInner}>
+                <Tabs 
+                  isOpen={true}
+                  handleTabSelection={handleTabSelection}
+                  defaultActiveTab="Projects"
+                  className={styles.projectTabs}
+                  tabListClassName={styles.projectTabsList}
+                  activeTab={activeTab}
+                  controlled={true}
+                >
+                  {
+                    !hideProjectsTab
+                    ?
+                      <Tab heading="Projects" className={styles.projectTabContent}>
+                        <ProjectsTableHeader 
+                          activeProjects={sortedActiveProjects}
+                          selectedProjects={selectedProjects}
+                          setSelectedProjects={setSelectedProjects}
+                          sortField={sortField}
+                          sortDirection={sortDirection}
+                          onSort={handleSort}
+                        />
+                        <LoadingWrapper
+                          loading={projectsLoading}
+                          wrapperClassName={styles.loadingWrapper}
+                          spinnerClassName={styles.loadingSpinner}
+                        >
+                          <div className={styles.projectGrid}>
+                            {sortedActiveProjects.length === 0 ? (
+                              <div className={styles.emptyState}>
+                                {
+                                  searchTerm.length > 0 
+                                  ? 
+                                    (
+                                      <p>No projects found matching your search.</p>
+                                    )
+                                  :
+                                    (
+                                      <p>No projects found. Create your first project to get started.</p>
+                                    )
+                                }
+                              </div>
+                            ) : (
+                              <>
+                                {sortedActiveProjects.map((project: Project, index: number) => (
+                                  <>
+                                    <ProjectCard 
+                                      key={project.id}
+                                      queries={queries}
+                                      project={project}
+                                      searchTerm={searchTerm}
+                                      setSelectedProjects={setSelectedProjects}
+                                      selectedProjects={selectedProjects}
+                                      onEdit={editHandlers.handleEditProject}
+                                    />
+                                    {/* Add separator before the last project (Unassigned) */}
+                                    {index === sortedActiveProjects.length - 2 && project.id !== -1 && (
+                                      <div className={styles.separator} />
+                                    )}
+                                  </>
+                                ))}
+                              </>
+                            )}
+                          </div>
+                        </LoadingWrapper>
+                      </Tab>
+                    : null
+                  }
+                  {
+                    !hideQueriesTab
+                    ?
+                      <Tab heading="Queries" className={styles.projectTabContent}>
                         <QueriesTableHeader 
                           activeQueries={sortedActiveQueries}
                           onSort={handleSort}
@@ -253,120 +232,132 @@ export const ProjectListInner = () => {
                           sortField={sortField}
                           sortDirection={sortDirection}
                         />
-                      )
-                    }
-                    <div className={styles.projectGrid}>
-                      {sortedActiveQueries.length === 0 ? (
-                        <div className={styles.emptyState}>
-                          {
-                            searchTerm.length > 0 
-                            ? 
-                              (
-                                <p>No queries found matching your search.</p>
-                              )
-                            :
-                              (
-                                <p>No queries found. Your saved queries will appear here.</p>
-                              )
-                          }
-                        </div>
-                      ) : (
-                        sortedActiveQueries.map((query: UserQueryObject) => (
-                          <QueryCard 
-                            key={query.data.qid}
-                            query={query}
-                            searchTerm={searchTerm}
-                            setSelectedQueries={setSelectedQueries}
-                            selectedQueries={selectedQueries}
-                            onEdit={editHandlers.handleEditQuery}
-                          />
-                        ))
+                        <LoadingWrapper
+                          loading={queriesLoading}
+                          wrapperClassName={styles.loadingWrapper}
+                          spinnerClassName={styles.loadingSpinner}
+                        >
+                          <div className={styles.projectGrid}>
+                            {sortedActiveQueries.length === 0 ? (
+                              <div className={styles.emptyState}>
+                                {
+                                  searchTerm.length > 0 
+                                  ? 
+                                    (
+                                      <p>No queries found matching your search.</p>
+                                    )
+                                  :
+                                    (
+                                      <p>No queries found. Your saved queries will appear here.</p>
+                                    )
+                                }
+                              </div>
+                            ) : (
+                              sortedActiveQueries.map((query: UserQueryObject) => (
+                                <QueryCard 
+                                  key={query.data.qid}
+                                  query={query}
+                                  searchTerm={searchTerm}
+                                  setSelectedQueries={setSelectedQueries}
+                                  selectedQueries={selectedQueries}
+                                  onEdit={editHandlers.handleEditQuery}
+                                />
+                              ))
+                            )}
+                          </div>
+                        </LoadingWrapper>
+                      </Tab>
+                    : null
+                  }
+                  {
+                    !hideTrashTab
+                    ?
+                      <Tab heading="Trash" className={styles.projectTabContent}>
+                        <DeletedTableHeader
+                          activeProjects={sortedDeletedProjects}
+                          activeQueries={sortedDeletedQueries}
+                          onSort={handleSort}
+                          selectedProjects={selectedProjects}
+                          setSelectedProjects={setSelectedProjects}
+                          selectedQueries={selectedQueries}
+                          setSelectedQueries={setSelectedQueries}
+                          sortDirection={sortDirection}
+                          sortField={sortField}
+                        />
+                        <LoadingWrapper
+                          loading={isLoading}
+                          wrapperClassName={styles.loadingWrapper}
+                          spinnerClassName={styles.loadingSpinner}
+                        >
+                          <div className={styles.projectGrid}>
+                            {sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0 ? (
+                              <div className={styles.emptyState}>
+                                <p>No deleted items found.</p>
+                              </div>
+                            ) : (
+                              <>
+                                {sortedDeletedProjects.length > 0 && (
+                                  sortedDeletedProjects.map((project: Project) => (
+                                    <ProjectCard 
+                                      key={project.id}
+                                      queries={queries}
+                                      project={project}
+                                      searchTerm={searchTerm}
+                                      setSelectedProjects={setSelectedProjects}
+                                      selectedProjects={selectedProjects}
+                                    />
+                                  ))
+                                )}
+                                {sortedDeletedQueries.length > 0 && (
+                                  sortedDeletedQueries.map((query: UserQueryObject) => (
+                                    <QueryCard 
+                                      key={query.data.qid}
+                                      query={query}
+                                      searchTerm={searchTerm}
+                                      setSelectedQueries={setSelectedQueries}
+                                      selectedQueries={selectedQueries}
+                                    />
+                                  ))
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </LoadingWrapper>
+                      </Tab>
+                    : null
+                  }
+                </Tabs>
+                <div className={styles.selectedInteractions}>
+                  {(selectedProjects.length > 0 || selectedQueries.length > 0) && (
+                    <>
+                      <span>{selectedProjects.length || selectedQueries.length} Selected</span>
+                      {(selectedQueries.length > 0 && !editState.isEditing) && (
+                        <Button
+                          variant="secondary"
+                          handleClick={() => {}}
+                          iconLeft={<FolderIcon />}
+                          small
+                          className={styles.button}
+                        >
+                          Add to Project
+                        </Button>
                       )}
-                    </div>
-                  </Tab>
-                : null
-              }
-              {
-                !hideTrashTab
-                ?
-                  <Tab heading="Trash" className={styles.projectTabContent}>
-                    <DeletedTableHeader
-                      activeProjects={sortedDeletedProjects}
-                      activeQueries={sortedDeletedQueries}
-                      onSort={handleSort}
-                      selectedProjects={selectedProjects}
-                      setSelectedProjects={setSelectedProjects}
-                      selectedQueries={selectedQueries}
-                      setSelectedQueries={setSelectedQueries}
-                      sortDirection={sortDirection}
-                      sortField={sortField}
-                    />
-                    <div className={styles.projectGrid}>
-                      {sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0 ? (
-                        <div className={styles.emptyState}>
-                          <p>No deleted items found.</p>
-                        </div>
-                      ) : (
-                        <>
-                          {sortedDeletedProjects.length > 0 && (
-                            sortedDeletedProjects.map((project: Project) => (
-                              <ProjectCard 
-                                key={project.id}
-                                queries={queries}
-                                project={project}
-                                searchTerm={searchTerm}
-                                setSelectedProjects={setSelectedProjects}
-                                selectedProjects={selectedProjects}
-                              />
-                            ))
-                          )}
-                          {sortedDeletedQueries.length > 0 && (
-                            sortedDeletedQueries.map((query: UserQueryObject) => (
-                              <QueryCard 
-                                key={query.data.qid}
-                                query={query}
-                                searchTerm={searchTerm}
-                                setSelectedQueries={setSelectedQueries}
-                                selectedQueries={selectedQueries}
-                              />
-                            ))
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </Tab>
-                : null
-              }
-            </Tabs>
-            <div className={styles.selectedInteractions}>
-              {(selectedProjects.length > 0 || selectedQueries.length > 0) && (
-                <>
-                  <span>{selectedProjects.length || selectedQueries.length} Selected</span>
-                  {(selectedQueries.length > 0 && !editState.isEditing) && (
-                    <Button
-                      variant="secondary"
-                      handleClick={() => {}}
-                      iconLeft={<FolderIcon />}
-                      small
-                      className={styles.button}
-                    >
-                      Add to Project
-                    </Button>
+                      <Button
+                        variant="secondary"
+                        handleClick={handleDelete}
+                        iconLeft={<TrashIcon />}
+                        small
+                        className={styles.button}
+                      >
+                        Delete
+                      </Button>
+                    </>
                   )}
-                  <Button
-                    variant="secondary"
-                    handleClick={handleDelete}
-                    iconLeft={<TrashIcon />}
-                    small
-                    className={styles.button}
-                  >
-                    Delete
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-      }
+                </div>
+              </div>
+          }
+        </div>
+      </div>
     </div>
   );
 };

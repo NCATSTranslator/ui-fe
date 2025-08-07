@@ -35,7 +35,7 @@ interface ProjectHeaderProps {
   searchTerm: string;
   selectedQueries?: UserQueryObject[];
   setSearchTerm: (searchTerm: string) => void;
-  setIsEditing: (isEditing: boolean) => void;
+  setIsEditing: (isEditing: boolean, editingItem?: EditingItem) => void;
   showBackButton?: boolean;
   showCreateButton?: boolean;
   subtitle?: string;
@@ -114,7 +114,12 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
 
   const handleCreateNewClick = () => {
       // Enter editing mode
-      setIsEditing(true);
+      setIsEditing(true, {
+        type: 'project',
+        id: '',
+        name: '',
+        status: 'new',
+      });
       setProjectName('');
       setProjectNameError('');
   };
@@ -231,7 +236,9 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
         <div className={styles.listLayout}>
           <div className={styles.top}>
             <div className={styles.titleSection}>
-              <h1 className={styles.title}>{title}</h1>
+              <h1 className={styles.title}>
+                {isEditing && editingItem?.status === 'new' ? 'New Project' : title}
+              </h1>
               {showCreateButton && isEditing && (
                   <ProjectHeaderEditControlButtons
                     createProjectMutation={createProjectMutation}

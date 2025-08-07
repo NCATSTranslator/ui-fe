@@ -49,7 +49,7 @@ const mockProjects: Project[] = [
 
 const mockQueries: UserQueryObject[] = [
   {
-    status: 'success',
+    status: 'complete',
     sid: 'sid1',
     data: {
       qid: 'qid1',
@@ -106,7 +106,7 @@ const mockQueries: UserQueryObject[] = [
     },
   },
   {
-    status: 'success',
+    status: 'complete',
     sid: 'sid4',
     data: {
       qid: 'qid4',
@@ -125,7 +125,7 @@ const mockQueries: UserQueryObject[] = [
     },
   },
   {
-    status: 'success',
+    status: 'complete',
     sid: 'sid5',
     data: {
       qid: 'qid5',
@@ -144,7 +144,7 @@ const mockQueries: UserQueryObject[] = [
     },
   },
   {
-    status: 'success',
+    status: 'complete',
     sid: 'sid6',
     data: {
       qid: 'qid6',

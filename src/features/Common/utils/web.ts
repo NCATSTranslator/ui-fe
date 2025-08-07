@@ -93,7 +93,6 @@ export const fetchWithErrorHandling = async <T>(
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.log('fetching with error handling', errorData, response);
       if (isErrorObject(errorData)) {
         throw new Error(`${errorData.error}: ${errorData.message}`);
       } else {

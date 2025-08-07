@@ -11,7 +11,7 @@ interface StatusIndicatorProps {
 
 const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
-  if(status === 'success') {
+  if(status === 'complete') {
     return (
       <span className={`${styles.status} ${styles.statusSuccess}`}>
         <CheckIcon/>
