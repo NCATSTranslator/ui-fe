@@ -239,41 +239,36 @@ export const useFormattedProjects = (
   }, [projects, queries]);
 };
 
-/**
- * Custom hook that returns a function that can be used to delete projects and queries.
- * @returns A function that can be used to delete projects and queries.
- */
-export const useDeleteProjectsAndQueries = () => {
-  const queryClient = useQueryClient();
-  const { mutate: deleteProjects } = useDeleteProjects();
-  const { mutate: deleteQueries } = useDeleteQueries();
+//   const queryClient = useQueryClient();
+//   const { mutate: deleteProjects } = useDeleteProjects();
+//   const { mutate: deleteQueries } = useDeleteQueries();
 
-  return (selectedProjects: Project[], setSelectedProjects: (projects: Project[]) => void, selectedQueries: UserQueryObject[], setSelectedQueries: (queries: UserQueryObject[]) => void) => {
-    if(selectedProjects.length > 0) {
-      deleteProjects(selectedProjects.map(project => project.id.toString()), {
-        onSuccess: () => {
-          handlePostProjectDeletion(queryClient, selectedProjects, setSelectedProjects);
-          projectDeletedToast();
-        },
-        onError: (error) => { 
-          handlePostProjectDeletion(queryClient, selectedProjects, setSelectedProjects);
-          console.error(error);
-          errorToast('Failed to delete project');
-        }
-      });
-    }
-    if(selectedQueries.length > 0) {  
-      deleteQueries(selectedQueries.map(query => query.data.qid.toString()), {
-        onSuccess: () => {
-          handlePostQueryDeletion(queryClient, selectedQueries, setSelectedQueries);
-          queryDeletedToast();
-        },
-        onError: (error) => {
-          handlePostQueryDeletion(queryClient, selectedQueries, setSelectedQueries); 
-          console.error(error);
-          errorToast('Failed to delete query');
-        }
-      });
-    }
-  };
-};
+//   return (selectedProjects: Project[], setSelectedProjects: (projects: Project[]) => void, selectedQueries: UserQueryObject[], setSelectedQueries: (queries: UserQueryObject[]) => void) => {
+//     if(selectedProjects.length > 0) {
+//       deleteProjects(selectedProjects.map(project => project.id.toString()), {
+//         onSuccess: () => {
+//           handlePostProjectDeletion(queryClient, selectedProjects, setSelectedProjects);
+//           projectDeletedToast();
+//         },
+//         onError: (error) => { 
+//           handlePostProjectDeletion(queryClient, selectedProjects, setSelectedProjects);
+//           console.error(error);
+//           errorToast('Failed to delete project');
+//         }
+//       });
+//     }
+//     if(selectedQueries.length > 0) {  
+//       deleteQueries(selectedQueries.map(query => query.data.qid.toString()), {
+//         onSuccess: () => {
+//           handlePostQueryDeletion(queryClient, selectedQueries, setSelectedQueries);
+//           queryDeletedToast();
+//         },
+//         onError: (error) => {
+//           handlePostQueryDeletion(queryClient, selectedQueries, setSelectedQueries); 
+//           console.error(error);
+//           errorToast('Failed to delete query');
+//         }
+//       });
+//     }
+//   };
+// };

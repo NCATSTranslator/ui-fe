@@ -79,8 +79,9 @@ export const useEditProjectQueryHandlers = (
       // Find the project and update it
       const projectToUpdate = projects.find(p => p.id === id);
       if (projectToUpdate) {
+        const queryKey = ['userProjects'];
         // Optimistically update the React Query cache
-        queryClient.setQueryData(['userProjects'], (oldData: Project[]) => {
+        queryClient.setQueryData(queryKey, (oldData: Project[]) => {
           if (!oldData) return oldData;
           return oldData.map((project: Project) => 
             project.id === id 
@@ -108,7 +109,7 @@ export const useEditProjectQueryHandlers = (
             console.error('Failed to update project:', error);
             errorToast('Failed to update project');
             // Revert optimistic update on error
-            queryClient.setQueryData(['userProjects'], (oldData: Project[]) => {
+            queryClient.setQueryData(queryKey, (oldData: Project[]) => {
               if (!oldData) return oldData;
               return oldData.map((project: Project) => 
                 project.id === id 
@@ -126,11 +127,12 @@ export const useEditProjectQueryHandlers = (
         });
       }
     } else if (type === 'query') {
+      const queryKey = ['userQueries'];
       // Find the query and update it
       const queryToUpdate = queries.find(q => q.data.qid === id);
       if (queryToUpdate) {
         // Optimistically update the React Query cache
-        queryClient.setQueryData(['userQueries'], (oldData: UserQueryObject[]) => {
+        queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
           if (!oldData) return oldData;
           return oldData.map((query: UserQueryObject) => 
             query.data.qid === id 
@@ -154,7 +156,7 @@ export const useEditProjectQueryHandlers = (
             console.error('Failed to update query:', error);
             errorToast('Failed to update query');
             // Revert optimistic update on error
-            queryClient.setQueryData(['userQueries'], (oldData: UserQueryObject[]) => {
+            queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
               if (!oldData) return oldData;
               return oldData.map((query: UserQueryObject) => 
                 query.data.qid === id 
@@ -176,6 +178,17 @@ export const useEditProjectQueryHandlers = (
   };
 
   const handleRestoreProject = (project: Project) => {
+    const queryKey = ['userProjects'];
+    // Optimistically update the React Query cache
+    queryClient.setQueryData(queryKey, (oldData: Project[]) => {
+      if (!oldData) return oldData;
+      return oldData.map((p: Project) => 
+        p.id === project.id 
+          ? { ...p, data: { ...p.data, is_deleted: false } }
+          : p
+      );
+    });
+
     restoreProjectsMutation.mutate([project.id.toString()], {
       onSuccess: () => {
         projectRestoredToast();
@@ -183,11 +196,31 @@ export const useEditProjectQueryHandlers = (
       onError: (error) => {
         console.error('Failed to restore project:', error);
         errorToast('Failed to restore project');
+        // Revert optimistic update on error
+        queryClient.setQueryData(queryKey, (oldData: Project[]) => {
+          if (!oldData) return oldData;
+          return oldData.map((p: Project) => 
+            p.id === project.id 
+              ? { ...p, data: { ...p.data, is_deleted: true } }
+              : p
+          );
+        });
       }
     });
   };
 
   const handleDeleteProject = (project: Project) => {
+    const queryKey = ['userProjects'];
+    // Optimistically update the React Query cache
+    queryClient.setQueryData(queryKey, (oldData: Project[]) => {
+      if (!oldData) return oldData;
+      return oldData.map((p: Project) => 
+        p.id === project.id 
+          ? { ...p, data: { ...p.data, is_deleted: true } }
+          : p
+      );
+    });
+
     deleteProjectsMutation.mutate([project.id.toString()], {
       onSuccess: () => {
         projectDeletedToast();
@@ -195,11 +228,31 @@ export const useEditProjectQueryHandlers = (
       onError: (error) => {
         console.error('Failed to delete project:', error);
         errorToast('Failed to delete project');
+        // Revert optimistic update on error
+        queryClient.setQueryData(queryKey, (oldData: Project[]) => {
+          if (!oldData) return oldData;
+          return oldData.map((p: Project) => 
+            p.id === project.id 
+              ? { ...p, data: { ...p.data, is_deleted: false } }
+              : p
+          );
+        });
       }
     });
   };
 
   const handleRestoreQuery = (query: UserQueryObject) => {
+    const queryKey = ['userQueries'];
+    // Optimistically update the React Query cache
+    queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
+      if (!oldData) return oldData;
+      return oldData.map((q: UserQueryObject) => 
+        q.data.qid === query.data.qid 
+          ? { ...q, data: { ...q.data, is_deleted: false } }
+          : q
+      );
+    });
+
     restoreQueriesMutation.mutate([query.data.qid.toString()], {
       onSuccess: () => {
         queryRestoredToast();
@@ -207,11 +260,31 @@ export const useEditProjectQueryHandlers = (
       onError: (error) => {
         console.error('Failed to restore query:', error);
         errorToast('Failed to restore query');
+        // Revert optimistic update on error
+        queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
+          if (!oldData) return oldData;
+          return oldData.map((q: UserQueryObject) => 
+            q.data.qid === query.data.qid 
+              ? { ...q, data: { ...q.data, is_deleted: true } }
+              : q
+          );
+        });
       }
     });
   };
 
   const handleDeleteQuery = (query: UserQueryObject) => {
+    const queryKey = ['userQueries'];
+    // Optimistically update the React Query cache
+    queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
+      if (!oldData) return oldData;
+      return oldData.map((q: UserQueryObject) => 
+        q.data.qid === query.data.qid 
+          ? { ...q, data: { ...q.data, is_deleted: true } }
+          : q
+      );
+    });
+
     deleteQueriesMutation.mutate([query.data.qid.toString()], {
       onSuccess: () => {
         queryDeletedToast();
@@ -219,6 +292,15 @@ export const useEditProjectQueryHandlers = (
       onError: (error) => {
         console.error('Failed to delete query:', error);
         errorToast('Failed to delete query');
+        // Revert optimistic update on error
+        queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
+          if (!oldData) return oldData;
+          return oldData.map((q: UserQueryObject) => 
+            q.data.qid === query.data.qid 
+              ? { ...q, data: { ...q.data, is_deleted: false } }
+              : q
+          );
+        });
       }
     });
   };

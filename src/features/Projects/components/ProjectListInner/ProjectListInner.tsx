@@ -7,7 +7,7 @@ import ProjectCard from '@/features/Projects/components/ProjectCard/ProjectCard'
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import ProjectsTableHeader from '@/features/Projects/components/TableHeader/ProjectsTableHeader/ProjectsTableHeader';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
-import { useDeleteProjectsAndQueries, useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
+import { useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
 import { ProjectRaw, UserQueryObject, SortField, SortDirection, Project, EditingItem } from '@/features/Projects/types/projects.d';
 import { filterAndSortProjects, filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
@@ -21,7 +21,6 @@ import DeletedTableHeader from '../TableHeader/DeletedTableHeader/DeletedTableHe
 export const ProjectListInner = () => {
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
   const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueries();
-  const deleteProjectsAndQueries = useDeleteProjectsAndQueries();
   const [activeTab, setActiveTab] = useState<string>('Projects');
   
   const [sortField, setSortField] = useState<SortField>('lastSeen');
@@ -80,7 +79,10 @@ export const ProjectListInner = () => {
   };
 
   const handleDelete = () => {
-    deleteProjectsAndQueries(selectedProjects, setSelectedProjects, selectedQueries, setSelectedQueries);
+    selectedProjects.forEach((project: Project) => editHandlers.handleDeleteProject(project));
+    selectedQueries.forEach((query: UserQueryObject) => editHandlers.handleDeleteQuery(query));
+    setSelectedProjects([]);
+    setSelectedQueries([]);
   };
 
   const isLoading = projectsLoading || queriesLoading;
