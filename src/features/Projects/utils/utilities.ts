@@ -3,9 +3,9 @@ import { queryTypes } from "@/features/Query/utils/queryTypes";
 
 /**
  * Get the status of a project based on the most recent query's status
- * @param project - The project to get the status of
- * @param queries - The queries to get the status from
- * @returns The status of the project
+ * @param {Project} project - The project to get the status of
+ * @param {UserQueryObject[]} queries - The queries to get the status from
+ * @returns {QueryStatus} The status of the project
  */
 export const getProjectStatus = (project: Project, queries: UserQueryObject[]): QueryStatus => {
   // Get the most recent query's status
@@ -23,8 +23,13 @@ export const getProjectStatus = (project: Project, queries: UserQueryObject[]): 
   }, null);
 
   return mostRecentQuery?.status || 'error';
-} 
+}
 
+/**
+ * Generates the title of a query based on the query type and direction
+ * @param {UserQueryObject} query - The query to generate the title for
+ * @returns {string} The title of the query
+ */
 export const generateQueryTitle = (query: UserQueryObject): string => {
   if(query.data.title)
     return query.data.title;
@@ -33,11 +38,13 @@ export const generateQueryTitle = (query: UserQueryObject): string => {
 
   if(query.data.query.type === 'pathfinder') {
     // TODO: add constraint and nodes to title when Gus adds them to the query object
-    const constraint = 'constraint'
-    const nodeOne = 'nodeOne';
-    const nodeTwo = 'nodeTwo';
+    const constraint = query.data.query.constraint || null;
+    const nodeOne = query.data.query.node_one_label || query.data.query.subject?.id || 'nodeOne';
+    const nodeTwo = query.data.query.node_two_label || query.data.query.object?.id || 'nodeTwo';
 
-    title = `What paths begin with ${nodeOne} and end with ${nodeTwo} and include a ${constraint}?`;
+    title = constraint
+      ? `What paths begin with ${nodeOne} and end with ${nodeTwo} and include a ${constraint}?`
+      : `What paths begin with ${nodeOne} and end with ${nodeTwo}?`;
   } else {
     const queryType = queryTypes.find(type => type.targetType === query.data.query.type);
     const label = query.data.query.node_one_label || query.data.query.curie;
@@ -48,4 +55,19 @@ export const generateQueryTitle = (query: UserQueryObject): string => {
   }
 
   return title;
+}
+
+/**
+ * Get the type ID from the type and direction
+ * @param {string} type - The type of the query
+ * @param {string | null} direction - The direction of the query
+ * @returns {number} The type ID
+ */
+export const getTypeIDFromType = (type: string, direction: string | null) => {
+  switch(type) {
+    case 'chemical': return direction === 'increased' ? 1 : 2;
+    case 'gene': return direction === 'increased' ? 3 : 4;
+    // default case is drug->disease type id
+    default: return 0;
+  }
 }

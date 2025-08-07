@@ -39,6 +39,11 @@ export type Project = ProjectRaw & {
 
 export type QueryStatus = 'complete' | 'running' | 'error';
 
+export type PathfinderNodeObject = {
+  id: string,
+  category: string,
+}
+
 export interface UserQueryObject {
   data: {
     aras: string[],
@@ -48,12 +53,15 @@ export interface UserQueryObject {
     qid: string,
     query: {
       constraint?: string | null,
-      curie: string,
-      direction: string | null,
+      curie?: string,
+      direction?: string | null,
       node_one_label?: string | null,
       node_two_label?: string | null,
+      object?: PathfinderNodeObject,
       pid?: string | null,
-      type: string,
+      // category is biolink entity type
+      subject?: PathfinderNodeObject,
+      type: "drug" | "gene" | "chemical" | "pathfinder"
     },
     time_created: Date,
     time_updated: Date,
@@ -258,18 +266,15 @@ export const isUserQueryObject = (obj: unknown): obj is UserQueryObject => {
     return false;
   }
 
-  if (!('curie' in query)) {
-    console.warn('isUserQueryObject: Missing "data.query.curie" property', query);
-    return false;
-  }
-
-  if (!('direction' in query)) {
-    console.warn('isUserQueryObject: Missing "data.query.direction" property', query);
-    return false;
-  }
-
   if (!('type' in query)) {
     console.warn('isUserQueryObject: Missing "data.query.type" property', query);
+    return false;
+  }
+
+  // Validate type is one of the allowed values
+  const type = (query as unknown).type;
+  if (typeof type !== 'string' || !['drug', 'gene', 'chemical', 'pathfinder'].includes(type)) {
+    console.warn('isUserQueryObject: "data.query.type" must be one of: drug, gene, chemical, pathfinder', type);
     return false;
   }
 

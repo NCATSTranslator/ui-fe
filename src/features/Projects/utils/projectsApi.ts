@@ -159,15 +159,15 @@ export const restoreQueries = async (
  * PUT /api/v1/users/me/queries/update
  * Update the queries in the body of the message.
  */
-export const updateQueries = async (
-  queries: QueryUpdate[],
+export const updateQuery = async (
+  query: QueryUpdate,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<UserQueryObject> => {
   const url = `${API_PATH_PREFIX}/users/me/queries/update`;
   
   return fetchWithErrorHandling<UserQueryObject>(
-    () => put(url, queries),
+    () => put(url, query),
     httpErrorHandler,
     fetchErrorHandler,
     isUserQueryObject

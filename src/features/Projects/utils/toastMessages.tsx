@@ -38,3 +38,7 @@ export const queryUpdatedToast = () => {
 export const errorToast = (message: string) => {
   return toast.error(message);
 };
+
+export const unableToReachLinkToast = () => {
+  return toast.error('Unable to reach link');
+};

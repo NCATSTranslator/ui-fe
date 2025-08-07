@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { EditingItem, Project, UserQueryObject } from '@/features/Projects/types/projects.d';
-import { useUpdateProjects, useUpdateQueries, useDeleteProjects, useRestoreProjects, useDeleteQueries, useRestoreQueries } from '@/features/Projects/hooks/customHooks';
+import { useUpdateProjects, useUpdateQuery, useDeleteProjects, useRestoreProjects, useDeleteQueries, useRestoreQueries } from '@/features/Projects/hooks/customHooks';
 import { errorToast, projectUpdatedToast, queryUpdatedToast, projectRestoredToast, projectDeletedToast, queryRestoredToast, queryDeletedToast } from './toastMessages';
 
 export interface EditProjectQueryState {
@@ -51,7 +51,7 @@ export const useEditProjectQueryHandlers = (
 ): EditHandlers => {
   const queryClient = useQueryClient();
   const updateProjectsMutation = useUpdateProjects();
-  const updateQueriesMutation = useUpdateQueries();
+  const updateQueryMutation = useUpdateQuery();
   const deleteProjectsMutation = useDeleteProjects();
   const restoreProjectsMutation = useRestoreProjects();
   const deleteQueriesMutation = useDeleteQueries();
@@ -144,10 +144,10 @@ export const useEditProjectQueryHandlers = (
           );
         });
 
-        updateQueriesMutation.mutate([{
+        updateQueryMutation.mutate({
           qid: queryToUpdate.data.qid,
           title: newName || queryToUpdate.data.title || ''
-        }], {
+        }, {
           onSuccess: () => {
             handleSetIsEditing(false);
             queryUpdatedToast();
