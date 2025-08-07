@@ -67,7 +67,6 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
 
     setIsLoading(true);
     const timestamp = new Date();
-    const title = getQueryTitle('smart', item.type, item.node);
 
     try {
       const queryJson = JSON.stringify({
@@ -75,7 +74,6 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
         type: item.type.targetType,
         direction: item.type.direction,
         pid: projectId || null,
-        title: title,
         node_one_label: item.node.label
       });
 
@@ -87,7 +85,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
 
       const data = await response.json();
 
-      if (data.data && data.status === 'success') {
+      if (data.data && data.status === 'complete') {
         dispatch(
           incrementHistory({
             item,
@@ -155,7 +153,6 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
       });
 
       const data = await response.json();
-      console.log(data);
       
       let newQueryPath = getPathfinderResultsShareURLPath(
         itemOne, 

@@ -39,11 +39,11 @@ export const generateQueryTitle = (query: UserQueryObject): string => {
 
     title = `What paths begin with ${nodeOne} and end with ${nodeTwo} and include a ${constraint}?`;
   } else {
-    const curie = query.data.query.curie;
     const queryType = queryTypes.find(type => type.targetType === query.data.query.type);
+    const label = query.data.query.node_one_label || query.data.query.curie;
     if(queryType) {
       // TODO: update curie to node label when Gus adds it to the query object
-      title = `${queryType.label.replaceAll("a disease?", "").replaceAll("a chemical?", "").replaceAll("a gene?", "")} ${curie}?`;
+      title = `${queryType.label.replaceAll("a disease?", "").replaceAll("a chemical?", "").replaceAll("a gene?", "")} ${label}?`;
     }
   }
 

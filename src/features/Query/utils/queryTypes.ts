@@ -107,7 +107,7 @@ export const generateSmartQueryQuestionText = (label: string, item: Autocomplete
     .replaceAll("a disease?", "")
     .replaceAll("a chemical?", "")
     .replaceAll("a gene?", "");
-  return `${resultsPaneQuestionText} ${item.label}?`;
+  return `${resultsPaneQuestionText}${item.label}?`;
 }
 export const getQueryTitle = (type: 'smart' | 'pathfinder', queryType: QueryType | null, itemOne: AutocompleteItem, itemTwo?: AutocompleteItem, constraintText?: string) => {
   if(type === 'smart' && !!queryType) {

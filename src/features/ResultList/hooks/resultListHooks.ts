@@ -54,7 +54,7 @@ const hasNewARAs = (currentARAs: string[], previousARAs: string[]): boolean => {
  * Helper function to check if status polling should stop
  */
 const shouldStopStatusPolling = (status: string, statusCheckCount: number): boolean => {
-  return status === 'success' || statusCheckCount >= STATUS_CHECK_TIMEOUT;
+  return status === 'complete' || statusCheckCount >= STATUS_CHECK_TIMEOUT;
 };
 
 /**

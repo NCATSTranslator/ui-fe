@@ -47,9 +47,13 @@ export interface UserQueryObject {
     note_count: number,
     qid: string,
     query: {
-      type: string,
+      constraint?: string | null,
       curie: string,
-      direction: string | null
+      direction: string | null,
+      node_one_label?: string | null,
+      node_two_label?: string | null,
+      pid?: string | null,
+      type: string,
     },
     time_created: Date,
     time_updated: Date,
@@ -207,6 +211,11 @@ export const isUserQueryObject = (obj: unknown): obj is UserQueryObject => {
     return false;
   }
 
+  if (!('data' in obj)) {
+    console.warn('isUserQueryObject: Missing "data" property', obj);
+    return false;
+  }
+
   const data = (obj as unknown).data;
   if (typeof data !== 'object' || data === null) {
     console.warn('isUserQueryObject: "data" property is not an object or is null', data);
@@ -249,11 +258,6 @@ export const isUserQueryObject = (obj: unknown): obj is UserQueryObject => {
     return false;
   }
 
-  if (!('type' in query)) {
-    console.warn('isUserQueryObject: Missing "data.query.type" property', query);
-    return false;
-  }
-
   if (!('curie' in query)) {
     console.warn('isUserQueryObject: Missing "data.query.curie" property', query);
     return false;
@@ -261,6 +265,11 @@ export const isUserQueryObject = (obj: unknown): obj is UserQueryObject => {
 
   if (!('direction' in query)) {
     console.warn('isUserQueryObject: Missing "data.query.direction" property', query);
+    return false;
+  }
+
+  if (!('type' in query)) {
+    console.warn('isUserQueryObject: Missing "data.query.type" property', query);
     return false;
   }
 
