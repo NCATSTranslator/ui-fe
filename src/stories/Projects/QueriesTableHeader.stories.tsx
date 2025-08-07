@@ -17,7 +17,7 @@ const mockQueries: UserQueryObject[] = [
       time_updated: new Date('2024-01-20'),
       deleted: false,
       query: {
-        type: 'query',
+        type: 'drug',
         curie: 'curie1',
         direction: 'direction1',
       },
@@ -36,7 +36,7 @@ const mockQueries: UserQueryObject[] = [
       time_updated: new Date('2024-01-19'),
       deleted: false,
       query: {
-        type: 'query',
+        type: 'chemical',
         curie: 'curie2',
         direction: 'direction2',
       },
@@ -55,7 +55,7 @@ const mockQueries: UserQueryObject[] = [
       time_updated: new Date('2024-01-18'),
       deleted: false,
       query: {
-        type: 'query',
+        type: 'gene',
         curie: 'curie3',
         direction: 'direction3',
       },
