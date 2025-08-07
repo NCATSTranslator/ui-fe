@@ -113,15 +113,9 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   };
 
   const handleCreateNewClick = () => {
-      // Enter editing mode
-      setIsEditing(true, {
-        type: 'project',
-        id: '',
-        name: '',
-        status: 'new',
-      });
-      setProjectName('');
-      setProjectNameError('');
+    setIsEditing(true, undefined);
+    setProjectName('');
+    setProjectNameError('');
   };
 
   const handleDoneClick = () => {
@@ -140,6 +134,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
         setProjectNameError('');
       } else {
         // Create the project using the mutation
+        console.log('creating project', projectName.trim(), selectedQueries?.map(query => query.data.qid));
         createProjectMutation.mutate({
           title: projectName.trim(),
           pks: selectedQueries?.map(query => query.data.qid) || []
