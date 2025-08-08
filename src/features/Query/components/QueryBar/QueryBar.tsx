@@ -20,7 +20,7 @@ type QueryBarProps = {
   onClearQueryItem: () => void;
   disabled?: boolean;
   isLoading?: boolean;
-  placeholderText?: string; 
+  placeholderText?: string;
 }
 
 const QueryBar: FC<QueryBarProps> = ({

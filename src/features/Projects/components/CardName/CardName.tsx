@@ -44,7 +44,6 @@ const CardName: FC<CardNameProps> = ({
           searchWords={searchTerm ? [searchTerm] : []}
           autoEscape={true}
           textToHighlight={name}
-          data-tooltip-id="unassigned-project-tooltip"
         />
         {
           (searchTerm && !name.toLowerCase().includes(searchTerm.toLowerCase())) && (

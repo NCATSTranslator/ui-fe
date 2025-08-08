@@ -15,6 +15,7 @@ interface TextInputProps {
   errorText?: string;
   handleChange: (value: string) => void;
   className?: string;
+  containerClassName?: string;
   iconLeft?: ReactNode;
   iconRight?: ReactNode;
   maxLength?: number;
@@ -35,6 +36,7 @@ const TextInput: FC<TextInputProps> = ({
   errorText = "Error Message",
   handleChange,
   className = '',
+  containerClassName = '',
   iconLeft,
   iconRight,
   maxLength = -1,
@@ -49,7 +51,8 @@ const TextInput: FC<TextInputProps> = ({
   const containerStyle = joinClasses(
     styles.textInputContainer,
     error && styles.error,
-    errorBottom && styles.errorBottom
+    errorBottom && styles.errorBottom,
+    containerClassName
   );
   
   const inputStyle = joinClasses(

@@ -1,4 +1,4 @@
-import { UserQueryObject, SortField, SortDirection, Project } from '@/features/Projects/types/projects.d';
+import { UserQueryObject, SortField, SortDirection, Project, ProjectRaw } from '@/features/Projects/types/projects.d';
 
 /**
  * Sorts projects based on the specified field and direction
@@ -47,6 +47,23 @@ export const sortProjects = (projects: Project[], sortField: SortField, sortDire
   });
 };
 
+export const filterProjects = (projects: Project[] | ProjectRaw[], searchTerm: string, queries?: UserQueryObject[]): Project[] | ProjectRaw[] => {
+  const formattedSearchTerm = searchTerm.toLowerCase();
+  const filteredProjects = projects.filter(project => {
+    let foundMatch = false;
+    // check if the project title matches the search term
+    if (project.data.title.toLowerCase().includes(formattedSearchTerm)) {
+      foundMatch = true;
+    }
+    // check if any of the project's queries match the search term
+    if (queries && project.data.pks.some(pk => queries.find(q => q.data.qid === pk)?.data.title?.toLowerCase().includes(formattedSearchTerm))) {
+      foundMatch = true;
+    }
+    return foundMatch;
+  });
+  return filteredProjects;
+}
+
 /**
  * Filters and sorts projects based on the specified search terms
  * @param {Project[]} projects - The projects to format
@@ -57,19 +74,7 @@ export const sortProjects = (projects: Project[], sortField: SortField, sortDire
  * @returns {Project[]} The formatted projects
  */
 export const filterAndSortProjects = (projects: Project[], queries: UserQueryObject[], sortField: SortField, sortDirection: SortDirection, searchTerm: string): Project[] => {
-  const formattedSearchTerm = searchTerm.toLowerCase();
-  const filteredProjects = projects.filter(project => {
-    let foundMatch = false;
-    // check if the project title matches the search term
-    if (project.data.title.toLowerCase().includes(formattedSearchTerm)) {
-      foundMatch = true;
-    }
-    // check if any of the project's queries match the search term
-    if (project.data.pks.some(pk => queries.find(q => q.data.qid === pk)?.data.title?.toLowerCase().includes(formattedSearchTerm))) {
-      foundMatch = true;
-    }
-    return foundMatch;
-  });
+  const filteredProjects: Project[] = filterProjects(projects, searchTerm, queries) as Project[];
   const sortedProjects = sortProjects(filteredProjects, sortField, sortDirection);
   // make sure unassigned is always at bottom (has id of -1)
   const unassignedProject = sortedProjects.find(project => project.id === -1);

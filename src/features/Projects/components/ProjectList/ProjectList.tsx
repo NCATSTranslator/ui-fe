@@ -1,18 +1,7 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { ProjectListInner } from '@/features/Projects/components/ProjectListInner/ProjectListInner';
+import { projectsQueryClient } from '@/features/Projects/utils/utilities';
 
-const projectsQueryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 2 * 60 * 1000, // 2 min
-      retry: false,
-      refetchOnWindowFocus: false,
-    },
-    mutations: {
-      retry: false,
-    },
-  },
-});
 
 const ProjectList = () => {
   return (

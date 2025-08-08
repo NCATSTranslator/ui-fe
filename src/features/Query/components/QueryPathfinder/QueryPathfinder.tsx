@@ -23,6 +23,7 @@ import QueryResultsHeader from '@/features/Query/components/QueryResultsHeader/Q
 import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
+import { ProjectRaw } from '@/features/Projects/types/projects';
 
 type QueryPathfinderProps = {
   handleResultMatchClick?: (match: ResultContextObject) => void;
@@ -31,6 +32,7 @@ type QueryPathfinderProps = {
   pk?: string;
   results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
+  selectedProject?: ProjectRaw | null;
 }
 
 const QueryPathfinder: FC<QueryPathfinderProps> = ({ 
@@ -39,7 +41,8 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   isResults = false,
   pk,
   results = [],
-  setShareModalFunction = ()=>{} 
+  setShareModalFunction = ()=>{},
+  selectedProject = null
 }) => {
 
   const config = useSelector(currentConfig);
@@ -140,7 +143,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       setErrorText("Second search term is not selected, please select a valid term.");
       return;
     }
-    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined);
+    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined);
   }
 
   // Event handler for form submission

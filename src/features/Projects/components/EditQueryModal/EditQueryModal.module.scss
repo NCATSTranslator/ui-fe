@@ -1,0 +1,84 @@
+@use "@/assets/styles/variables" as *;
+
+.editQueryModal {
+  .top {
+    border-bottom: 1px solid $midGray;
+    padding: 0 0 $s;
+    margin: 0 0 $l;
+  }
+  .bottom {
+    display: flex;
+    flex-direction: column;
+    gap: $m;
+  }
+  
+  .heading {
+    margin: 0;
+  }
+
+  .subheading {
+    color: $black;
+    margin: 0 0 $xs;
+  }
+  
+  .wrapper {
+    padding: $s;
+    background-color: $lightGray;
+    border-radius: $largeBorderRadius;
+  }
+  
+  .projectNameInputContainer {
+    width: 100%;
+    label {
+      margin: 0;
+    }
+  }
+  
+  .newProjectForm form {
+    display: flex;
+    align-items: flex-end;
+    gap: $xs;
+  }
+  .createButton {
+    padding: $xs;
+    svg {
+      path {
+        fill: transparent;
+        stroke: $white;
+      }
+    }
+  }
+
+  .noResults {
+    p {
+      margin: 0;
+    }
+  }
+
+  .clearSearchIcon {
+    cursor: pointer;
+  }
+
+  .projectItem {
+    padding: 12px;
+    &:hover {
+      cursor: pointer;
+      .projectName {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .projectName {
+    margin: 0;
+    font-size: $bodyTwoSize;
+    color: $black;
+    font-weight: 800;
+  }
+  .queryCount {
+    font-size: $captionSize;
+    color: $darkGray;
+    font-weight: 400;
+    margin: 0;
+  }
+}
