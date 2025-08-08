@@ -1,0 +1,40 @@
+@use '@/assets/styles/variables' as *;
+
+.sortableHeader {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: $defaultAnim;
+  color: $purpleOne;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 1px;
+  position: relative;
+  &:hover {
+    color: $purpleTwo;
+  }
+  &.activeSort {
+    color: $purpleTwo;
+  }
+}
+.sortArrow {
+  width: $m;
+  height: $m;
+  position: absolute;
+  right: -22px;
+  transition: $defaultTransformAnim;
+
+  &.asc {
+    transform: rotate(180deg);
+  }
+
+  &.desc {
+    transform: rotate(0deg);
+  }
+
+  path {
+    stroke: currentColor;
+  }
+} 

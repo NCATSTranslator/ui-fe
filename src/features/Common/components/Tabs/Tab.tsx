@@ -1,5 +1,6 @@
 import { ReactNode, KeyboardEvent, forwardRef, useImperativeHandle, useRef, RefObject } from 'react';
 import styles from './Tab.module.scss';
+import { joinClasses } from '../../utils/utilities';
 
 export interface TabProps {
   heading: string;
@@ -50,7 +51,7 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(({
     }
   };
 
-  const classes = `${className} ${styles.tabListItem} ${isActive ? styles.active : ''}`;
+  const classes = joinClasses(className, styles.tabListItem, isActive && styles.active);
 
   // Set ref in parent component for focus management
   const handleRef = (element: HTMLDivElement | null) => {

@@ -59,7 +59,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const submitQuery = useCallback(async (item: QueryItem) => {
+  const submitQuery = useCallback(async (item: QueryItem, projectId?: string) => {
     if (!item?.node) {
       console.error("No node attached to query item, unable to submit");
       return;
@@ -73,6 +73,8 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
         curie: item.node.id,
         type: item.type.targetType,
         direction: item.type.direction,
+        pid: projectId || null,
+        node_one_label: item.node.label
       });
 
       const response = await fetch(`${API_PATH_PREFIX}/query`, {
@@ -83,7 +85,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
 
       const data = await response.json();
 
-      if (data.data && data.status === 'success') {
+      if (data.data && data.status === 'complete') {
         dispatch(
           incrementHistory({
             item,
@@ -126,22 +128,23 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
   const submitPathfinderQuery = useCallback(async (
     itemOne: AutocompleteItem, 
     itemTwo: AutocompleteItem, 
-    middleType?: string
+    middleType?: string, 
+    projectId?: string
   ) => {
     setIsLoading(true);
 
     try {
       let subjectType = (!!itemOne?.types) ? itemOne.types[0] : "";
       let objectType = (!!itemTwo?.types) ? itemTwo.types[0] : "";
-      let queryObject: {type: string, subject: {id: string, category: string}, object: {id: string, category: string}, constraint?: string} = {
+      let queryJson = JSON.stringify({
         type: 'pathfinder',
         subject: {id: itemOne.id, category: subjectType},
         object: {id: itemTwo.id, category: objectType},
-      }
-      if(middleType)
-        queryObject.constraint = middleType;
-
-      let queryJson = JSON.stringify(queryObject);
+        pid: projectId || null,
+        constraint: middleType || null,
+        node_one_label: itemOne.label,
+        node_two_label: itemTwo.label
+      });
 
       const response = await fetch(`${API_PATH_PREFIX}/query`, {
         method: 'POST',
@@ -150,7 +153,6 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
       });
 
       const data = await response.json();
-      console.log(data);
       
       let newQueryPath = getPathfinderResultsShareURLPath(
         itemOne, 

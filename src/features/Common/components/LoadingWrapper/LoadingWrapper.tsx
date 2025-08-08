@@ -6,14 +6,18 @@ import { Timeout } from '@/features/Common/types/global';
 interface LoadingWrapperProps {
   loading?: boolean;
   children?: ReactNode;
-  className?: string;
+  wrapperClassName?: string;
+  contentClassName?: string;
+  spinnerClassName?: string;
   size?: 'small' | 'medium' | 'large';
 }
 
 const LoadingWrapper: FC<LoadingWrapperProps> = ({ 
   loading = false,
   children,
-  className = "",
+  wrapperClassName = "",
+  contentClassName = "",
+  spinnerClassName = "",
   size = 'medium' 
 }) => {
   const [showContent, setShowContent] = useState(false);
@@ -33,18 +37,18 @@ const LoadingWrapper: FC<LoadingWrapperProps> = ({
 
   if (!children) {
     return (
-      <div className={`${styles.loadingWrapper} ${styles[size]} ${className}`}>
-        <LoadingIcon size={size} />
+      <div className={`${styles.loadingWrapper} ${styles[size]} ${wrapperClassName}`}>
+        <LoadingIcon size={size} className={spinnerClassName} />
       </div>
     );
   }
 
   return (
     <div>
-      <div className={`${styles.loadingContainer} ${isLoading ? styles.fadeEnterActive : styles.fadeExitActive}`}>
-        <LoadingIcon size={size} />
+      <div className={`${styles.loadingContainer} ${isLoading ? styles.fadeEnterActive : styles.fadeExitActive} ${wrapperClassName}`}>
+        <LoadingIcon size={size} className={spinnerClassName} />
       </div>
-      <div className={`${styles.contentContainer} ${showContent ? styles.fadeEnterActive : styles.fadeExitActive} ${className}`}>
+      <div className={`${styles.contentContainer} ${showContent ? styles.fadeEnterActive : styles.fadeExitActive} ${contentClassName}`}>
         {children}
       </div>
     </div>

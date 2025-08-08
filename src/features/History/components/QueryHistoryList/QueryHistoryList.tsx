@@ -8,12 +8,12 @@ import { cloneDeep, debounce } from "lodash";
 import { getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { QueryHistoryItem } from "@/features/History/types/history";
 import ShareModal from "@/features/ResultList/components/ShareModal/ShareModal";
-import TextInput from "@/features/Common/components/TextInput/TextInput";
+import TextInput from "@/features/Core/components/TextInput/TextInput";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import Close from '@/assets/icons/buttons/Close/Close.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
-import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import RefreshIcon from '@/assets/icons/buttons/Refresh.svg?react';
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 
@@ -128,7 +128,7 @@ const QueryHistoryList = ({ loading }: { loading: boolean }) => {
           />
         </form>
       </div>
-      <LoadingWrapper loading={loading} className={`container ${styles.historyContainer}`}>
+      <LoadingWrapper loading={loading} contentClassName={`container ${styles.historyContainer}`}>
         <ul className={styles.historyList}>
           {filteredQueryHistoryState.map((query, i) => {
             // hide past queries with old formatting
@@ -166,7 +166,7 @@ const QueryHistoryList = ({ loading }: { loading: boolean }) => {
                         handleClick={(e) => handleExportClick(e, query)}
                         iconOnly
                         dataTooltipId={`query-history-share-button-${query.id}`}
-                        isSecondary
+                        variant="secondary"
                       >
                         <ShareIcon />
                       </Button>

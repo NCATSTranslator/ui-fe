@@ -1,0 +1,103 @@
+@use '@/assets/styles/variables' as *;
+
+
+.projectListContainer {
+  background-color: $white;
+  &.isEditing {
+    background-color: $lightGray;
+  }
+  .loadingWrapper {
+    align-items: flex-start;
+    .loadingSpinner {
+      margin-top: calc($xl * 2);
+    }
+  }
+  .deletedWrapper {
+    min-height: calc(($xl * 4));
+    position: relative;
+  }
+}
+.projectList {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: calc($interiorContainerWidth + ($m * 2));
+  margin: 0 auto;
+  .projectTabContent {
+    padding: $s $m $m;
+    position: relative;
+  }
+}
+.projectListInner {
+  position: relative;
+  .selectedInteractions {
+    position: absolute;
+    top: $m;
+    right: $l;
+    display: flex;
+    gap: $s;
+    align-items: center;
+    .button {
+      background-color: transparent;
+      color: $purpleOne;
+      padding: 0;
+      svg path {
+        fill: $purpleOne;
+      }
+      &:hover {
+        text-decoration: underline;
+        background-color: transparent;
+      }
+    }
+  }
+}
+.projectTabs {
+  flex: 1;
+  margin-top: $m;
+  .projectTabsList {
+    padding-right: 316px;
+  }
+}
+.projectGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $s;
+}
+.separator {
+  height: 1px;
+  background-color: $midGray;
+  margin: $xs 0;
+  width: 100%;
+}
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: $black;
+  font-size: 14px;
+}
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: $red;
+  font-size: 14px;
+  text-align: center;
+}
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: $black;
+  font-size: 14px;
+  line-height: 1.5;
+  p {
+    margin: 0;
+    max-width: 300px;
+  }
+}
+

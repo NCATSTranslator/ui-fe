@@ -1,0 +1,36 @@
+@use '@/assets/styles/variables' as *;
+
+$statusSize: 18px;
+
+.status {
+  position: relative;
+  display: flex;
+  height: $statusSize;
+  width: $statusSize;
+  border-radius: 100%;
+  color: $white;
+  svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: $statusSize;
+    height: $statusSize;
+    path {
+      stroke: $white;
+    }
+  }
+}
+.statusRunning {
+  > div {
+    height: $statusSize !important;
+    width: $statusSize !important;
+    margin-bottom: 0;
+  }
+}
+.statusSuccess {
+  background: $green;
+}
+.statusError {
+  background: $red;
+}

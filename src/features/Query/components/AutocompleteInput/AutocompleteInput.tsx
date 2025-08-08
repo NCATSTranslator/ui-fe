@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import TextInput from '@/features/Common/components/TextInput/TextInput';
+import TextInput from '@/features/Core/components/TextInput/TextInput';
 import Autocomplete from '@/features/Common/components/Autocomplete/Autocomplete';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
 import QuestionIcon from '@/assets/icons/buttons/Search.svg?react';
