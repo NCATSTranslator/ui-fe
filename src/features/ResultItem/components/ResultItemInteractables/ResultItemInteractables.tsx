@@ -5,15 +5,15 @@ import OutsideClickHandler from '@/features/Common/components/OutsideClickHandle
 import { Result } from "@/features/ResultList/types/results";
 import { useSelector } from "react-redux";
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
-import { useResultSummary } from "@/features/ResultItem/hooks/resultSummaryHooks";
 import ResultItemSummaryModal from "@/features/ResultItem/components/ResultItemSummaryModal/ResultItemSummaryModal";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSummaryState, sanitizeNameString } from "@/features/ResultItem/hooks/useResultItemInteractables";
+import { sanitizeNameString } from "@/features/ResultItem/hooks/useResultItemInteractables";
 import { useResponsiveBreakpoint } from "@/features/Common/hooks/customHooks";
 import SummaryButton from "@/features/ResultItem/components/ResultItemInteractables/SummaryButton";
 import BookmarkButton from "@/features/ResultItem/components/ResultItemInteractables/BookmarkButton";
 import NotesButton from "@/features/ResultItem/components/ResultItemInteractables/NotesButton";
 import ShareButton from "@/features/ResultItem/components/ResultItemInteractables/ShareButton";
+import { useStreamingSummaryState } from "@/features/ResultItem/hooks/resultSummaryHooks";
 
 interface ResultItemInteractablesProps {
   handleBookmarkClick: () => Promise<string | number | false | null>;
@@ -57,21 +57,26 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
   const belowBreakpoint = useResponsiveBreakpoint();
   const nameStringNoApostrophes = useMemo(() => sanitizeNameString(nameString), [nameString]);
 
-  const { error, refetch: fetchSummary } = useResultSummary(
-    resultSet, 
-    result, 
-    diseaseId, 
-    diseaseName, 
-    diseaseDescription
-  );
-
-
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  const { summaryState, isLoading: summaryIsLoading, fetchAndUpdateSummary, clearAndRefetchSummary } = useSummaryState(
-    result.id, 
-    fetchSummary
+  const {
+    summaryState,
+    isLoading,
+    fetchAndUpdateSummary,
+    clearAndRefetchSummary,
+    streamedText,
+    isStreaming,
+    isError
+  } = useStreamingSummaryState(
+    resultSet,
+    'https://transltr-bma-ui-dev.ncats.io/summarizer/summary-streaming',
+    result,
+    diseaseId,
+    diseaseName,
+    diseaseDescription,
+    () => console.log("summary generation complete"),
+    () => console.log("summary generation cancelled")
   );
 
   const handleOutsideClick = useCallback(() => {
@@ -145,9 +150,10 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
       
       <ResultItemSummaryModal
         isOpen={isModalOpen}
-        isLoading={summaryIsLoading}
-        isError={!!error}
-        summary={summaryState.content}
+        isLoading={isLoading}
+        isStreaming={isStreaming}
+        isError={isError}
+        summary={isStreaming ? streamedText : summaryState.content}
         onClose={handleCloseModal}
         onClearAndRefetchSummary={handleClearAndRefetchSummary}
       />

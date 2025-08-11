@@ -43,6 +43,11 @@
     background-color: $lightGray;
     color: $midDarkGray;
     cursor: default;
+    &:hover {
+      background-color: $lightGray;
+      color: $midDarkGray;
+      cursor: default;
+    }
   }
   &.small {
     padding: $xxs $xs;
