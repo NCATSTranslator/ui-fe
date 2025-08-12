@@ -6,6 +6,9 @@
   height: 100%;
   max-width: calc($interiorContainerWidth + ($m * 2));
   margin: 0 auto;
+  .projectHeaderContainer {
+    position: relative;
+  }
   .queryGrid {
     display: flex;
     flex-direction: column;

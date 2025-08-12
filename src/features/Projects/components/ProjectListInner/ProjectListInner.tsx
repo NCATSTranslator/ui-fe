@@ -17,6 +17,7 @@ import Button from '@/features/Core/components/Button/Button';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
 import DeletedTableHeader from '../TableHeader/DeletedTableHeader/DeletedTableHeader';
+import ProjectInnerErrorStates from '../ProjectInnerErrorStates/ProjectInnerErrorStates';
 
 export const ProjectListInner = () => {
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
@@ -106,28 +107,28 @@ export const ProjectListInner = () => {
     }
   }, [editState.isEditing]);
 
-  if (hasError) {
-    return (
-      <div className={styles.projectList}>
-        <ProjectHeader
-          title="Projects"
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          searchPlaceholder="Search by Project or Query Name"
-          showCreateButton={true}
-          variant="list"
-          isEditing={editState.isEditing}
-          setIsEditing={handleSetIsEditing}
-          editingItem={editState.editingItem}
-          onUpdateItem={editHandlers.handleUpdateItem}
-          onCancelEdit={editHandlers.handleCancelEdit}
-        />
-        <LoadingWrapper loading={isLoading}>
-          <div className={styles.error}>Error loading data. Please try again.</div>
-        </LoadingWrapper>
-      </div>
-    );
-  }
+  // if (hasError) {
+  //   return (
+  //     <div className={styles.projectList}>
+  //       <ProjectHeader
+  //         title="Projects"
+  //         searchTerm={searchTerm}
+  //         setSearchTerm={setSearchTerm}
+  //         searchPlaceholder="Search by Project or Query Name"
+  //         showCreateButton={true}
+  //         variant="list"
+  //         isEditing={editState.isEditing}
+  //         setIsEditing={handleSetIsEditing}
+  //         editingItem={editState.editingItem}
+  //         onUpdateItem={editHandlers.handleUpdateItem}
+  //         onCancelEdit={editHandlers.handleCancelEdit}
+  //       />
+  //       <LoadingWrapper loading={isLoading}>
+  //         <div className={styles.error}>Error loading data. Please try again.</div>
+  //       </LoadingWrapper>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className={`${styles.projectListContainer} ${editState.isEditing ? styles.isEditing : ''}`}>
@@ -176,49 +177,62 @@ export const ProjectListInner = () => {
                           sortDirection={sortDirection}
                           onSort={handleSort}
                         />
-                        <LoadingWrapper
-                          loading={projectsLoading}
-                          wrapperClassName={styles.loadingWrapper}
-                          spinnerClassName={styles.loadingSpinner}
-                        >
-                          <div className={styles.projectGrid}>
-                            {sortedActiveProjects.length === 0 ? (
-                              <div className={styles.emptyState}>
-                                {
-                                  searchTerm.length > 0 
-                                  ? 
-                                    (
-                                      <p>No projects found matching your search.</p>
-                                    )
-                                  :
-                                    (
-                                      <p>No projects found. Create your first project to get started.</p>
-                                    )
-                                }
-                              </div>
-                            ) : (
-                              <>
-                                {sortedActiveProjects.map((project: Project, index: number) => (
-                                  <>
-                                    <ProjectCard 
-                                      key={project.id}
-                                      queries={queries}
-                                      project={project}
-                                      searchTerm={searchTerm}
-                                      setSelectedProjects={setSelectedProjects}
-                                      selectedProjects={selectedProjects}
-                                      onEdit={editHandlers.handleEditProject}
-                                    />
-                                    {/* Add separator before the last project (Unassigned) */}
-                                    {index === sortedActiveProjects.length - 2 && project.id !== -1 && (
-                                      <div className={styles.separator} />
-                                    )}
-                                  </>
-                                ))}
-                              </>
-                            )}
-                          </div>
-                        </LoadingWrapper>
+                        {
+                          projectsError
+                          ? 
+                            (
+                              <ProjectInnerErrorStates
+                                type="projects"
+                                styles={styles}
+                              />
+                            )
+                          :
+                            (                              
+                              <LoadingWrapper
+                                loading={projectsLoading}
+                                wrapperClassName={styles.loadingWrapper}
+                                spinnerClassName={styles.loadingSpinner}
+                              >
+                                <div className={styles.projectGrid}>
+                                  {sortedActiveProjects.length === 0 ? (
+                                    <div className={styles.emptyState}>
+                                      {
+                                        searchTerm.length > 0 
+                                        ? 
+                                          (
+                                            <p>No projects found matching your search.</p>
+                                          )
+                                        :
+                                          (
+                                            <p>No projects found. Create your first project to get started.</p>
+                                          )
+                                      }
+                                    </div>
+                                  ) : (
+                                    <>
+                                      {sortedActiveProjects.map((project: Project, index: number) => (
+                                        <>
+                                          <ProjectCard 
+                                            key={project.id}
+                                            queries={queries}
+                                            project={project}
+                                            searchTerm={searchTerm}
+                                            setSelectedProjects={setSelectedProjects}
+                                            selectedProjects={selectedProjects}
+                                            onEdit={editHandlers.handleEditProject}
+                                          />
+                                          {/* Add separator before the last project (Unassigned) */}
+                                          {index === sortedActiveProjects.length - 2 && project.id !== -1 && (
+                                            <div className={styles.separator} />
+                                          )}
+                                        </>
+                                      ))}
+                                    </>
+                                  )}
+                                </div>
+                              </LoadingWrapper>
+                            )
+                        }
                       </Tab>
                     : null
                   }
@@ -234,40 +248,53 @@ export const ProjectListInner = () => {
                           sortField={sortField}
                           sortDirection={sortDirection}
                         />
-                        <LoadingWrapper
-                          loading={queriesLoading}
-                          wrapperClassName={styles.loadingWrapper}
-                          spinnerClassName={styles.loadingSpinner}
-                        >
-                          <div className={styles.projectGrid}>
-                            {sortedActiveQueries.length === 0 ? (
-                              <div className={styles.emptyState}>
-                                {
-                                  searchTerm.length > 0 
-                                  ? 
-                                    (
-                                      <p>No queries found matching your search.</p>
-                                    )
-                                  :
-                                    (
-                                      <p>No queries found. Your saved queries will appear here.</p>
-                                    )
-                                }
-                              </div>
-                            ) : (
-                              sortedActiveQueries.map((query: UserQueryObject) => (
-                                <QueryCard 
-                                  key={query.data.qid}
-                                  query={query}
-                                  searchTerm={searchTerm}
-                                  setSelectedQueries={setSelectedQueries}
-                                  selectedQueries={selectedQueries}
-                                  onEdit={editHandlers.handleEditQuery}
-                                />
-                              ))
-                            )}
-                          </div>
-                        </LoadingWrapper>
+                        {
+                          queriesError
+                          ?
+                            (
+                              <ProjectInnerErrorStates
+                                type="queries"
+                                styles={styles}
+                              />
+                            )
+                          :
+                            (                              
+                              <LoadingWrapper
+                                loading={queriesLoading}
+                                wrapperClassName={styles.loadingWrapper}
+                                spinnerClassName={styles.loadingSpinner}
+                              >
+                                <div className={styles.projectGrid}>
+                                  {sortedActiveQueries.length === 0 ? (
+                                    <div className={styles.emptyState}>
+                                      {
+                                        searchTerm.length > 0 
+                                        ? 
+                                          (
+                                            <p>No queries found matching your search.</p>
+                                          )
+                                        :
+                                          (
+                                            <p>No queries found. Your saved queries will appear here.</p>
+                                          )
+                                      }
+                                    </div>
+                                  ) : (
+                                    sortedActiveQueries.map((query: UserQueryObject) => (
+                                      <QueryCard 
+                                        key={query.data.qid}
+                                        query={query}
+                                        searchTerm={searchTerm}
+                                        setSelectedQueries={setSelectedQueries}
+                                        selectedQueries={selectedQueries}
+                                        onEdit={editHandlers.handleEditQuery}
+                                      />
+                                    ))
+                                  )}
+                                </div>
+                              </LoadingWrapper>
+                            )
+                        }
                       </Tab>
                     : null
                   }

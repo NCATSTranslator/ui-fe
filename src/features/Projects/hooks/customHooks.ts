@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
   restoreProjects, restoreQueries, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
-import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate } from '@/features/Projects/types/projects.d';
+import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection } from '@/features/Projects/types/projects.d';
 import { generateQueryTitle } from '@/features/Projects/utils/utilities';
 
 /**
@@ -237,36 +237,87 @@ export const useFormattedProjects = (
   }, [projects, queries]);
 };
 
-//   const queryClient = useQueryClient();
-//   const { mutate: deleteProjects } = useDeleteProjects();
-//   const { mutate: deleteQueries } = useDeleteQueries();
+/**
+ * Custom hook to manage project queries state including sorting, selection, and search
+ * @returns {SortField} sortField - The field to sort by
+ * @returns {SortDirection} sortDirection - The direction to sort in
+ * @returns {UserQueryObject[]} selectedQueries - The queries that are currently selected
+ * @returns {string} searchTerm - The search term to filter queries by
+ * @returns {Function} setSortField - Function to set the sort field
+ * @returns {Function} setSortDirection - Function to set the sort direction
+ * @returns {Function} setSelectedQueries - Function to set the selected queries
+ * @returns {Function} handleSort - Function to handle sorting
+ * @returns {Function} handleSelectQuery - Function to handle selecting a query
+ * @returns {Function} handleSelectAllQueries - Function to handle selecting all queries
+ * @returns {Function} clearSelectedQueries - Function to clear the selected queries
+ * @returns {Function} clearSearchTerm - Function to clear the search term
+ * @returns {Function} resetState - Function to reset the state
+ */
+export const useProjectDetailSortSearchSelectState = () => {
+  const [sortField, setSortField] = useState<SortField>('lastSeen');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [selectedQueries, setSelectedQueries] = useState<UserQueryObject[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
-//   return (selectedProjects: Project[], setSelectedProjects: (projects: Project[]) => void, selectedQueries: UserQueryObject[], setSelectedQueries: (queries: UserQueryObject[]) => void) => {
-//     if(selectedProjects.length > 0) {
-//       deleteProjects(selectedProjects.map(project => project.id.toString()), {
-//         onSuccess: () => {
-//           handlePostProjectDeletion(queryClient, selectedProjects, setSelectedProjects);
-//           projectDeletedToast();
-//         },
-//         onError: (error) => { 
-//           handlePostProjectDeletion(queryClient, selectedProjects, setSelectedProjects);
-//           console.error(error);
-//           errorToast('Failed to delete project');
-//         }
-//       });
-//     }
-//     if(selectedQueries.length > 0) {  
-//       deleteQueries(selectedQueries.map(query => query.data.qid.toString()), {
-//         onSuccess: () => {
-//           handlePostQueryDeletion(queryClient, selectedQueries, setSelectedQueries);
-//           queryDeletedToast();
-//         },
-//         onError: (error) => {
-//           handlePostQueryDeletion(queryClient, selectedQueries, setSelectedQueries); 
-//           console.error(error);
-//           errorToast('Failed to delete query');
-//         }
-//       });
-//     }
-//   };
-// };
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  const handleSelectQuery = (query: UserQueryObject, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedQueries(prev => [...prev, query]);
+    } else {
+      setSelectedQueries(prev => prev.filter(q => q.data.qid !== query.data.qid));
+    }
+  };
+
+  const handleSelectAllQueries = (queries: UserQueryObject[], isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedQueries(queries);
+    } else {
+      setSelectedQueries([]);
+    }
+  };
+
+  const clearSelectedQueries = () => {
+    setSelectedQueries([]);
+  };
+
+  const clearSearchTerm = () => {
+    setSearchTerm('');
+  };
+
+  const resetState = () => {
+    setSortField('lastSeen');
+    setSortDirection('desc');
+    setSelectedQueries([]);
+    setSearchTerm('');
+  };
+
+  return {
+    // State
+    sortField,
+    sortDirection,
+    selectedQueries,
+    searchTerm,
+    
+    // Setters
+    setSortField,
+    setSortDirection,
+    setSelectedQueries,
+    setSearchTerm,
+    
+    // Handlers
+    handleSort,
+    handleSelectQuery,
+    handleSelectAllQueries,
+    clearSelectedQueries,
+    clearSearchTerm,
+    resetState
+  };
+};
