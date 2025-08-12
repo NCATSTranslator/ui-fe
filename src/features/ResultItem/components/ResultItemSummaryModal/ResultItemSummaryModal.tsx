@@ -4,6 +4,7 @@ import Modal from "@/features/Common/components/Modal/Modal";
 import styles from "./ResultItemSummaryModal.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import LoadingIcon from "@/features/Common/components/LoadingIcon/LoadingIcon";
+import { Result } from "@/features/ResultList/types/results";
 
 interface ResultItemSummaryModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface ResultItemSummaryModalProps {
   summary: ReactNode | null;
   onClose: () => void;
   onClearAndRefetchSummary: () => void;
+  result: Result;
 }
 
 const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({ 
@@ -23,6 +25,7 @@ const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({
   summary,
   onClose,
   onClearAndRefetchSummary,
+  result,
 }) => {
 
   return (
@@ -34,7 +37,7 @@ const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({
         <div>
           <div className={styles.content}>
             <div className={styles.header}>
-              <h4 className={styles.title}>Result Summary</h4>
+              <h4 className={styles.title}>Result Summary for <span className={styles.resultName}>{result.drug_name}</span></h4>
             </div>
             {
               isError

@@ -156,6 +156,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
         summary={isStreaming ? streamedText : summaryState.content}
         onClose={handleCloseModal}
         onClearAndRefetchSummary={handleClearAndRefetchSummary}
+        result={result}
       />
     </>
   );
