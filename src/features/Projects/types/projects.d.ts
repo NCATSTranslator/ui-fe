@@ -37,7 +37,7 @@ export type Project = ProjectRaw & {
   note_count: number;
 }
 
-export type QueryStatus = 'complete' | 'running' | 'error';
+export type QueryStatus = 'complete' | 'running' | 'error' | 'unknown';
 
 export type PathfinderNodeObject = {
   id: string,

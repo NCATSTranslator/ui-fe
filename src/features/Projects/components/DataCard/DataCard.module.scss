@@ -16,6 +16,10 @@
     align-items: center;
     justify-content: flex-start;
   }
+
+  .statusColumn {
+    justify-content: space-between;
+  }
   
   .checkboxColumn {
     display: flex;

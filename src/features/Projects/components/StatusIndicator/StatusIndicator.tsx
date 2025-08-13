@@ -3,6 +3,7 @@ import styles from './StatusIndicator.module.scss';
 import { QueryStatus } from "@/features/Projects/types/projects";
 import CheckIcon from "@/assets/icons/buttons/Checkmark/Checkmark.svg?react";
 import ErrorIcon from "@/assets/icons/buttons/Close/Close.svg?react";
+import { Fade } from "react-awesome-reveal";
 import { FC } from "react";
 
 interface StatusIndicatorProps {
@@ -11,27 +12,74 @@ interface StatusIndicatorProps {
 
 const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
+  const FADE_DELAY = 100;
+  const FADE_DURATION = 500;
+
   if(status === 'complete') {
     return (
-      <span className={`${styles.status} ${styles.statusSuccess}`}>
-        <CheckIcon/>
-      </span>
+      <div>
+        <Fade
+          delay={FADE_DELAY}
+          duration={FADE_DURATION}
+          triggerOnce
+          key="complete"
+        >
+          <span className={`${styles.status} ${styles.statusSuccess}`}>
+            <CheckIcon/>
+          </span>
+        </Fade>
+      </div>
     )
   }
 
   if(status === 'running') {
     return (
-      <span className={`${styles.statusRunning}`}>
-        <LoadingIcon size="small"/>
-      </span>
+      <div>
+        <Fade
+          delay={FADE_DELAY}
+          duration={FADE_DURATION}
+          triggerOnce
+          key="running"
+        >
+          <span className={`${styles.status} ${styles.statusRunning}`}>
+            <LoadingIcon size="small"/>
+          </span>
+        </Fade>
+      </div>
     )
   }
 
   if(status === 'error') {
     return (
-      <span className={`${styles.status} ${styles.statusError}`}>
-        <ErrorIcon/>
-      </span>
+      <div>
+        <Fade
+          delay={FADE_DELAY}
+          duration={FADE_DURATION}
+          triggerOnce
+          key="error"
+        >
+          <span className={`${styles.status} ${styles.statusError}`}>
+            <ErrorIcon/>
+          </span>
+        </Fade>
+      </div>
+    ) 
+  }
+
+  if(status === 'unknown') {
+    return (
+      <div>
+        <Fade
+          delay={FADE_DELAY}
+          duration={FADE_DURATION}
+          triggerOnce
+          key="unknown"
+        >
+          <span className={`${styles.status} ${styles.statusUnknown}`}>
+            {/* TODO: Add unknown status icon */}
+          </span>
+        </Fade>
+      </div>
     ) 
   }
 

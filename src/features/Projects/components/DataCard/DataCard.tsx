@@ -11,6 +11,7 @@ import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
 import CardName from '@/features/Projects/components/CardName/CardName';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
+import ChevRightIcon from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import { Project, QueryStatus, UserQueryObject } from '@/features/Projects/types/projects';
 import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { getTypeIDFromType } from '@/features/Projects/utils/utilities';
@@ -35,7 +36,7 @@ interface DataCardProps<T> {
   searchTerm?: string;
   selectedItems: T[];
   setSelectedItems: Dispatch<SetStateAction<T[]>>;
-  status?: string;
+  status?: QueryStatus;
   type: 'project' | 'smartQuery' | 'pathfinderQuery';
 }
 
@@ -242,6 +243,7 @@ const DataCard = <T,>({
           !isUnassigned && (
             <>
               <StatusIndicator status={(status || itemStatus) as QueryStatus} />
+              <ChevRightIcon />
             </>
           )
         }
