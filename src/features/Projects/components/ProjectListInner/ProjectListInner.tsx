@@ -40,11 +40,7 @@ export const ProjectListInner = () => {
   const [selectedQueries, setSelectedQueries] = useState<UserQueryObject[]>([]);
 
   const handleSetIsEditing = (isEditing: boolean, editingItem?: EditingItem) => {
-    setEditState(prev => ({ 
-      ...prev, 
-      isEditing, 
-      ...(editingItem !== undefined && { editingItem })
-    }));
+    setEditState({isEditing: isEditing, editingItem: editingItem || undefined});
     if(isEditing) {
       const selectedQids = editingItem?.queryIds || [];
       const selectedQueries = activeQueries.filter(query => selectedQids.includes(query.data.qid));
@@ -86,8 +82,6 @@ export const ProjectListInner = () => {
     setSelectedQueries([]);
   };
 
-  const isLoading = projectsLoading || queriesLoading;
-  const hasError = projectsError || queriesError;
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const sortedActiveProjects = useMemo(() => filterAndSortProjects(activeFormattedProjects, activeQueries, sortField, sortDirection, searchTerm), [activeFormattedProjects, activeQueries, sortField, sortDirection, searchTerm]);
@@ -107,29 +101,6 @@ export const ProjectListInner = () => {
     }
   }, [editState.isEditing]);
 
-  // if (hasError) {
-  //   return (
-  //     <div className={styles.projectList}>
-  //       <ProjectHeader
-  //         title="Projects"
-  //         searchTerm={searchTerm}
-  //         setSearchTerm={setSearchTerm}
-  //         searchPlaceholder="Search by Project or Query Name"
-  //         showCreateButton={true}
-  //         variant="list"
-  //         isEditing={editState.isEditing}
-  //         setIsEditing={handleSetIsEditing}
-  //         editingItem={editState.editingItem}
-  //         onUpdateItem={editHandlers.handleUpdateItem}
-  //         onCancelEdit={editHandlers.handleCancelEdit}
-  //       />
-  //       <LoadingWrapper loading={isLoading}>
-  //         <div className={styles.error}>Error loading data. Please try again.</div>
-  //       </LoadingWrapper>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className={`${styles.projectListContainer} ${editState.isEditing ? styles.isEditing : ''}`}>
       <div className="container">
@@ -142,7 +113,7 @@ export const ProjectListInner = () => {
             showCreateButton={true}
             variant="list"
             isEditing={editState.isEditing}
-            setIsEditing={handleSetIsEditing}
+            setEditingState={handleSetIsEditing}
             editingItem={editState.editingItem}
             onUpdateItem={editHandlers.handleUpdateItem}
             onCancelEdit={editHandlers.handleCancelEdit}

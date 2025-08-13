@@ -57,7 +57,7 @@ export const Default: Story = {
     searchTerm: '',
     searchPlaceholder: 'Search by Query Name',
     isEditing: false,
-    setIsEditing: fn(),
+    setEditingState: fn(),
   },
 };
 
@@ -68,7 +68,7 @@ export const WithSubtitle: Story = {
     searchTerm: '',
     searchPlaceholder: 'Search by Query Name',
     isEditing: false,
-    setIsEditing: fn(),
+    setEditingState: fn(),
   },
 };
 
@@ -82,7 +82,7 @@ export const WithBackButton: Story = {
     backButtonText: 'All Projects',
     variant: 'detail',
     isEditing: false,
-    setIsEditing: fn(),
+    setEditingState: fn(),
   },
 };
 
@@ -94,7 +94,7 @@ export const WithCreateButton: Story = {
     showCreateButton: true,
     variant: 'list',
     isEditing: false,
-    setIsEditing: fn(),
+    setEditingState: fn(),
   },
 };
 
@@ -106,7 +106,7 @@ export const DetailVariant: Story = {
     searchPlaceholder: 'Search by Query Name',
     variant: 'detail',
     isEditing: false,
-    setIsEditing: fn(),
+    setEditingState: fn(),
   },
 };
 
@@ -117,6 +117,6 @@ export const ListVariant: Story = {
     searchPlaceholder: 'Search by Project or Query Name',
     variant: 'list',
     isEditing: false,
-    setIsEditing: fn(),
+    setEditingState: fn(),
   },
 }; 

@@ -39,7 +39,7 @@ const ProjectDetailInner = () => {
     handleSort
   } = useProjectDetailSortSearchSelectState();
 
-  const setIsEditing = (isEditing: boolean, editingItem?: EditingItem) => {
+  const setEditingState = (isEditing: boolean, editingItem?: EditingItem) => {
     setEditState(prev => ({ 
       ...prev, 
       isEditing, 
@@ -49,7 +49,7 @@ const ProjectDetailInner = () => {
 
   const [editState, setEditState] = useEditProjectQueryState();
   const editHandlers = useEditProjectQueryHandlers(
-    setIsEditing, 
+    setEditingState, 
     project ? [project] : [], 
     projectQueries
   );
@@ -90,7 +90,7 @@ const ProjectDetailInner = () => {
                     showBackButton={true}
                     backButtonText="All Projects"
                     isEditing={editState.isEditing}
-                    setIsEditing={setIsEditing}
+                    setEditingState={setEditingState}
                     editingItem={editState.editingItem}
                     onUpdateItem={editHandlers.handleUpdateItem}
                     onCancelEdit={editHandlers.handleCancelEdit}

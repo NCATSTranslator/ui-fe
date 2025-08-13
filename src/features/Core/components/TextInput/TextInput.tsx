@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, KeyboardEvent, ReactNode, useRef } from 'react';
+import { ChangeEvent, FC, KeyboardEvent, ReactNode, RefObject, useRef } from 'react';
 import styles from "./TextInput.module.scss";
 import { joinClasses } from '@/features/Common/utils/utilities';
 import InputLabel from '@/features/Core/components/InputLabel/InputLabel';
@@ -23,6 +23,7 @@ interface TextInputProps {
   testId?: string;
   disabled?: boolean;
   iconRightClickToReset?: boolean;
+  ref?: RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -43,10 +44,11 @@ const TextInput: FC<TextInputProps> = ({
   handleKeyDown = () => {},
   testId,
   disabled = false,
-  iconRightClickToReset
+  iconRightClickToReset,
+  ref
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = ref as RefObject<HTMLInputElement> || useRef<HTMLInputElement>(null);
+  const textareaRef = ref as RefObject<HTMLTextAreaElement> || useRef<HTMLTextAreaElement>(null);
 
   const containerStyle = joinClasses(
     styles.textInputContainer,

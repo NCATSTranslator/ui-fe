@@ -1,4 +1,4 @@
-import { FC, FormEvent, useCallback, useState, useEffect } from 'react';
+import { FC, FormEvent, useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash';
 import Button from '@/features/Core/components/Button/Button';
@@ -35,7 +35,7 @@ interface ProjectHeaderProps {
   searchTerm: string;
   selectedQueries?: UserQueryObject[];
   setSearchTerm: (searchTerm: string) => void;
-  setIsEditing: (isEditing: boolean, editingItem?: EditingItem) => void;
+  setEditingState: (isEditing: boolean, editingItem?: EditingItem) => void;
   showBackButton?: boolean;
   showCreateButton?: boolean;
   subtitle?: string;
@@ -62,7 +62,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   searchTerm,
   selectedQueries,
   setSearchTerm,
-  setIsEditing,
+  setEditingState,
   showBackButton = false,
   showCreateButton = false,
   subtitle,
@@ -71,22 +71,25 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   
-  const [projectName, setProjectName] = useState('');
   const [projectNameError, setProjectNameError] = useState('');
-  
+  const projectNameInputRef = useRef<HTMLInputElement>(null);
   const createProjectMutation = useCreateProject();
   const updateProjectsMutation = useUpdateProjects();
 
-  // Initialize project name when editing an existing item
+  // Focus and select text when editing starts
   useEffect(() => {
-    if (isEditing && editingItem) {
-      setProjectName(editingItem.name);
-      setProjectNameError('');
-    } else if (isEditing && !editingItem) {
-      setProjectName('');
+    if (isEditing && projectNameInputRef.current) {
+      projectNameInputRef.current.focus();
+      projectNameInputRef.current.select();
+    }
+  }, [isEditing]);
+
+  // Clear error when editing starts
+  useEffect(() => {
+    if (isEditing) {
       setProjectNameError('');
     }
-  }, [isEditing, editingItem]);
+  }, [isEditing]);
 
   const debouncedSearch = useCallback(
     debounce((searchTerm: string) => {
@@ -113,36 +116,35 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   };
 
   const handleCreateNewClick = () => {
-    setIsEditing(true, undefined);
-    setProjectName('');
+    setEditingState(true, undefined);
     setProjectNameError('');
   };
 
   const handleDoneClick = () => {
     if (isEditing) {
+      const currentName = editingItem?.name || '';
+      
       // Handle Done Editing
-      if (!projectName.trim()) {
+      if (!currentName.trim()) {
         setProjectNameError('Name is required');
         return;
       }
       
       if (editingItem && onUpdateItem) {
         // Update existing item
-        onUpdateItem(editingItem.id, editingItem.type, projectName.trim(), selectedQueries?.map(query => query.data.qid));
-        setIsEditing(false);
-        setProjectName('');
+        onUpdateItem(editingItem.id, editingItem.type, currentName.trim(), selectedQueries?.map(query => query.data.qid));
+        setEditingState(false);
         setProjectNameError('');
       } else {
         // Create the project using the mutation
-        console.log('creating project', projectName.trim(), selectedQueries?.map(query => query.data.qid));
+        console.log('creating project', currentName.trim(), selectedQueries?.map(query => query.data.qid));
         createProjectMutation.mutate({
-          title: projectName.trim(),
+          title: currentName.trim(),
           pks: selectedQueries?.map(query => query.data.qid) || []
         }, {
           onSuccess: (data) => {
             // Reset form on successful creation
-            setIsEditing(false);
-            setProjectName('');
+            setEditingState(false);
             setProjectNameError('');
             navigate(`/projects/${data.id}`);
           },
@@ -159,29 +161,26 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
     if (onCancelEdit)
       onCancelEdit();
 
-    setIsEditing(false);
-    setProjectName('');
+    setEditingState(false);
     setProjectNameError('');
   };
 
   const handleProjectNameChange = (value: string) => {
-    setProjectName(value);
-    if (projectNameError && value.trim()) {
+    if (editingItem)
+      setEditingState(true, { ...editingItem, name: value });
+    if (projectNameError && value.trim())
       setProjectNameError('');
-    }
   };
 
   const getInputLabel = () => {
-    if (editingItem) {
+    if (editingItem)
       return editingItem.type === 'project' ? 'Project Name' : 'Query Name';
-    }
     return 'Project Name';
   };
 
   const getInputPlaceholder = () => {
-    if (editingItem) {
+    if (editingItem)
       return editingItem.type === 'project' ? 'Unnamed Project' : 'Unnamed Query';
-    }
     return 'Unnamed Project';
   };
 
@@ -192,7 +191,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
     } else {
       // Fallback to local edit handling
       console.log('edit handler not provided');
-      setIsEditing(true);
+      setEditingState(true);
       if (variant === 'detail' && title) {
         // In detail view, we're editing the current project
         // The editingItem will be set by the parent component when needed
@@ -201,27 +200,23 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   };
 
   const handleRestoreProject = () => {
-    if (onRestoreProject && project) {
+    if (onRestoreProject && project)
       onRestoreProject(project);
-    }
   };
 
   const handleDeleteProjectPermanently = () => {
-    if (onDeleteProject && project) {
+    if (onDeleteProject && project)
       onDeleteProject(project);
-    }
   };
 
   const handleRestoreQuery = (query: UserQueryObject) => {
-    if (onRestoreQuery && query) {
+    if (onRestoreQuery && query)
       onRestoreQuery(query);
-    }
   };
 
   const handleDeleteQuery = (query: UserQueryObject) => { 
-    if (onDeleteQuery && query) {
+    if (onDeleteQuery && query)
       onDeleteQuery(query);
-    }
   };
 
   return (
@@ -268,7 +263,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
               <form onSubmit={handleProjectSubmit}>
                 <TextInput
                   label={getInputLabel()}
-                  value={projectName}
+                  value={editingItem?.name || ''}
                   handleChange={handleProjectNameChange}
                   error={!!projectNameError}
                   errorBottom
@@ -276,6 +271,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                   className={styles.projectNameInput}
                   disabled={createProjectMutation.isPending}
                   placeholder={getInputPlaceholder()}
+                  ref={projectNameInputRef}
                 />
               </form>
             </div>
@@ -347,7 +343,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                   <form onSubmit={handleProjectSubmit}>
                     <TextInput
                       label={getInputLabel()}
-                      value={projectName}
+                      value={editingItem?.name || ''}
                       handleChange={handleProjectNameChange}
                       error={!!projectNameError}
                       errorBottom
@@ -355,6 +351,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                       className={styles.projectNameInput}
                       disabled={createProjectMutation.isPending}
                       placeholder={getInputPlaceholder()}
+                      ref={projectNameInputRef}
                     />
                   </form>
                   <ProjectHeaderEditControlButtons
