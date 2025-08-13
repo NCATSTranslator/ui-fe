@@ -112,8 +112,8 @@ const DataCard = <T,>({
       const direction = query.data.query.direction || null;
       const typeID = getTypeIDFromType(type, direction);
       const qid = query.data.qid;
-      const url = getResultsShareURLPath(label, curie, typeID, "0", qid);
-      window.open(url, "_blank", "noopener");
+      const path = getResultsShareURLPath(label, curie, typeID, "0", qid);
+      window.open(encodeURI(`${window.location.origin}/${path}`), "_blank", "noopener");
       return;
     }
 
@@ -130,8 +130,8 @@ const DataCard = <T,>({
         }
         const constraint = query.data.query.constraint || undefined;
         const qid = query.data.qid;
-        const url = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
-        window.open(url, "_blank", "noopener");
+        const path = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
+        window.open(encodeURI(`${window.location.origin}/${path}`), "_blank", "noopener");
         return;
       }
       unableToReachLinkToast();
