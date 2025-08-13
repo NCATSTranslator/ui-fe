@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, FC, useCallback } from "react";
 import styles from './ResultsSummaryButton.module.scss';
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import SparkleIcon from '@/assets/icons/buttons/Sparkles.svg?react';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-purple.png';
@@ -102,23 +102,23 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({
     <>
       <Button
         className={styles.summaryButton}
-        isSecondary
+        variant="secondary"
         handleClick={()=>handleSummaryButtonClick(isSummaryAvailable.current)}
-        smallFont
+        small
+        iconLeft={
+            !!isStreaming
+            ?                  
+              <img
+                src={loadingIcon}
+                className={`${styles.summaryLoadingIcon} loadingIcon`}
+                alt="loading icon"
+              />
+            : 
+              <SparkleIcon className={styles.summaryLoadingIcon} />
+          }
+        iconRight={<InfoIcon className={styles.infoIcon} data-tooltip-id="result-summary-tooltip" />}
         >
-        {
-          !!isStreaming
-          ?                  
-            <img
-              src={loadingIcon}
-              className={`${styles.summaryLoadingIcon} loadingIcon`}
-              alt="loading icon"
-            />
-          : 
-            <SparkleIcon className={styles.summaryLoadingIcon} />
-        }
         <span>View Results Summary</span>
-        <InfoIcon className={styles.infoIcon} data-tooltip-id="result-summary-tooltip" />
         <Tooltip id="result-summary-tooltip">
           <span>This AI-generated summary reviews the data returned by Translator and identifies interesting results, ChEBI roles, and objects found in paths. <br/><br/> This summary is not intended to be a replacement for medical advice.</span>
         </Tooltip>

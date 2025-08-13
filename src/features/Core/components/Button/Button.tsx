@@ -15,6 +15,7 @@ interface ButtonProps {
   type?: "button" | "submit" | "reset";
   rel?: string;
   small?: boolean;
+  smallFont?: boolean;
   children?: ReactNode;
   disabled?: boolean;
   testId?: string;
@@ -32,6 +33,7 @@ const Button: FC<ButtonProps> = ({
   _blank = false,
   link = false,
   small = false,
+  smallFont = false,
   type = 'button',
   rel = '',
   children,
@@ -48,6 +50,7 @@ const Button: FC<ButtonProps> = ({
     small && styles.small,
     !!iconLeft && styles.iconLeft,
     !!iconRight && styles.iconRight,
+    smallFont && styles.smallFont,
     className
   )
 
@@ -68,12 +71,12 @@ const Button: FC<ButtonProps> = ({
     return link 
     ? <Link {...linkProps}>
         {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
-        {!iconOnly && <span className={styles.label}>{children}</span>}
+        {iconOnly ? children : <span className={styles.label}>{children}</span>}
         {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
       </Link> 
     : <a {...linkProps}>
         {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
-        {!iconOnly && <span className={styles.label}>{children}</span>}
+        {iconOnly ? children : <span className={styles.label}>{children}</span>}
         {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
       </a>;
   }
@@ -85,7 +88,7 @@ const Button: FC<ButtonProps> = ({
       disabled={disabled}
     >
       {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
-      {!iconOnly && <span className={styles.label}>{children}</span>}
+      {iconOnly ? children : <span className={styles.label}>{children}</span>}
       {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
     </button>
   );

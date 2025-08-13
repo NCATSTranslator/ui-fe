@@ -12,7 +12,7 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from '@/features/ResultItem/components/BookmarkToasts/BookmarkToasts';
 import NotesModal from '@/features/ResultItem/components/NotesModal/NotesModal';
-import TextInput from '@/features/Common/components/TextInput/TextInput';
+import TextInput from '@/features/Core/components/TextInput/TextInput';
 import { cloneDeep } from 'lodash';
 import UserSave from '@/features/WorkspaceV1/components/UserSave/UserSave';
 import LoginWarning from '@/features/UserAuth/components/LoginWarning/LoginWarning';
@@ -284,7 +284,7 @@ const UserSaves = () => {
                 </div>
               </div>
             </div>
-            <LoadingWrapper loading={loading} className="container">
+            <LoadingWrapper loading={loading} contentClassName="container">
               {
                 savesLoaded
                 ? 

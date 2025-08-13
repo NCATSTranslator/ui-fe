@@ -8,11 +8,11 @@ import { useQueryState, useAutocomplete, useQuerySubmission, useExampleQueries }
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import cloneDeep from "lodash/cloneDeep";
 import styles from './Query.module.scss';
-import { AppToastContainer } from '@/features/Common/components/AppToastContainer/AppToastContainer';
 import QueryResultsView from '@/features/Query/components/QueryResultsView/QueryResultsView';
 import QueryInputView from '@/features/Query/components/QueryInputView/QueryInputView';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
 import { User } from "@/features/UserAuth/types/user";
+import { ProjectRaw } from "@/features/Projects/types/projects";
 
 interface QueryProps {
   isResults?: boolean;
@@ -25,6 +25,7 @@ interface QueryProps {
   results?: Result[];
   handleResultMatchClick?: (match: ResultContextObject) => void;
   pk?: string;
+  selectedProject?: ProjectRaw | null;
 }
 
 const Query: FC<QueryProps> = ({
@@ -37,7 +38,8 @@ const Query: FC<QueryProps> = ({
   setShareModalFunction = () => {},
   results = [],
   handleResultMatchClick,
-  pk = ""
+  pk = "",
+  selectedProject = null
 }) => {
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
@@ -135,7 +137,7 @@ const Query: FC<QueryProps> = ({
     }
     if(!submitQuery)
       return;
-    submitQuery(item);
+    submitQuery(item, selectedProject?.id?.toString() || undefined);
   }, [submitQuery]);
 
   const handleSubmission = useCallback((item: QueryItem | null) => {
@@ -154,7 +156,6 @@ const Query: FC<QueryProps> = ({
   return (
     <>
       <div className={`${styles.query} ${isResults ? styles.results : ''}`}>
-        <AppToastContainer />
         <div className={styles.container}>
           {isResults ? (
             <QueryResultsView
