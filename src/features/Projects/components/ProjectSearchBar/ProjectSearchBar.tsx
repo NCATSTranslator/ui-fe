@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
-import Search from '@/assets/icons/buttons/search.svg?react';
+import Search from '@/assets/icons/buttons/Search.svg?react';
 import Close from '@/assets/icons/buttons/Close/Close.svg?react';
 
 interface ProjectSearchBarProps {
