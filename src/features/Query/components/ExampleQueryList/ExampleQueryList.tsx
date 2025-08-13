@@ -3,7 +3,7 @@ import styles from './ExampleQueryList.module.scss';
 import { getResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import AnimateHeight, { Height } from 'react-animate-height';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { Example } from '@/features/Query/types/querySubmission';
 import QueryTypeIcon from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
@@ -40,7 +40,7 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
         {
           (!!examples && examples?.length > 0 && examples[0].type === "drug") 
           ?
-            <Button handleClick={handleToggle} className={styles.expandButton}><ChevDown/>Examples</Button>
+            <Button handleClick={handleToggle} className={styles.expandButton} iconLeft={<ChevDown/>}>Examples</Button>
           : 
             <p className={styles.exampleHeading}>Examples</p>
         }
@@ -65,18 +65,18 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
                           el.targetType.toLowerCase() === item.type.toLowerCase()
                       );
                 return (
-                  <button
+                  <Button
                     className={`${styles.button} example-query`}
-                    onClick={() => setPresetURL(getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid))}
+                    handleClick={() => setPresetURL(getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid))}
                     data-testid={item.name}
                     data-url={getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid)}
                     key={item.id}
+                    iconLeft={<QueryTypeIcon type={queryTypes[typeID].searchTypeString}/>}
+                    smallFont
+                    variant="secondary"
                   >
-                    <QueryTypeIcon
-                      type={queryTypes[typeID].searchTypeString}
-                    />
                     {item.name}
-                  </button>
+                  </Button>
                 );
               })}
             </AnimateHeight>

@@ -1,7 +1,7 @@
 import { useCallback, FormEvent, useState } from "react";
 import styles from "./SendFeedbackForm.module.scss";
-import Button from "@/features/Common/components/Button/Button";
-import TextInput from "@/features/Common/components/TextInput/TextInput";
+import Button from "@/features/Core/components/Button/Button";
+import TextInput from "@/features/Core/components/TextInput/TextInput";
 import FileInput from "@/features/Common/components/FileInput/FileInput";
 import Select from "@/features/Common/components/Select/Select";
 import { Fade } from "react-awesome-reveal";
@@ -136,8 +136,24 @@ const SendFeedbackForm = () => {
           <p>Comments like yours help us improve and further develop the Translator interface.</p>
           <p>You can view this ticket on Github and subscribe to receive updates from our team. You may also leave additional comments or feedback on the ticket.</p>
           <div className={styles.buttonContainer}>
-            <Button isSecondary handleClick={() => setCreatedIssueURL(null)} className={styles.newIssue}><Feedback/> Send More Feedback</Button>
-            <Button link href={createdIssueURL} _blank rel="noopener noreferrer" className={styles.viewIssue}>View Ticket on GitHub <ExternalLink/></Button>
+            <Button 
+              variant="secondary" 
+              handleClick={() => setCreatedIssueURL(null)} 
+              className={styles.newIssue}
+              iconLeft={<Feedback/>}
+            >
+              Send More Feedback
+            </Button>
+            <Button 
+              link 
+              href={createdIssueURL} 
+              _blank 
+              rel="noopener noreferrer" 
+              className={styles.viewIssue}
+              iconRight={<ExternalLink/>}
+            >
+              View Ticket on GitHub
+            </Button>
           </div>
         </div>
       ) : (

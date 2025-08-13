@@ -2,7 +2,7 @@ import { FC } from 'react';
 import styles from './QueryBar.module.scss';
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import loadingIcon from '@/assets/images/loading/loading-white.png';
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import { cloneDeep } from 'lodash';
 import { AutocompleteItem, QueryItem, QueryType } from '@/features/Query/types/querySubmission';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
@@ -20,7 +20,7 @@ type QueryBarProps = {
   onClearQueryItem: () => void;
   disabled?: boolean;
   isLoading?: boolean;
-  placeholderText?: string; 
+  placeholderText?: string;
 }
 
 const QueryBar: FC<QueryBarProps> = ({

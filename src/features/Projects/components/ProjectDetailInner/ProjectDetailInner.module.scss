@@ -1,0 +1,30 @@
+@use '@/assets/styles/variables' as *;
+
+.projectDetail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: calc($interiorContainerWidth + ($m * 2));
+  margin: 0 auto;
+  .projectHeaderContainer {
+    position: relative;
+  }
+  .queryGrid {
+    display: flex;
+    flex-direction: column;
+    gap: $s;
+  }
+  .emptyState {
+    text-align: center;
+    padding: $xl;
+    color: $midGray;
+  }
+  .error {
+    text-align: center;
+    padding: $xl;
+    color: $red;
+  }
+  .projectTabContent {
+    padding: $s $m $m;
+  }
+}

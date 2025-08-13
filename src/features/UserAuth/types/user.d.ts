@@ -52,9 +52,19 @@ export type Config = {
   cached_queries: Example[];
   gaID: string;
   name_resolver: string;
-  social_providers: any;
+  social_providers: Record<string, SocialProvider>;
   include_pathfinder: boolean;
   include_summarization: boolean;
+}
+
+export type SocialProvider = {
+  auth_uri?: string;
+  client_id: string;
+  logout_uri?: string;
+  redirect_uri: string;
+  scope?: string;
+  token_uri: string;
+  user_data_uri?: string;
 }
 
 export type UserState = {
@@ -62,3 +72,16 @@ export type UserState = {
   currentPrefs: PreferencesContainer;
   currentConfig: Config | null;
 }
+
+export const isConfig = (obj: unknown): obj is Config => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'gaID' in obj &&
+    'name_resolver' in obj &&
+    'social_providers' in obj &&
+    'include_pathfinder' in obj &&
+    'include_summarization' in obj &&
+    'cached_queries' in obj
+  );
+};

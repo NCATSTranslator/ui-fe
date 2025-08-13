@@ -1,7 +1,6 @@
-   @use "@/assets/styles/variables" as *;
+@use "@/assets/styles/variables" as *;
 
-// Checkbox 
-label.checkbox {
+.facetCheckbox {
   display: flex;
   align-items: center;
   margin-bottom: $s;
