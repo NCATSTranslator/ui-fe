@@ -192,8 +192,12 @@ export const ProjectListInner = () => {
                                             selectedProjects={selectedProjects}
                                             onEdit={editHandlers.handleEditProject}
                                           />
-                                          {/* Add separator before the last project (Unassigned) */}
-                                          {index === sortedActiveProjects.length - 2 && project.id !== -1 && (
+                                          {/* Add separator before the last project (Unassigned), if the 
+                                          unassigned project is included in the sortedActiveProjects array */}
+                                          {
+                                            index === sortedActiveProjects.length - 2 && 
+                                            project.id !== -1 && 
+                                            sortedActiveProjects.some(p => p.id === -1) && (
                                             <div className={styles.separator} />
                                           )}
                                         </>
