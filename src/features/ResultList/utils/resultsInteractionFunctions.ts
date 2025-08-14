@@ -357,6 +357,12 @@ export const applyFilters = (
   }
 }
 
+export const injectDynamicFilters = (originalResults: Result[], bookmarkSet: SaveGroup | null): Result[] => {
+  console.log(bookmarkSet);
+  if (bookmarkSet === null) return originalResults;
+  return originalResults;
+}
+
 /**
  * Generates the initial path filter state object using all paths from the result set.
  * Each path is initialized to `false`, indicating it is not filtered.

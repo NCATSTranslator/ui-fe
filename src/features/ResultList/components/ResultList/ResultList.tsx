@@ -13,11 +13,18 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, 
-  sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, 
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
+  sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh,
   sortByNamePathfinderHighLow, filterCompare } from "@/features/Common/utils/sortingFunctions";
-import { applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts, checkBookmarkForNotes, 
-  checkBookmarksForItem } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import {
+  applyFilters,
+  injectDynamicFilters,
+  genPathFilterState,
+  areEntityFiltersEqual,
+  calculateFacetCounts,
+  checkBookmarkForNotes,
+  checkBookmarksForItem
+} from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { getDataFromQueryVar, getPathCount, getCompressedEdge } from "@/features/Common/utils/utilities";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
@@ -205,8 +212,7 @@ const ResultList = () => {
   const handleClearNotesEditor = async () => {
     await getUserSaves();
     if(prevRawResults.current)
-    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current);
-  }
+    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current); }
 
   useEffect(() => {
     if(!user)
@@ -255,11 +261,11 @@ const ResultList = () => {
     fr: Result[] = []
   ): Result[] => {
     if (!summary) return [];
-  
+
     let newFormattedResults: Result[] = [];
     let newOriginalResults: Result[] = [];
     let newPathFilterState = pfState ? cloneDeep(pfState) : {};
-  
+
     // Initial population of result state
     if (or.length === 0) {
       newFormattedResults = summary.data.results;
@@ -269,7 +275,10 @@ const ResultList = () => {
       newFormattedResults = justSort ? cloneDeep(fr) : or;
       newOriginalResults = or;
     }
-  
+
+    // Inject bookmark and note tag filters
+    newOriginalResults = injectDynamicFilters(newOriginalResults, userSaves);
+
     // Filtering
     if (!justSort) {
       const {
@@ -285,14 +294,14 @@ const ResultList = () => {
         summary,
         newPathFilterState
       );
-  
+
       newFormattedResults = results;
       newPathFilterState = updatedPathFilterState;
-  
+
       // Update entity filters if changed
       if (!areEntityFiltersEqual(updatedEntityFilters, asFilters))
         setActiveEntityFilters(updatedEntityFilters);
-  
+
       // Update available facet filters
       const newFilters = calculateFacetCounts(
         facetCounts.results,
@@ -302,21 +311,21 @@ const ResultList = () => {
         facetCounts.negatedResultFacets
       );
       setAvailableFilters(newFilters);
-  
+
       // Reset pagination if needed
       if (shouldResetPage && currentPage.current !== 0)
         handlePageReset(false, newFormattedResults.length);
-  
+
       originalResults.current = newOriginalResults;
     }
-  
+
     // Sorting
     newFormattedResults = getSortedResults(summary, newFormattedResults, sortType);
-  
+
     // State assignment
     setFormattedResults(newFormattedResults);
     setPathFilterState(newPathFilterState);
-  
+
     // First-load modal setup
     if (firstLoad.current && newFormattedResults.length > 0) {
       firstLoad.current = false;
@@ -335,11 +344,11 @@ const ResultList = () => {
         }
       }
     }
-  
+
     rawResults.current = summary;
     return newFormattedResults;
   };
-  
+
 
   const handleNewResults = (resultSet: ResultSet) => {
     // if we have no results, or the results aren't actually new, return
@@ -491,7 +500,7 @@ const ResultList = () => {
     let edge;
     if(!Array.isArray(edgeID))
       edge = getEdgeById(resultSet, edgeID);
-    else 
+    else
       edge = getCompressedEdge(resultSet, edgeID);
 
     if(!!edge) {
@@ -523,7 +532,7 @@ const ResultList = () => {
         f.value === filter.value &&
         f.negated === filter.negated
     );
-  
+
     if (exactMatchIndex !== -1) {
       // Exact match found → toggle off by removing it
       const updatedFilters = activeFilters.filter((_, i) => i !== exactMatchIndex);
@@ -536,7 +545,7 @@ const ResultList = () => {
       );
       return;
     }
-  
+
     // Try to find a filter with same {id, value} but different negated — for update
     const sameIdValueIndex = activeFilters.findIndex(
       (f) =>
@@ -544,7 +553,7 @@ const ResultList = () => {
         f.value === filter.value &&
         f.negated !== filter.negated
     );
-  
+
     let updatedFilters: Filter[];
     if (sameIdValueIndex !== -1) {
       // Replace old filter with new one (different negated)
@@ -555,9 +564,9 @@ const ResultList = () => {
       // Add new filter
       updatedFilters = [...activeFilters, { ...filter }];
     }
-  
+
     updatedFilters.sort(filterCompare);
-  
+
     handleApplyFilterAndCleanup(
       updatedFilters,
       activeEntityFilters,
@@ -566,8 +575,8 @@ const ResultList = () => {
       currentSortString.current
     );
   };
-  
-  
+
+
 
   const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string) => {
     if(!rawResults)
@@ -836,12 +845,12 @@ const ResultList = () => {
         }
       </div>
       {
-        blocker && 
-        <NavConfirmationPromptModal 
-          blocker={blocker} 
+        blocker &&
+        <NavConfirmationPromptModal
+          blocker={blocker}
           title="Are you sure you want to leave this page?"
           message="If you leave this page, you may lose your results and have to run this query again."
-          subtitle="Note: You can revisit this query later by visiting the Search History page." 
+          subtitle="Note: You can revisit this query later by visiting the Search History page."
           proceedButtonText="Navigate away from the results page"
           stayButtonText="Stay on the results page"
         />
