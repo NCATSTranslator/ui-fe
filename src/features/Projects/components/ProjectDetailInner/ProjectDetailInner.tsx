@@ -118,7 +118,7 @@ const ProjectDetailInner = () => {
                     setProjectEditingState={handleSetIsEditingProject}
                     setSearchTerm={setSearchTerm}
                     showBackButton={true}
-                    subtitle={`${project?.data.pks.length} Quer${project?.data.pks.length === 1 ? 'y' : 'ies'}`}
+                    subtitle={`${project?.data.pks.length || "-"} Quer${project?.data.pks.length === 1 ? 'y' : 'ies'}`}
                     title={project?.data.title || ''}
                   />
                 </LoadingWrapper>
