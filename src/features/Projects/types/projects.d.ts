@@ -75,12 +75,20 @@ export interface UserQueryObject {
 export type SortField = 'name' | 'lastSeen' | 'dateAdded' | 'bookmarks' | 'notes' | 'status';
 export type SortDirection = 'asc' | 'desc';
 
-export type EditingItem = {
+export type ProjectEditingItem = {
   id: number | string;
   name: string;
   queryIds?: string[];
   status?: 'new' | 'editing';
-  type: 'project' | 'query';
+  type: 'project';
+} | undefined;
+
+export type QueryEditingItem = {
+  id: number | string;
+  name: string;
+  queryIds?: string[];
+  status?: 'new' | 'editing';
+  type: 'query';
 } | undefined;
 
 export const isProjectRaw = (obj: unknown): obj is ProjectRaw => {

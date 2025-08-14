@@ -5,12 +5,12 @@ import QueriesTableHeader from '@/features/Projects/components/TableHeader/Queri
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 import { useUserProjects, useFormattedProjects, useUserQueries, useProjectDetailSortSearchSelectState } from '@/features/Projects/hooks/customHooks';
-import { UserQueryObject, EditingItem } from '@/features/Projects/types/projects.d';
+import { UserQueryObject, ProjectEditingItem, QueryEditingItem } from '@/features/Projects/types/projects.d';
 import { filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
-import { useEditProjectQueryState, useEditProjectQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
+import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
 import ProjectDetailErrorStates from '@/features/Projects/components/ProjectDetailErrorStates/ProjectDetailErrorStates';
 
 const ProjectDetailInner = () => {
@@ -39,24 +39,38 @@ const ProjectDetailInner = () => {
     handleSort
   } = useProjectDetailSortSearchSelectState();
 
-  const setEditingState = (isEditing: boolean, editingItem?: EditingItem) => {
-    setEditState(prev => ({ 
+  const handleSetIsEditingProject = (isEditing: boolean, editingItem?: ProjectEditingItem) => {
+    setProjectEditState(prev => ({ 
       ...prev, 
       isEditing, 
       ...(editingItem !== undefined && { editingItem })
     }));
   };
 
-  const [editState, setEditState] = useEditProjectQueryState();
-  const editHandlers = useEditProjectQueryHandlers(
-    setEditingState, 
-    project ? [project] : [], 
-    projectQueries
+  const handleSetIsEditingQuery = (isEditing: boolean, editingItem?: QueryEditingItem) => {
+    setQueryEditState(prev => ({ 
+      ...prev, 
+      isEditing, 
+      ...(editingItem !== undefined && { editingItem })
+    }));
+  };
+
+  const [projectEditState, setProjectEditState] = useEditProjectState();
+  const [queryEditState, setQueryEditState] = useEditQueryState();
+
+  const projectEditHandlers = useEditProjectHandlers(
+    handleSetIsEditingProject, 
+    project ? [project] : []
   );
 
+  const queryEditHandlers = useEditQueryHandlers(
+    handleSetIsEditingQuery, 
+    projectQueries
+  );
+  
   const handleEditClick = () => {
     if (project) {
-      editHandlers.handleEditProject(project);
+      projectEditHandlers.handleEditProject(project);
     }
   };
 
@@ -83,22 +97,22 @@ const ProjectDetailInner = () => {
                 <LoadingWrapper loading={projectLoading} >
                   <ProjectHeader
                     title={project?.data.title || ''}
-                    subtitle={`${projectQueries.length} Quer${projectQueries.length === 1 ? 'y' : 'ies'}`}
+                    subtitle={`${project?.data.pks.length} Quer${project?.data.pks.length === 1 ? 'y' : 'ies'}`}
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     searchPlaceholder="Search by Query Name"
                     showBackButton={true}
                     backButtonText="All Projects"
-                    isEditing={editState.isEditing}
-                    setEditingState={setEditingState}
-                    editingItem={editState.editingItem}
-                    onUpdateItem={editHandlers.handleUpdateItem}
-                    onCancelEdit={editHandlers.handleCancelEdit}
+                    isEditing={projectEditState.isEditing}
+                    setProjectEditingState={handleSetIsEditingProject}
+                    projectEditingItem={projectEditState.editingItem}
+                    onUpdateProjectItem={projectEditHandlers.handleUpdateProject}
+                    onCancelEdit={projectEditHandlers.handleCancelEdit}
                     onEditClick={handleEditClick}
-                    onRestoreProject={editHandlers.handleRestoreProject}
-                    onDeleteProject={editHandlers.handleDeleteProject}
-                    onRestoreQuery={editHandlers.handleRestoreQuery}
-                    onDeleteQuery={editHandlers.handleDeleteQuery}
+                    onRestoreProject={projectEditHandlers.handleRestoreProject}
+                    onDeleteProject={projectEditHandlers.handleDeleteProject}
+                    onRestoreQuery={queryEditHandlers.handleRestoreQuery}
+                    onDeleteQuery={queryEditHandlers.handleDeleteQuery}
                     bookmarkCount={project?.bookmark_count || 0}
                     noteCount={project?.note_count || 0}
                     project={project}
@@ -148,7 +162,7 @@ const ProjectDetailInner = () => {
                                     searchTerm={searchTerm}
                                     setSelectedQueries={setSelectedQueries}
                                     selectedQueries={selectedQueries}
-                                    onEdit={editHandlers.handleEditQuery}
+                                    onEdit={queryEditHandlers.handleEditQuery}
                                   />
                                 ))
                               )}

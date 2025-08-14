@@ -8,16 +8,17 @@ import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import ProjectsTableHeader from '@/features/Projects/components/TableHeader/ProjectsTableHeader/ProjectsTableHeader';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
 import { useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
-import { ProjectRaw, UserQueryObject, SortField, SortDirection, Project, EditingItem } from '@/features/Projects/types/projects.d';
+import { ProjectRaw, UserQueryObject, SortField, SortDirection, Project, QueryEditingItem, ProjectEditingItem } from '@/features/Projects/types/projects.d';
 import { filterAndSortProjects, filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
-import { useEditProjectQueryState, useEditProjectQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
+import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
 import Button from '@/features/Core/components/Button/Button';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
-import DeletedTableHeader from '../TableHeader/DeletedTableHeader/DeletedTableHeader';
-import ProjectInnerErrorStates from '../ProjectInnerErrorStates/ProjectInnerErrorStates';
+import DeletedTableHeader from '@/features/Projects/components/TableHeader/DeletedTableHeader/DeletedTableHeader';
+import ProjectInnerErrorStates from '@/features/Projects/components/ProjectInnerErrorStates/ProjectInnerErrorStates';
+import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
 
 export const ProjectListInner = () => {
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
@@ -39,9 +40,9 @@ export const ProjectListInner = () => {
   const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<UserQueryObject[]>([]);
 
-  const handleSetIsEditing = (isEditing: boolean, editingItem?: EditingItem) => {
-    setEditState({isEditing: isEditing, editingItem: editingItem || undefined});
-    if(isEditing) {
+  const handleSetIsEditingProject = (isEditing: boolean, editingItem?: ProjectEditingItem) => {
+    setProjectEditState({isEditing: isEditing, editingItem: editingItem || undefined});
+    if(isEditing && (editingItem?.type === 'project' || !editingItem)) {
       const selectedQids = editingItem?.queryIds || [];
       const selectedQueries = activeQueries.filter(query => selectedQids.includes(query.data.qid));
       setSelectedQueries(selectedQueries);
@@ -50,12 +51,21 @@ export const ProjectListInner = () => {
     }
   };
 
-  const [editState, setEditState] = useEditProjectQueryState();
-  const editHandlers = useEditProjectQueryHandlers(
-    handleSetIsEditing, 
-    activeFormattedProjects, 
-    activeQueries
-  );
+  const handleSetIsEditingQuery = (isEditing: boolean, editingItem?: QueryEditingItem) => {
+    setQueryEditState({isEditing: isEditing, editingItem: editingItem || undefined});
+    if(isEditing && editingItem?.type === 'query')
+      setIsEditQueryModalOpen(true);
+    else 
+      setIsEditQueryModalOpen(false);
+  };
+
+  const [projectEditState, setProjectEditState] = useEditProjectState();
+  const [queryEditState, setQueryEditState] = useEditQueryState();
+
+  const projectEditHandlers = useEditProjectHandlers(handleSetIsEditingProject, activeFormattedProjects);
+  const queryEditHandlers = useEditQueryHandlers(handleSetIsEditingQuery, activeQueries);
+
+  const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState(false);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -76,8 +86,8 @@ export const ProjectListInner = () => {
   };
 
   const handleDelete = () => {
-    selectedProjects.forEach((project: Project) => editHandlers.handleDeleteProject(project));
-    selectedQueries.forEach((query: UserQueryObject) => editHandlers.handleDeleteQuery(query));
+    selectedProjects.forEach((project: Project) => projectEditHandlers.handleDeleteProject(project));
+    selectedQueries.forEach((query: UserQueryObject) => queryEditHandlers.handleDeleteQuery(query));
     setSelectedProjects([]);
     setSelectedQueries([]);
   };
@@ -90,19 +100,27 @@ export const ProjectListInner = () => {
   const sortedDeletedProjects = useMemo(() => filterAndSortProjects(deletedFormattedProjects.filter(project => project.id !== -1), deletedQueries, sortField, sortDirection, searchTerm), [deletedFormattedProjects, deletedQueries, sortField, sortDirection, searchTerm]);
   const sortedDeletedQueries = useMemo(() => filterAndSortQueries(deletedQueries, sortField, sortDirection, searchTerm), [deletedQueries, sortField, sortDirection, searchTerm]);
 
-  const hideProjectsTab = (searchTerm.length > 0 && sortedActiveProjects.length === 0) || (editState.editingItem?.type !== "query" && editState.isEditing);
+  const hideProjectsTab = (searchTerm.length > 0 && sortedActiveProjects.length === 0) || (projectEditState.isEditing);
   const hideQueriesTab = (searchTerm.length > 0 && sortedActiveQueries.length === 0);
-  const hideTrashTab = (searchTerm.length > 0 && sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0) || (editState.editingItem?.type !== "query" && editState.isEditing);
+  const hideTrashTab = (searchTerm.length > 0 && sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0) || (projectEditState.isEditing);
 
   // reset active tab back to projects when editing is finished
   useEffect(() => {
-    if (!editState.isEditing) {
+    if (!projectEditState.isEditing) {
       setActiveTab('Projects');
     }
-  }, [editState.isEditing]);
+  }, [projectEditState.isEditing]);
 
   return (
-    <div className={`${styles.projectListContainer} ${editState.isEditing ? styles.isEditing : ''}`}>
+    <div className={`${styles.projectListContainer} ${projectEditState.isEditing ? styles.isEditing : ''}`}>
+      <EditQueryModal
+        isOpen={isEditQueryModalOpen}
+        handleClose={() => setIsEditQueryModalOpen(false)}
+        loading={queriesLoading}
+        mode="edit"
+        projects={activeFormattedProjects}
+        setSelectedProject={() => {}}
+      />
       <div className="container">
         <div className={styles.projectList}>
           <ProjectHeader
@@ -112,11 +130,11 @@ export const ProjectListInner = () => {
             searchPlaceholder="Search by Project or Query Name"
             showCreateButton={true}
             variant="list"
-            isEditing={editState.isEditing}
-            setEditingState={handleSetIsEditing}
-            editingItem={editState.editingItem}
-            onUpdateItem={editHandlers.handleUpdateItem}
-            onCancelEdit={editHandlers.handleCancelEdit}
+            isEditing={projectEditState.isEditing}
+            setProjectEditingState={handleSetIsEditingProject}
+            projectEditingItem={projectEditState.editingItem}
+            onUpdateProjectItem={projectEditHandlers.handleUpdateProject}
+            onCancelEdit={projectEditHandlers.handleCancelEdit}
             selectedQueries={selectedQueries}
           />
           {
@@ -190,7 +208,7 @@ export const ProjectListInner = () => {
                                             searchTerm={searchTerm}
                                             setSelectedProjects={setSelectedProjects}
                                             selectedProjects={selectedProjects}
-                                            onEdit={editHandlers.handleEditProject}
+                                            onEdit={projectEditHandlers.handleEditProject}
                                           />
                                           {/* Add separator before the last project (Unassigned), if the 
                                           unassigned project is included in the sortedActiveProjects array */}
@@ -262,7 +280,7 @@ export const ProjectListInner = () => {
                                         searchTerm={searchTerm}
                                         setSelectedQueries={setSelectedQueries}
                                         selectedQueries={selectedQueries}
-                                        onEdit={editHandlers.handleEditQuery}
+                                        onEdit={queryEditHandlers.handleEditQuery}
                                       />
                                     ))
                                   )}
@@ -347,7 +365,7 @@ export const ProjectListInner = () => {
                   {(selectedProjects.length > 0 || selectedQueries.length > 0) && (
                     <>
                       <span>{selectedProjects.length || selectedQueries.length} Selected</span>
-                      {(selectedQueries.length > 0 && !editState.isEditing) && (
+                      {(selectedQueries.length > 0 && !projectEditState.isEditing) && (
                         <Button
                           variant="secondary"
                           handleClick={() => {}}

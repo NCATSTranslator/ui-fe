@@ -158,22 +158,26 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
                 loading={loading}
               >
                 {
-                  filteredProjects.length > 0 ? filteredProjects.map((project) => (
-                    <div
-                      className={`${styles.projectItem}`}
-                      key={project.id} 
-                      onClick={() => handleSelectProject(project)}
-                      >
-                      <Highlighter
-                        highlightClassName="highlight"
-                        className={styles.projectName}
-                        searchWords={searchTerm ? [searchTerm] : []}
-                        autoEscape={true}
-                        textToHighlight={project.label || project.data.title}
-                      />
-                      <div className={styles.queryCount}>{project.data.pks.length} quer{project.data.pks.length === 1 ? 'y' : 'ies'}</div>
-                    </div>
-                  )) : (
+                  filteredProjects.length > 0 ? filteredProjects.map((project) => {
+                    const isUnassigned = project.id === -1;
+                    if(isUnassigned) return null;
+                    const projectName = project.label || project.data.title;
+                    return(
+                      <div
+                        className={`${styles.projectItem}`}
+                        key={project.id} 
+                        onClick={() => handleSelectProject(project)}
+                        >
+                        <Highlighter
+                          highlightClassName="highlight"
+                          className={styles.projectName}
+                          searchWords={searchTerm ? [searchTerm] : []}
+                          autoEscape={true}
+                          textToHighlight={projectName}
+                        />
+                        <div className={styles.queryCount}>{project.data.pks.length} quer{project.data.pks.length === 1 ? 'y' : 'ies'}</div>
+                      </div>
+                  )}) : (
                     <div className={styles.noResults}>
                       <p>No projects found matching "{searchTerm}"</p>
                     </div>
