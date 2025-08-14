@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { Project, ProjectEditingItem, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
+import { Project, ProjectEditingItem, ProjectRaw, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
 import { useUpdateProjects, useUpdateQuery, useDeleteProjects, useRestoreProjects, useDeleteQueries, useRestoreQueries } from '@/features/Projects/hooks/customHooks';
 import { errorToast, projectUpdatedToast, queryUpdatedToast, projectRestoredToast, projectDeletedToast, queryRestoredToast, queryDeletedToast } from './toastMessages';
 
@@ -416,4 +416,14 @@ export const onSetIsEditingProject = (
   } else {
     setSelectedQueries([]);
   }
+};
+
+/**
+ * Checks if the project is unassigned.
+ * @param project - The project to check.
+ * @returns True if the project is unassigned, false otherwise.
+ */
+export const isUnassignedProject = (project: Project | ProjectRaw | number) => {
+  const id = typeof project === 'number' ? project : project.id;
+  return id === -1;
 };

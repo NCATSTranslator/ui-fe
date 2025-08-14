@@ -12,7 +12,7 @@ import { ProjectRaw, UserQueryObject, SortField, SortDirection, Project, QueryEd
 import { filterAndSortProjects, filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
-import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject } from '@/features/Projects/utils/editUpdateFunctions';
+import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject, isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
 import Button from '@/features/Core/components/Button/Button';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
@@ -96,7 +96,7 @@ export const ProjectListInner = () => {
   const sortedActiveProjects = useMemo(() => filterAndSortProjects(activeFormattedProjects, activeQueries, sortField, sortDirection, searchTerm), [activeFormattedProjects, activeQueries, sortField, sortDirection, searchTerm]);
   const sortedActiveQueries = useMemo(() => filterAndSortQueries(activeQueries, sortField, sortDirection, searchTerm), [activeQueries, sortField, sortDirection, searchTerm]);
 
-  const sortedDeletedProjects = useMemo(() => filterAndSortProjects(deletedFormattedProjects.filter(project => project.id !== -1), deletedQueries, sortField, sortDirection, searchTerm), [deletedFormattedProjects, deletedQueries, sortField, sortDirection, searchTerm]);
+  const sortedDeletedProjects = useMemo(() => filterAndSortProjects(deletedFormattedProjects.filter(project => !isUnassignedProject(project)), deletedQueries, sortField, sortDirection, searchTerm), [deletedFormattedProjects, deletedQueries, sortField, sortDirection, searchTerm]);
   const sortedDeletedQueries = useMemo(() => filterAndSortQueries(deletedQueries, sortField, sortDirection, searchTerm), [deletedQueries, sortField, sortDirection, searchTerm]);
 
   const hideProjectsTab = (searchTerm.length > 0 && sortedActiveProjects.length === 0) || (projectEditState.isEditing);
@@ -214,8 +214,8 @@ export const ProjectListInner = () => {
                                           unassigned project is included in the sortedActiveProjects array */}
                                           {
                                             index === sortedActiveProjects.length - 2 && 
-                                            project.id !== -1 && 
-                                            sortedActiveProjects.some(p => p.id === -1) && (
+                                            !isUnassignedProject(project) && 
+                                            sortedActiveProjects.some(p => isUnassignedProject(p)) && (
                                             <div className={styles.separator} />
                                           )}
                                         </>

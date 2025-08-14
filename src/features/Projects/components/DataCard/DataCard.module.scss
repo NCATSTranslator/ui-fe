@@ -2,8 +2,18 @@
 
 .dataCard {
   background-color: $white;
-  &.projectWrapper {
+  &.projectCard {
     background: $lightGray;
+  }
+  &.queryCard {
+    .actionsColumn {
+      button {
+        background-color: $lightGray;
+        &:hover {
+          background-color: $white;
+        }
+      }
+    }
   }
   &:hover {
     background-color: $whiteHover;

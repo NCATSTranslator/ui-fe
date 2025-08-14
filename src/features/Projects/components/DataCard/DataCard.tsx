@@ -16,7 +16,8 @@ import { Project, QueryStatus, UserQueryObject } from '@/features/Projects/types
 import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { getTypeIDFromType } from '@/features/Projects/utils/utilities';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
-import { unableToReachLinkToast } from '../../utils/toastMessages';
+import { unableToReachLinkToast } from '@/features/Projects/utils/toastMessages';
+import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
 
 interface DataCardProps<T> {
   className?: string;
@@ -65,7 +66,7 @@ const DataCard = <T,>({
 }: DataCardProps<T>) => {
   const navigate = useNavigate();
 
-  const isUnassigned = getItemId(item) === -1;
+  const isUnassigned = type === 'project' ? isUnassignedProject(item as Project) : isUnassignedProject(getItemId(item) as number);
   
   const title = getItemTitle(item);
   const time_created = getItemTimeCreated(item);
@@ -155,7 +156,7 @@ const DataCard = <T,>({
 
   return (
     <CardWrapper 
-      className={`${styles.dataCard} ${className || ''} ${type === 'project' && styles.projectWrapper}`}
+      className={`${styles.dataCard} ${className || ''} ${type === 'project' ? styles.projectCard : styles.queryCard}`}
       onClick={handleCardClick}
     >
       <div className={`${styles.checkboxColumn} ${styles.column}`}>

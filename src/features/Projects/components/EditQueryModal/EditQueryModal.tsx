@@ -13,6 +13,7 @@ import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingW
 import Highlighter from "react-highlight-words";
 import { filterProjects } from "@/features/Projects/utils/filterAndSortingFunctions";
 import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
+import { isUnassignedProject } from "@/features/Projects/utils/editUpdateFunctions";
 
 interface EditQueryModalProps {
   handleClose?: () => void;
@@ -159,7 +160,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
               >
                 {
                   filteredProjects.length > 0 ? filteredProjects.map((project) => {
-                    const isUnassigned = project.id === -1;
+                    const isUnassigned = isUnassignedProject(project);
                     if(isUnassigned) return null;
                     const projectName = project.label || project.data.title;
                     return(

@@ -4,6 +4,7 @@ import styles from '@/features/Projects/components/TableHeader/TableHeader.modul
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import SortableHeader from '@/features/Projects/components/SortableHeader/SortableHeader';
+import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
 
 interface ProjectsTableHeaderProps {
   selectedProjects: Project[];
@@ -28,7 +29,7 @@ const ProjectsTableHeader = ({
       setSelectedProjects([]);
     } else {
       // dont include unassigned project in the selection
-      setSelectedProjects([...activeProjects.filter(project => project.id !== -1)]);
+      setSelectedProjects([...activeProjects.filter(project => !isUnassignedProject(project))]);
     }
   };
 
