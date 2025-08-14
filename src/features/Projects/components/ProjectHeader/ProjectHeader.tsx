@@ -31,9 +31,10 @@ interface ProjectHeaderProps {
   onDeleteQuery?: (query: UserQueryObject) => void;
   onUpdateProjectItem?: (id: number | string, name: string, queryIds: string[]) => void;
   project?: Project;
+  queriesLoading?: boolean;
   searchPlaceholder?: string;
   searchTerm: string;
-  selectedQueries?: UserQueryObject[];
+  selectedQueries: UserQueryObject[];
   setSearchTerm: (searchTerm: string) => void;
   setProjectEditingState: (isEditing: boolean, editingItem?: ProjectEditingItem) => void;
   showBackButton?: boolean;
@@ -58,6 +59,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   onDeleteQuery,
   onUpdateProjectItem,
   project,
+  queriesLoading = false,
   searchPlaceholder = 'Search by Query Name',
   searchTerm,
   selectedQueries,
@@ -338,6 +340,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                       className={styles.editButton}
                       iconLeft={<EditIcon />}
                       small
+                      disabled={queriesLoading}
                     >
                       Edit
                     </Button>

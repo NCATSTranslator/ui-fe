@@ -12,6 +12,7 @@ interface ProjectCardProps {
   searchTerm?: string;
   selectedProjects: Project[];
   setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
+  queriesLoading?: boolean;
 }
 
 const ProjectCard = ({
@@ -20,7 +21,8 @@ const ProjectCard = ({
   queries,
   searchTerm,
   selectedProjects,
-  setSelectedProjects
+  setSelectedProjects,
+  queriesLoading = false
 }: ProjectCardProps) => {
 
   const status = useMemo(() => getProjectStatus(project, queries), [project, queries]);
@@ -54,6 +56,7 @@ const ProjectCard = ({
       getItemBookmarkCount={(item: Project) => item.bookmark_count}
       getItemNoteCount={(item: Project) => item.note_count}
       getItemCount={(item: Project) => item.data.pks.length}
+      queriesLoading={queriesLoading}
     />
   );
 };

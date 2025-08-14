@@ -10,7 +10,7 @@ import { filterAndSortQueries } from '@/features/Projects/utils/filterAndSorting
 import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
-import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
+import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject } from '@/features/Projects/utils/editUpdateFunctions';
 import ProjectDetailErrorStates from '@/features/Projects/components/ProjectDetailErrorStates/ProjectDetailErrorStates';
 
 const ProjectDetailInner = () => {
@@ -39,14 +39,6 @@ const ProjectDetailInner = () => {
     handleSort
   } = useProjectDetailSortSearchSelectState();
 
-  const handleSetIsEditingProject = (isEditing: boolean, editingItem?: ProjectEditingItem) => {
-    setProjectEditState(prev => ({ 
-      ...prev, 
-      isEditing, 
-      ...(editingItem !== undefined && { editingItem })
-    }));
-  };
-
   const handleSetIsEditingQuery = (isEditing: boolean, editingItem?: QueryEditingItem) => {
     setQueryEditState(prev => ({ 
       ...prev, 
@@ -57,6 +49,16 @@ const ProjectDetailInner = () => {
 
   const [projectEditState, setProjectEditState] = useEditProjectState();
   const [queryEditState, setQueryEditState] = useEditQueryState();
+
+  const handleSetIsEditingProject = (isEditing: boolean, editingItem?: ProjectEditingItem) => {
+    onSetIsEditingProject(
+      isEditing,
+      projectQueries,
+      setProjectEditState,
+      setSelectedQueries,
+      editingItem
+    );
+  };
 
   const projectEditHandlers = useEditProjectHandlers(
     handleSetIsEditingProject, 
@@ -96,26 +98,28 @@ const ProjectDetailInner = () => {
               <div className={styles.projectHeaderContainer}>
                 <LoadingWrapper loading={projectLoading} >
                   <ProjectHeader
-                    title={project?.data.title || ''}
-                    subtitle={`${project?.data.pks.length} Quer${project?.data.pks.length === 1 ? 'y' : 'ies'}`}
-                    searchTerm={searchTerm}
-                    setSearchTerm={setSearchTerm}
-                    searchPlaceholder="Search by Query Name"
-                    showBackButton={true}
                     backButtonText="All Projects"
+                    bookmarkCount={project?.bookmark_count || 0}
                     isEditing={projectEditState.isEditing}
-                    setProjectEditingState={handleSetIsEditingProject}
-                    projectEditingItem={projectEditState.editingItem}
-                    onUpdateProjectItem={projectEditHandlers.handleUpdateProject}
+                    noteCount={project?.note_count || 0}
                     onCancelEdit={projectEditHandlers.handleCancelEdit}
+                    onDeleteProject={projectEditHandlers.handleDeleteProject}
+                    onDeleteQuery={queryEditHandlers.handleDeleteQuery}
                     onEditClick={handleEditClick}
                     onRestoreProject={projectEditHandlers.handleRestoreProject}
-                    onDeleteProject={projectEditHandlers.handleDeleteProject}
                     onRestoreQuery={queryEditHandlers.handleRestoreQuery}
-                    onDeleteQuery={queryEditHandlers.handleDeleteQuery}
-                    bookmarkCount={project?.bookmark_count || 0}
-                    noteCount={project?.note_count || 0}
+                    onUpdateProjectItem={projectEditHandlers.handleUpdateProject}
                     project={project}
+                    projectEditingItem={projectEditState.editingItem}
+                    queriesLoading={queriesLoading}
+                    searchPlaceholder="Search by Query Name"
+                    searchTerm={searchTerm}
+                    selectedQueries={selectedQueries}
+                    setProjectEditingState={handleSetIsEditingProject}
+                    setSearchTerm={setSearchTerm}
+                    showBackButton={true}
+                    subtitle={`${project?.data.pks.length} Quer${project?.data.pks.length === 1 ? 'y' : 'ies'}`}
+                    title={project?.data.title || ''}
                   />
                 </LoadingWrapper>
               </div>

@@ -392,3 +392,28 @@ export const handlePostQueryDeletion = (queryClient: QueryClient, selectedQuerie
   });
   setSelectedQueries([]);
 };
+
+/**
+ * Handles the setting of the editing state for a project.
+ * @param isEditing - Whether the project is being edited.
+ * @param editingItem - The editing item.
+ * @param setProjectEditState - The function to set the project edit state.
+ * @param activeQueries - The active queries.
+ * @param setSelectedQueries - The function to set the selected queries.
+ */
+export const onSetIsEditingProject = (
+  isEditing: boolean,
+  activeQueries: UserQueryObject[],
+  setProjectEditState: (state: EditProjectState) => void,
+  setSelectedQueries: (queries: UserQueryObject[]) => void,
+  editingItem?: ProjectEditingItem
+) => {
+  setProjectEditState({isEditing: isEditing, editingItem: editingItem || undefined});
+  if(isEditing && (editingItem?.type === 'project' || !editingItem)) {
+    const selectedQids = editingItem?.queryIds || [];
+    const selectedQueries = activeQueries.filter(query => selectedQids.includes(query.data.qid));
+    setSelectedQueries(selectedQueries);
+  } else {
+    setSelectedQueries([]);
+  }
+};

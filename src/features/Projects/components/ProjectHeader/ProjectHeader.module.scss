@@ -111,7 +111,7 @@
     width: 100%;
     .editButton, .shareButton {
       background-color: $white;
-      &:hover {
+      &:hover:not(:disabled) {
         background-color: $midGray;
       }
     }

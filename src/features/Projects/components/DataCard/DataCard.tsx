@@ -33,6 +33,7 @@ interface DataCardProps<T> {
   onShare?: (item: T) => void;
   onRestore?: (item: T) => void;
   onDelete?: (item: T) => void;
+  queriesLoading?: boolean;
   searchTerm?: string;
   selectedItems: T[];
   setSelectedItems: Dispatch<SetStateAction<T[]>>;
@@ -55,6 +56,7 @@ const DataCard = <T,>({
   onShare,
   onRestore,
   onDelete,
+  queriesLoading = false,
   searchTerm,
   selectedItems,
   setSelectedItems,
@@ -187,7 +189,7 @@ const DataCard = <T,>({
       <div className={`${styles.actionsColumn} ${styles.column}`}>
         {
           (!isUnassigned && !isDeleted) && (
-            <Button variant="secondary" iconOnly handleClick={handleEdit}>
+            <Button variant="secondary" iconOnly handleClick={handleEdit} disabled={queriesLoading}>
               <EditIcon/>
             </Button>
           )

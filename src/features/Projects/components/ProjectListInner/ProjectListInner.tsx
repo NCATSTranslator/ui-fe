@@ -12,7 +12,7 @@ import { ProjectRaw, UserQueryObject, SortField, SortDirection, Project, QueryEd
 import { filterAndSortProjects, filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
-import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
+import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject } from '@/features/Projects/utils/editUpdateFunctions';
 import Button from '@/features/Core/components/Button/Button';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
@@ -41,14 +41,13 @@ export const ProjectListInner = () => {
   const [selectedQueries, setSelectedQueries] = useState<UserQueryObject[]>([]);
 
   const handleSetIsEditingProject = (isEditing: boolean, editingItem?: ProjectEditingItem) => {
-    setProjectEditState({isEditing: isEditing, editingItem: editingItem || undefined});
-    if(isEditing && (editingItem?.type === 'project' || !editingItem)) {
-      const selectedQids = editingItem?.queryIds || [];
-      const selectedQueries = activeQueries.filter(query => selectedQids.includes(query.data.qid));
-      setSelectedQueries(selectedQueries);
-    } else {
-      setSelectedQueries([]);
-    }
+    onSetIsEditingProject(
+      isEditing,
+      activeQueries,
+      setProjectEditState,
+      setSelectedQueries,
+      editingItem
+    );
   };
 
   const handleSetIsEditingQuery = (isEditing: boolean, editingItem?: QueryEditingItem) => {
@@ -209,6 +208,7 @@ export const ProjectListInner = () => {
                                             setSelectedProjects={setSelectedProjects}
                                             selectedProjects={selectedProjects}
                                             onEdit={projectEditHandlers.handleEditProject}
+                                            queriesLoading={queriesLoading}
                                           />
                                           {/* Add separator before the last project (Unassigned), if the 
                                           unassigned project is included in the sortedActiveProjects array */}
@@ -328,6 +328,7 @@ export const ProjectListInner = () => {
                                         searchTerm={searchTerm}
                                         setSelectedProjects={setSelectedProjects}
                                         selectedProjects={selectedProjects}
+                                        queriesLoading={queriesLoading}
                                       />
                                     ))
                                   )}
