@@ -497,10 +497,19 @@ const deleteUserData = async (
     httpErrorHandler: ErrorHandler, 
     fetchErrorHandler: ErrorHandler
   ): Promise<boolean> => {
-    const response = await fetchUserData<Promise<boolean>>(async () => await remove(url), httpErrorHandler, fetchErrorHandler);
+    const response = await fetchUserData<boolean>(
+      async () => await remove(url), 
+      httpErrorHandler, 
+      fetchErrorHandler,
+      async (resp: Response): Promise<boolean> => {
+        // DELETE requests typically return empty body, so don't try to parse JSON
+        // Just return true if response is ok
+        return true;
+      }
+    );
 
     if(response === undefined || response === null) 
-      throw new Error('Failed to put user data.');
+      throw new Error('Failed to delete user data.');
   
     return response;
 }

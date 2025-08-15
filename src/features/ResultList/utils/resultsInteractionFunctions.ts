@@ -1,16 +1,6 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import {
-  isPath,
-  isResultEdge,
-  Path,
-  PathRank,
-  Result,
-  ResultEdge,
-  ResultNode,
-  ResultSet,
-  PathFilterState,
-  Tags, } from "@/features/ResultList/types/results.d";
-import { Filter, Filters, DynamicTag } from "@/features/ResultFiltering/types/filters";
+import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
+import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
 import { hasSupport } from "@/features/Common/utils/utilities";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
@@ -367,6 +357,18 @@ export const applyFilters = (
   }
 }
 
+/**
+ * Injects dynamic filters into the result set based on the bookmark set.
+ * This is used to display the bookmark and note tags on the result item.
+ * @param {ResultSet} summary - The result set containing the full tag list.
+ * @param {Result[]} formattedResults - The results that passed filtering and are currently shown.
+ * @param {Result[]} originalResults - The original, unfiltered list of results.
+ * @param {SaveGroup | null} bookmarkSet - The set of bookmark objects to search in.
+ * @returns {[ResultSet, Result[], Result[]]} A tuple containing:
+ *  - the modified result set,
+ *  - the modified formatted results,
+ *  - the modified original results.
+ */
 export const injectDynamicFilters = (
   summary: ResultSet,
   formattedResults: Result[],

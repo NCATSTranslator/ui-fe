@@ -168,6 +168,7 @@ const ResultList = () => {
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
   const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
   const [showHiddenPaths, setShowHiddenPaths] = useState(false);
+  const shouldUpdateResultsAfterBookmark = useRef(false);
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
@@ -212,7 +213,8 @@ const ResultList = () => {
   const handleClearNotesEditor = async () => {
     await getUserSaves();
     if(prevRawResults.current)
-    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current); }
+      handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current); 
+  }
 
   useEffect(() => {
     if(!user)
@@ -220,6 +222,15 @@ const ResultList = () => {
 
     getUserSaves();
   }, [user, getUserSaves]);
+
+  // Update results after bookmark to reflect new user saves in bookmark/note filter
+  useEffect(() => {
+    if(!shouldUpdateResultsAfterBookmark.current)
+      return;
+
+    shouldUpdateResultsAfterBookmark.current = false;
+    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current); 
+  }, [userSaves, activeFilters, activeEntityFilters, prevRawResults, currentSortString])
 
   useEffect(() => {
     if (!autoScrollToResult)
@@ -577,8 +588,6 @@ const ResultList = () => {
     );
   };
 
-
-
   const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string) => {
     if(!rawResults)
       return;
@@ -647,7 +656,7 @@ const ResultList = () => {
         setNotesModalOpen={setNotesModalOpen}
         handleClearNotesEditor={handleClearNotesEditor}
         noteLabel={noteLabel.current}
-        currentBookmarkID={currentBookmarkID.current}
+        currentBookmarkID={currentBookmarkID}
         pk={currentQueryID ? currentQueryID : ""}
         focusModalOpen={focusModalOpen}
         setFocusModalOpen={setFocusModalOpen}
@@ -661,6 +670,8 @@ const ResultList = () => {
         formattedResultsLength={formattedResults.length}
         setExpandSharedResult={setExpandSharedResult}
         setAutoScrollToResult={setAutoScrollToResult}
+        shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
+        updateUserSaves={setUserSaves}
       />
       <div className={styles.resultList}>
         {
@@ -802,6 +813,7 @@ const ResultList = () => {
                               resultsComplete={(!isError && freshRawResults === null && !isFetchingARAStatus.current && !isFetchingResults.current)}
                               scoreWeights={scoreWeights}
                               showHiddenPaths={showHiddenPaths}
+                              shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
                               setShowHiddenPaths={setShowHiddenPaths}
                               updateUserSaves={setUserSaves}
                             />
