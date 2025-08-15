@@ -1,6 +1,16 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
-import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
+import {
+  isPath,
+  isResultEdge,
+  Path,
+  PathRank,
+  Result,
+  ResultEdge,
+  ResultNode,
+  ResultSet,
+  PathFilterState,
+  Tags, } from "@/features/ResultList/types/results.d";
+import { Filter, Filters, DynamicTag } from "@/features/ResultFiltering/types/filters";
 import { hasSupport } from "@/features/Common/utils/utilities";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
@@ -357,10 +367,37 @@ export const applyFilters = (
   }
 }
 
-export const injectDynamicFilters = (originalResults: Result[], bookmarkSet: SaveGroup | null): Result[] => {
-  console.log(bookmarkSet);
-  if (bookmarkSet === null) return originalResults;
-  return originalResults;
+export const injectDynamicFilters = (
+  summary: ResultSet,
+  formattedResults: Result[],
+  originalResults: Result[],
+  bookmarkSet: SaveGroup | null): [ResultSet, Result[], Result[]] => {
+  if (bookmarkSet === null || bookmarkSet.saves.size === 0) return [summary, formattedResults, originalResults];
+  // If this becomes slow due to many bookmarks and results then look into making bookmarkSet and results maps keyed on the result ID
+  const tagsAdded = [];
+  for (let i = 0; i < formattedResults.length; i++) {
+    const result = formattedResults[i];
+    for (const save of bookmarkSet.saves) {
+      if (save.object_ref === result.id) {
+        tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.BOOKMARK});
+        if (save.notes && save.notes.length > 0) {
+          tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.NOTE});
+        }
+      }
+    }
+  }
+  if (tagsAdded.length === 0) return [summary, formattedResults, originalResults];
+  const modifiedSummary = cloneDeep(summary);
+  const modifiedFormattedResults = cloneDeep(formattedResults);
+  const modifiedOriginalResults = cloneDeep(originalResults);
+  for (const tagEntry of tagsAdded) {
+    const tag = tagEntry.tag;
+    const ridx = tagEntry.index;
+    modifiedSummary.data.tags[tag.id] = {name: tag.name, value: tag.value};
+    modifiedFormattedResults[ridx].tags[tag.id] = null;
+    modifiedOriginalResults[ridx].tags[tag.id] = null;
+  }
+  return [modifiedSummary, modifiedFormattedResults, modifiedOriginalResults];
 }
 
 /**

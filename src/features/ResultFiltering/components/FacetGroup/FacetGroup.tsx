@@ -53,9 +53,9 @@ const getTdlCaption = (): ReactNode => {
   )
 }
 
-const getSavesCaption = (): ReactNode => {
+const getBookmarkNotesCaption = (): ReactNode => {
   return(
-    <p className={styles.caption}>Include or exclude results that you have bookmarked or attached a note</p>
+    <p className={styles.caption}>Include or exclude results basd on whether they have bookmarks or notes added to them</p>
   )
 }
 
@@ -98,7 +98,7 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): ReactN
       headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Target Development Level" />
       break;
     case 'sv':
-      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Bookmarks and Notes" />
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Bookmarks & Notes" />
     break;
     default:
       headingToReturn = null;
@@ -134,7 +134,7 @@ const getTagCaptionMarkup = (tagFamily: string): ReactNode | null => {
       captionToReturn = getTdlCaption();
       break;
     case 'sv':
-      captionToReturn = getSavesCaption();
+      captionToReturn = getBookmarkNotesCaption();
       break;
     default:
       captionToReturn = null;

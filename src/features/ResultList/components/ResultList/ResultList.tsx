@@ -277,7 +277,8 @@ const ResultList = () => {
     }
 
     // Inject bookmark and note tag filters
-    newOriginalResults = injectDynamicFilters(newOriginalResults, userSaves);
+    [summary, newFormattedResults, newOriginalResults] = injectDynamicFilters(summary,
+        newFormattedResults, newOriginalResults, userSaves);
 
     // Filtering
     if (!justSort) {
