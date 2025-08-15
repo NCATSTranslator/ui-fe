@@ -2,12 +2,13 @@ import { FC, FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import styles from "./EditQueryModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
-import { ProjectCreate, ProjectRaw } from "@/features/Projects/types/projects";
+import { ProjectCreate, ProjectRaw, QueryEditingItem, UserQueryObject } from "@/features/Projects/types/projects";
 import Button from "@/features/Core/components/Button/Button";
 import { useCreateProject } from "@/features/Projects/hooks/customHooks";
 import CheckmarkIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
+import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
 import { debounce } from "lodash";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import Highlighter from "react-highlight-words";
@@ -16,12 +17,13 @@ import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
 import { isUnassignedProject } from "@/features/Projects/utils/editUpdateFunctions";
 
 interface EditQueryModalProps {
+  currentEditingQueryItem?: QueryEditingItem;
   handleClose?: () => void;
   isOpen: boolean;
   loading: boolean;
   mode: 'edit' | 'add';
   projects: ProjectRaw[];
-  setSelectedProject: (project: ProjectRaw) => void;
+  setSelectedProject?: (projects: ProjectRaw) => void;
 }
 
 const EditQueryModal: FC<EditQueryModalProps> = ({
@@ -30,7 +32,8 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   loading,
   mode = 'edit',
   projects,
-  setSelectedProject
+  currentEditingQueryItem,
+  setSelectedProject,
   }) => {
   
   const heading = mode === 'edit' ? 'Edit Query' : 'Add to Project';
@@ -41,6 +44,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const [projectNameError, setProjectNameError] = useState('');
   const createProjectMutation = useCreateProject();
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [localSelectedProjects, setLocalSelectedProjects] = useState<ProjectRaw[]>([]);
 
   const filteredProjects: ProjectRaw[] = useMemo(() => filterProjects(projects, searchTerm) as ProjectRaw[], [projects, searchTerm]);
 
@@ -50,8 +54,15 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   }
 
   const handleSelectProject = (project: ProjectRaw) => {
-    setSelectedProject(project);
-    onClose();
+    if(mode === 'add' && setSelectedProject) {
+      setSelectedProject(project);
+    } else {
+      if(localSelectedProjects.some(p => p.id === project.id)) {
+        setLocalSelectedProjects(prev => prev.filter(p => p.id !== project.id));
+      } else {
+        setLocalSelectedProjects(prev => [...prev, project]);
+      }
+    }
   }
 
   const handleProjectNameChange = (value: string) => {
@@ -77,7 +88,11 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
         // Reset form on successful creation
         setNewProject(null);
         setProjectNameError('');
-        setSelectedProject(data);
+        if(mode === 'add' && setSelectedProject) {
+          setSelectedProject(data);
+        } else {
+          setLocalSelectedProjects([...localSelectedProjects, data]);
+        }
         projectCreatedToast();
         onClose();
       },
@@ -103,6 +118,19 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
     }
   };
 
+  const handleDeleteQuery = () => {
+    console.log('delete query');
+  }
+
+  const handleSaveQuery = () => {
+    console.log('save query');
+    console.log(currentEditingQueryItem, localSelectedProjects);
+  }
+
+  const handleCancel = () => {
+    onClose();
+  }
+
   useEffect(() => {
     setOpen(isOpen);
   }, [isOpen]);
@@ -112,12 +140,13 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
       isOpen={open}
       onClose={onClose}
       className={styles.editQueryModal}
+      containerClass={styles.container}
     >
       <div className={styles.top}>
-        <h5 className={styles.heading}>{heading}</h5>
-      </div>
-      <div className={styles.bottom}>
-        <div>
+        <div className={styles.header}>
+          <h5 className={styles.heading}>{heading}</h5>
+        </div>
+        <div className={styles.inner}>
           <h6 className={styles.subheading}>{subheadingOne}</h6>
           <div className={`${styles.newProject} ${styles.wrapper}`}>
             <div className={styles.newProjectForm}>
@@ -142,7 +171,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
             </div>
           </div>
         </div>
-        <div className={styles.projectList}>
+        <div className={styles.inner}>
           <h6 className={styles.subheading}>{subheadingTwo}</h6>
           <div className={`${styles.projectList} ${styles.wrapper}`}>
             <div className={styles.projectSearch}>
@@ -163,9 +192,10 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
                     const isUnassigned = isUnassignedProject(project);
                     if(isUnassigned) return null;
                     const projectName = project.label || project.data.title;
+                    const isSelected = mode === "edit" && localSelectedProjects.some(p => p.id === project.id);
                     return(
                       <div
-                        className={`${styles.projectItem}`}
+                        className={`${styles.projectItem} ${isSelected ? styles.selected : ''}`}
                         key={project.id} 
                         onClick={() => handleSelectProject(project)}
                         >
@@ -189,6 +219,42 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
           </div>
         </div>
       </div>
+      {
+        mode === 'edit' && (
+          <div className={styles.bottom}>
+              <div className="left">
+                <Button
+                  variant="secondary"
+                  handleClick={handleDeleteQuery}
+                  iconLeft={<TrashIcon />}
+                  className={`${styles.button} ${styles.deleteButton}`}
+                  small
+                >
+                  Delete Query
+                </Button>
+              </div>
+              <div className={styles.right}>                
+                <Button
+                  variant="secondary"
+                  handleClick={handleCancel}
+                  iconLeft={<CloseIcon />}
+                  className={styles.button}
+                  small
+                >
+                  Cancel
+                </Button>
+                <Button
+                  handleClick={handleSaveQuery}
+                  iconLeft={<CheckmarkIcon />}
+                  className={`${styles.button} ${styles.saveButton}`}
+                  small
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          )
+        }
     </Modal>
   );
 };

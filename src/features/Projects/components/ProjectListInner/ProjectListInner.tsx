@@ -113,12 +113,14 @@ export const ProjectListInner = () => {
   return (
     <div className={`${styles.projectListContainer} ${projectEditState.isEditing ? styles.isEditing : ''}`}>
       <EditQueryModal
-        isOpen={isEditQueryModalOpen}
+        currentEditingQueryItem={queryEditState.editingItem?.type === 'query' ? queryEditState.editingItem : undefined}
         handleClose={() => setIsEditQueryModalOpen(false)}
+        isOpen={isEditQueryModalOpen}
         loading={queriesLoading}
         mode="edit"
         projects={activeFormattedProjects}
-        setSelectedProject={() => {}}
+        // selectedProjects={selectedProjects}
+        // setSelectedProjects={setSelectedProjects}
       />
       <div className="container">
         <div className={styles.projectList}>
