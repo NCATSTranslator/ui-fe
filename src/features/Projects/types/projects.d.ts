@@ -76,7 +76,7 @@ export type SortField = 'name' | 'lastSeen' | 'dateAdded' | 'bookmarks' | 'notes
 export type SortDirection = 'asc' | 'desc';
 
 export type ProjectEditingItem = {
-  id: number | string;
+  id: string;
   name: string;
   queryIds?: string[];
   status?: 'new' | 'editing';
@@ -84,7 +84,7 @@ export type ProjectEditingItem = {
 } | undefined;
 
 export type QueryEditingItem = {
-  id: number | string;
+  id: string;
   name: string;
   queryIds?: string[];
   status?: 'new' | 'editing';

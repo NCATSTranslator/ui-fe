@@ -119,18 +119,22 @@ export const restoreProjects = async (
  * PUT /api/v1/users/me/queries/delete
  * Updates a list of query IDs by setting the deleted flag to true.
  */
+// TODO: this endpoint returns an object for which the FE has no type, update the Promise return type to UserQueryObject when the BE is updated
+// then update the fetchWithErrorHandling type checker param back to isUserQueryObject
 export const deleteQueries = async (
   queryIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<UserQueryObject> => {
+): Promise<void> => {
+// ): Promise<UserQueryObject> => {
   const url = `${API_PATH_PREFIX}/users/me/queries/delete`;
   
-  return fetchWithErrorHandling<UserQueryObject>(
+  return fetchWithErrorHandling<void>(
     () => put(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    isUserQueryObject
+    (data: unknown): data is void => true
+    // isUserQueryObject
   );
 };
 

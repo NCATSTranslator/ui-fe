@@ -83,7 +83,7 @@ export const useEditProjectHandlers = (
 
   const handleEditProject = (project: Project) => {
     handleSetIsEditing(true, {
-      id: project.id,
+      id: project.id.toString(),
       name: project.data.title,
       type: 'project',
       queryIds: project.data.pks
@@ -336,7 +336,7 @@ export const useEditQueryHandlers = (
       );
     });
 
-    deleteQueriesMutation.mutate([query.data.qid.toString()], {
+    deleteQueriesMutation.mutate([query.sid], {
       onSuccess: () => {
         queryDeletedToast();
       },
