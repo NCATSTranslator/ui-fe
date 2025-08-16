@@ -68,7 +68,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     format: combinedQueryFormatter
   });
   const limitPrefixes = useRef([]);
-  const limitTypes = useRef(["Drug", "ChemicalEntity", "Disease", "Gene", "SmallMolecule", "PhenotypicFeature"]);
+  const limitTypes = useRef(["Drug", "ChemicalEntity", "Disease", "Gene/Protein", "SmallMolecule", "PhenotypicFeature"]);
   const excludePrefixes = useRef(["UMLS"]);
 
   const {
@@ -204,7 +204,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
         :
           <>
             <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
-            <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
+            <p className='caption'>Gene or proteins, diseases or phenotypes, and drugs or chemicals are currently supported</p>
             <div className={styles.buttons}>
               <Button
                 handleClick={swapTerms}
@@ -229,7 +229,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
               <Tooltip
                 id='middle-type-tooltip'
                 >
-                  <span>Pre-filter results by selecting a middle object type to be included within paths between the entered search terms. <br/><br/> Genes, diseases, phenotypes, and chemicals are currently supported.</span>
+                  <span>Pre-filter results by selecting a middle object type to be included within paths between the entered search terms. <br/><br/> Genes, proteins, diseases, phenotypes, and chemicals are currently supported.</span>
               </Tooltip>
             </div>
             {
@@ -273,7 +273,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                     <option value="biolink:ChemicalEntity">Chemical</option>
                     <option value="biolink:Disease">Disease</option>
                     <option value="biolink:Drug">Drug</option>
-                    <option value="biolink:Gene">Gene</option>
+                    <option value="biolink:Gene">Gene/Protein</option>
                     <option value="biolink:PhenotypicFeature">Phenotype</option>
                   </Select>
                   <PathfinderDivider className={styles.dividerIcon}/>
