@@ -35,7 +35,7 @@ type QueryPathfinderProps = {
   selectedProject?: ProjectRaw | null;
 }
 
-const QueryPathfinder: FC<QueryPathfinderProps> = ({ 
+const QueryPathfinder: FC<QueryPathfinderProps> = ({
   loading = false,
   handleResultMatchClick,
   isResults = false,
@@ -99,7 +99,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       delayedQueryTwo(e);
     }
   },[delayedQueryOne, delayedQueryTwo]);
-  
+
   const updateQueryItem = (selectedNode: AutocompleteItem, isFirstBar: boolean) => {
     // add in match text for genes, which should be the species
     if(selectedNode.id.includes("NCBIGene") && selectedNode?.match)
@@ -150,7 +150,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   const handleSubmission = (itemOne: AutocompleteItem | null, itemTwo: AutocompleteItem | null) => {
     validateSubmission(itemOne, itemTwo);
   }
-  
+
   const clearItem = (item: number) => {
     if(item === 1) {
       setQueryItemOne(null);
@@ -182,7 +182,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
   return (
     <div className={`${styles.queryPathfinder} ${isResults && styles.results}`}>
-      { isResults 
+      { isResults
         ?
           <QueryResultsHeader
             questionText={""}
@@ -206,17 +206,17 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
             <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
             <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
             <div className={styles.buttons}>
-              <Button 
-                handleClick={swapTerms} 
-                variant="secondary" 
+              <Button
+                handleClick={swapTerms}
+                variant="secondary"
                 className={`${styles.button}`}
                 iconLeft={<SwapIcon/>}
                 smallFont
               >
                 Swap Terms
               </Button>
-              <Button 
-                handleClick={handleMiddleTypeTrigger} 
+              <Button
+                handleClick={handleMiddleTypeTrigger}
                 variant="secondary"
                 className={`${styles.button} ${styles.middleTypeButton}`}
                 dataTooltipId='middle-type-tooltip'
@@ -236,12 +236,12 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
               isError &&
               <p className={styles.error}>{errorText}</p>
             }
-            <form 
+            <form
               className={`${styles.form} ${hasMiddleType && styles.hasMiddleType}`}
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmission(queryItemOne, queryItemTwo);
-              }} 
+              }}
             >
               <AutocompleteInput
                 placeholder="Enter First Search Term"
@@ -261,7 +261,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 hasMiddleType &&
                 <>
                   <Select
-                    label="" 
+                    label=""
                     name="Type"
                     handleChange={(value)=>{
                       setMiddleType(value.toString());
@@ -295,7 +295,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
               <Button type='submit' className={styles.submitButton} iconOnly>
                 {
                   isLoading
-                  ? 
+                  ?
                     <img
                       src={loadingIcon}
                       className={`loadingIcon`}
