@@ -1,4 +1,4 @@
-import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject, 
+import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject,
   Provenance, PublicationSupport } from "@/features/Evidence/types/evidence";
 
 export type ResultSet = {
@@ -39,7 +39,7 @@ export type SharedItem = {
   type: string;
 }
 
-export interface ResultBookmark extends Result { 
+export interface ResultBookmark extends Result {
   description?: string;
   bookmarkID?: number | boolean;
   bookmarked?: boolean;
@@ -77,7 +77,7 @@ export interface ResultEdge {
   compressed_edges?: ResultEdge[];
   id: string;
   knowledge_level: KnowledgeLevel;
-  metadata: { 
+  metadata: {
     edge_bindings: string[],
     inverted_id: string | null,
     is_root: boolean,
@@ -182,7 +182,7 @@ export const isResultEdge = (obj: unknown): obj is ResultEdge => {
     Array.isArray(obj.aras) &&
     obj.aras.every((item: unknown) => typeof item === "string") &&
     typeof obj.is_root === "boolean" &&
-    typeof obj.knowledge_level === "string" && 
+    typeof obj.knowledge_level === "string" &&
     typeof obj.metadata === "object" &&
     Array.isArray(obj.metadata.edge_bindings) &&
     obj.metadata.edge_bindings.every((item: unknown) => typeof item === "string") &&
@@ -192,7 +192,7 @@ export const isResultEdge = (obj: unknown): obj is ResultEdge => {
     typeof obj.predicate === "string" &&
     typeof obj.predicate_url === "string" &&
     Array.isArray(obj.provenance) &&
-    obj.provenance.every((prov: unknown) => typeof prov === "object") && 
+    obj.provenance.every((prov: unknown) => typeof prov === "object") &&
     typeof obj.publications === "object" &&
     typeof obj.subject === "string" &&
     Array.isArray(obj.support) &&
