@@ -821,6 +821,7 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   object: edge?.object || "",
   predicate: edge?.predicate || "",
   predicate_url: edge?.predicate_url || "",
+  description: edge?.description || "",
   provenance: edge?.provenance || [],
   publications: edge?.publications || {},
   subject: edge?.subject || "",

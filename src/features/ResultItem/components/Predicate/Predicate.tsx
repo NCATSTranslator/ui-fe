@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { useSupportPathKey, useExpandedPredicate } from '@/features/ResultItem/hooks/resultHooks';
 import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
+import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -194,6 +195,10 @@ const Predicate: FC<PredicateProps> = ({
                           </a>
                         }
                       </p>
+                      {
+                        edge.description &&
+                        <span className={styles.predicateDescription}>{capitalizeFirstLetter(edge.description)}.</span>
+                      }
                       {
                         (edgeEvidence.pubs.size > 0 || edgeEvidence.cts.size > 0) &&
                         <div className={styles.tooltipEvidenceCounts}>

@@ -86,6 +86,7 @@ export interface ResultEdge {
   object: string;
   predicate: string;
   predicate_url: string;
+  description: string | null;
   provenance: Provenance[];
   publications: {[key: string]: {id: string; support: PublicationSupport}[]};
   // nodeID
@@ -191,6 +192,7 @@ export const isResultEdge = (obj: unknown): obj is ResultEdge => {
     typeof obj.object === "string" &&
     typeof obj.predicate === "string" &&
     typeof obj.predicate_url === "string" &&
+    (typeof obj.description === "string" || obj.description === null) &&
     Array.isArray(obj.provenance) &&
     obj.provenance.every((prov: unknown) => typeof prov === "object") &&
     typeof obj.publications === "object" &&
