@@ -68,7 +68,7 @@
     width: 100%;
   }
   span {
-    cursor: pointer; 
+    cursor: pointer;
     text-overflow: ellipsis;
     overflow: hidden;
     &:hover {
@@ -105,7 +105,7 @@
       path {
         fill: $white;
       }
-    } 
+    }
     span {
       font-size: $subTwoSize;
       font-weight: 800;
