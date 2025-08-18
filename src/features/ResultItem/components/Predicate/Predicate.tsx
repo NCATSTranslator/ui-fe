@@ -198,7 +198,7 @@ const Predicate: FC<PredicateProps> = ({
                       {
                         edge.predicate.includes("impact") ?
                           <span className={styles.predicateDescription}>
-                            Indicates that a drug affects one or more biological processes relevant to a disease, in a way that may improve, worsen, or otherwise modify the condifition.
+                            Indicates that a drug affects one or more biological processes relevant to a disease, in a way that may improve, worsen, or otherwise modify the condition.
                           </span> :
                           edge.description &&
                             <span className={styles.predicateDescription}>
