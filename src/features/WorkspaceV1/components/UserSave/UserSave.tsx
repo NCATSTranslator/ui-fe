@@ -3,9 +3,10 @@ import { useState, useEffect, RefObject, Dispatch, SetStateAction, FC, useCallba
 import Highlighter from 'react-highlight-words';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultItem from '@/features/ResultItem/components/ResultItem/ResultItem';
-import { emptyEditor, SaveGroup } from '@/features/UserAuth/utils/userApi';
+import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { getCompressedEdge, getFormattedDate } from '@/features/Common/utils/utilities';
+import { findInSet, getCompressedEdge, getFormattedDate } from '@/features/Common/utils/utilities';
+import { isNotesEmpty } from '@/features/ResultItem/utils/utilities';
 import { Path, Result, ResultEdge } from '@/features/ResultList/types/results';
 import AnimateHeight from 'react-animate-height';
 import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react"
@@ -201,10 +202,11 @@ const UserSave: FC<UserSaveProps> = ({
           const queryNodeID = save.data.query.nodeId;
           const queryNodeLabel = save.data.query.nodeLabel;
           const queryNodeDescription = save.data.query.nodeDescription;
-          queryItem.hasNotes = (save.notes.length === 0 || JSON.stringify(save.notes) === emptyEditor) ? false : true;
+          queryItem.hasNotes = !isNotesEmpty(save.notes) ? false : true;
           if ('compressedPaths' in (save?.data?.item || {}))
             return null;
 
+          let bookmarkItem = queryObject.saves ? findInSet(queryObject.saves, save => save.id === save.id) : undefined;
           return (
             <div key={save.id} className={styles.result}>
               <ResultItem
@@ -219,9 +221,7 @@ const UserSave: FC<UserSaveProps> = ({
                 queryNodeID={(typeof queryNodeID === "string") ? queryNodeID : queryNodeID.toString()}
                 queryNodeLabel={queryNodeLabel}
                 queryNodeDescription={queryNodeDescription}
-                bookmarked={true}
-                bookmarkID={(typeof save.id === "string") ? save.id : (save.id === null) ? "" : save.id.toString()}
-                hasNotes={queryItem.hasNotes}
+                bookmarkItem={bookmarkItem}
                 handleBookmarkError={handleBookmarkError}
                 bookmarkAddedToast={bookmarkAddedToast}
                 bookmarkRemovedToast={bookmarkRemovedToast}

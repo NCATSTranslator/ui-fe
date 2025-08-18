@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from "react";
+import { Dispatch, ReactNode, SetStateAction, useMemo } from "react";
 import { Theme } from "./Theme";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -27,6 +27,7 @@ import { debounce } from "lodash";
 
 interface TextEditorProps {
   bookmarkID: string | null;
+  setSaveItem: Dispatch<SetStateAction<Save | null>>;
   handleSave: () => void;
   shouldClearEditor?: boolean;
   onClearEditorComplete?: () => void;
@@ -38,6 +39,7 @@ const Placeholder = (): ReactNode => {
 
 const TextEditor = ({ 
   bookmarkID, 
+  setSaveItem,
   handleSave, 
   shouldClearEditor, 
   onClearEditorComplete 
@@ -79,6 +81,7 @@ const TextEditor = ({
         
       newSave.notes = newNotes;
       updateUserSave(bookmarkID, newSave);
+      setSaveItem(newSave);
       handleSave();
     }
 
