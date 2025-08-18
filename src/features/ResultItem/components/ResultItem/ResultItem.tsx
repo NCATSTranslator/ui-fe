@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction, useMemo } from 'react';
 import styles from './ResultItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount, isStringArray } from '@/features/Common/utils/utilities';
-import { getARATagsFromResultTags } from '@/features/ResultItem/utils/utilities';
+import { getARATagsFromResultTags, isNotesEmpty } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import LoadingBar from '@/features/Common/components/LoadingBar/LoadingBar';
@@ -12,20 +12,20 @@ import BookmarkConfirmationModal from '@/features/ResultItem/components/Bookmark
 import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '@/features/ResultItem/utils/csvGeneration';
-import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject, Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
+import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
+import { handleBookmarkClick as handleBookmarkClickUtil, handleNotesClick as handleNotesClickUtil, BookmarkFunctionParams } from '@/features/ResultItem/utils/bookmarkFunctions';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getPathById, getPathsByIds, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { displayScore, generateScore } from '@/features/ResultList/utils/scoring';
 import { QueryType } from '@/features/Query/types/querySubmission';
-import { Result, PathFilterState, Path, ResultBookmark, ResultSet } from '@/features/ResultList/types/results';
+import { Result, PathFilterState, Path, ResultBookmark } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useTurnstileEffect } from '@/features/Common/hooks/customHooks';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
 import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
-import { cloneDeep } from 'lodash';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import { resultToCytoscape } from '@/features/ResultItem/utils/graphFunctions';
@@ -55,11 +55,9 @@ type ResultItemProps = {
   availableFilters: {[key: string]: Filter};
   bookmarkAddedToast?: () => void;
   bookmarkRemovedToast?: () => void;
-  bookmarked?: boolean;
-  bookmarkID?: string | null;
+  bookmarkItem?: Save | null;
   handleBookmarkError?: () => void;
   handleFilter: (filter: Filter) => void;
-  hasNotes: boolean;
   isEven: boolean;
   isInUserSave?: boolean;
   isPathfinder?: boolean;
@@ -79,6 +77,7 @@ type ResultItemProps = {
   setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   sharedItemRef: RefObject<HTMLDivElement> | null;
   showHiddenPaths: boolean;
+  shouldUpdateResultsAfterBookmark?: RefObject<boolean>;
   startExpanded: boolean;
   updateUserSaves?: Dispatch<SetStateAction<SaveGroup | null>>;
   zoomKeyDown: boolean;
@@ -92,12 +91,10 @@ const ResultItem: FC<ResultItemProps> = ({
     availableFilters: availableTags,
     bookmarkAddedToast = () => {},
     bookmarkRemovedToast = () => {},
-    bookmarked = false,
-    bookmarkID = null,
+    bookmarkItem,
     pk: currentQueryID,
     handleBookmarkError = () => {},
     handleFilter = () => {},
-    hasNotes = false,
     key,
     isEven = false,
     isInUserSave = false,
@@ -119,6 +116,7 @@ const ResultItem: FC<ResultItemProps> = ({
     showHiddenPaths,
     startExpanded = false,
     updateUserSaves,
+    shouldUpdateResultsAfterBookmark,
     zoomKeyDown
   }) => {
 
@@ -130,9 +128,9 @@ const ResultItem: FC<ResultItemProps> = ({
   let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
-  const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
-  const itemBookmarkID = useRef<string | null>(bookmarkID);
-  const [itemHasNotes, setItemHasNotes] = useState<boolean>(hasNotes);
+  const [isBookmarked, setIsBookmarked] = useState<boolean>(!!bookmarkItem);
+  const itemBookmarkID = useRef<string | null>(bookmarkItem?.id ? bookmarkItem.id.toString() : null);
+  const [itemHasNotes, setItemHasNotes] = useState<boolean>(!isNotesEmpty(bookmarkItem?.notes || null));
   const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
   const [graphActive, setGraphActive] = useState<boolean>(false);
   const [height, setHeight] = useState<Height>(0);
@@ -255,77 +253,45 @@ const ResultItem: FC<ResultItemProps> = ({
 
   },[newPaths, resultSet]);
 
-  const handleBookmarkClick = async () => {
-    if(isBookmarked) {
-      if(bookmarkRemovalApproved.current && itemBookmarkID.current) {
-        console.log("remove bookmark");
-        deleteUserSave(itemBookmarkID.current);
-        setIsBookmarked(false);
-        setItemHasNotes(false);
-        itemBookmarkID.current = null;
-        bookmarkRemovedToast();
-      }
-      if(!bookmarkRemovalApproved.current) {
-        setBookmarkRemovalConfirmationModalOpen(true);
-      }
-      return false;
-    } else {
-      if(!resultSet) {
-        console.warn("Unable to create bookmark, no resultSet available");
-        return false;
-      }
-      let bookmarkResult: ResultBookmark = cloneDeep(result);
-      const safeQueryNodeID = (!!queryNodeID) ? queryNodeID : "";
-      const safeQueryNodeLabel = (!!queryNodeLabel) ? queryNodeLabel : "";
-      const safeQueryNodeDescription = (!!queryNodeDescription) ? queryNodeDescription : "";
-      const safeCurrentQueryID = (!!currentQueryID) ? currentQueryID : "";
-      const safeResultSet: ResultSet = generateSafeResultSet(resultSet, bookmarkResult);
-      let bookmarkObject = getFormattedBookmarkObject("result", bookmarkResult.drug_name, "", safeQueryNodeID,
-        safeQueryNodeLabel, safeQueryNodeDescription, queryType, result, safeCurrentQueryID, safeResultSet);
-      
-      bookmarkObject.user_id = (user?.id) ? user.id : null;
-      bookmarkObject.time_created = new Date().toDateString();
-      bookmarkObject.time_updated = new Date().toDateString();
+  const bookmarkParams: BookmarkFunctionParams = useMemo(() => ({
+    result,
+    resultSet: resultSet!,
+    queryNodeID,
+    queryNodeLabel,
+    queryNodeDescription,
+    queryType,
+    currentQueryID,
+    user: user || null,
+    itemBookmarkID,
+    setIsBookmarked,
+    setItemHasNotes,
+    bookmarkRemovedToast,
+    bookmarkAddedToast,
+    handleBookmarkError,
+    updateUserSaves,
+    shouldUpdateResultsAfterBookmark
+  }), [result, resultSet, queryNodeID, queryNodeLabel, queryNodeDescription, queryType, currentQueryID, user, 
+       setIsBookmarked, setItemHasNotes, bookmarkRemovedToast, bookmarkAddedToast, handleBookmarkError, 
+       updateUserSaves, shouldUpdateResultsAfterBookmark]);
 
-      let bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
-      if(bookmarkedItem) {
-        let newBookmarkedItem = bookmarkedItem as unknown as Save;
-        setIsBookmarked(true);
-        itemBookmarkID.current = newBookmarkedItem.id?.toString() || null;
-        bookmarkAddedToast();
+  const handleBookmarkClick = useCallback(async (): Promise<string | false> => {
+    return await handleBookmarkClickUtil(
+      isBookmarked,
+      bookmarkRemovalApproved,
+      setBookmarkRemovalConfirmationModalOpen,
+      bookmarkParams
+    );
+  }, [isBookmarked, bookmarkParams]);
 
-        // update resultList userSaves
-        updateUserSaves?.((prev) => {
-          if(!prev) {
-            console.warn("No user saves found, unable to update userSaves");
-            return null;
-          }
-          const updatedSaves = cloneDeep(prev.saves);
-          updatedSaves.add(newBookmarkedItem);
-          return {
-            ...prev,
-            saves: updatedSaves
-          };
-        });
-        return newBookmarkedItem.id;
-      }
-      return false;
-    }
-  }
-
-  const handleNotesClick = async () => {
-    let tempBookmarkID: string | null = itemBookmarkID.current;
-    if(!isBookmarked) {
-      console.log("no bookmark exists for this item, creating one...")
-      let replacementID = await handleBookmarkClick();
-      console.log("new id: ", replacementID);
-      tempBookmarkID = (replacementID) ? replacementID.toString() : tempBookmarkID;
-    }
-    if(tempBookmarkID) {
-      activateNotes(nameString, tempBookmarkID);
-      setItemHasNotes(true);
-    }
-  }
+  const handleNotesClick = useCallback(async () => {
+    await handleNotesClickUtil(
+      isBookmarked,
+      itemBookmarkID,
+      nameString,
+      activateNotes,
+      handleBookmarkClick
+    );
+  }, [isBookmarked, nameString, activateNotes, handleBookmarkClick]);
 
   const handleTagClick = (filterID: string, filter: Filter) => {
     let newObj: Filter = {
@@ -348,12 +314,10 @@ const ResultItem: FC<ResultItemProps> = ({
   }
 
   useEffect(() => {
-    itemBookmarkID.current = bookmarkID;
-  }, [bookmarkID]);
-
-  useEffect(() => {
-    setItemHasNotes(hasNotes);
-  }, [result, hasNotes]);
+    itemBookmarkID.current = bookmarkItem?.id ? bookmarkItem.id.toString() : null;
+    setIsBookmarked(!!bookmarkItem);
+    setItemHasNotes(!isNotesEmpty(bookmarkItem?.notes || null));
+  }, [bookmarkItem]);
 
   if(!resultSet)
     return null;

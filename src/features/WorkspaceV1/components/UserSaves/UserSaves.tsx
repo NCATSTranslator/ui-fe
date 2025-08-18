@@ -44,6 +44,8 @@ const UserSaves = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const shareResultID = useRef<null | string>(null);
   const setShareResultID = (newID: string) => shareResultID.current = newID;
+  // dummy var for now
+  const shouldUpdateResultsAfterBookmark = useRef(false);
 
   const [confidenceWeight] = useState(1.0);
   const [noveltyWeight] = useState(0.1);
@@ -245,9 +247,11 @@ const UserSaves = () => {
             <NotesModal
               isOpen={notesOpen}
               onClose={()=>(setNotesOpen(false))}
-              handleClearNotesEditor={handleClearNotesEditor}
               noteLabel={noteLabel.current}
-              bookmarkID={currentBookmarkID.current}
+              currentBookmarkID={currentBookmarkID}
+              shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
+              // TODO: update user saves
+              updateUserSaves={()=>{}}
             />
             <EvidenceModal
               isOpen={evidenceModalOpen}

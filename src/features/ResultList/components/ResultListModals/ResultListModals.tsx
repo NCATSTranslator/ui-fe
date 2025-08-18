@@ -1,4 +1,4 @@
-import { FC, Dispatch, SetStateAction } from "react";
+import { FC, Dispatch, SetStateAction, RefObject } from "react";
 import EvidenceModal from "@/features/Evidence/components/EvidenceModal/EvidenceModal";
 import NotesModal from "@/features/ResultItem/components/NotesModal/NotesModal";
 import ShareModal from "@/features/ResultList/components/ShareModal/ShareModal";
@@ -6,13 +6,13 @@ import ResultFocusModal from "@/features/ResultList/components/ResultFocusModal/
 import { ToastContainer, Slide } from 'react-toastify';
 import { handleEvidenceModalClose } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { Path, Result, ResultEdge, SharedItem } from "@/features/ResultList/types/results.d";
+import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 
 interface ResultListModalsProps {
-  currentBookmarkID: string | null | undefined;
+  currentBookmarkID: RefObject<string | null>;
   evidenceModalOpen: boolean;
   focusModalOpen: boolean;
   formattedResultsLength: number;
-  handleClearNotesEditor: () => Promise<void>;
   handlePageClick: (event: {selected: number}, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   noteLabel: string;
   notesModalOpen: boolean;
@@ -31,6 +31,8 @@ interface ResultListModalsProps {
   sharedItem: SharedItem; 
   shareModalOpen: boolean;
   shareResultID: string;
+  shouldUpdateResultsAfterBookmark: RefObject<boolean>;
+  updateUserSaves: Dispatch<SetStateAction<SaveGroup | null>>;
 }
 
 const ResultListModals: FC<ResultListModalsProps> = ({
@@ -38,7 +40,6 @@ const ResultListModals: FC<ResultListModalsProps> = ({
   evidenceModalOpen,
   focusModalOpen,
   formattedResultsLength,
-  handleClearNotesEditor,
   handlePageClick,
   noteLabel,
   notesModalOpen,
@@ -57,7 +58,13 @@ const ResultListModals: FC<ResultListModalsProps> = ({
   sharedItem,
   shareModalOpen,
   shareResultID,
+  shouldUpdateResultsAfterBookmark,
+  updateUserSaves,
 }) => {
+
+  const handleNotesModalClose = () => {
+    setNotesModalOpen(false);
+  }
 
   return (
     <>
@@ -80,10 +87,11 @@ const ResultListModals: FC<ResultListModalsProps> = ({
       />
       <NotesModal
         isOpen={notesModalOpen}
-        onClose={()=>(setNotesModalOpen(false))}
-        handleClearNotesEditor={handleClearNotesEditor}
+        onClose={handleNotesModalClose}
         noteLabel={noteLabel}
-        bookmarkID={currentBookmarkID}
+        currentBookmarkID={currentBookmarkID}
+        updateUserSaves={updateUserSaves}
+        shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
       />
       <EvidenceModal
         isOpen={evidenceModalOpen}
