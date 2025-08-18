@@ -446,3 +446,27 @@ export const generatePathD = (
 export const generatePredicateId = (path: Path, edgeIds: string[]) => {
     return `${path.id}-${edgeIds.join('-')}`;
 }
+
+/**
+ * Checks if the notes on a save are empty.
+ *
+ * @param {string | null} notes - The notes.
+ * @returns {boolean} - Whether the notes are empty.
+ */
+export const isNotesEmpty = (notes?: string | null) => {
+  const notesObj = JSON.parse(notes || "{}");
+
+  if(Array.isArray(notesObj?.root?.children)) {
+    if(notesObj?.root?.children.length > 1)
+      return false;
+
+    for(const child of notesObj.root.children) {
+      if(Array.isArray(child?.children)) {
+        if(child.children.length > 1 || (child.children[0]?.text && child.children[0]?.text.length > 0))
+          return false;
+      }
+    }
+  }
+
+  return true;
+}

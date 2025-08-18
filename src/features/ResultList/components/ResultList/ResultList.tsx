@@ -22,10 +22,9 @@ import {
   genPathFilterState,
   areEntityFiltersEqual,
   calculateFacetCounts,
-  checkBookmarkForNotes,
   checkBookmarksForItem
 } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { getDataFromQueryVar, getPathCount, getCompressedEdge } from "@/features/Common/utils/utilities";
+import { getDataFromQueryVar, getPathCount, getCompressedEdge, findInSet } from "@/features/Common/utils/utilities";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import { getSaves, SaveGroup } from "@/features/UserAuth/utils/userApi";
@@ -210,12 +209,6 @@ const ResultList = () => {
     }
   }, [currentQueryID])
 
-  const handleClearNotesEditor = async () => {
-    await getUserSaves();
-    if(prevRawResults.current)
-      handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current); 
-  }
-
   useEffect(() => {
     if(!user)
       return;
@@ -229,7 +222,8 @@ const ResultList = () => {
       return;
 
     shouldUpdateResultsAfterBookmark.current = false;
-    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current); 
+    const tempUserSaves = cloneDeep(userSaves)
+    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current, tempUserSaves); 
   }, [userSaves, activeFilters, activeEntityFilters, prevRawResults, currentSortString])
 
   useEffect(() => {
@@ -268,8 +262,9 @@ const ResultList = () => {
     or: Result[] = [],
     justSort = false,
     sortType: string,
+    userSavesGroup: SaveGroup | null = null,
     pfState: PathFilterState | null = null,
-    fr: Result[] = []
+    fr: Result[] = [],
   ): Result[] => {
     if (!summary) return [];
 
@@ -289,7 +284,7 @@ const ResultList = () => {
 
     // Inject bookmark and note tag filters
     [summary, newFormattedResults, newOriginalResults] = injectDynamicFilters(summary,
-        newFormattedResults, newOriginalResults, userSaves);
+        newFormattedResults, newOriginalResults, userSavesGroup);
 
     // Filtering
     if (!justSort) {
@@ -389,7 +384,7 @@ const ResultList = () => {
 
     dispatch(setResultSet({pk: currentQueryID || "", resultSet: newResultSet}));
 
-    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current);
+    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current, userSaves);
 
     // we have results to show, set isLoading to false
     if (newFormattedResults.length > 0)
@@ -553,7 +548,8 @@ const ResultList = () => {
         activeEntityFilters,
         rawResults.current,
         originalResults.current,
-        currentSortString.current
+        currentSortString.current,
+        userSaves
       );
       return;
     }
@@ -584,21 +580,22 @@ const ResultList = () => {
       activeEntityFilters,
       rawResults.current,
       originalResults.current,
-      currentSortString.current
+      currentSortString.current,
+      userSaves
     );
   };
 
-  const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string) => {
+  const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string, userSaves: SaveGroup | null = null) => {
     if(!rawResults)
       return;
 
     setActiveFilters(filtersToActivate);
-    let newFormattedResults = handleUpdateResults(filtersToActivate, activeEntityFilters, rawResults, originalResults, false, sortString);
+    let newFormattedResults = handleUpdateResults(filtersToActivate, activeEntityFilters, rawResults, originalResults, false, sortString, userSaves);
     handlePageReset(false, newFormattedResults.length);
   }
 
   const handleClearAllFilters = () => {
-    handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current);
+    handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current, userSaves);
   }
 
   useEffect(() => {
@@ -654,7 +651,6 @@ const ResultList = () => {
         setShareModalOpen={setShareModalOpen}
         notesModalOpen={notesModalOpen}
         setNotesModalOpen={setNotesModalOpen}
-        handleClearNotesEditor={handleClearNotesEditor}
         noteLabel={noteLabel.current}
         currentBookmarkID={currentBookmarkID}
         pk={currentQueryID ? currentQueryID : ""}
@@ -756,7 +752,7 @@ const ResultList = () => {
                         isSortedByName={isSortedByName}
                         isSortedByPaths={isSortedByPaths}
                         isSortedByScore={isSortedByScore}
-                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current as ResultSet, originalResults.current, true, currentSortString.current, pathFilterState, formattedResults)}
+                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current as ResultSet, originalResults.current, true, currentSortString.current, userSaves, pathFilterState, formattedResults)}
                       />
                       {
                         isError &&
@@ -778,8 +774,7 @@ const ResultList = () => {
                             return null;
 
                           let bookmarkID = (userSaves === null) ? null : checkBookmarksForItem(item.id, userSaves);
-                          let bookmarked = (!bookmarkID) ? false : true;
-                          let hasNotes =  checkBookmarkForNotes(bookmarkID, userSaves);
+                          let bookmarkItem = userSaves?.saves ? findInSet(userSaves.saves, save => save.id ? save.id.toString() === bookmarkID : false) : undefined;
                           return (
                             <ResultItem
                               isEven={i % 2 !== 0}
@@ -796,9 +791,7 @@ const ResultList = () => {
                               queryNodeID={nodeIdParam}
                               queryNodeLabel={nodeLabelParam}
                               queryNodeDescription={nodeDescription}
-                              bookmarked={bookmarked}
-                              bookmarkID={bookmarkID}
-                              hasNotes={hasNotes}
+                              bookmarkItem={bookmarkItem}
                               handleBookmarkError={handleBookmarkError}
                               bookmarkAddedToast={bookmarkAddedToast}
                               bookmarkRemovedToast={bookmarkRemovedToast}

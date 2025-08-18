@@ -76,7 +76,7 @@ export const prefKeyToString = (prefKey: string): string => {
 }
 
 // A constant representing an empty editor state, used to initialize editors with no content.
-export const emptyEditor = '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
+export const emptyEditor = '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
 
 interface QueryObject {
   type: QueryType | null; 
@@ -346,7 +346,7 @@ export const updateUserSave = async (
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
   ) => {
-    saveObj.id = saveId;
+    saveObj.id = parseInt(saveId);
     return putUserData(`${userApiPath}/saves/${saveId}`, saveObj, httpErrorHandler, fetchErrorHandler);
 }
 
@@ -502,9 +502,7 @@ const deleteUserData = async (
       httpErrorHandler, 
       fetchErrorHandler,
       async (resp: Response): Promise<boolean> => {
-        // DELETE requests typically return empty body, so don't try to parse JSON
-        // Just return true if response is ok
-        return true;
+        return resp.ok;
       }
     );
 

@@ -228,7 +228,6 @@ export const handleNotesClick = async (
   itemBookmarkID: RefObject<string | null>,
   nameString: string,
   activateNotes: (nameString: string, id: string) => void,
-  setItemHasNotes: Dispatch<SetStateAction<boolean>>,
   handleBookmarkClickFn: () => Promise<string | false>
 ): Promise<void> => {
   let tempBookmarkID: string | null = itemBookmarkID.current;
@@ -236,12 +235,10 @@ export const handleNotesClick = async (
   if (!isBookmarked) {
     console.log("no bookmark exists for this item, creating one...");
     const replacementID = await handleBookmarkClickFn();
-    console.log("new id: ", replacementID);
     tempBookmarkID = replacementID ? replacementID.toString() : tempBookmarkID;
+    console.log("replacementID: ", tempBookmarkID, replacementID);
   }
   
-  if (tempBookmarkID) {
+  if (tempBookmarkID)
     activateNotes(nameString, tempBookmarkID);
-    setItemHasNotes(true);
-  }
 };

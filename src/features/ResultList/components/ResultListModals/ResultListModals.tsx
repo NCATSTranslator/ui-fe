@@ -13,7 +13,6 @@ interface ResultListModalsProps {
   evidenceModalOpen: boolean;
   focusModalOpen: boolean;
   formattedResultsLength: number;
-  handleClearNotesEditor: () => Promise<void>;
   handlePageClick: (event: {selected: number}, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   noteLabel: string;
   notesModalOpen: boolean;
@@ -41,7 +40,6 @@ const ResultListModals: FC<ResultListModalsProps> = ({
   evidenceModalOpen,
   focusModalOpen,
   formattedResultsLength,
-  handleClearNotesEditor,
   handlePageClick,
   noteLabel,
   notesModalOpen,
@@ -90,7 +88,6 @@ const ResultListModals: FC<ResultListModalsProps> = ({
       <NotesModal
         isOpen={notesModalOpen}
         onClose={handleNotesModalClose}
-        handleClearNotesEditor={handleClearNotesEditor}
         noteLabel={noteLabel}
         currentBookmarkID={currentBookmarkID}
         updateUserSaves={updateUserSaves}

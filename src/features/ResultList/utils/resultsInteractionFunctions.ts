@@ -1,12 +1,13 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
 import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
-import { hasSupport } from "@/features/Common/utils/utilities";
+import { findInSet, hasSupport } from "@/features/Common/utils/utilities";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import { cloneDeep } from "lodash";
-import { Save, SaveGroup } from "@/features/UserAuth/utils/userApi";
+import { SaveGroup } from "@/features/UserAuth/utils/userApi";
+import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
 
 /**
  * Performs a case-insensitive string match against a result's name, description, and all associated paths.
@@ -382,7 +383,7 @@ export const injectDynamicFilters = (
     for (const save of bookmarkSet.saves) {
       if (save.object_ref === result.id) {
         tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.BOOKMARK});
-        if (save.notes && save.notes.length > 0) {
+        if (!isNotesEmpty(save.notes)) {
           tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.NOTE});
         }
       }
@@ -537,18 +538,9 @@ export const areEntityFiltersEqual = (a: string[], b: string[]): boolean => {
  * @param {SaveGroup | null} bookmarkSet - The set of bookmark objects to search in.
  * @returns {boolean} Returns true if the matching item is found in bookmarksSet and has notes, otherwise returns false.
  */
-export const checkBookmarkForNotes = (bookmarkID: string | null, bookmarkSet: SaveGroup | null): boolean => {
+export const checkBookmarkIDForNotes = (bookmarkID: string | null, bookmarkSet: SaveGroup | null): boolean => {
   if(bookmarkID === null)
     return false;
-
-  const findInSet = (set: Set<Save>, predicate: (obj: Save)=>boolean): Save | undefined => {
-    for (const item of set) {
-      if(predicate(item)) {
-        return item;
-      }
-    }
-    return undefined;
-  }
 
   if(!!bookmarkSet && bookmarkSet.saves.size > 0) {
     let save = findInSet(bookmarkSet.saves, save => String(save.id) === bookmarkID);

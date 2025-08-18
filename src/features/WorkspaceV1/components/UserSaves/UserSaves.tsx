@@ -247,7 +247,6 @@ const UserSaves = () => {
             <NotesModal
               isOpen={notesOpen}
               onClose={()=>(setNotesOpen(false))}
-              handleClearNotesEditor={handleClearNotesEditor}
               noteLabel={noteLabel.current}
               currentBookmarkID={currentBookmarkID}
               shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}

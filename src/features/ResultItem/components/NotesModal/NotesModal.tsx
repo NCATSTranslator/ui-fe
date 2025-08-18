@@ -8,7 +8,6 @@ import { updateUserSavesState } from "../../utils/bookmarkFunctions";
 
 interface NotesModalProps {
   currentBookmarkID: RefObject<string | null>;
-  handleClearNotesEditor: () => void;
   isOpen?: boolean;
   noteLabel?: string;
   onClose?: () => void;
@@ -18,7 +17,6 @@ interface NotesModalProps {
 
 const NotesModal: FC<NotesModalProps> = ({
   currentBookmarkID, 
-  handleClearNotesEditor = ()=>{},
   isOpen = false, 
   noteLabel = "", 
   onClose = ()=>{}, 
@@ -37,12 +35,13 @@ const NotesModal: FC<NotesModalProps> = ({
     setConfirmClearNote(false);
     let itemToUpdate = localBookmarkItem.current || bookmarkedItem;
     if(itemToUpdate) {
-      console.log("update user saves with: ", itemToUpdate);
       updateUserSavesState('updateNote', updateUserSaves, currentBookmarkID, itemToUpdate);
       if (shouldUpdateResultsAfterBookmark)
         shouldUpdateResultsAfterBookmark.current = true;
     }
 
+    localBookmarkItem.current = null;
+    setBookmarkedItem(null);
     onClose();
   }
 
@@ -64,7 +63,6 @@ const NotesModal: FC<NotesModalProps> = ({
     // clear text editor
     setTriggerClearEditor(true);
     handleSave();
-    handleClearNotesEditor();
     setConfirmClearNote(false);
     handleClose();
   }
