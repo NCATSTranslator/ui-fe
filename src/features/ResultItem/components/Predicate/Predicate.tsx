@@ -179,7 +179,7 @@ const Predicate: FC<PredicateProps> = ({
                           textToHighlight={edge.predicate}
                         />
                         {
-                          edge.predicate.includes("impacts") &&
+                          edge.predicate.includes("impact") &&
                           <span className={styles.predicateImpact}> (either positively or negatively)</span>
                         }
                         {
@@ -196,8 +196,14 @@ const Predicate: FC<PredicateProps> = ({
                         }
                       </p>
                       {
-                        edge.description &&
-                        <span className={styles.predicateDescription}>{capitalizeFirstLetter(edge.description)}.</span>
+                        edge.predicate.includes("impact") ?
+                          <span className={styles.predicateDescription}>
+                            Indicates that a drug affects one or more biological processes relevant to a disease, in a way that may improve, worsen, or otherwise modify the condifition.
+                          </span> :
+                          edge.description &&
+                            <span className={styles.predicateDescription}>
+                              {capitalizeFirstLetter(edge.description)}.
+                            </span>
                       }
                       {
                         (edgeEvidence.pubs.size > 0 || edgeEvidence.cts.size > 0) &&
