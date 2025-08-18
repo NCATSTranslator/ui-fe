@@ -182,18 +182,6 @@ const Predicate: FC<PredicateProps> = ({
                           edge.predicate.includes("impact") &&
                           <span className={styles.predicateImpact}> (either positively or negatively)</span>
                         }
-                        {
-                          edge.predicate_url &&
-                          <a
-                            href={edge.predicate_url }
-                            onClick={(e)=> {
-                              e.stopPropagation();
-                            }}
-                            target="_blank"
-                            rel='noreferrer'>
-                              <ExternalLink/>
-                          </a>
-                        }
                       </p>
                       {
                         edge.predicate.includes("impact") ?
@@ -204,6 +192,20 @@ const Predicate: FC<PredicateProps> = ({
                             <span className={styles.predicateDescription}>
                               {capitalizeFirstLetter(edge.description)}.
                             </span>
+                      }
+                      {
+                        edge.predicate_url &&
+                        <a
+                          href={edge.predicate_url }
+                          onClick={(e)=> {
+                            e.stopPropagation();
+                          }}
+                          className={styles.predicateUrl}
+                          target="_blank"
+                          rel='noreferrer'>
+                            <span>{edge.predicate_url}</span>
+                            <ExternalLink/>
+                        </a>
                       }
                       {
                         (edgeEvidence.pubs.size > 0 || edgeEvidence.cts.size > 0) &&

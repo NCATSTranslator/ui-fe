@@ -96,6 +96,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    margin-bottom: $xxs;
     svg {
       margin-left: $xxs;
       width: 24px;
@@ -139,9 +140,37 @@
     -webkit-box-orient: vertical;
     -moz-box-orient: vertical;
     overflow: hidden;
-    font-size: 14px;
-    margin: 3px 0 8px;
+    font-size: $captionSize;
+    margin: 0;
     font-weight: 400;
+  }
+  .predicateUrl {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: $xxxs;
+    span {
+      display: -webkit-box;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: $captionSize;
+      font-weight: 800;
+      color: $white;
+    }
+    &:hover {
+      text-decoration: underline;
+    }
+    svg {
+      height: 18px;
+      width: 18px;
+      min-height: 18px;
+      min-width: 18px;
+      path {
+        fill: $white;
+      }
+    }
   }
 }
 .badges {
