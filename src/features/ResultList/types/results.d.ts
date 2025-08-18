@@ -143,8 +143,9 @@ export type ResultGraph = {
 }
 
 export type Tags = {
-  [key:string]: {name: string, value: string}
+  [key:string]: {name: string, value: string} | null;
 }
+
 export type PathFilterState = {
   [pid: string]: boolean;
 }
