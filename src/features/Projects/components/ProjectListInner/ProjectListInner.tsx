@@ -7,7 +7,7 @@ import ProjectCard from '@/features/Projects/components/ProjectCard/ProjectCard'
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import ProjectsTableHeader from '@/features/Projects/components/TableHeader/ProjectsTableHeader/ProjectsTableHeader';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
-import { useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
+import { useShouldShowDeletePrompt, useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
 import { ProjectRaw, UserQueryObject, SortField, SortDirection, Project, QueryEditingItem, ProjectEditingItem } from '@/features/Projects/types/projects.d';
 import { filterAndSortProjects, filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useFormattedProjects } from '@/features/Projects/hooks/customHooks';
@@ -19,6 +19,7 @@ import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
 import DeletedTableHeader from '@/features/Projects/components/TableHeader/DeletedTableHeader/DeletedTableHeader';
 import ProjectInnerErrorStates from '@/features/Projects/components/ProjectInnerErrorStates/ProjectInnerErrorStates';
 import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
+import WarningModal from '@/features/Common/components/WarningModal/WarningModal';
 
 export const ProjectListInner = () => {
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
@@ -84,11 +85,36 @@ export const ProjectListInner = () => {
     }
   };
 
-  const handleDelete = () => {
+  const [isDeleteProjectsPromptOpen, setIsDeleteProjectsPromptOpen] = useState(false);
+  const [isDeleteQueriesPromptOpen, setIsDeleteQueriesPromptOpen] = useState(false);
+
+  const { shouldShow: shouldShowDeleteProjectsPrompt, setHideDeletePrompt: setHideDeleteProjectsPrompt } = useShouldShowDeletePrompt('hideDeleteProjectsPrompt', true);
+  const { shouldShow: shouldShowDeleteQueriesPrompt, setHideDeletePrompt: setHideDeleteQueriesPrompt } = useShouldShowDeletePrompt('hideDeleteQueriesPrompt', true);
+
+  const handleDeleteSelectedProjects = () => {
     selectedProjects.forEach((project: Project) => projectEditHandlers.handleDeleteProject(project));
-    selectedQueries.forEach((query: UserQueryObject) => queryEditHandlers.handleDeleteQuery(query));
+    setIsDeleteProjectsPromptOpen(false);
     setSelectedProjects([]);
+  };
+  const handleDeleteSelectedQueries = () => {
+    selectedQueries.forEach((query: UserQueryObject) => queryEditHandlers.handleDeleteQuery(query));
+    setIsDeleteQueriesPromptOpen(false);
     setSelectedQueries([]);
+  };
+
+  const handleInitiateDelete = () => {
+    if(selectedProjects.length > 0) {
+      if(shouldShowDeleteProjectsPrompt)
+        setIsDeleteProjectsPromptOpen(true);
+      else
+        handleDeleteSelectedProjects();
+    }
+    if(selectedQueries.length > 0) {
+      if(shouldShowDeleteQueriesPrompt)
+        setIsDeleteQueriesPromptOpen(true);
+      else
+        handleDeleteSelectedQueries();
+    }
   };
 
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -103,6 +129,18 @@ export const ProjectListInner = () => {
   const hideQueriesTab = (searchTerm.length > 0 && sortedActiveQueries.length === 0);
   const hideTrashTab = (searchTerm.length > 0 && sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0) || (projectEditState.isEditing);
 
+  const projectsEmpty = sortedActiveProjects.length === 0 || (sortedActiveProjects.length === 1 && sortedActiveProjects.some(p => isUnassignedProject(p)));
+
+  const onCreateNewProjectClick = () => {
+    handleSetIsEditingProject(true, {
+      id: '',
+      name: '',
+      queryIds: [],
+      type: 'project',
+      status: 'new'
+    });
+  };
+
   // reset active tab back to projects when editing is finished
   useEffect(() => {
     if (!projectEditState.isEditing) {
@@ -112,6 +150,28 @@ export const ProjectListInner = () => {
 
   return (
     <div className={`${styles.projectListContainer} ${projectEditState.isEditing ? styles.isEditing : ''}`}>
+      <WarningModal
+        isOpen={isDeleteProjectsPromptOpen}
+        onClose={() => setIsDeleteProjectsPromptOpen(false)}
+        onConfirm={handleDeleteSelectedProjects}
+        onCancel={() => setIsDeleteProjectsPromptOpen(false)}
+        heading="Delete selected projects?"
+        content="This action cannot be undone."
+        cancelButtonText="Cancel"
+        confirmButtonText="Delete Projects"
+        setStorageKeyFn={setHideDeleteProjectsPrompt}
+      />
+      <WarningModal
+        isOpen={isDeleteQueriesPromptOpen}
+        onClose={() => setIsDeleteQueriesPromptOpen(false)}
+        onConfirm={handleDeleteSelectedQueries}
+        onCancel={() => setIsDeleteQueriesPromptOpen(false)}
+        heading="Delete selected queries?"
+        content="This action cannot be undone."
+        cancelButtonText="Cancel"
+        confirmButtonText="Delete Queries"
+        setStorageKeyFn={setHideDeleteQueriesPrompt}
+      />
       <EditQueryModal
         currentEditingQueryItem={queryEditState.editingItem?.type === 'query' ? queryEditState.editingItem : undefined}
         handleClose={() => setIsEditQueryModalOpen(false)}
@@ -119,8 +179,6 @@ export const ProjectListInner = () => {
         loading={queriesLoading}
         mode="edit"
         projects={activeFormattedProjects}
-        // selectedProjects={selectedProjects}
-        // setSelectedProjects={setSelectedProjects}
       />
       <div className="container">
         <div className={styles.projectList}>
@@ -137,6 +195,7 @@ export const ProjectListInner = () => {
             onUpdateProjectItem={projectEditHandlers.handleUpdateProject}
             onCancelEdit={projectEditHandlers.handleCancelEdit}
             selectedQueries={selectedQueries}
+            onCreateNewClick={onCreateNewProjectClick}
           />
           {
             hideProjectsTab && hideQueriesTab && hideTrashTab
@@ -184,24 +243,34 @@ export const ProjectListInner = () => {
                                 spinnerClassName={styles.loadingSpinner}
                               >
                                 <div className={styles.projectGrid}>
-                                  {sortedActiveProjects.length === 0 ? (
+                                  {projectsEmpty ? (
                                     <div className={styles.emptyState}>
                                       {
                                         searchTerm.length > 0 
                                         ? 
                                           (
-                                            <p>No projects found matching your search.</p>
+                                            <p>No matches found.</p>
                                           )
                                         :
                                           (
-                                            <p>No projects found. Create your first project to get started.</p>
+                                            <>
+                                              <h6>No Projects</h6>
+                                              <p>
+                                                <span className={styles.link} onClick={onCreateNewProjectClick}>Create a New Project</span> to start organizing your queries.<br/>
+                                                You can also add queries to a new project from the <span className={styles.link} onClick={() => setActiveTab('Queries')}>Queries</span> tab.
+                                              </p>
+                                            </>
                                           )
                                       }
                                     </div>
                                   ) : (
                                     <>
-                                      {sortedActiveProjects.map((project: Project, index: number) => (
-                                        <>
+                                      {sortedActiveProjects.map((project: Project, index: number) => {
+                                        const isLast = index === sortedActiveProjects.length - 1 && isUnassignedProject(project);
+                                        if(isLast) 
+                                          return null;
+
+                                        return (
                                           <ProjectCard 
                                             key={project.id}
                                             queries={queries}
@@ -212,18 +281,23 @@ export const ProjectListInner = () => {
                                             onEdit={projectEditHandlers.handleEditProject}
                                             queriesLoading={queriesLoading}
                                           />
-                                          {/* Add separator before the last project (Unassigned), if the 
-                                          unassigned project is included in the sortedActiveProjects array */}
-                                          {
-                                            index === sortedActiveProjects.length - 2 && 
-                                            !isUnassignedProject(project) && 
-                                            sortedActiveProjects.some(p => isUnassignedProject(p)) && (
-                                            <div className={styles.separator} />
-                                          )}
-                                        </>
-                                      ))}
+                                        )
+                                      })}
                                     </>
                                   )}
+                                  {/* Separator for the last project (Unassigned) */}
+                                  <div className={styles.separator} />
+                                  {/* Project Card for the last project (Unassigned) */}
+                                  <ProjectCard 
+                                    key={`unassigned`}
+                                    queries={queries}
+                                    project={sortedActiveProjects[sortedActiveProjects.length - 1]}
+                                    searchTerm={searchTerm}
+                                    setSelectedProjects={setSelectedProjects}
+                                    selectedProjects={selectedProjects}
+                                    onEdit={projectEditHandlers.handleEditProject}
+                                    queriesLoading={queriesLoading}
+                                  />
                                 </div>
                               </LoadingWrapper>
                             )
@@ -381,7 +455,7 @@ export const ProjectListInner = () => {
                       )}
                       <Button
                         variant="secondary"
-                        handleClick={handleDelete}
+                        handleClick={handleInitiateDelete}
                         iconLeft={<TrashIcon />}
                         small
                         className={styles.button}

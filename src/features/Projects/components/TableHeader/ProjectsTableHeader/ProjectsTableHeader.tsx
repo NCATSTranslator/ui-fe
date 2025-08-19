@@ -33,7 +33,7 @@ const ProjectsTableHeader = ({
     }
   };
 
-  const allSelected = activeProjects.length > 0 && selectedProjects.length === activeProjects.length - 1;
+  const allSelected = activeProjects.length > 0 && (selectedProjects.length === activeProjects.length - 1 && activeProjects.some(p => !isUnassignedProject(p)));
   const someSelected = selectedProjects.length > 0 && selectedProjects.length < activeProjects.length - 1;
 
   return (

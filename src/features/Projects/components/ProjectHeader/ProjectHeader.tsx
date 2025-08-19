@@ -23,6 +23,7 @@ interface ProjectHeaderProps {
   projectEditingItem?: ProjectEditingItem;
   isEditing: boolean;
   noteCount?: number;
+  onCreateNewClick?: () => void;
   onCancelEdit?: () => void;
   onEditClick?: () => void;
   onRestoreProject?: (project: Project) => void;
@@ -51,6 +52,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   projectEditingItem,
   isEditing = false,
   noteCount,
+  onCreateNewClick,
   onCancelEdit,
   onEditClick,
   onRestoreProject,
@@ -118,13 +120,17 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   };
 
   const handleCreateNewClick = () => {
-    setProjectEditingState(true, {
-      id: '',
-      name: '',
-      queryIds: [],
-      type: 'project',
-      status: 'new'
-    });
+    if (onCreateNewClick) {
+      onCreateNewClick();
+    } else {
+      setProjectEditingState(true, {
+        id: '',
+        name: '',
+        queryIds: [],
+        type: 'project',
+        status: 'new'
+      });
+    }
     setProjectNameError('');
   };
 

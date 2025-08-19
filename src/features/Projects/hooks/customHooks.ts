@@ -326,19 +326,21 @@ export const useProjectDetailSortSearchSelectState = () => {
 };
 
 /**
- * Custom hook to manage the state of the delete query prompt
- * @returns {boolean} shouldShow - Whether the delete query prompt should be shown
- * @returns {Function} setHideDeleteQueryPrompt - Function to set the hide delete query prompt
+ * Generic hook to manage the state of a delete prompt
+ * @param {string} storageKey - The key to store the prompt state in localStorage
+ * @param {boolean} defaultShow - Whether the prompt should be shown by default
+ * @returns {boolean} shouldShow - Whether the prompt should be shown
+ * @returns {Function} setHideDeletePrompt - Function to set the hide delete prompt
  */
-export const useShouldShowDeleteQueryPrompt = () => {
-  const showDeleteQueryPrompt = localStorage.getItem('hideDeleteQueryPrompt') === 'true' ? false : true;
+export const useShouldShowDeletePrompt = (storageKey: string, defaultShow: boolean = true) => {
+  const showDeletePrompt = localStorage.getItem(storageKey) === 'true' ? false : defaultShow;
 
-  const setHideDeleteQueryPrompt = (hide: boolean) => {
-    localStorage.setItem('hideDeleteQueryPrompt', hide ? 'true' : 'false');
+  const setHideDeletePrompt = (hide: boolean) => {
+    localStorage.setItem(storageKey, hide ? 'true' : 'false');
   };
 
   return {
-    shouldShow: showDeleteQueryPrompt,
-    setHideDeleteQueryPrompt
+    shouldShow: showDeletePrompt,
+    setHideDeletePrompt
   };
 };
