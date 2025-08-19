@@ -136,6 +136,7 @@
       color: $purpleOne;
       &:hover {
         background-color: transparent;
+        text-decoration: underline;
       }
       svg {
         path {

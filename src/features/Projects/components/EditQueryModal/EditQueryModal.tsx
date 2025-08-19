@@ -2,9 +2,9 @@ import { FC, FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import styles from "./EditQueryModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
-import { ProjectCreate, ProjectRaw, QueryEditingItem } from "@/features/Projects/types/projects";
+import { ProjectCreate, ProjectRaw, ProjectUpdate, QueryEditingItem } from "@/features/Projects/types/projects";
 import Button from "@/features/Core/components/Button/Button";
-import { useCreateProject } from "@/features/Projects/hooks/customHooks";
+import { useCreateProject, useDeleteQueries, useShouldShowDeleteQueryPrompt, useUpdateProjects, useUpdateQuery } from "@/features/Projects/hooks/customHooks";
 import CheckmarkIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
@@ -13,8 +13,9 @@ import { debounce } from "lodash";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import Highlighter from "react-highlight-words";
 import { filterProjects } from "@/features/Projects/utils/filterAndSortingFunctions";
-import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
+import { projectCreatedToast, projectUpdatedToast, queryDeletedToast } from "@/features/Projects/utils/toastMessages";
 import { isUnassignedProject } from "@/features/Projects/utils/editUpdateFunctions";
+import WarningModal from "@/features/Common/components/WarningModal/WarningModal";
 
 const getAttachedProjects = (projects: ProjectRaw[], queryId?: string) => {
   return projects.filter(p => queryId && p.data.pks.includes(queryId));
@@ -47,10 +48,14 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const [newProject, setNewProject] = useState<ProjectCreate | null>(null);
   const [projectNameError, setProjectNameError] = useState('');
   const createProjectMutation = useCreateProject();
+  const updateProjectsMutation = useUpdateProjects();
+  const deleteQueriesMutation = useDeleteQueries();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [localSelectedProjects, setLocalSelectedProjects] = useState<ProjectRaw[]>(getAttachedProjects(projects, currentEditingQueryItem?.id));
-
+  const [isDeleteQueryPromptOpen, setIsDeleteQueryPromptOpen] = useState(false);
   const filteredProjects: ProjectRaw[] = useMemo(() => filterProjects(projects, searchTerm) as ProjectRaw[], [projects, searchTerm]);
+
+  const { shouldShow, setHideDeleteQueryPrompt } = useShouldShowDeleteQueryPrompt();
 
   const onClose = () => {
     setOpen(false);
@@ -70,9 +75,10 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   }
 
   const handleProjectNameChange = (value: string) => {
+    if(!currentEditingQueryItem?.id) return;
     setNewProject({
       title: value,
-      pks: []
+      pks: [currentEditingQueryItem.id]
     });
   }
 
@@ -98,7 +104,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
           setLocalSelectedProjects([...localSelectedProjects, data]);
         }
         projectCreatedToast();
-        onClose();
+        // onClose();
       },
       onError: (error) => {
         console.error('Failed to create project:', error);
@@ -122,13 +128,54 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
     }
   };
 
+  const handleInitiateDeleteQuery = () => {
+    if(shouldShow)
+      setIsDeleteQueryPromptOpen(true);
+    else
+      handleDeleteQuery();
+  }
+
   const handleDeleteQuery = () => {
-    console.log('delete query');
+    if(!currentEditingQueryItem?.id) return;
+
+    deleteQueriesMutation.mutate([currentEditingQueryItem.id], {
+      onSuccess: () => {
+        queryDeletedToast();
+        onClose();
+      }
+    });
+    setIsDeleteQueryPromptOpen(false);
   }
 
   const handleSaveQuery = () => {
-    console.log('save query');
-    console.log(currentEditingQueryItem, localSelectedProjects);
+    if(!currentEditingQueryItem?.id) 
+      return;
+
+    // get all selected projects that do not have the current query id in their pks, then add the query id to their pks
+    const projectsToAddQueryTo: ProjectUpdate[] = localSelectedProjects.filter(p => !p.data.pks.includes(currentEditingQueryItem.id)).map(p => {
+      return {
+        id: p.id,
+        title: p.data.title,
+        pks: [...p.data.pks, currentEditingQueryItem.id]
+      }
+    });
+    // get allprojects that have the currentEditingQueryItem.id in their pks
+    const attachedProjects = getAttachedProjects(projects, currentEditingQueryItem.id);
+    // get allprojects that have the current query attached but aren't in the localSelectedProjects array, then remove the query id from their pks
+    const projectsToRemoveQueryFrom: ProjectUpdate[] = attachedProjects.filter(p => !localSelectedProjects.some(lp => lp.id === p.id)).map(p => {
+      return {
+        id: p.id,
+        title: p.data.title,
+        pks: p.data.pks.filter(pk => pk !== currentEditingQueryItem.id)
+      }
+    });
+
+    const projectsToUpdate: ProjectUpdate[] = [...projectsToAddQueryTo, ...projectsToRemoveQueryFrom];
+    updateProjectsMutation.mutate(projectsToUpdate, {
+      onSuccess: () => {
+        projectUpdatedToast();
+      }
+    });
   }
 
   const handleCancel = () => {
@@ -146,126 +193,139 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   }, [currentEditingQueryItem, projects]);
 
   return (
-    <Modal
-      isOpen={open}
-      onClose={onClose}
-      className={styles.editQueryModal}
-      containerClass={styles.container}
-    >
-      <div className={styles.top}>
-        <div className={styles.header}>
-          <h5 className={styles.heading}>{heading}</h5>
-        </div>
-        <div className={styles.inner}>
-          <h6 className={styles.subheading}>{subheadingOne}</h6>
-          <div className={`${styles.newProject} ${styles.wrapper}`}>
-            <div className={styles.newProjectForm}>
-              <form onSubmit={handleNewProjectFormSubmit}>
+    <>
+      <Modal
+        isOpen={open}
+        onClose={onClose}
+        className={styles.editQueryModal}
+        containerClass={styles.container}
+      >
+        <div className={styles.top}>
+          <div className={styles.header}>
+            <h5 className={styles.heading}>{heading}</h5>
+          </div>
+          <div className={styles.inner}>
+            <h6 className={styles.subheading}>{subheadingOne}</h6>
+            <div className={`${styles.newProject} ${styles.wrapper}`}>
+              <div className={styles.newProjectForm}>
+                <form onSubmit={handleNewProjectFormSubmit}>
+                  <TextInput
+                    placeholder="Enter a Project Name"
+                    value={newProject?.title || ''}
+                    handleChange={handleProjectNameChange}
+                    error={!!projectNameError}
+                    errorText={projectNameError}
+                    containerClassName={styles.projectNameInputContainer}
+                  />
+                  <Button
+                    iconOnly
+                    iconLeft={<CheckmarkIcon />}
+                    handleClick={handleNewProjectSubmit}
+                    disabled={createProjectMutation.isPending}
+                    small
+                    className={styles.createButton}
+                  />
+                </form>
+              </div>
+            </div>
+          </div>
+          <div className={styles.inner}>
+            <h6 className={styles.subheading}>{subheadingTwo}</h6>
+            <div className={`${styles.projectList} ${styles.wrapper}`}>
+              <div className={styles.projectSearch}>
                 <TextInput
-                  placeholder="Enter a Project Name"
-                  value={newProject?.title || ''}
-                  handleChange={handleProjectNameChange}
-                  error={!!projectNameError}
-                  errorText={projectNameError}
-                  containerClassName={styles.projectNameInputContainer}
+                  placeholder="Search Projects"
+                  iconLeft={<SearchIcon />}
+                  iconRight={searchTerm.length > 0 ? <CloseIcon onClick={() => setSearchTerm('')} className={styles.clearSearchIcon}/> : null}
+                  iconRightClickToReset={searchTerm.length > 0}
+                  handleChange={handleSearch}
                 />
-                <Button
-                  iconOnly
-                  iconLeft={<CheckmarkIcon />}
-                  handleClick={handleNewProjectSubmit}
-                  disabled={createProjectMutation.isPending}
-                  small
-                  className={styles.createButton}
-                />
-              </form>
-            </div>
-          </div>
-        </div>
-        <div className={styles.inner}>
-          <h6 className={styles.subheading}>{subheadingTwo}</h6>
-          <div className={`${styles.projectList} ${styles.wrapper}`}>
-            <div className={styles.projectSearch}>
-              <TextInput
-                placeholder="Search Projects"
-                iconLeft={<SearchIcon />}
-                iconRight={searchTerm.length > 0 ? <CloseIcon onClick={() => setSearchTerm('')} className={styles.clearSearchIcon}/> : null}
-                iconRightClickToReset={searchTerm.length > 0}
-                handleChange={handleSearch}
-              />
-            </div>
-            <div className={styles.projectListInner}>
-              <LoadingWrapper
-                loading={loading}
-              >
-                {
-                  filteredProjects.length > 0 ? filteredProjects.map((project) => {
-                    const isUnassigned = isUnassignedProject(project);
-                    if(isUnassigned) return null;
-                    const projectName = project.label || project.data.title;
-                    const isSelected = mode === "edit" && localSelectedProjects.some(p => p.id === project.id);
-                    return(
-                      <div
-                        className={`${styles.projectItem} ${isSelected ? styles.selected : ''}`}
-                        key={project.id} 
-                        onClick={() => handleSelectProject(project)}
-                        >
-                        <Highlighter
-                          highlightClassName="highlight"
-                          className={styles.projectName}
-                          searchWords={searchTerm ? [searchTerm] : []}
-                          autoEscape={true}
-                          textToHighlight={projectName}
-                        />
-                        <div className={styles.queryCount}>{project.data.pks.length} quer{project.data.pks.length === 1 ? 'y' : 'ies'}</div>
+              </div>
+              <div className={styles.projectListInner}>
+                <LoadingWrapper
+                  loading={loading}
+                >
+                  {
+                    filteredProjects.length > 0 ? filteredProjects.map((project) => {
+                      const isUnassigned = isUnassignedProject(project);
+                      if(isUnassigned) return null;
+                      const projectName = project.label || project.data.title;
+                      const isSelected = mode === "edit" && localSelectedProjects.some(p => p.id === project.id);
+                      return(
+                        <div
+                          className={`${styles.projectItem} ${isSelected ? styles.selected : ''}`}
+                          key={project.id} 
+                          onClick={() => handleSelectProject(project)}
+                          >
+                          <Highlighter
+                            highlightClassName="highlight"
+                            className={styles.projectName}
+                            searchWords={searchTerm ? [searchTerm] : []}
+                            autoEscape={true}
+                            textToHighlight={projectName}
+                          />
+                          <div className={styles.queryCount}>{project.data.pks.length} quer{project.data.pks.length === 1 ? 'y' : 'ies'}</div>
+                        </div>
+                    )}) : (
+                      <div className={styles.noResults}>
+                        <p>No projects found matching "{searchTerm}"</p>
                       </div>
-                  )}) : (
-                    <div className={styles.noResults}>
-                      <p>No projects found matching "{searchTerm}"</p>
-                    </div>
-                  )
-                }
-              </LoadingWrapper>
+                    )
+                  }
+                </LoadingWrapper>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      {
-        mode === 'edit' && (
-          <div className={styles.bottom}>
-              <div className="left">
-                <Button
-                  variant="secondary"
-                  handleClick={handleDeleteQuery}
-                  iconLeft={<TrashIcon />}
-                  className={`${styles.button} ${styles.deleteButton}`}
-                  small
-                >
-                  Delete Query
-                </Button>
+        {
+          mode === 'edit' && (
+            <div className={styles.bottom}>
+                <div className="left">
+                  <Button
+                    variant="secondary"
+                    handleClick={handleInitiateDeleteQuery}
+                    iconLeft={<TrashIcon />}
+                    className={`${styles.button} ${styles.deleteButton}`}
+                    small
+                  >
+                    Delete Query
+                  </Button>
+                </div>
+                <div className={styles.right}>                
+                  <Button
+                    variant="secondary"
+                    handleClick={handleCancel}
+                    iconLeft={<CloseIcon />}
+                    className={styles.button}
+                    small
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    handleClick={handleSaveQuery}
+                    iconLeft={<CheckmarkIcon />}
+                    className={`${styles.button} ${styles.saveButton}`}
+                    small
+                  >
+                    Save
+                  </Button>
+                </div>
               </div>
-              <div className={styles.right}>                
-                <Button
-                  variant="secondary"
-                  handleClick={handleCancel}
-                  iconLeft={<CloseIcon />}
-                  className={styles.button}
-                  small
-                >
-                  Cancel
-                </Button>
-                <Button
-                  handleClick={handleSaveQuery}
-                  iconLeft={<CheckmarkIcon />}
-                  className={`${styles.button} ${styles.saveButton}`}
-                  small
-                >
-                  Save
-                </Button>
-              </div>
-            </div>
-          )
-        }
-    </Modal>
+            )
+          }
+      </Modal>
+      <WarningModal
+        isOpen={isDeleteQueryPromptOpen}
+        onClose={() => setIsDeleteQueryPromptOpen(false)}
+        onConfirm={handleDeleteQuery}
+        onCancel={() => setIsDeleteQueryPromptOpen(false)}
+        cancelButtonText="Cancel"
+        confirmButtonText="Delete Query"
+        content="This query, along with any bookmarks or notes associated with it, can be recovered from your Trash."
+        heading="Delete Query?"
+        setStorageKeyFn={setHideDeleteQueryPrompt}
+      />
+    </>
   );
 };
 
