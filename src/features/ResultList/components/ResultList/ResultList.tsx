@@ -12,14 +12,22 @@ import { useBlocker } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
-import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh, sortScoreHighLow, sortByEntityStrings,
-  sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh, sortByNamePathfinderHighLow, filterCompare } from "@/features/Common/utils/sortingFunctions";
-import { handleResultsError, applyFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts, checkBookmarkForNotes, checkBookmarksForItem } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { getDataFromQueryVar, getPathCount, handleFetchErrors, getCompressedEdge } from "@/features/Common/utils/utilities";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
+  sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh,
+  sortByNamePathfinderHighLow, filterCompare } from "@/features/Common/utils/sortingFunctions";
+import {
+  applyFilters,
+  injectDynamicFilters,
+  genPathFilterState,
+  areEntityFiltersEqual,
+  calculateFacetCounts,
+  checkBookmarksForItem
+} from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { getDataFromQueryVar, getPathCount, getCompressedEdge, findInSet } from "@/features/Common/utils/utilities";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
-import { API_PATH_PREFIX, getSaves, SaveGroup } from "@/features/UserAuth/utils/userApi";
+import { getSaves, SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "@/features/ResultItem/components/BookmarkToasts/BookmarkToasts";
@@ -31,6 +39,7 @@ import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem } from
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
+import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 
 const ResultList = () => {
 
@@ -158,6 +167,7 @@ const ResultList = () => {
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
   const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
   const [showHiddenPaths, setShowHiddenPaths] = useState(false);
+  const shouldUpdateResultsAfterBookmark = useRef(false);
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
@@ -199,18 +209,22 @@ const ResultList = () => {
     }
   }, [currentQueryID])
 
-  const handleClearNotesEditor = async () => {
-    await getUserSaves();
-    if(prevRawResults.current)
-    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current);
-  }
-
   useEffect(() => {
     if(!user)
       return;
 
     getUserSaves();
   }, [user, getUserSaves]);
+
+  // Update results after bookmark to reflect new user saves in bookmark/note filter
+  useEffect(() => {
+    if(!shouldUpdateResultsAfterBookmark.current)
+      return;
+
+    shouldUpdateResultsAfterBookmark.current = false;
+    const tempUserSaves = cloneDeep(userSaves)
+    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current, tempUserSaves); 
+  }, [userSaves, activeFilters, activeEntityFilters, prevRawResults, currentSortString])
 
   useEffect(() => {
     if (!autoScrollToResult)
@@ -248,15 +262,16 @@ const ResultList = () => {
     or: Result[] = [],
     justSort = false,
     sortType: string,
+    userSavesGroup: SaveGroup | null = null,
     pfState: PathFilterState | null = null,
-    fr: Result[] = []
+    fr: Result[] = [],
   ): Result[] => {
     if (!summary) return [];
-  
+
     let newFormattedResults: Result[] = [];
     let newOriginalResults: Result[] = [];
     let newPathFilterState = pfState ? cloneDeep(pfState) : {};
-  
+
     // Initial population of result state
     if (or.length === 0) {
       newFormattedResults = summary.data.results;
@@ -266,7 +281,11 @@ const ResultList = () => {
       newFormattedResults = justSort ? cloneDeep(fr) : or;
       newOriginalResults = or;
     }
-  
+
+    // Inject bookmark and note tag filters
+    [summary, newFormattedResults, newOriginalResults] = injectDynamicFilters(summary,
+        newFormattedResults, newOriginalResults, userSavesGroup);
+
     // Filtering
     if (!justSort) {
       const {
@@ -282,14 +301,14 @@ const ResultList = () => {
         summary,
         newPathFilterState
       );
-  
+
       newFormattedResults = results;
       newPathFilterState = updatedPathFilterState;
-  
+
       // Update entity filters if changed
       if (!areEntityFiltersEqual(updatedEntityFilters, asFilters))
         setActiveEntityFilters(updatedEntityFilters);
-  
+
       // Update available facet filters
       const newFilters = calculateFacetCounts(
         facetCounts.results,
@@ -299,21 +318,21 @@ const ResultList = () => {
         facetCounts.negatedResultFacets
       );
       setAvailableFilters(newFilters);
-  
+
       // Reset pagination if needed
       if (shouldResetPage && currentPage.current !== 0)
         handlePageReset(false, newFormattedResults.length);
-  
+
       originalResults.current = newOriginalResults;
     }
-  
+
     // Sorting
     newFormattedResults = getSortedResults(summary, newFormattedResults, sortType);
-  
+
     // State assignment
     setFormattedResults(newFormattedResults);
     setPathFilterState(newPathFilterState);
-  
+
     // First-load modal setup
     if (firstLoad.current && newFormattedResults.length > 0) {
       firstLoad.current = false;
@@ -332,11 +351,11 @@ const ResultList = () => {
         }
       }
     }
-  
+
     rawResults.current = summary;
     return newFormattedResults;
   };
-  
+
 
   const handleNewResults = (resultSet: ResultSet) => {
     // if we have no results, or the results aren't actually new, return
@@ -365,7 +384,7 @@ const ResultList = () => {
 
     dispatch(setResultSet({pk: currentQueryID || "", resultSet: newResultSet}));
 
-    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current);
+    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current, userSaves);
 
     // we have results to show, set isLoading to false
     if (newFormattedResults.length > 0)
@@ -377,111 +396,29 @@ const ResultList = () => {
   }
 
   // React Query call for status of results
-  useQuery({
-    queryKey: ['resultsStatus'],
-    queryFn: async () => {
-      console.log("Fetching current ARA status...");
-
-      if(!currentQueryID)
-        return;
-
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      };
-      await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/status`, requestOptions)
-        .then(response => handleFetchErrors(response))
-        .then(response => response.json())
-        .then(data => {
-          // increment the number of status checks
-          numberOfStatusChecks.current++;
-          console.log("ARA status:", data);
-
-          let fetchResults = false;
-
-          if(data.data.aras.length > returnedARAs.current.aras.length) {
-            console.log(`Old ARAs: ${returnedARAs.current.aras}, New ARAs: ${data.data.aras}`);
-            let newReturnedARAs = {...data.data};
-            newReturnedARAs.status = data.status;
-            returnedARAs.current = newReturnedARAs;
-            fetchResults = true;
-          } else {
-            console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
-          }
-          /*
-          If status is success (meaning all ARAs have returned) or we've reached 120 status checks (meaning 20 min have elapsed)
-          stop fetching ARA status and move to fetching results.
-          */
-          if(data.status === 'success' || numberOfStatusChecks.current >= 120) {
-            isFetchingARAStatus.current = false;
-            fetchResults = true;
-          }
-          if(fetchResults)
-            isFetchingResults.current = true;
-        })
-        .catch((error) => {
-          if(formattedResults.length <= 0) {
-            handleResultsError(true, setIsError, setIsLoading);
-            isFetchingARAStatus.current = null;
-          }
-          if(formattedResults.length > 0) {
-            isFetchingARAStatus.current = null;
-          }
-          console.error(error)
-        });
-    },
-    refetchInterval: 10000,
-    enabled: isFetchingARAStatus.current === null ? false : isFetchingARAStatus.current,
-    refetchOnWindowFocus: false
-  });
+  useResultsStatusQuery(
+    currentQueryID,
+    isFetchingARAStatus,
+    returnedARAs,
+    numberOfStatusChecks,
+    formattedResults,
+    setIsError,
+    setIsLoading,
+    isFetchingResults
+  );
 
   // React Query call for results
-  useQuery({
-    queryKey: ['resultsData'],
-    queryFn: async () => {
-      console.log("Fetching new results...");
-
-      if(!currentQueryID)
-        return;
-
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      };
-      await fetch(`${API_PATH_PREFIX}/query/${currentQueryID}/result`, requestOptions)
-        .then(response => handleFetchErrors(response, () => {
-          console.log(response.json());
-          isFetchingARAStatus.current = false;
-          isFetchingResults.current = false;
-          if(formattedResults.length <= 0) {
-            handleResultsError(true, setIsError, setIsLoading);
-          }
-        }))
-        .then(response => response.json())
-        .then(data => {
-          console.log('New results:', data);
-          // if we've already gotten results before, set freshRawResults instead to
-          // prevent original results from being overwritten
-          if(formattedResults.length > 0) {
-            setFreshRawResults(data);
-          } else {
-            handleNewResults(data);
-          }
-
-          // The ARS can rarely report that it is done in the status check when it is not done
-          if (data.status === 'running' && numberOfStatusChecks.current < 120) {
-            isFetchingARAStatus.current = true;
-          }
-
-          isFetchingResults.current = false;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-    enabled: isFetchingResults.current,
-    refetchOnWindowFocus: false,
-  });
+  useResultsDataQuery(
+    currentQueryID,
+    isFetchingResults,
+    formattedResults,
+    setFreshRawResults,
+    handleNewResults,
+    numberOfStatusChecks,
+    isFetchingARAStatus,
+    setIsError,
+    setIsLoading
+  );
 
   // Handle the sorting
   const getSortedResults = useCallback((summary: ResultSet, resultsToSort: Result[], sortName: string) => {
@@ -570,7 +507,7 @@ const ResultList = () => {
     let edge;
     if(!Array.isArray(edgeID))
       edge = getEdgeById(resultSet, edgeID);
-    else 
+    else
       edge = getCompressedEdge(resultSet, edgeID);
 
     if(!!edge) {
@@ -602,7 +539,7 @@ const ResultList = () => {
         f.value === filter.value &&
         f.negated === filter.negated
     );
-  
+
     if (exactMatchIndex !== -1) {
       // Exact match found → toggle off by removing it
       const updatedFilters = activeFilters.filter((_, i) => i !== exactMatchIndex);
@@ -611,11 +548,12 @@ const ResultList = () => {
         activeEntityFilters,
         rawResults.current,
         originalResults.current,
-        currentSortString.current
+        currentSortString.current,
+        userSaves
       );
       return;
     }
-  
+
     // Try to find a filter with same {id, value} but different negated — for update
     const sameIdValueIndex = activeFilters.findIndex(
       (f) =>
@@ -623,7 +561,7 @@ const ResultList = () => {
         f.value === filter.value &&
         f.negated !== filter.negated
     );
-  
+
     let updatedFilters: Filter[];
     if (sameIdValueIndex !== -1) {
       // Replace old filter with new one (different negated)
@@ -634,31 +572,30 @@ const ResultList = () => {
       // Add new filter
       updatedFilters = [...activeFilters, { ...filter }];
     }
-  
+
     updatedFilters.sort(filterCompare);
-  
+
     handleApplyFilterAndCleanup(
       updatedFilters,
       activeEntityFilters,
       rawResults.current,
       originalResults.current,
-      currentSortString.current
+      currentSortString.current,
+      userSaves
     );
   };
-  
-  
 
-  const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string) => {
+  const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string, userSaves: SaveGroup | null = null) => {
     if(!rawResults)
       return;
 
     setActiveFilters(filtersToActivate);
-    let newFormattedResults = handleUpdateResults(filtersToActivate, activeEntityFilters, rawResults, originalResults, false, sortString);
+    let newFormattedResults = handleUpdateResults(filtersToActivate, activeEntityFilters, rawResults, originalResults, false, sortString, userSaves);
     handlePageReset(false, newFormattedResults.length);
   }
 
   const handleClearAllFilters = () => {
-    handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current);
+    handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current, userSaves);
   }
 
   useEffect(() => {
@@ -714,9 +651,8 @@ const ResultList = () => {
         setShareModalOpen={setShareModalOpen}
         notesModalOpen={notesModalOpen}
         setNotesModalOpen={setNotesModalOpen}
-        handleClearNotesEditor={handleClearNotesEditor}
         noteLabel={noteLabel.current}
-        currentBookmarkID={currentBookmarkID.current}
+        currentBookmarkID={currentBookmarkID}
         pk={currentQueryID ? currentQueryID : ""}
         focusModalOpen={focusModalOpen}
         setFocusModalOpen={setFocusModalOpen}
@@ -730,6 +666,8 @@ const ResultList = () => {
         formattedResultsLength={formattedResults.length}
         setExpandSharedResult={setExpandSharedResult}
         setAutoScrollToResult={setAutoScrollToResult}
+        shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
+        updateUserSaves={setUserSaves}
       />
       <div className={styles.resultList}>
         {
@@ -814,7 +752,7 @@ const ResultList = () => {
                         isSortedByName={isSortedByName}
                         isSortedByPaths={isSortedByPaths}
                         isSortedByScore={isSortedByScore}
-                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current as ResultSet, originalResults.current, true, currentSortString.current, pathFilterState, formattedResults)}
+                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current as ResultSet, originalResults.current, true, currentSortString.current, userSaves, pathFilterState, formattedResults)}
                       />
                       {
                         isError &&
@@ -836,8 +774,7 @@ const ResultList = () => {
                             return null;
 
                           let bookmarkID = (userSaves === null) ? null : checkBookmarksForItem(item.id, userSaves);
-                          let bookmarked = (!bookmarkID) ? false : true;
-                          let hasNotes =  checkBookmarkForNotes(bookmarkID, userSaves);
+                          let bookmarkItem = userSaves?.saves ? findInSet(userSaves.saves, save => save.id ? save.id.toString() === bookmarkID : false) : undefined;
                           return (
                             <ResultItem
                               isEven={i % 2 !== 0}
@@ -854,9 +791,7 @@ const ResultList = () => {
                               queryNodeID={nodeIdParam}
                               queryNodeLabel={nodeLabelParam}
                               queryNodeDescription={nodeDescription}
-                              bookmarked={bookmarked}
-                              bookmarkID={bookmarkID}
-                              hasNotes={hasNotes}
+                              bookmarkItem={bookmarkItem}
                               handleBookmarkError={handleBookmarkError}
                               bookmarkAddedToast={bookmarkAddedToast}
                               bookmarkRemovedToast={bookmarkRemovedToast}
@@ -871,7 +806,9 @@ const ResultList = () => {
                               resultsComplete={(!isError && freshRawResults === null && !isFetchingARAStatus.current && !isFetchingResults.current)}
                               scoreWeights={scoreWeights}
                               showHiddenPaths={showHiddenPaths}
+                              shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
                               setShowHiddenPaths={setShowHiddenPaths}
+                              updateUserSaves={setUserSaves}
                             />
                           )
                         })
@@ -914,12 +851,12 @@ const ResultList = () => {
         }
       </div>
       {
-        blocker && 
-        <NavConfirmationPromptModal 
-          blocker={blocker} 
+        blocker &&
+        <NavConfirmationPromptModal
+          blocker={blocker}
           title="Are you sure you want to leave this page?"
           message="If you leave this page, you may lose your results and have to run this query again."
-          subtitle="Note: You can revisit this query later by visiting the Search History page." 
+          subtitle="Note: You can revisit this query later by visiting the Search History page."
           proceedButtonText="Navigate away from the results page"
           stayButtonText="Stay on the results page"
         />

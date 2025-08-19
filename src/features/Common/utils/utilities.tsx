@@ -409,7 +409,7 @@ export const isValidDate = (date: string | number | Date): boolean => {
  * @param {Date} date - The date object to format.
  * @returns {string | boolean} - The formatted date string, or false if the date is invalid.
  */
-export const getFormattedDate = (date: Date): string | boolean => {
+export const getFormattedDate = (date: Date, includeTime: boolean = true): string | boolean => {
   if (!isValidDate(date))
     return false;
 
@@ -418,7 +418,7 @@ export const getFormattedDate = (date: Date): string | boolean => {
   const formattedDate = new Intl.DateTimeFormat('en-US', dateFormatOptions).format(date);
   const formattedTime = new Intl.DateTimeFormat('en-US', timeFormatOptions).format(date);
 
-  return `${formattedDate} (${formattedTime})`;
+  return `${formattedDate}${includeTime ? ` (${formattedTime})` : ''}`;
 };
 
 /**
@@ -851,3 +851,19 @@ export const scrollToRef = (elementRef: RefObject<HTMLElement | null>) => {
   else
     console.warn("Could not scroll to element, element ref is not set");
 };
+
+/**
+ * Finds an item in a set based on a provided predicate.
+ *
+ * @param {Set<T>} set - The set to search in.
+ * @param {function} predicate - The predicate function to use.
+ * @returns {T | undefined} - The item found in the set, or undefined if no item is found.
+ */
+export const findInSet = <T,>(set: Set<T>, predicate: (obj: T)=>boolean): T | undefined => {
+  for (const item of set) {
+    if(predicate(item)) {
+      return item;
+    }
+  }
+  return undefined;
+}

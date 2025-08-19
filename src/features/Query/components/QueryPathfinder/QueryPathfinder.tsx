@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, FC, Dispatch, SetStateAction } from 'rea
 import { useSelector } from 'react-redux';
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
 import { AutocompleteFunctions } from "@/features/Query/types/querySubmission";
 import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
@@ -18,12 +18,12 @@ import Select from '@/features/Common/components/Select/Select';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import { Result } from "@/features/ResultList/types/results.d";
 import { useAutocomplete, useQuerySubmission } from '@/features/Query/hooks/customQueryHooks';
-import { AppToastContainer } from '@/features/Common/components/AppToastContainer/AppToastContainer';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 import QueryResultsHeader from '@/features/Query/components/QueryResultsHeader/QueryResultsHeader';
 import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
+import { ProjectRaw } from '@/features/Projects/types/projects';
 
 type QueryPathfinderProps = {
   handleResultMatchClick?: (match: ResultContextObject) => void;
@@ -32,6 +32,7 @@ type QueryPathfinderProps = {
   pk?: string;
   results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
+  selectedProject?: ProjectRaw | null;
 }
 
 const QueryPathfinder: FC<QueryPathfinderProps> = ({ 
@@ -40,7 +41,8 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   isResults = false,
   pk,
   results = [],
-  setShareModalFunction = ()=>{} 
+  setShareModalFunction = ()=>{},
+  selectedProject = null
 }) => {
 
   const config = useSelector(currentConfig);
@@ -141,7 +143,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       setErrorText("Second search term is not selected, please select a valid term.");
       return;
     }
-    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined);
+    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined);
   }
 
   // Event handler for form submission
@@ -180,7 +182,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
   return (
     <div className={`${styles.queryPathfinder} ${isResults && styles.results}`}>
-      <AppToastContainer />
       { isResults 
         ?
           <QueryResultsHeader
@@ -205,8 +206,26 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
             <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
             <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
             <div className={styles.buttons}>
-              <Button handleClick={swapTerms} isSecondary className={`${styles.button}`}><SwapIcon/>Swap Terms</Button>
-              <Button handleClick={handleMiddleTypeTrigger} isSecondary className={`${styles.button} ${styles.middleTypeButton}`} dataTooltipId='middle-type-tooltip'>{ hasMiddleType ? <SubtractIcon/> : <AddIcon/>}Middle Object<InfoIcon className={styles.infoIcon}/></Button>
+              <Button 
+                handleClick={swapTerms} 
+                variant="secondary" 
+                className={`${styles.button}`}
+                iconLeft={<SwapIcon/>}
+                smallFont
+              >
+                Swap Terms
+              </Button>
+              <Button 
+                handleClick={handleMiddleTypeTrigger} 
+                variant="secondary"
+                className={`${styles.button} ${styles.middleTypeButton}`}
+                dataTooltipId='middle-type-tooltip'
+                iconLeft={hasMiddleType ? <SubtractIcon/> : <AddIcon/>}
+                iconRight={<InfoIcon className={styles.infoIcon}/>}
+                smallFont
+              >
+                Middle Object
+              </Button>
               <Tooltip
                 id='middle-type-tooltip'
                 >

@@ -7,7 +7,7 @@ import { pivotSort } from '@/features/Common/utils/sortingFunctions';
 import FacetHeading from "@/features/ResultFiltering/components/FacetHeading/FacetHeading";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import FacetTag from "@/features/ResultFiltering/components/FacetTag/FacetTag";
-import TextInput from "@/features/Common/components/TextInput/TextInput";
+import TextInput from "@/features/Core/components/TextInput/TextInput";
 import { debounce } from "lodash";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 
@@ -53,6 +53,12 @@ const getTdlCaption = (): ReactNode => {
   )
 }
 
+const getBookmarkNotesCaption = (): ReactNode => {
+  return(
+    <p className={styles.caption}>Include or exclude results basd on whether they have bookmarks or notes added to them</p>
+  )
+}
+
 const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): ReactNode | null => {
   let headingToReturn;
   switch(tagFamily) {
@@ -91,6 +97,9 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): ReactN
     case 'tdl':
       headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Target Development Level" />
       break;
+    case 'sv':
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Bookmarks & Notes" />
+    break;
     default:
       headingToReturn = null;
   }
@@ -123,6 +132,9 @@ const getTagCaptionMarkup = (tagFamily: string): ReactNode | null => {
       break;
     case 'tdl':
       captionToReturn = getTdlCaption();
+      break;
+    case 'sv':
+      captionToReturn = getBookmarkNotesCaption();
       break;
     default:
       captionToReturn = null;

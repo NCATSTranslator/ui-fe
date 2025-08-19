@@ -1,7 +1,7 @@
 import { FC, useCallback, useState } from "react";
 import styles from './ResultItemInteractables.module.scss';
 import { Link } from 'react-router-dom';
-import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
 import BookmarkFilled from "@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react";
 import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"

@@ -1,0 +1,79 @@
+@use '@/assets/styles/variables' as *;
+
+.dataCard {
+  background-color: $white;
+  &.projectWrapper {
+    background: $lightGray;
+  }
+  &:hover {
+    background-color: $whiteHover;
+  }
+  
+  .column {
+    font-size: $captionSize;
+    color: $darkGray;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  .checkboxColumn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    label {
+      display: flex;
+      margin-bottom: 0;
+      width: $s;
+      height: $s;
+      padding: $xxs;
+    }
+  }
+  
+  .nameColumn {
+    .queryTitle,
+    .projectTitle {
+      font-weight: 500;
+      color: $black;
+      font-size: 14px;
+    }
+  }
+  
+  .bookmarksColumn,
+  .notesColumn {
+    gap: 2px;
+    svg {
+      path {
+        fill: $darkGray;
+      }
+    }
+  }
+  
+  .actionsColumn {
+    gap: 4px;
+    button {
+      background-color: $white;
+      &:hover {
+        background-color: $lightGray;
+      }
+    }
+  }
+
+  .deletedInteractions {
+    display: flex;
+    gap: $xxs;
+    align-items: center;
+    margin-top: $xxs;
+    span {
+      font-size: $captionSize;
+      font-weight: 800;
+      color: $purpleOne;
+    }
+    .interaction {
+      &:hover {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    }
+  }
+}
