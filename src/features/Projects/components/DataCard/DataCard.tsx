@@ -122,10 +122,14 @@ const DataCard = <T,>({
         const itemOne: AutocompleteItem = {
           id: query.data.query.subject.id,
           label: query.data.query.node_one_label || query.data.query.subject.id,
+          isExact: false,
+          score: 0
         }
         const itemTwo: AutocompleteItem = {
           id: query.data.query.object.id,
           label: query.data.query.node_two_label || query.data.query.object.id,
+          isExact: false,
+          score: 0
         }
         const constraint = query.data.query.constraint || undefined;
         const qid = query.data.qid;

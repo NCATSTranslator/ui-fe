@@ -188,14 +188,11 @@ export const combinedQueryFormatter = async (
 
   // Sort all terms
   allTerms.sort((a, b) => {
-//    if (a.isExact && !b.isExact) return -1;
-//    if (!a.isExact && b.isExact) return 1;
     if (a.score < b.score) return -1;
     if (a.score > b.score) return 1;
     return 0;
   });
 
-  console.log(allTerms);
   return allTerms;
 };
 
@@ -203,7 +200,9 @@ const _calculateOrderScore = (
   input: string,
   bestMatch: string,
   isExactMatch: boolean): number => {
-    return distance(input, bestMatch) - (isExactMatch ? 10 : 0);
+    const lowInput = input.toLowerCase();
+    const lowBest = bestMatch.toLowerCase();
+    return distance(lowInput, lowBest) - (isExactMatch ? 10 : 0);
 };
 
 const _findExactMatch = (
