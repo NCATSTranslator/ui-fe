@@ -2,7 +2,7 @@ import { FC, FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import styles from "./EditQueryModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
-import { ProjectCreate, ProjectRaw, QueryEditingItem, UserQueryObject } from "@/features/Projects/types/projects";
+import { ProjectCreate, ProjectRaw, QueryEditingItem } from "@/features/Projects/types/projects";
 import Button from "@/features/Core/components/Button/Button";
 import { useCreateProject } from "@/features/Projects/hooks/customHooks";
 import CheckmarkIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
@@ -15,6 +15,10 @@ import Highlighter from "react-highlight-words";
 import { filterProjects } from "@/features/Projects/utils/filterAndSortingFunctions";
 import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
 import { isUnassignedProject } from "@/features/Projects/utils/editUpdateFunctions";
+
+const getAttachedProjects = (projects: ProjectRaw[], queryId?: string) => {
+  return projects.filter(p => queryId && p.data.pks.includes(queryId));
+}
 
 interface EditQueryModalProps {
   currentEditingQueryItem?: QueryEditingItem;
@@ -44,7 +48,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const [projectNameError, setProjectNameError] = useState('');
   const createProjectMutation = useCreateProject();
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [localSelectedProjects, setLocalSelectedProjects] = useState<ProjectRaw[]>([]);
+  const [localSelectedProjects, setLocalSelectedProjects] = useState<ProjectRaw[]>(getAttachedProjects(projects, currentEditingQueryItem?.id));
 
   const filteredProjects: ProjectRaw[] = useMemo(() => filterProjects(projects, searchTerm) as ProjectRaw[], [projects, searchTerm]);
 
@@ -134,6 +138,12 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   useEffect(() => {
     setOpen(isOpen);
   }, [isOpen]);
+
+  useEffect(() => {
+    if(currentEditingQueryItem) {
+      setLocalSelectedProjects(getAttachedProjects(projects, currentEditingQueryItem?.id));
+    }
+  }, [currentEditingQueryItem, projects]);
 
   return (
     <Modal
