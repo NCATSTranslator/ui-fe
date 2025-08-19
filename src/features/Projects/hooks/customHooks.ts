@@ -178,7 +178,7 @@ export const useFormattedProjects = (
     const assignedQueryIds = new Set(projects.flatMap(project => project.data.pks));
     
     // Find unassigned queries (queries that are not in any project)
-    const unassignedQueries = queries.filter(q => !assignedQueryIds.has(q.data.qid));
+    const unassignedQueries = queries.filter(q => !assignedQueryIds.has(q.data.qid) && !q.data.deleted);
     
     // Calculate bookmark and note counts for unassigned queries
     const unassignedBookmarkCount = unassignedQueries.reduce(
