@@ -324,3 +324,21 @@ export const useProjectDetailSortSearchSelectState = () => {
     resetState
   };
 };
+
+/**
+ * Custom hook to manage the state of the delete query prompt
+ * @returns {boolean} shouldShow - Whether the delete query prompt should be shown
+ * @returns {Function} setHideDeleteQueryPrompt - Function to set the hide delete query prompt
+ */
+export const useShouldShowDeleteQueryPrompt = () => {
+  const showDeleteQueryPrompt = localStorage.getItem('hideDeleteQueryPrompt') === 'true' ? false : true;
+
+  const setHideDeleteQueryPrompt = (hide: boolean) => {
+    localStorage.setItem('hideDeleteQueryPrompt', hide ? 'true' : 'false');
+  };
+
+  return {
+    shouldShow: showDeleteQueryPrompt,
+    setHideDeleteQueryPrompt
+  };
+};
