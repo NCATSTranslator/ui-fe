@@ -63,7 +63,7 @@ const DataCard = <T,>({
   const navigate = useNavigate();
 
   const isUnassigned = getItemId(item) === -1;
-  
+
   const title = getItemTitle(item);
   const time_created = getItemTimeCreated(item);
   const time_updated = getItemTimeUpdated(item);
@@ -97,7 +97,7 @@ const DataCard = <T,>({
   const handleCardClick = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
     const isInteractive = target.closest('button, input, a, [role="button"]');
-    
+
     if (!isInteractive && type === 'project') {
       navigate(`/projects/${getItemId(item)}`);
       return;
@@ -145,13 +145,13 @@ const DataCard = <T,>({
   };
 
   const handleDelete = (e: MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (onDelete)
       onDelete(item);
   };
 
   return (
-    <CardWrapper 
+    <CardWrapper
       className={`${styles.dataCard} ${className || ''} ${type === 'project' && styles.projectWrapper}`}
       onClick={handleCardClick}
     >
@@ -164,7 +164,7 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.nameColumn} ${styles.column}`}>
         <div className={styles.nameContainer}>
-          <CardName 
+          <CardName
             type={type}
             name={title}
             itemCount={itemCount}
@@ -250,4 +250,4 @@ const DataCard = <T,>({
   );
 }
 
-export default DataCard; 
+export default DataCard;
