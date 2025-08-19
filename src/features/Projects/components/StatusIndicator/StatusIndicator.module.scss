@@ -41,3 +41,12 @@ $statusSize: 18px;
 .statusError {
   background: $red;
 }
+.statusWarning {
+  background: $yellow;
+  svg {
+    path {
+      stroke: transparent;
+      fill: $white;
+    }
+  }
+}

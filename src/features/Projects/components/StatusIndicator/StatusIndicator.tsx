@@ -1,13 +1,13 @@
 import LoadingIcon from "@/features/Common/components/LoadingIcon/LoadingIcon";
 import styles from './StatusIndicator.module.scss';
-import { QueryStatus } from "@/features/Projects/types/projects";
 import CheckIcon from "@/assets/icons/buttons/Checkmark/Checkmark.svg?react";
 import ErrorIcon from "@/assets/icons/buttons/Close/Close.svg?react";
+import WarningIcon from "@/assets/icons/status/Alerts/Warning.svg?react";
 import { Fade } from "react-awesome-reveal";
 import { FC } from "react";
 
 interface StatusIndicatorProps {
-  status: QueryStatus;
+  status: 'warning' | 'complete' | 'running' | 'error' | 'unknown';
 }
 
 const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
@@ -43,6 +43,23 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
         >
           <span className={`${styles.status} ${styles.statusRunning}`}>
             <LoadingIcon size="small" className={styles.loadingIcon}/>
+          </span>
+        </Fade>
+      </div>
+    )
+  }
+
+  if(status === 'warning') {
+    return (
+      <div>
+        <Fade
+          delay={FADE_DELAY}
+          duration={FADE_DURATION}
+          triggerOnce
+          key="complete"
+        >
+          <span className={`${styles.status} ${styles.statusWarning}`}>
+            <WarningIcon/>
           </span>
         </Fade>
       </div>
