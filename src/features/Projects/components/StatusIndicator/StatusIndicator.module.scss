@@ -20,6 +20,13 @@ $statusSize: 18px;
       stroke: $white;
     }
   }
+  .loadingIcon {
+    width: 14px;
+    height: 14px;
+    min-height: 14px;
+    min-width: 14px;
+    margin-bottom: 0;
+  }
 }
 .statusRunning {
   > div {

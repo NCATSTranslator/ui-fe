@@ -42,7 +42,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
           key="running"
         >
           <span className={`${styles.status} ${styles.statusRunning}`}>
-            <LoadingIcon size="small"/>
+            <LoadingIcon size="small" className={styles.loadingIcon}/>
           </span>
         </Fade>
       </div>
@@ -77,6 +77,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
         >
           <span className={`${styles.status} ${styles.statusUnknown}`}>
             {/* TODO: Add unknown status icon */}
+            <LoadingIcon size="small" className={styles.loadingIcon}/>
           </span>
         </Fade>
       </div>
