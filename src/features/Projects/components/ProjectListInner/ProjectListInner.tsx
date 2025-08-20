@@ -361,19 +361,25 @@ export const ProjectListInner = () => {
                                       })}
                                     </>
                                   )}
-                                  {/* Separator for the last project (Unassigned) */}
-                                  <div className={styles.separator} />
-                                  {/* Project Card for the last project (Unassigned) */}
-                                  <ProjectCard 
-                                    key={`unassigned`}
-                                    queries={queries}
-                                    project={sortedActiveProjects[sortedActiveProjects.length - 1]}
-                                    searchTerm={searchTerm}
-                                    setSelectedProjects={setSelectedProjects}
-                                    selectedProjects={selectedProjects}
-                                    onEdit={projectEditHandlers.handleEditProject}
-                                    queriesLoading={queriesLoading}
-                                  />
+                                  {
+                                    sortedActiveProjects.length > 0 && isUnassignedProject(sortedActiveProjects[sortedActiveProjects.length - 1]) && (
+                                      <>
+                                        {/* Separator for the last project (Unassigned) */}
+                                        <div className={styles.separator} />
+                                        {/* Project Card for the last project (Unassigned) */}
+                                        <ProjectCard 
+                                          key={`unassigned`}
+                                          queries={queries}
+                                          project={sortedActiveProjects[sortedActiveProjects.length - 1]}
+                                          searchTerm={searchTerm}
+                                          setSelectedProjects={setSelectedProjects}
+                                          selectedProjects={selectedProjects}
+                                          onEdit={projectEditHandlers.handleEditProject}
+                                          queriesLoading={queriesLoading}
+                                        />
+                                      </>
+                                    )
+                                  }
                                 </div>
                               </LoadingWrapper>
                             )

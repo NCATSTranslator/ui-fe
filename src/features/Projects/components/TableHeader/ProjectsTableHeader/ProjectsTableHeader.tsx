@@ -23,26 +23,28 @@ const ProjectsTableHeader = ({
   sortDirection,
   onSort
 }: ProjectsTableHeaderProps) => {
+
+  const activeProjectsWithoutUnassigned = activeProjects.filter(project => !isUnassignedProject(project));
+
+  const allSelected = activeProjectsWithoutUnassigned.length > 0 && (selectedProjects.length === activeProjectsWithoutUnassigned.length);
+  const someSelected = selectedProjects.length > 0 && selectedProjects.length < activeProjectsWithoutUnassigned.length;
+
   const handleSelectAll = () => {
     // dont include unassigned project in the count
-    if (selectedProjects.length === activeProjects.length - 1) {
+    if (selectedProjects.length === activeProjectsWithoutUnassigned.length) {
       setSelectedProjects([]);
     } else {
       // dont include unassigned project in the selection
-      setSelectedProjects([...activeProjects.filter(project => !isUnassignedProject(project))]);
+      setSelectedProjects([...activeProjectsWithoutUnassigned]);
     }
   };
-
-  const allSelected = activeProjects.length > 0 && (selectedProjects.length === activeProjects.length - 1 && activeProjects.some(p => !isUnassignedProject(p)));
-  const someSelected = selectedProjects.length > 0 && selectedProjects.length < activeProjects.length - 1;
-
+  
   return (
     <div className={styles.tableHeader}>
       <div className={styles.tableRow}>
         <div className={styles.checkboxColumn}>
           <Checkbox
-            // disable when there is only the unassigned project
-            disabled={activeProjects.length === 1}
+            disabled={activeProjectsWithoutUnassigned.length === 0}
             checked={allSelected}
             handleClick={handleSelectAll}
             className={someSelected ? styles.indeterminate : ''}
