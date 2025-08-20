@@ -30,8 +30,6 @@ $statusSize: 18px;
 }
 .statusRunning {
   > div {
-    height: $statusSize !important;
-    width: $statusSize !important;
     margin-bottom: 0;
   }
 }
