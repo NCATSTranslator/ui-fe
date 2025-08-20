@@ -79,17 +79,22 @@ export const ProjectListInner = () => {
   const handleTabSelection = (tabName: string) => {
     if(activeTab != tabName) {
       setActiveTab(tabName);
-      // TODO: reset selected items when tab is changed. The below doesn't work bc the active tab is changed when a project is edited.
-      // setSelectedProjects([]);
-      // setSelectedQueries([]);
+      if(tabName !== 'Queries') {
+        setSelectedProjects([]);
+        setSelectedQueries([]);
+      }
     }
   };
 
   const [isDeleteProjectsPromptOpen, setIsDeleteProjectsPromptOpen] = useState(false);
   const [isDeleteQueriesPromptOpen, setIsDeleteQueriesPromptOpen] = useState(false);
+  const [isPermanentDeleteProjectPromptOpen, setIsPermanentDeleteProjectPromptOpen] = useState(false);
+  const [isPermanentDeleteQueryPromptOpen, setIsPermanentDeleteQueryPromptOpen] = useState(false);
 
   const { shouldShow: shouldShowDeleteProjectsPrompt, setHideDeletePrompt: setHideDeleteProjectsPrompt } = useShouldShowDeletePrompt('hideDeleteProjectsPrompt', true);
+  const { shouldShow: shouldShowPermanentDeleteProjectPrompt, setHideDeletePrompt: setHidePermanentDeleteProjectPrompt } = useShouldShowDeletePrompt('hidePermanentDeleteProjectPrompt', true);
   const { shouldShow: shouldShowDeleteQueriesPrompt, setHideDeletePrompt: setHideDeleteQueriesPrompt } = useShouldShowDeletePrompt('hideDeleteQueriesPrompt', true);
+  const { shouldShow: shouldShowPermanentDeleteQueryPrompt, setHideDeletePrompt: setHidePermanentDeleteQueryPrompt } = useShouldShowDeletePrompt('hidePermanentDeleteQueryPrompt', true);
 
   const handleDeleteSelectedProjects = () => {
     selectedProjects.forEach((project: Project) => projectEditHandlers.handleDeleteProject(project));
@@ -115,6 +120,44 @@ export const ProjectListInner = () => {
       else
         handleDeleteSelectedQueries();
     }
+  };
+
+  const handleInitiatePermanentDeleteProject = (project: Project) => {
+    setSelectedProjects([project]);
+    if(shouldShowPermanentDeleteProjectPrompt)
+      setIsPermanentDeleteProjectPromptOpen(true);
+    else
+      projectEditHandlers.handlePermanentDeleteProject(project);
+  };
+
+  const handlePermanentDeleteProject = () => {
+    setIsPermanentDeleteProjectPromptOpen(false);
+    projectEditHandlers.handlePermanentDeleteProject(selectedProjects[0]);
+    setSelectedProjects([]);
+  };
+
+  const handleCancelClosePermanentDeleteProject = () => {
+    setIsPermanentDeleteProjectPromptOpen(false);
+    setSelectedProjects([]);
+  };
+
+  const handleInitiatePermanentDeleteQuery = (query: UserQueryObject) => {
+    setSelectedQueries([query]);
+    if(shouldShowPermanentDeleteQueryPrompt)
+      setIsPermanentDeleteQueryPromptOpen(true);
+    else
+      queryEditHandlers.handlePermanentDeleteQuery(query);
+  };
+
+  const handlePermanentDeleteQuery = () => {
+    setIsPermanentDeleteQueryPromptOpen(false);
+    queryEditHandlers.handlePermanentDeleteQuery(selectedQueries[0]);
+    setSelectedQueries([]);
+  };
+
+  const handleCancelClosePermanentDeleteQuery = () => {
+    setIsPermanentDeleteQueryPromptOpen(false);
+    setSelectedQueries([]);
   };
 
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -150,27 +193,59 @@ export const ProjectListInner = () => {
 
   return (
     <div className={`${styles.projectListContainer} ${projectEditState.isEditing ? styles.isEditing : ''}`}>
+      {/* Delete Project Prompt */}
       <WarningModal
         isOpen={isDeleteProjectsPromptOpen}
-        onClose={() => setIsDeleteProjectsPromptOpen(false)}
+        onClose={() => {
+          setIsDeleteProjectsPromptOpen(false);
+          setSelectedProjects([]);
+        }}
         onConfirm={handleDeleteSelectedProjects}
-        onCancel={() => setIsDeleteProjectsPromptOpen(false)}
+        onCancel={() => {
+          setIsDeleteProjectsPromptOpen(false);
+          setSelectedProjects([]);
+        }}
         heading={`Delete ${selectedProjects.length} project${selectedProjects.length > 1 ? 's' : ''}?`}
-        content="This action cannot be undone."
+        content={`${selectedProjects.length > 1 ? 'These projects can be recovered from your Trash.' : 'This project can be recovered from your Trash.'}`}
         cancelButtonText="Cancel"
         confirmButtonText={`Delete Project${selectedProjects.length > 1 ? 's' : ''}`}
         setStorageKeyFn={setHideDeleteProjectsPrompt}
       />
+      {/* Delete Query Prompt */}
       <WarningModal
         isOpen={isDeleteQueriesPromptOpen}
         onClose={() => setIsDeleteQueriesPromptOpen(false)}
         onConfirm={handleDeleteSelectedQueries}
         onCancel={() => setIsDeleteQueriesPromptOpen(false)}
         heading={`Delete ${selectedQueries.length} quer${selectedQueries.length > 1 ? 'ies' : 'y'}?`}
-        content="This action cannot be undone."
+        content={`${selectedQueries.length > 1 ? 'These queries can be recovered from your Trash.' : 'This query can be recovered from your Trash.'}`}
         cancelButtonText="Cancel"
         confirmButtonText={`Delete Quer${selectedQueries.length > 1 ? 'ies' : 'y'}`}
         setStorageKeyFn={setHideDeleteQueriesPrompt}
+      />
+      {/* Permanent Delete Project Prompt */}
+      <WarningModal
+        isOpen={isPermanentDeleteProjectPromptOpen}
+        onClose={handleCancelClosePermanentDeleteProject}
+        onConfirm={handlePermanentDeleteProject}
+        onCancel={handleCancelClosePermanentDeleteProject}
+        heading={`Permanently Delete Project?`}
+        content={`This action cannot be undone.`}
+        cancelButtonText="Cancel"
+        confirmButtonText={`Delete Project`}
+        setStorageKeyFn={setHidePermanentDeleteProjectPrompt}
+      />
+      {/* Permanent Delete Query Prompt */}
+      <WarningModal
+        isOpen={isPermanentDeleteQueryPromptOpen}
+        onClose={handleCancelClosePermanentDeleteQuery}
+        onConfirm={handlePermanentDeleteQuery}
+        onCancel={handleCancelClosePermanentDeleteQuery}
+        heading={`Permanently Delete Query?`}
+        content={`This action cannot be undone.`}
+        cancelButtonText="Cancel"
+        confirmButtonText={`Delete Query`}
+        setStorageKeyFn={setHidePermanentDeleteQueryPrompt}
       />
       <EditQueryModal
         currentEditingQueryItem={queryEditState.editingItem?.type === 'query' ? queryEditState.editingItem : undefined}
@@ -279,6 +354,7 @@ export const ProjectListInner = () => {
                                             setSelectedProjects={setSelectedProjects}
                                             selectedProjects={selectedProjects}
                                             onEdit={projectEditHandlers.handleEditProject}
+                                            onDelete={handleInitiatePermanentDeleteProject}
                                             queriesLoading={queriesLoading}
                                           />
                                         )
@@ -362,6 +438,7 @@ export const ProjectListInner = () => {
                                         setSelectedQueries={setSelectedQueries}
                                         selectedQueries={selectedQueries}
                                         onEdit={queryEditHandlers.handleEditQuery}
+                                        onDelete={handleInitiatePermanentDeleteQuery}
                                       />
                                     ))
                                   )}
@@ -411,6 +488,7 @@ export const ProjectListInner = () => {
                                           setSelectedProjects={setSelectedProjects}
                                           selectedProjects={selectedProjects}
                                           queriesLoading={queriesLoading}
+                                          onDelete={handleInitiatePermanentDeleteProject}
                                         />
                                       ))
                                     }
@@ -434,6 +512,7 @@ export const ProjectListInner = () => {
                                           searchTerm={searchTerm}
                                           setSelectedQueries={setSelectedQueries}
                                           selectedQueries={selectedQueries}
+                                          onDelete={handleInitiatePermanentDeleteQuery}
                                         />
                                       ))
                                     }

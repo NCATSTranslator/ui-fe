@@ -20,6 +20,7 @@ export interface EditProjectHandlers {
   handleCancelEdit: () => void;
   handleRestoreProject: (project: Project) => void;
   handleDeleteProject: (project: Project) => void;
+  handlePermanentDeleteProject: (project: Project) => void;
 }
 
 export interface EditQueryHandlers {
@@ -28,6 +29,7 @@ export interface EditQueryHandlers {
   handleCancelEdit: () => void;
   handleRestoreQuery: (query: UserQueryObject) => void;
   handleDeleteQuery: (query: UserQueryObject) => void;
+  handlePermanentDeleteQuery: (query: UserQueryObject) => void;
 }
 
 export interface EditHandlers {
@@ -211,12 +213,18 @@ export const useEditProjectHandlers = (
     });
   };
 
+  const handlePermanentDeleteProject = (project: Project) => {
+    // TODO: Implement permanent delete project
+    console.log('NOT IMPLEMENTED: Permanently deleting project:', project);
+  };
+
   return {
     handleEditProject,
     handleUpdateProject,
     handleCancelEdit,
     handleRestoreProject,
-    handleDeleteProject
+    handleDeleteProject,
+    handlePermanentDeleteProject
   };
 };
 
@@ -356,12 +364,18 @@ export const useEditQueryHandlers = (
     });
   };
 
+  const handlePermanentDeleteQuery = (query: UserQueryObject) => {
+    // TODO: Implement permanent delete query
+    console.log('NOT IMPLEMENTED: Permanently deleting query:', query);
+  };
+
   return {
     handleEditQuery,
     handleUpdateQuery,
     handleCancelEdit,
     handleRestoreQuery,
-    handleDeleteQuery
+    handleDeleteQuery,
+    handlePermanentDeleteQuery
   };
 };
 

@@ -40,7 +40,9 @@ const ProjectsTableHeader = ({
     <div className={styles.tableHeader}>
       <div className={styles.tableRow}>
         <div className={styles.checkboxColumn}>
-          <Checkbox 
+          <Checkbox
+            // disable when there is only the unassigned project
+            disabled={activeProjects.length === 1}
             checked={allSelected}
             handleClick={handleSelectAll}
             className={someSelected ? styles.indeterminate : ''}

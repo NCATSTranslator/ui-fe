@@ -37,7 +37,8 @@ const QueriesTableHeader = ({
     <div className={styles.tableHeader}>
       <div className={styles.tableRow}>
         <div className={styles.checkboxColumn}>
-          <Checkbox 
+          <Checkbox
+            disabled={activeQueries.length === 0}
             checked={allSelected}
             handleClick={handleSelectAll}
             className={someSelected ? styles.indeterminate : ''}

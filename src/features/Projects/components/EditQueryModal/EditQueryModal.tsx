@@ -75,10 +75,9 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   }
 
   const handleProjectNameChange = (value: string) => {
-    if(!currentEditingQueryItem?.id) return;
     setNewProject({
       title: value,
-      pks: [currentEditingQueryItem.id]
+      pks: currentEditingQueryItem?.id ? [currentEditingQueryItem.id] : []
     });
   }
 
@@ -100,6 +99,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
         setProjectNameError('');
         if(mode === 'add' && setSelectedProject) {
           setSelectedProject(data);
+          onClose();
         } else {
           setLocalSelectedProjects([...localSelectedProjects, data]);
         }

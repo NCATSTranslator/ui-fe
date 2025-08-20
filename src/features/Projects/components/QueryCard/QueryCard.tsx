@@ -1,8 +1,11 @@
 import { Dispatch, SetStateAction } from 'react';
-import { UserQueryObject } from '@/features/Projects/types/projects.d';
+import { Project, UserQueryObject } from '@/features/Projects/types/projects.d';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
+import { useRestoreQueries } from '@/features/Projects/hooks/customHooks';
+import { errorToast, queryRestoredToast } from '@/features/Projects/utils/toastMessages';
 
 interface QueryCardProps {
+  onDelete?: (query: UserQueryObject) => void;
   onEdit?: (query: UserQueryObject) => void;
   query: UserQueryObject;
   searchTerm?: string;
@@ -11,12 +14,26 @@ interface QueryCardProps {
 }
 
 const QueryCard = ({ 
+  onDelete,
   onEdit,
   query,
   searchTerm,
   selectedQueries = [],
   setSelectedQueries
 }: QueryCardProps) => {
+
+  const restoreQueriesMutation = useRestoreQueries();
+  const onRestore = (query: UserQueryObject) => {
+    restoreQueriesMutation.mutate([query.sid.toString()], { 
+      onSuccess: () => {
+        queryRestoredToast();
+      },
+      onError: (error) => {
+        console.error('Failed to restore query:', error);
+        errorToast('Failed to restore query');
+      }
+    });
+  };
   
   return (
     <DataCard
@@ -26,7 +43,9 @@ const QueryCard = ({
       selectedItems={selectedQueries}
       setSelectedItems={setSelectedQueries}
       status={query.status}
+      onDelete={onDelete}
       onEdit={onEdit}
+      onRestore={onRestore}
       getItemId={(item: UserQueryObject) => item.data.qid}
       getItemTitle={(item: UserQueryObject) => item.data.title || ''}
       getItemTimeCreated={(item: UserQueryObject) => item.data.time_created.toString()}
