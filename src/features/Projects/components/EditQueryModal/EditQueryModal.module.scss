@@ -37,6 +37,12 @@
     padding: 0 $m;
   }
   
+  .modalInner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
   .wrapper {
     padding: $s;
     background-color: $lightGray;

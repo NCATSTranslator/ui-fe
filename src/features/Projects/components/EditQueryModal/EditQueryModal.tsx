@@ -53,7 +53,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [localSelectedProjects, setLocalSelectedProjects] = useState<ProjectRaw[]>(getAttachedProjects(projects, currentEditingQueryItem?.id));
   const [isDeleteQueryPromptOpen, setIsDeleteQueryPromptOpen] = useState(false);
-  const filteredProjects: ProjectRaw[] = useMemo(() => filterProjects(projects, searchTerm) as ProjectRaw[], [projects, searchTerm]);
+  const filteredProjects: ProjectRaw[] = useMemo(() => filterProjects(projects.filter(p => !p.deleted), searchTerm) as ProjectRaw[], [projects, searchTerm]);
 
   const { shouldShow, setHideDeletePrompt: setHideDeleteQueryPrompt } = useShouldShowDeletePrompt('hideDeleteQueryPrompt', true);
 
@@ -199,6 +199,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
         onClose={onClose}
         className={styles.editQueryModal}
         containerClass={styles.container}
+        innerClass={styles.modalInner}
       >
         <div className={styles.top}>
           <div className={styles.header}>
@@ -268,7 +269,13 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
                         </div>
                     )}) : (
                       <div className={styles.noResults}>
-                        <p>No projects found matching "{searchTerm}"</p>
+                        {
+                          searchTerm.length > 0 ? (
+                            <p>No projects found matching "{searchTerm}"</p>
+                          ) : (
+                            <p>No projects found</p>
+                          )
+                        }
                       </div>
                     )
                   }
