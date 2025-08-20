@@ -1,17 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from './ProjectDetailInner.module.scss';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
-import { useUserProjects, useFormattedProjects, useUserQueries, useProjectDetailSortSearchSelectState } from '@/features/Projects/hooks/customHooks';
-import { UserQueryObject, ProjectEditingItem, QueryEditingItem } from '@/features/Projects/types/projects.d';
+import { useUserProjects, useFormattedProjects, useUserQueries, useProjectDetailSortSearchSelectState, useShouldShowDeletePrompt } from '@/features/Projects/hooks/customHooks';
+import { UserQueryObject, ProjectEditingItem, QueryEditingItem, Project } from '@/features/Projects/types/projects.d';
 import { filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject } from '@/features/Projects/utils/editUpdateFunctions';
 import ProjectDetailErrorStates from '@/features/Projects/components/ProjectDetailErrorStates/ProjectDetailErrorStates';
+import ProjectDeleteWarningModal from '@/features/Projects/components/ProjectDeleteWarningModal/ProjectDeleteWarningModal';
 
 const ProjectDetailInner = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -27,6 +28,9 @@ const ProjectDetailInner = () => {
     if (!project) return [] as UserQueryObject[];
     return queries.filter((q: UserQueryObject) => project.data.pks.includes(q.data.qid));
   }, [project, queries]);
+
+  const [isDeleteProjectsPromptOpen, setIsDeleteProjectsPromptOpen] = useState(false);
+  const { shouldShow: shouldShowDeleteProjectsPrompt, setHideDeletePrompt: setHideDeleteProjectsPrompt } = useShouldShowDeletePrompt('hideDeleteProjectsPrompt', true);
 
   // handles sorting, selection, and search state
   const {
@@ -76,6 +80,19 @@ const ProjectDetailInner = () => {
     }
   };
 
+  const handleInitiateDeleteProject = () => {
+    if(shouldShowDeleteProjectsPrompt){
+      setIsDeleteProjectsPromptOpen(true);
+    } else {
+      if(project)
+        handleDeleteProject(project);
+    }
+  };
+
+  const handleDeleteProject = (project: Project) => {
+    projectEditHandlers.handleDeleteProject(project);
+  };
+
   const sortedQueries = useMemo(
     () => filterAndSortQueries(projectQueries, sortField, sortDirection, searchTerm),
     [projectQueries, sortField, sortDirection, searchTerm]
@@ -83,6 +100,20 @@ const ProjectDetailInner = () => {
 
   return (
     <div className={styles.projectDetail}>
+      <ProjectDeleteWarningModal
+        isOpen={isDeleteProjectsPromptOpen}
+        onClose={() => {setIsDeleteProjectsPromptOpen(false);}}
+        onConfirm={() => {
+          if(project)
+            handleDeleteProject(project);
+        }}
+        onCancel={() => {setIsDeleteProjectsPromptOpen(false);}}
+        heading={`Delete project?`}
+        content={`'This project can be recovered from your Trash.`}
+        cancelButtonText="Cancel"
+        confirmButtonText={`Delete Project`}
+        setStorageKeyFn={setHideDeleteProjectsPrompt}
+      />
       {
         projectError
         ? 
@@ -103,7 +134,7 @@ const ProjectDetailInner = () => {
                     isEditing={projectEditState.isEditing}
                     noteCount={project?.note_count || 0}
                     onCancelEdit={projectEditHandlers.handleCancelEdit}
-                    onDeleteProject={projectEditHandlers.handleDeleteProject}
+                    onDeleteProject={handleInitiateDeleteProject}
                     onDeleteQuery={queryEditHandlers.handleDeleteQuery}
                     onEditClick={handleEditClick}
                     onRestoreProject={projectEditHandlers.handleRestoreProject}

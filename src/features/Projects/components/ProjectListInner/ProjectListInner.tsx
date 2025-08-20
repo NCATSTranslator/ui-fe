@@ -20,6 +20,7 @@ import DeletedTableHeader from '@/features/Projects/components/TableHeader/Delet
 import ProjectInnerErrorStates from '@/features/Projects/components/ProjectInnerErrorStates/ProjectInnerErrorStates';
 import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
 import WarningModal from '@/features/Common/components/WarningModal/WarningModal';
+import ProjectDeleteWarningModal from '@/features/Projects/components/ProjectDeleteWarningModal/ProjectDeleteWarningModal';
 
 export const ProjectListInner = () => {
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
@@ -96,6 +97,14 @@ export const ProjectListInner = () => {
   const { shouldShow: shouldShowDeleteQueriesPrompt, setHideDeletePrompt: setHideDeleteQueriesPrompt } = useShouldShowDeletePrompt('hideDeleteQueriesPrompt', true);
   const { shouldShow: shouldShowPermanentDeleteQueryPrompt, setHideDeletePrompt: setHidePermanentDeleteQueryPrompt } = useShouldShowDeletePrompt('hidePermanentDeleteQueryPrompt', true);
 
+  const handleInitiateDeleteSingleProject = (project: Project) => {
+    if(shouldShowDeleteProjectsPrompt){
+      setSelectedProjects([project]);
+      setIsDeleteProjectsPromptOpen(true);
+    } else {
+      projectEditHandlers.handleDeleteProject(project);
+    }
+  };
   const handleDeleteSelectedProjects = () => {
     selectedProjects.forEach((project: Project) => projectEditHandlers.handleDeleteProject(project));
     setIsDeleteProjectsPromptOpen(false);
@@ -194,7 +203,7 @@ export const ProjectListInner = () => {
   return (
     <div className={`${styles.projectListContainer} ${projectEditState.isEditing ? styles.isEditing : ''}`}>
       {/* Delete Project Prompt */}
-      <WarningModal
+      <ProjectDeleteWarningModal
         isOpen={isDeleteProjectsPromptOpen}
         onClose={() => {
           setIsDeleteProjectsPromptOpen(false);
@@ -271,6 +280,7 @@ export const ProjectListInner = () => {
             onCancelEdit={projectEditHandlers.handleCancelEdit}
             selectedQueries={selectedQueries}
             onCreateNewClick={onCreateNewProjectClick}
+            onDeleteProject={handleInitiateDeleteSingleProject}
           />
           {
             hideProjectsTab && hideQueriesTab && hideTrashTab

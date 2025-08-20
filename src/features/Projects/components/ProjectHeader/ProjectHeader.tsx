@@ -171,6 +171,13 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
     }
   };
 
+  const handleDeleteClick = () => {
+    if (onDeleteProject && project) {
+      setProjectEditingState(false);
+      onDeleteProject(project);
+    }
+  };
+
   const handleCancelClick = () => {
     if (onCancelEdit)
       onCancelEdit();
@@ -249,6 +256,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                     updateProjectsMutation={updateProjectsMutation}
                     handleDoneClick={handleDoneClick}
                     handleCancelClick={handleCancelClick}
+                    handleDeleteClick={handleDeleteClick}
                     styles={styles}
                     type="create"
                   />
@@ -373,6 +381,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                     createProjectMutation={createProjectMutation}
                     handleDoneClick={handleDoneClick}
                     handleCancelClick={handleCancelClick}
+                    handleDeleteClick={handleDeleteClick}
                     type="update"
                     styles={styles}
                     updateProjectsMutation={updateProjectsMutation}
