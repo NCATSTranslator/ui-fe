@@ -15,6 +15,10 @@
   .deletedWrapper {
     min-height: calc(($xl * 4));
     position: relative;
+    margin-bottom: $s;
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
   .emptyState {
     display: flex;

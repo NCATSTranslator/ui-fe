@@ -155,10 +155,10 @@ export const ProjectListInner = () => {
         onClose={() => setIsDeleteProjectsPromptOpen(false)}
         onConfirm={handleDeleteSelectedProjects}
         onCancel={() => setIsDeleteProjectsPromptOpen(false)}
-        heading="Delete selected projects?"
+        heading={`Delete ${selectedProjects.length} project${selectedProjects.length > 1 ? 's' : ''}?`}
         content="This action cannot be undone."
         cancelButtonText="Cancel"
-        confirmButtonText="Delete Projects"
+        confirmButtonText={`Delete Project${selectedProjects.length > 1 ? 's' : ''}`}
         setStorageKeyFn={setHideDeleteProjectsPrompt}
       />
       <WarningModal
@@ -166,10 +166,10 @@ export const ProjectListInner = () => {
         onClose={() => setIsDeleteQueriesPromptOpen(false)}
         onConfirm={handleDeleteSelectedQueries}
         onCancel={() => setIsDeleteQueriesPromptOpen(false)}
-        heading="Delete selected queries?"
+        heading={`Delete ${selectedQueries.length} quer${selectedQueries.length > 1 ? 'ies' : 'y'}?`}
         content="This action cannot be undone."
         cancelButtonText="Cancel"
-        confirmButtonText="Delete Queries"
+        confirmButtonText={`Delete Quer${selectedQueries.length > 1 ? 'ies' : 'y'}`}
         setStorageKeyFn={setHideDeleteQueriesPrompt}
       />
       <EditQueryModal
@@ -344,7 +344,12 @@ export const ProjectListInner = () => {
                                           )
                                         :
                                           (
-                                            <p>No queries found. Your saved queries will appear here.</p>
+                                            <>
+                                              <h6>No Queries</h6>
+                                              <p>
+                                                Your bookmarks and notes are saved here when you run a <a href="/" target="_blank" className={styles.link}>New Query</a>.
+                                              </p>
+                                            </>
                                           )
                                       }
                                     </div>
@@ -388,50 +393,54 @@ export const ProjectListInner = () => {
                           </div>
                         ) : (
                           <>
-                            <div className={styles.deletedWrapper}>
-                              <LoadingWrapper
-                                loading={projectsLoading}
-                                wrapperClassName={styles.loadingWrapper}
-                                spinnerClassName={styles.loadingSpinner}
-                              >
-                                <div className={styles.projectGrid}>
-                                  {sortedDeletedProjects.length > 0 && (
-                                    sortedDeletedProjects.map((project: Project) => (
-                                      <ProjectCard 
-                                        key={project.id}
-                                        queries={queries}
-                                        project={project}
-                                        searchTerm={searchTerm}
-                                        setSelectedProjects={setSelectedProjects}
-                                        selectedProjects={selectedProjects}
-                                        queriesLoading={queriesLoading}
-                                      />
-                                    ))
-                                  )}
-                                </div>
-                              </LoadingWrapper>
-                            </div>
-                            <div className={styles.deletedWrapper}>
-                              <LoadingWrapper
-                                loading={queriesLoading}
-                                wrapperClassName={styles.loadingWrapper}
-                                spinnerClassName={styles.loadingSpinner}
-                              >
-                                <div className={styles.projectGrid}>
-                                  {sortedDeletedQueries.length > 0 && (
-                                    sortedDeletedQueries.map((query: UserQueryObject) => (
-                                      <QueryCard 
-                                        key={query.data.qid}
-                                        query={query}
-                                        searchTerm={searchTerm}
-                                        setSelectedQueries={setSelectedQueries}
-                                        selectedQueries={selectedQueries}
-                                      />
-                                    ))
-                                  )}
-                                </div>
-                              </LoadingWrapper>
-                            </div>
+                            {sortedDeletedProjects.length > 0 && (
+                              <div className={styles.deletedWrapper}>
+                                <LoadingWrapper
+                                  loading={projectsLoading}
+                                  wrapperClassName={styles.loadingWrapper}
+                                  spinnerClassName={styles.loadingSpinner}
+                                >
+                                  <div className={styles.projectGrid}>
+                                    {
+                                      sortedDeletedProjects.map((project: Project) => (
+                                        <ProjectCard 
+                                          key={project.id}
+                                          queries={queries}
+                                          project={project}
+                                          searchTerm={searchTerm}
+                                          setSelectedProjects={setSelectedProjects}
+                                          selectedProjects={selectedProjects}
+                                          queriesLoading={queriesLoading}
+                                        />
+                                      ))
+                                    }
+                                  </div>
+                                </LoadingWrapper>
+                              </div>
+                            )}
+                            {sortedDeletedQueries.length > 0 && (
+                              <div className={styles.deletedWrapper}>
+                                <LoadingWrapper
+                                  loading={queriesLoading}
+                                  wrapperClassName={styles.loadingWrapper}
+                                  spinnerClassName={styles.loadingSpinner}
+                                >
+                                  <div className={styles.projectGrid}>
+                                    {
+                                      sortedDeletedQueries.map((query: UserQueryObject) => (
+                                        <QueryCard 
+                                          key={query.data.qid}
+                                          query={query}
+                                          searchTerm={searchTerm}
+                                          setSelectedQueries={setSelectedQueries}
+                                          selectedQueries={selectedQueries}
+                                        />
+                                      ))
+                                    }
+                                  </div>
+                                </LoadingWrapper>
+                              </div>
+                            )}
                           </>
                         )}
                       </Tab>
