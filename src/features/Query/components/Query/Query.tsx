@@ -138,7 +138,7 @@ const Query: FC<QueryProps> = ({
     if(!submitQuery)
       return;
     submitQuery(item, selectedProject?.id?.toString() || undefined);
-  }, [submitQuery]);
+  }, [submitQuery, selectedProject]);
 
   const handleSubmission = useCallback((item: QueryItem | null) => {
     validateSubmission(item || queryItem);

@@ -65,6 +65,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const handleSelectProject = (project: ProjectRaw) => {
     if(mode === 'add' && setSelectedProject) {
       setSelectedProject(project);
+      onClose();
     } else {
       if(localSelectedProjects.some(p => p.id === project.id)) {
         setLocalSelectedProjects(prev => prev.filter(p => p.id !== project.id));
