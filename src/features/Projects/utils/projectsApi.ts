@@ -85,14 +85,14 @@ export const deleteProjects = async (
   projectIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<ProjectRaw[]> => {
+): Promise<"OK"> => {
   const url = `${API_PATH_PREFIX}/users/me/projects/delete`;
   
-  return fetchWithErrorHandling<ProjectRaw[]>(
+  return fetchWithErrorHandling<"OK">(
     () => put(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    isProjectRawArray
+    (data: unknown): data is "OK" => true
   );
 };
 
@@ -104,14 +104,14 @@ export const restoreProjects = async (
   projectIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<ProjectRaw[]> => {
+): Promise<"OK"> => {
   const url = `${API_PATH_PREFIX}/users/me/projects/restore`;
   
-  return fetchWithErrorHandling<ProjectRaw[]>(
+  return fetchWithErrorHandling<"OK">(
     () => put(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    isProjectRawArray
+    (data: unknown): data is "OK" => true
   );
 };
 
@@ -119,22 +119,18 @@ export const restoreProjects = async (
  * PUT /api/v1/users/me/queries/delete
  * Updates a list of query IDs by setting the deleted flag to true.
  */
-// TODO: this endpoint returns an object for which the FE has no type, update the Promise return type to UserQueryObject when the BE is updated
-// then update the fetchWithErrorHandling type checker param back to isUserQueryObject
 export const deleteQueries = async (
   queryIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<void> => {
-// ): Promise<UserQueryObject> => {
+): Promise<"OK"> => {
   const url = `${API_PATH_PREFIX}/users/me/queries/delete`;
   
-  return fetchWithErrorHandling<void>(
+  return fetchWithErrorHandling<"OK">(
     () => put(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is void => true
-    // isUserQueryObject
+    (data: unknown): data is "OK" => true
   );
 };
 
@@ -146,14 +142,14 @@ export const restoreQueries = async (
   queryIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<UserQueryObject> => {
+): Promise<"OK"> => {
   const url = `${API_PATH_PREFIX}/users/me/queries/restore`;
   
-  return fetchWithErrorHandling<UserQueryObject>(
+  return fetchWithErrorHandling<"OK">(
     () => put(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    isUserQueryObject
+    (data: unknown): data is "OK" => true
   );
 };
 
