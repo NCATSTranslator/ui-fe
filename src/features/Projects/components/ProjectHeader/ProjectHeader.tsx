@@ -151,7 +151,6 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
         setProjectNameError('');
       } else {
         // Create the project using the mutation
-        console.log('creating project', currentName.trim(), selectedQueries?.map(query => query.data.qid));
         createProjectMutation.mutate({
           title: currentName.trim(),
           pks: selectedQueries?.map(query => query.data.qid) || []

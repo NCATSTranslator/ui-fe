@@ -356,23 +356,3 @@ export const useProjectDetailSortSearchSelectState = () => {
     resetState
   };
 };
-
-/**
- * Generic hook to manage the state of a delete prompt
- * @param {string} storageKey - The key to store the prompt state in localStorage
- * @param {boolean} defaultShow - Whether the prompt should be shown by default
- * @returns {boolean} shouldShow - Whether the prompt should be shown
- * @returns {Function} setHideDeletePrompt - Function to set the hide delete prompt
- */
-export const useShouldShowDeletePrompt = (storageKey: string, defaultShow: boolean = true) => {
-  const showDeletePrompt = localStorage.getItem(storageKey) === 'true' ? false : defaultShow;
-
-  const setHideDeletePrompt = (hide: boolean) => {
-    localStorage.setItem(storageKey, hide ? 'true' : 'false');
-  };
-
-  return {
-    shouldShow: showDeletePrompt,
-    setHideDeletePrompt
-  };
-};

@@ -4,7 +4,8 @@ import Modal from "@/features/Common/components/Modal/Modal";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 import { ProjectCreate, ProjectRaw, ProjectUpdate, QueryEditingItem } from "@/features/Projects/types/projects";
 import Button from "@/features/Core/components/Button/Button";
-import { useCreateProject, useDeleteQueries, useShouldShowDeletePrompt, useUpdateProjects } from "@/features/Projects/hooks/customHooks";
+import { useCreateProject, useDeleteQueries, useUpdateProjects } from "@/features/Projects/hooks/customHooks";
+import { useDeletePrompts } from "@/features/Projects/hooks/useDeletePrompts";
 import CheckmarkIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
@@ -55,7 +56,8 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const [isDeleteQueryPromptOpen, setIsDeleteQueryPromptOpen] = useState(false);
   const filteredProjects: ProjectRaw[] = useMemo(() => filterProjects(projects.filter(p => !p.deleted), searchTerm) as ProjectRaw[], [projects, searchTerm]);
 
-  const { shouldShow, setHideDeletePrompt: setHideDeleteQueryPrompt } = useShouldShowDeletePrompt('hideDeleteQueryPrompt', true);
+  const deletePrompts = useDeletePrompts(['deleteQueries']);
+  const { shouldShow, setHideDeletePrompt: setHideDeleteQueryPrompt } = deletePrompts.deleteQueries || {};
 
   const onClose = () => {
     setOpen(false);

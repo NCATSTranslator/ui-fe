@@ -9,8 +9,8 @@ import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEdit
 import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
 import { useProjectListData } from '@/features/Projects/hooks/useProjectListData';
 import { useFilteredAndSortedData } from '@/features/Projects/hooks/useFilteredAndSortedData';
-import { useAllDeletePrompts } from '@/features/Projects/hooks/useAllDeletePrompts';
-import { useDeleteModals } from '@/features/Projects/hooks/useDeleteModals';
+import { useAllDeletePrompts } from '@/features/Projects/hooks/useDeletePrompts';
+import { useModals } from '@/features/Projects/hooks/useModals';
 import { useDeletionHandlers } from '@/features/Projects/hooks/useDeletionHandlers';
 import ProjectsTab from '@/features/Projects/components/Tabs/ProjectsTab/ProjectsTab';
 import QueriesTab from '@/features/Projects/components/Tabs/QueriesTab/QueriesTab';
@@ -22,7 +22,14 @@ export const ProjectListInner = () => {
   const data = useProjectListData();
   const projectListState = useProjectDetailSortSearchSelectState();
   const deletePrompts = useAllDeletePrompts();
-  const modals = useDeleteModals();
+  const modals = useModals({
+    deleteProjects: false,
+    deleteQueries: false,
+    permanentDeleteProject: false,
+    permanentDeleteQuery: false,
+    permanentDeleteSelected: false,
+    emptyTrash: false
+  });
   
   const [activeTab, setActiveTab] = useState<string>('Projects');
 
@@ -114,7 +121,7 @@ export const ProjectListInner = () => {
         modals={modals.modals}
         selectedProjects={projectListState.selectedProjects}
         selectedQueries={projectListState.selectedQueries}
-        onCloseModal={modals.closeModal}
+        onCloseModal={(modalType: string) => modals.closeModal(modalType as unknown as keyof typeof modals.modals)}
         setSelectedProjects={projectListState.setSelectedProjects}
         setSelectedQueries={projectListState.setSelectedQueries}
         deletionHandlers={deletionHandlers}

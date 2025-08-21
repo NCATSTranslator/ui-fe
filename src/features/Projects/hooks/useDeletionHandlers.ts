@@ -11,8 +11,8 @@ interface UseDeletionHandlersProps {
     handlePermanentDeleteQuery: (query: UserQueryObject) => void;
   };
   modals: {
-    openModal: (modalType: "deleteProjects" | "deleteQueries" | "permanentDeleteProject" | "permanentDeleteQuery" | "permanentDeleteSelected" | "emptyTrash") => void;
-    closeModal: (modalType: "deleteProjects" | "deleteQueries" | "permanentDeleteProject" | "permanentDeleteQuery" | "permanentDeleteSelected" | "emptyTrash") => void;
+    openModal: (modalType: any) => void;
+    closeModal: (modalType: any) => void;
   };
   selections: {
     selectedProjects: Project[];
@@ -20,14 +20,7 @@ interface UseDeletionHandlersProps {
     setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
     setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
   };
-  prompts: {
-    deleteProjects: { shouldShow: boolean };
-    deleteQueries: { shouldShow: boolean };
-    permanentDeleteProject: { shouldShow: boolean };
-    permanentDeleteQuery: { shouldShow: boolean };
-    permanentDeleteSelected: { shouldShow: boolean };
-    emptyTrash: { shouldShow: boolean };
-  };
+  prompts: Record<string, { shouldShow: boolean }>;
 }
 
 /**

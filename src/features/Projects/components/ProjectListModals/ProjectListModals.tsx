@@ -4,17 +4,10 @@ import WarningModal from '@/features/Common/components/WarningModal/WarningModal
 import { Project, UserQueryObject } from '@/features/Projects/types/projects.d';
 
 interface ProjectListModalsProps {
-  modals: {
-    deleteProjects: boolean;
-    deleteQueries: boolean;
-    permanentDeleteProject: boolean;
-    permanentDeleteQuery: boolean;
-    permanentDeleteSelected: boolean;
-    emptyTrash: boolean;
-  };
+  modals: Record<string, boolean>;
   selectedProjects: Project[];
   selectedQueries: UserQueryObject[];
-  onCloseModal: (modalType: keyof ProjectListModalsProps['modals']) => void;
+  onCloseModal: (modalType: string) => void;
   setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
   setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
   deletionHandlers: {
@@ -29,14 +22,7 @@ interface ProjectListModalsProps {
     handleCancelClosePermanentDeleteSelected: () => void;
     handleCancelCloseEmptyTrash: () => void;
   };
-  deletePrompts: {
-    deleteProjects: { setHideDeletePrompt: (hide: boolean) => void };
-    deleteQueries: { setHideDeletePrompt: (hide: boolean) => void };
-    permanentDeleteProject: { setHideDeletePrompt: (hide: boolean) => void };
-    permanentDeleteQuery: { setHideDeletePrompt: (hide: boolean) => void };
-    permanentDeleteSelected: { setHideDeletePrompt: (hide: boolean) => void };
-    emptyTrash: { setHideDeletePrompt: (hide: boolean) => void };
-  };
+  deletePrompts: Record<string, { setHideDeletePrompt: (hide: boolean) => void }>;
 }
 
 const ProjectListModals = ({
