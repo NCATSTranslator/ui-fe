@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DataCard.module.scss';
-import { getFormattedDate } from '@/features/Common/utils/utilities';
+import { getFormattedDate, joinClasses } from '@/features/Common/utils/utilities';
 import Button from '@/features/Core/components/Button/Button';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
@@ -29,7 +29,9 @@ interface DataCardProps<T> {
   getItemNoteCount: (item: T) => number;
   getItemStatus?: (item: T) => string;
   getItemCount?: (item: T) => number;
+  isEditing?: boolean;
   item: T;
+  location?: "list" | "detail"
   onEdit?: (item: T) => void;
   onShare?: (item: T) => void;
   onRestore?: (item: T) => void;
@@ -52,7 +54,9 @@ const DataCard = <T,>({
   getItemNoteCount,
   getItemStatus,
   getItemCount,
+  isEditing = false,
   item,
+  location = "list",
   onEdit,
   onShare,
   onRestore,
@@ -154,18 +158,32 @@ const DataCard = <T,>({
       onDelete(item);
   };
 
+  const classes = joinClasses(
+    styles.dataCard,
+    className,
+    type === 'project' ? styles.projectCard : styles.queryCard,
+    location === 'detail' && styles.detailCard,
+    isEditing && styles.isEditing
+  )
+
+  const showCheckbox = location !== 'detail' || (location === 'detail' && isEditing);
+
   return (
     <CardWrapper 
-      className={`${styles.dataCard} ${className || ''} ${type === 'project' ? styles.projectCard : styles.queryCard}`}
+      className={classes}
       onClick={handleCardClick}
     >
-      <div className={`${styles.checkboxColumn} ${styles.column}`}>
-        {
-          !isUnassigned && (
-            <Checkbox checked={isSelected} handleClick={handleSelectItem} />
-          )
-        }
-      </div>
+      {
+        showCheckbox && (          
+          <div className={`${styles.checkboxColumn} ${styles.column}`}>
+            {
+              !isUnassigned && (
+                <Checkbox checked={isSelected} handleClick={handleSelectItem} />
+              )
+            }
+          </div>
+        )
+      }
       <div className={`${styles.nameColumn} ${styles.column}`}>
         <div className={styles.nameContainer}>
           <CardName 

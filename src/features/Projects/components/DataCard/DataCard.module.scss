@@ -18,6 +18,12 @@
   &:hover {
     background-color: $whiteHover;
   }
+  &.detailCard {
+    grid-template-columns: $projectsDetailGridColumns;
+    &.isEditing {
+      grid-template-columns: $projectsTableGridColumns;
+    }
+  }
   
   .column {
     font-size: $captionSize;
@@ -69,6 +75,12 @@
       background-color: $white;
       &:hover {
         background-color: $lightGray;
+      }
+      &:disabled {
+        background-color: $hoverGray;
+        &:hover {
+          background-color: $hoverGray;
+        }
       }
     }
   }

@@ -170,6 +170,8 @@ const ProjectDetailInner = () => {
                         sortField={sortField}
                         sortDirection={sortDirection}
                         onSort={handleSort}
+                        location="detail"
+                        isEditing={projectEditState.isEditing}
                       />
                     )}
                     {
@@ -198,6 +200,8 @@ const ProjectDetailInner = () => {
                                     setSelectedQueries={setSelectedQueries}
                                     selectedQueries={selectedQueries}
                                     onEdit={queryEditHandlers.handleEditQuery}
+                                    isEditing={projectEditState.isEditing}
+                                    location="detail"
                                   />
                                 ))
                               )}

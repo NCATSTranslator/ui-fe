@@ -5,6 +5,8 @@ import { useRestoreQueries } from '@/features/Projects/hooks/customHooks';
 import { errorToast, queryRestoredToast } from '@/features/Projects/utils/toastMessages';
 
 interface QueryCardProps {
+  isEditing?: boolean;
+  location?: "list" | "detail"
   onDelete?: (query: UserQueryObject) => void;
   onEdit?: (query: UserQueryObject) => void;
   query: UserQueryObject;
@@ -14,6 +16,8 @@ interface QueryCardProps {
 }
 
 const QueryCard = ({ 
+  isEditing = false,
+  location = "list",
   onDelete,
   onEdit,
   query,
@@ -37,6 +41,8 @@ const QueryCard = ({
   
   return (
     <DataCard
+      location={location}
+      isEditing={isEditing}
       item={query}
       type={query.data.query.type === 'pathfinder' ? 'pathfinderQuery' : 'smartQuery'}
       searchTerm={searchTerm}

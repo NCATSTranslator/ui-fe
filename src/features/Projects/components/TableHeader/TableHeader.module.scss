@@ -12,6 +12,9 @@
   align-items: center;
   font-weight: 600;
   letter-spacing: 0.5px;
+  &.detail {
+    grid-template-columns: $projectsDetailGridColumns;
+  }
   > div {
     font-size: 10px;
     text-transform: uppercase;
