@@ -139,7 +139,7 @@ export const ProjectListInner = () => {
       <div className="container">
         <div className={styles.projectList}>
           <ProjectHeader
-            title="Projects"
+            title={`${projectEditState.isEditing ? "Edit Project" : "Projects"}`}
             searchTerm={projectListState.searchTerm}
             setSearchTerm={projectListState.setSearchTerm}
             searchPlaceholder="Search by Project or Query Name"
