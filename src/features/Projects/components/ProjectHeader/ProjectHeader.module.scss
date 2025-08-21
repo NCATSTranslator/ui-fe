@@ -115,10 +115,19 @@
         background-color: $midGray;
       }
     }
-
+    .searchSection {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
   }
   .editSection {
+    width: 100%;
     margin-top: $xs;
+  }
+  .editContainer {
+    display: grid;
+    gap: $m;
   }
   .subtitleSection {
     display: flex;

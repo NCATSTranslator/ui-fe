@@ -313,81 +313,94 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
               </Button>
             )}
             <h1 className={styles.title}>{title}</h1>
-            <div className={styles.subtitleSection}>
-              {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-              {bookmarkCount !== undefined && <p className={styles.bookmarkCount}><BookmarkIcon />{bookmarkCount}</p>}
-              {noteCount !== undefined && <p className={styles.noteCount}><NoteIcon />{noteCount}</p>}
-            </div>
-            <div className={styles.editSection}>
-              <div className={styles.buttonContainer}>
-              {
-                (project && project.deleted) 
-                ? 
-                  (
-                    <>
-                      <Button
-                        variant="secondary"
-                        handleClick={handleRestoreProject}
-                        className={`${styles.editButton} ${styles.restoreButton}`}
-                        iconLeft={<RestoreIcon />}
-                        small
-                      >
-                        Restore Project
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        handleClick={handleDeleteProjectPermanently}
-                        className={styles.editButton}
-                        iconLeft={<TrashIcon />}
-                        small
-                      >
-                        Delete Permanently
-                      </Button>
-                    </>
-                  )
-                : 
-                  (
-                    <Button
-                      variant="secondary"
-                      handleClick={handleEditClick}
-                      className={styles.editButton}
-                      iconLeft={<EditIcon />}
-                      small
-                      disabled={queriesLoading}
-                    >
-                      Edit
-                    </Button>
-                  )
-              }
-              </div>
-              {isEditing && (
-                <div className={styles.editContainer}>
-                  <form onSubmit={handleProjectSubmit}>
-                    <TextInput
-                      label={getInputLabel()}
-                      value={projectEditingItem?.name || ''}
-                      handleChange={handleProjectNameChange}
-                      error={!!projectNameError}
-                      errorBottom
-                      errorText={projectNameError}
-                      className={styles.projectNameInput}
-                      disabled={createProjectMutation.isPending}
-                      placeholder={getInputPlaceholder()}
-                      ref={projectNameInputRef}
-                    />
-                  </form>
-                  <ProjectHeaderEditControlButtons
-                    createProjectMutation={createProjectMutation}
-                    handleDoneClick={handleDoneClick}
-                    handleCancelClick={handleCancelClick}
-                    handleDeleteClick={handleDeleteClick}
-                    type="update"
-                    styles={styles}
-                    updateProjectsMutation={updateProjectsMutation}
-                  />
-                </div>
-              )}
-            </div>
+            {
+              isEditing 
+                ? (
+                  <div className={styles.editSection}>
+                    {isEditing && (
+                      <div className={styles.editContainer}>
+                        <ProjectHeaderEditControlButtons
+                          createProjectMutation={createProjectMutation}
+                          handleDoneClick={handleDoneClick}
+                          handleCancelClick={handleCancelClick}
+                          handleDeleteClick={handleDeleteClick}
+                          type="update"
+                          styles={styles}
+                          updateProjectsMutation={updateProjectsMutation}
+                        />
+                        <form onSubmit={handleProjectSubmit}>
+                          <TextInput
+                            label={getInputLabel()}
+                            value={projectEditingItem?.name || ''}
+                            handleChange={handleProjectNameChange}
+                            error={!!projectNameError}
+                            errorBottom
+                            errorText={projectNameError}
+                            className={styles.projectNameInput}
+                            disabled={createProjectMutation.isPending}
+                            placeholder={getInputPlaceholder()}
+                            ref={projectNameInputRef}
+                          />
+                        </form>
+                      </div>
+                    )}
+                  </div>
+                )
+                : (
+                  <>
+                    <div className={styles.subtitleSection}>
+                      {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+                      {bookmarkCount !== undefined && <p className={styles.bookmarkCount}><BookmarkIcon />{bookmarkCount}</p>}
+                      {noteCount !== undefined && <p className={styles.noteCount}><NoteIcon />{noteCount}</p>}
+                    </div>
+                    <div className={styles.editSection}>
+                      <div className={styles.buttonContainer}>
+                        {
+                          (project && project.deleted) 
+                            ? 
+                              (
+                                <>
+                                  <Button
+                                    variant="secondary"
+                                    handleClick={handleRestoreProject}
+                                    className={`${styles.editButton} ${styles.restoreButton}`}
+                                    iconLeft={<RestoreIcon />}
+                                    small
+                                  >
+                                    Restore Project
+                                  </Button>
+                                  <Button
+                                    variant="secondary"
+                                    handleClick={handleDeleteProjectPermanently}
+                                    className={styles.editButton}
+                                    iconLeft={<TrashIcon />}
+                                    small
+                                  >
+                                    Delete Permanently
+                                  </Button>
+                                </>
+                              )
+                            : 
+                              (
+                                <Button
+                                  variant="secondary"
+                                  handleClick={handleEditClick}
+                                  className={styles.editButton}
+                                  iconLeft={<EditIcon />}
+                                  small
+                                  disabled={queriesLoading}
+                                >
+                                  Edit
+                                </Button>
+                              )
+                        }
+                      </div>
+                    </div>
+                  </>
+                )
+            }
+            
+            
           </div>
           <div className={styles.searchSection}>
             <ProjectSearchBar
