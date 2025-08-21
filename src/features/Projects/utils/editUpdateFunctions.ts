@@ -94,7 +94,7 @@ export const useEditProjectHandlers = (
 
   const handleUpdateProject = (id: number | string, newName?: string, newQids?: string[]) => {
     // Find the project and update it
-    const projectToUpdate = projects.find(p => p.id === id);
+    const projectToUpdate = projects.find(p => p.id === parseInt(id.toString()));
     if (projectToUpdate) {
       const queryKey = ['userProjects'];
       // Optimistically update the React Query cache
