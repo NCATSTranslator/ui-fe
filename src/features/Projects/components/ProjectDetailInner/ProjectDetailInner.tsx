@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import styles from './ProjectDetailInner.module.scss';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
@@ -15,6 +16,7 @@ import { useProjectDetailSortedData } from '@/features/Projects/hooks/useProject
 import { useProjectDetailDeletePrompts } from '@/features/Projects/hooks/useDeletePrompts';
 import { useModals } from '@/features/Projects/hooks/useModals';
 import { useProjectDetailDeletionHandlers } from '@/features/Projects/hooks/useProjectDetailDeletionHandlers';
+import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
 
 const ProjectDetailInner = () => {
   // Data management
@@ -38,14 +40,17 @@ const ProjectDetailInner = () => {
   // Edit state management
   const [projectEditState, setProjectEditState] = useEditProjectState();
   const [queryEditState, setQueryEditState] = useEditQueryState();
+  const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState(false);
+
 
   const handleSetIsEditingQuery = (isEditing: boolean, editingItem?: QueryEditingItem) => {
-    setQueryEditState(prev => ({ 
-      ...prev, 
-      isEditing, 
-      ...(editingItem !== undefined && { editingItem })
-    }));
+    setQueryEditState({isEditing: isEditing, editingItem: editingItem || undefined});
+    if(isEditing && editingItem?.type === 'query')
+      setIsEditQueryModalOpen(true);
+    else 
+      setIsEditQueryModalOpen(false);
   };
+
 
   const handleSetIsEditingProject = (isEditing: boolean, editingItem?: ProjectEditingItem) => {
     onSetIsEditingProject(
@@ -95,6 +100,14 @@ const ProjectDetailInner = () => {
         cancelButtonText="Cancel"
         confirmButtonText={`Delete Project`}
         setStorageKeyFn={deletePrompts.deleteProjects.setHideDeletePrompt}
+      />
+      <EditQueryModal
+        currentEditingQueryItem={queryEditState.editingItem?.type === 'query' ? queryEditState.editingItem : undefined}
+        handleClose={() => setIsEditQueryModalOpen(false)}
+        isOpen={isEditQueryModalOpen}
+        loading={data.loading.queriesLoading}
+        mode="edit"
+        projects={data.raw.projects}
       />
       {
         data.errors.projectsError
