@@ -95,54 +95,57 @@ export const useEditProjectHandlers = (
   const handleUpdateProject = (id: number | string, newName?: string, newQids?: string[]) => {
     // Find the project and update it
     const projectToUpdate = projects.find(p => p.id === parseInt(id.toString()));
-    if (projectToUpdate) {
-      const queryKey = ['userProjects'];
-      // Optimistically update the React Query cache
-      queryClient.setQueryData(queryKey, (oldData: Project[]) => {
-        if (!oldData) return oldData;
-        return oldData.map((project: Project) => 
-          project.id === id 
-            ? { 
-                ...project, 
-                data: {
-                  title: newName || project.data.title,
-                  pks: newQids || project.data.pks
-                }
-              }
-            : project
-        );
-      });
-
-      updateProjectsMutation.mutate([{
-        id: projectToUpdate.id,
-        title: newName || projectToUpdate.data.title,
-        pks: newQids || projectToUpdate.data.pks
-      }], {
-        onSuccess: () => {
-          handleSetIsEditing(false);
-          projectUpdatedToast();
-        },
-        onError: (error) => {
-          console.error('Failed to update project:', error);
-          errorToast('Failed to update project');
-          // Revert optimistic update on error
-          queryClient.setQueryData(queryKey, (oldData: Project[]) => {
-            if (!oldData) return oldData;
-            return oldData.map((project: Project) => 
-              project.id === id 
-                ? { 
-                    ...project,
-                    data: {
-                      title: projectToUpdate.data.title,
-                      pks: projectToUpdate.data.pks
-                    }
-                  }
-                : project
-            );
-          });
-        }
-      });
+    if(!projectToUpdate) {
+      console.error('Project not found:', id);
+      return;
     }
+
+    const queryKey = ['userProjects'];
+    // Optimistically update the React Query cache
+    queryClient.setQueryData(queryKey, (oldData: Project[]) => {
+      if (!oldData) return oldData;
+      return oldData.map((project: Project) => 
+        project.id === id 
+          ? { 
+              ...project, 
+              data: {
+                title: newName || project.data.title,
+                pks: newQids || project.data.pks
+              }
+            }
+          : project
+      );
+    });
+
+    updateProjectsMutation.mutate([{
+      id: projectToUpdate.id,
+      title: newName || projectToUpdate.data.title,
+      pks: newQids || projectToUpdate.data.pks
+    }], {
+      onSuccess: () => {
+        handleSetIsEditing(false);
+        projectUpdatedToast();
+      },
+      onError: (error) => {
+        console.error('Failed to update project:', error);
+        errorToast('Failed to update project');
+        // Revert optimistic update on error
+        queryClient.setQueryData(queryKey, (oldData: Project[]) => {
+          if (!oldData) return oldData;
+          return oldData.map((project: Project) => 
+            project.id === id 
+              ? { 
+                  ...project,
+                  data: {
+                    title: projectToUpdate.data.title,
+                    pks: projectToUpdate.data.pks
+                  }
+                }
+              : project
+          );
+        });
+      }
+    });
   };
 
   const handleCancelEdit = () => {
