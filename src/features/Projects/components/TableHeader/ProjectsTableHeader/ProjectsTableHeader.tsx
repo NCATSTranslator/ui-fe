@@ -1,4 +1,4 @@
-import { Project, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { Project, ProjectListState } from '@/features/Projects/types/projects.d';
 import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
 import styles from '@/features/Projects/components/TableHeader/TableHeader.module.scss';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
@@ -7,22 +7,21 @@ import SortableHeader from '@/features/Projects/components/SortableHeader/Sortab
 import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
 
 interface ProjectsTableHeaderProps {
-  selectedProjects: Project[];
-  setSelectedProjects: (projects: Project[]) => void;
   activeProjects: Project[];
-  sortField: SortField;
-  sortDirection: SortDirection;
-  onSort: (field: SortField) => void;
+  projectListState: ProjectListState;
 }
 
 const ProjectsTableHeader = ({ 
-  selectedProjects, 
-  setSelectedProjects, 
   activeProjects,
-  sortField,
-  sortDirection,
-  onSort
+  projectListState
 }: ProjectsTableHeaderProps) => {
+  const { 
+    selectedProjects, 
+    setSelectedProjects, 
+    sortField, 
+    sortDirection, 
+    handleSort 
+  } = projectListState;
 
   const activeProjectsWithoutUnassigned = activeProjects.filter(project => !isUnassignedProject(project));
 
@@ -56,7 +55,7 @@ const ProjectsTableHeader = ({
             field="name" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             Name
           </SortableHeader>
@@ -67,7 +66,7 @@ const ProjectsTableHeader = ({
             field="lastSeen" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             Last Seen
           </SortableHeader>
@@ -77,7 +76,7 @@ const ProjectsTableHeader = ({
             field="dateAdded" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             Date Added
           </SortableHeader>
@@ -87,7 +86,7 @@ const ProjectsTableHeader = ({
             field="bookmarks" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             <BookmarkIcon />
           </SortableHeader>
@@ -97,7 +96,7 @@ const ProjectsTableHeader = ({
             field="notes" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             <NoteIcon />
           </SortableHeader>
@@ -107,7 +106,7 @@ const ProjectsTableHeader = ({
             field="status" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             Status
           </SortableHeader>

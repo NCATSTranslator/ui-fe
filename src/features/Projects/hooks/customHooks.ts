@@ -245,14 +245,19 @@ export const useFormattedProjects = (
  * @returns {SortField} sortField - The field to sort by
  * @returns {SortDirection} sortDirection - The direction to sort in
  * @returns {UserQueryObject[]} selectedQueries - The queries that are currently selected
+ * @returns {Project[]} selectedProjects - The projects that are currently selected
  * @returns {string} searchTerm - The search term to filter queries by
  * @returns {Function} setSortField - Function to set the sort field
  * @returns {Function} setSortDirection - Function to set the sort direction
  * @returns {Function} setSelectedQueries - Function to set the selected queries
+ * @returns {Function} setSelectedProjects - Function to set the selected projects
  * @returns {Function} handleSort - Function to handle sorting
  * @returns {Function} handleSelectQuery - Function to handle selecting a query
+ * @returns {Function} handleSelectProject - Function to handle selecting a project
  * @returns {Function} handleSelectAllQueries - Function to handle selecting all queries
+ * @returns {Function} handleSelectAllProjects - Function to handle selecting all projects
  * @returns {Function} clearSelectedQueries - Function to clear the selected queries
+ * @returns {Function} clearSelectedProjects - Function to clear the selected projects
  * @returns {Function} clearSearchTerm - Function to clear the search term
  * @returns {Function} resetState - Function to reset the state
  */
@@ -260,6 +265,7 @@ export const useProjectDetailSortSearchSelectState = () => {
   const [sortField, setSortField] = useState<SortField>('lastSeen');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [selectedQueries, setSelectedQueries] = useState<UserQueryObject[]>([]);
+  const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const handleSort = (field: SortField) => {
@@ -279,6 +285,14 @@ export const useProjectDetailSortSearchSelectState = () => {
     }
   };
 
+  const handleSelectProject = (project: Project, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedProjects(prev => [...prev, project]);
+    } else {
+      setSelectedProjects(prev => prev.filter(p => p.id !== project.id));
+    }
+  };
+
   const handleSelectAllQueries = (queries: UserQueryObject[], isSelected: boolean) => {
     if (isSelected) {
       setSelectedQueries(queries);
@@ -287,8 +301,20 @@ export const useProjectDetailSortSearchSelectState = () => {
     }
   };
 
+  const handleSelectAllProjects = (projects: Project[], isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedProjects(projects);
+    } else {
+      setSelectedProjects([]);
+    }
+  };
+
   const clearSelectedQueries = () => {
     setSelectedQueries([]);
+  };
+
+  const clearSelectedProjects = () => {
+    setSelectedProjects([]);
   };
 
   const clearSearchTerm = () => {
@@ -299,6 +325,7 @@ export const useProjectDetailSortSearchSelectState = () => {
     setSortField('lastSeen');
     setSortDirection('desc');
     setSelectedQueries([]);
+    setSelectedProjects([]);
     setSearchTerm('');
   };
 
@@ -307,19 +334,24 @@ export const useProjectDetailSortSearchSelectState = () => {
     sortField,
     sortDirection,
     selectedQueries,
+    selectedProjects,
     searchTerm,
     
     // Setters
     setSortField,
     setSortDirection,
     setSelectedQueries,
+    setSelectedProjects,
     setSearchTerm,
     
     // Handlers
     handleSort,
     handleSelectQuery,
+    handleSelectProject,
     handleSelectAllQueries,
+    handleSelectAllProjects,
     clearSelectedQueries,
+    clearSelectedProjects,
     clearSearchTerm,
     resetState
   };
