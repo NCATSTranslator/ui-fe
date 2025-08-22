@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import ProjectsTableHeader from '@/features/Projects/components/TableHeader/ProjectsTableHeader/ProjectsTableHeader';
-import { Project, SortField, SortDirection } from '@/features/Projects/types/projects';
+import { Project, ProjectListState } from '@/features/Projects/types/projects';
 
 const mockProjects: Project[] = [
   {
@@ -45,6 +45,22 @@ const mockProjects: Project[] = [
   },
 ];
 
+// Helper function to create projectListState for different scenarios
+const createProjectListState = (
+  selectedProjects: Project[] = [],
+  sortField: ProjectListState['sortField'] = 'name',
+  sortDirection: ProjectListState['sortDirection'] = 'asc'
+): ProjectListState => ({
+  selectedProjects,
+  selectedQueries: [],
+  setSelectedProjects: fn(),
+  setSelectedQueries: fn(),
+  sortField,
+  sortDirection,
+  handleSort: fn(),
+  searchTerm: '',
+});
+
 const meta = {
   title: 'Projects/ProjectsTableHeader',
   component: ProjectsTableHeader,
@@ -53,22 +69,16 @@ const meta = {
   },
   tags: ['autodocs'],
   argTypes: {
-    sortField: {
-      control: { type: 'select' },
-      options: ['name', 'lastSeen', 'dateAdded', 'bookmarks', 'notes', 'status'],
+    activeProjects: {
+      control: { type: 'object' },
     },
-    sortDirection: {
-      control: { type: 'select' },
-      options: ['asc', 'desc'],
+    projectListState: {
+      control: { type: 'object' },
     },
   },
   args: {
-    selectedProjects: [],
     activeProjects: mockProjects,
-    sortField: 'name',
-    sortDirection: 'asc',
-    setSelectedProjects: fn(),
-    onSort: fn(),
+    projectListState: createProjectListState(),
   },
 } satisfies Meta<typeof ProjectsTableHeader>;
 
@@ -77,90 +87,70 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    selectedProjects: [],
     activeProjects: mockProjects,
-    sortField: 'name',
-    sortDirection: 'asc',
+    projectListState: createProjectListState(),
   },
 };
 
 export const AllSelected: Story = {
   args: {
-    selectedProjects: mockProjects,
     activeProjects: mockProjects,
-    sortField: 'name',
-    sortDirection: 'asc',
+    projectListState: createProjectListState(mockProjects),
   },
 };
 
 export const SomeSelected: Story = {
   args: {
-    selectedProjects: [mockProjects[0], mockProjects[1]],
     activeProjects: mockProjects,
-    sortField: 'name',
-    sortDirection: 'asc',
+    projectListState: createProjectListState([mockProjects[0], mockProjects[1]]),
   },
 };
 
 export const SortedByName: Story = {
   args: {
-    selectedProjects: [],
     activeProjects: mockProjects,
-    sortField: 'name',
-    sortDirection: 'desc',
+    projectListState: createProjectListState([], 'name', 'desc'),
   },
 };
 
 export const SortedByLastSeen: Story = {
   args: {
-    selectedProjects: [],
     activeProjects: mockProjects,
-    sortField: 'lastSeen',
-    sortDirection: 'desc',
+    projectListState: createProjectListState([], 'lastSeen', 'desc'),
   },
 };
 
 export const SortedByDateAdded: Story = {
   args: {
-    selectedProjects: [],
     activeProjects: mockProjects,
-    sortField: 'dateAdded',
-    sortDirection: 'asc',
+    projectListState: createProjectListState([], 'dateAdded', 'asc'),
   },
 };
 
 export const SortedByBookmarks: Story = {
   args: {
-    selectedProjects: [],
     activeProjects: mockProjects,
-    sortField: 'bookmarks',
-    sortDirection: 'desc',
+    projectListState: createProjectListState([], 'bookmarks', 'desc'),
   },
 };
 
 export const SortedByNotes: Story = {
   args: {
-    selectedProjects: [],
     activeProjects: mockProjects,
-    sortField: 'notes',
-    sortDirection: 'asc',
+    projectListState: createProjectListState([], 'notes', 'asc'),
   },
 };
 
 export const SortedByStatus: Story = {
   args: {
-    selectedProjects: [],
     activeProjects: mockProjects,
-    sortField: 'status',
-    sortDirection: 'desc',
+    projectListState: createProjectListState([], 'status', 'desc'),
   },
 };
 
 export const EmptyList: Story = {
   args: {
-    selectedProjects: [],
     activeProjects: [],
-    sortField: 'name',
-    sortDirection: 'asc',
+    projectListState: createProjectListState(),
   },
 }; 

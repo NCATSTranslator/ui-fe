@@ -14,7 +14,6 @@ export const getUserProjects = async (
   fetchErrorHandler?: ErrorHandler
 ): Promise<ProjectRaw[]> => {
   const url = `${API_PATH_PREFIX}/users/me/projects?include_deleted=true`;
-  
   return fetchWithErrorHandling<ProjectRaw[]>(
     () => get(url),
     httpErrorHandler,
@@ -32,7 +31,6 @@ export const getUserQueries = async (
   fetchErrorHandler?: ErrorHandler
 ): Promise<UserQueryObject[]> => {
   const url = `${API_PATH_PREFIX}/users/me/queries?include_deleted=true`;
-  
   return fetchWithErrorHandling<UserQueryObject[]>(
     () => get(url),
     httpErrorHandler,
@@ -87,14 +85,14 @@ export const deleteProjects = async (
   projectIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<ProjectRaw[]> => {
+): Promise<"OK"> => {
   const url = `${API_PATH_PREFIX}/users/me/projects/delete`;
   
-  return fetchWithErrorHandling<ProjectRaw[]>(
+  return fetchWithErrorHandling<"OK">(
     () => put(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    isProjectRawArray
+    (data: unknown): data is "OK" => true
   );
 };
 
@@ -106,14 +104,14 @@ export const restoreProjects = async (
   projectIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<ProjectRaw[]> => {
+): Promise<"OK"> => {
   const url = `${API_PATH_PREFIX}/users/me/projects/restore`;
   
-  return fetchWithErrorHandling<ProjectRaw[]>(
+  return fetchWithErrorHandling<"OK">(
     () => put(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    isProjectRawArray
+    (data: unknown): data is "OK" => true
   );
 };
 
@@ -125,14 +123,14 @@ export const deleteQueries = async (
   queryIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<UserQueryObject> => {
+): Promise<"OK"> => {
   const url = `${API_PATH_PREFIX}/users/me/queries/delete`;
   
-  return fetchWithErrorHandling<UserQueryObject>(
+  return fetchWithErrorHandling<"OK">(
     () => put(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    isUserQueryObject
+    (data: unknown): data is "OK" => true
   );
 };
 
@@ -144,14 +142,14 @@ export const restoreQueries = async (
   queryIds: string[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<UserQueryObject> => {
+): Promise<"OK"> => {
   const url = `${API_PATH_PREFIX}/users/me/queries/restore`;
   
-  return fetchWithErrorHandling<UserQueryObject>(
+  return fetchWithErrorHandling<"OK">(
     () => put(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    isUserQueryObject
+    (data: unknown): data is "OK" => true
   );
 };
 

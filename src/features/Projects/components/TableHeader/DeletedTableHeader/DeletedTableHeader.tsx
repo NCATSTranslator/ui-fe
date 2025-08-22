@@ -1,4 +1,4 @@
-import { Project, UserQueryObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { Project, UserQueryObject, ProjectListState } from '@/features/Projects/types/projects.d';
 import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
 import styles from '@/features/Projects/components/TableHeader/TableHeader.module.scss';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
@@ -7,28 +7,25 @@ import SortableHeader from '@/features/Projects/components/SortableHeader/Sortab
 
 
 interface DeletedTableHeaderProps {
-  selectedProjects: Project[];
-  selectedQueries: UserQueryObject[];
-  setSelectedProjects: (projects: Project[]) => void;
-  setSelectedQueries: (queries: UserQueryObject[]) => void;
   activeProjects: Project[];
   activeQueries: UserQueryObject[];
-  sortField: SortField;
-  sortDirection: SortDirection;
-  onSort: (field: SortField) => void;
+  projectListState: ProjectListState;
 }
 
 const DeletedTableHeader = ({
-  selectedProjects,
-  selectedQueries,
-  setSelectedProjects,
-  setSelectedQueries,
   activeProjects,
   activeQueries,
-  sortField,
-  sortDirection,
-  onSort
+  projectListState
 }: DeletedTableHeaderProps) => {
+  const { 
+    selectedProjects, 
+    selectedQueries, 
+    setSelectedProjects, 
+    setSelectedQueries, 
+    sortField, 
+    sortDirection, 
+    handleSort 
+  } = projectListState;
   const handleSelectAll = () => {
     if (selectedProjects.length === activeProjects.length) {
       setSelectedProjects([]);
@@ -53,7 +50,8 @@ const DeletedTableHeader = ({
     <div className={styles.tableHeader}>
       <div className={styles.tableRow}>
         <div className={styles.checkboxColumn}>
-          <Checkbox 
+          <Checkbox
+            disabled={activeProjects.length === 0 && activeQueries.length === 0}
             checked={allSelected}
             handleClick={handleSelectAll}
             className={someSelected ? styles.indeterminate : ''}
@@ -65,7 +63,7 @@ const DeletedTableHeader = ({
             field="name" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             Name
           </SortableHeader>
@@ -76,7 +74,7 @@ const DeletedTableHeader = ({
             field="lastSeen" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             Last Seen
           </SortableHeader>
@@ -86,7 +84,7 @@ const DeletedTableHeader = ({
             field="dateAdded" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             Date Added
           </SortableHeader>
@@ -96,7 +94,7 @@ const DeletedTableHeader = ({
             field="bookmarks" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             <BookmarkIcon />
           </SortableHeader>
@@ -106,7 +104,7 @@ const DeletedTableHeader = ({
             field="notes" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             <NoteIcon />
           </SortableHeader>
@@ -116,7 +114,7 @@ const DeletedTableHeader = ({
             field="status" 
             sortField={sortField}
             sortDirection={sortDirection}
-            onSort={onSort}
+            onSort={handleSort}
           >
             Status
           </SortableHeader>

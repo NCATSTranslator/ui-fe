@@ -1,0 +1,53 @@
+@use "@/assets/styles/variables" as *;
+
+.warningModal {
+  .container {
+    padding: $l;
+    max-width: 500px;
+  }
+  .header {
+    display: flex;
+    gap: $xs;
+    justify-content: flex-start;
+    align-items: center;
+    .heading {
+      color: $yellow;
+      font-size: $h5Size;
+      margin: 0;
+      line-height: 1;
+    }
+  }
+  .inner {
+    display: flex;
+    flex-direction: column;
+    gap: $s;
+  }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    gap: $s;
+    .button {
+      flex: 1;
+      margin: 0;
+    }
+    .confirmButton {
+      background: $yellow;
+      color: $white;
+      &:hover {
+        background: $yellowHover;
+      }
+    }
+  }
+  .checkbox {
+    display: flex;
+    align-items: center;
+    gap: $xxs;
+    margin: 0;
+    span {
+      font-weight: 400;
+      &:first-child {
+        order: 2
+      }
+    }
+  }
+}

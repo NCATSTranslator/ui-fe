@@ -10,8 +10,6 @@ interface WindowSize {
   height: number | undefined;
 }
 
-
-
 interface DeepDifference {
   path: string;
   from: unknown;

@@ -12,6 +12,9 @@
   align-items: center;
   font-weight: 600;
   letter-spacing: 0.5px;
+  &.detail {
+    grid-template-columns: $projectsDetailGridColumns;
+  }
   > div {
     font-size: 10px;
     text-transform: uppercase;
@@ -51,23 +54,23 @@
   font-weight: 600;
 }
 
-.lastSeenColumn,
-.dateAddedColumn {
-  // text-align: center;
-}
+// .lastSeenColumn,
+// .dateAddedColumn {
+//   // text-align: center;
+// }
 
-.bookmarksColumn,
-.notesColumn {
-  // text-align: center;
-}
+// .bookmarksColumn,
+// .notesColumn {
+//   // text-align: center;
+// }
 
-.statusColumn {
-  // text-align: center;
-}
+// .statusColumn {
+//   // text-align: center;
+// }
 
-.actionsColumn {
-  // text-align: center;
-}
+// .actionsColumn {
+//   // text-align: center;
+// }
 
 .indeterminate {
   opacity: 0.7;

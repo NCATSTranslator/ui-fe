@@ -56,8 +56,9 @@ export const Default: Story = {
     title: 'My Projects',
     searchTerm: '',
     searchPlaceholder: 'Search by Query Name',
+    selectedQueries: [],
     isEditing: false,
-    setIsEditing: fn(),
+    setProjectEditingState: fn(),
   },
 };
 
@@ -67,8 +68,9 @@ export const WithSubtitle: Story = {
     subtitle: 'Manage your research projects and queries',
     searchTerm: '',
     searchPlaceholder: 'Search by Query Name',
+    selectedQueries: [],
     isEditing: false,
-    setIsEditing: fn(),
+    setProjectEditingState: fn(),
   },
 };
 
@@ -81,8 +83,9 @@ export const WithBackButton: Story = {
     showBackButton: true,
     backButtonText: 'All Projects',
     variant: 'detail',
+    selectedQueries: [],
     isEditing: false,
-    setIsEditing: fn(),
+    setProjectEditingState: fn(),
   },
 };
 
@@ -93,8 +96,9 @@ export const WithCreateButton: Story = {
     searchPlaceholder: 'Search by Project orQuery Name',
     showCreateButton: true,
     variant: 'list',
+    selectedQueries: [],
     isEditing: false,
-    setIsEditing: fn(),
+    setProjectEditingState: fn(),
   },
 };
 
@@ -105,8 +109,9 @@ export const DetailVariant: Story = {
     searchTerm: '',
     searchPlaceholder: 'Search by Query Name',
     variant: 'detail',
+    selectedQueries: [],
     isEditing: false,
-    setIsEditing: fn(),
+    setProjectEditingState: fn(),
   },
 };
 
@@ -116,7 +121,8 @@ export const ListVariant: Story = {
     searchTerm: '',
     searchPlaceholder: 'Search by Project or Query Name',
     variant: 'list',
+    selectedQueries: [],
     isEditing: false,
-    setIsEditing: fn(),
+    setProjectEditingState: fn(),
   },
 }; 

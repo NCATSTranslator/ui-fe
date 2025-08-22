@@ -36,7 +36,7 @@ export const getProjectStatus = (project: Project, queries: UserQueryObject[]): 
     return mostRecent;
   }, null);
 
-  return mostRecentQuery?.status || 'error';
+  return mostRecentQuery?.status || 'unknown';
 }
 
 /**
