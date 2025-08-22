@@ -73,7 +73,6 @@ const DataCard = <T,>({
   const navigate = useNavigate();
 
   const isUnassignedPrj = type === 'project' ? isUnassignedProject(item as Project) : isUnassignedProject(getItemId(item) as number);
-  
   const title = getItemTitle(item);
   const time_created = getItemTimeCreated(item);
   const time_updated = getItemTimeUpdated(item);
@@ -107,7 +106,7 @@ const DataCard = <T,>({
   const handleCardClick = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
     const isInteractive = target.closest('button, input, a, [role="button"]');
-    
+
     if (!isInteractive && type === 'project') {
       navigate(`/projects/${getItemId(item)}`);
       return;
@@ -132,10 +131,14 @@ const DataCard = <T,>({
         const itemOne: AutocompleteItem = {
           id: query.data.query.subject.id,
           label: query.data.query.node_one_label || query.data.query.subject.id,
+          isExact: false,
+          score: 0
         }
         const itemTwo: AutocompleteItem = {
           id: query.data.query.object.id,
           label: query.data.query.node_two_label || query.data.query.object.id,
+          isExact: false,
+          score: 0
         }
         const constraint = query.data.query.constraint || undefined;
         const qid = query.data.qid;
@@ -155,7 +158,7 @@ const DataCard = <T,>({
   };
 
   const handleDelete = (e: MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (onDelete)
       onDelete(item);
   };
@@ -188,7 +191,7 @@ const DataCard = <T,>({
       }
       <div className={`${styles.nameColumn} ${styles.column}`}>
         <div className={styles.nameContainer}>
-          <CardName 
+          <CardName
             type={type}
             name={title}
             itemCount={itemCount}
@@ -275,4 +278,4 @@ const DataCard = <T,>({
   );
 }
 
-export default DataCard; 
+export default DataCard;
