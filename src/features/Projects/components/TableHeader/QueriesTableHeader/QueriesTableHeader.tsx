@@ -36,7 +36,7 @@ const QueriesTableHeader = ({
     }
   };
 
-  const allSelected = activeQueries.length > 0 && selectedQueries.length === activeQueries.length;
+  const allSelected = activeQueries.length > 0 && selectedQueries.length >= activeQueries.length;
   const someSelected = selectedQueries.length > 0 && selectedQueries.length < activeQueries.length;
 
   const showCheckbox = location !== 'detail' || (location === 'detail' && (isEditing || isUnassigned));

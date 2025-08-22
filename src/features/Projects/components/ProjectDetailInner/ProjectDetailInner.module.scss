@@ -33,4 +33,15 @@
   .projectTabContent {
     padding: $s $m $m;
   }
+  .separator {
+    margin: $s auto;
+    border-bottom: 1px solid $midGray;
+    width: 87%
+  }
+  .additionalQueriesLabel {
+    margin: 0;
+    font-weight: 400;
+    font-size: $bodyTwoSize;
+    color: $darkGray
+  }
 }

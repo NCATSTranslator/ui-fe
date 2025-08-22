@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import styles from './ProjectDetailInner.module.scss';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
@@ -22,7 +22,7 @@ import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectM
 const ProjectDetailInner = () => {
   // Data management
   const data = useProjectDetailData();
-  
+
   // State management hooks
   const projectListState = useProjectDetailSortSearchSelectState();
   const deletePrompts = useProjectDetailDeletePrompts();
@@ -38,6 +38,8 @@ const ProjectDetailInner = () => {
     sortDirection: projectListState.sortDirection,
     searchTerm: projectListState.searchTerm
   });
+
+  const additionalQueries = useMemo(() => data.raw.queries.filter((query) => !sortedData.sortedQueries.map((q) => q.data.qid).includes(query.data.qid)), [data.raw.queries, sortedData.sortedQueries]);
 
   // Edit state management
   const [projectEditState, setProjectEditState] = useEditProjectState();
@@ -112,7 +114,6 @@ const ProjectDetailInner = () => {
           projects: data.raw.projects
         }}
       />
-
       {
         data.errors.projectsError
         ? 
@@ -210,6 +211,29 @@ const ProjectDetailInner = () => {
                                     />
                                   ))
                                 )}
+                                {
+                                  (projectEditState.isEditing && additionalQueries.length > 0) && (
+                                    <>
+                                      <div className={styles.separator} />
+                                      <p className={styles.additionalQueriesLabel}>Select to Add to Project</p>
+                                      {
+                                        additionalQueries.map((query) => (
+                                          <QueryCard
+                                            key={query.data.qid}
+                                            query={query}
+                                            searchTerm={projectListState.searchTerm}
+                                            setSelectedQueries={projectListState.setSelectedQueries}
+                                            selectedQueries={projectListState.selectedQueries}
+                                            onEdit={queryEditHandlers.handleEditQuery}
+                                            isEditing={projectEditState.isEditing}
+                                            location="detail"
+                                            inUnassignedProject={isUnassignedPrj}
+                                          />
+                                        ))
+                                      }
+                                    </>
+                                  )
+                                }
                               </div>
                             </LoadingWrapper>
                           )
