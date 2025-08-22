@@ -56,6 +56,7 @@ export const useAllDeletePrompts = () => {
  */
 export const useProjectDetailDeletePrompts = () => {
   return useDeletePrompts([
-    'deleteProjects'
+    'deleteProjects',
+    'deleteQueries'
   ]);
 };

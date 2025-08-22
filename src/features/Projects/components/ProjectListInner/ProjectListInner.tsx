@@ -4,9 +4,9 @@ import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectH
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import { useProjectDetailSortSearchSelectState } from '@/features/Projects/hooks/customHooks';
-import { ProjectEditingItem, QueryEditingItem, Project } from '@/features/Projects/types/projects.d';
+import { ProjectEditingItem, QueryEditingItem } from '@/features/Projects/types/projects.d';
 import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject } from '@/features/Projects/utils/editUpdateFunctions';
-import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
+
 import { useProjectListData } from '@/features/Projects/hooks/useProjectListData';
 import { useFilteredAndSortedData } from '@/features/Projects/hooks/useFilteredAndSortedData';
 import { useAllDeletePrompts } from '@/features/Projects/hooks/useDeletePrompts';
@@ -15,7 +15,7 @@ import { useDeletionHandlers } from '@/features/Projects/hooks/useDeletionHandle
 import ProjectsTab from '@/features/Projects/components/Tabs/ProjectsTab/ProjectsTab';
 import QueriesTab from '@/features/Projects/components/Tabs/QueriesTab/QueriesTab';
 import TrashTab from '@/features/Projects/components/Tabs/TrashTab/TrashTab';
-import ProjectListModals from '@/features/Projects/components/ProjectListModals/ProjectListModals';
+import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
 import SelectedItemsActionBar from '@/features/Projects/components/SelectedItemsActionBar/SelectedItemsActionBar';
 
 export const ProjectListInner = () => {
@@ -117,7 +117,7 @@ export const ProjectListInner = () => {
 
   return (
     <div className={`${styles.projectListContainer} ${projectEditState.isEditing ? styles.isEditing : ''}`}>
-      <ProjectListModals 
+      <ProjectModals 
         modals={modals.modals}
         selectedProjects={projectListState.selectedProjects}
         selectedQueries={projectListState.selectedQueries}
@@ -126,15 +126,14 @@ export const ProjectListInner = () => {
         setSelectedQueries={projectListState.setSelectedQueries}
         deletionHandlers={deletionHandlers}
         deletePrompts={deletePrompts}
-      />
-      
-      <EditQueryModal
-        currentEditingQueryItem={queryEditState.editingItem?.type === 'query' ? queryEditState.editingItem : undefined}
-        handleClose={() => setIsEditQueryModalOpen(false)}
-        isOpen={isEditQueryModalOpen}
-        loading={data.loading.queriesLoading}
-        mode="edit"
-        projects={data.formatted.active}
+        editQueryModal={{
+          currentEditingQueryItem: queryEditState.editingItem?.type === 'query' ? queryEditState.editingItem : undefined,
+          handleClose: () => setIsEditQueryModalOpen(false),
+          isOpen: isEditQueryModalOpen,
+          loading: data.loading.queriesLoading,
+          mode: 'edit',
+          projects: data.formatted.active
+        }}
       />
       <div className="container">
         <div className={styles.projectList}>
@@ -153,6 +152,7 @@ export const ProjectListInner = () => {
             selectedQueries={projectListState.selectedQueries}
             onCreateNewClick={onCreateNewProjectClick}
             onDeleteProject={deletionHandlers.handleInitiateDeleteSingleProject}
+            project={projectEditState.editingItem?.type === 'project' ? data.formatted.active.find(p => projectEditState.editingItem && p.id === parseInt(projectEditState.editingItem.id)): undefined}
           />
           {hideAllTabs ? (
             <div className={styles.emptyState}>

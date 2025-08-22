@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
 import ProjectDeleteWarningModal from '@/features/Projects/components/ProjectDeleteWarningModal/ProjectDeleteWarningModal';
-import ProjectListModals from '@/features/Projects/components/ProjectListModals/ProjectListModals';
+import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
 import { Project, UserQueryObject, QueryEditingItem, ProjectRaw } from '@/features/Projects/types/projects.d';
 
 // Mock data
@@ -306,7 +306,7 @@ export const ProjectDeleteWarning: Story = {
 export const ProjectListModalsDeleteProjects: Story = {
   name: 'Project List Modals - Delete Projects',
   render: () => (
-    <ProjectListModals
+    <ProjectModals
       modals={{ deleteProjects: true, deleteQueries: false, permanentDeleteProject: false, permanentDeleteQuery: false, permanentDeleteSelected: false, emptyTrash: false }}
       selectedProjects={mockProjectsWithCounts.slice(0, 2)}
       selectedQueries={[]}
@@ -329,7 +329,7 @@ export const ProjectListModalsDeleteProjects: Story = {
 export const ProjectListModalsDeleteQueries: Story = {
   name: 'Project List Modals - Delete Queries',
   render: () => (
-    <ProjectListModals
+    <ProjectModals
       modals={{ deleteProjects: false, deleteQueries: true, permanentDeleteProject: false, permanentDeleteQuery: false, permanentDeleteSelected: false, emptyTrash: false }}
       selectedProjects={[]}
       selectedQueries={mockQueries.slice(0, 2)}
@@ -352,7 +352,7 @@ export const ProjectListModalsDeleteQueries: Story = {
 export const ProjectListModalsPermanentDeleteProject: Story = {
   name: 'Project List Modals - Permanent Delete Project',
   render: () => (
-    <ProjectListModals
+    <ProjectModals
       modals={{ deleteProjects: false, deleteQueries: false, permanentDeleteProject: true, permanentDeleteQuery: false, permanentDeleteSelected: false, emptyTrash: false }}
       selectedProjects={mockProjectsWithCounts.slice(0, 1)}
       selectedQueries={[]}
@@ -375,7 +375,7 @@ export const ProjectListModalsPermanentDeleteProject: Story = {
 export const ProjectListModalsPermanentDeleteQuery: Story = {
   name: 'Project List Modals - Permanent Delete Query',
   render: () => (
-    <ProjectListModals
+    <ProjectModals
       modals={{ deleteProjects: false, deleteQueries: false, permanentDeleteProject: false, permanentDeleteQuery: true, permanentDeleteSelected: false, emptyTrash: false }}
       selectedProjects={[]}
       selectedQueries={mockQueries.slice(0, 1)}
@@ -398,7 +398,7 @@ export const ProjectListModalsPermanentDeleteQuery: Story = {
 export const ProjectListModalsPermanentDeleteSelected: Story = {
   name: 'Project List Modals - Permanent Delete Selected',
   render: () => (
-    <ProjectListModals
+    <ProjectModals
       modals={{ deleteProjects: false, deleteQueries: false, permanentDeleteProject: false, permanentDeleteQuery: false, permanentDeleteSelected: true, emptyTrash: false }}
       selectedProjects={mockProjectsWithCounts.slice(0, 1)}
       selectedQueries={mockQueries.slice(0, 1)}
@@ -421,7 +421,7 @@ export const ProjectListModalsPermanentDeleteSelected: Story = {
 export const ProjectListModalsEmptyTrash: Story = {
   name: 'Project List Modals - Empty Trash',
   render: () => (
-    <ProjectListModals
+    <ProjectModals
       modals={{ deleteProjects: false, deleteQueries: false, permanentDeleteProject: false, permanentDeleteQuery: false, permanentDeleteSelected: false, emptyTrash: true }}
       selectedProjects={[]}
       selectedQueries={[]}

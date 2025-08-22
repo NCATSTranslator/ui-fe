@@ -1,15 +1,20 @@
-import { useCallback } from 'react';
-import { Project } from '@/features/Projects/types/projects.d';
+import { Dispatch, SetStateAction, useCallback } from 'react';
+import { Project, UserQueryObject } from '@/features/Projects/types/projects.d';
 
 interface UseProjectDetailDeletionHandlersProps {
   projectEditHandlers: {
     handleDeleteProject: (project: Project) => void;
+  };
+  queryEditHandlers: {
+    handleDeleteQuery: (query: UserQueryObject) => void;
   };
   modals: {
     openModal: (modalType: any) => void;
     closeModal: (modalType: any) => void;
   };
   prompts: Record<string, { shouldShow: boolean }>;
+  selectedQueries: UserQueryObject[];
+  setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
 }
 
 /**
@@ -19,8 +24,11 @@ interface UseProjectDetailDeletionHandlersProps {
  */
 export const useProjectDetailDeletionHandlers = ({
   projectEditHandlers,
+  queryEditHandlers,
   modals,
-  prompts
+  prompts,
+  selectedQueries,
+  setSelectedQueries
 }: UseProjectDetailDeletionHandlersProps) => {
 
   const handleInitiateDeleteProject = useCallback((project: Project) => {
@@ -40,9 +48,28 @@ export const useProjectDetailDeletionHandlers = ({
     modals.closeModal('deleteProject');
   }, [modals]);
 
+  const handleDeleteSelectedQueries = useCallback(() => {
+    selectedQueries.forEach((query: UserQueryObject) => queryEditHandlers.handleDeleteQuery(query));
+    modals.closeModal('deleteQueries');
+    setSelectedQueries([]);
+  }, [selectedQueries, queryEditHandlers, modals, setSelectedQueries]);
+
+  const handleInitiateDeleteSelectedQueries = useCallback(() => {
+    console.log('handleInitiateDeleteSelectedQueries', selectedQueries);
+    if (selectedQueries.length > 0) {
+      if (prompts.deleteQueries.shouldShow) {
+        modals.openModal('deleteQueries');
+      } else {
+        handleDeleteSelectedQueries();
+      }
+    }
+  }, [selectedQueries, prompts.deleteQueries.shouldShow, modals]);
+
   return {
     handleInitiateDeleteProject,
     handleDeleteProject,
-    handleCancelDeleteProject
+    handleCancelDeleteProject,
+    handleInitiateDeleteSelectedQueries,
+    handleDeleteSelectedQueries
   };
 };

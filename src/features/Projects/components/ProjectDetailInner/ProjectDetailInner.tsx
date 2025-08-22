@@ -10,14 +10,14 @@ import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject, isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
 import ProjectDetailErrorStates from '@/features/Projects/components/ProjectDetailErrorStates/ProjectDetailErrorStates';
-import ProjectDeleteWarningModal from '@/features/Projects/components/ProjectDeleteWarningModal/ProjectDeleteWarningModal';
 import { useProjectDetailData } from '@/features/Projects/hooks/useProjectDetailData';
 import { useProjectDetailSortedData } from '@/features/Projects/hooks/useProjectDetailSortedData';
 import { useProjectDetailDeletePrompts } from '@/features/Projects/hooks/useDeletePrompts';
 import { useModals } from '@/features/Projects/hooks/useModals';
 import { useProjectDetailDeletionHandlers } from '@/features/Projects/hooks/useProjectDetailDeletionHandlers';
-import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
+
 import SelectedItemsActionBar from '../SelectedItemsActionBar/SelectedItemsActionBar';
+import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
 
 const ProjectDetailInner = () => {
   // Data management
@@ -27,7 +27,8 @@ const ProjectDetailInner = () => {
   const projectListState = useProjectDetailSortSearchSelectState();
   const deletePrompts = useProjectDetailDeletePrompts();
   const modals = useModals({
-    deleteProject: false
+    deleteProject: false,
+    deleteQueries: false
   });
 
   // Sorted data
@@ -77,8 +78,11 @@ const ProjectDetailInner = () => {
   // Deletion handlers
   const deletionHandlers = useProjectDetailDeletionHandlers({
     projectEditHandlers,
+    queryEditHandlers,
     modals,
-    prompts: deletePrompts
+    prompts: deletePrompts,
+    selectedQueries: projectListState.selectedQueries,
+    setSelectedQueries: projectListState.setSelectedQueries
   });
   
   const handleEditClick = () => {
@@ -89,28 +93,26 @@ const ProjectDetailInner = () => {
 
   return (
     <div className={styles.projectDetail}>
-      <ProjectDeleteWarningModal
-        isOpen={modals.modals.deleteProject}
-        onClose={deletionHandlers.handleCancelDeleteProject}
-        onConfirm={() => {
-          if(data.project)
-            deletionHandlers.handleDeleteProject(data.project);
+      <ProjectModals
+        modals={modals.modals}
+        selectedProjects={[]}
+        selectedQueries={projectListState.selectedQueries}
+        onCloseModal={(modalType: string) => modals.closeModal(modalType as keyof typeof modals.modals)}
+        setSelectedQueries={projectListState.setSelectedQueries}
+        deletionHandlers={deletionHandlers}
+        deletePrompts={deletePrompts}
+        currentProject={data.project || undefined}
+        variant="detail"
+        editQueryModal={{
+          currentEditingQueryItem: queryEditState.editingItem?.type === 'query' ? queryEditState.editingItem : undefined,
+          handleClose: () => setIsEditQueryModalOpen(false),
+          isOpen: isEditQueryModalOpen,
+          loading: data.loading.queriesLoading,
+          mode: 'edit',
+          projects: data.raw.projects
         }}
-        onCancel={deletionHandlers.handleCancelDeleteProject}
-        heading={`Delete project?`}
-        content={`'This project can be recovered from your Trash.`}
-        cancelButtonText="Cancel"
-        confirmButtonText={`Delete Project`}
-        setStorageKeyFn={deletePrompts.deleteProjects.setHideDeletePrompt}
       />
-      <EditQueryModal
-        currentEditingQueryItem={queryEditState.editingItem?.type === 'query' ? queryEditState.editingItem : undefined}
-        handleClose={() => setIsEditQueryModalOpen(false)}
-        isOpen={isEditQueryModalOpen}
-        loading={data.loading.queriesLoading}
-        mode="edit"
-        projects={data.raw.projects}
-      />
+
       {
         data.errors.projectsError
         ? 
@@ -222,7 +224,7 @@ const ProjectDetailInner = () => {
                       selectedQueries={projectListState.selectedQueries}
                       activeTab="queries"
                       projectEditingState={projectEditState}
-                      onDeleteSelected={() => {console.log('TODO: delete selected')}} // TODO: implement
+                      onDeleteSelected={deletionHandlers.handleInitiateDeleteSelectedQueries}
                       onPermanentDeleteSelected={() => {console.log('TODO: permanent delete selected')}} // TODO: implement
                       onEmptyTrash={() => {console.log('TODO: empty trash')}} // TODO: implement
                       onAddToProject={() => {console.log('TODO: add to project')}} // TODO: implement

@@ -174,7 +174,6 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
 
   const handleDeleteClick = () => {
     if (onDeleteProject && project) {
-      setProjectEditingState(false);
       onDeleteProject(project);
     }
   };
