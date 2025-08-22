@@ -9,6 +9,12 @@
   .projectHeaderContainer {
     position: relative;
   }
+  .projectTabsContainer {
+    position: relative;
+    .projectTabs {
+      margin-top: $m;
+    }
+  }
   .queryGrid {
     display: flex;
     flex-direction: column;

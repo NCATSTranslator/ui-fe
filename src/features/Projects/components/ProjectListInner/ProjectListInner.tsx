@@ -228,7 +228,6 @@ export const ProjectListInner = () => {
                 onPermanentDeleteSelected={deletionHandlers.handleInitiatePermanentDeleteSelected}
                 onEmptyTrash={deletionHandlers.handleInitiateEmptyTrash}
                 onAddToProject={() => {console.log('TODO: add to project')}} // TODO: implement
-                styles={styles}
               />
             </div>
           )}

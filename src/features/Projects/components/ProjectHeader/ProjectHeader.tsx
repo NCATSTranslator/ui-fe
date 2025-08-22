@@ -15,6 +15,7 @@ import styles from './ProjectHeader.module.scss';
 import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/ProjectSearchBar';
 import ProjectHeaderEditControlButtons from './ProjectHeaderEditControlButtons';
 import { UserQueryObject, Project, ProjectEditingItem } from '@/features/Projects/types/projects';
+import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
 
 interface ProjectHeaderProps {
   backButtonText?: string;
@@ -79,6 +80,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   const projectNameInputRef = useRef<HTMLInputElement>(null);
   const createProjectMutation = useCreateProject();
   const updateProjectsMutation = useUpdateProjects();
+  const isUnassigned = isUnassignedProject(project || 0);
 
   // Focus and select text when editing starts
   useEffect(() => {
@@ -350,57 +352,61 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
                   <>
                     <div className={styles.subtitleSection}>
                       {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-                      {bookmarkCount !== undefined && <p className={styles.bookmarkCount}><BookmarkIcon />{bookmarkCount}</p>}
-                      {noteCount !== undefined && <p className={styles.noteCount}><NoteIcon />{noteCount}</p>}
+                      {(bookmarkCount !== undefined && !isUnassigned) && <p className={styles.bookmarkCount}><BookmarkIcon />{bookmarkCount}</p>}
+                      {(noteCount !== undefined && !isUnassigned) && <p className={styles.noteCount}><NoteIcon />{noteCount}</p>}
                     </div>
-                    <div className={styles.editSection}>
-                      <div className={styles.buttonContainer}>
-                        {
-                          (project && project.deleted) 
-                            ? 
-                              (
-                                <>
-                                  <Button
-                                    variant="secondary"
-                                    handleClick={handleRestoreProject}
-                                    className={`${styles.editButton} ${styles.restoreButton}`}
-                                    iconLeft={<RestoreIcon />}
-                                    small
-                                  >
-                                    Restore Project
-                                  </Button>
-                                  <Button
-                                    variant="secondary"
-                                    handleClick={handleDeleteProjectPermanently}
-                                    className={styles.editButton}
-                                    iconLeft={<TrashIcon />}
-                                    small
-                                  >
-                                    Delete Permanently
-                                  </Button>
-                                </>
-                              )
-                            : 
-                              (
-                                <Button
-                                  variant="secondary"
-                                  handleClick={handleEditClick}
-                                  className={styles.editButton}
-                                  iconLeft={<EditIcon />}
-                                  small
-                                  disabled={queriesLoading}
-                                >
-                                  Edit
-                                </Button>
-                              )
-                        }
-                      </div>
-                    </div>
+                    {
+                      isUnassigned
+                        ? null
+                        : (
+                          <div className={styles.editSection}>
+                            <div className={styles.buttonContainer}>
+                              {
+                                (project && project.deleted) 
+                                  ? 
+                                    (
+                                      <>
+                                        <Button
+                                          variant="secondary"
+                                          handleClick={handleRestoreProject}
+                                          className={`${styles.editButton} ${styles.restoreButton}`}
+                                          iconLeft={<RestoreIcon />}
+                                          small
+                                        >
+                                          Restore Project
+                                        </Button>
+                                        <Button
+                                          variant="secondary"
+                                          handleClick={handleDeleteProjectPermanently}
+                                          className={styles.editButton}
+                                          iconLeft={<TrashIcon />}
+                                          small
+                                        >
+                                          Delete Permanently
+                                        </Button>
+                                      </>
+                                    )
+                                  : 
+                                    (
+                                      <Button
+                                        variant="secondary"
+                                        handleClick={handleEditClick}
+                                        className={styles.editButton}
+                                        iconLeft={<EditIcon />}
+                                        small
+                                        disabled={queriesLoading}
+                                      >
+                                        Edit
+                                      </Button>
+                                    )
+                              }
+                            </div>
+                          </div>
+                        )
+                    }
                   </>
                 )
             }
-            
-            
           </div>
           <div className={styles.searchSection}>
             <ProjectSearchBar

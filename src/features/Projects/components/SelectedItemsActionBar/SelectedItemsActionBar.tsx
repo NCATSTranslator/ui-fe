@@ -1,3 +1,4 @@
+import styles from './SelectedItemsActionBar.module.scss';
 import Button from '@/features/Core/components/Button/Button';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
@@ -13,7 +14,6 @@ interface SelectedItemsActionBarProps {
   onPermanentDeleteSelected: () => void;
   onEmptyTrash: () => void;
   onAddToProject?: () => void;
-  styles: Record<string, string>;
 }
 
 const SelectedItemsActionBar = ({
@@ -25,7 +25,6 @@ const SelectedItemsActionBar = ({
   onPermanentDeleteSelected,
   onEmptyTrash,
   onAddToProject,
-  styles
 }: SelectedItemsActionBarProps) => {
   const totalSelected = selectedProjects.length + selectedQueries.length;
   

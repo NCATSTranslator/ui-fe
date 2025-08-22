@@ -8,6 +8,7 @@ import SortableHeader from '@/features/Projects/components/SortableHeader/Sortab
 interface QueriesTableHeaderProps {
   activeQueries: UserQueryObject[];
   isEditing?: boolean;
+  isUnassigned?: boolean;
   location?: "list" | "detail";
   onSort: (field: SortField) => void;
   selectedQueries: UserQueryObject[];
@@ -19,6 +20,7 @@ interface QueriesTableHeaderProps {
 const QueriesTableHeader = ({
   activeQueries,
   isEditing = false,
+  isUnassigned = false,
   location,
   onSort,
   selectedQueries,
@@ -37,7 +39,7 @@ const QueriesTableHeader = ({
   const allSelected = activeQueries.length > 0 && selectedQueries.length === activeQueries.length;
   const someSelected = selectedQueries.length > 0 && selectedQueries.length < activeQueries.length;
 
-  const showCheckbox = location !== 'detail' || (location === 'detail' && isEditing);
+  const showCheckbox = location !== 'detail' || (location === 'detail' && (isEditing || isUnassigned));
 
   return (
     <div className={styles.tableHeader}>

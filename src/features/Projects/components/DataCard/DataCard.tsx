@@ -29,6 +29,7 @@ interface DataCardProps<T> {
   getItemNoteCount: (item: T) => number;
   getItemStatus?: (item: T) => string;
   getItemCount?: (item: T) => number;
+  inUnassignedProject?: boolean;
   isEditing?: boolean;
   item: T;
   location?: "list" | "detail"
@@ -54,6 +55,7 @@ const DataCard = <T,>({
   getItemNoteCount,
   getItemStatus,
   getItemCount,
+  inUnassignedProject = false,
   isEditing = false,
   item,
   location = "list",
@@ -70,7 +72,7 @@ const DataCard = <T,>({
 }: DataCardProps<T>) => {
   const navigate = useNavigate();
 
-  const isUnassigned = type === 'project' ? isUnassignedProject(item as Project) : isUnassignedProject(getItemId(item) as number);
+  const isUnassignedPrj = type === 'project' ? isUnassignedProject(item as Project) : isUnassignedProject(getItemId(item) as number);
   
   const title = getItemTitle(item);
   const time_created = getItemTimeCreated(item);
@@ -163,10 +165,10 @@ const DataCard = <T,>({
     className,
     type === 'project' ? styles.projectCard : styles.queryCard,
     location === 'detail' && styles.detailCard,
-    isEditing && styles.isEditing
+    (isEditing || inUnassignedProject) && styles.isEditing
   )
 
-  const showCheckbox = location !== 'detail' || (location === 'detail' && isEditing);
+  const showCheckbox = location !== 'detail' || (location === 'detail' && (isEditing || inUnassignedProject));
 
   return (
     <CardWrapper 
@@ -177,7 +179,7 @@ const DataCard = <T,>({
         showCheckbox && (          
           <div className={`${styles.checkboxColumn} ${styles.column}`}>
             {
-              !isUnassigned && (
+              !isUnassignedPrj && (
                 <Checkbox checked={isSelected} handleClick={handleSelectItem} />
               )
             }
@@ -191,7 +193,7 @@ const DataCard = <T,>({
             name={title}
             itemCount={itemCount}
             searchTerm={searchTerm}
-            isUnassigned={isUnassigned}
+            isUnassigned={isUnassignedPrj}
           />
           {
             isDeleted && (
@@ -207,14 +209,14 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.actionsColumn} ${styles.column}`}>
         {
-          (!isUnassigned && !isDeleted) && (
+          (!isUnassignedPrj && !isDeleted) && (
             <Button variant="secondary" iconOnly handleClick={handleEdit} disabled={queriesLoading}>
               <EditIcon/>
             </Button>
           )
         }
         {
-          (!isUnassigned && !isDeleted) && (
+          (!isUnassignedPrj && !isDeleted) && (
             <Button variant="secondary" iconOnly handleClick={handleShare}>
               <ShareIcon/>
             </Button>
@@ -223,7 +225,7 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.lastSeenColumn} ${styles.column}`}>
         {
-          !isUnassigned && (
+          !isUnassignedPrj && (
             <>
               {getFormattedDate(new Date(time_updated), false)}
             </>
@@ -232,7 +234,7 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.dateCreatedColumn} ${styles.column}`}>
       {
-          !isUnassigned && (
+          !isUnassignedPrj && (
             <>
               {getFormattedDate(new Date(time_created), false)}
             </>
@@ -241,7 +243,7 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.bookmarksColumn} ${styles.column}`}>
         {
-          !isUnassigned && (
+          !isUnassignedPrj && (
             <>
               <BookmarkIcon />
               {bookmark_count}
@@ -251,7 +253,7 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.notesColumn} ${styles.column}`}>
         {
-          !isUnassigned && (
+          !isUnassignedPrj && (
             <>
               <NoteIcon />
               {note_count}
@@ -261,7 +263,7 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.statusColumn} ${styles.column}`}>
         {
-          !isUnassigned && (
+          !isUnassignedPrj && (
             <>
               <StatusIndicator status={(status || itemStatus) as QueryStatus} />
               <ChevRightIcon />

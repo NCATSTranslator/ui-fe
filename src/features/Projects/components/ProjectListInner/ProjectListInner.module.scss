@@ -63,26 +63,6 @@
 }
 .projectListInner {
   position: relative;
-  .selectedInteractions {
-    position: absolute;
-    top: $m;
-    right: $l;
-    display: flex;
-    gap: $s;
-    align-items: center;
-    .button {
-      background-color: transparent;
-      color: $purpleOne;
-      padding: 0;
-      svg path {
-        fill: $purpleOne;
-      }
-      &:hover {
-        text-decoration: underline;
-        background-color: transparent;
-      }
-    }
-  }
 }
 .projectTabs {
   flex: 1;

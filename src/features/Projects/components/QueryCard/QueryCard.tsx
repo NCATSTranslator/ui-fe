@@ -1,10 +1,11 @@
 import { Dispatch, SetStateAction } from 'react';
-import { Project, UserQueryObject } from '@/features/Projects/types/projects.d';
+import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
 import { useRestoreQueries } from '@/features/Projects/hooks/customHooks';
 import { errorToast, queryRestoredToast } from '@/features/Projects/utils/toastMessages';
 
 interface QueryCardProps {
+  inUnassignedProject?: boolean;
   isEditing?: boolean;
   location?: "list" | "detail"
   onDelete?: (query: UserQueryObject) => void;
@@ -16,6 +17,7 @@ interface QueryCardProps {
 }
 
 const QueryCard = ({ 
+  inUnassignedProject = false,
   isEditing = false,
   location = "list",
   onDelete,
@@ -42,6 +44,7 @@ const QueryCard = ({
   return (
     <DataCard
       location={location}
+      inUnassignedProject={inUnassignedProject}
       isEditing={isEditing}
       item={query}
       type={query.data.query.type === 'pathfinder' ? 'pathfinderQuery' : 'smartQuery'}

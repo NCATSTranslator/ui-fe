@@ -8,7 +8,7 @@ import { ProjectEditingItem, QueryEditingItem } from '@/features/Projects/types/
 import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
-import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject } from '@/features/Projects/utils/editUpdateFunctions';
+import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject, isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
 import ProjectDetailErrorStates from '@/features/Projects/components/ProjectDetailErrorStates/ProjectDetailErrorStates';
 import ProjectDeleteWarningModal from '@/features/Projects/components/ProjectDeleteWarningModal/ProjectDeleteWarningModal';
 import { useProjectDetailData } from '@/features/Projects/hooks/useProjectDetailData';
@@ -17,6 +17,7 @@ import { useProjectDetailDeletePrompts } from '@/features/Projects/hooks/useDele
 import { useModals } from '@/features/Projects/hooks/useModals';
 import { useProjectDetailDeletionHandlers } from '@/features/Projects/hooks/useProjectDetailDeletionHandlers';
 import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
+import SelectedItemsActionBar from '../SelectedItemsActionBar/SelectedItemsActionBar';
 
 const ProjectDetailInner = () => {
   // Data management
@@ -42,6 +43,7 @@ const ProjectDetailInner = () => {
   const [queryEditState, setQueryEditState] = useEditQueryState();
   const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState(false);
 
+  const isUnassignedPrj = isUnassignedProject(data.project || 0);
 
   const handleSetIsEditingQuery = (isEditing: boolean, editingItem?: QueryEditingItem) => {
     setQueryEditState({isEditing: isEditing, editingItem: editingItem || undefined});
@@ -152,64 +154,82 @@ const ProjectDetailInner = () => {
                   />
                 </LoadingWrapper>
               </div>
-              <Tabs 
-                isOpen={true}
-                handleTabSelection={() => {}}
-                defaultActiveTab="Queries"
-                className={styles.projectTabs}
-              >
-                {[
-                  <Tab key="queries" heading="Queries" className={styles.projectTabContent}>
-                    {sortedData.sortedQueries.length > 0 && (
-                      <QueriesTableHeader
-                        activeQueries={sortedData.sortedQueries}
-                        selectedQueries={projectListState.selectedQueries}
-                        setSelectedQueries={projectListState.setSelectedQueries}
-                        sortField={projectListState.sortField}
-                        sortDirection={projectListState.sortDirection}
-                        onSort={projectListState.handleSort}
-                        location="detail"
-                        isEditing={projectEditState.isEditing}
-                      />
-                    )}
-                    {
-                      data.errors.queriesError
-                      ?
-                        (
-                          <ProjectDetailErrorStates
-                            type="queries"
-                            styles={styles}
-                          />
-                        )
-                      : 
-                        (
-                          <LoadingWrapper loading={data.loading.queriesLoading}>
-                            <div className={styles.queryGrid}>
-                              {sortedData.sortedQueries.length === 0 ? (
-                                <div className={styles.emptyState}>
-                                  <p>No queries found{projectListState.searchTerm ? ' matching your search.' : '.'}</p>
-                                </div>
-                              ) : (
-                                sortedData.sortedQueries.map((query) => (
-                                  <QueryCard
-                                    key={query.data.qid}
-                                    query={query}
-                                    searchTerm={projectListState.searchTerm}
-                                    setSelectedQueries={projectListState.setSelectedQueries}
-                                    selectedQueries={projectListState.selectedQueries}
-                                    onEdit={queryEditHandlers.handleEditQuery}
-                                    isEditing={projectEditState.isEditing}
-                                    location="detail"
-                                  />
-                                ))
-                              )}
-                            </div>
-                          </LoadingWrapper>
-                        )
-                    }
-                  </Tab>
-                ]}
-              </Tabs>
+              <div className={styles.projectTabsContainer}>
+                <Tabs 
+                  isOpen={true}
+                  handleTabSelection={() => {}}
+                  defaultActiveTab="Queries"
+                  className={styles.projectTabs}
+                >
+                  {[
+                    <Tab key="queries" heading="Queries" className={styles.projectTabContent}>
+                      {sortedData.sortedQueries.length > 0 && (
+                        <QueriesTableHeader
+                          activeQueries={sortedData.sortedQueries}
+                          selectedQueries={projectListState.selectedQueries}
+                          setSelectedQueries={projectListState.setSelectedQueries}
+                          sortField={projectListState.sortField}
+                          sortDirection={projectListState.sortDirection}
+                          onSort={projectListState.handleSort}
+                          location="detail"
+                          isEditing={projectEditState.isEditing}
+                          isUnassigned={isUnassignedPrj}
+                        />
+                      )}
+                      {
+                        data.errors.queriesError
+                        ?
+                          (
+                            <ProjectDetailErrorStates
+                              type="queries"
+                              styles={styles}
+                            />
+                          )
+                        : 
+                          (
+                            <LoadingWrapper loading={data.loading.queriesLoading}>
+                              <div className={styles.queryGrid}>
+                                {sortedData.sortedQueries.length === 0 ? (
+                                  <div className={styles.emptyState}>
+                                    <p>No queries found{projectListState.searchTerm ? ' matching your search.' : '.'}</p>
+                                  </div>
+                                ) : (
+                                  sortedData.sortedQueries.map((query) => (
+                                    <QueryCard
+                                      key={query.data.qid}
+                                      query={query}
+                                      searchTerm={projectListState.searchTerm}
+                                      setSelectedQueries={projectListState.setSelectedQueries}
+                                      selectedQueries={projectListState.selectedQueries}
+                                      onEdit={queryEditHandlers.handleEditQuery}
+                                      isEditing={projectEditState.isEditing}
+                                      location="detail"
+                                      inUnassignedProject={isUnassignedPrj}
+                                    />
+                                  ))
+                                )}
+                              </div>
+                            </LoadingWrapper>
+                          )
+                      }
+                    </Tab>
+                  ]}
+                </Tabs>
+                {
+                  isUnassignedPrj && (
+                    <SelectedItemsActionBar
+                      selectedProjects={[]}
+                      selectedQueries={projectListState.selectedQueries}
+                      activeTab="queries"
+                      projectEditingState={projectEditState}
+                      onDeleteSelected={() => {console.log('TODO: delete selected')}} // TODO: implement
+                      onPermanentDeleteSelected={() => {console.log('TODO: permanent delete selected')}} // TODO: implement
+                      onEmptyTrash={() => {console.log('TODO: empty trash')}} // TODO: implement
+                      onAddToProject={() => {console.log('TODO: add to project')}} // TODO: implement
+                    />
+                  )
+                }
+              </div>
             </>
           )
       }
