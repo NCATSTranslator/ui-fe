@@ -3,12 +3,13 @@ import styles from './StatusIndicator.module.scss';
 import LoadingIcon from "@/features/Common/components/LoadingIcon/LoadingIcon";
 import CheckIcon from "@/assets/icons/buttons/Checkmark/Checkmark.svg?react";
 import ErrorIcon from "@/assets/icons/buttons/Close/Close.svg?react";
+import CloseIcon from "@/assets/icons/buttons/Close/Close.svg?react";
 import WarningIcon from "@/assets/icons/status/Alerts/Warning.svg?react";
 import { Fade } from "react-awesome-reveal";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 
 interface StatusIndicatorProps {
-  status: 'warning' | 'complete' | 'running' | 'error' | 'unknown';
+  status: 'warning' | 'complete' | 'running' | 'error' | 'unknown' | 'noQueries' | 'noResults';
 }
 
 const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
@@ -101,6 +102,27 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
     ) 
   }
 
+  if(status === 'noQueries' || status === 'noResults') {
+    return (
+      <div data-tooltip-id={`${uniqueId}-none-tooltip`} className={styles.statusIndicator} >
+        <Tooltip id={`${uniqueId}-none-tooltip`}>
+          <span className={styles.tooltipHeading}>{status === 'noQueries' ? 'No Queries' : 'No Results'}</span>
+          <span>{status === 'noQueries' ? 'No queries have been added to this project.' : 'No results are available for this query.'}</span>
+        </Tooltip>
+        <Fade
+          delay={FADE_DELAY}
+          duration={FADE_DURATION}
+          triggerOnce
+          key="unknown"
+        >
+          <span className={`${styles.status} ${status === 'noQueries' ? styles.statusNoQueries : styles.statusNoResults}`}>
+            <CloseIcon/>
+          </span>
+        </Fade>
+      </div>
+    ) 
+  }
+
   if(status === 'unknown') {
     return (
       <div data-tooltip-id={`${uniqueId}-unknown-tooltip`} className={styles.statusIndicator} >
@@ -111,8 +133,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
           key="unknown"
         >
           <span className={`${styles.status} ${styles.statusUnknown}`}>
-            {/* TODO: Add unknown status icon */}
-            <LoadingIcon size="small" className={styles.loadingIcon}/>
+            <CloseIcon/>
           </span>
         </Fade>
       </div>

@@ -22,6 +22,13 @@ export const projectsQueryClient = new QueryClient({
  * @returns {QueryStatus} The status of the project
  */
 export const getProjectStatus = (project: Project, queries: UserQueryObject[]): QueryStatus => {
+
+  if(project.data.pks.length === 0)
+    return 'noQueries';
+
+  if(project.data.pks.every((qid) => queries.find((query) => query.data.qid === qid)?.status === 'noResults'))
+    return 'noResults';
+
   // Get the most recent query's status
   const mostRecentQuery = project.data.pks.reduce((mostRecent: UserQueryObject | null, qid) => {
     const query = queries.find((query) => query.data.qid === qid);
