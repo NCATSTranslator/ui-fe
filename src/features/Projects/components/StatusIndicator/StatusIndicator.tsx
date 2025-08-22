@@ -1,10 +1,11 @@
-import LoadingIcon from "@/features/Common/components/LoadingIcon/LoadingIcon";
+import { FC, useId } from "react";
 import styles from './StatusIndicator.module.scss';
+import LoadingIcon from "@/features/Common/components/LoadingIcon/LoadingIcon";
 import CheckIcon from "@/assets/icons/buttons/Checkmark/Checkmark.svg?react";
 import ErrorIcon from "@/assets/icons/buttons/Close/Close.svg?react";
 import WarningIcon from "@/assets/icons/status/Alerts/Warning.svg?react";
 import { Fade } from "react-awesome-reveal";
-import { FC } from "react";
+import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 
 interface StatusIndicatorProps {
   status: 'warning' | 'complete' | 'running' | 'error' | 'unknown';
@@ -14,17 +15,22 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   const FADE_DELAY = 100;
   const FADE_DURATION = 500;
+  const uniqueId = useId();
 
   if(status === 'complete') {
     return (
-      <div>
+      <div data-tooltip-id={`${uniqueId}-success-tooltip`} className={styles.statusIndicator}>
+        <Tooltip id={`${uniqueId}-success-tooltip`}>
+          <span className={styles.tooltipHeading}>Fully Loaded</span>
+          <span>Click to view results</span>
+        </Tooltip>
         <Fade
           delay={FADE_DELAY}
           duration={FADE_DURATION}
           triggerOnce
           key="complete"
         >
-          <span className={`${styles.status} ${styles.statusSuccess}`}>
+          <span className={`${styles.status} ${styles.statusSuccess}`} >
             <CheckIcon/>
           </span>
         </Fade>
@@ -34,7 +40,11 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   if(status === 'running') {
     return (
-      <div>
+      <div data-tooltip-id={`${uniqueId}-running-tooltip`} className={styles.statusIndicator}>
+        <Tooltip id={`${uniqueId}-running-tooltip`}>
+          <span className={styles.tooltipHeading}>Loading</span>
+          <span>You will be notified when this query is fully loaded. While you wait, you can click to view the results that have been returned so far.</span>
+        </Tooltip>
         <Fade
           delay={FADE_DELAY}
           duration={FADE_DURATION}
@@ -51,7 +61,11 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   if(status === 'warning') {
     return (
-      <div>
+      <div data-tooltip-id={`${uniqueId}-warning-tooltip`} className={styles.statusIndicator}>
+        <Tooltip id={`${uniqueId}-warning-tooltip`}>
+          <span className={styles.tooltipHeading}>Error</span>
+          <span>There was an error while processing your query results. Please try again later, or try clearing your cache if the problem persists.<br/>Click to view the results that were returned.</span>
+        </Tooltip>
         <Fade
           delay={FADE_DELAY}
           duration={FADE_DURATION}
@@ -68,7 +82,11 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   if(status === 'error') {
     return (
-      <div>
+      <div data-tooltip-id={`${uniqueId}-error-tooltip`} className={styles.statusIndicator}>
+        <Tooltip id={`${uniqueId}-error-tooltip`}>
+          <span className={styles.tooltipHeading}>Query Failed</span>
+          <span>There was an error while processing your query results. Please try again later, or try clearing your cache if the problem persists.</span>
+        </Tooltip>
         <Fade
           delay={FADE_DELAY}
           duration={FADE_DURATION}
@@ -85,7 +103,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   if(status === 'unknown') {
     return (
-      <div>
+      <div data-tooltip-id={`${uniqueId}-unknown-tooltip`} className={styles.statusIndicator} >
         <Fade
           delay={FADE_DELAY}
           duration={FADE_DURATION}

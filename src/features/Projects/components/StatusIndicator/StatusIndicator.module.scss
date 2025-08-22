@@ -48,3 +48,10 @@ $statusSize: 18px;
     }
   }
 }
+.statusIndicator {
+  .tooltipHeading {
+    font-size: $bodyTwoSize;
+    font-weight: 800;
+    margin: 0 0 $xxs;
+  }
+}
