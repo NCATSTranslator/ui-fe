@@ -48,6 +48,12 @@ $statusSize: 18px;
     }
   }
 }
+.statusNoQueries, .statusNoResults {
+  background: $lightPurpleTwo;
+}
+.statusUnknown {
+  background: $midGray;
+}
 .statusIndicator {
   .tooltipHeading {
     font-size: $bodyTwoSize;
