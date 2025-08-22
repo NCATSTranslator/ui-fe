@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DataCard.module.scss';
-import { getFormattedDate } from '@/features/Common/utils/utilities';
+import { getFormattedDate, joinClasses } from '@/features/Common/utils/utilities';
 import Button from '@/features/Core/components/Button/Button';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
@@ -11,11 +11,13 @@ import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
 import CardName from '@/features/Projects/components/CardName/CardName';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
+import ChevRightIcon from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import { Project, QueryStatus, UserQueryObject } from '@/features/Projects/types/projects';
 import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { getTypeIDFromType } from '@/features/Projects/utils/utilities';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
-import { unableToReachLinkToast } from '../../utils/toastMessages';
+import { unableToReachLinkToast } from '@/features/Projects/utils/toastMessages';
+import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
 
 interface DataCardProps<T> {
   className?: string;
@@ -27,15 +29,19 @@ interface DataCardProps<T> {
   getItemNoteCount: (item: T) => number;
   getItemStatus?: (item: T) => string;
   getItemCount?: (item: T) => number;
+  inUnassignedProject?: boolean;
+  isEditing?: boolean;
   item: T;
+  location?: "list" | "detail"
   onEdit?: (item: T) => void;
   onShare?: (item: T) => void;
   onRestore?: (item: T) => void;
   onDelete?: (item: T) => void;
+  queriesLoading?: boolean;
   searchTerm?: string;
   selectedItems: T[];
   setSelectedItems: Dispatch<SetStateAction<T[]>>;
-  status?: string;
+  status?: QueryStatus;
   type: 'project' | 'smartQuery' | 'pathfinderQuery';
 }
 
@@ -49,11 +55,15 @@ const DataCard = <T,>({
   getItemNoteCount,
   getItemStatus,
   getItemCount,
+  inUnassignedProject = false,
+  isEditing = false,
   item,
+  location = "list",
   onEdit,
   onShare,
   onRestore,
   onDelete,
+  queriesLoading = false,
   searchTerm,
   selectedItems,
   setSelectedItems,
@@ -62,8 +72,7 @@ const DataCard = <T,>({
 }: DataCardProps<T>) => {
   const navigate = useNavigate();
 
-  const isUnassigned = getItemId(item) === -1;
-
+  const isUnassignedPrj = type === 'project' ? isUnassignedProject(item as Project) : isUnassignedProject(getItemId(item) as number);
   const title = getItemTitle(item);
   const time_created = getItemTimeCreated(item);
   const time_updated = getItemTimeUpdated(item);
@@ -111,8 +120,8 @@ const DataCard = <T,>({
       const direction = query.data.query.direction || null;
       const typeID = getTypeIDFromType(type, direction);
       const qid = query.data.qid;
-      const url = getResultsShareURLPath(label, curie, typeID, "0", qid);
-      window.open(url, "_blank", "noopener");
+      const path = getResultsShareURLPath(label, curie, typeID, "0", qid);
+      window.open(encodeURI(`${window.location.origin}/${path}`), "_blank", "noopener");
       return;
     }
 
@@ -133,8 +142,8 @@ const DataCard = <T,>({
         }
         const constraint = query.data.query.constraint || undefined;
         const qid = query.data.qid;
-        const url = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
-        window.open(url, "_blank", "noopener");
+        const path = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
+        window.open(encodeURI(`${window.location.origin}/${path}`), "_blank", "noopener");
         return;
       }
       unableToReachLinkToast();
@@ -154,18 +163,32 @@ const DataCard = <T,>({
       onDelete(item);
   };
 
+  const classes = joinClasses(
+    styles.dataCard,
+    className,
+    type === 'project' ? styles.projectCard : styles.queryCard,
+    location === 'detail' && styles.detailCard,
+    (isEditing || inUnassignedProject) && styles.isEditing
+  )
+
+  const showCheckbox = location !== 'detail' || (location === 'detail' && (isEditing || inUnassignedProject));
+
   return (
-    <CardWrapper
-      className={`${styles.dataCard} ${className || ''} ${type === 'project' && styles.projectWrapper}`}
+    <CardWrapper 
+      className={classes}
       onClick={handleCardClick}
     >
-      <div className={`${styles.checkboxColumn} ${styles.column}`}>
-        {
-          !isUnassigned && (
-            <Checkbox checked={isSelected} handleClick={handleSelectItem} />
-          )
-        }
-      </div>
+      {
+        showCheckbox && (          
+          <div className={`${styles.checkboxColumn} ${styles.column}`}>
+            {
+              !isUnassignedPrj && (
+                <Checkbox checked={isSelected} handleClick={handleSelectItem} />
+              )
+            }
+          </div>
+        )
+      }
       <div className={`${styles.nameColumn} ${styles.column}`}>
         <div className={styles.nameContainer}>
           <CardName
@@ -173,7 +196,7 @@ const DataCard = <T,>({
             name={title}
             itemCount={itemCount}
             searchTerm={searchTerm}
-            isUnassigned={isUnassigned}
+            isUnassigned={isUnassignedPrj}
           />
           {
             isDeleted && (
@@ -189,14 +212,14 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.actionsColumn} ${styles.column}`}>
         {
-          (!isUnassigned && !isDeleted) && (
-            <Button variant="secondary" iconOnly handleClick={handleEdit}>
+          (!isUnassignedPrj && !isDeleted) && (
+            <Button variant="secondary" iconOnly handleClick={handleEdit} disabled={queriesLoading}>
               <EditIcon/>
             </Button>
           )
         }
         {
-          (!isUnassigned && !isDeleted) && (
+          (!isUnassignedPrj && !isDeleted) && (
             <Button variant="secondary" iconOnly handleClick={handleShare}>
               <ShareIcon/>
             </Button>
@@ -205,7 +228,7 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.lastSeenColumn} ${styles.column}`}>
         {
-          !isUnassigned && (
+          !isUnassignedPrj && (
             <>
               {getFormattedDate(new Date(time_updated), false)}
             </>
@@ -214,7 +237,7 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.dateCreatedColumn} ${styles.column}`}>
       {
-          !isUnassigned && (
+          !isUnassignedPrj && (
             <>
               {getFormattedDate(new Date(time_created), false)}
             </>
@@ -223,7 +246,7 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.bookmarksColumn} ${styles.column}`}>
         {
-          !isUnassigned && (
+          !isUnassignedPrj && (
             <>
               <BookmarkIcon />
               {bookmark_count}
@@ -233,7 +256,7 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.notesColumn} ${styles.column}`}>
         {
-          !isUnassigned && (
+          !isUnassignedPrj && (
             <>
               <NoteIcon />
               {note_count}
@@ -243,9 +266,10 @@ const DataCard = <T,>({
       </div>
       <div className={`${styles.statusColumn} ${styles.column}`}>
         {
-          !isUnassigned && (
+          !isUnassignedPrj && (
             <>
               <StatusIndicator status={(status || itemStatus) as QueryStatus} />
+              <ChevRightIcon />
             </>
           )
         }

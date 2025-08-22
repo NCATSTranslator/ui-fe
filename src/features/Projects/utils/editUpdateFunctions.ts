@@ -1,17 +1,35 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { EditingItem, Project, UserQueryObject } from '@/features/Projects/types/projects.d';
+import { Project, ProjectEditingItem, ProjectRaw, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
 import { useUpdateProjects, useUpdateQuery, useDeleteProjects, useRestoreProjects, useDeleteQueries, useRestoreQueries } from '@/features/Projects/hooks/customHooks';
 import { errorToast, projectUpdatedToast, queryUpdatedToast, projectRestoredToast, projectDeletedToast, queryRestoredToast, queryDeletedToast } from './toastMessages';
 
-export interface EditProjectQueryState {
+export interface EditProjectState {
   isEditing: boolean;
-  editingItem?: { 
-    id: number | string; 
-    name: string; 
-    type: 'project' | 'query';
-    queryIds?: string[];
-  };
+  editingItem?: ProjectEditingItem;
+}
+
+export interface EditQueryState {
+  isEditing: boolean;
+  editingItem?: QueryEditingItem;
+}
+
+export interface EditProjectHandlers {
+  handleEditProject: (project: Project) => void;
+  handleUpdateProject: (id: number | string, newName?: string, newQids?: string[]) => void;
+  handleCancelEdit: () => void;
+  handleRestoreProject: (project: Project) => void;
+  handleDeleteProject: (project: Project) => void;
+  handlePermanentDeleteProject: (project: Project) => void;
+}
+
+export interface EditQueryHandlers {
+  handleEditQuery: (query: UserQueryObject) => void;
+  handleUpdateQuery: (id: number | string, newName?: string) => void;
+  handleCancelEdit: () => void;
+  handleRestoreQuery: (query: UserQueryObject) => void;
+  handleDeleteQuery: (query: UserQueryObject) => void;
+  handlePermanentDeleteQuery: (query: UserQueryObject) => void;
 }
 
 export interface EditHandlers {
@@ -29,8 +47,8 @@ export interface EditHandlers {
  * Handles the edit state of the project or query.
  * @returns The edit state and the function to set the state.
  */
-export const useEditProjectQueryState = (): [EditProjectQueryState, Dispatch<SetStateAction<EditProjectQueryState>>] => {
-  const [editState, setEditState] = useState<EditProjectQueryState>({
+export const useEditQueryState = (): [EditQueryState, Dispatch<SetStateAction<EditQueryState>>] => {
+  const [editState, setEditState] = useState<EditQueryState>({
     isEditing: false,
     editingItem: undefined
   });
@@ -39,138 +57,95 @@ export const useEditProjectQueryState = (): [EditProjectQueryState, Dispatch<Set
 };
 
 /**
- * Handles the editing of projects and queries.
+ * Handles the edit state of the project or query.
+ * @returns The edit state and the function to set the state.
+ */
+export const useEditProjectState = (): [EditProjectState, Dispatch<SetStateAction<EditProjectState>>] => {
+  const [editState, setEditState] = useState<EditProjectState>({
+    isEditing: false,
+    editingItem: undefined
+  });
+
+  return [editState, setEditState];
+};
+
+/**
+ * Handles the editing of projects.
  * @param handleSetIsEditing - The function to handle setting the edit state.
  * @param projects - The projects to edit.
- * @param queries - The queries to edit.
  */
-export const useEditProjectQueryHandlers = (
-  handleSetIsEditing: (isEditing: boolean, editingItem?: EditingItem) => void,
-  projects: Project[],
-  queries: UserQueryObject[]
-): EditHandlers => {
+export const useEditProjectHandlers = (
+  handleSetIsEditing: (isEditing: boolean, editingItem?: ProjectEditingItem) => void,
+  projects: Project[]
+): EditProjectHandlers => {
   const queryClient = useQueryClient();
   const updateProjectsMutation = useUpdateProjects();
-  const updateQueryMutation = useUpdateQuery();
   const deleteProjectsMutation = useDeleteProjects();
   const restoreProjectsMutation = useRestoreProjects();
-  const deleteQueriesMutation = useDeleteQueries();
-  const restoreQueriesMutation = useRestoreQueries();
 
   const handleEditProject = (project: Project) => {
     handleSetIsEditing(true, {
-      id: project.id,
+      id: project.id.toString(),
       name: project.data.title,
       type: 'project',
       queryIds: project.data.pks
     });
   };
 
-  const handleEditQuery = (query: UserQueryObject) => {
-    handleSetIsEditing(true, {
-      id: query.data.qid,
-      name: query.data.title || '',
-      type: 'query'
-    });
-  };
+  const handleUpdateProject = (id: number | string, newName?: string, newQids?: string[]) => {
+    // Find the project and update it
+    const projectToUpdate = projects.find(p => p.id === parseInt(id.toString()));
+    if(!projectToUpdate) {
+      console.error('Project not found:', id);
+      return;
+    }
 
-  const handleUpdateItem = (id: number | string, type: 'project' | 'query', newName?: string, newQids?: string[]) => {
-    if (type === 'project') {
-      // Find the project and update it
-      const projectToUpdate = projects.find(p => p.id === id);
-      if (projectToUpdate) {
-        const queryKey = ['userProjects'];
-        // Optimistically update the React Query cache
+    const queryKey = ['userProjects'];
+    // Optimistically update the React Query cache
+    queryClient.setQueryData(queryKey, (oldData: Project[]) => {
+      if (!oldData) return oldData;
+      return oldData.map((project: Project) => 
+        project.id === id 
+          ? { 
+              ...project, 
+              data: {
+                title: newName || project.data.title,
+                pks: newQids || project.data.pks
+              }
+            }
+          : project
+      );
+    });
+
+    updateProjectsMutation.mutate([{
+      id: projectToUpdate.id,
+      title: newName || projectToUpdate.data.title,
+      pks: newQids || projectToUpdate.data.pks
+    }], {
+      onSuccess: () => {
+        handleSetIsEditing(false);
+        projectUpdatedToast();
+      },
+      onError: (error) => {
+        console.error('Failed to update project:', error);
+        errorToast('Failed to update project');
+        // Revert optimistic update on error
         queryClient.setQueryData(queryKey, (oldData: Project[]) => {
           if (!oldData) return oldData;
           return oldData.map((project: Project) => 
             project.id === id 
               ? { 
-                  ...project, 
+                  ...project,
                   data: {
-                    title: newName || project.data.title,
-                    pks: newQids || project.data.pks
+                    title: projectToUpdate.data.title,
+                    pks: projectToUpdate.data.pks
                   }
                 }
               : project
           );
         });
-
-        updateProjectsMutation.mutate([{
-          id: projectToUpdate.id,
-          title: newName || projectToUpdate.data.title,
-          pks: newQids || projectToUpdate.data.pks
-        }], {
-          onSuccess: () => {
-            handleSetIsEditing(false);
-            projectUpdatedToast();
-          },
-          onError: (error) => {
-            console.error('Failed to update project:', error);
-            errorToast('Failed to update project');
-            // Revert optimistic update on error
-            queryClient.setQueryData(queryKey, (oldData: Project[]) => {
-              if (!oldData) return oldData;
-              return oldData.map((project: Project) => 
-                project.id === id 
-                  ? { 
-                      ...project,
-                      data: {
-                        title: projectToUpdate.data.title,
-                        pks: projectToUpdate.data.pks
-                      }
-                    }
-                  : project
-              );
-            });
-          }
-        });
       }
-    } else if (type === 'query') {
-      const queryKey = ['userQueries'];
-      // Find the query and update it
-      const queryToUpdate = queries.find(q => q.data.qid === id);
-      if (queryToUpdate) {
-        // Optimistically update the React Query cache
-        queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
-          if (!oldData) return oldData;
-          return oldData.map((query: UserQueryObject) => 
-            query.data.qid === id 
-              ? { 
-                  ...query, 
-                  data: { ...query.data, title: newName || query.data.title }
-                }
-              : query
-          );
-        });
-
-        updateQueryMutation.mutate({
-          qid: queryToUpdate.data.qid,
-          title: newName || queryToUpdate.data.title || ''
-        }, {
-          onSuccess: () => {
-            handleSetIsEditing(false);
-            queryUpdatedToast();
-          },
-          onError: (error) => {
-            console.error('Failed to update query:', error);
-            errorToast('Failed to update query');
-            // Revert optimistic update on error
-            queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
-              if (!oldData) return oldData;
-              return oldData.map((query: UserQueryObject) => 
-                query.data.qid === id 
-                  ? { 
-                      ...query, 
-                      data: { ...query.data, title: queryToUpdate.data.title }
-                    }
-                  : query
-              );
-            });
-          }
-        });
-      }
-    }
+    });
   };
 
   const handleCancelEdit = () => {
@@ -241,6 +216,93 @@ export const useEditProjectQueryHandlers = (
     });
   };
 
+  const handlePermanentDeleteProject = (project: Project) => {
+    // TODO: Implement permanent delete project
+    console.log('NOT IMPLEMENTED: Permanently deleting project:', project);
+  };
+
+  return {
+    handleEditProject,
+    handleUpdateProject,
+    handleCancelEdit,
+    handleRestoreProject,
+    handleDeleteProject,
+    handlePermanentDeleteProject
+  };
+};
+
+/**
+ * Handles the editing of queries.
+ * @param handleSetIsEditing - The function to handle setting the edit state.
+ * @param queries - The queries to edit.
+ */
+export const useEditQueryHandlers = (
+  handleSetIsEditing: (isEditing: boolean, editingItem?: QueryEditingItem) => void,
+  queries: UserQueryObject[]
+): EditQueryHandlers => {
+  const queryClient = useQueryClient();
+  const updateQueryMutation = useUpdateQuery();
+  const deleteQueriesMutation = useDeleteQueries();
+  const restoreQueriesMutation = useRestoreQueries();
+
+  const handleEditQuery = (query: UserQueryObject) => {
+    handleSetIsEditing(true, {
+      id: query.data.qid,
+      name: query.data.title || '',
+      type: 'query'
+    });
+  };
+
+  const handleUpdateQuery = (id: number | string, newName?: string) => {
+    const queryKey = ['userQueries'];
+    // Find the query and update it
+    const queryToUpdate = queries.find(q => q.data.qid === id);
+    if (queryToUpdate) {
+      // Optimistically update the React Query cache
+      queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
+        if (!oldData) return oldData;
+        return oldData.map((query: UserQueryObject) => 
+          query.data.qid === id 
+            ? { 
+                ...query, 
+                data: { ...query.data, title: newName || query.data.title }
+              }
+            : query
+        );
+      });
+
+      updateQueryMutation.mutate({
+        qid: queryToUpdate.data.qid,
+        title: newName || queryToUpdate.data.title || ''
+      }, {
+        onSuccess: () => {
+          handleSetIsEditing(false);
+          queryUpdatedToast();
+        },
+        onError: (error) => {
+          console.error('Failed to update query:', error);
+          errorToast('Failed to update query');
+          // Revert optimistic update on error
+          queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
+            if (!oldData) return oldData;
+            return oldData.map((query: UserQueryObject) => 
+              query.data.qid === id 
+                ? { 
+                    ...query, 
+                    data: { ...query.data, title: queryToUpdate.data.title }
+                  }
+                : query
+            );
+          });
+        }
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    handleSetIsEditing(false, undefined);
+  };
+
   const handleRestoreQuery = (query: UserQueryObject) => {
     const queryKey = ['userQueries'];
     // Optimistically update the React Query cache
@@ -285,7 +347,7 @@ export const useEditProjectQueryHandlers = (
       );
     });
 
-    deleteQueriesMutation.mutate([query.data.qid.toString()], {
+    deleteQueriesMutation.mutate([query.sid], {
       onSuccess: () => {
         queryDeletedToast();
       },
@@ -305,17 +367,20 @@ export const useEditProjectQueryHandlers = (
     });
   };
 
-  return {
-    handleEditProject,
-    handleEditQuery,
-    handleUpdateItem,
-    handleCancelEdit,
-    handleRestoreProject,
-    handleDeleteProject,
-    handleRestoreQuery,
-    handleDeleteQuery
+  const handlePermanentDeleteQuery = (query: UserQueryObject) => {
+    // TODO: Implement permanent delete query
+    console.log('NOT IMPLEMENTED: Permanently deleting query:', query);
   };
-}; 
+
+  return {
+    handleEditQuery,
+    handleUpdateQuery,
+    handleCancelEdit,
+    handleRestoreQuery,
+    handleDeleteQuery,
+    handlePermanentDeleteQuery
+  };
+};
 
 /**
  * Handles the post-deletion of projects by removing them from the userProjects query.
@@ -343,4 +408,39 @@ export const handlePostQueryDeletion = (queryClient: QueryClient, selectedQuerie
     return oldData.filter((query: UserQueryObject) => !selectedQueries.some(q => q.data.qid === query.data.qid));
   });
   setSelectedQueries([]);
+};
+
+/**
+ * Handles the setting of the editing state for a project.
+ * @param isEditing - Whether the project is being edited.
+ * @param editingItem - The editing item.
+ * @param setProjectEditState - The function to set the project edit state.
+ * @param activeQueries - The active queries.
+ * @param setSelectedQueries - The function to set the selected queries.
+ */
+export const onSetIsEditingProject = (
+  isEditing: boolean,
+  activeQueries: UserQueryObject[],
+  setProjectEditState: (state: EditProjectState) => void,
+  setSelectedQueries: (queries: UserQueryObject[]) => void,
+  editingItem?: ProjectEditingItem
+) => {
+  setProjectEditState({isEditing: isEditing, editingItem: editingItem || undefined});
+  if(isEditing && (editingItem?.type === 'project' || !editingItem)) {
+    const selectedQids = editingItem?.queryIds || [];
+    const selectedQueries = activeQueries.filter(query => selectedQids.includes(query.data.qid));
+    setSelectedQueries(selectedQueries);
+  } else {
+    setSelectedQueries([]);
+  }
+};
+
+/**
+ * Checks if the project is unassigned.
+ * @param project - The project to check.
+ * @returns True if the project is unassigned, false otherwise.
+ */
+export const isUnassignedProject = (project: Project | ProjectRaw | number) => {
+  const id = typeof project === 'number' ? project : project.id;
+  return id === -1;
 };

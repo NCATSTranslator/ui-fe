@@ -100,13 +100,33 @@ export const fetchWithErrorHandling = async <T>(
       }
     }
     
-    const data = await response.json();
+    // Handle responses that might be plain text "OK" instead of JSON
+    const contentType = response.headers.get('content-type');
+    let data: unknown;
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      // For non-JSON responses, try to get text first
+      const textResponse = await response.text();
+      // If the response is "OK", return it as is, otherwise try to parse as JSON
+      if (textResponse === 'OK') {
+        data = textResponse;
+      } else {
+        try {
+          data = JSON.parse(textResponse);
+        } catch {
+          // If it's not valid JSON, return the text as is
+          data = textResponse;
+        }
+      }
+    }
     
     if (responseValidator && !responseValidator(data)) {
       throw new Error('Invalid response format');
     }
     
-    return data;
+    return data as T;
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes('HTTP Error')) {

@@ -6,21 +6,27 @@ import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import SortableHeader from '@/features/Projects/components/SortableHeader/SortableHeader';
 
 interface QueriesTableHeaderProps {
+  activeQueries: UserQueryObject[];
+  isEditing?: boolean;
+  isUnassigned?: boolean;
+  location?: "list" | "detail";
+  onSort: (field: SortField) => void;
   selectedQueries: UserQueryObject[];
   setSelectedQueries: (queries: UserQueryObject[]) => void;
-  activeQueries: UserQueryObject[];
-  sortField: SortField;
   sortDirection: SortDirection;
-  onSort: (field: SortField) => void;
+  sortField: SortField;
 }
 
 const QueriesTableHeader = ({
+  activeQueries,
+  isEditing = false,
+  isUnassigned = false,
+  location,
+  onSort,
   selectedQueries,
   setSelectedQueries,
-  activeQueries,
   sortField,
-  sortDirection,
-  onSort
+  sortDirection
 }: QueriesTableHeaderProps) => {
   const handleSelectAll = () => {
     if (selectedQueries.length === activeQueries.length) {
@@ -30,20 +36,27 @@ const QueriesTableHeader = ({
     }
   };
 
-  const allSelected = activeQueries.length > 0 && selectedQueries.length === activeQueries.length;
+  const allSelected = activeQueries.length > 0 && selectedQueries.length >= activeQueries.length;
   const someSelected = selectedQueries.length > 0 && selectedQueries.length < activeQueries.length;
+
+  const showCheckbox = location !== 'detail' || (location === 'detail' && (isEditing || isUnassigned));
 
   return (
     <div className={styles.tableHeader}>
-      <div className={styles.tableRow}>
-        <div className={styles.checkboxColumn}>
-          <Checkbox 
-            checked={allSelected}
-            handleClick={handleSelectAll}
-            className={someSelected ? styles.indeterminate : ''}
-          />
-          <div className={styles.separator}></div>
-        </div>
+      <div className={`${styles.tableRow} ${!showCheckbox && styles.detail}`}>
+        {
+          showCheckbox && (
+            <div className={styles.checkboxColumn}>
+              <Checkbox
+                disabled={activeQueries.length === 0}
+                checked={allSelected}
+                handleClick={handleSelectAll}
+                className={someSelected ? styles.indeterminate : ''}
+              />
+              <div className={styles.separator}></div>
+            </div>
+          )
+        }
         <div className={styles.nameColumn}>
           <SortableHeader 
             field="name" 

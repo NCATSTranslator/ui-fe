@@ -111,13 +111,23 @@
     width: 100%;
     .editButton, .shareButton {
       background-color: $white;
-      &:hover {
+      &:hover:not(:disabled) {
         background-color: $midGray;
       }
     }
+    .searchSection {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
   }
   .editSection {
+    width: 100%;
     margin-top: $xs;
+  }
+  .editContainer {
+    display: grid;
+    gap: $m;
   }
   .subtitleSection {
     display: flex;
@@ -154,6 +164,17 @@
         fill: transparent;
         stroke: $black;
       }
+    }
+  }
+  .deleteButton {
+    background-color: transparent;
+    color: $purpleOne;
+    svg path {
+      fill: $purpleOne;
+    }
+    &:hover {
+      background-color: transparent;
+      text-decoration: underline;
     }
   }
 }

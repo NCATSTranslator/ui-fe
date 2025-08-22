@@ -4,16 +4,25 @@ import Close from '@/assets/icons/buttons/Close/Close.svg?react';
 
 interface ModalProps {
   children?: ReactNode;
-  isOpen: boolean;
-  hideCloseButton?: boolean;
-  onClose?: () => void;
   className?: string;
   containerClass?: string;
+  hideCloseButton?: boolean;
+  innerClass?: string;
+  isOpen: boolean;
+  onClose?: () => void;
   testId?: string;
 }
 
-const Modal: FC<ModalProps> = ({children, isOpen = false, onClose = () => { console.log('No onClose method specified for Modal component.') }, 
-  className = "", containerClass = "", hideCloseButton = false, testId = ""}) => {
+const Modal: FC<ModalProps> = ({
+  children,
+  className = "",
+  containerClass = "",
+  hideCloseButton = false,
+  innerClass = "",
+  isOpen = false,
+  onClose = () => { console.log('No onClose method specified for Modal component.') }, 
+  testId = ""
+}) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpenClass = (startOpen) ? styles.true : styles.false;
@@ -56,7 +65,7 @@ const Modal: FC<ModalProps> = ({children, isOpen = false, onClose = () => { cons
         onClick={(e) => e.stopPropagation()}
         className={`${styles.modalContainer} ${containerClass}`}
         >
-          <div className={styles.inner} >
+          <div className={`${styles.inner} ${innerClass}`}>
             {children}
           </div>
           {
