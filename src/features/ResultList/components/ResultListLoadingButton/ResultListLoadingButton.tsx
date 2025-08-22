@@ -63,7 +63,7 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
       <div className={styles.right}>
       <Tooltip 
         id="sync-new-results-button"
-        isOpen={isTooltipOpen}
+        // isOpen={isTooltipOpen}
         >
         <span className={styles.tooltipInner}>
           <p className={styles.bold}>
@@ -80,10 +80,10 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
             />
             <label htmlFor="checkbox-dont-show">Don't show again</label>
           </span>
-          <CloseIcon
+          {/* <CloseIcon
             onClick={() => setIsTooltipOpen(false)}
             className={styles.close}
-          />
+          /> */}
         </span>
       </Tooltip>
       {
