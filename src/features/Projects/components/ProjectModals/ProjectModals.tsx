@@ -3,6 +3,8 @@ import ProjectDeleteWarningModal from '@/features/Projects/components/ProjectDel
 import WarningModal from '@/features/Common/components/WarningModal/WarningModal';
 import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
 import { Project, UserQueryObject, QueryEditingItem, ProjectRaw } from '@/features/Projects/types/projects.d';
+import ShareModal from '@/features/ResultList/components/ShareModal/ShareModal';
+import { getTypeIDFromType } from '@/features/Projects/utils/utilities';
 
 interface ProjectModalsProps {
   modals: Record<string, boolean>;
@@ -37,6 +39,10 @@ interface ProjectModalsProps {
     projects: ProjectRaw[];
     setSelectedProject?: (project: ProjectRaw) => void;
   };
+  shareQueryModal?: {
+    sharedQuery: UserQueryObject | null;
+    onClose: () => void;
+  };
 }
 
 const ProjectModals = ({
@@ -50,7 +56,8 @@ const ProjectModals = ({
   deletePrompts,
   currentProject,
   variant = 'list',
-  editQueryModal
+  editQueryModal,
+  shareQueryModal
 }: ProjectModalsProps) => {
   const isDetailVariant = variant === 'detail';
   
@@ -195,6 +202,18 @@ const ProjectModals = ({
           projects={editQueryModal.projects}
           setSelectedProject={editQueryModal.setSelectedProject}
         />
+      )}
+
+      {/* Share Query Modal */}
+      {modals.shareQuery && shareQueryModal?.sharedQuery && (
+      <ShareModal
+        isOpen={modals.shareQuery}
+        onClose={shareQueryModal.onClose}
+        qid={shareQueryModal.sharedQuery.data.qid || ''}
+        label={shareQueryModal.sharedQuery.data.query.node_one_label || ''}
+        nodeID={shareQueryModal.sharedQuery.data.query.curie || ''}
+        typeID={shareQueryModal.sharedQuery.data.query.type ? getTypeIDFromType(shareQueryModal.sharedQuery.data.query.type, shareQueryModal.sharedQuery.data.query.direction || null).toString() : null}
+      />
       )}
     </>
   );

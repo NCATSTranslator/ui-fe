@@ -14,6 +14,7 @@ interface QueryCardProps {
   searchTerm?: string;
   selectedQueries?: UserQueryObject[];
   setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
+  onShare?: (query: UserQueryObject) => void;
 }
 
 const QueryCard = ({ 
@@ -25,7 +26,8 @@ const QueryCard = ({
   query,
   searchTerm,
   selectedQueries = [],
-  setSelectedQueries
+  setSelectedQueries,
+  onShare
 }: QueryCardProps) => {
 
   const restoreQueriesMutation = useRestoreQueries();
@@ -40,6 +42,10 @@ const QueryCard = ({
       }
     });
   };
+
+  const handleShare = (query: UserQueryObject) => {
+    onShare?.(query);
+  }
   
   return (
     <DataCard
@@ -62,6 +68,7 @@ const QueryCard = ({
       getItemBookmarkCount={(item: UserQueryObject) => item.data.bookmark_ids.length}
       getItemNoteCount={(item: UserQueryObject) => item.data.note_count}
       getItemStatus={(item: UserQueryObject) => item.status}
+      onShare={handleShare}
     />
   );
 };

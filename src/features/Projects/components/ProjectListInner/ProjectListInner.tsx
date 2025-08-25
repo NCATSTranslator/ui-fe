@@ -4,7 +4,7 @@ import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectH
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import { useProjectDetailSortSearchSelectState } from '@/features/Projects/hooks/customHooks';
-import { ProjectEditingItem, QueryEditingItem } from '@/features/Projects/types/projects.d';
+import { ProjectEditingItem, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
 import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject } from '@/features/Projects/utils/editUpdateFunctions';
 
 import { useProjectListData } from '@/features/Projects/hooks/useProjectListData';
@@ -28,7 +28,8 @@ export const ProjectListInner = () => {
     permanentDeleteProject: false,
     permanentDeleteQuery: false,
     permanentDeleteSelected: false,
-    emptyTrash: false
+    emptyTrash: false,
+    shareQuery: false
   });
   
   const [activeTab, setActiveTab] = useState<string>('Projects');
@@ -36,6 +37,7 @@ export const ProjectListInner = () => {
   const [projectEditState, setProjectEditState] = useEditProjectState();
   const [queryEditState, setQueryEditState] = useEditQueryState();
   const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState(false);
+  const [sharedQuery, setSharedQuery] = useState<UserQueryObject | null>(null);
 
   const handleSetIsEditingProject = (isEditing: boolean, editingItem?: ProjectEditingItem) => {
     onSetIsEditingProject(
@@ -108,6 +110,11 @@ export const ProjectListInner = () => {
     });
   };
 
+  const handleShareQuery = (query: UserQueryObject) => {
+    setSharedQuery(query);
+    modals.openModal('shareQuery');
+  };
+
   // reset active tab back to projects when editing is finished
   useEffect(() => {
     if (!projectEditState.isEditing) {
@@ -133,6 +140,13 @@ export const ProjectListInner = () => {
           loading: data.loading.queriesLoading,
           mode: 'edit',
           projects: data.formatted.active
+        }}  
+        shareQueryModal={{
+          onClose: () => {
+            setSharedQuery(null);
+            modals.closeModal('shareQuery');
+          },
+          sharedQuery: sharedQuery
         }}
       />
       <div className="container">
@@ -197,6 +211,7 @@ export const ProjectListInner = () => {
                       queriesLoading={data.loading.queriesLoading}
                       onEditQuery={queryEditHandlers.handleEditQuery}
                       onDeleteQuery={deletionHandlers.handleInitiatePermanentDeleteQuery}
+                      onShareQuery={handleShareQuery}
                       styles={styles}
                     />
                   </Tab>
