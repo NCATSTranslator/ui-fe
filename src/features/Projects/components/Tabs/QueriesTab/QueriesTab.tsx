@@ -11,6 +11,7 @@ interface QueriesTabProps {
   queriesLoading: boolean;
   onEditQuery: (query: UserQueryObject) => void;
   onDeleteQuery: (query: UserQueryObject) => void;
+  onShareQuery: (query: UserQueryObject) => void;
   styles: Record<string, string>;
 }
 
@@ -21,6 +22,7 @@ const QueriesTab = ({
   queriesLoading,
   onEditQuery,
   onDeleteQuery,
+  onShareQuery,
   styles
 }: QueriesTabProps) => {
   const { 
@@ -76,6 +78,7 @@ const QueriesTab = ({
                   selectedQueries={selectedQueries}
                   onEdit={onEditQuery}
                   onDelete={onDeleteQuery}
+                  onShare={onShareQuery}
                 />
               ))
             )}

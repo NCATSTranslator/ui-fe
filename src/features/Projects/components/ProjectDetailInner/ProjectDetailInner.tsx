@@ -4,7 +4,7 @@ import QueriesTableHeader from '@/features/Projects/components/TableHeader/Queri
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 import { useProjectDetailSortSearchSelectState } from '@/features/Projects/hooks/customHooks';
-import { ProjectEditingItem, QueryEditingItem } from '@/features/Projects/types/projects.d';
+import { ProjectEditingItem, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
 import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
@@ -15,7 +15,6 @@ import { useProjectDetailSortedData } from '@/features/Projects/hooks/useProject
 import { useProjectDetailDeletePrompts } from '@/features/Projects/hooks/useDeletePrompts';
 import { useModals } from '@/features/Projects/hooks/useModals';
 import { useProjectDetailDeletionHandlers } from '@/features/Projects/hooks/useProjectDetailDeletionHandlers';
-
 import SelectedItemsActionBar from '../SelectedItemsActionBar/SelectedItemsActionBar';
 import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
 
@@ -28,7 +27,8 @@ const ProjectDetailInner = () => {
   const deletePrompts = useProjectDetailDeletePrompts();
   const modals = useModals({
     deleteProject: false,
-    deleteQueries: false
+    deleteQueries: false,
+    shareQuery: false
   });
 
   // Sorted data
@@ -45,6 +45,7 @@ const ProjectDetailInner = () => {
   const [projectEditState, setProjectEditState] = useEditProjectState();
   const [queryEditState, setQueryEditState] = useEditQueryState();
   const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState(false);
+  const [sharedQuery, setSharedQuery] = useState<UserQueryObject | null>(null);
 
   const isUnassignedPrj = isUnassignedProject(data.project || 0);
 
@@ -93,6 +94,11 @@ const ProjectDetailInner = () => {
     }
   };
 
+  const handleShareQuery = (query: UserQueryObject) => {
+    setSharedQuery(query);
+    modals.openModal('shareQuery');
+  };
+
   return (
     <div className={styles.projectDetail}>
       <ProjectModals
@@ -112,6 +118,13 @@ const ProjectDetailInner = () => {
           loading: data.loading.queriesLoading,
           mode: 'edit',
           projects: data.raw.projects
+        }}
+        shareQueryModal={{
+          onClose: () => {
+            setSharedQuery(null);
+            modals.closeModal('shareQuery');
+          },
+          sharedQuery: sharedQuery
         }}
       />
       {
@@ -208,6 +221,7 @@ const ProjectDetailInner = () => {
                                       isEditing={projectEditState.isEditing}
                                       location="detail"
                                       inUnassignedProject={isUnassignedPrj}
+                                      onShare={handleShareQuery}
                                     />
                                   ))
                                 )}
@@ -228,6 +242,7 @@ const ProjectDetailInner = () => {
                                             isEditing={projectEditState.isEditing}
                                             location="detail"
                                             inUnassignedProject={isUnassignedPrj}
+                                            onShare={handleShareQuery}
                                           />
                                         ))
                                       }
