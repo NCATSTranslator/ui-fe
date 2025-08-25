@@ -99,7 +99,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
           </span>
         </Fade>
       </div>
-    ) 
+    )
   }
 
   if(status === 'noQueries' || status === 'noResults') {
@@ -113,7 +113,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
           delay={FADE_DELAY}
           duration={FADE_DURATION}
           triggerOnce
-          key="unknown"
+          key={status}
         >
           <span className={`${styles.status} ${status === 'noQueries' ? styles.statusNoQueries : styles.statusNoResults}`}>
             <CloseIcon/>
