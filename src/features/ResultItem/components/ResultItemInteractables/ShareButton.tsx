@@ -1,5 +1,5 @@
 import { FC } from "react";
-import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import Button from "@/features/Core/components/Button/Button";
 import styles from './ResultItemInteractables.module.scss';

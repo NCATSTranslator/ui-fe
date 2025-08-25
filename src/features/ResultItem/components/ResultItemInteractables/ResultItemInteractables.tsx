@@ -1,12 +1,5 @@
 import { FC, useCallback, useState, useMemo } from "react";
 import styles from './ResultItemInteractables.module.scss';
-import { Link } from 'react-router-dom';
-import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
-import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
-import BookmarkFilled from "@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react";
-import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"
-import NotesFilled from "@/assets/icons/buttons/Notes/Filled Notes.svg?react"
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import MenuIcon from '@/assets/icons/buttons/Dot Menu/Horizontal Dot Menu.svg?react';
 import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 import { Result } from "@/features/ResultList/types/results";
