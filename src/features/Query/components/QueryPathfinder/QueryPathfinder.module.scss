@@ -32,6 +32,9 @@
     }
   }
   .buttons {
+    display: flex;
+    gap: $s;
+    margin-bottom: $s;
     .button {
       font-size: $captionSize;
       padding: $xxs $xs;
@@ -73,7 +76,7 @@
 }
 .form {
   display: grid;
-  grid-template-columns: 1fr 18px 1fr 40px;
+  grid-template-columns: 1fr 24px 1fr auto;
   column-gap: $xs;
   align-items: center;
   box-shadow: $dropShadow;
@@ -102,10 +105,6 @@
       }
     }
   }
-  .inputContainer {
-    position: relative;
-    display: flex;
-  }
   .input {
     margin: 0;
     width: 100%;
@@ -127,6 +126,7 @@
     margin: 0;
     border: none;
     background-color: $purpleOne;
+    padding: $xs;
     svg {
       height: 24px;
       width: 24px;

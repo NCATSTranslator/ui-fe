@@ -1,0 +1,206 @@
+@use '@/assets/styles/variables' as *;
+
+.projectHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $m;
+  margin-bottom: $m;
+  .backButton {
+    flex-shrink: 0;
+    background: transparent;
+    color: $purpleOne;
+    border: none;
+    padding: 0;
+    margin: 0;
+    &:hover {
+      background: transparent;
+      svg {
+        left: -10px;
+      }
+    }
+    svg {
+      position: relative;
+      transition: $defaultAnim;
+      left: 0;
+      path {
+        fill: $purpleOne;
+      }
+    }
+  }
+  .title {
+    font-size: $h4Size;
+    color: $purpleTwo;
+    font-weight: 800;
+    margin: 0;
+  }
+  .titleSection {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: $xs;
+    flex-direction: column;
+  }
+  .searchSection {
+    flex-shrink: 0;
+    .searchInput {
+      width: 380px;
+    }
+  }
+  .editButtons {
+    display: flex;
+    gap: $s;
+    align-items: center;
+    .doneButton {
+      &:disabled {
+        svg path {
+          stroke: $midDarkGray;
+        }
+      }
+      svg path {
+        stroke: $white;
+        fill: transparent;
+      }
+    }
+  }
+  // List variant styles
+  .listLayout {
+    display: flex;
+    flex-direction: column;
+    gap: $m;
+    width: 100%;
+    .title {
+      font-size: $h5Size;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .right {
+      flex-shrink: 0;
+    }
+    .searchInput {
+      width: 380px;
+    }
+    .editContainer {
+      display: flex;
+      flex-direction: column;
+      gap: $s;
+      min-width: 300px;
+      .projectNameInput {
+        margin: 0;
+      }
+      .editButtons {
+        display: flex;
+        gap: $xs;
+        align-items: center;
+        button {
+          flex: 1;
+        }
+      }
+    }
+  }
+  // Detail variant styles
+  .detailLayout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $m;
+    width: 100%;
+    .editButton, .shareButton {
+      background-color: $white;
+      &:hover:not(:disabled) {
+        background-color: $midGray;
+      }
+    }
+    .searchSection {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+  }
+  .editSection {
+    width: 100%;
+    margin-top: $xs;
+  }
+  .editContainer {
+    display: grid;
+    gap: $m;
+  }
+  .subtitleSection {
+    display: flex;
+    gap: $s;
+    align-items: center;
+    font-size: $bodyTwoSize;
+    color: $black;
+    .subtitle {
+      margin: 0;
+      font-weight: 400;
+      color: $black;
+      font-size: $bodyTwoSize;
+    }
+    .bookmarkCount, .noteCount {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin: 0;
+      svg {
+        width: $m;
+        height: $m;
+        path {
+          fill: $darkGray;
+        }
+      }
+    }
+  }
+  .buttonContainer {
+    display: flex;
+    gap: $xs;
+    align-items: center;
+    .restoreButton {
+      svg path {
+        fill: transparent;
+        stroke: $black;
+      }
+    }
+  }
+  .deleteButton {
+    background-color: transparent;
+    color: $purpleOne;
+    svg path {
+      fill: $purpleOne;
+    }
+    &:hover {
+      background-color: transparent;
+      text-decoration: underline;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: $mediumLarge) {
+  .projectHeader {
+    flex-direction: column;
+    gap: $s;
+    .searchSection {
+      width: 100%;
+      .searchInput {
+        width: 100%;
+      }
+    }
+    .listLayout {
+      .top {
+        flex-direction: column;
+        gap: $s;
+      }
+      .right {
+        width: 100%;
+        .searchInput {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

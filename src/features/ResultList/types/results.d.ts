@@ -1,4 +1,4 @@
-import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject, 
+import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject,
   Provenance, PublicationSupport } from "@/features/Evidence/types/evidence";
 
 export type ResultSet = {
@@ -39,7 +39,7 @@ export type SharedItem = {
   type: string;
 }
 
-export interface ResultBookmark extends Result { 
+export interface ResultBookmark extends Result {
   description?: string;
   bookmarkID?: number | boolean;
   bookmarked?: boolean;
@@ -77,10 +77,16 @@ export interface ResultEdge {
   compressed_edges?: ResultEdge[];
   id: string;
   knowledge_level: KnowledgeLevel;
+  metadata: {
+    edge_bindings: string[],
+    inverted_id: string | null,
+    is_root: boolean,
+  };
   // nodeID
   object: string;
   predicate: string;
   predicate_url: string;
+  description?: string | null;
   provenance: Provenance[];
   publications: {[key: string]: {id: string; support: PublicationSupport}[]};
   // nodeID
@@ -137,8 +143,9 @@ export type ResultGraph = {
 }
 
 export type Tags = {
-  [key:string]: {name: string, value: string}
+  [key:string]: {name: string, value: string} | null;
 }
+
 export type PathFilterState = {
   [pid: string]: boolean;
 }
@@ -161,6 +168,13 @@ export type Errors = {
   "biothings-annotator": string[];
   unknown: string[];
 }
+export type ARAStatusResponse = {
+  status: string;
+  data: {
+    aras: string[];
+    status: string;
+  };
+}
 
 export type HoverTarget = { id: string; type: 'node' | 'edge' } | null;
 
@@ -170,12 +184,18 @@ export const isResultEdge = (obj: unknown): obj is ResultEdge => {
     Array.isArray(obj.aras) &&
     obj.aras.every((item: unknown) => typeof item === "string") &&
     typeof obj.is_root === "boolean" &&
-    typeof obj.knowledge_level === "string" && 
+    typeof obj.knowledge_level === "string" &&
+    typeof obj.metadata === "object" &&
+    Array.isArray(obj.metadata.edge_bindings) &&
+    obj.metadata.edge_bindings.every((item: unknown) => typeof item === "string") &&
+    (typeof obj.metadata.inverted_id === "string" || obj.metadata.inverted_id === null) &&
+    typeof obj.metadata.is_root === "boolean" &&
     typeof obj.object === "string" &&
     typeof obj.predicate === "string" &&
     typeof obj.predicate_url === "string" &&
+    (typeof obj.description === "string" || obj.description === null || obj.description === undefined) &&
     Array.isArray(obj.provenance) &&
-    obj.provenance.every((prov: unknown) => typeof prov === "object") && 
+    obj.provenance.every((prov: unknown) => typeof prov === "object") &&
     typeof obj.publications === "object" &&
     typeof obj.subject === "string" &&
     Array.isArray(obj.support) &&

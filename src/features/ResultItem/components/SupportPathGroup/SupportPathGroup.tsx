@@ -9,7 +9,7 @@ import { sortSupportByEntityStrings, sortSupportByLength } from '@/features/Comm
 import { Path, PathFilterState, ResultNode } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { intToChar, isStringArray, intToNumeral } from '@/features/Common/utils/utilities';
-import { getPathsWithSelectionsSet, getFilteredPathCount, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
+import { getPathsWithSelectionsSet, getFilteredPathCount, getIsPathFiltered, getPathIdSet } from '@/features/ResultItem/utils/utilities';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSupportPathDepth, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
@@ -69,8 +69,12 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
 
   const initHeight = (isExpanded) ? 'auto' : 0;
   const [height, setHeight] = useState<number | string>(initHeight);
-
+  const fullPathCount = useMemo(() => getPathIdSet(formattedPaths, true, resultSet).size, [formattedPaths, resultSet]);
   const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
+  const currentPathCount = useMemo(() => {
+    return showHiddenPaths ? fullPathCount : fullPathCount - filteredPathCount;
+  }, [filteredPathCount, formattedPaths, showHiddenPaths]);
+
   const itemsPerPage: number = 10;
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0);
@@ -111,11 +115,18 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
       className={`${!!pathViewStyles && pathViewStyles.support} ${styles.support} ${!isExpanded && styles.closed } ${currentDepth > 1 && styles.nested}`}
       duration={500}
       height={typeof height === "number" ? height : 'auto'}
+      animateOpacity
     >
       <SupportPathDepthContext.Provider value={currentDepth}>
         <SupportPathKeyContext.Provider value={currentKey}>
           <div className={`${!!pathViewStyles && pathViewStyles.supportGroupContainer} scrollable-support`}>
-            <p className={styles.supportLabel}>Supporting Paths</p>
+            <p className={styles.supportLabel}>
+              {currentPathCount} Supporting Path{currentPathCount === 1 ? '' : 's'} <span className={styles.outOfText}>{filteredPathCount > 0 && `(out of ${fullPathCount})`}</span>
+            </p>
+            {
+              (!showHiddenPaths && filteredPathCount >= fullPathCount) &&
+              <p className={styles.filteredDisclaimer}>Try modifying or removing filters to broaden your search.</p>
+            }
             {
               displayedPaths.map((supportPath) => {
                 if(!supportPath)

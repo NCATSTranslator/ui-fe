@@ -1,0 +1,105 @@
+@use '@/assets/styles/variables' as *;
+
+.dataCard {
+  background-color: $white;
+  &.projectCard {
+    background: $lightGray;
+  }
+  &.queryCard {
+    .actionsColumn {
+      button {
+        background-color: $lightGray;
+        &:hover {
+          background-color: $white;
+        }
+      }
+    }
+  }
+  &:hover {
+    background-color: $whiteHover;
+  }
+  &.detailCard {
+    grid-template-columns: $projectsDetailGridColumns;
+    &.isEditing {
+      grid-template-columns: $projectsTableGridColumns;
+    }
+  }
+  
+  .column {
+    font-size: $captionSize;
+    color: $darkGray;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .statusColumn {
+    justify-content: space-between;
+  }
+  
+  .checkboxColumn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    label {
+      display: flex;
+      margin-bottom: 0;
+      width: $s;
+      height: $s;
+      padding: $xxs;
+    }
+  }
+  
+  .nameColumn {
+    .queryTitle,
+    .projectTitle {
+      font-weight: 500;
+      color: $black;
+      font-size: 14px;
+    }
+  }
+  
+  .bookmarksColumn,
+  .notesColumn {
+    gap: 2px;
+    svg {
+      path {
+        fill: $darkGray;
+      }
+    }
+  }
+  
+  .actionsColumn {
+    gap: 4px;
+    button {
+      background-color: $white;
+      &:hover {
+        background-color: $lightGray;
+      }
+      &:disabled {
+        background-color: $hoverGray;
+        &:hover {
+          background-color: $hoverGray;
+        }
+      }
+    }
+  }
+
+  .deletedInteractions {
+    display: flex;
+    gap: $xxs;
+    align-items: center;
+    margin-top: $xxs;
+    span {
+      font-size: $captionSize;
+      font-weight: 800;
+      color: $purpleOne;
+    }
+    .interaction {
+      &:hover {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    }
+  }
+}

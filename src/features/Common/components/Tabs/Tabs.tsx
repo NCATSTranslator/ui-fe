@@ -8,6 +8,7 @@ interface TabsProps {
   children: (ReactElement<TabProps> | null)[];
   className?: string;
   tabListClassName?: string;
+  tabClassName?: string;
   isOpen: boolean;
   handleTabSelection?: (heading: string) => void;
   defaultActiveTab?: string;
@@ -18,7 +19,8 @@ interface TabsProps {
 const Tabs: FC<TabsProps> = ({ 
   children, 
   className, 
-  tabListClassName,
+  tabListClassName = "",
+  tabClassName = "",
   isOpen, 
   handleTabSelection = () => {}, 
   defaultActiveTab,
@@ -142,6 +144,7 @@ const Tabs: FC<TabsProps> = ({
               onClick={handleTabClick}
               dataTooltipId={dataTooltipId}
               setTabRef={setTabRef}
+              className={tabClassName}
             />
           );
         })}

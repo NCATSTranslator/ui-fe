@@ -1,25 +1,26 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
 import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
-import { hasSupport } from "@/features/Common/utils/utilities";
+import { findInSet, hasSupport } from "@/features/Common/utils/utilities";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import { cloneDeep } from "lodash";
-import { Save, SaveGroup } from "@/features/UserAuth/utils/userApi";
+import { SaveGroup } from "@/features/UserAuth/utils/userApi";
+import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
 
 /**
  * Performs a case-insensitive string match against a result's name, description, and all associated paths.
- * 
+ *
  * This function checks the `Result` object for a match with the provided search term by:
  * - Comparing the term against the `drug_name` and the primary description of the subject node
  * - Recursively traversing all paths and their support subpaths
  * - Matching the term against node names, curies, descriptions, and edge predicates
- * 
+ *
  * During traversal, the function also mutates the corresponding `PathRank` objects to influence relevance scoring:
  * - Decreases rank when a direct match is found
  * - Increases rank when a supporting subpath contains a match
- * 
+ *
  * @param resultSet - The full ResultSet containing all nodes, edges, and paths
  * @param result - The individual result to check for a string match
  * @param searchTerm - The lowercase search term to match against result content
@@ -58,8 +59,7 @@ export const findStringMatch = (
 
     for (let i = 0; i < path.subgraph.length; i++) {
       const elementID = path.subgraph[i];
-      const isNode = i % 2 === 0;
-      const item = isNode ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
+      const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
 
       // Recursive support path checking
       if (isResultEdge(item) && hasSupport(item)) {
@@ -138,7 +138,7 @@ export const getPathfinderResultsShareURLPath = (itemOne: AutocompleteItem, item
  * Applies all active filters (entity, result, facet, path) to the provided result set.
  * Separates results into included and excluded groups based on match criteria, then
  * re-evaluates available facet filters, path-based inclusion, and path rank states.
- * 
+ *
  * @param {Filter[]} filters - The complete list of filters to apply.
  * @param {Result[]} filteredResults - The UI-visible list of results, possibly pre-filtered.
  * @param {Result[]} originalResults - The original, unfiltered list of results.
@@ -166,11 +166,64 @@ export const applyFilters = (
   unrankedIsFiltered: boolean;
   shouldResetPage: boolean;
 } => {
+  let [resultFilters, pathFilters, globalFilters] = filtering.groupFilterByType(filters);
+  const resultFacets = resultFilters.filter(f => !filtering.isExclusion(f));
+  const negatedResultFacets = resultFilters.filter(f => filtering.isExclusion(f));
+  resultFilters = negatedResultFacets.concat(globalFilters);
+
+  if (filters.length === 0) {
+    return {
+      results: filteredResults,
+      updatedEntityFilters: [],
+      updatedPathFilterState: genPathFilterState(summary),
+      facetCounts: {
+        resultFacets: resultFacets,
+        negatedResultFacets: negatedResultFacets,
+        results: filteredResults,
+        negatedResults: []
+      },
+      unrankedIsFiltered: false,
+      shouldResetPage: false
+    };
+  }
+
+  const resultPathRanks = new Map<string, Map<string, PathRank>>();
+  let [results, negatedResults, updatedEntityFilters] = _filterResults(
+    summary,
+    resultFilters,
+    originalResults,
+    resultPathRanks
+  );
+
+  const resultsAfterFacets = _facetResults(summary, resultFacets, pathFilters, results, resultPathRanks);
+  const unrankedIsFiltered = [...resultPathRanks.values()].some(rankMap =>
+    [...rankMap.values()].some(rank => rank.rank < 0)
+  );
+
+  for (const pathRanks of resultPathRanks.values())
+    updatePathFilterState(pathFilterState, [...pathRanks.values()], unrankedIsFiltered);
+
+  const finalResults = _filterResultsByPathFilterState(resultsAfterFacets, pathFilterState);
+
+  return {
+    results: finalResults,
+    updatedEntityFilters,
+    updatedPathFilterState: pathFilterState,
+    facetCounts: {
+      resultFacets,
+      negatedResultFacets,
+      results,
+      negatedResults
+    },
+    unrankedIsFiltered,
+    shouldResetPage: finalResults.length > 0
+  };
+
   /**
    * Applies entity and result-level filters to the result set.
    * Separates matched and negated results based on exclusion logic, while constructing
    * per-result path rank maps for downstream facet filtering and path state updates.
-   * 
+   *
    * @param {ResultSet} resultSet - The full dataset used for path lookup and context.
    * @param {Filter[]} filters - The filters to apply (entity or result type).
    * @param {Result[]} originalResults - The unfiltered list of results to be evaluated.
@@ -180,12 +233,12 @@ export const applyFilters = (
    *  - the negated (excluded) results,
    *  - the updated list of active entity filter values.
    */
-  const filterResults = (
+  function _filterResults(
     resultSet: ResultSet,
     filters: Filter[],
     originalResults: Result[],
     resultPathRanks: Map<string, Map<string, PathRank>>
-  ): [Result[], Result[], string[]] => {
+  ): [Result[], Result[], string[]] {
     const filtered: Result[] = [];
     const negated: Result[] = [];
     const newEntityFilters: string[] = [];
@@ -237,7 +290,7 @@ export const applyFilters = (
    * Applies facet-based filters to an already filtered list of results.
    * Enforces AND logic between facet families and OR logic within each family.
    * Updates and sorts per-path ranks for each retained result.
-   * 
+   *
    * @param {ResultSet} resultSet - The full dataset used for path and tag metadata.
    * @param {Filter[]} resultFacets - The set of active facet filters to apply.
    * @param {Filter[]} pathFilters - Filters applied to individual paths (e.g., to update ranks).
@@ -245,13 +298,13 @@ export const applyFilters = (
    * @param {Map<string, Map<string, PathRank>>} resultPathRanks - A map of result IDs to their path rank structures.
    * @returns {Result[]} A filtered list of results that satisfy the facet filtering logic.
    */
-  const facetResults = (
+  function _facetResults(
     resultSet: ResultSet,
     resultFacets: Filter[],
     pathFilters: Filter[],
     filteredResults: Result[],
     resultPathRanks: Map<string, Map<string, PathRank>>
-  ): Result[] => {
+  ): Result[] {
     const facetsByFamily: Record<string, Filter[]> = {};
     for (const facet of resultFacets) {
       const family = filtering.filterFamily(facet);
@@ -287,76 +340,68 @@ export const applyFilters = (
   /**
    * Removes results whose paths are fully excluded by the current path filter state.
    * A result is retained if at least one of its paths is not explicitly filtered out.
-   * 
+   *
    * @param {Result[]} results - The list of results to evaluate.
    * @param {PathFilterState} pathFilterState - A map of path IDs to boolean values indicating exclusion.
    * @returns {Result[]} The list of results that have at least one unfiltered path.
    */
-  const filterResultsByPathFilterState = (
+  function _filterResultsByPathFilterState(
     results: Result[],
     pathFilterState: PathFilterState
-  ): Result[] => {
+  ): Result[] {
     return results.filter((result) =>
       result.paths.some((p) => {
         const pid = typeof p === "string" ? p : p.id;
         return pid && !pathFilterState[pid];
       })
     );
-  };
-
-  let [resultFilters, pathFilters, globalFilters] = filtering.groupFilterByType(filters);
-  const resultFacets = resultFilters.filter(f => !filtering.isExclusion(f));
-  const negatedResultFacets = resultFilters.filter(f => filtering.isExclusion(f));
-  resultFilters = negatedResultFacets.concat(globalFilters);
-
-  if (filters.length === 0) {
-    return {
-      results: filteredResults,
-      updatedEntityFilters: [],
-      updatedPathFilterState: genPathFilterState(summary),
-      facetCounts: {
-        resultFacets: resultFacets,
-        negatedResultFacets: negatedResultFacets,
-        results: filteredResults,
-        negatedResults: []
-      },
-      unrankedIsFiltered: false,
-      shouldResetPage: false
-    };
   }
+}
 
-  const resultPathRanks = new Map<string, Map<string, PathRank>>();
-  let [results, negatedResults, updatedEntityFilters] = filterResults(
-    summary,
-    resultFilters,
-    originalResults,
-    resultPathRanks
-  );
-
-  const resultsAfterFacets = facetResults(summary, resultFacets, pathFilters, results, resultPathRanks);
-  const unrankedIsFiltered = [...resultPathRanks.values()].some(rankMap =>
-    [...rankMap.values()].some(rank => rank.rank < 0)
-  );
-
-  for (const pathRanks of resultPathRanks.values())
-    updatePathFilterState(pathFilterState, [...pathRanks.values()], unrankedIsFiltered);
-
-  const finalResults = filterResultsByPathFilterState(resultsAfterFacets, pathFilterState);
-
-  return {
-    results: finalResults,
-    updatedEntityFilters,
-    updatedPathFilterState: pathFilterState,
-    facetCounts: {
-      resultFacets,
-      negatedResultFacets,
-      results,
-      negatedResults
-    },
-    unrankedIsFiltered,
-    shouldResetPage: finalResults.length > 0
-  };
-};
+/**
+ * Injects dynamic filters into the result set based on the bookmark set.
+ * This is used to display the bookmark and note tags on the result item.
+ * @param {ResultSet} summary - The result set containing the full tag list.
+ * @param {Result[]} formattedResults - The results that passed filtering and are currently shown.
+ * @param {Result[]} originalResults - The original, unfiltered list of results.
+ * @param {SaveGroup | null} bookmarkSet - The set of bookmark objects to search in.
+ * @returns {[ResultSet, Result[], Result[]]} A tuple containing:
+ *  - the modified result set,
+ *  - the modified formatted results,
+ *  - the modified original results.
+ */
+export const injectDynamicFilters = (
+  summary: ResultSet,
+  formattedResults: Result[],
+  originalResults: Result[],
+  bookmarkSet: SaveGroup | null): [ResultSet, Result[], Result[]] => {
+  if (bookmarkSet === null || bookmarkSet.saves.size === 0) return [summary, formattedResults, originalResults];
+  // If this becomes slow due to many bookmarks and results then look into making bookmarkSet and results maps keyed on the result ID
+  const tagsAdded = [];
+  for (let i = 0; i < formattedResults.length; i++) {
+    const result = formattedResults[i];
+    for (const save of bookmarkSet.saves) {
+      if (save.object_ref === result.id) {
+        tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.BOOKMARK});
+        if (!isNotesEmpty(save.notes)) {
+          tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.NOTE});
+        }
+      }
+    }
+  }
+  if (tagsAdded.length === 0) return [summary, formattedResults, originalResults];
+  const modifiedSummary = cloneDeep(summary);
+  const modifiedFormattedResults = cloneDeep(formattedResults);
+  const modifiedOriginalResults = cloneDeep(originalResults);
+  for (const tagEntry of tagsAdded) {
+    const tag = tagEntry.tag;
+    const ridx = tagEntry.index;
+    modifiedSummary.data.tags[tag.id] = {name: tag.name, value: tag.value};
+    modifiedFormattedResults[ridx].tags[tag.id] = null;
+    modifiedOriginalResults[ridx].tags[tag.id] = null;
+  }
+  return [modifiedSummary, modifiedFormattedResults, modifiedOriginalResults];
+}
 
 /**
  * Generates the initial path filter state object using all paths from the result set.
@@ -493,18 +538,9 @@ export const areEntityFiltersEqual = (a: string[], b: string[]): boolean => {
  * @param {SaveGroup | null} bookmarkSet - The set of bookmark objects to search in.
  * @returns {boolean} Returns true if the matching item is found in bookmarksSet and has notes, otherwise returns false.
  */
-export const checkBookmarkForNotes = (bookmarkID: string | null, bookmarkSet: SaveGroup | null): boolean => {
+export const checkBookmarkIDForNotes = (bookmarkID: string | null, bookmarkSet: SaveGroup | null): boolean => {
   if(bookmarkID === null)
     return false;
-
-  const findInSet = (set: Set<Save>, predicate: (obj: Save)=>boolean): Save | undefined => {
-    for (const item of set) {
-      if(predicate(item)) {
-        return item;
-      }
-    }
-    return undefined;
-  }
 
   if(!!bookmarkSet && bookmarkSet.saves.size > 0) {
     let save = findInSet(bookmarkSet.saves, save => String(save.id) === bookmarkID);
@@ -531,4 +567,15 @@ export const checkBookmarksForItem = (itemID: string, bookmarksSet: SaveGroup): 
     }
   }
   return null;
+}
+
+/**
+ * Checks if the given index is for a node in a path.
+ * Nodes are represented by even indices, while edges are represented by odd indices.
+ *
+ * @param {number} index - The index to check.
+ * @returns {boolean} Returns true if the index is for a node, otherwise returns false.
+ */
+export const isNodeIndex = (index: number): boolean => {
+  return index % 2 === 0;
 }

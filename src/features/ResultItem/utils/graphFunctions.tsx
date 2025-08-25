@@ -6,6 +6,7 @@ import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { Result, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import { GraphLayoutList, RenderableGraph, RenderableNode, RenderableEdge } from '@/features/ResultItem/types/graph.d';
 import { RefObject } from 'react';
+import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
 export const layoutList: GraphLayoutList = {
   klay: {
@@ -51,7 +52,7 @@ export const resultToCytoscape = (
     if (path) {
       supportStack.push(pathID);
       path.subgraph.forEach((elemID, i) => {
-        if (i % 2 === 0) nodeCollection.add(elemID);
+        if (isNodeIndex(i)) nodeCollection.add(elemID);
         else {
           edgeCollection.add(elemID);
           const edge = edgesArray[elemID];

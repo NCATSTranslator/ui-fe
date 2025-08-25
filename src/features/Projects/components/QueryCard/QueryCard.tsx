@@ -1,0 +1,69 @@
+import { Dispatch, SetStateAction } from 'react';
+import { UserQueryObject } from '@/features/Projects/types/projects.d';
+import DataCard from '@/features/Projects/components/DataCard/DataCard';
+import { useRestoreQueries } from '@/features/Projects/hooks/customHooks';
+import { errorToast, queryRestoredToast } from '@/features/Projects/utils/toastMessages';
+
+interface QueryCardProps {
+  inUnassignedProject?: boolean;
+  isEditing?: boolean;
+  location?: "list" | "detail"
+  onDelete?: (query: UserQueryObject) => void;
+  onEdit?: (query: UserQueryObject) => void;
+  query: UserQueryObject;
+  searchTerm?: string;
+  selectedQueries?: UserQueryObject[];
+  setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
+}
+
+const QueryCard = ({ 
+  inUnassignedProject = false,
+  isEditing = false,
+  location = "list",
+  onDelete,
+  onEdit,
+  query,
+  searchTerm,
+  selectedQueries = [],
+  setSelectedQueries
+}: QueryCardProps) => {
+
+  const restoreQueriesMutation = useRestoreQueries();
+  const onRestore = (query: UserQueryObject) => {
+    restoreQueriesMutation.mutate([query.sid.toString()], { 
+      onSuccess: () => {
+        queryRestoredToast();
+      },
+      onError: (error) => {
+        console.error('Failed to restore query:', error);
+        errorToast('Failed to restore query');
+      }
+    });
+  };
+  
+  return (
+    <DataCard
+      location={location}
+      inUnassignedProject={inUnassignedProject}
+      isEditing={isEditing}
+      item={query}
+      type={query.data.query.type === 'pathfinder' ? 'pathfinderQuery' : 'smartQuery'}
+      searchTerm={searchTerm}
+      selectedItems={selectedQueries}
+      setSelectedItems={setSelectedQueries}
+      status={query.status}
+      onDelete={onDelete}
+      onEdit={onEdit}
+      onRestore={onRestore}
+      getItemId={(item: UserQueryObject) => item.data.qid}
+      getItemTitle={(item: UserQueryObject) => item.data.title || ''}
+      getItemTimeCreated={(item: UserQueryObject) => item.data.time_created.toString()}
+      getItemTimeUpdated={(item: UserQueryObject) => item.data.time_updated.toString()}
+      getItemBookmarkCount={(item: UserQueryObject) => item.data.bookmark_ids.length}
+      getItemNoteCount={(item: UserQueryObject) => item.data.note_count}
+      getItemStatus={(item: UserQueryObject) => item.status}
+    />
+  );
+};
+
+export default QueryCard; 

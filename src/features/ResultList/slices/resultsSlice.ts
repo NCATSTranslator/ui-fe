@@ -9,6 +9,7 @@ type ResultState = {
 
 const initialState: ResultState = {};
 const TREATS_REPLACEMENT = "impacts";
+const INVERTED_TREATS_REPLACEMENT = "impacted by";
 
 const resultSetsSlice = createSlice({
   name: "resultSets",
@@ -54,7 +55,8 @@ export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdg
   // Temporary fix to not display the "treats" predicate in the UI
   if(edge.predicate.includes("treat")) {
     let newEdge = cloneDeep(edge);
-    newEdge.predicate = TREATS_REPLACEMENT;
+    
+    newEdge.predicate = (newEdge.metadata.inverted_id === null) ? TREATS_REPLACEMENT : INVERTED_TREATS_REPLACEMENT;
     newEdge.predicate_url = "";
     return newEdge;
   }

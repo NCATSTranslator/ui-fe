@@ -14,13 +14,17 @@
   font-weight: 800;
 }
 .expandButton {
-  transition: $defaultAnim;
   background-color: transparent;
   border: none;
   margin: 0 0 $xxs;
   padding: 0;
   color: $purpleTwo;
   font-size: $subTwoSize;
+  font-weight: 800;
+  &:hover {
+    text-decoration: underline;
+    background-color: transparent;
+  }
   svg {
     height: $m;
     width: $m;
@@ -29,6 +33,7 @@
     margin-right: $xxs;
     path {
       stroke: $purpleTwo;
+      fill: transparent;
     }
   }
 }

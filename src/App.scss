@@ -3,7 +3,7 @@
 
 .app {
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: min-content min-content auto min-content;
   min-height: 100vh;
 }
 

@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { currentPrefs, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import Select from 'react-select';
 import styles from './UserPreferences.module.scss';
 import { cloneDeep } from 'lodash';

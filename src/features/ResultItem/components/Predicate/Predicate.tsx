@@ -1,4 +1,4 @@
-import { useState, FC, MouseEvent, useMemo, RefObject } from 'react';
+import { FC, MouseEvent, useMemo, RefObject } from 'react';
 import styles from './Predicate.module.scss';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
@@ -16,7 +16,9 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
-import { useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
+import { useSupportPathKey, useExpandedPredicate } from '@/features/ResultItem/hooks/resultHooks';
+import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
+import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -30,7 +32,7 @@ interface PredicateProps {
     onMouseLeave: () => void;
   };
   edge: ResultEdge;
-  edgeIDs: string[];
+  edgeIds: string[];
   inModal?: boolean | null;
   isEven?: boolean;
   isHighlighted?: boolean;
@@ -49,12 +51,12 @@ interface PredicateProps {
   uid: string;
 }
 
-const Predicate: FC<PredicateProps> = ({ 
+const Predicate: FC<PredicateProps> = ({
   activeEntityFilters,
   activeFilters,
   className = "",
   edge,
-  edgeIDs,
+  edgeIds,
   handleActivateEvidence,
   handleEdgeClick,
   handleNodeClick,
@@ -77,9 +79,19 @@ const Predicate: FC<PredicateProps> = ({
   uid }) => {
 
   let resultSet = useSelector(getResultSetById(pk));
-  const formattedEdge = (!!resultSet && Array.isArray(edgeIDs) && edgeIDs.length > 1) ? getCompressedEdge(resultSet, edgeIDs) : edge;
+  const formattedEdge = (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
-  const [isSupportExpanded, setIsSupportExpanded] = useState(formattedEdge.is_root);
+
+  const { expandedPredicateId, setExpandedPredicateId } = useExpandedPredicate();
+
+  // Create a unique identifier for this predicate
+  const predicateId = useMemo(() => {
+    return generatePredicateId(path, edgeIds);
+  }, [path.id, edgeIds]);
+
+  // Determine if this predicate is expanded
+  const isSupportExpanded = (expandedPredicateId === predicateId);
+
   const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0) ? [...formattedEdge.compressed_edges, formattedEdge] : [formattedEdge];
   const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
   const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
@@ -95,7 +107,7 @@ const Predicate: FC<PredicateProps> = ({
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    setIsSupportExpanded(prev=>!prev);
+    setExpandedPredicateId(isSupportExpanded ? null : predicateId);
   }
 
   const pushAndReturn = (arr: ResultEdge[], element: ResultEdge) => {
@@ -103,8 +115,8 @@ const Predicate: FC<PredicateProps> = ({
     newArr.push(element);
     return newArr;
   }
-  
-  const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges) 
+
+  const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges)
   ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
   : [formattedEdge];
 
@@ -128,9 +140,9 @@ const Predicate: FC<PredicateProps> = ({
       <span
         className={edgeClass}
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
-        data-edge-ids={edgeIDs.toString()}
+        data-edge-ids={edgeIds.toString()}
         data-aras={edge.aras.toString()}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIDs, path, fullPathKey);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIds, path, fullPathKey);}}
         ref={selected ? selectedEdgeRef : null}
         {...hoverHandlers}
         >
@@ -167,31 +179,43 @@ const Predicate: FC<PredicateProps> = ({
                           textToHighlight={edge.predicate}
                         />
                         {
-                          edge.predicate.includes("impacts") &&
+                          edge.predicate.includes("impact") &&
                           <span className={styles.predicateImpact}> (either positively or negatively)</span>
                         }
-                        {
-                          edge.predicate_url &&
-                          <a
-                            href={edge.predicate_url }
-                            onClick={(e)=> {
-                              e.stopPropagation();
-                            }}
-                            target="_blank"
-                            rel='noreferrer'>
-                              <ExternalLink/>
-                          </a>
-                        }
                       </p>
+                      {
+                        edge.predicate.includes("impact") ?
+                          <span className={styles.predicateDescription}>
+                            Indicates that a drug affects one or more biological processes relevant to a disease, in a way that may improve, worsen, or otherwise modify the condition.
+                          </span> :
+                          edge.description &&
+                            <span className={styles.predicateDescription}>
+                              {capitalizeFirstLetter(edge.description)}.
+                            </span>
+                      }
+                      {
+                        edge.predicate_url &&
+                        <a
+                          href={edge.predicate_url }
+                          onClick={(e)=> {
+                            e.stopPropagation();
+                          }}
+                          className={styles.predicateUrl}
+                          target="_blank"
+                          rel='noreferrer'>
+                            <span>{edge.predicate_url}</span>
+                            <ExternalLink/>
+                        </a>
+                      }
                       {
                         (edgeEvidence.pubs.size > 0 || edgeEvidence.cts.size > 0) &&
                         <div className={styles.tooltipEvidenceCounts}>
                           {
-                            (edgeEvidence.pubs.size > 0) && 
+                            (edgeEvidence.pubs.size > 0) &&
                             <span className={styles.count}><PubIcon/>{edgeEvidence.pubs.size} Publication{edgeEvidence.pubs.size > 1 && "s"}</span>
                           }
                           {
-                            (edgeEvidence.cts.size > 0) && 
+                            (edgeEvidence.cts.size > 0) &&
                             <span className={styles.count}><CTIcon/>{edgeEvidence.cts.size} Clinical Trial{edgeEvidence.cts.size > 1 && "s"}</span>
                           }
                         </div>

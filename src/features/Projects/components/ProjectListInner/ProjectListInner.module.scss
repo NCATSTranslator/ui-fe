@@ -1,0 +1,102 @@
+@use '@/assets/styles/variables' as *;
+
+
+.projectListContainer {
+  background-color: $white;
+  &.isEditing {
+    background-color: $lightGray;
+  }
+  .loadingWrapper {
+    align-items: flex-start;
+    .loadingSpinner {
+      margin-top: calc($xl * 2);
+    }
+  }
+  .deletedWrapper {
+    min-height: calc(($xl * 4));
+    position: relative;
+    margin-bottom: $s;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: $m;
+    padding: 108px 20px;
+    h6 {
+      font-weight: 800;
+      margin: 0;
+      color: $black;
+    }
+    p, p span {
+      margin: 0;
+      font-size: $bodyOneSize;
+    }
+    p {
+      max-width: fit-content;
+    }
+  }
+  .link {
+    color: $purpleOne;
+    cursor: pointer;
+    font-weight: 800;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+.projectList {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: calc($interiorContainerWidth + ($m * 2));
+  margin: 0 auto;
+  .projectTabContent {
+    padding: $s $m $m;
+    position: relative;
+  }
+}
+.projectListInner {
+  position: relative;
+}
+.projectTabs {
+  flex: 1;
+  margin-top: $m;
+  .projectTabsList {
+    padding-right: 316px;
+  }
+}
+.projectGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $s;
+}
+.separator {
+  height: 1px;
+  background-color: $midGray;
+  margin: $xs 0;
+  width: 100%;
+}
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: $black;
+  font-size: 14px;
+}
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: $red;
+  font-size: 14px;
+  text-align: center;
+}
+

@@ -17,6 +17,7 @@ import { cloneDeep } from 'lodash';
 import { isResultEdge, Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import { Location } from 'react-router-dom';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
+import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
 /**
  * Retrieves an icon based on a category.
@@ -408,7 +409,7 @@ export const isValidDate = (date: string | number | Date): boolean => {
  * @param {Date} date - The date object to format.
  * @returns {string | boolean} - The formatted date string, or false if the date is invalid.
  */
-export const getFormattedDate = (date: Date): string | boolean => {
+export const getFormattedDate = (date: Date, includeTime: boolean = true): string | boolean => {
   if (!isValidDate(date))
     return false;
 
@@ -417,7 +418,7 @@ export const getFormattedDate = (date: Date): string | boolean => {
   const formattedDate = new Intl.DateTimeFormat('en-US', dateFormatOptions).format(date);
   const formattedTime = new Intl.DateTimeFormat('en-US', timeFormatOptions).format(date);
 
-  return `${formattedDate} (${formattedTime})`;
+  return `${formattedDate}${includeTime ? ` (${formattedTime})` : ''}`;
 };
 
 /**
@@ -548,7 +549,7 @@ export const intToNumeral = (num: number): string => {
       num -= value;
     }
   }
-  
+
   return result.toLowerCase();
 };
 
@@ -566,7 +567,7 @@ export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): nu
     if(!path)
       continue;
     for(const [i, subgraphItemID] of path.subgraph.entries()) {
-      if(i % 2 === 0)
+      if(isNodeIndex(i))
         continue;
       const edge = getEdgeById(resultSet, subgraphItemID);
       if(isResultEdge(edge) && edge.support.length > 0) {
@@ -579,9 +580,9 @@ export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): nu
 
 /**
  * Takes a ResultEdge object and returns a boolean value based on whether the edge has any support paths.
- * 
+ *
  * @param {ResultEdge | null | undefined} item - ResultEdge Object.
- * @returns {boolean} - Does the edge have support paths attached. 
+ * @returns {boolean} - Does the edge have support paths attached.
  */
 export const hasSupport = (item: ResultEdge | null | undefined): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;
@@ -589,10 +590,10 @@ export const hasSupport = (item: ResultEdge | null | undefined): boolean => {
 
 /**
  * Generates a single compressed edge based on a provided list of edge IDs.
- * 
+ *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {string[]} edgeIDs - An array of edge IDs.
- * @returns {ResultEdge} - A compressed edge. 
+ * @returns {ResultEdge} - A compressed edge.
  */
 export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): ResultEdge => {
   const edges = edgeIDs.map(edgeID => getEdgeById(resultSet, edgeID)).filter(edge => !!edge);
@@ -663,7 +664,7 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
           }
         }
       } else {
-        // handle inferred edges that have different predicates 
+        // handle inferred edges that have different predicates
         if(currentEdge.support.length > 0 && baseEdge.support.length > 0)
           mergeSupport(baseEdge, currentEdge);
         // Add as a new compressed edge
@@ -677,15 +678,15 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
 
 /**
  * Generates an array of compressed edges based on a provided array of edges.
- * 
+ *
  * For use primarily in the evidence modal.
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {ResultEdge[]} edges - An array of edges.
- * @returns {ResultEdge[]} - An array of compressed edges. 
+ * @returns {ResultEdge[]} - An array of compressed edges.
  */
 export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): ResultEdge[] => {
-  const compressedEdges: ResultEdge[] = []; 
+  const compressedEdges: ResultEdge[] = [];
   // sort edges by predicate alphabetically
   edges.sort((a,b)=> a.predicate.localeCompare(b.predicate));
   let edgeIDsToCompress: Set<string> = new Set<string>([]);
@@ -693,7 +694,7 @@ export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): R
     let edge = edges[i];
     let nextEdge: undefined | ResultEdge = edges[i+1];
     // compress edges if predicates match and support status is the same
-    if(!!nextEdge 
+    if(!!nextEdge
       && nextEdge.predicate === edge.predicate
       && hasSupport(nextEdge) === hasSupport(edge)
     ) {
@@ -717,18 +718,18 @@ export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): R
 
 /**
  * Generates a compressed subgraph based on a provided subgraph.
- * 
+ *
  * For use primarily in the evidence modal.
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string | string)[]} subgraph - The initial subgraph (an array of node/edge ids).
- * @returns {(ResultNode | ResultEdge | ResultEdge[])[]} - The compressed subgraph with nodes and edges fetched from the ResultSet. 
+ * @returns {(ResultNode | ResultEdge | ResultEdge[])[]} - The compressed subgraph with nodes and edges fetched from the ResultSet.
  */
 export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | string[])[]): (ResultNode | ResultEdge | ResultEdge[])[] => {
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] = [];
   for(const [i, ID] of subgraph.entries()) {
     // handle nodes
-    if(i % 2 === 0) {
+    if(isNodeIndex(i)) {
       if(Array.isArray(ID))
         continue;
       const node = getNodeById(resultSet, ID);
@@ -743,7 +744,7 @@ export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | 
           compressedSubgraph.push(edge);
       // compressed edges
       } else {
-        const edges: ResultEdge[] = getEdgesByIds(resultSet, ID); 
+        const edges: ResultEdge[] = getEdgesByIds(resultSet, ID);
         const compressedEdges = getCompressedEdges(resultSet, edges);
         // add the compressed edges to the subgraph
         compressedSubgraph.push(compressedEdges);
@@ -758,7 +759,7 @@ export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | 
  * Returns a formatted name for pathfinder results based on a provided string.
  *
  * @param {string} name - The pathfinder result name to format
- * @returns {string} - The formatted result name. 
+ * @returns {string} - The formatted result name.
  */
 export const getFormattedPathfinderName = (name: string) => {
   const formattedName = name.replace(/([A-Z])/g, '$1').trim()
@@ -770,13 +771,13 @@ export const getFormattedPathfinderName = (name: string) => {
  *
  * @param {ResultSet} resultSet - ResultSet object.
  * @param {Path} path - Path object.
- * @returns {string} - Represents a user-readable version of the path. 
+ * @returns {string} - Represents a user-readable version of the path.
  *
  */
 export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string => {
   let stringName = "";
   for(const [i, id] of path.subgraph.entries()) {
-    if(i % 2 !== 0) {
+    if(isNodeIndex(i)) {
       const node = getNodeById(resultSet, id);
       stringName += node?.names[0];
     } else {
@@ -791,7 +792,7 @@ export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string 
  * Type guard to check if a provided value is a string array
  *
  * @param {unknown} value - Arbitrary value.
- * @returns {boolean} - True if the value is a string array, otherwise false. 
+ * @returns {boolean} - True if the value is a string array, otherwise false.
  *
  */
 export const isStringArray = (value: unknown): value is string[] => {
@@ -800,10 +801,10 @@ export const isStringArray = (value: unknown): value is string[] => {
 
 /**
  * Returns a result edge object with either the properties of an optionally provided result edge object, or
- * a blank result edge object. 
+ * a blank result edge object.
  *
  * @param {ResultEdge | undefined} edge - An optional edge object used to fill out the returned default edge.
- * @returns {ResultEdge} - The default result edge object. 
+ * @returns {ResultEdge} - The default result edge object.
  *
  */
 export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
@@ -812,9 +813,15 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   is_root: edge?.is_root || false,
   compressed_edges: edge?.compressed_edges || [],
   knowledge_level: edge?.knowledge_level || "unknown",
+  metadata: edge?.metadata || {
+    edge_bindings: [],
+    inverted_id: null,
+    is_root: false,
+  },
   object: edge?.object || "",
   predicate: edge?.predicate || "",
   predicate_url: edge?.predicate_url || "",
+  description: edge?.description || "",
   provenance: edge?.provenance || [],
   publications: edge?.publications || {},
   subject: edge?.subject || "",
@@ -838,10 +845,26 @@ export const joinClasses = (...classes: (string | false | null | undefined)[]) =
  * Scrolls to a provided element reference.
  *
  * @param {RefObject<HTMLElement | null>} elementRef - The element reference to scroll to.
- */ 
+ */
 export const scrollToRef = (elementRef: RefObject<HTMLElement | null>) => {
   if (elementRef.current)
     elementRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   else
     console.warn("Could not scroll to element, element ref is not set");
 };
+
+/**
+ * Finds an item in a set based on a provided predicate.
+ *
+ * @param {Set<T>} set - The set to search in.
+ * @param {function} predicate - The predicate function to use.
+ * @returns {T | undefined} - The item found in the set, or undefined if no item is found.
+ */
+export const findInSet = <T,>(set: Set<T>, predicate: (obj: T)=>boolean): T | undefined => {
+  for (const item of set) {
+    if(predicate(item)) {
+      return item;
+    }
+  }
+  return undefined;
+}

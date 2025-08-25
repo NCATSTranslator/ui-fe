@@ -8,6 +8,15 @@
   span {
     white-space: nowrap;
   }
+  .refreshDisclaimer, .loadingButton {
+    opacity: 0;
+    transition: $defaultAnim;
+    pointer-events: none;
+    &.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
   .refreshDisclaimer {
     font-size: 12px;
     margin: 0 $xs 0 0;

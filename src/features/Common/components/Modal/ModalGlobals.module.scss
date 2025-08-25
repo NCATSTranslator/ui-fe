@@ -22,9 +22,9 @@
   }
   .closeContainer {
     position: absolute;
-    top: $m;
-    right: $m;
-    z-index: 1001;
+    top: 12px;
+    right: 12px;
+    z-index: 20;
     .closeButton {
       background-color: transparent;
       margin: 0;

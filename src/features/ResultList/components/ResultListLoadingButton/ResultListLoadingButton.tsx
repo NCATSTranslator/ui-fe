@@ -4,7 +4,7 @@ import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultsAvailableIcon from '@/assets/icons/buttons/Refresh.svg?react';
 import CompleteIcon from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
 import AlertIcon from '@/assets/icons/status/Alerts/Warning.svg?react';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useNewResultsDisclaimerApproved } from '@/features/ResultList/hooks/resultListHooks';
 import { ResultListLoadingData } from '@/features/ResultList/types/results';
@@ -63,7 +63,7 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
       <div className={styles.right}>
       <Tooltip 
         id="sync-new-results-button"
-        isOpen={isTooltipOpen}
+        // isOpen={isTooltipOpen}
         >
         <span className={styles.tooltipInner}>
           <p className={styles.bold}>
@@ -80,10 +80,10 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
             />
             <label htmlFor="checkbox-dont-show">Don't show again</label>
           </span>
-          <CloseIcon
+          {/* <CloseIcon
             onClick={() => setIsTooltipOpen(false)}
             className={styles.close}
-          />
+          /> */}
         </span>
       </Tooltip>
       {
@@ -91,21 +91,21 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
         <>
           {
             (data.showDisclaimer) &&
-            <p className={styles.refreshDisclaimer}>Syncing may update and reorder previously viewed results.</p>
+            <p className={`${styles.refreshDisclaimer} ${isResultsAvailable && styles.active}`}>Syncing may update and reorder previously viewed results.</p>
           }
-          <Button 
-            handleClick={data.handleResultsRefresh} 
-            className={`${buttonClassName} ${styles.loadingButton} ${styles.active}`}
+          <Button
+            handleClick={data.handleResultsRefresh}
+            className={`${buttonClassName} ${styles.loadingButton} ${isResultsAvailable && styles.active}`}
             dataTooltipId="sync-new-results-button"
+            iconLeft={<ResultsAvailableIcon/>}
             >
-            <ResultsAvailableIcon/>
             Sync New Results
           </Button>
         </>
       }
       {
         (displayCloseButton) &&
-        <Button iconOnly handleClick={() => data.setIsActive?.(false)} isSecondary><CloseIcon/></Button>
+        <Button iconOnly handleClick={() => data.setIsActive?.(false)} variant="secondary"><CloseIcon/></Button>
       }
       </div>
     </div>
