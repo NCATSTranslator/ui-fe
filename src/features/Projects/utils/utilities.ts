@@ -1,4 +1,4 @@
-import { Project, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
+import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 
 /**
@@ -108,7 +108,7 @@ export const getProjectDetailHeaderSubtitle = (project: Project | undefined, que
  * @param {UserQueryObject[]} queries - The queries to get the query count from
  * @returns {number} The query count
  */
-export const getProjectQueryCount = (project: Project | undefined, queries: UserQueryObject[]) => {
+export const getProjectQueryCount = (project: Project | ProjectRaw | undefined, queries: UserQueryObject[]) => {
   const projectPks = project?.data.pks || [];
   return projectPks.filter(pk => !queries.find(q => q.data.qid === pk)?.data.deleted).length;
 }

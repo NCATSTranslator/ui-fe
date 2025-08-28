@@ -4,7 +4,7 @@ import Modal from "@/features/Common/components/Modal/Modal";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 import { ProjectCreate, ProjectRaw, ProjectUpdate, QueryEditingItem, UserQueryObject } from "@/features/Projects/types/projects";
 import Button from "@/features/Core/components/Button/Button";
-import { useCreateProject, useDeleteQueries, useUpdateProjects } from "@/features/Projects/hooks/customHooks";
+import { useCreateProject } from "@/features/Projects/hooks/customHooks";
 import { useDeletePrompts } from "@/features/Projects/hooks/useDeletePrompts";
 import CheckmarkIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
@@ -14,9 +14,10 @@ import { debounce } from "lodash";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import Highlighter from "react-highlight-words";
 import { filterProjects } from "@/features/Projects/utils/filterAndSortingFunctions";
-import { projectCreatedToast, projectUpdatedToast, queryDeletedToast } from "@/features/Projects/utils/toastMessages";
+import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
 import { isUnassignedProject, useEditProjectHandlers, useEditQueryHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import WarningModal from "@/features/Common/components/WarningModal/WarningModal";
+import { getProjectQueryCount } from "@/features/Projects/utils/utilities";
 
 const getAttachedProjects = (projects: ProjectRaw[], queryId?: string) => {
   return projects.filter(p => queryId && p.data.pks.includes(queryId));
@@ -253,6 +254,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
                       if(isUnassigned) return null;
                       const projectName = project.label || project.data.title;
                       const isSelected = mode === "edit" && localSelectedProjects.some(p => p.id === project.id);
+                      const queryCount = getProjectQueryCount(project, queries);
                       return(
                         <div
                           className={`${styles.projectItem} ${isSelected ? styles.selected : ''}`}
@@ -266,7 +268,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
                             autoEscape={true}
                             textToHighlight={projectName}
                           />
-                          <div className={styles.queryCount}>{project.data.pks.length} quer{project.data.pks.length === 1 ? 'y' : 'ies'}</div>
+                          <div className={styles.queryCount}>{queryCount} quer{queryCount === 1 ? 'y' : 'ies'}</div>
                         </div>
                     )}) : (
                       <div className={styles.noResults}>
