@@ -115,6 +115,7 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
         loading={projectsLoading}
         mode="edit"
         projects={projects}
+        queries={queries}
         currentEditingQueryItem={currentEditingQueryItem}
       />
       <div className={styles.showingResultsContainer}>

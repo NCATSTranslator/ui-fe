@@ -91,6 +91,7 @@ const meta = {
   args: {
     queries: mockQueries,
     project: mockProject,
+    projects: [],
     searchTerm: '',
     setSelectedProjects: fn(),
     selectedProjects: [],
@@ -111,6 +112,7 @@ export const Default: Story = {
   args: {
     queries: mockQueries,
     project: mockProject,
+    projects: [],
     searchTerm: '',
     selectedProjects: [],
   },
@@ -129,6 +131,7 @@ export const Selected: Story = {
   args: {
     queries: mockQueries,
     project: mockProject,
+    projects: [],
     searchTerm: '',
     selectedProjects: [mockProject],
   },
@@ -147,6 +150,7 @@ export const EmptyProject: Story = {
       bookmark_count: 0,
       note_count: 0,
     },
+    projects: [],
     searchTerm: '',
     selectedProjects: [],
   },
@@ -162,6 +166,7 @@ export const LongTitle: Story = {
         title: 'Very Long Project Title That Might Overflow and Need to be Handled Properly',
       },
     },
+    projects: [],
     searchTerm: '',
     selectedProjects: [],
   },
@@ -175,6 +180,7 @@ export const HighBookmarkCount: Story = {
       bookmark_count: 150,
       note_count: 25,
     },
+    projects: [],
     searchTerm: '',
     selectedProjects: [],
   },

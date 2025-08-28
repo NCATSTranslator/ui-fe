@@ -230,16 +230,6 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
       onDeleteProject(project);
   };
 
-  const handleRestoreQuery = (query: UserQueryObject) => {
-    if (onRestoreQuery && query)
-      onRestoreQuery(query);
-  };
-
-  const handleDeleteQuery = (query: UserQueryObject) => { 
-    if (onDeleteQuery && query)
-      onDeleteQuery(query);
-  };
-
   return (
     <div className={`${styles.projectHeader} ${className || ''}`}>
       {variant === 'list' ? (

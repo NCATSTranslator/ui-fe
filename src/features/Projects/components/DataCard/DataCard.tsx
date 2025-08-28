@@ -194,7 +194,7 @@ const DataCard = <T,>({
           <CardName
             type={type}
             name={title}
-            itemCount={itemCount}
+            itemCount={queriesLoading ? "-" : itemCount || 0}
             searchTerm={searchTerm}
             isUnassigned={isUnassignedPrj}
           />

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { filterAndSortQueries } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { UserQueryObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { getAdditionalQueries } from '@/features/Projects/utils/utilities';
 
 interface UseProjectDetailSortedDataProps {
   projectQueries: UserQueryObject[];
@@ -21,11 +22,23 @@ export const useProjectDetailSortedData = ({
   searchTerm
 }: UseProjectDetailSortedDataProps) => {
   const sortedQueries = useMemo(
-    () => filterAndSortQueries(projectQueries, sortField, sortDirection, searchTerm),
+    () => filterAndSortQueries(projectQueries, sortField, sortDirection, searchTerm).filter((query) => !query.data.deleted),
     [projectQueries, sortField, sortDirection, searchTerm]
   );
 
+  const additionalQueries = useMemo(
+    () => getAdditionalQueries(projectQueries, sortedQueries),
+    [projectQueries, sortedQueries]
+  );
+
+  const deletedQueries = useMemo(
+    () => projectQueries.filter((query) => query.data.deleted),
+    [projectQueries]
+  );
+
   return {
-    sortedQueries
+    additionalQueries,
+    sortedQueries,
+    deletedQueries
   };
 };

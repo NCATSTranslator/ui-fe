@@ -2,7 +2,7 @@ import ProjectsTableHeader from '@/features/Projects/components/TableHeader/Proj
 import ProjectInnerErrorStates from '@/features/Projects/components/ProjectInnerErrorStates/ProjectInnerErrorStates';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 import ProjectCard from '@/features/Projects/components/ProjectCard/ProjectCard';
-import { Project, UserQueryObject, ProjectListState } from '@/features/Projects/types/projects.d';
+import { Project, UserQueryObject, ProjectListState, ProjectRaw } from '@/features/Projects/types/projects.d';
 import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
 
 interface ProjectsTabProps {
@@ -10,6 +10,7 @@ interface ProjectsTabProps {
   projectListState: ProjectListState;
   projectsError: Error | null;
   projectsLoading: boolean;
+  rawProjects: ProjectRaw[];
   queries: UserQueryObject[];
   queriesLoading: boolean;
   projectsEmpty: boolean;
@@ -25,6 +26,7 @@ const ProjectsTab = ({
   projectListState,
   projectsError,
   projectsLoading,
+  rawProjects,
   queries,
   queriesLoading,
   projectsEmpty,
@@ -80,6 +82,7 @@ const ProjectsTab = ({
                   return (
                     <ProjectCard 
                       key={project.id}
+                      projects={rawProjects}
                       queries={queries}
                       project={project}
                       searchTerm={searchTerm}
@@ -102,6 +105,7 @@ const ProjectsTab = ({
                   key={`unassigned`}
                   queries={queries}
                   project={sortedActiveProjects[sortedActiveProjects.length - 1]}
+                  projects={rawProjects}
                   searchTerm={searchTerm}
                   setSelectedProjects={setSelectedProjects}
                   selectedProjects={selectedProjects}

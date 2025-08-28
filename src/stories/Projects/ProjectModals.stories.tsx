@@ -215,6 +215,7 @@ export const EditQueryModalOpen: Story = {
       loading={false}
       mode="edit"
       projects={mockProjects}
+      queries={mockQueries}
     />
   ),
   parameters: {
@@ -240,6 +241,7 @@ export const EditQueryModalLoading: Story = {
       loading={true}
       mode="edit"
       projects={mockProjects}
+      queries={mockQueries}
     />
   ),
   parameters: {
@@ -261,6 +263,7 @@ export const AddToProjectModal: Story = {
       loading={false}
       mode="add"
       projects={mockProjects}
+      queries={mockQueries}
       setSelectedProject={fn()}
     />
   ),

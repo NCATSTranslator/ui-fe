@@ -9,7 +9,7 @@ import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 interface CardNameProps {
   className?: string;
   isUnassigned?: boolean;
-  itemCount?: number;
+  itemCount?: number | "-";
   name: string;
   searchTerm?: string;
   type: 'project' | 'smartQuery' | 'pathfinderQuery';
@@ -25,6 +25,9 @@ const CardName: FC<CardNameProps> = ({
 }) => {
   const icon = type === 'project' ? <Folder /> : null;
   const classes = joinClasses(styles.cardName, className);
+
+  const itemCountText = itemCount === "-" ? "-" : itemCount > 0 ? itemCount : "0";
+  const itemCountTextPlural = itemCount === 1 ? "Query" : "Queries";
 
   return (
     <div className={classes}>
@@ -73,7 +76,7 @@ const CardName: FC<CardNameProps> = ({
         }
       </span>
       {type === 'project' && (
-        <span className={styles.itemCount}>{itemCount > 0 ? itemCount : '0'} Quer{itemCount === 1 ? 'y' : 'ies'}</span>
+        <span className={styles.itemCount}>{itemCountText} {itemCountTextPlural}</span>
       )}
     </div>
   );

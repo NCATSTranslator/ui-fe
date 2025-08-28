@@ -73,6 +73,7 @@ const QueriesTab = ({
                 <QueryCard 
                   key={query.data.qid}
                   query={query}
+                  queries={sortedActiveQueries}
                   searchTerm={searchTerm}
                   setSelectedQueries={setSelectedQueries}
                   selectedQueries={selectedQueries}

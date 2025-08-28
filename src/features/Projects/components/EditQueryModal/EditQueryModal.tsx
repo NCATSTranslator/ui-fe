@@ -2,7 +2,7 @@ import { FC, FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import styles from "./EditQueryModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
-import { ProjectCreate, ProjectRaw, ProjectUpdate, QueryEditingItem } from "@/features/Projects/types/projects";
+import { ProjectCreate, ProjectRaw, ProjectUpdate, QueryEditingItem, UserQueryObject } from "@/features/Projects/types/projects";
 import Button from "@/features/Core/components/Button/Button";
 import { useCreateProject, useDeleteQueries, useUpdateProjects } from "@/features/Projects/hooks/customHooks";
 import { useDeletePrompts } from "@/features/Projects/hooks/useDeletePrompts";
@@ -15,7 +15,7 @@ import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingW
 import Highlighter from "react-highlight-words";
 import { filterProjects } from "@/features/Projects/utils/filterAndSortingFunctions";
 import { projectCreatedToast, projectUpdatedToast, queryDeletedToast } from "@/features/Projects/utils/toastMessages";
-import { isUnassignedProject } from "@/features/Projects/utils/editUpdateFunctions";
+import { isUnassignedProject, useEditProjectHandlers, useEditQueryHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import WarningModal from "@/features/Common/components/WarningModal/WarningModal";
 
 const getAttachedProjects = (projects: ProjectRaw[], queryId?: string) => {
@@ -28,6 +28,7 @@ interface EditQueryModalProps {
   isOpen: boolean;
   loading: boolean;
   mode: 'edit' | 'add';
+  queries: UserQueryObject[];
   projects: ProjectRaw[];
   setSelectedProject?: (projects: ProjectRaw) => void;
 }
@@ -37,6 +38,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   isOpen,
   loading,
   mode = 'edit',
+  queries,
   projects,
   currentEditingQueryItem,
   setSelectedProject,
@@ -49,8 +51,10 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const [newProject, setNewProject] = useState<ProjectCreate | null>(null);
   const [projectNameError, setProjectNameError] = useState('');
   const createProjectMutation = useCreateProject();
-  const updateProjectsMutation = useUpdateProjects();
-  const deleteQueriesMutation = useDeleteQueries();
+
+  const  { handleUpdateProject } = useEditProjectHandlers(undefined, projects);
+  const { handleDeleteQuery } = useEditQueryHandlers(undefined, queries);
+
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isDeleteQueryPromptOpen, setIsDeleteQueryPromptOpen] = useState(false);
   const filteredProjects: ProjectRaw[] = useMemo(() => filterProjects(projects.filter(p => !p.deleted), searchTerm) as ProjectRaw[], [projects, searchTerm]);
@@ -134,20 +138,17 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const handleInitiateDeleteQuery = () => {
     if(shouldShow)
       setIsDeleteQueryPromptOpen(true);
-    else
-      handleDeleteQuery();
+    else {
+      findAndCallDeleteQuery();
+    }
   }
 
-  const handleDeleteQuery = () => {
-    if(!currentEditingQueryItem?.pk) return;
-
-    deleteQueriesMutation.mutate([currentEditingQueryItem.pk], {
-      onSuccess: () => {
-        queryDeletedToast();
-        onClose();
-      }
-    });
-    setIsDeleteQueryPromptOpen(false);
+  const findAndCallDeleteQuery = () => {
+    const query = queries.find(q => q.data.qid === currentEditingQueryItem?.pk);
+    if(query)
+      handleDeleteQuery(query);
+    else 
+      console.warn("query not found, unable to delete");
   }
 
   const handleSaveQuery = () => {
@@ -174,11 +175,9 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
     });
 
     const projectsToUpdate: ProjectUpdate[] = [...projectsToAddQueryTo, ...projectsToRemoveQueryFrom];
-    updateProjectsMutation.mutate(projectsToUpdate, {
-      onSuccess: () => {
-        projectUpdatedToast();
-      }
-    });
+    for(const project of projectsToUpdate) {
+      handleUpdateProject(project.id, project.title || undefined, project.pks);
+    }
   }
 
   const handleCancel = () => {
@@ -326,7 +325,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
       <WarningModal
         isOpen={isDeleteQueryPromptOpen}
         onClose={() => setIsDeleteQueryPromptOpen(false)}
-        onConfirm={handleDeleteQuery}
+        onConfirm={findAndCallDeleteQuery}
         onCancel={() => setIsDeleteQueryPromptOpen(false)}
         cancelButtonText="Cancel"
         confirmButtonText="Delete Query"

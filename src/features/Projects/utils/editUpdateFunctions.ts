@@ -75,8 +75,8 @@ export const useEditProjectState = (): [EditProjectState, Dispatch<SetStateActio
  * @param projects - The projects to edit.
  */
 export const useEditProjectHandlers = (
-  handleSetIsEditing: (isEditing: boolean, editingItem?: ProjectEditingItem) => void,
-  projects: Project[]
+  handleSetIsEditing?: (isEditing: boolean, editingItem?: ProjectEditingItem) => void,
+  projects?: ProjectRaw[]
 ): EditProjectHandlers => {
   const queryClient = useQueryClient();
   const updateProjectsMutation = useUpdateProjects();
@@ -84,6 +84,10 @@ export const useEditProjectHandlers = (
   const restoreProjectsMutation = useRestoreProjects();
 
   const handleEditProject = (project: Project) => {
+    if(!handleSetIsEditing) {
+      console.warn("handleSetIsEditing is undefined");
+      return;
+    }
     handleSetIsEditing(true, {
       id: project.id.toString(),
       name: project.data.title,
@@ -93,6 +97,10 @@ export const useEditProjectHandlers = (
   };
 
   const handleUpdateProject = (id: number | string, newName?: string, newQids?: string[]) => {
+    if(!projects) {
+      console.warn("projects is undefined");
+      return;
+    }
     // Find the project and update it
     const projectToUpdate = projects.find(p => p.id === parseInt(id.toString()));
     if(!projectToUpdate) {
@@ -123,8 +131,12 @@ export const useEditProjectHandlers = (
       pks: newQids || projectToUpdate.data.pks
     }], {
       onSuccess: () => {
-        handleSetIsEditing(false);
         projectUpdatedToast();
+        if(!handleSetIsEditing) {
+          console.warn("handleSetIsEditing not provided");
+          return;
+        }
+        handleSetIsEditing(false);
       },
       onError: (error) => {
         console.error('Failed to update project:', error);
@@ -149,6 +161,10 @@ export const useEditProjectHandlers = (
   };
 
   const handleCancelEdit = () => {
+    if(!handleSetIsEditing) {
+      console.warn("handleSetIsEditing not provided");
+      return;
+    }
     handleSetIsEditing(false, undefined);
   };
 
@@ -237,8 +253,8 @@ export const useEditProjectHandlers = (
  * @param queries - The queries to edit.
  */
 export const useEditQueryHandlers = (
-  handleSetIsEditing: (isEditing: boolean, editingItem?: QueryEditingItem) => void,
-  queries: UserQueryObject[]
+  handleSetIsEditing?: (isEditing: boolean, editingItem?: QueryEditingItem) => void,
+  queries?: UserQueryObject[]
 ): EditQueryHandlers => {
   const queryClient = useQueryClient();
   const updateQueryMutation = useUpdateQuery();
@@ -246,6 +262,10 @@ export const useEditQueryHandlers = (
   const restoreQueriesMutation = useRestoreQueries();
 
   const handleEditQuery = (query: UserQueryObject) => {
+    if(!handleSetIsEditing) {
+      console.warn("handleSetIsEditing not provided");
+      return;
+    }
     handleSetIsEditing(true, {
       pk: query.data.qid,
       name: query.data.title || '',
@@ -254,6 +274,10 @@ export const useEditQueryHandlers = (
   };
 
   const handleUpdateQuery = (id: number | string, newName?: string) => {
+    if(!queries) {
+      console.warn("queries is undefined");
+      return;
+    }
     const queryKey = ['userQueries'];
     // Find the query and update it
     const queryToUpdate = queries.find(q => q.data.qid === id);
@@ -276,8 +300,12 @@ export const useEditQueryHandlers = (
         title: newName || queryToUpdate.data.title || ''
       }, {
         onSuccess: () => {
-          handleSetIsEditing(false);
           queryUpdatedToast();
+          if(!handleSetIsEditing) {
+            console.warn("handleSetIsEditing not provided");
+            return;
+          }
+          handleSetIsEditing(false);
         },
         onError: (error) => {
           console.error('Failed to update query:', error);
@@ -300,12 +328,17 @@ export const useEditQueryHandlers = (
   };
 
   const handleCancelEdit = () => {
+    if(!handleSetIsEditing) {
+      console.warn("handleSetIsEditing not provided");
+      return;
+    }
     handleSetIsEditing(false, undefined);
   };
 
   const handleRestoreQuery = (query: UserQueryObject) => {
     const queryKey = ['userQueries'];
     // Optimistically update the React Query cache
+    console.log("optimistic update for restore query");
     queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
       if (!oldData) return oldData;
       return oldData.map((q: UserQueryObject) => 
@@ -338,6 +371,7 @@ export const useEditQueryHandlers = (
   const handleDeleteQuery = (query: UserQueryObject) => {
     const queryKey = ['userQueries'];
     // Optimistically update the React Query cache
+    console.log("optimistic update for delete query");
     queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
       if (!oldData) return oldData;
       return oldData.map((q: UserQueryObject) => 
