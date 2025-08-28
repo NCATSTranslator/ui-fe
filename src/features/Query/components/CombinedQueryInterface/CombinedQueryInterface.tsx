@@ -88,7 +88,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
           />
         )}
         <Tooltip id="add-to-project-tooltip">
-          <p>{selectedProject?.data.title || 'Add this query to a project' }</p>
+          <p className={styles.tooltipText}>{selectedProject?.data.title || 'Add this query to a project' }</p>
         </Tooltip>
       </div>
       <Tabs
