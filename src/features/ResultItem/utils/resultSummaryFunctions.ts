@@ -78,6 +78,7 @@ export function resultToSummarySpec(resultSet: ResultSet, result: Result, diseas
         object: edge.object,
         support: edge.support,
         publications: edge.publications,
+        trials: edge.trials,
       };
     }
   });
