@@ -52,9 +52,9 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const updateProjectsMutation = useUpdateProjects();
   const deleteQueriesMutation = useDeleteQueries();
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [localSelectedProjects, setLocalSelectedProjects] = useState<ProjectRaw[]>(getAttachedProjects(projects, currentEditingQueryItem?.id));
   const [isDeleteQueryPromptOpen, setIsDeleteQueryPromptOpen] = useState(false);
   const filteredProjects: ProjectRaw[] = useMemo(() => filterProjects(projects.filter(p => !p.deleted), searchTerm) as ProjectRaw[], [projects, searchTerm]);
+  const [localSelectedProjects, setLocalSelectedProjects] = useState<ProjectRaw[]>(getAttachedProjects(filteredProjects, currentEditingQueryItem?.pk));
 
   const deletePrompts = useDeletePrompts(['deleteQueries']);
   const { shouldShow, setHideDeletePrompt: setHideDeleteQueryPrompt } = deletePrompts.deleteQueries || {};
@@ -80,7 +80,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const handleProjectNameChange = (value: string) => {
     setNewProject({
       title: value,
-      pks: currentEditingQueryItem?.id ? [currentEditingQueryItem.id] : []
+      pks: currentEditingQueryItem?.pk ? [currentEditingQueryItem.pk] : []
     });
   }
 
@@ -139,9 +139,9 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   }
 
   const handleDeleteQuery = () => {
-    if(!currentEditingQueryItem?.id) return;
+    if(!currentEditingQueryItem?.pk) return;
 
-    deleteQueriesMutation.mutate([currentEditingQueryItem.id], {
+    deleteQueriesMutation.mutate([currentEditingQueryItem.pk], {
       onSuccess: () => {
         queryDeletedToast();
         onClose();
@@ -151,25 +151,25 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   }
 
   const handleSaveQuery = () => {
-    if(!currentEditingQueryItem?.id) 
+    if(!currentEditingQueryItem?.pk) 
       return;
 
     // get all selected projects that do not have the current query id in their pks, then add the query id to their pks
-    const projectsToAddQueryTo: ProjectUpdate[] = localSelectedProjects.filter(p => !p.data.pks.includes(currentEditingQueryItem.id)).map(p => {
+    const projectsToAddQueryTo: ProjectUpdate[] = localSelectedProjects.filter(p => !p.data.pks.includes(currentEditingQueryItem.pk)).map(p => {
       return {
         id: p.id,
         title: p.data.title,
-        pks: [...p.data.pks, currentEditingQueryItem.id]
+        pks: [...p.data.pks, currentEditingQueryItem.pk]
       }
     });
-    // get allprojects that have the currentEditingQueryItem.id in their pks
-    const attachedProjects = getAttachedProjects(projects, currentEditingQueryItem.id);
+    // get allprojects that have the currentEditingQueryItem.pk in their pks
+    const attachedProjects = getAttachedProjects(projects, currentEditingQueryItem.pk);
     // get allprojects that have the current query attached but aren't in the localSelectedProjects array, then remove the query id from their pks
     const projectsToRemoveQueryFrom: ProjectUpdate[] = attachedProjects.filter(p => !localSelectedProjects.some(lp => lp.id === p.id)).map(p => {
       return {
         id: p.id,
         title: p.data.title,
-        pks: p.data.pks.filter(pk => pk !== currentEditingQueryItem.id)
+        pks: p.data.pks.filter(pk => pk !== currentEditingQueryItem.pk)
       }
     });
 
@@ -190,10 +190,9 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   }, [isOpen]);
 
   useEffect(() => {
-    if(currentEditingQueryItem) {
-      setLocalSelectedProjects(getAttachedProjects(projects, currentEditingQueryItem?.id));
-    }
-  }, [currentEditingQueryItem, projects]);
+    if(currentEditingQueryItem)
+      setLocalSelectedProjects(getAttachedProjects(filteredProjects, currentEditingQueryItem?.pk));
+  }, [currentEditingQueryItem, filteredProjects]);
 
   return (
     <>

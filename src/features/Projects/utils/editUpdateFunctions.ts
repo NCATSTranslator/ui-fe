@@ -247,7 +247,7 @@ export const useEditQueryHandlers = (
 
   const handleEditQuery = (query: UserQueryObject) => {
     handleSetIsEditing(true, {
-      id: query.data.qid,
+      pk: query.data.qid,
       name: query.data.title || '',
       type: 'query'
     });

@@ -1,19 +1,5 @@
 import { Project, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
-import { QueryClient } from "@tanstack/react-query";
-
-export const projectsQueryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 2 * 60 * 1000, // 2 min
-      retry: false,
-      refetchOnWindowFocus: false,
-    },
-    mutations: {
-      retry: false,
-    },
-  },
-});
 
 /**
  * Get the status of a project based on the most recent query's status

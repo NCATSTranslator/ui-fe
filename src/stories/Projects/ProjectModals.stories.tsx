@@ -129,7 +129,7 @@ const mockQueries: UserQueryObject[] = [
 ];
 
 const mockQueryEditingItem: QueryEditingItem = {
-  id: 'qid1',
+  pk: 'qid1',
   name: 'BRCA1 Gene Query',
   type: 'query',
   status: 'editing',
