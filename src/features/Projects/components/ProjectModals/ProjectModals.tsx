@@ -37,6 +37,7 @@ interface ProjectModalsProps {
     loading: boolean;
     mode: 'edit' | 'add';
     projects: ProjectRaw[];
+    queries: UserQueryObject[];
     setSelectedProject?: (project: ProjectRaw) => void;
   };
   shareQueryModal?: {
@@ -200,6 +201,7 @@ const ProjectModals = ({
           loading={editQueryModal.loading}
           mode={editQueryModal.mode}
           projects={editQueryModal.projects}
+          queries={editQueryModal.queries}
           setSelectedProject={editQueryModal.setSelectedProject}
         />
       )}

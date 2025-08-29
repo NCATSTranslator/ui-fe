@@ -139,7 +139,8 @@ export const ProjectListInner = () => {
           isOpen: isEditQueryModalOpen,
           loading: data.loading.queriesLoading,
           mode: 'edit',
-          projects: data.formatted.active
+          projects: data.formatted.active,
+          queries: data.raw.queries
         }}  
         shareQueryModal={{
           onClose: () => {
@@ -190,6 +191,7 @@ export const ProjectListInner = () => {
                       projectListState={projectListState}
                       projectsError={data.errors.projectsError}
                       projectsLoading={data.loading.projectsLoading}
+                      rawProjects={data.raw.projects}
                       queries={data.raw.queries}
                       queriesLoading={data.loading.queriesLoading}
                       projectsEmpty={sortedData.projectsEmpty}
@@ -226,6 +228,7 @@ export const ProjectListInner = () => {
                       projectsLoading={data.loading.projectsLoading}
                       queriesLoading={data.loading.queriesLoading}
                       queries={data.raw.queries}
+                      rawProjects={data.raw.projects}
                       onDeleteProject={deletionHandlers.handleInitiatePermanentDeleteProject}
                       onDeleteQuery={deletionHandlers.handleInitiatePermanentDeleteQuery}
                       styles={styles}

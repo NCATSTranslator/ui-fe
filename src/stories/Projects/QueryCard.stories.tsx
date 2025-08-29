@@ -95,6 +95,7 @@ type Story = StoryObj<typeof meta>;
 export const Success: Story = {
   args: {
     query: mockQuerySuccess,
+    queries: [],
     searchTerm: '',
     selectedQueries: [],
   },
@@ -103,6 +104,7 @@ export const Success: Story = {
 export const Running: Story = {
   args: {
     query: mockQueryRunning,
+    queries: [],
     searchTerm: '',
     selectedQueries: [],
   },
@@ -111,6 +113,7 @@ export const Running: Story = {
 export const Error: Story = {
   args: {
     query: mockQueryError,
+    queries: [],
     searchTerm: '',
     selectedQueries: [],
   },
@@ -119,6 +122,7 @@ export const Error: Story = {
 export const WithSearchTerm: Story = {
   args: {
     query: mockQuerySuccess,
+    queries: [],
     searchTerm: 'cancer',
     selectedQueries: [],
   },
@@ -127,6 +131,7 @@ export const WithSearchTerm: Story = {
 export const Selected: Story = {
   args: {
     query: mockQuerySuccess,
+    queries: [],
     searchTerm: '',
     selectedQueries: [mockQuerySuccess],
   },
@@ -141,6 +146,7 @@ export const LongTitle: Story = {
         title: 'Very Long Query Title That Might Overflow and Need to be Handled Properly in the UI',
       },
     },
+    queries: [],
     searchTerm: '',
     selectedQueries: [],
   },
@@ -156,6 +162,7 @@ export const HighBookmarkCount: Story = {
         note_count: 25,
       },
     },
+    queries: [],
     searchTerm: '',
     selectedQueries: [],
   },
@@ -171,6 +178,7 @@ export const NoBookmarks: Story = {
         note_count: 0,
       },
     },
+    queries: [],
     searchTerm: '',
     selectedQueries: [],
   },

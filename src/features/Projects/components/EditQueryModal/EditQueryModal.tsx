@@ -2,9 +2,9 @@ import { FC, FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import styles from "./EditQueryModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
-import { ProjectCreate, ProjectRaw, ProjectUpdate, QueryEditingItem } from "@/features/Projects/types/projects";
+import { ProjectCreate, ProjectRaw, ProjectUpdate, QueryEditingItem, UserQueryObject } from "@/features/Projects/types/projects";
 import Button from "@/features/Core/components/Button/Button";
-import { useCreateProject, useDeleteQueries, useUpdateProjects } from "@/features/Projects/hooks/customHooks";
+import { useCreateProject } from "@/features/Projects/hooks/customHooks";
 import { useDeletePrompts } from "@/features/Projects/hooks/useDeletePrompts";
 import CheckmarkIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
@@ -14,9 +14,10 @@ import { debounce } from "lodash";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import Highlighter from "react-highlight-words";
 import { filterProjects } from "@/features/Projects/utils/filterAndSortingFunctions";
-import { projectCreatedToast, projectUpdatedToast, queryDeletedToast } from "@/features/Projects/utils/toastMessages";
-import { isUnassignedProject } from "@/features/Projects/utils/editUpdateFunctions";
+import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
+import { isUnassignedProject, useEditProjectHandlers, useEditQueryHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import WarningModal from "@/features/Common/components/WarningModal/WarningModal";
+import { getProjectQueryCount } from "@/features/Projects/utils/utilities";
 
 const getAttachedProjects = (projects: ProjectRaw[], queryId?: string) => {
   return projects.filter(p => queryId && p.data.pks.includes(queryId));
@@ -28,6 +29,7 @@ interface EditQueryModalProps {
   isOpen: boolean;
   loading: boolean;
   mode: 'edit' | 'add';
+  queries: UserQueryObject[];
   projects: ProjectRaw[];
   setSelectedProject?: (projects: ProjectRaw) => void;
 }
@@ -37,6 +39,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   isOpen,
   loading,
   mode = 'edit',
+  queries,
   projects,
   currentEditingQueryItem,
   setSelectedProject,
@@ -49,12 +52,14 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const [newProject, setNewProject] = useState<ProjectCreate | null>(null);
   const [projectNameError, setProjectNameError] = useState('');
   const createProjectMutation = useCreateProject();
-  const updateProjectsMutation = useUpdateProjects();
-  const deleteQueriesMutation = useDeleteQueries();
+
+  const  { handleUpdateProject } = useEditProjectHandlers(undefined, projects);
+  const { handleDeleteQuery } = useEditQueryHandlers(undefined, queries);
+
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [localSelectedProjects, setLocalSelectedProjects] = useState<ProjectRaw[]>(getAttachedProjects(projects, currentEditingQueryItem?.id));
   const [isDeleteQueryPromptOpen, setIsDeleteQueryPromptOpen] = useState(false);
   const filteredProjects: ProjectRaw[] = useMemo(() => filterProjects(projects.filter(p => !p.deleted), searchTerm) as ProjectRaw[], [projects, searchTerm]);
+  const [localSelectedProjects, setLocalSelectedProjects] = useState<ProjectRaw[]>(getAttachedProjects(filteredProjects, currentEditingQueryItem?.pk));
 
   const deletePrompts = useDeletePrompts(['deleteQueries']);
   const { shouldShow, setHideDeletePrompt: setHideDeleteQueryPrompt } = deletePrompts.deleteQueries || {};
@@ -80,7 +85,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const handleProjectNameChange = (value: string) => {
     setNewProject({
       title: value,
-      pks: currentEditingQueryItem?.id ? [currentEditingQueryItem.id] : []
+      pks: currentEditingQueryItem?.pk ? [currentEditingQueryItem.pk] : []
     });
   }
 
@@ -134,51 +139,46 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const handleInitiateDeleteQuery = () => {
     if(shouldShow)
       setIsDeleteQueryPromptOpen(true);
-    else
-      handleDeleteQuery();
+    else {
+      findAndCallDeleteQuery();
+    }
   }
 
-  const handleDeleteQuery = () => {
-    if(!currentEditingQueryItem?.id) return;
-
-    deleteQueriesMutation.mutate([currentEditingQueryItem.id], {
-      onSuccess: () => {
-        queryDeletedToast();
-        onClose();
-      }
-    });
-    setIsDeleteQueryPromptOpen(false);
+  const findAndCallDeleteQuery = () => {
+    const query = queries.find(q => q.data.qid === currentEditingQueryItem?.pk);
+    if(query)
+      handleDeleteQuery(query);
+    else 
+      console.warn("query not found, unable to delete");
   }
 
   const handleSaveQuery = () => {
-    if(!currentEditingQueryItem?.id) 
+    if(!currentEditingQueryItem?.pk) 
       return;
 
     // get all selected projects that do not have the current query id in their pks, then add the query id to their pks
-    const projectsToAddQueryTo: ProjectUpdate[] = localSelectedProjects.filter(p => !p.data.pks.includes(currentEditingQueryItem.id)).map(p => {
+    const projectsToAddQueryTo: ProjectUpdate[] = localSelectedProjects.filter(p => !p.data.pks.includes(currentEditingQueryItem.pk)).map(p => {
       return {
         id: p.id,
         title: p.data.title,
-        pks: [...p.data.pks, currentEditingQueryItem.id]
+        pks: [...p.data.pks, currentEditingQueryItem.pk]
       }
     });
-    // get allprojects that have the currentEditingQueryItem.id in their pks
-    const attachedProjects = getAttachedProjects(projects, currentEditingQueryItem.id);
+    // get allprojects that have the currentEditingQueryItem.pk in their pks
+    const attachedProjects = getAttachedProjects(projects, currentEditingQueryItem.pk);
     // get allprojects that have the current query attached but aren't in the localSelectedProjects array, then remove the query id from their pks
     const projectsToRemoveQueryFrom: ProjectUpdate[] = attachedProjects.filter(p => !localSelectedProjects.some(lp => lp.id === p.id)).map(p => {
       return {
         id: p.id,
         title: p.data.title,
-        pks: p.data.pks.filter(pk => pk !== currentEditingQueryItem.id)
+        pks: p.data.pks.filter(pk => pk !== currentEditingQueryItem.pk)
       }
     });
 
     const projectsToUpdate: ProjectUpdate[] = [...projectsToAddQueryTo, ...projectsToRemoveQueryFrom];
-    updateProjectsMutation.mutate(projectsToUpdate, {
-      onSuccess: () => {
-        projectUpdatedToast();
-      }
-    });
+    for(const project of projectsToUpdate) {
+      handleUpdateProject(project.id, project.title || undefined, project.pks);
+    }
   }
 
   const handleCancel = () => {
@@ -190,10 +190,9 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   }, [isOpen]);
 
   useEffect(() => {
-    if(currentEditingQueryItem) {
-      setLocalSelectedProjects(getAttachedProjects(projects, currentEditingQueryItem?.id));
-    }
-  }, [currentEditingQueryItem, projects]);
+    if(currentEditingQueryItem)
+      setLocalSelectedProjects(getAttachedProjects(filteredProjects, currentEditingQueryItem?.pk));
+  }, [currentEditingQueryItem, filteredProjects]);
 
   return (
     <>
@@ -255,6 +254,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
                       if(isUnassigned) return null;
                       const projectName = project.label || project.data.title;
                       const isSelected = mode === "edit" && localSelectedProjects.some(p => p.id === project.id);
+                      const queryCount = getProjectQueryCount(project, queries);
                       return(
                         <div
                           className={`${styles.projectItem} ${isSelected ? styles.selected : ''}`}
@@ -268,7 +268,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
                             autoEscape={true}
                             textToHighlight={projectName}
                           />
-                          <div className={styles.queryCount}>{project.data.pks.length} quer{project.data.pks.length === 1 ? 'y' : 'ies'}</div>
+                          <div className={styles.queryCount}>{queryCount} quer{queryCount === 1 ? 'y' : 'ies'}</div>
                         </div>
                     )}) : (
                       <div className={styles.noResults}>
@@ -327,7 +327,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
       <WarningModal
         isOpen={isDeleteQueryPromptOpen}
         onClose={() => setIsDeleteQueryPromptOpen(false)}
-        onConfirm={handleDeleteQuery}
+        onConfirm={findAndCallDeleteQuery}
         onCancel={() => setIsDeleteQueryPromptOpen(false)}
         cancelButtonText="Cancel"
         confirmButtonText="Delete Query"

@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction } from 'react';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
-import { useRestoreQueries } from '@/features/Projects/hooks/customHooks';
-import { errorToast, queryRestoredToast } from '@/features/Projects/utils/toastMessages';
+import { useEditQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
+import { useUserQueries } from '@/features/Projects/hooks/customHooks';
 
 interface QueryCardProps {
   inUnassignedProject?: boolean;
@@ -11,6 +11,7 @@ interface QueryCardProps {
   onDelete?: (query: UserQueryObject) => void;
   onEdit?: (query: UserQueryObject) => void;
   query: UserQueryObject;
+  queries: UserQueryObject[];
   searchTerm?: string;
   selectedQueries?: UserQueryObject[];
   setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
@@ -24,23 +25,17 @@ const QueryCard = ({
   onDelete,
   onEdit,
   query,
+  queries,
   searchTerm,
   selectedQueries = [],
   setSelectedQueries,
   onShare
 }: QueryCardProps) => {
 
-  const restoreQueriesMutation = useRestoreQueries();
+  const editQueryHandlers = useEditQueryHandlers(undefined, queries);
+
   const onRestore = (query: UserQueryObject) => {
-    restoreQueriesMutation.mutate([query.sid.toString()], { 
-      onSuccess: () => {
-        queryRestoredToast();
-      },
-      onError: (error) => {
-        console.error('Failed to restore query:', error);
-        errorToast('Failed to restore query');
-      }
-    });
+    editQueryHandlers.handleRestoreQuery(query);
   };
 
   const handleShare = (query: UserQueryObject) => {
