@@ -1,40 +1,46 @@
 import { Dispatch, SetStateAction, useMemo } from 'react';
-import { Project, UserQueryObject } from '@/features/Projects/types/projects';
-import { getProjectStatus } from '@/features/Projects/utils/utilities';
+import { Project, ProjectRaw, UserQueryObject } from '@/features/Projects/types/projects';
+import { getProjectQueryCount, getProjectStatus } from '@/features/Projects/utils/utilities';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
-import { useRestoreProjects } from '@/features/Projects/hooks/customHooks';
-import { errorToast, projectRestoredToast } from '@/features/Projects/utils/toastMessages';
+import { useEditProjectHandlers } from '@/features/Projects/utils/editUpdateFunctions';
 
 interface ProjectCardProps {
+  onDelete?: (project: Project) => void;
   onEdit?: (project: Project) => void;
   project: Project;
+  projects: ProjectRaw[];
   queries: UserQueryObject[];
   searchTerm?: string;
   selectedProjects: Project[];
   setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
+  queriesLoading?: boolean;
 }
 
 const ProjectCard = ({
+  onDelete,
   onEdit,
   project,
+  projects,
   queries,
   searchTerm,
   selectedProjects,
-  setSelectedProjects
+  setSelectedProjects,
+  queriesLoading = false
 }: ProjectCardProps) => {
 
   const status = useMemo(() => getProjectStatus(project, queries), [project, queries]);
-  const restoreProjectsMutation = useRestoreProjects();
+
+  const { handleRestoreProject } = useEditProjectHandlers(undefined, projects);
+  
   const onRestore = (project: Project) => {
-    restoreProjectsMutation.mutate([project.id.toString()], { 
-      onSuccess: () => {
-        projectRestoredToast();
-      },
-      onError: (error) => {
-        console.error('Failed to restore project:', error);
-        errorToast('Failed to restore project');
-      }
-    });
+    handleRestoreProject(project);
+  };
+
+  const handleDelete = (project: Project) => {
+    if(onDelete)
+      onDelete(project);
+    else
+      console.warn('No onDelete function provided to ProjectCard.');
   };
 
   return (
@@ -47,13 +53,15 @@ const ProjectCard = ({
       status={status}
       onEdit={onEdit}
       onRestore={onRestore}
+      onDelete={handleDelete}
       getItemId={(item: Project) => item.id}
       getItemTitle={(item: Project) => item.data.title}
       getItemTimeCreated={(item: Project) => item.time_created.toString()}
       getItemTimeUpdated={(item: Project) => item.time_updated.toString()}
       getItemBookmarkCount={(item: Project) => item.bookmark_count}
       getItemNoteCount={(item: Project) => item.note_count}
-      getItemCount={(item: Project) => item.data.pks.length}
+      getItemCount={(item: Project) => getProjectQueryCount(item, queries)}
+      queriesLoading={queriesLoading}
     />
   );
 };

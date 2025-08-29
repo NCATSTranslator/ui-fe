@@ -1,7 +1,10 @@
 import ResultList from "@/features/ResultList/components/ResultList/ResultList";
+import { commonQueryClientOptions } from "@/features/Common/utils/utilities";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient(commonQueryClientOptions);
+
 const Results = () => {
-  const queryClient = new QueryClient();
 
   return (
     <div>

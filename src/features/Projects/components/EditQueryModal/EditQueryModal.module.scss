@@ -1,24 +1,46 @@
 @use "@/assets/styles/variables" as *;
 
 .editQueryModal {
-  .top {
+  .container {
+    position: relative;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    height: 80%;
+    scrollbar-width: none;
+  }
+  .header {
     border-bottom: 1px solid $midGray;
     padding: 0 0 $s;
-    margin: 0 0 $l;
+    margin: 0;
   }
-  .bottom {
+  .top {
     display: flex;
     flex-direction: column;
     gap: $m;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    padding-bottom: $s;
   }
   
   .heading {
     margin: 0;
+    padding: 0 $m;
   }
 
   .subheading {
     color: $black;
     margin: 0 0 $xs;
+  }
+
+  .inner {
+    padding: 0 $m;
+  }
+  
+  .modalInner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
   
   .wrapper {
@@ -61,6 +83,16 @@
 
   .projectItem {
     padding: 12px;
+    transition: $defaultAnim;
+    .projectName, .queryCount {
+      transition: $defaultAnim;
+    }
+    &.selected {
+      background-color: $lightPurpleTwo;
+      .projectName, .queryCount {
+        color: $purpleOne;
+      }
+    }
     &:hover {
       cursor: pointer;
       .projectName {
@@ -80,5 +112,43 @@
     color: $darkGray;
     font-weight: 400;
     margin: 0;
+  }
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $s;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: $white;
+    border-top: 1px solid $midGray;
+    .right {
+      display: flex;
+      gap: $s;
+    }
+    .button {
+      margin: 0;
+    }
+    .saveButton {
+      svg path {
+        fill: transparent;
+        stroke: $white;
+      }
+    }
+    .deleteButton {
+      background-color: transparent;
+      color: $purpleOne;
+      &:hover {
+        background-color: transparent;
+        text-decoration: underline;
+      }
+      svg {
+        path {
+          fill: $purpleOne;
+        }
+      }
+    }
   }
 }

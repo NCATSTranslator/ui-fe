@@ -20,11 +20,16 @@ $statusSize: 18px;
       stroke: $white;
     }
   }
+  .loadingIcon {
+    width: 14px;
+    height: 14px;
+    min-height: 14px;
+    min-width: 14px;
+    margin-bottom: 0;
+  }
 }
 .statusRunning {
   > div {
-    height: $statusSize !important;
-    width: $statusSize !important;
     margin-bottom: 0;
   }
 }
@@ -33,4 +38,26 @@ $statusSize: 18px;
 }
 .statusError {
   background: $red;
+}
+.statusWarning {
+  background: $yellow;
+  svg {
+    path {
+      stroke: transparent;
+      fill: $white;
+    }
+  }
+}
+.statusNoQueries, .statusNoResults {
+  background: $lightPurpleTwo;
+}
+.statusUnknown {
+  background: $midGray;
+}
+.statusIndicator {
+  .tooltipHeading {
+    font-size: $bodyTwoSize;
+    font-weight: 800;
+    margin: 0 0 $xxs;
+  }
 }

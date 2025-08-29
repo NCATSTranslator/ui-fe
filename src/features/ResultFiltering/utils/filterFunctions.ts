@@ -6,7 +6,19 @@ export const CONSTANTS = {
   GLOBAL: 'g' as const,
   FAMILIES: {
     ROLE: 'role' as const
-  }
+  },
+  DYNAMIC_TAG: {
+    BOOKMARK: {
+      id: 'r/sv/bookmark',
+      name: 'Has Bookmark',
+      value: '',
+    },
+    NOTE: {
+      id: 'r/sv/note',
+      name: 'Has Note',
+      value: '',
+    },
+  },
 } as const;
 
 export const makeEntitySearch = (): Filter => {
@@ -34,11 +46,11 @@ export const isGlobalTag = (tagID: string): boolean => {
 }
 
 export const getValidFamilies = (): FilterFamily[] => {
-  return ['cc', 'di', 'pc', 'pt', 'role', 'ara', 'otc', 'tdl'];
+  return ['cc', 'di', 'pc', 'pt', 'role', 'ara', 'otc', 'tdl', 'sv'];
 }
 
 export const getResultFamilies = (): FilterFamily[] => {
-  return ['cc', 'di', 'role', 'ara', 'otc', 'tdl'];
+  return ['cc', 'di', 'role', 'ara', 'otc', 'tdl', 'sv'];
 }
 
 export const getPathFamilies = (): FilterFamily[] => {
@@ -126,4 +138,4 @@ export const getTagFamily = (tagID: string): FilterFamily => {
 
 const splitTagID = (tagID: string): string[] => {
   return tagID.split('/');
-} 
+}

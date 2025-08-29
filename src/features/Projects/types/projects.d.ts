@@ -1,4 +1,6 @@
 
+import { Dispatch, SetStateAction } from 'react';
+
 export type ProjectCreate = {
   title: string;
   pks: string[];
@@ -37,7 +39,7 @@ export type Project = ProjectRaw & {
   note_count: number;
 }
 
-export type QueryStatus = 'complete' | 'running' | 'error';
+export type QueryStatus = 'complete' | 'running' | 'error' | 'unknown' | 'noQueries' | 'noResults';
 
 export type PathfinderNodeObject = {
   id: string,
@@ -75,12 +77,31 @@ export interface UserQueryObject {
 export type SortField = 'name' | 'lastSeen' | 'dateAdded' | 'bookmarks' | 'notes' | 'status';
 export type SortDirection = 'asc' | 'desc';
 
-export type EditingItem = {
-  id: number | string;
+export interface ProjectListState {
+  selectedProjects: Project[];
+  selectedQueries: UserQueryObject[];
+  setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
+  setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
+  sortField: SortField;
+  sortDirection: SortDirection;
+  handleSort: (field: SortField) => void;
+  searchTerm: string;
+}
+
+export type ProjectEditingItem = {
+  id: string;
   name: string;
   queryIds?: string[];
   status?: 'new' | 'editing';
-  type: 'project' | 'query';
+  type: 'project';
+} | undefined;
+
+export type QueryEditingItem = {
+  pk: string;
+  name: string;
+  queryIds?: string[];
+  status?: 'new' | 'editing';
+  type: 'query';
 } | undefined;
 
 export const isProjectRaw = (obj: unknown): obj is ProjectRaw => {

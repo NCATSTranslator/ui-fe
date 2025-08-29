@@ -1,19 +1,5 @@
-import { Project, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
+import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
-import { QueryClient } from "@tanstack/react-query";
-
-export const projectsQueryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 2 * 60 * 1000, // 2 min
-      retry: false,
-      refetchOnWindowFocus: false,
-    },
-    mutations: {
-      retry: false,
-    },
-  },
-});
 
 /**
  * Get the status of a project based on the most recent query's status
@@ -22,6 +8,13 @@ export const projectsQueryClient = new QueryClient({
  * @returns {QueryStatus} The status of the project
  */
 export const getProjectStatus = (project: Project, queries: UserQueryObject[]): QueryStatus => {
+
+  if(project.data.pks.length === 0)
+    return 'noQueries';
+
+  if(project.data.pks.every((qid) => queries.find((query) => query.data.qid === qid)?.status === 'noResults'))
+    return 'noResults';
+
   // Get the most recent query's status
   const mostRecentQuery = project.data.pks.reduce((mostRecent: UserQueryObject | null, qid) => {
     const query = queries.find((query) => query.data.qid === qid);
@@ -36,7 +29,7 @@ export const getProjectStatus = (project: Project, queries: UserQueryObject[]): 
     return mostRecent;
   }, null);
 
-  return mostRecentQuery?.status || 'error';
+  return mostRecentQuery?.status || 'unknown';
 }
 
 /**
@@ -84,4 +77,38 @@ export const getTypeIDFromType = (type: string, direction: string | null) => {
     // default case is drug->disease type id
     default: return 0;
   }
+}
+
+/**
+ * Get the additional queries that are not in the sorted data
+ * @param {UserQueryObject[]} queries - The queries to get the additional queries from
+ * @param {UserQueryObject[]} sortedQueries - The sorted queries
+ * @returns {UserQueryObject[]} The additional queries
+ */
+export const getAdditionalQueries = (queries: UserQueryObject[], sortedQueries: UserQueryObject[] ) => {
+  const sortedQueryIds = sortedQueries.filter((q) => !q.data.deleted).map((q) => q.data.qid);
+  return queries.filter((query) => !sortedQueryIds.includes(query.data.qid) && !query.data.deleted);
+}
+
+/**
+ * Get the subtitle for the project detail header
+ * @param {Project | undefined} project - The project to get the subtitle for
+ * @param {UserQueryObject[]} sortedQueries - The sorted queries
+ * @returns {string} The subtitle for the project detail header
+ */
+export const getProjectDetailHeaderSubtitle = (project: Project | undefined, queries: UserQueryObject[]) => {
+  const queryCount = getProjectQueryCount(project, queries);
+  const queryCountText = queryCount === 1 ? 'Query' : 'Queries';
+  return `${queryCount} ${queryCountText}`;
+}
+
+/**
+ * Get the query count for the project
+ * @param {Project} project - The project to get the query count for
+ * @param {UserQueryObject[]} queries - The queries to get the query count from
+ * @returns {number} The query count
+ */
+export const getProjectQueryCount = (project: Project | ProjectRaw | undefined, queries: UserQueryObject[]) => {
+  const projectPks = project?.data.pks || [];
+  return projectPks.filter(pk => !queries.find(q => q.data.qid === pk)?.data.deleted).length;
 }

@@ -3,13 +3,15 @@ import HomeOne from "@/assets/images/home/home1.svg?react";
 import HomeTwo from "@/assets/images/home/home2.svg?react";
 import HomeThree from "@/assets/images/home/home3.svg?react";
 import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { projectsQueryClient } from "@/features/Projects/utils/utilities";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { commonQueryClientOptions } from "@/features/Common/utils/utilities";
+
+const queryClient = new QueryClient(commonQueryClientOptions);
 
 const Home = () => {
 
   return (
-    <QueryClientProvider client={projectsQueryClient}>
+    <QueryClientProvider client={queryClient}>
       <div>
         <h1 className={styles.pageHeading}>Explore Translator</h1>
         <CombinedQueryInterface />

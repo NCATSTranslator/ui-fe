@@ -11,7 +11,7 @@ import { useSelector } from "react-redux";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import { QueryType } from "@/features/Query/types/querySubmission";
 import { ProjectRaw } from "@/features/Projects/types/projects.d";
-import { useUserProjects } from "@/features/Projects/hooks/customHooks";
+import { useUserProjects, useUserQueries } from "@/features/Projects/hooks/customHooks";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import EditQueryModal from "@/features/Projects/components/EditQueryModal/EditQueryModal";
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
@@ -47,6 +47,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   const isPathfinderEnabled = config?.include_pathfinder;
   const [selectedProject, setSelectedProject] = useState<ProjectRaw | null>(null);
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
+  const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueries();
   const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState<boolean>(false);
 
   const handleTabSelection = (tabName: string) => {
@@ -65,6 +66,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
         loading={projectsLoading}
         mode="add"
         projects={projects}
+        queries={queries}
         setSelectedProject={setSelectedProject}
       />
       <div className={styles.addToProject} data-tooltip-id="add-to-project-tooltip">
@@ -86,7 +88,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
           />
         )}
         <Tooltip id="add-to-project-tooltip">
-          <p>{selectedProject?.data.title || 'Add this query to a project' }</p>
+          <p className={styles.tooltipText}>{selectedProject?.data.title || 'Add this query to a project' }</p>
         </Tooltip>
       </div>
       <Tabs

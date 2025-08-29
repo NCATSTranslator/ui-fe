@@ -2,11 +2,27 @@
 
 .dataCard {
   background-color: $white;
-  &.projectWrapper {
+  &.projectCard {
     background: $lightGray;
+  }
+  &.queryCard {
+    .actionsColumn {
+      button {
+        background-color: $lightGray;
+        &:hover {
+          background-color: $white;
+        }
+      }
+    }
   }
   &:hover {
     background-color: $whiteHover;
+  }
+  &.detailCard {
+    grid-template-columns: $projectsDetailGridColumns;
+    &.isEditing {
+      grid-template-columns: $projectsTableGridColumns;
+    }
   }
   
   .column {
@@ -15,6 +31,10 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
+  }
+
+  .statusColumn {
+    justify-content: space-between;
   }
   
   .checkboxColumn {
@@ -55,6 +75,12 @@
       background-color: $white;
       &:hover {
         background-color: $lightGray;
+      }
+      &:disabled {
+        background-color: $hoverGray;
+        &:hover {
+          background-color: $hoverGray;
+        }
       }
     }
   }
