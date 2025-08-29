@@ -66,14 +66,14 @@ export const updateProjects = async (
   projects: ProjectUpdate[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<ProjectRaw> => {
+): Promise<ProjectRaw[]> => {
   const url = `${API_PATH_PREFIX}/users/me/projects/update`;
   
-  return fetchWithErrorHandling<ProjectRaw>(
+  return fetchWithErrorHandling<ProjectRaw[]>(
     () => put(url, projects),
     httpErrorHandler,
     fetchErrorHandler,
-    isProjectRaw
+    isProjectRawArray
   );
 };
 
