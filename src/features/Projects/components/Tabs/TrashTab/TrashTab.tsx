@@ -2,7 +2,7 @@ import DeletedTableHeader from '@/features/Projects/components/TableHeader/Delet
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 import ProjectCard from '@/features/Projects/components/ProjectCard/ProjectCard';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
-import { Project, UserQueryObject, ProjectListState } from '@/features/Projects/types/projects.d';
+import { Project, ProjectRaw, UserQueryObject, ProjectListState } from '@/features/Projects/types/projects.d';
 
 interface TrashTabProps {
   sortedDeletedProjects: Project[];
@@ -11,6 +11,7 @@ interface TrashTabProps {
   projectsLoading: boolean;
   queriesLoading: boolean;
   queries: UserQueryObject[];
+  rawProjects: ProjectRaw[];
   onDeleteProject: (project: Project) => void;
   onDeleteQuery: (query: UserQueryObject) => void;
   styles: Record<string, string>;
@@ -19,6 +20,7 @@ interface TrashTabProps {
 const TrashTab = ({
   sortedDeletedProjects,
   sortedDeletedQueries,
+  rawProjects,
   projectListState,
   projectsLoading,
   queriesLoading,
@@ -63,6 +65,7 @@ const TrashTab = ({
                       key={project.id}
                       queries={queries}
                       project={project}
+                      projects={rawProjects}
                       searchTerm={searchTerm}
                       setSelectedProjects={setSelectedProjects}
                       selectedProjects={selectedProjects}
@@ -86,6 +89,7 @@ const TrashTab = ({
                     <QueryCard 
                       key={query.data.qid}
                       query={query}
+                      queries={queries}
                       searchTerm={searchTerm}
                       setSelectedQueries={setSelectedQueries}
                       selectedQueries={selectedQueries}

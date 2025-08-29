@@ -79,7 +79,8 @@ export type TrialObject = {
   size: number;
   start_date: string;
   status: 'COMPLETED' | 'TERMINATED' | 'WITHDRAWN' | 'UNKNOWN';
-  type: 'enrolled' | 'anticipated';
+  title?: string;
+  type?: 'enrolled' | 'anticipated';
   url: string;
 }
 

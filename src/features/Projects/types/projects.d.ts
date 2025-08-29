@@ -97,7 +97,7 @@ export type ProjectEditingItem = {
 } | undefined;
 
 export type QueryEditingItem = {
-  id: string;
+  pk: string;
   name: string;
   queryIds?: string[];
   status?: 'new' | 'editing';

@@ -10,6 +10,7 @@ import { PublicationObject, Provenance, TrialObject } from '@/features/Evidence/
 import { ResultEdge } from '@/features/ResultList/types/results.d';
 import { PreferencesContainer } from '@/features/UserAuth/types/user';
 import styles from '@/features/Evidence/components/EvidenceModal/EvidenceModal.module.scss';
+import { getFormattedDate } from '@/features/Common/utils/utilities';
 
 interface EvidenceTabsProps {
   isOpen: boolean;
@@ -58,22 +59,44 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
         <Tab heading="Clinical Trials" className={`${styles.tab} scrollable`}>
           <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
             <div className={`table-head ${styles.tableHead}`}>
-              <div className={`head ${styles.head} ${styles.link}`}>Link</div>
+              <div className={`head ${styles.head}`}>Title</div>
+              <div className={`head ${styles.head}`}>Start Date</div>
+              <div className={`head ${styles.head}`}>Phase</div>
+              <div className={`head ${styles.head}`}>Status</div>
+              <div className={`head ${styles.head}`}>Participants</div>
             </div>
             <div className={`table-items ${styles.tableItems} scrollable`}>
               {clinicalTrials.map((item, i) => {
                 let url = item.url;
+                let title = item.title;
+                let startDate = item.start_date;
+                let phase = item.phase;
+                let participants = item.size;
+                let type = item.type;
+                let status = item.status;
                 if (!item.url && item.id) {
-                  url = getUrlByType(item.id, item.type);
+                  url = getUrlByType(item.id, "NCT");
                 }
                 return (
                   <div className={styles.tableItem} key={i}>
                     <div className={`table-cell ${styles.cell} ${styles.link} link`}>
                       {url && (
                         <a href={url} rel="noreferrer" target="_blank">
-                          {url} <ExternalLink />
+                          {title || url} <ExternalLink />
                         </a>
                       )}
+                    </div>
+                    <div className={`table-cell ${styles.cell}`}>
+                      {startDate ? getFormattedDate(new Date(startDate), false) : ''}
+                    </div>
+                    <div className={`table-cell ${styles.cell}`}>
+                      {phase}
+                    </div>
+                    <div className={`table-cell ${styles.cell}`}>
+                      {status}
+                    </div>
+                    <div className={`table-cell ${styles.cell}`}>
+                      {participants} {type || ''}
                     </div>
                   </div>
                 );

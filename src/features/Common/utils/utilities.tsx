@@ -868,3 +868,21 @@ export const findInSet = <T,>(set: Set<T>, predicate: (obj: T)=>boolean): T | un
   }
   return undefined;
 }
+
+/**
+ * Common query client options for all queries.
+ *
+ * @returns {QueryClientConfig} - The common query client options.
+ */
+export const commonQueryClientOptions = {
+  defaultOptions: {
+    queries: {
+      staleTime: 2 * 60 * 1000, // 2 min
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+};

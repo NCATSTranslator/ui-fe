@@ -14,7 +14,7 @@ interface ProjectHeaderEditControlButtonsProps {
   handleDoneClick: () => void;
   styles: {[key: string]: string};
   type: 'create' | 'update';
-  updateProjectsMutation: UseMutationResult<ProjectRaw, Error, ProjectUpdate[], unknown>;
+  updateProjectsMutation: UseMutationResult<ProjectRaw[], Error, ProjectUpdate[], unknown>;
 }
 
 const ProjectHeaderEditControlButtons: FC<ProjectHeaderEditControlButtonsProps> = ({ 

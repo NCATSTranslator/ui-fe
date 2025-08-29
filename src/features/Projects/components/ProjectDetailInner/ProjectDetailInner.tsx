@@ -17,6 +17,7 @@ import { useModals } from '@/features/Projects/hooks/useModals';
 import { useProjectDetailDeletionHandlers } from '@/features/Projects/hooks/useProjectDetailDeletionHandlers';
 import SelectedItemsActionBar from '../SelectedItemsActionBar/SelectedItemsActionBar';
 import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
+import { getProjectDetailHeaderSubtitle } from '@/features/Projects/utils/utilities';
 
 const ProjectDetailInner = () => {
   // Data management
@@ -39,8 +40,6 @@ const ProjectDetailInner = () => {
     searchTerm: projectListState.searchTerm
   });
 
-  const additionalQueries = useMemo(() => data.raw.queries.filter((query) => !sortedData.sortedQueries.map((q) => q.data.qid).includes(query.data.qid)), [data.raw.queries, sortedData.sortedQueries]);
-
   // Edit state management
   const [projectEditState, setProjectEditState] = useEditProjectState();
   const [queryEditState, setQueryEditState] = useEditQueryState();
@@ -48,6 +47,7 @@ const ProjectDetailInner = () => {
   const [sharedQuery, setSharedQuery] = useState<UserQueryObject | null>(null);
 
   const isUnassignedPrj = isUnassignedProject(data.project || 0);
+  const headerSubtitle = useMemo(() => getProjectDetailHeaderSubtitle(data.project, data.raw.queries), [data.project, data.raw.queries]);
 
   const handleSetIsEditingQuery = (isEditing: boolean, editingItem?: QueryEditingItem) => {
     setQueryEditState({isEditing: isEditing, editingItem: editingItem || undefined});
@@ -117,7 +117,8 @@ const ProjectDetailInner = () => {
           isOpen: isEditQueryModalOpen,
           loading: data.loading.queriesLoading,
           mode: 'edit',
-          projects: data.raw.projects
+          projects: data.raw.projects,
+          queries: data.raw.queries
         }}
         shareQueryModal={{
           onClose: () => {
@@ -165,7 +166,7 @@ const ProjectDetailInner = () => {
                     setProjectEditingState={handleSetIsEditingProject}
                     setSearchTerm={projectListState.setSearchTerm}
                     showBackButton={true}
-                    subtitle={`${data.project?.data.pks.length || "-"} Quer${data.project?.data.pks.length === 1 ? 'y' : 'ies'}`}
+                    subtitle={headerSubtitle}
                     title={data.project?.data.title || ''}
                   />
                 </LoadingWrapper>
@@ -213,6 +214,7 @@ const ProjectDetailInner = () => {
                                   sortedData.sortedQueries.map((query) => (
                                     <QueryCard
                                       key={query.data.qid}
+                                      queries={data.raw.queries}
                                       query={query}
                                       searchTerm={projectListState.searchTerm}
                                       setSelectedQueries={projectListState.setSelectedQueries}
@@ -226,14 +228,15 @@ const ProjectDetailInner = () => {
                                   ))
                                 )}
                                 {
-                                  (projectEditState.isEditing && additionalQueries.length > 0) && (
+                                  (projectEditState.isEditing && sortedData.additionalQueries.length > 0) && (
                                     <>
                                       <div className={styles.separator} />
                                       <p className={styles.additionalQueriesLabel}>Select to Add to Project</p>
                                       {
-                                        additionalQueries.map((query) => (
+                                        sortedData.additionalQueries.map((query) => (
                                           <QueryCard
                                             key={query.data.qid}
+                                            queries={data.raw.queries}
                                             query={query}
                                             searchTerm={projectListState.searchTerm}
                                             setSelectedQueries={projectListState.setSelectedQueries}

@@ -125,7 +125,7 @@ export const useDeleteQueries = () => {
     mutationFn: (queryIds: string[]) => deleteQueries(queryIds),
     onSuccess: () => {
       // Invalidate and refetch user query status
-      queryClient.invalidateQueries({ queryKey: ['userQueryStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['userQueries'] });
     },
   });
 };
@@ -140,7 +140,7 @@ export const useRestoreQueries = () => {
     mutationFn: (queryIds: string[]) => restoreQueries(queryIds),
     onSuccess: () => {
       // Invalidate and refetch user query status
-      queryClient.invalidateQueries({ queryKey: ['userQueryStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['userQueries'] });
     },
   });
 };
@@ -155,7 +155,7 @@ export const useUpdateQuery = () => {
     mutationFn: (query: QueryUpdate) => updateQuery(query),
     onSuccess: () => {
       // Invalidate and refetch user query status
-      queryClient.invalidateQueries({ queryKey: ['userQueryStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['userQueries'] });
     },
   });
 };
