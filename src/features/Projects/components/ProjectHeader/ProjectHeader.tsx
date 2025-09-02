@@ -108,11 +108,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
     if (value.length === 0) {
       setSearchTerm('');
     } else {
-      if (variant === 'list') {
-        debouncedSearch(value);
-      } else {
-        setSearchTerm(value);
-      }
+      debouncedSearch(value);
     }
   };
 
