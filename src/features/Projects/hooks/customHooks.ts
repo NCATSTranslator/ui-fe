@@ -26,7 +26,6 @@ export const useUserProjects = () => {
 export const useUserQueries = () => {
   const config = useSelector(currentConfig);
   const refetchInterval = config?.include_query_status_polling ? 15 * 1000 : false; // 15s
-  console.log("refetchInterval", refetchInterval, config);
   const query = useQuery({
     queryKey: ['userQueries'],
     queryFn: () => getUserQueries(),
