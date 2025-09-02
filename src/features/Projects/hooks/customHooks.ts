@@ -16,6 +16,8 @@ export const useUserProjects = () => {
     queryFn: () => getUserProjects(),
     staleTime: Infinity, // only considered stale if query is manually invalidated
     refetchInterval: 30 * 1000, // 30s
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     retry: false,
   });
 };
@@ -29,9 +31,10 @@ export const useUserQueries = () => {
   const query = useQuery({
     queryKey: ['userQueries'],
     queryFn: () => getUserQueries(),
-    refetchOnWindowFocus: true,
     staleTime: Infinity, // only considered stale if query is manually invalidated
     refetchInterval: refetchInterval,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     retry: false,
   });
 
