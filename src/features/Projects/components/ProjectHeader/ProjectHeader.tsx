@@ -29,8 +29,6 @@ interface ProjectHeaderProps {
   onEditClick?: () => void;
   onRestoreProject?: (project: Project) => void;
   onDeleteProject?: (project: Project) => void;
-  onRestoreQuery?: (query: UserQueryObject) => void;
-  onDeleteQuery?: (query: UserQueryObject) => void;
   onUpdateProjectItem?: (id: number | string, name: string, queryIds: string[]) => void;
   project?: Project;
   queriesLoading?: boolean;
@@ -58,8 +56,6 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   onEditClick,
   onRestoreProject,
   onDeleteProject,
-  onRestoreQuery,
-  onDeleteQuery,
   onUpdateProjectItem,
   project,
   queriesLoading = false,

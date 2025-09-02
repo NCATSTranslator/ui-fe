@@ -315,7 +315,6 @@ export const ProjectListModalsDeleteProjects: Story = {
       selectedQueries={[]}
       onCloseModal={fn()}
       setSelectedProjects={fn()}
-      setSelectedQueries={fn()}
       deletionHandlers={mockDeletionHandlers}
       deletePrompts={mockDeletePrompts}
     />
@@ -338,7 +337,6 @@ export const ProjectListModalsDeleteQueries: Story = {
       selectedQueries={mockQueries.slice(0, 2)}
       onCloseModal={fn()}
       setSelectedProjects={fn()}
-      setSelectedQueries={fn()}
       deletionHandlers={mockDeletionHandlers}
       deletePrompts={mockDeletePrompts}
     />
@@ -361,7 +359,6 @@ export const ProjectListModalsPermanentDeleteProject: Story = {
       selectedQueries={[]}
       onCloseModal={fn()}
       setSelectedProjects={fn()}
-      setSelectedQueries={fn()}
       deletionHandlers={mockDeletionHandlers}
       deletePrompts={mockDeletePrompts}
     />
@@ -384,7 +381,6 @@ export const ProjectListModalsPermanentDeleteQuery: Story = {
       selectedQueries={mockQueries.slice(0, 1)}
       onCloseModal={fn()}
       setSelectedProjects={fn()}
-      setSelectedQueries={fn()}
       deletionHandlers={mockDeletionHandlers}
       deletePrompts={mockDeletePrompts}
     />
@@ -407,7 +403,6 @@ export const ProjectListModalsPermanentDeleteSelected: Story = {
       selectedQueries={mockQueries.slice(0, 1)}
       onCloseModal={fn()}
       setSelectedProjects={fn()}
-      setSelectedQueries={fn()}
       deletionHandlers={mockDeletionHandlers}
       deletePrompts={mockDeletePrompts}
     />
@@ -430,7 +425,6 @@ export const ProjectListModalsEmptyTrash: Story = {
       selectedQueries={[]}
       onCloseModal={fn()}
       setSelectedProjects={fn()}
-      setSelectedQueries={fn()}
       deletionHandlers={mockDeletionHandlers}
       deletePrompts={mockDeletePrompts}
     />
