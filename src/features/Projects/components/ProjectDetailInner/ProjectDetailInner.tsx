@@ -17,7 +17,7 @@ import { useModals } from '@/features/Projects/hooks/useModals';
 import { useProjectDetailDeletionHandlers } from '@/features/Projects/hooks/useProjectDetailDeletionHandlers';
 import SelectedItemsActionBar from '../SelectedItemsActionBar/SelectedItemsActionBar';
 import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
-import { getProjectDetailHeaderSubtitle } from '@/features/Projects/utils/utilities';
+import { getAdditionalQueries, getProjectDetailHeaderSubtitle } from '@/features/Projects/utils/utilities';
 
 const ProjectDetailInner = () => {
   // Data management
@@ -34,6 +34,7 @@ const ProjectDetailInner = () => {
 
   // Sorted data
   const sortedData = useProjectDetailSortedData({
+    rawQueries: data.raw.queries,
     projectQueries: data.projectQueries,
     sortField: projectListState.sortField,
     sortDirection: projectListState.sortDirection,
