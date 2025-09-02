@@ -4,6 +4,8 @@ import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQ
   restoreProjects, restoreQueries, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection } from '@/features/Projects/types/projects.d';
 import { generateQueryTitle } from '@/features/Projects/utils/utilities';
+import { useSelector } from 'react-redux';
+import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 
 /**
  * Hook to fetch user projects with React Query
@@ -22,12 +24,15 @@ export const useUserProjects = () => {
  * Hook to fetch user queries with React Query
  */
 export const useUserQueries = () => {
+  const config = useSelector(currentConfig);
+  const refetchInterval = config?.include_query_status_polling ? 15 * 1000 : false; // 15s
+  console.log("refetchInterval", refetchInterval, config);
   const query = useQuery({
     queryKey: ['userQueries'],
     queryFn: () => getUserQueries(),
     refetchOnWindowFocus: true,
     staleTime: Infinity, // only considered stale if query is manually invalidated
-    refetchInterval: 15 * 1000, // 15s
+    refetchInterval: refetchInterval,
     retry: false,
   });
 

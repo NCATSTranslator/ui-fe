@@ -55,6 +55,7 @@ export type Config = {
   social_providers: Record<string, SocialProvider>;
   include_pathfinder: boolean;
   include_summarization: boolean;
+  include_query_status_polling: boolean;
 }
 
 export type SocialProvider = {
