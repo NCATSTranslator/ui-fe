@@ -72,9 +72,6 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   variant = 'detail'
 }) => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  
   const [projectNameError, setProjectNameError] = useState('');
   const projectNameInputRef = useRef<HTMLInputElement>(null);
   const createProjectMutation = useCreateProject();
