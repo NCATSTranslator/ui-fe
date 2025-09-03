@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction, useMemo } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useMemo, useState } from 'react';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import PublicationsTable from '@/features/Evidence/components/PublicationsTable/PublicationsTable';
@@ -40,8 +40,33 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
     [clinicalTrials.length, publications.length, sources.length]
   );
 
+  const [activeTab, setActiveTab] = useState<'Publications' | 'Clinical Trials' | 'Miscellaneous' | 'Knowledge Sources'>('Publications');
+  const firstTabHeading = publications.length > 0 ? 'Publications' : clinicalTrials.length > 0 ? 'Clinical Trials' : sources.length > 0 ? 'Knowledge Sources' : 'Miscellaneous';
+  const handleTabSelection = (tabName: string) => {
+    setActiveTab(tabName as 'Publications' | 'Clinical Trials' | 'Miscellaneous' | 'Knowledge Sources');
+  };
+
+  // reset active tab when component is closed
+  useEffect(() => {
+    if (!isOpen)
+      setActiveTab(firstTabHeading);
+  }, [isOpen, firstTabHeading]);
+
+  // reset active tab when selected edge changes
+  useEffect(() => {
+    if(selectedEdge)
+      setActiveTab(firstTabHeading);
+  }, [selectedEdge]);
+
   return (
-    <Tabs isOpen={isOpen} className={styles.tabs}>
+    <Tabs
+      isOpen={isOpen}
+      className={styles.tabs}
+      controlled={true}
+      activeTab={activeTab}
+      defaultActiveTab={firstTabHeading}
+      handleTabSelection={handleTabSelection}
+    >
       {publications.length > 0 ? (
         <Tab heading="Publications" className={`${styles.tab} scrollable`}>
           <PublicationsTable
