@@ -2,7 +2,6 @@ import { Dispatch, SetStateAction } from 'react';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
 import { useEditQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
-import { useUserQueries } from '@/features/Projects/hooks/customHooks';
 
 interface QueryCardProps {
   inUnassignedProject?: boolean;

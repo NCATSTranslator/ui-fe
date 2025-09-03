@@ -16,6 +16,8 @@ export const useUserProjects = () => {
     queryFn: () => getUserProjects(),
     staleTime: Infinity, // only considered stale if query is manually invalidated
     refetchInterval: 30 * 1000, // 30s
+    refetchOnWindowFocus: true,
+    refetchOnMount: 'always',
     retry: false,
   });
 };
@@ -26,13 +28,13 @@ export const useUserProjects = () => {
 export const useUserQueries = () => {
   const config = useSelector(currentConfig);
   const refetchInterval = config?.include_query_status_polling ? 15 * 1000 : false; // 15s
-  console.log("refetchInterval", refetchInterval, config);
   const query = useQuery({
     queryKey: ['userQueries'],
     queryFn: () => getUserQueries(),
-    refetchOnWindowFocus: true,
     staleTime: Infinity, // only considered stale if query is manually invalidated
     refetchInterval: refetchInterval,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     retry: false,
   });
 

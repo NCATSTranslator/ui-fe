@@ -1,5 +1,4 @@
 import styles from './ResultListLoadingButton.module.scss';
-import { useState } from 'react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultsAvailableIcon from '@/assets/icons/buttons/Refresh.svg?react';
 import CompleteIcon from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
@@ -19,7 +18,7 @@ const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoa
   const containerClassName = (data.containerClassName) ? data.containerClassName : '';
   const buttonClassName = (data.buttonClassName) ? data.buttonClassName : '';
   const [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved] = useNewResultsDisclaimerApproved(false);
-  const [isTooltipOpen, setIsTooltipOpen] = useState(!isNewResultsDisclaimerApproved);
+  // const [isTooltipOpen, setIsTooltipOpen] = useState(!isNewResultsDisclaimerApproved);
   
   const handleCheckbox = (): void => setAndPersistNewResultsDisclaimerApproved(prev => !prev);
 

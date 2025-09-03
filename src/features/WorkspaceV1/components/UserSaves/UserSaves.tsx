@@ -223,10 +223,6 @@ const UserSaves = () => {
     };
   }, [initSaves]);
 
-  const handleClearNotesEditor = () => {
-    initSaves();
-  }
-
   return(
     <QueryClientProvider client={queryClient}>
       {

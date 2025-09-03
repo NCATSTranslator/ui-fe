@@ -34,9 +34,9 @@ const TrashTab = ({
     selectedQueries, 
     setSelectedProjects, 
     setSelectedQueries, 
-    sortField, 
-    sortDirection, 
-    handleSort, 
+    // sortField, 
+    // sortDirection, 
+    // handleSort, 
     searchTerm 
   } = projectListState;
   return (
