@@ -17,7 +17,7 @@ export const useUserProjects = () => {
     staleTime: Infinity, // only considered stale if query is manually invalidated
     refetchInterval: 30 * 1000, // 30s
     refetchOnWindowFocus: true,
-    refetchOnMount: true,
+    refetchOnMount: 'always',
     retry: false,
   });
 };
