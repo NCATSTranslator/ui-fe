@@ -12,7 +12,6 @@ interface ProjectModalsProps {
   selectedQueries: UserQueryObject[];
   onCloseModal: (modalType: string) => void;
   setSelectedProjects?: Dispatch<SetStateAction<Project[]>>;
-  setSelectedQueries?: Dispatch<SetStateAction<UserQueryObject[]>>;
   deletionHandlers: {
     handleDeleteSelectedProjects?: () => void;
     handleDeleteSelectedQueries?: () => void;
@@ -52,7 +51,6 @@ const ProjectModals = ({
   selectedQueries,
   onCloseModal,
   setSelectedProjects,
-  setSelectedQueries,
   deletionHandlers,
   deletePrompts,
   currentProject,

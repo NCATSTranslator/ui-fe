@@ -130,7 +130,6 @@ export const ProjectListInner = () => {
         selectedQueries={projectListState.selectedQueries}
         onCloseModal={(modalType: string) => modals.closeModal(modalType as unknown as keyof typeof modals.modals)}
         setSelectedProjects={projectListState.setSelectedProjects}
-        setSelectedQueries={projectListState.setSelectedQueries}
         deletionHandlers={deletionHandlers}
         deletePrompts={deletePrompts}
         editQueryModal={{

@@ -1,5 +1,6 @@
 import { useCallback, Dispatch, SetStateAction } from 'react';
 import { Project, UserQueryObject } from '@/features/Projects/types/projects.d';
+import { ModalType } from '@/features/Projects/types/projects.d';
 
 interface UseDeletionHandlersProps {
   projectEditHandlers: {
@@ -11,8 +12,8 @@ interface UseDeletionHandlersProps {
     handlePermanentDeleteQuery: (query: UserQueryObject) => void;
   };
   modals: {
-    openModal: (modalType: any) => void;
-    closeModal: (modalType: any) => void;
+    openModal: (modalType: ModalType) => void;
+    closeModal: (modalType: ModalType) => void;
   };
   selections: {
     selectedProjects: Project[];

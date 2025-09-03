@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useCallback } from 'react';
-import { Project, UserQueryObject } from '@/features/Projects/types/projects.d';
+import { ModalType, Project, UserQueryObject } from '@/features/Projects/types/projects.d';
 
 interface UseProjectDetailDeletionHandlersProps {
   projectEditHandlers: {
@@ -9,8 +9,8 @@ interface UseProjectDetailDeletionHandlersProps {
     handleDeleteQuery: (query: UserQueryObject) => void;
   };
   modals: {
-    openModal: (modalType: any) => void;
-    closeModal: (modalType: any) => void;
+    openModal: (modalType: ModalType) => void;
+    closeModal: (modalType: ModalType) => void;
   };
   prompts: Record<string, { shouldShow: boolean }>;
   selectedQueries: UserQueryObject[];

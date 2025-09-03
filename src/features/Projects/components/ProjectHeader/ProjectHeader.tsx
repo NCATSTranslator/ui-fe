@@ -16,6 +16,7 @@ import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/Pr
 import ProjectHeaderEditControlButtons from './ProjectHeaderEditControlButtons';
 import { UserQueryObject, Project, ProjectEditingItem } from '@/features/Projects/types/projects';
 import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ProjectHeaderProps {
   backButtonText?: string;
@@ -29,8 +30,6 @@ interface ProjectHeaderProps {
   onEditClick?: () => void;
   onRestoreProject?: (project: Project) => void;
   onDeleteProject?: (project: Project) => void;
-  onRestoreQuery?: (query: UserQueryObject) => void;
-  onDeleteQuery?: (query: UserQueryObject) => void;
   onUpdateProjectItem?: (id: number | string, name: string, queryIds: string[]) => void;
   project?: Project;
   queriesLoading?: boolean;
@@ -58,8 +57,6 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   onEditClick,
   onRestoreProject,
   onDeleteProject,
-  onRestoreQuery,
-  onDeleteQuery,
   onUpdateProjectItem,
   project,
   queriesLoading = false,
@@ -75,6 +72,8 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   variant = 'detail'
 }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   
   const [projectNameError, setProjectNameError] = useState('');
   const projectNameInputRef = useRef<HTMLInputElement>(null);
@@ -108,11 +107,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
     if (value.length === 0) {
       setSearchTerm('');
     } else {
-      if (variant === 'list') {
-        debouncedSearch(value);
-      } else {
-        setSearchTerm(value);
-      }
+      debouncedSearch(value);
     }
   };
 
@@ -296,9 +291,10 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
             {showBackButton && (
               <Button 
                 variant="secondary" 
-                handleClick={() => navigate('/projects')}
                 className={styles.backButton}
                 iconLeft={<ArrowLeft />}
+                link
+                href="/projects"
               >
                 {backButtonText}
               </Button>

@@ -71,10 +71,15 @@
         .cell, .link a {
           align-items: flex-start;
         }
+        .link a {
+          display: inline;
+        }
         svg {
-          height: 18px;
-          width: 18px;
+          height: 16px;
+          width: 16px;
           margin-bottom: 0;
+          display: inline;
+          vertical-align: text-top;
         }
       }
     }
