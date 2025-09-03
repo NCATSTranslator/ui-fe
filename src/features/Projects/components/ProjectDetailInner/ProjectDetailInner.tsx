@@ -34,6 +34,7 @@ const ProjectDetailInner = () => {
 
   // Sorted data
   const sortedData = useProjectDetailSortedData({
+    rawQueries: data.raw.queries,
     projectQueries: data.projectQueries,
     sortField: projectListState.sortField,
     sortDirection: projectListState.sortDirection,
@@ -106,7 +107,6 @@ const ProjectDetailInner = () => {
         selectedProjects={[]}
         selectedQueries={projectListState.selectedQueries}
         onCloseModal={(modalType: string) => modals.closeModal(modalType as keyof typeof modals.modals)}
-        setSelectedQueries={projectListState.setSelectedQueries}
         deletionHandlers={deletionHandlers}
         deletePrompts={deletePrompts}
         currentProject={data.project || undefined}
@@ -152,10 +152,8 @@ const ProjectDetailInner = () => {
                       if(data.project)
                         deletionHandlers.handleInitiateDeleteProject(data.project);
                     }}
-                    onDeleteQuery={queryEditHandlers.handleDeleteQuery}
                     onEditClick={handleEditClick}
                     onRestoreProject={projectEditHandlers.handleRestoreProject}
-                    onRestoreQuery={queryEditHandlers.handleRestoreQuery}
                     onUpdateProjectItem={projectEditHandlers.handleUpdateProject}
                     project={data.project}
                     projectEditingItem={projectEditState.editingItem}

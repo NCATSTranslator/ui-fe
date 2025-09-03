@@ -46,8 +46,8 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   const config = useSelector(currentConfig);
   const isPathfinderEnabled = config?.include_pathfinder;
   const [selectedProject, setSelectedProject] = useState<ProjectRaw | null>(null);
-  const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
-  const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueries();
+  const { data: projects = [], isLoading: projectsLoading } = useUserProjects();
+  const { data: queries = []} = useUserQueries();
   const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState<boolean>(false);
 
   const handleTabSelection = (tabName: string) => {

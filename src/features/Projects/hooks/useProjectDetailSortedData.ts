@@ -4,6 +4,7 @@ import { UserQueryObject, SortField, SortDirection } from '@/features/Projects/t
 import { getAdditionalQueries } from '@/features/Projects/utils/utilities';
 
 interface UseProjectDetailSortedDataProps {
+  rawQueries: UserQueryObject[];
   projectQueries: UserQueryObject[];
   sortField: SortField;
   sortDirection: SortDirection;
@@ -16,6 +17,7 @@ interface UseProjectDetailSortedDataProps {
  * @returns {Object} - An object containing the sorted queries
  */
 export const useProjectDetailSortedData = ({
+  rawQueries,
   projectQueries,
   sortField,
   sortDirection,
@@ -27,8 +29,8 @@ export const useProjectDetailSortedData = ({
   );
 
   const additionalQueries = useMemo(
-    () => getAdditionalQueries(projectQueries, sortedQueries),
-    [projectQueries, sortedQueries]
+    () => getAdditionalQueries(rawQueries, sortedQueries),
+    [rawQueries, sortedQueries]
   );
 
   const deletedQueries = useMemo(
