@@ -12,7 +12,8 @@ import CardName from '@/features/Projects/components/CardName/CardName';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import ChevRightIcon from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
-import { Project, QueryStatus, UserQueryObject } from '@/features/Projects/types/projects';
+import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
+import { DataCardLocation, Project, QueryStatus, UserQueryObject } from '@/features/Projects/types/projects';
 import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { getTypeIDFromType } from '@/features/Projects/utils/utilities';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
@@ -32,7 +33,7 @@ interface DataCardProps<T> {
   inUnassignedProject?: boolean;
   isEditing?: boolean;
   item: T;
-  location?: "list" | "detail"
+  location?: DataCardLocation;
   onEdit?: (item: T) => void;
   onShare?: (item: T) => void;
   onRestore?: (item: T) => void;
@@ -163,16 +164,16 @@ const DataCard = <T,>({
       onDelete(item);
   };
 
+  const showCheckbox = location === 'list' || (location === 'detail' && (isEditing || inUnassignedProject));
+
   const classes = joinClasses(
     styles.dataCard,
     className,
     type === 'project' ? styles.projectCard : styles.queryCard,
     location === 'detail' && styles.detailCard,
-    (isEditing || inUnassignedProject) && styles.isEditing
+    (isEditing || inUnassignedProject) && styles.isEditing,
+    !showCheckbox && styles.noCheckbox
   )
-
-  const showCheckbox = location !== 'detail' || (location === 'detail' && (isEditing || inUnassignedProject));
-
   return (
     <CardWrapper 
       className={classes}
@@ -211,12 +212,19 @@ const DataCard = <T,>({
 
       </div>
       <div className={`${styles.actionsColumn} ${styles.column}`}>
-        {
+      {
           (!isUnassignedPrj && !isDeleted) && (
-            <Button variant="secondary" iconOnly handleClick={handleEdit} disabled={queriesLoading}>
-              <EditIcon/>
+            <Button variant="secondary" iconOnly handleClick={handleDelete} disabled={queriesLoading}>
+              <TrashIcon/>
             </Button>
           )
+        }
+        {
+          // (!isUnassignedPrj && !isDeleted) && (
+          //   <Button variant="secondary" iconOnly handleClick={handleEdit} disabled={queriesLoading}>
+          //     <EditIcon/>
+          //   </Button>
+          // )
         }
         {
           (!isUnassignedPrj && !isDeleted) && (

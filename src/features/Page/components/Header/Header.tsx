@@ -34,6 +34,7 @@ const Header: FC<HeaderProps> = ({children}) => {
   const loginURL = getFormattedLoginURL(location);
   const currentPage = location.pathname;
   const currentARSpk = getDataFromQueryVar("q");
+  const showProjectsLink = config?.include_projects;
 
   return (
     <header className={styles.header}>
@@ -47,7 +48,11 @@ const Header: FC<HeaderProps> = ({children}) => {
           <div className={styles.right}>
             {
               !!user &&
-              <Link to={`/projects`} className={`${currentPage.includes("projects") && styles.active} ${styles.projectsLink}`}><FolderIcon/><span className={styles.linkSpan}>Projects</span></Link>
+              (
+                showProjectsLink
+                ? <Link to={`/projects`} className={`${currentPage.includes("projects") && styles.active} ${styles.projectsLink}`}><FolderIcon/><span className={styles.linkSpan}>Projects</span></Link>
+                : <Link to={`/queries`} className={`${currentPage.includes("queries") && styles.active} ${styles.projectsLink}`}><FolderIcon/><span className={styles.linkSpan}>Queries</span></Link>
+              )
             }
             <Link to={`/send-feedback${!!currentARSpk ? `?q=${currentARSpk}` : ''}`} className={`${currentPage === '/send-feedback' && styles.active}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
             <Link to={`/help`}  className={`${currentPage === '/help' && styles.active} ${styles.helpLink}`} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>

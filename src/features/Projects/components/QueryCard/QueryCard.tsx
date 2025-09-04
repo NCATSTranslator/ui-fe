@@ -1,12 +1,12 @@
 import { Dispatch, SetStateAction } from 'react';
-import { UserQueryObject } from '@/features/Projects/types/projects.d';
+import { DataCardLocation, UserQueryObject } from '@/features/Projects/types/projects.d';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
 import { useEditQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
 
 interface QueryCardProps {
   inUnassignedProject?: boolean;
   isEditing?: boolean;
-  location?: "list" | "detail"
+  location?: DataCardLocation;
   onDelete?: (query: UserQueryObject) => void;
   onEdit?: (query: UserQueryObject) => void;
   query: UserQueryObject;

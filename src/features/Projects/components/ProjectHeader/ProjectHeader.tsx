@@ -10,13 +10,13 @@ import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import RestoreIcon from '@/assets/icons/directional/Undo & Redo/Undo.svg?react';
 import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
+import PlusIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import { useCreateProject, useUpdateProjects } from '@/features/Projects/hooks/customHooks';
 import styles from './ProjectHeader.module.scss';
 import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/ProjectSearchBar';
 import ProjectHeaderEditControlButtons from './ProjectHeaderEditControlButtons';
 import { UserQueryObject, Project, ProjectEditingItem } from '@/features/Projects/types/projects';
 import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
-import { useQueryClient } from '@tanstack/react-query';
 
 interface ProjectHeaderProps {
   backButtonText?: string;
@@ -42,7 +42,7 @@ interface ProjectHeaderProps {
   showCreateButton?: boolean;
   subtitle?: string;
   title: string;
-  variant?: 'detail' | 'list';
+  variant?: 'detail' | 'list' | 'queries';
 }
 
 const ProjectHeader: FC<ProjectHeaderProps> = ({
@@ -69,7 +69,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
   showCreateButton = false,
   subtitle,
   title,
-  variant = 'detail'
+  variant = 'detail',
 }) => {
   const navigate = useNavigate();
   const [projectNameError, setProjectNameError] = useState('');
@@ -226,7 +226,7 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
     <div className={`${styles.projectHeader} ${className || ''}`}>
       {variant === 'list' ? (
         // List variant layout
-        <div className={styles.listLayout}>
+        <div className={`${styles.listLayout} ${styles.layout}`}>
           <div className={styles.top}>
             <div className={styles.titleSection}>
               <h1 className={styles.title}>
@@ -281,9 +281,36 @@ const ProjectHeader: FC<ProjectHeaderProps> = ({
             </div>
           )}
         </div>
+      ) : variant === 'queries' ? (
+        // Queries variant layout
+        <div className={`${styles.queriesLayout} ${styles.layout}`}>
+          <div className={styles.top}>
+            <div className={styles.titleSection}>
+              <h1 className={styles.title}>{title}</h1>
+              <Button
+                iconLeft={<PlusIcon />}
+                small
+                className={styles.submitNewButton}
+                href="/"
+                link
+                _blank
+              >
+                Submit New
+              </Button>
+            </div>
+            <div className={styles.right}>
+              <ProjectSearchBar
+                searchPlaceholder={searchPlaceholder}
+                searchTerm={searchTerm}
+                handleSearch={handleSearch}
+                styles={styles}
+              />
+            </div>
+          </div>
+        </div>
       ) : (
         // Detail variant layout
-        <div className={styles.detailLayout}>
+        <div className={`${styles.detailLayout} ${styles.layout}`}>
           <div className={styles.titleSection}>
             {showBackButton && (
               <Button 

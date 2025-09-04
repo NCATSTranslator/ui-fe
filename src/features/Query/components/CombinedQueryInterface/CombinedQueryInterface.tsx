@@ -8,7 +8,7 @@ import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPa
 import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
 import Button from "@/features/Core/components/Button/Button";
 import { useSelector } from "react-redux";
-import { currentConfig } from "@/features/UserAuth/slices/userSlice";
+import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import { QueryType } from "@/features/Query/types/querySubmission";
 import { ProjectRaw } from "@/features/Projects/types/projects.d";
 import { useUserProjects, useUserQueries } from "@/features/Projects/hooks/customHooks";
@@ -44,11 +44,13 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<string>("Query");
   const config = useSelector(currentConfig);
+  const user = useSelector(currentUser);
   const isPathfinderEnabled = config?.include_pathfinder;
   const [selectedProject, setSelectedProject] = useState<ProjectRaw | null>(null);
   const { data: projects = [], isLoading: projectsLoading } = useUserProjects();
   const { data: queries = []} = useUserQueries();
   const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState<boolean>(false);
+  const showAddToProject = !!user && config?.include_projects;
 
   const handleTabSelection = (tabName: string) => {
     setActiveTab(tabName);
@@ -69,28 +71,30 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
         queries={queries}
         setSelectedProject={setSelectedProject}
       />
-      <div className={styles.addToProject} data-tooltip-id="add-to-project-tooltip">
-        <span className={styles.label}>Add to</span>
-        <Button
-          className={styles.button}
-          handleClick={handleAddToProject}
-          iconLeft={<FolderIcon/>}
-        >
-          <span className={styles.projectName}>{selectedProject?.data.title || 'Select Project'}</span>
-        </Button>
-        {selectedProject && (
+      {showAddToProject && (
+        <div className={styles.addToProject} data-tooltip-id="add-to-project-tooltip">
+          <span className={styles.label}>Add to</span>
           <Button
-            className={`${styles.removeSelectedProject} ${styles.button}`}
-            handleClick={() => setSelectedProject(null)}
-            iconOnly
-            iconLeft={<CloseIcon />}
-            small
-          />
-        )}
-        <Tooltip id="add-to-project-tooltip">
-          <p className={styles.tooltipText}>{selectedProject?.data.title || 'Add this query to a project' }</p>
-        </Tooltip>
-      </div>
+            className={styles.button}
+            handleClick={handleAddToProject}
+            iconLeft={<FolderIcon/>}
+          >
+            <span className={styles.projectName}>{selectedProject?.data.title || 'Select Project'}</span>
+          </Button>
+          {selectedProject && (
+            <Button
+              className={`${styles.removeSelectedProject} ${styles.button}`}
+              handleClick={() => setSelectedProject(null)}
+              iconOnly
+              iconLeft={<CloseIcon />}
+              small
+            />
+          )}
+          <Tooltip id="add-to-project-tooltip">
+            <p className={styles.tooltipText}>{selectedProject?.data.title || 'Add this query to a project' }</p>
+          </Tooltip>
+        </div>
+      )}
       <Tabs
         isOpen={true}
         handleTabSelection={handleTabSelection}

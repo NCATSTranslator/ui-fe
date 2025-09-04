@@ -18,6 +18,10 @@
   &:hover {
     background-color: $whiteHover;
   }
+  &.noCheckbox {
+    grid-template-columns: $projectsDetailGridColumns;
+  }
+
   &.detailCard {
     grid-template-columns: $projectsDetailGridColumns;
     &.isEditing {

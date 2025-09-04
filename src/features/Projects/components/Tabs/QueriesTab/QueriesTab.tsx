@@ -2,9 +2,10 @@ import QueriesTableHeader from '@/features/Projects/components/TableHeader/Queri
 import ProjectInnerErrorStates from '@/features/Projects/components/ProjectInnerErrorStates/ProjectInnerErrorStates';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
-import { UserQueryObject, ProjectListState } from '@/features/Projects/types/projects.d';
+import { UserQueryObject, ProjectListState, DataCardLocation } from '@/features/Projects/types/projects.d';
 
 interface QueriesTabProps {
+  location?: DataCardLocation;
   sortedActiveQueries: UserQueryObject[];
   projectListState: ProjectListState;
   queriesError: Error | null;
@@ -16,6 +17,7 @@ interface QueriesTabProps {
 }
 
 const QueriesTab = ({
+  location = 'list',
   sortedActiveQueries,
   projectListState,
   queriesError,
@@ -42,6 +44,7 @@ const QueriesTab = ({
         setSelectedQueries={setSelectedQueries}
         sortField={sortField}
         sortDirection={sortDirection}
+        location={location}
       />
       {queriesError ? (
         <ProjectInnerErrorStates
@@ -72,6 +75,7 @@ const QueriesTab = ({
               sortedActiveQueries.map((query: UserQueryObject) => (
                 <QueryCard 
                   key={query.data.qid}
+                  location={location}
                   query={query}
                   queries={sortedActiveQueries}
                   searchTerm={searchTerm}

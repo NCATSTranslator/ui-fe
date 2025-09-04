@@ -1,0 +1,24 @@
+@use '@/assets/styles/variables' as *;
+
+.queryListContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: calc($interiorContainerWidth + ($m * 2));
+  margin: 0 auto;
+  .projectGrid {
+    display: flex;
+    flex-direction: column;
+    gap: $s;
+  }
+  .title {
+    font-size: $h4Size;
+    color: $purpleTwo;
+    font-weight: 800;
+    margin: 0;
+  }
+  .queryTabContent {
+    padding: $s $m $m;
+    position: relative;
+  }
+}
