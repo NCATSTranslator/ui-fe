@@ -2,9 +2,10 @@ import DeletedTableHeader from '@/features/Projects/components/TableHeader/Delet
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 import ProjectCard from '@/features/Projects/components/ProjectCard/ProjectCard';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
-import { Project, ProjectRaw, UserQueryObject, ProjectListState } from '@/features/Projects/types/projects.d';
+import { Project, ProjectRaw, UserQueryObject, ProjectListState, DataCardLocation } from '@/features/Projects/types/projects.d';
 
 interface TrashTabProps {
+  location: DataCardLocation;
   sortedDeletedProjects: Project[];
   sortedDeletedQueries: UserQueryObject[];
   projectListState: ProjectListState;
@@ -18,6 +19,7 @@ interface TrashTabProps {
 }
 
 const TrashTab = ({
+  location,
   sortedDeletedProjects,
   sortedDeletedQueries,
   rawProjects,
@@ -88,6 +90,7 @@ const TrashTab = ({
                   {sortedDeletedQueries.map((query: UserQueryObject) => (
                     <QueryCard 
                       key={query.data.qid}
+                      location={location}
                       query={query}
                       queries={queries}
                       searchTerm={searchTerm}

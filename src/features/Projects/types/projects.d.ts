@@ -118,6 +118,8 @@ export type ModalObject = {
   [K in ModalType]?: boolean;
 };
 
+export type DataCardLocation = "list" | "detail" | "queries" | "trash";
+
 export const isProjectRaw = (obj: unknown): obj is ProjectRaw => {
   if (typeof obj !== 'object' || obj === null) {
     console.warn('isProjectRaw: Object is not an object or is null', obj);

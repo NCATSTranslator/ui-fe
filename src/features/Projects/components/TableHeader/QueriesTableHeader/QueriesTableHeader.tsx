@@ -1,4 +1,4 @@
-import { UserQueryObject, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { UserQueryObject, SortField, SortDirection, DataCardLocation } from '@/features/Projects/types/projects.d';
 import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
 import styles from '@/features/Projects/components/TableHeader/TableHeader.module.scss';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
@@ -9,7 +9,7 @@ interface QueriesTableHeaderProps {
   activeQueries: UserQueryObject[];
   isEditing?: boolean;
   isUnassigned?: boolean;
-  location?: "list" | "detail";
+  location?: DataCardLocation;
   onSort: (field: SortField) => void;
   selectedQueries: UserQueryObject[];
   setSelectedQueries: (queries: UserQueryObject[]) => void;
@@ -21,7 +21,7 @@ const QueriesTableHeader = ({
   activeQueries,
   isEditing = false,
   isUnassigned = false,
-  location,
+  location = 'list',
   onSort,
   selectedQueries,
   setSelectedQueries,
@@ -39,7 +39,7 @@ const QueriesTableHeader = ({
   const allSelected = activeQueries.length > 0 && selectedQueries.length >= activeQueries.length;
   const someSelected = selectedQueries.length > 0 && selectedQueries.length < activeQueries.length;
 
-  const showCheckbox = location !== 'detail' || (location === 'detail' && (isEditing || isUnassigned));
+  const showCheckbox = location === 'list' || (location === 'detail' && (isEditing || isUnassigned));
 
   return (
     <div className={styles.tableHeader}>

@@ -6,7 +6,6 @@ import Tab from '@/features/Common/components/Tabs/Tab';
 import { useProjectDetailSortSearchSelectState } from '@/features/Projects/hooks/customHooks';
 import { ProjectEditingItem, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
 import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject } from '@/features/Projects/utils/editUpdateFunctions';
-
 import { useProjectListData } from '@/features/Projects/hooks/useProjectListData';
 import { useFilteredAndSortedData } from '@/features/Projects/hooks/useFilteredAndSortedData';
 import { useAllDeletePrompts } from '@/features/Projects/hooks/useDeletePrompts';
@@ -231,6 +230,7 @@ export const ProjectListInner = () => {
                       onDeleteProject={deletionHandlers.handleInitiatePermanentDeleteProject}
                       onDeleteQuery={deletionHandlers.handleInitiatePermanentDeleteQuery}
                       styles={styles}
+                      location="trash"
                     />
                   </Tab>
                 ) : null}

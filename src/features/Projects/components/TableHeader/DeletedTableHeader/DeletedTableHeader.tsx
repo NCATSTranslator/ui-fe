@@ -48,16 +48,7 @@ const DeletedTableHeader = ({
 
   return (
     <div className={styles.tableHeader}>
-      <div className={styles.tableRow}>
-        <div className={styles.checkboxColumn}>
-          <Checkbox
-            disabled={activeProjects.length === 0 && activeQueries.length === 0}
-            checked={allSelected}
-            handleClick={handleSelectAll}
-            className={someSelected ? styles.indeterminate : ''}
-          />
-          <div className={styles.separator}></div>
-        </div>
+      <div className={`${styles.tableRow} ${styles.trash}`}>
         <div className={styles.nameColumn}>
           <SortableHeader 
             field="name" 
