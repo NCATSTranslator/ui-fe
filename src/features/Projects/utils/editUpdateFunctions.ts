@@ -371,7 +371,6 @@ export const useEditQueryHandlers = (
   const handleDeleteQuery = (query: UserQueryObject) => {
     const queryKey = ['userQueries'];
     // Optimistically update the React Query cache
-    console.log("optimistic update for delete query");
     queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
       if (!oldData) return oldData;
       return oldData.map((q: UserQueryObject) => 

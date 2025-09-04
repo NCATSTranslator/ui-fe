@@ -17,6 +17,7 @@ const Workspace = lazy(() => import('@/pageRoutes/Workspace/Workspace'));
 const SendFeedbackPage = lazy(() => import('@/pageRoutes/SendFeedback/SendFeedback'));
 const Projects = lazy(() => import('@/pageRoutes/Projects/Projects'));
 const ProjectDetail = lazy(() => import('@/pageRoutes/ProjectDetail/ProjectDetail'));
+const Queries = lazy(() => import('@/pageRoutes/Queries/Queries'));
 const Help = lazy(() => import('@/pageRoutes/Articles/Help').then(m => ({ default: m.Help })));
 const LoggingIn = lazy(() => import('@/pageRoutes/Articles/LoggingIn').then(m => ({ default: m.LoggingIn })));
 const WhatIs = lazy(() => import('@/pageRoutes/Articles/WhatIs').then(m => ({ default: m.WhatIs })));
@@ -115,6 +116,10 @@ const routes = [
   {
     path: "projects/:projectId",
     element: <Page title="Projects"><Suspense fallback={<LoadingWrapper />}><ProjectDetail /></Suspense></Page>
+  },
+  {
+    path: "queries",
+    element: <Page title="Queries"><Suspense fallback={<LoadingWrapper />}><Queries /></Suspense></Page>
   },
   {
     path: "*",

@@ -51,11 +51,12 @@ export type SessionStatus = {
 export type Config = {
   cached_queries: Example[];
   gaID: string;
+  include_pathfinder: boolean;
+  include_projects: boolean;
+  include_query_status_polling: boolean;
+  include_summarization: boolean;
   name_resolver: string;
   social_providers: Record<string, SocialProvider>;
-  include_pathfinder: boolean;
-  include_summarization: boolean;
-  include_query_status_polling: boolean;
 }
 
 export type SocialProvider = {

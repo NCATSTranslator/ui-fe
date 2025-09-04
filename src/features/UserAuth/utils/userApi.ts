@@ -696,11 +696,12 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
         const defaultConfig: Config = {
           cached_queries: [],
           gaID: '',
+          include_pathfinder: false,
+          include_projects: false,
+          include_query_status_polling: false,
+          include_summarization: false,
           name_resolver: '',
           social_providers: {},
-          include_pathfinder: false,
-          include_summarization: false,
-          include_query_status_polling: false
         };
         dispatch(setCurrentConfig(defaultConfig));
       }

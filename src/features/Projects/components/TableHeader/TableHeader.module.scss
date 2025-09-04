@@ -12,7 +12,7 @@
   align-items: center;
   font-weight: 600;
   letter-spacing: 0.5px;
-  &.detail {
+  &.detail, &.trash {
     grid-template-columns: $projectsDetailGridColumns;
   }
   > div {

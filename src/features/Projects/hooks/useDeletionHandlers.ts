@@ -76,6 +76,20 @@ export const useDeletionHandlers = ({
     }
   }, [selectedProjects, selectedQueries, prompts, modals, handleDeleteSelectedProjects, handleDeleteSelectedQueries]);
 
+  const handleDeleteQuery = useCallback((query: UserQueryObject) => {
+    queryEditHandlers.handleDeleteQuery(query);
+    modals.closeModal('deleteQueries');
+  }, [queryEditHandlers, modals, setSelectedQueries]);
+
+  const handleInitiateDeleteQuery = useCallback((query: UserQueryObject) => {
+    if (prompts.deleteQueries.shouldShow) {
+      modals.openModal('deleteQueries');
+      setSelectedQueries([query]);
+    } else {
+      handleDeleteQuery(query);
+    }
+  }, [prompts.deleteQueries.shouldShow, modals, handleDeleteQuery, setSelectedQueries]);
+
   const handleInitiatePermanentDeleteSelected = useCallback(() => {
     if (selectedProjects.length > 0 || selectedQueries.length > 0) {
       if (prompts.permanentDeleteSelected.shouldShow) {
@@ -169,6 +183,8 @@ export const useDeletionHandlers = ({
     handleDeleteSelectedProjects,
     handleDeleteSelectedQueries,
     handleInitiateDelete,
+    handleInitiateDeleteQuery,
+    handleDeleteQuery,
     handleInitiatePermanentDeleteSelected,
     handlePermanentDeleteSelected,
     handleCancelClosePermanentDeleteSelected,

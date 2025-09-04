@@ -109,7 +109,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
           <span className={styles.tooltipHeading}>{status === 'noQueries' ? 'No Queries' : 'No Results'}</span>
           <span>{status === 'noQueries' ? 'No queries have been added to this project.' : 'No results are available for this query.'}</span>
         </Tooltip>
-        <Fade
+        {/* <Fade
           delay={FADE_DELAY}
           duration={FADE_DURATION}
           triggerOnce
@@ -118,7 +118,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
           <span className={`${styles.status} ${status === 'noQueries' ? styles.statusNoQueries : styles.statusNoResults}`}>
             <CloseIcon/>
           </span>
-        </Fade>
+        </Fade> */}
       </div>
     ) 
   }

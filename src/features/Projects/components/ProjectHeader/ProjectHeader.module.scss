@@ -52,37 +52,39 @@
     display: flex;
     gap: $s;
     align-items: center;
-    .doneButton {
-      &:disabled {
-        svg path {
-          stroke: $midDarkGray;
-        }
-      }
+  }
+  .doneButton, .submitNewButton {
+    &:disabled {
       svg path {
-        stroke: $white;
-        fill: transparent;
+        stroke: $midDarkGray;
       }
     }
+    svg path {
+      stroke: $white;
+      fill: transparent;
+    }
   }
-  // List variant styles
-  .listLayout {
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .right {
+    flex-shrink: 0;
+  }
+  .searchInput {
+    width: 380px;
+  }
+  .layout {
     display: flex;
     flex-direction: column;
     gap: $m;
     width: 100%;
+  }
+  // List variant styles
+  .listLayout {
     .title {
       font-size: $h5Size;
-    }
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-    .right {
-      flex-shrink: 0;
-    }
-    .searchInput {
-      width: 380px;
     }
     .editContainer {
       display: flex;
@@ -104,11 +106,7 @@
   }
   // Detail variant styles
   .detailLayout {
-    display: flex;
-    justify-content: space-between;
     align-items: flex-start;
-    gap: $m;
-    width: 100%;
     .editButton, .shareButton {
       background-color: $white;
       &:hover:not(:disabled) {
