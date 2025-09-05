@@ -1,4 +1,4 @@
-import { get, post, put, fetchWithErrorHandling, ErrorHandler } from '@/features/Common/utils/web';
+import { get, post, put, remove, fetchWithErrorHandling, ErrorHandler } from '@/features/Common/utils/web';
 import { isProjectRaw, isProjectRawArray, isUserQueryObject, ProjectCreate, ProjectUpdate, 
   UserQueryObject, ProjectRaw, QueryUpdate, isUserQueryObjectArray} from '@/features/Projects/types/projects.d';
 
@@ -67,7 +67,7 @@ export const updateProjects = async (
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<ProjectRaw[]> => {
-  const url = `${API_PATH_PREFIX}/users/me/projects/update`;
+  const url = `${API_PATH_PREFIX}/users/me/projects`;
   
   return fetchWithErrorHandling<ProjectRaw[]>(
     () => put(url, projects),
@@ -86,10 +86,29 @@ export const deleteProjects = async (
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<"OK"> => {
-  const url = `${API_PATH_PREFIX}/users/me/projects/delete`;
+  const url = `${API_PATH_PREFIX}/users/me/projects/trash`;
   
   return fetchWithErrorHandling<"OK">(
     () => put(url, projectIds),
+    httpErrorHandler,
+    fetchErrorHandler,
+    (data: unknown): data is "OK" => true
+  );
+};
+
+/**
+ * DELETE /api/v1/users/me/projects
+ * Permanently deletes a list of project IDs.
+ */
+export const permanentDeleteProjects = async (
+  projectIds: string[],
+  httpErrorHandler?: ErrorHandler,
+  fetchErrorHandler?: ErrorHandler
+): Promise<"OK"> => {
+  const url = `${API_PATH_PREFIX}/users/me/projects`;
+  
+  return fetchWithErrorHandling<"OK">(
+    () => remove(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
     (data: unknown): data is "OK" => true
@@ -124,10 +143,29 @@ export const deleteQueries = async (
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<"OK"> => {
-  const url = `${API_PATH_PREFIX}/users/me/queries/delete`;
+  const url = `${API_PATH_PREFIX}/users/me/queries/trash`;
   
   return fetchWithErrorHandling<"OK">(
     () => put(url, queryIds),
+    httpErrorHandler,
+    fetchErrorHandler,
+    (data: unknown): data is "OK" => true
+  );
+};
+
+/**
+ * DELETE /api/v1/users/me/queries
+ * Permanently deletes a list of query IDs.
+ */
+export const permanentDeleteQueries = async (
+  queryIds: string[],
+  httpErrorHandler?: ErrorHandler,
+  fetchErrorHandler?: ErrorHandler
+): Promise<"OK"> => {
+  const url = `${API_PATH_PREFIX}/users/me/queries`;
+  
+  return fetchWithErrorHandling<"OK">(
+    () => remove(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
     (data: unknown): data is "OK" => true
@@ -162,7 +200,7 @@ export const updateQuery = async (
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<UserQueryObject> => {
-  const url = `${API_PATH_PREFIX}/users/me/queries/update`;
+  const url = `${API_PATH_PREFIX}/users/me/queries`;
   
   return fetchWithErrorHandling<UserQueryObject>(
     () => put(url, query),
