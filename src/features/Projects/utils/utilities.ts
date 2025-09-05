@@ -127,15 +127,12 @@ export const fetcNodeNameFromCurie = async (curie: string): Promise<string> => {
 }
 
 /**
- * Check if the query title has a curie
+ * Find all curies in the query title
  * @param {string} title - The title to check
- * @returns {string | false} The curie if the title has a curie, false otherwise
+ * @returns {string[]} Array of all curies found in the title
  */
-export const queryTitleHasCurie = (title: string): string | false => {
-  const curieRegex = /\b[A-Za-z][A-Za-z0-9_]*:[A-Za-z0-9_-]+\b/;
-  const match = title.match(curieRegex);
-  if (!match)
-    return false;
-
-  return match[0];
+export const findAllCuriesInTitle = (title: string): string[] => {
+  const curieRegex = /\b[A-Za-z][A-Za-z0-9_]*:[A-Za-z0-9_-]+\b/g;
+  const matches = title.match(curieRegex);
+  return matches || [];
 }

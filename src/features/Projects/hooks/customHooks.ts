@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
   restoreProjects, restoreQueries, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection } from '@/features/Projects/types/projects.d';
-import { fetcNodeNameFromCurie, generateQueryTitle, queryTitleHasCurie } from '@/features/Projects/utils/utilities';
+import { fetcNodeNameFromCurie, generateQueryTitle, findAllCuriesInTitle } from '@/features/Projects/utils/utilities';
 import { useSelector } from 'react-redux';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 
@@ -364,22 +364,39 @@ export const useProjectDetailSortSearchSelectState = () => {
   };
 };
 
-// edit to return string, not a promise 
-
 /**
- * Hook to fetch resolved curie name using React Query
- * @param {string} curie - The curie string to resolve
- * @param {boolean} enabled - Whether the query should be enabled
- * @returns {data: string, isLoading: boolean} React Query result with resolved name
+ * Hook to fetch resolved names for multiple curies using React Query
+ * @param {string[]} curies - The curie strings to resolve
+ * @param {boolean} enabled - Whether the queries should be enabled
+ * @returns {Record<string, string>, boolean} Object with curie->name mapping and loading state
  */
-export const useResolvedCurieName = (curie: string, enabled: boolean = true) => {
-  return useQuery({
-    queryKey: ['curieName', curie],
-    queryFn: () => fetcNodeNameFromCurie(curie),
-    enabled: enabled && !!curie,
+export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean = true) => {
+  const queries = useQuery({
+    queryKey: ['curieNames', curies],
+    queryFn: async () => {
+      const results: Record<string, string> = {};
+      await Promise.all(
+        curies.map(async (curie) => {
+          try {
+            const name = await fetcNodeNameFromCurie(curie);
+            results[curie] = name;
+          } catch (error) {
+            console.error(`Failed to resolve curie ${curie}:`, error);
+            results[curie] = curie; // fallback to original curie
+          }
+        })
+      );
+      return results;
+    },
+    enabled: enabled && curies.length > 0,
     staleTime: Infinity,
     retry: false,
   });
+
+  return {
+    data: queries.data || {},
+    isLoading: queries.isLoading,
+  };
 };
 
 /**
@@ -394,28 +411,40 @@ export const useGetQueryCardTitle = (query: UserQueryObject): { title: string; i
     [query]
   );
   
-  const hasCurie = useMemo(() => 
-    queryTitleHasCurie(baseTitle), 
+  const curies = useMemo(() => 
+    findAllCuriesInTitle(baseTitle), 
     [baseTitle]
   );
   
-  const { data: resolvedName, isLoading } = useResolvedCurieName(
-    hasCurie || '', 
-    !!hasCurie
+  const { data: resolvedNames, isLoading } = useMultipleResolvedCurieNames(
+    curies,
+    curies.length > 0
   );
   
   const title = useMemo(() => {
-    if (hasCurie && resolvedName) {
-      const newTitle = baseTitle.replace(hasCurie, resolvedName);
-      // call update query endpoint
-      updateQueryMutation.mutate({
-        id: query.sid,
-        title: newTitle
+    if (curies.length > 0 && Object.keys(resolvedNames).length > 0) {
+      let newTitle = baseTitle;
+      
+      // Replace each curie with its resolved name
+      curies.forEach(curie => {
+        const resolvedName = resolvedNames[curie];
+        if (resolvedName && resolvedName !== curie) {
+          newTitle = newTitle.replace(curie, resolvedName);
+        }
       });
-      return newTitle;
+      
+      // Only update if we actually made replacements
+      if (newTitle !== baseTitle) {
+        // call update query endpoint
+        // updateQueryMutation.mutate({
+        //   id: query.sid,
+        //   title: newTitle
+        // });
+        return newTitle;
+      }
     }
     return baseTitle;
-  }, [hasCurie, resolvedName, baseTitle]);
+  }, [curies, resolvedNames, baseTitle, updateQueryMutation, query.sid]);
   
   return { title, isLoading };
 };
