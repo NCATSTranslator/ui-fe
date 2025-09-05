@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
   restoreProjects, restoreQueries, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection } from '@/features/Projects/types/projects.d';
-import { generateQueryTitle } from '@/features/Projects/utils/utilities';
+import { fetcNodeNameFromCurie, generateQueryTitle, queryTitleHasCurie } from '@/features/Projects/utils/utilities';
 import { useSelector } from 'react-redux';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 
@@ -362,4 +362,60 @@ export const useProjectDetailSortSearchSelectState = () => {
     clearSearchTerm,
     resetState
   };
+};
+
+// edit to return string, not a promise 
+
+/**
+ * Hook to fetch resolved curie name using React Query
+ * @param {string} curie - The curie string to resolve
+ * @param {boolean} enabled - Whether the query should be enabled
+ * @returns {data: string, isLoading: boolean} React Query result with resolved name
+ */
+export const useResolvedCurieName = (curie: string, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['curieName', curie],
+    queryFn: () => fetcNodeNameFromCurie(curie),
+    enabled: enabled && !!curie,
+    staleTime: Infinity,
+    retry: false,
+  });
+};
+
+/**
+ * Hook to get query card title with async curie name resolution
+ * @param {UserQueryObject} query - The query object
+ * @returns { title: string; isLoading: boolean } Object with title and loading state
+ */
+export const useGetQueryCardTitle = (query: UserQueryObject): { title: string; isLoading: boolean } => {
+  const updateQueryMutation = useUpdateQuery();
+  const baseTitle = useMemo(() => 
+    query.data.title || generateQueryTitle(query), 
+    [query]
+  );
+  
+  const hasCurie = useMemo(() => 
+    queryTitleHasCurie(baseTitle), 
+    [baseTitle]
+  );
+  
+  const { data: resolvedName, isLoading } = useResolvedCurieName(
+    hasCurie || '', 
+    !!hasCurie
+  );
+  
+  const title = useMemo(() => {
+    if (hasCurie && resolvedName) {
+      const newTitle = baseTitle.replace(hasCurie, resolvedName);
+      // call update query endpoint
+      updateQueryMutation.mutate({
+        id: query.sid,
+        title: newTitle
+      });
+      return newTitle;
+    }
+    return baseTitle;
+  }, [hasCurie, resolvedName, baseTitle]);
+  
+  return { title, isLoading };
 };
