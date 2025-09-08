@@ -85,8 +85,15 @@ const PathObject: FC<PathObjectProps> = ({
   const provenance = (!!pathObject?.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const description = (isNode && !!pathObject?.descriptions[0]) ? pathObject.descriptions[0] : '';
 
-  if(!pathObject)
+  if (!pathObject) {
+    console.warn(`Could not generate PathObject, pathObject is ${String(pathObject)}`);
     return null;
+  }
+  if (!isNode && !isEdge) {
+    console.warn('Could not generate PathObject, pathObject does not match any known type:');
+    console.warn(pathObject);
+    return null;
+  }
 
   const nodeClass = joinClasses(
     styles.nameContainer,
