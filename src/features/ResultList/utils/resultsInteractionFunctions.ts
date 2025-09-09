@@ -511,16 +511,24 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
                         depth: number) {
     for (let pathRank of pathRanks) {
       const pid = pathRank.path.id;
-      if(!pid) continue;
-      if (pathRank.support.length !== 0) {
+      if (!pid) continue;
+      if (depth > 1) {
+        if (pathRank.support.length !== 0) {
+          _updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
+        }
+        pathFilterState[pid] = false;
+      } else if (pathRank.support.length !== 0) {
         _updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
-        let filterIndirect = (depth < 1); // Only filter indirect paths by support if it is a top level path
+        let filterIndirect = true; // Only filter indirect paths by support if it is a top level path
         for (let supportRank of pathRank.support) {
           const supportPid = supportRank.path.id;
-          if(!!supportPid)
+          if (!!supportPid) {
             filterIndirect = filterIndirect && pathFilterState[supportPid];
+          }
         }
-        pathFilterState[pid] = filterIndirect; } else { pathFilterState[pid] = (pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered));
+        pathFilterState[pid] = filterIndirect;
+      } else {
+        pathFilterState[pid] = (pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered));
       }
     }
   }
