@@ -36,7 +36,29 @@ export const findStringMatch = (
 ): boolean => {
   const normalizedTerm = searchTerm.toLowerCase();
 
-  const checkItemForMatch = (item?: ResultNode | ResultEdge): boolean => {
+  // Shallow properties: drug name and subject node description
+  const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
+  const subjectNode = getNodeById(resultSet, result.subject);
+  const descriptionMatch = subjectNode?.descriptions?.[0]?.toLowerCase().includes(normalizedTerm) ?? false;
+
+  let matched = !normalizedTerm || nameMatch || descriptionMatch;
+
+  for (let i = 0; i < result.paths.length; i++) {
+    const path = isPath(result.paths[i])
+      ? result.paths[i]
+      : getPathById(resultSet, result.paths[i] as string);
+
+    const pathRank = pathRanks[i];
+
+    if (path && pathRank && typeof path !== "string") {
+      const pathMatch = _checkPathForMatch(resultSet, path, pathRank);
+      matched = matched || pathMatch;
+    }
+  }
+
+  return matched;
+
+  const _checkItemForMatch = (item?: ResultNode | ResultEdge): boolean => {
     if (!item) return false;
 
     if (isResultEdge(item)) {
@@ -50,7 +72,7 @@ export const findStringMatch = (
     );
   };
 
-  const checkPathForMatch = (
+  const _checkPathForMatch = (
     resultSet: ResultSet,
     path: Path,
     pathRank: PathRank
@@ -69,7 +91,7 @@ export const findStringMatch = (
           const supportRank = pathRank.support?.[j];
 
           if (supportPath && typeof supportPath !== "string" && supportRank) {
-            const subMatch = checkPathForMatch(resultSet, supportPath, supportRank);
+            const subMatch = _checkPathForMatch(resultSet, supportPath, supportRank);
             if (subMatch) {
               pathRank.rank += supportRank.rank;
               matched = true;
@@ -79,7 +101,7 @@ export const findStringMatch = (
       }
 
       // Direct match
-      if (checkItemForMatch(item)) {
+      if (_checkItemForMatch(item)) {
         pathRank.rank -= 1;
         matched = true;
       }
@@ -88,27 +110,6 @@ export const findStringMatch = (
     return matched;
   };
 
-  // Shallow properties: drug name and subject node description
-  const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
-  const subjectNode = getNodeById(resultSet, result.subject);
-  const descriptionMatch = subjectNode?.descriptions?.[0]?.toLowerCase().includes(normalizedTerm) ?? false;
-
-  let matched = !normalizedTerm || nameMatch || descriptionMatch;
-
-  for (let i = 0; i < result.paths.length; i++) {
-    const path = isPath(result.paths[i])
-      ? result.paths[i]
-      : getPathById(resultSet, result.paths[i] as string);
-
-    const pathRank = pathRanks[i];
-
-    if (path && pathRank && typeof path !== "string") {
-      const pathMatch = checkPathForMatch(resultSet, path, pathRank);
-      matched = matched || pathMatch;
-    }
-  }
-
-  return matched;
 };
 
 
