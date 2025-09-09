@@ -37,7 +37,7 @@ export interface PathObjectProps {
   showHiddenPaths?: boolean;
 }
 
-const PathObject: FC<PathObjectProps> = ({ 
+const PathObject: FC<PathObjectProps> = ({
   activeEntityFilters,
   activeFilters,
   className = "",
@@ -61,7 +61,7 @@ const PathObject: FC<PathObjectProps> = ({
   const resultSet = useSelector(getResultSetById(pk));
 
   // ID of the main element (in the case of a compressed edge)
-  const itemID = (Array.isArray(id)) ? id[0] : id; 
+  const itemID = (Array.isArray(id)) ? id[0] : id;
   const pathObject = (isNodeIndex(index)) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
   const isNode = isResultNode(pathObject);
   const isEdge = isResultEdge(pathObject);
@@ -85,8 +85,15 @@ const PathObject: FC<PathObjectProps> = ({
   const provenance = (!!pathObject?.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
   const description = (isNode && !!pathObject?.descriptions[0]) ? pathObject.descriptions[0] : '';
 
-  if(!pathObject)
+  if (!pathObject) {
+    console.warn(`Could not generate PathObject, pathObject is ${String(pathObject)}`);
     return null;
+  }
+  if (!isNode && !isEdge) {
+    console.warn('Could not generate PathObject, pathObject does not match any known type:');
+    console.warn(pathObject);
+    return null;
+  }
 
   const nodeClass = joinClasses(
     styles.nameContainer,
@@ -101,9 +108,9 @@ const PathObject: FC<PathObjectProps> = ({
   return (
     <>
       {
-        isNode 
+        isNode
           ?
-            <span 
+            <span
               className={nodeClass}
               data-tooltip-id={`${uid}`}
               data-node-id={pathObject.id}
@@ -140,7 +147,7 @@ const PathObject: FC<PathObjectProps> = ({
               </Tooltip>
             </span>
           :
-            isEdge 
+            isEdge
               ?
                 <Predicate
                   path={path}
