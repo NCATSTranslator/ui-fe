@@ -112,3 +112,27 @@ export const getProjectQueryCount = (project: Project | ProjectRaw | undefined, 
   const projectPks = project?.data.pks || [];
   return projectPks.filter(pk => !queries.find(q => q.data.qid === pk)?.data.deleted).length;
 }
+
+/**
+ * Get the name of a node from a curie using the name resolver
+ * @param {string} curie - The curie of the node
+ * @returns {string} The preferred name of the node
+ */
+export const fetcNodeNameFromCurie = async (curie: string): Promise<string> => {
+  const nameResolverEndpoint = 'https://name-resolution-sri.renci.org/synonyms';
+  const response = await fetch(`${nameResolverEndpoint}?preferred_curies=${curie}`);
+  const data = await response.json();
+  console.log(data);
+  return data[curie]?.preferred_name || '';
+}
+
+/**
+ * Find all curies in the query title
+ * @param {string} title - The title to check
+ * @returns {string[]} Array of all curies found in the title
+ */
+export const findAllCuriesInTitle = (title: string): string[] => {
+  const curieRegex = /\b[A-Za-z][A-Za-z0-9_]*:[A-Za-z0-9_-]+\b/g;
+  const matches = title.match(curieRegex);
+  return matches || [];
+}

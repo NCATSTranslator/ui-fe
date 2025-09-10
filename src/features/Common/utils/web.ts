@@ -29,8 +29,8 @@ export const put = async (url: string, body: unknown): Promise<Response> => {
   return fetch(url, buildOptions('PUT', body));
 };
 
-export const remove = async (url: string): Promise<Response> => {
-  return fetch(url, buildOptions('DELETE'));
+export const remove = async (url: string, body?: unknown): Promise<Response> => {
+  return fetch(url, buildOptions('DELETE', body));
 };
 
 // Error handling utilities

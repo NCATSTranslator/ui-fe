@@ -13,7 +13,7 @@ export type ProjectUpdate = {
 }
 
 export type QueryUpdate = {
-  qid: string;
+  id: string;
   title: string;
 }
 

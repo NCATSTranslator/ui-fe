@@ -12,6 +12,8 @@ import { useUser } from '@/features/UserAuth/utils/userApi';
 import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
 import { useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
 import { QueryEditingItem } from '@/features/Projects/types/projects';
+import { useSelector } from 'react-redux';
+import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 
 const generatePathfinderSubheading = (idOne: string, labelOne: string, idTwo: string, labelTwo: string, constraintText?: string, searchedTermClassName?: string) => {
   const linkOne = generateEntityLink(idOne, `${styles.searchedTerm} ${searchedTermClassName || ""}`, () => labelOne, true);
@@ -78,6 +80,7 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
   isPathfinder = false,
   constraintText
 }) => {
+  const config = useSelector(currentConfig);
   const [user, userLoading] = useUser();
   const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState<boolean>(false);
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
@@ -105,7 +108,14 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
       searchedTermClassName
     )
   : generateSmartQuerySubheading(questionText, entityId || '', entityLabel || '', searchedTermClassName);
-  const showAddToProjectButton = !!user && !userLoading && !projectsLoading && !projectsError && !queriesLoading && !queriesError;
+  const showAddToProjectButton = 
+    !!user &&
+    !userLoading &&
+    !projectsLoading &&
+    !projectsError &&
+    !queriesLoading &&
+    !queriesError &&
+    config?.include_projects;
 
   return(
     <div className={`${styles.resultsHeader} ${className}`}>
