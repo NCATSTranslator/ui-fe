@@ -280,13 +280,13 @@ export const useEditQueryHandlers = (
     }
     const queryKey = ['userQueries'];
     // Find the query and update it
-    const queryToUpdate = queries.find(q => q.data.qid === id);
+    const queryToUpdate = queries.find(q => q.sid === id);
     if (queryToUpdate) {
       // Optimistically update the React Query cache
       queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
         if (!oldData) return oldData;
         return oldData.map((query: UserQueryObject) => 
-          query.data.qid === id 
+          query.sid === id 
             ? { 
                 ...query, 
                 data: { ...query.data, title: newName || query.data.title }
@@ -296,7 +296,7 @@ export const useEditQueryHandlers = (
       });
 
       updateQueryMutation.mutate({
-        qid: queryToUpdate.data.qid,
+        id: queryToUpdate.sid,
         title: newName || queryToUpdate.data.title || ''
       }, {
         onSuccess: () => {
@@ -314,7 +314,7 @@ export const useEditQueryHandlers = (
           queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
             if (!oldData) return oldData;
             return oldData.map((query: UserQueryObject) => 
-              query.data.qid === id 
+              query.sid === id 
                 ? { 
                     ...query, 
                     data: { ...query.data, title: queryToUpdate.data.title }
@@ -342,13 +342,13 @@ export const useEditQueryHandlers = (
     queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
       if (!oldData) return oldData;
       return oldData.map((q: UserQueryObject) => 
-        q.data.qid === query.data.qid 
+        q.sid === query.sid 
           ? { ...q, data: { ...q.data, is_deleted: false } }
           : q
       );
     });
 
-    restoreQueriesMutation.mutate([query.data.qid.toString()], {
+    restoreQueriesMutation.mutate([query.sid.toString()], {
       onSuccess: () => {
         queryRestoredToast();
       },
@@ -359,7 +359,7 @@ export const useEditQueryHandlers = (
         queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
           if (!oldData) return oldData;
           return oldData.map((q: UserQueryObject) => 
-            q.data.qid === query.data.qid 
+            q.sid === query.sid 
               ? { ...q, data: { ...q.data, is_deleted: true } }
               : q
           );
@@ -374,7 +374,7 @@ export const useEditQueryHandlers = (
     queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
       if (!oldData) return oldData;
       return oldData.map((q: UserQueryObject) => 
-        q.data.qid === query.data.qid 
+        q.sid === query.sid 
           ? { ...q, data: { ...q.data, is_deleted: true } }
           : q
       );
@@ -391,7 +391,7 @@ export const useEditQueryHandlers = (
         queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
           if (!oldData) return oldData;
           return oldData.map((q: UserQueryObject) => 
-            q.data.qid === query.data.qid 
+            q.sid === query.sid 
               ? { ...q, data: { ...q.data, is_deleted: false } }
               : q
           );

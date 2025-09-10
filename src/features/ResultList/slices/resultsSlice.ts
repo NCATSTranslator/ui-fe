@@ -44,7 +44,15 @@ export const getPathsByIds = (resultSet: ResultSet | undefined | null, pathIDs: 
 
   return pathIDs.map(pathID => getPathById(resultSet, pathID)).filter((path): path is Path => path !== undefined)
 }
-export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNode | undefined => (resultSet === null || !id) ? undefined : resultSet.data.nodes[id];
+export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNode | undefined => {
+  let node: ResultNode | undefined = (resultSet === null || !id) ? undefined : resultSet.data.nodes[id];
+  if(!node) {
+    console.warn(`Unable to find node with id: ${id} within result set.`);
+    return undefined;
+  }
+  return node;
+
+}
 export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
   let edge: ResultEdge | undefined = (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
   if(!edge) {

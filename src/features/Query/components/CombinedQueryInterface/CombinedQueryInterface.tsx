@@ -129,6 +129,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
               setShareModalFunction={setShareModalFunction}
               pk={pk}
               selectedProject={selectedProject}
+              user={user}
             />
           </Tab>
           : null}

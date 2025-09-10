@@ -1,7 +1,8 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useCallback } from 'react';
 import { DataCardLocation, UserQueryObject } from '@/features/Projects/types/projects.d';
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
 import { useEditQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
+import { useGetQueryCardTitle } from '@/features/Projects/hooks/customHooks';
 
 interface QueryCardProps {
   inUnassignedProject?: boolean;
@@ -32,6 +33,7 @@ const QueryCard = ({
 }: QueryCardProps) => {
 
   const editQueryHandlers = useEditQueryHandlers(undefined, queries);
+  const { title: queryCardTitle, isLoading } = useGetQueryCardTitle(query);
 
   const onRestore = (query: UserQueryObject) => {
     editQueryHandlers.handleRestoreQuery(query);
@@ -40,7 +42,7 @@ const QueryCard = ({
   const handleShare = (query: UserQueryObject) => {
     onShare?.(query);
   }
-  
+
   return (
     <DataCard
       location={location}
@@ -56,7 +58,7 @@ const QueryCard = ({
       onEdit={onEdit}
       onRestore={onRestore}
       getItemId={(item: UserQueryObject) => item.data.qid}
-      getItemTitle={(item: UserQueryObject) => item.data.title || ''}
+      getItemTitle={() => queryCardTitle}
       getItemTimeCreated={(item: UserQueryObject) => item.data.time_created.toString()}
       getItemTimeUpdated={(item: UserQueryObject) => item.data.time_updated.toString()}
       getItemBookmarkCount={(item: UserQueryObject) => item.data.bookmark_ids.length}

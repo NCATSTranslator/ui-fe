@@ -24,6 +24,7 @@ import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
 import { ProjectRaw } from '@/features/Projects/types/projects';
+import { User } from '@/features/UserAuth/types/user';
 
 type QueryPathfinderProps = {
   handleResultMatchClick?: (match: ResultContextObject) => void;
@@ -33,6 +34,7 @@ type QueryPathfinderProps = {
   results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   selectedProject?: ProjectRaw | null;
+  user?: User | null;
 }
 
 const QueryPathfinder: FC<QueryPathfinderProps> = ({ 
@@ -42,10 +44,12 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   pk,
   results = [],
   setShareModalFunction = ()=>{},
-  selectedProject = null
+  selectedProject = null,
+  user = null
 }) => {
 
   const config = useSelector(currentConfig);
+  const disabled = user === null;
   const nameResolverEndpoint = (config?.name_resolver) ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
   const [isError, setIsError] = useState(false);
   const [errorText, setErrorText] = useState("");
@@ -244,7 +248,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
               }} 
             >
               <AutocompleteInput
-                placeholder="Enter First Search Term"
                 value={inputOneText}
                 onChange={(e) => handleQueryItemChange(e, true)}
                 onItemSelect={(item) => handleItemSelection(item, true)}
@@ -255,6 +258,8 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 className={styles.inputContainer}
                 selectedClassName={styles.selected}
                 onClearAutocomplete={clearAutocompleteItemsOne}
+                disabled={disabled}
+                placeholder={user === null ? "Log In to Enter a Search Term" : "Enter First Search Term"}
               />
               <PathfinderDivider className={styles.dividerIcon}/>
               {
@@ -280,7 +285,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 </>
               }
               <AutocompleteInput
-                placeholder="Enter Second Search Term"
                 value={inputTwoText}
                 onChange={(e) => handleQueryItemChange(e, false)}
                 onItemSelect={(item) => handleItemSelection(item, false)}
@@ -291,8 +295,10 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 className={styles.inputContainer}
                 selectedClassName={styles.selected}
                 onClearAutocomplete={clearAutocompleteItemsTwo}
+                disabled={disabled}
+                placeholder={user === null ? "Log In to Enter a Search Term" : "Enter First Search Term"}
               />
-              <Button type='submit' className={styles.submitButton} iconOnly>
+              <Button type='submit' className={styles.submitButton} iconOnly disabled={disabled}>
                 {
                   isLoading
                   ? 

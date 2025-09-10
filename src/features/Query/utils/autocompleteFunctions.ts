@@ -76,7 +76,7 @@ const newFetchNodesFromInputText = async (
   };
 
   return fetch(
-    `${endpoint}?string=${inputText}&offset=0&limit=100${typesString}${prefixString}${excludePrefixString}`,
+    `${endpoint}?string=${inputText}&autocomplete=true&offset=0&limit=100${typesString}${prefixString}${excludePrefixString}`,
     nameResolverRequestOptions
   );
 };

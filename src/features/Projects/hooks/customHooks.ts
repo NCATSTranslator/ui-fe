@@ -3,17 +3,20 @@ import { useMemo, useState } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
   restoreProjects, restoreQueries, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection } from '@/features/Projects/types/projects.d';
-import { generateQueryTitle } from '@/features/Projects/utils/utilities';
+import { fetcNodeNameFromCurie, generateQueryTitle, findAllCuriesInTitle } from '@/features/Projects/utils/utilities';
 import { useSelector } from 'react-redux';
-import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 
 /**
  * Hook to fetch user projects with React Query
  */
 export const useUserProjects = () => {
+  const user = useSelector(currentUser);
+  const shouldFetch = user !== null;
   return useQuery({
     queryKey: ['userProjects'],
     queryFn: () => getUserProjects(),
+    enabled: shouldFetch,
     staleTime: Infinity, // only considered stale if query is manually invalidated
     refetchInterval: 30 * 1000, // 30s
     refetchOnWindowFocus: true,
@@ -26,11 +29,14 @@ export const useUserProjects = () => {
  * Hook to fetch user queries with React Query
  */
 export const useUserQueries = () => {
+  const user = useSelector(currentUser);
+  const shouldFetch = user !== null;
   const config = useSelector(currentConfig);
   const refetchInterval = config?.include_query_status_polling ? 15 * 1000 : false; // 15s
   const query = useQuery({
     queryKey: ['userQueries'],
     queryFn: () => getUserQueries(),
+    enabled: shouldFetch,
     staleTime: Infinity, // only considered stale if query is manually invalidated
     refetchInterval: refetchInterval,
     refetchOnWindowFocus: true,
@@ -362,4 +368,89 @@ export const useProjectDetailSortSearchSelectState = () => {
     clearSearchTerm,
     resetState
   };
+};
+
+/**
+ * Hook to fetch resolved names for multiple curies using React Query
+ * @param {string[]} curies - The curie strings to resolve
+ * @param {boolean} enabled - Whether the queries should be enabled
+ * @returns {Record<string, string>, boolean} Object with curie->name mapping and loading state
+ */
+export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean = true) => {
+  const queries = useQuery({
+    queryKey: ['curieNames', curies],
+    queryFn: async () => {
+      const results: Record<string, string> = {};
+      await Promise.all(
+        curies.map(async (curie) => {
+          try {
+            const name = await fetcNodeNameFromCurie(curie);
+            results[curie] = name;
+          } catch (error) {
+            console.error(`Failed to resolve curie ${curie}:`, error);
+            results[curie] = curie; // fallback to original curie
+          }
+        })
+      );
+      return results;
+    },
+    enabled: enabled && curies.length > 0,
+    staleTime: Infinity,
+    retry: false,
+  });
+
+  return {
+    data: queries.data || {},
+    isLoading: queries.isLoading,
+  };
+};
+
+/**
+ * Hook to get query card title with async curie name resolution
+ * @param {UserQueryObject} query - The query object
+ * @returns { title: string; isLoading: boolean } Object with title and loading state
+ */
+export const useGetQueryCardTitle = (query: UserQueryObject): { title: string; isLoading: boolean } => {
+  const updateQueryMutation = useUpdateQuery();
+  const baseTitle = useMemo(() => 
+    query.data.title || generateQueryTitle(query), 
+    [query]
+  );
+  
+  const curies = useMemo(() => 
+    findAllCuriesInTitle(baseTitle), 
+    [baseTitle]
+  );
+  
+  const { data: resolvedNames, isLoading } = useMultipleResolvedCurieNames(
+    curies,
+    curies.length > 0
+  );
+  
+  const title = useMemo(() => {
+    if (curies.length > 0 && Object.keys(resolvedNames).length > 0) {
+      let newTitle = baseTitle;
+      
+      // Replace each curie with its resolved name
+      curies.forEach(curie => {
+        const resolvedName = resolvedNames[curie];
+        if (resolvedName && resolvedName !== curie) {
+          newTitle = newTitle.replace(curie, resolvedName);
+        }
+      });
+      
+      // Only update if we actually made replacements
+      if (newTitle !== baseTitle) {
+        // call update query endpoint
+        // updateQueryMutation.mutate({
+        //   id: query.sid,
+        //   title: newTitle
+        // });
+        return newTitle;
+      }
+    }
+    return baseTitle;
+  }, [curies, resolvedNames, baseTitle, updateQueryMutation, query.sid]);
+  
+  return { title, isLoading };
 };
