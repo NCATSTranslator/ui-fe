@@ -5,15 +5,18 @@ import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQ
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection } from '@/features/Projects/types/projects.d';
 import { fetcNodeNameFromCurie, generateQueryTitle, findAllCuriesInTitle } from '@/features/Projects/utils/utilities';
 import { useSelector } from 'react-redux';
-import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 
 /**
  * Hook to fetch user projects with React Query
  */
 export const useUserProjects = () => {
+  const user = useSelector(currentUser);
+  const shouldFetch = user !== null;
   return useQuery({
     queryKey: ['userProjects'],
     queryFn: () => getUserProjects(),
+    enabled: shouldFetch,
     staleTime: Infinity, // only considered stale if query is manually invalidated
     refetchInterval: 30 * 1000, // 30s
     refetchOnWindowFocus: true,
@@ -26,11 +29,14 @@ export const useUserProjects = () => {
  * Hook to fetch user queries with React Query
  */
 export const useUserQueries = () => {
+  const user = useSelector(currentUser);
+  const shouldFetch = user !== null;
   const config = useSelector(currentConfig);
   const refetchInterval = config?.include_query_status_polling ? 15 * 1000 : false; // 15s
   const query = useQuery({
     queryKey: ['userQueries'],
     queryFn: () => getUserQueries(),
+    enabled: shouldFetch,
     staleTime: Infinity, // only considered stale if query is manually invalidated
     refetchInterval: refetchInterval,
     refetchOnWindowFocus: true,
