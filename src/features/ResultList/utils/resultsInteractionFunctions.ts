@@ -36,7 +36,26 @@ export const findStringMatch = (
 ): boolean => {
   const normalizedTerm = searchTerm.toLowerCase();
 
-  const checkItemForMatch = (item?: ResultNode | ResultEdge): boolean => {
+  // Shallow properties: drug name and subject node description
+  const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
+  const subjectNode = getNodeById(resultSet, result.subject);
+  const descriptionMatch = subjectNode?.descriptions?.[0]?.toLowerCase().includes(normalizedTerm) ?? false;
+  let matched = !normalizedTerm || nameMatch || descriptionMatch;
+  for (let i = 0; i < result.paths.length; i++) {
+    const path = isPath(result.paths[i])
+      ? result.paths[i]
+      : getPathById(resultSet, result.paths[i] as string);
+
+    const pathRank = pathRanks[i];
+    if (path && pathRank && typeof path !== "string") {
+      const pathMatch = _checkPathForMatch(resultSet, path, pathRank);
+      matched = matched || pathMatch;
+    }
+  }
+
+  return matched;
+
+  function _checkItemForMatch(item?: ResultNode | ResultEdge): boolean {
     if (!item) return false;
 
     if (isResultEdge(item)) {
@@ -50,11 +69,11 @@ export const findStringMatch = (
     );
   };
 
-  const checkPathForMatch = (
+  function _checkPathForMatch(
     resultSet: ResultSet,
     path: Path,
     pathRank: PathRank
-  ): boolean => {
+  ): boolean {
     let matched = false;
 
     for (let i = 0; i < path.subgraph.length; i++) {
@@ -69,7 +88,7 @@ export const findStringMatch = (
           const supportRank = pathRank.support?.[j];
 
           if (supportPath && typeof supportPath !== "string" && supportRank) {
-            const subMatch = checkPathForMatch(resultSet, supportPath, supportRank);
+            const subMatch = _checkPathForMatch(resultSet, supportPath, supportRank);
             if (subMatch) {
               pathRank.rank += supportRank.rank;
               matched = true;
@@ -79,7 +98,7 @@ export const findStringMatch = (
       }
 
       // Direct match
-      if (checkItemForMatch(item)) {
+      if (_checkItemForMatch(item)) {
         pathRank.rank -= 1;
         matched = true;
       }
@@ -87,28 +106,6 @@ export const findStringMatch = (
 
     return matched;
   };
-
-  // Shallow properties: drug name and subject node description
-  const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
-  const subjectNode = getNodeById(resultSet, result.subject);
-  const descriptionMatch = subjectNode?.descriptions?.[0]?.toLowerCase().includes(normalizedTerm) ?? false;
-
-  let matched = !normalizedTerm || nameMatch || descriptionMatch;
-
-  for (let i = 0; i < result.paths.length; i++) {
-    const path = isPath(result.paths[i])
-      ? result.paths[i]
-      : getPathById(resultSet, result.paths[i] as string);
-
-    const pathRank = pathRanks[i];
-
-    if (path && pathRank && typeof path !== "string") {
-      const pathMatch = checkPathForMatch(resultSet, path, pathRank);
-      matched = matched || pathMatch;
-    }
-  }
-
-  return matched;
 };
 
 
@@ -200,8 +197,9 @@ export const applyFilters = (
     [...rankMap.values()].some(rank => rank.rank < 0)
   );
 
-  for (const pathRanks of resultPathRanks.values())
-    updatePathFilterState(pathFilterState, [...pathRanks.values()], unrankedIsFiltered);
+  for (const pathRanks of resultPathRanks.values()) {
+    _updatePathFilterState(pathFilterState, [...pathRanks.values()], unrankedIsFiltered);
+  }
 
   const finalResults = _filterResultsByPathFilterState(resultsAfterFacets, pathFilterState);
 
@@ -504,25 +502,37 @@ export const calculateFacetCounts = (
  * @param {PathRank[]} pathRanks - The ranked paths to evaluate and update in the state.
  * @param {boolean} unrankedIsFiltered - Whether paths with rank 0 should be considered filtered.
  */
-const updatePathFilterState = (pathFilterState: {[key: string]: boolean}, pathRanks: PathRank[], unrankedIsFiltered: boolean) => {
-  for (let pathRank of pathRanks) {
-    const pid = pathRank.path.id;
-    if(!pid)
-      continue;
-
-    if (pathRank.support.length !== 0) {
-      updatePathFilterState(pathFilterState, pathRank.support, unrankedIsFiltered);
-      let filterIndirect = true;
-      for (let supportRank of pathRank.support) {
-        const supportPid = supportRank.path.id;
-        if(!!supportPid)
-          filterIndirect = filterIndirect && pathFilterState[supportPid];
+function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
+                                pathRanks: PathRank[],
+                                unrankedIsFiltered: boolean) {
+  function _updateState(pathFilterState: {[key: string]: boolean},
+                        pathRanks: PathRank[],
+                        unrankedIsFiltered: boolean,
+                        depth: number) {
+    for (let pathRank of pathRanks) {
+      const pid = pathRank.path.id;
+      if (!pid) continue;
+      if (depth > 1) {
+        if (pathRank.support.length !== 0) {
+          _updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
+        }
+        pathFilterState[pid] = false;
+      } else if (pathRank.support.length !== 0) {
+        _updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
+        let filterIndirect = true; // Only filter indirect paths by support if it is a top level path
+        for (let supportRank of pathRank.support) {
+          const supportPid = supportRank.path.id;
+          if (!!supportPid) {
+            filterIndirect = filterIndirect && pathFilterState[supportPid];
+          }
+        }
+        pathFilterState[pid] = filterIndirect;
+      } else {
+        pathFilterState[pid] = (pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered));
       }
-      pathFilterState[pid] = filterIndirect;
-    } else {
-      pathFilterState[pid] = (pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered));
     }
   }
+  _updateState(pathFilterState, pathRanks, unrankedIsFiltered, 0);
 }
 
 export const areEntityFiltersEqual = (a: string[], b: string[]): boolean => {
