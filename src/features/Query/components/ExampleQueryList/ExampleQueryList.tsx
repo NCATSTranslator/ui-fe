@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import styles from './ExampleQueryList.module.scss';
-import { getResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { getResultsShareURLPath } from '@/features/Common/utils/web';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import AnimateHeight, { Height } from 'react-animate-height';
 import Button from '@/features/Core/components/Button/Button';

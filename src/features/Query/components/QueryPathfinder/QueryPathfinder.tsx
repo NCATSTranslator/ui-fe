@@ -25,6 +25,7 @@ import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatte
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
 import { ProjectRaw } from '@/features/Projects/types/projects';
 import { User } from '@/features/UserAuth/types/user';
+import { getDecodedParams } from '@/features/Common/utils/web';
 
 type QueryPathfinderProps = {
   handleResultMatchClick?: (match: ResultContextObject) => void;
@@ -60,11 +61,12 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   const [hasMiddleType, setHasMiddleType] = useState<boolean>(false);
   const [middleType, setMiddleType] = useState<string>("");
 
-  const labelOne = getDataFromQueryVar("lone");
-  const labelTwo = getDataFromQueryVar("ltwo");
-  const idOne = getDataFromQueryVar("ione");
-  const idTwo = getDataFromQueryVar("itwo");
-  const constraintText = getDataFromQueryVar("c");
+  const decodedParams = getDecodedParams();
+  const labelOne = getDataFromQueryVar("lone", decodedParams);
+  const labelTwo = getDataFromQueryVar("ltwo", decodedParams);
+  const idOne = getDataFromQueryVar("ione", decodedParams);
+  const idTwo = getDataFromQueryVar("itwo", decodedParams);
+  const constraintText = getDataFromQueryVar("c", decodedParams);
 
   const autocompleteFunctions = useRef<AutocompleteFunctions>( {
     filter: defaultQueryFilterFactory,

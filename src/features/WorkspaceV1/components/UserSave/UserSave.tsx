@@ -4,7 +4,7 @@ import Highlighter from 'react-highlight-words';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultItem from '@/features/ResultItem/components/ResultItem/ResultItem';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
-import { getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { getResultsShareURLPath } from "@/features/Common/utils/web";
 import { findInSet, getCompressedEdge, getFormattedDate } from '@/features/Common/utils/utilities';
 import { isNotesEmpty } from '@/features/ResultItem/utils/utilities';
 import { Path, Result, ResultEdge } from '@/features/ResultList/types/results';
