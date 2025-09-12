@@ -2,9 +2,10 @@ import { useEffect, useState, FC } from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import Button from "@/features/Core/components/Button/Button";
-import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/Common/utils/web";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
+import { getDecodedParams } from "@/features/Common/utils/web";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -17,10 +18,11 @@ interface ShareModalProps {
 }
 
 const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, nodeID = null, typeID = null, shareResultID = null}) => {
-  const sharedQueryLabel = (label) ? label : getDataFromQueryVar("l");
-  const sharedQueryType = (typeID) ? typeID : getDataFromQueryVar("t");
-  const sharedQueryItemID = (nodeID) ? nodeID : getDataFromQueryVar("i");
-  const initSharedQueryResultID = (shareResultID != null) ? shareResultID : getDataFromQueryVar("r");
+  const decodedParams = getDecodedParams();
+  const sharedQueryLabel = (label) ? label : getDataFromQueryVar("l", decodedParams);
+  const sharedQueryType = (typeID) ? typeID : getDataFromQueryVar("t", decodedParams);
+  const sharedQueryItemID = (nodeID) ? nodeID : getDataFromQueryVar("i", decodedParams);
+  const initSharedQueryResultID = (shareResultID != null) ? shareResultID : getDataFromQueryVar("r", decodedParams);
   const [sharedQueryResultID, setSharedQueryResultID] = useState(initSharedQueryResultID);
 
   useEffect(() => {
@@ -44,18 +46,18 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, no
   let qidPath = null;
   if(isPathfinder) {
     const itemOne: AutocompleteItem = {
-      id: getDataFromQueryVar('ione') || "",
-      label: getDataFromQueryVar('lone') || "",
+      id: getDataFromQueryVar('ione', decodedParams) || "",
+      label: getDataFromQueryVar('lone', decodedParams) || "",
       isExact: false,
       score: Infinity
     }
     const itemTwo = {
-      id: getDataFromQueryVar('itwo') || "",
-      label: getDataFromQueryVar('ltwo') || "",
+      id: getDataFromQueryVar('itwo', decodedParams) || "",
+      label: getDataFromQueryVar('ltwo', decodedParams) || "",
       isExact: false,
       score: Infinity
     }
-    const constraint = getDataFromQueryVar('c') || "";
+    const constraint = getDataFromQueryVar('c', decodedParams) || "";
     qidPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid);
   } else {
     qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);

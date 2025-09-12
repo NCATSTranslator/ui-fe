@@ -40,6 +40,7 @@ import { Filter } from "@/features/ResultFiltering/types/filters";
 import { generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
+import { getDecodedParams } from '@/features/Common/utils/web';
 
 const ResultList = () => {
 
@@ -49,17 +50,18 @@ const ResultList = () => {
   let blocker = useBlocker(true);
 
   // URL search params
-  const loadingParam = getDataFromQueryVar("loading");
-  const currentQueryID = getDataFromQueryVar("q");
-  const presetTypeID = getDataFromQueryVar("t");
+  const decodedParams = getDecodedParams();
+  const loadingParam = getDataFromQueryVar("loading", decodedParams);
+  const currentQueryID = getDataFromQueryVar("q", decodedParams);
+  const presetTypeID = getDataFromQueryVar("t", decodedParams);
   const isPathfinder = (presetTypeID === "p");
   let presetTypeObject = (!!presetTypeID)
     ? queryTypes.find(type => type.id === parseInt(presetTypeID)) ?? null
     : null;
 
-  const nodeLabelParam = getDataFromQueryVar("l");
-  const nodeIdParam = getDataFromQueryVar("i");
-  const [resultIdParam, setResultIdParam] = useState(getDataFromQueryVar("r"));
+  const nodeLabelParam = getDataFromQueryVar("l", decodedParams);
+  const nodeIdParam = getDataFromQueryVar("i", decodedParams);
+  const [resultIdParam, setResultIdParam] = useState(getDataFromQueryVar("r", decodedParams));
   const firstLoad = useRef(true);
   const [nodeDescription, setNodeDescription] = useState("");
   const shareResultID = useRef<string | null>(null);

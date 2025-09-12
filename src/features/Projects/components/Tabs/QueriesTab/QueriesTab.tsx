@@ -3,6 +3,8 @@ import ProjectInnerErrorStates from '@/features/Projects/components/ProjectInner
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import { UserQueryObject, ProjectListState, DataCardLocation } from '@/features/Projects/types/projects.d';
+import { currentUser } from '@/features/UserAuth/slices/userSlice';
+import { useSelector } from 'react-redux';
 
 interface QueriesTabProps {
   location?: DataCardLocation;
@@ -35,17 +37,24 @@ const QueriesTab = ({
     handleSort, 
     searchTerm 
   } = projectListState;
+  const user = useSelector(currentUser);
+  const hasUser = !!user;
+  const noQueriesFound = sortedActiveQueries.length === 0;
+  const noQueriesFoundWithSearch = noQueriesFound && searchTerm.length > 0;
   return (
     <>
-      <QueriesTableHeader 
-        activeQueries={sortedActiveQueries}
-        onSort={handleSort}
-        selectedQueries={selectedQueries}
-        setSelectedQueries={setSelectedQueries}
-        sortField={sortField}
-        sortDirection={sortDirection}
-        location={location}
-      />
+      {
+        !noQueriesFound && (
+        <QueriesTableHeader 
+          activeQueries={sortedActiveQueries}
+          onSort={handleSort}
+          selectedQueries={selectedQueries}
+          setSelectedQueries={setSelectedQueries}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          location={location}
+        />
+      )}
       {queriesError ? (
         <ProjectInnerErrorStates
           type="queries"
@@ -58,17 +67,26 @@ const QueriesTab = ({
           spinnerClassName={styles.loadingSpinner}
         >
           <div className={styles.projectGrid}>
-            {sortedActiveQueries.length === 0 ? (
+            {noQueriesFound ? (
               <div className={styles.emptyState}>
-                {searchTerm.length > 0 ? (
+                {noQueriesFoundWithSearch ? (
                   <p>No queries found matching your search.</p>
                 ) : (
-                  <>
+                  hasUser ? (
+                    <>
                     <h6>No Queries</h6>
                     <p>
-                      Your bookmarks and notes are saved here when you run a <a href="/" target="_blank" className={styles.link}>New Query</a>.
+                      Anytime you run a <a href="/" target="_blank" className={styles.link}>New Query</a>, it will be saved here.
                     </p>
                   </>
+                  ) : (
+                    <>
+                      <h6>No Queries</h6>
+                      <p>
+                        <a href="/login" className={styles.link}>Log in</a> to view your saved queries.
+                      </p>
+                    </>
+                  )
                 )}
               </div>
             ) : (

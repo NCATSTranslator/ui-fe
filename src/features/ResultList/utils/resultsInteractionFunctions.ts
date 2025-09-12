@@ -118,19 +118,6 @@ export const handleEvidenceModalClose = (setEvidenceOpen: (value: boolean) => vo
   setEvidenceOpen(false);
 }
 
-export const getResultsShareURLPath = (label: string, nodeID: string | number, typeID: string | number, resultID: string | number, pk: string | number) => {
-  return `results?l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`;
-}
-
-export const getPathfinderResultsShareURLPath = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem, resultID: string, constraint: string | undefined, pk: string) => {
-  let labelOne = (itemOne.label) ? itemOne.label : null;
-  let labelTwo = (itemTwo.label) ? itemTwo.label : null;
-  let idOne = (itemOne.id) ? itemOne.id : null;
-  let idTwo = (itemTwo.id) ? itemTwo.id : null;
-  let constraintVar = !!constraint ?  `&c=${constraint}`: '';
-  return `results?lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}&q=${pk}`;
-}
-
 /**
  * Applies all active filters (entity, result, facet, path) to the provided result set.
  * Separates results into included and excluded groups based on match criteria, then

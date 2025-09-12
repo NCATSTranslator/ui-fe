@@ -6,7 +6,7 @@ import { debounce } from 'lodash';
 import { Example, QueryItem } from '@/features/Query/types/querySubmission';
 import { incrementHistory } from '@/features/History/slices/historySlice';
 import { filterAndSortExamples, getAutocompleteTerms } from '@/features/Query/utils/autocompleteFunctions';
-import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '@/features/Common/utils/web';
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import { AutocompleteItem, AutocompleteFunctions, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';

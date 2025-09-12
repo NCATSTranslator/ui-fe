@@ -10,6 +10,7 @@ import Cog from '@/assets/icons/navigation/Settings.svg?react';
 import Logo from '@/assets/images/site-logo.png';
 import styles from './Header.module.scss';
 import { getFullPathname, getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { getDecodedParams } from '@/features/Common/utils/web';
 
 type HeaderProps = {
   children?: ReactNode;
@@ -33,7 +34,8 @@ const Header: FC<HeaderProps> = ({children}) => {
   const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
   const loginURL = getFormattedLoginURL(location);
   const currentPage = location.pathname;
-  const currentARSpk = getDataFromQueryVar("q");
+  const decodedParams = getDecodedParams();
+  const currentARSpk = getDataFromQueryVar("q", decodedParams);
   const showProjectsLink = config?.include_projects;
 
   return (

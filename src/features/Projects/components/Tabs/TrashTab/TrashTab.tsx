@@ -41,20 +41,29 @@ const TrashTab = ({
     // handleSort, 
     searchTerm 
   } = projectListState;
+
+  const noDeletedProjects = sortedDeletedProjects.length === 0;
+  const noDeletedQueries = sortedDeletedQueries.length === 0;
+  const noDeletedItems = noDeletedProjects && noDeletedQueries;
   return (
     <>
-      <DeletedTableHeader
-        activeProjects={sortedDeletedProjects}
-        activeQueries={sortedDeletedQueries}
-        projectListState={projectListState}
-      />
-      {sortedDeletedProjects.length === 0 && sortedDeletedQueries.length === 0 ? (
+      {
+        !noDeletedItems && (
+        <DeletedTableHeader
+          activeProjects={sortedDeletedProjects}
+            activeQueries={sortedDeletedQueries}
+            projectListState={projectListState}
+          />
+        )
+      }
+      {noDeletedItems ? (
         <div className={styles.emptyState}>
-          <p>No deleted items found.</p>
+          <h6>Trash is Empty</h6>
+          <p>Whenever you delete a query it will be moved here.</p>
         </div>
       ) : (
         <>
-          {sortedDeletedProjects.length > 0 && (
+          {!noDeletedProjects && (
             <div className={styles.deletedWrapper}>
               <LoadingWrapper
                 loading={projectsLoading}
@@ -79,7 +88,7 @@ const TrashTab = ({
               </LoadingWrapper>
             </div>
           )}
-          {sortedDeletedQueries.length > 0 && (
+          {!noDeletedQueries && (
             <div className={styles.deletedWrapper}>
               <LoadingWrapper
                 loading={queriesLoading}
