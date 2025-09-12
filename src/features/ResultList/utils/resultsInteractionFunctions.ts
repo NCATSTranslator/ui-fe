@@ -163,7 +163,7 @@ export const applyFilters = (
   unrankedIsFiltered: boolean;
   shouldResetPage: boolean;
 } => {
-  let [resultFilters, pathFilters, globalFilters] = filtering.groupFilterByType(filters);
+  let [resultFilters, pathFilters, edgeFilters, globalFilters] = filtering.groupFilterByType(filters);
   const resultFacets = resultFilters.filter(f => !filtering.isExclusion(f));
   const negatedResultFacets = resultFilters.filter(f => filtering.isExclusion(f));
   resultFilters = negatedResultFacets.concat(globalFilters);
@@ -432,21 +432,6 @@ export const calculateFacetCounts = (
   activeFacets: Filter[],
   negatedFacets: Filter[]
 ): Filters => {
-  // Function that adds the tag counts when a certain condition (predicate) is met
-  const addTagCountsWhen = (countedTags: {[key: string]: Filter}, result: Result, predicate: (tag: string)=>boolean) => {
-    for(const tag of Object.keys(result.tags)) {
-      // If the tag exists on the list, either increment it or initialize its count
-      if (predicate(tag)) {
-        if (Object.prototype.hasOwnProperty.call(countedTags, tag)) {
-          countedTags[tag].count = (countedTags[tag].count ?? 0) + 1;
-        } else {
-          // If it doesn't exist on the current list of tags, add it and initialize its count
-          countedTags[tag] = { name: tag, value: '', count: 1 };
-        }
-      }
-    }
-  }
-
   // Create a list of tags from the master tag list provided by the backend
   const countedTags = cloneDeep(summary.data.tags) as Filters;
   const activeFamilies = new Set(activeFacets.map(facet => filtering.filterFamily(facet)));
@@ -462,7 +447,7 @@ export const calculateFacetCounts = (
     const missingFamiliesCount = activeFamilies.size - resultFamilies.size;
     // When the family counts are equal, add all the result's tags
     if (missingFamiliesCount === 0) {
-      addTagCountsWhen(countedTags, result, () => { return true; });
+      _addTagCountsWhen(countedTags, result, () => { return true; });
     // When the result is missing a single family, add all tags from only the missing family
     } else if (missingFamiliesCount === 1) {
       // Find the missing family
@@ -470,7 +455,7 @@ export const calculateFacetCounts = (
         return !resultFamilies.has(family);
       })[0];
 
-      addTagCountsWhen(countedTags, result, (tagID: string) => {
+      _addTagCountsWhen(countedTags, result, (tagID: string) => {
         return filtering.getTagFamily(tagID) === missingFamily;
       });
     }
@@ -479,7 +464,7 @@ export const calculateFacetCounts = (
 
   // Count all results that have a matching negated facet
   for (const result of negatedResults) {
-    addTagCountsWhen(countedTags, result, (tagID) => {
+    _addTagCountsWhen(countedTags, result, (tagID) => {
       return negatedFacets.reduce((acc, facet) => {
         return (tagID === facet.id) || acc;
       }, false);
@@ -492,6 +477,25 @@ export const calculateFacetCounts = (
   })
 
   return countedTags;
+
+  // Function that adds the tag counts when a certain condition (predicate) is met
+  function _addTagCountsWhen(
+    countedTags: {[key: string]: Filter},
+    result: Result,
+    predicate: (tag: string) => boolean)
+  ) {
+    for(const tag of Object.keys(result.tags)) {
+      // If the tag exists on the list, either increment it or initialize its count
+      if (predicate(tag)) {
+        if (Object.prototype.hasOwnProperty.call(countedTags, tag)) {
+          countedTags[tag].count = (countedTags[tag].count ?? 0) + 1;
+        } else {
+          // If it doesn't exist on the current list of tags, add it and initialize its count
+          countedTags[tag] = { name: tag, value: '', count: 1 };
+        }
+      }
+    }
+  }
 }
 
 /**
