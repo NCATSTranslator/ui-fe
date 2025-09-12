@@ -439,7 +439,7 @@ export const calculateFacetCounts = (
     // Determine the distance between a result's facets and the facet selection
     const resultFamilies = new Set();
     for (const facet of activeFacets) {
-      if (!!facet.id && Object.keys(result.tags).includes(facet.id)) {
+      if (!!facet.id && !!result.tags[facet.id]) {
         resultFamilies.add(filtering.filterFamily(facet));
       }
     }
