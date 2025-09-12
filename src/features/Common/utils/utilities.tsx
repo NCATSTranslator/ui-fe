@@ -386,8 +386,8 @@ export const getLastItemInArray = <T,>(arr: T[]): T | undefined => {
  * @param {string} varID - The ID of the query variable to retrieve.
  * @returns {string | null} - The value of the query variable, or null if the variable is not found.
  */
-export const getDataFromQueryVar = (varID: string) => {
-  const dataValue = new URLSearchParams(window.location.search).get(varID);
+export const getDataFromQueryVar = (varID: string, decodedParams: string) => {
+  const dataValue = new URLSearchParams(decodedParams).get(varID);
   const valueToReturn = (dataValue) ? dataValue : null;
   return valueToReturn;
 }

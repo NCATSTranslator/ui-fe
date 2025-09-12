@@ -29,7 +29,7 @@ const App = ({children}: {children?: ReactNode}) => {
   if(location.pathname.includes('/projects/'))
     additionalClasses += 'project-detail';
 
-  const initFeedbackModalOpen = getDataFromQueryVar("fm") === "true";
+  const initFeedbackModalOpen = getDataFromQueryVar("fm", window.location.search) === "true";
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(initFeedbackModalOpen);
   const handleModalClose = () => {
     setFeedbackModalOpen(false);

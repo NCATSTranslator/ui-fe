@@ -72,6 +72,7 @@ const QueryBar: FC<QueryBarProps> = ({
           className={styles.autocompleteInput}
           onClearAutocomplete={onClearAutocomplete}
           onClear={onClearQueryItem}
+          disabled={disabled}
         />
         <Button type='submit' className={styles.submitButton} iconOnly disabled={isLoading}>
           {

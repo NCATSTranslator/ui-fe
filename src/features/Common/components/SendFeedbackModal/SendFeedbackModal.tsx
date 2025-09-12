@@ -107,8 +107,8 @@ const SendFeedbackModal = ({ isOpen, onClose }: SendFeedbackModalProps) => {
   };
 
   const buildPayload = useCallback(() => ({
-    url: encodeURI(decodeURIComponent(getDataFromQueryVar("link") || "")),
-    ars_pk: getDataFromQueryVar("q"),
+    url: encodeURI(decodeURIComponent(getDataFromQueryVar("link", window.location.search) || "")),
+    ars_pk: getDataFromQueryVar("q", window.location.search),
     description: form.comments,
     reproduction_steps: form.steps,
     type: form.category,
