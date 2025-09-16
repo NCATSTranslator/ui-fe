@@ -4,7 +4,7 @@ type SidebarItemId = 'newQuery' | 'projects' | 'queries' | 'projectsPanel' | 'fi
 
 export type SidebarContextValue = {
   collapsed: boolean;
-  activePanel: SidebarItemId | 'none';
+  activePanelId: SidebarItemId | 'none';
   dynamicSidebarItems: SidebarItem[];
   setCollapsed: (v: boolean) => void;
   togglePanel: (id: SidebarItemId) => void;
@@ -26,8 +26,8 @@ export type SidebarItem = {
   to?: string;
   onClick?: () => void;
   icon: ReactNode;
+  panelComponent?: ReactNode;
   tooltipText?: string;
-  requiresRoute?: string;
 };
 
 export type SidebarRegistrationOptions = {

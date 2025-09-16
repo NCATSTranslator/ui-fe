@@ -3,7 +3,7 @@ import { SidebarContextValue, SidebarItemId, SidebarItem } from "@/features/Side
 
 export const SidebarContext = createContext<SidebarContextValue>({
   collapsed: true,
-  activePanel: 'none',
+  activePanelId: 'none',
   dynamicSidebarItems: [],
   setCollapsed: () => {},
   togglePanel: () => {},
@@ -19,7 +19,7 @@ export const SidebarContext = createContext<SidebarContextValue>({
 const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const [collapsed, setCollapsedState] = useState<boolean>(true);
-  const [activePanel, setActivePanel] = useState<SidebarContextValue['activePanel']>('none');
+  const [activePanelId, setActivePanelId] = useState<SidebarContextValue['activePanelId']>('none');
   const [dynamicSidebarItems, setDynamicSidebarItems] = useState<Map<SidebarItemId, SidebarItem>>(new Map());
   const contextPanels = useRef<Map<SidebarItemId, ReactNode>>(new Map());
 
@@ -28,16 +28,16 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }, []);
 
   const togglePanel = useCallback((id: SidebarItemId) => {
-    setActivePanel(prev => {
+    setActivePanelId(prev => {
       const shouldCollapse = prev === id;
-      const newActivePanel = shouldCollapse? 'none' : id;
+      const newActivePanelId = shouldCollapse? 'none' : id;
       setCollapsedState(shouldCollapse);
-      return newActivePanel;
+      return newActivePanelId;
     });
   }, []);
 
   const closePanel = useCallback(() => {
-    setActivePanel('none');
+    setActivePanelId('none');
     setCollapsedState(true);
   }, []);
 
@@ -71,7 +71,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const value: SidebarContextValue = useMemo(() => ({
     collapsed,
-    activePanel,
+    activePanelId,
     dynamicSidebarItems: Array.from(dynamicSidebarItems.values()),
     setCollapsed,
     togglePanel,
@@ -84,7 +84,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     getContextPanel,
   }), [
     collapsed,
-    activePanel,
+    activePanelId,
     dynamicSidebarItems,
     setCollapsed,
     togglePanel,

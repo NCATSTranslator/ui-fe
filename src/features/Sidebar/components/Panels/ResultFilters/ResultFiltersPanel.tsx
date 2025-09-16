@@ -1,6 +1,6 @@
 
 
-const PanelResultFilters = () => {
+const ResultFiltersPanel = () => {
   return (
     <div>
       <p>Result Filters</p>
@@ -8,4 +8,4 @@ const PanelResultFilters = () => {
   );
 };
 
-export default PanelResultFilters;
+export default ResultFiltersPanel;

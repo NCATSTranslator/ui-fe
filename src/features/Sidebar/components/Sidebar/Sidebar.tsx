@@ -7,9 +7,9 @@ import SidebarLinkList from "@/features/Sidebar/components/SidebarLinkList/Sideb
 import ContextPanel from "@/features/Sidebar/components/ContextPanel/ContextPanel";
 
 const Sidebar = () => {
-  const { collapsed, activePanel, dynamicSidebarItems, getContextPanel } = useSidebar();
+  const { collapsed, activePanelId, dynamicSidebarItems, getContextPanel } = useSidebar();
   const allSidebarItems = useMemo(() => [...topItems, ...dynamicSidebarItems, ...bottomItems], [dynamicSidebarItems]);
-  const activePanelItem = useMemo(() => allSidebarItems.find(item => item.id === activePanel), [allSidebarItems, activePanel]);
+  const activeSidebarItem = useMemo(() => allSidebarItems.find(item => item.id === activePanelId), [allSidebarItems, activePanelId]);
 
   return (
     <aside className={joinClasses(styles.sidebar, collapsed && styles.collapsed)} aria-label="Sidebar">
@@ -38,10 +38,10 @@ const Sidebar = () => {
       </div>
       <div className={styles.activePanel}>
         {
-          activePanel !== 'none' &&
+          activePanelId !== 'none' &&
           <ContextPanel
-            panel={getContextPanel(activePanel)}
-            title={activePanelItem?.label || ''}
+            panel={activeSidebarItem?.panelComponent || getContextPanel(activePanelId)}
+            title={activeSidebarItem?.label || ''}
           />
         }
       </div>

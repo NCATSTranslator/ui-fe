@@ -33,8 +33,7 @@
     }
   }
   .activePanel {
-    width: calc(260px - ($s * 2));
-    padding: $s;
+    width: 260px;
     opacity: 1;
     transition: $defaultAnim;
   }
