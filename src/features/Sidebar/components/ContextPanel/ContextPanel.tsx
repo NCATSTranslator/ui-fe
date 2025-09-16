@@ -16,14 +16,16 @@ const ContextPanel: FC<ContextPanelProps> = ({ panel, title }) => {
     <div className={styles.contextPanel}>
       <div className={styles.header}>
         <h6 className={styles.title}>{title}</h6>
-        <Button 
+        <Button
           handleClick={closePanel}
           iconLeft={<CloseIcon />}
           iconOnly
           variant="secondary"
         />
       </div>
-      {panel}
+      <div className={styles.content}>
+        {panel}
+      </div>
     </div>
   );
 };
