@@ -1,11 +1,8 @@
-import { commonQueryClientOptions } from "@/features/Common/utils/utilities";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSidebarRegistration } from "@/features/Sidebar/hooks/sidebarHooks";
 import ResultList from "@/features/ResultList/components/ResultList/ResultList";
 import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
 import ResultFiltersPanel from "@/features/Sidebar/components/Panels/ResultFilters/ResultFiltersPanel";
 
-const queryClient = new QueryClient(commonQueryClientOptions);
 
 const Results = () => {
 
@@ -21,9 +18,7 @@ const Results = () => {
 
   return (
     <div>
-      <QueryClientProvider client={queryClient}>
-        <ResultList />
-      </QueryClientProvider>
+      <ResultList />
     </div>
   );
 }

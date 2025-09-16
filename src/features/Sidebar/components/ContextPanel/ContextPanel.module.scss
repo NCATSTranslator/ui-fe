@@ -1,6 +1,9 @@
 @use "@/assets/styles/variables" as *;
 
 .contextPanel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
   .header {
     display: flex;
     justify-content: space-between;
@@ -17,5 +20,6 @@
   }
   .content {
     padding: 0 $s $s;
+    position: relative;
   }
 }

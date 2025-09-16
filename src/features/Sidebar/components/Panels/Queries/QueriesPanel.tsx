@@ -1,16 +1,18 @@
 import styles from "./QueriesPanel.module.scss";
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
+import { useUserQueries } from "@/features/Projects/hooks/customHooks";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
-import QueryHistoryList from "@/features/History/components/QueryHistoryList/QueryHistoryList";
-
+import SidebarQueryCard from "@/features/Sidebar/components/SidebarQueryCard/SidebarQueryCard";
+import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 
 const QueriesPanel = () => {
   const user = useSelector(currentUser);
+  const { data: queries = [], isLoading: queriesLoading } = useUserQueries();
 
   return (
-    <div>
+    <div className={styles.queriesPanel}>
       <div className={styles.top}>
         <TextInput iconLeft={<SearchIcon />} handleChange={() => {}} placeholder="Search Queries" />
       </div>
@@ -23,7 +25,11 @@ const QueriesPanel = () => {
               </p>
             </div>
           ) : (
-            <QueryHistoryList loading={false} />
+            <LoadingWrapper loading={queriesLoading} contentClassName={styles.queriesList}>
+              {queries.map((query) => (
+                <SidebarQueryCard key={query.data.qid} query={query} />
+              ))}
+            </LoadingWrapper>
           )
         }
       </div>
