@@ -1,5 +1,6 @@
 import { useEffect, useState, FormEvent } from 'react';
-import { defaultPrefs, prefKeyToString, updateUserPreferences } from '@/features/UserAuth/utils/userApi';
+import { prefKeyToString, updateUserPreferences } from '@/features/UserAuth/utils/userApi';
+import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
 import { useSelector, useDispatch } from 'react-redux';
 import { currentPrefs, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';

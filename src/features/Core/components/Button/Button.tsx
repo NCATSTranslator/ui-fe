@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface ButtonProps {
+  ariaLabel?: string;
   variant?: "secondary";
   handleClick?: (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   href?: string;
@@ -24,6 +25,7 @@ interface ButtonProps {
 }
 
 const Button: FC<ButtonProps> = ({
+  ariaLabel,
   variant,
   handleClick,
   href,
@@ -66,6 +68,7 @@ const Button: FC<ButtonProps> = ({
       ...commonProps,
       to: href,
       rel: rel,
+      'aria-label': ariaLabel || '',
       ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
     };
     return link 

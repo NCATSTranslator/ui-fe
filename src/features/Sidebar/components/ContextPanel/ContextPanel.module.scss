@@ -1,0 +1,13 @@
+@use "@/assets/styles/variables" as *;
+
+.contextPanel {
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .title {
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { ReactNode, KeyboardEvent, forwardRef, useImperativeHandle, useRef, RefObject } from 'react';
 import styles from './Tab.module.scss';
-import { joinClasses } from '../../utils/utilities';
+import { joinClasses } from '@/features/Common/utils/utilities';
 
 export interface TabProps {
   heading: string;

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { defaultPrefs } from '@/features/UserAuth/utils/userApi';
+import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
 import { Config, UserState, PreferencesContainer, User } from '@/features/UserAuth/types/user';
 
 const initialState: UserState = {

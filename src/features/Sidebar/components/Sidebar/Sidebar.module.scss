@@ -1,0 +1,41 @@
+@use "@/assets/styles/variables" as *;
+
+.sidebar {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  .linkList {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    background-color: $lightGray;
+  }
+  .top {
+    & > *:first-child {
+      padding: 12px;
+      background-color: $purpleTwo;
+      svg path {
+        fill: $white;
+      }
+    }
+  }
+  .sep {
+    border-bottom: 1px solid $midGray;
+    width: $m;
+    margin: 0 auto;
+  }
+  &.collapsed {
+    .activePanel {
+      width: 0;
+      padding: $s 0;
+      opacity: 0;
+    }
+  }
+  .activePanel {
+    width: calc(260px - ($s * 2));
+    padding: $s;
+    opacity: 1;
+    transition: $defaultAnim;
+  }
+}

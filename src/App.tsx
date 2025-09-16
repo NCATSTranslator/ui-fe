@@ -1,14 +1,15 @@
 import { useState, ReactNode } from 'react';
-import Footer from '@/features/Page/components/Footer/Footer';
-import Header from '@/features/Page/components/Header/Header';
-import SmallScreenOverlay from '@/features/Common/components/SmallScreenOverlay/SmallScreenOverlay';
-import SendFeedbackModal from "@/features/Common/components/SendFeedbackModal/SendFeedbackModal";
+import './App.scss';
 import { useGoogleAnalytics, useGoogleTagManager, useWindowSize, useScrollToHash } from '@/features/Common/hooks/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import './App.scss';
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import { useFetchConfigAndPrefs, useGetSessionStatus } from '@/features/UserAuth/utils/userApi';
 import { AppToastContainer } from '@/features/Common/components/AppToastContainer/AppToastContainer';
+import Footer from '@/features/Page/components/Footer/Footer';
+import SmallScreenOverlay from '@/features/Common/components/SmallScreenOverlay/SmallScreenOverlay';
+import SendFeedbackModal from "@/features/Common/components/SendFeedbackModal/SendFeedbackModal";
+import SidebarProvider from '@/features/Sidebar/components/SidebarProvider/SidebarProvider';
+import Sidebar from '@/features/Sidebar/components/Sidebar/Sidebar';
 
 const App = ({children}: {children?: ReactNode}) => {
 
@@ -40,40 +41,44 @@ const App = ({children}: {children?: ReactNode}) => {
   useScrollToHash();
 
   return (
-    <div className={`app ${pathnameClass} ${additionalClasses}`}>
-      <AppToastContainer />
-      <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />
-      <div className='header-disclaimer'>
-        <p>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
+    <SidebarProvider>
+      <div className={`app ${pathnameClass} ${additionalClasses}`}>
+        <AppToastContainer />
+        <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />
+        <div className='layout'>
+          <Sidebar />
+          <main className='content scrollable'>
+            <div className='header-disclaimer'>
+              <p>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
+            </div>
+            {
+              children && children
+            }
+            {
+              (width && width < minScreenWidth) && <SmallScreenOverlay /> 
+            }
+            <Outlet context={setFeedbackModalOpen}/>
+            <Footer>
+              <nav>
+                <a
+                  href="https://ncats.nih.gov/translator/about"
+                  rel="noreferrer"
+                  target="_blank"
+                >About Translator</a>
+                <NavLink to={`/terms-of-use`}
+                  className={({isActive}) => {return (isActive) ? 'active' : '' }}
+                >Terms of Use</NavLink>
+                <a
+                  href="https://ncats.nih.gov/privacy"
+                  rel="noreferrer"
+                  target="_blank"
+                >Privacy Policy</a>
+              </nav>
+            </Footer>
+          </main>
+        </div>
       </div>
-      <Header />
-      <div className='body'>
-        {
-          children && children
-        }
-        {
-          (width && width < minScreenWidth) && <SmallScreenOverlay /> 
-        }
-        <Outlet context={setFeedbackModalOpen}/>
-      </div>
-      <Footer>
-        <nav>
-          <a
-            href="https://ncats.nih.gov/translator/about"
-            rel="noreferrer"
-            target="_blank"
-          >About Translator</a>
-          <NavLink to={`/terms-of-use`}
-            className={({isActive}) => {return (isActive) ? 'active' : '' }}
-          >Terms of Use</NavLink>
-          <a
-            href="https://ncats.nih.gov/privacy"
-            rel="noreferrer"
-            target="_blank"
-          >Privacy Policy</a>
-        </nav>
-      </Footer>
-    </div>
+    </SidebarProvider>
   );
 }
 

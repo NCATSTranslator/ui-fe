@@ -22,7 +22,8 @@ import ListMaxIndentLevelPlugin from "./plugins/ListMaxIndentLevelPlugin";
 import CodeHighlightPlugin from "./plugins/CodeHighlightPlugin";
 import CustomAutoLinkPlugin from "./plugins/CustomAutoLinkPlugin";
 import OnChangePlugin from "./plugins/OnChangePlugin";
-import { getUserSave, updateUserSave, emptyEditor, Save } from "@/features/UserAuth/utils/userApi";
+import { getUserSave, updateUserSave, Save } from "@/features/UserAuth/utils/userApi";
+import { emptyEditor } from "@/features/UserAuth/utils/userDefaults";
 import { debounce } from "lodash";
 
 interface TextEditorProps {
