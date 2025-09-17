@@ -12,9 +12,7 @@ export type SidebarContextValue = {
   registerSidebarItem: (id: SidebarItemId, item: SidebarItem) => void;
   unregisterSidebarItem: (id: SidebarItemId) => void;
   getSidebarItem: (id: SidebarItemId) => SidebarItem | null;
-  registerContextPanel: (id: SidebarItemId, node: ReactNode) => void;
-  unregisterContextPanel: (id: SidebarItemId) => void;
-  getContextPanel: (id: SidebarItemId) => ReactNode | null;
+  getContextPanel: (sidebarItem: SidebarItem) => ReactNode | null;
 };
 
 

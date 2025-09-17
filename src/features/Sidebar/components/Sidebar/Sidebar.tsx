@@ -38,10 +38,10 @@ const Sidebar = () => {
       </div>
       <div className={styles.activePanel}>
         {
-          activePanelId !== 'none' &&
+          activeSidebarItem &&
           <ContextPanel
-            panel={activeSidebarItem?.panelComponent || getContextPanel(activePanelId)}
-            title={activeSidebarItem?.label || ''}
+            panel={activeSidebarItem && getContextPanel(activeSidebarItem)}
+            title={activeSidebarItem.label || ''}
           />
         }
       </div>

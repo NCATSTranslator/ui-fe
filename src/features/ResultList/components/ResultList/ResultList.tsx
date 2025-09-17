@@ -41,6 +41,8 @@ import { generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 import { getDecodedParams } from '@/features/Common/utils/web';
+import { useSidebarRegistration } from "@/features/Sidebar/hooks/sidebarHooks";
+import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
 
 const ResultList = () => {
 
@@ -642,6 +644,24 @@ const ResultList = () => {
       handleNewResults(freshRawResults);
     setFreshRawResults(null);
   }
+
+  useSidebarRegistration({
+    ariaLabel: "Filters",
+    icon: <FilterIcon />,
+    id: 'filters',
+    label: "Filters",
+    panelComponent: <ResultsFilter
+      activeFilters={activeFilters}
+      onFilter={handleFilter}
+      onClearAll={handleClearAllFilters}
+      expanded={filtersExpanded}
+      setExpanded={setFiltersExpanded}
+      availableFilters={availableFilters}
+      isPathfinder={isPathfinder}
+    />,
+    tooltipText: "Filters",
+    // autoOpen: true // Uncomment to auto-open when landing on Results
+  });
 
   return (
     <QueryClientProvider client={queryClient}>

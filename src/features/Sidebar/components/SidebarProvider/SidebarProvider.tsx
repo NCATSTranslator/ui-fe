@@ -11,8 +11,6 @@ export const SidebarContext = createContext<SidebarContextValue>({
   registerSidebarItem: () => {},
   unregisterSidebarItem: () => {},
   getSidebarItem: () => null,
-  registerContextPanel: () => {},
-  unregisterContextPanel: () => {},
   getContextPanel: () => null,
 });
 
@@ -21,7 +19,6 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [collapsed, setCollapsedState] = useState<boolean>(true);
   const [activePanelId, setActivePanelId] = useState<SidebarContextValue['activePanelId']>('none');
   const [dynamicSidebarItems, setDynamicSidebarItems] = useState<Map<SidebarItemId, SidebarItem>>(new Map());
-  const contextPanels = useRef<Map<SidebarItemId, ReactNode>>(new Map());
 
   const setCollapsed = useCallback((v: boolean) => {
     setCollapsedState(v);
@@ -57,16 +54,9 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return dynamicSidebarItems.get(id) ?? null;
   }, [dynamicSidebarItems]);
 
-  const registerContextPanel = useCallback((id: SidebarItemId, node: ReactNode) => {
-    contextPanels.current.set(id, node);
-  }, []);
-
-  const unregisterContextPanel = useCallback((id: SidebarItemId) => {
-    contextPanels.current.delete(id);
-  }, []);
-
-  const getContextPanel = useCallback((id: SidebarItemId) => {
-    return contextPanels.current.get(id) ?? null;
+  const getContextPanel = useCallback((sidebarItem: SidebarItem) => {
+    return sidebarItem.panelComponent || null;
+    // return contextPanels.current.get(sidebarItem.id) ?? null;
   }, []);
 
   const value: SidebarContextValue = useMemo(() => ({
@@ -79,8 +69,6 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     registerSidebarItem,
     unregisterSidebarItem,
     getSidebarItem,
-    registerContextPanel,
-    unregisterContextPanel,
     getContextPanel,
   }), [
     collapsed,
@@ -92,8 +80,6 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     registerSidebarItem,
     unregisterSidebarItem,
     getSidebarItem,
-    registerContextPanel,
-    unregisterContextPanel,
     getContextPanel,
   ]);
 

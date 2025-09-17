@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef } from "react";
 import { SidebarContext } from "@/features/Sidebar/components/SidebarProvider/SidebarProvider";
 import { SidebarItem, SidebarRegistrationOptions } from "@/features/Sidebar/types/sidebar";
+import { isEqual } from "lodash";
 
 /**
  * Custom hook for accessing the sidebar context
@@ -15,18 +16,15 @@ export const useSidebar = () => useContext(SidebarContext);
  * @param options - Configuration for the sidebar item registration
  */
 export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
-  const { 
-    registerSidebarItem, 
-    unregisterSidebarItem, 
-    registerContextPanel, 
-    unregisterContextPanel,
-    togglePanel 
+  const {
+    registerSidebarItem,
+    unregisterSidebarItem,
+    togglePanel
   } = useSidebar();
   
   // Use ref to store options to avoid dependency on options object changing
   const optionsRef = useRef(options);
   optionsRef.current = options;
-  
   // Track if we've already registered to prevent duplicate registrations
   const hasBeenRegistered = useRef(false);
 
@@ -43,22 +41,19 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
     
     // Create the sidebar item
     const sidebarItem: SidebarItem = {
+      ariaLabel: ariaLabel || tooltipText,
+      icon,
       id,
       label,
-      type,
-      to,
       onClick,
-      icon,
+      panelComponent,
+      to,
       tooltipText,
-      ariaLabel: ariaLabel || tooltipText,
+      type
     };
 
     // Register the sidebar item
     registerSidebarItem(id, sidebarItem);
-    
-    // If it has a panel component, register the panel
-    if (panelComponent)
-      registerContextPanel(id, panelComponent);
     
     // Auto-open the panel if specified
     if (autoOpen && type === 'panel')
@@ -69,9 +64,6 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
     // Cleanup function
     return () => {
       unregisterSidebarItem(id);
-      if (panelComponent) {
-        unregisterContextPanel(id);
-      }
       hasBeenRegistered.current = false;
     };
   }, []);
