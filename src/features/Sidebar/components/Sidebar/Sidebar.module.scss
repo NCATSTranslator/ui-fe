@@ -1,6 +1,5 @@
 @use "@/assets/styles/variables" as *;
 
-$panelWidth: 292px;
 .sidebar {
   height: 100vh;
   display: grid;
@@ -37,5 +36,6 @@ $panelWidth: 292px;
     width: $panelWidth;
     opacity: 1;
     transition: $defaultAnim;
+    overflow: hidden;
   }
 }

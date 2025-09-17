@@ -15,7 +15,6 @@ export type SidebarContextValue = {
   getContextPanel: (sidebarItem: SidebarItem) => ReactNode | null;
 };
 
-
 export type SidebarItem = {
   ariaLabel?: string;
   id: SidebarItemId;
@@ -25,6 +24,7 @@ export type SidebarItem = {
   onClick?: () => void;
   icon: ReactNode;
   panelComponent?: ReactNode;
+  panelComponentFactory?: () => ReactNode;
   tooltipText?: string;
 };
 
@@ -32,10 +32,11 @@ export type SidebarRegistrationOptions = {
   id: SidebarItemId;
   to?: string;
   onClick?: () => void;
-  panelComponent?: ReactNode;
+  panelComponent?: ReactNode | (() => ReactNode);
   icon: ReactNode;
   tooltipText: string;
   label: string;
   ariaLabel?: string;
   autoOpen?: boolean;
+  dependencies?: readonly unknown[];
 }

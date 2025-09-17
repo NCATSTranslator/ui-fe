@@ -13,7 +13,7 @@ const ContextPanel: FC<ContextPanelProps> = ({ panel, title }) => {
   const { closePanel } = useSidebar();
 
   return (
-    <div className={styles.contextPanel}>
+    <div className={`${styles.contextPanel} scrollable`}>
       <div className={styles.header}>
         <h6 className={styles.title}>{title}</h6>
         <Button

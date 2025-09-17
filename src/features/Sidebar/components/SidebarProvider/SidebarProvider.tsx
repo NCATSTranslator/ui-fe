@@ -1,4 +1,4 @@
-import { FC, ReactNode, createContext, useCallback, useMemo, useRef, useState } from "react";
+import { FC, ReactNode, createContext, useCallback, useMemo, useState } from "react";
 import { SidebarContextValue, SidebarItemId, SidebarItem } from "@/features/Sidebar/types/sidebar";
 
 export const SidebarContext = createContext<SidebarContextValue>({
@@ -55,8 +55,12 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }, [dynamicSidebarItems]);
 
   const getContextPanel = useCallback((sidebarItem: SidebarItem) => {
+    // If there's a factory function, call it to get the dynamic component
+    if (sidebarItem.panelComponentFactory) {
+      return sidebarItem.panelComponentFactory();
+    }
+    // Otherwise return the static component
     return sidebarItem.panelComponent || null;
-    // return contextPanels.current.get(sidebarItem.id) ?? null;
   }, []);
 
   const value: SidebarContextValue = useMemo(() => ({

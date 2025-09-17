@@ -3,7 +3,8 @@
 .contextPanel {
   display: grid;
   grid-template-rows: auto 1fr;
-  height: 100%;
+  height: 100vh;
+  overflow-x: hidden;
   .header {
     display: flex;
     justify-content: space-between;
@@ -21,5 +22,6 @@
   .content {
     padding: 0 $s $s;
     position: relative;
+    width: calc($panelWidth - ($s*2));
   }
 }
