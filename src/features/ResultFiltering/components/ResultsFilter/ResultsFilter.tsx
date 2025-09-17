@@ -12,7 +12,6 @@ import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
 interface ResultsFilterProps {
   activeFilters: Filter[];
   availableFilters: {[key: string]: Filter};
-  expanded?: boolean;
   isPathfinder?: boolean;
   onFilter: (arg0: Filter) => void;
   onClearAll: () => void;
@@ -22,19 +21,10 @@ interface ResultsFilterProps {
 const ResultsFilter: FC<ResultsFilterProps> = ({
   activeFilters,
   availableFilters,
-  expanded = false,
   isPathfinder = false,
   onFilter,
   onClearAll,
   setExpanded = () => {} }) => {
-
-  const [isExpanded, setIsExpanded] = useState(expanded);
-  const toggleIsExpanded = () => {
-    setIsExpanded(prev => {
-      setExpanded(!prev);
-      return !prev;
-    });
-  }
 
   // returns a new object with each tag grouped by its type
   const groupFilters = (filters: {[key: string]: Filter}, type: FilterType): GroupedFilters => {
@@ -72,17 +62,11 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
     // pt: (a: [string, Filter], b: [string, Filter]) => -(a[1].name.localeCompare(b[1].name))
   };
 
-  useEffect(() => { 
-    setIsExpanded(expanded); 
-  }, [expanded]);
-
   return (
-    <div className={`${styles.resultsFilter} ${isExpanded ? styles.expanded : styles.collapsed}`} onClick={()=>(!isExpanded) ? toggleIsExpanded() : ()=>{}}>
+    <div className={`${styles.resultsFilter}`}>
       <div className={styles.top}>
-        <p className={styles.heading} onClick={()=>(isExpanded) ? toggleIsExpanded() : ()=>{}} ><FilterIcon/><span>Filters</span></p>
         <div className={styles.right}>
           <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
-          <Button className={styles.closeButton} iconOnly><CloseIcon onClick={toggleIsExpanded}/></Button>
         </div>
       </div>
       <div className={styles.bottom}>

@@ -650,16 +650,22 @@ const ResultList = () => {
     icon: <FilterIcon />,
     id: 'filters',
     label: "Filters",
-    panelComponent: <ResultsFilter
-      activeFilters={activeFilters}
-      onFilter={handleFilter}
-      onClearAll={handleClearAllFilters}
-      expanded={filtersExpanded}
-      setExpanded={setFiltersExpanded}
-      availableFilters={availableFilters}
-      isPathfinder={isPathfinder}
-    />,
+    panelComponent: () => (
+      <ResultsFilter
+        activeFilters={activeFilters}
+        onFilter={handleFilter}
+        onClearAll={handleClearAllFilters}
+        setExpanded={setFiltersExpanded}
+        availableFilters={availableFilters}
+        isPathfinder={isPathfinder}
+      />
+    ),
     tooltipText: "Filters",
+    dependencies: [
+      activeFilters,
+      availableFilters,
+      isPathfinder
+    ],
     // autoOpen: true // Uncomment to auto-open when landing on Results
   });
 
@@ -731,15 +737,6 @@ const ResultList = () => {
           {
             !isLoading &&
             <>
-              <ResultsFilter
-                activeFilters={activeFilters}
-                onFilter={handleFilter}
-                onClearAll={handleClearAllFilters}
-                expanded={filtersExpanded}
-                setExpanded={setFiltersExpanded}
-                availableFilters={availableFilters}
-                isPathfinder={isPathfinder}
-              />
               <div>
                 <ResultListHeader
                   data={{
@@ -759,8 +756,6 @@ const ResultList = () => {
                     ResultListStyles: styles,
                     pageCount: pageCount,
                     handlePageClick: handlePageClick,
-                    filtersExpanded: filtersExpanded,
-                    setFiltersExpanded: setFiltersExpanded
                   }}
                 />
                 <div className={`${styles.resultsTableContainer} ${isPathfinder ? styles.pathfinder : ''}`}>
