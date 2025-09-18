@@ -1,0 +1,41 @@
+@use "@/assets/styles/variables" as *;
+
+
+.sidebarProjectCard {
+  padding: $xs;
+  display: grid;
+  gap: $xxs;
+  grid-template-columns: auto 1fr;
+  .title {
+    margin-bottom: 0;
+    font-size: $bodyTwoSize;
+    font-weight: 800;
+  }
+  .count,.type {
+    font-size: $captionSize;
+    font-weight: 400;
+    color: $darkGray;
+  }
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    .saves {
+      display: flex;
+      gap: $xxs;
+      .count {
+        display: flex;
+        align-items: center;
+        gap: $xxs;
+        svg {
+          width: 15px;
+          height: 15px;
+          path {
+            fill: $darkGray;
+          }
+        }
+      }
+    }
+  }
+
+}
