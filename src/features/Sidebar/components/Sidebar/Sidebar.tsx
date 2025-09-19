@@ -17,20 +17,15 @@ const Sidebar = () => {
         <nav className={styles.top} aria-label="Global navigation">
           <SidebarLinkList items={topItems} />
           <div className={styles.sep} />
+          <div className={styles.middle} aria-label="Page-specific links">
+            {
+              dynamicSidebarItems && dynamicSidebarItems.length > 0 && 
+              (
+                <SidebarLinkList items={dynamicSidebarItems} />
+              )
+            }
+          </div>
         </nav>
-        <div className={styles.middle} aria-label="Page-specific links">
-        {
-          dynamicSidebarItems && dynamicSidebarItems.length > 0 && 
-          (
-            <SidebarLinkList items={dynamicSidebarItems} />
-          )
-        }
-          {/* Context-specific: e.g., filters on Results route */}
-          {/* {getContextPanel('filters')} */}
-          {/* Global panels: only show when active */}
-          {/* {activePanel === 'projects' && <ProjectsQuickList />} */}
-          {/* {activePanel === 'settings' && <SettingsQuickPanel />} */}
-        </div>
         <nav className={styles.bottom} aria-label="Bottom navigation">
           <div className={styles.sep} />
           <SidebarLinkList items={bottomItems} />
