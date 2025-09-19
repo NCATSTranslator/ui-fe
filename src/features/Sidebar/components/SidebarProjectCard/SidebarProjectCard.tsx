@@ -4,6 +4,7 @@ import { Project } from "@/features/Projects/types/projects";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
+import { Link } from "react-router-dom";
 
 interface SidebarProjectCardProps {
   project: Project;
@@ -17,7 +18,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project }) => {
         <FolderIcon/>
       </div>
       <div>
-        <p className={styles.title}>{project.data.title}</p>
+        <Link className={styles.title} to={`/projects/${project.id}`}>{project.data.title}</Link>
         <div className={styles.bottom}>
           <div className={styles.saves}>
             <span className={styles.count}><BookmarkIcon />{project.bookmark_count}</span>

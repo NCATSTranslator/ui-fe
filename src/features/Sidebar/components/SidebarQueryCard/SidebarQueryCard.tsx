@@ -1,5 +1,6 @@
 import { FC } from "react";
 import styles from "./SidebarQueryCard.module.scss";
+import { Link } from "react-router-dom";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
@@ -21,7 +22,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query }) => {
       <StatusIndicator status={query.status} />
       </div>
       <div>
-        <a className={styles.title} href={`${queryURL}`} target="_blank">{queryCardTitle}</a>
+        <Link className={styles.title} to={`${queryURL}`} target="_blank">{queryCardTitle}</Link>
         <div className={styles.bottom}>
           <span className={styles.type}>{query.data.query.type === 'pathfinder' ? 'Pathfinder Query' : 'Smart Query'}</span>
           <div className={styles.saves}>
