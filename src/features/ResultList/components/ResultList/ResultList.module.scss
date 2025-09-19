@@ -5,7 +5,6 @@
   padding: 0 0 $s;
   .resultsContainer {
     display: grid;
-    grid-template-columns: auto 1fr;
     column-gap: $l;
     align-items: flex-start;
     position: relative;
