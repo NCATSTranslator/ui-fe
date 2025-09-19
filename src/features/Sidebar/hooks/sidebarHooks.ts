@@ -1,6 +1,8 @@
-import { useContext, useEffect, useRef, ReactNode } from "react";
+import { useContext, useEffect, useRef, ReactNode, useMemo } from "react";
 import { SidebarContext } from "@/features/Sidebar/components/SidebarProvider/SidebarProvider";
 import { SidebarItem, SidebarRegistrationOptions } from "@/features/Sidebar/types/sidebar";
+import { UserQueryObject } from "@/features/Projects/types/projects";
+import { useGetQueriesUpdatedTitles } from "@/features/Projects/hooks/customHooks";
 
 /**
  * Custom hook for accessing the sidebar context
@@ -73,3 +75,16 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
   }, options.dependencies || []); // Re-register when dependencies change
 };
 
+/**
+ * Custom hook for filtering queries based on a search term
+ * @param {UserQueryObject[]} queries - The queries to filter
+ * @param {string} searchTerm - The search term to filter by
+ * @returns {UserQueryObject[]} The filtered queries
+ */
+export const useFilteredQueries = (queries: UserQueryObject[], searchTerm: string) => {
+  const { queries: queriesWithTitles } = useGetQueriesUpdatedTitles(queries);
+
+  return useMemo(() => queriesWithTitles.filter((query) => {
+    return query.data.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
+  }), [queriesWithTitles, searchTerm]);
+};

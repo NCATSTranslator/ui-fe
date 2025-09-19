@@ -4,6 +4,7 @@ import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQ
   restoreProjects, restoreQueries, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection } from '@/features/Projects/types/projects.d';
 import { fetcNodeNameFromCurie, generateQueryTitle, findAllCuriesInTitle } from '@/features/Projects/utils/utilities';
+import { getBaseTitle, extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, createUpdatedQueryWithTitle } from '@/features/Projects/utils/queryTitleUtils';
 import { useSelector } from 'react-redux';
 import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 
@@ -413,7 +414,7 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
 export const useGetQueryCardTitle = (query: UserQueryObject): { title: string; isLoading: boolean } => {
   const updateQueryMutation = useUpdateQuery();
   const baseTitle = useMemo(() => 
-    query.data.title || generateQueryTitle(query), 
+    getBaseTitle(query), 
     [query]
   );
   
@@ -428,29 +429,69 @@ export const useGetQueryCardTitle = (query: UserQueryObject): { title: string; i
   );
   
   const title = useMemo(() => {
-    if (curies.length > 0 && Object.keys(resolvedNames).length > 0) {
-      let newTitle = baseTitle;
-      
-      // Replace each curie with its resolved name
-      curies.forEach(curie => {
-        const resolvedName = resolvedNames[curie];
-        if (resolvedName && resolvedName !== curie) {
-          newTitle = newTitle.replace(curie, resolvedName);
-        }
-      });
-      
-      // Only update if we actually made replacements
-      if (newTitle !== baseTitle) {
-        // call update query endpoint
-        // updateQueryMutation.mutate({
-        //   id: query.sid,
-        //   title: newTitle
-        // });
-        return newTitle;
-      }
+    const updatedTitle = replaceCuriesInTitle(baseTitle, resolvedNames);
+    
+    // Only update if we actually made replacements
+    if (hasTitleBeenUpdated(baseTitle, updatedTitle)) {
+      // call update query endpoint
+      // updateQueryMutation.mutate({
+      //   id: query.sid,
+      //   title: updatedTitle
+      // });
+      return updatedTitle;
     }
+    
     return baseTitle;
   }, [curies, resolvedNames, baseTitle, updateQueryMutation, query.sid]);
   
   return { title, isLoading };
+};
+
+/**
+ * Hook to get queries with updated titles for multiple queries with async curie name resolution
+ * @param {UserQueryObject[]} queries - Array of query objects
+ * @returns { queries: UserQueryObject[]; isLoading: boolean } Array of query objects with updated titles and loading state
+ */
+export const useGetQueriesUpdatedTitles = (queries: UserQueryObject[]): { queries: UserQueryObject[]; isLoading: boolean } => {
+  const updateQueryMutation = useUpdateQuery();
+  
+  const baseTitles = useMemo(() => 
+    queries.reduce((acc, query) => {
+      acc[query.data.qid] = getBaseTitle(query);
+      return acc;
+    }, {} as Record<string, string>), 
+    [queries]
+  );
+  
+  const allCuries = useMemo(() => 
+    extractAllCuriesFromTitles(Object.values(baseTitles)), 
+    [baseTitles]
+  );
+  
+  const { data: resolvedNames, isLoading } = useMultipleResolvedCurieNames(
+    allCuries,
+    allCuries.length > 0
+  );
+  
+  const updatedQueries = useMemo(() => {
+    return queries.map(query => {
+      const baseTitle = baseTitles[query.data.qid];
+      const updatedTitle = replaceCuriesInTitle(baseTitle, resolvedNames);
+      
+      // Only update if we actually made replacements
+      if (hasTitleBeenUpdated(baseTitle, updatedTitle)) {
+        // call update query endpoint
+        // updateQueryMutation.mutate({
+        //   id: query.sid,
+        //   title: updatedTitle
+        // });
+        return createUpdatedQueryWithTitle(query, updatedTitle);
+      }
+      
+      // Return query with base title if no updates needed
+      return createUpdatedQueryWithTitle(query, baseTitle);
+    });
+  }, [queries, baseTitles, allCuries, resolvedNames, updateQueryMutation]);
+  
+  return { queries: updatedQueries, isLoading };
 };

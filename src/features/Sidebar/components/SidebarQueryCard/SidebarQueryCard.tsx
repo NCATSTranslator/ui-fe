@@ -6,18 +6,17 @@ import StatusIndicator from "@/features/Projects/components/StatusIndicator/Stat
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import { getQueryLink } from "@/features/Projects/utils/utilities";
-import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import Highlighter from "react-highlight-words";
 
 interface SidebarQueryCardProps {
   query: UserQueryObject;
   searchTerm?: string;
-  title?: string;
+  title: string;
 }
 
 const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm, title }) => {
   const queryURL = getQueryLink(query);
-  const { title: queryCardTitle } = useGetQueryCardTitle(query);
+  // const { title: queryCardTitle } = useGetQueryCardTitle(query);
 
   return (
     <div className={styles.sidebarQueryCard}>
@@ -26,11 +25,11 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm, title 
       </div>
       <div>
         <Link className={styles.title} to={`${queryURL}`} target="_blank">
-          <Highlighter
+          <Highlighter  
             highlightClassName="highlight"
             searchWords={searchTerm ? [searchTerm] : []}
             autoEscape={true}
-            textToHighlight={title || queryCardTitle}
+            textToHighlight={title}
           />
         </Link>
         <div className={styles.bottom}>
