@@ -14,7 +14,7 @@ import ChevRightIcon from '@/assets/icons/directional/Chevron/Chevron Right.svg?
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { DataCardLocation, Project, QueryStatus, UserQueryObject } from '@/features/Projects/types/projects';
 import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from '@/features/Common/utils/web';
-import { getTypeIDFromType } from '@/features/Projects/utils/utilities';
+import { getQueryLink, getTypeIDFromType } from '@/features/Projects/utils/utilities';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
 import { unableToReachLinkToast } from '@/features/Projects/utils/toastMessages';
 import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
@@ -112,38 +112,10 @@ const DataCard = <T,>({
       return;
     }
 
-    if(!isInteractive && type === 'smartQuery') {
-      const query = item as UserQueryObject;
-      const curie = query.data.query.curie || '';
-      const label = query.data.query.node_one_label || curie|| '';
-      const type = query.data.query.type;
-      const direction = query.data.query.direction || null;
-      const typeID = getTypeIDFromType(type, direction);
-      const qid = query.data.qid;
-      const path = getResultsShareURLPath(label, curie, typeID, "0", qid);
-      window.open(encodeURI(`${window.location.origin}/${path}`), "_blank", "noopener");
-      return;
-    }
-
-    if(!isInteractive && type === 'pathfinderQuery') {
-      const query = item as UserQueryObject;
-      if(query.data.query.type === 'pathfinder' && query.data.query.subject && query.data.query.object) {
-        const itemOne: AutocompleteItem = {
-          id: query.data.query.subject.id,
-          label: query.data.query.node_one_label || query.data.query.subject.id,
-          isExact: false,
-          score: 0
-        }
-        const itemTwo: AutocompleteItem = {
-          id: query.data.query.object.id,
-          label: query.data.query.node_two_label || query.data.query.object.id,
-          isExact: false,
-          score: 0
-        }
-        const constraint = query.data.query.constraint || undefined;
-        const qid = query.data.qid;
-        const path = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
-        window.open(encodeURI(`${window.location.origin}/${path}`), "_blank", "noopener");
+    if(!isInteractive && type === 'smartQuery' || type === 'pathfinderQuery') {
+      const url = getQueryLink(item as UserQueryObject);
+      if(url) {
+        window.open(encodeURI(`${url}`), "_blank", "noopener");
         return;
       }
       unableToReachLinkToast();

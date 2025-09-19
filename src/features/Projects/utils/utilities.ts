@@ -1,5 +1,8 @@
+import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/Common/utils/web";
 import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
+import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
+import { unableToReachLinkToast } from "./toastMessages";
 
 /**
  * Get the status of a project based on the most recent query's status
@@ -135,4 +138,38 @@ export const findAllCuriesInTitle = (title: string): string[] => {
   const curieRegex = /\b[A-Za-z][A-Za-z0-9_]*:[A-Za-z0-9_-]+\b/g;
   const matches = title.match(curieRegex);
   return matches || [];
+}
+
+export const getQueryLink = (query: UserQueryObject) => {
+  const qid = query.data.qid;
+
+  if(query.data.query.type === 'pathfinder' && query.data.query.subject && query.data.query.object) {
+    if(!query.data.query.subject || !query.data.query.object) {
+      unableToReachLinkToast();
+      return "";
+    }
+    const itemOne: AutocompleteItem = {
+      id: query.data.query.subject.id,
+      label: query.data.query.node_one_label || query.data.query.subject.id,
+      isExact: false,
+      score: 0
+    }
+    const itemTwo: AutocompleteItem = {
+      id: query.data.query.object.id,
+      label: query.data.query.node_two_label || query.data.query.object.id,
+      isExact: false,
+      score: 0
+    }
+    const constraint = query.data.query.constraint || undefined;
+    const path = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
+    return encodeURI(`${window.location.origin}/${path}`);
+  } else {
+    const curie = query.data.query.curie || '';
+    const label = query.data.query.node_one_label || curie|| '';
+    const type = query.data.query.type;
+    const direction = query.data.query.direction || null;
+    const typeID = getTypeIDFromType(type, direction);
+    const path = getResultsShareURLPath(label, curie, typeID, "0", qid);
+    return encodeURI(`${window.location.origin}/${path}`);
+  }
 }
