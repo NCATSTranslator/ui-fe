@@ -84,9 +84,9 @@ export const sortScoreLowHigh = (items: Result[], scoreWeights: {confidenceWeigh
   return items.sort((a: Result, b: Result) => {
     const aScore = (!!a?.score) ? a.score : generateScore(a.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
     const bScore = (!!b?.score) ? b.score : generateScore(b.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
-    if (equal(aScore.main, bScore.main)) 
+    if (equal(aScore.main, bScore.main))
       return aScore.secondary - bScore.secondary;
-    
+
     return aScore.main - bScore.main;
   });
 }
@@ -95,9 +95,9 @@ export const sortScoreHighLow = (items: Result[], scoreWeights: {confidenceWeigh
   return items.sort((a: Result, b: Result) => {
     const aScore = (!!a?.score) ? a.score : generateScore(a.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
     const bScore = (!!b?.score) ? b.score : generateScore(b.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
-    if (equal(aScore.main, bScore.main)) 
+    if (equal(aScore.main, bScore.main))
       return bScore.secondary - aScore.secondary;
-    
+
     return bScore.main - aScore.main;
   });
 }
@@ -264,7 +264,7 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
 
 export const pathRankSort = (pathRanks: PathRank[]) => {
   for (let pathRank of pathRanks) {
-    if (pathRank.support.length > 1) 
+    if (pathRank.support.length > 1)
       pathRankSort(pathRank.support);
   }
 
@@ -312,7 +312,7 @@ export const convertPathToRankedPath = (resultSet: ResultSet, path: Path): Ranke
   const transformedSubgraph = path.subgraph.map((id, i) => {
     if(isNodeIndex(i)) {
       const node = getNodeById(resultSet, id);
-      return node || defaultNode; 
+      return node || defaultNode;
     } else {
       const edge = getEdgeById(resultSet, id) || getDefaultEdge(undefined);
       return convertResultEdgeToRankedEdge(resultSet, edge);
@@ -337,13 +337,13 @@ export const genRankedPaths = (resultSet: ResultSet | null, pathRanks: PathRank[
 
 export const sortPathsByFilterState = (paths: Path[], pathFilterState: { [key: string]: boolean }): Path[] => {
   return paths.sort((a: Path, b: Path) => {
-    const aState = pathFilterState[a.id || ""] ?? false; 
-    const bState = pathFilterState[b.id || ""] ?? false; 
+    const aState = pathFilterState[a.id || ""] ?? false;
+    const bState = pathFilterState[b.id || ""] ?? false;
 
     // Keep original order if both have the same state
-    if (aState === bState) 
-      return 0; 
-    
-    return aState ? -1 : 1; 
+    if (aState === bState)
+      return 0;
+
+    return aState ? -1 : 1;
   });
 }
