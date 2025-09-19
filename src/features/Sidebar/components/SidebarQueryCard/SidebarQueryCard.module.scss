@@ -1,15 +1,18 @@
 @use "@/assets/styles/variables" as *;
 
-
 .sidebarQueryCard {
   padding: $xs;
   display: grid;
   gap: $xxs;
   grid-template-columns: auto 1fr;
-  .title {
+  .status {
+    margin-top: 3px;
+  }
+  .title, .title span, .title mark {
     margin-bottom: 0;
     font-size: $bodyTwoSize;
     font-weight: 800;
+    color: $black;
   }
   .count,.type {
     font-size: $captionSize;

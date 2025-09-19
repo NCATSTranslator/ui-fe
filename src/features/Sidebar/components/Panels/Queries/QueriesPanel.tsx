@@ -6,15 +6,18 @@ import TextInput from "@/features/Core/components/TextInput/TextInput";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import SidebarQueryCard from "@/features/Sidebar/components/SidebarQueryCard/SidebarQueryCard";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 
 const QueriesPanel = () => {
   const user = useSelector(currentUser);
   const { data: queries = [], isLoading: queriesLoading } = useUserQueries();
 
+  const { searchTerm, handleSearch } = useSimpleSearch();
+
   return (
     <div className={styles.queriesPanel}>
       <div className={styles.top}>
-        <TextInput iconLeft={<SearchIcon />} handleChange={() => {}} placeholder="Search Queries" />
+        <TextInput iconLeft={<SearchIcon />} handleChange={handleSearch} placeholder="Search Queries" />
       </div>
       <div className={styles.list}>
         {
@@ -27,7 +30,7 @@ const QueriesPanel = () => {
           ) : (
             <LoadingWrapper loading={queriesLoading} contentClassName={styles.queriesList}>
               {queries.map((query) => (
-                <SidebarQueryCard key={query.data.qid} query={query} />
+                <SidebarQueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
               ))}
             </LoadingWrapper>
           )

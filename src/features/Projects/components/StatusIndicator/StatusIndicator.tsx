@@ -10,9 +10,10 @@ import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 
 interface StatusIndicatorProps {
   status: 'warning' | 'complete' | 'running' | 'error' | 'unknown' | 'noQueries' | 'noResults';
+  className?: string;
 }
 
-const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
+const StatusIndicator: FC<StatusIndicatorProps> = ({ status, className }) => {
 
   const FADE_DELAY = 100;
   const FADE_DURATION = 500;
@@ -20,7 +21,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   if(status === 'complete') {
     return (
-      <div data-tooltip-id={`${uniqueId}-success-tooltip`} className={styles.statusIndicator}>
+      <div data-tooltip-id={`${uniqueId}-success-tooltip`} className={`${styles.statusIndicator} ${className}`}>
         <Tooltip id={`${uniqueId}-success-tooltip`}>
           <span className={styles.tooltipHeading}>Fully Loaded</span>
           <span>Click to view results</span>
@@ -41,7 +42,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   if(status === 'running') {
     return (
-      <div data-tooltip-id={`${uniqueId}-running-tooltip`} className={styles.statusIndicator}>
+      <div data-tooltip-id={`${uniqueId}-running-tooltip`} className={`${styles.statusIndicator} ${className}`}>
         <Tooltip id={`${uniqueId}-running-tooltip`}>
           <span className={styles.tooltipHeading}>Loading</span>
           <span>You will be notified when this query is fully loaded. While you wait, you can click to view the results that have been returned so far.</span>
@@ -62,7 +63,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   if(status === 'warning') {
     return (
-      <div data-tooltip-id={`${uniqueId}-warning-tooltip`} className={styles.statusIndicator}>
+      <div data-tooltip-id={`${uniqueId}-warning-tooltip`} className={`${styles.statusIndicator} ${className}`}>
         <Tooltip id={`${uniqueId}-warning-tooltip`}>
           <span className={styles.tooltipHeading}>Error</span>
           <span>There was an error while processing your query results. Please try again later, or try clearing your cache if the problem persists.<br/>Click to view the results that were returned.</span>
@@ -83,7 +84,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   if(status === 'error') {
     return (
-      <div data-tooltip-id={`${uniqueId}-error-tooltip`} className={styles.statusIndicator}>
+      <div data-tooltip-id={`${uniqueId}-error-tooltip`} className={`${styles.statusIndicator} ${className}`}>
         <Tooltip id={`${uniqueId}-error-tooltip`}>
           <span className={styles.tooltipHeading}>Query Failed</span>
           <span>There was an error while processing your query results. Please try again later, or try clearing your cache if the problem persists.</span>
@@ -104,7 +105,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   if(status === 'noQueries' || status === 'noResults') {
     return (
-      <div data-tooltip-id={`${uniqueId}-none-tooltip`} className={styles.statusIndicator} >
+      <div data-tooltip-id={`${uniqueId}-none-tooltip`} className={`${styles.statusIndicator} ${className}`} >
         <Tooltip id={`${uniqueId}-none-tooltip`}>
           <span className={styles.tooltipHeading}>{status === 'noQueries' ? 'No Queries' : 'No Results'}</span>
           <span>{status === 'noQueries' ? 'No queries have been added to this project.' : 'No results are available for this query.'}</span>
@@ -125,7 +126,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status }) => {
 
   if(status === 'unknown') {
     return (
-      <div data-tooltip-id={`${uniqueId}-unknown-tooltip`} className={styles.statusIndicator} >
+      <div data-tooltip-id={`${uniqueId}-unknown-tooltip`} className={`${styles.statusIndicator} ${className}`} >
         <Fade
           delay={FADE_DELAY}
           duration={FADE_DURATION}

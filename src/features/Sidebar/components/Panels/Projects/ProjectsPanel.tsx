@@ -7,17 +7,23 @@ import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import SidebarProjectCard from "@/features/Sidebar/components/SidebarProjectCard/SidebarProjectCard";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import { useProjectListData } from "@/features/Projects/hooks/useProjectListData";
+import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 
 const ProjectsPanel = () => {
   const user = useSelector(currentUser);
   const data = useProjectListData();
   const projects = useMemo(() => data.formatted.active, [data.formatted.active]);
   const projectsLoading = data.loading.projectsLoading;
+  const { searchTerm, handleSearch } = useSimpleSearch();
+
+  const filteredProjects = useMemo(() => {
+    return projects.filter((project) => project.data.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [projects, searchTerm]);
 
   return (
     <div className={styles.projectsPanel}>
       <div className={styles.top}>
-        <TextInput iconLeft={<SearchIcon />} handleChange={() => {}} placeholder="Search Projects" />
+        <TextInput iconLeft={<SearchIcon />} handleChange={handleSearch} placeholder="Search Projects" />
       </div>
       <div className={styles.list}>
         {
@@ -29,8 +35,8 @@ const ProjectsPanel = () => {
             </div>
           ) : (
             <LoadingWrapper loading={projectsLoading} contentClassName={styles.projectsList}>
-              {projects.map((project) => (
-                <SidebarProjectCard key={project.id} project={project} />
+              {filteredProjects.map((project) => (
+                <SidebarProjectCard key={project.id} project={project} searchTerm={searchTerm} />
               ))}
             </LoadingWrapper>
           )

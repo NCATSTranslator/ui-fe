@@ -7,22 +7,32 @@ import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import { getQueryLink } from "@/features/Projects/utils/utilities";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
+import Highlighter from "react-highlight-words";
 
 interface SidebarQueryCardProps {
   query: UserQueryObject;
+  searchTerm?: string;
+  title?: string;
 }
 
-const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query }) => {
+const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm, title }) => {
   const queryURL = getQueryLink(query);
   const { title: queryCardTitle } = useGetQueryCardTitle(query);
 
   return (
     <div className={styles.sidebarQueryCard}>
       <div>
-      <StatusIndicator status={query.status} />
+      <StatusIndicator status={query.status} className={styles.status} />
       </div>
       <div>
-        <Link className={styles.title} to={`${queryURL}`} target="_blank">{queryCardTitle}</Link>
+        <Link className={styles.title} to={`${queryURL}`} target="_blank">
+          <Highlighter
+            highlightClassName="highlight"
+            searchWords={searchTerm ? [searchTerm] : []}
+            autoEscape={true}
+            textToHighlight={title || queryCardTitle}
+          />
+        </Link>
         <div className={styles.bottom}>
           <span className={styles.type}>{query.data.query.type === 'pathfinder' ? 'Pathfinder Query' : 'Smart Query'}</span>
           <div className={styles.saves}>
