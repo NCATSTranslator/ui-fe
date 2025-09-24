@@ -267,6 +267,7 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
         continue;
       };
       if (hasSupport(edge)) {
+        const supportRanks = [];
         for (const [j, sp] of edge.support.entries()) {
           const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;
           const supportRank = pathRank.support[j];
@@ -275,9 +276,16 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
             continue;
           }
           _updatePathRanks(resultSet, supportPath, supportRank, evidenceFilters, otherFilters);
-          if (supportRank?.rank && supportRank.rank < 0) {
-            pathRank.rank += supportRank.rank;
+          if (supportRank && supportRank.rank !== undefined && supportRank.rank !== null) {
+            supportRanks.push(supportRank.rank);
           }
+        }
+        const validSupportCount = supportRanks.filter(rank => rank <= 0).length;
+        if (validSupportCount === 0) {
+          pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
+          return;
+        } else {
+          pathRank.rank += includeRankBase * validSupportCount * CONSTANTS.WEIGHT.LIGHT;
         }
       } else {
         edgeRanks.push(_calcEdgeRank(edge, evidenceFilters));
@@ -287,10 +295,11 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
     let edgesUnmatched = true;
     for (const rank of edgeRanks) {
       if (rank > 0) {
-        pathRank.rank = CONSTANTS.WEIGHT.HEAVY;
+        pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
         return;
       }
       edgesUnmatched = edgesUnmatched && rank === 0;
+      pathRank.rank += includeRankBase * CONSTANTS.WEIGHT.LIGHT;
     }
     if (edgesUnmatched && evidenceFilters.length !== 0) {
       pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
