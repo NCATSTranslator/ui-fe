@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "@/features/Common/utils/utilities";
 import { pastQueryState, setHistory } from "@/features/History/slices/historySlice";
 import { cloneDeep, debounce } from "lodash";
-import { getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { getResultsShareURLPath } from "@/features/Common/utils/web";
 import { QueryHistoryItem } from "@/features/History/types/history";
 import ShareModal from "@/features/ResultList/components/ShareModal/ShareModal";
 import TextInput from "@/features/Core/components/TextInput/TextInput";

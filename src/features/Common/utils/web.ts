@@ -1,3 +1,4 @@
+import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { toast } from "react-toastify";
 
 const buildOptions = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: unknown) => {
@@ -140,3 +141,73 @@ export const fetchWithErrorHandling = async <T>(
     throw error;
   }
 };
+
+/**
+ * Retrieves the decoded query parameters from the URL.
+ *
+ * @returns {string} The decoded query parameters.
+ */
+export const getDecodedParams = (): string => {
+  if(!window.location.search)
+    return "";
+  let decodedParams = window.location.search.slice(1);
+  try {
+    decodedParams = window.atob(decodedParams);
+  } catch {
+    // if the search is not encoded, return the search without decoding
+    decodedParams = window.location.search.slice(1);
+  }
+  
+  return decodedParams;
+}
+
+/**
+ * Encodes the query parameters.
+ *
+ * @param {string} params - The query parameters to encode.
+ * @returns {string} The encoded query parameters.
+ */
+export const encodeParams = (params: string): string => {
+  if(!params)
+    return "";
+  return window.btoa(params);
+}
+
+/**
+ * Generates the share URL path for a results query.
+ *
+ * @param {string} label - The label of the result.
+ * @param {string | number} nodeID - The ID of the node.
+ * @param {string | number} typeID - The ID of the type.
+ * @param {string | number} resultID - The ID of the result.
+ * @param {string | number} pk - The ID of the query.
+ * @returns {string} The share URL path.
+ */
+export const getResultsShareURLPath = (label: string, nodeID: string | number, typeID: string | number, resultID: string | number, pk: string | number) => {
+  // let path = `results?${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`)}`;
+  // TODO: replace with above if NCATS approves
+  let path = `results?${`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`}`;
+  return path;
+}
+
+/**
+ * Generates the share URL path for a pathfinder results query.
+ *
+ * @param {AutocompleteItem} itemOne - The first item.
+ * @param {AutocompleteItem} itemTwo - The second item.
+ * @param {string} resultID - The ID of the result.
+ * @param {string | undefined} constraint - The constraint.
+ * @param {string} pk - The ID of the query.
+ * @returns {string} The share URL path.
+ */
+export const getPathfinderResultsShareURLPath = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem, resultID: string, constraint: string | undefined, pk: string) => {
+  let labelOne = (itemOne.label) ? itemOne.label : null;
+  let labelTwo = (itemTwo.label) ? itemTwo.label : null;
+  let idOne = (itemOne.id) ? itemOne.id : null;
+  let idTwo = (itemTwo.id) ? itemTwo.id : null;
+  let constraintVar = !!constraint ?  `&c=${constraint}`: '';
+  // let path = `results?${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}&q=${pk}`)}`;
+  // TODO: replace with above if NCATS approves
+  let path = `results?${`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}&q=${pk}`}`;
+  return path;
+}

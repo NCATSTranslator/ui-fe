@@ -27,7 +27,7 @@ const SendFeedbackForm = () => {
   } = useFeedbackForm();
 
   const [createdIssueURL, setCreatedIssueURL] = useState<string | null>(null);
-  const currentARSpk = (getDataFromQueryVar("q") !== null) ? getDataFromQueryVar("q") : "";
+  const currentARSpk = (getDataFromQueryVar("q", window.location.search) !== null) ? getDataFromQueryVar("q", window.location.search) : "";
 
   const errorMessages = {
     category: "Please select a category.",
@@ -93,7 +93,7 @@ const SendFeedbackForm = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url: encodeURI(decodeURIComponent(getDataFromQueryVar("link") as string)),
+          url: encodeURI(decodeURIComponent(getDataFromQueryVar("link", window.location.search) as string)),
           ars_pk: currentARSpk,
           description: form.comments,
           reproduction_steps: form.steps,
