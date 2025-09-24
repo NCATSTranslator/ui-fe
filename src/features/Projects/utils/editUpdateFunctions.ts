@@ -175,7 +175,7 @@ export const useEditProjectHandlers = (
       if (!oldData) return oldData;
       return oldData.map((p: Project) => 
         p.id === project.id 
-          ? { ...p, data: { ...p.data, is_deleted: false } }
+          ? { ...p, data: { ...p.data, deleted: false } }
           : p
       );
     });
@@ -192,7 +192,7 @@ export const useEditProjectHandlers = (
           if (!oldData) return oldData;
           return oldData.map((p: Project) => 
             p.id === project.id 
-              ? { ...p, data: { ...p.data, is_deleted: true } }
+              ? { ...p, data: { ...p.data, deleted: true } }
               : p
           );
         });
@@ -207,7 +207,7 @@ export const useEditProjectHandlers = (
       if (!oldData) return oldData;
       return oldData.map((p: Project) => 
         p.id === project.id 
-          ? { ...p, data: { ...p.data, is_deleted: true } }
+          ? { ...p, data: { ...p.data, deleted: true } }
           : p
       );
     });
@@ -224,7 +224,7 @@ export const useEditProjectHandlers = (
           if (!oldData) return oldData;
           return oldData.map((p: Project) => 
             p.id === project.id 
-              ? { ...p, data: { ...p.data, is_deleted: false } }
+              ? { ...p, data: { ...p.data, deleted: false } }
               : p
           );
         });
@@ -338,14 +338,13 @@ export const useEditQueryHandlers = (
   const handleRestoreQuery = (query: UserQueryObject) => {
     const queryKey = ['userQueries'];
     // Optimistically update the React Query cache
-    console.log("optimistic update for restore query");
     queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
       if (!oldData) return oldData;
-      return oldData.map((q: UserQueryObject) => 
-        q.sid === query.sid 
-          ? { ...q, data: { ...q.data, is_deleted: false } }
-          : q
-      );
+      return oldData.map((q: UserQueryObject) => {
+        return q.sid === query.sid 
+            ? { ...q, data: { ...q.data, deleted: false } }
+            : q
+      });
     });
 
     restoreQueriesMutation.mutate([query.sid.toString()], {
@@ -360,7 +359,7 @@ export const useEditQueryHandlers = (
           if (!oldData) return oldData;
           return oldData.map((q: UserQueryObject) => 
             q.sid === query.sid 
-              ? { ...q, data: { ...q.data, is_deleted: true } }
+              ? { ...q, data: { ...q.data, deleted: true } }
               : q
           );
         });
@@ -373,11 +372,11 @@ export const useEditQueryHandlers = (
     // Optimistically update the React Query cache
     queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
       if (!oldData) return oldData;
-      return oldData.map((q: UserQueryObject) => 
-        q.sid === query.sid 
-          ? { ...q, data: { ...q.data, is_deleted: true } }
-          : q
-      );
+      return oldData.map((q: UserQueryObject) => {
+        return q.sid === query.sid 
+            ? { ...q, data: { ...q.data, deleted: true } }
+            : q
+      });
     });
 
     deleteQueriesMutation.mutate([query.sid], {
@@ -392,7 +391,7 @@ export const useEditQueryHandlers = (
           if (!oldData) return oldData;
           return oldData.map((q: UserQueryObject) => 
             q.sid === query.sid 
-              ? { ...q, data: { ...q.data, is_deleted: false } }
+              ? { ...q, data: { ...q.data, deleted: false } }
               : q
           );
         });
