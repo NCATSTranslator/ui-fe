@@ -292,7 +292,7 @@ export const applyFilters = (
   ): Result[] {
     const facetsByFamily: Record<string, Filter[]> = {};
     for (const facet of resultFacets) {
-      const family = filtering.filterFamily(facet);
+      const family = filtering.getFilterFamily(facet);
       if (!facetsByFamily[family]) facetsByFamily[family] = [];
       facetsByFamily[family].push(facet);
     }
@@ -421,13 +421,13 @@ export const calculateFacetCounts = (
 ): Filters => {
   // Create a list of tags from the master tag list provided by the backend
   const countedTags = cloneDeep(summary.data.tags) as Filters;
-  const activeFamilies = new Set(activeFacets.map(facet => filtering.filterFamily(facet)));
+  const activeFamilies = new Set(activeFacets.map(facet => filtering.getFilterFamily(facet)));
   for(const result of filteredResults) {
     // Determine the distance between a result's facets and the facet selection
     const resultFamilies = new Set();
     for (const facet of activeFacets) {
       if (!!facet.id && result.tags[facet.id] !== undefined) {
-        resultFamilies.add(filtering.filterFamily(facet));
+        resultFamilies.add(filtering.getFilterFamily(facet));
       }
     }
 

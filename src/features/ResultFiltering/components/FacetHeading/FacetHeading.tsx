@@ -4,7 +4,7 @@ import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import Alert from '@/assets/icons/status/Alerts/Info.svg?react';
 import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
 import { Filter } from "@/features/ResultFiltering/types/filters";
-import { filterFamily } from "@/features/ResultFiltering/utils/filterFunctions";
+import { getFilterFamily } from "@/features/ResultFiltering/utils/filterFunctions";
 
 type FacetHeadingProps = {
   title: string;
@@ -15,7 +15,7 @@ type FacetHeadingProps = {
 
 const FacetHeading: FC<FacetHeadingProps> = ({ title, tagFamily, activeFilters, children }) => {
 
-  const matchingActiveFacets = activeFilters.filter((filter)=> filterFamily(filter) === tagFamily).length;
+  const matchingActiveFacets = activeFilters.filter((filter)=> getFilterFamily(filter) === tagFamily).length;
 
   return (
     <div className={`${styles.labelContainer}`}>

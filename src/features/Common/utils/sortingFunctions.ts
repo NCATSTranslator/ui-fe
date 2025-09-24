@@ -5,7 +5,7 @@ import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode,
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore } from '@/features/ResultList/utils/scoring';
-import { getTagFamily, isEvidenceFilter, CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
+import { getFilterFamily, getTagFamily, isEvidenceFilter, CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 import { getEdgeById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
@@ -239,6 +239,7 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
   const excludeRankBase = 1;
   const evidenceFilters = [];
   const otherFilters = [];
+
   for (const ftr of pathFilters) {
     if (isEvidenceFilter(ftr)) {
       evidenceFilters.push(ftr);
@@ -291,14 +292,30 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
       }
       edgesUnmatched = edgesUnmatched && rank === 0;
     }
-    // Finally apply inclusion based on other filters
-    for (let ftr of otherFilters) {
-      if (!ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
-        pathRank.rank += includeRankBase * (ftr.includeWeight ? ftr.includeWeight : CONSTANTS.WEIGHT.LIGHT);
-      }
+    if (edgesUnmatched && evidenceFilters.length !== 0) {
+      pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
+      return;
     }
-    if (pathRank.rank === 0 && edgesUnmatched && evidenceFilters.length !== 0) {
-      pathRank.rank = CONSTANTS.WEIGHT.HEAVY;
+    // Finally apply inclusion based on other filters
+    otherFilters.sort();
+    let include = true;
+    let lastFamily = null;
+    for (let ftr of otherFilters) {
+      if (!ftr.negated && ftr.id) { // Exclusion was handled above
+        let currentFamily = getFilterFamily(ftr);
+        if (currentFamily !== lastFamily) {
+          include &&= (path.tags[ftr.id] !== undefined);
+          lastFamily = currentFamily;
+        } else {
+          include ||= (path.tags[ftr.id] !== undefined);
+        }
+      }
+      if (include) {
+        pathRank.rank += includeRankBase * CONSTANTS.WEIGHT.LIGHT;
+      } else {
+        pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
+        return;
+      }
     }
   }
 

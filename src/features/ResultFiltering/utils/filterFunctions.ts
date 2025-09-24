@@ -84,7 +84,7 @@ export const getPathFamilies = (): FilterFamily[] => {
 }
 
 export const isTagFilter = (filter: Filter): boolean => {
-  const family = filterFamily(filter);
+  const family = getFilterFamily(filter);
   return getValidFamilies().includes(family);
 }
 
@@ -118,7 +118,7 @@ export const isGlobalFilter = (filter: Filter): boolean => {
 }
 
 export const isEvidenceFilter = (filter: Filter): boolean => {
-  return filterFamily(filter) === 'ev';
+  return getFilterFamily(filter) === 'ev';
 }
 
 export const isExclusion = (filter: Filter): boolean => {
@@ -126,26 +126,26 @@ export const isExclusion = (filter: Filter): boolean => {
 }
 
 export const isEntityFilter = (filter: Filter): boolean => {
-  return filterFamily(filter) === 'str';
+  return getFilterFamily(filter) === 'str';
 }
 
-export const filterFamily = (filter: Filter): FilterFamily => {
+export const getFilterFamily = (filter: Filter): FilterFamily => {
   return getTagFamily(filter.id || '') as FilterFamily;
 }
 
 export const hasSameFamily = (filterA: Filter | null, filterB: Filter | null): boolean => {
   if (filterA === null || filterB === null) return false;
-  return filterFamily(filterA) === filterFamily(filterB);
+  return getFilterFamily(filterA) === getFilterFamily(filterB);
 }
 
 export const hasFilterFamily = (filter: Filter, family: FilterFamily): boolean => {
-  return filterFamily(filter) === family;
+  return getFilterFamily(filter) === family;
 }
 
 export const getFilterLabel = (filter: Filter): string => {
   const defaultLabel = "Tag";
 
-  switch(filterFamily(filter)) {
+  switch(getFilterFamily(filter)) {
     case "cc":   return "Development Stage";
     case "pc":   return "Objects within Paths";
     case "di":   return "CT Indications";
