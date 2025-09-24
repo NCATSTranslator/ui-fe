@@ -426,7 +426,7 @@ export const calculateFacetCounts = (
     // Determine the distance between a result's facets and the facet selection
     const resultFamilies = new Set();
     for (const facet of activeFacets) {
-      if (!!facet.id && !!result.tags[facet.id]) {
+      if (!!facet.id && result.tags[facet.id] !== undefined) {
         resultFamilies.add(filtering.filterFamily(facet));
       }
     }
@@ -441,7 +441,6 @@ export const calculateFacetCounts = (
       const missingFamily = [...activeFamilies].filter((family) => {
         return !resultFamilies.has(family);
       })[0];
-
       _addTagCountsWhen(countedTags, result, (tagID: string) => {
         return filtering.getTagFamily(tagID) === missingFamily;
       });
@@ -459,8 +458,9 @@ export const calculateFacetCounts = (
   }
 
   Object.entries(countedTags).forEach((tag)=> {
-    if(tag[1].count === undefined || tag[1].count <= 0)
+    if(tag[1].count === undefined || tag[1].count <= 0) {
       delete countedTags[tag[0]];
+    }
   })
 
   return countedTags;
@@ -474,7 +474,7 @@ export const calculateFacetCounts = (
       // If the tag exists on the list, either increment it or initialize its count
       if (predicate(tag)) {
         if (!countedTags[tag].count) {
-          countedTags[tag] = filtering.makeFilter(tag, filtering.CONSTANTS.WEIGHT.LIGHT,
+          countedTags[tag] = filtering.makeFilter(countedTags[tag].name, filtering.CONSTANTS.WEIGHT.LIGHT,
             filtering.CONSTANTS.WEIGHT.HEAVY);
         } else {
           countedTags[tag].count += 1;
