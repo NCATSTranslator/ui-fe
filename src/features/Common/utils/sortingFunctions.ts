@@ -5,7 +5,7 @@ import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode,
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore } from '@/features/ResultList/utils/scoring';
-import { getTagFamily } from '@/features/ResultFiltering/utils/filterFunctions';
+import { getTagFamily, isEvidenceFilter, CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 import { getEdgeById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
@@ -234,31 +234,83 @@ export const makePathRank = (resultSet: ResultSet, path: Path) => {
 }
 
 export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: PathRank, pathFilters: Filter[]) => {
-  const includeRank = -1;
-  const excludeRank = 10000;
+  const includeRankBase = -1;
+  const excludeRankBase = 1;
+  const evidenceFilters = [];
+  const otherFilters = [];
+  for (const ftr of pathFilters) {
+    if (isEvidenceFilter(ftr)) {
+      evidenceFilters.push(ftr);
+    } else {
+      otherFilters.push(ftr);
+    }
+  }
+  _updatePathRanks(resultSet, path, pathRank, evidenceFilters, otherFilters);
 
-  for (let i = 1; i < path.subgraph.length; i += 2) {
-    const edge = getEdgeById(resultSet, path.subgraph[i]);
-    if (!!edge && hasSupport(edge)) {
-      for (const [j, sp] of edge.support.entries()) {
-        const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;
-        const supportRank = pathRank.support[j];
-        if(!!supportPath) {
-          updatePathRanks(resultSet, supportPath, supportRank, pathFilters);
+  function _updatePathRanks(resultSet: ResultSet, path: Path, pathRank: PathRank, evidenceFilters: Filter[],
+      otherFilters: Filter[]) {
+    // Apply exclusion first
+    for (const ftr of otherFilters) {
+      if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
+        pathRank.rank = excludeRankBase * (ftr.excludeWeight ? ftr.excludeWeight : CONSTANTS.WEIGHT.HEAVY);
+        return;
+      }
+    }
+    // Next apply edge level path filtering
+    const edgeRanks = [];
+    for (let i = 1; i < path.subgraph.length; i += 2) {
+      const edge = getEdgeById(resultSet, path.subgraph[i]);
+      if (!edge) {
+        console.warn(`_updatePathRanks: found undefined or null edge in path: ${path}`);
+        continue;
+      };
+      if (hasSupport(edge)) {
+        for (const [j, sp] of edge.support.entries()) {
+          const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;
+          const supportRank = pathRank.support[j];
+          if (!supportPath) {
+            console.warn(`_updatePathRanks: found undefined or null support path in edge: ${edge}`);
+            continue;
+          }
+          _updatePathRanks(resultSet, supportPath, supportRank, evidenceFilters, otherFilters);
           if (supportRank?.rank && supportRank.rank < 0) {
             pathRank.rank += supportRank.rank;
           }
         }
-      }
-    } else {
-      for (let ftr of pathFilters) {
-        if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
-          pathRank.rank = excludeRank;
-        } else if (!ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
-          pathRank.rank += includeRank;
-        }
+      } else {
+        edgeRanks.push(_calcEdgeRank(edge, evidenceFilters));
       }
     }
+    // Determine if path should be filtered by edge ranks
+    let edgesUnmatched = true;
+    for (const rank of edgeRanks) {
+      if (rank > 0) {
+        pathRank.rank = CONSTANTS.WEIGHT.HEAVY;
+        return;
+      }
+      edgesUnmatched = edgesUnmatched && rank === 0;
+    }
+    // Finally apply inclusion based on other filters
+    for (let ftr of otherFilters) {
+      if (!ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
+        pathRank.rank += includeRankBase * (ftr.includeWeight ? ftr.includeWeight : CONSTANTS.WEIGHT.LIGHT);
+      }
+    }
+    if (pathRank.rank === 0 && edgesUnmatched && evidenceFilters.length !== 0) {
+      pathRank.rank = CONSTANTS.WEIGHT.HEAVY;
+    }
+  }
+
+  // Only remove edges if there is a matching exclusion filter and no matching inclusion filters
+  function _calcEdgeRank(edge: ResultEdge, evidenceFilters: Filter[]): number {
+    let edgeRank = 0;
+    for (const ftr of evidenceFilters) {
+      if (ftr.id && edge.tags[ftr.id] !== undefined) {
+        if (!ftr.negated) return -1;
+        edgeRank = 1;
+      }
+    }
+    return edgeRank;
   }
 }
 

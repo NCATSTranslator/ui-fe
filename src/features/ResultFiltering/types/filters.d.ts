@@ -7,6 +7,8 @@ export type Filter = {
   negated?: boolean;
   id?: string;
   value?: string;
+  includeWeight?: number;
+  excludeWeight?: number;
 }
 
 export type Filters =  {[key: string]: Filter};

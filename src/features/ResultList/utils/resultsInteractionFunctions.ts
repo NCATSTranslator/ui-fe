@@ -150,7 +150,7 @@ export const applyFilters = (
   unrankedIsFiltered: boolean;
   shouldResetPage: boolean;
 } => {
-  let [resultFilters, pathFilters, edgeFilters, globalFilters] = filtering.groupFilterByType(filters);
+  let [resultFilters, pathFilters, globalFilters] = filtering.groupFilterByType(filters);
   const resultFacets = resultFilters.filter(f => !filtering.isExclusion(f));
   const negatedResultFacets = resultFilters.filter(f => filtering.isExclusion(f));
   resultFilters = negatedResultFacets.concat(globalFilters);
@@ -469,16 +469,17 @@ export const calculateFacetCounts = (
   function _addTagCountsWhen(
     countedTags: {[key: string]: Filter},
     result: Result,
-    predicate: (tag: string) => boolean)
+    predicate: (tag: string) => boolean
   ) {
     for(const tag of Object.keys(result.tags)) {
       // If the tag exists on the list, either increment it or initialize its count
       if (predicate(tag)) {
-        if (Object.prototype.hasOwnProperty.call(countedTags, tag)) {
-          countedTags[tag].count = (countedTags[tag].count ?? 0) + 1;
+        const countedTag = countedTags[tag];
+        if (countedTag.count === undefined) {
+          countedTags[tag] = filtering.makeFilter(countedTag.name, filtering.CONSTANTS.WEIGHT.LIGHT,
+            filtering.CONSTANTS.WEIGHT.HEAVY);
         } else {
-          // If it doesn't exist on the current list of tags, add it and initialize its count
-          countedTags[tag] = { name: tag, value: '', count: 1 };
+          countedTag.count += 1;
         }
       }
     }
@@ -496,6 +497,8 @@ export const calculateFacetCounts = (
 function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
                                 pathRanks: PathRank[],
                                 unrankedIsFiltered: boolean) {
+  _updateState(pathFilterState, pathRanks, unrankedIsFiltered, 0);
+
   function _updateState(pathFilterState: {[key: string]: boolean},
                         pathRanks: PathRank[],
                         unrankedIsFiltered: boolean,
@@ -523,7 +526,6 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
       }
     }
   }
-  _updateState(pathFilterState, pathRanks, unrankedIsFiltered, 0);
 }
 
 export const areEntityFiltersEqual = (a: string[], b: string[]): boolean => {

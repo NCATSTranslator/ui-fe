@@ -1,9 +1,9 @@
-import { Filter, FilterFamily, FilterType } from '@/features/ResultFiltering/types/filters';
+import { Filter, Filters, FilterFamily, FilterType } from '@/features/ResultFiltering/types/filters';
+import { Tags } from '@/features/ResultList/types/results';
 
 export const CONSTANTS = {
   RESULT: 'r' as const,
   PATH: 'p' as const,
-  EDGE: 'e' as const,
   GLOBAL: 'g' as const,
   FAMILIES: {
     ROLE: 'role' as const
@@ -20,17 +20,37 @@ export const CONSTANTS = {
       value: '',
     },
   },
+  WEIGHT: {
+    LIGHT: 1,
+    HEAVY: 10000,
+  },
 } as const;
 
 export const makeEntitySearch = (): Filter => {
-  return { id: 'g/str', value: '', negated: false, name: '' };
+  return {
+    id: 'g/str',
+    value: '',
+    negated: false,
+    name: '',
+    includeWeight: CONSTANTS.WEIGHT.LIGHT,
+    excludeWeight: CONSTANTS.WEIGHT.HEAVY
+  };
+}
+
+export const makeFilter = (name: string, includeWeight: number, excludeWeight: number): Filter => {
+  return {
+    name: name,
+    value: '',
+    count: 1,
+    includeWeight: includeWeight,
+    excludeWeight: excludeWeight
+  }
 }
 
 export const getFamiliesByType = (type: FilterType): FilterFamily[] => {
   switch(type) {
     case CONSTANTS.RESULT: return getResultFamilies();
     case CONSTANTS.PATH: return getPathFamilies();
-    case CONSTANTS.EDGE: return getEdgeFamilies();
     default: throw new RangeError(`Invalid filter type: ${type}`);
   }
 }
@@ -43,12 +63,12 @@ export const isPathTag = (tagID: string): boolean => {
   return getTagType(tagID) === CONSTANTS.PATH;
 }
 
-export const isEdgeTag = (tagID: string): boolean => {
-  return getTagType(tagID) === CONSTANTS.EDGE;
-}
-
 export const isGlobalTag = (tagID: string): boolean => {
   return getTagType(tagID) === CONSTANTS.GLOBAL;
+}
+
+export const isPathEvidenceTag = (tagID: string): boolean => {
+  return isPathTag(tagID) && getTagFamily(tagID) === 'ev';
 }
 
 export const getValidFamilies = (): FilterFamily[] => {
@@ -60,11 +80,7 @@ export const getResultFamilies = (): FilterFamily[] => {
 }
 
 export const getPathFamilies = (): FilterFamily[] => {
-  return ['pc', 'pt'];
-}
-
-export const getEdgeFamilies = (): FilterFamily[] => {
-  return ['ev'];
+  return ['pc', 'pt', 'ev'];
 }
 
 export const isTagFilter = (filter: Filter): boolean => {
@@ -72,24 +88,21 @@ export const isTagFilter = (filter: Filter): boolean => {
   return getValidFamilies().includes(family);
 }
 
-export const groupFilterByType = (filters: Filter[]): [Filter[], Filter[], Filter[], Filter[]] => {
+export const groupFilterByType = (filters: Filter[]): [Filter[], Filter[], Filter[]] => {
   const resultFilters: Filter[] = [];
   const pathFilters: Filter[] = [];
-  const edgeFilters: Filter[] = [];
   const globalFilters: Filter[] = [];
   for (let filter of filters) {
     if (isResultFilter(filter)) {
       resultFilters.push(filter);
     } else if (isPathFilter(filter)) {
       pathFilters.push(filter);
-    } else if (isEdgeFilter(filter)) {
-      edgeFilters.push(filter);
     } else {
       globalFilters.push(filter);
     }
   }
 
-  return [resultFilters, pathFilters, edgeFilters, globalFilters];
+  return [resultFilters, pathFilters, globalFilters];
 }
 
 export const isResultFilter = (filter: Filter): boolean => {
@@ -100,12 +113,12 @@ export const isPathFilter = (filter: Filter): boolean => {
   return isPathTag(filter.id || '');
 }
 
-export const isEdgeFilter = (filter: Filter): boolean => {
-  return isEdgeTag(filter.id || '');
-}
-
 export const isGlobalFilter = (filter: Filter): boolean => {
   return isGlobalTag(filter.id || '');
+}
+
+export const isEvidenceFilter = (filter: Filter): boolean => {
+  return filterFamily(filter) === 'ev';
 }
 
 export const isExclusion = (filter: Filter): boolean => {
@@ -141,7 +154,7 @@ export const getFilterLabel = (filter: Filter): string => {
     case "pt":   return "Path Length";
     case "otc":  return "Availability";
     case "tdl":  return "Target Development Level";
-    case "ev":   return "Evidence";
+    case "ev":   return "Evidence Type";
     default: return defaultLabel;
   }
 }
