@@ -234,6 +234,7 @@ export const makePathRank = (resultSet: ResultSet, path: Path) => {
 }
 
 export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: PathRank, pathFilters: Filter[]) => {
+  if (pathFilters.length === 0) return;
   const includeRankBase = -1;
   const excludeRankBase = 1;
   const evidenceFilters = [];

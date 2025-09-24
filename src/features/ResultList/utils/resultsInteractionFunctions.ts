@@ -434,7 +434,7 @@ export const calculateFacetCounts = (
     const missingFamiliesCount = activeFamilies.size - resultFamilies.size;
     // When the family counts are equal, add all the result's tags
     if (missingFamiliesCount === 0) {
-      _addTagCountsWhen(countedTags, result, () => { return true; });
+      _addTagCountsWhen(countedTags, result, (tagID: string) => { return true; });
     // When the result is missing a single family, add all tags from only the missing family
     } else if (missingFamiliesCount === 1) {
       // Find the missing family
@@ -467,19 +467,17 @@ export const calculateFacetCounts = (
 
   // Function that adds the tag counts when a certain condition (predicate) is met
   function _addTagCountsWhen(
-    countedTags: {[key: string]: Filter},
-    result: Result,
-    predicate: (tag: string) => boolean
-  ) {
+      countedTags: {[key: string]: Filter},
+      result: Result,
+      predicate: (tag: string) => boolean) {
     for(const tag of Object.keys(result.tags)) {
       // If the tag exists on the list, either increment it or initialize its count
       if (predicate(tag)) {
-        const countedTag = countedTags[tag];
-        if (countedTag.count === undefined) {
-          countedTags[tag] = filtering.makeFilter(countedTag.name, filtering.CONSTANTS.WEIGHT.LIGHT,
+        if (!countedTags[tag].count) {
+          countedTags[tag] = filtering.makeFilter(tag, filtering.CONSTANTS.WEIGHT.LIGHT,
             filtering.CONSTANTS.WEIGHT.HEAVY);
         } else {
-          countedTag.count += 1;
+          countedTags[tag].count += 1;
         }
       }
     }
