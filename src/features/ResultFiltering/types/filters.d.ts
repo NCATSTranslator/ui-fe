@@ -1,5 +1,5 @@
 export type FilterType = 'p' | 'r' | 'g';
-export type FilterFamily = 'cc' | 'di' | 'pc' | 'pt' | 'role' | 'ara' | 'otc' | 'tdl' | 'str' | 'sv';
+export type FilterFamily = 'cc' | 'di' | 'pc' | 'pt' | 'role' | 'ara' | 'otc' | 'tdl' | 'str' | 'sv' | 'ev';
 
 export type Filter = {
   count?: number;
@@ -7,6 +7,8 @@ export type Filter = {
   negated?: boolean;
   id?: string;
   value?: string;
+  includeWeight?: number;
+  excludeWeight?: number;
 }
 
 export type Filters =  {[key: string]: Filter};

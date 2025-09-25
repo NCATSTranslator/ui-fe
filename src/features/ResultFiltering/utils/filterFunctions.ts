@@ -1,8 +1,9 @@
-import { Filter, FilterFamily, FilterType } from '@/features/ResultFiltering/types/filters';
+import { Filter, Filters, FilterFamily, FilterType } from '@/features/ResultFiltering/types/filters';
+import { Tags } from '@/features/ResultList/types/results';
 
 export const CONSTANTS = {
-  PATH: 'p' as const,
   RESULT: 'r' as const,
+  PATH: 'p' as const,
   GLOBAL: 'g' as const,
   FAMILIES: {
     ROLE: 'role' as const
@@ -19,10 +20,31 @@ export const CONSTANTS = {
       value: '',
     },
   },
+  WEIGHT: {
+    LIGHT: 1,
+    HEAVY: 10000,
+  },
 } as const;
 
 export const makeEntitySearch = (): Filter => {
-  return { id: 'g/str', value: '', negated: false, name: '' };
+  return {
+    id: 'g/str',
+    value: '',
+    negated: false,
+    name: '',
+    includeWeight: CONSTANTS.WEIGHT.LIGHT,
+    excludeWeight: CONSTANTS.WEIGHT.HEAVY
+  };
+}
+
+export const makeFilter = (name: string, includeWeight: number, excludeWeight: number): Filter => {
+  return {
+    name: name,
+    value: '',
+    count: 1,
+    includeWeight: includeWeight,
+    excludeWeight: excludeWeight
+  }
 }
 
 export const getFamiliesByType = (type: FilterType): FilterFamily[] => {
@@ -45,8 +67,12 @@ export const isGlobalTag = (tagID: string): boolean => {
   return getTagType(tagID) === CONSTANTS.GLOBAL;
 }
 
+export const isPathEvidenceTag = (tagID: string): boolean => {
+  return isPathTag(tagID) && getTagFamily(tagID) === 'ev';
+}
+
 export const getValidFamilies = (): FilterFamily[] => {
-  return ['cc', 'di', 'pc', 'pt', 'role', 'ara', 'otc', 'tdl', 'sv'];
+  return ['cc', 'di', 'pc', 'pt', 'role', 'ara', 'otc', 'tdl', 'sv', 'ev'];
 }
 
 export const getResultFamilies = (): FilterFamily[] => {
@@ -54,11 +80,11 @@ export const getResultFamilies = (): FilterFamily[] => {
 }
 
 export const getPathFamilies = (): FilterFamily[] => {
-  return ['pc', 'pt'];
+  return ['pc', 'pt', 'ev'];
 }
 
 export const isTagFilter = (filter: Filter): boolean => {
-  const family = filterFamily(filter);
+  const family = getFilterFamily(filter);
   return getValidFamilies().includes(family);
 }
 
@@ -91,31 +117,35 @@ export const isGlobalFilter = (filter: Filter): boolean => {
   return isGlobalTag(filter.id || '');
 }
 
+export const isEvidenceFilter = (filter: Filter): boolean => {
+  return getFilterFamily(filter) === 'ev';
+}
+
 export const isExclusion = (filter: Filter): boolean => {
   return filter.negated || false;
 }
 
 export const isEntityFilter = (filter: Filter): boolean => {
-  return filterFamily(filter) === 'str';
+  return getFilterFamily(filter) === 'str';
 }
 
-export const filterFamily = (filter: Filter): FilterFamily => {
+export const getFilterFamily = (filter: Filter): FilterFamily => {
   return getTagFamily(filter.id || '') as FilterFamily;
 }
 
 export const hasSameFamily = (filterA: Filter | null, filterB: Filter | null): boolean => {
   if (filterA === null || filterB === null) return false;
-  return filterFamily(filterA) === filterFamily(filterB);
+  return getFilterFamily(filterA) === getFilterFamily(filterB);
 }
 
 export const hasFilterFamily = (filter: Filter, family: FilterFamily): boolean => {
-  return filterFamily(filter) === family;
+  return getFilterFamily(filter) === family;
 }
 
 export const getFilterLabel = (filter: Filter): string => {
   const defaultLabel = "Tag";
 
-  switch(filterFamily(filter)) {
+  switch(getFilterFamily(filter)) {
     case "cc":   return "Development Stage";
     case "pc":   return "Objects within Paths";
     case "di":   return "CT Indications";
@@ -124,18 +154,19 @@ export const getFilterLabel = (filter: Filter): string => {
     case "pt":   return "Path Length";
     case "otc":  return "Availability";
     case "tdl":  return "Target Development Level";
+    case "ev":   return "Evidence Type";
     default: return defaultLabel;
   }
 }
 
 export const getTagType = (tagID: string): FilterType => {
-  return splitTagID(tagID)[0] as FilterType;
+  return _splitTagID(tagID)[0] as FilterType;
 }
 
 export const getTagFamily = (tagID: string): FilterFamily => {
-  return splitTagID(tagID)[1] as FilterFamily;
+  return _splitTagID(tagID)[1] as FilterFamily;
 }
 
-const splitTagID = (tagID: string): string[] => {
+const _splitTagID = (tagID: string): string[] => {
   return tagID.split('/');
 }

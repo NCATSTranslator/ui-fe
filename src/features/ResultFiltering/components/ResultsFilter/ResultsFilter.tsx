@@ -77,7 +77,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
         />
         <div>
           {
-            groupHasFilters(resultFilters) && !isPathfinder && 
+            groupHasFilters(resultFilters) && !isPathfinder &&
             <>
               <h5 className={styles.typeHeading}> Results </h5>
               {

@@ -292,7 +292,7 @@ export const applyFilters = (
   ): Result[] {
     const facetsByFamily: Record<string, Filter[]> = {};
     for (const facet of resultFacets) {
-      const family = filtering.filterFamily(facet);
+      const family = filtering.getFilterFamily(facet);
       if (!facetsByFamily[family]) facetsByFamily[family] = [];
       facetsByFamily[family].push(facet);
     }
@@ -419,45 +419,29 @@ export const calculateFacetCounts = (
   activeFacets: Filter[],
   negatedFacets: Filter[]
 ): Filters => {
-  // Function that adds the tag counts when a certain condition (predicate) is met
-  const addTagCountsWhen = (countedTags: {[key: string]: Filter}, result: Result, predicate: (tag: string)=>boolean) => {
-    for(const tag of Object.keys(result.tags)) {
-      // If the tag exists on the list, either increment it or initialize its count
-      if (predicate(tag)) {
-        if (Object.prototype.hasOwnProperty.call(countedTags, tag)) {
-          countedTags[tag].count = (countedTags[tag].count ?? 0) + 1;
-        } else {
-          // If it doesn't exist on the current list of tags, add it and initialize its count
-          countedTags[tag] = { name: tag, value: '', count: 1 };
-        }
-      }
-    }
-  }
-
   // Create a list of tags from the master tag list provided by the backend
   const countedTags = cloneDeep(summary.data.tags) as Filters;
-  const activeFamilies = new Set(activeFacets.map(facet => filtering.filterFamily(facet)));
+  const activeFamilies = new Set(activeFacets.map(facet => filtering.getFilterFamily(facet)));
   for(const result of filteredResults) {
     // Determine the distance between a result's facets and the facet selection
     const resultFamilies = new Set();
     for (const facet of activeFacets) {
-      if (!!facet.id && Object.keys(result.tags).includes(facet.id)) {
-        resultFamilies.add(filtering.filterFamily(facet));
+      if (!!facet.id && result.tags[facet.id] !== undefined) {
+        resultFamilies.add(filtering.getFilterFamily(facet));
       }
     }
 
     const missingFamiliesCount = activeFamilies.size - resultFamilies.size;
     // When the family counts are equal, add all the result's tags
     if (missingFamiliesCount === 0) {
-      addTagCountsWhen(countedTags, result, () => { return true; });
+      _addTagCountsWhen(countedTags, result, (tagID: string) => { return true; });
     // When the result is missing a single family, add all tags from only the missing family
     } else if (missingFamiliesCount === 1) {
       // Find the missing family
       const missingFamily = [...activeFamilies].filter((family) => {
         return !resultFamilies.has(family);
       })[0];
-
-      addTagCountsWhen(countedTags, result, (tagID: string) => {
+      _addTagCountsWhen(countedTags, result, (tagID: string) => {
         return filtering.getTagFamily(tagID) === missingFamily;
       });
     }
@@ -466,7 +450,7 @@ export const calculateFacetCounts = (
 
   // Count all results that have a matching negated facet
   for (const result of negatedResults) {
-    addTagCountsWhen(countedTags, result, (tagID) => {
+    _addTagCountsWhen(countedTags, result, (tagID) => {
       return negatedFacets.reduce((acc, facet) => {
         return (tagID === facet.id) || acc;
       }, false);
@@ -474,11 +458,30 @@ export const calculateFacetCounts = (
   }
 
   Object.entries(countedTags).forEach((tag)=> {
-    if(tag[1].count === undefined || tag[1].count <= 0)
+    if(tag[1].count === undefined || tag[1].count <= 0) {
       delete countedTags[tag[0]];
+    }
   })
 
   return countedTags;
+
+  // Function that adds the tag counts when a certain condition (predicate) is met
+  function _addTagCountsWhen(
+      countedTags: {[key: string]: Filter},
+      result: Result,
+      predicate: (tag: string) => boolean) {
+    for(const tag of Object.keys(result.tags)) {
+      // If the tag exists on the list, either increment it or initialize its count
+      if (predicate(tag)) {
+        if (!countedTags[tag].count) {
+          countedTags[tag] = filtering.makeFilter(countedTags[tag].name, filtering.CONSTANTS.WEIGHT.LIGHT,
+            filtering.CONSTANTS.WEIGHT.HEAVY);
+        } else {
+          countedTags[tag].count += 1;
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -492,6 +495,8 @@ export const calculateFacetCounts = (
 function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
                                 pathRanks: PathRank[],
                                 unrankedIsFiltered: boolean) {
+  _updateState(pathFilterState, pathRanks, unrankedIsFiltered, 0);
+
   function _updateState(pathFilterState: {[key: string]: boolean},
                         pathRanks: PathRank[],
                         unrankedIsFiltered: boolean,
@@ -519,7 +524,6 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
       }
     }
   }
-  _updateState(pathFilterState, pathRanks, unrankedIsFiltered, 0);
 }
 
 export const areEntityFiltersEqual = (a: string[], b: string[]): boolean => {

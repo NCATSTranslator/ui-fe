@@ -227,7 +227,7 @@ const ResultList = () => {
 
     shouldUpdateResultsAfterBookmark.current = false;
     const tempUserSaves = cloneDeep(userSaves)
-    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current, tempUserSaves); 
+    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current, tempUserSaves);
   }, [userSaves, activeFilters, activeEntityFilters, prevRawResults, currentSortString])
 
   useEffect(() => {
