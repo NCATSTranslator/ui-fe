@@ -122,7 +122,6 @@ export const fetcNodeNameFromCurie = async (curie: string): Promise<string> => {
   const nameResolverEndpoint = 'https://name-resolution-sri.renci.org/synonyms';
   const response = await fetch(`${nameResolverEndpoint}?preferred_curies=${curie}`);
   const data = await response.json();
-  console.log(data);
   return data[curie]?.preferred_name || '';
 }
 
