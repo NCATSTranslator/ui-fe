@@ -72,8 +72,8 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
     // pt: (a: [string, Filter], b: [string, Filter]) => -(a[1].name.localeCompare(b[1].name))
   };
 
-  useEffect(() => { 
-    setIsExpanded(expanded); 
+  useEffect(() => {
+    setIsExpanded(expanded);
   }, [expanded]);
 
   return (
@@ -93,7 +93,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
         />
         <div>
           {
-            groupHasFilters(resultFilters) && !isPathfinder && 
+            groupHasFilters(resultFilters) && !isPathfinder &&
             <>
               <h5 className={styles.typeHeading}> Results </h5>
               {

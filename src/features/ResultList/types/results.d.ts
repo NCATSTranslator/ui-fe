@@ -94,6 +94,7 @@ export interface ResultEdge {
   // array of path ids or Path objects
   support: string[] | Path[];
   trials: string[];
+  tags: Tags;
 }
 
 export interface RankedEdge extends ResultEdge {
@@ -198,6 +199,7 @@ export const isResultEdge = (obj: unknown): obj is ResultEdge => {
     obj.provenance.every((prov: unknown) => typeof prov === "object") &&
     typeof obj.publications === "object" &&
     typeof obj.subject === "string" &&
+    typeof obj.tags === "object" &&
     Array.isArray(obj.support) &&
     obj.support.every((item: unknown) => typeof item === "string")
   );

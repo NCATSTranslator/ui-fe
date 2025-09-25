@@ -55,7 +55,14 @@ const getTdlCaption = (): ReactNode => {
 
 const getBookmarkNotesCaption = (): ReactNode => {
   return(
-    <p className={styles.caption}>Include or exclude results basd on whether they have bookmarks or notes added to them</p>
+    <p className={styles.caption}>Include or exclude results based on whether they have bookmarks or notes added to them</p>
+  )
+}
+
+
+const getPathEvidenceCaption = (): ReactNode => {
+  return(
+    <p className={styles.caption}>Include or exclude paths from results based on the types of evidence supporting the path</p>
   )
 }
 
@@ -100,6 +107,9 @@ const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): ReactN
     case 'sv':
       headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Bookmarks & Notes" />
     break;
+    case 'ev':
+      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Path Evidence" />
+      break;
     default:
       headingToReturn = null;
   }
@@ -135,6 +145,9 @@ const getTagCaptionMarkup = (tagFamily: string): ReactNode | null => {
       break;
     case 'sv':
       captionToReturn = getBookmarkNotesCaption();
+      break;
+    case 'ev':
+      captionToReturn = getPathEvidenceCaption();
       break;
     default:
       captionToReturn = null;
