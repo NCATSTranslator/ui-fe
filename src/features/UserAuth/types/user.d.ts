@@ -51,6 +51,7 @@ export type SessionStatus = {
 export type Config = {
   cached_queries: Example[];
   gaID: string;
+  include_hashed_parameters: boolean;
   include_pathfinder: boolean;
   include_projects: boolean;
   include_query_status_polling: boolean;

@@ -6,6 +6,8 @@ import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/feat
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { getDecodedParams } from "@/features/Common/utils/web";
+import { currentConfig } from "@/features/UserAuth/slices/userSlice";
+import { useSelector } from "react-redux";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ interface ShareModalProps {
 }
 
 const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, nodeID = null, typeID = null, shareResultID = null}) => {
+  const config = useSelector(currentConfig);
   const decodedParams = getDecodedParams();
   const sharedQueryLabel = (label) ? label : getDataFromQueryVar("l", decodedParams);
   const sharedQueryType = (typeID) ? typeID : getDataFromQueryVar("t", decodedParams);
@@ -58,9 +61,9 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, no
       score: Infinity
     }
     const constraint = getDataFromQueryVar('c', decodedParams) || "";
-    qidPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid);
+    qidPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid, config?.include_hashed_parameters);
   } else {
-    qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);
+    qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid, config?.include_hashed_parameters);
   }
   const qidURL = encodeURI(`${window.location.origin}/${qidPath}`);
 

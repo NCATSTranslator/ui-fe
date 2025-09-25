@@ -18,6 +18,8 @@ import { getTypeIDFromType } from '@/features/Projects/utils/utilities';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
 import { unableToReachLinkToast } from '@/features/Projects/utils/toastMessages';
 import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
+import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { useSelector } from 'react-redux';
 
 interface DataCardProps<T> {
   className?: string;
@@ -71,6 +73,7 @@ const DataCard = <T,>({
   type
 }: DataCardProps<T>) => {
   const navigate = useNavigate();
+  const config = useSelector(currentConfig);
 
   const isUnassignedPrj = type === 'project' ? isUnassignedProject(item as Project) : isUnassignedProject(getItemId(item) as number);
   const title = getItemTitle(item);
@@ -120,7 +123,7 @@ const DataCard = <T,>({
       const direction = query.data.query.direction || null;
       const typeID = getTypeIDFromType(type, direction);
       const qid = query.data.qid;
-      const path = getResultsShareURLPath(label, curie, typeID, "0", qid);
+      const path = getResultsShareURLPath(label, curie, typeID, "0", qid, config?.include_hashed_parameters);
       window.open(encodeURI(`${window.location.origin}/${path}`), "_blank", "noopener");
       return;
     }
@@ -142,7 +145,7 @@ const DataCard = <T,>({
         }
         const constraint = query.data.query.constraint || undefined;
         const qid = query.data.qid;
-        const path = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
+        const path = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid, config?.include_hashed_parameters);
         window.open(encodeURI(`${window.location.origin}/${path}`), "_blank", "noopener");
         return;
       }
