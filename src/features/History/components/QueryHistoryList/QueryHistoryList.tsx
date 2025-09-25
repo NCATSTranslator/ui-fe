@@ -16,12 +16,14 @@ import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import RefreshIcon from '@/assets/icons/buttons/Refresh.svg?react';
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 
 const QueryHistoryList = ({ loading }: { loading: boolean }) => {
   let previousTimeName: string | undefined;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const config = useSelector(currentConfig);
 
   const tempQueryHistory = useSelector(pastQueryState) as QueryHistoryItem[];
   // query history stored from oldest -> newest, so we must reverse it to display the most recent first
@@ -51,7 +53,7 @@ const QueryHistoryList = ({ loading }: { loading: boolean }) => {
     const nodeLabel = (!!query.item?.node) ? query.item.node.label : "";
     const nodeID = (!!query.item?.node) ? query.item.node.id : "";
     const typeID = (!!query.item?.type) ?  query.item.type.id : "";
-    navigate(`/${getResultsShareURLPath(nodeLabel, nodeID, typeID, '0', query.id)}`);
+    navigate(`/${getResultsShareURLPath(nodeLabel, nodeID, typeID, '0', query.id, config?.include_hashed_parameters)}`);
   };
 
   const handleSearch = useCallback((value: string, setIsLoading: Dispatch<SetStateAction<boolean>>, setFilteredQueryHistoryState: Dispatch<SetStateAction<QueryHistoryItem[]>>) => {

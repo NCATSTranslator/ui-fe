@@ -216,11 +216,17 @@ export const encodeParams = (params: string): string => {
  * @param {string | number} typeID - The ID of the type.
  * @param {string | number} resultID - The ID of the result.
  * @param {string | number} pk - The ID of the query.
+ * @param {boolean} shouldHash - Whether to hash the parameters.
  * @returns {string} The share URL path.
  */
-export const getResultsShareURLPath = (label: string, nodeID: string | number, typeID: string | number, resultID: string | number, pk: string | number) => {
+export const getResultsShareURLPath = (label: string, nodeID: string | number, typeID: string | number, resultID: string | number, pk: string | number, shouldHash: boolean = false) => {
+  let path = "";
   // partially encode params, q (query pk) is not encoded
-  let path = `results?${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}`)}&q=${pk}`;
+  if(shouldHash)
+    path = `results?${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}`)}&q=${pk}`;
+  else
+    path = `results?${`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`}`;
+
   return path;
 }
 
@@ -232,15 +238,20 @@ export const getResultsShareURLPath = (label: string, nodeID: string | number, t
  * @param {string} resultID - The ID of the result.
  * @param {string | undefined} constraint - The constraint.
  * @param {string} pk - The ID of the query.
+ * @param {boolean} shouldHash - Whether to hash the parameters.
  * @returns {string} The share URL path.
  */
-export const getPathfinderResultsShareURLPath = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem, resultID: string, constraint: string | undefined, pk: string) => {
+export const getPathfinderResultsShareURLPath = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem, resultID: string, constraint: string | undefined, pk: string, shouldHash: boolean = false) => {
   let labelOne = (itemOne.label) ? itemOne.label : null;
   let labelTwo = (itemTwo.label) ? itemTwo.label : null;
   let idOne = (itemOne.id) ? itemOne.id : null;
   let idTwo = (itemTwo.id) ? itemTwo.id : null;
   let constraintVar = !!constraint ?  `&c=${constraint}`: '';
+  let path = "";
   // partially encode params, q (query pk) is not encoded
-  let path = `results?${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}`)}&q=${pk}`;
+  if(shouldHash)
+    path = `results?${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}`)}&q=${pk}`;
+  else
+    path = `results?${`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}&q=${pk}`}`;
   return path;
 }

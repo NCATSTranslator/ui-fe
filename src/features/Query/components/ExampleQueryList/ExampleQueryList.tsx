@@ -7,6 +7,8 @@ import Button from '@/features/Core/components/Button/Button';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { Example } from '@/features/Query/types/querySubmission';
 import QueryTypeIcon from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
+import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { useSelector } from 'react-redux';
 
 type ExampleQueryListProps = {
   examples: Example[] | null;
@@ -22,6 +24,7 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
   const minHeight = 32;
   const [height, setHeight] = useState<Height>(minHeight);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const config = useSelector(currentConfig);
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
@@ -67,9 +70,9 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
                 return (
                   <Button
                     className={`${styles.button} example-query`}
-                    handleClick={() => setPresetURL(getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid))}
+                    handleClick={() => setPresetURL(getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid, config?.include_hashed_parameters))}
                     data-testid={item.name}
-                    data-url={getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid)}
+                    data-url={getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid, config?.include_hashed_parameters)}
                     key={item.id}
                     iconLeft={<QueryTypeIcon type={queryTypes[typeID].searchTypeString}/>}
                     smallFont
