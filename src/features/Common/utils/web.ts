@@ -144,21 +144,56 @@ export const fetchWithErrorHandling = async <T>(
 
 /**
  * Retrieves the decoded query parameters from the URL.
+ * Automatically detects and decodes base64 encoded portions while preserving other parameters.
  *
  * @returns {string} The decoded query parameters.
  */
 export const getDecodedParams = (): string => {
-  if(!window.location.search)
+  if (!window.location.search) {
     return "";
-  let decodedParams = window.location.search.slice(1);
-  try {
-    decodedParams = window.atob(decodedParams);
-  } catch {
-    // if the search is not encoded, return the search without decoding
-    decodedParams = window.location.search.slice(1);
   }
+
+  const searchParams = window.location.search.slice(1);
   
-  return decodedParams;
+  // Split by & to handle individual parameter segments
+  const segments = searchParams.split('&');
+  const decodedSegments: string[] = [];
+
+  for (const segment of segments) {
+    // Skip empty segments
+    if (!segment) {
+      continue;
+    }
+
+    // Check if this segment looks like a regular query parameter (key=value format)
+    const equalIndex = segment.indexOf('=');
+    if (equalIndex > 0 && equalIndex < segment.length - 1) {
+      // This appears to be a key=value pair, keep it as is
+      decodedSegments.push(segment);
+    } else {
+      // This might be a base64 encoded segment, try to decode it
+      try {
+        const decoded = window.atob(segment);
+        // Verify the decoded content looks like query parameters
+        // It should contain at least one = that's not at the start or end
+        const hasValidQueryFormat = decoded.includes('=') && 
+          decoded.indexOf('=') > 0 && 
+          decoded.indexOf('=') < decoded.length - 1;
+        
+        if (hasValidQueryFormat) {
+          decodedSegments.push(decoded);
+        } else {
+          // If decoded content doesn't look like query parameters, keep original
+          decodedSegments.push(segment);
+        }
+      } catch {
+        // If decoding fails, keep the original segment
+        decodedSegments.push(segment);
+      }
+    }
+  }
+
+  return decodedSegments.join('&');
 }
 
 /**
@@ -184,9 +219,8 @@ export const encodeParams = (params: string): string => {
  * @returns {string} The share URL path.
  */
 export const getResultsShareURLPath = (label: string, nodeID: string | number, typeID: string | number, resultID: string | number, pk: string | number) => {
-  // let path = `results?${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`)}`;
-  // TODO: replace with above if NCATS approves
-  let path = `results?${`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`}`;
+  // partially encode params, q (query pk) is not encoded
+  let path = `results?${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}`)}&q=${pk}`;
   return path;
 }
 
@@ -206,8 +240,7 @@ export const getPathfinderResultsShareURLPath = (itemOne: AutocompleteItem, item
   let idOne = (itemOne.id) ? itemOne.id : null;
   let idTwo = (itemTwo.id) ? itemTwo.id : null;
   let constraintVar = !!constraint ?  `&c=${constraint}`: '';
-  // let path = `results?${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}&q=${pk}`)}`;
-  // TODO: replace with above if NCATS approves
-  let path = `results?${`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}&q=${pk}`}`;
+  // partially encode params, q (query pk) is not encoded
+  let path = `results?${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}`)}&q=${pk}`;
   return path;
 }
