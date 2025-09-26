@@ -7,6 +7,8 @@ import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react
 import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { cloneDeep } from 'lodash';
+import { getTagType } from '@/features/ResultFiltering/utils/filterFunctions';
+import { CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 
 interface FacetTagProps {
   activeFilters: Filter[];
@@ -67,6 +69,8 @@ const FacetTag: FC<FacetTagProps> = ({
   let tagName: string = generateTagName(isEntitySearch, filter, family);
   let positiveChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, false, filter);
   let negativeChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, true, filter);
+  const type = getTagType(tagKey);
+  const shouldShowCount = !isEntitySearch && type !== CONSTANTS.PATH;
 
   return (
     <div className={`facet-container ${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey} data-facet-name={tagName}>
@@ -87,7 +91,7 @@ const FacetTag: FC<FacetTagProps> = ({
           {tagName}
         </span>
         {
-          !isEntitySearch &&
+          shouldShowCount &&
           <span className={styles.facetCount}>
             {(filter.count) ? filter.count : 0}
             {
