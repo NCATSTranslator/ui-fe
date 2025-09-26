@@ -1,12 +1,11 @@
 import { FC } from "react";
-import styles from "./SidebarQueryCard.module.scss";
-import { Link } from "react-router-dom";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import { getQueryLink } from "@/features/Projects/utils/utilities";
-import Highlighter from "react-highlight-words";
+import SidebarCard from "@/features/Sidebar/components/SidebarCard/SidebarCard";
+import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
 
 interface SidebarQueryCardProps {
   query: UserQueryObject;
@@ -16,31 +15,39 @@ interface SidebarQueryCardProps {
 
 const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm, title }) => {
   const queryURL = getQueryLink(query);
-  // const { title: queryCardTitle } = useGetQueryCardTitle(query);
+  
+  const leftIcon = <StatusIndicator status={query.status} />;
+  
+  const bottomLeft = (
+    <span className={styles.type}>
+      {query.data.query.type === 'pathfinder' ? 'Pathfinder Query' : 'Smart Query'}
+    </span>
+  );
+  
+  const bottomRight = (
+    <>
+      <span className={styles.count}>
+        <BookmarkIcon />
+        {query.data.bookmark_ids.length}
+      </span>
+      <span className={styles.count}>
+        <NoteIcon />
+        {query.data.note_count}
+      </span>
+    </>
+  );
 
   return (
-    <div className={styles.sidebarQueryCard}>
-      <div>
-      <StatusIndicator status={query.status} className={styles.status} />
-      </div>
-      <div>
-        <Link className={styles.title} to={`${queryURL}`} target="_blank">
-          <Highlighter  
-            highlightClassName="highlight"
-            searchWords={searchTerm ? [searchTerm] : []}
-            autoEscape={true}
-            textToHighlight={title}
-          />
-        </Link>
-        <div className={styles.bottom}>
-          <span className={styles.type}>{query.data.query.type === 'pathfinder' ? 'Pathfinder Query' : 'Smart Query'}</span>
-          <div className={styles.saves}>
-            <span className={styles.count}><BookmarkIcon />{query.data.bookmark_ids.length}</span>
-            <span className={styles.count}><NoteIcon />{query.data.note_count}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <SidebarCard
+      leftIcon={leftIcon}
+      title={title}
+      searchTerm={searchTerm}
+      linkTo={queryURL}
+      linkTarget="_blank"
+      bottomLeft={bottomLeft}
+      bottomRight={bottomRight}
+      data-testid="sidebar-query-card"
+    />
   );
 };
 

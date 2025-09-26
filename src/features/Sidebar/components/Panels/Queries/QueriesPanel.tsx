@@ -31,9 +31,12 @@ const QueriesPanel = () => {
             </div>
           ) : (
             <LoadingWrapper loading={queriesLoading} contentClassName={styles.queriesList}>
-              {filteredQueries.map((query) => (
-                <SidebarQueryCard key={query.data.qid} query={query} searchTerm={searchTerm} title={query.data.title || ''} />
-              ))}
+              {filteredQueries.map((query) => {
+                const { title } = useGetQueryCardTitle(query);
+                return (
+                  <SidebarQueryCard key={query.data.qid} query={query} searchTerm={searchTerm} title={title} />
+                )
+              })}
             </LoadingWrapper>
           )
         }

@@ -1,0 +1,63 @@
+@use "@/assets/styles/variables" as *;
+
+.sidebarCard {
+  padding: $xs;
+  display: grid;
+  gap: $xxs;
+  grid-template-columns: auto 1fr;
+  .leftSection {
+    display: flex;
+    align-items: flex-start;
+    padding-top: $xxxs;
+  }
+  .content {
+    min-width: 0;
+  }
+  .title, .title span, .title mark {
+    margin-bottom: 0;
+    font-size: $bodyTwoSize;
+    font-weight: 800;
+    color: $black;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: $xxxs;
+    .bottomLeft {
+      display: flex;
+      align-items: center;
+      gap: $xxs;
+    }
+    .bottomRight {
+      display: flex;
+      align-items: center;
+      gap: $xxs;
+    }
+  }
+}
+
+.count {
+  font-size: $captionSize;
+  font-weight: 400;
+  color: $darkGray;
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  svg {
+    width: 15px;
+    height: 15px;
+    path {
+      fill: $darkGray;
+    }
+  }
+}
+.type {
+  font-size: $captionSize;
+  font-weight: 400;
+  color: $darkGray;
+}
