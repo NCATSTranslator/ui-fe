@@ -121,6 +121,10 @@ export const isEvidenceFilter = (filter: Filter): boolean => {
   return getFilterFamily(filter) === 'ev';
 }
 
+export const isIndirectFilter = (filter: Filter): boolean => {
+  return getFilterFamily(filter) === 'pt' && _getFilterSpecifier(filter) === 'inf';
+}
+
 export const isExclusion = (filter: Filter): boolean => {
   return filter.negated || false;
 }
@@ -169,4 +173,12 @@ export const getTagFamily = (tagID: string): FilterFamily => {
 
 const _splitTagID = (tagID: string): string[] => {
   return tagID.split('/');
+}
+
+const _getTagSpecifier = (tagID: string): string => {
+  return _splitTagID(tagID)[2];
+}
+
+const _getFilterSpecifier = (filter: Filter): string => {
+  return _getTagSpecifier(filter.id || '');
 }

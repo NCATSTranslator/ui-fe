@@ -232,8 +232,9 @@ export const applyFilters = (
       const pathRanks = new Map<string, PathRank>();
       for (const p of result.paths) {
         const path: Path | null = typeof p === "string" ? getPathById(resultSet, p) : p as Path;
-        if (path?.id)
+        if (path?.id) {
           pathRanks.set(path.id, makePathRank(resultSet, path));
+        }
       }
 
       let include = true;
@@ -504,14 +505,10 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
     for (let pathRank of pathRanks) {
       const pid = pathRank.path.id;
       if (!pid) continue;
-      if (depth > 1) {
-        if (pathRank.support.length !== 0) {
-          _updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
-        }
-        pathFilterState[pid] = false;
-      } else if (pathRank.support.length !== 0) {
-        _updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
-        let filterIndirect = true; // Only filter indirect paths by support if it is a top level path
+      pathFilterState[pid] = false;
+      _updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
+      if (pathRank.support.length !== 0) {
+        let filterIndirect = true;
         for (let supportRank of pathRank.support) {
           const supportPid = supportRank.path.id;
           if (!!supportPid) {
@@ -520,7 +517,7 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
         }
         pathFilterState[pid] = filterIndirect;
       } else {
-        pathFilterState[pid] = (pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered));
+        pathFilterState[pid] = pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered);
       }
     }
   }
