@@ -23,7 +23,7 @@ import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
  *
  * @param resultSet - The full ResultSet containing all nodes, edges, and paths
  * @param result - The individual result to check for a string match
- * @param searchTerm - The lowercase search term to match against result content
+ * @param filter - The entity filter
  * @param pathRanks - Mutable ranking data structure, updated based on path relevance
  * @returns True if the search term is found in the result or any associated path; false otherwise
  */
@@ -31,28 +31,29 @@ import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
 export const findStringMatch = (
   resultSet: ResultSet,
   result: Result,
-  searchTerm: string,
-  pathRanks: PathRank[]
-): boolean => {
-  const normalizedTerm = searchTerm.toLowerCase();
-
+  filter: Filter,
+  pathRanks: Map<string, PathRank>): boolean => {
+  const normalizedTerm = (filter.value || '').toLowerCase();
+  const isExclusion = filtering.isExclusion(filter);
   // Shallow properties: drug name and subject node description
   const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
   const subjectNode = getNodeById(resultSet, result.subject);
   const descriptionMatch = subjectNode?.descriptions?.[0]?.toLowerCase().includes(normalizedTerm) ?? false;
   let matched = !normalizedTerm || nameMatch || descriptionMatch;
+  if (isExclusion && matched) return true;
   for (let i = 0; i < result.paths.length; i++) {
     const path = isPath(result.paths[i])
       ? result.paths[i]
       : getPathById(resultSet, result.paths[i] as string);
 
-    const pathRank = pathRanks[i];
-    if (path && pathRank && typeof path !== "string") {
-      const pathMatch = _checkPathForMatch(resultSet, path, pathRank);
-      matched = matched || pathMatch;
+    if (!!path && typeof path !== 'string') {
+      const pathRank = (path && typeof path !== 'string' && path.id) ? pathRanks.get(path.id) : null;
+      if (!!pathRank) {
+        const subMatch = _checkPathForMatch(resultSet, path, pathRank, isExclusion, 0);
+        matched ||= subMatch;
+      }
     }
   }
-
   return matched;
 
   function _checkItemForMatch(item?: ResultNode | ResultEdge): boolean {
@@ -62,52 +63,81 @@ export const findStringMatch = (
       return !!item.predicate?.toLowerCase().includes(normalizedTerm);
     }
 
-    return (
-      item.names.some(name => name.toLowerCase().includes(normalizedTerm)) ||
-      item.curies.some(curie => curie.toLowerCase().includes(normalizedTerm)) ||
-      item.descriptions.some(desc => desc.toLowerCase().includes(normalizedTerm))
-    );
-  };
+    return (item.names &&
+        item.names.length > 0 &&
+        item.names[0].toLowerCase().includes(normalizedTerm)) ||
+      (item.descriptions &&
+        item.descriptions.length > 0 &&
+        item.descriptions[0].toLowerCase().includes(normalizedTerm)) ||
+      item.curies.some(curie => curie.toLowerCase().includes(normalizedTerm));
+  }
 
   function _checkPathForMatch(
-    resultSet: ResultSet,
-    path: Path,
-    pathRank: PathRank
-  ): boolean {
-    let matched = false;
-
+      resultSet: ResultSet,
+      path: Path,
+      pathRank: PathRank,
+      isExclusion: boolean,
+      depth: number): boolean {
     for (let i = 0; i < path.subgraph.length; i++) {
       const elementID = path.subgraph[i];
       const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
-
+      if (depth === 1 && _checkItemForMatch(item)) {
+        pathRank.rank += -1 * filtering.CONSTANTS.WEIGHT.LIGHT;
+        if (isExclusion) {
+          pathRank.rank = filtering.CONSTANTS.WEIGHT.HEAVY
+          return false;
+        }
+        _cascadePathRank(resultSet, path, pathRank);
+        return true;
+      }
       // Recursive support path checking
       if (isResultEdge(item) && hasSupport(item)) {
         for (let j = 0; j < item.support.length; j++) {
           const support = item.support[j];
           const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
           const supportRank = pathRank.support?.[j];
-
           if (supportPath && typeof supportPath !== "string" && supportRank) {
-            const subMatch = _checkPathForMatch(resultSet, supportPath, supportRank);
-            if (subMatch) {
+            const subMatch = _checkPathForMatch(resultSet, supportPath, supportRank, isExclusion, depth+1);
+            if (subMatch && supportRank.rank < 0) {
               pathRank.rank += supportRank.rank;
-              matched = true;
             }
           }
         }
       }
-
       // Direct match
-      if (_checkItemForMatch(item)) {
-        pathRank.rank -= 1;
-        matched = true;
+      if (depth !== 1 && _checkItemForMatch(item)) {
+        if (isExclusion) {
+          pathRank.rank = filtering.CONSTANTS.WEIGHT.HEAVY
+          return false;
+        }
+        pathRank.rank += -1 * filtering.CONSTANTS.WEIGHT.LIGHT;
       }
     }
+    return (!isExclusion && pathRank.rank < 0);
+  }
 
-    return matched;
-  };
-};
-
+  function _cascadePathRank(
+      resultSet: ResultSet,
+      path: Path,
+      pathRank: PathRank) {
+    for (let i = 0; i < path.subgraph.length; i++) {
+      const elementID = path.subgraph[i];
+      const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
+      // Recursive support path checking
+      if (isResultEdge(item) && hasSupport(item)) {
+        for (let j = 0; j < item.support.length; j++) {
+          const support = item.support[j];
+          const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
+          const supportRank = pathRank.support?.[j];
+          if (supportPath && typeof supportPath !== "string" && supportRank) {
+            supportRank.rank = pathRank.rank;
+            _cascadePathRank(resultSet, supportPath, supportRank);
+          }
+        }
+      }
+    }
+  }
+}
 
 export const handleResultsError = (errorExists = true, setIsError: (value: boolean) => void, setIsLoading: (value: boolean) => void) => {
   setIsError(errorExists);
@@ -241,7 +271,7 @@ export const applyFilters = (
       for (const filter of filters) {
         if (
           filtering.isEntityFilter(filter) &&
-          filtering.isExclusion(filter) === findStringMatch(resultSet, result, filter.value || "", [...pathRanks.values()])
+          filtering.isExclusion(filter) === findStringMatch(resultSet, result, filter || "", pathRanks)
         ) {
           include = false;
           negated.push(result);
