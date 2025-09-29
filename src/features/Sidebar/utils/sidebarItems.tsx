@@ -13,11 +13,11 @@ import FolderPlus from '@/assets/icons/projects/folderplus.svg?react';
 import SearchPlus from '@/assets/icons/projects/searchplus.svg?react';
 
 const NewProjectButton = () => {
-  return <Button iconLeft={<FolderPlus />} iconOnly  />;
+  return <Button iconLeft={<FolderPlus />} iconOnly />;
 };
 
 const NewQueryButton = () => {
-  return <Button iconLeft={<SearchPlus />} iconOnly href="/" />;
+  return <Button iconLeft={<SearchPlus />} iconOnly href="/" link />;
 };
 
 export const topItems: SidebarItem[] = [
