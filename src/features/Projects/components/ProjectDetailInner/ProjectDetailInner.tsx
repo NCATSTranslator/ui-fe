@@ -177,7 +177,7 @@ const ProjectDetailInner = () => {
                   className={styles.projectTabs}
                 >
                   {[
-                    <Tab key="queries" heading="Queries" className={styles.projectTabContent}>
+                    <Tab key="queries" heading={`${sortedData.sortedQueries.length} Quer${sortedData.sortedQueries.length === 1 ? 'y' : 'ies'}`} className={styles.projectTabContent}>
                       {sortedData.sortedQueries.length > 0 && (
                         <QueriesTableHeader
                           activeQueries={sortedData.sortedQueries}
