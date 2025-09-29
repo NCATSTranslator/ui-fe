@@ -5,6 +5,13 @@
   display: grid;
   gap: $xxs;
   grid-template-columns: auto 1fr;
+  border-radius: $defaultBorderRadius;
+  border: 1px solid transparent;
+  transition: $defaultAnim;
+  &:hover {
+    background-color: $lightGray;
+    border: 1px solid $lightPurpleTwo;
+  }
   .leftSection {
     display: flex;
     align-items: flex-start;

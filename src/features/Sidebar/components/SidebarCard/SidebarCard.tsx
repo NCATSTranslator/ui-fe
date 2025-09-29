@@ -1,6 +1,7 @@
 import { FC, ReactNode, MouseEvent, useCallback } from "react";
-import SidebarCardTitle from "../SidebarCardTitle/SidebarCardTitle";
 import styles from "./SidebarCard.module.scss";
+import SidebarCardTitle from "@/features/Sidebar/components/SidebarCardTitle/SidebarCardTitle";
+import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface SidebarCardProps {
   leftIcon: ReactNode;
@@ -36,7 +37,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
     onClick?.(event);
   }, [onClick, linkTo]);
 
-  const cardClassName = [styles.sidebarCard, className].filter(Boolean).join(' ');
+  const cardClassName = joinClasses(styles.sidebarCard, className);
 
   return (
     <div 
