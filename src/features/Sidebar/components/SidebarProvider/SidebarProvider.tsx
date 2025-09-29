@@ -12,6 +12,7 @@ export const SidebarContext = createContext<SidebarContextValue>({
   unregisterSidebarItem: () => {},
   getSidebarItem: () => null,
   getContextPanel: () => null,
+  getButtonComponent: () => null,
 });
 
 const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -54,6 +55,15 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return dynamicSidebarItems.get(id) ?? null;
   }, [dynamicSidebarItems]);
 
+  const getButtonComponent = useCallback((sidebarItem: SidebarItem) => {
+    // If there's a factory function, call it to get the dynamic component
+    if (sidebarItem.buttonComponentFactory) {
+      return sidebarItem.buttonComponentFactory();
+    }
+    // Otherwise return the static component
+    return sidebarItem.buttonComponent || null;
+  }, []);
+
   const getContextPanel = useCallback((sidebarItem: SidebarItem) => {
     // If there's a factory function, call it to get the dynamic component
     if (sidebarItem.panelComponentFactory) {
@@ -74,6 +84,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     unregisterSidebarItem,
     getSidebarItem,
     getContextPanel,
+    getButtonComponent,
   }), [
     collapsed,
     activePanelId,
@@ -85,6 +96,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     unregisterSidebarItem,
     getSidebarItem,
     getContextPanel,
+    getButtonComponent,
   ]);
 
   return (

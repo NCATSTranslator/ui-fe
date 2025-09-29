@@ -7,7 +7,7 @@ import SidebarLinkList from "@/features/Sidebar/components/SidebarLinkList/Sideb
 import ContextPanel from "@/features/Sidebar/components/ContextPanel/ContextPanel";
 
 const Sidebar = () => {
-  const { collapsed, activePanelId, dynamicSidebarItems, getContextPanel } = useSidebar();
+  const { collapsed, activePanelId, dynamicSidebarItems, getContextPanel, getButtonComponent } = useSidebar();
   const allSidebarItems = useMemo(() => [...topItems, ...dynamicSidebarItems, ...bottomItems], [dynamicSidebarItems]);
   const activeSidebarItem = useMemo(() => allSidebarItems.find(item => item.id === activePanelId), [allSidebarItems, activePanelId]);
 
@@ -35,6 +35,7 @@ const Sidebar = () => {
         {
           activeSidebarItem &&
           <ContextPanel
+            buttonComponent={activeSidebarItem && getButtonComponent(activeSidebarItem)}
             panel={activeSidebarItem && getContextPanel(activeSidebarItem)}
             title={activeSidebarItem.label || ''}
           />

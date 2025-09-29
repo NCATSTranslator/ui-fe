@@ -27,14 +27,13 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
   const sidebarItemIdRef = useRef(options.id);
 
   useEffect(() => {
-    const { id, to, onClick, panelComponent, icon, tooltipText, ariaLabel, autoOpen, label } = options;
+    const { id, to, onClick, panelComponent, buttonComponent, icon, tooltipText, ariaLabel, autoOpen, label } = options;
     // Determine the type based on whether it has a panel component or navigation
     const type: 'link' | 'panel' = panelComponent ? 'panel' : 'link';
     
     // Handle panel component - support both static ReactNode and factory function
     let resolvedPanelComponent: ReactNode = undefined;
     let panelComponentFactory: (() => ReactNode) | undefined = undefined;
-    
     if (panelComponent) {
       if (typeof panelComponent === 'function') {
         // It's a factory function - store it for dynamic rendering
@@ -44,6 +43,18 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
         // It's a static ReactNode
         resolvedPanelComponent = panelComponent;
         panelComponentFactory = undefined;
+      }
+    }
+    // Handle button component - support both static ReactNode and factory function
+    let resolvedButtonComponent: ReactNode = undefined;
+    let buttonComponentFactory: (() => ReactNode) | undefined = undefined;
+    if (buttonComponent) {
+      if (typeof buttonComponent === 'function') {
+        buttonComponentFactory = buttonComponent;
+        resolvedButtonComponent = undefined;
+      } else {
+        resolvedButtonComponent = buttonComponent;
+        buttonComponentFactory = undefined;
       }
     }
     
@@ -56,6 +67,8 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
       onClick,
       panelComponent: resolvedPanelComponent,
       panelComponentFactory,
+      buttonComponent: resolvedButtonComponent,
+      buttonComponentFactory,
       to,
       tooltipText,
       type

@@ -19,6 +19,14 @@
       font-weight: 800;
     }
   }
+  .buttonContainer {
+    display: flex;
+    align-items: center;
+    gap: $s;
+    button, a {
+      margin: 0;
+    }
+  }
   .content {
     padding: 0 $s $s;
     position: relative;

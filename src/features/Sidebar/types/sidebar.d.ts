@@ -13,6 +13,7 @@ export type SidebarContextValue = {
   unregisterSidebarItem: (id: SidebarItemId) => void;
   getSidebarItem: (id: SidebarItemId) => SidebarItem | null;
   getContextPanel: (sidebarItem: SidebarItem) => ReactNode | null;
+  getButtonComponent: (sidebarItem: SidebarItem) => ReactNode | null;
 };
 
 export type SidebarItem = {
@@ -25,6 +26,8 @@ export type SidebarItem = {
   icon: ReactNode;
   panelComponent?: ReactNode;
   panelComponentFactory?: () => ReactNode;
+  buttonComponent?: ReactNode;
+  buttonComponentFactory?: () => ReactNode;
   tooltipText?: string;
 };
 
@@ -33,6 +36,7 @@ export type SidebarRegistrationOptions = {
   to?: string;
   onClick?: () => void;
   panelComponent?: ReactNode | (() => ReactNode);
+  buttonComponent?: ReactNode | (() => ReactNode);
   icon: ReactNode;
   tooltipText: string;
   label: string;
