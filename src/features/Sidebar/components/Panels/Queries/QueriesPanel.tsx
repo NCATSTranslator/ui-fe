@@ -1,8 +1,7 @@
-import { useMemo } from "react";
 import styles from "./QueriesPanel.module.scss";
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
-import { useGetQueryCardTitle, useUserQueries } from "@/features/Projects/hooks/customHooks";
+import { useUserQueries } from "@/features/Projects/hooks/customHooks";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import SidebarQueryCard from "@/features/Sidebar/components/SidebarQueryCard/SidebarQueryCard";
@@ -32,9 +31,8 @@ const QueriesPanel = () => {
           ) : (
             <LoadingWrapper loading={queriesLoading} contentClassName={styles.queriesList}>
               {filteredQueries.map((query) => {
-                const { title } = useGetQueryCardTitle(query);
                 return (
-                  <SidebarQueryCard key={query.data.qid} query={query} searchTerm={searchTerm} title={title} />
+                  <SidebarQueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
                 )
               })}
             </LoadingWrapper>

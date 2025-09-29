@@ -6,14 +6,16 @@ import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import { getQueryLink } from "@/features/Projects/utils/utilities";
 import SidebarCard from "@/features/Sidebar/components/SidebarCard/SidebarCard";
 import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
+import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 
 interface SidebarQueryCardProps {
   query: UserQueryObject;
   searchTerm?: string;
-  title: string;
 }
 
-const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm, title }) => {
+const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
+  const { title } = useGetQueryCardTitle(query);  
+
   const queryURL = getQueryLink(query);
   
   const leftIcon = <StatusIndicator status={query.status} />;
