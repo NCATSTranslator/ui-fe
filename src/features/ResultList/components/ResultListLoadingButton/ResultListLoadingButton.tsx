@@ -9,105 +9,88 @@ import { useNewResultsDisclaimerApproved } from '@/features/ResultList/hooks/res
 import { ResultListLoadingData } from '@/features/ResultList/types/results';
 
 interface ResultListLoadingButtonProps {
-  data?: Partial<ResultListLoadingData>;
   currentPercentage: number;
+  hasFreshResults: boolean;
+  isFetchingARAStatus: boolean;
+  isFetchingResults: boolean;
+  isError: boolean;
+  showDisclaimer: boolean;
+  handleResultsRefresh: () => void;
+  setIsActive: (active: boolean) => void;
 }
 
-const ResultListLoadingButton = ({ data = {}, currentPercentage }: ResultListLoadingButtonProps) => {
+const ResultListLoadingButton = ({
+  currentPercentage,
+  hasFreshResults,
+  isFetchingARAStatus,
+  isFetchingResults,
+  isError,
+  showDisclaimer,
+  handleResultsRefresh,
+  setIsActive
+}: ResultListLoadingButtonProps) => {
 
-  const containerClassName = (data.containerClassName) ? data.containerClassName : '';
-  const buttonClassName = (data.buttonClassName) ? data.buttonClassName : '';
   const [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved] = useNewResultsDisclaimerApproved(false);
   // const [isTooltipOpen, setIsTooltipOpen] = useState(!isNewResultsDisclaimerApproved);
   
   const handleCheckbox = (): void => setAndPersistNewResultsDisclaimerApproved(prev => !prev);
 
-  const isResultsAvailable = data.hasFreshResults;
-  const isResultsComplete = !isResultsAvailable && !data.isFetchingARAStatus && !data.isFetchingResults;
-  const displayCloseButton = !data.isError && !isResultsAvailable && !data.isFetchingARAStatus && !data.isFetchingResults;
-  const displayResultPercentage = (isResultsAvailable || currentPercentage < 100) && !isResultsComplete;
+  const resultsAvailable = hasFreshResults;
+  // const resultsComplete = !resultsAvailable && !isFetchingARAStatus && !isFetchingResults;
 
   return(
-    <div 
-      className={`${containerClassName} ${styles.loadingButtonContainer}`}
-      >
-      <div className={styles.left}>
-        {
-          data.isError
-          ? 
-            <div className={styles.complete}>
-              <AlertIcon/>
-              <span>Error</span>
-            </div>
-          : 
-            <>
-              {
-                (isResultsComplete) &&
-                <div className={styles.complete}>
-                  <CompleteIcon/>
-                  <span>All Results Shown</span>
-                </div>
-              }
-              {
-                (isResultsAvailable) &&
-                <span className={styles.resultsAvailable}>New Results Available</span>
-              }
-          </>
-        }
-        {
-          (displayResultPercentage) &&
-          <span className={styles.loadPercentage}>{Math.round(currentPercentage)}% Loaded</span>
-        }
-      </div>
-      <div className={styles.right}>
-      <Tooltip 
-        id="sync-new-results-button"
-        // isOpen={isTooltipOpen}
-        >
-        <span className={styles.tooltipInner}>
-          <p className={styles.bold}>
-            New Results Available
-          </p>
-          <p>
-            We return the first available results as soon as we get them to cut down on loading times. Click this button to load new results.
-          </p>
-          <span className={styles.checkbox}>
-            <input
-              type="checkbox"
-              id="checkbox-dont-show"
-              onClick={handleCheckbox}
-            />
-            <label htmlFor="checkbox-dont-show">Don't show again</label>
-          </span>
-          {/* <CloseIcon
-            onClick={() => setIsTooltipOpen(false)}
-            className={styles.close}
-          /> */}
-        </span>
-      </Tooltip>
+    <>
       {
-        (isResultsAvailable) &&
-        <>
-          {
-            (data.showDisclaimer) &&
-            <p className={`${styles.refreshDisclaimer} ${isResultsAvailable && styles.active}`}>Syncing may update and reorder previously viewed results.</p>
-          }
-          <Button
-            handleClick={data.handleResultsRefresh}
-            className={`${buttonClassName} ${styles.loadingButton} ${isResultsAvailable && styles.active}`}
-            dataTooltipId="sync-new-results-button"
-            iconLeft={<ResultsAvailableIcon/>}
+        resultsAvailable && (
+          <div 
+            className={`${styles.loadingButtonContainer}`}
             >
-            Sync New Results
-          </Button>
-        </>
+            <Tooltip 
+              id="sync-new-results-button"
+              // isOpen={isTooltipOpen}
+              >
+              <span className={styles.tooltipInner}>
+                <p className={styles.bold}>
+                  New Results Available
+                </p>
+                <p>
+                  We return the first available results as soon as we get them to cut down on loading times. Click this button to load new results.
+                </p>
+                <span className={styles.checkbox}>
+                  <input
+                    type="checkbox"
+                    id="checkbox-dont-show"
+                    onClick={handleCheckbox}
+                  />
+                  <label htmlFor="checkbox-dont-show">Don't show again</label>
+                </span>
+                {/* <CloseIcon
+                  onClick={() => setIsTooltipOpen(false)}
+                  className={styles.close}
+                /> */}
+              </span>
+            </Tooltip>
+            {
+              (resultsAvailable) &&
+              <>
+                {
+                  (showDisclaimer) &&
+                  <p className={`${styles.refreshDisclaimer} ${resultsAvailable && styles.active}`}>Syncing may update and reorder previously viewed results.</p>
+                }
+                <Button
+                  handleClick={handleResultsRefresh}
+                  className={`${styles.loadingButton} ${resultsAvailable && styles.active}`}
+                  dataTooltipId="sync-new-results-button"
+                  iconLeft={<ResultsAvailableIcon/>}
+                  >
+                  Sync New Results
+                </Button>
+              </>
+            }
+          </div>
+        )
       }
-      {
-        (displayCloseButton) &&
-        <Button iconOnly handleClick={() => data.setIsActive?.(false)} variant="secondary"><CloseIcon/></Button>
-      }
-      </div>
-    </div>
+    </>
   )
 }
 

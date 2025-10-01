@@ -82,8 +82,14 @@ const ResultListLoadingBar: FC<ResultListLoadingBarProps> = ({
     <div className={styles.ResultListLoadingBar}>
       <div className={styles.top}>
         <ResultListLoadingButton 
-          data={data} 
           currentPercentage={barWidthPercentage}
+          hasFreshResults={data.hasFreshResults}
+          isFetchingARAStatus={data.isFetchingARAStatus ?? false}
+          isFetchingResults={data.isFetchingResults ?? false}
+          isError={data.isError}
+          showDisclaimer={data.showDisclaimer}
+          handleResultsRefresh={data.handleResultsRefresh}
+          setIsActive={data.setIsActive ?? (() => {})}
         />
       </div>
       <div className={styles.loadingBarContainer}>

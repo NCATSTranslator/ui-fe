@@ -1,0 +1,19 @@
+@use '@/assets/styles/variables' as *;
+
+.queryStatusPanel {
+  display: grid;
+  gap: $s;
+  .text {
+    p {
+      margin: 0;
+    }
+  }
+  .statusIndicator {
+    display: flex;
+    align-items: center;
+    gap: $xxs;
+    .percentage {
+      color: $darkGray;
+    }
+  }
+}

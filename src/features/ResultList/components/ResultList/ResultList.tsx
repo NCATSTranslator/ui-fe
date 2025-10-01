@@ -35,7 +35,7 @@ import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPa
 import ResultListTableHead from "@/features/ResultList/components/ResultListTableHead/ResultListTableHead";
 import ResultListModals from "@/features/ResultList/components/ResultListModals/ResultListModals";
 import ResultListBottomPagination from "@/features/ResultList/components/ResultListBottomPagination/ResultListBottomPagination";
-import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARAStatusResponse } from "@/features/ResultList/types/results.d";
+import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARAStatusResponse, ResultListLoadingData } from "@/features/ResultList/types/results.d";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
@@ -43,7 +43,7 @@ import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultLis
 import { getDecodedParams } from '@/features/Common/utils/web';
 import { useSidebarRegistration } from "@/features/Sidebar/hooks/sidebarHooks";
 import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
-import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatus/QueryStatusPanel";
+import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import { QueryStatus } from "@/features/Projects/types/projects";
 
@@ -642,13 +642,36 @@ const ResultList = () => {
     setAutoScrollToResult(true);
   }, [formattedResults, itemsPerPage, handlePageClick, resultSet]);
 
-  const handleResultsRefresh = () => {
+  const handleResultsRefresh = useCallback(() => {
     // Update rawResults with the fresh data
     if(!!freshRawResults)
       handleNewResults(freshRawResults);
     setFreshRawResults(null);
-  }
+  }, [freshRawResults]);
 
+  // data for the loading button in the Query Status panel in the sidebar
+  const loadingButtonData: ResultListLoadingData = useMemo(() => ({
+    handleResultsRefresh: handleResultsRefresh,
+    isFetchingARAStatus: isFetchingARAStatus.current,
+    isFetchingResults: isFetchingResults.current,
+    showDisclaimer: true,
+    hasFreshResults: (freshRawResults !== null),
+    isError: isError,
+    setIsActive: setIsLoading
+  }), [handleResultsRefresh, isFetchingARAStatus.current, isFetchingResults.current, freshRawResults, isError, setIsLoading]);
+
+  // Register the status sidebar item
+  useSidebarRegistration({
+    ariaLabel: "Query Status",
+    icon: () => <StatusIndicator status={arsStatus?.status as QueryStatus || "unknown"} inSidebar/>,
+    id: 'queryStatus',
+    label: "Status",
+    panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} />,
+    tooltipText: "",
+    dependencies: [arsStatus, loadingButtonData]
+  });
+
+  // Register the filters sidebar item
   useSidebarRegistration({
     ariaLabel: "Filters",
     icon: <FilterIcon />,
@@ -671,15 +694,6 @@ const ResultList = () => {
       isPathfinder
     ],
     // autoOpen: true // Uncomment to auto-open when landing on Results
-  });
-  useSidebarRegistration({
-    ariaLabel: "Query Status",
-    icon: () => <StatusIndicator status={arsStatus?.status as QueryStatus || "unknown"} inSidebar/>,
-    id: 'queryStatus',
-    label: "Query Status",
-    panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} />,
-    tooltipText: "",
-    dependencies: [arsStatus]
   });
 
   return (
@@ -863,25 +877,6 @@ const ResultList = () => {
             </>
           }
         </div>
-        {
-          formattedResults.length > 0 &&
-          <StickyToolbar
-            loadingButtonData={{
-              handleResultsRefresh: handleResultsRefresh,
-              isFetchingARAStatus: isFetchingARAStatus.current,
-              isFetchingResults: isFetchingResults.current,
-              showDisclaimer: true,
-              containerClassName: styles.shareLoadingButtonContainer,
-              buttonClassName: styles.loadingButton,
-              hasFreshResults: (freshRawResults !== null)
-            }}
-            isError={isError}
-            returnedARAs={{
-              aras: arsStatus?.data.aras || [],
-              status: arsStatus?.status || "unknown"
-            }}
-          />
-        }
       </div>
       {
         blocker &&

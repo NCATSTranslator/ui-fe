@@ -3,6 +3,7 @@ import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Pr
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import { unableToReachLinkToast } from "./toastMessages";
+import { ARAStatusResponse } from "@/features/ResultList/types/results.d";
 
 /**
  * Get the status of a project based on the most recent query's status
@@ -180,13 +181,14 @@ export const getQueryLink = (query: UserQueryObject) => {
 
 /**
  * Get the percentage of the query status based on the number of ARAs returned and the total number of ARAs
- * @param {UserQueryObject} query - The query to get the percentage for
+ * @param {UserQueryObject | ARAStatusResponse} item - The query to get the percentage for
  * @returns {number} The percentage of the query status
  */
-export const getQueryStatusPercentage = (query: UserQueryObject) => {
-  const currentInterval = query.data.aras.length;
+export const getQueryStatusPercentage = (item: UserQueryObject | ARAStatusResponse) => {
+  const currentInterval = item.data.aras.length;
   const TOTAL_INTERVALS = 4;
   const initialPercentage = 5;
   const progressPercentage = ((currentInterval / TOTAL_INTERVALS) * 100) - initialPercentage;
-  return Math.max(initialPercentage, progressPercentage);
+  // If the query is complete, return 100%, otherwise return the progress percentage
+  return item.status === 'complete' ? 100 : Math.max(initialPercentage, progressPercentage);
 }
