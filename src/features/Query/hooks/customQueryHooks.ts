@@ -10,6 +10,8 @@ import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '@/feat
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import { AutocompleteItem, AutocompleteFunctions, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
+import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { useSelector } from 'react-redux';
 
 /**
  * Custom hook that filters and sorts cached queries into categorized example queries.
@@ -58,6 +60,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const config = useSelector(currentConfig);
 
   const submitQuery = useCallback(async (item: QueryItem, projectId?: string) => {
     if (!item?.node) {
@@ -106,7 +109,8 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
           nodeID,
           item.type.id,
           '0',
-          data.data
+          data.data, 
+          config?.include_hashed_parameters
         );
 
         if (window.location.href.includes('results')) {
@@ -158,7 +162,8 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
         itemTwo,
         '0',
         middleType?.replace("biolink:", ""),
-        data.data
+        data.data,
+        config?.include_hashed_parameters
       );
       navigate(newQueryPath);
     } catch (error) {
@@ -169,7 +174,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
       console.log(error);
       throw error;
     }
-  }, [navigate]);
+  }, [navigate, config]);
 
   return {
     isLoading,

@@ -18,6 +18,8 @@ import { getQueryLink, getTypeIDFromType } from '@/features/Projects/utils/utili
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
 import { unableToReachLinkToast } from '@/features/Projects/utils/toastMessages';
 import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
+import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { useSelector } from 'react-redux';
 
 interface DataCardProps<T> {
   className?: string;
@@ -71,6 +73,7 @@ const DataCard = <T,>({
   type
 }: DataCardProps<T>) => {
   const navigate = useNavigate();
+  const config = useSelector(currentConfig);
 
   const isUnassignedPrj = type === 'project' ? isUnassignedProject(item as Project) : isUnassignedProject(getItemId(item) as number);
   const title = getItemTitle(item);

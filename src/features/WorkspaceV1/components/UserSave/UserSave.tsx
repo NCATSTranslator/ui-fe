@@ -14,6 +14,7 @@ import ChevUp from "@/assets/icons/directional/Chevron/Chevron Up.svg?react";
 import Alert from "@/assets/icons/status/Alerts/Info.svg?react";
 import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
+import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 
 interface UserSaveProps {
   activateEvidence?: (item: Result, edge: ResultEdge, path: Path, pathKey: string, pk: string) => void;
@@ -46,7 +47,7 @@ const UserSave: FC<UserSaveProps> = ({
   showHiddenPaths,
   zoomKeyDown }) => {
 
-    
+  const config = useSelector(currentConfig);
   let key = save[0];
   let queryObject = save[1];
   const arspk = useMemo(() => save[1].query.pk, [save]);
@@ -54,7 +55,7 @@ const UserSave: FC<UserSaveProps> = ({
   let typeString = (!!queryObject.query.type) ? `What ${queryObject.query.type.targetType}s ${queryObject.query.type.pathString}` : "";
   let queryNodeString = queryObject.query.nodeLabel;
   let queryTypeID = (!!queryObject.query.type) ? queryObject.query.type.id : 'p';
-  let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryTypeID, "", key);
+  let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryTypeID, "", key, config?.include_hashed_parameters);
   let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState<number | "auto">(0);
