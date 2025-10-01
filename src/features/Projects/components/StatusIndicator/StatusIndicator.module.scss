@@ -35,6 +35,11 @@ $statusSize: 18px;
 }
 .statusSuccess {
   background: $green;
+  &.status {
+    svg path {
+      fill: transparent !important;
+    }
+  }
 }
 .statusError {
   background: $red;
