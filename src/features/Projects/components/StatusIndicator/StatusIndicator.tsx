@@ -9,11 +9,12 @@ import { Fade } from "react-awesome-reveal";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 
 interface StatusIndicatorProps {
-  status: 'warning' | 'complete' | 'running' | 'error' | 'unknown' | 'noQueries' | 'noResults';
   className?: string;
+  inSidebar?: boolean;
+  status: 'warning' | 'complete' | 'running' | 'error' | 'unknown' | 'noQueries' | 'noResults';
 }
 
-const StatusIndicator: FC<StatusIndicatorProps> = ({ status, className }) => {
+const StatusIndicator: FC<StatusIndicatorProps> = ({ className, inSidebar = false, status }) => {
 
   const FADE_DELAY = 100;
   const FADE_DURATION = 500;
@@ -23,8 +24,21 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({ status, className }) => {
     return (
       <div data-tooltip-id={`${uniqueId}-success-tooltip`} className={`${styles.statusIndicator} ${className}`}>
         <Tooltip id={`${uniqueId}-success-tooltip`}>
-          <span className={styles.tooltipHeading}>Fully Loaded</span>
-          <span>Click to view results</span>
+          {
+            inSidebar 
+              ? (
+                <>
+                  <span>Results fully loaded</span>
+                </>
+              )
+              : (
+                <>  
+                  <span className={styles.tooltipHeading}>Fully Loaded</span>
+                  <span>Click to view results</span>
+                </>
+              )
+          }
+
         </Tooltip>
         <Fade
           delay={FADE_DELAY}

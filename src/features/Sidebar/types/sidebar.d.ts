@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-type SidebarItemId = 'newQuery' | 'projects' | 'queries' | 'projectsPanel' | 'filters' | 'settings' | 'feedback' | 'help';
+type SidebarItemId = 'newQuery' | 'projects' | 'queries' | 'projectsPanel' | 'filters' | 'queryStatus' | 'settings' | 'feedback' | 'help';
 
 export type SidebarContextValue = {
   collapsed: boolean;
@@ -23,7 +23,7 @@ export type SidebarItem = {
   type: 'link' | 'panel';
   to?: string;
   onClick?: () => void;
-  icon: ReactNode;
+  icon: ReactNode | (() => ReactNode);
   panelComponent?: ReactNode;
   panelComponentFactory?: () => ReactNode;
   buttonComponent?: ReactNode;
@@ -37,7 +37,7 @@ export type SidebarRegistrationOptions = {
   onClick?: () => void;
   panelComponent?: ReactNode | (() => ReactNode);
   buttonComponent?: ReactNode | (() => ReactNode);
-  icon: ReactNode;
+  icon: ReactNode | (() => ReactNode);
   tooltipText: string;
   label: string;
   ariaLabel?: string;

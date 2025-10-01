@@ -8,7 +8,7 @@ interface SidebarLinkProps {
   ariaLabel?: string;
   className?: string;
   href?: string;
-  icon: ReactNode;
+  icon: ReactNode | (() => ReactNode);
   onClick?: () => void;
   tooltipText: string;
 }
@@ -32,14 +32,18 @@ const SidebarLink: FC<SidebarLinkProps> = ({
         link={isLink}
         href={href}
         handleClick={onClick}
-        iconLeft={icon}
+        iconLeft={typeof icon === 'function' ? icon() : icon}
         iconOnly
         dataTooltipId={id}
         className={classNames}
       >
-        <Tooltip id={id} place="right">
-          <span>{tooltipText}</span>
-        </Tooltip>
+        {
+          tooltipText && (
+            <Tooltip id={id} place="right">
+              <span>{tooltipText}</span>
+            </Tooltip>
+          )
+        }
       </Button>
     </>
 

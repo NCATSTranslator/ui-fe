@@ -35,7 +35,7 @@ import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPa
 import ResultListTableHead from "@/features/ResultList/components/ResultListTableHead/ResultListTableHead";
 import ResultListModals from "@/features/ResultList/components/ResultListModals/ResultListModals";
 import ResultListBottomPagination from "@/features/ResultList/components/ResultListBottomPagination/ResultListBottomPagination";
-import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem } from "@/features/ResultList/types/results.d";
+import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARAStatusResponse } from "@/features/ResultList/types/results.d";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
@@ -43,6 +43,9 @@ import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultLis
 import { getDecodedParams } from '@/features/Common/utils/web';
 import { useSidebarRegistration } from "@/features/Sidebar/hooks/sidebarHooks";
 import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
+import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatus/QueryStatusPanel";
+import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
+import { QueryStatus } from "@/features/Projects/types/projects";
 
 const ResultList = () => {
 
@@ -82,6 +85,8 @@ const ResultList = () => {
   // Bool, should results be fetched
   // const [isFetchingResults, setIsFetchingResults] = useState(false);
   const isFetchingResults = useRef(false);
+
+  const [arsStatus, setArsStatus] = useState<ARAStatusResponse | null>(null);
 
   // set to not sort by score for Pathfinder, set to false to sort score high low for MVP queries
   const initSortByScore = (isPathfinder) ? null : false;
@@ -152,8 +157,6 @@ const ResultList = () => {
   const [availableFilters, setAvailableFilters] = useState<{[key: string]: Filter}>({});
   // Array, currently active string filters
   const [activeEntityFilters, setActiveEntityFilters] = useState<string[]>([]);
-  // Array, aras that have returned data
-  const returnedARAs = useRef<{aras: string[], status: string}>({aras: [], status: ''});
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
   // Bool, is the shift key being held down
@@ -403,12 +406,13 @@ const ResultList = () => {
   useResultsStatusQuery(
     currentQueryID,
     isFetchingARAStatus,
-    returnedARAs,
     numberOfStatusChecks,
     formattedResults,
     setIsError,
     setIsLoading,
-    isFetchingResults
+    isFetchingResults,
+    arsStatus,
+    setArsStatus
   );
 
   // React Query call for results
@@ -668,6 +672,15 @@ const ResultList = () => {
     ],
     // autoOpen: true // Uncomment to auto-open when landing on Results
   });
+  useSidebarRegistration({
+    ariaLabel: "Query Status",
+    icon: () => <StatusIndicator status={arsStatus?.status as QueryStatus || "unknown"} inSidebar/>,
+    id: 'queryStatus',
+    label: "Query Status",
+    panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} />,
+    tooltipText: "",
+    dependencies: [arsStatus]
+  });
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -863,7 +876,10 @@ const ResultList = () => {
               hasFreshResults: (freshRawResults !== null)
             }}
             isError={isError}
-            returnedARAs={returnedARAs.current}
+            returnedARAs={{
+              aras: arsStatus?.data.aras || [],
+              status: arsStatus?.status || "unknown"
+            }}
           />
         }
       </div>

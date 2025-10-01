@@ -139,6 +139,11 @@ export const findAllCuriesInTitle = (title: string): string[] => {
   return matches || [];
 }
 
+/**
+ * Get the link for a query
+ * @param {UserQueryObject} query - The query to get the link for
+ * @returns {string} The link for the query
+ */
 export const getQueryLink = (query: UserQueryObject) => {
   const qid = query.data.qid;
 
@@ -171,4 +176,17 @@ export const getQueryLink = (query: UserQueryObject) => {
     const path = getResultsShareURLPath(label, curie, typeID, "0", qid);
     return encodeURI(`${window.location.origin}/${path}`);
   }
+}
+
+/**
+ * Get the percentage of the query status based on the number of ARAs returned and the total number of ARAs
+ * @param {UserQueryObject} query - The query to get the percentage for
+ * @returns {number} The percentage of the query status
+ */
+export const getQueryStatusPercentage = (query: UserQueryObject) => {
+  const currentInterval = query.data.aras.length;
+  const TOTAL_INTERVALS = 4;
+  const initialPercentage = 5;
+  const progressPercentage = ((currentInterval / TOTAL_INTERVALS) * 100) - initialPercentage;
+  return Math.max(initialPercentage, progressPercentage);
 }
