@@ -30,11 +30,26 @@ const QueriesPanel = () => {
             </div>
           ) : (
             <LoadingWrapper loading={queriesLoading} contentClassName={styles.queriesList}>
-              {filteredQueries.map((query) => {
-                return (
-                  <SidebarQueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
+              {
+                queries.length === 0 ? (
+                  <div className={styles.empty}>
+                    <p>No queries found.</p>
+                  </div>
+                ) : 
+                (
+                  filteredQueries.length === 0 ? (
+                    <div className={styles.empty}>
+                      <p>No queries found matching your search.</p>
+                    </div>
+                  ) : (
+                    filteredQueries.map((query) => {
+                      return (
+                        <SidebarQueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
+                      )
+                    })
+                  )
                 )
-              })}
+              }
             </LoadingWrapper>
           )
         }
