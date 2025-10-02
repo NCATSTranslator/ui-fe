@@ -73,10 +73,6 @@ const ResultListLoadingButton = ({
             {
               (resultsAvailable) &&
               <>
-                {
-                  (showDisclaimer) &&
-                  <p className={`${styles.refreshDisclaimer} ${resultsAvailable && styles.active}`}>Syncing may update and reorder previously viewed results.</p>
-                }
                 <Button
                   handleClick={handleResultsRefresh}
                   className={`${styles.loadingButton} ${resultsAvailable && styles.active}`}
@@ -85,6 +81,10 @@ const ResultListLoadingButton = ({
                   >
                   Sync New Results
                 </Button>
+                {
+                  (showDisclaimer) &&
+                  <p className={`${styles.refreshDisclaimer} ${resultsAvailable && styles.active}`}>Syncing may reorder results and update paths and evidence in previously viewed results.</p>
+                }
               </>
             }
           </div>
