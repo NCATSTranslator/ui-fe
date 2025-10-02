@@ -19,7 +19,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const [collapsed, setCollapsedState] = useState<boolean>(true);
   const [activePanelId, setActivePanelId] = useState<SidebarContextValue['activePanelId']>('none');
-  const [dynamicSidebarItems, setDynamicSidebarItems] = useState<Map<SidebarItemId, SidebarItem>>(new Map());
+  const [dynamicSidebarItems, setDynamicSidebarItems] = useState<SidebarItem[]>([]);
 
   const setCollapsed = useCallback((v: boolean) => {
     setCollapsedState(v);
@@ -40,19 +40,27 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }, []);
 
   const registerSidebarItem = useCallback((id: SidebarItemId, item: SidebarItem) => {
-    setDynamicSidebarItems(prev => new Map(prev).set(id, item));
-  }, []);
-
-  const unregisterSidebarItem = useCallback((id: SidebarItemId) => {
     setDynamicSidebarItems(prev => {
-      const newMap = new Map(prev);
-      newMap.delete(id);
-      return newMap;
+      const existingIndex = prev.findIndex(existingItem => existingItem.id === id);
+      
+      if (existingIndex >= 0) {
+        // Update existing item in place
+        const newItems = [...prev];
+        newItems[existingIndex] = item;
+        return newItems;
+      } else {
+        // Add new item at the end
+        return [...prev, item];
+      }
     });
   }, []);
 
+  const unregisterSidebarItem = useCallback((id: SidebarItemId) => {
+    setDynamicSidebarItems(prev => prev.filter(item => item.id !== id));
+  }, []);
+
   const getSidebarItem = useCallback((id: SidebarItemId) => {
-    return dynamicSidebarItems.get(id) ?? null;
+    return dynamicSidebarItems.find(item => item.id === id) ?? null;
   }, [dynamicSidebarItems]);
 
   const getButtonComponent = useCallback((sidebarItem: SidebarItem) => {
@@ -76,7 +84,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const value: SidebarContextValue = useMemo(() => ({
     collapsed,
     activePanelId,
-    dynamicSidebarItems: Array.from(dynamicSidebarItems.values()),
+    dynamicSidebarItems,
     setCollapsed,
     togglePanel,
     closePanel,

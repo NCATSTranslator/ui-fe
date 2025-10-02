@@ -26,37 +26,24 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
   // Track the sidebar item ID for cleanup
   const sidebarItemIdRef = useRef(options.id);
 
+  const resolveComponent = (panelComponent: ReactNode | (() => ReactNode) | undefined) => {
+    if (!panelComponent)
+      return { static: undefined, factory: undefined };
+    if (typeof panelComponent === 'function')
+      return { static: undefined, factory: panelComponent };
+    return { static: panelComponent, factory: undefined };
+  };
+
+  // Update the item content whenever dependencies change
   useEffect(() => {
     const { id, to, onClick, panelComponent, buttonComponent, icon, tooltipText, ariaLabel, autoOpen, label } = options;
     // Determine the type based on whether it has a panel component or navigation
     const type: 'link' | 'panel' = panelComponent ? 'panel' : 'link';
     
     // Handle panel component - support both static ReactNode and factory function
-    let resolvedPanelComponent: ReactNode = undefined;
-    let panelComponentFactory: (() => ReactNode) | undefined = undefined;
-    if (panelComponent) {
-      if (typeof panelComponent === 'function') {
-        // It's a factory function - store it for dynamic rendering
-        panelComponentFactory = panelComponent;
-        resolvedPanelComponent = undefined;
-      } else {
-        // It's a static ReactNode
-        resolvedPanelComponent = panelComponent;
-        panelComponentFactory = undefined;
-      }
-    }
+    let resolvedPanelComponent = resolveComponent(panelComponent);
     // Handle button component - support both static ReactNode and factory function
-    let resolvedButtonComponent: ReactNode = undefined;
-    let buttonComponentFactory: (() => ReactNode) | undefined = undefined;
-    if (buttonComponent) {
-      if (typeof buttonComponent === 'function') {
-        buttonComponentFactory = buttonComponent;
-        resolvedButtonComponent = undefined;
-      } else {
-        resolvedButtonComponent = buttonComponent;
-        buttonComponentFactory = undefined;
-      }
-    }
+    let resolvedButtonComponent = resolveComponent(buttonComponent);
     
     // Create the sidebar item
     const sidebarItem: SidebarItem = {
@@ -65,27 +52,33 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
       id,
       label,
       onClick,
-      panelComponent: resolvedPanelComponent,
-      panelComponentFactory,
-      buttonComponent: resolvedButtonComponent,
-      buttonComponentFactory,
+      panelComponent: resolvedPanelComponent.static,
+      panelComponentFactory: resolvedPanelComponent.factory,
+      buttonComponent: resolvedButtonComponent.static,
+      buttonComponentFactory: resolvedButtonComponent.factory,
       to,
       tooltipText,
       type
     };
 
-    // Register the sidebar item
+    // Register/update the sidebar item
     registerSidebarItem(id, sidebarItem);
     
     // Auto-open the panel if specified
     if (autoOpen && type === 'panel')
       togglePanel(id);
+      
+  }, [registerSidebarItem, togglePanel, ...options.dependencies || []]);
 
-    // Cleanup function
+  // Hook to handle cleanup on unmount or id change
+  useEffect(() => {
+    const { id } = options;
+    sidebarItemIdRef.current = id;
+    
     return () => {
       unregisterSidebarItem(sidebarItemIdRef.current);
     };
-  }, options.dependencies || []); // Re-register when dependencies change
+  }, [options.id, unregisterSidebarItem]);
 };
 
 /**
