@@ -1,0 +1,33 @@
+@use '@/assets/styles/variables' as *;
+
+.loadingBarContainer {
+  width: 100%;
+  height: $s;
+  background-color: $midGray;
+  border-radius: $defaultBorderRadius;
+  overflow: hidden;
+  position: relative;
+}
+
+.loadingBarFill {
+  height: 100%;
+  background-color: $purpleOne;
+  border-radius: $defaultBorderRadius;
+  transition: width 0.3s ease;
+  animation: pulse 2s infinite;
+  &.full {
+    animation: none;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    background-color: $purpleOne;
+  }
+  50% {
+    background-color: $lightPurpleOne;
+  }
+  100% {
+    background-color: $purpleOne;
+  }
+}

@@ -1,0 +1,9 @@
+@use "@/assets/styles/variables" as *;
+
+.projectsPanel {
+  .projectsList {
+    display: flex;
+    flex-direction: column;
+    gap: $xxs;
+  }
+}

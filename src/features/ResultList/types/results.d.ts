@@ -267,8 +267,6 @@ export interface ResultListLoadingData {
   isFetchingARAStatus: boolean | null;
   isFetchingResults: boolean | null;
   showDisclaimer: boolean;
-  containerClassName: string;
-  buttonClassName: string;
   hasFreshResults: boolean;
   currentInterval?: number;
   status?: string;

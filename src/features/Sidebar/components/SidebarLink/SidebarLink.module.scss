@@ -1,0 +1,22 @@
+@use "@/assets/styles/variables" as *;
+
+.link.sidebarLink {
+  padding: 20px 12px;
+  background-color: $lightGray;
+  border-radius: 0;
+  svg {
+    height: $m;
+    width: $m;
+    path {
+      fill: $darkGray;
+    }
+  }
+  &:hover, &.active {
+    background-color: $lightPurpleTwo;
+    svg {
+      path {
+        fill: $purpleOne;
+      }
+    }
+  }
+}

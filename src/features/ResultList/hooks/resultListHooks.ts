@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { API_PATH_PREFIX } from "@/features/UserAuth/utils/userApi";
 import { fetchWithErrorHandling } from "@/features/Common/utils/web";
 import { handleResultsError } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { ARAStatusResponse, Result, ResultSet } from "@/features/ResultList/types/results";
+import { ARAStatusResponse, Result, ResultSet } from "@/features/ResultList/types/results.d";
 
 // Constants
 const STATUS_CHECK_TIMEOUT = 120; // 20 minutes (120 * 10 second intervals)
@@ -58,20 +58,6 @@ const shouldStopStatusPolling = (status: string, statusCheckCount: number): bool
 };
 
 /**
- * Helper function to update returned ARAs state
- */
-const updateReturnedARAs = (
-  data: ARAStatusResponse,
-  returnedARAs: RefObject<{aras: string[], status: string}>
-): void => {
-  const newReturnedARAs = {
-    ...data.data,
-    status: data.status
-  };
-  returnedARAs.current = newReturnedARAs;
-};
-
-/**
  * Helper function to handle error cases
  */
 const handleStatusError = (
@@ -95,22 +81,24 @@ const handleStatusError = (
  * 
  * @param currentQueryID - The current query ID
  * @param isFetchingARAStatus - Ref to track if ARA status is being fetched
- * @param returnedARAs - Ref to track returned ARAs
  * @param numberOfStatusChecks - Ref to track number of status checks
  * @param formattedResults - Array of formatted results
  * @param setIsError - Function to set error state
  * @param setIsLoading - Function to set loading state
  * @param isFetchingResults - Ref to track if results are being fetched
+ * @param arsStatus - Ref to track ARA status
+ * @param setArsStatus - Function to set query status
  */
 export const useResultsStatusQuery = (
   currentQueryID: string | null,
   isFetchingARAStatus: RefObject<boolean | null>,
-  returnedARAs: RefObject<{aras: string[], status: string}>,
   numberOfStatusChecks: RefObject<number>,
   formattedResults: Result[],
   setIsError: (value: boolean) => void,
   setIsLoading: (value: boolean) => void,
-  isFetchingResults: RefObject<boolean>
+  isFetchingResults: RefObject<boolean>,
+  arsStatus: ARAStatusResponse | null,
+  setArsStatus: (value: ARAStatusResponse) => void
 ) => {
   return useQuery({
     queryKey: ['resultsStatus', currentQueryID],
@@ -135,11 +123,10 @@ export const useResultsStatusQuery = (
         console.log("ARA status:", data);
 
         // Check if new ARAs have returned data
-        const hasNewARAData = hasNewARAs(data.data.aras, returnedARAs.current.aras);
+        const hasNewARAData = hasNewARAs(data.data.aras, arsStatus?.data.aras || []);
         
         if (hasNewARAData) {
-          console.log(`Old ARAs: ${returnedARAs.current.aras}, New ARAs: ${data.data.aras}`);
-          updateReturnedARAs(data, returnedARAs);
+          console.log(`Old ARAs: ${arsStatus?.data.aras}, New ARAs: ${data.data.aras}`);
           isFetchingResults.current = true;
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
@@ -151,6 +138,9 @@ export const useResultsStatusQuery = (
           isFetchingARAStatus.current = false;
           isFetchingResults.current = true;
         }
+
+        // Set ars status
+        setArsStatus(data);
       } catch (error) {
         handleStatusError(error, formattedResults, setIsError, setIsLoading, isFetchingARAStatus);
       }

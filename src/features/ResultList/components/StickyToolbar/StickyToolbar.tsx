@@ -32,8 +32,6 @@ const StickyToolbar: FC<StickyToolbarProps> = ({ loadingButtonData, isError, ret
               isFetchingARAStatus: loadingButtonData.isFetchingARAStatus,
               isFetchingResults: loadingButtonData.isFetchingResults,
               showDisclaimer: loadingButtonData.showDisclaimer,
-              containerClassName: loadingButtonData.containerClassName,
-              buttonClassName: loadingButtonData.buttonClassName,
               hasFreshResults: loadingButtonData.hasFreshResults,
               currentInterval: returnedARAs.aras.length,
               status: returnedARAs.status, 

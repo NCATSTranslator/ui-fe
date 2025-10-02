@@ -1,0 +1,9 @@
+@use "@/assets/styles/variables" as *;
+
+.queriesPanel {
+  .queriesList {
+    display: flex;
+    flex-direction: column;
+    gap: $xxs;
+  }
+}

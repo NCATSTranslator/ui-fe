@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface ButtonProps {
+  ariaLabel?: string;
   variant?: "secondary";
   handleClick?: (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   href?: string;
@@ -24,6 +25,7 @@ interface ButtonProps {
 }
 
 const Button: FC<ButtonProps> = ({
+  ariaLabel,
   variant,
   handleClick,
   href,
@@ -64,17 +66,17 @@ const Button: FC<ButtonProps> = ({
   if (href) {
     const linkProps = {
       ...commonProps,
-      to: href,
       rel: rel,
+      'aria-label': ariaLabel || '',
       ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
     };
     return link 
-    ? <Link {...linkProps}>
+    ? <Link {...linkProps} to={href}>
         {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
         {iconOnly ? children : <span className={styles.label}>{children}</span>}
         {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
       </Link> 
-    : <a {...linkProps}>
+    : <a {...linkProps} href={href}>
         {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
         {iconOnly ? children : <span className={styles.label}>{children}</span>}
         {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
