@@ -3,10 +3,8 @@
 .queryStatusPanel {
   display: grid;
   gap: $s;
-  .text {
-    p {
-      margin: 0;
-    }
+  p {
+    margin: 0;
   }
   .statusIndicator {
     display: flex;
