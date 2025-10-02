@@ -4,6 +4,7 @@
   height: 100vh;
   display: grid;
   grid-template-columns: repeat(2, auto);
+  box-shadow: $dropShadow;
   .linkList {
     display: flex;
     flex-direction: column;

@@ -2,7 +2,12 @@
 
 .queryStatusPanel {
   display: grid;
-  gap: $s;
+  align-content: space-between;
+  height: 100%;
+  .top {
+    display: grid;
+    gap: $s;
+  }
   p {
     margin: 0;
   }

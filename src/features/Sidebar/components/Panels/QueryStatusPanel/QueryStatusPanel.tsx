@@ -21,23 +21,26 @@ const QueryStatusPanel: FC<QueryStatusPanelProps> = ({
 
   return (
     <div className={styles.queryStatusPanel}>
-      <div className={styles.statusIndicator}>
-        <StatusIndicator status={arsStatus?.status as QueryStatus || "unknown"} />
-        <span className={styles.percentage}>{!!arsStatus?.status ? `${percentage}% Loaded` : `Loading`}</span>
+      <div className={styles.top}>        
+        <div className={styles.statusIndicator}>
+          <StatusIndicator status={arsStatus?.status as QueryStatus || "unknown"} />
+          <span className={styles.percentage}>{!!arsStatus?.status ? `${percentage}% Loaded` : `Loading`}</span>
+        </div>
+        <QueryLoadingBar fillPercentage={percentage} full={isComplete} />
+        <p>Translator results are loaded incrementally due to the complexity of our reasoning systems. As more results become available, you'll be prompted to refresh the page to view them.</p>
       </div>
-      <QueryLoadingBar fillPercentage={percentage} full={isComplete} />
-      <ResultListLoadingButton 
-        hasFreshResults={data.hasFreshResults}
-        isFetchingARAStatus={data.isFetchingARAStatus ?? false}
-        isFetchingResults={data.isFetchingResults ?? false}
-        isError={data.isError}
-        showDisclaimer={data.showDisclaimer}
-        handleResultsRefresh={data.handleResultsRefresh}
-        setIsActive={data.setIsActive ?? (() => {})}
-        currentPercentage={percentage}
-      />
-      <p>Translator results are loaded incrementally due to the complexity of our reasoning systems. As more results become available, you'll be prompted to refresh the page to view them.</p>
-      <p>You can run a new query or explore the results, bookmarks, and notes from your past queries in Projects while you wait for results to load.</p>
+      <div className={styles.bottom}>
+        <ResultListLoadingButton 
+          hasFreshResults={data.hasFreshResults}
+          isFetchingARAStatus={data.isFetchingARAStatus ?? false}
+          isFetchingResults={data.isFetchingResults ?? false}
+          isError={data.isError}
+          showDisclaimer={data.showDisclaimer}
+          handleResultsRefresh={data.handleResultsRefresh}
+          setIsActive={data.setIsActive ?? (() => {console.log("no setIsActive function provided in QueryStatusPanel")})}
+          currentPercentage={percentage}
+        />
+      </div>
     </div>
   );
 };
