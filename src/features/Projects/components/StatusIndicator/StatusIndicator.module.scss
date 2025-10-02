@@ -60,6 +60,20 @@ $statusSize: 18px;
   background: $midGray;
 }
 .statusIndicator {
+  position: relative;
+  &.redDot {
+    &::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 100%;
+      border: 1.5px solid $lightGray;
+      background-color: $red;
+    }
+  }
   .tooltipHeading {
     font-size: $bodyTwoSize;
     font-weight: 800;
