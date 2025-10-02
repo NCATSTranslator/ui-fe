@@ -35,12 +35,17 @@ import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPa
 import ResultListTableHead from "@/features/ResultList/components/ResultListTableHead/ResultListTableHead";
 import ResultListModals from "@/features/ResultList/components/ResultListModals/ResultListModals";
 import ResultListBottomPagination from "@/features/ResultList/components/ResultListBottomPagination/ResultListBottomPagination";
-import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem } from "@/features/ResultList/types/results.d";
+import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARAStatusResponse, ResultListLoadingData } from "@/features/ResultList/types/results.d";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 import { getDecodedParams } from '@/features/Common/utils/web';
+import { useSidebarRegistration } from "@/features/Sidebar/hooks/sidebarHooks";
+import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
+import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
+import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
+import { QueryStatus } from "@/features/Projects/types/projects";
 
 const ResultList = () => {
 
@@ -80,6 +85,8 @@ const ResultList = () => {
   // Bool, should results be fetched
   // const [isFetchingResults, setIsFetchingResults] = useState(false);
   const isFetchingResults = useRef(false);
+
+  const [arsStatus, setArsStatus] = useState<ARAStatusResponse | null>(null);
 
   // set to not sort by score for Pathfinder, set to false to sort score high low for MVP queries
   const initSortByScore = (isPathfinder) ? null : false;
@@ -150,8 +157,6 @@ const ResultList = () => {
   const [availableFilters, setAvailableFilters] = useState<{[key: string]: Filter}>({});
   // Array, currently active string filters
   const [activeEntityFilters, setActiveEntityFilters] = useState<string[]>([]);
-  // Array, aras that have returned data
-  const returnedARAs = useRef<{aras: string[], status: string}>({aras: [], status: ''});
   // Bool, is share modal open
   const [shareModalOpen, setShareModalOpen] = useState(false);
   // Bool, is the shift key being held down
@@ -170,6 +175,7 @@ const ResultList = () => {
   const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
   const [showHiddenPaths, setShowHiddenPaths] = useState(false);
   const shouldUpdateResultsAfterBookmark = useRef(false);
+  const hasFreshResults = useMemo(() => freshRawResults !== null, [freshRawResults]);
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
@@ -401,12 +407,13 @@ const ResultList = () => {
   useResultsStatusQuery(
     currentQueryID,
     isFetchingARAStatus,
-    returnedARAs,
     numberOfStatusChecks,
     formattedResults,
     setIsError,
     setIsLoading,
-    isFetchingResults
+    isFetchingResults,
+    arsStatus,
+    setArsStatus
   );
 
   // React Query call for results
@@ -636,12 +643,59 @@ const ResultList = () => {
     setAutoScrollToResult(true);
   }, [formattedResults, itemsPerPage, handlePageClick, resultSet]);
 
-  const handleResultsRefresh = () => {
+  const handleResultsRefresh = useCallback(() => {
     // Update rawResults with the fresh data
     if(!!freshRawResults)
       handleNewResults(freshRawResults);
     setFreshRawResults(null);
-  }
+  }, [freshRawResults]);
+
+  // data for the loading button in the Query Status panel in the sidebar
+  const loadingButtonData: ResultListLoadingData = useMemo(() => ({
+    handleResultsRefresh: handleResultsRefresh,
+    isFetchingARAStatus: isFetchingARAStatus.current,
+    isFetchingResults: isFetchingResults.current,
+    showDisclaimer: true,
+    hasFreshResults: hasFreshResults,
+    isError: isError,
+    setIsActive: setIsLoading
+  }), [handleResultsRefresh, isFetchingARAStatus.current, isFetchingResults.current, freshRawResults, isError, setIsLoading]);
+
+  // Register the status sidebar item
+  useSidebarRegistration({
+    ariaLabel: "Query Status",
+    icon: () => <StatusIndicator status={arsStatus?.status as QueryStatus || "unknown"} inSidebar redDot={hasFreshResults}/>,
+    id: 'queryStatus',
+    label: "Status",
+    panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} />,
+    tooltipText: "",
+    dependencies: [arsStatus, loadingButtonData]
+  });
+
+  // Register the filters sidebar item
+  useSidebarRegistration({
+    ariaLabel: "Filters",
+    icon: <FilterIcon />,
+    id: 'filters',
+    label: "Filters",
+    panelComponent: () => (
+      <ResultsFilter
+        activeFilters={activeFilters}
+        onFilter={handleFilter}
+        onClearAll={handleClearAllFilters}
+        setExpanded={setFiltersExpanded}
+        availableFilters={availableFilters}
+        isPathfinder={isPathfinder}
+      />
+    ),
+    tooltipText: "Filters",
+    dependencies: [
+      activeFilters,
+      availableFilters,
+      isPathfinder
+    ],
+    // autoOpen: true // Uncomment to auto-open when landing on Results
+  });
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -711,15 +765,6 @@ const ResultList = () => {
           {
             !isLoading &&
             <>
-              <ResultsFilter
-                activeFilters={activeFilters}
-                onFilter={handleFilter}
-                onClearAll={handleClearAllFilters}
-                expanded={filtersExpanded}
-                setExpanded={setFiltersExpanded}
-                availableFilters={availableFilters}
-                isPathfinder={isPathfinder}
-              />
               <div>
                 <ResultListHeader
                   data={{
@@ -739,8 +784,6 @@ const ResultList = () => {
                     ResultListStyles: styles,
                     pageCount: pageCount,
                     handlePageClick: handlePageClick,
-                    filtersExpanded: filtersExpanded,
-                    setFiltersExpanded: setFiltersExpanded
                   }}
                 />
                 <div className={`${styles.resultsTableContainer} ${isPathfinder ? styles.pathfinder : ''}`}>
@@ -835,22 +878,6 @@ const ResultList = () => {
             </>
           }
         </div>
-        {
-          formattedResults.length > 0 &&
-          <StickyToolbar
-            loadingButtonData={{
-              handleResultsRefresh: handleResultsRefresh,
-              isFetchingARAStatus: isFetchingARAStatus.current,
-              isFetchingResults: isFetchingResults.current,
-              showDisclaimer: true,
-              containerClassName: styles.shareLoadingButtonContainer,
-              buttonClassName: styles.loadingButton,
-              hasFreshResults: (freshRawResults !== null)
-            }}
-            isError={isError}
-            returnedARAs={returnedARAs.current}
-          />
-        }
       </div>
       {
         blocker &&

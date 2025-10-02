@@ -20,7 +20,7 @@ $statusSize: 18px;
       stroke: $white;
     }
   }
-  .loadingIcon {
+  div.loadingIcon {
     width: 14px;
     height: 14px;
     min-height: 14px;
@@ -35,6 +35,11 @@ $statusSize: 18px;
 }
 .statusSuccess {
   background: $green;
+  &.status {
+    svg path {
+      fill: transparent !important;
+    }
+  }
 }
 .statusError {
   background: $red;
@@ -55,6 +60,21 @@ $statusSize: 18px;
   background: $midGray;
 }
 .statusIndicator {
+  position: relative;
+  &.redDot {
+    &::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 100%;
+      border: 1.5px solid $lightGray;
+      background-color: $red;
+      z-index: 10;
+    }
+  }
   .tooltipHeading {
     font-size: $bodyTwoSize;
     font-weight: 800;

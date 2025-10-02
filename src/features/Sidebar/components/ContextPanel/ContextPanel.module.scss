@@ -1,0 +1,35 @@
+@use "@/assets/styles/variables" as *;
+
+.contextPanel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  overflow-x: hidden;
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $s;
+    padding: $s;
+    border-bottom: 1px solid $midGray;
+    .title {
+      margin-bottom: 0;
+      white-space: nowrap;
+      color: $black;
+      font-weight: 800;
+    }
+  }
+  .buttonContainer {
+    display: flex;
+    align-items: center;
+    gap: $s;
+    button, a {
+      margin: 0;
+    }
+  }
+  .content {
+    padding: 0 $s $s;
+    position: relative;
+    width: calc($panelWidth - ($s*2));
+  }
+}
