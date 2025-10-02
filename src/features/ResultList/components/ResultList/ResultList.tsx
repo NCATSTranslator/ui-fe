@@ -175,6 +175,7 @@ const ResultList = () => {
   const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
   const [showHiddenPaths, setShowHiddenPaths] = useState(false);
   const shouldUpdateResultsAfterBookmark = useRef(false);
+  const hasFreshResults = useMemo(() => freshRawResults !== null, [freshRawResults]);
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
@@ -655,7 +656,7 @@ const ResultList = () => {
     isFetchingARAStatus: isFetchingARAStatus.current,
     isFetchingResults: isFetchingResults.current,
     showDisclaimer: true,
-    hasFreshResults: (freshRawResults !== null),
+    hasFreshResults: hasFreshResults,
     isError: isError,
     setIsActive: setIsLoading
   }), [handleResultsRefresh, isFetchingARAStatus.current, isFetchingResults.current, freshRawResults, isError, setIsLoading]);
@@ -663,7 +664,7 @@ const ResultList = () => {
   // Register the status sidebar item
   useSidebarRegistration({
     ariaLabel: "Query Status",
-    icon: () => <StatusIndicator status={arsStatus?.status as QueryStatus || "unknown"} inSidebar/>,
+    icon: () => <StatusIndicator status={arsStatus?.status as QueryStatus || "unknown"} inSidebar redDot={hasFreshResults}/>,
     id: 'queryStatus',
     label: "Status",
     panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} />,
