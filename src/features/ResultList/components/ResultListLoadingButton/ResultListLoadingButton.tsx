@@ -1,33 +1,20 @@
 import styles from './ResultListLoadingButton.module.scss';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultsAvailableIcon from '@/assets/icons/buttons/Refresh.svg?react';
-import CompleteIcon from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
-import AlertIcon from '@/assets/icons/status/Alerts/Warning.svg?react';
 import Button from '@/features/Core/components/Button/Button';
-import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
+// import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useNewResultsDisclaimerApproved } from '@/features/ResultList/hooks/resultListHooks';
-import { ResultListLoadingData } from '@/features/ResultList/types/results';
 
 interface ResultListLoadingButtonProps {
-  currentPercentage: number;
   hasFreshResults: boolean;
-  isFetchingARAStatus: boolean;
-  isFetchingResults: boolean;
-  isError: boolean;
   showDisclaimer: boolean;
   handleResultsRefresh: () => void;
-  setIsActive: (active: boolean) => void;
 }
 
 const ResultListLoadingButton = ({
-  currentPercentage,
   hasFreshResults,
-  isFetchingARAStatus,
-  isFetchingResults,
-  isError,
   showDisclaimer,
   handleResultsRefresh,
-  setIsActive
 }: ResultListLoadingButtonProps) => {
 
   const [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved] = useNewResultsDisclaimerApproved(false);

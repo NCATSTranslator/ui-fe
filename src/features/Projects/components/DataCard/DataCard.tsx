@@ -13,13 +13,9 @@ import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import ChevRightIcon from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { DataCardLocation, Project, QueryStatus, UserQueryObject } from '@/features/Projects/types/projects';
-import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from '@/features/Common/utils/web';
-import { getQueryLink, getTypeIDFromType } from '@/features/Projects/utils/utilities';
-import { AutocompleteItem } from '@/features/Query/types/querySubmission';
+import { getQueryLink } from '@/features/Projects/utils/utilities';
 import { unableToReachLinkToast } from '@/features/Projects/utils/toastMessages';
 import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
-import { currentConfig } from '@/features/UserAuth/slices/userSlice';
-import { useSelector } from 'react-redux';
 
 interface DataCardProps<T> {
   className?: string;
@@ -73,7 +69,6 @@ const DataCard = <T,>({
   type
 }: DataCardProps<T>) => {
   const navigate = useNavigate();
-  const config = useSelector(currentConfig);
 
   const isUnassignedPrj = type === 'project' ? isUnassignedProject(item as Project) : isUnassignedProject(getItemId(item) as number);
   const title = getItemTitle(item);
@@ -94,11 +89,11 @@ const DataCard = <T,>({
     });
   };
 
-  const handleEdit = () => {
-    if (onEdit) {
-      onEdit(item);
-    }
-  };
+  // const handleEdit = () => {
+  //   if (onEdit) {
+  //     onEdit(item);
+  //   }
+  // };
 
   const handleShare = () => {
     if (onShare) {

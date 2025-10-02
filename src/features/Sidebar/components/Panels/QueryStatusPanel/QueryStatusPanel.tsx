@@ -32,13 +32,8 @@ const QueryStatusPanel: FC<QueryStatusPanelProps> = ({
       <div className={styles.bottom}>
         <ResultListLoadingButton 
           hasFreshResults={data.hasFreshResults}
-          isFetchingARAStatus={data.isFetchingARAStatus ?? false}
-          isFetchingResults={data.isFetchingResults ?? false}
-          isError={data.isError}
           showDisclaimer={data.showDisclaimer}
           handleResultsRefresh={data.handleResultsRefresh}
-          setIsActive={data.setIsActive ?? (() => {console.log("no setIsActive function provided in QueryStatusPanel")})}
-          currentPercentage={percentage}
         />
       </div>
     </div>
