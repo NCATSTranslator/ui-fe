@@ -668,7 +668,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
           include_projects: false,
           include_query_status_polling: false,
           include_summarization: false,
-          name_resolver: {endpoint: ''},
+          name_resolver: '',
           social_providers: {},
         };
         dispatch(setCurrentConfig(defaultConfig));
