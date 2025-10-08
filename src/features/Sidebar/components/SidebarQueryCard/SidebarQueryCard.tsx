@@ -7,6 +7,8 @@ import { getQueryLink } from "@/features/Projects/utils/utilities";
 import SidebarCard from "@/features/Sidebar/components/SidebarCard/SidebarCard";
 import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
+import { DraggableCard } from "@/features/DragAndDrop/components/DraggableCard/DraggableCard";
+import { DraggableData } from "@/features/DragAndDrop/types/types";
 
 interface SidebarQueryCardProps {
   query: UserQueryObject;
@@ -39,17 +41,24 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
     </>
   );
 
+  const draggableData: DraggableData = {
+    type: 'query',
+    data: query,
+  };
+
   return (
-    <SidebarCard
-      leftIcon={leftIcon}
-      title={title}
-      searchTerm={searchTerm}
-      linkTo={queryURL}
-      linkTarget="_blank"
-      bottomLeft={bottomLeft}
-      bottomRight={bottomRight}
-      data-testid="sidebar-query-card"
-    />
+    <DraggableCard id={query.data.qid} data={draggableData}>
+      <SidebarCard
+        leftIcon={leftIcon}
+        title={title}
+        searchTerm={searchTerm}
+        linkTo={queryURL}
+        linkTarget="_blank"
+        bottomLeft={bottomLeft}
+        bottomRight={bottomRight}
+        data-testid="sidebar-query-card"
+      />
+    </DraggableCard>
   );
 };
 
