@@ -1,0 +1,21 @@
+@use "@/assets/styles/variables" as *;
+
+.draggableCard {
+  cursor: grab;
+  transition: opacity 0.2s ease;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.dragging {
+  opacity: 0.5;
+}
+
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
