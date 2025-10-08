@@ -96,12 +96,18 @@ export const useEditProjectHandlers = (
     });
   };
 
+  /**
+   * Handles the updating of a project.
+   * @param {number | string} id - The id of the project to update.
+   * @param {string} newName - Optional, a new name for the project.
+   * @param {string[]} newQids - Optional, a new list of qids for the project. SHOULD INCLUDE ALL QIDS FOR THE PROJECT.
+   */
   const handleUpdateProject = (id: number | string, newName?: string, newQids?: string[]) => {
     if(!projects) {
       console.warn("projects is undefined");
       return;
     }
-    // Find the project and update it
+    // Find the project
     const projectToUpdate = projects.find(p => p.id === parseInt(id.toString()));
     if(!projectToUpdate) {
       console.error('Project not found:', id);
