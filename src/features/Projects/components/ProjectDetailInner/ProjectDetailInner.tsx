@@ -20,6 +20,7 @@ import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectM
 import { getProjectDetailHeaderSubtitle } from '@/features/Projects/utils/utilities';
 import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
 import { DraggableData } from '@/features/DragAndDrop/types/types';
+import { handleQueryDrop } from '@/features/Projects/utils/dragDropUtils';
 
 const ProjectDetailInner = () => {
   // Data management
@@ -102,16 +103,12 @@ const ProjectDetailInner = () => {
     modals.openModal('shareQuery');
   };
 
-  const handleQueryDrop = useCallback((draggedItem: DraggableData) => {
-    if (draggedItem.type === 'query') {
-      console.log('Dropped data:', draggedItem);
-      // if query does not exist in project, add it
-      if(data.project?.id && isUserQueryObject(draggedItem.data) && !data.projectQueries.some(q => q.data.qid === draggedItem.data.data.qid)) {
-        console.log('Adding query to project:', draggedItem.data.data.qid);
-        projectEditHandlers.handleUpdateProject(data.project?.id?.toString(), undefined, [...data.projectQueries.map(q => q.data.qid), draggedItem.data.data.qid]);
-      }
-    }
-  }, [data.project?.id, data.projectQueries, projectEditHandlers]);
+  const onQueryDrop = useCallback((draggedItem: DraggableData) => {
+    if(data.project)
+      handleQueryDrop(draggedItem, data.project, data.project?.data.pks, projectEditHandlers.handleUpdateProject);
+    else
+      console.error('No project found');
+  }, [data.project, data.project?.data.pks, projectEditHandlers.handleUpdateProject]);
 
   return (
     <div className={styles.projectDetail}>
@@ -198,7 +195,7 @@ const ProjectDetailInner = () => {
                         data={{ 
                           id: data.project?.id?.toString(),
                           type: 'project',
-                          onDrop: handleQueryDrop
+                          onDrop: onQueryDrop
                         }}
                         indicatorText="Drop queries here to add to project"
                       >
