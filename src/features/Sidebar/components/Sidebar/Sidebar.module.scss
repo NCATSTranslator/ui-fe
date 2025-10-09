@@ -5,6 +5,7 @@
   display: grid;
   grid-template-columns: repeat(2, auto);
   box-shadow: $dropShadow;
+  z-index: 10;
   .linkList {
     display: flex;
     flex-direction: column;
