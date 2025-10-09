@@ -15,6 +15,7 @@ export interface DroppableAreaProps {
   indicatorText?: string;
   'data-testid'?: string;
   canAccept?: (draggedData: DraggableData) => boolean;
+  indicateOnlyOnOver?: boolean;
 }
 
 export const DroppableArea: FC<DroppableAreaProps> = ({
@@ -28,6 +29,7 @@ export const DroppableArea: FC<DroppableAreaProps> = ({
   indicatorText = 'Drop here',
   'data-testid': testId,
   canAccept,
+  indicateOnlyOnOver = false,
 }) => {
   const { isOver, setNodeRef } = useDroppable({
     id,
@@ -44,7 +46,7 @@ export const DroppableArea: FC<DroppableAreaProps> = ({
   }, [active, canAccept, disabled]);
 
   // Show active styles when either hovering OR when dragging a compatible item
-  const shouldShowActive = (isOver || isDraggingCompatibleItem) && !disabled;
+  const shouldShowActive = (isOver || (isDraggingCompatibleItem && !indicateOnlyOnOver)) && !disabled;
 
   const containerClassName = useMemo(() => 
     joinClasses(
