@@ -1,5 +1,6 @@
 import { DraggableData } from "@/features/DragAndDrop/types/types";
 import { Project, isUserQueryObject } from "@/features/Projects/types/projects.d";
+import { toast } from "react-toastify";
 
 /**
  * Handles the dropping of a query into a project. (WRAP IN A USECALLBACK IF PROVIDING TO DroppableArea)
@@ -14,12 +15,17 @@ export const handleQueryDrop = (
   projectQIds: string[],
   handleUpdateProject: (id: number | string, newName?: string, newQids?: string[]) => void) => {
   if (draggedItem.type === 'query') {
-    console.log('Dropped data:', draggedItem);
     // if query does not exist in project, add it
-    
-    if(project?.id && isUserQueryObject(draggedItem.data) && !projectQIds.some((q: string) => q === draggedItem.data.data.qid)) {
-      console.log('Adding query to project:', draggedItem.data.data.qid);
-      handleUpdateProject(project?.id?.toString(), undefined, [...projectQIds, draggedItem.data.data.qid]);
+    const isQueryInProject = projectQIds.some((q: string) => q === draggedItem.data.data.qid);
+    if(isQueryInProject) {
+      toast.error('Query already in project');
+      return;
     }
+    if(!project?.id || !isUserQueryObject(draggedItem.data)) {
+      console.error('No project or query found');
+      return;
+    }
+    
+    handleUpdateProject(project?.id?.toString(), undefined, [...projectQIds, draggedItem.data.data.qid]);
   }
 }
