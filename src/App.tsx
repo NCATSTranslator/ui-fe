@@ -12,9 +12,10 @@ import SidebarProvider from '@/features/Sidebar/components/SidebarProvider/Sideb
 import Sidebar from '@/features/Sidebar/components/Sidebar/Sidebar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { UserQueryObject } from './features/Projects/types/projects';
-import SidebarQueryCard from './features/Sidebar/components/SidebarQueryCard/SidebarQueryCard';
+import { UserQueryObject } from '@/features/Projects/types/projects.d';
+import SidebarQueryCard from '@/features/Sidebar/components/SidebarQueryCard/SidebarQueryCard';
 import { createPortal } from 'react-dom';
+import Header from '@/features/Page/components/Header/Header';
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -85,9 +86,7 @@ const App = ({children}: {children?: ReactNode}) => {
             <div className='layout'>
               <Sidebar />
               <main className='content scrollable'>
-                <div className='header-disclaimer'>
-                  <p>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
-                </div>
+                <Header />
                 {
                   children && children
                 }

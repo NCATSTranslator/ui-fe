@@ -40,50 +40,47 @@ const Header: FC<HeaderProps> = ({children}) => {
 
   return (
     <header className={styles.header}>
-      <div className={styles.topBar}>
-        <div className={styles.container}>
-          <div className={styles.left}>
-            <Link to={`/`} className={styles.logo} reloadDocument={location.pathname === "/results" ? false : true}>
-              <img src={Logo} alt="Translator Logo" />
-            </Link>
-          </div>
-          <div className={styles.right}>
-            {
-              !!user &&
-              (
-                showProjectsLink
-                ? <Link to={`/projects`} className={`${currentPage.includes("projects") && styles.active} ${styles.projectsLink}`}><FolderIcon/><span className={styles.linkSpan}>Projects</span></Link>
-                : <Link to={`/queries`} className={`${currentPage.includes("queries") && styles.active} ${styles.projectsLink}`}><FolderIcon/><span className={styles.linkSpan}>Queries</span></Link>
-              )
-            }
-            <Link to={`/send-feedback${!!currentARSpk ? `?q=${currentARSpk}` : ''}`} className={`${currentPage === '/send-feedback' && styles.active}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
-            <Link to={`/help`}  className={`${currentPage === '/help' && styles.active} ${styles.helpLink}`} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
-            {
-              !user 
-              ? 
-                <a className={styles.login} href={!!loginURL ? loginURL : ''}>Log In</a>
-              : 
-                <>
-                  <Link to={`/preferences`} className={`${currentPage === '/preferences' && styles.active} ${styles.userIcon}`}>
-                    <Cog/>
-                    {
-                      user?.name && !!width &&
-                      <span className={`${width <= collapseNameScreenWidth ? styles.hide : ''} ${styles.userName} ${styles.linkSpan}`}>Preferences</span>
-                    }
-                  </Link>
-                  {
-                    logoutReady && 
-                    <form method="post" action={logoutURI}>
-                      <input type="hidden" name="client_id" value={clientID} />
-                      <input type="hidden" name="show_prompt" value="false" />
-                      <input type="hidden" name="post_logout_redirect_uri" value={postLogoutRedirectUri}/> 
-                      <button type="submit" value="submit" className={`${styles.logout} ${styles.login}`}>Log Out</button>
-                    </form>
-                  }
-                </>
-            }
-          </div>
-        </div>
+      <div className={styles.left}>
+        <Link to={`/`} className={styles.logo} reloadDocument={location.pathname === "/results" ? false : true}>
+          <img src={Logo} alt="Translator Logo" />
+        </Link>
+      </div>
+      <div className={styles.right}>
+        <p className={styles.disclaimer}>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
+        {/* {
+          !!user &&
+          (
+            showProjectsLink
+            ? <Link to={`/projects`} className={`${currentPage.includes("projects") && styles.active} ${styles.projectsLink}`}><FolderIcon/><span className={styles.linkSpan}>Projects</span></Link>
+            : <Link to={`/queries`} className={`${currentPage.includes("queries") && styles.active} ${styles.projectsLink}`}><FolderIcon/><span className={styles.linkSpan}>Queries</span></Link>
+          )
+        }
+        <Link to={`/send-feedback${!!currentARSpk ? `?q=${currentARSpk}` : ''}`} className={`${currentPage === '/send-feedback' && styles.active}`} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
+        <Link to={`/help`}  className={`${currentPage === '/help' && styles.active} ${styles.helpLink}`} rel="noreferrer" target={'_blank'} ><Question/><span className={styles.linkSpan}>Help</span></Link>
+        {
+          !user 
+          ? 
+            <a className={styles.login} href={!!loginURL ? loginURL : ''}>Log In</a>
+          : 
+            <>
+              <Link to={`/preferences`} className={`${currentPage === '/preferences' && styles.active} ${styles.userIcon}`}>
+                <Cog/>
+                {
+                  user?.name && !!width &&
+                  <span className={`${width <= collapseNameScreenWidth ? styles.hide : ''} ${styles.userName} ${styles.linkSpan}`}>Preferences</span>
+                }
+              </Link>
+              {
+                logoutReady && 
+                <form method="post" action={logoutURI}>
+                  <input type="hidden" name="client_id" value={clientID} />
+                  <input type="hidden" name="show_prompt" value="false" />
+                  <input type="hidden" name="post_logout_redirect_uri" value={postLogoutRedirectUri}/> 
+                  <button type="submit" value="submit" className={`${styles.logout} ${styles.login}`}>Log Out</button>
+                </form>
+              }
+            </>
+        } */}
       </div>
         {children}
     </header>
