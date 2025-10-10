@@ -4,15 +4,17 @@ import { NavLink } from 'react-router-dom';
 import styles from './Accordion.module.scss';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
+import { joinClasses } from '@/features/Common/utils/utilities';
 
 export interface AccordionProps {
-  title: string;
+  title: string | ReactNode;
   titleLink?: string;
   navLink?: boolean;
   extLink?: boolean;
   children: ReactNode;
   expanded?: boolean;
   accordionClass?: string;
+  buttonClass?: string;
   panelClass?: string;
   icon?: ReactNode;
   id?: string;
@@ -28,6 +30,7 @@ const Accordion: FC<AccordionProps> = ({
   children,
   expanded = false,
   accordionClass = '',
+  buttonClass = '',
   panelClass = '',
   icon,
   id,
@@ -65,6 +68,9 @@ const Accordion: FC<AccordionProps> = ({
   const defaultIcon = <ChevDown />;
   const displayIcon = icon || defaultIcon;
   const expandedClass = isExpanded ? styles.open : styles.closed;
+  const buttonClasses = joinClasses(styles.accordionButton, titleLink && styles.titleLink, buttonClass);
+  const accordionClasses = joinClasses(styles.accordion, 'accordion', expandedClass, accordionClass);
+  const panelClasses = joinClasses(styles.accordionPanel, panelClass, expandedClass);
 
   const renderTitleWithLink = () => {
     if (navLink && titleLink) {
@@ -78,7 +84,7 @@ const Accordion: FC<AccordionProps> = ({
           <span>{title}</span>
           <button
             id={buttonId}
-            className={styles.accordionButton}
+            className={buttonClasses}
             onClick={handleToggle}
             disabled={disabled}
             aria-expanded={isExpanded}
@@ -105,7 +111,7 @@ const Accordion: FC<AccordionProps> = ({
           </span>
           <button
             id={buttonId}
-            className={styles.accordionButton}
+            className={buttonClasses}
             onClick={handleToggle}
             disabled={disabled}
             aria-expanded={isExpanded}
@@ -124,7 +130,7 @@ const Accordion: FC<AccordionProps> = ({
           <span>{title}</span>
           <button
             id={buttonId}
-            className={styles.accordionButton}
+            className={buttonClasses}
             onClick={handleToggle}
             disabled={disabled}
             aria-expanded={isExpanded}
@@ -143,7 +149,7 @@ const Accordion: FC<AccordionProps> = ({
   const renderSimpleTitle = () => (
     <button
       id={buttonId}
-      className={styles.accordionButton}
+      className={buttonClasses}
       onClick={handleToggle}
       disabled={disabled}
       aria-expanded={isExpanded}
@@ -155,15 +161,16 @@ const Accordion: FC<AccordionProps> = ({
     </button>
   );
 
+
   return (
     <div
       id={accordionId}
-      className={`${styles.accordion} accordion ${expandedClass} ${accordionClass}`}
+      className={accordionClasses}
       role="region"
       aria-labelledby={buttonId}
     >
       {titleLink ? (
-        <span className={`${styles.accordionButton} ${styles.titleLink}`}>
+        <span className={buttonClasses}>
           {renderTitleWithLink()}
         </span>
       ) : (
@@ -172,7 +179,7 @@ const Accordion: FC<AccordionProps> = ({
       
       <AnimateHeight
         id={panelId}
-        className={`${styles.accordionPanel} ${panelClass} ${expandedClass}`}
+        className={panelClasses}
         duration={250}
         height={height}
         role="region"

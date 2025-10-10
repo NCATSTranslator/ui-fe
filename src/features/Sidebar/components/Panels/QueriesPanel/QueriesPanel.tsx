@@ -13,7 +13,7 @@ const QueriesPanel = () => {
   const user = useSelector(currentUser);
   const { data: queries = [], isLoading: queriesLoading } = useUserQueries();
   const { searchTerm, handleSearch } = useSimpleSearch();
-  const filteredQueries = useFilteredQueries(queries, searchTerm);
+  const filteredQueries = useFilteredQueries(queries, false, searchTerm);
 
   return (
     <div className={styles.queriesPanel}>

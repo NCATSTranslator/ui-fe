@@ -1,10 +1,11 @@
-   @use "@/assets/styles/variables" as *;
+@use "@/assets/styles/variables" as *;
 
 .accordion {
   svg {
     margin: 0;
-    height: 24px;
-    width: 24px;
+    height: $m;
+    width: $m;
+    min-width: $m;
     transition: all .25s ease;
     path {
       stroke: $darkGray;
@@ -14,7 +15,7 @@
     height: 20px;
     min-width: 20px;
     width: 20px;
-    margin-left: 4px;
+    margin-left: $xxs;
     transform: none !important;
     path {
       stroke: transparent;
@@ -30,6 +31,9 @@
     box-shadow: none;
     margin: 0;
     padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
   }
   .navLink, .extLink {
     display: flex;

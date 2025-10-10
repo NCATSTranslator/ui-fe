@@ -2,187 +2,30 @@
 
 .header {
   box-shadow: $dropShadow;
-  position: relative;
+  position: sticky;
   z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  top: 0;
+  right: 0;
+  left: $xl;
+  background-color: $white;
+  padding: $s $m;
   .right, .left {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   .logo {
-    max-width: 160px;
     display: flex;
-    svg {
-      width: 100%;
+    img {
+      height: $l;
     }
   }
-  .topBar {
-    .container {
-      display: flex;
-      justify-content: space-between;
-      max-width: $maxwidth;
-      margin: 0 auto;
-      h5,h1,.h1 {
-        margin-bottom: 0;
-      }
-      .left {
-        padding: $s 12px;
-      }
-      .right {
-        display: none;
-        @media (min-width: $medium) {
-          display: flex;
-        }
-        button {
-          margin: 0;
-        }
-        button, a {
-          display: inline-flex;
-          align-items: center;
-          width: fit-content;
-        }
-        a {
-          color: $darkGray;
-          font-size: 14px;
-          background-color: transparent;
-          text-decoration: none;
-          font-weight: 800;
-          margin: 0;
-          line-height: 1;
-          padding: 21px 12px;
-          box-shadow: none;
-          transition: $defaultAnim;
-          .linkSpan {
-            position: relative;
-            font-size: 14px;
-            color: $darkGray;
-            font-weight: 800;
-            line-height: 1;
-            transition: $defaultAnim;
-          }
-          svg, svg path {
-            fill: $darkGray;
-            transition: $defaultAnim;
-          }
-          svg {
-            margin-right: 4px;
-            height: 24px;
-            width: 24px;
-          }
-          &:hover, &.active {
-            box-shadow: none;
-            background-color: $palePurple;
-            .linkSpan {
-              color: $purpleOne;
-            }
-            svg, svg path {
-              fill: $purpleOne;
-            }
-          }
-        }
-        .workspaceLink {
-          svg {
-            width: 24px;
-            margin-right: 6px;
-            rect, polygon, line {
-              stroke: $darkGray;
-            }
-          }
-        }
-        .helpLink {
-          svg {
-            fill: transparent;
-            circle {
-              stroke: $darkGray;
-            }
-            path {
-              fill: $darkGray;
-            }
-          }
-        }
-        .login, .logout {
-          margin: 0 12px;
-        }
-        .login {
-          font-weight: 800;
-          padding: 10px 12px;
-          border-radius: $defaultBorderRadius;
-          transition: $defaultAnim;
-          background-color: $purpleOne;
-          color: $white;
-          &:hover {
-            background-color: $purpleOne;
-            color: $white;
-          }
-        }
-        .logout {
-          font-size: 16px;
-          background-color: $lightGray;
-          box-shadow: none;
-          color: $black;
-          &:hover {
-            background-color: $lightGray;
-            color: $black;
-            box-shadow: none;
-          }
-        }
-      }
-    }
-  }
-  .userIcon {
-    position: relative;
-  }
-  .toolbar {
-    background-color: $lightGray;
-    .container {
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .left {
-      button,label {
-        margin-bottom: 0;
-      }
-
-    }
-    .right {
-      a {
-        font-size: $bodyOneSize;
-        color: $darkGray;
-        text-decoration: none;
-        margin-right: $m;
-        margin-bottom: 0;
-        position: relative;
-        &:after {
-          position: absolute;
-          top: 110%;
-          left: 50%;
-          transform: translateX(-50%);
-          content: '';
-          width: 100%;
-          height: 2px;
-          background-color: $purpleOne;
-          opacity: 0;
-          transition: $defaultAnim;
-        }
-        &.active {
-          color: $purpleOne;
-          font-weight: bold;
-          &:after {
-            opacity: 1;
-          }
-        }
-        &:last-of-type {
-          margin-right: 0;
-        }
-        &:hover {
-          color: $black;
-          &:after {
-            background-color: $black;
-            opacity: 1;
-          }
-        }
-      }
-    }
+  .disclaimer {
+    font-size: $captionSize;
+    color: $black;
+    font-weight: 400;
+    margin: 0;
   }
 }

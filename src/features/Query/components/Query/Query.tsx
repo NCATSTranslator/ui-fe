@@ -46,7 +46,7 @@ const Query: FC<QueryProps> = ({
   const user = useSelector(currentUser) as User | null;
   
   const nameResolverEndpoint = config?.name_resolver.endpoint
-    ? `${config.name_resolver.endpoint}/lookup` 
+    ? `${config.name_resolver.endpoint}/lookup`
     : 'https://name-lookup.transltr.io/lookup';
 
   const {

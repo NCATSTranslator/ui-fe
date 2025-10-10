@@ -26,6 +26,7 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
   // Track the sidebar item ID for cleanup
   const sidebarItemIdRef = useRef(options.id);
 
+  // Helper function to resolve a component to a static ReactNode or a factory function
   const resolveComponent = (panelComponent: ReactNode | (() => ReactNode) | undefined) => {
     if (!panelComponent)
       return { static: undefined, factory: undefined };
@@ -34,7 +35,7 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
     return { static: panelComponent, factory: undefined };
   };
 
-  // Update the item content whenever dependencies change
+  // Update the item content on initial registration and whenever dependencies change
   useEffect(() => {
     const { id, to, onClick, panelComponent, buttonComponent, icon, tooltipText, ariaLabel, autoOpen, label } = options;
     // Determine the type based on whether it has a panel component or navigation
@@ -84,13 +85,17 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
 /**
  * Custom hook for filtering queries based on a search term
  * @param {UserQueryObject[]} queries - The queries to filter
+ * @param {boolean} includeDeleted - Whether to include deleted queries
  * @param {string} searchTerm - The search term to filter by
  * @returns {UserQueryObject[]} The filtered queries
  */
-export const useFilteredQueries = (queries: UserQueryObject[], searchTerm: string) => {
+export const useFilteredQueries = (queries: UserQueryObject[], includeDeleted: boolean = false, searchTerm?: string) => {
   const { queries: queriesWithTitles } = useGetQueriesUpdatedTitles(queries);
 
   return useMemo(() => queriesWithTitles.filter((query) => {
-    return query.data.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
-  }), [queriesWithTitles, searchTerm]);
+    if(includeDeleted)
+      return query.data.title?.toLowerCase().includes(searchTerm?.toLowerCase() ?? '');
+    else
+      return query.data.title?.toLowerCase().includes(searchTerm?.toLowerCase() ?? '') && !query.data.deleted;
+  }), [queriesWithTitles, searchTerm, includeDeleted]);
 };
