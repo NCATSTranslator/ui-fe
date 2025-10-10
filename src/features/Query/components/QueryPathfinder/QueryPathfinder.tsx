@@ -51,7 +51,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
   const config = useSelector(currentConfig);
   const disabled = user === null;
-  const nameResolverEndpoint = (config?.name_resolver) ? `${config.name_resolver}/lookup` : 'https://name-lookup.transltr.io/lookup';
+  const nameResolverEndpoint = (config?.name_resolver.endpoint) ? `${config.name_resolver.endpoint}/lookup` : 'https://name-lookup.transltr.io/lookup';
   const [isError, setIsError] = useState(false);
   const [errorText, setErrorText] = useState("");
   const [inputOneText, setInputOneText] = useState("");
