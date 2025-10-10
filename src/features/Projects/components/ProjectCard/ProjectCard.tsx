@@ -6,6 +6,7 @@ import { isUnassignedProject, useEditProjectHandlers } from '@/features/Projects
 import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
 import { handleQueryDrop } from '@/features/Projects/utils/dragDropUtils';
 import { DraggableData } from '@/features/DragAndDrop/types/types';
+import { useDndContext } from '@dnd-kit/core';
 
 interface ProjectCardProps {
   onDelete?: (project: Project) => void;
@@ -32,7 +33,15 @@ const ProjectCard = ({
 }: ProjectCardProps) => {
 
   const status = useMemo(() => getProjectStatus(project, queries), [project, queries]);
+  const { active } = useDndContext();
 
+  const isDraggedQueryInProject = useMemo(() => {
+    if(!active || !active.data.current) return false;
+    const draggedQid = active.data.current.data.data.qid;
+    const projectQids = project?.data.pks || [];
+    return active.data.current.type === 'query' && projectQids.includes(draggedQid);
+  }, [active, project]);
+  
   const { handleRestoreProject, handleUpdateProject } = useEditProjectHandlers(undefined, projects);
   
   const onRestore = (project: Project) => {
@@ -63,7 +72,8 @@ const ProjectCard = ({
         type: 'project',
         onDrop: onQueryDrop
       }}
-      indicatorText="Add to Project"
+      indicatorText={`${isDraggedQueryInProject ? 'Query Already in Project' : 'Add to Project'}`}
+      indicatorStatus={isDraggedQueryInProject ? 'error' : 'default'}
       indicateOnlyOnOver
     >
       <DataCard

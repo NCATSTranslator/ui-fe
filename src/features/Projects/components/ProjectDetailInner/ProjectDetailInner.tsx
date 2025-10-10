@@ -21,10 +21,21 @@ import { getProjectDetailHeaderSubtitle } from '@/features/Projects/utils/utilit
 import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
 import { DraggableData } from '@/features/DragAndDrop/types/types';
 import { handleQueryDrop } from '@/features/Projects/utils/dragDropUtils';
+import { useDndContext } from '@dnd-kit/core';
 
 const ProjectDetailInner = () => {
   // Data management
   const data = useProjectDetailData();
+
+  // drag and drop context
+  const { active } = useDndContext();
+
+  const isDraggedQueryInProject = useMemo(() => {
+    if(!active || !active.data.current) return false;
+    const draggedQid = active.data.current.data.data.qid;
+    const projectQids = data.project?.data.pks || [];
+    return active.data.current.type === 'query' && projectQids.includes(draggedQid);
+  }, [active, data.project]);
 
   // State management hooks
   const projectListState = useProjectDetailSortSearchSelectState();
@@ -197,7 +208,8 @@ const ProjectDetailInner = () => {
                           type: 'project',
                           onDrop: onQueryDrop
                         }}
-                        indicatorText="Drop queries here to add to project"
+                        indicatorText={`${isDraggedQueryInProject ? 'Query Already in Project' : 'Add to Project'}`}
+                        indicatorStatus={isDraggedQueryInProject ? 'error' : 'default'}
                       >
                         {sortedData.sortedQueries.length > 0 && (
                           <QueriesTableHeader

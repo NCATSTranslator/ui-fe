@@ -36,6 +36,17 @@
       opacity: 1;
     }
   }
+  &.error {
+    &:before {
+      background: $droppableOverlayBackgroundError;
+    }
+    &:after {
+      outline-color: $midGray;
+    }
+    .dropIndicator {
+      color: $red;
+    }
+  }
 }
 
 .dropIndicator {
