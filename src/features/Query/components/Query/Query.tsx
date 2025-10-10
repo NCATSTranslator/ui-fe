@@ -44,9 +44,9 @@ const Query: FC<QueryProps> = ({
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser) as User | null;
-  
+
   const nameResolverEndpoint = config?.name_resolver.endpoint
-    ? `${config.name_resolver.endpoint}/lookup` 
+    ? `${config.name_resolver.endpoint}/lookup`
     : 'https://name-lookup.transltr.io/lookup';
 
   const {
@@ -64,7 +64,9 @@ const Query: FC<QueryProps> = ({
   const {
     autocompleteItems,
     loadingAutocomplete,
+    autocompleteVisibility,
     delayedQuery,
+    setAutocompleteVisibility,
     clearAutocompleteItems
   } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes);
 
@@ -98,7 +100,7 @@ const Query: FC<QueryProps> = ({
       limitTypes.current = [newQueryType.filterType];
       limitPrefixes.current = newQueryType.limitPrefixes;
       clearAutocompleteItems();
-      
+
       if (resetInputText) {
         setQueryItem({ node: null, type: newQueryType });
         setInputText("");
@@ -121,8 +123,8 @@ const Query: FC<QueryProps> = ({
       prevQueryItems.current = newPrevItems;
       return newQueryItem;
     });
-    clearAutocompleteItems();
-  }, [setInputText, setQueryItem, prevQueryItems, clearAutocompleteItems]);
+    setAutocompleteVisibility(false);
+  }, [setInputText, setQueryItem, prevQueryItems]);
 
   const validateSubmission = useCallback((item: QueryItem | null) => {
     if (!item?.node || !item.node.id) {
@@ -183,7 +185,8 @@ const Query: FC<QueryProps> = ({
               onItemSelection={handleItemSelection}
               onSubmission={handleSubmission}
               onClearQueryItem={clearQueryItem}
-              onClearAutocomplete={clearAutocompleteItems}
+              autocompleteVisibility={autocompleteVisibility}
+              setAutocompleteVisibility={setAutocompleteVisibility}
             />
           )}
         </div>

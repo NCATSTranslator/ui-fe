@@ -1,4 +1,4 @@
-import { FC, MouseEvent, ReactNode } from "react";
+import { FC, MouseEvent, ReactNode, RefObject } from "react";
 import styles from './Button.module.scss';
 import { Link } from "react-router-dom";
 import { joinClasses } from "@/features/Common/utils/utilities";
@@ -22,6 +22,7 @@ interface ButtonProps {
   testId?: string;
   className?: string;
   dataTooltipId?: string;
+  ref?: RefObject<HTMLButtonElement | null>;
 }
 
 const Button: FC<ButtonProps> = ({
@@ -42,7 +43,8 @@ const Button: FC<ButtonProps> = ({
   disabled = false,
   testId,
   className = "",
-  dataTooltipId = ""
+  dataTooltipId = "",
+  ref
 }) => {
   const buttonStyle = joinClasses(
     'button',
@@ -70,12 +72,12 @@ const Button: FC<ButtonProps> = ({
       'aria-label': ariaLabel || '',
       ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
     };
-    return link 
+    return link
     ? <Link {...linkProps} to={href}>
         {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
         {iconOnly ? children : <span className={styles.label}>{children}</span>}
         {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
-      </Link> 
+      </Link>
     : <a {...linkProps} href={href}>
         {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
         {iconOnly ? children : <span className={styles.label}>{children}</span>}
@@ -86,6 +88,7 @@ const Button: FC<ButtonProps> = ({
   return (
     <button
       {...commonProps}
+      ref={ref}
       type={type}
       disabled={disabled}
     >

@@ -24,7 +24,8 @@ interface QueryInputViewProps {
   onQueryItemChange: (value: string) => void;
   onItemSelection: (item: AutocompleteItem) => void;
   onSubmission: (item: QueryItem | null) => void;
-  onClearAutocomplete: () => void;
+  autocompleteVisibility: boolean;
+  setAutocompleteVisibility: (state: boolean) => void;
   onClearQueryItem: () => void;
 }
 
@@ -42,7 +43,8 @@ const QueryInputView: FC<QueryInputViewProps> = ({
   onQueryItemChange,
   onItemSelection,
   onSubmission,
-  onClearAutocomplete,
+  autocompleteVisibility,
+  setAutocompleteVisibility,
   onClearQueryItem
 }) => {
   const navigate = useNavigate();
@@ -63,7 +65,7 @@ const QueryInputView: FC<QueryInputViewProps> = ({
       <p className='blurb'>Select a question and enter a search term to find paths between biomedical entities</p>
       {isError && <p className={styles.error}>{errorText}</p>}
       <OutsideClickHandler
-        onOutsideClick={onClearAutocomplete}
+        onOutsideClick={() => setAutocompleteVisibility(false)}
         className={styles.queryBarContainer}
       >
         <span className={styles.icon}>
@@ -88,7 +90,7 @@ const QueryInputView: FC<QueryInputViewProps> = ({
             </option>
           ))}
         </QuerySelect>
-        
+
         <QueryBar
           handleSubmission={onSubmission}
           handleChange={onQueryItemChange}
@@ -103,7 +105,8 @@ const QueryInputView: FC<QueryInputViewProps> = ({
             user === null ? "Log In to Enter a Search Term" : undefined
           }
           isLoading={isLoading}
-          onClearAutocomplete={onClearAutocomplete}
+          autocompleteVisibility={autocompleteVisibility}
+          setAutocompleteVisibility={setAutocompleteVisibility}
           onClearQueryItem={onClearQueryItem}
         />
       </OutsideClickHandler>
@@ -141,6 +144,6 @@ const QueryInputView: FC<QueryInputViewProps> = ({
       )}
     </>
   );
-}; 
+};
 
 export default QueryInputView;
