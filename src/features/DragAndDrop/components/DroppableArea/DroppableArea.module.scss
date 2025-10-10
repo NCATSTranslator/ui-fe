@@ -1,0 +1,67 @@
+@use "@/assets/styles/variables" as *;
+
+.droppableArea {
+  position: relative;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  border-radius: $largeBorderRadius;
+  &:before, &:after {
+    content: '';
+    position: absolute;
+    opacity: 0;
+    transition: $defaultAnim;
+    pointer-events: none;
+  }
+  &:before {
+    top: -$xs;
+    right: -$xs;
+    bottom: -$xs;
+    left: -$xs;
+    background: $droppableOverlayBackground;
+    z-index: 10;
+    filter: blur(10px);
+  }
+  &:after {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: $largeBorderRadius;
+    outline: 2px dashed $lightBlueOne;
+    outline-offset: -2px;
+    z-index: 20;
+  }
+  &.over {
+    &:before, &:after {
+      opacity: 1;
+    }
+  }
+  &.error {
+    &:before {
+      background: $droppableOverlayBackgroundError;
+    }
+    &:after {
+      outline-color: $midGray;
+    }
+    .dropIndicator {
+      color: $red;
+    }
+  }
+}
+
+.dropIndicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: $blueOne;
+  font-weight: 800;
+  font-size: $h5Size;
+  pointer-events: none;
+  z-index: 110;
+  opacity: 0;
+  transition: $defaultAnim;
+  &.show {
+    opacity: 1;
+  }
+}

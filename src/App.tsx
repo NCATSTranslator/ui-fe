@@ -11,6 +11,11 @@ import SendFeedbackModal from "@/features/Common/components/SendFeedbackModal/Se
 import SidebarProvider from '@/features/Sidebar/components/SidebarProvider/SidebarProvider';
 import Sidebar from '@/features/Sidebar/components/Sidebar/Sidebar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { UserQueryObject } from '@/features/Projects/types/projects.d';
+import SidebarQueryCard from '@/features/Sidebar/components/SidebarQueryCard/SidebarQueryCard';
+import { createPortal } from 'react-dom';
+import Header from '@/features/Page/components/Header/Header';
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -43,44 +48,78 @@ const App = ({children}: {children?: ReactNode}) => {
   useFetchConfigAndPrefs(sessionStatus ? !!sessionStatus.user : undefined, setGaID, setGtmID);
   useScrollToHash();
 
+  // Drag and drop state
+  const [activeQuery, setActiveQuery] = useState<UserQueryObject | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 }, // Require 8px movement before drag starts
+    })
+  );
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    if (active.data.current?.type === 'query') {
+      const query = active.data.current?.data as UserQueryObject;
+      setActiveQuery(query);
+    }
+  }
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveQuery(null);
+    
+    if (over?.data.current?.onDrop) {
+      try {
+        over.data.current.onDrop(active.data.current);
+      } catch (error) {
+        console.error('Drop failed:', error);
+        // Show toast/error message
+      }
+    }
+  }
+
   return (
     <SidebarProvider>
       <QueryClientProvider client={queryClient}>
         <div className={`app ${pathnameClass} ${additionalClasses}`}>
           <AppToastContainer />
           <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />
-          <div className='layout'>
-            <Sidebar />
-            <main className='content scrollable'>
-              <div className='header-disclaimer'>
-                <p>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
-              </div>
-              {
-                children && children
-              }
-              {
-                (width && width < minScreenWidth) && <SmallScreenOverlay /> 
-              }
-              <Outlet context={setFeedbackModalOpen}/>
-              <Footer>
-                <nav>
-                  <a
-                    href="https://ncats.nih.gov/translator/about"
-                    rel="noreferrer"
-                    target="_blank"
-                  >About Translator</a>
-                  <NavLink to={`/terms-of-use`}
-                    className={({isActive}) => {return (isActive) ? 'active' : '' }}
-                  >Terms of Use</NavLink>
-                  <a
-                    href="https://ncats.nih.gov/privacy"
-                    rel="noreferrer"
-                    target="_blank"
-                  >Privacy Policy</a>
-                </nav>
-              </Footer>
-            </main>
-          </div>
+          <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <div className='layout'>
+              <Sidebar />
+              <main className='content scrollable'>
+                <Header />
+                {
+                  children && children
+                }
+                {
+                  (width && width < minScreenWidth) && <SmallScreenOverlay /> 
+                }
+                <Outlet context={setFeedbackModalOpen}/>
+                <Footer>
+                  <nav>
+                    <a
+                      href="https://ncats.nih.gov/translator/about"
+                      rel="noreferrer"
+                      target="_blank"
+                    >About Translator</a>
+                    <NavLink to={`/terms-of-use`}
+                      className={({isActive}) => {return (isActive) ? 'active' : '' }}
+                    >Terms of Use</NavLink>
+                    <a
+                      href="https://ncats.nih.gov/privacy"
+                      rel="noreferrer"
+                      target="_blank"
+                    >Privacy Policy</a>
+                  </nav>
+                </Footer>
+              </main>
+            </div>
+            {createPortal(
+              <DragOverlay>
+                {activeQuery && <SidebarQueryCard query={activeQuery} />}
+              </DragOverlay>,
+              document.body,
+            )}
+          </DndContext>
         </div>
       </QueryClientProvider>
     </SidebarProvider>

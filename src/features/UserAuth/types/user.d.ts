@@ -56,7 +56,9 @@ export type Config = {
   include_projects: boolean;
   include_query_status_polling: boolean;
   include_summarization: boolean;
-  name_resolver: {endpoint: string};
+  name_resolver: {
+    endpoint: string;
+  };
   social_providers: Record<string, SocialProvider>;
 }
 
