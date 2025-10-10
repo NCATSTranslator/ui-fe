@@ -2,7 +2,7 @@
 
 .header {
   box-shadow: $dropShadow;
-  position: fixed;
+  position: sticky;
   z-index: 10;
   display: flex;
   justify-content: space-between;

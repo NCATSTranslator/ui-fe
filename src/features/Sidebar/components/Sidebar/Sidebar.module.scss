@@ -4,7 +4,6 @@
   height: 100vh;
   display: grid;
   grid-template-columns: repeat(2, auto);
-  box-shadow: $dropShadow;
   z-index: 10;
   .linkList {
     display: flex;
@@ -12,6 +11,8 @@
     justify-content: space-between;
     height: 100%;
     background-color: $lightGray;
+    // border right, but inset
+    box-shadow: inset -1px 0 0 0 $midGray;
   }
   .top {
     & > *:first-child {
@@ -44,5 +45,6 @@
     opacity: 1;
     transition: $defaultAnim;
     overflow: hidden;
+    box-shadow: inset -1px 0 $midGray;
   }
 }
