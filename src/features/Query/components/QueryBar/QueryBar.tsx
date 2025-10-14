@@ -4,7 +4,7 @@ import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react"
 import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Button from "@/features/Core/components/Button/Button";
 import { cloneDeep } from 'lodash';
-import { AutocompleteItem, QueryItem, QueryType } from '@/features/Query/types/querySubmission';
+import { AutocompleteItem, AutocompleteContext, QueryItem, QueryType } from '@/features/Query/types/querySubmission';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 
 type QueryBarProps = {
@@ -40,6 +40,8 @@ const QueryBar: FC<QueryBarProps> = ({
   onClearQueryItem,
   placeholderText
 }) => {
+  const autocompleteId = 'ac';
+  const autocompleteInputRef = useRef<HTMLInputElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
 
   const handleSubmit = (e: FormEvent) => {
@@ -60,6 +62,19 @@ const QueryBar: FC<QueryBarProps> = ({
     }
   }
 
+  const handleAutocompleteSelect = (cxt: AutocompleteContext) => submitRef?.current?.focus();
+  const handleInputSubmit = (cxt: AutocompleteContext) => {
+    if (cxt.event === undefined || cxt.event === null) {
+      throw Error(`Developer Error in QueryBar.tsx: \n  In handleInputSubmit cxt.event is required but is ${cxt.event}`);
+    }
+    if (queryItem?.node) {
+      cxt.event.preventDefault();
+      cxt.event.stopPropagation();
+      submitRef.current?.click();
+    }
+  }
+
+
   let placeholder = '';
   if (!!placeholderText) {
     placeholder = placeholderText;
@@ -73,6 +88,7 @@ const QueryBar: FC<QueryBarProps> = ({
     >
       <div className={`${disabled && styles.disabled} ${styles.inputContainer}`}>
         <AutocompleteInput
+          id={autocompleteId}
           placeholder={placeholder}
           value={value}
           onChange={handleChange}
@@ -85,7 +101,9 @@ const QueryBar: FC<QueryBarProps> = ({
           setAutocompleteVisibility={setAutocompleteVisibility}
           onClear={onClearQueryItem}
           disabled={disabled}
-          submitRef={submitRef}
+          handleSelect={handleAutocompleteSelect}
+          handleSubmit={handleInputSubmit}
+          inputRef={autocompleteInputRef}
         />
         <Button
           ref={submitRef}

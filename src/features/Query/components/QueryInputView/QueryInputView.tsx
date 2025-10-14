@@ -5,7 +5,6 @@ import { AutocompleteItem, ExampleQueries, QueryItem } from '@/features/Query/ty
 import { QuerySelect } from '@/features/Query/components/QuerySelect/QuerySelect';
 import ExampleQueryList from '@/features/Query/components/ExampleQueryList/ExampleQueryList';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
-import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 import { QueryTypeIcon } from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
 import { User } from '@/features/UserAuth/types/user';
 import { useNavigate } from 'react-router-dom';
@@ -64,10 +63,7 @@ const QueryInputView: FC<QueryInputViewProps> = ({
     <>
       <p className='blurb'>Select a question and enter a search term to find paths between biomedical entities</p>
       {isError && <p className={styles.error}>{errorText}</p>}
-      <OutsideClickHandler
-        onOutsideClick={() => setAutocompleteVisibility(false)}
-        className={styles.queryBarContainer}
-      >
+      <div className={styles.queryBarContainer}>
         <span className={styles.icon}>
           <QueryTypeIcon type={queryItem.type.targetType || ''} />
         </span>
@@ -109,7 +105,7 @@ const QueryInputView: FC<QueryInputViewProps> = ({
           setAutocompleteVisibility={setAutocompleteVisibility}
           onClearQueryItem={onClearQueryItem}
         />
-      </OutsideClickHandler>
+      </div>
 
       {/* Example queries based on type */}
       {queryItem.type.id === 0 && exampleQueries.exampleDiseases && (

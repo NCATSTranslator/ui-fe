@@ -1,13 +1,15 @@
-import { FC, useRef, useState, useCallback, KeyboardEvent, RefObject } from 'react';
+import { FC, useRef, useState, useCallback, useEffect, KeyboardEvent, RefObject } from 'react';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import Autocomplete from '@/features/Common/components/Autocomplete/Autocomplete';
-import { AutocompleteItem } from '@/features/Query/types/querySubmission';
+import { AutocompleteItem, AutocompleteContext } from '@/features/Query/types/querySubmission';
+import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 import QuestionIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { getIcon } from '@/features/Common/utils/utilities';
 import styles from './AutocompleteInput.module.scss';
 
 interface AutocompleteInputProps {
+  id: string;
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
@@ -21,10 +23,13 @@ interface AutocompleteInputProps {
   className?: string;
   selectedClassName?: string;
   disabled?: boolean;
-  submitRef: RefObject<HTMLButtonElement | null> | null;
+  handleSelect: (cxt: AutocompleteContext) => void;
+  handleSubmit: (cxt: AutocompleteContext) => void;
+  inputRef: RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
 }
 
 const AutocompleteInput: FC<AutocompleteInputProps> = ({
+  id,
   placeholder,
   value,
   onChange,
@@ -38,14 +43,17 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
   className = '',
   selectedClassName = '',
   disabled = false,
-  submitRef
+  handleSelect,
+  handleSubmit,
+  inputRef
 }) => {
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const autocompleteItemsRef = useRef<HTMLDivElement>(null);
   const autocompleteContainerRef = useRef<HTMLDivElement>(null);
   const autocompleteItemsContainerRef = useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [scrollingIndex, setScrollingIndex] = useState<number>(-1);
+
+  useEffect(() => setAutocompleteVisibility(true), [loadingAutocomplete]);
 
   const handleAutocompleteScrolling = useCallback((index: number) => {
     const isValidIndex = index >= 0 && index < (autocompleteItems?.length || 0);
@@ -102,30 +110,36 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
         if (scrollingIndex >= 0 && scrollingIndex < autocompleteItems.length) {
           setSelectedIndex(scrollingIndex);
           onItemSelect(autocompleteItems[scrollingIndex]);
-          submitRef?.current?.focus()
+          handleSelect({id: id});
         }
         break;
     }
   }, [autocompleteItems, scrollingIndex, loadingAutocomplete, onItemSelect, handleAutocompleteScrolling]);
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key == 'ArrowDown' || event.key == 'ArrowUp') {
-      event.preventDefault();
-      event.stopPropagation();
-      const validAutocompleteItems = autocompleteItems && autocompleteItems.length > 0;
-      if (validAutocompleteItems && autocompleteItemsRef.current) {
-        autocompleteItemsRef.current.focus();
-        handleAutocompleteKeyDown(event);
-      }
-    } else if (event.key == 'Enter') {
-      event.preventDefault();
-      event.stopPropagation();
-      submitRef?.current?.click();
+    switch (event.key) {
+      case 'ArrowDown':
+      case 'ArrowUp':
+        event.preventDefault();
+        event.stopPropagation();
+        if (autocompleteItems && autocompleteItems.length > 0 && autocompleteItemsRef.current) {
+          autocompleteItemsRef.current.focus();
+          handleAutocompleteKeyDown(event);
+        }
+        break;
+      case 'Enter':
+        handleSubmit({id: id, event: event})
+        break;
     }
   }
+   const handleOutsideClick = () => {
+     setAutocompleteVisibility(false);
+     setScrollingIndex(selectedIndex);
+   }
 
   return (
-    <div
+    <OutsideClickHandler
+      onOutsideClick={handleOutsideClick}
       className={`${styles.inputContainer} ${disabled && styles.disabled} ${className}`}
       tabIndex={-1}
       onKeyDown={handleKeyDown}
@@ -138,15 +152,7 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
           setSelectedIndex(-1);
           onChange(e);
         }}
-        handleFocus={() => {
-          let autocompleteIndex = scrollingIndex;
-          if (scrollingIndex < 0) {
-            setScrollingIndex(selectedIndex);
-            autocompleteIndex = selectedIndex;
-          }
-          handleAutocompleteScrolling(autocompleteIndex);
-          setAutocompleteVisibility(true);
-        }}
+        handleFocus={() => {setAutocompleteVisibility(true)}}
         className={`${styles.input} ${!!selectedItem && styles.selected} ${selectedClassName}`}
         value={value}
         iconLeft={!!selectedItem?.types ? getIcon(selectedItem.types[0]) : <QuestionIcon/>}
@@ -163,16 +169,18 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
           items={autocompleteItems}
           scrollingIndex={scrollingIndex}
           setScrollingIndex={setScrollingIndex}
+          selectedIndex={selectedIndex}
           setSelectedIndex={setSelectedIndex}
           handleItemClick={onItemSelect}
           handleKeyDown={handleAutocompleteKeyDown}
           handleScrolling={handleAutocompleteScrolling}
+          handleSelect={() => handleSelect({id: id})}
           autocompleteItemsRef={autocompleteItemsRef}
           itemsContainerRef={autocompleteItemsContainerRef}
           containerRef={autocompleteContainerRef}
         />
       }
-    </div>
+    </OutsideClickHandler>
   )
 };
 

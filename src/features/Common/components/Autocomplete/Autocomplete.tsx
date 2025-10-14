@@ -11,10 +11,12 @@ type AutocompleteProps = {
   items: Array<AutocompleteItem> | null;
   scrollingIndex: number;
   setScrollingIndex: (index: number | ((index: number) => number)) => void;
+  selectedIndex: number;
   setSelectedIndex: (index: number) => void;
   handleItemClick: (item: AutocompleteItem) => void;
   handleKeyDown: (event: KeyboardEvent) => void;
   handleScrolling: (index: number) => void;
+  handleSelect: () => void;
   autocompleteItemsRef: RefObject<HTMLDivElement | null>;
   containerRef: RefObject<HTMLDivElement | null>;
   itemsContainerRef: RefObject<HTMLDivElement | null>;
@@ -25,10 +27,12 @@ const Autocomplete: FC<AutocompleteProps> = ({
   items,
   scrollingIndex,
   setScrollingIndex,
+  selectedIndex,
   setSelectedIndex,
   handleItemClick,
   handleKeyDown,
   handleScrolling,
+  handleSelect,
   autocompleteItemsRef,
   containerRef,
   itemsContainerRef,
@@ -81,6 +85,7 @@ const Autocomplete: FC<AutocompleteProps> = ({
                     <span className={`${styles.term} autocomplete-item`}
                           onClick={()=> {
                             setSelectedIndex(scrollingIndex);
+                            handleSelect();
                             handleItemClick(item)
                           }}
                           title={item.match ? `${item.label} (${item.match})` : item.label}>

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
 import Button from '@/features/Core/components/Button/Button';
-import { AutocompleteItem } from '@/features/Query/types/querySubmission';
+import { AutocompleteItem, AutocompleteContext } from '@/features/Query/types/querySubmission';
 import { AutocompleteFunctions } from "@/features/Query/types/querySubmission";
 import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
@@ -49,9 +49,14 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   user = null
 }) => {
 
+  const autocompleteOneId = 'ac1';
+  const autocompleteTwoId = 'ac2';
   const config = useSelector(currentConfig);
   const disabled = user === null;
   const nameResolverEndpoint = (config?.name_resolver.endpoint) ? `${config.name_resolver.endpoint}/lookup` : 'https://name-lookup.transltr.io/lookup';
+  const submitRef = useRef<HTMLButtonElement>(null);
+  const autocompleteInputRefOne = useRef<HTMLInputElement>(null);
+  const autocompleteInputRefTwo = useRef<HTMLInputElement>(null);
   const [isError, setIsError] = useState(false);
   const [errorText, setErrorText] = useState("");
   const [inputOneText, setInputOneText] = useState("");
@@ -130,9 +135,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
     if(autocompleteItemsOne || autocompleteItemsTwo) {
       if(isFirstBar) {
-        clearAutocompleteItemsOne();
+        setAutocompleteVisibilityOne(false);
       } else {
-        clearAutocompleteItemsTwo();
+        setAutocompleteVisibilityTwo(false);
       }
     }
   }
@@ -188,6 +193,23 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       setMiddleType("biolink:ChemicalEntity");
     }
     setHasMiddleType(prev => !prev);
+  }
+
+  const handleAutocompleteSelect = (cxt: AutocompleteContext) => {
+    if (cxt.id === autocompleteOneId) {
+      autocompleteInputRefTwo.current?.focus();
+    } else if (cxt.id === autocompleteTwoId) {
+      submitRef.current?.focus();
+    } else {
+      throw Error(`Developer Error in QueryPathfinder.tsx: In handleAutocompleteSelect\n  cxt.id: ${cxt.id}`);
+    }
+  }
+
+  const handleInputSubmit = (cxt: AutocompleteContext) => {
+    if (cxt.event === undefined || cxt.event === null) {
+      throw Error(`Developer Error in QueryPathfinder.tsx: \n  In handleInputSubmit cxt.event is required but is ${cxt.event}`);
+    }
+    return;
   }
 
   return (
@@ -254,6 +276,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
               }}
             >
               <AutocompleteInput
+                id={autocompleteOneId}
                 value={inputOneText}
                 onChange={(e) => handleQueryItemChange(e, true)}
                 onItemSelect={(item) => handleItemSelection(item, true)}
@@ -267,7 +290,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 setAutocompleteVisibility={setAutocompleteVisibilityOne}
                 disabled={disabled}
                 placeholder={user === null ? "Log In to Enter a Search Term" : "Enter First Search Term"}
-                submitRef={null}
+                handleSelect={handleAutocompleteSelect}
+                handleSubmit={handleInputSubmit}
+                inputRef={autocompleteInputRefOne}
               />
               <PathfinderDivider className={styles.dividerIcon}/>
               {
@@ -293,6 +318,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 </>
               }
               <AutocompleteInput
+                id={autocompleteTwoId}
                 value={inputTwoText}
                 onChange={(e) => handleQueryItemChange(e, false)}
                 onItemSelect={(item) => handleItemSelection(item, false)}
@@ -306,9 +332,17 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 setAutocompleteVisibility={setAutocompleteVisibilityTwo}
                 disabled={disabled}
                 placeholder={user === null ? "Log In to Enter a Search Term" : "Enter First Search Term"}
-                submitRef={null}
+                handleSelect={handleAutocompleteSelect}
+                handleSubmit={handleInputSubmit}
+                inputRef={autocompleteInputRefTwo}
               />
-              <Button type='submit' className={styles.submitButton} iconOnly disabled={disabled}>
+              <Button
+                ref={submitRef}
+                type='submit'
+                className={styles.submitButton}
+                iconOnly
+                disabled={disabled}
+              >
                 {
                   isLoading
                   ?

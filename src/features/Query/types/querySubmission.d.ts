@@ -1,3 +1,5 @@
+import { KeyboardEvent } from 'react';
+
 export type Example = {
   id: string;
   name: string;
@@ -39,6 +41,11 @@ export type AutocompleteFunctions = {
   filter: (type: any) => (item: any) => any;
   annotate: (normalizedNodes: any) => Promise<any>;
   format: (items: any, formatData: any) => Promise<any[]>;
+}
+
+export type AutocompleteContext = {
+  id: string;
+  event?: KeyboardEvent;
 }
 
 export type GeneAnnotation = {
