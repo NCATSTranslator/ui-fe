@@ -1,10 +1,14 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { Project } from "@/features/Projects/types/projects";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import SidebarCard from "@/features/Sidebar/components/SidebarCard/SidebarCard";
 import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
+import Button from "@/features/Core/components/Button/Button";
+import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
+import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
+import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 
 interface SidebarProjectCardProps {
   project: Project;
@@ -13,6 +17,8 @@ interface SidebarProjectCardProps {
 
 const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }) => {
   const queryCount = project.data.pks.length;
+  const [isRenaming, setIsRenaming] = useState(false);
+  const { handleUpdateProject } = useEditProjectHandlers(undefined, [project]);
   
   const leftIcon = <FolderIcon />;
   
@@ -35,6 +41,13 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }
     </span>
   );
 
+  const options = (
+    <div className={styles.options}>
+      <Button handleClick={()=>{setIsRenaming(true)}} iconLeft={<EditIcon />}>Rename</Button>
+      <Button handleClick={()=>{console.log('delete')}} iconLeft={<TrashIcon />}>Delete</Button>
+    </div>
+  );
+
   return (
     <SidebarCard
       leftIcon={leftIcon}
@@ -44,6 +57,8 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }
       bottomLeft={bottomLeft}
       bottomRight={bottomRight}
       data-testid="sidebar-project-card"
+      className={styles.projectCard}
+      options={options}
     />
   );
 };
