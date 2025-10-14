@@ -5,7 +5,7 @@ import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface ButtonProps {
   ariaLabel?: string;
-  variant?: "secondary";
+  variant?: "secondary" | "textOnly";
   handleClick?: (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   href?: string;
   link?: boolean;
@@ -50,6 +50,7 @@ const Button: FC<ButtonProps> = ({
     'button',
     styles.button,
     variant === "secondary" && styles.secondary,
+    variant === "textOnly" && styles.textOnly,
     iconOnly && styles.iconOnly,
     small && styles.small,
     !!iconLeft && styles.iconLeft,

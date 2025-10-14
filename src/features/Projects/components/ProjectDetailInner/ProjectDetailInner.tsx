@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import styles from './ProjectDetailInner.module.scss';
 import QueriesTableHeader from '@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
 import { useProjectDetailSortSearchSelectState } from '@/features/Projects/hooks/customHooks';
-import { ProjectEditingItem, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
+import { isUserQueryObject, ProjectEditingItem, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
 import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectHeader';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
@@ -18,10 +18,24 @@ import { useProjectDetailDeletionHandlers } from '@/features/Projects/hooks/useP
 import SelectedItemsActionBar from '../SelectedItemsActionBar/SelectedItemsActionBar';
 import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
 import { getProjectDetailHeaderSubtitle } from '@/features/Projects/utils/utilities';
+import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
+import { DraggableData } from '@/features/DragAndDrop/types/types';
+import { handleQueryDrop } from '@/features/Projects/utils/dragDropUtils';
+import { useDndContext } from '@dnd-kit/core';
 
 const ProjectDetailInner = () => {
   // Data management
   const data = useProjectDetailData();
+
+  // drag and drop context
+  const { active } = useDndContext();
+
+  const isDraggedQueryInProject = useMemo(() => {
+    if(!active || !active.data.current) return false;
+    const draggedQid = active.data.current.data.data.qid;
+    const projectQids = data.project?.data.pks || [];
+    return active.data.current.type === 'query' && projectQids.includes(draggedQid);
+  }, [active, data.project]);
 
   // State management hooks
   const projectListState = useProjectDetailSortSearchSelectState();
@@ -99,6 +113,13 @@ const ProjectDetailInner = () => {
     setSharedQuery(query);
     modals.openModal('shareQuery');
   };
+
+  const onQueryDrop = useCallback((draggedItem: DraggableData) => {
+    if(data.project)
+      handleQueryDrop(draggedItem, data.project, data.project?.data.pks, projectEditHandlers.handleUpdateProject);
+    else
+      console.error('No project found');
+  }, [data.project, data.project?.data.pks, projectEditHandlers.handleUpdateProject]);
 
   return (
     <div className={styles.projectDetail}>
@@ -178,82 +199,95 @@ const ProjectDetailInner = () => {
                 >
                   {[
                     <Tab key="queries" heading={`${sortedData.sortedQueries.length} Quer${sortedData.sortedQueries.length === 1 ? 'y' : 'ies'}`} className={styles.projectTabContent}>
-                      {sortedData.sortedQueries.length > 0 && (
-                        <QueriesTableHeader
-                          activeQueries={sortedData.sortedQueries}
-                          selectedQueries={projectListState.selectedQueries}
-                          setSelectedQueries={projectListState.setSelectedQueries}
-                          sortField={projectListState.sortField}
-                          sortDirection={projectListState.sortDirection}
-                          onSort={projectListState.handleSort}
-                          location="detail"
-                          isEditing={projectEditState.isEditing}
-                          isUnassigned={isUnassignedPrj}
-                        />
-                      )}
-                      {
-                        data.errors.queriesError
-                        ?
-                          (
-                            <ProjectDetailErrorStates
-                              type="queries"
-                              styles={styles}
-                            />
-                          )
-                        : 
-                          (
-                            <LoadingWrapper loading={data.loading.queriesLoading}>
-                              <div className={styles.queryGrid}>
-                                {sortedData.sortedQueries.length === 0 ? (
-                                  <div className={styles.emptyState}>
-                                    <p>No queries found{projectListState.searchTerm ? ' matching your search.' : '.'}</p>
-                                  </div>
-                                ) : (
-                                  sortedData.sortedQueries.map((query) => (
-                                    <QueryCard
-                                      key={query.data.qid}
-                                      queries={data.raw.queries}
-                                      query={query}
-                                      searchTerm={projectListState.searchTerm}
-                                      setSelectedQueries={projectListState.setSelectedQueries}
-                                      selectedQueries={projectListState.selectedQueries}
-                                      onEdit={queryEditHandlers.handleEditQuery}
-                                      isEditing={projectEditState.isEditing}
-                                      location="detail"
-                                      inUnassignedProject={isUnassignedPrj}
-                                      onShare={handleShareQuery}
-                                    />
-                                  ))
-                                )}
-                                {
-                                  (projectEditState.isEditing && sortedData.additionalQueries.length > 0) && (
-                                    <>
-                                      <div className={styles.separator} />
-                                      <p className={styles.additionalQueriesLabel}>Select to Add to Project</p>
-                                      {
-                                        sortedData.additionalQueries.map((query) => (
-                                          <QueryCard
-                                            key={query.data.qid}
-                                            queries={data.raw.queries}
-                                            query={query}
-                                            searchTerm={projectListState.searchTerm}
-                                            setSelectedQueries={projectListState.setSelectedQueries}
-                                            selectedQueries={projectListState.selectedQueries}
-                                            onEdit={queryEditHandlers.handleEditQuery}
-                                            isEditing={projectEditState.isEditing}
-                                            location="detail"
-                                            inUnassignedProject={isUnassignedPrj}
-                                            onShare={handleShareQuery}
-                                          />
-                                        ))
-                                      }
-                                    </>
-                                  )
-                                }
-                              </div>
-                            </LoadingWrapper>
-                          )
-                      }
+                      <DroppableArea 
+                        id="project-zone"
+                        canAccept={(draggedData) => draggedData.type === 'query'}
+                        disabled={isUnassignedProject(data.project || -1)}
+                        data={{ 
+                          id: data.project?.id?.toString(),
+                          type: 'project',
+                          onDrop: onQueryDrop
+                        }}
+                        indicatorText={`${isDraggedQueryInProject ? 'Query Already in Project' : 'Add to Project'}`}
+                        indicatorStatus={isDraggedQueryInProject ? 'error' : 'default'}
+                      >
+                        {sortedData.sortedQueries.length > 0 && (
+                          <QueriesTableHeader
+                            activeQueries={sortedData.sortedQueries}
+                            selectedQueries={projectListState.selectedQueries}
+                            setSelectedQueries={projectListState.setSelectedQueries}
+                            sortField={projectListState.sortField}
+                            sortDirection={projectListState.sortDirection}
+                            onSort={projectListState.handleSort}
+                            location="detail"
+                            isEditing={projectEditState.isEditing}
+                            isUnassigned={isUnassignedPrj}
+                          />
+                        )}
+                        {
+                          data.errors.queriesError
+                          ?
+                            (
+                              <ProjectDetailErrorStates
+                                type="queries"
+                                styles={styles}
+                              />
+                            )
+                          : 
+                            (
+                              <LoadingWrapper loading={data.loading.queriesLoading}>
+                                <div className={styles.queryGrid}>
+                                  {sortedData.sortedQueries.length === 0 ? (
+                                    <div className={styles.emptyState}>
+                                      <p>No queries found{projectListState.searchTerm ? ' matching your search.' : '.'}</p>
+                                    </div>
+                                  ) : (
+                                    sortedData.sortedQueries.map((query) => (
+                                      <QueryCard
+                                        key={query.data.qid}
+                                        queries={data.raw.queries}
+                                        query={query}
+                                        searchTerm={projectListState.searchTerm}
+                                        setSelectedQueries={projectListState.setSelectedQueries}
+                                        selectedQueries={projectListState.selectedQueries}
+                                        onEdit={queryEditHandlers.handleEditQuery}
+                                        isEditing={projectEditState.isEditing}
+                                        location="detail"
+                                        inUnassignedProject={isUnassignedPrj}
+                                        onShare={handleShareQuery}
+                                      />
+                                    ))
+                                  )}
+                                  {
+                                    (projectEditState.isEditing && sortedData.additionalQueries.length > 0) && (
+                                      <>
+                                        <div className={styles.separator} />
+                                        <p className={styles.additionalQueriesLabel}>Select to Add to Project</p>
+                                        {
+                                          sortedData.additionalQueries.map((query) => (
+                                            <QueryCard
+                                              key={query.data.qid}
+                                              queries={data.raw.queries}
+                                              query={query}
+                                              searchTerm={projectListState.searchTerm}
+                                              setSelectedQueries={projectListState.setSelectedQueries}
+                                              selectedQueries={projectListState.selectedQueries}
+                                              onEdit={queryEditHandlers.handleEditQuery}
+                                              isEditing={projectEditState.isEditing}
+                                              location="detail"
+                                              inUnassignedProject={isUnassignedPrj}
+                                              onShare={handleShareQuery}
+                                            />
+                                          ))
+                                        }
+                                      </>
+                                    )
+                                  }
+                                </div>
+                              </LoadingWrapper>
+                            )
+                        }
+                      </DroppableArea>
                     </Tab>
                   ]}
                 </Tabs>

@@ -11,7 +11,8 @@
     align-items: center;
     margin-bottom: $s;
     padding: $s;
-    border-bottom: 1px solid $midGray;
+    // border bottom, but inset
+    box-shadow: inset 0px -1px 0 0 $midGray;
     .title {
       margin-bottom: 0;
       white-space: nowrap;
@@ -23,6 +24,7 @@
     display: flex;
     align-items: center;
     gap: $s;
+    max-height: $l;
     button, a {
       margin: 0;
     }

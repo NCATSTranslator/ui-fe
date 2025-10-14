@@ -44,6 +44,20 @@
       background-color: $grayHover;
     }
   }
+  &.textOnly {
+    background-color: transparent;
+    color: $purpleOne;
+    svg {
+      path {
+        fill: $purpleOne;
+      }
+    }
+    &:hover {
+      .label {
+        text-decoration: underline;
+      }
+    }
+  }
   &:disabled {
     background-color: $lightGray;
     color: $midDarkGray;
