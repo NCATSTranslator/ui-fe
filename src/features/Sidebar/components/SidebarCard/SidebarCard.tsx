@@ -77,10 +77,10 @@ const SidebarCard: FC<SidebarCardProps> = ({
               <Button className={styles.optionsButton} handleClick={()=>setOptionsOpen(prev=>!prev)}>
                 <OptionsIcon />
               </Button>
-              <OptionsPane open={optionsOpen}>
-                {options && options}
-              </OptionsPane>
             </OutsideClickHandler>
+            <OptionsPane open={optionsOpen}>
+              {options && options}
+            </OptionsPane>
           </>
         )
       }
