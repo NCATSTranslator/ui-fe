@@ -53,6 +53,11 @@
       }
     }
   }
+  &.isRenaming {
+    .optionsButton {
+      display: none;
+    }
+  }
   .leftSection {
     display: flex;
     align-items: flex-start;
@@ -69,6 +74,22 @@
     text-decoration: none;
     &:hover {
       text-decoration: underline;
+    }
+  }
+  .titleInput {
+    margin-bottom: 0;
+    input {
+      font-size: $bodyTwoSize;
+      font-weight: 800;
+      color: $black;
+      text-decoration: none;
+      background-color: $lightGray;
+      border: none;
+      outline: none;
+      padding: $xxxs $xxs;
+    }
+    &:hover {
+      text-decoration: none;
     }
   }
   .bottom {

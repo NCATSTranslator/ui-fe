@@ -9,6 +9,8 @@ import Button from "@/features/Core/components/Button/Button";
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
+import { isUnassignedProject, useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
+import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
 
 interface SidebarProjectCardProps {
   project: Project;
@@ -19,6 +21,8 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }
   const queryCount = project.data.pks.length;
   const [isRenaming, setIsRenaming] = useState(false);
   const { openDeleteProjectModal } = useProjectModals();
+  const { handleUpdateProject } = useEditProjectHandlers(undefined, [project]);
+  const isUnassigned = isUnassignedProject(project);
   
   const leftIcon = <FolderIcon />;
   
@@ -48,18 +52,27 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }
     </div>
   );
 
+  const handleRename = (value: string) => {
+    handleUpdateProject(project.id, value);
+  }
+
   return (
-    <SidebarCard
-      leftIcon={leftIcon}
-      title={project.data.title}
-      searchTerm={searchTerm}
-      linkTo={`/projects/${project.id}`}
-      bottomLeft={bottomLeft}
-      bottomRight={bottomRight}
-      data-testid="sidebar-project-card"
-      className={styles.projectCard}
-      options={options}
-    />
+    <OutsideClickHandler onOutsideClick={() => { if(isRenaming) setIsRenaming(false) } }>
+      <SidebarCard
+        leftIcon={leftIcon}
+        title={project.data.title}
+        searchTerm={searchTerm}
+        linkTo={`/projects/${project.id}`}
+        bottomLeft={bottomLeft}
+        bottomRight={bottomRight}
+        data-testid="sidebar-project-card"
+        className={styles.projectCard}
+        options={isUnassigned ? undefined : options}
+        isRenaming={isRenaming}
+        setIsRenaming={setIsRenaming}
+        onRename={handleRename}
+      />
+    </OutsideClickHandler>
   );
 };
 

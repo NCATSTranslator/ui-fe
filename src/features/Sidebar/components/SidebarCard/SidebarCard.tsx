@@ -20,6 +20,9 @@ interface SidebarCardProps {
   className?: string;
   'data-testid'?: string;
   options?: ReactNode;
+  isRenaming?: boolean;
+  setIsRenaming?: (isRenaming: boolean) => void;
+  onRename?: (value: string) => void;
 }
 
 const SidebarCard: FC<SidebarCardProps> = ({
@@ -33,7 +36,10 @@ const SidebarCard: FC<SidebarCardProps> = ({
   bottomRight,
   className,
   'data-testid': testId,
-  options
+  options,
+  isRenaming,
+  setIsRenaming,
+  onRename
 }) => {
   const handleClick = useCallback((event: MouseEvent<HTMLDivElement>) => {
     // Don't trigger onClick if user clicked on a link
@@ -43,7 +49,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
     onClick?.(event);
   }, [onClick, linkTo]);
 
-  const cardClassName = joinClasses(styles.sidebarCard, className);
+  const cardClassName = joinClasses(styles.sidebarCard, className, isRenaming && styles.isRenaming);
   const [optionsOpen, setOptionsOpen] = useState(false);
 
   return (
@@ -61,6 +67,9 @@ const SidebarCard: FC<SidebarCardProps> = ({
           searchTerm={searchTerm}
           linkTo={linkTo}
           linkTarget={linkTarget}
+          isRenaming={isRenaming}
+          setIsRenaming={setIsRenaming}
+          onRename={onRename}
         />
         {(bottomLeft || bottomRight) && (
           <div className={styles.bottom}>
