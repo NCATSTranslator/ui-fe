@@ -4,32 +4,33 @@ import ProjectHeader from '@/features/Projects/components/ProjectHeader/ProjectH
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import { useProjectDetailSortSearchSelectState } from '@/features/Projects/hooks/customHooks';
-import { ProjectEditingItem, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
+import { Project, ProjectEditingItem, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
 import { useEditProjectState, useEditProjectHandlers, useEditQueryState, useEditQueryHandlers, onSetIsEditingProject } from '@/features/Projects/utils/editUpdateFunctions';
 import { useProjectListData } from '@/features/Projects/hooks/useProjectListData';
 import { useFilteredAndSortedData } from '@/features/Projects/hooks/useFilteredAndSortedData';
 import { useAllDeletePrompts } from '@/features/Projects/hooks/useDeletePrompts';
-import { useModals } from '@/features/Projects/hooks/useModals';
-import { useDeletionHandlers } from '@/features/Projects/hooks/useDeletionHandlers';
 import ProjectsTab from '@/features/Projects/components/Tabs/ProjectsTab/ProjectsTab';
 import QueriesTab from '@/features/Projects/components/Tabs/QueriesTab/QueriesTab';
 import TrashTab from '@/features/Projects/components/Tabs/TrashTab/TrashTab';
-import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
 import SelectedItemsActionBar from '@/features/Projects/components/SelectedItemsActionBar/SelectedItemsActionBar';
+import { useProjectModals } from '@/features/Projects/hooks/useProjectModals';
 
 export const ProjectListInner = () => {
   const data = useProjectListData();
   const projectListState = useProjectDetailSortSearchSelectState();
   const deletePrompts = useAllDeletePrompts();
-  const modals = useModals({
-    deleteProjects: false,
-    deleteQueries: false,
-    permanentDeleteProject: false,
-    permanentDeleteQuery: false,
-    permanentDeleteSelected: false,
-    emptyTrash: false,
-    shareQuery: false
-  });
+  
+  // Global modals context
+  const {
+    openDeleteProjectsModal,
+    openDeleteQueriesModal,
+    openPermanentDeleteProjectModal,
+    openPermanentDeleteQueryModal,
+    openPermanentDeleteSelectedModal,
+    openEmptyTrashModal,
+    openEditQueryModal,
+    openShareQueryModal
+  } = useProjectModals();
   
   const [activeTab, setActiveTab] = useState<string>('Projects');
 
@@ -50,10 +51,20 @@ export const ProjectListInner = () => {
 
   const handleSetIsEditingQuery = (isEditing: boolean, editingItem?: QueryEditingItem) => {
     setQueryEditState({isEditing: isEditing, editingItem: editingItem || undefined});
-    if(isEditing && editingItem?.type === 'query')
+    if(isEditing && editingItem?.type === 'query') {
       setIsEditQueryModalOpen(true);
-    else 
+      openEditQueryModal({
+        currentEditingQueryItem: editingItem,
+        handleClose: () => setIsEditQueryModalOpen(false),
+        isOpen: true,
+        loading: data.loading.queriesLoading,
+        mode: 'edit',
+        projects: data.formatted.active,
+        queries: data.raw.queries
+      });
+    } else {
       setIsEditQueryModalOpen(false);
+    }
   };
 
   const projectEditHandlers = useEditProjectHandlers(handleSetIsEditingProject, data.formatted.active);
@@ -69,18 +80,37 @@ export const ProjectListInner = () => {
     searchTerm: projectListState.searchTerm
   });
 
-  const deletionHandlers = useDeletionHandlers({
-    projectEditHandlers,
-    queryEditHandlers,
-    modals,
-    selections: { 
-      selectedProjects: projectListState.selectedProjects, 
-      selectedQueries: projectListState.selectedQueries,
-      setSelectedProjects: projectListState.setSelectedProjects,
-      setSelectedQueries: projectListState.setSelectedQueries
-    },
-    prompts: deletePrompts
-  });
+  // Simplified deletion handlers - just trigger modals with data
+  const handleInitiateDeleteSingleProject = (project: Project) => {
+    openDeleteProjectsModal([project]);
+  };
+
+  const handleInitiateDelete = () => {
+    if (projectListState.selectedProjects.length > 0) {
+      openDeleteProjectsModal(projectListState.selectedProjects);
+    }
+    if (projectListState.selectedQueries.length > 0) {
+      openDeleteQueriesModal(projectListState.selectedQueries);
+    }
+  };
+
+  const handleInitiatePermanentDeleteProject = (project: Project) => {
+    openPermanentDeleteProjectModal(project);
+  };
+
+  const handleInitiatePermanentDeleteQuery = (query: UserQueryObject) => {
+    openPermanentDeleteQueryModal(query);
+  };
+
+  const handleInitiatePermanentDeleteSelected = () => {
+    if (projectListState.selectedProjects.length > 0 || projectListState.selectedQueries.length > 0) {
+      openPermanentDeleteSelectedModal(projectListState.selectedProjects, projectListState.selectedQueries);
+    }
+  };
+
+  const handleInitiateEmptyTrash = () => {
+    openEmptyTrashModal();
+  };
 
   const handleTabSelection = (tabName: string) => {
     if(activeTab != tabName) {
@@ -111,7 +141,7 @@ export const ProjectListInner = () => {
 
   const handleShareQuery = (query: UserQueryObject) => {
     setSharedQuery(query);
-    modals.openModal('shareQuery');
+    openShareQueryModal(query);
   };
 
   // reset active tab back to projects when editing is finished
@@ -123,31 +153,6 @@ export const ProjectListInner = () => {
 
   return (
     <div className={`${styles.projectListContainer} ${projectEditState.isEditing ? styles.isEditing : ''}`}>
-      <ProjectModals 
-        modals={modals.modals}
-        selectedProjects={projectListState.selectedProjects}
-        selectedQueries={projectListState.selectedQueries}
-        onCloseModal={(modalType: string) => modals.closeModal(modalType as unknown as keyof typeof modals.modals)}
-        setSelectedProjects={projectListState.setSelectedProjects}
-        deletionHandlers={deletionHandlers}
-        deletePrompts={deletePrompts}
-        editQueryModal={{
-          currentEditingQueryItem: queryEditState.editingItem?.type === 'query' ? queryEditState.editingItem : undefined,
-          handleClose: () => setIsEditQueryModalOpen(false),
-          isOpen: isEditQueryModalOpen,
-          loading: data.loading.queriesLoading,
-          mode: 'edit',
-          projects: data.formatted.active,
-          queries: data.raw.queries
-        }}  
-        shareQueryModal={{
-          onClose: () => {
-            setSharedQuery(null);
-            modals.closeModal('shareQuery');
-          },
-          sharedQuery: sharedQuery
-        }}
-      />
       <div className="container">
         <div className={styles.projectList}>
           <ProjectHeader
@@ -164,7 +169,7 @@ export const ProjectListInner = () => {
             onCancelEdit={projectEditHandlers.handleCancelEdit}
             selectedQueries={projectListState.selectedQueries}
             onCreateNewClick={onCreateNewProjectClick}
-            onDeleteProject={deletionHandlers.handleInitiateDeleteSingleProject}
+            onDeleteProject={handleInitiateDeleteSingleProject}
             project={projectEditState.editingItem?.type === 'project' ? data.formatted.active.find(p => projectEditState.editingItem && p.id === parseInt(projectEditState.editingItem.id)): undefined}
           />
           {hideAllTabs ? (
@@ -196,7 +201,7 @@ export const ProjectListInner = () => {
                       onCreateNewProjectClick={onCreateNewProjectClick}
                       onSetActiveTab={setActiveTab}
                       onEditProject={projectEditHandlers.handleEditProject}
-                      onDeleteProject={deletionHandlers.handleInitiatePermanentDeleteProject}
+                      onDeleteProject={handleInitiatePermanentDeleteProject}
                       styles={styles}
                     />
                   </Tab>
@@ -210,7 +215,7 @@ export const ProjectListInner = () => {
                       queriesError={data.errors.queriesError}
                       queriesLoading={data.loading.queriesLoading}
                       onEditQuery={queryEditHandlers.handleEditQuery}
-                      onDeleteQuery={deletionHandlers.handleInitiatePermanentDeleteQuery}
+                      onDeleteQuery={handleInitiatePermanentDeleteQuery}
                       onShareQuery={handleShareQuery}
                       styles={styles}
                     />
@@ -227,8 +232,8 @@ export const ProjectListInner = () => {
                       queriesLoading={data.loading.queriesLoading}
                       queries={data.raw.queries}
                       rawProjects={data.raw.projects}
-                      onDeleteProject={deletionHandlers.handleInitiatePermanentDeleteProject}
-                      onDeleteQuery={deletionHandlers.handleInitiatePermanentDeleteQuery}
+                      onDeleteProject={handleInitiatePermanentDeleteProject}
+                      onDeleteQuery={handleInitiatePermanentDeleteQuery}
                       styles={styles}
                       location="trash"
                     />
@@ -241,9 +246,9 @@ export const ProjectListInner = () => {
                 selectedQueries={projectListState.selectedQueries}
                 activeTab={activeTab}
                 projectEditingState={projectEditState}
-                onDeleteSelected={deletionHandlers.handleInitiateDelete}
-                onPermanentDeleteSelected={deletionHandlers.handleInitiatePermanentDeleteSelected}
-                onEmptyTrash={deletionHandlers.handleInitiateEmptyTrash}
+                onDeleteSelected={handleInitiateDelete}
+                onPermanentDeleteSelected={handleInitiatePermanentDeleteSelected}
+                onEmptyTrash={handleInitiateEmptyTrash}
                 onAddToProject={() => {console.log('TODO: add to project')}} // TODO: implement
               />
             </div>

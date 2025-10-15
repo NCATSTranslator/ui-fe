@@ -84,10 +84,8 @@ export const useEditProjectHandlers = (
   const restoreProjectsMutation = useRestoreProjects();
 
   const handleEditProject = (project: Project) => {
-    if(!handleSetIsEditing) {
-      console.warn("handleSetIsEditing is undefined");
+    if(!handleSetIsEditing)
       return;
-    }
     handleSetIsEditing(true, {
       id: project.id.toString(),
       name: project.data.title,

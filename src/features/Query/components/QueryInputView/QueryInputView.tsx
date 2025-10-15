@@ -5,7 +5,6 @@ import { AutocompleteItem, ExampleQueries, QueryItem } from '@/features/Query/ty
 import { QuerySelect } from '@/features/Query/components/QuerySelect/QuerySelect';
 import ExampleQueryList from '@/features/Query/components/ExampleQueryList/ExampleQueryList';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
-import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 import { QueryTypeIcon } from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
 import { User } from '@/features/UserAuth/types/user';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +23,8 @@ interface QueryInputViewProps {
   onQueryItemChange: (value: string) => void;
   onItemSelection: (item: AutocompleteItem) => void;
   onSubmission: (item: QueryItem | null) => void;
-  onClearAutocomplete: () => void;
+  autocompleteVisibility: boolean;
+  setAutocompleteVisibility: (state: boolean) => void;
   onClearQueryItem: () => void;
 }
 
@@ -42,7 +42,8 @@ const QueryInputView: FC<QueryInputViewProps> = ({
   onQueryItemChange,
   onItemSelection,
   onSubmission,
-  onClearAutocomplete,
+  autocompleteVisibility,
+  setAutocompleteVisibility,
   onClearQueryItem
 }) => {
   const navigate = useNavigate();
@@ -62,10 +63,7 @@ const QueryInputView: FC<QueryInputViewProps> = ({
     <>
       <p className='blurb'>Select a question and enter a search term to find paths between biomedical entities</p>
       {isError && <p className={styles.error}>{errorText}</p>}
-      <OutsideClickHandler
-        onOutsideClick={onClearAutocomplete}
-        className={styles.queryBarContainer}
-      >
+      <div className={styles.queryBarContainer}>
         <span className={styles.icon}>
           <QueryTypeIcon type={queryItem.type.targetType || ''} />
         </span>
@@ -88,7 +86,7 @@ const QueryInputView: FC<QueryInputViewProps> = ({
             </option>
           ))}
         </QuerySelect>
-        
+
         <QueryBar
           handleSubmission={onSubmission}
           handleChange={onQueryItemChange}
@@ -103,10 +101,11 @@ const QueryInputView: FC<QueryInputViewProps> = ({
             user === null ? "Log In to Enter a Search Term" : undefined
           }
           isLoading={isLoading}
-          onClearAutocomplete={onClearAutocomplete}
+          autocompleteVisibility={autocompleteVisibility}
+          setAutocompleteVisibility={setAutocompleteVisibility}
           onClearQueryItem={onClearQueryItem}
         />
-      </OutsideClickHandler>
+      </div>
 
       {/* Example queries based on type */}
       {queryItem.type.id === 0 && exampleQueries.exampleDiseases && (
@@ -141,6 +140,6 @@ const QueryInputView: FC<QueryInputViewProps> = ({
       )}
     </>
   );
-}; 
+};
 
 export default QueryInputView;

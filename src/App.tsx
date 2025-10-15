@@ -16,6 +16,7 @@ import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import SidebarQueryCard from '@/features/Sidebar/components/SidebarQueryCard/SidebarQueryCard';
 import { createPortal } from 'react-dom';
 import Header from '@/features/Page/components/Header/Header';
+import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -79,48 +80,50 @@ const App = ({children}: {children?: ReactNode}) => {
   return (
     <SidebarProvider>
       <QueryClientProvider client={queryClient}>
-        <div className={`app ${pathnameClass} ${additionalClasses}`}>
-          <AppToastContainer />
-          <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />
-          <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <div className='layout'>
-              <Sidebar />
-              <main className='content scrollable'>
-                <Header />
-                {
-                  children && children
-                }
-                {
-                  (width && width < minScreenWidth) && <SmallScreenOverlay /> 
-                }
-                <Outlet context={setFeedbackModalOpen}/>
-                <Footer>
-                  <nav>
-                    <a
-                      href="https://ncats.nih.gov/translator/about"
-                      rel="noreferrer"
-                      target="_blank"
-                    >About Translator</a>
-                    <NavLink to={`/terms-of-use`}
-                      className={({isActive}) => {return (isActive) ? 'active' : '' }}
-                    >Terms of Use</NavLink>
-                    <a
-                      href="https://ncats.nih.gov/privacy"
-                      rel="noreferrer"
-                      target="_blank"
-                    >Privacy Policy</a>
-                  </nav>
-                </Footer>
-              </main>
-            </div>
-            {createPortal(
-              <DragOverlay>
-                {activeQuery && <SidebarQueryCard query={activeQuery} />}
-              </DragOverlay>,
-              document.body,
-            )}
-          </DndContext>
-        </div>
+        <ProjectModalsProvider>
+          <div className={`app ${pathnameClass} ${additionalClasses}`}>
+            <AppToastContainer />
+            <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />
+            <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+              <div className='layout'>
+                <Sidebar />
+                <main className='content scrollable'>
+                  <Header />
+                  {
+                    children && children
+                  }
+                  {
+                    (width && width < minScreenWidth) && <SmallScreenOverlay /> 
+                  }
+                  <Outlet context={setFeedbackModalOpen}/>
+                  <Footer>
+                    <nav>
+                      <a
+                        href="https://ncats.nih.gov/translator/about"
+                        rel="noreferrer"
+                        target="_blank"
+                      >About Translator</a>
+                      <NavLink to={`/terms-of-use`}
+                        className={({isActive}) => {return (isActive) ? 'active' : '' }}
+                      >Terms of Use</NavLink>
+                      <a
+                        href="https://ncats.nih.gov/privacy"
+                        rel="noreferrer"
+                        target="_blank"
+                      >Privacy Policy</a>
+                    </nav>
+                  </Footer>
+                </main>
+              </div>
+              {createPortal(
+                <DragOverlay>
+                  {activeQuery && <SidebarQueryCard query={activeQuery} />}
+                </DragOverlay>,
+                document.body,
+              )}
+            </DndContext>
+          </div>
+        </ProjectModalsProvider>
       </QueryClientProvider>
     </SidebarProvider>
   );

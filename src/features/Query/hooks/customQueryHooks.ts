@@ -109,7 +109,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
           nodeID,
           item.type.id,
           '0',
-          data.data, 
+          data.data,
           config?.include_hashed_parameters
         );
 
@@ -207,6 +207,7 @@ export const useAutocomplete = (
   excludePrefixes?: RefObject<string[] | null>
 ) => {
   const [autocompleteItems, setAutoCompleteItems] = useState<AutocompleteItem[] | null>(null);
+  const [autocompleteVisibility, setAutocompleteVisibility] = useState<boolean>(true);
   const [loadingAutocomplete, setLoadingAutocomplete] = useState<boolean>(false);
 
   const delayedQuery = useMemo(
@@ -235,7 +236,9 @@ export const useAutocomplete = (
   return {
     autocompleteItems,
     loadingAutocomplete,
+    autocompleteVisibility,
     delayedQuery,
+    setAutocompleteVisibility,
     clearAutocompleteItems
   };
 };
