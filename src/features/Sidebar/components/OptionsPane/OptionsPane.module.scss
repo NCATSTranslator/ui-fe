@@ -1,0 +1,42 @@
+@use "@/assets/styles/variables" as *;
+
+.optionsPane {
+  position: absolute;
+  top: calc(100% + $xxxs);
+  right: -1px;
+  background-color: $white;
+  border-radius: $defaultBorderRadius;
+  opacity: 0;
+  pointer-events: none;
+  transition: $defaultAnim;
+  z-index: 10;
+  box-shadow: $dropShadow;
+  &.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  button {
+    background-color: transparent;
+    border: none;
+    padding: 12px;
+    color: $black;
+    font-size: $bodyTwoSize;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    gap: $xxs;
+    svg {
+      path {
+        fill: $darkGray;
+      }
+    }
+    &:hover {
+      background-color: $palePurple;
+      svg {
+        path {
+          fill: $purpleOne;
+        }
+      }
+    }
+  }
+}

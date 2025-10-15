@@ -23,12 +23,6 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
   const leftIcon = <StatusIndicator status={query.status} />;
   
   const bottomLeft = (
-    <span className={styles.type}>
-      {query.data.query.type === 'pathfinder' ? 'Pathfinder Query' : 'Smart Query'}
-    </span>
-  );
-  
-  const bottomRight = (
     <>
       <span className={styles.count}>
         <BookmarkIcon />
@@ -39,6 +33,13 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
         {query.data.note_count}
       </span>
     </>
+  );
+  
+  const bottomRight = (
+      <span className={`${styles.date} ${styles.count}`}>
+        {/* TODO: Add date */}
+        Date
+      </span>
   );
 
   const draggableData: DraggableData = {
