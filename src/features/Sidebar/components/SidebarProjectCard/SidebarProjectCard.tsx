@@ -8,7 +8,7 @@ import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module
 import Button from "@/features/Core/components/Button/Button";
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
-import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
+import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
 
 interface SidebarProjectCardProps {
   project: Project;
@@ -18,7 +18,7 @@ interface SidebarProjectCardProps {
 const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }) => {
   const queryCount = project.data.pks.length;
   const [isRenaming, setIsRenaming] = useState(false);
-  const { handleUpdateProject } = useEditProjectHandlers(undefined, [project]);
+  const { openDeleteProjectModal } = useProjectModals();
   
   const leftIcon = <FolderIcon />;
   
@@ -44,7 +44,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }
   const options = (
     <div className={styles.options}>
       <Button handleClick={()=>{setIsRenaming(true)}} iconLeft={<EditIcon />}>Rename</Button>
-      <Button handleClick={()=>{console.log('delete')}} iconLeft={<TrashIcon />}>Delete</Button>
+      <Button handleClick={() => openDeleteProjectModal(project)} iconLeft={<TrashIcon />}>Delete</Button>
     </div>
   );
 
