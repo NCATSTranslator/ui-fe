@@ -86,7 +86,7 @@ const FAQPage: FC<FAQPageProps> = ({ title, children }) => {
     },
     {
       title: 'Send Feedback', 
-      slug:'send-feedback'
+      slug:'send-feedback-help'
     },
     {
       title: 'Security and Privacy', 
