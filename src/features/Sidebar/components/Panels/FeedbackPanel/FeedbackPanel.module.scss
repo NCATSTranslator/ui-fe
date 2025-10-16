@@ -1,0 +1,10 @@
+@use "@/assets/styles/variables" as *;
+
+.helpText {
+  font-size: $captionSize;
+  color: $darkGray;
+}
+
+.helpText, .helpText a {
+  font-size: $captionSize;
+}

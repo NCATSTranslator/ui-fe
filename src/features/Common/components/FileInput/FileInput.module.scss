@@ -4,7 +4,7 @@
   .container {
     border: 1px solid $midPurpleTwo;
     border-radius: $defaultBorderRadius;
-    padding: $l $m;
+    padding: $m;
     background-color: $palePurple;
     .top {
       display: flex;
@@ -19,8 +19,7 @@
     left: -99999rem;
   }
   .buttonLabel {
-    margin: 0 0 0 $xs;
-    padding: 4px 8px;
+    margin: 0 0 $xs;
     font-size: $captionSize;
   }
   .file {

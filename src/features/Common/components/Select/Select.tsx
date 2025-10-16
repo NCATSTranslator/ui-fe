@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, ReactNode, ReactElement, MouseEvent } from "react";
 import AnimateHeight from "react-animate-height";
 import styles from './Select.module.scss';
+import InputLabel from "@/features/Core/components/InputLabel/InputLabel";
 
 // OptionProps for individual <option>
 export interface OptionProps<T extends string | number> {
@@ -82,10 +83,10 @@ const Select = <T extends string | number>({
     <label className={`select ${styles.select} ${size} ${animateClass} ${className}`} ref={wrapperRef}>
       {
         (label || subtitle) && (
-          <span className="input-label-container">
-            {label && <span className="input-label">{label}</span>}
-            {subtitle && <span className="input-subtitle">{subtitle}</span>}
-          </span>
+          <InputLabel
+            label={label}
+            subtitle={subtitle}
+          />
         )
       }
       <div className={`${styles.selectContainer} ${openClass}`}>

@@ -13,6 +13,7 @@ import ProjectsPanel from "@/features/Sidebar/components/Panels/ProjectsPanel/Pr
 import QueriesPanel from "@/features/Sidebar/components/Panels/QueriesPanel/QueriesPanel";
 import SettingsPanel from "@/features/Sidebar/components/Panels/SettingsPanel/SettingsPanel";
 import HelpPanel from "@/features/Sidebar/components/Panels/HelpPanel/HelpPanel";
+import FeedbackPanel from "@/features/Sidebar/components/Panels/FeedbackPanel/FeedbackPanel";
 
 const NewProjectButton = () => {
   return <Button iconLeft={<FolderPlus />} iconOnly />;
@@ -33,7 +34,7 @@ export const topItems: SidebarItem[] = [
 ];
 
 export const bottomItems: SidebarItem[] = [
-  { id: 'feedback', label: 'Send Feedback', type: 'link', to: '/send-feedback', icon: <Feedback />, tooltipText: 'Send Feedback' },
+  { id: 'feedback', label: 'Send Feedback', type: 'panel', icon: <Feedback />, tooltipText: 'Send Feedback', panelComponent: <FeedbackPanel /> },
   { id: 'help', label: 'Help', type: 'panel', icon: <Question />, tooltipText: 'Help', panelComponent: <HelpPanel />, buttonComponent: <HelpButton /> },
   { id: 'settings', label: 'Settings', type: 'panel', icon: <UserIcon />, tooltipText: 'Settings', panelComponent: <SettingsPanel /> },
 ];
