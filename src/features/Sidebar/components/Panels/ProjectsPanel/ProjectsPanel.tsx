@@ -8,6 +8,8 @@ import SidebarProjectCard from "@/features/Sidebar/components/SidebarProjectCard
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import { useProjectListData } from "@/features/Projects/hooks/useProjectListData";
 import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
+import Button from "@/features/Core/components/Button/Button";
+import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 
 const ProjectsPanel = () => {
   const user = useSelector(currentUser);
@@ -35,6 +37,15 @@ const ProjectsPanel = () => {
             </div>
           ) : (
             <LoadingWrapper loading={projectsLoading} contentClassName={styles.projectsList}>
+              <Button 
+                iconLeft={<Plus />}
+                href="/projects/new"
+                link
+                title="Create New Project"
+                className={styles.createNewProjectButton}
+              >
+                Create New Project
+              </Button>
               {filteredProjects.map((project) => (
                 <SidebarProjectCard key={project.id} project={project} searchTerm={searchTerm} />
               ))}

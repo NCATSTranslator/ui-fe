@@ -22,9 +22,11 @@ interface ButtonProps {
   testId?: string;
   className?: string;
   dataTooltipId?: string;
+  title?: string;
 }
 
 const Button: FC<ButtonProps> = ({
+  title,
   ariaLabel,
   variant,
   handleClick,
@@ -58,6 +60,7 @@ const Button: FC<ButtonProps> = ({
   )
 
   const commonProps = {
+    title: title,
     className: buttonStyle,
     onClick: handleClick,
     'data-testid': testId,
@@ -72,12 +75,12 @@ const Button: FC<ButtonProps> = ({
       ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
     };
     return link 
-    ? <Link {...linkProps} to={href}>
+    ? <Link {...linkProps} to={href} >
         {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
         {iconOnly ? children : <span className={styles.label}>{children}</span>}
         {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
       </Link> 
-    : <a {...linkProps} href={href}>
+    : <a {...linkProps} href={href} >
         {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
         {iconOnly ? children : <span className={styles.label}>{children}</span>}
         {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
