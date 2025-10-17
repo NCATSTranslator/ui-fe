@@ -47,10 +47,10 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }
   );
 
   const options = (
-    <div className={styles.options}>
-      <Button handleClick={()=>{setIsRenaming(true)}} iconLeft={<EditIcon />}>Rename</Button>
+    <>
+      <Button handleClick={()=> setIsRenaming(true)} iconLeft={<EditIcon />}>Rename</Button>
       <Button handleClick={() => openDeleteProjectModal(project)} iconLeft={<TrashIcon />}>Delete</Button>
-    </div>
+    </>
   );
 
   const handleRename = (value: string) => {

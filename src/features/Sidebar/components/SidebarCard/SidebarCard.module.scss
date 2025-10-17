@@ -44,8 +44,8 @@
     transition: $defaultAnim;
     cursor: pointer;
     position: absolute;
-    right: $xs;
-    top: $xs;
+    right: 0;
+    top: $xxs;
     background-color: transparent;
     border: none;
     padding: 0;
@@ -59,6 +59,11 @@
   &.isRenaming {
     .optionsButton {
       display: none;
+    }
+  }
+  .folderPlusIcon {
+    path {
+      stroke: $white;
     }
   }
   .leftSection {

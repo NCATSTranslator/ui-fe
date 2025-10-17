@@ -9,6 +9,11 @@ import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { DraggableCard } from "@/features/DragAndDrop/components/DraggableCard/DraggableCard";
 import { DraggableData } from "@/features/DragAndDrop/types/types";
+import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
+import Button from "@/features/Core/components/Button/Button";
+import FolderPlusIcon from '@/assets/icons/projects/folderplus.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
+import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 
 interface SidebarQueryCardProps {
   query: UserQueryObject;
@@ -17,6 +22,7 @@ interface SidebarQueryCardProps {
 
 const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
   const { title } = useGetQueryCardTitle(query);  
+  const { openDeleteQueriesModal } = useProjectModals();
 
   const queryURL = getQueryLink(query);
   
@@ -42,6 +48,14 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
       </span>
   );
 
+  const options = (
+    <>
+      <Button handleClick={()=>{}} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />}>Add to Project</Button>
+      <Button handleClick={()=>{}} iconLeft={<ShareIcon />}>Share Query</Button>
+      <Button handleClick={() => openDeleteQueriesModal([query])} iconLeft={<TrashIcon />}>Delete Query</Button>
+    </>
+  );
+
   const draggableData: DraggableData = {
     type: 'query',
     data: query,
@@ -58,6 +72,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
         bottomLeft={bottomLeft}
         bottomRight={bottomRight}
         data-testid="sidebar-query-card"
+        options={options}
       />
     </DraggableCard>
   );
