@@ -14,6 +14,7 @@ import Button from "@/features/Core/components/Button/Button";
 import FolderPlusIcon from '@/assets/icons/projects/folderplus.svg?react';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
+import { getTimeRelativeDate } from "@/features/Common/utils/utilities";
 
 interface SidebarQueryCardProps {
   query: UserQueryObject;
@@ -25,6 +26,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
   const { openDeleteQueriesModal } = useProjectModals();
 
   const queryURL = getQueryLink(query);
+  const queryTime = getTimeRelativeDate(new Date(query.data.time_updated));
   
   const leftIcon = <StatusIndicator status={query.status} />;
   
@@ -43,8 +45,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
   
   const bottomRight = (
       <span className={`${styles.date} ${styles.count}`}>
-        {/* TODO: Add date */}
-        Date
+        {queryTime}
       </span>
   );
 

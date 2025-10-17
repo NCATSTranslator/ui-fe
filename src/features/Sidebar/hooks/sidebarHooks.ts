@@ -92,7 +92,10 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
 export const useFilteredQueries = (queries: UserQueryObject[], includeDeleted: boolean = false, searchTerm?: string) => {
   const { queries: queriesWithTitles } = useGetQueriesUpdatedTitles(queries);
 
-  return useMemo(() => queriesWithTitles.filter((query) => {
+  return useMemo(() => queriesWithTitles.sort((a, b) => {
+    // sort by time updated descending
+    return new Date(b.data.time_updated).getTime() - new Date(a.data.time_updated).getTime();
+  }).filter((query) => {
     if(includeDeleted)
       return query.data.title?.toLowerCase().includes(searchTerm?.toLowerCase() ?? '');
     else
