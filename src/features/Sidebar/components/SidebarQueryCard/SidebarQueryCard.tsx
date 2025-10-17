@@ -23,7 +23,7 @@ interface SidebarQueryCardProps {
 
 const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
   const { title } = useGetQueryCardTitle(query);  
-  const { openDeleteQueriesModal } = useProjectModals();
+  const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
 
   const queryURL = getQueryLink(query);
   const queryTime = getTimeRelativeDate(new Date(query.data.time_updated));
@@ -52,7 +52,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
   const options = (
     <>
       <Button handleClick={()=>{}} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />}>Add to Project</Button>
-      <Button handleClick={()=>{}} iconLeft={<ShareIcon />}>Share Query</Button>
+      <Button handleClick={() => openShareQueryModal(query)} iconLeft={<ShareIcon />}>Share Query</Button>
       <Button handleClick={() => openDeleteQueriesModal([query])} iconLeft={<TrashIcon />}>Delete Query</Button>
     </>
   );
