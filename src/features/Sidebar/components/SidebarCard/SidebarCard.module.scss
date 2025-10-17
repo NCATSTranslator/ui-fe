@@ -23,6 +23,9 @@
       fill: $black;
       transition: $defaultAnim;
     }
+    &.unassigned {
+      border: none;
+    }
   }
   &:hover {
     background-color: $lightPurpleTwo;

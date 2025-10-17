@@ -11,6 +11,7 @@ import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
 import { isUnassignedProject, useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
+import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface SidebarProjectCardProps {
   project: Project;
@@ -23,7 +24,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }
   const { openDeleteProjectModal } = useProjectModals();
   const { handleUpdateProject } = useEditProjectHandlers(undefined, [project]);
   const isUnassigned = isUnassignedProject(project);
-  
+  const className = joinClasses(styles.projectCard, isUnassigned && styles.unassigned);
   const leftIcon = <FolderIcon />;
   
   const bottomLeft = (
@@ -66,7 +67,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }
         bottomLeft={bottomLeft}
         bottomRight={bottomRight}
         data-testid="sidebar-project-card"
-        className={styles.projectCard}
+        className={className}
         options={isUnassigned ? undefined : options}
         isRenaming={isRenaming}
         setIsRenaming={setIsRenaming}
