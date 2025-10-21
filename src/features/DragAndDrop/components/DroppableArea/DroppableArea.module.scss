@@ -4,7 +4,7 @@
   position: relative;
   transition: all 0.2s ease;
   overflow: hidden;
-  border-radius: $largeBorderRadius;
+  border-radius: $defaultBorderRadius;
   &:before, &:after {
     content: '';
     position: absolute;
@@ -26,7 +26,7 @@
     right: 0;
     bottom: 0;
     left: 0;
-    border-radius: $largeBorderRadius;
+    border-radius: $defaultBorderRadius;
     outline: 2px dashed $lightBlueOne;
     outline-offset: -2px;
     z-index: 20;
@@ -61,6 +61,7 @@
   z-index: 110;
   opacity: 0;
   transition: $defaultAnim;
+  text-align: center;
   &.show {
     opacity: 1;
   }

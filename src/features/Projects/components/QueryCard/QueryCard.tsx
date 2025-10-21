@@ -3,6 +3,7 @@ import { DataCardLocation, UserQueryObject } from '@/features/Projects/types/pro
 import DataCard from '@/features/Projects/components/DataCard/DataCard';
 import { useEditQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
 import { useGetQueryCardTitle } from '@/features/Projects/hooks/customHooks';
+import { DraggableCard } from '@/features/DragAndDrop/components/DraggableCard/DraggableCard';
 
 interface QueryCardProps {
   inUnassignedProject?: boolean;
@@ -44,28 +45,30 @@ const QueryCard = ({
   }
 
   return (
-    <DataCard
-      location={location}
-      inUnassignedProject={inUnassignedProject}
-      isEditing={isEditing}
-      item={query}
-      type={query.data.query.type === 'pathfinder' ? 'pathfinderQuery' : 'smartQuery'}
-      searchTerm={searchTerm}
-      selectedItems={selectedQueries}
-      setSelectedItems={setSelectedQueries}
-      status={query.status}
-      onDelete={onDelete}
-      onEdit={onEdit}
-      onRestore={onRestore}
-      getItemId={(item: UserQueryObject) => item.data.qid}
-      getItemTitle={() => queryCardTitle}
-      getItemTimeCreated={(item: UserQueryObject) => item.data.time_created.toString()}
-      getItemTimeUpdated={(item: UserQueryObject) => item.data.time_updated.toString()}
-      getItemBookmarkCount={(item: UserQueryObject) => item.data.bookmark_ids.length}
-      getItemNoteCount={(item: UserQueryObject) => item.data.note_count}
-      getItemStatus={(item: UserQueryObject) => item.status}
-      onShare={handleShare}
-    />
+    <DraggableCard id={query.data.qid} data={{ type: 'query', data: query }}>
+      <DataCard
+        location={location}
+        inUnassignedProject={inUnassignedProject}
+        isEditing={isEditing}
+        item={query}
+        type={query.data.query.type === 'pathfinder' ? 'pathfinderQuery' : 'smartQuery'}
+        searchTerm={searchTerm}
+        selectedItems={selectedQueries}
+        setSelectedItems={setSelectedQueries}
+        status={query.status}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        onRestore={onRestore}
+        getItemId={(item: UserQueryObject) => item.data.qid}
+        getItemTitle={() => queryCardTitle}
+        getItemTimeCreated={(item: UserQueryObject) => item.data.time_created.toString()}
+        getItemTimeUpdated={(item: UserQueryObject) => item.data.time_updated.toString()}
+        getItemBookmarkCount={(item: UserQueryObject) => item.data.bookmark_ids.length}
+        getItemNoteCount={(item: UserQueryObject) => item.data.note_count}
+        getItemStatus={(item: UserQueryObject) => item.status}
+        onShare={handleShare}
+      />
+    </DraggableCard>
   );
 };
 
