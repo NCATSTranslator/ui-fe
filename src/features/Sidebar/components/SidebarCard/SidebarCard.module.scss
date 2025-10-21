@@ -74,6 +74,10 @@
   .content {
     min-width: 0;
   }
+  .title {
+    display: flex;
+    min-height: 20px;
+  }
   .title, .title span, .title mark {
     margin-bottom: 0;
     font-size: $bodyTwoSize;

@@ -14,13 +14,16 @@ import OutsideClickHandler from "@/features/Common/components/OutsideClickHandle
 import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface SidebarProjectCardProps {
+  blankProjectTitle: string;
+  onRename?: (project: Project) => void;
   project: Project;
   searchTerm?: string;
+  startRenaming?: boolean;
 }
 
-const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }) => {
+const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm, startRenaming = false, onRename, blankProjectTitle }) => {
   const queryCount = project.data.pks.length;
-  const [isRenaming, setIsRenaming] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(startRenaming);
   const { openDeleteProjectModal } = useProjectModals();
   const { handleUpdateProject } = useEditProjectHandlers(undefined, [project]);
   const isUnassigned = isUnassignedProject(project);
@@ -54,11 +57,22 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm }
   );
 
   const handleRename = (value: string) => {
-    handleUpdateProject(project.id, value);
+    const newTitle = (value.length > 0) ? value.trim() : blankProjectTitle;
+    handleUpdateProject(project.id, newTitle);
+    onRename?.(project);
   }
 
+  const handleOutsideClick = () => {
+    if(isRenaming) {
+      // if the project title is empty, call handleRename with an empty string to set the default title
+      if(project.data.title.length === 0)
+        handleRename('');
+      setIsRenaming(false);
+    }
+  };
+
   return (
-    <OutsideClickHandler onOutsideClick={() => { if(isRenaming) setIsRenaming(false) } }>
+    <OutsideClickHandler onOutsideClick={handleOutsideClick}>
       <SidebarCard
         leftIcon={leftIcon}
         title={project.data.title}
