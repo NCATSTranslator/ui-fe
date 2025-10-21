@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
@@ -15,6 +15,7 @@ import FolderPlusIcon from '@/assets/icons/projects/folderplus.svg?react';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { getTimeRelativeDate } from "@/features/Common/utils/utilities";
+import { useLocation } from "react-router-dom";
 
 interface SidebarQueryCardProps {
   query: UserQueryObject;
@@ -24,6 +25,11 @@ interface SidebarQueryCardProps {
 const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
   const { title } = useGetQueryCardTitle(query);  
   const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
+
+  const currentPage = useLocation().pathname.replace('/', '');
+  const disableDragging = useMemo(() => {
+    return query.data.deleted || !currentPage.includes('projects');
+  }, [query.data.deleted, currentPage]);
 
   const queryURL = getQueryLink(query);
   const queryTime = getTimeRelativeDate(new Date(query.data.time_updated));
@@ -61,9 +67,8 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
     type: 'query',
     data: query,
   };
-
   return (
-    <DraggableCard id={query.data.qid} data={draggableData}>
+    <DraggableCard id={query.data.qid} data={draggableData} disableDraggingOnly={disableDragging}>
       <SidebarCard
         leftIcon={leftIcon}
         title={title}
