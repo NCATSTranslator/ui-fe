@@ -76,7 +76,7 @@
   }
   .title {
     display: flex;
-    min-height: 20px;
+    min-height: $m;
   }
   .title, .title span, .title mark {
     margin-bottom: 0;

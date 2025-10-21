@@ -10,6 +10,7 @@ import { useProjectListData } from "@/features/Projects/hooks/useProjectListData
 import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import Button from "@/features/Core/components/Button/Button";
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
+import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useCreateProject } from "@/features/Projects/hooks/customHooks";
 import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
 import { getBlankProjectTitle } from "@/features/Projects/utils/utilities";
@@ -53,7 +54,13 @@ const ProjectsPanel = () => {
   return (
     <div className={styles.projectsPanel}>
       <div className={styles.top}>
-        <TextInput iconLeft={<SearchIcon />} handleChange={handleSearch} placeholder="Search Projects" />
+        <TextInput
+          iconLeft={<SearchIcon />}
+          iconRight={searchTerm.length > 0 && <CloseIcon />}
+          iconRightClickToReset
+          handleChange={handleSearch}
+          placeholder="Search Projects"
+        />
       </div>
       <div className={styles.list}>
         {
