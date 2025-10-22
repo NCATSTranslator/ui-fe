@@ -26,7 +26,13 @@ interface ProjectCardProps {
   startRenaming?: boolean;
 }
 
-const ProjectCard: FC<ProjectCardProps> = ({ project, searchTerm, startRenaming = false, onRename, blankProjectTitle }) => {
+const ProjectCard: FC<ProjectCardProps> = ({
+  project,
+  searchTerm,
+  startRenaming = false,
+  onRename,
+  blankProjectTitle
+}) => {
   const queryCount = project.data.pks.length;
   const [isRenaming, setIsRenaming] = useState(startRenaming);
   const { openDeleteProjectModal } = useProjectModals();

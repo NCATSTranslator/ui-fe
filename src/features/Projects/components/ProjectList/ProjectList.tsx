@@ -58,7 +58,9 @@ const ProjectList = () => {
 
 
   const projectsTabHeading = useMemo(() => {
-    return `${filteredProjects.length} Project${filteredProjects.length === 1 ? '' : 's'}`;
+    // subtract 1 to account for the unassigned project
+    const projectCount = filteredProjects.length - 1;
+    return `${projectCount} Project${projectCount === 1 ? '' : 's'}`;
   }, [filteredProjects]);
 
   return (
