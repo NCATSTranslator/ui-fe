@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, KeyboardEvent, ReactNode, RefObject, useRef } from 'react';
+import { ChangeEvent, FocusEvent, FC, KeyboardEvent, ReactNode, RefObject, useRef } from 'react';
 import styles from "./TextInput.module.scss";
 import { joinClasses } from '@/features/Common/utils/utilities';
 import InputLabel from '@/features/Core/components/InputLabel/InputLabel';
@@ -14,6 +14,7 @@ interface TextInputProps {
   errorBottom?: boolean;
   errorText?: string;
   handleChange: (value: string) => void;
+  handleFocus?: (event: FocusEvent) => void;
   className?: string;
   containerClassName?: string;
   iconLeft?: ReactNode;
@@ -36,6 +37,7 @@ const TextInput: FC<TextInputProps> = ({
   errorBottom = false,
   errorText = "Error Message",
   handleChange,
+  handleFocus,
   className = '',
   containerClassName = '',
   iconLeft,
@@ -56,7 +58,7 @@ const TextInput: FC<TextInputProps> = ({
     errorBottom && styles.errorBottom,
     containerClassName
   );
-  
+
   const inputStyle = joinClasses(
     'text-input',
     styles.textInput,
@@ -71,7 +73,7 @@ const TextInput: FC<TextInputProps> = ({
     if (iconRightClickToReset && !disabled) {
       // Call the parent's handleChange to update their state
       handleChange('');
-      
+
       // Also directly reset the input/textarea as a fallback
       // This ensures the input resets even if the parent doesn't update immediately, or isn't controlling the input value directly
       const currentInput = inputRef.current || textareaRef.current;
@@ -89,6 +91,7 @@ const TextInput: FC<TextInputProps> = ({
     value: value,
     onKeyDown: handleKeyDown,
     onChange: (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {handleChange(e.target.value)},
+    onFocus: handleFocus,
     'data-testid': testId,
     disabled,
   };
@@ -97,7 +100,7 @@ const TextInput: FC<TextInputProps> = ({
     <div className={containerStyle}>
       {
         (label || subtitle) && (
-          <InputLabel 
+          <InputLabel
             label={label}
             subtitle={subtitle}
             error={error}
@@ -108,7 +111,7 @@ const TextInput: FC<TextInputProps> = ({
       <label className={inputStyle}>
         {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
         {iconRight && (
-          <div 
+          <div
             className={joinClasses(
               styles.iconContainerRight,
               iconRightClickToReset && styles.clickable
