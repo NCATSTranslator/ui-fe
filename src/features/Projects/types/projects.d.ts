@@ -77,11 +77,7 @@ export interface UserQueryObject {
 export type SortField = 'name' | 'lastSeen' | 'dateAdded' | 'bookmarks' | 'notes' | 'status';
 export type SortDirection = 'asc' | 'desc';
 
-export interface ProjectListState {
-  selectedProjects: Project[];
-  selectedQueries: UserQueryObject[];
-  setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
-  setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
+export interface SortSearchState {
   sortField: SortField;
   sortDirection: SortDirection;
   handleSort: (field: SortField) => void;

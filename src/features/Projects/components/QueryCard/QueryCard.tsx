@@ -1,75 +1,87 @@
-import { Dispatch, SetStateAction, useCallback } from 'react';
-import { DataCardLocation, UserQueryObject } from '@/features/Projects/types/projects.d';
-import DataCard from '@/features/Projects/components/DataCard/DataCard';
-import { useEditQueryHandlers } from '@/features/Projects/utils/editUpdateFunctions';
-import { useGetQueryCardTitle } from '@/features/Projects/hooks/customHooks';
-import { DraggableCard } from '@/features/DragAndDrop/components/DraggableCard/DraggableCard';
+import { FC, useMemo } from "react";
+import { UserQueryObject } from "@/features/Projects/types/projects";
+import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
+import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
+import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
+import { getQueryLink } from "@/features/Projects/utils/utilities";
+import SidebarCard from "@/features/Sidebar/components/SidebarCard/SidebarCard";
+import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
+import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
+import { DraggableCard } from "@/features/DragAndDrop/components/DraggableCard/DraggableCard";
+import { DraggableData } from "@/features/DragAndDrop/types/types";
+import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
+import Button from "@/features/Core/components/Button/Button";
+import FolderPlusIcon from '@/assets/icons/projects/folderplus.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
+import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
+import { getTimeRelativeDate } from "@/features/Common/utils/utilities";
+import { useLocation } from "react-router-dom";
 
 interface QueryCardProps {
-  inUnassignedProject?: boolean;
-  isEditing?: boolean;
-  location?: DataCardLocation;
-  onDelete?: (query: UserQueryObject) => void;
-  onEdit?: (query: UserQueryObject) => void;
   query: UserQueryObject;
-  queries: UserQueryObject[];
   searchTerm?: string;
-  selectedQueries?: UserQueryObject[];
-  setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
-  onShare?: (query: UserQueryObject) => void;
 }
 
-const QueryCard = ({ 
-  inUnassignedProject = false,
-  isEditing = false,
-  location = "list",
-  onDelete,
-  onEdit,
-  query,
-  queries,
-  searchTerm,
-  selectedQueries = [],
-  setSelectedQueries,
-  onShare
-}: QueryCardProps) => {
+const QueryCard: FC<QueryCardProps> = ({ query, searchTerm }) => {
+  const { title } = useGetQueryCardTitle(query);  
+  const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
 
-  const editQueryHandlers = useEditQueryHandlers(undefined, queries);
-  const { title: queryCardTitle, isLoading } = useGetQueryCardTitle(query);
+  const currentPage = useLocation().pathname.replace('/', '');
+  const disableDragging = useMemo(() => {
+    return query.data.deleted || !currentPage.includes('projects');
+  }, [query.data.deleted, currentPage]);
 
-  const onRestore = (query: UserQueryObject) => {
-    editQueryHandlers.handleRestoreQuery(query);
+  const queryURL = getQueryLink(query);
+  const queryTime = getTimeRelativeDate(new Date(query.data.time_updated));
+  
+  const leftIcon = <StatusIndicator status={query.status} />;
+  
+  const bottomLeft = (
+    <>
+      <span className={styles.count}>
+        <BookmarkIcon />
+        {query.data.bookmark_ids.length}
+      </span>
+      <span className={styles.count}>
+        <NoteIcon />
+        {query.data.note_count}
+      </span>
+    </>
+  );
+  
+  const bottomRight = (
+      <span className={`${styles.date} ${styles.count}`}>
+        {queryTime}
+      </span>
+  );
+
+  const options = (
+    <>
+      <Button handleClick={()=>{}} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />}>Add to Project</Button>
+      <Button handleClick={() => openShareQueryModal(query)} iconLeft={<ShareIcon />}>Share Query</Button>
+      <Button handleClick={() => openDeleteQueriesModal([query])} iconLeft={<TrashIcon />}>Delete Query</Button>
+    </>
+  );
+
+  const draggableData: DraggableData = {
+    type: 'query',
+    data: query,
   };
-
-  const handleShare = (query: UserQueryObject) => {
-    onShare?.(query);
-  }
-
   return (
-    <DraggableCard id={query.data.qid} data={{ type: 'query', data: query }}>
-      <DataCard
-        location={location}
-        inUnassignedProject={inUnassignedProject}
-        isEditing={isEditing}
-        item={query}
-        type={query.data.query.type === 'pathfinder' ? 'pathfinderQuery' : 'smartQuery'}
+    <DraggableCard id={query.data.qid} data={draggableData} disableDraggingOnly={disableDragging}>
+      <SidebarCard
+        leftIcon={leftIcon}
+        title={title}
         searchTerm={searchTerm}
-        selectedItems={selectedQueries}
-        setSelectedItems={setSelectedQueries}
-        status={query.status}
-        onDelete={onDelete}
-        onEdit={onEdit}
-        onRestore={onRestore}
-        getItemId={(item: UserQueryObject) => item.data.qid}
-        getItemTitle={() => queryCardTitle}
-        getItemTimeCreated={(item: UserQueryObject) => item.data.time_created.toString()}
-        getItemTimeUpdated={(item: UserQueryObject) => item.data.time_updated.toString()}
-        getItemBookmarkCount={(item: UserQueryObject) => item.data.bookmark_ids.length}
-        getItemNoteCount={(item: UserQueryObject) => item.data.note_count}
-        getItemStatus={(item: UserQueryObject) => item.status}
-        onShare={handleShare}
+        linkTo={queryURL}
+        linkTarget="_blank"
+        bottomLeft={bottomLeft}
+        bottomRight={bottomRight}
+        data-testid="sidebar-query-card"
+        options={options}
       />
     </DraggableCard>
   );
 };
 
-export default QueryCard; 
+export default QueryCard;

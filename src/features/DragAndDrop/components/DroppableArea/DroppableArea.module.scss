@@ -3,7 +3,7 @@
 .droppableArea {
   position: relative;
   transition: all 0.2s ease;
-  overflow: hidden;
+  // overflow: hidden;
   border-radius: $defaultBorderRadius;
   &:before, &:after {
     content: '';
@@ -13,10 +13,10 @@
     pointer-events: none;
   }
   &:before {
-    top: -$xs;
-    right: -$xs;
-    bottom: -$xs;
-    left: -$xs;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     background: $droppableOverlayBackground;
     z-index: 10;
     filter: blur(10px);

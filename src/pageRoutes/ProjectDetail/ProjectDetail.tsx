@@ -4,9 +4,7 @@ import ProjectDetailInner from '@/features/Projects/components/ProjectDetailInne
 const ProjectDetail = () => {
 
   return (
-    <div className="container">
-      <ProjectDetailInner />
-    </div>
+    <ProjectDetailInner />
   )
 };
 

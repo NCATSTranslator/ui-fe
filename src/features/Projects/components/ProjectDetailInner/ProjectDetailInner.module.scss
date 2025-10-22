@@ -4,7 +4,6 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-width: calc($interiorContainerWidth + ($m * 2));
   margin: 0 auto;
   .projectHeaderContainer {
     position: relative;
@@ -12,7 +11,7 @@
   .projectTabsContainer {
     position: relative;
     .projectTabs {
-      margin-top: $m;
+      margin-top: 0;
     }
   }
   .queryGrid {
@@ -31,7 +30,6 @@
     color: $red;
   }
   .projectTabContent {
-    padding: $s $m $m;
     min-height: 250px;
   }
   .separator {

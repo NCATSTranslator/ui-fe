@@ -1,5 +1,4 @@
-import { Project, ProjectListState } from '@/features/Projects/types/projects.d';
-import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
+import { Project, SortSearchState } from '@/features/Projects/types/projects.d';
 import styles from '@/features/Projects/components/TableHeader/TableHeader.module.scss';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
@@ -8,48 +7,22 @@ import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctio
 
 interface ProjectsTableHeaderProps {
   activeProjects: Project[];
-  projectListState: ProjectListState;
+  sortSearchState: SortSearchState;
 }
 
 const ProjectsTableHeader = ({ 
   activeProjects,
-  projectListState
+  sortSearchState
 }: ProjectsTableHeaderProps) => {
   const { 
-    selectedProjects, 
-    setSelectedProjects, 
     sortField, 
     sortDirection, 
     handleSort 
-  } = projectListState;
+  } = sortSearchState;
 
-  const activeProjectsWithoutUnassigned = activeProjects.filter(project => !isUnassignedProject(project));
-
-  const allSelected = activeProjectsWithoutUnassigned.length > 0 && (selectedProjects.length === activeProjectsWithoutUnassigned.length);
-  const someSelected = selectedProjects.length > 0 && selectedProjects.length < activeProjectsWithoutUnassigned.length;
-
-  const handleSelectAll = () => {
-    // dont include unassigned project in the count
-    if (selectedProjects.length === activeProjectsWithoutUnassigned.length) {
-      setSelectedProjects([]);
-    } else {
-      // dont include unassigned project in the selection
-      setSelectedProjects([...activeProjectsWithoutUnassigned]);
-    }
-  };
-  
   return (
     <div className={styles.tableHeader}>
       <div className={styles.tableRow}>
-        <div className={styles.checkboxColumn}>
-          <Checkbox
-            disabled={activeProjectsWithoutUnassigned.length === 0}
-            checked={allSelected}
-            handleClick={handleSelectAll}
-            className={someSelected ? styles.indeterminate : ''}
-          />
-          <div className={styles.separator}></div>
-        </div>
         <div className={styles.nameColumn}>
           <SortableHeader 
             field="name" 
