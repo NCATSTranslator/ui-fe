@@ -1,4 +1,4 @@
-   @use "@/assets/styles/variables" as *;
+@use "@/assets/styles/variables" as *;
 
 .sendFeedbackFormContainer {
   max-width: 640px;
@@ -10,21 +10,22 @@
   .submitButton {
     display: grid;
     width: 100%;
-    margin: 0;
+    margin: $s 0 0;
     background-color: $purpleOne;
     &:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
-  }
-  .errorContainer {
-    margin-bottom: $s;
+    &:hover {
+      background-color: $midPurpleTwo;
+    }
   }
   .errorText {
     color: $red;
     font-style: italic;
     margin: $xxs 0;
     font-size: $subTwoSize;
+    margin-bottom: $s;
   }
   .successMessage {
     color: $purpleOne;

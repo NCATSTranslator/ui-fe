@@ -19,12 +19,15 @@
     background-color: transparent;
     border: none;
     padding: 12px;
-    color: $black;
-    font-size: $bodyTwoSize;
     width: 100%;
     display: flex;
     justify-content: flex-start;
     gap: $xxs;
+    span {
+      color: $black;
+      font-size: $bodyTwoSize !important;
+      font-weight: 400 !important;
+    }
     svg {
       path {
         fill: $darkGray;

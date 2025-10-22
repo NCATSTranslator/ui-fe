@@ -1,11 +1,9 @@
-import QueryList from "@/features/QueryList/components/QueryList/QueryList";
+import QueryList from "@/features/QueryList/components/QueryList";
 
 const Queries = () => {
 
   return (
-    <div>
-      <QueryList />
-    </div>
+    <QueryList />
   );
 }
 

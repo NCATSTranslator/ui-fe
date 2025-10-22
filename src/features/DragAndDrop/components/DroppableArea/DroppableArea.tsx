@@ -14,6 +14,7 @@ export interface DroppableAreaProps {
   hideIndicator?: boolean;
   indicatorText?: string;
   indicatorStatus?: 'default' | 'error';
+  indicatorClass?: string;
   'data-testid'?: string;
   canAccept?: (draggedData: DraggableData) => boolean;
   indicateOnlyOnOver?: boolean;
@@ -29,6 +30,7 @@ export const DroppableArea: FC<DroppableAreaProps> = ({
   hideIndicator = false,
   indicatorText = 'Drop here',
   indicatorStatus = 'default',
+  indicatorClass,
   'data-testid': testId,
   canAccept,
   indicateOnlyOnOver = false,
@@ -64,9 +66,10 @@ export const DroppableArea: FC<DroppableAreaProps> = ({
   const indicatorClassName = useMemo(() => 
     joinClasses(
       styles.dropIndicator,
+      indicatorClass,
       (!hideIndicator && shouldShowActive) && styles.show,
     ),
-    [hideIndicator, shouldShowActive]
+    [hideIndicator, shouldShowActive, indicatorClass]
   );
 
   return (

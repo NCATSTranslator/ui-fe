@@ -4,6 +4,11 @@
   .projectsList {
     display: flex;
     flex-direction: column;
-    gap: $xxs;
+    gap: $xs;
+  }
+  .createNewProjectButton {
+    svg path {
+      stroke: $white;
+    }
   }
 }

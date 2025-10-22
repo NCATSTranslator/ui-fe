@@ -10,6 +10,7 @@ export interface DraggableCardProps {
   children: ReactNode | ((props: { isDragging: boolean }) => ReactNode);
   className?: string;
   disabled?: boolean;
+  disableDraggingOnly?: boolean;
   style?: CSSProperties;
   'data-testid'?: string;
 }
@@ -37,20 +38,22 @@ export const DraggableCard: FC<DraggableCardProps> = ({
   children, 
   className,
   disabled = false,
+  disableDraggingOnly = false,
   style,
   'data-testid': testId,
 }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id,
     data,
-    disabled,
+    disabled: disableDraggingOnly || disabled,
   });
 
   const cardClassName = joinClasses(
     styles.draggableCard,
     className,
     isDragging && styles.dragging,
-    disabled && styles.disabled
+    disabled && styles.disabled,
+    disableDraggingOnly && styles.disableDraggingOnly
   );
 
   return (

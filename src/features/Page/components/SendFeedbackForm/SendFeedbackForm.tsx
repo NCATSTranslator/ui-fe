@@ -1,4 +1,4 @@
-import { useCallback, FormEvent, useState } from "react";
+import { useCallback, FormEvent, useState, ReactNode } from "react";
 import styles from "./SendFeedbackForm.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
@@ -121,12 +121,14 @@ const SendFeedbackForm = () => {
     errors: { category: boolean; comments: boolean; steps: boolean }; 
     errorMessages: Record<string, string> 
   }) => (
-    <div className={styles.errorContainer}>
+    <div>
       {errors.category && <p className={styles.errorText} role="alert">{errorMessages.category}</p>}
       {errors.comments && <p className={styles.errorText} role="alert">{errorMessages.comments}</p>}
       {errors.steps && <p className={styles.errorText} role="alert">{errorMessages.steps}</p>}
     </div>
   );
+
+  const fileInputLabel: ReactNode = <>Add Files <span className="fw-normal">- Optional</span></> as ReactNode;
 
   return (
     <div className={styles.sendFeedbackFormContainer}>
@@ -170,9 +172,9 @@ const SendFeedbackForm = () => {
                   <p className={styles.errorText} role="alert">{submitError}</p>
                 </div>
               )}
-              
+
               <ErrorDisplay errors={errors} errorMessages={errorMessages} />
-              
+
               <Select
                 label="Category *"
                 name="category"
@@ -190,13 +192,13 @@ const SendFeedbackForm = () => {
                 <option value="Bug Report" key="1">Bug Report</option>
                 <option value="Other Comment" key="2">Other Comment</option>
               </Select>
-              
+
               {showFieldError('category') && (
                 <div id="category-error" className={styles.errorText} role="alert">
                   {errorMessages.category}
                 </div>
               )}
-              
+
               {form.category === 'Bug Report' && (
                 <>
                   <TextInput
@@ -220,7 +222,7 @@ const SendFeedbackForm = () => {
                   )}
                 </>
               )}
-              
+
               <TextInput
                 label="Comments *"
                 rows={5}
@@ -234,28 +236,28 @@ const SendFeedbackForm = () => {
                 errorText={errorMessages.comments}
                 testId="comments"
               />
-              
+
               {showFieldError('comments') && (
                 <div id="comments-error" className={styles.errorText} role="alert">
                   {errorMessages.comments}
                 </div>
               )}
-              
+
               <FileInput
-                label={<>Add Files <span className="fw-normal">- Optional</span></>}
+                label={fileInputLabel}
                 buttonLabel="Browse Files"
                 fileTypes=".png,.jpg,.jpeg"
                 handleChange={handleFileChange}
                 multiple
               />
-              
+
               <Button 
-                type="submit" 
-                disabled={isSubmitting} 
+                type="submit"
+                disabled={isSubmitting}
                 className={styles.submitButton}
                 aria-describedby={isSubmitting ? 'submitting-status' : undefined}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
+                {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
               </Button>
               
               {isSubmitting && (

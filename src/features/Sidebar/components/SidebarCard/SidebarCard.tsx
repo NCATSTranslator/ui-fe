@@ -81,7 +81,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
       {
         options &&
         (        
-          <>
+          <div className={styles.options}>
             <OutsideClickHandler onOutsideClick={()=>setOptionsOpen(false)}>
               <Button className={styles.optionsButton} handleClick={()=>setOptionsOpen(prev=>!prev)}>
                 <OptionsIcon />
@@ -90,7 +90,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
             <OptionsPane open={optionsOpen}>
               {options && options}
             </OptionsPane>
-          </>
+          </div>
         )
       }
     </div>

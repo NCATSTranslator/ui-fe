@@ -1,9 +1,9 @@
-import { ProjectListInner } from "@/features/Projects/components/ProjectListInner/ProjectListInner";
+import ProjectList from "@/features/Projects/components/ProjectList/ProjectList";
 
 const Projects = () => {
 
   return (
-    <ProjectListInner />
+    <ProjectList />
   );
 }
 

@@ -22,10 +22,12 @@ interface ButtonProps {
   testId?: string;
   className?: string;
   dataTooltipId?: string;
+  title?: string;
   ref?: RefObject<HTMLButtonElement | null>;
 }
 
 const Button: FC<ButtonProps> = ({
+  title,
   ariaLabel,
   variant,
   handleClick,
@@ -60,6 +62,7 @@ const Button: FC<ButtonProps> = ({
   )
 
   const commonProps = {
+    title: title,
     className: buttonStyle,
     onClick: handleClick,
     'data-testid': testId,

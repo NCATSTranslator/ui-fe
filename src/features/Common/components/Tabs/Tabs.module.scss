@@ -9,8 +9,9 @@
   .tabList {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 $s $s;
+    margin: 0 0 $s;
     border-bottom: 1px solid $midGray;
+    padding: 0 $xl;
   }
   .tabContent {
     padding: 0px;
