@@ -228,7 +228,7 @@
     }
   }
   .needHelp {
-    font-size: 12px;
+    font-size: $captionSize;
     text-align: center;
     display: flex;
     justify-content: center;
@@ -236,19 +236,18 @@
     color: $purpleOne;
     margin: 0 0 $xxs;
     svg {
-      margin-right: 4px;
       path {
         fill: $purpleOne;
       }
     }
-    a {
+    button {
       padding: 0;
       color: $purpleOne;
       text-decoration: none;
       font-weight: 800;
-      font-size: 12px;
+      font-size: $captionSize;
       box-shadow: none;
-      margin: 0 0 0 4px;
+      margin: 0 0 0 $xxs;
       background-color: transparent;
       &:hover {
         box-shadow: none;

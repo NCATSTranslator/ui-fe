@@ -4,6 +4,7 @@ import { currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useUserQueries } from "@/features/Projects/hooks/customHooks";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
+import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import SidebarQueryCard from "@/features/Sidebar/components/SidebarQueryCard/SidebarQueryCard";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
@@ -18,7 +19,13 @@ const QueriesPanel = () => {
   return (
     <div className={styles.queriesPanel}>
       <div className={styles.top}>
-        <TextInput iconLeft={<SearchIcon />} handleChange={handleSearch} placeholder="Search Queries" />
+        <TextInput
+          iconLeft={<SearchIcon />}
+          iconRight={searchTerm.length > 0 && <CloseIcon />}
+          iconRightClickToReset
+          handleChange={handleSearch}
+          placeholder="Search Queries"
+        />
       </div>
       <div className={styles.list}>
         {

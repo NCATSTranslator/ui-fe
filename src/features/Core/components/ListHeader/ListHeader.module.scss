@@ -1,11 +1,12 @@
 @use '@/assets/styles/variables' as *;
 
-.projectHeader {
+.listHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: $m;
-  margin-bottom: $m;
+  margin-bottom: 0;
+  padding: $xl $xl 0 $xl;
   .backButton {
     flex-shrink: 0;
     background: transparent;

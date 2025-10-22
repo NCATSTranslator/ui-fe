@@ -421,6 +421,59 @@ export const getFormattedDate = (date: Date, includeTime: boolean = true): strin
   return `${formattedDate}${includeTime ? ` (${formattedTime})` : ''}`;
 };
 
+
+/**
+ * Formats a date relative to the current date.
+ * - Returns time (e.g., "8:59am") if the date is today
+ * - Returns brief date (e.g., "Oct 14") if the date is in the current year
+ * - Returns numerical date (e.g., "6/10/24") if the date is from a previous year
+ *
+ * @param {Date} date - The date to format.
+ * @returns {string} - The formatted date string.
+ */
+export const getTimeRelativeDate = (date: Date): string => {
+  if (!isValidDate(date)) {
+    return '';
+  }
+
+  const now = new Date();
+  const inputDate = new Date(date);
+  
+  // Check if it's today
+  const isToday = now.getFullYear() === inputDate.getFullYear() &&
+                  now.getMonth() === inputDate.getMonth() &&
+                  now.getDate() === inputDate.getDate();
+  
+  if (isToday) {
+    // Return time in format like "8:59am"
+    const timeFormatOptions: Intl.DateTimeFormatOptions = { 
+      hour: 'numeric', 
+      minute: '2-digit', 
+      hour12: true 
+    };
+    return new Intl.DateTimeFormat('en-US', timeFormatOptions).format(inputDate).toLowerCase();
+  }
+  
+  // Check if it's in the current year
+  const isCurrentYear = now.getFullYear() === inputDate.getFullYear();
+  
+  if (isCurrentYear) {
+    // Return brief date like "Oct 14"
+    const briefDateOptions: Intl.DateTimeFormatOptions = { 
+      month: 'short', 
+      day: 'numeric' 
+    };
+    return new Intl.DateTimeFormat('en-US', briefDateOptions).format(inputDate);
+  }
+  
+  // Return numerical date like "6/10/24" for older years
+  const numericalDateOptions: Intl.DateTimeFormatOptions = { 
+    month: 'numeric', 
+    day: 'numeric', 
+    year: '2-digit' 
+  };
+  return new Intl.DateTimeFormat('en-US', numericalDateOptions).format(inputDate);
+}
 /**
  * Generates a link to the feedback form with the current page URL encoded.
  *

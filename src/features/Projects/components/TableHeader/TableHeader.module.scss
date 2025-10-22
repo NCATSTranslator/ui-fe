@@ -1,20 +1,17 @@
 @use '@/assets/styles/variables' as *;
 
 .tableHeader {
-  margin-bottom: $xs;
+  margin-bottom: 0;
   padding: $xxs $m;
 }
 
 .tableRow {
   display: grid;
-  grid-template-columns: $projectsTableGridColumns;
+  grid-template-columns: $projectsGridColumns;
   gap: $s;
   align-items: center;
   font-weight: 600;
   letter-spacing: 0.5px;
-  &.detail, &.trash {
-    grid-template-columns: $projectsDetailGridColumns;
-  }
   > div {
     font-size: 10px;
     text-transform: uppercase;
@@ -27,26 +24,6 @@
     svg path {
       fill: $purpleOne;
     }
-  }
-}
-
-.checkboxColumn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  label {
-    display: flex;
-    margin: 0;
-  }
-  .separator {
-    width: 1px;
-    height: $s;
-    background-color: $midGray;
-    position: absolute;
-    top: 50%;
-    right: -6px;
-    transform: translateY(-50%);
   }
 }
 

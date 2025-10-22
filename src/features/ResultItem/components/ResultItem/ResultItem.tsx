@@ -29,6 +29,8 @@ import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import { resultToCytoscape } from '@/features/ResultItem/utils/graphFunctions';
+import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
+import Button from '@/features/Core/components/Button/Button';
 
 const GraphView = lazy(() => import("@/features/ResultItem/components/GraphView/GraphView"));
 
@@ -120,6 +122,7 @@ const ResultItem: FC<ResultItemProps> = ({
     zoomKeyDown
   }) => {
 
+  const {togglePanel} = useSidebar();
   let resultSet = useSelector(getResultSetById(pk));
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
   const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
@@ -489,8 +492,7 @@ const ResultItem: FC<ResultItemProps> = ({
             </Tab>
         </Tabs>
         <p className={styles.needHelp}>
-          <Feedback/>
-          <Link to={`/send-feedback?q=${pk}`} target={'_blank'}>Send Feedback</Link>
+          <Button handleClick={()=>togglePanel('feedback')} iconLeft={<Feedback/>}>Send Feedback</Button>
         </p>
       </AnimateHeight>
       <BookmarkConfirmationModal

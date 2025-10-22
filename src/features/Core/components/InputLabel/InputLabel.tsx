@@ -1,9 +1,9 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import styles from './InputLabel.module.scss';
 
 type InputLabelProps = {
   error?: boolean;
-  label?: string;
+  label?: string | ReactNode;
   subtitle?: string;
 };
 

@@ -53,7 +53,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const [projectNameError, setProjectNameError] = useState('');
   const createProjectMutation = useCreateProject();
 
-  const  { handleUpdateProject } = useEditProjectHandlers(undefined, projects);
+  const { handleUpdateProject } = useEditProjectHandlers();
   const { handleDeleteQuery } = useEditQueryHandlers(undefined, queries);
 
   const [searchTerm, setSearchTerm] = useState<string>('');

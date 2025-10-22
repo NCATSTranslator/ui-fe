@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { Project, ProjectEditingItem, ProjectRaw, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
-import { useUpdateProjects, useUpdateQuery, useDeleteProjects, useRestoreProjects, useDeleteQueries, useRestoreQueries } from '@/features/Projects/hooks/customHooks';
+import { useUpdateProjects, useUpdateQuery, useDeleteProjects, useRestoreProjects, useDeleteQueries, useRestoreQueries, useUserProjects } from '@/features/Projects/hooks/customHooks';
 import { errorToast, projectUpdatedToast, queryUpdatedToast, projectRestoredToast, projectDeletedToast, queryRestoredToast, queryDeletedToast } from './toastMessages';
 
 export interface EditProjectState {
@@ -74,24 +74,15 @@ export const useEditProjectState = (): [EditProjectState, Dispatch<SetStateActio
  * @param handleSetIsEditing - The function to handle setting the edit state.
  * @param projects - The projects to edit.
  */
-export const useEditProjectHandlers = (
-  handleSetIsEditing?: (isEditing: boolean, editingItem?: ProjectEditingItem) => void,
-  projects?: ProjectRaw[]
-): EditProjectHandlers => {
+export const useEditProjectHandlers = (): EditProjectHandlers => {
   const queryClient = useQueryClient();
+  const { data: projects = [] } = useUserProjects();
   const updateProjectsMutation = useUpdateProjects();
   const deleteProjectsMutation = useDeleteProjects();
   const restoreProjectsMutation = useRestoreProjects();
 
   const handleEditProject = (project: Project) => {
-    if(!handleSetIsEditing)
-      return;
-    handleSetIsEditing(true, {
-      id: project.id.toString(),
-      name: project.data.title,
-      type: 'project',
-      queryIds: project.data.pks
-    });
+    console.log('TODO: edit project');
   };
 
   /**
@@ -136,11 +127,6 @@ export const useEditProjectHandlers = (
     }], {
       onSuccess: () => {
         projectUpdatedToast();
-        if(!handleSetIsEditing) {
-          console.warn("handleSetIsEditing not provided");
-          return;
-        }
-        handleSetIsEditing(false);
       },
       onError: (error) => {
         console.error('Failed to update project:', error);
@@ -165,11 +151,7 @@ export const useEditProjectHandlers = (
   };
 
   const handleCancelEdit = () => {
-    if(!handleSetIsEditing) {
-      console.warn("handleSetIsEditing not provided");
-      return;
-    }
-    handleSetIsEditing(false, undefined);
+    console.log('TODO: cancel edit project');
   };
 
   const handleRestoreProject = (project: Project) => {

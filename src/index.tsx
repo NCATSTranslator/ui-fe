@@ -14,7 +14,6 @@ const History = lazy(() => import('@/pageRoutes/History/History'));
 const Terms = lazy(() => import('@/pageRoutes/Terms/Terms'));
 const UserPrefs = lazy(() => import('@/pageRoutes/UserPrefs/UserPrefs'));
 const Workspace = lazy(() => import('@/pageRoutes/Workspace/Workspace'));
-const SendFeedbackPage = lazy(() => import('@/pageRoutes/SendFeedback/SendFeedback'));
 const Projects = lazy(() => import('@/pageRoutes/Projects/Projects'));
 const ProjectDetail = lazy(() => import('@/pageRoutes/ProjectDetail/ProjectDetail'));
 const Queries = lazy(() => import('@/pageRoutes/Queries/Queries'));
@@ -104,10 +103,6 @@ const routes = [
   {
     path: "workspace",
     element: <Page title="User Workspace"><Suspense fallback={<LoadingWrapper />}><Workspace /></Suspense></Page>
-  },
-  {
-    path: "send-feedback",
-    element: <Page title="Send Feedback"><Suspense fallback={<LoadingWrapper />}><SendFeedbackPage /></Suspense></Page>
   },
   {
     path: "projects",

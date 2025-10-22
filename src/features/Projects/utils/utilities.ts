@@ -192,3 +192,32 @@ export const getQueryStatusPercentage = (item: UserQueryObject | ARAStatusRespon
   // If the query is complete, return 100%, otherwise return the progress percentage
   return item.status === 'complete' ? 100 : Math.max(initialPercentage, progressPercentage);
 }
+
+/**
+ * Get the blank project title
+ * @returns {string} The blank project title
+ */
+export const getBlankProjectTitle = (projects: Project[]) => {
+  // Find all projects with "New Project" in their name and extract numbers
+  const newProjectNumbers = projects
+    .filter((project) => {
+      const title = project.data.title.toLowerCase();
+      return title.includes('new project');
+    })
+    .map((project) => {
+      const title = project.data.title;
+      // Match "New Project" followed by optional spaces and a number
+      const match = title.match(/^new project\s+(\d+)$/i);
+      return match ? parseInt(match[1], 10) : null;
+    })
+    .filter((num): num is number => num !== null);
+
+  // If no valid "New Project X" projects found, return "New Project 1"
+  if (newProjectNumbers.length === 0) {
+    return 'New Project 1';
+  }
+
+  // Find the highest number and add 1
+  const highestNumber = Math.max(...newProjectNumbers);
+  return `New Project ${highestNumber + 1}`;
+}

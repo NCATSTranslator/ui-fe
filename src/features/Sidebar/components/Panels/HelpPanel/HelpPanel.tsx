@@ -233,16 +233,18 @@ const HelpPanel = () => {
           placeholder="Search Help"
           iconRight={searchTerm.length > 0 ? <CloseIcon /> : null}
           iconRightClickToReset
+          className={styles.searchInput}
         />
       </div>
 
       <div className={styles.content}>
+        <p className={`caption ${styles.caption}`}>Last updated on October 16th, 2025</p>
         {filteredHelpItems.length === 0 && searchTerm && (
           <p className={styles.noResults}>No help topics match your search.</p>
         )}
         {filteredHelpItems.map((item) => (
-          <Accordion 
-            key={item.id} // Use stable ID instead of index
+          <Accordion
+            key={item.id}
             title={
               <>
                 <Highlighter

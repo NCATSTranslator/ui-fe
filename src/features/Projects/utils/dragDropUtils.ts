@@ -1,5 +1,6 @@
 import { DraggableData } from "@/features/DragAndDrop/types/types";
 import { Project, isUserQueryObject } from "@/features/Projects/types/projects.d";
+import { Active } from "@dnd-kit/core";
 import { toast } from "react-toastify";
 
 /**
@@ -28,4 +29,17 @@ export const handleQueryDrop = (
     
     handleUpdateProject(project?.id?.toString(), undefined, [...projectQIds, draggedItem.data.data.qid]);
   }
+}
+
+/**
+ * Checks if the dragged query is in the project.
+ * @param {Active} draggedItem - The dragged item data.
+ * @param {Project} project - The project to check if the query is in.
+ * @returns {boolean} True if the query is in the project, false otherwise.
+ */
+export const isDraggedQueryInProject = (draggedItem: Active, project: Project) => {
+  if(!draggedItem.data.current) return false;
+  const draggedQid = draggedItem.data.current.data.data.qid;
+  const projectQids = project?.data.pks || [];
+  return draggedItem.data.current.type === 'query' && projectQids.includes(draggedQid);
 }
