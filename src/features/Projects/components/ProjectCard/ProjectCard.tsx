@@ -1,7 +1,7 @@
 import { FC, useCallback, useMemo, useState } from "react";
 import { Project } from "@/features/Projects/types/projects";
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
-import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
+import styles from "@/features/Projects/components/DataCard/DataCard.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
