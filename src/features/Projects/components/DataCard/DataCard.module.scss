@@ -31,13 +31,13 @@
     }
   }
   
-  .column {
-    font-size: $captionSize;
-    color: $darkGray;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+  &.unassigned {
+    border: none;
+    .icon svg path {
+      fill: $white;
+    }
   }
+  
   .icon {
     display: flex;
     margin-right: $xxs;

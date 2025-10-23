@@ -76,7 +76,7 @@ export interface UserQueryObject {
   status: QueryStatus,
 }
 
-export type SortField = 'name' | 'lastSeen' | 'queries' | 'bookmarks' | 'notes' | 'status';
+export type SortField = 'name' | 'lastSeen' | 'queries' | 'bookmarks' | 'notes' | 'status' | 'queryType';
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortSearchState {

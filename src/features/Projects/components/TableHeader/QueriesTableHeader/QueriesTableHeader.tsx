@@ -29,17 +29,6 @@ const QueriesTableHeader = ({
             Name
           </SortableHeader>
         </div>
-        <div className={styles.actionsColumn}></div>
-        <div className={styles.lastSeenColumn}>
-          <SortableHeader 
-            field="lastSeen" 
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSort={onSort}
-          >
-            Last Seen
-          </SortableHeader>
-        </div>
         <div className={styles.bookmarksColumn}>
           <SortableHeader 
             field="bookmarks" 
@@ -60,16 +49,28 @@ const QueriesTableHeader = ({
             <NoteIcon />
           </SortableHeader>
         </div>
-        <div className={styles.statusColumn}>
+        <div className={styles.queryTypeColumn}>
           <SortableHeader 
-            field="status" 
+            field="queryType" 
             sortField={sortField}
             sortDirection={sortDirection}
             onSort={onSort}
           >
-            Status
+            Query Type
           </SortableHeader>
         </div>
+        <div className={styles.lastSeenColumn}>
+          <SortableHeader 
+            field="lastSeen" 
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={onSort}
+          >
+            Last Seen
+          </SortableHeader>
+        </div>
+
+        <div className={styles.optionsColumn}></div>
       </div>
     </div>
   );

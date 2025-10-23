@@ -119,6 +119,10 @@ export const sortQueries = (queries: UserQueryObject[], sortField: SortField, so
         aValue = a.data.note_count;
         bValue = b.data.note_count;
         break;
+      case 'queryType':
+        aValue = a.data.query.type;
+        bValue = b.data.query.type;
+        break;
       case 'status':
         aValue = a.status;
         bValue = b.status;
