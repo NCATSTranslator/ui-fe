@@ -59,6 +59,7 @@
     display: flex;
     align-items: center;
     min-height: $m;
+    width: fit-content;
   }
   .title, .title span, .title mark {
     margin-bottom: 0;
