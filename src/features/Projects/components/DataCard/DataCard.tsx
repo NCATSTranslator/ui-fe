@@ -1,258 +1,130 @@
-import { Dispatch, SetStateAction, MouseEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './DataCard.module.scss';
-import { getFormattedDate, joinClasses } from '@/features/Common/utils/utilities';
-import Button from '@/features/Core/components/Button/Button';
-import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
-import CardWrapper from '@/features/Projects/components/CardWrapper/CardWrapper';
-import StatusIndicator from '@/features/Projects/components/StatusIndicator/StatusIndicator';
-import Checkbox from '@/features/Core/components/Checkbox/Checkbox';
-import CardName from '@/features/Projects/components/CardName/CardName';
+import { FC, ReactNode, MouseEvent, useCallback, useState, useMemo } from "react";
+import styles from "./DataCard.module.scss";
+import { joinClasses } from "@/features/Common/utils/utilities";
+import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
-import ChevRightIcon from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
-import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
-import { DataCardLocation, Project, QueryStatus, UserQueryObject } from '@/features/Projects/types/projects';
-import { getQueryLink } from '@/features/Projects/utils/utilities';
-import { unableToReachLinkToast } from '@/features/Projects/utils/toastMessages';
-import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
+import CardName from "@/features/Projects/components/CardName/CardName";
+import Button from "@/features/Core/components/Button/Button";
+import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
+import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
+import { QueryTypeString } from "@/features/Projects/types/projects";
 
-interface DataCardProps<T> {
-  className?: string;
-  getItemId: (item: T) => number | string;
-  getItemTitle: (item: T) => string;
-  getItemTimeCreated: (item: T) => string;
-  getItemTimeUpdated: (item: T) => string;
-  getItemBookmarkCount: (item: T) => number;
-  getItemNoteCount: (item: T) => number;
-  getItemStatus?: (item: T) => string;
-  getItemCount?: (item: T) => number;
-  inUnassignedProject?: boolean;
-  isEditing?: boolean;
-  item: T;
-  location?: DataCardLocation;
-  onEdit?: (item: T) => void;
-  onShare?: (item: T) => void;
-  onRestore?: (item: T) => void;
-  onDelete?: (item: T) => void;
-  queriesLoading?: boolean;
+interface DataCardProps {
+  icon: ReactNode;
+  title: string;
   searchTerm?: string;
-  selectedItems: T[];
-  setSelectedItems: Dispatch<SetStateAction<T[]>>;
-  status?: QueryStatus;
-  type: 'project' | 'smartQuery' | 'pathfinderQuery';
+  linkTo?: string;
+  linkTarget?: string;
+  onClick?: (event: MouseEvent<HTMLDivElement>) => void;
+  className?: string;
+  'data-testid'?: string;
+  options?: ReactNode;
+  isRenaming?: boolean;
+  setIsRenaming?: (isRenaming: boolean) => void;
+  onRename?: (value: string) => void;
+  type: 'project' | 'query';
+  bookmarksCount: number;
+  notesCount: number;
+  queryCount?: number;
+  queryType?: QueryTypeString;
+  date: string;
 }
 
-const DataCard = <T,>({
-  className,
-  getItemId,
-  getItemTitle,
-  getItemTimeCreated,
-  getItemTimeUpdated,
-  getItemBookmarkCount,
-  getItemNoteCount,
-  getItemStatus,
-  getItemCount,
-  inUnassignedProject = false,
-  isEditing = false,
-  item,
-  location = "list",
-  onEdit,
-  onShare,
-  onRestore,
-  onDelete,
-  queriesLoading = false,
+const DataCard: FC<DataCardProps> = ({
+  icon,
+  title,
   searchTerm,
-  selectedItems,
-  setSelectedItems,
-  status,
-  type
-}: DataCardProps<T>) => {
-  const navigate = useNavigate();
-
-  const isUnassignedPrj = type === 'project' ? isUnassignedProject(item as Project) : isUnassignedProject(getItemId(item) as number);
-  const title = getItemTitle(item);
-  const time_created = getItemTimeCreated(item);
-  const time_updated = getItemTimeUpdated(item);
-  const bookmark_count =  getItemBookmarkCount(item);
-  const note_count =  getItemNoteCount(item);
-  const itemCount =  getItemCount?.(item);
-  const itemStatus = getItemStatus?.(item);
-  const isSelected = selectedItems.some((i) => getItemId(i) === getItemId(item));
-
-  const isDeleted = type === 'project' ? (item as Project).deleted : (item as UserQueryObject).data.deleted;
-
-  const handleSelectItem = () => {
-    setSelectedItems((prevItems) => {
-      const isSelected = prevItems.some((i) => getItemId(i) === getItemId(item));
-      return isSelected ? prevItems.filter((i) => getItemId(i) !== getItemId(item)) : [...prevItems, item];
-    });
-  };
-
-  // const handleEdit = () => {
-  //   if (onEdit) {
-  //     onEdit(item);
-  //   }
-  // };
-
-  const handleShare = () => {
-    if (onShare) {
-      onShare(item);
-    }
-  };
-
-  const handleCardClick = (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    const isInteractive = target.closest('button, input, a, [role="button"]');
-
-    if (!isInteractive && type === 'project') {
-      navigate(`/projects/${getItemId(item)}`);
+  linkTo,
+  linkTarget,
+  onClick,
+  className,
+  'data-testid': testId,
+  options,
+  isRenaming,
+  setIsRenaming,
+  onRename,
+  type,
+  bookmarksCount,
+  notesCount,
+  queryCount,
+  queryType,
+  date
+}) => {
+  const handleClick = useCallback((event: MouseEvent<HTMLDivElement>) => {
+    // Don't trigger onClick if user clicked on a link
+    if (linkTo && event.target !== event.currentTarget) {
       return;
     }
+    onClick?.(event);
+  }, [onClick, linkTo]);
 
-    if(!isInteractive && type === 'smartQuery' || type === 'pathfinderQuery') {
-      const url = getQueryLink(item as UserQueryObject);
-      if(url) {
-        window.open(encodeURI(`${url}`), "_blank", "noopener");
-        return;
-      }
-      unableToReachLinkToast();
-      return;
-    }
-  };
+  const cardClassName = joinClasses(styles.dataCard, className, isRenaming && styles.isRenaming, type === 'project' && styles.projectCard, type === 'query' && styles.queryCard);
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
-  const handleRestore = (e: MouseEvent) => {
-    e.stopPropagation();
-    if (onRestore)
-      onRestore(item);
-  };
+  const queryTypeLabel = useMemo(() => {
+    if(queryType === 'drug' || queryType === 'gene' || queryType === 'chemical') return 'Smart Query';
+    if(queryType === 'pathfinder') return 'Pathfinder Query';
+    return 'Unknown Query Type';
+  }, [queryType]);
 
-  const handleDelete = (e: MouseEvent) => {
-    e.stopPropagation();
-    if (onDelete)
-      onDelete(item);
-  };
-
-  const showCheckbox = location === 'list' || (location === 'detail' && (isEditing || inUnassignedProject));
-
-  const classes = joinClasses(
-    styles.dataCard,
-    className,
-    type === 'project' ? styles.projectCard : styles.queryCard,
-    location === 'detail' && styles.detailCard,
-    (isEditing || inUnassignedProject) && styles.isEditing,
-    !showCheckbox && styles.noCheckbox
-  )
   return (
-    <CardWrapper 
-      className={classes}
-      onClick={handleCardClick}
+    <div 
+      className={cardClassName}
+      onClick={onClick ? handleClick : undefined}
+      data-testid={testId}
     >
-      {
-        showCheckbox && (          
-          <div className={`${styles.checkboxColumn} ${styles.column}`}>
-            {
-              !isUnassignedPrj && (
-                <Checkbox checked={isSelected} handleClick={handleSelectItem} />
-              )
-            }
-          </div>
-        )
-      }
-      <div className={`${styles.nameColumn} ${styles.column}`}>
-        <div className={styles.nameContainer}>
-          <CardName
-            type={type}
-            name={title}
-            itemCount={queriesLoading ? "-" : itemCount || 0}
-            searchTerm={searchTerm}
-            isUnassigned={isUnassignedPrj}
-          />
+      <div className={styles.container}>
+        <CardName
+          title={title}
+          searchTerm={searchTerm}
+          linkTo={linkTo}
+          linkTarget={linkTarget}
+          isRenaming={isRenaming}
+          setIsRenaming={setIsRenaming}
+          onRename={onRename}
+          icon={icon}
+        />
+        <div className={styles.bookmarksColumn}>
+          <BookmarkIcon />
+          {bookmarksCount}
+        </div>
+        <div className={styles.notesColumn}>
+          <NoteIcon />
+          {notesCount}
+        </div>
+        <div className={styles.queriesColumn}>
           {
-            isDeleted && (
-              <div className={styles.deletedInteractions}>
-                <span className={styles.interaction} onClick={handleRestore}>Restore {type === 'project' ? 'Project' : 'Query'}</span>
-                <span className={styles.separator}>·</span>
-                <span className={styles.interaction} onClick={handleDelete}>Delete Now</span>
-              </div>
+            type === 'project' ? (
+              <>
+                {!!queryCount && `${queryCount} Quer${queryCount === 1 ? 'y' : 'ies'}`}
+              </>
+            ) : (
+              !!queryType && queryTypeLabel
             )
           }
         </div>
-
-      </div>
-      <div className={`${styles.actionsColumn} ${styles.column}`}>
-      {
-          (!isUnassignedPrj && !isDeleted) && (
-            <Button variant="secondary" iconOnly handleClick={handleDelete} disabled={queriesLoading}>
-              <TrashIcon/>
-            </Button>
-          )
-        }
+        <div className={styles.date}>
+          {date}
+        </div>
         {
-          // (!isUnassignedPrj && !isDeleted) && (
-          //   <Button variant="secondary" iconOnly handleClick={handleEdit} disabled={queriesLoading}>
-          //     <EditIcon/>
-          //   </Button>
-          // )
-        }
-        {
-          (!isUnassignedPrj && !isDeleted) && (
-            <Button variant="secondary" iconOnly handleClick={handleShare}>
-              <ShareIcon/>
-            </Button>
+          options &&
+          (        
+            <div className={styles.optionsColumn}>
+              <OutsideClickHandler onOutsideClick={()=>setOptionsOpen(false)}>
+                <Button className={styles.optionsButton} handleClick={()=>setOptionsOpen(prev=>!prev)}>
+                  <OptionsIcon />
+                </Button>
+              </OutsideClickHandler>
+              <OptionsPane open={optionsOpen}>
+                {options && options}
+              </OptionsPane>
+            </div>
           )
         }
       </div>
-      <div className={`${styles.lastSeenColumn} ${styles.column}`}>
-        {
-          !isUnassignedPrj && (
-            <>
-              {getFormattedDate(new Date(time_updated), false)}
-            </>
-          )
-        }
-      </div>
-      <div className={`${styles.dateCreatedColumn} ${styles.column}`}>
-      {
-          !isUnassignedPrj && (
-            <>
-              {getFormattedDate(new Date(time_created), false)}
-            </>
-          )
-        }
-      </div>
-      <div className={`${styles.bookmarksColumn} ${styles.column}`}>
-        {
-          !isUnassignedPrj && (
-            <>
-              <BookmarkIcon />
-              {bookmark_count}
-            </>
-          )
-        }
-      </div>
-      <div className={`${styles.notesColumn} ${styles.column}`}>
-        {
-          !isUnassignedPrj && (
-            <>
-              <NoteIcon />
-              {note_count}
-            </>
-          )
-        }
-      </div>
-      <div className={`${styles.statusColumn} ${styles.column}`}>
-        {
-          !isUnassignedPrj && (
-            <>
-              <StatusIndicator status={(status || itemStatus) as QueryStatus} />
-              <ChevRightIcon />
-            </>
-          )
-        }
-      </div>
-    </CardWrapper>
+    </div>
   );
-}
+};
 
 export default DataCard;

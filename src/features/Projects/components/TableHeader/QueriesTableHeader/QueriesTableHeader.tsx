@@ -40,16 +40,6 @@ const QueriesTableHeader = ({
             Last Seen
           </SortableHeader>
         </div>
-        <div className={styles.dateAddedColumn}>
-          <SortableHeader 
-            field="dateAdded" 
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSort={onSort}
-          >
-            Date Added
-          </SortableHeader>
-        </div>
         <div className={styles.bookmarksColumn}>
           <SortableHeader 
             field="bookmarks" 

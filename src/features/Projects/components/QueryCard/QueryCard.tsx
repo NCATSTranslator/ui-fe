@@ -4,7 +4,7 @@ import StatusIndicator from "@/features/Projects/components/StatusIndicator/Stat
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import { getQueryLink } from "@/features/Projects/utils/utilities";
-import SidebarCard from "@/features/Sidebar/components/SidebarCard/SidebarCard";
+import DataCard from "@/features/Projects/components/DataCard/DataCard";
 import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { DraggableCard } from "@/features/DragAndDrop/components/DraggableCard/DraggableCard";
@@ -34,7 +34,7 @@ const QueryCard: FC<QueryCardProps> = ({ query, searchTerm }) => {
   const queryURL = getQueryLink(query);
   const queryTime = getTimeRelativeDate(new Date(query.data.time_updated));
   
-  const leftIcon = <StatusIndicator status={query.status} />;
+  const icon = <StatusIndicator status={query.status} />;
   
   const bottomLeft = (
     <>
@@ -69,16 +69,18 @@ const QueryCard: FC<QueryCardProps> = ({ query, searchTerm }) => {
   };
   return (
     <DraggableCard id={query.data.qid} data={draggableData} disableDraggingOnly={disableDragging}>
-      <SidebarCard
-        leftIcon={leftIcon}
+      <DataCard
+        icon={icon}
         title={title}
         searchTerm={searchTerm}
         linkTo={queryURL}
         linkTarget="_blank"
-        bottomLeft={bottomLeft}
-        bottomRight={bottomRight}
-        data-testid="sidebar-query-card"
         options={options}
+        type="query"
+        bookmarksCount={query.data.bookmark_ids.length}
+        notesCount={query.data.note_count}
+        date={getTimeRelativeDate(new Date(query.data.time_updated))}
+        queryType={query.data.query.type}
       />
     </DraggableCard>
   );

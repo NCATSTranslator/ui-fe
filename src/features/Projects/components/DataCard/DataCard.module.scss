@@ -2,30 +2,32 @@
 
 .dataCard {
   background-color: $white;
+  border-radius: $defaultBorderRadius;
+  .container {
+    display: grid;
+    grid-template-columns: $dataCardColumns;
+    gap: $dataCardGap;
+    padding: 12px $xs;
+    align-items: center;
+    justify-content: flex-start;
+  }
   &.projectCard {
-    background: $lightGray;
+    border: 1px solid $lightPurpleTwo;
+    background: $white;
   }
   &.queryCard {
-    .actionsColumn {
-      button {
-        background-color: $lightGray;
-        &:hover {
-          background-color: $white;
-        }
-      }
-    }
+    background: $lightGray;
   }
   &:hover {
     background-color: $whiteHover;
-  }
-  &.noCheckbox {
-    grid-template-columns: $projectsDetailGridColumns;
-  }
-
-  &.detailCard {
-    grid-template-columns: $projectsDetailGridColumns;
-    &.isEditing {
-      grid-template-columns: $projectsTableGridColumns;
+    .title, .title span, .title mark, .count {
+      color: $purpleOne;
+    }
+    svg path {
+      fill: $purpleOne;
+    }
+    .optionsButton {
+      opacity: 1;
     }
   }
   
@@ -36,74 +38,88 @@
     align-items: center;
     justify-content: flex-start;
   }
-
-  .statusColumn {
-    justify-content: space-between;
-  }
-  
-  .checkboxColumn {
+  .icon {
     display: flex;
-    justify-content: center;
+    margin-right: $xxs;
+    svg {
+      height: $m;
+      width: $m;
+      path {
+        fill: $black;
+      }
+    }
+  }
+
+  .title {
+    display: flex;
     align-items: center;
-    label {
-      display: flex;
-      margin-bottom: 0;
-      width: $s;
-      height: $s;
-      padding: $xxs;
+    min-height: $m;
+  }
+  .title, .title span, .title mark {
+    margin-bottom: 0;
+    font-size: $bodyTwoSize;
+    font-weight: 800;
+    color: $black;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
     }
   }
-  
-  .nameColumn {
-    .queryTitle,
-    .projectTitle {
-      font-weight: 500;
+  .titleInput {
+    margin-bottom: 0;
+    input {
+      font-size: $bodyTwoSize;
+      font-weight: 800;
       color: $black;
-      font-size: 14px;
+      text-decoration: none;
+      background-color: $lightGray;
+      border: none;
+      outline: none;
+      padding: $xxxs $xxs;
+    }
+    &:hover {
+      text-decoration: none;
     }
   }
-  
-  .bookmarksColumn,
-  .notesColumn {
-    gap: 2px;
+  .optionsButton {
+    opacity: 0;
+    transition: $defaultAnim;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    height: $m;
+    width: $s;
     svg {
       path {
-        fill: $darkGray;
+        fill: $purpleOne;
       }
     }
   }
-  
-  .actionsColumn {
-    gap: 4px;
-    button {
-      background-color: $white;
-      &:hover {
-        background-color: $lightGray;
-      }
-      &:disabled {
-        background-color: $hoverGray;
-        &:hover {
-          background-color: $hoverGray;
-        }
-      }
+  &.isRenaming {
+    .optionsButton {
+      display: none;
     }
   }
 
-  .deletedInteractions {
+  .bookmarksColumn, .notesColumn, .queriesColumn, .date {
+    font-size: $bodyTwoSize;
+    color: $darkGray;
+    svg path {
+      fill: $darkGray;
+    }
+  }
+
+  .bookmarksColumn, .notesColumn, .optionsColumn  {
     display: flex;
-    gap: $xxs;
     align-items: center;
-    margin-top: $xxs;
-    span {
-      font-size: $captionSize;
-      font-weight: 800;
-      color: $purpleOne;
-    }
-    .interaction {
-      &:hover {
-        text-decoration: underline;
-        cursor: pointer;
-      }
-    }
+    justify-content: flex-start;
+  }
+  
+  .optionsColumn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

@@ -5,7 +5,7 @@ import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?r
 import SidebarCardTitle from "@/features/Sidebar/components/SidebarCardTitle/SidebarCardTitle";
 import Button from "@/features/Core/components/Button/Button";
 import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
-import OptionsPane from "../OptionsPane/OptionsPane";
+import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
 
 interface SidebarCardProps {
   leftIcon: ReactNode;

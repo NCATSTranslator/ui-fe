@@ -1,83 +1,88 @@
-import { FC } from 'react';
-import styles from './CardName.module.scss';
-import { joinClasses } from '@/features/Common/utils/utilities';
-import Folder from '@/assets/icons/projects/folder.svg?react';
-import Highlighter from 'react-highlight-words';
-import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import { FC, useCallback, useRef, useEffect, useState, FormEvent, ReactNode } from "react";
+import styles from "@/features/Projects/components/DataCard/DataCard.module.scss";
+import { Link } from "react-router-dom";
+import Highlighter from "react-highlight-words";
+import TextInput from "@/features/Core/components/TextInput/TextInput";
+import { debounce } from "lodash";
 
 interface CardNameProps {
-  className?: string;
-  isUnassigned?: boolean;
-  itemCount?: number | "-";
-  name: string;
+  icon?: ReactNode;
+  isRenaming?: boolean;
+  setIsRenaming?: (isRenaming: boolean) => void;
+  onRename?: (value: string) => void;
+  linkTarget?: string;
+  linkTo?: string;
   searchTerm?: string;
-  type: 'project' | 'smartQuery' | 'pathfinderQuery';
+  title: string;
 }
 
 const CardName: FC<CardNameProps> = ({
-  className,
-  isUnassigned = false,
-  itemCount = 0,
-  name,
+  icon,
+  isRenaming,
+  setIsRenaming,
+  onRename,
+  title,
   searchTerm,
-  type,
+  linkTo,
+  linkTarget,
 }) => {
-  const icon = type === 'project' ? <Folder /> : null;
-  const classes = joinClasses(styles.cardName, className);
+  const textInputRef = useRef<HTMLInputElement>(null);
+  const [localTitle, setLocalTitle] = useState(title);
 
-  const itemCountText = itemCount === "-" ? "-" : itemCount > 0 ? itemCount : "0";
-  const itemCountTextPlural = itemCount === 1 ? "Query" : "Queries";
+  const debouncedOnRename = useCallback(debounce((value: string) => {
+    onRename?.(value);
+  }, 1000), [onRename]);
+
+  useEffect(() => {
+    if (isRenaming && textInputRef.current) {
+      textInputRef.current.focus();
+      textInputRef.current.select();
+    }
+  }, [isRenaming]);
+
+  const handleChange = (value: string) => {
+    setLocalTitle(value);
+    debouncedOnRename(value);
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onRename?.(localTitle);
+    setIsRenaming?.(false);
+  };
+
+  const titleContent = (
+    isRenaming ? (
+      <form onSubmit={handleSubmit}>
+        <TextInput value={localTitle} handleChange={handleChange} iconRightClickToReset ref={textInputRef} className={styles.titleInput}/>
+      </form>
+    ) : (
+      <Highlighter
+        highlightClassName="highlight"
+        searchWords={searchTerm ? [searchTerm] : []}
+        autoEscape={true}
+        textToHighlight={title}
+      />
+    )
+  );
+
+  if (linkTo && !isRenaming) {
+    return (
+      <Link 
+        className={styles.title} 
+        to={linkTo}
+        target={linkTarget}
+      >
+        {icon && <div className={styles.icon}>{icon}</div>}
+        {titleContent}
+      </Link>
+    );
+  }
 
   return (
-    <div className={classes}>
-      {
-        !isUnassigned && (
-          <div className={styles.icon}>
-            {icon}
-            {type === 'project' && <span className={styles.iconText}>PROJECT</span>}
-            {type === 'smartQuery' && <span className={styles.iconText}>SMART QUERY</span>}
-            {type === 'pathfinderQuery' && <span className={styles.iconText}>PATHFINDER QUERY</span>}
-          </div>
-        )
-      }
-      <span className={styles.projectTitle}>
-        <Highlighter
-          highlightClassName="highlight"
-          searchWords={searchTerm ? [searchTerm] : []}
-          autoEscape={true}
-          textToHighlight={name}
-        />
-        {
-          (searchTerm && !name.toLowerCase().includes(searchTerm.toLowerCase())) && (
-            <>
-              <Highlighter
-                highlightClassName="highlight"
-                searchWords={['*']}
-                autoEscape={true}
-                textToHighlight="*"
-                data-tooltip-id="found-match-in-pks-tooltip"
-              />
-              <Tooltip id="found-match-in-pks-tooltip" place="top" >
-                <span>This project contains a query that matches the search term.</span>
-              </Tooltip>
-            </>
-          )
-        }
-        {
-          isUnassigned && (
-            <>
-              <InfoIcon data-tooltip-id="unassigned-project-tooltip" className={styles.infoIcon}/>
-              <Tooltip id="unassigned-project-tooltip" place="top" >
-                <span>Queries that are not associated with any projects are automatically placed here.</span>
-              </Tooltip>
-            </>
-          )
-        }
-      </span>
-      {type === 'project' && (
-        <span className={styles.itemCount}>{itemCountText} {itemCountTextPlural}</span>
-      )}
+    <div className={styles.title}>
+      {icon && <div className={styles.icon}>{icon}</div>}
+      {titleContent}
     </div>
   );
 };
