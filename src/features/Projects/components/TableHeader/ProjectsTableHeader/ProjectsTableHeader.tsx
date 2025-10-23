@@ -22,7 +22,7 @@ const ProjectsTableHeader = ({
 
   return (
     <div className={styles.tableHeader}>
-      <div className={styles.tableRow}>
+      <div className={`${styles.tableRow} ${styles.projectCardRow}`}>
         <div className={styles.nameColumn}>
           <SortableHeader 
             field="name" 

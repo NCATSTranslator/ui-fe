@@ -7,11 +7,16 @@
 
 .tableRow {
   display: grid;
-  grid-template-columns: $dataCardColumns;
   gap: $dataCardGap;
   align-items: center;
   font-weight: 600;
   letter-spacing: 0.5px;
+  &.projectCardRow {
+    grid-template-columns: $projectCardColumns;
+  }
+  &.queryCardRow {
+    grid-template-columns: $queryCardColumns;
+  }
   > div {
     font-size: 10px;
     text-transform: uppercase;

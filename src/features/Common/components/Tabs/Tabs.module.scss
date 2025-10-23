@@ -16,7 +16,6 @@
   .tabContent {
     padding: 0px;
     display: grid;
-    overflow-y: hidden;
     &.inactive {
       opacity: 0;
       pointer-events: none;
@@ -26,7 +25,6 @@
   }
   .fade {
     display: grid;
-    overflow-y: hidden;
     &.inactive {
       pointer-events: none;
       height: 0;

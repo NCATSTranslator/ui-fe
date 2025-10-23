@@ -18,7 +18,7 @@ const QueriesTableHeader = ({
 
   return (
     <div className={styles.tableHeader}>
-      <div className={`${styles.tableRow}`}>
+      <div className={`${styles.tableRow} ${styles.queryCardRow}`}>
         <div className={styles.nameColumn}>
           <SortableHeader 
             field="name" 
