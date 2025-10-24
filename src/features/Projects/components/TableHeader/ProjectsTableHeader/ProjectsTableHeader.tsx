@@ -22,7 +22,7 @@ const ProjectsTableHeader = ({
 
   return (
     <div className={styles.tableHeader}>
-      <div className={styles.tableRow}>
+      <div className={`${styles.tableRow} ${styles.projectCardRow}`}>
         <div className={styles.nameColumn}>
           <SortableHeader 
             field="name" 
@@ -31,27 +31,6 @@ const ProjectsTableHeader = ({
             onSort={handleSort}
           >
             Name
-          </SortableHeader>
-        </div>
-        <div className={styles.actionsColumn}></div>
-        <div className={styles.lastSeenColumn}>
-          <SortableHeader 
-            field="lastSeen" 
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSort={handleSort}
-          >
-            Last Seen
-          </SortableHeader>
-        </div>
-        <div className={styles.dateAddedColumn}>
-          <SortableHeader 
-            field="dateAdded" 
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSort={handleSort}
-          >
-            Date Added
           </SortableHeader>
         </div>
         <div className={styles.bookmarksColumn}>
@@ -74,16 +53,27 @@ const ProjectsTableHeader = ({
             <NoteIcon />
           </SortableHeader>
         </div>
-        <div className={styles.statusColumn}>
+        <div className={styles.queriesColumn}>
           <SortableHeader 
-            field="status" 
+            field="queries" 
             sortField={sortField}
             sortDirection={sortDirection}
             onSort={handleSort}
           >
-            Status
+            Queries
           </SortableHeader>
         </div>
+        <div className={styles.lastSeenColumn}>
+          <SortableHeader 
+            field="lastSeen" 
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+          >
+            Last Changed
+          </SortableHeader>
+        </div>
+        <div className={styles.optionsColumn}></div>
       </div>
     </div>
   );

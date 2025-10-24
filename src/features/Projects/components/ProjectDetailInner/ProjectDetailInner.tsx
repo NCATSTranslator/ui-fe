@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, MouseEvent } from 'react';
 import styles from './ProjectDetailInner.module.scss';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
@@ -19,17 +19,16 @@ import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import OptionsPane from '@/features/Sidebar/components/OptionsPane/OptionsPane';
 import Button from '@/features/Core/components/Button/Button';
-import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
-import { useRenameProject } from '@/features/Projects/hooks/useRenameProject';
 import ListHeader from '@/features/Core/components/ListHeader/ListHeader';
 import QueriesTableHeader from '../TableHeader/QueriesTableHeader/QueriesTableHeader';
 import CardList from '@/features/Projects/components/CardList/CardList';
+import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
+import { useRenameProject } from '@/features/Projects/hooks/useRenameProject';
   
 const ProjectDetailInner = () => {
   // Data management
   const data = useProjectDetailData();
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const [isRenaming, setIsRenaming] = useState(false);
 
   // drag and drop context
   const { active } = useDndContext();
@@ -45,12 +44,10 @@ const ProjectDetailInner = () => {
   const sortSearchState = useSortSearchState();
 
   const { handleUpdateProject } = useEditProjectHandlers();
-  const { handleRenameProject } = useRenameProject();
   
   // Global modals context
   const {
     openDeleteProjectModal,
-    openShareQueryModal
   } = useProjectModals();
 
   // Sorted data
@@ -62,12 +59,21 @@ const ProjectDetailInner = () => {
     searchTerm: sortSearchState.searchTerm
   });
 
-  // Edit state management
-  const isUnassignedPrj = isUnassignedProject(data.project || 0);
-
-  const handleEditClick = () => {
-    console.log('TODO: edit project');
-  };
+  // Rename state management
+  const {
+    isRenaming,
+    localTitle,
+    startRenaming,
+    handleTitleChange,
+    handleFormSubmit,
+    handleOutsideClick,
+    textInputRef
+  } = useRenameProject({
+    project: data.project,
+    allProjects: data.formatted.projects,
+    startRenaming: false,
+    onRename: () => {}
+  });
 
   const onQueryDrop = useCallback((draggedItem: DraggableData) => {
     if(data.project)
@@ -77,15 +83,19 @@ const ProjectDetailInner = () => {
   }, [data.project, data.project?.data.pks, handleUpdateProject]);
 
   const handleTabSelection = (heading: string) => {
-    if(heading === 'Options') {
-      console.log('Options');
-      setOptionsOpen(true);
-    }
+    if(heading === 'Options')
+      setOptionsOpen(prev => !prev);
   };
+
+  const handleRenameClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+    e.stopPropagation();
+    setOptionsOpen(prev => !prev);
+    startRenaming();
+  }
 
   const options = (
     <>
-      <Button handleClick={() => {if(data.project) setIsRenaming(true)}} iconLeft={<EditIcon />}>Rename</Button>
+      <Button handleClick={handleRenameClick} iconLeft={<EditIcon />}>Rename</Button>
       <Button handleClick={() => {if(data.project) openDeleteProjectModal(data.project)}} iconLeft={<TrashIcon />}>Delete</Button>
     </>
   );
@@ -93,7 +103,6 @@ const ProjectDetailInner = () => {
   const OptionsButton = () => (
     <div>
       <OptionsIcon />
-      {/* <Button iconLeft={<OptionsIcon />} iconOnly handleClick={() => setOptionsOpen(true)} /> */}
       <OptionsPane open={optionsOpen}>
         {options}
       </OptionsPane>
@@ -121,10 +130,15 @@ const ProjectDetailInner = () => {
               <div className={styles.projectHeaderContainer}>
                 <LoadingWrapper loading={data.loading.projectsLoading} >
                   <ListHeader
-                    heading={data.project?.data.title || ''}
+                    heading={localTitle}
                     searchPlaceholder="Search by Query Name"
                     searchTerm={sortSearchState.searchTerm}
                     handleSearch={sortSearchState.setSearchTerm}
+                    isRenaming={isRenaming}
+                    onTitleChange={handleTitleChange}
+                    onFormSubmit={handleFormSubmit}
+                    textInputRef={textInputRef}
+                    onOutsideClick={handleOutsideClick}
                   />
                 </LoadingWrapper>
               </div>
@@ -191,7 +205,7 @@ const ProjectDetailInner = () => {
                       </LoadingWrapper>
                     </DroppableArea>
                   </Tab>
-                  <Tab key="options" heading="Options" headingOverride={<OptionsButton />} onClick={() => setOptionsOpen(prev=>!prev)}>
+                  <Tab key="options" heading="Options" headingOverride={<OptionsButton />}>
                   </Tab>
                 </Tabs>
               </div>

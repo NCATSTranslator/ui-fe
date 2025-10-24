@@ -46,6 +46,8 @@ export type PathfinderNodeObject = {
   category: string,
 }
 
+export type QueryTypeString = 'drug' | 'gene' | 'chemical' | 'pathfinder';
+
 export interface UserQueryObject {
   data: {
     aras: string[],
@@ -63,7 +65,7 @@ export interface UserQueryObject {
       pid?: string | null,
       // category is biolink entity type
       subject?: PathfinderNodeObject,
-      type: "drug" | "gene" | "chemical" | "pathfinder"
+      type: QueryTypeString
     },
     time_created: Date,
     time_updated: Date,
@@ -74,7 +76,7 @@ export interface UserQueryObject {
   status: QueryStatus,
 }
 
-export type SortField = 'name' | 'lastSeen' | 'dateAdded' | 'bookmarks' | 'notes' | 'status';
+export type SortField = 'name' | 'lastSeen' | 'queries' | 'bookmarks' | 'notes' | 'status' | 'queryType';
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortSearchState {

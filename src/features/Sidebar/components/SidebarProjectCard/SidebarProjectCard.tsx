@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { Project } from "@/features/Projects/types/projects";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
@@ -17,18 +17,24 @@ import { handleQueryDrop } from "@/features/Projects/utils/dragDropUtils";
 import { DraggableData } from "@/features/DragAndDrop/types/types";
 import { isDraggedQueryInProject } from "@/features/Projects/utils/dragDropUtils";
 import { useDndContext } from "@dnd-kit/core";
+import { useRenameProject } from "@/features/Projects/hooks/useRenameProject";
 
 interface SidebarProjectCardProps {
-  blankProjectTitle: string;
+  allProjects?: Project[];
   onRename?: (project: Project) => void;
   project: Project;
   searchTerm?: string;
   startRenaming?: boolean;
 }
 
-const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm, startRenaming = false, onRename, blankProjectTitle }) => {
+const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
+  project,
+  searchTerm,
+  startRenaming = false,
+  onRename,
+  allProjects
+}) => {
   const queryCount = project.data.pks.length;
-  const [isRenaming, setIsRenaming] = useState(startRenaming);
   const { openDeleteProjectModal } = useProjectModals();
   const { handleUpdateProject } = useEditProjectHandlers();
   const isUnassigned = isUnassignedProject(project);
@@ -36,6 +42,21 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm, 
   const leftIcon = <FolderIcon />;
   const { active } = useDndContext();
   const isQueryInProject = useMemo(() => active ? isDraggedQueryInProject(active, project) : false, [active, project]);
+
+  const {
+    isRenaming,
+    localTitle,
+    startRenaming: startRenamingAction,
+    handleTitleChange,
+    handleFormSubmit,
+    handleOutsideClick,
+    textInputRef
+  } = useRenameProject({
+    project,
+    allProjects,
+    startRenaming,
+    onRename
+  });
 
   const bottomLeft = (
     <>
@@ -58,25 +79,10 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm, 
 
   const options = (
     <>
-      <Button handleClick={()=> setIsRenaming(true)} iconLeft={<EditIcon />}>Rename</Button>
+      <Button handleClick={startRenamingAction} iconLeft={<EditIcon />}>Rename</Button>
       <Button handleClick={() => openDeleteProjectModal(project)} iconLeft={<TrashIcon />}>Delete</Button>
     </>
   );
-
-  const handleRename = (value: string) => {
-    const newTitle = (value.length > 0) ? value.trim() : blankProjectTitle;
-    handleUpdateProject(project.id, newTitle);
-    onRename?.(project);
-  }
-
-  const handleOutsideClick = () => {
-    if(isRenaming) {
-      // if the project title is empty, call handleRename with an empty string to set the default title
-      if(project.data.title.length === 0)
-        handleRename('');
-      setIsRenaming(false);
-    }
-  };
 
   const onQueryDrop = useCallback((draggedItem: DraggableData) => {
     if(project)
@@ -102,7 +108,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm, 
       >
         <SidebarCard
           leftIcon={leftIcon}
-          title={project.data.title}
+          title={localTitle}
           searchTerm={searchTerm}
           linkTo={`/projects/${project.id}`}
           bottomLeft={bottomLeft}
@@ -111,8 +117,9 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({ project, searchTerm, 
           className={className}
           options={isUnassigned ? undefined : options}
           isRenaming={isRenaming}
-          setIsRenaming={setIsRenaming}
-          onRename={handleRename}
+          onTitleChange={handleTitleChange}
+          onFormSubmit={handleFormSubmit}
+          textInputRef={textInputRef}
         />
       </DroppableArea>
     </OutsideClickHandler>
