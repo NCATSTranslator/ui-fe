@@ -4,7 +4,7 @@ import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunc
 import { getBlankProjectTitle } from "@/features/Projects/utils/utilities";
 
 interface UseRenameProjectOptions {
-  project: Project;
+  project?: Project;
   allProjects?: Project[];
   startRenaming?: boolean;
   onRename?: (project: Project) => void;
@@ -33,7 +33,7 @@ interface UseRenameProjectReturn {
  * Provides a unified interface for renaming projects across different components
  * 
  * @param options - Configuration options
- * @param options.project - The project to rename
+ * @param options.project - The project to rename (optional - hook will handle undefined gracefully)
  * @param options.allProjects - Optional array of all projects to calculate next "New Project X" title
  * @param options.startRenaming - Whether to start in renaming mode
  * @param options.onRename - Callback when rename completes
@@ -46,12 +46,12 @@ export const useRenameProject = ({
   onRename
 }: UseRenameProjectOptions): UseRenameProjectReturn => {
   const [isRenaming, setIsRenaming] = useState(initialRenaming);
-  const [localTitle, setLocalTitle] = useState(project.data.title);
+  const [localTitle, setLocalTitle] = useState(project?.data.title || '');
   const textInputRef = useRef<HTMLInputElement>(null);
   const { handleUpdateProject } = useEditProjectHandlers();
   
   // Calculate blank project title
-  // Priority: blankProjectTitle prop > calculated from allProjects > default
+  // Priority: calculated from allProjects > default
   const defaultBlankTitle = useMemo(() => {
     if (allProjects) return getBlankProjectTitle(allProjects);
     return 'Untitled Project';
@@ -59,10 +59,10 @@ export const useRenameProject = ({
   
   // Keep local title in sync with project title when not renaming
   useEffect(() => {
-    if (!isRenaming) {
+    if (!isRenaming && project) {
       setLocalTitle(project.data.title);
     }
-  }, [project.data.title, isRenaming]);
+  }, [project?.data.title, isRenaming, project]);
 
   // Focus and select text when entering rename mode
   useEffect(() => {
@@ -83,17 +83,30 @@ export const useRenameProject = ({
    * Cancel renaming and revert to original title
    */
   const cancelRenaming = useCallback(() => {
-    setLocalTitle(project.data.title);
+    if (project)
+      setLocalTitle(project.data.title);
+
     setIsRenaming(false);
-  }, [project.data.title]);
+  }, [project]);
 
   /**
    * Complete the renaming process and update the project
    * @param title - Optional title to use, defaults to localTitle
    */
   const completeRenaming = useCallback((title?: string) => {
+    if (!project) {
+      setIsRenaming(false);
+      return;
+    }
+    
     const titleToUse = title !== undefined ? title : localTitle;
     const finalTitle = titleToUse.trim().length > 0 ? titleToUse.trim() : defaultBlankTitle;
+
+    // If the final title is the same as the current title, don't update
+    if(finalTitle === project.data.title) {
+      setIsRenaming(false);
+      return;
+    }
     
     handleUpdateProject(project.id, finalTitle);
     onRename?.(project);
@@ -120,9 +133,8 @@ export const useRenameProject = ({
    * Completes renaming with current value or blank title if empty
    */
   const handleOutsideClick = useCallback(() => {
-    if (isRenaming) {
+    if (isRenaming)
       completeRenaming();
-    }
   }, [isRenaming, completeRenaming]);
 
   return {
