@@ -1,15 +1,15 @@
-import { FC, useCallback, useRef, useEffect, useState, FormEvent, ReactNode } from "react";
+import { FC, FormEvent, ReactNode, RefObject } from "react";
 import styles from "@/features/Projects/components/DataCard/DataCard.module.scss";
 import { Link } from "react-router-dom";
 import Highlighter from "react-highlight-words";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
-import { debounce } from "lodash";
 
 interface CardNameProps {
   icon?: ReactNode;
   isRenaming?: boolean;
-  setIsRenaming?: (isRenaming: boolean) => void;
-  onRename?: (value: string) => void;
+  onTitleChange?: (value: string) => void;
+  onFormSubmit?: (e: FormEvent<HTMLFormElement>) => void;
+  textInputRef?: RefObject<HTMLInputElement | null>;
   linkTarget?: string;
   linkTo?: string;
   searchTerm?: string;
@@ -19,42 +19,18 @@ interface CardNameProps {
 const CardName: FC<CardNameProps> = ({
   icon,
   isRenaming,
-  setIsRenaming,
-  onRename,
+  onTitleChange,
+  onFormSubmit,
+  textInputRef,
   title,
   searchTerm,
   linkTo,
   linkTarget,
 }) => {
-  const textInputRef = useRef<HTMLInputElement>(null);
-  const [localTitle, setLocalTitle] = useState(title);
-
-  const debouncedOnRename = useCallback(debounce((value: string) => {
-    onRename?.(value);
-  }, 1000), [onRename]);
-
-  useEffect(() => {
-    if (isRenaming && textInputRef.current) {
-      textInputRef.current.focus();
-      textInputRef.current.select();
-    }
-  }, [isRenaming]);
-
-  const handleChange = (value: string) => {
-    setLocalTitle(value);
-    debouncedOnRename(value);
-  };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onRename?.(localTitle);
-    setIsRenaming?.(false);
-  };
-
   const titleContent = (
-    isRenaming ? (
-      <form onSubmit={handleSubmit}>
-        <TextInput value={localTitle} handleChange={handleChange} iconRightClickToReset ref={textInputRef} className={styles.titleInput}/>
+    isRenaming && onTitleChange && onFormSubmit ? (
+      <form onSubmit={onFormSubmit}>
+        <TextInput value={title} handleChange={onTitleChange} iconRightClickToReset ref={textInputRef} className={styles.titleInput}/>
       </form>
     ) : (
       <Highlighter

@@ -1,4 +1,4 @@
-import { FC, ReactNode, MouseEvent, useCallback, useState } from "react";
+import { FC, ReactNode, MouseEvent, useCallback, useState, FormEvent, RefObject } from "react";
 import styles from "./SidebarCard.module.scss";
 import { joinClasses } from "@/features/Common/utils/utilities";
 import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
@@ -21,8 +21,9 @@ interface SidebarCardProps {
   'data-testid'?: string;
   options?: ReactNode;
   isRenaming?: boolean;
-  setIsRenaming?: (isRenaming: boolean) => void;
-  onRename?: (value: string) => void;
+  onTitleChange?: (value: string) => void;
+  onFormSubmit?: (e: FormEvent<HTMLFormElement>) => void;
+  textInputRef?: RefObject<HTMLInputElement | null>;
 }
 
 const SidebarCard: FC<SidebarCardProps> = ({
@@ -38,8 +39,9 @@ const SidebarCard: FC<SidebarCardProps> = ({
   'data-testid': testId,
   options,
   isRenaming,
-  setIsRenaming,
-  onRename
+  onTitleChange,
+  onFormSubmit,
+  textInputRef
 }) => {
   const handleClick = useCallback((event: MouseEvent<HTMLDivElement>) => {
     // Don't trigger onClick if user clicked on a link
@@ -68,8 +70,9 @@ const SidebarCard: FC<SidebarCardProps> = ({
           linkTo={linkTo}
           linkTarget={linkTarget}
           isRenaming={isRenaming}
-          setIsRenaming={setIsRenaming}
-          onRename={onRename}
+          onTitleChange={onTitleChange}
+          onFormSubmit={onFormSubmit}
+          textInputRef={textInputRef}
         />
         {(bottomLeft || bottomRight) && (
           <div className={styles.bottom}>

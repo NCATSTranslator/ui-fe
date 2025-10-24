@@ -9,7 +9,6 @@ import Button from "@/features/Core/components/Button/Button";
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import { useCreateProject, useSortSearchState } from "@/features/Projects/hooks/customHooks";
 import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
-import { getBlankProjectTitle } from "@/features/Projects/utils/utilities";
 import ProjectCard from "@/features/Projects/components/ProjectCard/ProjectCard";
 import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
 import Tab from "@/features/Common/components/Tabs/Tab";
@@ -32,8 +31,6 @@ const ProjectList = () => {
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => project.data.title.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [projects, searchTerm]);
-
-  const blankProjectTitle = useMemo(() => getBlankProjectTitle(projects), [projects]);
 
   const handleCreateNewProjectClick = () => {
     const newProject = {
@@ -109,10 +106,10 @@ const ProjectList = () => {
                         <ProjectCard
                           key={project.id}
                           project={project}
+                          allProjects={projects}
                           searchTerm={searchTerm}
                           startRenaming={newProjectId === project.id}
                           onRename={handleRenameProject}
-                          blankProjectTitle={blankProjectTitle}
                         />
                       ))}
                     </CardList>

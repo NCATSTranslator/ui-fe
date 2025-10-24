@@ -1,4 +1,4 @@
-import { FC, ReactNode, MouseEvent, useCallback, useState, useMemo } from "react";
+import { FC, ReactNode, MouseEvent, useCallback, useState, useMemo, FormEvent, RefObject } from "react";
 import styles from "./DataCard.module.scss";
 import { joinClasses } from "@/features/Common/utils/utilities";
 import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
@@ -21,8 +21,9 @@ interface DataCardProps {
   'data-testid'?: string;
   options?: ReactNode;
   isRenaming?: boolean;
-  setIsRenaming?: (isRenaming: boolean) => void;
-  onRename?: (value: string) => void;
+  onTitleChange?: (value: string) => void;
+  onFormSubmit?: (e: FormEvent<HTMLFormElement>) => void;
+  textInputRef?: RefObject<HTMLInputElement | null>;
   type: 'project' | 'query';
   bookmarksCount: number;
   notesCount: number;
@@ -42,8 +43,9 @@ const DataCard: FC<DataCardProps> = ({
   'data-testid': testId,
   options,
   isRenaming,
-  setIsRenaming,
-  onRename,
+  onTitleChange,
+  onFormSubmit,
+  textInputRef,
   type,
   bookmarksCount,
   notesCount,
@@ -81,8 +83,9 @@ const DataCard: FC<DataCardProps> = ({
           linkTo={linkTo}
           linkTarget={linkTarget}
           isRenaming={isRenaming}
-          setIsRenaming={setIsRenaming}
-          onRename={onRename}
+          onTitleChange={onTitleChange}
+          onFormSubmit={onFormSubmit}
+          textInputRef={textInputRef}
           icon={icon}
         />
         <div className={styles.bookmarksColumn}>

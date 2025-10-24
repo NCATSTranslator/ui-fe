@@ -13,7 +13,6 @@ import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useCreateProject } from "@/features/Projects/hooks/customHooks";
 import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
-import { getBlankProjectTitle } from "@/features/Projects/utils/utilities";
 
 const ProjectsPanel = () => {
   const user = useSelector(currentUser);
@@ -27,8 +26,6 @@ const ProjectsPanel = () => {
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => project.data.title.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [projects, searchTerm]);
-
-  const blankProjectTitle = useMemo(() => getBlankProjectTitle(projects), [projects]);
 
   const handleCreateNewProjectClick = () => {
     const newProject = {
@@ -84,10 +81,10 @@ const ProjectsPanel = () => {
                 <SidebarProjectCard 
                   key={project.id}
                   project={project}
+                  allProjects={projects}
                   searchTerm={searchTerm}
                   startRenaming={newProjectId === project.id}
                   onRename={handleRenameProject}
-                  blankProjectTitle={blankProjectTitle}
                 />
               ))}
             </LoadingWrapper>

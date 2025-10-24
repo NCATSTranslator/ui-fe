@@ -19,8 +19,6 @@ import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import OptionsPane from '@/features/Sidebar/components/OptionsPane/OptionsPane';
 import Button from '@/features/Core/components/Button/Button';
-import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
-import { useRenameProject } from '@/features/Projects/hooks/useRenameProject';
 import ListHeader from '@/features/Core/components/ListHeader/ListHeader';
 import QueriesTableHeader from '../TableHeader/QueriesTableHeader/QueriesTableHeader';
 import CardList from '@/features/Projects/components/CardList/CardList';
@@ -45,12 +43,10 @@ const ProjectDetailInner = () => {
   const sortSearchState = useSortSearchState();
 
   const { handleUpdateProject } = useEditProjectHandlers();
-  const { handleRenameProject } = useRenameProject();
   
   // Global modals context
   const {
     openDeleteProjectModal,
-    openShareQueryModal
   } = useProjectModals();
 
   // Sorted data
@@ -64,10 +60,6 @@ const ProjectDetailInner = () => {
 
   // Edit state management
   const isUnassignedPrj = isUnassignedProject(data.project || 0);
-
-  const handleEditClick = () => {
-    console.log('TODO: edit project');
-  };
 
   const onQueryDrop = useCallback((draggedItem: DraggableData) => {
     if(data.project)
