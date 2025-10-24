@@ -75,48 +75,6 @@ const Tabs: FC<TabsProps> = ({
     handleTabSelection(heading);
   }, [controlled, handleTabSelection]);
 
-  // Keyboard navigation handler
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
-    if (!activeTabHeading) return;
-
-    const currentIndex = tabHeadings.indexOf(activeTabHeading);
-    if (currentIndex === -1) return;
-
-    let nextIndex: number;
-
-    switch (e.key) {
-      case 'ArrowRight':
-        e.preventDefault();
-        nextIndex = (currentIndex + 1) % tabHeadings.length;
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        nextIndex = (currentIndex - 1 + tabHeadings.length) % tabHeadings.length;
-        break;
-      case 'Home':
-        e.preventDefault();
-        nextIndex = 0;
-        break;
-      case 'End':
-        e.preventDefault();
-        nextIndex = tabHeadings.length - 1;
-        break;
-      default:
-        return;
-    }
-
-    const nextHeading = tabHeadings[nextIndex];
-    handleTabClick(nextHeading);
-    
-    // Focus the next tab after a brief delay to ensure state update
-    setTimeout(() => {
-      const nextTabRef = tabRefs.current[nextHeading];
-      if (nextTabRef) {
-        nextTabRef.focus();
-      }
-    }, 0);
-  }, [activeTabHeading, tabHeadings, handleTabClick]);
-
   // Set tab ref
   const setTabRef = useCallback((heading: string, element: HTMLDivElement | null) => {
     tabRefs.current[heading] = element;
@@ -129,7 +87,6 @@ const Tabs: FC<TabsProps> = ({
       className={`${styles.tabs} ${className || ''}`} 
       role="tablist"
       ref={tabsContainerRef}
-      onKeyDown={handleKeyDown}
     >
       <div className={`${styles.tabList} ${tabListClassName || ''}`}>
         {validChildren.map((child, i) => {
