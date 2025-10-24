@@ -95,7 +95,9 @@ $maxwidth: 1250px;
 $panelWidth: 292px;
 
 // Grids //
-$projectsGridColumns: 1fr 72px 80px 90px $xl $xl $xxl;
+$projectCardColumns: 1fr $xl $xl 85px 110px 14px;
+$dataCardGap: $l;
+$queryCardColumns: 1fr $xl $xl 120px 110px 14px;
 
 // Screens //
 $small: 425px;

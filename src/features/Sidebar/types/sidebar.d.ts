@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-type SidebarItemId = 'newQuery' | 'projects' | 'queries' | 'projectsPanel' | 'filters' | 'queryStatus' | 'settings' | 'feedback' | 'help';
+type SidebarItemId = 'newQuery' | 'queries' | 'projects' | 'filters' | 'queryStatus' | 'settings' | 'feedback' | 'help';
 
 export type SidebarContextValue = {
   collapsed: boolean;

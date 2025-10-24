@@ -22,9 +22,9 @@ export const sortProjects = (projects: Project[], sortField: SortField, sortDire
         aValue = a.time_updated;
         bValue = b.time_updated;
         break;
-      case 'dateAdded':
-        aValue = a.time_created;
-        bValue = b.time_created;
+      case 'queries':
+        aValue = a.data.pks.length;
+        bValue = b.data.pks.length;
         break;
       case 'bookmarks':
         aValue = a.bookmark_count;
@@ -107,9 +107,9 @@ export const sortQueries = (queries: UserQueryObject[], sortField: SortField, so
         aValue = a.data.time_updated;
         bValue = b.data.time_updated;
         break;
-      case 'dateAdded':
-        aValue = a.data.time_created;
-        bValue = b.data.time_created;
+      case 'queries':
+        aValue = 0;
+        bValue = 0;
         break;
       case 'bookmarks':
         aValue = a.data.bookmark_ids.length;
@@ -118,6 +118,10 @@ export const sortQueries = (queries: UserQueryObject[], sortField: SortField, so
       case 'notes':
         aValue = a.data.note_count;
         bValue = b.data.note_count;
+        break;
+      case 'queryType':
+        aValue = a.data.query.type;
+        bValue = b.data.query.type;
         break;
       case 'status':
         aValue = a.status;
