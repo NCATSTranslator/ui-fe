@@ -12,8 +12,17 @@
     position: relative;
     .projectTabs {
       margin-top: 0;
+      svg path {
+        fill: $purpleOne;
+      }
+      .optionsIcon {
+        path {
+          fill: $darkGray;
+        }
+      }
     }
   }
+
   .queryGrid {
     display: flex;
     flex-direction: column;

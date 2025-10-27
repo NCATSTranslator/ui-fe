@@ -102,7 +102,7 @@ const ProjectDetailInner = () => {
 
   const OptionsButton = () => (
     <div>
-      <OptionsIcon />
+      <OptionsIcon className={styles.optionsIcon} />
       <OptionsPane open={optionsOpen}>
         {options}
       </OptionsPane>
