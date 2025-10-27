@@ -82,11 +82,6 @@ const ProjectDetailInner = () => {
       console.error('No project found');
   }, [data.project, data.project?.data.pks, handleUpdateProject]);
 
-  const handleTabSelection = (heading: string) => {
-    if(heading === 'Options')
-      setOptionsOpen(prev => !prev);
-  };
-
   const handleRenameClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     e.stopPropagation();
     setOptionsOpen(prev => !prev);
@@ -99,9 +94,12 @@ const ProjectDetailInner = () => {
       <Button handleClick={() => {if(data.project) openDeleteProjectModal(data.project)}} iconLeft={<TrashIcon />}>Delete</Button>
     </>
   );
+  const handleOutsideTabListClick = useCallback(() => {
+    setOptionsOpen(false);
+  }, [optionsOpen]);
 
   const OptionsButton = () => (
-    <div>
+    <div onClick={(e) => {e.stopPropagation(); setOptionsOpen(prev=>!prev); }}>
       <OptionsIcon className={styles.optionsIcon} />
       <OptionsPane open={optionsOpen}>
         {options}
@@ -145,7 +143,7 @@ const ProjectDetailInner = () => {
               <div className={styles.projectTabsContainer}>
                 <Tabs 
                   isOpen={true}
-                  handleTabSelection={handleTabSelection}
+                  handleOutsideTabListClick={handleOutsideTabListClick}
                   defaultActiveTab={queriesTabHeading}
                   className={styles.projectTabs}
                   activeTab={queriesTabHeading}

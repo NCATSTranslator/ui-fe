@@ -3,6 +3,7 @@ import { useState, useEffect, FC, ReactElement, Children, isValidElement,
 import Tab, { TabProps } from "./Tab";
 import { Fade } from 'react-awesome-reveal';
 import styles from './Tabs.module.scss';
+import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
 
 interface TabsProps {
   children: (ReactElement<TabProps> | null)[];
@@ -11,6 +12,7 @@ interface TabsProps {
   tabClassName?: string;
   isOpen: boolean;
   handleTabSelection?: (heading: string) => void;
+  handleOutsideTabListClick?: () => void;
   defaultActiveTab?: string;
   controlled?: boolean;
   activeTab?: string;
@@ -23,6 +25,7 @@ const Tabs: FC<TabsProps> = ({
   tabClassName = "",
   isOpen, 
   handleTabSelection = () => {}, 
+  handleOutsideTabListClick = () => {},
   defaultActiveTab,
   controlled = false,
   activeTab: controlledActiveTab
@@ -88,23 +91,27 @@ const Tabs: FC<TabsProps> = ({
       role="tablist"
       ref={tabsContainerRef}
     >
-      <div className={`${styles.tabList} ${tabListClassName || ''}`}>
-        {validChildren.map((child, i) => {
-          const { heading, headingOverride, tooltipIcon, dataTooltipId = "" } = child.props;
-          return (
-            <Tab
-              key={`${heading}-${i}`}
-              activeTabHeading={activeTabHeading}
-              heading={heading}
-              headingOverride={headingOverride}
-              tooltipIcon={tooltipIcon}
-              onClick={handleTabClick}
-              dataTooltipId={dataTooltipId}
-              setTabRef={setTabRef}
-              className={tabClassName}
-            />
-          );
-        })}
+      <div className={styles.tabListWrapper}>
+        <OutsideClickHandler onOutsideClick={handleOutsideTabListClick} className={styles.outsideClickHandler}>
+          <div className={`${styles.tabList} ${tabListClassName || ''}`}>
+            {validChildren.map((child, i) => {
+              const { heading, headingOverride, tooltipIcon, dataTooltipId = "" } = child.props;
+              return (
+                <Tab
+                  key={`${heading}-${i}`}
+                  activeTabHeading={activeTabHeading}
+                  heading={heading}
+                  headingOverride={headingOverride}
+                  tooltipIcon={tooltipIcon}
+                  onClick={handleTabClick}
+                  dataTooltipId={dataTooltipId}
+                  setTabRef={setTabRef}
+                  className={tabClassName}
+                />
+              );
+            })}
+          </div>
+        </OutsideClickHandler>
       </div>
       
       {validChildren.map((child, i) => {
