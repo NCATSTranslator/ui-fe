@@ -193,6 +193,7 @@ const ProjectDetailInner = () => {
                                           key={query.data.qid}
                                           query={query}
                                           searchTerm={sortSearchState.searchTerm}
+                                          projectId={data.project?.id}
                                         />
                                       ))
                                     )}

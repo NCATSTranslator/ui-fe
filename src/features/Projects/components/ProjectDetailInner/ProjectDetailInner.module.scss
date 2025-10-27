@@ -10,18 +10,8 @@
   }
   .projectTabsContainer {
     position: relative;
-    .projectTabs {
-      margin-top: 0;
-      svg path {
-        fill: $purpleOne;
-      }
-      .optionsIcon {
-        path {
-          fill: $darkGray;
-        }
-      }
-    }
   }
+
 
   .queryGrid {
     display: flex;
@@ -52,5 +42,17 @@
     font-weight: 400;
     font-size: $bodyTwoSize;
     color: $darkGray
+  }
+}
+
+.projectTabs {
+  margin-top: 0;
+  svg path {
+    fill: $purpleOne;
+  }
+  .optionsIcon {
+    path {
+      fill: $darkGray;
+    }
   }
 }

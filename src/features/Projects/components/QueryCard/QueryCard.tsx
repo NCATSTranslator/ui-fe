@@ -3,13 +3,14 @@ import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import { getQueryLink } from "@/features/Projects/utils/utilities";
 import DataCard from "@/features/Projects/components/DataCard/DataCard";
-import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
+import styles from "@/features/Projects/components/DataCard/DataCard.module.scss";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { DraggableCard } from "@/features/DragAndDrop/components/DraggableCard/DraggableCard";
 import { DraggableData } from "@/features/DragAndDrop/types/types";
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
 import Button from "@/features/Core/components/Button/Button";
 import FolderPlusIcon from '@/assets/icons/projects/folderplus.svg?react';
+import FolderEmptyIcon from '@/assets/icons/projects/folderempty.svg?react';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { getTimeRelativeDate } from "@/features/Common/utils/utilities";
@@ -17,11 +18,16 @@ import { useLocation } from "react-router-dom";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 
 interface QueryCardProps {
+  projectId?: number;
   query: UserQueryObject;
   searchTerm?: string;
 }
 
-const QueryCard: FC<QueryCardProps> = ({ query, searchTerm }) => {
+const QueryCard: FC<QueryCardProps> = ({
+  projectId,
+  query,
+  searchTerm
+}) => {
   const { title } = useGetQueryCardTitle(query);  
   const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
   const { activePanelId } = useSidebar();
@@ -38,7 +44,12 @@ const QueryCard: FC<QueryCardProps> = ({ query, searchTerm }) => {
 
   const options = (
     <>
-      <Button handleClick={()=>{}} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />}>Add to Project</Button>
+      <Button handleClick={()=>{console.log('add to project');}} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />} className={styles.addToProjectButton}>Add to Project</Button>
+      {
+        projectId && (
+          <Button handleClick={()=>{console.log('remove from project');}} iconLeft={<FolderEmptyIcon className={styles.folderPlusIcon} />} className={styles.removeFromProjectButton}>Remove from this Project</Button>
+        )
+      }
       <Button handleClick={() => openShareQueryModal(query)} iconLeft={<ShareIcon />}>Share Query</Button>
       <Button handleClick={() => openDeleteQueriesModal([query])} iconLeft={<TrashIcon />}>Delete Query</Button>
     </>

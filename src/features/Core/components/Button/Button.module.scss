@@ -28,8 +28,10 @@
   svg {
     height: $m;
     width: $m;
+    transition: $defaultAnim;
     path {
       fill: $white;
+      transition: $defaultAnim;
     }
   }
   &.secondary {
