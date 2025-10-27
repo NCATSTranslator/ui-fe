@@ -65,7 +65,12 @@
     border: 1px solid $lightPurpleTwo;
     background-color: $palePurple;
   }
-  
+  .tabListWrapper {
+    padding: 0;
+    & > div {
+      width: auto;
+    }
+  }
   .queryTab,
   .pathfinderTab {
     overflow: visible;

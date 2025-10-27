@@ -101,6 +101,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
         defaultActiveTab="Smart Query"
         className={styles.tabsContainer}
         tabListClassName={styles.tabList}
+        tabListWrapperClassName={styles.tabListWrapper}
       >
         <Tab heading="Smart Query" className={styles.queryTab}>
           <Query
