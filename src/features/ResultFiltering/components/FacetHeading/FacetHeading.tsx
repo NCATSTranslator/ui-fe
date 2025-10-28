@@ -2,7 +2,7 @@ import { FC, ReactNode } from "react";
 import styles from "./FacetHeading.module.scss";
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import Alert from '@/assets/icons/status/Alerts/Info.svg?react';
-import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
+import ChevRight from "@/assets/icons/directional/Chevron/Chevron Right.svg?react";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { getFilterFamily } from "@/features/ResultFiltering/utils/filterFunctions";
 
@@ -36,7 +36,7 @@ const FacetHeading: FC<FacetHeadingProps> = ({ title, tagFamily, activeFilters, 
         </div>
         {
           tagFamily !== "str" &&
-          <ChevDown className={styles.expansionSVG}/>
+          <ChevRight className={styles.expansionSVG}/>
         }
       </div>
     </div>

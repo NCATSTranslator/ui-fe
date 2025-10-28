@@ -4,16 +4,17 @@
   width: 100%;
   .labelHeading {
     display: grid;
-    grid-template-columns: 1fr 35px;
+    grid-template-columns: 1fr $m;
+    align-items: center;
     width: 100%;
   }
   .filterCount {
     background-color: $midGray;
     color: $darkGray;
-    font-size: 12px;
+    font-size: $captionSize;
     font-weight: 800;
     line-height: 1.25;
-    padding: 2.5px 4px;
+    padding: $xxxs $xxs;
     border-radius: $defaultBorderRadius;
   }
   .label {
@@ -30,7 +31,7 @@
     }
   } 
   svg {
-    margin-left: 4px;
+    margin-left: $xxs;
     &.tooltipIcon {
       transform: none !important;
     }
@@ -41,12 +42,12 @@
   .subTwo {
     margin: 0;
     font-weight: 800;
-    font-size: 14px;
-    color: $black;
+    font-size: $subTwoSize;
+    color: $darkGray;
   }
   .caption {
     font-size: $captionSize;
-    margin: 0 0 15px;
+    margin: 0 0 $s;
     font-weight: 400;
     color: $darkGray;
   }
