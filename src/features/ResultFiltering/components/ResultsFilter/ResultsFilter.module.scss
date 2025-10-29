@@ -34,10 +34,7 @@
       color: $darkGray;
       padding: 0;
       white-space: nowrap;
-    }
-    svg path {
-      stroke: $darkGray;
-      transition: $defaultAnim;
+      text-align: right;
     }
   }
   .entitySearch {

@@ -68,41 +68,6 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
     // pt: (a: [string, Filter], b: [string, Filter]) => -(a[1].name.localeCompare(b[1].name))
   };
 
-  const getTagHeadingMarkup = (tagFamily: FilterFamily, activeFilters: Filter[]): ReactNode | null => {
-    let headingToReturn;
-    const title = getFilterLabel(tagFamily);
-    const commonProps = {
-      activeFilters: activeFilters,
-      tagFamily: tagFamily,
-      title: title,
-    }
-    switch(tagFamily) {
-      case 'cc':
-        headingToReturn =
-          <FacetHeading {...commonProps}>
-            <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
-            <p className={styles.tooltipParagraph}>Phase 1-3 Drugs are chemicals that are part of a clinical trial and do not yet have FDA approval.</p>
-            <p className={styles.tooltipParagraph}>Other includes all other chemicals.</p>
-          </FacetHeading>;
-        break;
-      case 'pc':
-        headingToReturn =
-          <FacetHeading {...commonProps}>
-            <span className={styles.fdaSpan}>Click <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}> here <ExternalLink/></a> to learn more about the Biolink Model.</span>
-          </FacetHeading>;
-        break;
-      case 'role':
-        headingToReturn =
-          <FacetHeading {...commonProps}>
-            <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more <ExternalLink/></a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
-          </FacetHeading>;
-        break;
-      default:
-        headingToReturn = <FacetHeading {...commonProps} />
-    }
-    return headingToReturn;
-  }
-
   return (
     <div className={`${styles.resultsFilter}`}>
       {/* <div className={styles.top}>
@@ -115,7 +80,11 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
           handleClick={()=>handleSetActiveFilterFamily('txt')}
           className={styles.facetButton}
         >
-          {getTagHeadingMarkup('txt', activeFilters)}
+          <FacetHeading
+            activeFilters={activeFilters}
+            tagFamily="txt"
+            title="Text"
+          />
         </Button>
         <div>
           {
@@ -133,7 +102,11 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                       handleClick={()=>handleSetActiveFilterFamily(filterFamily as FilterFamily)}
                       className={styles.facetButton}
                     >
-                      {getTagHeadingMarkup(filterFamily as FilterFamily, activeFilters)}
+                      <FacetHeading
+                        activeFilters={activeFilters}
+                        tagFamily={filterFamily as FilterFamily}
+                        title={getFilterLabel(filterFamily as FilterFamily)}
+                      />
                     </Button>
                   )
                 })
@@ -156,7 +129,11 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                       handleClick={()=>handleSetActiveFilterFamily(filterFamily as FilterFamily)}
                       className={styles.facetButton}
                     >
-                      {getTagHeadingMarkup(filterFamily as FilterFamily, activeFilters)}
+                      <FacetHeading
+                        activeFilters={activeFilters}
+                        tagFamily={filterFamily as FilterFamily}
+                        title={getFilterLabel(filterFamily as FilterFamily)}
+                      />
                     </Button>
                   )
                 })

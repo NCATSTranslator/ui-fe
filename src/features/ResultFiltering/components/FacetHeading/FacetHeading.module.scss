@@ -21,19 +21,20 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    span {
+    & > span {
       display: inline-flex;
       align-items: center;
       position: relative;
     }
-    svg path {
+    .tooltipIcon path {
       fill: $darkGray;
     }
   } 
-  svg {
+  svg.tooltipIcon {
     margin-left: $xxs;
-    &.tooltipIcon {
-      transform: none !important;
+    transform: none !important;
+    path {
+      stroke: transparent;
     }
   }
   .subOne {
@@ -53,5 +54,11 @@
   }
   label {
     margin: 0;
+  }
+  .expansionSVG {
+    path {
+      stroke: $darkGray;
+      transition: $defaultAnim;
+    }
   }
 }
