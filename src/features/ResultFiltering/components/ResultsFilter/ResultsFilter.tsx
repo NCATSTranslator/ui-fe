@@ -97,27 +97,6 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
             <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more <ExternalLink/></a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
           </FacetHeading>;
         break;
-      // case 'ara':
-      //   headingToReturn = <FacetHeading {...commonProps} />;
-      //   break;
-      // case 'di':
-      //   headingToReturn = <FacetHeading {...commonProps} />;
-      //   break;
-      // case 'pt':
-      //   headingToReturn = <FacetHeading {...commonProps} />;
-      //   break;
-      // case 'otc':
-      //   headingToReturn = <FacetHeading {...commonProps} />;
-      //   break;
-      // case 'tdl':
-      //   headingToReturn = <FacetHeading {...commonProps} />
-      //   break;
-      // case 'sv':
-      //   headingToReturn = <FacetHeading {...commonProps} />
-      // break;
-      // case 'ev':
-      //   headingToReturn = <FacetHeading {...commonProps} />
-      //   break;
       default:
         headingToReturn = <FacetHeading {...commonProps} />
     }
@@ -138,7 +117,6 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
         >
           {getTagHeadingMarkup('txt', activeFilters)}
         </Button>
-
         <div>
           {
             groupHasFilters(resultFilters) && !isPathfinder &&
