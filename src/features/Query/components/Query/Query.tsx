@@ -26,6 +26,7 @@ interface QueryProps {
   handleResultMatchClick?: (match: ResultContextObject) => void;
   pk?: string;
   selectedProject?: ProjectRaw | null;
+  combinedStyles?: { [key: string]: string };
 }
 
 const Query: FC<QueryProps> = ({
@@ -39,7 +40,8 @@ const Query: FC<QueryProps> = ({
   results = [],
   handleResultMatchClick,
   pk = "",
-  selectedProject = null
+  selectedProject = null,
+  combinedStyles
 }) => {
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
@@ -187,6 +189,7 @@ const Query: FC<QueryProps> = ({
               onClearQueryItem={clearQueryItem}
               autocompleteVisibility={autocompleteVisibility}
               setAutocompleteVisibility={setAutocompleteVisibility}
+              combinedStyles={combinedStyles}
             />
           )}
         </div>

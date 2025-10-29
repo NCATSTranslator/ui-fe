@@ -170,7 +170,6 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
 
   const handleChemicalCategorySearch = useMemo(() =>debounce((value: string) => { setChemicalCategorySearchTerm(value) }, 500),[]);
 
-  console.log('grouped filters: ', groupedFilters, Object.keys(groupedFilters[filterFamily]!).length > 0);
   return (
     <div className={styles.facetGroup}>
       {

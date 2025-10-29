@@ -91,4 +91,30 @@
   .tooltipText {
     margin: 0;
   }
+  &.projectPage {
+    position: relative;
+    z-index: 10;
+    padding: 0;
+    .queryTab, .pathfinderTab {
+      padding: 0;
+    }
+    .tabsContainer {
+      border: none;
+      margin: 0;
+      padding: $s 0 $l;
+    }
+    .tabListWrapper, .queryBarContainer {
+      margin: 0;
+    }
+    .tabList {
+      background-color: transparent;
+    }
+    .examples, p {
+      display: none;
+    }
+    .betaTag {
+      background-color: $lightPurpleTwo;
+      color: $darkGray;
+    }
+  }
 }

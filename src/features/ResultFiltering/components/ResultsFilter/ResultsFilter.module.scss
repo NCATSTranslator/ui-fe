@@ -9,7 +9,7 @@
   height: 100%;
   .activeFilterFamily {
     position: absolute;
-    inset: 0;
+    inset: 0 1px 0 0;
     background-color: $lightGray;
     z-index: 1000;
   }
@@ -28,6 +28,12 @@
     &.backButton {
       padding: $s;
       margin: 0;
+      justify-content: flex-start;
+      gap: $xxs;
+      & > span {
+        width: auto;
+        text-align: left;
+      }
     }
     & > span {
       width: 100%;
@@ -69,7 +75,6 @@
   .top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     .right {
       display: flex;
       align-items: center;

@@ -12,6 +12,7 @@ import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice
 import { QueryType } from "@/features/Query/types/querySubmission";
 import { ProjectRaw } from "@/features/Projects/types/projects.d";
 import { useUserProjects, useUserQueries } from "@/features/Projects/hooks/customHooks";
+import { joinClasses } from "@/features/Common/utils/utilities";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import EditQueryModal from "@/features/Projects/components/EditQueryModal/EditQueryModal";
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
@@ -23,6 +24,7 @@ interface CombinedQueryInterfaceProps {
   results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   pk?: string;
+  projectPage?: boolean;  
   // Query-specific props
   initPresetTypeObject?: QueryType | null;
   initNodeLabelParam?: string | null;
@@ -36,13 +38,13 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   results = [],
   setShareModalFunction = () => {},
   pk = "",
+  projectPage = false,
   // Query-specific props
   initPresetTypeObject = null,
   initNodeLabelParam = null,
   initNodeIdParam = null,
   nodeDescription = null,
 }) => {
-  const [activeTab, setActiveTab] = useState<string>("Query");
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser);
   const isPathfinderEnabled = config?.include_pathfinder;
@@ -52,16 +54,14 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState<boolean>(false);
   const showAddToProject = !!user && config?.include_projects;
 
-  const handleTabSelection = (tabName: string) => {
-    setActiveTab(tabName);
-  };
-
   const handleAddToProject = () => {
     setIsEditQueryModalOpen(true);
   };
 
+  const classNames = joinClasses(styles.combinedQueryInterface, projectPage ? styles.projectPage : '');
+
   return (
-    <div className={styles.combinedQueryInterface}>
+    <div className={classNames}>
       <EditQueryModal
         isOpen={isEditQueryModalOpen}
         handleClose={() => setIsEditQueryModalOpen(false)}
@@ -97,7 +97,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
       )}
       <Tabs
         isOpen={true}
-        handleTabSelection={handleTabSelection}
         defaultActiveTab="Smart Query"
         className={styles.tabsContainer}
         tabListClassName={styles.tabList}
@@ -115,13 +114,14 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             results={results}
             pk={pk}
             selectedProject={selectedProject}
+            combinedStyles={styles}
           />
         </Tab>
         { isPathfinderEnabled 
         ? 
           <Tab 
             heading="Pathfinder Query"
-            headingOverride={<BetaTag heading="Pathfinder Query" />}
+            headingOverride={<BetaTag heading="Pathfinder Query" tagClassName={projectPage ? styles.betaTag : ''} />}
             className={styles.pathfinderTab}>
             <QueryPathfinder
               isResults={isResults}

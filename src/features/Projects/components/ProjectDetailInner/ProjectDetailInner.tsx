@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, MouseEvent } from 'react';
+import { useCallback, useMemo, useState, MouseEvent, useEffect } from 'react';
 import styles from './ProjectDetailInner.module.scss';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
@@ -22,8 +22,11 @@ import Button from '@/features/Core/components/Button/Button';
 import ListHeader from '@/features/Core/components/ListHeader/ListHeader';
 import QueriesTableHeader from '../TableHeader/QueriesTableHeader/QueriesTableHeader';
 import CardList from '@/features/Projects/components/CardList/CardList';
-import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 import { useRenameProject } from '@/features/Projects/hooks/useRenameProject';
+import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
+import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
+import AnimateHeight from 'react-animate-height';
+import CombinedQueryInterface from '@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface';
   
 const ProjectDetailInner = () => {
   // Data management
@@ -42,9 +45,19 @@ const ProjectDetailInner = () => {
 
   // State management hooks
   const sortSearchState = useSortSearchState();
-
   const { handleUpdateProject } = useEditProjectHandlers();
-  
+
+  const [height, setHeight] = useState<number | 'auto'>(0);
+  const [addNewQueryOpen, setAddNewQueryOpen] = useState(false);
+
+  useEffect(() => {
+    if (addNewQueryOpen === false) {
+      setHeight(0);
+    } else {
+      setHeight('auto');
+    }
+  }, [addNewQueryOpen])
+
   // Global modals context
   const {
     openDeleteProjectModal,
@@ -111,6 +124,10 @@ const ProjectDetailInner = () => {
     return `${sortedData.sortedQueries.length} Quer${sortedData.sortedQueries.length === 1 ? 'y' : 'ies'}`;
   }, [sortedData.sortedQueries]);
 
+  const handleAddNewQueryClick = () => {
+    setAddNewQueryOpen(prev => !prev);
+  }
+
   return (
     <div className={styles.projectDetail}>
       {
@@ -141,6 +158,16 @@ const ProjectDetailInner = () => {
                 </LoadingWrapper>
               </div>
               <div className={styles.projectTabsContainer}>
+                <Button 
+                  iconLeft={<SearchPlusIcon />}
+                  iconRight={<ChevDownIcon className={styles.iconRight} />}
+                  handleClick={handleAddNewQueryClick}
+                  title="Add New Query"
+                  className={styles.addNewQueryButton}
+                  variant="textOnly"
+                >
+                  Add New Query
+                </Button>
                 <Tabs 
                   isOpen={true}
                   handleOutsideTabListClick={handleOutsideTabListClick}
@@ -150,6 +177,15 @@ const ProjectDetailInner = () => {
                   controlled
                 >
                   <Tab key="queries" heading={queriesTabHeading} className={styles.projectTabContent}>
+                    <AnimateHeight
+                      duration={500}
+                      height={height}
+                      className={styles.combinedQueryInterfaceContainer}
+                    >
+                      <CombinedQueryInterface
+                        projectPage
+                      />
+                    </AnimateHeight>
                     <DroppableArea 
                       id="project-zone"
                       canAccept={(draggedData) => draggedData.type === 'query'}

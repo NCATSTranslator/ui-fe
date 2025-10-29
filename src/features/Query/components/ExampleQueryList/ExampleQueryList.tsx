@@ -9,6 +9,7 @@ import { Example } from '@/features/Query/types/querySubmission';
 import QueryTypeIcon from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { useSelector } from 'react-redux';
+import { joinClasses } from '@/features/Common/utils/utilities';
 
 type ExampleQueryListProps = {
   examples: Example[] | null;
@@ -37,8 +38,10 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
       setHeight('auto');
   }, [isExpanded])
 
+  const classNames = joinClasses(styles.examplesContainer, className, isExpanded && styles.expanded);
+
   return (
-    <div className={`${styles.examplesContainer} ${className} ${isExpanded && styles.expanded}`}>
+    <div className={classNames}>
       <div>
         {
           (!!examples && examples?.length > 0 && examples[0].type === "drug") 
