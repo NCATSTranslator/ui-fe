@@ -19,6 +19,7 @@ import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 
 interface CombinedQueryInterfaceProps {
+  defaultProject?: ProjectRaw | null;
   isResults?: boolean;
   loading?: boolean;
   results?: Result[];
@@ -33,6 +34,7 @@ interface CombinedQueryInterfaceProps {
 }
 
 const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
+  defaultProject = null,
   isResults = false,
   loading = false,
   results = [],
@@ -48,7 +50,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser);
   const isPathfinderEnabled = config?.include_pathfinder;
-  const [selectedProject, setSelectedProject] = useState<ProjectRaw | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectRaw | null>(defaultProject);
   const { data: projects = [], isLoading: projectsLoading } = useUserProjects();
   const { data: queries = []} = useUserQueries();
   const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState<boolean>(false);
@@ -91,7 +93,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             />
           )}
           <Tooltip id="add-to-project-tooltip">
-            <p className={styles.tooltipText}>{selectedProject?.data.title || 'Add this query to a project' }</p>
+            <span className={styles.tooltipText}>{selectedProject?.data.title || 'Add this query to a project' }</span>
           </Tooltip>
         </div>
       )}
@@ -131,6 +133,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
               pk={pk}
               selectedProject={selectedProject}
               user={user}
+              projectPage={projectPage}
             />
           </Tab>
           : null}

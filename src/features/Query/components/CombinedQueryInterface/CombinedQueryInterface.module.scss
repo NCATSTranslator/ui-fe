@@ -105,6 +105,7 @@
     }
     .tabListWrapper, .queryBarContainer {
       margin: 0;
+      border: none;
     }
     .tabList {
       background-color: transparent;
@@ -115,6 +116,10 @@
     .betaTag {
       background-color: $lightPurpleTwo;
       color: $darkGray;
+    }
+    .addToProject {
+      top: $m;
+      right: 0;
     }
   }
 }
