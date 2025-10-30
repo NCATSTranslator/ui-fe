@@ -86,9 +86,9 @@ const ProjectDetailInner = () => {
       console.error('No project found');
   }, [data.project, data.project?.data.pks, handleUpdateProject]);
 
-  const handleRenameClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+  const handleRenameClick = (e: MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    setOptionsOpen(prev => !prev);
+    setOptionsOpen(false);
     startRenaming();
   }
 
@@ -146,6 +146,7 @@ const ProjectDetailInner = () => {
                     onFormSubmit={handleFormSubmit}
                     textInputRef={textInputRef}
                     onOutsideClick={handleOutsideClick}
+                    onTitleClick={handleRenameClick}
                   />
                 </LoadingWrapper>
               </div>

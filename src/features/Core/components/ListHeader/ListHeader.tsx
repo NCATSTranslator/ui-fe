@@ -1,4 +1,4 @@
-import { FC, FormEvent, RefObject } from 'react';
+import { FC, FormEvent, RefObject, MouseEvent } from 'react';
 import styles from './ListHeader.module.scss';
 import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/ProjectSearchBar';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
@@ -14,6 +14,7 @@ interface ListHeaderProps {
   onFormSubmit?: (e: FormEvent<HTMLFormElement>) => void;
   textInputRef?: RefObject<HTMLInputElement | null>;
   onOutsideClick?: () => void;
+  onTitleClick?: (e: MouseEvent<HTMLElement>) => void;
 }
 
 const ListHeader: FC<ListHeaderProps> = ({
@@ -26,6 +27,7 @@ const ListHeader: FC<ListHeaderProps> = ({
   onFormSubmit,
   textInputRef,
   onOutsideClick,
+  onTitleClick,
 }) => {
 
   const handleOutsideClick = () => {
@@ -40,7 +42,7 @@ const ListHeader: FC<ListHeaderProps> = ({
         </form>
       </OutsideClickHandler>
     ) : (
-      <h1 className={`h5 ${styles.title}`}>{heading}</h1>
+      <h1 className={`h5 ${styles.title} ${onTitleClick ? styles.titleClickable : ''}`} onClick={onTitleClick ? onTitleClick : undefined}>{heading}</h1>
     )
   );
 
