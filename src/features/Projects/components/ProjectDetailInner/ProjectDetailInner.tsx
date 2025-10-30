@@ -184,6 +184,7 @@ const ProjectDetailInner = () => {
                     >
                       <CombinedQueryInterface
                         projectPage
+                        defaultProject={data.project}
                       />
                     </AnimateHeight>
                     <DroppableArea 
