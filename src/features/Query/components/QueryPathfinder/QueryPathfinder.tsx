@@ -31,10 +31,11 @@ type QueryPathfinderProps = {
   isResults?: boolean;
   loading?: boolean;
   pk?: string;
-  projectPage?: boolean;
   results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   selectedProject?: ProjectRaw | null;
+  shouldNavigate?: boolean;
+  submissionCallback?: () => void;
   user?: User | null;
 }
 
@@ -43,10 +44,11 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   handleResultMatchClick,
   isResults = false,
   pk,
-  projectPage = false,
   results = [],
   setShareModalFunction = ()=>{},
   selectedProject = null,
+  shouldNavigate = true,
+  submissionCallback = () => {},
   user = null
 }) => {
 
@@ -101,7 +103,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     clearAutocompleteItems: clearAutocompleteItemsTwo
   } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes, excludePrefixes);
 
-  const { isLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder');
+  const { isLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder', shouldNavigate, submissionCallback);
 
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = useCallback((e: string, isFirstBar:boolean) => {
@@ -159,7 +161,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       setErrorText("Second search term is not selected, please select a valid term.");
       return;
     }
-    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined);
+    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined, shouldNavigate);
   }
 
   // Event handler for form submission

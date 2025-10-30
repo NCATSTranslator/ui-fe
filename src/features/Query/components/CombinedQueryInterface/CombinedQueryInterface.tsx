@@ -1,4 +1,4 @@
-import { useState, FC, Dispatch, SetStateAction } from "react";
+import { useState, FC, Dispatch, SetStateAction, useEffect } from "react";
 import styles from './CombinedQueryInterface.module.scss';
 import { Result } from "@/features/ResultList/types/results.d";
 import Tabs from "@/features/Common/components/Tabs/Tabs";
@@ -31,6 +31,7 @@ interface CombinedQueryInterfaceProps {
   initNodeLabelParam?: string | null;
   initNodeIdParam?: string | null;
   nodeDescription?: string | null;
+  submissionCallback?: () => void;
 }
 
 const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
@@ -46,6 +47,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   initNodeLabelParam = null,
   initNodeIdParam = null,
   nodeDescription = null,
+  submissionCallback = () => {},
 }) => {
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser);
@@ -61,6 +63,12 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   };
 
   const classNames = joinClasses(styles.combinedQueryInterface, projectPage ? styles.projectPage : '');
+  const shouldNavigate = !projectPage;
+
+  useEffect(() => {
+    if(defaultProject)
+      setSelectedProject(defaultProject);
+  }, [defaultProject]);
 
   return (
     <div className={classNames}>
@@ -117,6 +125,8 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             pk={pk}
             selectedProject={selectedProject}
             combinedStyles={styles}
+            shouldNavigate={shouldNavigate}
+            submissionCallback={submissionCallback}
           />
         </Tab>
         { isPathfinderEnabled 
@@ -133,7 +143,8 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
               pk={pk}
               selectedProject={selectedProject}
               user={user}
-              projectPage={projectPage}
+              shouldNavigate={shouldNavigate}
+              submissionCallback={submissionCallback}
             />
           </Tab>
           : null}

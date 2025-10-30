@@ -27,6 +27,8 @@ interface QueryProps {
   pk?: string;
   selectedProject?: ProjectRaw | null;
   combinedStyles?: { [key: string]: string };
+  shouldNavigate?: boolean;
+  submissionCallback?: () => void;
 }
 
 const Query: FC<QueryProps> = ({
@@ -41,7 +43,9 @@ const Query: FC<QueryProps> = ({
   handleResultMatchClick,
   pk = "",
   selectedProject = null,
-  combinedStyles
+  combinedStyles,
+  shouldNavigate = true,
+  submissionCallback = () => {}
 }) => {
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
@@ -72,7 +76,7 @@ const Query: FC<QueryProps> = ({
     clearAutocompleteItems
   } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes);
 
-  const { isLoading, setIsLoading, submitQuery } = useQuerySubmission();
+  const { isLoading, setIsLoading, submitQuery } = useQuerySubmission('single', shouldNavigate, submissionCallback);
 
   const exampleQueries = useExampleQueries(config?.cached_queries);
 

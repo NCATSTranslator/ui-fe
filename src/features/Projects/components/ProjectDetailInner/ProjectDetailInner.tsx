@@ -92,6 +92,11 @@ const ProjectDetailInner = () => {
     startRenaming();
   }
 
+  const handleRefetch = () => {
+    data.refetch.projects();
+    data.refetch.queries();
+  }
+
   const options = (
     <>
       <Button handleClick={handleRenameClick} iconLeft={<EditIcon />}>Rename</Button>
@@ -172,6 +177,7 @@ const ProjectDetailInner = () => {
                       <CombinedQueryInterface
                         projectPage
                         defaultProject={data.project}
+                        submissionCallback={handleRefetch}
                       />
                     </AnimateHeight>
                     <DroppableArea 
