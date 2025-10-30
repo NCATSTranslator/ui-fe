@@ -62,7 +62,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
     setIsEditQueryModalOpen(true);
   };
 
-  const classNames = joinClasses(styles.combinedQueryInterface, projectPage ? styles.projectPage : '');
+  const classNames = joinClasses(styles.combinedQueryInterface, projectPage  && styles.projectPage);
   const shouldNavigate = !projectPage;
 
   useEffect(() => {

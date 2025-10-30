@@ -15,34 +15,26 @@ import CardList from "@/features/Projects/components/CardList/CardList";
 import Button from "@/features/Core/components/Button/Button";
 import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
 import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
+import { useAnimateHeight } from "@/features/Core/hooks/useAnimateHeight";
+import AnimateHeight from "react-animate-height";
+import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
 
 const QueryList = () => {
   const user = useSelector(currentUser);
-  const { data: queries = [], isLoading: queriesLoading } = useUserQueries();
+  const { data: queries = [], isLoading: queriesLoading, refetch: refetchQueries } = useUserQueries();
   const { searchTerm, handleSearch } = useSimpleSearch();
   const filteredQueries = useFilteredQueries(queries, false, searchTerm);
   const sortSearchState = useSortSearchState();
 
-  const [height, setHeight] = useState<number | 'auto'>(0);
-  const [addNewQueryOpen, setAddNewQueryOpen] = useState(false);
+  const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
 
-  useEffect(() => {
-    if (addNewQueryOpen === false) {
-      setHeight(0);
-    } else {
-      setHeight('auto');
-    }
-  }, [addNewQueryOpen])
-
-  const handleAddNewQueryClick = () => {
-    setAddNewQueryOpen(prev => !prev);
+  const handleRefetch = () => {
+    refetchQueries();
   }
-
+  
   const queriesTabHeading = useMemo(() => {
     return `${filteredQueries.length} Quer${filteredQueries.length === 1 ? 'y' : 'ies'}`;
   }, [filteredQueries]);
-
-  
 
   return (
     <div className={styles.queriesPanel}>
@@ -82,6 +74,16 @@ const QueryList = () => {
               >
                 {[
                   <Tab key="queries" heading={queriesTabHeading} className={styles.queryTabContent}>
+                    <AnimateHeight
+                      duration={500}
+                      height={height}
+                      className={styles.combinedQueryInterfaceContainer}
+                    >
+                      <CombinedQueryInterface
+                        projectPage
+                        submissionCallback={handleRefetch}
+                      />
+                    </AnimateHeight>
                     <CardList> 
                       <QueriesTableHeader
                         sortField={sortSearchState.sortField}
