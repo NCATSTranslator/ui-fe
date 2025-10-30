@@ -8,6 +8,7 @@ import { queryTypes } from '@/features/Query/utils/queryTypes';
 import { QueryTypeIcon } from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
 import { User } from '@/features/UserAuth/types/user';
 import { useNavigate } from 'react-router-dom';
+import { joinClasses } from '@/features/Common/utils/utilities';
 
 interface QueryInputViewProps {
   queryItem: QueryItem;
@@ -26,6 +27,7 @@ interface QueryInputViewProps {
   autocompleteVisibility: boolean;
   setAutocompleteVisibility: (state: boolean) => void;
   onClearQueryItem: () => void;
+  combinedStyles?: { [key: string]: string };
 }
 
 const QueryInputView: FC<QueryInputViewProps> = ({
@@ -44,7 +46,8 @@ const QueryInputView: FC<QueryInputViewProps> = ({
   onSubmission,
   autocompleteVisibility,
   setAutocompleteVisibility,
-  onClearQueryItem
+  onClearQueryItem,
+  combinedStyles
 }) => {
   const navigate = useNavigate();
   const [presetURL, setPresetURL] = useState<string | false>(false);
@@ -59,11 +62,13 @@ const QueryInputView: FC<QueryInputViewProps> = ({
     }
   }, [presetURL, navigate]);
 
+  const queryBarContainerClassNames = joinClasses(styles.queryBarContainer, combinedStyles?.queryBarContainer);
+  
   return (
     <>
       <p className='blurb'>Select a question and enter a search term to find paths between biomedical entities</p>
       {isError && <p className={styles.error}>{errorText}</p>}
-      <div className={styles.queryBarContainer}>
+      <div className={queryBarContainerClassNames}>
         <span className={styles.icon}>
           <QueryTypeIcon type={queryItem.type.targetType || ''} />
         </span>
@@ -112,30 +117,35 @@ const QueryInputView: FC<QueryInputViewProps> = ({
         <ExampleQueryList
           examples={exampleQueries.exampleDiseases}
           setPresetURL={setPresetURL}
+          className={combinedStyles?.examples}
         />
       )}
       {queryItem.type.id === 1 && exampleQueries.exampleGenesUp && (
         <ExampleQueryList
           examples={exampleQueries.exampleGenesUp}
           setPresetURL={setPresetURL}
+          className={combinedStyles?.examples}
         />
       )}
       {queryItem.type.id === 2 && exampleQueries.exampleGenesDown && (
         <ExampleQueryList
           examples={exampleQueries.exampleGenesDown}
           setPresetURL={setPresetURL}
+          className={combinedStyles?.examples}
         />
       )}
       {queryItem.type.id === 3 && exampleQueries.exampleChemsUp && (
         <ExampleQueryList
           examples={exampleQueries.exampleChemsUp}
           setPresetURL={setPresetURL}
+          className={combinedStyles?.examples}
         />
       )}
       {queryItem.type.id === 4 && exampleQueries.exampleChemsDown && (
         <ExampleQueryList
           examples={exampleQueries.exampleChemsDown}
           setPresetURL={setPresetURL}
+          className={combinedStyles?.examples}
         />
       )}
     </>

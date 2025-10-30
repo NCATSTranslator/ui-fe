@@ -74,7 +74,7 @@
   input + span {
     position: relative;
     width: 100%;
-    padding: 12px 45px 12px 12px;
+    padding: 12px 30px 12px 12px;
     margin-right: 6px;
   }
   label.checkbox {
@@ -123,11 +123,16 @@
   }
   .tagName {
     line-height: 15px;
-    max-width: 140px;
+    max-width: 125px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
+  }
+  .roleFacet {
+    .tagName {
+      max-width: 115px;
+    }
   }
   .checkbox {
     margin-bottom: 0;

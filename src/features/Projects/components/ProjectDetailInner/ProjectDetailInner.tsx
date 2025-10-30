@@ -22,8 +22,12 @@ import Button from '@/features/Core/components/Button/Button';
 import ListHeader from '@/features/Core/components/ListHeader/ListHeader';
 import QueriesTableHeader from '../TableHeader/QueriesTableHeader/QueriesTableHeader';
 import CardList from '@/features/Projects/components/CardList/CardList';
-import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 import { useRenameProject } from '@/features/Projects/hooks/useRenameProject';
+import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
+import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
+import AnimateHeight from 'react-animate-height';
+import CombinedQueryInterface from '@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface';
+import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
   
 const ProjectDetailInner = () => {
   // Data management
@@ -42,9 +46,9 @@ const ProjectDetailInner = () => {
 
   // State management hooks
   const sortSearchState = useSortSearchState();
-
   const { handleUpdateProject } = useEditProjectHandlers();
-  
+  const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
+
   // Global modals context
   const {
     openDeleteProjectModal,
@@ -82,15 +86,15 @@ const ProjectDetailInner = () => {
       console.error('No project found');
   }, [data.project, data.project?.data.pks, handleUpdateProject]);
 
-  const handleTabSelection = (heading: string) => {
-    if(heading === 'Options')
-      setOptionsOpen(prev => !prev);
-  };
-
-  const handleRenameClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+  const handleRenameClick = (e: MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    setOptionsOpen(prev => !prev);
+    setOptionsOpen(false);
     startRenaming();
+  }
+
+  const handleRefetch = () => {
+    data.refetch.projects();
+    data.refetch.queries();
   }
 
   const options = (
@@ -99,10 +103,13 @@ const ProjectDetailInner = () => {
       <Button handleClick={() => {if(data.project) openDeleteProjectModal(data.project)}} iconLeft={<TrashIcon />}>Delete</Button>
     </>
   );
+  const handleOutsideTabListClick = useCallback(() => {
+    setOptionsOpen(false);
+  }, [optionsOpen]);
 
   const OptionsButton = () => (
-    <div>
-      <OptionsIcon />
+    <div onClick={(e) => {e.stopPropagation(); setOptionsOpen(prev=>!prev); }}>
+      <OptionsIcon className={styles.optionsIcon} />
       <OptionsPane open={optionsOpen}>
         {options}
       </OptionsPane>
@@ -139,19 +146,41 @@ const ProjectDetailInner = () => {
                     onFormSubmit={handleFormSubmit}
                     textInputRef={textInputRef}
                     onOutsideClick={handleOutsideClick}
+                    onTitleClick={handleRenameClick}
                   />
                 </LoadingWrapper>
               </div>
               <div className={styles.projectTabsContainer}>
+                <Button 
+                  iconLeft={<SearchPlusIcon />}
+                  iconRight={<ChevDownIcon className={styles.iconRight} />}
+                  handleClick={handleAddNewQueryClick}
+                  title="Add New Query"
+                  className={styles.addNewQueryButton}
+                  variant="textOnly"
+                >
+                  Add New Query
+                </Button>
                 <Tabs 
                   isOpen={true}
-                  handleTabSelection={handleTabSelection}
+                  handleOutsideTabListClick={handleOutsideTabListClick}
                   defaultActiveTab={queriesTabHeading}
                   className={styles.projectTabs}
                   activeTab={queriesTabHeading}
                   controlled
                 >
                   <Tab key="queries" heading={queriesTabHeading} className={styles.projectTabContent}>
+                    <AnimateHeight
+                      duration={500}
+                      height={height}
+                      className={styles.combinedQueryInterfaceContainer}
+                    >
+                      <CombinedQueryInterface
+                        projectPage
+                        defaultProject={data.project}
+                        submissionCallback={handleRefetch}
+                      />
+                    </AnimateHeight>
                     <DroppableArea 
                       id="project-zone"
                       canAccept={(draggedData) => draggedData.type === 'query'}
@@ -195,6 +224,7 @@ const ProjectDetailInner = () => {
                                           key={query.data.qid}
                                           query={query}
                                           searchTerm={sortSearchState.searchTerm}
+                                          projectId={data.project?.id}
                                         />
                                       ))
                                     )}

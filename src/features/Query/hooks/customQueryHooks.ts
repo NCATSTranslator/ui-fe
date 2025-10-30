@@ -50,13 +50,15 @@ export const useExampleQueries = (cachedQueries: Example[] | undefined): Example
  * navigation, and Redux state updates. Provides loading state and submission function.
  *
  * @param {'single' | 'pathfinder'} queryType - Type of query: 'single' for regular queries, 'pathfinder' for dual-item queries
+ * @param {boolean} shouldNavigate - Whether to navigate to the results page
+ * @param {() => void} submissionCallback - Callback function to call when a query is submitted
  * @returns Object containing:
  *   - isLoading: Boolean indicating if a query is currently being submitted
  *   - setIsLoading: Function to manually set loading state
  *   - submitQuery: Async function to submit a query item to the API
  *   - submitPathfinderQuery: Async function to submit a pathfinder query with two items
  */
-export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single') => {
+export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single', shouldNavigate: boolean = true, submissionCallback: () => void = () => {}) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -113,6 +115,13 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
           config?.include_hashed_parameters
         );
 
+        submissionCallback();
+
+        if(!shouldNavigate) {
+          setIsLoading(false);
+          return;
+        }
+
         if (window.location.href.includes('results')) {
           setIsLoading(false);
           window.open(newQueryPath, "_blank", "noopener");
@@ -133,7 +142,8 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
     itemOne: AutocompleteItem,
     itemTwo: AutocompleteItem,
     middleType?: string,
-    projectId?: string
+    projectId?: string,
+    shouldNavigate: boolean = true,
   ) => {
     setIsLoading(true);
 
@@ -165,7 +175,10 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
         data.data,
         config?.include_hashed_parameters
       );
-      navigate(newQueryPath);
+      submissionCallback();
+      if(shouldNavigate)
+        navigate(newQueryPath);
+
     } catch (error) {
       toast.error(
         "We were unable to submit your query at this time. Please attempt to submit it again or try again later."

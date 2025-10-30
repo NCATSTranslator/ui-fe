@@ -1,5 +1,5 @@
 export type FilterType = 'p' | 'r' | 'g';
-export type FilterFamily = 'cc' | 'di' | 'pc' | 'pt' | 'role' | 'ara' | 'otc' | 'tdl' | 'str' | 'sv' | 'ev';
+export type FilterFamily = 'cc' | 'di' | 'pc' | 'pt' | 'role' | 'ara' | 'otc' | 'tdl' | 'str' | 'sv' | 'ev' | 'txt';
 
 export type Filter = {
   count?: number;

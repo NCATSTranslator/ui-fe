@@ -62,11 +62,9 @@ const EntitySearch: FC<EntitySearchProps> = ({
     <div className={`${styles.entitySearch} ${!!className && className}`}>
       <FacetHeading
         title="Text Filter"
-        tagFamily="str"
+        tagFamily="txt"
         activeFilters={activeFilters}
-      >
-        <span className={styles.tooltip}>Search all textual elements (result name, description, node names, edge names) for a given string.</span>
-      </FacetHeading>
+      />
       <p className={`${styles.caption} caption`}>Include or exclude results or paths containing a word or phrase in the result name, description, or paths</p>
       <span className={styles.inputContainer}>
         <input

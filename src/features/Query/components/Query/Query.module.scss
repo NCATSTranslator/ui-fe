@@ -127,7 +127,7 @@ button .dualArrows {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 0 35px;
+  margin: 0 0 $l;
   box-shadow: $dropShadow;
   height: fit-content;
   border-radius: $largeBorderRadius;

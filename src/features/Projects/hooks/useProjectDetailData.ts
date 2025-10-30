@@ -11,8 +11,8 @@ import { UserQueryObject } from '@/features/Projects/types/projects.d';
 export const useProjectDetailData = () => {
   const { projectId } = useParams<{ projectId: string }>();
 
-  const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
-  const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueries();
+  const { data: projects = [], isLoading: projectsLoading, error: projectsError, refetch: refetchProjects } = useUserProjects();
+  const { data: queries = [], isLoading: queriesLoading, error: queriesError, refetch: refetchQueries } = useUserQueries();
   
   const formattedProjects = useFormattedProjects(projects, queries);
   
@@ -42,6 +42,10 @@ export const useProjectDetailData = () => {
     errors: {
       projectsError,
       queriesError
+    },
+    refetch: {
+      projects: refetchProjects,
+      queries: refetchQueries
     }
   };
 };

@@ -1,11 +1,12 @@
    @use "@/assets/styles/variables" as *;
 
 .facetGroup {
-  padding: 15px 0;
-  border-bottom: 1px solid $midGray;
-  &:last-of-type {
-    border-bottom: none;
-  }
+  padding: $s;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  max-height: -webkit-fill-available;
+  max-height: -moz-available;
+  max-height: fill-available;
   .underline {
     text-decoration: underline;
   }
@@ -87,10 +88,6 @@
   .section {
     &::-webkit-scrollbar-track {
       background-color: $white;
-    }
-    &.role {
-      max-height: 250px;
-      overflow-y: auto;
     }
   }
   .roleFilter {

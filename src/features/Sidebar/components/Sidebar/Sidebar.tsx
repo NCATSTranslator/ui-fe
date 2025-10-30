@@ -35,6 +35,7 @@ const Sidebar = () => {
         {
           activeSidebarItem &&
           <ContextPanel
+            activePanelId={activePanelId}
             buttonComponent={activeSidebarItem && getButtonComponent(activeSidebarItem)}
             panel={activeSidebarItem && getContextPanel(activeSidebarItem)}
             title={activeSidebarItem.label || ''}

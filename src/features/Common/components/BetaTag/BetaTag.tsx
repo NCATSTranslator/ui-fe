@@ -1,16 +1,22 @@
-import styles from './BetaTag.module.scss';
 import { FC } from 'react';
+import styles from './BetaTag.module.scss';
+import { joinClasses } from '@/features/Common/utils/utilities';
 
 interface BetaTagProps {
   heading: string;
-  className?: string;
+  wrapperClassName?: string;
+  tagClassName?: string;
 }
 
 const BetaTag: FC<BetaTagProps> = ({
   heading,
-  className}) => {
+  wrapperClassName,
+  tagClassName
+}) => {
+  const wrapperClassNames = joinClasses(styles.betaTag, wrapperClassName);
+  const tagClassNames = joinClasses(styles.tag, tagClassName);
   return (
-    <span className={`${styles.betaTag} ${className || ''}`}>{heading}<span className={styles.tag}>Beta</span></span>
+    <span className={wrapperClassNames}>{heading}<span className={tagClassNames}>Beta</span></span>
   );
 };
 
