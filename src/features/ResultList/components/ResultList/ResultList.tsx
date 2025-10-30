@@ -1,12 +1,10 @@
 import { useState, useRef, useCallback, useEffect, useMemo, RefObject } from "react";
 import styles from './ResultList.module.scss';
 import Query from "@/features/Query/components/Query/Query";
-import ResultsFilter from "@/features/ResultFiltering/components/ResultsFilter/ResultsFilter";
 import ResultItem from "@/features/ResultItem/components/ResultItem/ResultItem";
 import LoadingBar from "@/features/Common/components/LoadingBar/LoadingBar";
 import ResultListHeader from "@/features/ResultList/components/ResultListHeader/ResultListHeader";
 import NavConfirmationPromptModal from "@/features/Common/components/NavConfirmationPromptModal/NavConfirmationPromptModal";
-import StickyToolbar from "@/features/ResultList/components/StickyToolbar/StickyToolbar";
 import { cloneDeep, isEqual } from "lodash";
 import { useBlocker } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
@@ -46,6 +44,7 @@ import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
 import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import { QueryStatus } from "@/features/Projects/types/projects";
+import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/FiltersPanel";
 
 const ResultList = () => {
 
@@ -168,7 +167,6 @@ const ResultList = () => {
   // Float, weight for clinical score
   const [clinicalWeight] = useState(1.0);
   const scoreWeights = useMemo(()=> { return {confidenceWeight: confidenceWeight, noveltyWeight: noveltyWeight, clinicalWeight: clinicalWeight}}, [confidenceWeight, noveltyWeight, clinicalWeight]);
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [userSaves, setUserSaves] = useState<SaveGroup | null>(null);
   const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
   const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
@@ -679,11 +677,10 @@ const ResultList = () => {
     id: 'filters',
     label: "Filters",
     panelComponent: () => (
-      <ResultsFilter
+      <FiltersPanel
         activeFilters={activeFilters}
         onFilter={handleFilter}
         onClearAll={handleClearAllFilters}
-        setExpanded={setFiltersExpanded}
         availableFilters={availableFilters}
         isPathfinder={isPathfinder}
       />

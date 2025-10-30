@@ -1,5 +1,4 @@
-import { Filter, Filters, FilterFamily, FilterType } from '@/features/ResultFiltering/types/filters';
-import { Tags } from '@/features/ResultList/types/results';
+import { Filter, FilterFamily, FilterType } from '@/features/ResultFiltering/types/filters';
 
 export const CONSTANTS = {
   RESULT: 'r' as const,
@@ -146,10 +145,10 @@ export const hasFilterFamily = (filter: Filter, family: FilterFamily): boolean =
   return getFilterFamily(filter) === family;
 }
 
-export const getFilterLabel = (filter: Filter): string => {
+export const getFilterLabel = (filter: Filter | FilterFamily): string => {
   const defaultLabel = "Tag";
 
-  switch(getFilterFamily(filter)) {
+  switch(typeof filter === 'string' ? filter as FilterFamily : getFilterFamily(filter)) {
     case "cc":   return "Development Stage";
     case "pc":   return "Objects within Paths";
     case "di":   return "CT Indications";
@@ -159,6 +158,7 @@ export const getFilterLabel = (filter: Filter): string => {
     case "otc":  return "Availability";
     case "tdl":  return "Target Development Level";
     case "ev":   return "Evidence Type";
+    case "txt":  return "Text Filter";
     default: return defaultLabel;
   }
 }

@@ -10,10 +10,9 @@
   }
   .projectTabsContainer {
     position: relative;
-    .projectTabs {
-      margin-top: 0;
-    }
   }
+
+
   .queryGrid {
     display: flex;
     flex-direction: column;
@@ -30,7 +29,6 @@
     color: $red;
   }
   .projectTabContent {
-    min-height: 250px;
     overflow: visible;
   }
   .separator {
@@ -44,4 +42,38 @@
     font-size: $bodyTwoSize;
     color: $darkGray
   }
+}
+
+.projectTabs {
+  margin-top: 0;
+  svg path {
+    fill: $purpleOne;
+  }
+  .optionsIcon {
+    path {
+      fill: $darkGray;
+    }
+  }
+}
+.addNewQueryButton {
+  position: absolute;
+  top: 12px;
+  right: $xl;
+  z-index: 10;
+  padding: 0;
+  span {
+    padding: 0 !important;
+    font-size: $captionSize !important;
+    font-weight: 800 !important;
+    color: $purpleOne;
+  }
+  svg.iconRight {
+    path {
+      fill: $white;
+    }
+  }
+}
+.combinedQueryInterfaceContainer {
+  margin-top: -$s;
+  background-color: $palePurple;
 }

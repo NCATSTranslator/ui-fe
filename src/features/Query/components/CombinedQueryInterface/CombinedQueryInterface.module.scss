@@ -65,11 +65,16 @@
     border: 1px solid $lightPurpleTwo;
     background-color: $palePurple;
   }
-  
+  .tabListWrapper {
+    padding: 0;
+    & > div {
+      width: auto;
+    }
+  }
   .queryTab,
   .pathfinderTab {
     overflow: visible;
-    padding: $m;
+    padding: $xs $m $m;
   }
   
   .tabList {
@@ -78,11 +83,43 @@
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     padding: 0 12px;
+    width: auto;
     & ~ div {
       overflow-y: visible;
     }
   }
   .tooltipText {
     margin: 0;
+  }
+  &.projectPage {
+    position: relative;
+    z-index: 10;
+    padding: 0;
+    .queryTab, .pathfinderTab {
+      padding: 0;
+    }
+    .tabsContainer {
+      border: none;
+      margin: 0;
+      padding: $s 0 $l;
+    }
+    .tabListWrapper, .queryBarContainer {
+      margin: 0;
+      border: none;
+    }
+    .tabList {
+      background-color: transparent;
+    }
+    .examples, p {
+      display: none;
+    }
+    .betaTag {
+      background-color: $lightPurpleTwo;
+      color: $darkGray;
+    }
+    .addToProject {
+      top: $m;
+      right: 0;
+    }
   }
 }

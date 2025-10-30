@@ -6,10 +6,9 @@ import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import LoadingBar from '@/features/Common/components/LoadingBar/LoadingBar';
 import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
-import AnimateHeight, { Height } from "react-animate-height";
+import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
-import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '@/features/ResultItem/utils/csvGeneration';
 import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
@@ -31,6 +30,7 @@ import ResultItemInteractables from '@/features/ResultItem/components/ResultItem
 import { resultToCytoscape } from '@/features/ResultItem/utils/graphFunctions';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 import Button from '@/features/Core/components/Button/Button';
+import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 const GraphView = lazy(() => import("@/features/ResultItem/components/GraphView/GraphView"));
 
@@ -134,9 +134,8 @@ const ResultItem: FC<ResultItemProps> = ({
   const [isBookmarked, setIsBookmarked] = useState<boolean>(!!bookmarkItem);
   const itemBookmarkID = useRef<string | null>(bookmarkItem?.id ? bookmarkItem.id.toString() : null);
   const [itemHasNotes, setItemHasNotes] = useState<boolean>(!isNotesEmpty(bookmarkItem?.notes || null));
-  const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
+  const { height, isOpen: isExpanded, toggle: handleToggle, setIsOpen: setIsExpanded } = useAnimateHeight({ initialOpen: startExpanded });
   const [graphActive, setGraphActive] = useState<boolean>(false);
-  const [height, setHeight] = useState<Height>(0);
   const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
   const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
   // const [csvData, setCsvData] = useState([]);
@@ -179,10 +178,6 @@ const ResultItem: FC<ResultItemProps> = ({
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, subjectNode.species) : '';
   const resultDescription = subjectNode?.descriptions[0];
 
-  const handleToggle = () => {
-    setIsExpanded(prev => !prev);
-  }
-
   const handleEdgeSpecificEvidence = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
     if(!result)
       return;
@@ -194,13 +189,6 @@ const ResultItem: FC<ResultItemProps> = ({
     if(!!path.subgraph[1])
       activateEvidence(result, [path.subgraph[1]], path, pathKey);
   }, [result, activateEvidence])
-
-  useEffect(() => {
-    if(isExpanded === false)
-      setHeight(0);
-    else
-      setHeight('auto');
-  }, [isExpanded])
 
   const handleClearSelectedPaths = useCallback(() => {
     setSelectedPaths(null);

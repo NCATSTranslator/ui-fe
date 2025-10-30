@@ -1,12 +1,14 @@
 import { FC, useRef, useState, useCallback, useEffect, KeyboardEvent, RefObject } from 'react';
+import styles from './AutocompleteInput.module.scss';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import Autocomplete from '@/features/Common/components/Autocomplete/Autocomplete';
 import { AutocompleteItem, AutocompleteContext } from '@/features/Query/types/querySubmission';
 import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
 import QuestionIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
-import { getIcon } from '@/features/Common/utils/utilities';
-import styles from './AutocompleteInput.module.scss';
+import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
+import { getIcon, joinClasses } from '@/features/Common/utils/utilities';
+import Button from '@/features/Core/components/Button/Button';
 
 interface AutocompleteInputProps {
   id: string;
@@ -26,6 +28,7 @@ interface AutocompleteInputProps {
   handleSelect: (cxt: AutocompleteContext) => void;
   handleSubmit: (cxt: AutocompleteContext) => void;
   inputRef: RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+  handleSwapTerms?: () => void;
 }
 
 const AutocompleteInput: FC<AutocompleteInputProps> = ({
@@ -45,7 +48,8 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
   disabled = false,
   handleSelect,
   handleSubmit,
-  inputRef
+  inputRef,
+  handleSwapTerms,
 }) => {
   const autocompleteItemsRef = useRef<HTMLDivElement>(null);
   const autocompleteContainerRef = useRef<HTMLDivElement>(null);
@@ -132,15 +136,29 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
         break;
     }
   }
-   const handleOutsideClick = () => {
-     setAutocompleteVisibility(false);
-     setScrollingIndex(selectedIndex);
-   }
+  const handleOutsideClick = () => {
+    setAutocompleteVisibility(false);
+    setScrollingIndex(selectedIndex);
+  }
+
+  const inputContainerClassNames = joinClasses(
+    styles.inputContainer,
+    disabled && styles.disabled,
+    handleSwapTerms && styles.swapTerms,
+    className
+  );
+
+  const IconLeft = (
+    <>
+      {handleSwapTerms && <Button iconOnly iconLeft={<SwapIcon/>} handleClick={handleSwapTerms} variant="secondary" />}
+      {!!selectedItem?.types ? getIcon(selectedItem.types[0]) : <QuestionIcon/>}
+    </>
+  )
 
   return (
     <OutsideClickHandler
       onOutsideClick={handleOutsideClick}
-      className={`${styles.inputContainer} ${disabled && styles.disabled} ${className}`}
+      className={inputContainerClassNames}
       tabIndex={-1}
       onKeyDown={handleKeyDown}
     >
@@ -155,7 +173,8 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
         handleFocus={() => {setAutocompleteVisibility(true)}}
         className={`${styles.input} ${!!selectedItem && styles.selected} ${selectedClassName}`}
         value={value}
-        iconLeft={!!selectedItem?.types ? getIcon(selectedItem.types[0]) : <QuestionIcon/>}
+        iconLeft={IconLeft}
+        iconLeftClassName={styles.iconLeft}
         iconRight={!!selectedItem && onClear ?
           <button className={styles.close} onClick={onClear}><CloseIcon/></button> :
           false

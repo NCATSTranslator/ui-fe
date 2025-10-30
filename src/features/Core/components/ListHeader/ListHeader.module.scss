@@ -18,6 +18,13 @@
 
   .title {
     padding: 3.5px 0;
+    &.titleClickable {
+      cursor: pointer;
+      transition: $defaultAnim;
+      &:hover {
+        color: $purpleOne;
+      }
+    }
   }
   
   .titleInput {

@@ -18,6 +18,7 @@ interface TextInputProps {
   className?: string;
   containerClassName?: string;
   iconLeft?: ReactNode;
+  iconLeftClassName?: string;
   iconRight?: ReactNode;
   maxLength?: number;
   handleKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => void;
@@ -41,6 +42,7 @@ const TextInput: FC<TextInputProps> = ({
   className = '',
   containerClassName = '',
   iconLeft,
+  iconLeftClassName = '',
   iconRight,
   maxLength = -1,
   handleKeyDown = () => {},
@@ -109,7 +111,7 @@ const TextInput: FC<TextInputProps> = ({
       }
       {error && <span className={styles.errorText}><Warning />{errorText}</span>}
       <label className={inputStyle}>
-        {iconLeft && <div className={styles.iconContainerLeft}>{iconLeft}</div>}
+        {iconLeft && <div className={`${styles.iconContainerLeft} ${iconLeftClassName}`}>{iconLeft}</div>}
         {iconRight && (
           <div
             className={joinClasses(

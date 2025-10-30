@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import styles from "./QueryList.module.scss";
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
@@ -12,14 +12,26 @@ import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
 import Tabs from "@/features/Common/components/Tabs/Tabs";
 import Tab from "@/features/Common/components/Tabs/Tab";
 import CardList from "@/features/Projects/components/CardList/CardList";
+import Button from "@/features/Core/components/Button/Button";
+import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
+import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
+import { useAnimateHeight } from "@/features/Core/hooks/useAnimateHeight";
+import AnimateHeight from "react-animate-height";
+import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
 
 const QueryList = () => {
   const user = useSelector(currentUser);
-  const { data: queries = [], isLoading: queriesLoading } = useUserQueries();
+  const { data: queries = [], isLoading: queriesLoading, refetch: refetchQueries } = useUserQueries();
   const { searchTerm, handleSearch } = useSimpleSearch();
   const filteredQueries = useFilteredQueries(queries, false, searchTerm);
   const sortSearchState = useSortSearchState();
 
+  const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
+
+  const handleRefetch = () => {
+    refetchQueries();
+  }
+  
   const queriesTabHeading = useMemo(() => {
     return `${filteredQueries.length} Quer${filteredQueries.length === 1 ? 'y' : 'ies'}`;
   }, [filteredQueries]);
@@ -33,6 +45,16 @@ const QueryList = () => {
         handleSearch={handleSearch}
       />
       <div className={styles.list}>
+        <Button 
+          iconLeft={<SearchPlusIcon />}
+          iconRight={<ChevDownIcon className={styles.iconRight} />}
+          handleClick={handleAddNewQueryClick}
+          title="Add New Query"
+          className={styles.addNewQueryButton}
+          variant="textOnly"
+        >
+          Add New Query
+        </Button>
         {
           !user ? (
             <div className={styles.empty}>
@@ -52,6 +74,16 @@ const QueryList = () => {
               >
                 {[
                   <Tab key="queries" heading={queriesTabHeading} className={styles.queryTabContent}>
+                    <AnimateHeight
+                      duration={500}
+                      height={height}
+                      className={styles.combinedQueryInterfaceContainer}
+                    >
+                      <CombinedQueryInterface
+                        projectPage
+                        submissionCallback={handleRefetch}
+                      />
+                    </AnimateHeight>
                     <CardList> 
                       <QueriesTableHeader
                         sortField={sortSearchState.sortField}

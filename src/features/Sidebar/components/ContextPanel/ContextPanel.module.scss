@@ -34,4 +34,13 @@
     position: relative;
     width: calc($panelWidth - ($s*2));
   }
+  &.reduceSpacing {
+    .content {
+      padding: 0;
+      width: $panelWidth;
+    }
+    .header {
+      margin-bottom: 0;
+    }
+  }
 }

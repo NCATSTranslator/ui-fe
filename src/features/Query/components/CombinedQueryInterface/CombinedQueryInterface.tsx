@@ -1,4 +1,4 @@
-import { useState, FC, Dispatch, SetStateAction } from "react";
+import { useState, FC, Dispatch, SetStateAction, useEffect } from "react";
 import styles from './CombinedQueryInterface.module.scss';
 import { Result } from "@/features/ResultList/types/results.d";
 import Tabs from "@/features/Common/components/Tabs/Tabs";
@@ -12,56 +12,66 @@ import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice
 import { QueryType } from "@/features/Query/types/querySubmission";
 import { ProjectRaw } from "@/features/Projects/types/projects.d";
 import { useUserProjects, useUserQueries } from "@/features/Projects/hooks/customHooks";
+import { joinClasses } from "@/features/Common/utils/utilities";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import EditQueryModal from "@/features/Projects/components/EditQueryModal/EditQueryModal";
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 
 interface CombinedQueryInterfaceProps {
+  defaultProject?: ProjectRaw | null;
   isResults?: boolean;
   loading?: boolean;
   results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   pk?: string;
+  projectPage?: boolean;  
   // Query-specific props
   initPresetTypeObject?: QueryType | null;
   initNodeLabelParam?: string | null;
   initNodeIdParam?: string | null;
   nodeDescription?: string | null;
+  submissionCallback?: () => void;
 }
 
 const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
+  defaultProject = null,
   isResults = false,
   loading = false,
   results = [],
   setShareModalFunction = () => {},
   pk = "",
+  projectPage = false,
   // Query-specific props
   initPresetTypeObject = null,
   initNodeLabelParam = null,
   initNodeIdParam = null,
   nodeDescription = null,
+  submissionCallback = () => {},
 }) => {
-  const [activeTab, setActiveTab] = useState<string>("Query");
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser);
   const isPathfinderEnabled = config?.include_pathfinder;
-  const [selectedProject, setSelectedProject] = useState<ProjectRaw | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectRaw | null>(defaultProject);
   const { data: projects = [], isLoading: projectsLoading } = useUserProjects();
   const { data: queries = []} = useUserQueries();
   const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState<boolean>(false);
   const showAddToProject = !!user && config?.include_projects;
 
-  const handleTabSelection = (tabName: string) => {
-    setActiveTab(tabName);
-  };
-
   const handleAddToProject = () => {
     setIsEditQueryModalOpen(true);
   };
 
+  const classNames = joinClasses(styles.combinedQueryInterface, projectPage  && styles.projectPage);
+  const shouldNavigate = !projectPage;
+
+  useEffect(() => {
+    if(defaultProject)
+      setSelectedProject(defaultProject);
+  }, [defaultProject]);
+
   return (
-    <div className={styles.combinedQueryInterface}>
+    <div className={classNames}>
       <EditQueryModal
         isOpen={isEditQueryModalOpen}
         handleClose={() => setIsEditQueryModalOpen(false)}
@@ -91,16 +101,16 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             />
           )}
           <Tooltip id="add-to-project-tooltip">
-            <p className={styles.tooltipText}>{selectedProject?.data.title || 'Add this query to a project' }</p>
+            <span className={styles.tooltipText}>{selectedProject?.data.title || 'Add this query to a project' }</span>
           </Tooltip>
         </div>
       )}
       <Tabs
         isOpen={true}
-        handleTabSelection={handleTabSelection}
         defaultActiveTab="Smart Query"
         className={styles.tabsContainer}
         tabListClassName={styles.tabList}
+        tabListWrapperClassName={styles.tabListWrapper}
       >
         <Tab heading="Smart Query" className={styles.queryTab}>
           <Query
@@ -114,13 +124,16 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             results={results}
             pk={pk}
             selectedProject={selectedProject}
+            combinedStyles={styles}
+            shouldNavigate={shouldNavigate}
+            submissionCallback={submissionCallback}
           />
         </Tab>
         { isPathfinderEnabled 
         ? 
           <Tab 
             heading="Pathfinder Query"
-            headingOverride={<BetaTag heading="Pathfinder Query" />}
+            headingOverride={<BetaTag heading="Pathfinder Query" tagClassName={projectPage ? styles.betaTag : ''} />}
             className={styles.pathfinderTab}>
             <QueryPathfinder
               isResults={isResults}
@@ -130,6 +143,8 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
               pk={pk}
               selectedProject={selectedProject}
               user={user}
+              shouldNavigate={shouldNavigate}
+              submissionCallback={submissionCallback}
             />
           </Tab>
           : null}

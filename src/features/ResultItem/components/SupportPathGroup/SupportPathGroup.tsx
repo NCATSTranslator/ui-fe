@@ -1,7 +1,7 @@
-import { useState, useEffect, FC, useRef, useMemo, createContext } from 'react';
+import { FC, useState, useRef, useMemo, createContext, useEffect } from 'react';
 import styles from './SupportPathGroup.module.scss';
 import SupportPath from '@/features/ResultItem/components/SupportPath/SupportPath';
-import AnimateHeight from '@/features/Common/components/AnimateHeight/AnimateHeight';
+import AnimateHeight from 'react-animate-height';
 import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
@@ -14,6 +14,7 @@ import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSupportPathDepth, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import { SupportPathDepthContext } from '@/features/ResultItem/components/PathView/PathView';
+import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 export const SupportPathKeyContext = createContext<string>("");
 
@@ -67,13 +68,17 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
     })
   }, [formattedPaths, pathFilterState, showHiddenPaths]);
 
-  const initHeight = (isExpanded) ? 'auto' : 0;
-  const [height, setHeight] = useState<number | string>(initHeight);
+  const { height, setIsOpen } = useAnimateHeight({ initialOpen: isExpanded });
   const fullPathCount = useMemo(() => getPathIdSet(formattedPaths, true, resultSet).size, [formattedPaths, resultSet]);
   const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
   const currentPathCount = useMemo(() => {
     return showHiddenPaths ? fullPathCount : fullPathCount - filteredPathCount;
   }, [filteredPathCount, formattedPaths, showHiddenPaths]);
+
+  // Sync with parent's isExpanded prop
+  useEffect(() => {
+    setIsOpen(isExpanded);
+  }, [isExpanded, setIsOpen]);
 
   const itemsPerPage: number = 10;
   const [itemOffset, setItemOffset] = useState<number>(0);
@@ -102,13 +107,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   const displayedPaths = (!!filteredPaths) 
     ? filteredPaths.slice(itemOffset, endResultIndex.current)
     : [];
-
-  useEffect(() => {
-    if(isExpanded === false)
-      setHeight(0);
-    else
-      setHeight('auto');
-  }, [isExpanded])
 
   return(
     <AnimateHeight

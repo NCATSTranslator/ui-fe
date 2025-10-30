@@ -9,7 +9,6 @@ import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilte
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "@/assets/icons/directional/Pathfinder/Pathfinder.svg?react";
-import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
@@ -35,6 +34,8 @@ type QueryPathfinderProps = {
   results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   selectedProject?: ProjectRaw | null;
+  shouldNavigate?: boolean;
+  submissionCallback?: () => void;
   user?: User | null;
 }
 
@@ -46,6 +47,8 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   results = [],
   setShareModalFunction = ()=>{},
   selectedProject = null,
+  shouldNavigate = true,
+  submissionCallback = () => {},
   user = null
 }) => {
 
@@ -100,7 +103,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     clearAutocompleteItems: clearAutocompleteItemsTwo
   } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes, excludePrefixes);
 
-  const { isLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder');
+  const { isLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder', shouldNavigate, submissionCallback);
 
   // Event handler called when search bar is updated by user
   const handleQueryItemChange = useCallback((e: string, isFirstBar:boolean) => {
@@ -158,7 +161,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       setErrorText("Second search term is not selected, please select a valid term.");
       return;
     }
-    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined);
+    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined, shouldNavigate);
   }
 
   // Event handler for form submission
@@ -237,33 +240,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
           <>
             <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
             <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
-            <div className={styles.buttons}>
-              <Button
-                handleClick={swapTerms}
-                variant="secondary"
-                className={`${styles.button}`}
-                iconLeft={<SwapIcon/>}
-                smallFont
-              >
-                Swap Terms
-              </Button>
-              <Button
-                handleClick={handleMiddleTypeTrigger}
-                variant="secondary"
-                className={`${styles.button} ${styles.middleTypeButton}`}
-                dataTooltipId='middle-type-tooltip'
-                iconLeft={hasMiddleType ? <SubtractIcon/> : <AddIcon/>}
-                iconRight={<InfoIcon className={styles.infoIcon}/>}
-                smallFont
-              >
-                Middle Object
-              </Button>
-              <Tooltip
-                id='middle-type-tooltip'
-                >
-                  <span>Pre-filter results by selecting a middle object type to be included within paths between the entered search terms. <br/><br/> Genes, diseases, phenotypes, and chemicals are currently supported.</span>
-              </Tooltip>
-            </div>
             {
               isError &&
               <p className={styles.error}>{errorText}</p>
@@ -293,30 +269,35 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 handleSelect={handleAutocompleteSelect}
                 handleSubmit={handleInputSubmit}
                 inputRef={autocompleteInputRefOne}
+                handleSwapTerms={swapTerms}
               />
               <PathfinderDivider className={styles.dividerIcon}/>
               {
-                hasMiddleType &&
-                <>
-                  <Select
-                    label=""
-                    name="Type"
-                    handleChange={(value)=>{
-                      setMiddleType(value.toString());
-                    }}
-                    value={middleType ?? ""}
-                    noanimate
-                    className={styles.middleTypeSelector}
-                    >
-                    <option value="biolink:ChemicalEntity">Chemical</option>
-                    <option value="biolink:Disease">Disease</option>
-                    <option value="biolink:Drug">Drug</option>
-                    <option value="biolink:Gene">Gene</option>
-                    <option value="biolink:PhenotypicFeature">Phenotype</option>
-                  </Select>
-                  <PathfinderDivider className={styles.dividerIcon}/>
-                </>
+                hasMiddleType
+                ?
+                  <>
+                    <Button iconOnly iconLeft={<SubtractIcon/>} handleClick={handleMiddleTypeTrigger} variant="secondary" dataTooltipId='middle-type-tooltip' />
+                    <Select
+                      label=""
+                      name="Type"
+                      handleChange={(value)=>{
+                        setMiddleType(value.toString());
+                      }}
+                      value={middleType ?? ""}
+                      noanimate
+                      className={styles.middleTypeSelector}
+                      >
+                      <option value="biolink:ChemicalEntity">Chemical</option>
+                      <option value="biolink:Disease">Disease</option>
+                      <option value="biolink:Drug">Drug</option>
+                      <option value="biolink:Gene">Gene</option>
+                      <option value="biolink:PhenotypicFeature">Phenotype</option>
+                    </Select>
+                  </>
+                : 
+                  <Button iconOnly iconLeft={<AddIcon/>} handleClick={handleMiddleTypeTrigger} variant="secondary" dataTooltipId='middle-type-tooltip' />
               }
+              <PathfinderDivider className={styles.dividerIcon}/>
               <AutocompleteInput
                 id={autocompleteTwoId}
                 value={inputTwoText}
@@ -331,7 +312,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 autocompleteVisibility={autocompleteVisibilityTwo}
                 setAutocompleteVisibility={setAutocompleteVisibilityTwo}
                 disabled={disabled}
-                placeholder={user === null ? "Log In to Enter a Search Term" : "Enter First Search Term"}
+                placeholder={user === null ? "Log In to Enter a Search Term" : "Enter Second Search Term"}
                 handleSelect={handleAutocompleteSelect}
                 handleSubmit={handleInputSubmit}
                 inputRef={autocompleteInputRefTwo}
@@ -356,6 +337,11 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 }
               </Button>
             </form>
+            <Tooltip
+              id='middle-type-tooltip'
+              >
+                <span>Pre-filter results by selecting a middle object type to be included within paths between the entered search terms. <br/><br/> Genes, diseases, phenotypes, and chemicals are currently supported.</span>
+            </Tooltip>
           </>
       }
     </div>

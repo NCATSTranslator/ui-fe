@@ -27,6 +27,18 @@
       opacity: 1;
     }
   }
+  &.swapTerms {
+    .iconLeft {
+      display: flex;
+      width: 68px;
+      height: 32px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .input input {
+      padding-left: 88px;
+    }
+  }
 }
 
 .input {
