@@ -1,10 +1,11 @@
-import { FC, useState, useEffect, useCallback, ReactNode, MouseEvent } from 'react';
+import { FC, useEffect, useCallback, ReactNode, MouseEvent } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { NavLink } from 'react-router-dom';
 import styles from './Accordion.module.scss';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { joinClasses } from '@/features/Common/utils/utilities';
+import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 export interface AccordionProps {
   title: string | ReactNode;
@@ -37,8 +38,7 @@ const Accordion: FC<AccordionProps> = ({
   onToggle,
   disabled = false,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(expanded);
-  const [height, setHeight] = useState<number | 'auto'>(expanded ? 'auto' : 0);
+  const { height, isOpen: isExpanded, setIsOpen: setIsExpanded } = useAnimateHeight({ initialOpen: expanded });
 
   // Generate unique ID if not provided
   const accordionId = id || `accordion-${Math.random().toString(36).substr(2, 9)}`;
@@ -55,15 +55,12 @@ const Accordion: FC<AccordionProps> = ({
     const newExpandedState = !isExpanded;
     setIsExpanded(newExpandedState);
     onToggle?.(newExpandedState);
-  }, [isExpanded, disabled, onToggle]);
+  }, [isExpanded, disabled, onToggle, setIsExpanded]);
 
-  useEffect(() => {
-    setHeight(isExpanded ? 'auto' : 0);
-  }, [isExpanded]);
-
+  // Sync with parent's expanded prop
   useEffect(() => {
     setIsExpanded(expanded);
-  }, [expanded]);
+  }, [expanded, setIsExpanded]);
 
   const defaultIcon = <ChevDown />;
   const displayIcon = icon || defaultIcon;

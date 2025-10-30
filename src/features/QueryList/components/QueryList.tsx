@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import styles from "./QueryList.module.scss";
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
@@ -12,6 +12,9 @@ import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
 import Tabs from "@/features/Common/components/Tabs/Tabs";
 import Tab from "@/features/Common/components/Tabs/Tab";
 import CardList from "@/features/Projects/components/CardList/CardList";
+import Button from "@/features/Core/components/Button/Button";
+import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
+import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 
 const QueryList = () => {
   const user = useSelector(currentUser);
@@ -20,9 +23,26 @@ const QueryList = () => {
   const filteredQueries = useFilteredQueries(queries, false, searchTerm);
   const sortSearchState = useSortSearchState();
 
+  const [height, setHeight] = useState<number | 'auto'>(0);
+  const [addNewQueryOpen, setAddNewQueryOpen] = useState(false);
+
+  useEffect(() => {
+    if (addNewQueryOpen === false) {
+      setHeight(0);
+    } else {
+      setHeight('auto');
+    }
+  }, [addNewQueryOpen])
+
+  const handleAddNewQueryClick = () => {
+    setAddNewQueryOpen(prev => !prev);
+  }
+
   const queriesTabHeading = useMemo(() => {
     return `${filteredQueries.length} Quer${filteredQueries.length === 1 ? 'y' : 'ies'}`;
   }, [filteredQueries]);
+
+  
 
   return (
     <div className={styles.queriesPanel}>
@@ -33,6 +53,16 @@ const QueryList = () => {
         handleSearch={handleSearch}
       />
       <div className={styles.list}>
+        <Button 
+          iconLeft={<SearchPlusIcon />}
+          iconRight={<ChevDownIcon className={styles.iconRight} />}
+          handleClick={handleAddNewQueryClick}
+          title="Add New Query"
+          className={styles.addNewQueryButton}
+          variant="textOnly"
+        >
+          Add New Query
+        </Button>
         {
           !user ? (
             <div className={styles.empty}>

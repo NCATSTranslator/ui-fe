@@ -1,5 +1,5 @@
 import styles from './UserSave.module.scss';
-import { useState, useEffect, RefObject, Dispatch, SetStateAction, FC, useCallback, useMemo } from 'react';
+import { RefObject, Dispatch, SetStateAction, FC, useCallback, useMemo } from 'react';
 import Highlighter from 'react-highlight-words';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultItem from '@/features/ResultItem/components/ResultItem/ResultItem';
@@ -15,6 +15,7 @@ import Alert from "@/assets/icons/status/Alerts/Info.svg?react";
 import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 interface UserSaveProps {
   activateEvidence?: (item: Result, edge: ResultEdge, path: Path, pathKey: string, pk: string) => void;
@@ -57,19 +58,7 @@ const UserSave: FC<UserSaveProps> = ({
   let queryTypeID = (!!queryObject.query.type) ? queryObject.query.type.id : 'p';
   let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryTypeID, "", key, config?.include_hashed_parameters);
   let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [height, setHeight] = useState<number | "auto">(0);
-
-  useEffect(() => {
-    if(isExpanded === false)
-      setHeight(0);
-    else
-      setHeight('auto');
-  }, [isExpanded])
-
-  const handleToggle = () => {
-    setIsExpanded(!isExpanded);
-  }
+  const { height, isOpen: isExpanded, toggle: handleToggle } = useAnimateHeight();
 
   const handleActivateEvidence = useCallback((item: Result, edgeIDs: string[], path: Path, pathKey: string) => {
     if(!resultSet)

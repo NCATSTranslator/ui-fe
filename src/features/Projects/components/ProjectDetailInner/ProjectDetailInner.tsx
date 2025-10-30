@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, MouseEvent, useEffect } from 'react';
+import { useCallback, useMemo, useState, MouseEvent } from 'react';
 import styles from './ProjectDetailInner.module.scss';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
@@ -27,6 +27,7 @@ import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
 import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import AnimateHeight from 'react-animate-height';
 import CombinedQueryInterface from '@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface';
+import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
   
 const ProjectDetailInner = () => {
   // Data management
@@ -46,17 +47,7 @@ const ProjectDetailInner = () => {
   // State management hooks
   const sortSearchState = useSortSearchState();
   const { handleUpdateProject } = useEditProjectHandlers();
-
-  const [height, setHeight] = useState<number | 'auto'>(0);
-  const [addNewQueryOpen, setAddNewQueryOpen] = useState(false);
-
-  useEffect(() => {
-    if (addNewQueryOpen === false) {
-      setHeight(0);
-    } else {
-      setHeight('auto');
-    }
-  }, [addNewQueryOpen])
+  const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
 
   // Global modals context
   const {
@@ -123,10 +114,6 @@ const ProjectDetailInner = () => {
   const queriesTabHeading = useMemo(() => {
     return `${sortedData.sortedQueries.length} Quer${sortedData.sortedQueries.length === 1 ? 'y' : 'ies'}`;
   }, [sortedData.sortedQueries]);
-
-  const handleAddNewQueryClick = () => {
-    setAddNewQueryOpen(prev => !prev);
-  }
 
   return (
     <div className={styles.projectDetail}>
