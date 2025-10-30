@@ -82,7 +82,7 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
   const restoreProjectsMutation = useRestoreProjects();
 
   const handleEditProject = (project: Project) => {
-    console.log('TODO: edit project');
+    console.log('TODO: edit project', project);
   };
 
   /**

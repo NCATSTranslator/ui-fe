@@ -99,7 +99,6 @@ const ProjectList = () => {
                   <Tab key="projects" heading={projectsTabHeading} className={styles.projectTabContent}>
                     <CardList>
                       <ProjectsTableHeader
-                        activeProjects={filteredProjects}
                         sortSearchState={sortSearchState}
                       />
                       {filteredProjects.map((project) => (

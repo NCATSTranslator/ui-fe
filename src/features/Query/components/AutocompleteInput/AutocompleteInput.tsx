@@ -188,7 +188,6 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
           items={autocompleteItems}
           scrollingIndex={scrollingIndex}
           setScrollingIndex={setScrollingIndex}
-          selectedIndex={selectedIndex}
           setSelectedIndex={setSelectedIndex}
           handleItemClick={onItemSelect}
           handleKeyDown={handleAutocompleteKeyDown}

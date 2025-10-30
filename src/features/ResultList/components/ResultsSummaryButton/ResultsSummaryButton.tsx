@@ -129,7 +129,6 @@ const ResultsSummaryButton: FC<ResultsSummaryButtonProps> = ({
         isOpen={isSummaryModalOpen}
         isSummaryLoading={isStreaming}
         onClose={()=>setIsSummaryModalOpen(false)}
-        pk={pk}
         resultContext={resultContext.current}
         streamedText={streamedText}
       />

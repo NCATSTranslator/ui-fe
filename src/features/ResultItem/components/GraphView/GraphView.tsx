@@ -44,7 +44,6 @@ interface GraphViewProps {
   graph: RenderableGraph;
   result: Result;
   resultSet: ResultSet | null;
-  onNodeClick: (nodes: Set<string[]>) => void;
   clearSelectedPaths: () => void;
   active: boolean;
   zoomKeyDown: boolean;
@@ -54,7 +53,6 @@ const GraphView = ({
   graph,
   result,
   resultSet,
-  onNodeClick,
   clearSelectedPaths,
   active,
   zoomKeyDown
