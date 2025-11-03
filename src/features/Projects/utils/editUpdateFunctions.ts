@@ -108,10 +108,10 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
     // Optimistically update the React Query cache
     queryClient.setQueryData(queryKey, (oldData: Project[]) => {
       if (!oldData) return oldData;
-      return oldData.map((project: Project) => 
-        project.id === id 
-          ? { 
-              ...project, 
+      return oldData.map((project: Project) =>
+        project.id === id
+          ? {
+              ...project,
               data: {
                 title: newName || project.data.title,
                 pks: newQids || project.data.pks
@@ -126,6 +126,16 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
     const newlyIncludedQueryTitles = newlyIncludedQids?.map(qid => {
       return queries.find(q => q.data.qid === qid)?.data.title || '';
     }).join(', ');
+    const newlyRemovedQids = projectToUpdate.data.pks?.filter(qid => !newQids?.includes(qid));
+    const newlyRemovedQueryTitles = newlyRemovedQids?.map(qid => {
+      return queries.find(q => q.data.qid === qid)?.data.title || '';
+    }).join(', ');
+
+    const action = (newlyIncludedQueryTitles && newlyIncludedQueryTitles.length > 0)
+      ? 'add'
+      : (newlyRemovedQueryTitles && newlyRemovedQueryTitles.length > 0)
+        ? 'remove'
+        : undefined;
 
     updateProjectsMutation.mutate([{
       id: projectToUpdate.id,
@@ -133,7 +143,13 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
       pks: newQids || projectToUpdate.data.pks
     }], {
       onSuccess: () => {
-        projectUpdatedToast(projectTitle, newlyIncludedQueryTitles);
+        if(action === 'remove') {
+          projectUpdatedToast(projectTitle, newlyRemovedQueryTitles, action);
+        } else if(action === 'add') {
+          projectUpdatedToast(projectTitle, newlyIncludedQueryTitles, action);
+        } else {
+          projectUpdatedToast(projectTitle);
+        }
       },
       onError: (error) => {
         console.error('Failed to update project:', error);
@@ -141,9 +157,9 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
         // Revert optimistic update on error
         queryClient.setQueryData(queryKey, (oldData: Project[]) => {
           if (!oldData) return oldData;
-          return oldData.map((project: Project) => 
-            project.id === id 
-              ? { 
+          return oldData.map((project: Project) =>
+            project.id === id
+              ? {
                   ...project,
                   data: {
                     title: projectToUpdate.data.title,
@@ -166,8 +182,8 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
     // Optimistically update the React Query cache
     queryClient.setQueryData(queryKey, (oldData: Project[]) => {
       if (!oldData) return oldData;
-      return oldData.map((p: Project) => 
-        p.id === project.id 
+      return oldData.map((p: Project) =>
+        p.id === project.id
           ? { ...p, data: { ...p.data, deleted: false } }
           : p
       );
@@ -183,8 +199,8 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
         // Revert optimistic update on error
         queryClient.setQueryData(queryKey, (oldData: Project[]) => {
           if (!oldData) return oldData;
-          return oldData.map((p: Project) => 
-            p.id === project.id 
+          return oldData.map((p: Project) =>
+            p.id === project.id
               ? { ...p, data: { ...p.data, deleted: true } }
               : p
           );
@@ -198,8 +214,8 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
     // Optimistically update the React Query cache
     queryClient.setQueryData(queryKey, (oldData: Project[]) => {
       if (!oldData) return oldData;
-      return oldData.map((p: Project) => 
-        p.id === project.id 
+      return oldData.map((p: Project) =>
+        p.id === project.id
           ? { ...p, data: { ...p.data, deleted: true } }
           : p
       );
@@ -215,8 +231,8 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
         // Revert optimistic update on error
         queryClient.setQueryData(queryKey, (oldData: Project[]) => {
           if (!oldData) return oldData;
-          return oldData.map((p: Project) => 
-            p.id === project.id 
+          return oldData.map((p: Project) =>
+            p.id === project.id
               ? { ...p, data: { ...p.data, deleted: false } }
               : p
           );
@@ -278,10 +294,10 @@ export const useEditQueryHandlers = (
       // Optimistically update the React Query cache
       queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
         if (!oldData) return oldData;
-        return oldData.map((query: UserQueryObject) => 
-          query.sid === id 
-            ? { 
-                ...query, 
+        return oldData.map((query: UserQueryObject) =>
+          query.sid === id
+            ? {
+                ...query,
                 data: { ...query.data, title: newName || query.data.title }
               }
             : query
@@ -306,10 +322,10 @@ export const useEditQueryHandlers = (
           // Revert optimistic update on error
           queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
             if (!oldData) return oldData;
-            return oldData.map((query: UserQueryObject) => 
-              query.sid === id 
-                ? { 
-                    ...query, 
+            return oldData.map((query: UserQueryObject) =>
+              query.sid === id
+                ? {
+                    ...query,
                     data: { ...query.data, title: queryToUpdate.data.title }
                   }
                 : query
@@ -334,7 +350,7 @@ export const useEditQueryHandlers = (
     queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
       if (!oldData) return oldData;
       return oldData.map((q: UserQueryObject) => {
-        return q.sid === query.sid 
+        return q.sid === query.sid
             ? { ...q, data: { ...q.data, deleted: false } }
             : q
       });
@@ -350,8 +366,8 @@ export const useEditQueryHandlers = (
         // Revert optimistic update on error
         queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
           if (!oldData) return oldData;
-          return oldData.map((q: UserQueryObject) => 
-            q.sid === query.sid 
+          return oldData.map((q: UserQueryObject) =>
+            q.sid === query.sid
               ? { ...q, data: { ...q.data, deleted: true } }
               : q
           );
@@ -366,7 +382,7 @@ export const useEditQueryHandlers = (
     queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
       if (!oldData) return oldData;
       return oldData.map((q: UserQueryObject) => {
-        return q.sid === query.sid 
+        return q.sid === query.sid
             ? { ...q, data: { ...q.data, deleted: true } }
             : q
       });
@@ -382,8 +398,8 @@ export const useEditQueryHandlers = (
         // Revert optimistic update on error
         queryClient.setQueryData(queryKey, (oldData: UserQueryObject[]) => {
           if (!oldData) return oldData;
-          return oldData.map((q: UserQueryObject) => 
-            q.sid === query.sid 
+          return oldData.map((q: UserQueryObject) =>
+            q.sid === query.sid
               ? { ...q, data: { ...q.data, deleted: false } }
               : q
           );

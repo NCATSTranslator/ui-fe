@@ -21,15 +21,21 @@ export const projectCreatedToast = () => {
   return toast.success('Project created');
 };
 
-export const projectUpdatedToast = (projectTitle?: string, queryTitle?: string) => {
-  if(projectTitle && queryTitle)
+export const projectUpdatedToast = (projectTitle?: string, queryTitle?: string, action?: 'add' | 'remove') => {
+  if(projectTitle && queryTitle && action === 'add')
     return toast.success(`${queryTitle} added to ${projectTitle}`);
+
+  if(projectTitle && action === 'remove')
+    return toast.success(`${queryTitle} removed from ${projectTitle}`);
 
   if(projectTitle)
     return toast.success(`${projectTitle} updated`);
 
-  if(queryTitle)
+  if(queryTitle && action === 'add')
     return toast.success(`${queryTitle} added to project`);
+
+  if(queryTitle && action === 'remove')
+    return toast.success(`${queryTitle} removed from project`);
 
   return toast.success('Project updated');
 };
