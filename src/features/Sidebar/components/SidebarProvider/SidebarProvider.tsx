@@ -5,9 +5,12 @@ export const SidebarContext = createContext<SidebarContextValue>({
   collapsed: true,
   activePanelId: 'none',
   dynamicSidebarItems: [],
+  addToProjectQuery: null,
   setCollapsed: () => {},
   togglePanel: () => {},
   closePanel: () => {},
+  setAddToProjectMode: () => {},
+  clearAddToProjectMode: () => {},
   registerSidebarItem: () => {},
   unregisterSidebarItem: () => {},
   getSidebarItem: () => null,
@@ -20,6 +23,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [collapsed, setCollapsedState] = useState<boolean>(true);
   const [activePanelId, setActivePanelId] = useState<SidebarContextValue['activePanelId']>('none');
   const [dynamicSidebarItems, setDynamicSidebarItems] = useState<SidebarItem[]>([]);
+  const [addToProjectQuery, setAddToProjectQuery] = useState<SidebarContextValue['addToProjectQuery']>(null);
 
   const setCollapsed = useCallback((v: boolean) => {
     setCollapsedState(v);
@@ -37,6 +41,15 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const closePanel = useCallback(() => {
     setActivePanelId('none');
     setCollapsedState(true);
+    setAddToProjectQuery(null);
+  }, []);
+
+  const setAddToProjectMode = useCallback((query: SidebarContextValue['addToProjectQuery']) => {
+    setAddToProjectQuery(query);
+  }, []);
+
+  const clearAddToProjectMode = useCallback(() => {
+    setAddToProjectQuery(null);
   }, []);
 
   const registerSidebarItem = useCallback((id: SidebarItemId, item: SidebarItem) => {
@@ -85,9 +98,12 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     collapsed,
     activePanelId,
     dynamicSidebarItems,
+    addToProjectQuery,
     setCollapsed,
     togglePanel,
     closePanel,
+    setAddToProjectMode,
+    clearAddToProjectMode,
     registerSidebarItem,
     unregisterSidebarItem,
     getSidebarItem,
@@ -97,9 +113,12 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     collapsed,
     activePanelId,
     dynamicSidebarItems,
+    addToProjectQuery,
     setCollapsed,
     togglePanel,
     closePanel,
+    setAddToProjectMode,
+    clearAddToProjectMode,
     registerSidebarItem,
     unregisterSidebarItem,
     getSidebarItem,

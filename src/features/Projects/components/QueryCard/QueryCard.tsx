@@ -30,7 +30,7 @@ const QueryCard: FC<QueryCardProps> = ({
 }) => {
   const { title } = useGetQueryCardTitle(query);  
   const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
-  const { activePanelId } = useSidebar();
+  const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
 
   const currentPage = useLocation().pathname.replace('/', '');
   const disableDragging = useMemo(() => {
@@ -42,9 +42,16 @@ const QueryCard: FC<QueryCardProps> = ({
   
   const icon = <StatusIndicator status={query.status} />;
 
+  const handleAddToProject = () => {
+    setAddToProjectMode(query);
+    if (activePanelId !== 'projects') {
+      togglePanel('projects');
+    }
+  };
+
   const options = (
     <>
-      <Button handleClick={()=>{console.log('add to project');}} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />} className={styles.addToProjectButton}>Add to Project</Button>
+      <Button handleClick={handleAddToProject} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />} className={styles.addToProjectButton}>Add to Project</Button>
       {
         projectId && (
           <Button handleClick={()=>{console.log('remove from project');}} iconLeft={<FolderEmptyIcon className={styles.folderPlusIcon} />} className={styles.removeFromProjectButton}>Remove from this Project</Button>

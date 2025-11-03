@@ -9,6 +9,14 @@ export const projectDeletedToast = () => {
   return toast.error('Project deleted');
 };
 
+export const queryAddedToProjectToast = (queryTitle: string, projectTitle: string) => {
+  return toast.success(`${queryTitle} Added to ${projectTitle}`);
+};
+
+export const queryAlreadyInProjectToast = () => {
+  return toast.error('Query already in project');
+};
+
 export const projectCreatedToast = () => {
   return toast.success('Project created');
 };

@@ -12,25 +12,32 @@ import Button from "@/features/Core/components/Button/Button";
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useCreateProject } from "@/features/Projects/hooks/customHooks";
-import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
+import { projectCreatedToast, queryAddedToProjectToast } from "@/features/Projects/utils/toastMessages";
+import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
+import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
+import { Project } from "@/features/Projects/types/projects";
 
 const ProjectsPanel = () => {
   const user = useSelector(currentUser);
   const data = useProjectListData();
-  const projects = useMemo(() => data.formatted.active, [data.formatted.active]);
+  const projects = data.formatted.active || [];
   const projectsLoading = data.loading.projectsLoading;
   const { searchTerm, handleSearch } = useSimpleSearch();
   const createProjectMutation = useCreateProject();
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
+  const { addToProjectQuery, clearAddToProjectMode } = useSidebar();
+  const { title: queryTitle } = useGetQueryCardTitle(addToProjectQuery || null);
 
   const filteredProjects = useMemo(() => {
+    if(searchTerm.length === 0) return projects;
+
     return projects.filter((project) => project.data.title.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [projects, searchTerm]);
 
   const handleCreateNewProjectClick = () => {
     const newProject = {
       title: '',
-      pks: []
+      pks: addToProjectQuery !== null ? [addToProjectQuery.data.qid] : []
     };
 
     createProjectMutation.mutate(newProject, {
@@ -44,8 +51,14 @@ const ProjectsPanel = () => {
     });
   };
 
-  const handleRenameProject = () => {
+  const handleRenameProject = (project: Project) => {
     setNewProjectId(null);
+    
+    // If in add-to-project mode and this was the new project being named
+    if (addToProjectQuery && project) {
+      queryAddedToProjectToast(queryTitle, project.data.title);
+      clearAddToProjectMode();
+    }
   };
 
   return (

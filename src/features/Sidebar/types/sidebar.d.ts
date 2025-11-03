@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { UserQueryObject } from '@/features/Projects/types/projects';
 
 type SidebarItemId = 'newQuery' | 'queries' | 'projects' | 'filters' | 'queryStatus' | 'settings' | 'feedback' | 'help';
 
@@ -6,9 +7,12 @@ export type SidebarContextValue = {
   collapsed: boolean;
   activePanelId: SidebarItemId | 'none';
   dynamicSidebarItems: SidebarItem[];
+  addToProjectQuery: UserQueryObject | null;
   setCollapsed: (v: boolean) => void;
   togglePanel: (id: SidebarItemId) => void;
   closePanel: () => void;
+  setAddToProjectMode: (query: UserQueryObject) => void;
+  clearAddToProjectMode: () => void;
   registerSidebarItem: (id: SidebarItemId, item: SidebarItem) => void;
   unregisterSidebarItem: (id: SidebarItemId) => void;
   getSidebarItem: (id: SidebarItemId) => SidebarItem | null;

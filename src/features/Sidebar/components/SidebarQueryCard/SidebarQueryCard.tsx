@@ -16,15 +16,20 @@ import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { getTimeRelativeDate } from "@/features/Common/utils/utilities";
 import { useLocation } from "react-router-dom";
+import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 
 interface SidebarQueryCardProps {
   query: UserQueryObject;
   searchTerm?: string;
 }
 
-const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
+const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
+  query,
+  searchTerm
+}) => {
   const { title } = useGetQueryCardTitle(query);  
   const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
+  const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
 
   const currentPage = useLocation().pathname.replace('/', '');
   const disableDragging = useMemo(() => {
@@ -55,9 +60,16 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({ query, searchTerm }) => {
       </span>
   );
 
+  const handleAddToProject = () => {
+    setAddToProjectMode(query);
+    if (activePanelId !== 'projects') {
+      togglePanel('projects');
+    }
+  };
+
   const options = (
     <>
-      <Button handleClick={()=>{}} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />}>Add to Project</Button>
+      <Button handleClick={handleAddToProject} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />} className={styles.addToProjectButton}>Add to Project</Button>
       <Button handleClick={() => openShareQueryModal(query)} iconLeft={<ShareIcon />}>Share Query</Button>
       <Button handleClick={() => openDeleteQueriesModal([query])} iconLeft={<TrashIcon />}>Delete Query</Button>
     </>

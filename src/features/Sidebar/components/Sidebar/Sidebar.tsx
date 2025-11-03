@@ -7,9 +7,20 @@ import SidebarLinkList from "@/features/Sidebar/components/SidebarLinkList/Sideb
 import ContextPanel from "@/features/Sidebar/components/ContextPanel/ContextPanel";
 
 const Sidebar = () => {
-  const { collapsed, activePanelId, dynamicSidebarItems, getContextPanel, getButtonComponent } = useSidebar();
+  const { collapsed, activePanelId, dynamicSidebarItems, getContextPanel, getButtonComponent, addToProjectQuery } = useSidebar();
   const allSidebarItems = useMemo(() => [...topItems, ...dynamicSidebarItems, ...bottomItems], [dynamicSidebarItems]);
   const activeSidebarItem = useMemo(() => allSidebarItems.find(item => item.id === activePanelId), [allSidebarItems, activePanelId]);
+  
+  const activeTitle = useMemo(() => {
+    if (!activeSidebarItem) return '';
+    
+    // Special case for projects panel - dynamic title based on mode
+    if (activeSidebarItem.id === 'projects' && addToProjectQuery) {
+      return 'Add to Project';
+    }
+    
+    return activeSidebarItem.label;
+  }, [activeSidebarItem, addToProjectQuery]);
 
   return (
     <aside className={joinClasses(styles.sidebar, collapsed && styles.collapsed)} aria-label="Sidebar">
@@ -38,7 +49,7 @@ const Sidebar = () => {
             activePanelId={activePanelId}
             buttonComponent={activeSidebarItem && getButtonComponent(activeSidebarItem)}
             panel={activeSidebarItem && getContextPanel(activeSidebarItem)}
-            title={activeSidebarItem.label || ''}
+            title={activeTitle}
           />
         }
       </div>
