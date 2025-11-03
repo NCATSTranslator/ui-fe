@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { Project, ProjectEditingItem, ProjectRaw, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
-import { useUpdateProjects, useUpdateQuery, useDeleteProjects, useRestoreProjects, useDeleteQueries, useRestoreQueries, useUserProjects } from '@/features/Projects/hooks/customHooks';
+import { useUpdateProjects, useUpdateQuery, useDeleteProjects, useRestoreProjects, useDeleteQueries, useRestoreQueries, useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
 import { errorToast, projectUpdatedToast, queryUpdatedToast, projectRestoredToast, projectDeletedToast, queryRestoredToast, queryDeletedToast } from './toastMessages';
 
 export interface EditProjectState {
@@ -77,6 +77,7 @@ export const useEditProjectState = (): [EditProjectState, Dispatch<SetStateActio
 export const useEditProjectHandlers = (): EditProjectHandlers => {
   const queryClient = useQueryClient();
   const { data: projects = [] } = useUserProjects();
+  const { data: queries = [] } = useUserQueries();
   const updateProjectsMutation = useUpdateProjects();
   const deleteProjectsMutation = useDeleteProjects();
   const restoreProjectsMutation = useRestoreProjects();
@@ -119,14 +120,20 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
           : project
       );
     });
+    const projectTitle = newName || projectToUpdate.data.title;
+    // check diff between newQids and projectToUpdate.data.pks. If different, get the titles of the newly included queries
+    const newlyIncludedQids = newQids?.filter(qid => !projectToUpdate.data.pks.includes(qid));
+    const newlyIncludedQueryTitles = newlyIncludedQids?.map(qid => {
+      return queries.find(q => q.data.qid === qid)?.data.title || '';
+    }).join(', ');
 
     updateProjectsMutation.mutate([{
       id: projectToUpdate.id,
-      title: newName || projectToUpdate.data.title,
+      title: projectTitle,
       pks: newQids || projectToUpdate.data.pks
     }], {
       onSuccess: () => {
-        projectUpdatedToast();
+        projectUpdatedToast(projectTitle, newlyIncludedQueryTitles);
       },
       onError: (error) => {
         console.error('Failed to update project:', error);

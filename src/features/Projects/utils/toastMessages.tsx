@@ -21,7 +21,16 @@ export const projectCreatedToast = () => {
   return toast.success('Project created');
 };
 
-export const projectUpdatedToast = () => {
+export const projectUpdatedToast = (projectTitle?: string, queryTitle?: string) => {
+  if(projectTitle && queryTitle)
+    return toast.success(`${queryTitle} added to ${projectTitle}`);
+
+  if(projectTitle)
+    return toast.success(`${projectTitle} updated`);
+
+  if(queryTitle)
+    return toast.success(`${queryTitle} added to project`);
+
   return toast.success('Project updated');
 };
 
