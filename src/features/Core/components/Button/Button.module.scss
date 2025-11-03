@@ -83,4 +83,11 @@
   .iconLeft, .iconRight {
     display: flex;
   }
+  &.inline {
+    display: inline;
+    padding: 0;
+    .label {
+      padding: 0;
+    }
+  }
 }

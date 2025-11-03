@@ -18,6 +18,7 @@ import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?re
 import { useAnimateHeight } from "@/features/Core/hooks/useAnimateHeight";
 import AnimateHeight from "react-animate-height";
 import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
+import EmptyArea from "@/features/Projects/components/EmptyArea/EmptyArea";
 
 const QueryList = () => {
   const user = useSelector(currentUser);
@@ -93,9 +94,9 @@ const QueryList = () => {
                       {
                         queries.length === 0 
                         ? (
-                            <div className={styles.empty}>
-                              <p>No queries found.</p>
-                            </div>
+                          <EmptyArea heading="No Queries">
+                            <p>Your bookmarks and notes are saved here when you run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.</p>
+                          </EmptyArea>
                           ) 
                         : 
                           (
