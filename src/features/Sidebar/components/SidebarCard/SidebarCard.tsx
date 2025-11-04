@@ -9,6 +9,7 @@ import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
 
 interface SidebarCardProps {
   leftIcon: ReactNode;
+  rightIcon?: ReactNode;
   title: string;
   searchTerm?: string;
   linkTo?: string;
@@ -28,6 +29,7 @@ interface SidebarCardProps {
 
 const SidebarCard: FC<SidebarCardProps> = ({
   leftIcon,
+  rightIcon,
   title,
   searchTerm,
   linkTo,
@@ -73,6 +75,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
           onTitleChange={onTitleChange}
           onFormSubmit={onFormSubmit}
           textInputRef={textInputRef}
+          rightIcon={rightIcon}
         />
         {(bottomLeft || bottomRight) && (
           <div className={styles.bottom}>
@@ -80,22 +83,22 @@ const SidebarCard: FC<SidebarCardProps> = ({
             {bottomRight && bottomRight}
           </div>
         )}
+        {
+          options &&
+          (        
+            <div className={styles.options}>
+              <OutsideClickHandler onOutsideClick={()=>setOptionsOpen(false)}>
+                <Button className={styles.optionsButton} handleClick={()=>setOptionsOpen(prev=>!prev)}>
+                  <OptionsIcon />
+                </Button>
+              </OutsideClickHandler>
+              <OptionsPane open={optionsOpen}>
+                {options && options}
+              </OptionsPane>
+            </div>
+          )
+        }
       </div>
-      {
-        options &&
-        (        
-          <div className={styles.options}>
-            <OutsideClickHandler onOutsideClick={()=>setOptionsOpen(false)}>
-              <Button className={styles.optionsButton} handleClick={()=>setOptionsOpen(prev=>!prev)}>
-                <OptionsIcon />
-              </Button>
-            </OutsideClickHandler>
-            <OptionsPane open={optionsOpen}>
-              {options && options}
-            </OptionsPane>
-          </div>
-        )
-      }
     </div>
   );
 };

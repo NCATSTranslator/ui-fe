@@ -2,7 +2,7 @@ import { FC, ReactNode, createContext, useState, useCallback, useMemo } from 're
 import { Project, UserQueryObject, QueryEditingItem, ProjectRaw } from '@/features/Projects/types/projects.d';
 import { useModals } from '@/features/Projects/hooks/useModals';
 import { useAllDeletePrompts } from '@/features/Projects/hooks/useDeletePrompts';
-import { useDeleteProjects, useDeleteQueries, useRestoreProjects, useRestoreQueries } from '@/features/Projects/hooks/customHooks';
+import { useDeleteProjects, useDeleteQueries } from '@/features/Projects/hooks/customHooks';
 import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
 import { projectDeletedToast, queryDeletedToast, errorToast } from '@/features/Projects/utils/toastMessages';
 

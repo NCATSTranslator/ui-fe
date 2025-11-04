@@ -1,4 +1,4 @@
-import { useMemo, FC, ReactNode, useState } from 'react';
+import { useMemo, FC, useState } from 'react';
 import styles from './ResultsFilter.module.scss';
 import { Filter, FilterType, GroupedFilters, FilterFamily } from '@/features/ResultFiltering/types/filters';
 import { cloneDeep } from 'lodash';
@@ -7,7 +7,6 @@ import EntitySearch from '@/features/ResultFiltering/components/EntitySearch/Ent
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
 import Button from '@/features/Core/components/Button/Button';
 import FacetHeading from '@/features/ResultFiltering/components/FacetHeading/FacetHeading';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { getFilterLabel } from '@/features/ResultFiltering/utils/filterFunctions';
 import ChevLeft from "@/assets/icons/directional/Chevron/Chevron Left.svg?react";
 

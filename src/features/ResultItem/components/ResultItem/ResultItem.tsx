@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction, useMemo } from 'react';
 import styles from './ResultItem.module.scss';
-import { formatBiolinkEntity, formatBiolinkNode, getPathCount, isStringArray } from '@/features/Common/utils/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
 import { getARATagsFromResultTags, isNotesEmpty } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
@@ -14,7 +14,7 @@ import BookmarkConfirmationModal from '@/features/ResultItem/components/Bookmark
 import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { handleBookmarkClick as handleBookmarkClickUtil, handleNotesClick as handleNotesClickUtil, BookmarkFunctionParams } from '@/features/ResultItem/utils/bookmarkFunctions';
 import { useSelector } from 'react-redux';
-import { getResultSetById, getNodeById, getPathById, getPathsByIds, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
+import { getResultSetById, getNodeById } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { displayScore, generateScore } from '@/features/ResultList/utils/scoring';
 import { QueryType } from '@/features/Query/types/querySubmission';
@@ -193,56 +193,6 @@ const ResultItem: FC<ResultItemProps> = ({
   const handleClearSelectedPaths = useCallback(() => {
     setSelectedPaths(null);
   },[]);
-
-  const handleGraphNodeClick = useCallback((nodeSequences: Set<string[]>) => {
-    if(!nodeSequences)
-      return;
-
-    let newSelectedPaths: Set<Path> = new Set();
-    let paths = (isStringArray(newPaths)) ? getPathsByIds(resultSet, newPaths) : newPaths;
-
-    const extractNodeSequence = (subgraph: string[]): string[] => {
-      let nodeSequence: string[] = [];
-      for(let i = 0; i < subgraph.length; i+=2)
-        nodeSequence.push(subgraph[i]);
-
-      return nodeSequence;
-    };
-
-    const checkForNodeMatches = (nodeSequence: string[], path: Path) => {
-      let pathNodeSequence = extractNodeSequence(path.subgraph);
-      return pathNodeSequence === nodeSequence;
-    }
-
-    for(const sequence of nodeSequences) {
-      for(const path of paths) {
-        // check edges for support
-        for(let i = 1; i < path.subgraph.length; i+=2) {
-          let edge = getEdgeById(resultSet, path.subgraph[i]);
-          // check support for matches
-          if(!!edge && edge.support.length > 0) {
-            for(const pathID of edge.support) {
-              let supportPath = (typeof pathID === "string") ? getPathById(resultSet, pathID) : pathID;
-              if(!!supportPath && checkForNodeMatches(sequence, supportPath))
-                newSelectedPaths.add(supportPath);
-            }
-          }
-        }
-
-        // include all 1 hops, bc they're unselectable otherwise
-        if(path.subgraph.length === 3) {
-          newSelectedPaths.add(path);
-          continue;
-        }
-
-        // check base path for matches
-        if(checkForNodeMatches(sequence, path))
-          newSelectedPaths.add(path);
-      }
-    }
-    setSelectedPaths(newSelectedPaths)
-
-  },[newPaths, resultSet]);
 
   const bookmarkParams: BookmarkFunctionParams = useMemo(() => ({
     result,
@@ -471,7 +421,6 @@ const ResultItem: FC<ResultItemProps> = ({
                   graph={graph}
                   result={result}
                   resultSet={resultSet}
-                  onNodeClick={handleGraphNodeClick}
                   clearSelectedPaths={handleClearSelectedPaths}
                   active={graphActive}
                   zoomKeyDown={zoomKeyDown}

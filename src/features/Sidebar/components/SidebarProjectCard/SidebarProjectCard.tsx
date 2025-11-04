@@ -3,11 +3,13 @@ import { Project } from "@/features/Projects/types/projects";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
+import FolderEmptyIcon from '@/assets/icons/projects/folderempty.svg?react';
 import SidebarCard from "@/features/Sidebar/components/SidebarCard/SidebarCard";
 import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
+import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
 import { isUnassignedProject, useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
@@ -18,6 +20,9 @@ import { DraggableData } from "@/features/DragAndDrop/types/types";
 import { isDraggedQueryInProject } from "@/features/Projects/utils/dragDropUtils";
 import { useDndContext } from "@dnd-kit/core";
 import { useRenameProject } from "@/features/Projects/hooks/useRenameProject";
+import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
+import { queryAlreadyInProjectToast, queryAddedToProjectToast } from "@/features/Projects/utils/toastMessages";
+import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 
 interface SidebarProjectCardProps {
   allProjects?: Project[];
@@ -28,20 +33,23 @@ interface SidebarProjectCardProps {
 }
 
 const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
+  allProjects,
+  onRename,
   project,
   searchTerm,
   startRenaming = false,
-  onRename,
-  allProjects
 }) => {
   const queryCount = project.data.pks.length;
   const { openDeleteProjectModal } = useProjectModals();
   const { handleUpdateProject } = useEditProjectHandlers();
+  const { addToProjectQuery, clearAddToProjectMode } = useSidebar();
   const isUnassigned = isUnassignedProject(project);
   const className = joinClasses(styles.projectCard, isUnassigned && styles.unassigned);
-  const leftIcon = <FolderIcon />;
+  const leftIcon = isUnassigned ? <FolderEmptyIcon className={styles.emptyIcon} /> : <FolderIcon />;
   const { active } = useDndContext();
   const isQueryInProject = useMemo(() => active ? isDraggedQueryInProject(active, project) : false, [active, project]);
+  const { title: queryTitle } = useGetQueryCardTitle(addToProjectQuery || null);
+  const isAddToProjectMode = !!addToProjectQuery;
 
   const {
     isRenaming,
@@ -91,6 +99,24 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
       console.error('No project found');
   }, [project, handleUpdateProject]);
 
+  const handleAddQueryToProject = useCallback(() => {
+    if (!addToProjectQuery || !project || isUnassigned) return;
+
+    // Check if query is already in project
+    const isQueryAlreadyInProject = project.data.pks.includes(addToProjectQuery.data.qid);
+    if (isQueryAlreadyInProject) {
+      queryAlreadyInProjectToast();
+      clearAddToProjectMode();
+      return;
+    }
+
+    // Add query to project
+    handleUpdateProject(project.id, undefined, [...project.data.pks, addToProjectQuery.data.qid]);
+    // Show toast and clear mode
+    queryAddedToProjectToast(queryTitle, project.data.title);
+    clearAddToProjectMode();
+  }, [addToProjectQuery, project, isUnassigned, handleUpdateProject, clearAddToProjectMode, queryTitle]);
+
   return (
     <OutsideClickHandler onOutsideClick={handleOutsideClick}>
       <DroppableArea 
@@ -110,16 +136,18 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
           leftIcon={leftIcon}
           title={localTitle}
           searchTerm={searchTerm}
-          linkTo={`/projects/${project.id}`}
+          linkTo={isAddToProjectMode ? undefined : `/projects/${project.id}`}
+          onClick={isAddToProjectMode && !isUnassigned ? handleAddQueryToProject : undefined}
           bottomLeft={bottomLeft}
           bottomRight={bottomRight}
           data-testid="sidebar-project-card"
           className={className}
-          options={isUnassigned ? undefined : options}
+          options={isUnassigned || isAddToProjectMode ? undefined : options}
           isRenaming={isRenaming}
           onTitleChange={handleTitleChange}
           onFormSubmit={handleFormSubmit}
           textInputRef={textInputRef}
+          rightIcon={isUnassigned ? <InfoIcon data-tooltip-content="Unassigned Project" /> : undefined}
         />
       </DroppableArea>
     </OutsideClickHandler>

@@ -2,7 +2,6 @@ import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/sli
 import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
 import { findInSet, hasSupport } from "@/features/Common/utils/utilities";
-import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import { cloneDeep } from "lodash";
@@ -465,7 +464,7 @@ export const calculateFacetCounts = (
     const missingFamiliesCount = activeFamilies.size - resultFamilies.size;
     // When the family counts are equal, add all the result's tags
     if (missingFamiliesCount === 0) {
-      _addTagCountsWhen(countedTags, result, (tagID: string) => { return true; });
+      _addTagCountsWhen(countedTags, result, () => { return true; });
     // When the result is missing a single family, add all tags from only the missing family
     } else if (missingFamiliesCount === 1) {
       // Find the missing family

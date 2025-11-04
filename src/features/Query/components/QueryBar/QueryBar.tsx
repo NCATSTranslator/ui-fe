@@ -62,7 +62,7 @@ const QueryBar: FC<QueryBarProps> = ({
     }
   }
 
-  const handleAutocompleteSelect = (cxt: AutocompleteContext) => submitRef?.current?.focus();
+  const handleAutocompleteSelect = () => submitRef?.current?.focus();
   const handleInputSubmit = (cxt: AutocompleteContext) => {
     if (cxt.event === undefined || cxt.event === null) {
       throw Error(`Developer Error in QueryBar.tsx: \n  In handleInputSubmit cxt.event is required but is ${cxt.event}`);

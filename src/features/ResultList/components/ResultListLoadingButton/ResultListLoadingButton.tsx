@@ -17,7 +17,7 @@ const ResultListLoadingButton = ({
   handleResultsRefresh,
 }: ResultListLoadingButtonProps) => {
 
-  const [isNewResultsDisclaimerApproved, setAndPersistNewResultsDisclaimerApproved] = useNewResultsDisclaimerApproved(false);
+  const [, setAndPersistNewResultsDisclaimerApproved] = useNewResultsDisclaimerApproved(false);
   // const [isTooltipOpen, setIsTooltipOpen] = useState(!isNewResultsDisclaimerApproved);
   
   const handleCheckbox = (): void => setAndPersistNewResultsDisclaimerApproved(prev => !prev);

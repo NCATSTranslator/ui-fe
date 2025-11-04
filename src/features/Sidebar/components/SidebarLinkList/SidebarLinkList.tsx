@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import styles from './SidebarLinkList.module.scss';
 import { SidebarItem } from '@/features/Sidebar/types/sidebar';
 import SidebarLink from '@/features/Sidebar/components/SidebarLink/SidebarLink';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';

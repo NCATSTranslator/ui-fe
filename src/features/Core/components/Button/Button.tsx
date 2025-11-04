@@ -6,6 +6,7 @@ import { joinClasses } from "@/features/Common/utils/utilities";
 interface ButtonProps {
   ariaLabel?: string;
   variant?: "secondary" | "textOnly";
+  inline?: boolean;
   handleClick?: (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   href?: string;
   link?: boolean;
@@ -30,6 +31,7 @@ const Button: FC<ButtonProps> = ({
   title,
   ariaLabel,
   variant,
+  inline,
   handleClick,
   href,
   iconOnly = false,
@@ -58,6 +60,7 @@ const Button: FC<ButtonProps> = ({
     !!iconLeft && styles.iconLeft,
     !!iconRight && styles.iconRight,
     smallFont && styles.smallFont,
+    inline && styles.inline,
     className
   )
 
