@@ -3,11 +3,13 @@ import { Project } from "@/features/Projects/types/projects";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
+import FolderEmptyIcon from '@/assets/icons/projects/folderempty.svg?react';
 import SidebarCard from "@/features/Sidebar/components/SidebarCard/SidebarCard";
 import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
+import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
 import { isUnassignedProject, useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
@@ -43,7 +45,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
   const { addToProjectQuery, clearAddToProjectMode } = useSidebar();
   const isUnassigned = isUnassignedProject(project);
   const className = joinClasses(styles.projectCard, isUnassigned && styles.unassigned);
-  const leftIcon = <FolderIcon />;
+  const leftIcon = isUnassigned ? <FolderEmptyIcon className={styles.emptyIcon} /> : <FolderIcon />;
   const { active } = useDndContext();
   const isQueryInProject = useMemo(() => active ? isDraggedQueryInProject(active, project) : false, [active, project]);
   const { title: queryTitle } = useGetQueryCardTitle(addToProjectQuery || null);
@@ -145,6 +147,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
           onTitleChange={handleTitleChange}
           onFormSubmit={handleFormSubmit}
           textInputRef={textInputRef}
+          rightIcon={isUnassigned ? <InfoIcon data-tooltip-content="Unassigned Project" /> : undefined}
         />
       </DroppableArea>
     </OutsideClickHandler>

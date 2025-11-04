@@ -21,6 +21,7 @@
     &.titleClickable {
       cursor: pointer;
       transition: $defaultAnim;
+      display: inline-flex;
       &:hover {
         color: $purpleOne;
       }
