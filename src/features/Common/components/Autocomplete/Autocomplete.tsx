@@ -11,7 +11,6 @@ type AutocompleteProps = {
   items: Array<AutocompleteItem> | null;
   scrollingIndex: number;
   setScrollingIndex: (index: number | ((index: number) => number)) => void;
-  selectedIndex: number;
   setSelectedIndex: (index: number) => void;
   handleItemClick: (item: AutocompleteItem) => void;
   handleKeyDown: (event: KeyboardEvent) => void;
@@ -27,7 +26,6 @@ const Autocomplete: FC<AutocompleteProps> = ({
   items,
   scrollingIndex,
   setScrollingIndex,
-  selectedIndex,
   setSelectedIndex,
   handleItemClick,
   handleKeyDown,

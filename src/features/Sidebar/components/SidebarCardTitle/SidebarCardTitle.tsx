@@ -1,29 +1,31 @@
-import { FC, FormEvent, RefObject } from "react";
+import { FC, FormEvent, ReactNode, RefObject } from "react";
+import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
 import { Link } from "react-router-dom";
 import Highlighter from "react-highlight-words";
-import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 
 interface SidebarCardTitleProps {
   isRenaming?: boolean;
-  onTitleChange?: (value: string) => void;
-  onFormSubmit?: (e: FormEvent<HTMLFormElement>) => void;
-  textInputRef?: RefObject<HTMLInputElement | null>;
   linkTarget?: string;
   linkTo?: string;
+  onTitleChange?: (value: string) => void;
+  onFormSubmit?: (e: FormEvent<HTMLFormElement>) => void;
+  rightIcon?: ReactNode;
   searchTerm?: string;
+  textInputRef?: RefObject<HTMLInputElement | null>;
   title: string;
 }
 
 const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
   isRenaming,
-  onTitleChange,
-  onFormSubmit,
-  textInputRef,
-  title,
-  searchTerm,
+  rightIcon,
   linkTo,
   linkTarget,
+  onTitleChange,
+  onFormSubmit,
+  searchTerm,
+  textInputRef,
+  title,
 }) => {
   const titleContent = (
     isRenaming && onTitleChange && onFormSubmit ? (
@@ -48,6 +50,7 @@ const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
         target={linkTarget}
       >
         {titleContent}
+        {rightIcon && <div className={styles.rightIcon}>{rightIcon}</div>}
       </Link>
     );
   }
@@ -55,6 +58,7 @@ const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
   return (
     <div className={styles.title}>
       {titleContent}
+      {rightIcon && <div className={styles.rightIcon}>{rightIcon}</div>}
     </div>
   );
 };

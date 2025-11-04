@@ -1,5 +1,5 @@
 import { useState, useEffect, FC, ReactElement, Children, isValidElement,
-  useMemo, useCallback, useRef, KeyboardEvent } from "react";
+  useMemo, useCallback, useRef } from "react";
 import Tab, { TabProps } from "./Tab";
 import { Fade } from 'react-awesome-reveal';
 import styles from './Tabs.module.scss';

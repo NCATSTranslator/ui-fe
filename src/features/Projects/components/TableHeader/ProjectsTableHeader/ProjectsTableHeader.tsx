@@ -1,17 +1,14 @@
-import { Project, SortSearchState } from '@/features/Projects/types/projects.d';
+import { SortSearchState } from '@/features/Projects/types/projects.d';
 import styles from '@/features/Projects/components/TableHeader/TableHeader.module.scss';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import SortableHeader from '@/features/Projects/components/SortableHeader/SortableHeader';
-import { isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
 
 interface ProjectsTableHeaderProps {
-  activeProjects: Project[];
   sortSearchState: SortSearchState;
 }
 
 const ProjectsTableHeader = ({ 
-  activeProjects,
   sortSearchState
 }: ProjectsTableHeaderProps) => {
   const { 

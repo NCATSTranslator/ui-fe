@@ -1,6 +1,3 @@
-
-import { Dispatch, SetStateAction } from 'react';
-
 export type ProjectCreate = {
   title: string;
   pks: string[];

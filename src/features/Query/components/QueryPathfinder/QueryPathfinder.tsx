@@ -9,7 +9,6 @@ import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilte
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "@/assets/icons/directional/Pathfinder/Pathfinder.svg?react";
-import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-white.png';
@@ -91,7 +90,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     delayedQuery: delayedQueryOne,
     autocompleteVisibility: autocompleteVisibilityOne,
     setAutocompleteVisibility: setAutocompleteVisibilityOne,
-    clearAutocompleteItems: clearAutocompleteItemsOne
   } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes, excludePrefixes);
 
   const {
@@ -100,7 +98,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     delayedQuery: delayedQueryTwo,
     autocompleteVisibility: autocompleteVisibilityTwo,
     setAutocompleteVisibility: setAutocompleteVisibilityTwo,
-    clearAutocompleteItems: clearAutocompleteItemsTwo
   } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes, excludePrefixes);
 
   const { isLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder', shouldNavigate, submissionCallback);

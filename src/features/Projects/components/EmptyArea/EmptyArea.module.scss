@@ -1,0 +1,9 @@
+@use '@/assets/styles/variables' as *;
+
+.emptyArea {
+  padding: calc($xxl *2) 0;
+  text-align: center;
+  .heading {
+    color: $black;
+  }
+}

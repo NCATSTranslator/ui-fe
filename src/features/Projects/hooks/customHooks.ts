@@ -348,15 +348,16 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
  * @param {UserQueryObject} query - The query object
  * @returns { title: string; isLoading: boolean } Object with title and loading state
  */
-export const useGetQueryCardTitle = (query: UserQueryObject): { title: string; isLoading: boolean } => {
+export const useGetQueryCardTitle = (query: UserQueryObject | null): { title: string; isLoading: boolean } => {
+  
   const updateQueryMutation = useUpdateQuery();
   const baseTitle = useMemo(() => 
-    getBaseTitle(query), 
+    query ? getBaseTitle(query) : '', 
     [query]
   );
   
   const curies = useMemo(() => 
-    findAllCuriesInTitle(baseTitle), 
+    query ? findAllCuriesInTitle(baseTitle) : [], 
     [baseTitle]
   );
   
@@ -366,6 +367,9 @@ export const useGetQueryCardTitle = (query: UserQueryObject): { title: string; i
   );
   
   const title = useMemo(() => {
+    if(query === null)
+      return baseTitle;
+      
     const updatedTitle = replaceCuriesInTitle(baseTitle, resolvedNames);
     
     // Only update if we actually made replacements
@@ -379,7 +383,7 @@ export const useGetQueryCardTitle = (query: UserQueryObject): { title: string; i
     }
     
     return baseTitle;
-  }, [curies, resolvedNames, baseTitle, updateQueryMutation, query.sid]);
+  }, [curies, resolvedNames, baseTitle, updateQueryMutation, query?.sid]);
   
   return { title, isLoading };
 };

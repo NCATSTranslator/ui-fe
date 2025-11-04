@@ -40,6 +40,7 @@ const ProjectCard: FC<ProjectCardProps> = ({
   const icon = <FolderIcon />;
   const { active } = useDndContext();
   const isQueryInProject = useMemo(() => active ? isDraggedQueryInProject(active, project) : false, [active, project]);
+  const date = (isUnassigned) ? "" : getTimeRelativeDate(new Date(project.time_updated));
 
   const {
     isRenaming,
@@ -61,7 +62,7 @@ const ProjectCard: FC<ProjectCardProps> = ({
       <Button handleClick={startRenamingAction} iconLeft={<EditIcon />}>Rename</Button>
       <Button handleClick={() => openDeleteProjectModal(project)} iconLeft={<TrashIcon />}>Delete</Button>
     </>
-  ); 
+  );
 
   const onQueryDrop = useCallback((draggedItem: DraggableData) => {
     if(project)
@@ -100,7 +101,7 @@ const ProjectCard: FC<ProjectCardProps> = ({
           queryCount={queryCount}
           bookmarksCount={project.bookmark_count}
           notesCount={project.note_count}
-          date={getTimeRelativeDate(new Date(project.time_updated))}
+          date={date}
         />
       </DroppableArea>
     </OutsideClickHandler>

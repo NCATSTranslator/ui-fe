@@ -70,6 +70,13 @@
     display: flex;
     align-items: flex-start;
     padding-top: $xxxs;
+    svg {
+      width: 22px;
+      height: 22px;
+      &.emptyIcon path {
+        fill: transparent;
+      }
+    }
   }
   .content {
     min-width: 0;
@@ -77,6 +84,14 @@
   .title {
     display: flex;
     min-height: $m;
+    align-items: center;
+    .rightIcon {
+      margin-left: $xxs;
+      svg {
+        height: 18px;
+        width: 18px;
+      }
+    }
   }
   .title, .title span, .title mark {
     margin-bottom: 0;

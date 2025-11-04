@@ -1,4 +1,3 @@
-import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 
 export const SendFeedbackArticle = () => {

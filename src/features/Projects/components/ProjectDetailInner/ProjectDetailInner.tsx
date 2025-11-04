@@ -28,6 +28,7 @@ import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?re
 import AnimateHeight from 'react-animate-height';
 import CombinedQueryInterface from '@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface';
 import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
+import EmptyArea from '@/features/Projects/components/EmptyArea/EmptyArea';
   
 const ProjectDetailInner = () => {
   // Data management
@@ -215,9 +216,15 @@ const ProjectDetailInner = () => {
                               (
                                 <>
                                   {sortedData.sortedQueries.length === 0 ? (
-                                      <div className={styles.emptyState}>
-                                        <p>No queries found{sortSearchState.searchTerm ? ' matching your search.' : '.'}</p>
-                                      </div>
+                                      <EmptyArea>
+                                        {
+                                          sortSearchState.searchTerm ? (
+                                            <p>No matches found.</p>
+                                          ) : (
+                                            <p>No queries found.</p>
+                                          )
+                                        }
+                                      </EmptyArea>
                                     ) : (
                                       sortedData.sortedQueries.map((query) => (
                                         <QueryCard

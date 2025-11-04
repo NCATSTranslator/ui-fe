@@ -15,7 +15,6 @@ interface ResultsSummaryModalProps {
   isOpen?: boolean;
   isSummaryLoading: boolean;
   onClose?: () => void;
-  pk: string;
   resultContext: ResultContextObject[];
   streamedText: string;
 }
@@ -26,7 +25,6 @@ const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({
   isOpen = false,
   isSummaryLoading,
   onClose = ()=>{},
-  pk,
   streamedText,
   resultContext
 }) => {
