@@ -2,7 +2,7 @@ import { useEffect, useCallback, useMemo, FC, Dispatch, SetStateAction } from 'r
 import LoadingBar from "@/features/Common/components/LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import { handleEvidenceSort, getInitItemsPerPage } from "@/features/Evidence/utils/evidenceModalFunctions";
-import { PreferencesContainer } from '@/features/UserAuth/types/user';
+import { Preferences } from '@/features/UserAuth/types/user';
 import { PublicationObject, EvidenceSortState, KnowledgeLevelFilterType } from '@/features/Evidence/types/evidence';
 import { ResultEdge } from '@/features/ResultList/types/results';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
@@ -16,7 +16,7 @@ import PublicationPaginationControls from '@/features/Evidence/components/Public
 interface PublicationsTableProps {
   isOpen: boolean;
   pk: string;
-  prefs: PreferencesContainer;
+  prefs: Preferences;
   publications: PublicationObject[];
   selectedEdge: ResultEdge | null;
   setPublications: Dispatch<SetStateAction<PublicationObject[]>>

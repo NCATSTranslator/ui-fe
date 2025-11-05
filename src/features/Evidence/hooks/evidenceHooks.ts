@@ -1,7 +1,7 @@
 import { HoverTarget, ResultSet, ResultEdge } from "@/features/ResultList/types/results.d";
 import { useCallback, useState, useRef, useEffect, Dispatch, SetStateAction, useMemo } from "react";
 import { PublicationObject, SortPreference, TableState, Provenance, TrialObject } from "@/features/Evidence/types/evidence";
-import { PreferencesContainer } from "@/features/UserAuth/types/user";
+import { Preferences } from "@/features/UserAuth/types/user";
 import { PubmedMetadataMap } from "@/features/Evidence/types/evidence";
 import { cloneDeep, chunk } from "lodash";
 import { useQuery } from "@tanstack/react-query";
@@ -70,7 +70,7 @@ interface FetchResult {
  * @param {boolean} isOpen - Whether the evidence modal is currently open.
  * @param {PublicationObject[]} publications - Array of publication objects to fetch metadata for.
  * @param {string | null} selectedEdgeId - ID of the currently selected edge.
- * @param {PreferencesContainer} prefs - User preferences container.
+ * @param {Preferences} prefs - User preferences container.
  * @param {Dispatch<SetStateAction<PublicationObject[]>>} setPublications - State setter for publications.
  * @param {(updates: Partial<TableState>) => void} updateState - Function to update table state.
  * @returns {void} - This function does not return a value but updates the state directly.
@@ -79,7 +79,7 @@ export const usePubmedDataFetch = (
   isOpen: boolean,
   publications: PublicationObject[],
   selectedEdgeId: string | null,
-  prefs: PreferencesContainer,
+  prefs: Preferences,
   setPublications: Dispatch<SetStateAction<PublicationObject[]>>,
   updateState: (updates: Partial<TableState>) => void
 ) => {
@@ -122,12 +122,12 @@ export const usePubmedDataFetch = (
   /**
    * Applies sorting to publication data based on user preferences and updates the state.
    *
-   * @param {PreferencesContainer} prefs - User preferences container containing sorting preferences.
+   * @param {Preferences} prefs - User preferences container containing sorting preferences.
    * @param {PublicationObject[]} dataToSort - Array of publication objects to sort.
    * @returns {void} - This function does not return a value but updates the state directly.
    */
   const applySortingAndUpdate = useCallback((
-    prefs: PreferencesContainer,
+    prefs: Preferences,
     dataToSort: PublicationObject[]
   ) => {
     const sortPreference = prefs?.evidence_sort?.pref_value as SortPreference;
@@ -149,12 +149,12 @@ export const usePubmedDataFetch = (
   /**
    * Inserts additional evidence metadata and applies sorting to the publications.
    *
-   * @param {PreferencesContainer} prefs - User preferences container containing sorting preferences.
+   * @param {Preferences} prefs - User preferences container containing sorting preferences.
    * @param {PubmedMetadataMap} metadata - PubMed metadata map containing publication information.
    * @returns {void} - This function does not return a value but updates the state directly.
    */
   const insertAdditionalEvidenceAndSort = useCallback((
-    prefs: PreferencesContainer,
+    prefs: Preferences,
     metadata: PubmedMetadataMap
   ) => {
     const dataToSort = insertAdditionalPubmedData(metadata, publications);
@@ -386,10 +386,10 @@ export const usePubmedDataFetch = (
 /**
  * Custom hook to manage the publication table state including pagination, sorting, and filtering.
  *
- * @param {PreferencesContainer} prefs - User preferences container.
+ * @param {Preferences} prefs - User preferences container.
  * @returns {[TableState, (updates: Partial<TableState>) => void]} Returns a tuple containing the current table state and a function to update it.
  */
-export const usePubTableState = (prefs: PreferencesContainer): [TableState, (updates: Partial<TableState>) => void] => {
+export const usePubTableState = (prefs: Preferences): [TableState, (updates: Partial<TableState>) => void] => {
   const [state, setState] = useState<TableState>({
     itemsPerPage: getInitItemsPerPage(prefs, DEFAULT_ITEMS_PER_PAGE),
     currentPage: 0,

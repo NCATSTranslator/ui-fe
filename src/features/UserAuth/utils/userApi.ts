@@ -3,7 +3,7 @@ import { cloneDeep } from 'lodash';
 import { get, post, put, remove, fetchWithErrorHandling } from '@/features/Common/utils/web';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
-import { PreferencesContainer, PrefObject, SessionStatus, User, Config, isConfig } from '@/features/UserAuth/types/user.d';
+import { Preferences, PreferencesContainer, PrefObject, SessionStatus, User, Config, isConfig } from '@/features/UserAuth/types/user.d';
 import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
@@ -268,13 +268,13 @@ export const getUserSave = async (
 /**
  * Updates the current user's preferences.
  * 
- * @param {PreferencesContainer} preferences - The new preferences to be updated.
+ * @param {Preferences} preferences - The new preferences to be updated.
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
  * @returns {Promise<boolean>} Indicates success or failure of the update operation.
  */
 export const updateUserPreferences = async (
-    preferences: PreferencesContainer,
+    preferences: Preferences,
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler, 
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
   ) => {
@@ -619,21 +619,23 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
 
   useEffect(() => {
     const fetchPrefs = async (hasUser: boolean) => {
-      let prefs: PreferencesContainer | undefined;
+      let formattedPrefs: Preferences | undefined;
       if(!hasUser) {
-        prefs = defaultPrefs;
+        formattedPrefs = defaultPrefs;
         console.warn("no user available, setting to default prefs.");
       } else {
-        prefs = await getUserPreferences(() => {
+        const prefs = await getUserPreferences(() => {
           console.warn("no prefs found for this user, setting to default prefs.");
         });
         console.log("initial fetch of user prefs: ", prefs);
         if(prefs === undefined) {
-          prefs = defaultPrefs;
+          formattedPrefs = defaultPrefs;
+        } else {
+          formattedPrefs = formatPrefs(prefs.preferences);
         }
       }
-      if(isPreferencesContainer(prefs?.preferences)) 
-        dispatch(setCurrentPrefs(prefs.preferences));
+      if(!!formattedPrefs) 
+        dispatch(setCurrentPrefs(formattedPrefs));
     };
 
     const fetchConfig = async () => {
@@ -699,6 +701,26 @@ export const useUser = (): [ user: User | null | undefined, loading: boolean ] =
 
   return [ user, loading ];
 };
+
+export const formatPrefs = (prefs: Preferences) => {
+  console.log("formatting prefs");
+  let newPrefs: Preferences = cloneDeep(prefs);
+
+  for(const key of Object.keys(prefs)) {
+    newPrefs[key].name = getPrefName(key);
+    newPrefs[key].possible_values = getPrefPossibleValues(key);
+  }
+
+  return newPrefs;
+}
+
+const getPrefPossibleValues = (key: string) => {
+  return (!!defaultPrefs[key]) ? defaultPrefs[key].possible_values : [];
+}
+
+export const getPrefName = (key: string) => {
+  return (!!defaultPrefs[key]) ? defaultPrefs[key].name : key;
+}
 
 const getAllPathsFromResult = (resultSet: ResultSet, result: Result) => {
   let paths: {[key: string]: Path} = {};
@@ -829,17 +851,17 @@ export const mergeResultSets = (resultSetOne: ResultSet, resultSetTwo: ResultSet
 }
 
 /**
- * Type guard to check if an object is a PreferencesContainer.
+ * Type guard to check if an object is a Preferences.
  *
  * @param obj - The object to check.
- * @returns {boolean} True if the object is a PreferencesContainer, otherwise false.
+ * @returns {boolean} True if the object is a Preferences, otherwise false.
  */
-export const isPreferencesContainer = (obj: unknown): obj is PreferencesContainer => {
+export const isPreferences = (obj: unknown): obj is Preferences => {
   let isPrefContainer;
   if (typeof obj !== 'object' || obj === null) {
     isPrefContainer = false;
   } else {
-    const requiredKeys: Array<keyof PreferencesContainer> = [
+    const requiredKeys: Array<keyof Preferences> = [
       'result_sort',
       'result_per_screen',
       'graph_visibility',

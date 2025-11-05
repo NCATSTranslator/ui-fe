@@ -34,5 +34,5 @@ export const topItems: SidebarItem[] = [
 export const bottomItems: SidebarItem[] = [
   { id: 'feedback', label: 'Send Feedback', type: 'panel', icon: <Feedback />, tooltipText: 'Send Feedback', panelComponent: <FeedbackPanel /> },
   { id: 'help', label: 'Help', type: 'panel', icon: <Question />, tooltipText: 'Help', panelComponent: <HelpPanel />, buttonComponent: <HelpButton /> },
-  { id: 'settings', label: 'Settings', type: 'panel', icon: <UserIcon />, tooltipText: 'Settings', panelComponent: <SettingsPanel /> },
+  { id: 'settings', label: 'Account Settings', type: 'panel', icon: <UserIcon />, tooltipText: 'Account Settings', panelComponent: <SettingsPanel /> },
 ];

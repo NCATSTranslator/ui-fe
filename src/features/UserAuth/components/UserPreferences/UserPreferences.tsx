@@ -1,6 +1,5 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { prefKeyToString, updateUserPreferences } from '@/features/UserAuth/utils/userApi';
-import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
 import { useSelector, useDispatch } from 'react-redux';
 import { currentPrefs, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -9,16 +8,17 @@ import Button from '@/features/Core/components/Button/Button';
 import Select from 'react-select';
 import styles from './UserPreferences.module.scss';
 import { cloneDeep } from 'lodash';
-import { PreferencesContainer } from '@/features/UserAuth/types/user';
+import { Preferences } from '@/features/UserAuth/types/user';
 import LoginWarning from '@/features/UserAuth/components/LoginWarning/LoginWarning';
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
+import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
 
 const UserPreferences = () => {
 
   const initPrefs = useSelector(currentPrefs);
   const [user, loading] = useUser();
-  const [userPrefs, setUserPrefs] = useState<PreferencesContainer>(initPrefs);
+  const [userPrefs, setUserPrefs] = useState<Preferences>(initPrefs);
   const prefsSavedToast = () => toast.success("Preferences saved!");
   const dispatch = useDispatch();
 
