@@ -2,6 +2,7 @@ import { Example } from "@/features/Query/types/querySubmission";
 
 // User Prefs
 export type PrefObject = {
+  name?: string;
   pref_value: string | number;
   possible_values: string[] | number[];
   time_created?: string;
@@ -10,6 +11,11 @@ export type PrefObject = {
 }
 
 export type PreferencesContainer = {
+  user_id: string;
+  preferences: Preferences;
+}
+
+export type Preferences = {
   [key:string]: PrefObject;
   result_sort: PrefObject;
   result_per_screen: PrefObject;
@@ -19,6 +25,9 @@ export type PreferencesContainer = {
   evidence_sort: PrefObject;
   evidence_per_screen: PrefObject;
 }
+
+export type PrefType = "results" | "evidence" | "graphs";
+export type PrefKey = "result_sort" | "result_per_screen" | "graph_visibility" | "graph_layout" | "path_show_count" | "evidence_sort" | "evidence_per_screen";
 
 export type User = {
   data: null;
@@ -74,7 +83,7 @@ export type SocialProvider = {
 
 export type UserState = {
   currentUser?: User | null; 
-  currentPrefs: PreferencesContainer;
+  currentPrefs: Preferences;
   currentConfig: Config | null;
 }
 

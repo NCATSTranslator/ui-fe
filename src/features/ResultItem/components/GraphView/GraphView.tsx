@@ -19,7 +19,7 @@ import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import Minus from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import styles from './GraphView.module.scss';
 import { debounce } from 'lodash';
-import { PreferencesContainer } from '@/features/UserAuth/types/user';
+import { Preferences } from '@/features/UserAuth/types/user';
 
 cytoscape.use(klay);
 cytoscape.use(avsdf);
@@ -28,7 +28,7 @@ cytoscape.use(navigator);
 cytoscape.use(cytoscapePopper(createPopper));
 cytoscape.warnings(false);
 
-const getInitialLayout = (prefs: PreferencesContainer) => {
+const getInitialLayout = (prefs: Preferences) => {
   const layoutPref = prefs?.graph_layout?.pref_value || 'vertical';
   switch (layoutPref) {
     case 'horizontal':

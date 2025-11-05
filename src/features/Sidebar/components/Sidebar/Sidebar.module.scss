@@ -18,6 +18,7 @@
     & > *:first-child {
       padding: 20px 12px;
       background-color: $purpleTwo;
+      margin-right: 0;
       svg path {
         fill: $white;
       }
