@@ -5,7 +5,7 @@ import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHig
   sortDateYearHighLow, sortDateYearLowHigh } from '@/features/Common/utils/sortingFunctions';
 import { cloneDeep } from 'lodash';
 import { EvidenceSortState, PublicationObject, SortingState, SortPreference } from '@/features/Evidence/types/evidence';
-import { PreferencesContainer } from '@/features/UserAuth/types/user';
+import { Preferences } from '@/features/UserAuth/types/user';
 
 /**
  * Sorts PubMed evidence based on the specified sorting criteria and updates the state.
@@ -80,11 +80,11 @@ export const handleEvidenceSort = (
 /**
  * Retrieves the initial number of items per page from user preferences.
  *
- * @param {PreferencesContainer} prefs - The user preferences container.
+ * @param {Preferences} prefs - The user preferences container.
  * @param {number} defaultItemsPerPage - The default number of items per page if no preference is set.
  * @returns {number} - The number of items per page from preferences or the default value.
  */
-export const getInitItemsPerPage = (prefs: PreferencesContainer, defaultItemsPerPage: number): number => {
+export const getInitItemsPerPage = (prefs: Preferences, defaultItemsPerPage: number): number => {
   const value = prefs?.evidence_per_screen?.pref_value;
   if (!value) return defaultItemsPerPage;
   
