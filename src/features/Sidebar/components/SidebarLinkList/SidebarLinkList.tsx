@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { SidebarItem } from '@/features/Sidebar/types/sidebar';
 import SidebarLink from '@/features/Sidebar/components/SidebarLink/SidebarLink';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
+import { useUser } from '@/features/UserAuth/utils/userApi';
 
 interface SidebarLinkListProps {
   items: SidebarItem[];
@@ -9,6 +10,7 @@ interface SidebarLinkListProps {
 
 const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
   const { togglePanel } = useSidebar();
+  const [ user ] = useUser();
 
   return (
     <>
@@ -16,6 +18,8 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
         const ariaLabel = item.ariaLabel || item.tooltipText || '';
         const tooltipText = item.tooltipText || '';
         const icon = item.icon;
+        const isGrayedOut = (item.id === 'projects' || item.id === 'queries') && !user;
+
         return item.type === 'link'
           ? 
             <SidebarLink
@@ -24,6 +28,7 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
               icon={icon}
               tooltipText={tooltipText}
               ariaLabel={ariaLabel}
+              isGrayedOut={isGrayedOut}
             />
           : 
             <SidebarLink
@@ -32,6 +37,7 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
               icon={icon}
               tooltipText={tooltipText}
               ariaLabel={ariaLabel}
+              isGrayedOut={isGrayedOut}
             />
       }
       )}
