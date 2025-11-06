@@ -14,6 +14,7 @@ import { Preferences} from '@/features/UserAuth/types/user';
 import { toast } from 'react-toastify';
 import { updateUserPreferences } from '@/features/UserAuth/utils/userApi';
 import { cloneDeep } from 'lodash';
+import { getPrettyPrefValue } from '@/features/UserAuth/utils/formatPrefs';
 
 const SettingsPanel = () => {
   const [user, loading] = useUser();
@@ -132,7 +133,7 @@ const SettingsPanel = () => {
                           iconRight={<ChevRight />}
                           handleClick={()=>handleSetActivePrefObject(key as PrefKey, userPrefs)}
                         >
-                          {pref.pref_value.toString()}
+                          {getPrettyPrefValue(pref.pref_value)}
                         </Button>
                       </div>
                     ))
@@ -155,11 +156,11 @@ const SettingsPanel = () => {
                     {activePrefObject.prefObject.possible_values.map((value) => (
                       <Button
                         key={value}
-                        className={styles.prefValueSelectorButton}
+                        className={`${styles.prefValueSelectorButton} ${userPrefs[activePrefObject.prefKey].pref_value === value ? styles.active : ''}`}
                         variant="secondary"
                         handleClick={()=>handlePrefValueClick(activePrefObject.prefKey, value)}
                         >
-                        {value.toString()}
+                        {getPrettyPrefValue(value)}
                       </Button>
                     ))}
                   </div>
