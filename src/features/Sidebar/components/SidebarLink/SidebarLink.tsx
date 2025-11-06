@@ -9,6 +9,7 @@ interface SidebarLinkProps {
   className?: string;
   href?: string;
   icon: ReactNode | (() => ReactNode);
+  isGrayedOut?: boolean;
   onClick?: () => void;
   tooltipText: string;
 }
@@ -18,11 +19,12 @@ const SidebarLink: FC<SidebarLinkProps> = ({
   className = "",
   href,
   icon,
+  isGrayedOut = false,
   onClick,
   tooltipText
 }) => {
   const id = useId();
-  const classNames = joinClasses(styles.sidebarLink, styles.link, className);
+  const classNames = joinClasses(styles.sidebarLink, styles.link, isGrayedOut && styles.grayedOut, className);
   const isLink = !!href;
 
   return (

@@ -5,12 +5,16 @@
   margin-right: 1px;
   background-color: $lightGray;
   border-radius: 0;
+  transition: $defaultAnim;
   svg {
     height: $m;
     width: $m;
     path {
       fill: $darkGray;
     }
+  }
+  &.grayedOut {
+    opacity: 0.75;
   }
   &:hover, &.active {
     background-color: $lightPurpleTwo;

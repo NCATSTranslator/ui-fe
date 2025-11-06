@@ -262,6 +262,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 autocompleteVisibility={autocompleteVisibilityOne}
                 setAutocompleteVisibility={setAutocompleteVisibilityOne}
                 disabled={disabled}
+                loginOnDisabled
                 placeholder={user === null ? "Log In to Enter a Search Term" : "Enter First Search Term"}
                 handleSelect={handleAutocompleteSelect}
                 handleSubmit={handleInputSubmit}
@@ -309,6 +310,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 autocompleteVisibility={autocompleteVisibilityTwo}
                 setAutocompleteVisibility={setAutocompleteVisibilityTwo}
                 disabled={disabled}
+                loginOnDisabled
                 placeholder={user === null ? "Log In to Enter a Search Term" : "Enter Second Search Term"}
                 handleSelect={handleAutocompleteSelect}
                 handleSubmit={handleInputSubmit}

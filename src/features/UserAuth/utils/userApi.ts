@@ -11,6 +11,7 @@ import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { getEdgeById, getNodeById, getPathById, getPubById } from '@/features/ResultList/slices/resultsSlice';
 import { PublicationObject } from '@/features/Evidence/types/evidence';
 import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
+import { formatPrefs } from '@/features/UserAuth/utils/formatPrefs';
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';
@@ -701,26 +702,6 @@ export const useUser = (): [ user: User | null | undefined, loading: boolean ] =
 
   return [ user, loading ];
 };
-
-export const formatPrefs = (prefs: Preferences) => {
-  console.log("formatting prefs");
-  let newPrefs: Preferences = cloneDeep(prefs);
-
-  for(const key of Object.keys(prefs)) {
-    newPrefs[key].name = getPrefName(key);
-    newPrefs[key].possible_values = getPrefPossibleValues(key);
-  }
-
-  return newPrefs;
-}
-
-const getPrefPossibleValues = (key: string) => {
-  return (!!defaultPrefs[key]) ? defaultPrefs[key].possible_values : [];
-}
-
-export const getPrefName = (key: string) => {
-  return (!!defaultPrefs[key]) ? defaultPrefs[key].name : key;
-}
 
 const getAllPathsFromResult = (resultSet: ResultSet, result: Result) => {
   let paths: {[key: string]: Path} = {};
