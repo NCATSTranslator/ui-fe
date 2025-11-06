@@ -74,13 +74,13 @@ const QueryBar: FC<QueryBarProps> = ({
     }
   }
 
-
   let placeholder = '';
   if (!!placeholderText) {
     placeholder = placeholderText;
   } else if (queryType) {
     placeholder = queryType.placeholder;
   }
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -101,6 +101,7 @@ const QueryBar: FC<QueryBarProps> = ({
           setAutocompleteVisibility={setAutocompleteVisibility}
           onClear={onClearQueryItem}
           disabled={disabled}
+          loginOnDisabled
           handleSelect={handleAutocompleteSelect}
           handleSubmit={handleInputSubmit}
           inputRef={autocompleteInputRef}
@@ -110,7 +111,7 @@ const QueryBar: FC<QueryBarProps> = ({
           type='submit'
           className={styles.submitButton}
           iconOnly
-          disabled={isLoading}
+          disabled={isLoading || disabled}
         >
           {
             isLoading
