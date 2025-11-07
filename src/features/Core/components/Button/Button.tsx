@@ -1,4 +1,4 @@
-import { FC, MouseEvent, ReactNode, RefObject } from "react";
+import { CSSProperties, FC, MouseEvent, ReactNode, RefObject } from "react";
 import styles from './Button.module.scss';
 import { Link } from "react-router-dom";
 import { joinClasses } from "@/features/Common/utils/utilities";
@@ -25,6 +25,7 @@ interface ButtonProps {
   dataTooltipId?: string;
   title?: string;
   ref?: RefObject<HTMLButtonElement | null>;
+  style?: CSSProperties;
 }
 
 const Button: FC<ButtonProps> = ({
@@ -48,7 +49,8 @@ const Button: FC<ButtonProps> = ({
   testId,
   className = "",
   dataTooltipId = "",
-  ref
+  ref,
+  style
 }) => {
   const buttonStyle = joinClasses(
     'button',
@@ -69,7 +71,8 @@ const Button: FC<ButtonProps> = ({
     className: buttonStyle,
     onClick: handleClick,
     'data-testid': testId,
-    'data-tooltip-id': dataTooltipId
+    'data-tooltip-id': dataTooltipId,
+    style: style
   };
 
   if (href) {

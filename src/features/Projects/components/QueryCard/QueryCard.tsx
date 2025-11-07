@@ -17,7 +17,7 @@ import { getTimeRelativeDate } from "@/features/Common/utils/utilities";
 import { useLocation } from "react-router-dom";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
-import { projectUpdatedToast } from "@/features/Projects/utils/toastMessages";
+import { projectUpdatedToast } from "@/features/Core/utils/toastMessages";
 
 interface QueryCardProps {
   projectId?: number;
