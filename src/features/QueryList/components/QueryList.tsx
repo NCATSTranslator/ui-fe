@@ -93,7 +93,7 @@ const QueryList = () => {
                         onSort={sortSearchState.handleSort}
                       />
                       {
-                        queries.length === 0 
+                        (searchTerm.length === 0 && filteredQueries.length === 0)
                         ? (
                           <EmptyArea heading="No Queries">
                             {
