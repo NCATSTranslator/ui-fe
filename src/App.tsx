@@ -18,10 +18,6 @@ import { createPortal } from 'react-dom';
 import Header from '@/features/Page/components/Header/Header';
 import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
 
-import Button from '@/features/Core/components/Button/Button';
-import { toast } from 'react-toastify';
-import AppToast from '@/features/Core/components/AppToast/AppToast';
-
 const queryClient = new QueryClient(commonQueryClientOptions);
 
 const App = ({children}: {children?: ReactNode}) => {
@@ -83,7 +79,6 @@ const App = ({children}: {children?: ReactNode}) => {
 
   return (
     <SidebarProvider>
-      <Button style={{ position: 'absolute', top: 0, right: 0, zIndex: 1000 }} handleClick={() => toast(AppToast, {data: { topText: 'Top text', bottomText: 'Bottom text' }})}>Click me</Button>
       <QueryClientProvider client={queryClient}>
         <ProjectModalsProvider>
           <div className={`app ${pathnameClass} ${additionalClasses}`}>
