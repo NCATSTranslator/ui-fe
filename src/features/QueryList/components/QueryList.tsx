@@ -58,11 +58,11 @@ const QueryList = () => {
         </Button>
         {
           !user ? (
-            <div className={styles.empty}>
+            <EmptyArea>
               <p>
                 <a href="/login" className={styles.link}>Log in</a> to view your saved queries.
               </p>
-            </div>
+            </EmptyArea>
           ) : (
             <LoadingWrapper loading={queriesLoading} contentClassName={styles.queriesList}>
               <Tabs
@@ -92,18 +92,20 @@ const QueryList = () => {
                         onSort={sortSearchState.handleSort}
                       />
                       {
-                        queries.length === 0 
+                        (searchTerm.length === 0 && filteredQueries.length === 0)
                         ? (
                           <EmptyArea heading="No Queries">
-                            <p>Your bookmarks and notes are saved here when you run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.</p>
+                            {
+                              <p>Your bookmarks and notes are saved here when you run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.</p>
+                            }
                           </EmptyArea>
                           ) 
                         : 
                           (
                             filteredQueries.length === 0 ? (
-                              <div className={styles.empty}>
+                              <EmptyArea>
                                 <p>No queries found matching your search.</p>
-                              </div>
+                              </EmptyArea>
                             ) : (
                               <>
                                 {

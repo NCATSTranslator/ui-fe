@@ -4,7 +4,7 @@ import { useModals } from '@/features/Projects/hooks/useModals';
 import { useAllDeletePrompts } from '@/features/Projects/hooks/useDeletePrompts';
 import { useDeleteProjects, useDeleteQueries } from '@/features/Projects/hooks/customHooks';
 import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
-import { projectDeletedToast, queryDeletedToast, errorToast } from '@/features/Projects/utils/toastMessages';
+import { projectDeletedToast, queryDeletedToast, errorToast } from '@/features/Core/utils/toastMessages';
 
 interface EditQueryModalData {
   currentEditingQueryItem?: QueryEditingItem;

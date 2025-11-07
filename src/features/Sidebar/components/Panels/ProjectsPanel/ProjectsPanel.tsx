@@ -12,7 +12,7 @@ import Button from "@/features/Core/components/Button/Button";
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useCreateProject } from "@/features/Projects/hooks/customHooks";
-import { projectCreatedToast, queryAddedToProjectToast } from "@/features/Projects/utils/toastMessages";
+import { projectCreatedToast, queryAddedToProjectToast } from "@/features/Core/utils/toastMessages";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { Project } from "@/features/Projects/types/projects";

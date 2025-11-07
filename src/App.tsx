@@ -4,7 +4,7 @@ import { useGoogleAnalytics, useGoogleTagManager, useWindowSize, useScrollToHash
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { commonQueryClientOptions, getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import { useFetchConfigAndPrefs, useGetSessionStatus } from '@/features/UserAuth/utils/userApi';
-import { AppToastContainer } from '@/features/Common/components/AppToastContainer/AppToastContainer';
+import { AppToastContainer } from '@/features/Core/components/AppToastContainer/AppToastContainer';
 import Footer from '@/features/Page/components/Footer/Footer';
 import SmallScreenOverlay from '@/features/Common/components/SmallScreenOverlay/SmallScreenOverlay';
 import SendFeedbackModal from "@/features/Common/components/SendFeedbackModal/SendFeedbackModal";
@@ -17,6 +17,10 @@ import SidebarQueryCard from '@/features/Sidebar/components/SidebarQueryCard/Sid
 import { createPortal } from 'react-dom';
 import Header from '@/features/Page/components/Header/Header';
 import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
+
+import Button from '@/features/Core/components/Button/Button';
+import { toast } from 'react-toastify';
+import AppToast from '@/features/Core/components/AppToast/AppToast';
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -79,6 +83,7 @@ const App = ({children}: {children?: ReactNode}) => {
 
   return (
     <SidebarProvider>
+      <Button style={{ position: 'absolute', top: 0, right: 0, zIndex: 1000 }} handleClick={() => toast(AppToast, {data: { topText: 'Top text', bottomText: 'Bottom text' }})}>Click me</Button>
       <QueryClientProvider client={queryClient}>
         <ProjectModalsProvider>
           <div className={`app ${pathnameClass} ${additionalClasses}`}>

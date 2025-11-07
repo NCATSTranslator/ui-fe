@@ -2,7 +2,7 @@ import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/feat
 import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
-import { unableToReachLinkToast } from "./toastMessages";
+import { unableToReachLinkToast } from "../../Core/utils/toastMessages";
 import { ARAStatusResponse } from "@/features/ResultList/types/results.d";
 
 /**

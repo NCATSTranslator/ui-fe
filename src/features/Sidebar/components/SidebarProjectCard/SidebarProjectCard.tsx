@@ -21,7 +21,7 @@ import { isDraggedQueryInProject } from "@/features/Projects/utils/dragDropUtils
 import { useDndContext } from "@dnd-kit/core";
 import { useRenameProject } from "@/features/Projects/hooks/useRenameProject";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
-import { queryAlreadyInProjectToast, queryAddedToProjectToast } from "@/features/Projects/utils/toastMessages";
+import { queryAlreadyInProjectToast, queryAddedToProjectToast } from "@/features/Core/utils/toastMessages";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 
 interface SidebarProjectCardProps {

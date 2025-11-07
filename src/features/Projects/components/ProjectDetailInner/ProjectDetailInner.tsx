@@ -28,6 +28,7 @@ import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?re
 import AnimateHeight from 'react-animate-height';
 import CombinedQueryInterface from '@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface';
 import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
+import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 import EmptyArea from '@/features/Projects/components/EmptyArea/EmptyArea';
   
 const ProjectDetailInner = () => {
@@ -49,7 +50,7 @@ const ProjectDetailInner = () => {
   const sortSearchState = useSortSearchState();
   const { handleUpdateProject } = useEditProjectHandlers();
   const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
-
+  const { togglePanel } = useSidebar();
   // Global modals context
   const {
     openDeleteProjectModal,
@@ -216,12 +217,14 @@ const ProjectDetailInner = () => {
                               (
                                 <>
                                   {sortedData.sortedQueries.length === 0 ? (
-                                      <EmptyArea>
+                                      <EmptyArea heading={sortSearchState.searchTerm  ? "" : "No Queries"}>
                                         {
                                           sortSearchState.searchTerm ? (
                                             <p>No matches found.</p>
                                           ) : (
-                                            <p>No queries found.</p>
+                                            <p>
+                                              You can add queries to this project from the <Button handleClick={() => togglePanel('queries')} title="Queries" variant="textOnly" inline>Queries</Button> tab or run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.
+                                            </p>
                                           )
                                         }
                                       </EmptyArea>
