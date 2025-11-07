@@ -26,7 +26,6 @@ const QueryList = () => {
   const { searchTerm, handleSearch } = useSimpleSearch();
   const filteredQueries = useFilteredQueries(queries, false, searchTerm);
   const sortSearchState = useSortSearchState();
-  console.log(queries);
 
   const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
 

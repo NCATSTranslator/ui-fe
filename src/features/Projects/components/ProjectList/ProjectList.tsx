@@ -8,7 +8,7 @@ import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import Button from "@/features/Core/components/Button/Button";
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import { useCreateProject, useSortSearchState } from "@/features/Projects/hooks/customHooks";
-import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
+import { projectCreatedToast } from "@/features/Core/utils/toastMessages";
 import ProjectCard from "@/features/Projects/components/ProjectCard/ProjectCard";
 import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
 import Tab from "@/features/Common/components/Tabs/Tab";

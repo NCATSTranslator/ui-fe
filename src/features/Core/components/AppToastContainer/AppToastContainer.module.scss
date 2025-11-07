@@ -1,0 +1,22 @@
+@use "@/assets/styles/variables" as *;
+
+.toast {
+  padding: 0;
+  svg.closeButton {
+    width: $m;
+    height: $m;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    cursor: pointer;
+    path {
+      stroke: $midGray;
+      transition: $defaultAnim;
+    }
+    &:hover {
+      path {
+        stroke: $darkGray;
+      }
+    }
+  }
+}

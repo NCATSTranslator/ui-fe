@@ -14,7 +14,7 @@ import { debounce } from "lodash";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import Highlighter from "react-highlight-words";
 import { filterProjects } from "@/features/Projects/utils/filterAndSortingFunctions";
-import { projectCreatedToast } from "@/features/Projects/utils/toastMessages";
+import { projectCreatedToast } from "@/features/Core/utils/toastMessages";
 import { isUnassignedProject, useEditProjectHandlers, useEditQueryHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import WarningModal from "@/features/Common/components/WarningModal/WarningModal";
 import { getProjectQueryCount } from "@/features/Projects/utils/utilities";
