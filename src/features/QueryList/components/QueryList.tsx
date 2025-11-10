@@ -19,6 +19,7 @@ import { useAnimateHeight } from "@/features/Core/hooks/useAnimateHeight";
 import AnimateHeight from "react-animate-height";
 import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
 import EmptyArea from "@/features/Projects/components/EmptyArea/EmptyArea";
+import { joinClasses } from "@/features/Common/utils/utilities";
 
 const QueryList = () => {
   const user = useSelector(currentUser);
@@ -41,7 +42,7 @@ const QueryList = () => {
     <div className={styles.queriesPanel}>
       <ListHeader
         heading="Queries"
-        searchPlaceholder="Search by Project or Query Name"
+        searchPlaceholder="Search Queries"
         searchTerm={searchTerm}
         handleSearch={handleSearch}
       />
@@ -51,8 +52,9 @@ const QueryList = () => {
           iconRight={<ChevDownIcon className={styles.iconRight} />}
           handleClick={handleAddNewQueryClick}
           title="Add New Query"
-          className={styles.addNewQueryButton}
+          className={joinClasses(styles.addNewQueryButton, (!user || queriesLoading) && styles.disabled)}
           variant="textOnly"
+          disabled={!user || queriesLoading}
         >
           Add New Query
         </Button>

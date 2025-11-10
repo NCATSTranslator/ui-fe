@@ -67,18 +67,18 @@ const ProjectList = () => {
     <div className={styles.projectsPanel}>
       <ListHeader
         heading="Projects"
-        searchPlaceholder="Search by Project or Query Name"
+        searchPlaceholder="Search Projects"
         searchTerm={searchTerm}
         handleSearch={handleSearch}
       />
       <div className={styles.list}>
         {
           !user ? (
-            <div className={styles.empty}>
+            <EmptyArea>
               <p>
                 <a href="/login" className={styles.link}>Log in</a> to view your saved projects.
               </p>
-            </div>
+            </EmptyArea>
           ) : (
             <LoadingWrapper loading={projectsLoading} contentClassName={styles.projectList}>
               <Button 

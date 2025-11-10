@@ -140,7 +140,7 @@ const ProjectDetailInner = () => {
                 <LoadingWrapper loading={data.loading.projectsLoading} >
                   <ListHeader
                     heading={localTitle}
-                    searchPlaceholder="Search by Query Name"
+                    searchPlaceholder="Search Queries"
                     searchTerm={sortSearchState.searchTerm}
                     handleSearch={sortSearchState.setSearchTerm}
                     isRenaming={isRenaming}
