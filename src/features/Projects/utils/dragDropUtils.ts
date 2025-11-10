@@ -1,7 +1,7 @@
 import { DraggableData } from "@/features/DragAndDrop/types/types";
 import { Project, isUserQueryObject } from "@/features/Projects/types/projects.d";
 import { Active } from "@dnd-kit/core";
-import { toast } from "react-toastify";
+import { queryAlreadyInProjectToast } from "@/features/Core/utils/toastMessages";
 
 /**
  * Handles the dropping of a query into a project. (WRAP IN A USECALLBACK IF PROVIDING TO DroppableArea)
@@ -19,7 +19,7 @@ export const handleQueryDrop = (
     // if query does not exist in project, add it
     const isQueryInProject = projectQIds.some((q: string) => q === draggedItem.data.data.qid);
     if(isQueryInProject) {
-      toast.error('Query already in project');
+      queryAlreadyInProjectToast(draggedItem.data.data.title, project.data.title);
       return;
     }
     if(!project?.id || !isUserQueryObject(draggedItem.data)) {

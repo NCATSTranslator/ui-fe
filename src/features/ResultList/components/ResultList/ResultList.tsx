@@ -26,9 +26,6 @@ import { getDataFromQueryVar, getPathCount, getCompressedEdge, findInSet } from 
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import { getSaves, SaveGroup } from "@/features/UserAuth/utils/userApi";
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from "@/features/ResultItem/components/BookmarkToasts/BookmarkToasts";
 import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPathfinder";
 import ResultListTableHead from "@/features/ResultList/components/ResultListTableHead/ResultListTableHead";
 import ResultListModals from "@/features/ResultList/components/ResultListModals/ResultListModals";
@@ -45,6 +42,7 @@ import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPa
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import { QueryStatus } from "@/features/Projects/types/projects";
 import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/FiltersPanel";
+import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from "@/features/Core/utils/toastMessages";
 
 const ResultList = () => {
 
@@ -168,9 +166,6 @@ const ResultList = () => {
   const [clinicalWeight] = useState(1.0);
   const scoreWeights = useMemo(()=> { return {confidenceWeight: confidenceWeight, noveltyWeight: noveltyWeight, clinicalWeight: clinicalWeight}}, [confidenceWeight, noveltyWeight, clinicalWeight]);
   const [userSaves, setUserSaves] = useState<SaveGroup | null>(null);
-  const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
-  const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
-  const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
   const [showHiddenPaths, setShowHiddenPaths] = useState(false);
   const shouldUpdateResultsAfterBookmark = useRef(false);
   const hasFreshResults = useMemo(() => freshRawResults !== null, [freshRawResults]);
@@ -834,7 +829,7 @@ const ResultList = () => {
                               queryNodeLabel={nodeLabelParam}
                               queryNodeDescription={nodeDescription}
                               bookmarkItem={bookmarkItem}
-                              handleBookmarkError={handleBookmarkError}
+                              handleBookmarkError={bookmarkErrorToast}
                               bookmarkAddedToast={bookmarkAddedToast}
                               bookmarkRemovedToast={bookmarkRemovedToast}
                               availableFilters={availableFilters}
