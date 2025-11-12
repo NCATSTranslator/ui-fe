@@ -194,9 +194,10 @@ const ProjectDetailInner = () => {
                       }}
                       indicatorText={`${isDraggedQueryInProject ? 'Query Already in Project' : 'Add to Project'}`}
                       indicatorStatus={isDraggedQueryInProject ? 'error' : 'default'}
+                      className={styles.droppableArea}
                     >
                       <LoadingWrapper loading={data.loading.queriesLoading}>
-                        <CardList>
+                        <CardList className={styles.cardList}>
                           {sortedData.sortedQueries.length > 0 && (
                             <QueriesTableHeader
                               sortField={sortSearchState.sortField}
