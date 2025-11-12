@@ -1,7 +1,7 @@
-   @use "@/assets/styles/variables" as *;
+@use "@/assets/styles/variables" as *;
 
 .combinedQueryInterface {
-  max-width: $mediumLarge;
+  max-width: $desktop;
   margin: 0 auto;
   padding: 0 $m;
   position: relative;
