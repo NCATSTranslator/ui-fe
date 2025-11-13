@@ -101,7 +101,6 @@ const QueryBar: FC<QueryBarProps> = ({
           setAutocompleteVisibility={setAutocompleteVisibility}
           onClear={onClearQueryItem}
           disabled={disabled}
-          loginOnDisabled
           handleSelect={handleAutocompleteSelect}
           handleSubmit={handleInputSubmit}
           inputRef={autocompleteInputRef}

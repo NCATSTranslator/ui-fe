@@ -5,29 +5,24 @@ import AppToast from "@/features/Core/components/AppToast/AppToast";
 export const projectRestoredToast = () => {
   return toast(AppToast, { data: { topText: 'Project restored' } });
 };
-
 export const projectDeletedToast = () => {
   return toast(AppToast, { data: { topText: 'Project deleted' } });
 };
-
 export const queryAddedToProjectToast = (queryTitle: string, projectTitle: string) => {
-  return toast(AppToast, { data: { topText: `${queryTitle} Added to ${projectTitle}` } });
+  return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Added to ${projectTitle}` } });
 };
-
-export const queryAlreadyInProjectToast = () => {
-  return toast(AppToast, { data: { topText: 'Query already in project' } });
+export const queryAlreadyInProjectToast = (queryTitle: string, projectTitle: string) => {
+  return toast.error(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Already in ${projectTitle}` } });
 };
-
 export const projectCreatedToast = () => {
   return toast(AppToast, { data: { topText: 'Project created' } });
 };
-
 export const projectUpdatedToast = (projectTitle?: string, queryTitle?: string, action?: 'add' | 'remove') => {
   if(projectTitle && queryTitle && action === 'add')
-    return toast(AppToast, { data: { topText: `${queryTitle} added to ${projectTitle}` } });
+    return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Added to ${projectTitle}` } });
 
   if(projectTitle && action === 'remove')
-    return toast(AppToast, { data: { topText: `${queryTitle} removed from ${projectTitle}` } });
+    return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Removed from ${projectTitle}` } });
 
   if(projectTitle)
     return toast(AppToast, { data: { topText: `${projectTitle} updated` } });
@@ -45,15 +40,12 @@ export const projectUpdatedToast = (projectTitle?: string, queryTitle?: string, 
 export const queryRestoredToast = () => {
   return toast(AppToast, { data: { topText: 'Query restored' } });
 };
-
 export const queryDeletedToast = () => {
   return toast(AppToast, { data: { topText: 'Query deleted' } } );
 };
-
 export const queryCreatedToast = () => {
   return toast(AppToast, { data: { topText: 'Query created' } });
 };
-
 export const queryUpdatedToast = () => {
   return toast(AppToast, { data: { topText: 'Query updated' } });
 };
@@ -62,7 +54,34 @@ export const queryUpdatedToast = () => {
 export const errorToast = (message: string) => {
   return toast.error(AppToast, { data: { topText: message } });
 };
-
 export const unableToReachLinkToast = () => {
   return toast.error(AppToast, { data: { topText: 'Unable to reach link' } });
+};
+
+// Authentication
+export const unauthorizedErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'Your login has expired or is invalid. Please try logging in again.', bottomText: <a href="/login">Log In</a> } });
+};
+export const forbiddenErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'You do not have permission to access this resource. Please contact support if you believe this is an error.', bottomText: <a href="/login">Log In</a> } });
+};
+export const notFoundErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'The requested resource was not found. Please contact support if you believe this is an error.' } });
+};
+export const internalServerErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'An internal server error occurred. Please try again later or contact support if the problem persists.' } });
+};
+export const preferencesSavedToast = () => {
+  return toast(AppToast, { data: { topText: 'Preferences Saved' } });
+};
+
+// Bookmarks
+export const bookmarkAddedToast = () => {
+  return toast(AppToast, { data: { topText: 'Bookmark Added' } });
+};
+export const bookmarkRemovedToast = () => {
+  return toast(AppToast, { data: { topText: 'Bookmark Removed' } });
+}
+export const bookmarkErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'Error Adding Bookmark', bottomText: 'We were unable to save this bookmark to your account.' } });
 };

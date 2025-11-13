@@ -11,8 +11,6 @@
   .projectTabsContainer {
     position: relative;
   }
-
-
   .queryGrid {
     display: flex;
     flex-direction: column;
@@ -76,4 +74,11 @@
 .combinedQueryInterfaceContainer {
   margin-top: -$s;
   background-color: $palePurple;
+}
+
+.droppableArea {
+  margin: $xl;
+}
+.cardList {
+  padding: 0;
 }

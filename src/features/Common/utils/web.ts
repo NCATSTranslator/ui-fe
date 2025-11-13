@@ -1,5 +1,5 @@
+import { forbiddenErrorToast, internalServerErrorToast, notFoundErrorToast, unauthorizedErrorToast } from "@/features/Core/utils/toastMessages";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
-import { toast } from "react-toastify";
 
 const buildOptions = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: unknown) => {
   const headers = {
@@ -45,20 +45,20 @@ export type ErrorHandler = (error: Error) => void;
 
 export const defaultHttpErrorHandler: ErrorHandler = (error: Error): void => {
   console.error('HTTP Error:', error.message);
-  if (error.message.includes('401')) {
-    toast.error('Your login has expired or is invalid. Please try logging in again.');
+  if (error.message.includes('401'))
+    unauthorizedErrorToast();
+
     // TODO: redirect to login page
-  }
-  if (error.message.includes('403')) {
-    toast.error('You do not have permission to access this resource. Please contact support if you believe this is an error.');
+  if (error.message.includes('403'))
+    forbiddenErrorToast();
+
     // TODO: redirect to login page
-  }
-  if (error.message.includes('404')) {
-    toast.error('The requested resource was not found. Please contact support if you believe this is an error.');
-  }
-  if (error.message.includes('500')) {
-    toast.error('An internal server error occurred. Please try again later or contact support if the problem persists.');
-  }
+  if (error.message.includes('404'))
+    notFoundErrorToast();
+
+  if (error.message.includes('500'))
+    internalServerErrorToast();
+
   throw error;
 };
 

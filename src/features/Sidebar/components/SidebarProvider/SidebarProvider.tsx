@@ -6,6 +6,11 @@ export const SidebarContext = createContext<SidebarContextValue>({
   activePanelId: 'none',
   dynamicSidebarItems: [],
   addToProjectQuery: null,
+  selectedProject: null,
+  isSelectedProjectMode: false,
+  setSelectedProjectMode: () => {},
+  setSelectedProject: () => {},
+  clearSelectedProject: () => {},
   setCollapsed: () => {},
   togglePanel: () => {},
   closePanel: () => {},
@@ -24,6 +29,8 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [activePanelId, setActivePanelId] = useState<SidebarContextValue['activePanelId']>('none');
   const [dynamicSidebarItems, setDynamicSidebarItems] = useState<SidebarItem[]>([]);
   const [addToProjectQuery, setAddToProjectQuery] = useState<SidebarContextValue['addToProjectQuery']>(null);
+  const [selectedProject, handleSetSelectedProject] = useState<SidebarContextValue['selectedProject']>(null);
+  const [isSelectedProjectMode, setIsSelectedProjectMode] = useState<boolean>(false);
 
   const setCollapsed = useCallback((v: boolean) => {
     setCollapsedState(v);
@@ -38,18 +45,38 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   }, []);
 
+  const openPanel = useCallback((id: SidebarItemId) => {
+    setActivePanelId(id);
+    setCollapsedState(false);
+  }, []);
+
   const closePanel = useCallback(() => {
     setActivePanelId('none');
     setCollapsedState(true);
     setAddToProjectQuery(null);
   }, []);
 
+  // Add Query to Project Mode Handlers
   const setAddToProjectMode = useCallback((query: SidebarContextValue['addToProjectQuery']) => {
     setAddToProjectQuery(query);
   }, []);
 
   const clearAddToProjectMode = useCallback(() => {
     setAddToProjectQuery(null);
+  }, []);
+
+
+  // Selected Project Mode Handlers
+  const setSelectedProject = useCallback((project: SidebarContextValue['selectedProject']) => {
+    handleSetSelectedProject(project);
+  }, []);
+
+  const setSelectedProjectMode = useCallback((setOpen?: boolean) => {
+    setIsSelectedProjectMode(prev => setOpen ?? !prev);
+  }, [togglePanel, openPanel, closePanel, setIsSelectedProjectMode, setSelectedProject]);
+
+  const clearSelectedProject = useCallback(() => {
+    setSelectedProject(null);
   }, []);
 
   const registerSidebarItem = useCallback((id: SidebarItemId, item: SidebarItem) => {
@@ -99,6 +126,11 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     activePanelId,
     dynamicSidebarItems,
     addToProjectQuery,
+    selectedProject,
+    isSelectedProjectMode,
+    setSelectedProjectMode,
+    setSelectedProject,
+    clearSelectedProject,
     setCollapsed,
     togglePanel,
     closePanel,
@@ -114,6 +146,11 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     activePanelId,
     dynamicSidebarItems,
     addToProjectQuery,
+    selectedProject,
+    isSelectedProjectMode,
+    setSelectedProjectMode,
+    setSelectedProject,
+    clearSelectedProject,
     setCollapsed,
     togglePanel,
     closePanel,

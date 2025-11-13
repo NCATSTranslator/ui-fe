@@ -11,10 +11,10 @@ import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
 import { useDispatch, useSelector } from 'react-redux';
 import { currentPrefs, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { Preferences} from '@/features/UserAuth/types/user';
-import { toast } from 'react-toastify';
 import { updateUserPreferences } from '@/features/UserAuth/utils/userApi';
 import { cloneDeep } from 'lodash';
 import { getPrettyPrefValue } from '@/features/UserAuth/utils/formatPrefs';
+import { preferencesSavedToast } from '@/features/Core/utils/toastMessages';
 
 const SettingsPanel = () => {
   const [user, loading] = useUser();
@@ -27,7 +27,6 @@ const SettingsPanel = () => {
 
   const initPrefs = useSelector(currentPrefs);
   const [userPrefs, setUserPrefs] = useState<Preferences>(initPrefs);
-  const prefsSavedToast = () => toast.success("Preferences saved!");
   const dispatch = useDispatch();
   
   const resultPrefs = useMemo(()=> {
@@ -62,7 +61,7 @@ const SettingsPanel = () => {
   const handleSubmitUserPrefs = async (prefs: Preferences) => {
     await updateUserPreferences(prefs);
     dispatch(setCurrentPrefs(prefs));
-    prefsSavedToast();
+    preferencesSavedToast();
   }
 
   const handlePrefValueClick = (prefKey: PrefKey, prefValue: string | number) => {

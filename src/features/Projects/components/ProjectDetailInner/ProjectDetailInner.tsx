@@ -140,7 +140,7 @@ const ProjectDetailInner = () => {
                 <LoadingWrapper loading={data.loading.projectsLoading} >
                   <ListHeader
                     heading={localTitle}
-                    searchPlaceholder="Search by Query Name"
+                    searchPlaceholder="Search Queries"
                     searchTerm={sortSearchState.searchTerm}
                     handleSearch={sortSearchState.setSearchTerm}
                     isRenaming={isRenaming}
@@ -194,9 +194,10 @@ const ProjectDetailInner = () => {
                       }}
                       indicatorText={`${isDraggedQueryInProject ? 'Query Already in Project' : 'Add to Project'}`}
                       indicatorStatus={isDraggedQueryInProject ? 'error' : 'default'}
+                      className={styles.droppableArea}
                     >
                       <LoadingWrapper loading={data.loading.queriesLoading}>
-                        <CardList>
+                        <CardList className={styles.cardList}>
                           {sortedData.sortedQueries.length > 0 && (
                             <QueriesTableHeader
                               sortField={sortSearchState.sortField}

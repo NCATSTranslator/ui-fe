@@ -1,4 +1,4 @@
-import { FC, ReactNode, useMemo } from "react";
+import { FC, ReactNode, useCallback, useMemo } from "react";
 import styles from './ContextPanel.module.scss';
 import Button from "@/features/Core/components/Button/Button";
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
@@ -18,12 +18,17 @@ const ContextPanel: FC<ContextPanelProps> = ({
   panel,
   title
 }) => {
-  const { closePanel } = useSidebar();
+  const { closePanel, setSelectedProjectMode } = useSidebar();
 
   const reduceSpacing = useMemo(() => {
     if(activePanelId === 'filters') return true;
     return false;
   }, [activePanelId]);
+
+  const handleClosePanel = useCallback(() => {
+    closePanel();
+    setSelectedProjectMode(false);
+  }, [closePanel, setSelectedProjectMode]);
 
   return (
     <div className={`${styles.contextPanel} scrollable ${reduceSpacing && styles.reduceSpacing}`}>
@@ -32,7 +37,7 @@ const ContextPanel: FC<ContextPanelProps> = ({
         <div className={styles.buttonContainer}>
           {buttonComponent && buttonComponent}
           <Button
-            handleClick={closePanel}
+            handleClick={handleClosePanel}
             iconLeft={<CloseIcon />}
             iconOnly
             variant="secondary"

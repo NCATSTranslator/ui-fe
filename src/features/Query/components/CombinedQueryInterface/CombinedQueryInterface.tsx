@@ -1,4 +1,4 @@
-import { useState, FC, Dispatch, SetStateAction, useEffect } from "react";
+import { FC, Dispatch, SetStateAction, useEffect } from "react";
 import styles from './CombinedQueryInterface.module.scss';
 import { Result } from "@/features/ResultList/types/results.d";
 import Tabs from "@/features/Common/components/Tabs/Tabs";
@@ -11,12 +11,11 @@ import { useSelector } from "react-redux";
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import { QueryType } from "@/features/Query/types/querySubmission";
 import { ProjectRaw } from "@/features/Projects/types/projects.d";
-import { useUserProjects, useUserQueries } from "@/features/Projects/hooks/customHooks";
 import { joinClasses } from "@/features/Common/utils/utilities";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
-import EditQueryModal from "@/features/Projects/components/EditQueryModal/EditQueryModal";
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
+import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 
 interface CombinedQueryInterfaceProps {
   defaultProject?: ProjectRaw | null;
@@ -51,15 +50,20 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
 }) => {
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser);
+  const { activePanelId, togglePanel, isSelectedProjectMode, setSelectedProjectMode, selectedProject, setSelectedProject, clearSelectedProject } = useSidebar();
   const isPathfinderEnabled = config?.include_pathfinder;
-  const [selectedProject, setSelectedProject] = useState<ProjectRaw | null>(defaultProject);
-  const { data: projects = [], isLoading: projectsLoading } = useUserProjects();
-  const { data: queries = []} = useUserQueries();
-  const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState<boolean>(false);
   const showAddToProject = !!user && config?.include_projects;
 
   const handleAddToProject = () => {
-    setIsEditQueryModalOpen(true);
+    if(activePanelId !== 'projects')
+      togglePanel('projects');
+
+    if(activePanelId === 'projects' && isSelectedProjectMode) {
+      togglePanel('projects');
+      setSelectedProjectMode(false);
+    } else {
+      setSelectedProjectMode(true);
+    } 
   };
 
   const classNames = joinClasses(styles.combinedQueryInterface, projectPage  && styles.projectPage);
@@ -72,15 +76,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
 
   return (
     <div className={classNames}>
-      <EditQueryModal
-        isOpen={isEditQueryModalOpen}
-        handleClose={() => setIsEditQueryModalOpen(false)}
-        loading={projectsLoading}
-        mode="add"
-        projects={projects}
-        queries={queries}
-        setSelectedProject={setSelectedProject}
-      />
       {showAddToProject && (
         <div className={styles.addToProject} data-tooltip-id="add-to-project-tooltip">
           <span className={styles.label}>Add to</span>
@@ -94,7 +89,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
           {selectedProject && (
             <Button
               className={`${styles.removeSelectedProject} ${styles.button}`}
-              handleClick={() => setSelectedProject(null)}
+              handleClick={() => clearSelectedProject()}
               iconOnly
               iconLeft={<CloseIcon />}
               small
