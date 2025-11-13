@@ -42,7 +42,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
   const queryCount = project.data.pks.length;
   const { openDeleteProjectModal } = useProjectModals();
   const { handleUpdateProject } = useEditProjectHandlers();
-  const { addToProjectQuery, clearAddToProjectMode } = useSidebar();
+  const { addToProjectQuery, clearAddToProjectMode, isSelectedProjectMode, setSelectedProject, setSelectedProjectMode, togglePanel } = useSidebar();
   const isUnassigned = isUnassignedProject(project);
   const className = joinClasses(styles.projectCard, isUnassigned && styles.unassigned);
   const leftIcon = isUnassigned ? <FolderEmptyIcon className={styles.emptyIcon} /> : <FolderIcon />;
@@ -104,9 +104,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
 
     // Check if query is already in project
     const isQueryAlreadyInProject = project.data.pks.includes(addToProjectQuery.data.qid);
-    console.log('isQueryAlreadyInProject', isQueryAlreadyInProject, addToProjectQuery.data.qid, project.data.pks);
     if (isQueryAlreadyInProject) {
-      console.log('already in project');
       queryAlreadyInProjectToast(queryTitle, project.data.title);
       clearAddToProjectMode();
       return;
@@ -118,6 +116,23 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
     queryAddedToProjectToast(queryTitle, project.data.title);
     clearAddToProjectMode();
   }, [addToProjectQuery, project, isUnassigned, handleUpdateProject, clearAddToProjectMode, queryTitle]);
+
+  const handleProjectClick = useMemo(() => {
+    if(isAddToProjectMode) {
+      return () => {
+        handleAddQueryToProject();
+      }
+    }
+    if(isSelectedProjectMode) {
+      return () => {
+        setSelectedProject(project);
+        setSelectedProjectMode(false);
+        togglePanel('projects');
+      }
+    }
+
+    return undefined;
+  }, [isAddToProjectMode, isSelectedProjectMode, project, setSelectedProject, setSelectedProjectMode, handleAddQueryToProject]);
 
   return (
     <OutsideClickHandler onOutsideClick={handleOutsideClick}>
@@ -138,8 +153,8 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
           leftIcon={leftIcon}
           title={localTitle}
           searchTerm={searchTerm}
-          linkTo={isAddToProjectMode ? undefined : `/projects/${project.id}`}
-          onClick={isAddToProjectMode && !isUnassigned ? handleAddQueryToProject : undefined}
+          linkTo={`/projects/${project.id}`}
+          onClick={handleProjectClick}
           bottomLeft={bottomLeft}
           bottomRight={bottomRight}
           data-testid="sidebar-project-card"

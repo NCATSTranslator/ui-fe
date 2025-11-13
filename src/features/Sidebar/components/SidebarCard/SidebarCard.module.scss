@@ -85,6 +85,7 @@
     display: flex;
     min-height: $m;
     align-items: center;
+    cursor: pointer;
     .rightIcon {
       margin-left: $xxs;
       svg {
