@@ -8,9 +8,7 @@ import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import RefreshIcon from '@/assets/icons/buttons/Refresh.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { getFormattedDate } from '@/features/Common/utils/utilities';
-import { ToastContainer, toast, Slide } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { BookmarkAddedMarkup, BookmarkRemovedMarkup, BookmarkErrorMarkup } from '@/features/ResultItem/components/BookmarkToasts/BookmarkToasts';
+import { ToastContainer, Slide } from 'react-toastify';
 import NotesModal from '@/features/ResultItem/components/NotesModal/NotesModal';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import { cloneDeep } from 'lodash';
@@ -22,6 +20,7 @@ import { debounce } from 'lodash';
 import { Path, Result, ResultEdge, ResultSet } from '@/features/ResultList/types/results';
 import { useDispatch } from 'react-redux';
 import { setResultSets } from '@/features/ResultList/slices/resultsSlice';
+import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from '@/features/Core/utils/toastMessages';
 
 const UserSaves = () => {
 
@@ -56,11 +55,6 @@ const UserSaves = () => {
   const noteLabel = useRef("");
   const currentBookmarkID = useRef<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  const bookmarkAddedToast = () => toast.success(<BookmarkAddedMarkup/>);
-  const bookmarkRemovedToast = () => toast.success(<BookmarkRemovedMarkup/>);
-  const handleBookmarkError = () => toast.error(<BookmarkErrorMarkup/>);
-
   const [showHiddenPaths, setShowHiddenPaths] = useState(false);
 
   const queryClient = new QueryClient();
@@ -305,7 +299,7 @@ const UserSaves = () => {
                               zoomKeyDown={zoomKeyDown}
                               activateEvidence={activateEvidence}
                               activateNotes={activateNotes}
-                              handleBookmarkError={handleBookmarkError}
+                              handleBookmarkError={bookmarkErrorToast}
                               bookmarkAddedToast={bookmarkAddedToast}
                               bookmarkRemovedToast={bookmarkRemovedToast}
                               setShareModalOpen={setShareModalOpen}

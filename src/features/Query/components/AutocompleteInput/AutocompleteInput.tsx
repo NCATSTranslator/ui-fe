@@ -9,7 +9,6 @@ import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
 import { getIcon, joinClasses } from '@/features/Common/utils/utilities';
 import Button from '@/features/Core/components/Button/Button';
-import { useNavigate } from 'react-router-dom';
 
 interface AutocompleteInputProps {
   id: string;
@@ -26,7 +25,6 @@ interface AutocompleteInputProps {
   className?: string;
   selectedClassName?: string;
   disabled?: boolean;
-  loginOnDisabled?: boolean;
   handleSelect: (cxt: AutocompleteContext) => void;
   handleSubmit: (cxt: AutocompleteContext) => void;
   inputRef: RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
@@ -48,7 +46,6 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
   className = '',
   selectedClassName = '',
   disabled = false,
-  loginOnDisabled = false,
   handleSelect,
   handleSubmit,
   inputRef,
@@ -59,7 +56,6 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
   const autocompleteItemsContainerRef = useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [scrollingIndex, setScrollingIndex] = useState<number>(-1);
-  const navigate = useNavigate();
   
   useEffect(() => setAutocompleteVisibility(true), [loadingAutocomplete]);
 

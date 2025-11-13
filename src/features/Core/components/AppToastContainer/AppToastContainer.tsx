@@ -10,8 +10,7 @@ const CloseButton = ({closeToast}: {closeToast: () => void}) => (
 export const AppToastContainer: FC = () => (
   <ToastContainer
     position="top-right"
-    autoClose={false}
-    // autoClose={4000}
+    autoClose={4000}
     theme="light"
     transition={Slide}
     pauseOnFocusLoss={false}
@@ -21,6 +20,5 @@ export const AppToastContainer: FC = () => (
     closeOnClick={false}
     closeButton={CloseButton}
     toastClassName={styles.toast}
-    
   />
 ); 

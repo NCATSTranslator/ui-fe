@@ -14,6 +14,7 @@ interface SidebarCardProps {
   searchTerm?: string;
   linkTo?: string;
   linkTarget?: string;
+  // onClick overrides linkTo
   onClick?: (event: MouseEvent<HTMLDivElement>) => void;
   // Bottom content (metadata, counts, etc.)
   bottomLeft?: ReactNode;
@@ -46,15 +47,15 @@ const SidebarCard: FC<SidebarCardProps> = ({
   textInputRef
 }) => {
   const handleClick = useCallback((event: MouseEvent<HTMLDivElement>) => {
-    // Don't trigger onClick if user clicked on a link
-    if (linkTo && event.target !== event.currentTarget) {
+    if(onClick === undefined)
       return;
-    }
+
     onClick?.(event);
   }, [onClick, linkTo]);
 
   const cardClassName = joinClasses(styles.sidebarCard, className, isRenaming && styles.isRenaming);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const link = (onClick === undefined) ? linkTo : undefined;
 
   return (
     <div 
@@ -69,7 +70,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
         <SidebarCardTitle
           title={title}
           searchTerm={searchTerm}
-          linkTo={linkTo}
+          linkTo={link}
           linkTarget={linkTarget}
           isRenaming={isRenaming}
           onTitleChange={onTitleChange}

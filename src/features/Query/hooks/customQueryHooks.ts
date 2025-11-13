@@ -1,7 +1,6 @@
 import { useMemo, useState, useCallback, useRef, RefObject  } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { debounce } from 'lodash';
 import { Example, QueryItem } from '@/features/Query/types/querySubmission';
 import { incrementHistory } from '@/features/History/slices/historySlice';
@@ -12,6 +11,7 @@ import { queryTypes } from '@/features/Query/utils/queryTypes';
 import { AutocompleteItem, AutocompleteFunctions, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { useSelector } from 'react-redux';
+import { errorToast } from '@/features/Core/utils/toastMessages';
 
 /**
  * Custom hook that filters and sorts cached queries into categorized example queries.
@@ -130,9 +130,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
         }
       }
     } catch (error) {
-      toast.error(
-        "We were unable to submit your query at this time. Please attempt to submit it again or try again later."
-      );
+      errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
       setIsLoading(false);
       console.error(error);
     }
@@ -180,9 +178,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
         navigate(newQueryPath);
 
     } catch (error) {
-      toast.error(
-        "We were unable to submit your query at this time. Please attempt to submit it again or try again later."
-      );
+      errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
       setIsLoading(false);
       console.log(error);
       throw error;
