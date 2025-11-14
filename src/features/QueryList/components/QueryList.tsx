@@ -28,8 +28,8 @@ const QueryList = () => {
   const user = useSelector(currentUser);
   const { data: queries = [], isLoading: queriesLoading, refetch: refetchQueries } = useUserQueries();
   const { searchTerm, handleSearch } = useSimpleSearch();
-  const filteredQueries = useFilteredQueries(queries, false, searchTerm);
   const sortSearchState = useSortSearchState();
+  const filteredQueries = useFilteredQueries(queries, false, sortSearchState, searchTerm);
 
   const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
 

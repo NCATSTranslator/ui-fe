@@ -1,8 +1,9 @@
 import { useContext, useEffect, useRef, ReactNode, useMemo } from "react";
 import { SidebarContext } from "@/features/Sidebar/components/SidebarProvider/SidebarProvider";
 import { SidebarItem, SidebarRegistrationOptions } from "@/features/Sidebar/types/sidebar";
-import { UserQueryObject } from "@/features/Projects/types/projects";
+import { SortSearchState, UserQueryObject } from "@/features/Projects/types/projects";
 import { useGetQueriesUpdatedTitles } from "@/features/Projects/hooks/customHooks";
+import { filterAndSortQueries } from "@/features/Projects/utils/filterAndSortingFunctions";
 
 /**
  * Custom hook for accessing the sidebar context
@@ -86,19 +87,14 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
  * Custom hook for filtering queries based on a search term
  * @param {UserQueryObject[]} queries - The queries to filter
  * @param {boolean} includeDeleted - Whether to include deleted queries
+ * @param {SortSearchState} sortState - The sort state to use
  * @param {string} searchTerm - The search term to filter by
  * @returns {UserQueryObject[]} The filtered queries
  */
-export const useFilteredQueries = (queries: UserQueryObject[], includeDeleted: boolean = false, searchTerm?: string) => {
+export const useFilteredQueries = (queries: UserQueryObject[], includeDeleted: boolean = false, sortState: SortSearchState, searchTerm?: string) => {
   const { queries: queriesWithTitles } = useGetQueriesUpdatedTitles(queries);
 
-  return useMemo(() => queriesWithTitles.sort((a, b) => {
-    // sort by time updated descending
-    return new Date(b.data.time_updated).getTime() - new Date(a.data.time_updated).getTime();
-  }).filter((query) => {
-    if(includeDeleted)
-      return query.data.title?.toLowerCase().includes(searchTerm?.toLowerCase() ?? '');
-    else
-      return query.data.title?.toLowerCase().includes(searchTerm?.toLowerCase() ?? '') && !query.data.deleted;
-  }), [queriesWithTitles, searchTerm, includeDeleted]);
+  return useMemo(() => filterAndSortQueries(queriesWithTitles, sortState.sortField, sortState.sortDirection, searchTerm ?? '').filter((query) => {
+    return includeDeleted ? true : !query.data.deleted;
+  }), [queriesWithTitles, sortState, searchTerm, includeDeleted]);
 };

@@ -2,7 +2,7 @@ import styles from "./QueriesPanel.module.scss";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
-import { useUserQueries } from "@/features/Projects/hooks/customHooks";
+import { useSortSearchState, useUserQueries } from "@/features/Projects/hooks/customHooks";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
@@ -17,7 +17,8 @@ const QueriesPanel = () => {
   const user = useSelector(currentUser);
   const { data: queries = [], isLoading: queriesLoading } = useUserQueries();
   const { searchTerm, handleSearch } = useSimpleSearch();
-  const filteredQueries = useFilteredQueries(queries, false, searchTerm);
+  const sortSearchState = useSortSearchState();
+  const filteredQueries = useFilteredQueries(queries, false, sortSearchState, searchTerm);
 
   return (
     <div className={styles.queriesPanel}>
