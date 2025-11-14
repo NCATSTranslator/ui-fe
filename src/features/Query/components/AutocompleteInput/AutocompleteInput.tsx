@@ -1,4 +1,5 @@
 import { FC, useRef, useState, useCallback, useEffect, KeyboardEvent, RefObject } from 'react';
+import { useLocation } from 'react-router-dom';
 import styles from './AutocompleteInput.module.scss';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import Autocomplete from '@/features/Common/components/Autocomplete/Autocomplete';
@@ -9,6 +10,7 @@ import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
 import { getIcon, joinClasses } from '@/features/Common/utils/utilities';
 import Button from '@/features/Core/components/Button/Button';
+import { getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
 
 interface AutocompleteInputProps {
   id: string;
@@ -51,6 +53,7 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
   inputRef,
   handleSwapTerms,
 }) => {
+  const location = useLocation();
   const autocompleteItemsRef = useRef<HTMLDivElement>(null);
   const autocompleteContainerRef = useRef<HTMLDivElement>(null);
   const autocompleteItemsContainerRef = useRef<HTMLDivElement>(null);
@@ -181,7 +184,7 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
         }
         disabled={disabled}
       />
-      {disabled && <a className={styles.clickablePlaceholder} href='/login'>Log In to Enter a Search Term</a>}
+      {disabled && <a className={styles.clickablePlaceholder} href={getFormattedLoginURL(location)}>Log In to Enter a Search Term</a>}
       {
         autocompleteVisibility &&
         <Autocomplete

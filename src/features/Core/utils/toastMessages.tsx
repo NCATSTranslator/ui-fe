@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 import AppToast from "@/features/Core/components/AppToast/AppToast";
+import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 
 // Projects
 export const projectRestoredToast = () => {
@@ -59,11 +60,11 @@ export const unableToReachLinkToast = () => {
 };
 
 // Authentication
-export const unauthorizedErrorToast = () => {
-  return toast.error(AppToast, { data: { topText: 'Your login has expired or is invalid. Please try logging in again.', bottomText: <a href="/login">Log In</a> } });
+export const unauthorizedErrorToast = (location?: Location) => {
+  return toast.error(AppToast, { data: { topText: 'Your login has expired or is invalid. Please try logging in again.', bottomText: <a href={getFormattedLoginURL(location)}>Log In</a> } });
 };
-export const forbiddenErrorToast = () => {
-  return toast.error(AppToast, { data: { topText: 'You do not have permission to access this resource. Please contact support if you believe this is an error.', bottomText: <a href="/login">Log In</a> } });
+export const forbiddenErrorToast = (location?: Location) => {
+  return toast.error(AppToast, { data: { topText: 'You do not have permission to access this resource. Please contact support if you believe this is an error.', bottomText: <a href={getFormattedLoginURL(location)}>Log In</a> } });
 };
 export const notFoundErrorToast = () => {
   return toast.error(AppToast, { data: { topText: 'The requested resource was not found. Please contact support if you believe this is an error.' } });

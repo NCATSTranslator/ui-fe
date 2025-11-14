@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import styles from './SettingsPanel.module.scss';
 import Button from "@/features/Core/components/Button/Button";
 import UserIcon from '@/assets/icons/projects/user.svg?react';
 import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
-import { useUser } from '@/features/UserAuth/utils/userApi';
+import { getFormattedLoginURL, useUser } from '@/features/UserAuth/utils/userApi';
 import { PrefKey, PrefObject, PrefType } from '@/features/UserAuth/types/user';
 import ChevRight from "@/assets/icons/directional/Chevron/Chevron Right.svg?react";
 import ChevLeft from "@/assets/icons/directional/Chevron/Chevron Left.svg?react";
@@ -17,6 +18,7 @@ import { getPrettyPrefValue } from '@/features/UserAuth/utils/formatPrefs';
 import { preferencesSavedToast } from '@/features/Core/utils/toastMessages';
 
 const SettingsPanel = () => {
+  const location = useLocation();
   const [user, loading] = useUser();
   const [activePrefTypeId, setActivePrefTypeId] = useState<PrefType | null>(null);
   const [activePrefObject, setActivePrefObject] = useState<{prefObject: PrefObject, prefKey: PrefKey} | null>(null);
@@ -86,7 +88,7 @@ const SettingsPanel = () => {
               !user ? (
                 <div className={styles.iconText}>
                   <UserIcon />
-                  <p>Log in to view your query history, projects, bookmarks, and notes.<br/><Button href="/login" title="Log In" className={styles.loginButton} variant="textOnly" inline>Log In</Button></p>
+                  <p>Log in to view your query history, projects, bookmarks, and notes.<br/><Button href={getFormattedLoginURL(location)} title="Log In" className={styles.loginButton} variant="textOnly" inline>Log In</Button></p>
                 </div>
               ) : (
                 <>

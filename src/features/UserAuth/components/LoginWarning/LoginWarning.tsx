@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
-import styles from './LoginWarning.module.scss';
 import { FC } from 'react';
+import styles from './LoginWarning.module.scss';
+import { Link, useLocation } from 'react-router-dom';
+import { getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
 
 type LoginWarningProps = {
   displayLink?: boolean;
@@ -8,7 +9,7 @@ type LoginWarningProps = {
 }
 
 const LoginWarning: FC<LoginWarningProps> = ({text = "", displayLink = true}) => {
-
+  const location = useLocation();
   let temptext = !!text ? text : "You must be logged in to view this content.";
   
   return(
@@ -16,7 +17,7 @@ const LoginWarning: FC<LoginWarningProps> = ({text = "", displayLink = true}) =>
       <h4 className={styles.heading}>{temptext}</h4>
       {
         displayLink && (
-          <Link to="/login" className={styles.link}>Log In</Link>
+          <Link to={getFormattedLoginURL(location)} className={styles.link}>Log In</Link>
         )
       }
     </div>

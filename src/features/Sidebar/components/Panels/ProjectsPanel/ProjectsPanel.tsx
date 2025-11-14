@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./ProjectsPanel.module.scss";
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
@@ -16,8 +17,10 @@ import { projectCreatedToast, queryAddedToProjectToast } from "@/features/Core/u
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { Project } from "@/features/Projects/types/projects";
+import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 
 const ProjectsPanel = () => {
+  const location = useLocation();
   const user = useSelector(currentUser);
   const data = useProjectListData();
   const projects = data.formatted.active || [];
@@ -77,7 +80,7 @@ const ProjectsPanel = () => {
           !user ? (
             <div className={styles.empty}>
               <p>
-                <a href="/login" className={styles.link}>Log in</a> to view your saved projects.
+                <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your saved projects.
               </p>
             </div>
           ) : (

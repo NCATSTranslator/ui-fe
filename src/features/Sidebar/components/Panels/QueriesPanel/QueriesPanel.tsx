@@ -1,5 +1,6 @@
 import styles from "./QueriesPanel.module.scss";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useUserQueries } from "@/features/Projects/hooks/customHooks";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
@@ -9,8 +10,10 @@ import SidebarQueryCard from "@/features/Sidebar/components/SidebarQueryCard/Sid
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import { useFilteredQueries } from "@/features/Sidebar/hooks/sidebarHooks";
+import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 
 const QueriesPanel = () => {
+  const location = useLocation();
   const user = useSelector(currentUser);
   const { data: queries = [], isLoading: queriesLoading } = useUserQueries();
   const { searchTerm, handleSearch } = useSimpleSearch();
@@ -32,7 +35,7 @@ const QueriesPanel = () => {
           !user ? (
             <div className={styles.empty}>
               <p>
-                <a href="/login" className={styles.link}>Log in</a> to view your saved queries.
+                <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your saved queries.
               </p>
             </div>
           ) : (
