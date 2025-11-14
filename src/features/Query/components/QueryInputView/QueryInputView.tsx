@@ -103,7 +103,7 @@ const QueryInputView: FC<QueryInputViewProps> = ({
           handleItemClick={onItemSelection}
           disabled={user === null}
           placeholderText={
-            user === null ? "Log In to Enter a Search Term" : undefined
+            user === null ? "Log In to Enter Search Terms" : undefined
           }
           isLoading={isLoading}
           autocompleteVisibility={autocompleteVisibility}

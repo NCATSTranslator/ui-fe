@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./QueryList.module.scss";
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
@@ -20,13 +21,15 @@ import AnimateHeight from "react-animate-height";
 import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
 import EmptyArea from "@/features/Projects/components/EmptyArea/EmptyArea";
 import { joinClasses } from "@/features/Common/utils/utilities";
+import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 
 const QueryList = () => {
+  const location = useLocation();
   const user = useSelector(currentUser);
   const { data: queries = [], isLoading: queriesLoading, refetch: refetchQueries } = useUserQueries();
   const { searchTerm, handleSearch } = useSimpleSearch();
-  const filteredQueries = useFilteredQueries(queries, false, searchTerm);
   const sortSearchState = useSortSearchState();
+  const filteredQueries = useFilteredQueries(queries, false, sortSearchState, searchTerm);
 
   const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
 
@@ -62,7 +65,7 @@ const QueryList = () => {
           !user ? (
             <EmptyArea>
               <p>
-                <a href="/login" className={styles.link}>Log in</a> to view your saved queries.
+                <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your saved queries.
               </p>
             </EmptyArea>
           ) : (
