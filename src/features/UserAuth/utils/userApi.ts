@@ -12,6 +12,8 @@ import { getEdgeById, getNodeById, getPathById, getPubById } from '@/features/Re
 import { PublicationObject } from '@/features/Evidence/types/evidence';
 import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
 import { formatPrefs } from '@/features/UserAuth/utils/formatPrefs';
+import { getFullPathname } from '@/features/Common/utils/utilities';
+import { Location as RouterLocation } from 'react-router-dom';
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';
@@ -879,3 +881,16 @@ const isPrefObject = (obj: unknown): obj is PrefObject => {
 
   return isAPrefObject;
 };
+
+/**
+ * Generates a formatted login URL with the current pathname encoded.
+ *
+ * @param {RouterLocation | Location} location - Optional location object from React Router or browser. If not provided, uses window.location.
+ * @returns {string} The formatted login URL.
+ */
+export const getFormattedLoginURL = (location?: RouterLocation | Location): string => {
+  const currentLocation = location || window.location;
+  const pathname = getFullPathname(currentLocation as Location);
+  let url = `/login?path=${encodeURIComponent(pathname)}`;
+  return url;
+}

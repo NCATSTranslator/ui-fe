@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { useUserProjects, useUserQueries, useFormattedProjects } from './customHooks';
+import { useUserProjects, useUserQueries, useFormattedProjects, useSortSearchState } from './customHooks';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
 
 /**
@@ -10,11 +10,11 @@ import { UserQueryObject } from '@/features/Projects/types/projects.d';
  */
 export const useProjectDetailData = () => {
   const { projectId } = useParams<{ projectId: string }>();
-
+  const sortSearchState = useSortSearchState();
   const { data: projects = [], isLoading: projectsLoading, error: projectsError, refetch: refetchProjects } = useUserProjects();
   const { data: queries = [], isLoading: queriesLoading, error: queriesError, refetch: refetchQueries } = useUserQueries();
   
-  const formattedProjects = useFormattedProjects(projects, queries);
+  const formattedProjects = useFormattedProjects(projects, queries, sortSearchState);
   
   const project = useMemo(() => {
     return formattedProjects.find((p) => p.id === Number(projectId));

@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 import AppToast from "@/features/Core/components/AppToast/AppToast";
+import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 
 // Projects
 export const projectRestoredToast = () => {
@@ -59,17 +60,17 @@ export const unableToReachLinkToast = () => {
 };
 
 // Authentication
-export const unauthorizedErrorToast = () => {
-  return toast.error(AppToast, { data: { topText: 'Your login has expired or is invalid. Please try logging in again.', bottomText: <a href="/login">Log In</a> } });
+export const unauthorizedErrorToast = (location?: Location) => {
+  return toast.error(AppToast, { data: { topText: 'Your login has expired or is invalid. Please try logging in again.', bottomText: <a href={getFormattedLoginURL(location)}>Log In</a> } });
 };
-export const forbiddenErrorToast = () => {
-  return toast.error(AppToast, { data: { topText: 'You do not have permission to access this resource. Please contact support if you believe this is an error.', bottomText: <a href="/login">Log In</a> } });
+export const forbiddenErrorToast = (location?: Location) => {
+  return toast.error(AppToast, { data: { topText: 'You do not have permission to access this resource. Please contact support if you believe this is an error.', bottomText: <a href={getFormattedLoginURL(location)}>Log In</a> } });
 };
 export const notFoundErrorToast = () => {
-  return toast.error(AppToast, { data: { topText: 'The requested resource was not found. Please contact support if you believe this is an error.' } });
+  return toast.error(AppToast, { data: { topText: 'The requested resource was not found.', bottomText: 'Please contact support if you believe this is an error.' } });
 };
 export const internalServerErrorToast = () => {
-  return toast.error(AppToast, { data: { topText: 'An internal server error occurred. Please try again later or contact support if the problem persists.' } });
+  return toast.error(AppToast, { data: { topText: 'An internal server error occurred.', bottomText: 'Please try again later or contact support if the problem persists.' } });
 };
 export const preferencesSavedToast = () => {
   return toast(AppToast, { data: { topText: 'Preferences Saved' } });

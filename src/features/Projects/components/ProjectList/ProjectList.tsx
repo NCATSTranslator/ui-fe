@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./ProjectList.module.scss";
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
@@ -17,10 +18,14 @@ import ProjectsTableHeader from "../TableHeader/ProjectsTableHeader/ProjectsTabl
 import CardList from "@/features/Projects/components/CardList/CardList";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import EmptyArea from "@/features/Projects/components/EmptyArea/EmptyArea";
+import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 
 const ProjectList = () => {
+  const location = useLocation();
   const user = useSelector(currentUser);
-  const data = useProjectListData();
+  // Sort/Search state management
+  const sortSearchState = useSortSearchState();
+  const data = useProjectListData(sortSearchState);
   const projects = useMemo(() => data.formatted.active, [data.formatted.active]);
   const projectsLoading = data.loading.projectsLoading;
   const { searchTerm, handleSearch } = useSimpleSearch();
@@ -28,9 +33,6 @@ const ProjectList = () => {
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
   const { togglePanel } = useSidebar();
   
-  // Sort/Search state management
-  const sortSearchState = useSortSearchState();
-
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => project.data.title.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [projects, searchTerm]);
@@ -76,7 +78,7 @@ const ProjectList = () => {
           !user ? (
             <EmptyArea>
               <p>
-                <a href="/login" className={styles.link}>Log in</a> to view your saved projects.
+                <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your saved projects.
               </p>
             </EmptyArea>
           ) : (
