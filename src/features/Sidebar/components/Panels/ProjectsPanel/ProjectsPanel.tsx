@@ -12,7 +12,7 @@ import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import Button from "@/features/Core/components/Button/Button";
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
-import { useCreateProject } from "@/features/Projects/hooks/customHooks";
+import { useCreateProject, useSortSearchState } from "@/features/Projects/hooks/customHooks";
 import { projectCreatedToast, queryAddedToProjectToast } from "@/features/Core/utils/toastMessages";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
@@ -22,7 +22,8 @@ import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 const ProjectsPanel = () => {
   const location = useLocation();
   const user = useSelector(currentUser);
-  const data = useProjectListData();
+  const sortSearchState = useSortSearchState();
+  const data = useProjectListData(sortSearchState);
   const projects = data.formatted.active || [];
   const projectsLoading = data.loading.projectsLoading;
   const { searchTerm, handleSearch } = useSimpleSearch();

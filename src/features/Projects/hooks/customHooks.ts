@@ -2,11 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
   restoreProjects, restoreQueries, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
-import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection } from '@/features/Projects/types/projects.d';
+import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
 import { fetcNodeNameFromCurie, generateQueryTitle, findAllCuriesInTitle } from '@/features/Projects/utils/utilities';
 import { getBaseTitle, extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, createUpdatedQueryWithTitle } from '@/features/Projects/utils/queryTitleUtils';
 import { useSelector } from 'react-redux';
 import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
+import { filterAndSortProjects } from '@/features/Projects/utils/filterAndSortingFunctions';
 
 /**
  * Hook to fetch user projects with React Query
@@ -185,6 +186,7 @@ export const useUpdateQuery = () => {
 export const useFormattedProjects = (
   projects: ProjectRaw[], 
   queries: UserQueryObject[],
+  sortSearchState: SortSearchState,
   includeUnassigned: boolean = true
 ): Project[] => {
   return useMemo(() => {
@@ -225,7 +227,7 @@ export const useFormattedProjects = (
     };
     
     // Format regular projects
-    const formattedProjects = projects.map(project => {
+    let formattedProjects = projects.map(project => {
       // Find all queries that belong to this project
       const projectQueries = queries.filter(q => project.data.pks.includes(q.data.qid));
       
@@ -248,10 +250,11 @@ export const useFormattedProjects = (
         note_count
       };
     });
+    formattedProjects = filterAndSortProjects(formattedProjects, queries, sortSearchState.sortField, sortSearchState.sortDirection, sortSearchState.searchTerm);
     
     // Return formatted projects with unassigned project appended
     return includeUnassigned ? [...formattedProjects, unassignedProject] : formattedProjects;
-  }, [projects, queries]);
+  }, [projects, queries, sortSearchState]);
 };
 
 /**
