@@ -128,7 +128,7 @@ const ResultList = () => {
     return ((!!prefValue) ? (typeof prefValue === "string") ? parseInt(prefValue) : prefValue : 10) as number;
   }, []);
   // number, how many items per page
-  const [itemsPerPage, setItemsPerPage] = useState<number>(calculateItemsPerPage(prefs.result_per_screen.pref_value));
+  const [itemsPerPage, setItemsPerPage] = useState<number>(calculateItemsPerPage(prefs.results_per_page.pref_value));
   // number, last result item index
   const [endResultIndex, setEndResultIndex] = useState<number>(itemsPerPage);
   // ResultSet, original raw result set from the BE
@@ -174,7 +174,7 @@ const ResultList = () => {
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
   useEffect(() => {
     currentSortString.current = (isPathfinder) ? 'nameLowHigh' : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
-    const tempItemsPerPage = calculateItemsPerPage(prefs.result_per_screen.pref_value);
+    const tempItemsPerPage = calculateItemsPerPage(prefs.results_per_page.pref_value);
     setItemsPerPage(tempItemsPerPage);
     setEndResultIndex(tempItemsPerPage);
   }, [prefs, isPathfinder, calculateItemsPerPage]);

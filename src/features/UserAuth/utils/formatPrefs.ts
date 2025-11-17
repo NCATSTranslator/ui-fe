@@ -7,11 +7,18 @@ export const formatPrefs = (prefs: Preferences) => {
   let newPrefs: Preferences = cloneDeep(prefs);
 
   for(const key of Object.keys(prefs)) {
-    newPrefs[key].name = getPrefName(key);
-    newPrefs[key].possible_values = getPrefPossibleValues(key);
+    const checkedKey = checkOldPrefKey(key);
+    newPrefs[checkedKey].name = getPrefName(checkedKey);
+    newPrefs[checkedKey].possible_values = getPrefPossibleValues(checkedKey);
   }
 
   return newPrefs;
+}
+
+const checkOldPrefKey = (key: string) => {
+  if(key === "results_per_screen") return "results_per_page";
+  if(key === "evidence_per_screen") return "evidence_per_page";
+  return key;
 }
 
 const getPrefPossibleValues = (key: string) => {

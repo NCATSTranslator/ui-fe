@@ -26,6 +26,7 @@ import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 
 interface SidebarProjectCardProps {
   allProjects?: Project[];
+  isActiveProject?: boolean;
   onRename?: (project: Project) => void;
   project: Project;
   searchTerm?: string;
@@ -34,6 +35,7 @@ interface SidebarProjectCardProps {
 
 const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
   allProjects,
+  isActiveProject = false,
   onRename,
   project,
   searchTerm,
@@ -44,7 +46,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
   const { handleUpdateProject } = useEditProjectHandlers();
   const { addToProjectQuery, clearAddToProjectMode, isSelectedProjectMode, setSelectedProject, setSelectedProjectMode, togglePanel } = useSidebar();
   const isUnassigned = isUnassignedProject(project);
-  const className = joinClasses(styles.projectCard, isUnassigned && styles.unassigned);
+  const className = joinClasses(styles.projectCard, isUnassigned && styles.unassigned, isActiveProject && styles.activeProject);
   const leftIcon = isUnassigned ? <FolderEmptyIcon className={styles.emptyIcon} /> : <FolderIcon />;
   const { active } = useDndContext();
   const isQueryInProject = useMemo(() => active ? isDraggedQueryInProject(active, project) : false, [active, project]);

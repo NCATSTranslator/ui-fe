@@ -61,7 +61,7 @@ export const unableToReachLinkToast = () => {
 
 // Authentication
 export const unauthorizedErrorToast = (location?: Location) => {
-  return toast.error(AppToast, { data: { topText: 'Your login has expired or is invalid. Please try logging in again.', bottomText: <a href={getFormattedLoginURL(location)}>Log In</a> } });
+  return toast.error(AppToast, { data: { topText: 'Your login has expired or is invalid.', bottomText: <>Please try logging in again.<br/><a href={getFormattedLoginURL(location)}>Log In</a></> } });
 };
 export const forbiddenErrorToast = (location?: Location) => {
   return toast.error(AppToast, { data: { topText: 'You do not have permission to access this resource. Please contact support if you believe this is an error.', bottomText: <a href={getFormattedLoginURL(location)}>Log In</a> } });
