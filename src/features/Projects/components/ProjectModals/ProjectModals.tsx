@@ -92,17 +92,17 @@ const ProjectModals = ({
 
   return (
     <>
-      {/* Delete Project Prompt - Works for both list and detail variants */}
+      {/* Delete Project Prompt */}
       {(modals.deleteProjects || modals.deleteProject) && (
         <ProjectDeleteWarningModal
           isOpen={modals.deleteProjects || modals.deleteProject}
           onClose={handleCloseDeleteProjects}
           onConfirm={handleConfirmDeleteProjects}
           onCancel={handleCancelDeleteProjects}
-          heading={`Delete ${projectCount} project${projectCount > 1 ? 's' : ''}?`}
-          content={`${projectCount > 1 ? 'These projects can be recovered from your Trash.' : 'This project can be recovered from your Trash.'}`}
+          heading={`${projectCount > 1 ? `Delete ${projectCount} Projects` : 'Delete Project'}?`}
+          content={`Queries in this project, along with any bookmarks or notes associated with them, will not be deleted and will still be available from your Query History.`}
           cancelButtonText="Cancel"
-          confirmButtonText={`Delete Project${projectCount > 1 ? 's' : ''}`}
+          confirmButtonText={`${projectCount > 1 ? `Delete ${projectCount} Projects` : 'Delete Project'}`}
           setStorageKeyFn={deletePrompts.deleteProjects?.setHideDeletePrompt}
         />
       )}
@@ -114,8 +114,8 @@ const ProjectModals = ({
           onClose={() => onCloseModal('deleteQueries')}
           onConfirm={deletionHandlers.handleDeleteSelectedQueries}
           onCancel={() => onCloseModal('deleteQueries')}
-          heading={`Delete ${selectedQueries.length} quer${selectedQueries.length > 1 ? 'ies' : 'y'}?`}
-          content={`${selectedQueries.length > 1 ? 'These queries can be recovered from your Trash.' : 'This query can be recovered from your Trash.'}`}
+          heading={`${selectedQueries.length > 1 ? `Delete ${selectedQueries.length} Queries` : 'Delete this Query'}?`}
+          content={`This action cannot be undone.`}
           cancelButtonText="Cancel"
           confirmButtonText={`Delete Quer${selectedQueries.length > 1 ? 'ies' : 'y'}`}
           setStorageKeyFn={deletePrompts.deleteQueries?.setHideDeletePrompt}
