@@ -10,7 +10,7 @@ export const defaultPrefs: Preferences = {
     pref_value: "scoreHighLow",
     possible_values:["nameLowHigh", "nameHighLow", "evidenceLowHigh", "evidenceHighLow", "scoreHighLow", "scoreLowHigh", "pathHighLow", "pathLowHigh"]
   },
-  result_per_screen: {
+  results_per_page: {
     name: "Results Shown per Page",
     pref_value: 10,
     possible_values:[5, 10, 20]

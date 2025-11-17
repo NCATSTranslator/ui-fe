@@ -30,7 +30,7 @@ export const prefKeyToString = (prefKey: string): string => {
   switch (prefKey) {
     case "result_sort":
       return "Sort results by";
-    case "result_per_screen":
+    case "results_per_page":
       return "Results to show per page";
     case "graph_visibility":
       return "Graph visibility";
@@ -846,7 +846,7 @@ export const isPreferences = (obj: unknown): obj is Preferences => {
   } else {
     const requiredKeys: Array<keyof Preferences> = [
       'result_sort',
-      'result_per_screen',
+      'results_per_page',
       'graph_visibility',
       'graph_layout',
       'path_show_count',
