@@ -42,7 +42,7 @@ const SettingsPanel = () => {
   const evidencePrefs = useMemo(()=> {
     return {
       evidence_sort: userPrefs.evidence_sort,
-      evidence_per_screen: userPrefs.evidence_per_screen,
+      evidence_per_page: userPrefs.evidence_per_page,
     }
   }, [userPrefs]);
 

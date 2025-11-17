@@ -85,7 +85,7 @@ export const handleEvidenceSort = (
  * @returns {number} - The number of items per page from preferences or the default value.
  */
 export const getInitItemsPerPage = (prefs: Preferences, defaultItemsPerPage: number): number => {
-  const value = prefs?.evidence_per_screen?.pref_value;
+  const value = prefs?.evidence_per_page?.pref_value;
   if (!value) return defaultItemsPerPage;
   
   return typeof value === "string" ? parseInt(value) : value;

@@ -35,7 +35,7 @@ export const defaultPrefs: Preferences = {
     pref_value: "dateHighLow",
     possible_values:["titleLowHigh", "titleHighLow", "sourceLowHigh", "sourceHighLow", "dateLowHigh", "dateHighLow"]
   },
-  evidence_per_screen: {
+  evidence_per_page: {
     name: "Default Publications Shown per Page",
     pref_value: 5,
     possible_values:[5, 10, 20, 50]

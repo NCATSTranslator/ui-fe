@@ -23,11 +23,11 @@ export type Preferences = {
   graph_layout: PrefObject;
   path_show_count: PrefObject;
   evidence_sort: PrefObject;
-  evidence_per_screen: PrefObject;
+  evidence_per_page: PrefObject;
 }
 
 export type PrefType = "results" | "evidence" | "graphs";
-export type PrefKey = "result_sort" | "results_per_page" | "graph_visibility" | "graph_layout" | "path_show_count" | "evidence_sort" | "evidence_per_screen";
+export type PrefKey = "result_sort" | "results_per_page" | "graph_visibility" | "graph_layout" | "path_show_count" | "evidence_sort" | "evidence_per_page";
 
 export type User = {
   data: null;

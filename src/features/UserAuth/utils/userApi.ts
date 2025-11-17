@@ -40,7 +40,7 @@ export const prefKeyToString = (prefKey: string): string => {
       return "Number of paths to show";
     case "evidence_sort":
       return "Sort evidence by";
-    case "evidence_per_screen":
+    case "evidence_per_page":
       return "Publications to show per page";
     default: 
       return `No label provided for ${prefKey}`;
@@ -851,7 +851,7 @@ export const isPreferences = (obj: unknown): obj is Preferences => {
       'graph_layout',
       'path_show_count',
       'evidence_sort',
-      'evidence_per_screen',
+      'evidence_per_page',
     ];
 
     isPrefContainer = requiredKeys.every(key => key in obj && isPrefObject((obj as unknown as Record<string, unknown>)[key])) && Object.values(obj).every(isPrefObject);
