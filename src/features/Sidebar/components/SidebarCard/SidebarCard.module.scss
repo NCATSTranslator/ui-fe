@@ -12,7 +12,17 @@
   &.projectCard {
     background-color: $white;
     border: 1px solid $midGray;
-    &:hover {
+    &.activeProject {
+      background-color: $lightPurpleTwo;
+      border: 1px solid $midPurpleTwo;
+      .leftSection svg path, .count svg path {
+        fill: $purpleOne;
+      }
+      .title, .title span, .title mark, .count {
+        color: $purpleOne;
+      }
+    }
+    &:hover  {
       background-color: $whiteHover;
       border: 1px solid $lightPurpleTwo;
       .leftSection svg path, .count svg path {

@@ -293,7 +293,7 @@ export const useSortSearchState = () => {
     setSearchTerm('');
   };
 
-  return {
+  return useMemo(() => ({
     // State
     sortField,
     sortDirection,
@@ -308,7 +308,7 @@ export const useSortSearchState = () => {
     handleSort,
     clearSearchTerm,
     resetState
-  };
+  }), [sortField, sortDirection, searchTerm]);
 };
 
 /**

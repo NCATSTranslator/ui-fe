@@ -34,7 +34,7 @@ const SettingsPanel = () => {
   const resultPrefs = useMemo(()=> {
     return {
       result_sort: userPrefs.result_sort,
-      result_per_screen: userPrefs.result_per_screen,
+      results_per_page: userPrefs.results_per_page,
       path_show_count: userPrefs.path_show_count,
     }
   }, [userPrefs]);
@@ -42,7 +42,7 @@ const SettingsPanel = () => {
   const evidencePrefs = useMemo(()=> {
     return {
       evidence_sort: userPrefs.evidence_sort,
-      evidence_per_screen: userPrefs.evidence_per_screen,
+      evidence_per_page: userPrefs.evidence_per_page,
     }
   }, [userPrefs]);
 
