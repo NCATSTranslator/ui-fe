@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { matchPath, useLocation } from "react-router-dom";
 import styles from "./ProjectsPanel.module.scss";
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
@@ -31,7 +31,11 @@ const ProjectsPanel = () => {
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
   const { addToProjectQuery, clearAddToProjectMode } = useSidebar();
   const { title: queryTitle } = useGetQueryCardTitle(addToProjectQuery || null);
-
+  const activeProjectId = useMemo(() => {
+    const match = matchPath('/projects/:projectId', location.pathname);
+    return match?.params.projectId ? Number(match.params.projectId) : null;
+  }, [location.pathname]);
+  
   const filteredProjects = useMemo(() => {
     if(searchTerm.length === 0) return projects;
 
@@ -97,6 +101,7 @@ const ProjectsPanel = () => {
               {filteredProjects.map((project) => (
                 <SidebarProjectCard 
                   key={project.id}
+                  isActiveProject={activeProjectId === project.id}
                   project={project}
                   allProjects={projects}
                   searchTerm={searchTerm}
