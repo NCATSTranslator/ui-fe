@@ -38,6 +38,7 @@ export type SidebarItem = {
   buttonComponent?: ReactNode;
   buttonComponentFactory?: () => ReactNode;
   tooltipText?: string;
+  noUserTooltipText?: string;
 };
 
 export type SidebarRegistrationOptions = {

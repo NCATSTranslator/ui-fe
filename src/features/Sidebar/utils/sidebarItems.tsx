@@ -27,8 +27,8 @@ const HelpButton = () => {
 
 export const topItems: SidebarItem[] = [
   { id: 'newQuery', label: 'New Query', type: 'link', to: '/', icon: <SearchPlusIcon />, tooltipText: 'New Query' },
-  { id: 'projects', label: 'Projects', type: 'panel', icon: <FolderIcon />, tooltipText: 'Projects', panelComponent: <ProjectsPanel />, buttonComponent: <ViewProjectsButton /> },
-  { id: 'queries', label: 'Query History', type: 'panel', icon: <HistoryIcon />, tooltipText: 'Query History', panelComponent: <QueriesPanel />, buttonComponent: <ViewAllQueriesButton /> },
+  { id: 'projects', label: 'Projects', type: 'panel', icon: <FolderIcon />, tooltipText: 'Projects', noUserTooltipText: 'Log In to View Projects', panelComponent: <ProjectsPanel />, buttonComponent: <ViewProjectsButton /> },
+  { id: 'queries', label: 'Query History', type: 'panel', icon: <HistoryIcon />, tooltipText: 'Query History', noUserTooltipText: 'Log In to View Query History', panelComponent: <QueriesPanel />, buttonComponent: <ViewAllQueriesButton /> },
 ];
 
 export const bottomItems: SidebarItem[] = [
