@@ -8,6 +8,7 @@ import { getBaseTitle, extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitl
 import { useSelector } from 'react-redux';
 import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 import { filterAndSortProjects } from '@/features/Projects/utils/filterAndSortingFunctions';
+import { useSimpleSearch } from '@/features/Common/hooks/simpleSearchHook';
 
 /**
  * Hook to fetch user projects with React Query
@@ -264,7 +265,7 @@ export const useFormattedProjects = (
  * @returns {string} searchTerm - The search term to filter by
  * @returns {Function} setSortField - Function to set the sort field
  * @returns {Function} setSortDirection - Function to set the sort direction
- * @returns {Function} setSearchTerm - Function to set the search term
+ * @returns {Function} handleSearch - Function to handle searching
  * @returns {Function} handleSort - Function to handle sorting
  * @returns {Function} clearSearchTerm - Function to clear the search term
  * @returns {Function} resetState - Function to reset the state
@@ -272,7 +273,7 @@ export const useFormattedProjects = (
 export const useSortSearchState = () => {
   const [sortField, setSortField] = useState<SortField>('lastSeen');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const { searchTerm, handleSearch } = useSimpleSearch();
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -284,13 +285,13 @@ export const useSortSearchState = () => {
   };
 
   const clearSearchTerm = () => {
-    setSearchTerm('');
+    handleSearch('');
   };
 
   const resetState = () => {
     setSortField('lastSeen');
     setSortDirection('desc');
-    setSearchTerm('');
+    handleSearch('');
   };
 
   return useMemo(() => ({
@@ -302,9 +303,9 @@ export const useSortSearchState = () => {
     // Setters
     setSortField,
     setSortDirection,
-    setSearchTerm,
     
     // Handlers
+    handleSearch,
     handleSort,
     clearSearchTerm,
     resetState

@@ -68,6 +68,9 @@
     min-height: $m;
     width: fit-content;
   }
+  .titleMatch {
+    margin-left: $xxxs;
+  }
   .title, .title span, .title mark {
     margin-bottom: 0;
     font-size: $bodyTwoSize;

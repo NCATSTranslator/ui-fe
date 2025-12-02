@@ -76,7 +76,7 @@ const ProjectCard: FC<ProjectCardProps> = ({
       <DroppableArea 
         id={`project-zone-${project.id}`}
         canAccept={(draggedData) => draggedData.type === 'query'}
-        disabled={isUnassignedProject(project || -1)}
+        disabled={isUnassigned}
         data={{
           id: project.id?.toString(),
           type: 'project',
@@ -102,6 +102,7 @@ const ProjectCard: FC<ProjectCardProps> = ({
           bookmarksCount={project.bookmark_count}
           notesCount={project.note_count}
           date={date}
+          ignoreTitleMatch={isUnassigned}
         />
       </DroppableArea>
     </OutsideClickHandler>

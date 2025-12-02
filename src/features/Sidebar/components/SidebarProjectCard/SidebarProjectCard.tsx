@@ -141,7 +141,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
       <DroppableArea 
         id={`project-zone-${project.id}`}
         canAccept={(draggedData) => draggedData.type === 'query'}
-        disabled={isUnassignedProject(project || -1)}
+        disabled={isUnassigned}
         data={{ 
           id: project.id?.toString(),
           type: 'project',
@@ -167,6 +167,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
           onFormSubmit={handleFormSubmit}
           textInputRef={textInputRef}
           rightIcon={isUnassigned ? <InfoIcon data-tooltip-content="Unassigned Project" /> : undefined}
+          ignoreTitleMatch={isUnassigned}
         />
       </DroppableArea>
     </OutsideClickHandler>

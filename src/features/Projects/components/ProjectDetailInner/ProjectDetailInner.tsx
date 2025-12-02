@@ -142,7 +142,7 @@ const ProjectDetailInner = () => {
                     heading={localTitle}
                     searchPlaceholder="Search Queries"
                     searchTerm={sortSearchState.searchTerm}
-                    handleSearch={sortSearchState.setSearchTerm}
+                    handleSearch={sortSearchState.handleSearch}
                     isRenaming={isRenaming}
                     onTitleChange={handleTitleChange}
                     onFormSubmit={handleFormSubmit}

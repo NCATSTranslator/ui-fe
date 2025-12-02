@@ -12,6 +12,7 @@ import { QueryTypeString } from "@/features/Projects/types/projects";
 
 interface DataCardProps {
   icon: ReactNode;
+  ignoreTitleMatch?: boolean;
   title: string;
   searchTerm?: string;
   linkTo?: string;
@@ -34,6 +35,7 @@ interface DataCardProps {
 
 const DataCard: FC<DataCardProps> = ({
   icon,
+  ignoreTitleMatch = false,
   title,
   searchTerm,
   linkTo,
@@ -78,6 +80,7 @@ const DataCard: FC<DataCardProps> = ({
     >
       <div className={styles.container}>
         <CardName
+          ignoreTitleMatch={ignoreTitleMatch}
           title={title}
           searchTerm={searchTerm}
           linkTo={linkTo}
