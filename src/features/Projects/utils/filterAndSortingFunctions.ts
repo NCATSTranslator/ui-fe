@@ -57,17 +57,6 @@ export const filterProjects = (projects: Project[] | ProjectRaw[], searchTerm: s
       foundMatch = true;
     }
     // check if any of the project's queries match the search term
-    if(queries) {
-      for(const pk of project.data.pks) {
-        const query = queries.find(q => q.data.qid === pk);
-        console.log(query, query?.data.title?.toLowerCase(), query?.data.title?.toLowerCase().includes(formattedSearchTerm));
-        // if(query?.data.title?.toLowerCase().includes(formattedSearchTerm)) {
-        //   foundMatch = true;
-        //   break;
-        // }
-      }
-    }
-
     if (queries && project.data.pks.some(pk => queries.find(q => q.data.qid === pk)?.data.title?.toLowerCase().includes(formattedSearchTerm))) {
       foundMatch = true;
     }
