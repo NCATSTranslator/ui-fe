@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
   restoreProjects, restoreQueries, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
@@ -275,24 +275,24 @@ export const useSortSearchState = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const { searchTerm, handleSearch } = useSimpleSearch();
 
-  const handleSort = (field: SortField) => {
+  const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
       setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortDirection('desc');
     }
-  };
+  }, [sortField]);
 
-  const clearSearchTerm = () => {
+  const clearSearchTerm = useCallback(() => {
     handleSearch('');
-  };
+  }, [handleSearch]);
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setSortField('lastSeen');
     setSortDirection('desc');
     handleSearch('');
-  };
+  }, [handleSearch]);
 
   return useMemo(() => ({
     // State
@@ -309,7 +309,7 @@ export const useSortSearchState = () => {
     handleSort,
     clearSearchTerm,
     resetState
-  }), [sortField, sortDirection, searchTerm]);
+  }), [sortField, sortDirection, searchTerm, handleSearch, handleSort, clearSearchTerm, resetState]);
 };
 
 /**

@@ -86,7 +86,6 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
         title={title}
         searchTerm={searchTerm}
         linkTo={queryURL}
-        // linkTarget="_blank"
         bottomLeft={bottomLeft}
         bottomRight={bottomRight}
         data-testid="sidebar-query-card"
