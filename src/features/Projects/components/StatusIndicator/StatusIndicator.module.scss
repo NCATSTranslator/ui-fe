@@ -59,7 +59,7 @@ $statusSize: 18px;
 .statusUnknown {
   background: $midGray;
 }
-.statusIndicator {
+div.statusIndicator {
   position: relative;
   &.redDot {
     &::before {
@@ -75,9 +75,19 @@ $statusSize: 18px;
       z-index: 10;
     }
   }
-  .tooltipHeading {
-    font-size: $bodyTwoSize;
-    font-weight: 800;
-    margin: 0 0 $xxs;
+  .tooltip {
+    span.tooltipHeading, span {
+      color: $white !important;
+      text-decoration: none !important;
+    }
+    span.tooltipHeading {
+      font-size: $bodyTwoSize !important;
+      font-weight: 800 !important;
+      margin: 0 0 $xxs !important;
+    }
+    span {
+      font-weight: 400 !important;
+      font-size: $captionSize !important;
+    }
   }
 }

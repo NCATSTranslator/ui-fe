@@ -87,7 +87,6 @@ const QueryCard: FC<QueryCardProps> = ({
         title={title}
         searchTerm={searchTerm}
         linkTo={queryURL}
-        linkTarget="_blank"
         options={options}
         type="query"
         bookmarksCount={query.data.bookmark_ids.length}
