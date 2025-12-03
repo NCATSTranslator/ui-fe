@@ -62,7 +62,6 @@ export const filterProjects = (projects: Project[] | ProjectRaw[], searchTerm: s
     }
     return foundMatch;
   });
-  console.log(filteredProjects);
   return filteredProjects;
 }
 
