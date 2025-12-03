@@ -32,7 +32,6 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
 }) => {
   const resultSet = useSelector(getResultSetById(pk));
   const selectedEdgeId = selectedEdge?.id || null;
-  
   const [state, updateState] = usePubTableState(prefs);
   usePubmedDataFetch(
     isOpen,
@@ -103,7 +102,6 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     );
   }, [state.sortingState, publications, handlePageClick, updateState, setPublications]);
 
-  // Effects
   useEffect(() => {
     const value = getInitItemsPerPage(prefs, DEFAULT_ITEMS_PER_PAGE);
     updateState({ itemsPerPage: value });
