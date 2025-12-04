@@ -2,6 +2,8 @@ import { FC, ReactNode, useCallback } from "react";
 import DisclaimerModal from "@/features/Common/components/DisclaimerModal/DisclaimerModal";
 import { useDisclaimersApproved } from "@/features/Common/hooks/customHooks";
 import { PageTitleProvider } from "@/features/Page/components/PageTitleProvider/PageTitleProvider";
+import BackNavButton from "@/features/Core/components/BackNavButton/BackNavButton";
+import { joinClasses } from "@/features/Common/utils/utilities";
 
 export interface PageProps {
   title: string;
@@ -17,7 +19,8 @@ const Page: FC<PageProps> = ({
   onDisclaimerApproved 
 }) => {
   const [isDisclaimerApproved, setIsDisclaimerApproved] = useDisclaimersApproved(title);
-
+  const pageClasses = joinClasses(className, 'page');
+  
   const handleDisclaimerClose = useCallback(() => {
     try {
       const cookieName = window.location.pathname.includes("login") 
@@ -41,8 +44,9 @@ const Page: FC<PageProps> = ({
 
   return (
     <PageTitleProvider baseTitle={title}>
-      <div className={className}>
+      <div className={pageClasses}>
         {children}
+        <BackNavButton />
         <DisclaimerModal
           isOpen={!isDisclaimerApproved}
           onClose={handleDisclaimerClose}

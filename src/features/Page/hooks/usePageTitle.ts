@@ -25,9 +25,7 @@ export const useDynamicPageTitle = (title: string | null) => {
   
   useEffect(() => {
     setDynamicTitle(title);
-    // document.title = `${title} - NCATS Biomedical Data Translator`;
     return () => {
-      console.log('unmounting');
       setDynamicTitle(null);
     }; // Clean up on unmount
   }, [title, setDynamicTitle, baseTitle]);

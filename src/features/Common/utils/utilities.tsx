@@ -17,6 +17,7 @@ import { cloneDeep } from 'lodash';
 import { isResultEdge, Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { Location as RouterLocation } from 'react-router-dom';
 
 /**
  * Retrieves an icon based on a category.
@@ -522,10 +523,10 @@ export const combineObjectArrays = <T extends Record<string, unknown>,>(arr1: T[
 /**
  * Utility function that returns a full pathname plus any search and hash params.
  *
- * @param location - The Location object to check.
+ * @param {RouterLocation | Location} location - The Location or RouterLocation object to check.
  * @returns {string} String containing the full pathname.
  */
-export const getFullPathname = (location: Location): string => {
+export const getFullPathname = (location: RouterLocation | Location): string => {
   let fullPath = location.pathname;
   if(!!location.search)
     fullPath += location.search;
