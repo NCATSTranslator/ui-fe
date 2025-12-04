@@ -30,11 +30,14 @@ import CombinedQueryInterface from '@/features/Query/components/CombinedQueryInt
 import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 import EmptyArea from '@/features/Projects/components/EmptyArea/EmptyArea';
+import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
   
 const ProjectDetailInner = () => {
   // Data management
   const data = useProjectDetailData();
   const [optionsOpen, setOptionsOpen] = useState(false);
+
+  useDynamicPageTitle(data.project?.data.title || "Project");
 
   // drag and drop context
   const { active } = useDndContext();

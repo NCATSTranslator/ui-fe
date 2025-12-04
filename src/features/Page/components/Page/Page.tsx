@@ -1,6 +1,7 @@
 import { FC, ReactNode, useCallback } from "react";
 import DisclaimerModal from "@/features/Common/components/DisclaimerModal/DisclaimerModal";
 import { useDisclaimersApproved } from "@/features/Common/hooks/customHooks";
+import { PageTitleProvider } from "@/features/Page/components/PageTitleProvider/PageTitleProvider";
 
 export interface PageProps {
   title: string;
@@ -39,13 +40,15 @@ const Page: FC<PageProps> = ({
   }, [setIsDisclaimerApproved, onDisclaimerApproved]);
 
   return (
-    <div className={className}>
-      {children}
-      <DisclaimerModal
-        isOpen={!isDisclaimerApproved}
-        onClose={handleDisclaimerClose}
-      />
-    </div>
+    <PageTitleProvider baseTitle={title}>
+      <div className={className}>
+        {children}
+        <DisclaimerModal
+          isOpen={!isDisclaimerApproved}
+          onClose={handleDisclaimerClose}
+        />
+      </div>
+    </PageTitleProvider>
   );
 };
 

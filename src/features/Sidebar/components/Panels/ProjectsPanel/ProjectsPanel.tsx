@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import styles from "./ProjectsPanel.module.scss";
 import { useSelector } from "react-redux";
