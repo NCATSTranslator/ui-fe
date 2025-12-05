@@ -2,8 +2,9 @@ import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/feat
 import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
-import { unableToReachLinkToast } from "../../Core/utils/toastMessages";
+import { unableToReachLinkToast } from "@/features/Core/utils/toastMessages";
 import { ARAStatusResponse } from "@/features/ResultList/types/results.d";
+import { capitalizeFirstLetter } from "@/features/Common/utils/utilities";
 
 /**
  * Get the status of a project based on the most recent query's status
@@ -54,14 +55,14 @@ export const generateQueryTitle = (query: UserQueryObject): string => {
     const nodeTwo = query.data.query.node_two_label || query.data.query.object?.id || 'nodeTwo';
 
     title = constraint
-      ? `What paths begin with ${nodeOne} and end with ${nodeTwo} and include a ${constraint}?`
-      : `What paths begin with ${nodeOne} and end with ${nodeTwo}?`;
+      ? `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)} — ${capitalizeFirstLetter(constraint)} Connections`
+      : `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)}`;
   } else {
     const queryType = queryTypes.find(type => type.targetType === query.data.query.type);
     const label = query.data.query.node_one_label || query.data.query.curie;
     if(queryType) {
       // TODO: update curie to node label when Gus adds it to the query object
-      title = `${queryType.label.replaceAll("a disease?", "").replaceAll("a chemical?", "").replaceAll("a gene?", "")} ${label}?`;
+      title = `${label} — ${capitalizeFirstLetter(queryType.targetType)}s`;
     }
   }
 

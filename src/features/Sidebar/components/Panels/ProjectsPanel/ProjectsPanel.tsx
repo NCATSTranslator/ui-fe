@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import styles from "./ProjectsPanel.module.scss";
 import { useSelector } from "react-redux";
@@ -8,7 +8,6 @@ import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import SidebarProjectCard from "@/features/Sidebar/components/SidebarProjectCard/SidebarProjectCard";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import { useProjectListData } from "@/features/Projects/hooks/useProjectListData";
-import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import Button from "@/features/Core/components/Button/Button";
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
@@ -26,19 +25,12 @@ const ProjectsPanel = () => {
   const data = useProjectListData(sortSearchState);
   const projects = data.formatted.active || [];
   const projectsLoading = data.loading.projectsLoading;
-  const { searchTerm, handleSearch } = useSimpleSearch();
   const createProjectMutation = useCreateProject();
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
   const { addToProjectQuery, clearAddToProjectMode } = useSidebar();
   const { title: queryTitle } = useGetQueryCardTitle(addToProjectQuery || null);
   const { projectId } = useParams<{ projectId: string }>();
   const activeProjectId = projectId ? Number(projectId) : null;
-  
-  const filteredProjects = useMemo(() => {
-    if(searchTerm.length === 0) return projects;
-
-    return projects.filter((project) => project.data.title.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [projects, searchTerm]);
 
   const handleCreateNewProjectClick = () => {
     const newProject = {
@@ -72,9 +64,9 @@ const ProjectsPanel = () => {
       <div className={styles.top}>
         <TextInput
           iconLeft={<SearchIcon />}
-          iconRight={searchTerm.length > 0 && <CloseIcon />}
+          iconRight={sortSearchState.searchTerm.length > 0 && <CloseIcon />}
           iconRightClickToReset
-          handleChange={handleSearch}
+          handleChange={sortSearchState.handleSearch}
           placeholder="Search Projects"
         />
       </div>
@@ -96,13 +88,13 @@ const ProjectsPanel = () => {
               >
                 Create New Project
               </Button>
-              {filteredProjects.map((project) => (
+              {projects.map((project) => (
                 <SidebarProjectCard 
                   key={project.id}
                   isActiveProject={activeProjectId === project.id}
                   project={project}
                   allProjects={projects}
-                  searchTerm={searchTerm}
+                  searchTerm={sortSearchState.searchTerm}
                   startRenaming={newProjectId === project.id}
                   onRename={handleRenameProject}
                 />

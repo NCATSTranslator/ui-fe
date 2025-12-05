@@ -7,6 +7,10 @@
   opacity: 0;
 }
 
+.page {
+  position: relative;
+}
+
 .pane {
   &.actions {
     a,button {

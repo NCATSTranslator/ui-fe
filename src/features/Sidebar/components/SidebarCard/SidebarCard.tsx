@@ -8,6 +8,7 @@ import OutsideClickHandler from "@/features/Common/components/OutsideClickHandle
 import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
 
 interface SidebarCardProps {
+  ignoreTitleMatch?: boolean;
   leftIcon: ReactNode;
   rightIcon?: ReactNode;
   title: string;
@@ -29,6 +30,7 @@ interface SidebarCardProps {
 }
 
 const SidebarCard: FC<SidebarCardProps> = ({
+  ignoreTitleMatch = false,
   leftIcon,
   rightIcon,
   title,
@@ -68,6 +70,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
       </div>
       <div className={styles.content}>
         <SidebarCardTitle
+          ignoreTitleMatch={ignoreTitleMatch}
           title={title}
           searchTerm={searchTerm}
           linkTo={link}

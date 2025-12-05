@@ -8,6 +8,7 @@ interface SidebarLinkProps {
   ariaLabel?: string;
   className?: string;
   href?: string;
+  hasRedDot?: boolean;
   icon: ReactNode | (() => ReactNode);
   isGrayedOut?: boolean;
   onClick?: () => void;
@@ -18,13 +19,20 @@ const SidebarLink: FC<SidebarLinkProps> = ({
   ariaLabel,
   className = "",
   href,
+  hasRedDot = false,
   icon,
   isGrayedOut = false,
   onClick,
   tooltipText
 }) => {
   const id = useId();
-  const classNames = joinClasses(styles.sidebarLink, styles.link, isGrayedOut && styles.grayedOut, className);
+  const classNames = joinClasses(
+    styles.sidebarLink,
+    styles.link,
+    isGrayedOut && styles.grayedOut,
+    hasRedDot && styles.redDot,
+    className
+  );
   const isLink = !!href;
 
   return (
@@ -39,14 +47,14 @@ const SidebarLink: FC<SidebarLinkProps> = ({
         dataTooltipId={id}
         className={classNames}
       >
-        {
-          tooltipText && (
-            <Tooltip id={id} place="right">
-              <span>{tooltipText}</span>
-            </Tooltip>
-          )
-        }
       </Button>
+      {
+        tooltipText && (
+          <Tooltip id={id} place="right">
+            <span>{tooltipText}</span>
+          </Tooltip>
+        )
+      }
     </>
 
   );

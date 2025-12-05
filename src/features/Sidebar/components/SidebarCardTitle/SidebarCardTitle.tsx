@@ -5,6 +5,7 @@ import Highlighter from "react-highlight-words";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 
 interface SidebarCardTitleProps {
+  ignoreTitleMatch?: boolean;
   isRenaming?: boolean;
   linkTarget?: string;
   linkTo?: string;
@@ -17,6 +18,7 @@ interface SidebarCardTitleProps {
 }
 
 const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
+  ignoreTitleMatch = false,
   isRenaming,
   rightIcon,
   linkTo,
@@ -27,18 +29,32 @@ const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
   textInputRef,
   title,
 }) => {
+  const titleMatches = title.toLowerCase().includes(searchTerm?.toLowerCase() || '');
   const titleContent = (
     isRenaming && onTitleChange && onFormSubmit ? (
       <form onSubmit={onFormSubmit}>
         <TextInput value={title} handleChange={onTitleChange} iconRightClickToReset ref={textInputRef} className={styles.titleInput}/>
       </form>
     ) : (
-      <Highlighter
-        highlightClassName="highlight"
-        searchWords={searchTerm ? [searchTerm] : []}
-        autoEscape={true}
-        textToHighlight={title}
-      />
+      <>
+        <Highlighter
+          highlightClassName="highlight"
+          searchWords={searchTerm ? [searchTerm] : []}
+          autoEscape={true}
+          textToHighlight={title}
+        />
+        {
+          searchTerm && !titleMatches && !ignoreTitleMatch && (
+            <Highlighter
+              highlightClassName="highlight"
+              searchWords={['*']}
+              autoEscape={true}
+              textToHighlight=" *"
+              className={styles.titleMatch}
+            />
+          )
+        }
+      </>
     )
   );
 

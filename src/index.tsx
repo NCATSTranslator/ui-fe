@@ -105,7 +105,7 @@ const routes = [
   },
   {
     path: "projects/:projectId",
-    element: <Page title="Projects"><Suspense fallback={<LoadingWrapper />}><ProjectDetail /></Suspense></Page>
+    element: <Page title="Project"><Suspense fallback={<LoadingWrapper />}><ProjectDetail /></Suspense></Page>
   },
   {
     path: "queries",
