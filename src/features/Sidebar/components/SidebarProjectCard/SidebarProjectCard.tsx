@@ -114,8 +114,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
 
     // Add query to project
     handleUpdateProject(project.id, undefined, [...project.data.pks, addToProjectQuery.data.qid]);
-    // Show toast and clear mode
-    queryAddedToProjectToast(queryTitle, project.data.title);
+    // Clear mode
     clearAddToProjectMode();
   }, [addToProjectQuery, project, isUnassigned, handleUpdateProject, clearAddToProjectMode, queryTitle]);
 
