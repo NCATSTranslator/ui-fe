@@ -4,9 +4,7 @@ import Query from "@/features/Query/components/Query/Query";
 import ResultItem from "@/features/ResultItem/components/ResultItem/ResultItem";
 import LoadingBar from "@/features/Common/components/LoadingBar/LoadingBar";
 import ResultListHeader from "@/features/ResultList/components/ResultListHeader/ResultListHeader";
-import NavConfirmationPromptModal from "@/features/Common/components/NavConfirmationPromptModal/NavConfirmationPromptModal";
 import { cloneDeep, isEqual } from "lodash";
-import { useBlocker } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
@@ -49,7 +47,6 @@ const ResultList = () => {
   const user = useSelector(currentUser);
   const prefs = useSelector(currentPrefs);
   const dispatch = useDispatch();
-  let blocker = useBlocker(true);
 
   // URL search params
   const decodedParams = getDecodedParams();
@@ -871,17 +868,6 @@ const ResultList = () => {
           }
         </div>
       </div>
-      {
-        blocker &&
-        <NavConfirmationPromptModal
-          blocker={blocker}
-          title="Are you sure you want to leave this page?"
-          message="If you leave this page, you may lose your results and have to run this query again."
-          subtitle="Note: You can revisit this query later by visiting the Search History page."
-          proceedButtonText="Navigate away from the results page"
-          stayButtonText="Stay on the results page"
-        />
-      }
     </QueryClientProvider>
   );
 }
