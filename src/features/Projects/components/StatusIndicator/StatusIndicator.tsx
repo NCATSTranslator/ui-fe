@@ -35,7 +35,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({
   if(status === 'complete') {
     return (
       <div data-tooltip-id={`${uniqueId}-success-tooltip`} className={classes}>
-        <Tooltip id={`${uniqueId}-success-tooltip`}>
+        <Tooltip id={`${uniqueId}-success-tooltip`} className={styles.tooltip}>
           {
             inSidebar 
               ? (
@@ -69,7 +69,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({
   if(status === 'running') {
     return (
       <div data-tooltip-id={`${uniqueId}-running-tooltip`} className={classes}>
-        <Tooltip id={`${uniqueId}-running-tooltip`}>
+        <Tooltip id={`${uniqueId}-running-tooltip`} className={styles.tooltip}>
           <span className={styles.tooltipHeading}>Loading</span>
           <span>You will be notified when this query is fully loaded. While you wait, you can click to view the results that have been returned so far.</span>
         </Tooltip>
@@ -90,7 +90,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({
   if(status === 'warning') {
     return (
       <div data-tooltip-id={`${uniqueId}-warning-tooltip`} className={classes}>
-        <Tooltip id={`${uniqueId}-warning-tooltip`}>
+        <Tooltip id={`${uniqueId}-warning-tooltip`} className={styles.tooltip}>
           <span className={styles.tooltipHeading}>Error</span>
           <span>There was an error while processing your query results. Please try again later, or try clearing your cache if the problem persists.<br/>Click to view the results that were returned.</span>
         </Tooltip>
@@ -111,7 +111,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({
   if(status === 'error') {
     return (
       <div data-tooltip-id={`${uniqueId}-error-tooltip`} className={classes}>
-        <Tooltip id={`${uniqueId}-error-tooltip`}>
+        <Tooltip id={`${uniqueId}-error-tooltip`} className={styles.tooltip}>
           <span className={styles.tooltipHeading}>Query Failed</span>
           <span>There was an error while processing your query results. Please try again later, or try clearing your cache if the problem persists.</span>
         </Tooltip>
@@ -132,7 +132,7 @@ const StatusIndicator: FC<StatusIndicatorProps> = ({
   if(status === 'noQueries' || status === 'noResults') {
     return (
       <div data-tooltip-id={`${uniqueId}-none-tooltip`} className={classes} >
-        <Tooltip id={`${uniqueId}-none-tooltip`}>
+        <Tooltip id={`${uniqueId}-none-tooltip`} className={styles.tooltip}>
           <span className={styles.tooltipHeading}>{status === 'noQueries' ? 'No Queries' : 'No Results'}</span>
           <span>{status === 'noQueries' ? 'No queries have been added to this project.' : 'No results are available for this query.'}</span>
         </Tooltip>

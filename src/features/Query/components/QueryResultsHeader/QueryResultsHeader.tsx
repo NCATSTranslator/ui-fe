@@ -14,6 +14,8 @@ import { useUserProjects, useUserQueries } from '@/features/Projects/hooks/custo
 import { QueryEditingItem } from '@/features/Projects/types/projects';
 import { useSelector } from 'react-redux';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
+import { generateQueryTitle } from '@/features/Projects/utils/utilities';
 
 const generatePathfinderSubheading = (idOne: string, labelOne: string, idTwo: string, labelTwo: string, constraintText?: string, searchedTermClassName?: string) => {
   const linkOne = generateEntityLink(idOne, `${styles.searchedTerm} ${searchedTermClassName || ""}`, () => labelOne, true);
@@ -116,6 +118,9 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
     !queriesLoading &&
     !queriesError &&
     config?.include_projects;
+
+  const queryTitle = query ? generateQueryTitle(query) : '';  
+  useDynamicPageTitle(queryTitle);
 
   return(
     <div className={`${styles.resultsHeader} ${className}`}>

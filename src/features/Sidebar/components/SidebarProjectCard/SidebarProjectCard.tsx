@@ -114,8 +114,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
 
     // Add query to project
     handleUpdateProject(project.id, undefined, [...project.data.pks, addToProjectQuery.data.qid]);
-    // Show toast and clear mode
-    queryAddedToProjectToast(queryTitle, project.data.title);
+    // Clear mode
     clearAddToProjectMode();
   }, [addToProjectQuery, project, isUnassigned, handleUpdateProject, clearAddToProjectMode, queryTitle]);
 
@@ -141,7 +140,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
       <DroppableArea 
         id={`project-zone-${project.id}`}
         canAccept={(draggedData) => draggedData.type === 'query'}
-        disabled={isUnassignedProject(project || -1)}
+        disabled={isUnassigned}
         data={{ 
           id: project.id?.toString(),
           type: 'project',
@@ -167,6 +166,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
           onFormSubmit={handleFormSubmit}
           textInputRef={textInputRef}
           rightIcon={isUnassigned ? <InfoIcon data-tooltip-content="Unassigned Project" /> : undefined}
+          ignoreTitleMatch={isUnassigned}
         />
       </DroppableArea>
     </OutsideClickHandler>

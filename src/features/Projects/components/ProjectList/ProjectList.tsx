@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import { useProjectListData } from "@/features/Projects/hooks/useProjectListData";
-import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import Button from "@/features/Core/components/Button/Button";
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import { useCreateProject, useSortSearchState } from "@/features/Projects/hooks/customHooks";
@@ -28,14 +27,9 @@ const ProjectList = () => {
   const data = useProjectListData(sortSearchState);
   const projects = useMemo(() => data.formatted.active, [data.formatted.active]);
   const projectsLoading = data.loading.projectsLoading;
-  const { searchTerm, handleSearch } = useSimpleSearch();
   const createProjectMutation = useCreateProject();
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
   const { togglePanel } = useSidebar();
-  
-  const filteredProjects = useMemo(() => {
-    return projects.filter((project) => project.data.title.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [projects, searchTerm]);
 
   const handleCreateNewProjectClick = () => {
     const newProject = {
@@ -58,20 +52,19 @@ const ProjectList = () => {
     setNewProjectId(null);
   };
 
-
   const projectsTabHeading = useMemo(() => {
     // subtract 1 to account for the unassigned project
-    const projectCount = filteredProjects.length - 1;
-    return `${projectCount} Project${projectCount === 1 ? '' : 's'}`;
-  }, [filteredProjects]);
+    const projectCount = projects.length - 1;
+    return `${projectCount >= 0 ? projectCount : '0'} Project${projectCount === 1 ? '' : 's'}`;
+  }, [projects]);
 
   return (
     <div className={styles.projectsPanel}>
       <ListHeader
         heading="Projects"
         searchPlaceholder="Search Projects"
-        searchTerm={searchTerm}
-        handleSearch={handleSearch}
+        searchTerm={sortSearchState.searchTerm}
+        handleSearch={sortSearchState.handleSearch}
       />
       <div className={styles.list}>
         {
@@ -107,27 +100,33 @@ const ProjectList = () => {
                         sortSearchState={sortSearchState}
                       />
                       {
-                        projects.length === 1 
-                        ? 
-                          (
-                            <EmptyArea heading="No Projects">
-                              <p>
-                                <Button handleClick={handleCreateNewProjectClick} title="Create New Project" variant="textOnly" inline>Create New Project</Button> to start organizing your queries.<br/>
-                                You can also add queries to a new project from the <Button handleClick={() => togglePanel('queries')} title="Queries" variant="textOnly" inline>Queries</Button> tab.
-                              </p>
-                            </EmptyArea>
-                          )
-                        : 
-                          filteredProjects.map((project) => (
-                            <ProjectCard
-                              key={project.id}
-                              project={project}
-                              allProjects={projects}
-                              searchTerm={searchTerm}
-                              startRenaming={newProjectId === project.id}
-                              onRename={handleRenameProject}
-                            />
-                          ))
+                        projects.length === 0 
+                        ? (
+                          <EmptyArea>
+                            <p>No projects found matching your search.</p>
+                          </EmptyArea>
+                        ) 
+                        : projects.length === 1
+                          ? 
+                            (
+                              <EmptyArea heading="No Projects">
+                                <p>
+                                  <Button handleClick={handleCreateNewProjectClick} title="Create New Project" variant="textOnly" inline>Create New Project</Button> to start organizing your queries.<br/>
+                                  You can also add queries to a new project from the <Button handleClick={() => togglePanel('queries')} title="Queries" variant="textOnly" inline>Queries</Button> tab.
+                                </p>
+                              </EmptyArea>
+                            )
+                          : 
+                            projects.map((project) => (
+                              <ProjectCard
+                                key={project.id}
+                                project={project}
+                                allProjects={projects}
+                                searchTerm={sortSearchState.searchTerm}
+                                startRenaming={newProjectId === project.id}
+                                onRename={handleRenameProject}
+                              />
+                            ))
                       }
                     </CardList>
                   </Tab>

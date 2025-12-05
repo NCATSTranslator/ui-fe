@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
   restoreProjects, restoreQueries, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
@@ -8,6 +8,7 @@ import { getBaseTitle, extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitl
 import { useSelector } from 'react-redux';
 import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 import { filterAndSortProjects } from '@/features/Projects/utils/filterAndSortingFunctions';
+import { useSimpleSearch } from '@/features/Common/hooks/simpleSearchHook';
 
 /**
  * Hook to fetch user projects with React Query
@@ -264,7 +265,7 @@ export const useFormattedProjects = (
  * @returns {string} searchTerm - The search term to filter by
  * @returns {Function} setSortField - Function to set the sort field
  * @returns {Function} setSortDirection - Function to set the sort direction
- * @returns {Function} setSearchTerm - Function to set the search term
+ * @returns {Function} handleSearch - Function to handle searching
  * @returns {Function} handleSort - Function to handle sorting
  * @returns {Function} clearSearchTerm - Function to clear the search term
  * @returns {Function} resetState - Function to reset the state
@@ -272,26 +273,26 @@ export const useFormattedProjects = (
 export const useSortSearchState = () => {
   const [sortField, setSortField] = useState<SortField>('lastSeen');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const { searchTerm, handleSearch } = useSimpleSearch();
 
-  const handleSort = (field: SortField) => {
+  const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
       setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortDirection('desc');
     }
-  };
+  }, [sortField]);
 
-  const clearSearchTerm = () => {
-    setSearchTerm('');
-  };
+  const clearSearchTerm = useCallback(() => {
+    handleSearch('');
+  }, [handleSearch]);
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setSortField('lastSeen');
     setSortDirection('desc');
-    setSearchTerm('');
-  };
+    handleSearch('');
+  }, [handleSearch]);
 
   return useMemo(() => ({
     // State
@@ -302,13 +303,13 @@ export const useSortSearchState = () => {
     // Setters
     setSortField,
     setSortDirection,
-    setSearchTerm,
     
     // Handlers
+    handleSearch,
     handleSort,
     clearSearchTerm,
     resetState
-  }), [sortField, sortDirection, searchTerm]);
+  }), [sortField, sortDirection, searchTerm, handleSearch, handleSort, clearSearchTerm, resetState]);
 };
 
 /**

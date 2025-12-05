@@ -8,17 +8,17 @@ export const useSimpleSearch = () => {
     debounce((searchTerm: string) => {
       setSearchTerm(searchTerm);
     }, 500),
-    [setSearchTerm]
+    []
   );
 
-  const handleSearch = (value: string) => {
+  const handleSearch = useCallback((value: string) => {
     if (value.length === 0) {
       debouncedSearch.cancel();
       setSearchTerm('');
     } else {
       debouncedSearch(value);
     }
-  };
+  }, [debouncedSearch]);
 
   return {
     searchTerm,
