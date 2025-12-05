@@ -16,6 +16,7 @@ import { useSelector } from 'react-redux';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
 import { generateQueryTitle } from '@/features/Projects/utils/utilities';
+import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 
 const generatePathfinderSubheading = (idOne: string, labelOne: string, idTwo: string, labelTwo: string, constraintText?: string, searchedTermClassName?: string) => {
   const linkOne = generateEntityLink(idOne, `${styles.searchedTerm} ${searchedTermClassName || ""}`, () => labelOne, true);
@@ -84,7 +85,6 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
 }) => {
   const config = useSelector(currentConfig);
   const [user, userLoading] = useUser();
-  const [isEditQueryModalOpen, setIsEditQueryModalOpen] = useState<boolean>(false);
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
   const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueries();
   const query = useMemo(() => queries.find(q => q.data.qid === pk), [queries, pk]);
@@ -96,8 +96,14 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
     type: "query",
   } : undefined, [query, pk]);
 
+  const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
+
   const handleAddToProject = () => {
-    setIsEditQueryModalOpen(true);
+    if(!query) return;
+
+    setAddToProjectMode(query);
+    if (activePanelId !== 'projects')
+      togglePanel('projects');
   };
   
   const subHeading = isPathfinder 
@@ -124,7 +130,7 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
 
   return(
     <div className={`${styles.resultsHeader} ${className}`}>
-      <EditQueryModal
+      {/* <EditQueryModal
         isOpen={isEditQueryModalOpen}
         handleClose={() => setIsEditQueryModalOpen(false)}
         loading={projectsLoading}
@@ -132,7 +138,7 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
         projects={projects}
         queries={queries}
         currentEditingQueryItem={currentEditingQueryItem}
-      />
+      /> */}
       <div className={styles.showingResultsContainer}>
         <h2 className={styles.subHeading}>
           {subHeading}
