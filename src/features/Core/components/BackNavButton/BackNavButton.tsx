@@ -1,5 +1,5 @@
 import styles from './BackNavButton.module.scss';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Button from "@/features/Core/components/Button/Button";
 import ChevLeftIcon from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import { useNavigate, useLocation} from 'react-router-dom';
