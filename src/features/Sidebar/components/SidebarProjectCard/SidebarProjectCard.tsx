@@ -108,7 +108,6 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
     const isQueryAlreadyInProject = project.data.pks.includes(addToProjectQuery.data.qid);
     if (isQueryAlreadyInProject) {
       queryAlreadyInProjectToast(queryTitle, project.data.title);
-      clearAddToProjectMode();
       return;
     }
 
