@@ -25,7 +25,7 @@ const BackNavButton = () => {
       setHistory(prevHistory => 
         prevHistory.map(item => item.pathname === getFullPathname(location) ? { ...item, title: finalTitle } : item)
       );
-    } else {
+    } else if(history.length === 0 || history[history.length - 1]?.pathname !== getFullPathname(location)) {
       // if the last item in the history is different from the current location, 
       // add a new item to the history
       setHistory(prevHistory => [...prevHistory, { pathname: getFullPathname(location), title: finalTitle }]);
