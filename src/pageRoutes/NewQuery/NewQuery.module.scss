@@ -1,0 +1,11 @@
+@use "@/assets/styles/variables" as *;
+
+.newQuery {
+  padding: 72px $l 0;
+  margin: 0 auto;
+  max-width: $maxwidth;
+  .combinedQueryInterface {
+    margin-left: 0;
+    padding: 0;
+  }
+}

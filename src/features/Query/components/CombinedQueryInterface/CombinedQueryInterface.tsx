@@ -18,6 +18,7 @@ import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 
 interface CombinedQueryInterfaceProps {
+  className?: string;
   defaultProject?: ProjectRaw | null;
   isResults?: boolean;
   loading?: boolean;
@@ -34,6 +35,7 @@ interface CombinedQueryInterfaceProps {
 }
 
 const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
+  className = '',
   defaultProject = null,
   isResults = false,
   loading = false,
@@ -66,7 +68,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
     } 
   };
 
-  const classNames = joinClasses(styles.combinedQueryInterface, projectPage  && styles.projectPage);
+  const classNames = joinClasses(styles.combinedQueryInterface, projectPage  && styles.projectPage, className);
   const shouldNavigate = !projectPage;
 
   useEffect(() => {

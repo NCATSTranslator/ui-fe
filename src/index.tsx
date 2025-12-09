@@ -27,6 +27,7 @@ const ExploringRelationships = lazy(() => import('@/pageRoutes/Articles/Explorin
 const ReviewIdentify = lazy(() => import('@/pageRoutes/Articles/ReviewIdentify').then(m => ({ default: m.ReviewIdentify })));
 const WorkspaceHelp = lazy(() => import('@/pageRoutes/Articles/Workspace').then(m => ({ default: m.WorkspaceHelp })));
 const UserPreferences = lazy(() => import('@/pageRoutes/Articles/UserPreferences').then(m => ({ default: m.UserPreferences })));
+const NewQuery = lazy(() => import('@/pageRoutes/NewQuery/NewQuery'));
 
 const container = document.getElementById('root');
 if (!container) {
@@ -110,6 +111,10 @@ const routes = [
   {
     path: "queries",
     element: <Page title="Queries"><Suspense fallback={<LoadingWrapper />}><Queries /></Suspense></Page>
+  },
+  {
+    path: "new-query",
+    element: <Page title="New Query"><Suspense fallback={<LoadingWrapper />}><NewQuery /></Suspense></Page>
   },
   {
     path: "*",
