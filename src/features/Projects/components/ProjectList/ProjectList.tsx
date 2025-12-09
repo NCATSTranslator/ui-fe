@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import styles from "./ProjectList.module.scss";
 import { useSelector } from "react-redux";
@@ -29,7 +29,7 @@ const ProjectList = () => {
   const projectsLoading = data.loading.projectsLoading;
   const createProjectMutation = useCreateProject();
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
-  const { togglePanel } = useSidebar();
+  const { togglePanel, activePanelId, closePanel } = useSidebar();
 
   const handleCreateNewProjectClick = () => {
     const newProject = {
@@ -57,6 +57,11 @@ const ProjectList = () => {
     const projectCount = projects.length - 1;
     return `${projectCount >= 0 ? projectCount : '0'} Project${projectCount === 1 ? '' : 's'}`;
   }, [projects]);
+
+  useEffect(() => {
+    if (activePanelId === 'projects')
+      closePanel();
+  }, []);
 
   return (
     <div className={styles.projectsPanel}>
