@@ -58,6 +58,7 @@ const ProjectList = () => {
     return `${projectCount >= 0 ? projectCount : '0'} Project${projectCount === 1 ? '' : 's'}`;
   }, [projects]);
 
+  // on component mount, if the projects panel is open, close it
   useEffect(() => {
     if (activePanelId === 'projects')
       closePanel();
