@@ -49,7 +49,7 @@ const ResultList = () => {
   const dispatch = useDispatch();
 
   // URL search params
-  const decodedParams = getDecodedParams();
+  const decodedParams = useMemo(() => getDecodedParams(), []);
   const loadingParam = getDataFromQueryVar("loading", decodedParams);
   const currentQueryID = getDataFromQueryVar("q", decodedParams);
   const presetTypeID = getDataFromQueryVar("t", decodedParams);
