@@ -12,6 +12,7 @@ interface SidebarLinkProps {
   icon: ReactNode | (() => ReactNode);
   isGrayedOut?: boolean;
   onClick?: () => void;
+  to?: string;
   tooltipText: string;
 }
 
@@ -23,6 +24,7 @@ const SidebarLink: FC<SidebarLinkProps> = ({
   icon,
   isGrayedOut = false,
   onClick,
+  to,
   tooltipText
 }) => {
   const id = useId();
@@ -33,14 +35,14 @@ const SidebarLink: FC<SidebarLinkProps> = ({
     hasRedDot && styles.redDot,
     className
   );
-  const isLink = !!href;
+  const isLink = !!to;
 
   return (
     <>
       <Button
         ariaLabel={ariaLabel || ''}
         link={isLink}
-        href={href}
+        href={isLink ? to : href}
         handleClick={onClick}
         iconLeft={typeof icon === 'function' ? icon() : icon}
         iconOnly

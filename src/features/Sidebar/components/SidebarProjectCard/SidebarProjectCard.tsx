@@ -21,7 +21,7 @@ import { isDraggedQueryInProject } from "@/features/Projects/utils/dragDropUtils
 import { useDndContext } from "@dnd-kit/core";
 import { useRenameProject } from "@/features/Projects/hooks/useRenameProject";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
-import { queryAlreadyInProjectToast, queryAddedToProjectToast } from "@/features/Core/utils/toastMessages";
+import { queryAlreadyInProjectToast } from "@/features/Core/utils/toastMessages";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 
 interface SidebarProjectCardProps {
@@ -108,7 +108,6 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
     const isQueryAlreadyInProject = project.data.pks.includes(addToProjectQuery.data.qid);
     if (isQueryAlreadyInProject) {
       queryAlreadyInProjectToast(queryTitle, project.data.title);
-      clearAddToProjectMode();
       return;
     }
 

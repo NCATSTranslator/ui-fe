@@ -8,8 +8,8 @@ type ResultState = {
 };
 
 const initialState: ResultState = {};
-const TREATS_REPLACEMENT = "impacts";
-const INVERTED_TREATS_REPLACEMENT = "impacted by";
+export const TREATS_REPLACEMENT = "impacts";
+export const INVERTED_TREATS_REPLACEMENT = "impacted by";
 
 const resultSetsSlice = createSlice({
   name: "resultSets",

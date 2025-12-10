@@ -66,6 +66,7 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
       activeTab={activeTab}
       defaultActiveTab={firstTabHeading}
       handleTabSelection={handleTabSelection}
+      fadeClassName={styles.fade}
     >
       {publications.length > 0 ? (
         <Tab heading="Publications" className={`${styles.tab} scrollable`}>
