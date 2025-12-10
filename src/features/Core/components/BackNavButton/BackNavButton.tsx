@@ -33,7 +33,7 @@ const BackNavButton = () => {
   }, [location.pathname, finalTitle]);
 
   const handleBack = () => {
-    navigate(history[history.length - 2]?.pathname || '/', { replace: true });
+    navigate(history[history.length - 2]?.pathname || '/', { replace: false });
     setHistory(prevHistory => prevHistory.slice(0, -1));
   };
 
