@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo } from 'react';
 import Button from '@/features/Core/components/Button/Button';
 import ResultsSummaryButton from '@/features/ResultList/components/ResultsSummaryButton/ResultsSummaryButton';
 import { Result } from '@/features/ResultList/types/results';
@@ -9,9 +9,7 @@ import styles from './QueryResultsHeader.module.scss';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
 import { generatePathfinderQuestionText } from '@/features/Query/utils/queryTypes';
 import { useUser } from '@/features/UserAuth/utils/userApi';
-import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
 import { useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
-import { QueryEditingItem } from '@/features/Projects/types/projects';
 import { useSelector } from 'react-redux';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
@@ -85,16 +83,9 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
 }) => {
   const config = useSelector(currentConfig);
   const [user, userLoading] = useUser();
-  const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useUserProjects();
+  const { isLoading: projectsLoading, error: projectsError } = useUserProjects();
   const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueries();
   const query = useMemo(() => queries.find(q => q.data.qid === pk), [queries, pk]);
-  const currentEditingQueryItem: QueryEditingItem = useMemo(() => query && pk ? {
-    pk: query.data.qid,
-    name: query.data.title || "",
-    queryIds: [pk],
-    status: "editing",
-    type: "query",
-  } : undefined, [query, pk]);
 
   const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
 

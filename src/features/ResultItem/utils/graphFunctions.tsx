@@ -7,6 +7,7 @@ import { Result, ResultEdge, ResultNode } from '@/features/ResultList/types/resu
 import { GraphLayoutList, RenderableGraph, RenderableNode, RenderableEdge } from '@/features/ResultItem/types/graph.d';
 import { RefObject } from 'react';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { INVERTED_TREATS_REPLACEMENT, TREATS_REPLACEMENT } from '@/features/ResultList/slices/resultsSlice';
 
 export const layoutList: GraphLayoutList = {
   klay: {
@@ -382,13 +383,15 @@ export function convertResultEdgeToRenderable(
 ): RenderableEdge {
   const sourceLabel = nodes[e.subject]?.names[0] ?? "unknown node";
   const targetLabel = nodes[e.object]?.names[0] ?? "unknown node";
+  // Temporary fix to not display the "treats" predicate in the UI
+  const label = e.predicate.includes("treat") ? (e.metadata.inverted_id === null) ? TREATS_REPLACEMENT : INVERTED_TREATS_REPLACEMENT : e.predicate;
   return {
     id: e.id,
     source: e.subject,
     target: e.object,
     sourceLabel,
     targetLabel,
-    label: e.predicate,
+    label: label,
     inferred: Array.isArray(e.support) && e.support.length > 0
   };
 }

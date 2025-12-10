@@ -4,10 +4,12 @@ import Tab, { TabProps } from "./Tab";
 import { Fade } from 'react-awesome-reveal';
 import styles from './Tabs.module.scss';
 import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
+import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface TabsProps {
   children: (ReactElement<TabProps> | null)[];
   className?: string;
+  fadeClassName?: string;
   tabListClassName?: string;
   tabListWrapperClassName?: string;
   tabClassName?: string;
@@ -22,6 +24,7 @@ interface TabsProps {
 const Tabs: FC<TabsProps> = ({ 
   children, 
   className, 
+  fadeClassName = "",
   tabListClassName = "",
   tabListWrapperClassName = "",
   tabClassName = "",
@@ -87,15 +90,20 @@ const Tabs: FC<TabsProps> = ({
 
   if (!isOpen) return null;
 
+  const tabsClasses = joinClasses(className, styles.tabs);
+  const tabListWrapperClasses = joinClasses(tabListWrapperClassName, styles.tabListWrapper);
+  const tabListClasses = joinClasses(tabListClassName, styles.tabList);
+
+
   return (
     <div 
-      className={`${styles.tabs} ${className && className}`} 
+      className={tabsClasses} 
       role="tablist"
       ref={tabsContainerRef}
     >
-      <div className={`${styles.tabListWrapper} ${tabListWrapperClassName && tabListWrapperClassName}`}>
+      <div className={tabListWrapperClasses}>
         <OutsideClickHandler onOutsideClick={handleOutsideTabListClick} className={styles.outsideClickHandler}>
-          <div className={`${styles.tabList} ${tabListClassName && tabListClassName}`}>
+          <div className={tabListClasses}>
             {validChildren.map((child, i) => {
               const { heading, headingOverride, tooltipIcon, dataTooltipId = "" } = child.props;
               return (
@@ -119,11 +127,12 @@ const Tabs: FC<TabsProps> = ({
       {validChildren.map((child, i) => {
         const { heading, className: childClassName = "" } = child.props;
         const isActive = activeTabHeading === heading;
-        
+        const fadeClasses = joinClasses(fadeClassName, styles.fade, isActive ? '' : styles.inactive);
+        const tabContentClasses = joinClasses(styles.tabContent, childClassName, isActive ? '' : styles.inactive);
         return (
-          <Fade key={`${heading}-${i}`} className={`${styles.fade} ${isActive ? '' : styles.inactive}`}>
+          <Fade key={`${heading}-${i}`} className={fadeClasses}>
             <div 
-              className={`${styles.tabContent} ${childClassName} ${isActive ? '' : styles.inactive}`}
+              className={tabContentClasses}
               role="tabpanel"
               aria-labelledby={`tab-${heading}`}
               id={`tabpanel-${heading}`}

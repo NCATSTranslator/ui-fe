@@ -31,6 +31,7 @@ export type SidebarItem = {
   label: string;
   type: 'link' | 'panel';
   to?: string;
+  href?: string;
   onClick?: () => void;
   icon: ReactNode | (() => ReactNode);
   panelComponent?: ReactNode;
