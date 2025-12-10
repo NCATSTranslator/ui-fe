@@ -135,6 +135,8 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
         }
         break;
       case 'Enter':
+        event.preventDefault();
+        event.stopPropagation();
         handleSubmit({id: id, event: event})
         break;
     }

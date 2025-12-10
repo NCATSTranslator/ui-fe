@@ -149,9 +149,8 @@ export const fetchWithErrorHandling = async <T>(
  * @returns {string} The decoded query parameters.
  */
 export const getDecodedParams = (): string => {
-  if (!window.location.search) {
+  if (!window.location.search)
     return "";
-  }
 
   const searchParams = window.location.search.slice(1);
   
@@ -161,35 +160,30 @@ export const getDecodedParams = (): string => {
 
   for (const segment of segments) {
     // Skip empty segments
-    if (!segment) {
+    if (!segment)
       continue;
-    }
 
-    // Check if this segment looks like a regular query parameter (key=value format)
-    const equalIndex = segment.indexOf('=');
-    if (equalIndex > 0 && equalIndex < segment.length - 1) {
-      // This appears to be a key=value pair, keep it as is
-      decodedSegments.push(segment);
-    } else {
-      // This might be a base64 encoded segment, try to decode it
-      try {
-        const decoded = window.atob(segment);
-        // Verify the decoded content looks like query parameters
-        // It should contain at least one = that's not at the start or end
-        const hasValidQueryFormat = decoded.includes('=') && 
-          decoded.indexOf('=') > 0 && 
-          decoded.indexOf('=') < decoded.length - 1;
-        
-        if (hasValidQueryFormat) {
-          decodedSegments.push(decoded);
-        } else {
-          // If decoded content doesn't look like query parameters, keep original
-          decodedSegments.push(segment);
-        }
-      } catch {
-        // If decoding fails, keep the original segment
+    // Try to decode as base64 first
+    // If successful and results in valid query parameters, use decoded version
+    // Otherwise treat as regular key=value parameter
+    try {
+      const decoded = window.atob(segment);
+      // Verify the decoded content looks like query parameters
+      // It should contain at least one = that's not at the start or end
+      const hasValidQueryFormat = decoded.includes('=') && 
+        decoded.indexOf('=') > 0 && 
+        decoded.indexOf('=') < decoded.length - 1;
+      
+      if (hasValidQueryFormat) {
+        decodedSegments.push(decoded);
+      } else {
+        // If decoded content doesn't look like query parameters, keep original
         decodedSegments.push(segment);
       }
+    } catch {
+      // If decoding fails, this is a regular key=value parameter or invalid base64
+      // Keep the original segment
+      decodedSegments.push(segment);
     }
   }
 
