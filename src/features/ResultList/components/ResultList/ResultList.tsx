@@ -228,10 +228,10 @@ const ResultList = () => {
     if (!autoScrollToResult)
       return;
 
-    const yOffset = -40;
+    const yOffset = -60;
     if(!!sharedItemRef.current) {
       const y = sharedItemRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({top: y, behavior: 'smooth'});
+      window.document.querySelector('main.content')?.scrollTo({top: y, behavior: 'smooth'});
       setAutoScrollToResult(false);
     }
   }, [autoScrollToResult]);
