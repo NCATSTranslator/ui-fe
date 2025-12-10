@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, FC, Dispatch, SetStateAction } from 'react';
+import { useState, useCallback, useRef, FC, Dispatch, SetStateAction, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
@@ -68,7 +68,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   const [hasMiddleType, setHasMiddleType] = useState<boolean>(false);
   const [middleType, setMiddleType] = useState<string>("");
 
-  const decodedParams = getDecodedParams();
+  const decodedParams = useMemo(() => getDecodedParams(), []);
   const labelOne = getDataFromQueryVar("lone", decodedParams);
   const labelTwo = getDataFromQueryVar("ltwo", decodedParams);
   const idOne = getDataFromQueryVar("ione", decodedParams);
@@ -117,7 +117,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
   const updateQueryItem = (selectedNode: AutocompleteItem, isFirstBar: boolean) => {
     // add in match text for genes, which should be the species
-    if(selectedNode.id.includes("NCBIGene") && selectedNode?.match)
+    if(selectedNode.id.includes("NCBIGene") && selectedNode?.match && !selectedNode.label.includes(`(${selectedNode.match})`))
       selectedNode.label += ` (${selectedNode.match})`;
 
     if(isFirstBar) {
@@ -209,6 +209,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     if (cxt.event === undefined || cxt.event === null) {
       throw Error(`Developer Error in QueryPathfinder.tsx: \n  In handleInputSubmit cxt.event is required but is ${cxt.event}`);
     }
+    cxt.event.preventDefault();
+    cxt.event.stopPropagation();
+    handleSubmission(queryItemOne, queryItemTwo);
     return;
   }
 
