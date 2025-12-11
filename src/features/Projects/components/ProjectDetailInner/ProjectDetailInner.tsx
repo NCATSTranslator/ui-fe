@@ -182,7 +182,7 @@ const ProjectDetailInner = () => {
                     >
                       <CombinedQueryInterface
                         projectPage
-                        defaultProject={data.project}
+                        defaultProject={isUnassignedProject(data.project?.id || -1) ? null : data.project}
                         submissionCallback={handleRefetch}
                       />
                     </AnimateHeight>

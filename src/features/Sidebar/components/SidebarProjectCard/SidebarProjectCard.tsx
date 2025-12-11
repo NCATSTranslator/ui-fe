@@ -125,6 +125,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
     }
     if(isSelectedProjectMode) {
       return () => {
+        if(isUnassignedProject(project.id)) return;
         setSelectedProject(project);
         setSelectedProjectMode(false);
         togglePanel('projects');
