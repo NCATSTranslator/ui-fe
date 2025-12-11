@@ -44,7 +44,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
   const queryCount = project.data.pks.length;
   const { openDeleteProjectModal } = useProjectModals();
   const { handleUpdateProject } = useEditProjectHandlers();
-  const { addToProjectQuery, clearAddToProjectMode, isSelectedProjectMode, setSelectedProject, setSelectedProjectMode, togglePanel } = useSidebar();
+  const { addToProjectQuery, clearAddToProjectMode, isSelectedProjectMode, setSelectedProject, setSelectedProjectMode, closePanel } = useSidebar();
   const isUnassigned = isUnassignedProject(project);
   const className = joinClasses(styles.projectCard, isUnassigned && styles.unassigned, isActiveProject && styles.activeProject);
   const leftIcon = isUnassigned ? <FolderEmptyIcon className={styles.emptyIcon} /> : <FolderIcon />;
@@ -125,9 +125,10 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
     }
     if(isSelectedProjectMode) {
       return () => {
+        if(isUnassignedProject(project.id)) return;
         setSelectedProject(project);
         setSelectedProjectMode(false);
-        togglePanel('projects');
+        closePanel();
       }
     }
 

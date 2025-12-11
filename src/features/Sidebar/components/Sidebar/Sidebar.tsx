@@ -15,11 +15,11 @@ const Sidebar = () => {
     if (!activeSidebarItem) return '';
     
     // Special case for projects panel - dynamic title based on mode
-    if (activeSidebarItem.id === 'projects' && addToProjectQuery)
-      return 'Add to Project';
+    // if (activeSidebarItem.id === 'projects' && addToProjectQuery)
+    //   return 'Add to Project';
 
-    if (activeSidebarItem.id === 'projects' && isSelectedProjectMode)
-      return 'Select Project';
+    // if (activeSidebarItem.id === 'projects' && isSelectedProjectMode)
+    //   return 'Select Project';
 
     return activeSidebarItem.label;
   }, [activeSidebarItem, addToProjectQuery, isSelectedProjectMode]);
