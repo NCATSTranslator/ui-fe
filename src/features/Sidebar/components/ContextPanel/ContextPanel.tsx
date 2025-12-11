@@ -1,4 +1,4 @@
-import { FC, ReactNode, useCallback, useMemo } from "react";
+import { FC, ReactNode, useCallback, useMemo, useEffect } from "react";
 import styles from './ContextPanel.module.scss';
 import Button from "@/features/Core/components/Button/Button";
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
@@ -18,7 +18,7 @@ const ContextPanel: FC<ContextPanelProps> = ({
   panel,
   title
 }) => {
-  const { closePanel, setSelectedProjectMode } = useSidebar();
+  const { closePanel, setSelectedProjectMode, isSelectedProjectMode } = useSidebar();
 
   const reduceSpacing = useMemo(() => {
     if(activePanelId === 'filters') return true;
@@ -29,6 +29,12 @@ const ContextPanel: FC<ContextPanelProps> = ({
     closePanel();
     setSelectedProjectMode(false);
   }, [closePanel, setSelectedProjectMode]);
+
+  useEffect(() => {
+    // If the panel is not the queries panel and we are in selected project mode, close the selected project mode
+    if(activePanelId !== 'queries' && isSelectedProjectMode)
+      setSelectedProjectMode(false);
+  }, [closePanel, setSelectedProjectMode, isSelectedProjectMode, activePanelId]);
 
   return (
     <div className={`${styles.contextPanel} scrollable ${reduceSpacing && styles.reduceSpacing}`}>
