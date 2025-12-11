@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FC, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import styles from "./ProjectsPanel.module.scss";
 import { useSelector } from "react-redux";
@@ -9,7 +9,7 @@ import SidebarProjectCard from "@/features/Sidebar/components/SidebarProjectCard
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import { useProjectListData } from "@/features/Projects/hooks/useProjectListData";
 import Button from "@/features/Core/components/Button/Button";
-import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
+import PlusIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useCreateProject, useSortSearchState } from "@/features/Projects/hooks/customHooks";
 import { projectCreatedToast, queryAddedToProjectToast } from "@/features/Core/utils/toastMessages";
@@ -17,13 +17,22 @@ import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { Project } from "@/features/Projects/types/projects";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
+import { isUnassignedProject } from "@/features/Projects/utils/editUpdateFunctions";
 
-const ProjectsPanel = () => {
+interface ProjectsPanelProps {
+  className?: string;
+  selectProjectMode?: boolean;
+}
+
+const ProjectsPanel: FC<ProjectsPanelProps> = ({
+  className,
+  selectProjectMode = false
+}) => {
   const location = useLocation();
   const user = useSelector(currentUser);
   const sortSearchState = useSortSearchState();
   const data = useProjectListData(sortSearchState);
-  const projects = data.formatted.active || [];
+  const projects = useMemo(() => selectProjectMode ? data.formatted.active.filter(proj => !isUnassignedProject(proj)) : data.formatted.active || [], [data.formatted.active, selectProjectMode]);
   const projectsLoading = data.loading.projectsLoading;
   const createProjectMutation = useCreateProject();
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
@@ -60,7 +69,7 @@ const ProjectsPanel = () => {
   };
 
   return (
-    <div className={styles.projectsPanel}>
+    <div className={`${styles.projectsPanel} ${className}`}>
       <div className={styles.top}>
         <TextInput
           iconLeft={<SearchIcon />}
@@ -81,7 +90,7 @@ const ProjectsPanel = () => {
           ) : (
             <LoadingWrapper loading={projectsLoading} contentClassName={styles.projectsList}>
               <Button 
-                iconLeft={<Plus />}
+                iconLeft={<PlusIcon />}
                 handleClick={handleCreateNewProjectClick}
                 title="Create New Project"
                 className={styles.createNewProjectButton}
@@ -89,7 +98,7 @@ const ProjectsPanel = () => {
                 Create New Project
               </Button>
               {projects.map((project) => (
-                <SidebarProjectCard 
+                <SidebarProjectCard
                   key={project.id}
                   isActiveProject={activeProjectId === project.id}
                   project={project}
