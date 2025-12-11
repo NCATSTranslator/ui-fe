@@ -57,11 +57,11 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   const showAddToProject = !!user && config?.include_projects;
 
   const handleAddToProject = () => {
-    if(activePanelId !== 'projects')
-      togglePanel('projects');
+    if(activePanelId !== 'queries')
+      togglePanel('queries');
 
-    if(activePanelId === 'projects' && isSelectedProjectMode) {
-      togglePanel('projects');
+    if(activePanelId === 'queries' && isSelectedProjectMode) {
+      togglePanel('queries');
       setSelectedProjectMode(false);
     } else {
       setSelectedProjectMode(true);

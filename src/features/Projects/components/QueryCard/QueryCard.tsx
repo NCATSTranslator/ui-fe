@@ -48,8 +48,8 @@ const QueryCard: FC<QueryCardProps> = ({
 
   const handleAddToProject = () => {
     setAddToProjectMode(query);
-    if (activePanelId !== 'projects') {
-      togglePanel('projects');
+    if (activePanelId !== 'queries') {
+      togglePanel('queries');
     }
   };
 

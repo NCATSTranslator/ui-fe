@@ -93,8 +93,8 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
     if(!query) return;
 
     setAddToProjectMode(query);
-    if (activePanelId !== 'projects')
-      togglePanel('projects');
+    if (activePanelId !== 'queries')
+      togglePanel('queries');
   };
   
   const subHeading = isPathfinder 
