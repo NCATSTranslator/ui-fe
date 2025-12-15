@@ -126,7 +126,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
           setIsLoading(false);
           window.open(newQueryPath, "_blank", "noopener");
         } else {
-          navigate(newQueryPath);
+          navigate(`/${newQueryPath}`);
         }
       }
     } catch (error) {
@@ -175,7 +175,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
       );
       submissionCallback();
       if(shouldNavigate)
-        navigate(newQueryPath);
+        navigate(`/${newQueryPath}`);
 
     } catch (error) {
       errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");

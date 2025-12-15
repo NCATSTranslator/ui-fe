@@ -131,9 +131,9 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             submissionCallback={onSubmitCallback}
           />
         </Tab>
-        { isPathfinderEnabled 
+        { isPathfinderEnabled
         ? 
-          <Tab 
+          <Tab
             heading="Pathfinder Query"
             headingOverride={<BetaTag heading="Pathfinder Query" tagClassName={projectPage ? styles.betaTag : ''} />}
             className={styles.pathfinderTab}>
