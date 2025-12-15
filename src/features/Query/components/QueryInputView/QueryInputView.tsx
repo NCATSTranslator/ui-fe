@@ -56,7 +56,7 @@ const QueryInputView: FC<QueryInputViewProps> = ({
     if (presetURL) {
       const timer = setTimeout(() => {
         const cleanedURL = presetURL.replaceAll("//", "/");
-        navigate(cleanedURL);
+        navigate(`/${cleanedURL}`);
       }, 100);
       return () => clearTimeout(timer);
     }

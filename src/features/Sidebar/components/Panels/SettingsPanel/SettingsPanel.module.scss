@@ -77,8 +77,7 @@
     }
     &:hover {
       span {
-        text-decoration: none !important;
-        color: $purpleOne;
+        text-decoration: underline;
       }
       svg {
         path {
