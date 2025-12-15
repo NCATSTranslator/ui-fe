@@ -41,6 +41,12 @@
       padding: 0;
       white-space: nowrap;
       text-align: right;
+      font-size: $subTwoSize;
+    }
+    &:hover {
+      & > span {
+        text-decoration: underline;
+      }
     }
   }
   .entitySearch {
@@ -63,7 +69,6 @@
     padding: $s;
     display: flex;
     align-items: center;
-    cursor: pointer;
     border-bottom: 1px solid $midGray;
     span {
       user-select: none;
