@@ -71,6 +71,11 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   const classNames = joinClasses(styles.combinedQueryInterface, projectPage  && styles.projectPage, className);
   const shouldNavigate = !projectPage;
 
+  const onSubmitCallback = () => {
+    submissionCallback();
+    clearSelectedProject();
+  };
+
   useEffect(() => {
     if(defaultProject)
       setSelectedProject(defaultProject);
@@ -123,7 +128,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             selectedProject={selectedProject}
             combinedStyles={styles}
             shouldNavigate={shouldNavigate}
-            submissionCallback={submissionCallback}
+            submissionCallback={onSubmitCallback}
           />
         </Tab>
         { isPathfinderEnabled 
@@ -141,7 +146,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
               selectedProject={selectedProject}
               user={user}
               shouldNavigate={shouldNavigate}
-              submissionCallback={submissionCallback}
+              submissionCallback={onSubmitCallback}
             />
           </Tab>
           : null}
