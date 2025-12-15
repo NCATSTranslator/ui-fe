@@ -5,6 +5,7 @@ import { useAllDeletePrompts } from '@/features/Projects/hooks/useDeletePrompts'
 import { useDeleteProjects, useDeleteQueries } from '@/features/Projects/hooks/customHooks';
 import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
 import { projectDeletedToast, queryDeletedToast, errorToast } from '@/features/Core/utils/toastMessages';
+import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 
 interface EditQueryModalData {
   currentEditingQueryItem?: QueryEditingItem;
@@ -59,6 +60,8 @@ export const ProjectModalsProvider: FC<ProjectModalsProviderProps> = ({ children
   const [selectedQueries, setSelectedQueries] = useState<UserQueryObject[]>([]);
   const [sharedQuery, setSharedQuery] = useState<UserQueryObject | null>(null);
   const [editQueryModalData, setEditQueryModalData] = useState<EditQueryModalData | null>(null);
+
+  const { selectedProject, clearSelectedProject } = useSidebar();
   
   // Determine variant based on context
   const modalVariant = selectedProjects.length === 1 && modals.modals.deleteProject ? 'detail' : 'list';
@@ -72,6 +75,9 @@ export const ProjectModalsProvider: FC<ProjectModalsProviderProps> = ({ children
         projectDeletedToast();
         modals.closeModal('deleteProject');
         setSelectedProjects([]);
+        if(selectedProject?.id === project.id) {
+          clearSelectedProject();
+        }
       },
       onError: () => errorToast('Failed to delete project')
     });
