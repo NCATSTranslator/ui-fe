@@ -82,7 +82,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
           <FacetHeading
             activeFilters={activeFilters}
             tagFamily="txt"
-            title="Text"
+            title={getFilterLabel("txt")}
           />
         </Button>
         <div>
@@ -149,7 +149,12 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                   className={`${styles.facetButton} ${styles.backButton}`}
                   iconLeft={<ChevLeft />}
                 >
-                  {getFilterLabel(activeFilterFamily as FilterFamily)}
+                  <FacetHeading
+                    activeFilters={activeFilters}
+                    tagFamily={activeFilterFamily as FilterFamily}
+                    title={getFilterLabel(activeFilterFamily as FilterFamily)}
+                    includeArrow={false}
+                  />
                 </Button>
               </div>
               {
