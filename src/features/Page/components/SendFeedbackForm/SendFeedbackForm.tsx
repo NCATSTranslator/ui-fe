@@ -8,7 +8,6 @@ import { Fade } from "react-awesome-reveal";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
 import { useFeedbackForm } from "@/features/Common/hooks/customHooks";
 import { CustomFile } from "@/features/Common/types/global";
-import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
 import Feedback from "@/assets/icons/navigation/Feedback.svg?react";
 
 const SendFeedbackForm = () => {
@@ -134,9 +133,8 @@ const SendFeedbackForm = () => {
     <div className={styles.sendFeedbackFormContainer}>
       {createdIssueURL ? (
         <div className={styles.issueCreatedContainer}>
-          <h5 className={styles.title}>Thanks for your feedback!</h5>
-          <p>Comments like yours help us improve and further develop the Translator interface.</p>
-          <p>You can view this ticket on Github and subscribe to receive updates from our team. You may also leave additional comments or feedback on the ticket.</p>
+          <h5 className={styles.title}>Thanks for helping us improve Translator!</h5>
+          <p>We really appreciate you sharing your valuable feedback with our team.</p>
           <div className={styles.buttonContainer}>
             <Button 
               variant="secondary" 
@@ -145,16 +143,6 @@ const SendFeedbackForm = () => {
               iconLeft={<Feedback/>}
             >
               Send More Feedback
-            </Button>
-            <Button 
-              link 
-              href={createdIssueURL} 
-              _blank 
-              rel="noopener noreferrer" 
-              className={styles.viewIssue}
-              iconRight={<ExternalLink/>}
-            >
-              View Ticket on GitHub
             </Button>
           </div>
         </div>
