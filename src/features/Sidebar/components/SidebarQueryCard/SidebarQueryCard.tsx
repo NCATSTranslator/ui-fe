@@ -14,22 +14,25 @@ import Button from "@/features/Core/components/Button/Button";
 import FolderPlusIcon from '@/assets/icons/projects/folderplus.svg?react';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
-import { getTimeRelativeDate } from "@/features/Common/utils/utilities";
+import { getTimeRelativeDate, joinClasses } from "@/features/Common/utils/utilities";
 import { useLocation } from "react-router-dom";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 
 interface SidebarQueryCardProps {
+  isActiveQuery?: boolean;
   query: UserQueryObject;
   searchTerm?: string;
 }
 
 const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
+  isActiveQuery = false,
   query,
   searchTerm
 }) => {
   const { title } = useGetQueryCardTitle(query);  
   const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
   const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
+  const className = joinClasses(isActiveQuery && styles.activeQuery);
 
   const currentPage = useLocation().pathname.replace('/', '');
   const disableDragging = useMemo(() => {
@@ -82,6 +85,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
   return (
     <DraggableCard id={query.data.qid} data={draggableData} disableDraggingOnly={disableDragging}>
       <SidebarCard
+        className={className}
         leftIcon={leftIcon}
         title={title}
         searchTerm={searchTerm}
