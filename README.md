@@ -15,11 +15,12 @@ Results can be filtered and sorted according to several different criteria, such
 
 ## Feature Roadmap
 
-- [ ] Project-based Workflow
-- [ ] Power Bar
+- [ ] Workspace
 - [ ] Additional Query Types
 - [ ] Additional Facets
 - [ ] Graph View Improvements
+- [x] Project-based Workflow
+- [x] Power Bar
 - [x] Typescript Conversion
 - [x] Knowledge Type (Inferred vs Asserted) Edges Display Overhaul
 - [x] Facet Exclusion
