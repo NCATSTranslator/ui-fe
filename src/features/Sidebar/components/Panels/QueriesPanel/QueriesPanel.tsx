@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import styles from "./QueriesPanel.module.scss";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
@@ -15,6 +16,7 @@ import { useProjectListData } from "@/features/Projects/hooks/useProjectListData
 import Button from "@/features/Core/components/Button/Button";
 import ChevLeftIcon from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ProjectsPanel from "@/features/Sidebar/components/Panels/ProjectsPanel/ProjectsPanel";
+import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
 
 const QueriesPanel = () => {
   const location = useLocation();
@@ -24,6 +26,10 @@ const QueriesPanel = () => {
   const sortSearchState = useSortSearchState();
   const filteredQueries = useFilteredQueries(queries, false, sortSearchState, searchTerm);
   const { addToProjectQuery, isSelectedProjectMode, clearAddToProjectMode, setSelectedProjectMode }= useSidebar();
+  const activeQueryId = useMemo(() => {
+    const currentQid = getDataFromQueryVar('q', window.location.search);
+    return filteredQueries.find(query => query.data.qid === currentQid)?.data.qid;
+  }, [filteredQueries, window.location.search]);
 
   const handleCloseProjectList = () => {
     clearAddToProjectMode();
@@ -65,7 +71,12 @@ const QueriesPanel = () => {
                   ) : (
                     filteredQueries.map((query) => {
                       return (
-                        <SidebarQueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
+                        <SidebarQueryCard
+                          key={query.data.qid}
+                          query={query}
+                          searchTerm={searchTerm}
+                          isActiveQuery={activeQueryId === query.data.qid}
+                        />
                       )
                     })
                   )

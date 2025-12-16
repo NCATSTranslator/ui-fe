@@ -6,7 +6,11 @@
   left: 12px;
   z-index: 10000;
   span {
-    font-size: $captionSize;
+    font-size: $captionSize !important;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 300px;
   }
   svg path {
     fill: transparent !important;

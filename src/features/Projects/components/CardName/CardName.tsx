@@ -32,7 +32,7 @@ const CardName: FC<CardNameProps> = ({
   const titleMatches = title.toLowerCase().includes(searchTerm?.toLowerCase() || '');
   const titleContent = (
     isRenaming && onTitleChange && onFormSubmit ? (
-      <form onSubmit={onFormSubmit}>
+      <form onSubmit={onFormSubmit} className={styles.titleForm}>
         <TextInput value={title} handleChange={onTitleChange} iconRightClickToReset ref={textInputRef} className={styles.titleInput}/>
       </form>
     ) : (

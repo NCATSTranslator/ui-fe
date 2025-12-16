@@ -22,7 +22,7 @@ const ViewAllQueriesButton = () => {
 };
 
 const HelpButton = () => {
-  return <Button iconRight={<ExternalLink />} href="/help" link variant="textOnly" smallFont>All Help Topics</Button>;
+  return <Button iconRight={<ExternalLink />} href="/help" link variant="textOnly" title="All Help Topics" />;
 };
 
 export const topItems: SidebarItem[] = [

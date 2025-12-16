@@ -158,7 +158,7 @@ export const getFilterLabel = (filter: Filter | FilterFamily): string => {
     case "otc":  return "Availability";
     case "tdl":  return "Target Development Level";
     case "ev":   return "Evidence Type";
-    case "txt":  return "Text Filter";
+    case "txt":  return "Search";
     default: return defaultLabel;
   }
 }
