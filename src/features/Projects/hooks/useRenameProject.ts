@@ -107,8 +107,10 @@ export const useRenameProject = ({
       setIsRenaming(false);
       return;
     }
+    // If we're using the default blank title, don't show an update toast
+    const noToast = finalTitle === defaultBlankTitle;
     
-    handleUpdateProject(project.id, finalTitle);
+    handleUpdateProject(project.id, finalTitle, undefined, undefined, undefined, noToast);
     onRename?.(project);
     setIsRenaming(false);
   }, [localTitle, defaultBlankTitle, project, handleUpdateProject, onRename]);
