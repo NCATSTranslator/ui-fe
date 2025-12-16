@@ -20,6 +20,7 @@
     display: flex;
     img {
       height: $l;
+      width: 155px;
     }
   }
   .disclaimer {
@@ -27,5 +28,11 @@
     color: $black;
     font-weight: 400;
     margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    padding-left: $xs;
   }
 }

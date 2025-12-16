@@ -49,7 +49,6 @@ const ProjectsPanel: FC<ProjectsPanelProps> = ({
 
     createProjectMutation.mutate(newProject, {
       onSuccess: (data) => {
-        projectCreatedToast();
         setNewProjectId(data.id);
       },
       onError: (error) => {

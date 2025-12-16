@@ -16,7 +16,7 @@ export interface EditQueryState {
 
 export interface EditProjectHandlers {
   handleEditProject: (project: Project) => void;
-  handleUpdateProject: (id: number | string, newName?: string, newQids?: string[]) => void;
+  handleUpdateProject: (id: number | string, newName?: string, newQids?: string[], onSuccess?: () => void, onError?: (error: Error) => void, noToast?: boolean) => void;
   handleCancelEdit: () => void;
   handleRestoreProject: (project: Project) => void;
   handleDeleteProject: (project: Project) => void;
@@ -92,7 +92,7 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
    * @param {string} newName - Optional, a new name for the project.
    * @param {string[]} newQids - Optional, a new list of qids for the project. SHOULD INCLUDE ALL QIDS FOR THE PROJECT.
    */
-  const handleUpdateProject = (id: number | string, newName?: string, newQids?: string[]) => {
+  const handleUpdateProject = (id: number | string, newName?: string, newQids?: string[], onSuccess?: () => void, onError?: (error: Error) => void, noToast: boolean = false) => {
     if(!projects) {
       console.warn("projects is undefined");
       return;
@@ -143,17 +143,22 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
       pks: newQids || projectToUpdate.data.pks
     }], {
       onSuccess: () => {
-        if(action === 'remove') {
-          projectUpdatedToast(projectTitle, newlyRemovedQueryTitles, action);
-        } else if(action === 'add') {
-          projectUpdatedToast(projectTitle, newlyIncludedQueryTitles, action);
-        } else {
-          projectUpdatedToast(projectTitle);
+        if(!noToast) {
+          if(action === 'remove')
+            projectUpdatedToast(projectTitle, newlyRemovedQueryTitles, action);
+          else if(action === 'add')
+            projectUpdatedToast(projectTitle, newlyIncludedQueryTitles, action);
+          else
+            projectUpdatedToast(projectTitle);
         }
+
+        if(onSuccess)
+          onSuccess();
       },
       onError: (error) => {
         console.error('Failed to update project:', error);
-        errorToast('Failed to update project');
+        if(!noToast)
+          errorToast('Failed to update project');
         // Revert optimistic update on error
         queryClient.setQueryData(queryKey, (oldData: Project[]) => {
           if (!oldData) return oldData;
@@ -169,6 +174,8 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
               : project
           );
         });
+        if(onError)
+          onError(error);
       }
     });
   };

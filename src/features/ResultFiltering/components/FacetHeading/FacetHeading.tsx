@@ -8,12 +8,18 @@ import { getFilterFamily } from "@/features/ResultFiltering/utils/filterFunction
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 
 type FacetHeadingProps = {
+  includeArrow?: boolean;
   title: string;
   tagFamily: string;
   activeFilters: Filter[];
 }
 
-const FacetHeading: FC<FacetHeadingProps> = ({ title, tagFamily, activeFilters }) => {
+const FacetHeading: FC<FacetHeadingProps> = ({
+  includeArrow = true,
+  title,
+  tagFamily,
+  activeFilters
+}) => {
 
   const matchingActiveFacets = activeFilters.filter((filter)=> getFilterFamily(filter) === tagFamily).length;
 
@@ -33,7 +39,7 @@ const FacetHeading: FC<FacetHeadingProps> = ({ title, tagFamily, activeFilters }
     </>
   )
   const txtTooltipMarkup = (
-    <span className={styles.tooltip}>Search all textual elements (result name, description, node names, edge names) for a given string.</span>
+    <span className={styles.tooltip}>Search all textual elements (result name, description, node names, edge names) for a given term.</span>
   )
 
   const tooltipMarkup = useMemo(() => {
@@ -72,7 +78,7 @@ const FacetHeading: FC<FacetHeadingProps> = ({ title, tagFamily, activeFilters }
           }
         </div>
         {
-          tagFamily !== "str" &&
+          (tagFamily !== "str" && includeArrow) &&
           <ChevRight className={styles.expansionSVG}/>
         }
       </div>
