@@ -111,10 +111,8 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
       return;
     }
 
-    // Add query to project
-    handleUpdateProject(project.id, undefined, [...project.data.pks, addToProjectQuery.data.qid]);
-    // Clear mode
-    clearAddToProjectMode();
+    // Add query to project, clear add to project mode on success
+    handleUpdateProject(project.id, undefined, [...project.data.pks, addToProjectQuery.data.qid], clearAddToProjectMode);
   }, [addToProjectQuery, project, isUnassigned, handleUpdateProject, clearAddToProjectMode, queryTitle]);
 
   const handleProjectClick = useMemo(() => {

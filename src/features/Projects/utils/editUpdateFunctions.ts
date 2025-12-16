@@ -16,7 +16,7 @@ export interface EditQueryState {
 
 export interface EditProjectHandlers {
   handleEditProject: (project: Project) => void;
-  handleUpdateProject: (id: number | string, newName?: string, newQids?: string[]) => void;
+  handleUpdateProject: (id: number | string, newName?: string, newQids?: string[], onSuccess?: () => void, onError?: (error: Error) => void) => void;
   handleCancelEdit: () => void;
   handleRestoreProject: (project: Project) => void;
   handleDeleteProject: (project: Project) => void;
@@ -92,7 +92,7 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
    * @param {string} newName - Optional, a new name for the project.
    * @param {string[]} newQids - Optional, a new list of qids for the project. SHOULD INCLUDE ALL QIDS FOR THE PROJECT.
    */
-  const handleUpdateProject = (id: number | string, newName?: string, newQids?: string[]) => {
+  const handleUpdateProject = (id: number | string, newName?: string, newQids?: string[], onSuccess?: () => void, onError?: (error: Error) => void) => {
     if(!projects) {
       console.warn("projects is undefined");
       return;
@@ -143,13 +143,15 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
       pks: newQids || projectToUpdate.data.pks
     }], {
       onSuccess: () => {
-        if(action === 'remove') {
+        if(action === 'remove')
           projectUpdatedToast(projectTitle, newlyRemovedQueryTitles, action);
-        } else if(action === 'add') {
+        else if(action === 'add')
           projectUpdatedToast(projectTitle, newlyIncludedQueryTitles, action);
-        } else {
+        else
           projectUpdatedToast(projectTitle);
-        }
+
+        if(onSuccess)
+          onSuccess();
       },
       onError: (error) => {
         console.error('Failed to update project:', error);
@@ -169,6 +171,8 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
               : project
           );
         });
+        if(onError)
+          onError(error);
       }
     });
   };
