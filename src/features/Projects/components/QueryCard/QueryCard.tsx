@@ -71,7 +71,7 @@ const QueryCard: FC<QueryCardProps> = ({
           <Button handleClick={handleRemoveFromProject} iconLeft={<FolderEmptyIcon className={styles.folderPlusIcon} />} className={styles.removeFromProjectButton}>Remove from this Project</Button>
         )
       }
-      <Button handleClick={() => openShareQueryModal(query)} iconLeft={<ShareIcon />}>Share Query</Button>
+      <Button handleClick={() => openShareQueryModal(query)} iconLeft={<ShareIcon />}>Share Link</Button>
       <Button handleClick={() => openDeleteQueriesModal([query])} iconLeft={<TrashIcon />}>Delete Query</Button>
     </>
   );

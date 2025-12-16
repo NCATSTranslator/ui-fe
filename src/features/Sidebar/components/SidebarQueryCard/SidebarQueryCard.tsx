@@ -73,7 +73,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
   const options = (
     <>
       <Button handleClick={handleAddToProject} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />} className={styles.addToProjectButton}>Add to Project</Button>
-      <Button handleClick={() => openShareQueryModal(query)} iconLeft={<ShareIcon />}>Share Query</Button>
+      <Button handleClick={() => openShareQueryModal(query)} iconLeft={<ShareIcon />}>Share Link</Button>
       <Button handleClick={() => openDeleteQueriesModal([query])} iconLeft={<TrashIcon />}>Delete Query</Button>
     </>
   );
