@@ -228,18 +228,19 @@ export const getQueryStatusIndicatorStatus = (
   isFetchingARAStatus: boolean,
   hasFreshResults: boolean,
   isFetchingResults: boolean,
-  resultStatus: "error" | "running" | "success" | "unknown"
+  resultStatus: "error" | "running" | "success" | "unknown",
+  resultCount: number
 ): { 
-  label: 'Loading' | 'Error' | 'New Results Available' | 'All Results Loaded' | 'Unknown';
+  label: 'Loading' | 'Error' | 'New Results Available' | 'All Results Loaded' | 'No Results' | 'Unknown';
   status: 'complete' | 'running' | 'error' | 'unknown';
 } => {
   // Error states take highest priority
-  if (arsStatus?.status === 'error' || resultStatus === 'error') {
+  if(arsStatus?.status === 'error' || resultStatus === 'error') {
     return { label: 'Error', status: 'error' };
   }
   
   // Check for fresh results
-  if (hasFreshResults) {
+  if(hasFreshResults) {
     if(arsStatus?.status === 'complete') {
       return { label: 'New Results Available', status: 'complete' };
     } else {
@@ -248,12 +249,16 @@ export const getQueryStatusIndicatorStatus = (
   }
   
   // Check if complete and all loaded
-  if (arsStatus?.status === 'complete' && !isFetchingResults) {
-    return { label: 'All Results Loaded', status: 'complete' };
+  if(arsStatus?.status === 'complete' && !isFetchingResults) {
+    if(resultCount === 0) {
+      return { label: 'No Results', status: 'unknown' };
+    } else {
+      return { label: 'All Results Loaded', status: 'complete' };
+    }
   }
   
   // Loading states
-  if (isFetchingARAStatus || arsStatus?.status === 'running' || arsStatus === null || isFetchingResults) {
+  if(isFetchingARAStatus || arsStatus?.status === 'running' || arsStatus === null || isFetchingResults) {
     return { label: 'Loading', status: 'running' };
   }
   

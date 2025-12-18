@@ -5,16 +5,19 @@ import QueryLoadingBar from "@/features/Sidebar/components/QueryLoadingBar/Query
 import { ARAStatusResponse, ResultListLoadingData } from "@/features/ResultList/types/results.d";
 import { getQueryStatusIndicatorStatus, getQueryStatusPercentage } from "@/features/Projects/utils/utilities";
 import ResultListLoadingButton from "@/features/ResultList/components/ResultListLoadingButton/ResultListLoadingButton";
+import { Link } from "react-router-dom";
 
 interface QueryStatusPanelProps {
   arsStatus: ARAStatusResponse | null;
   data: ResultListLoadingData;
+  resultCount: number;
   resultStatus: "error" | "running" | "success" | "unknown";
 }
 
 const QueryStatusPanel: FC<QueryStatusPanelProps> = ({
   arsStatus,
   data,
+  resultCount,
   resultStatus
 }) => {
   const percentage = arsStatus ? getQueryStatusPercentage(arsStatus) : 5;
@@ -25,8 +28,9 @@ const QueryStatusPanel: FC<QueryStatusPanelProps> = ({
     data.isFetchingARAStatus || false,
     data.hasFreshResults || false,
     data.isFetchingResults || false,
-    resultStatus
-  ), [arsStatus, data.isFetchingARAStatus, data.hasFreshResults, data.isFetchingResults, resultStatus]);
+    resultStatus,
+    resultCount
+  ), [arsStatus, data.isFetchingARAStatus, data.hasFreshResults, data.isFetchingResults, resultStatus, resultCount]);
 
   return (
     <div className={styles.queryStatusPanel}>
@@ -37,7 +41,29 @@ const QueryStatusPanel: FC<QueryStatusPanelProps> = ({
           <span className={styles.percentage}>{!!arsStatus?.status && `${percentage}% Loaded`}</span>
         </div>
         <QueryLoadingBar fillPercentage={percentage} full={isComplete} />
-        <p>Translator results are loaded incrementally due to the complexity of our reasoning systems.</p>
+        {
+          statusLabel === 'Error' && (
+            <p>There was an error while processing your query results. Please try again later, or try clearing your cache if the problem persists.</p>
+          )
+        }
+        {
+          statusLabel === 'No Results' && (
+            <p>There are no results available for your query.</p>
+          )
+        }
+        {
+          (statusLabel === 'New Results Available' || statusLabel === 'All Results Loaded') && (
+            <p>Translator results are loaded incrementally due to the complexity of our reasoning systems. As more results become available, you'll be prompted to refresh the page to view them.</p>
+          )
+        }
+        {
+          statusLabel === 'Loading' && (
+            <>
+              <p>Translator results are loaded incrementally due to the complexity of our reasoning systems. As more results become available, you'll be prompted to refresh the page to view them.</p>
+              <p>You can run a new query or explore the results, bookmarks, and notes from your past queries in <Link to="/projects">Projects</Link> while you wait for results to load.</p>
+            </>          
+          )
+        }
       </div>
       <div className={styles.bottom}>
         <ResultListLoadingButton 

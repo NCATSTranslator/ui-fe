@@ -658,7 +658,8 @@ const ResultList = () => {
     isFetchingARAStatus.current || false,
     hasFreshResults,
     isFetchingResults.current,
-    resultStatus
+    resultStatus,
+    formattedResults.length || 0
   )
 
   // Register the status sidebar item
@@ -667,9 +668,9 @@ const ResultList = () => {
     icon: () => <StatusIndicator status={statusIndicatorStatus} inSidebar redDot={hasFreshResults} className={styles.statusIndicator}/>,
     id: 'queryStatus',
     label: "Status",
-    panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} resultStatus={resultStatus} />,
+    panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} resultStatus={resultStatus} resultCount={formattedResults.length || 0} />,
     tooltipText: "",
-    dependencies: [arsStatus, loadingButtonData, resultStatus]
+    dependencies: [arsStatus, loadingButtonData, resultStatus, formattedResults.length]
   });
 
   // Register the filters sidebar item
