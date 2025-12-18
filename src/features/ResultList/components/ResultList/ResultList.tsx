@@ -38,9 +38,9 @@ import { useSidebarRegistration } from "@/features/Sidebar/hooks/sidebarHooks";
 import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
 import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
-import { QueryStatus } from "@/features/Projects/types/projects";
 import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/FiltersPanel";
 import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from "@/features/Core/utils/toastMessages";
+import { getQueryStatusIndicatorStatus } from "@/features/Projects/utils/utilities";
 
 const ResultList = () => {
 
@@ -74,13 +74,12 @@ const ResultList = () => {
   const presetIsLoading = (currentQueryID) ? true : loading;
   const [isLoading, setIsLoading] = useState(presetIsLoading);
   // Bool/null , should ara status be fetched
-  // const [isFetchingARAStatus, setIsFetchingARAStatus] = useState(presetIsLoading);
   const isFetchingARAStatus = useRef<boolean | null>(presetIsLoading);
   // Bool, should results be fetched
-  // const [isFetchingResults, setIsFetchingResults] = useState(false);
   const isFetchingResults = useRef(false);
 
   const [arsStatus, setArsStatus] = useState<ARAStatusResponse | null>(null);
+  const [resultStatus, setResultStatus] = useState<"error" | "running" | "success" | "unknown">("unknown");
 
   // set to not sort by score for Pathfinder, set to false to sort score high low for MVP queries
   const initSortByScore = (isPathfinder) ? null : false;
@@ -356,6 +355,9 @@ const ResultList = () => {
 
 
   const handleNewResults = (resultSet: ResultSet) => {
+    
+    setResultStatus(resultSet.status);
+
     // if we have no results, or the results aren't actually new, return
     if(resultSet == null || isEqual(resultSet, prevRawResults.current))
       return;
@@ -649,17 +651,25 @@ const ResultList = () => {
     hasFreshResults: hasFreshResults,
     isError: isError,
     setIsActive: setIsLoading
-  }), [handleResultsRefresh, isFetchingARAStatus.current, isFetchingResults.current, freshRawResults, isError, setIsLoading]);
+  }), [handleResultsRefresh, isFetchingARAStatus.current, isFetchingResults.current, freshRawResults, isError, setIsLoading, hasFreshResults]);
+
+  const { status: statusIndicatorStatus } = getQueryStatusIndicatorStatus(
+    arsStatus,
+    isFetchingARAStatus.current || false,
+    hasFreshResults,
+    isFetchingResults.current,
+    resultStatus
+  )
 
   // Register the status sidebar item
   useSidebarRegistration({
     ariaLabel: "Query Status",
-    icon: () => <StatusIndicator status={arsStatus?.status as QueryStatus || "unknown"} inSidebar redDot={hasFreshResults}/>,
+    icon: () => <StatusIndicator status={statusIndicatorStatus} inSidebar redDot={hasFreshResults} className={styles.statusIndicator}/>,
     id: 'queryStatus',
     label: "Status",
-    panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} />,
+    panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} resultStatus={resultStatus} />,
     tooltipText: "",
-    dependencies: [arsStatus, loadingButtonData]
+    dependencies: [arsStatus, loadingButtonData, resultStatus]
   });
 
   // Register the filters sidebar item
