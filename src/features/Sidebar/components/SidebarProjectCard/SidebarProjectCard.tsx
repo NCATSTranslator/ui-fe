@@ -144,9 +144,10 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
           type: 'project',
           onDrop: onQueryDrop
         }}
-        indicatorText={`${isQueryInProject ? 'Query Already in Project' : 'Add to Project'}`}
+        indicatorText={`${isQueryInProject ? 'Already in Project' : 'Add to Project'}`}
         indicatorStatus={isQueryInProject ? 'error' : 'default'}
         indicatorClass={styles.sidebarDropIndicator}
+        indicateOnlyOnOver
       >
         <SidebarCard
           leftIcon={leftIcon}

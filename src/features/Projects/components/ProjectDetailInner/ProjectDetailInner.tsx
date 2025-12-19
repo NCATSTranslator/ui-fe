@@ -195,7 +195,7 @@ const ProjectDetailInner = () => {
                         type: 'project',
                         onDrop: onQueryDrop
                       }}
-                      indicatorText={`${isDraggedQueryInProject ? 'Query Already in Project' : 'Add to Project'}`}
+                      indicatorText={`${isDraggedQueryInProject ? 'Already in Project' : 'Add to Project'}`}
                       indicatorStatus={isDraggedQueryInProject ? 'error' : 'default'}
                       className={styles.droppableArea}
                     >

@@ -82,9 +82,10 @@ const ProjectCard: FC<ProjectCardProps> = ({
           type: 'project',
           onDrop: onQueryDrop
         }}
-        indicatorText={`${isQueryInProject ? 'Query Already in Project' : 'Add to Project'}`}
+        indicatorText={`${isQueryInProject ? 'Already in Project' : 'Add to Project'}`}
         indicatorStatus={isQueryInProject ? 'error' : 'default'}
         indicatorClass={styles.sidebarDropIndicator}
+        indicateOnlyOnOver
       >
         <DataCard
           icon={icon}
