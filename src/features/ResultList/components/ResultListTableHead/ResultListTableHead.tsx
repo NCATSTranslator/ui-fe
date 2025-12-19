@@ -61,7 +61,7 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
         Paths
         <Alert/>
         <ArrowUp className={parentStyles.chev}/>
-        <Tooltip id="paths-tooltip">
+        <Tooltip id="paths-tooltip" place="bottom">
           <span className={parentStyles.scoreSpan}>Number of paths that support the result.</span>
         </Tooltip>
       </div>
@@ -79,7 +79,7 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
           Score
           <Alert/>
           <ArrowUp className={parentStyles.chev}/>
-          <Tooltip id="score-tooltip">
+          <Tooltip id="score-tooltip" place="bottom">
             <span className={parentStyles.scoreSpan}>A result's score is a multimodal calculation considering the strength of relationships supporting it. Scores range from 0 to 5 and are shown once all results are synced.</span>
           </Tooltip>
         </div>

@@ -482,13 +482,3 @@ export const onSetIsEditingProject = (
     setSelectedQueries([]);
   }
 };
-
-/**
- * Checks if the project is unassigned.
- * @param project - The project to check.
- * @returns True if the project is unassigned, false otherwise.
- */
-export const isUnassignedProject = (project: Project | ProjectRaw | number) => {
-  const id = typeof project === 'number' ? project : project.id;
-  return id === -1;
-};

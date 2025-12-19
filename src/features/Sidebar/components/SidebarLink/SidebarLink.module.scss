@@ -40,4 +40,12 @@
       }
     }
   }
+  &:hover:has(:global(.freshResultsToast):hover) {
+    background-color: $lightGray;
+    svg {
+      path {
+        fill: $darkGray;
+      }
+    }
+  }
 }

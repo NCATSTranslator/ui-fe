@@ -8,8 +8,9 @@
     display: grid;
     gap: $s;
   }
-  p {
+  p, a {
     margin: 0;
+    font-size: $bodyTwoSize;
   }
   .statusIndicator {
     display: flex;
@@ -17,6 +18,12 @@
     gap: $xxs;
     .percentage {
       color: $darkGray;
+      font-size: $captionSize;
     }
+  }
+  .statusLabel {
+    font-weight: 800;
+    font-size: $subOneSize;
+    color: $black;
   }
 }

@@ -7,6 +7,9 @@
   border-radius: $defaultBorderRadius;
   overflow: hidden;
   position: relative;
+  &.hide {
+    display: none;
+  }
 }
 
 .loadingBarFill {

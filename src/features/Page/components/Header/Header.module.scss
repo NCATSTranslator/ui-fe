@@ -3,12 +3,11 @@
 .header {
   box-shadow: $dropShadow;
   position: sticky;
-  z-index: 10;
+  z-index: 10000;
   display: flex;
   justify-content: space-between;
   top: 0;
   right: 0;
-  left: $xl;
   background-color: $white;
   padding: $s $m;
   .right, .left {

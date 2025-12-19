@@ -222,3 +222,46 @@ export const getBlankProjectTitle = (projects: Project[]) => {
   const highestNumber = Math.max(...newProjectNumbers);
   return `New Project ${highestNumber + 1}`;
 }
+
+export const getQueryStatusIndicatorStatus = (
+  arsStatus: ARAStatusResponse | null,
+  isFetchingARAStatus: boolean,
+  hasFreshResults: boolean,
+  isFetchingResults: boolean,
+  resultStatus: "error" | "running" | "success" | "unknown",
+  resultCount: number
+): { 
+  label: 'Error' | 'New Results Available' | 'All Results Shown' | 'No Results' | 'Unknown' | '';
+  status: 'complete' | 'running' | 'error' | 'unknown';
+} => {
+  // Error states take highest priority
+  if(arsStatus?.status === 'error' || resultStatus === 'error') {
+    return { label: 'Error', status: 'error' };
+  }
+  
+  // Check for fresh results
+  if(hasFreshResults) {
+    if(arsStatus?.status === 'complete') {
+      return { label: 'New Results Available', status: 'complete' };
+    } else {
+      return { label: 'New Results Available', status: 'running' };
+    }
+  }
+  
+  // Check if complete and all loaded
+  if(arsStatus?.status === 'complete' && !isFetchingResults) {
+    if(resultCount === 0) {
+      return { label: 'No Results', status: 'unknown' };
+    } else {
+      return { label: 'All Results Shown', status: 'complete' };
+    }
+  }
+  
+  // Loading states
+  if(isFetchingARAStatus || arsStatus?.status === 'running' || arsStatus === null || isFetchingResults) {
+    return { label: '', status: 'running' };
+  }
+  
+  // Default fallback
+  return { label: '', status: 'unknown' };
+}

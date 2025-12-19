@@ -86,6 +86,7 @@
     }
   }
   .section {
+    padding-bottom: $l;
     &::-webkit-scrollbar-track {
       background-color: $white;
     }

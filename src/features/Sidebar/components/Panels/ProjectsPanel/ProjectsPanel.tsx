@@ -12,12 +12,11 @@ import Button from "@/features/Core/components/Button/Button";
 import PlusIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useCreateProject, useSortSearchState } from "@/features/Projects/hooks/customHooks";
-import { projectCreatedToast, queryAddedToProjectToast } from "@/features/Core/utils/toastMessages";
+import { queryAddedToProjectToast } from "@/features/Core/utils/toastMessages";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { Project } from "@/features/Projects/types/projects";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
-import { isUnassignedProject } from "@/features/Projects/utils/editUpdateFunctions";
 
 interface ProjectsPanelProps {
   className?: string;
@@ -32,7 +31,7 @@ const ProjectsPanel: FC<ProjectsPanelProps> = ({
   const user = useSelector(currentUser);
   const sortSearchState = useSortSearchState();
   const data = useProjectListData(sortSearchState);
-  const projects = useMemo(() => selectProjectMode ? data.formatted.active.filter(proj => !isUnassignedProject(proj)) : data.formatted.active || [], [data.formatted.active, selectProjectMode]);
+  const projects = useMemo(() => data.formatted.active || [], [data.formatted.active]);
   const projectsLoading = data.loading.projectsLoading;
   const createProjectMutation = useCreateProject();
   const [newProjectId, setNewProjectId] = useState<number | null>(null);

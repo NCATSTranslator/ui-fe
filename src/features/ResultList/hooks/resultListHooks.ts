@@ -1,9 +1,10 @@
-import { Dispatch, SetStateAction, useEffect, useState, RefObject } from "react";
+import { Dispatch, SetStateAction, useEffect, useState, RefObject, useRef } from "react";
 import { useQuery } from '@tanstack/react-query';
 import { API_PATH_PREFIX } from "@/features/UserAuth/utils/userApi";
 import { fetchWithErrorHandling } from "@/features/Common/utils/web";
 import { handleResultsError } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { ARAStatusResponse, Result, ResultSet } from "@/features/ResultList/types/results.d";
+import { queryStatusResultsCompleteToast } from "@/features/Core/utils/toastMessages";
 
 // Constants
 const STATUS_CHECK_TIMEOUT = 120; // 20 minutes (120 * 10 second intervals)
@@ -282,4 +283,14 @@ export const useResultsDataQuery = (
     refetchOnWindowFocus: false,
     retry: false,
   });
+};
+
+export const useResultsCompleteToast = (arsStatus: ARAStatusResponse | null, isFetchingResults: boolean) => {
+  const hasShownToast = useRef(false);
+  useEffect(() => {
+    if(arsStatus?.status === 'complete' && !isFetchingResults && !hasShownToast.current) {
+      hasShownToast.current = true;
+      queryStatusResultsCompleteToast();
+    }
+  }, [arsStatus?.status, isFetchingResults]);
 };

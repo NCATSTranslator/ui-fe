@@ -17,13 +17,6 @@
     .container {
       grid-template-columns: $projectCardColumns;
     }
-    &.unassigned {
-      border: none;
-      .icon svg path {
-        fill: $white;
-        stroke: $black;
-      }
-    }
   }
   &.queryCard {
     background: $lightGray;
@@ -36,11 +29,6 @@
     .title, .title span, .title mark, .count,.bookmarksColumn, .notesColumn, .queriesColumn, .date, .icon  {
       color: $purpleOne;
       svg path {
-        fill: $purpleOne;
-      }
-    }
-    &.projectCard.unassigned {
-      .icon svg path {
         fill: $purpleOne;
       }
     }
