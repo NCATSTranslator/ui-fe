@@ -86,3 +86,8 @@ export const bookmarkRemovedToast = () => {
 export const bookmarkErrorToast = () => {
   return toast.error(AppToast, { data: { topText: 'Error Adding Bookmark', bottomText: 'We were unable to save this bookmark to your account.' } });
 };
+
+// Query Status
+export const queryStatusResultsCompleteToast = () => {
+  return toast(AppToast, { data: { topText: 'Results Complete' } });
+};
