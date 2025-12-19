@@ -89,7 +89,7 @@
   .backButton {
     padding: $s;
     background-color: $white;
-    border-bottom: 1px solid $midGray;
+    border-bottom: 1px solid $midGray !important;
     justify-content: flex-start;
     gap: $xxs;
   }
