@@ -187,48 +187,11 @@ export const useUpdateQuery = () => {
 export const useFormattedProjects = (
   projects: ProjectRaw[], 
   queries: UserQueryObject[],
-  sortSearchState: SortSearchState,
-  includeUnassigned: boolean = true
+  sortSearchState: SortSearchState
 ): Project[] => {
   return useMemo(() => {
-    // Get all query IDs that are assigned to projects
-    const assignedQueryIds = new Set(projects.flatMap(project => project.data.pks));
-    
-    // Find unassigned queries (queries that are not in any project)
-    const unassignedQueries = queries.filter(q => !assignedQueryIds.has(q.data.qid) && !q.data.deleted);
-    
-    // Calculate bookmark and note counts for unassigned queries
-    const unassignedBookmarkCount = unassignedQueries.reduce(
-      (sum, q) => sum + q.data.bookmark_ids.length, 
-      0
-    );
-    const unassignedNoteCount = unassignedQueries.reduce(
-      (sum, q) => sum + q.data.note_count, 
-      0
-    );
-    
-    // Create the unassigned project
-    const unassignedProject: Project = {
-      id: -1, // Special ID for unassigned project
-      data: {
-        pks: unassignedQueries.map(q => q.data.qid),
-        title: 'Unassigned'
-      },
-      time_created: new Date(0), // Use epoch time for unassigned
-      time_updated: new Date(0), // Use epoch time for unassigned
-      deleted: false,
-      bookmark_count: unassignedBookmarkCount,
-      note_count: unassignedNoteCount,
-      save_type: 'project',
-      ars_pkey: null,
-      label: null,
-      notes: null,
-      object_ref: null,
-      user_id: null
-    };
-    
     // Format regular projects
-    let formattedProjects = projects.map(project => {
+    const formattedProjects = projects.map(project => {
       // Find all queries that belong to this project
       const projectQueries = queries.filter(q => project.data.pks.includes(q.data.qid));
       
@@ -251,10 +214,8 @@ export const useFormattedProjects = (
         note_count
       };
     });
-    formattedProjects = filterAndSortProjects(formattedProjects, queries, sortSearchState.sortField, sortSearchState.sortDirection, sortSearchState.searchTerm);
     
-    // Return formatted projects with unassigned project appended
-    return includeUnassigned ? [...formattedProjects, unassignedProject] : formattedProjects;
+    return filterAndSortProjects(formattedProjects, queries, sortSearchState.sortField, sortSearchState.sortDirection, sortSearchState.searchTerm);
   }, [projects, queries, sortSearchState]);
 };
 

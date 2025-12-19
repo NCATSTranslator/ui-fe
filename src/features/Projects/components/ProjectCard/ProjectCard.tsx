@@ -6,9 +6,9 @@ import Button from "@/features/Core/components/Button/Button";
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
-import { isUnassignedProject, useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
+import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
-import { getTimeRelativeDate, joinClasses } from "@/features/Common/utils/utilities";
+import { getTimeRelativeDate } from "@/features/Common/utils/utilities";
 import { DroppableArea } from "@/features/DragAndDrop/components/DroppableArea/DroppableArea";
 import { handleQueryDrop } from "@/features/Projects/utils/dragDropUtils";
 import { DraggableData } from "@/features/DragAndDrop/types/types";
@@ -35,12 +35,11 @@ const ProjectCard: FC<ProjectCardProps> = ({
   const queryCount = project.data.pks.length;
   const { openDeleteProjectModal } = useProjectModals();
   const { handleUpdateProject } = useEditProjectHandlers();
-  const isUnassigned = isUnassignedProject(project);
-  const className = joinClasses(styles.projectCard, isUnassigned && styles.unassigned);
+  const className = styles.projectCard;
   const icon = <FolderIcon />;
   const { active } = useDndContext();
   const isQueryInProject = useMemo(() => active ? isDraggedQueryInProject(active, project) : false, [active, project]);
-  const date = (isUnassigned) ? "" : getTimeRelativeDate(new Date(project.time_updated));
+  const date = getTimeRelativeDate(new Date(project.time_updated));
 
   const {
     isRenaming,
@@ -76,7 +75,6 @@ const ProjectCard: FC<ProjectCardProps> = ({
       <DroppableArea 
         id={`project-zone-${project.id}`}
         canAccept={(draggedData) => draggedData.type === 'query'}
-        disabled={isUnassigned}
         data={{
           id: project.id?.toString(),
           type: 'project',
@@ -93,7 +91,7 @@ const ProjectCard: FC<ProjectCardProps> = ({
           searchTerm={searchTerm}
           linkTo={`/projects/${project.id}`}
           className={className}
-          options={isUnassigned ? undefined : options}
+          options={options}
           isRenaming={isRenaming}
           onTitleChange={handleTitleChange}
           onFormSubmit={handleFormSubmit}
@@ -103,7 +101,6 @@ const ProjectCard: FC<ProjectCardProps> = ({
           bookmarksCount={project.bookmark_count}
           notesCount={project.note_count}
           date={date}
-          ignoreTitleMatch={isUnassigned}
         />
       </DroppableArea>
     </OutsideClickHandler>

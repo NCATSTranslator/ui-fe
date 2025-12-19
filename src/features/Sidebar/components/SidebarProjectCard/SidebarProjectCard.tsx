@@ -3,15 +3,13 @@ import { Project } from "@/features/Projects/types/projects";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
-import FolderEmptyIcon from '@/assets/icons/projects/folderempty.svg?react';
 import SidebarCard from "@/features/Sidebar/components/SidebarCard/SidebarCard";
 import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
-import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
-import { isUnassignedProject, useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
+import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
 import { joinClasses } from "@/features/Common/utils/utilities";
 import { DroppableArea } from "@/features/DragAndDrop/components/DroppableArea/DroppableArea";
@@ -45,9 +43,8 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
   const { openDeleteProjectModal } = useProjectModals();
   const { handleUpdateProject } = useEditProjectHandlers();
   const { addToProjectQuery, clearAddToProjectMode, isSelectedProjectMode, setSelectedProject, setSelectedProjectMode, closePanel } = useSidebar();
-  const isUnassigned = isUnassignedProject(project);
-  const className = joinClasses(styles.projectCard, isUnassigned && styles.unassigned, isActiveProject && styles.activeProject);
-  const leftIcon = isUnassigned ? <FolderEmptyIcon className={styles.emptyIcon} /> : <FolderIcon />;
+  const className = joinClasses(styles.projectCard, isActiveProject && styles.activeProject);
+  const leftIcon = <FolderIcon />;
   const { active } = useDndContext();
   const isQueryInProject = useMemo(() => active ? isDraggedQueryInProject(active, project) : false, [active, project]);
   const { title: queryTitle } = useGetQueryCardTitle(addToProjectQuery || null);
@@ -102,7 +99,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
   }, [project, handleUpdateProject]);
 
   const handleAddQueryToProject = useCallback(() => {
-    if (!addToProjectQuery || !project || isUnassigned) return;
+    if (!addToProjectQuery || !project) return;
 
     // Check if query is already in project
     const isQueryAlreadyInProject = project.data.pks.includes(addToProjectQuery.data.qid);
@@ -113,7 +110,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
 
     // Add query to project, clear add to project mode on success
     handleUpdateProject(project.id, undefined, [...project.data.pks, addToProjectQuery.data.qid], clearAddToProjectMode);
-  }, [addToProjectQuery, project, isUnassigned, handleUpdateProject, clearAddToProjectMode, queryTitle]);
+  }, [addToProjectQuery, project, handleUpdateProject, clearAddToProjectMode, queryTitle]);
 
   const handleProjectClick = useMemo(() => {
     if(isAddToProjectMode) {
@@ -123,7 +120,6 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
     }
     if(isSelectedProjectMode) {
       return () => {
-        if(isUnassignedProject(project.id)) return;
         setSelectedProject(project);
         setSelectedProjectMode(false);
         closePanel();
@@ -138,7 +134,6 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
       <DroppableArea 
         id={`project-zone-${project.id}`}
         canAccept={(draggedData) => draggedData.type === 'query'}
-        disabled={isUnassigned}
         data={{ 
           id: project.id?.toString(),
           type: 'project',
@@ -159,13 +154,11 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
           bottomRight={bottomRight}
           data-testid="sidebar-project-card"
           className={className}
-          options={isUnassigned || isAddToProjectMode ? undefined : options}
+          options={isAddToProjectMode ? undefined : options}
           isRenaming={isRenaming}
           onTitleChange={handleTitleChange}
           onFormSubmit={handleFormSubmit}
           textInputRef={textInputRef}
-          rightIcon={isUnassigned ? <InfoIcon data-tooltip-content="Unassigned Project" /> : undefined}
-          ignoreTitleMatch={isUnassigned}
         />
       </DroppableArea>
     </OutsideClickHandler>

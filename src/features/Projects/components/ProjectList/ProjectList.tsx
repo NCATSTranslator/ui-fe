@@ -53,9 +53,8 @@ const ProjectList = () => {
   };
 
   const projectsTabHeading = useMemo(() => {
-    // subtract 1 to account for the unassigned project
-    const projectCount = projects.length - 1;
-    return `${projectCount >= 0 ? projectCount : '0'} Project${projectCount === 1 ? '' : 's'}`;
+    const projectCount = projects.length;
+    return `${projectCount} Project${projectCount === 1 ? '' : 's'}`;
   }, [projects]);
 
   // on component mount, if the projects panel is open, close it
@@ -106,13 +105,13 @@ const ProjectList = () => {
                         sortSearchState={sortSearchState}
                       />
                       {
-                        projects.length === 0 
+                        projects.length === 0 && sortSearchState.searchTerm
                         ? (
                           <EmptyArea>
                             <p>No projects found matching your search.</p>
                           </EmptyArea>
                         ) 
-                        : projects.length === 1
+                        : projects.length === 0
                           ? 
                             (
                               <EmptyArea heading="No Projects">

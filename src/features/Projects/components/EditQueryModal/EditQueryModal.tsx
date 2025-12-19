@@ -15,7 +15,7 @@ import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingW
 import Highlighter from "react-highlight-words";
 import { filterProjects } from "@/features/Projects/utils/filterAndSortingFunctions";
 import { projectCreatedToast } from "@/features/Core/utils/toastMessages";
-import { isUnassignedProject, useEditProjectHandlers, useEditQueryHandlers } from "@/features/Projects/utils/editUpdateFunctions";
+import { useEditProjectHandlers, useEditQueryHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import WarningModal from "@/features/Common/components/WarningModal/WarningModal";
 import { getProjectQueryCount } from "@/features/Projects/utils/utilities";
 
@@ -250,8 +250,6 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
                 >
                   {
                     filteredProjects.length > 0 ? filteredProjects.map((project) => {
-                      const isUnassigned = isUnassignedProject(project);
-                      if(isUnassigned) return null;
                       const projectName = project.label || project.data.title;
                       const isSelected = mode === "edit" && localSelectedProjects.some(p => p.id === project.id);
                       const queryCount = getProjectQueryCount(project, queries);
