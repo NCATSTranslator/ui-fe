@@ -103,7 +103,7 @@ const DataCard: FC<DataCardProps> = ({
           {
             type === 'project' ? (
               <>
-                {!!queryCount && `${queryCount} Quer${queryCount === 1 ? 'y' : 'ies'}`}
+                {`${queryCount || 0} Quer${queryCount === 1 ? 'y' : 'ies'}`}
               </>
             ) : (
               !!queryType && queryTypeLabel

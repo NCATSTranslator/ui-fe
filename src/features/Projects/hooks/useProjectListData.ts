@@ -24,7 +24,7 @@ export const useProjectListData = (sortSearchState: SortSearchState) => {
   }), [projects, queries]);
 
   const activeFormattedProjects = useFormattedProjects(dataFilters.active.projects, queries, sortSearchState);
-  const deletedFormattedProjects = useFormattedProjects(dataFilters.deleted.projects, queries, sortSearchState, false);
+  const deletedFormattedProjects = useFormattedProjects(dataFilters.deleted.projects, queries, sortSearchState);
 
   return {
     raw: {

@@ -5,7 +5,7 @@ import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingW
 import { useSortSearchState } from '@/features/Projects/hooks/customHooks';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
-import { useEditProjectHandlers, isUnassignedProject } from '@/features/Projects/utils/editUpdateFunctions';
+import { useEditProjectHandlers } from '@/features/Projects/utils/editUpdateFunctions';
 import ProjectDetailErrorStates from '@/features/Projects/components/ProjectDetailErrorStates/ProjectDetailErrorStates';
 import { useProjectDetailData } from '@/features/Projects/hooks/useProjectDetailData';
 import { useProjectDetailSortedData } from '@/features/Projects/hooks/useProjectDetailSortedData';
@@ -182,20 +182,19 @@ const ProjectDetailInner = () => {
                     >
                       <CombinedQueryInterface
                         projectPage
-                        defaultProject={isUnassignedProject(data.project?.id || -1) ? null : data.project}
+                        defaultProject={data.project}
                         submissionCallback={handleRefetch}
                       />
                     </AnimateHeight>
                     <DroppableArea 
                       id="project-zone"
                       canAccept={(draggedData) => draggedData.type === 'query'}
-                      disabled={isUnassignedProject(data.project || -1)}
                       data={{ 
                         id: data.project?.id?.toString(),
                         type: 'project',
                         onDrop: onQueryDrop
                       }}
-                      indicatorText={`${isDraggedQueryInProject ? 'Query Already in Project' : 'Add to Project'}`}
+                      indicatorText={`${isDraggedQueryInProject ? 'Already in Project' : 'Add to Project'}`}
                       indicatorStatus={isDraggedQueryInProject ? 'error' : 'default'}
                       className={styles.droppableArea}
                     >

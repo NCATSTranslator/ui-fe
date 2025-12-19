@@ -1,5 +1,4 @@
 import { UserQueryObject, SortField, SortDirection, Project, ProjectRaw } from '@/features/Projects/types/projects.d';
-import { isUnassignedProject } from './editUpdateFunctions';
 
 /**
  * Sorts projects based on the specified field and direction
@@ -76,14 +75,7 @@ export const filterProjects = (projects: Project[] | ProjectRaw[], searchTerm: s
  */
 export const filterAndSortProjects = (projects: Project[], queries: UserQueryObject[], sortField: SortField, sortDirection: SortDirection, searchTerm: string): Project[] => {
   const filteredProjects: Project[] = filterProjects(projects, searchTerm, queries) as Project[];
-  const sortedProjects = sortProjects(filteredProjects, sortField, sortDirection);
-  // make sure unassigned is always at bottom (has id of -1)
-  const unassignedProject = sortedProjects.find(project => isUnassignedProject(project));
-  if (unassignedProject && sortedProjects.length > 1) {
-    sortedProjects.splice(sortedProjects.indexOf(unassignedProject), 1);
-    sortedProjects.push(unassignedProject);
-  }
-  return sortedProjects;
+  return sortProjects(filteredProjects, sortField, sortDirection);
 };
 
 /**

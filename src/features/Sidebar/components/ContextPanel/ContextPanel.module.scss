@@ -9,7 +9,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: $s;
     padding: $s;
     // border bottom, but inset
     box-shadow: inset 0px -1px 0 0 $midGray;
@@ -30,14 +29,15 @@
     }
   }
   .content {
-    padding: 0 $s $s;
+    padding: $s 15px $s $s;
     position: relative;
     width: calc($panelWidth - ($s*2));
+    overflow: hidden auto;
   }
   &.reduceSpacing {
     .content {
       padding: 0;
-      width: $panelWidth;
+      width: calc($panelWidth - 1px);
     }
     .header {
       margin-bottom: 0;

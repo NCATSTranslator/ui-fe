@@ -35,18 +35,19 @@ const Sidebar = () => {
       <div className={styles.linkList}>
         <nav className={styles.top} aria-label="Global navigation">
           <SidebarLinkList items={topItems} />
-          <div className={styles.sep} />
           <div className={styles.middle} aria-label="Page-specific links">
             {
               dynamicSidebarItems && dynamicSidebarItems.length > 0 && 
               (
-                <SidebarLinkList items={dynamicSidebarItems} />
+                <>
+                  <div className={styles.sep} />
+                  <SidebarLinkList items={dynamicSidebarItems} />
+                </>
               )
             }
           </div>
         </nav>
         <nav className={styles.bottom} aria-label="Bottom navigation">
-          <div className={styles.sep} />
           <SidebarLinkList items={bottomItems} />
         </nav>
       </div>

@@ -12,7 +12,6 @@ import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingW
 import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
-import { useProjectListData } from "@/features/Projects/hooks/useProjectListData";
 import Button from "@/features/Core/components/Button/Button";
 import ChevLeftIcon from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ProjectsPanel from "@/features/Sidebar/components/Panels/ProjectsPanel/ProjectsPanel";

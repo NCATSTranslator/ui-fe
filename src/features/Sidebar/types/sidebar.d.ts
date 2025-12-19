@@ -27,6 +27,7 @@ export type SidebarContextValue = {
 
 export type SidebarItem = {
   ariaLabel?: string;
+  className?: string;
   id: SidebarItemId;
   label: string;
   type: 'link' | 'panel';
@@ -43,6 +44,7 @@ export type SidebarItem = {
 };
 
 export type SidebarRegistrationOptions = {
+  className?: string;
   id: SidebarItemId;
   to?: string;
   onClick?: () => void;
