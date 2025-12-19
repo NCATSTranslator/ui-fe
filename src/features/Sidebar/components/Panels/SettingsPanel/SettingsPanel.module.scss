@@ -68,6 +68,7 @@
     span {
       font-size: $bodyTwoSize;
       color: $darkGray;
+      padding: 0;
     }
     svg {
       path {
@@ -87,7 +88,7 @@
     }
   }
   .backButton {
-    padding: $s;
+    padding: 12px 12px 12px $xs;
     background-color: $white;
     border-bottom: 1px solid $midGray !important;
     justify-content: flex-start;
