@@ -32,6 +32,10 @@ const QueryStatusPanel: FC<QueryStatusPanelProps> = ({
     resultCount
   ), [arsStatus, data.isFetchingARAStatus, data.hasFreshResults, data.isFetchingResults, resultStatus, resultCount]);
 
+  const hideLoadingBar = useMemo(() => {
+    return isComplete || statusLabel === 'All Results Shown' || statusLabel === 'No Results' || statusLabel === 'Error';
+  }, [isComplete, statusLabel]);
+
   return (
     <div className={styles.queryStatusPanel}>
       <div className={styles.top}>
@@ -40,7 +44,7 @@ const QueryStatusPanel: FC<QueryStatusPanelProps> = ({
           <StatusIndicator status={statusIndicatorStatus} />
           <span className={styles.percentage}>{!!arsStatus?.status && `${percentage}% Loaded`}</span>
         </div>
-        <QueryLoadingBar fillPercentage={percentage} full={isComplete} />
+        <QueryLoadingBar fillPercentage={percentage} full={isComplete} hide={hideLoadingBar} />
         {
           statusLabel === 'Error' && (
             <p>There was an error while processing your query results. Please try again later, or try clearing your cache if the problem persists.</p>
@@ -52,18 +56,11 @@ const QueryStatusPanel: FC<QueryStatusPanelProps> = ({
           )
         }
         {
-          (statusLabel === 'New Results Available' || statusLabel === 'All Results Loaded') && (
+          (statusLabel === '' || statusLabel === 'New Results Available') && (
             <p>Translator results are loaded incrementally due to the complexity of our reasoning systems. As more results become available, you'll be prompted to refresh the page to view them.</p>
           )
         }
-        {
-          statusLabel === 'Loading' && (
-            <>
-              <p>Translator results are loaded incrementally due to the complexity of our reasoning systems. As more results become available, you'll be prompted to refresh the page to view them.</p>
-              <p>You can run a new query or explore the results, bookmarks, and notes from your past queries in <Link to="/projects">Projects</Link> while you wait for results to load.</p>
-            </>          
-          )
-        }
+        <p>You can <Link to="/new-query">run another query</Link> or explore the results, bookmarks, and notes from your past queries in your <Link to="/projects">Projects</Link> or <Link to="/queries">Query History</Link> while you wait for results to load.</p>
       </div>
       <div className={styles.bottom}>
         <ResultListLoadingButton 

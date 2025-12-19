@@ -8,8 +8,9 @@
     display: grid;
     gap: $s;
   }
-  p {
+  p, a {
     margin: 0;
+    font-size: $bodyTwoSize;
   }
   .statusIndicator {
     display: flex;
