@@ -18,7 +18,7 @@ const Header: FC<HeaderProps> = ({children}) => {
         </Link>
       </div>
       <div className={styles.right}>
-        <p className={styles.disclaimer}>This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
+        <p className={styles.disclaimer} title="This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.">This system is for research purposes and is not meant to be used by clinical service providers in the course of treating patients.</p>
       </div>
         {children}
     </header>
