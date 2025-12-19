@@ -6,6 +6,7 @@
   transition: $defaultAnim;
   overflow: hidden;
   position: relative;
+  height: 100%;
   .activeFilterFamily {
     position: absolute;
     inset: 0 1px 0 0;
