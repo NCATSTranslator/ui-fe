@@ -32,21 +32,22 @@ import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARASt
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
-import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
+import { useResultsStatusQuery, useResultsDataQuery, useResultsCompleteToast } from "@/features/ResultList/hooks/resultListHooks";
 import { getDecodedParams } from '@/features/Common/utils/web';
-import { useSidebarRegistration } from "@/features/Sidebar/hooks/sidebarHooks";
+import { useSidebarRegistration, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
 import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
-import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/FiltersPanel";
 import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from "@/features/Core/utils/toastMessages";
 import { getQueryStatusIndicatorStatus } from "@/features/Projects/utils/utilities";
+import StatusSidebarIcon from "@/features/ResultList/components/StatusSidebarIcon/StatusSidebarIcon";
 
 const ResultList = () => {
 
   const user = useSelector(currentUser);
   const prefs = useSelector(currentPrefs);
   const dispatch = useDispatch();
+  const { togglePanel } = useSidebar();
 
   // URL search params
   const decodedParams = useMemo(() => getDecodedParams(), []);
@@ -164,7 +165,12 @@ const ResultList = () => {
   const [userSaves, setUserSaves] = useState<SaveGroup | null>(null);
   const [showHiddenPaths, setShowHiddenPaths] = useState(false);
   const shouldUpdateResultsAfterBookmark = useRef(false);
+  const [showQueryStatusToast, setShowQueryStatusToast] = useState(true);
   const hasFreshResults = useMemo(() => freshRawResults !== null, [freshRawResults]);
+
+  useEffect(() => {
+    setShowQueryStatusToast(hasFreshResults);
+  }, [hasFreshResults]);
 
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
@@ -661,16 +667,25 @@ const ResultList = () => {
     resultStatus,
     formattedResults.length || 0
   )
+  
+  useResultsCompleteToast(arsStatus, isFetchingResults.current);
+
+  const handleQueryStatusClick = () => {
+    togglePanel('queryStatus');
+    setShowQueryStatusToast(false);
+  }
 
   // Register the status sidebar item
   useSidebarRegistration({
     ariaLabel: "Query Status",
-    icon: () => <StatusIndicator status={statusIndicatorStatus} inSidebar redDot={hasFreshResults} className={styles.statusIndicator}/>,
+    className: styles.statusSidebarIcon,
+    onClick: handleQueryStatusClick,
+    icon: () => <StatusSidebarIcon status={statusIndicatorStatus} hasFreshResults={hasFreshResults} showQueryStatusToast={showQueryStatusToast} setShowQueryStatusToast={setShowQueryStatusToast} />,
     id: 'queryStatus',
     label: "Status",
     panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} resultStatus={resultStatus} resultCount={formattedResults.length || 0} />,
     tooltipText: "",
-    dependencies: [arsStatus, loadingButtonData, resultStatus, formattedResults.length]
+    dependencies: [arsStatus, loadingButtonData, resultStatus, formattedResults.length, showQueryStatusToast, hasFreshResults, statusIndicatorStatus, setShowQueryStatusToast]
   });
 
   // Register the filters sidebar item
