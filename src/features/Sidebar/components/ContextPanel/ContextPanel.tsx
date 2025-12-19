@@ -37,7 +37,7 @@ const ContextPanel: FC<ContextPanelProps> = ({
   }, [closePanel, setSelectedProjectMode, isSelectedProjectMode, activePanelId]);
 
   return (
-    <div className={`${styles.contextPanel} scrollable ${reduceSpacing && styles.reduceSpacing}`}>
+    <div className={`${styles.contextPanel}  ${reduceSpacing && styles.reduceSpacing}`}>
       <div className={styles.header}>
         <h6 className={styles.title}>{title}</h6>
         <div className={styles.buttonContainer}>
@@ -50,7 +50,7 @@ const ContextPanel: FC<ContextPanelProps> = ({
           />
         </div>
       </div>
-      <div className={styles.content}>
+      <div className={`${styles.content} scrollable`}>
         {panel}
       </div>
     </div>
