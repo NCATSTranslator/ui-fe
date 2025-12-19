@@ -21,6 +21,7 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
         const icon = item.icon;
         const isGrayedOut = (item.id === 'projects' || item.id === 'queries') && !user;
         const hasRedDot = item.id === 'settings' && !user;
+        const onClick = isGrayedOut ? undefined : item.onClick ? item.onClick : () => togglePanel(item.id);
 
         return item.type === 'link'
           ? 
@@ -31,18 +32,20 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
               tooltipText={isGrayedOut ? noUserTooltipText : tooltipText}
               ariaLabel={ariaLabel}
               isGrayedOut={isGrayedOut}
-              onClick={isGrayedOut ? undefined : item.onClick}
+              onClick={onClick}
               hasRedDot={hasRedDot}
+              className={item.className}
             />
           : 
             <SidebarLink
               key={item.id}
-              onClick={isGrayedOut ? undefined : () => togglePanel(item.id)}
+              onClick={onClick}
               icon={icon}
               tooltipText={isGrayedOut ? noUserTooltipText : tooltipText}
               ariaLabel={ariaLabel}
               isGrayedOut={isGrayedOut}
               hasRedDot={hasRedDot}
+              className={item.className}
             />
       }
       )}
