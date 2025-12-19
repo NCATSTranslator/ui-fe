@@ -231,7 +231,7 @@ export const getQueryStatusIndicatorStatus = (
   resultStatus: "error" | "running" | "success" | "unknown",
   resultCount: number
 ): { 
-  label: 'Loading' | 'Error' | 'New Results Available' | 'All Results Loaded' | 'No Results' | 'Unknown';
+  label: 'Error' | 'New Results Available' | 'All Results Shown' | 'No Results' | 'Unknown' | '';
   status: 'complete' | 'running' | 'error' | 'unknown';
 } => {
   // Error states take highest priority
@@ -253,15 +253,15 @@ export const getQueryStatusIndicatorStatus = (
     if(resultCount === 0) {
       return { label: 'No Results', status: 'unknown' };
     } else {
-      return { label: 'All Results Loaded', status: 'complete' };
+      return { label: 'All Results Shown', status: 'complete' };
     }
   }
   
   // Loading states
   if(isFetchingARAStatus || arsStatus?.status === 'running' || arsStatus === null || isFetchingResults) {
-    return { label: 'Loading', status: 'running' };
+    return { label: '', status: 'running' };
   }
   
   // Default fallback
-  return { label: 'Unknown', status: 'unknown' };
+  return { label: '', status: 'unknown' };
 }
