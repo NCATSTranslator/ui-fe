@@ -246,7 +246,7 @@ const HelpPanel = () => {
           <Accordion
             key={item.id}
             title={
-              <>
+              <span>
                 <Highlighter
                   highlightClassName="highlight"
                   searchWords={searchTerm ? [searchTerm] : []}
@@ -261,7 +261,7 @@ const HelpPanel = () => {
                     textToHighlight=" *"
                   />
                 )}
-              </>
+              </span>
             }
             // uncomment to expand all accordions when search term is used
             // expanded={searchTerm ? true : false}
