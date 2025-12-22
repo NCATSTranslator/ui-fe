@@ -47,6 +47,9 @@
     .optionsButton {
       opacity: 1;
     }
+    .title, .title span, .title mark {
+      text-decoration: underline;
+    }
   }
   .optionsButton {
     opacity: 0;
