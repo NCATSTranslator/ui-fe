@@ -187,18 +187,22 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
       {
         <div className={`${styles.section} ${Object.keys(sortedFacets).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
           {
-            sortedFacets.map((tag: [string, Filter]) => {
-              return(
-                <FacetTag
-                  key={tag[1].id}
-                  activeFilters={activeFilters}
-                  family={filterFamily}
-                  onFilter={onFilter}
-                  filterObject={tag}
-                />
-              )
-            })
-          }
+            sortedFacets.length === 0 
+            ? 
+              <p className={styles.noResults}>No matches found for <span className={styles.searchTerm}>"{chemicalCategorySearchTerm}"</span></p>
+            :
+              sortedFacets.map((tag: [string, Filter]) => {
+                return(
+                  <FacetTag
+                    key={tag[1].id}
+                    activeFilters={activeFilters}
+                    family={filterFamily}
+                    onFilter={onFilter}
+                    filterObject={tag}
+                  />
+                )
+              })
+            }
         </div>
       }
     </div>
