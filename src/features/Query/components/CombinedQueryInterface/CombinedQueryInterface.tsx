@@ -16,6 +16,7 @@ import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
+import { useLocation } from "react-router-dom";
 
 interface CombinedQueryInterfaceProps {
   className?: string;
@@ -52,7 +53,16 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
 }) => {
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser);
-  const { activePanelId, togglePanel, isSelectedProjectMode, setSelectedProjectMode, selectedProject, setSelectedProject, clearSelectedProject } = useSidebar();
+  const location = useLocation();
+  const {
+    activePanelId,
+    togglePanel,
+    isSelectedProjectMode,
+    setSelectedProjectMode,
+    selectedProject,
+    setSelectedProject,
+    clearSelectedProject
+  } = useSidebar();
   const isPathfinderEnabled = config?.include_pathfinder;
   const showAddToProject = !!user && config?.include_projects;
 
@@ -76,10 +86,13 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
     clearSelectedProject();
   };
 
+  // On navigation, apply defaultProject if provided, otherwise clear the selected project
   useEffect(() => {
-    if(defaultProject)
+    if (defaultProject)
       setSelectedProject(defaultProject);
-  }, [defaultProject]);
+    else
+      clearSelectedProject();
+  }, [location.pathname, defaultProject?.id]);
 
   return (
     <div className={classNames}>

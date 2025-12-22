@@ -108,6 +108,7 @@ const ProjectDetailInner = () => {
       <Button handleClick={() => {if(data.project) openDeleteProjectModal(data.project)}} iconLeft={<TrashIcon />}>Delete</Button>
     </>
   );
+  
   const handleOutsideTabListClick = useCallback(() => {
     setOptionsOpen(false);
   }, [optionsOpen]);
