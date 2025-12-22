@@ -32,7 +32,7 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
               tooltipText={isGrayedOut ? noUserTooltipText : tooltipText}
               ariaLabel={ariaLabel}
               isGrayedOut={isGrayedOut}
-              onClick={onClick}
+              onClick={item.onClick}
               hasRedDot={hasRedDot}
               className={item.className}
             />
