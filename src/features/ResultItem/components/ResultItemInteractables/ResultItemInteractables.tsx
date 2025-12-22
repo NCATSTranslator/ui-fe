@@ -80,8 +80,8 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
                     <span className={styles.tooltip}>
                       {
                         isBookmarked
-                        ? <>Remove this bookmark.</>
-                        : <>Bookmark this result to review it later in the <Link to="/workspace" target='_blank'>Workspace</Link>.</>
+                        ? <>Remove this result from your bookmarks.</>
+                        : <>Bookmark this result to review it later in your <Link to="/projects" target='_blank'>Projects</Link>.</>
                       }
                     </span>
                   </Tooltip>
@@ -103,7 +103,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
                     aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`}
                   />
                   <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
-                    <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/workspace" target='_blank'>Workspace</Link>).</span>
+                    <span className={styles.tooltip}>Add your own custom notes to this result. You can also view and edit notes on your bookmarked results in your <Link to="/projects" target='_blank'>Projects</Link>.</span>
                   </Tooltip>
                   <span className={styles.label}>Notes</span>
                 </button>
