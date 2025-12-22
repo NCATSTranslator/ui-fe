@@ -6,7 +6,6 @@ import { cloneDeep } from 'lodash';
 import { isEntityFilter, makeEntitySearch } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import FacetTag from '@/features/ResultFiltering/components/FacetTag/FacetTag';
-import FacetHeading from '@/features/ResultFiltering/components/FacetHeading/FacetHeading';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 
 interface EntitySearchProps {
