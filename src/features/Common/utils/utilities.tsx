@@ -438,39 +438,39 @@ export const getTimeRelativeDate = (date: Date): string => {
 
   const now = new Date();
   const inputDate = new Date(date);
-  
+
   // Check if it's today
   const isToday = now.getFullYear() === inputDate.getFullYear() &&
                   now.getMonth() === inputDate.getMonth() &&
                   now.getDate() === inputDate.getDate();
-  
+
   if (isToday) {
     // Return time in format like "8:59am"
-    const timeFormatOptions: Intl.DateTimeFormatOptions = { 
-      hour: 'numeric', 
-      minute: '2-digit', 
-      hour12: true 
+    const timeFormatOptions: Intl.DateTimeFormatOptions = {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
     };
     return new Intl.DateTimeFormat('en-US', timeFormatOptions).format(inputDate).toLowerCase();
   }
-  
+
   // Check if it's in the current year
   const isCurrentYear = now.getFullYear() === inputDate.getFullYear();
-  
+
   if (isCurrentYear) {
     // Return brief date like "Oct 14"
-    const briefDateOptions: Intl.DateTimeFormatOptions = { 
-      month: 'short', 
-      day: 'numeric' 
+    const briefDateOptions: Intl.DateTimeFormatOptions = {
+      month: 'short',
+      day: 'numeric'
     };
     return new Intl.DateTimeFormat('en-US', briefDateOptions).format(inputDate);
   }
-  
+
   // Return numerical date like "6/10/24" for older years
-  const numericalDateOptions: Intl.DateTimeFormatOptions = { 
-    month: 'numeric', 
-    day: 'numeric', 
-    year: '2-digit' 
+  const numericalDateOptions: Intl.DateTimeFormatOptions = {
+    month: 'numeric',
+    day: 'numeric',
+    year: '2-digit'
   };
   return new Intl.DateTimeFormat('en-US', numericalDateOptions).format(inputDate);
 }
@@ -641,6 +641,11 @@ export const hasSupport = (item: ResultEdge | null | undefined): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;
 };
 
+export const isPathIndirectEdge = (resultSet: ResultSet, path: Path): boolean => {
+  if (!(path.subgraph && path.subgraph.length === 3)) return false;
+  const edge = getEdgeById(resultSet, path.subgraph[1]);
+  return hasSupport(edge);
+}
 /**
  * Generates a single compressed edge based on a provided list of edge IDs.
  *

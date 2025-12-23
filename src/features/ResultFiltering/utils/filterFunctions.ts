@@ -120,10 +120,6 @@ export const isEvidenceFilter = (filter: Filter): boolean => {
   return getFilterFamily(filter) === 'ev';
 }
 
-export const isIndirectFilter = (filter: Filter): boolean => {
-  return getFilterFamily(filter) === 'pt' && _getFilterSpecifier(filter) === 'inf';
-}
-
 export const isExclusion = (filter: Filter): boolean => {
   return filter.negated || false;
 }
