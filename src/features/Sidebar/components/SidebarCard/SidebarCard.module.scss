@@ -9,6 +9,7 @@
   transition: $defaultAnim;
   background-color: $lightGray;
   position: relative;
+  font-weight: 400;
   &.activeQuery, &.projectCard.activeProject {
     background-color: $lightPurpleTwo;
     .leftSection svg path, .count svg path {
@@ -38,6 +39,7 @@
   }
   &:hover {
     background-color: $lightPurpleTwo;
+    text-decoration: none;
     .title, .title span, .title mark, .count {
       color: $purpleOne;
     }

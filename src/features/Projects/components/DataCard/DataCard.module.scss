@@ -4,6 +4,8 @@
   background-color: $white;
   border-radius: $defaultBorderRadius;
   transition: $defaultAnim;
+  display: block;
+  font-weight: 400;
   .container {
     display: grid;
     gap: $dataCardGap;
@@ -26,6 +28,8 @@
   }
   &:hover {
     background-color: $whiteHover;
+    cursor: pointer;
+    text-decoration: none;
     .title, .title span, .title mark, .count,.bookmarksColumn, .notesColumn, .queriesColumn, .date, .icon  {
       color: $purpleOne;
       svg path {

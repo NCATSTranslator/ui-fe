@@ -1,4 +1,4 @@
-import { FC, ReactNode, MouseEvent, useCallback, useState, useMemo, FormEvent, RefObject } from "react";
+import { FC, ReactNode, MouseEvent, useState, useMemo, FormEvent, RefObject } from "react";
 import styles from "./DataCard.module.scss";
 import { joinClasses } from "@/features/Common/utils/utilities";
 import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
@@ -9,6 +9,7 @@ import Button from "@/features/Core/components/Button/Button";
 import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
 import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
 import { QueryTypeString } from "@/features/Projects/types/projects";
+import CardWrapper from "@/features/Projects/components/CardWrapper/CardWrapper";
 
 interface DataCardProps {
   icon: ReactNode;
@@ -55,13 +56,6 @@ const DataCard: FC<DataCardProps> = ({
   queryType,
   date
 }) => {
-  const handleClick = useCallback((event: MouseEvent<HTMLDivElement>) => {
-    // Don't trigger onClick if user clicked on a link
-    if (linkTo && event.target !== event.currentTarget) {
-      return;
-    }
-    onClick?.(event);
-  }, [onClick, linkTo]);
 
   const cardClassName = joinClasses(styles.dataCard, className, isRenaming && styles.isRenaming, type === 'project' && styles.projectCard, type === 'query' && styles.queryCard);
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -73,10 +67,12 @@ const DataCard: FC<DataCardProps> = ({
   }, [queryType]);
 
   return (
-    <div 
+    <CardWrapper 
       className={cardClassName}
-      onClick={onClick ? handleClick : undefined}
-      data-testid={testId}
+      onClick={onClick}
+      linkTo={linkTo}
+      linkTarget={linkTarget}
+      testId={testId}
     >
       <div className={styles.container}>
         <CardName
@@ -129,7 +125,7 @@ const DataCard: FC<DataCardProps> = ({
           )
         }
       </div>
-    </div>
+    </CardWrapper>
   );
 };
 

@@ -1,4 +1,4 @@
-import { FC, ReactNode, MouseEvent, useCallback, useState, FormEvent, RefObject } from "react";
+import { FC, ReactNode, MouseEvent, useState, FormEvent, RefObject } from "react";
 import styles from "./SidebarCard.module.scss";
 import { joinClasses } from "@/features/Common/utils/utilities";
 import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
@@ -6,6 +6,7 @@ import SidebarCardTitle from "@/features/Sidebar/components/SidebarCardTitle/Sid
 import Button from "@/features/Core/components/Button/Button";
 import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
 import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
+import CardWrapper from "@/features/Projects/components/CardWrapper/CardWrapper";
 
 interface SidebarCardProps {
   ignoreTitleMatch?: boolean;
@@ -48,22 +49,17 @@ const SidebarCard: FC<SidebarCardProps> = ({
   onFormSubmit,
   textInputRef
 }) => {
-  const handleClick = useCallback((event: MouseEvent<HTMLDivElement>) => {
-    if(onClick === undefined)
-      return;
-
-    onClick?.(event);
-  }, [onClick, linkTo]);
 
   const cardClassName = joinClasses(styles.sidebarCard, className, isRenaming && styles.isRenaming);
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const link = (onClick === undefined) ? linkTo : undefined;
 
   return (
-    <div 
+    <CardWrapper 
       className={cardClassName}
-      onClick={onClick ? handleClick : undefined}
-      data-testid={testId}
+      onClick={onClick}
+      linkTo={linkTo}
+      linkTarget={linkTarget}
+      testId={testId}
     >
       <div className={styles.leftSection}>
         {leftIcon}
@@ -73,7 +69,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
           ignoreTitleMatch={ignoreTitleMatch}
           title={title}
           searchTerm={searchTerm}
-          linkTo={link}
+          linkTo={linkTo}
           linkTarget={linkTarget}
           isRenaming={isRenaming}
           onTitleChange={onTitleChange}
@@ -103,7 +99,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
           )
         }
       </div>
-    </div>
+    </CardWrapper>
   );
 };
 
