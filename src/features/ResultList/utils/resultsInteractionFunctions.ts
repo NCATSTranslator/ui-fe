@@ -525,9 +525,9 @@ export const calculateFacetCounts = (
 function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
                                 pathRanks: PathRank[],
                                 unrankedIsFiltered: boolean) {
-  _updateState(pathFilterState, pathRanks, unrankedIsFiltered, 0);
+  __updateState(pathFilterState, pathRanks, unrankedIsFiltered, 0);
 
-  function _updateState(pathFilterState: {[key: string]: boolean},
+  function __updateState(pathFilterState: {[key: string]: boolean},
                         pathRanks: PathRank[],
                         unrankedIsFiltered: boolean,
                         depth: number) {
@@ -535,7 +535,7 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
       const pid = pathRank.path.id;
       if (!pid) continue;
       pathFilterState[pid] = false;
-      _updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
+      __updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
       if (pathRank.support.length !== 0) {
         let filterIndirect = true;
         for (let supportRank of pathRank.support) {

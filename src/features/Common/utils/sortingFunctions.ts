@@ -1,11 +1,11 @@
 import { equal } from 'mathjs';
-import { getPathCount, hasSupport, getStringNameFromPath, getDefaultEdge } from '@/features/Common/utils/utilities';
+import { getPathCount, hasSupport, isPathIndirectEdge, getStringNameFromPath, getDefaultEdge } from '@/features/Common/utils/utilities';
 import { getEvidenceCounts, isPublicationObjectArray, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
 import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore } from '@/features/ResultList/utils/scoring';
-import { getFilterFamily, getTagFamily, isEvidenceFilter, isIndirectFilter, CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
+import { getFilterFamily, getTagFamily, isEvidenceFilter, CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 import { getEdgeById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
@@ -239,26 +239,26 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
   const excludeRankBase = 1;
   const evidenceFilters = [];
   const otherFilters = [];
-  let indirectExcluded = false;
 
   for (const ftr of pathFilters) {
     if (isEvidenceFilter(ftr)) {
       evidenceFilters.push(ftr);
-    } else if (isIndirectFilter(ftr) && ftr.negated) {
-      indirectExcluded = true;
     } else {
       otherFilters.push(ftr);
     }
   }
-  _updatePathRanks(resultSet, path, pathRank, evidenceFilters, otherFilters, indirectExcluded);
+  _updatePathRanks(resultSet, path, pathRank, evidenceFilters, otherFilters);
 
   function _updatePathRanks(resultSet: ResultSet, path: Path, pathRank: PathRank,
-      evidenceFilters: Filter[], otherFilters: Filter[], indirectExcluded: boolean) {
+      evidenceFilters: Filter[], otherFilters: Filter[]) {
     // Apply exclusion first
-    for (const ftr of otherFilters) {
-      if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
-        pathRank.rank = excludeRankBase * (ftr.excludeWeight ? ftr.excludeWeight : CONSTANTS.WEIGHT.HEAVY);
-        return;
+    const isIndirectEdge = isPathIndirectEdge(resultSet, path);
+    if (!isIndirectEdge) {
+      for (const ftr of otherFilters) {
+        if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
+          pathRank.rank = excludeRankBase * (ftr.excludeWeight ? ftr.excludeWeight : CONSTANTS.WEIGHT.HEAVY);
+          return;
+        }
       }
     }
     // Next apply edge level and indirect edge filtering
@@ -278,13 +278,13 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
             console.warn(`_updatePathRanks: found undefined or null support path in edge: ${edge}`);
             continue;
           }
-          _updatePathRanks(resultSet, supportPath, supportRank, evidenceFilters, otherFilters, indirectExcluded);
+          _updatePathRanks(resultSet, supportPath, supportRank, evidenceFilters, otherFilters);
           if (supportRank && supportRank.rank !== undefined && supportRank.rank !== null) {
             supportRanks.push(supportRank.rank);
           }
         }
         const nonExcludedRanks = supportRanks.filter(rank => rank <= 0)
-        if (indirectExcluded || nonExcludedRanks.length === 0) {
+        if (nonExcludedRanks.length === 0) {
           pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
           return;
         } else {
@@ -311,6 +311,7 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
       pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
       return;
     }
+    if (isIndirectEdge) return;
     // Finally apply inclusion based on other filters
     otherFilters.sort();
     let include = true;
@@ -327,10 +328,10 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
       }
       if (include) {
         pathRank.rank += includeRankBase * CONSTANTS.WEIGHT.LIGHT;
-      } else {
-        pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
-        return;
       }
+    }
+    if (!include) {
+      pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
     }
   }
 
