@@ -67,6 +67,9 @@
       -webkit-line-clamp: 2;
       line-clamp: 2;
       overflow: hidden;
+      span {
+        display: inline;
+      }
     }
   }
   .titleForm {
