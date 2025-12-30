@@ -52,6 +52,17 @@ const SidebarCard: FC<SidebarCardProps> = ({
 
   const cardClassName = joinClasses(styles.sidebarCard, className, isRenaming && styles.isRenaming);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const onOptionsClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOptionsOpen(prev => !prev);
+  };
+
+  const onOptionItemClick = (e: MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOptionsOpen(false);
+  };
 
   return (
     <CardWrapper 
@@ -88,11 +99,11 @@ const SidebarCard: FC<SidebarCardProps> = ({
           (        
             <div className={styles.options}>
               <OutsideClickHandler onOutsideClick={()=>setOptionsOpen(false)}>
-                <Button className={styles.optionsButton} handleClick={()=>setOptionsOpen(prev=>!prev)}>
+                <Button className={styles.optionsButton} handleClick={onOptionsClick}>
                   <OptionsIcon />
                 </Button>
               </OutsideClickHandler>
-              <OptionsPane open={optionsOpen}>
+              <OptionsPane open={optionsOpen} onOptionItemClick={onOptionItemClick}>
                 {options && options}
               </OptionsPane>
             </div>

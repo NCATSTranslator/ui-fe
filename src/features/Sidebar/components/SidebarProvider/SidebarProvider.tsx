@@ -62,7 +62,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }, []);
 
   const clearAddToProjectMode = useCallback(() => {
-    closePanel();
+    setAddToProjectQuery(null);
   }, []);
 
 

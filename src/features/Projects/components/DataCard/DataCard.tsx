@@ -66,6 +66,18 @@ const DataCard: FC<DataCardProps> = ({
     return 'Unknown Query Type';
   }, [queryType]);
 
+  const onOptionsClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOptionsOpen(prev => !prev);
+  };
+
+  const onOptionItemClick = (e: MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOptionsOpen(false);
+  };
+
   return (
     <CardWrapper 
       className={cardClassName}
@@ -114,11 +126,11 @@ const DataCard: FC<DataCardProps> = ({
           (        
             <div className={styles.optionsColumn}>
               <OutsideClickHandler onOutsideClick={()=>setOptionsOpen(false)}>
-                <Button className={styles.optionsButton} handleClick={()=>setOptionsOpen(prev=>!prev)}>
+                <Button className={styles.optionsButton} handleClick={onOptionsClick}>
                   <OptionsIcon />
                 </Button>
               </OutsideClickHandler>
-              <OptionsPane open={optionsOpen}>
+              <OptionsPane open={optionsOpen} onOptionItemClick={onOptionItemClick}>
                 {options && options}
               </OptionsPane>
             </div>
