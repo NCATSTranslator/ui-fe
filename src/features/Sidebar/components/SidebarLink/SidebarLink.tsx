@@ -1,8 +1,9 @@
-import { FC, ReactNode, useId } from "react";
+import { FC, ReactNode } from "react";
 import styles from "./SidebarLink.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import { joinClasses } from "@/features/Common/utils/utilities";
+import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 
 interface SidebarLinkProps {
   ariaLabel?: string;
@@ -10,6 +11,7 @@ interface SidebarLinkProps {
   href?: string;
   hasRedDot?: boolean;
   icon: ReactNode | (() => ReactNode);
+  id: string;
   isGrayedOut?: boolean;
   onClick?: () => void;
   to?: string;
@@ -22,17 +24,20 @@ const SidebarLink: FC<SidebarLinkProps> = ({
   href,
   hasRedDot = false,
   icon,
+  id,
   isGrayedOut = false,
   onClick,
   to,
   tooltipText
 }) => {
-  const id = useId();
+  const { activePanelId } = useSidebar();
+  const tooltipId = `${id}-tooltip`;
   const classNames = joinClasses(
     styles.sidebarLink,
     styles.link,
     isGrayedOut && styles.grayedOut,
     hasRedDot && styles.redDot,
+    activePanelId === id && styles.active,
     className
   );
   const isLink = !!to;
@@ -46,13 +51,13 @@ const SidebarLink: FC<SidebarLinkProps> = ({
         handleClick={onClick}
         iconLeft={typeof icon === 'function' ? icon() : icon}
         iconOnly
-        dataTooltipId={id}
+        dataTooltipId={tooltipId}
         className={classNames}
       >
       </Button>
       {
         tooltipText && (
-          <Tooltip id={id} place="right">
+          <Tooltip id={tooltipId} place="right">
             <span>{tooltipText}</span>
           </Tooltip>
         )
