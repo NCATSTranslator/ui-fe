@@ -31,6 +31,7 @@ import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 import EmptyArea from '@/features/Projects/components/EmptyArea/EmptyArea';
 import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
+import DropLabel from '@/features/Projects/components/DropLabel/DropLabel';
   
 const ProjectDetailInner = () => {
   // Data management
@@ -53,7 +54,7 @@ const ProjectDetailInner = () => {
   const sortSearchState = useSortSearchState();
   const { handleUpdateProject } = useEditProjectHandlers();
   const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
-  const { togglePanel } = useSidebar();
+  const { togglePanel, activePanelId } = useSidebar();
   // Global modals context
   const {
     openDeleteProjectModal,
@@ -125,6 +126,10 @@ const ProjectDetailInner = () => {
   const queriesTabHeading = useMemo(() => {
     return `${sortedData.sortedQueries.length} Quer${sortedData.sortedQueries.length === 1 ? 'y' : 'ies'}`;
   }, [sortedData.sortedQueries]);
+
+  const showDropLabel = useMemo(() => {
+    return activePanelId === 'projects';
+  }, [activePanelId]);
 
   return (
     <div className={styles.projectDetail}>
@@ -199,6 +204,10 @@ const ProjectDetailInner = () => {
                       indicatorStatus={isDraggedQueryInProject ? 'error' : 'default'}
                       className={styles.droppableArea}
                     >
+                      <DropLabel
+                        show={showDropLabel}
+                        label="Drag to drop queries into projects."
+                      />
                       <LoadingWrapper loading={data.loading.queriesLoading}>
                         <CardList className={styles.cardList}>
                           {sortedData.sortedQueries.length > 0 && (
