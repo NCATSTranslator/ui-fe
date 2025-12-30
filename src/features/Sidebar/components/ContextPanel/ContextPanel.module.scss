@@ -31,13 +31,13 @@
   .content {
     padding: $s 15px $s $s;
     position: relative;
-    width: calc($panelWidth - ($s*2));
+    width: calc(($panelWidth - ($s*2)) + 1px);
     overflow: hidden auto;
   }
   &.reduceSpacing {
     .content {
       padding: 0;
-      width: calc($panelWidth - 1px);
+      width: $panelWidth;
     }
     .header {
       margin-bottom: 0;

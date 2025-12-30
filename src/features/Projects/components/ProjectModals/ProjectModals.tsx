@@ -5,6 +5,7 @@ import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQu
 import { Project, UserQueryObject, QueryEditingItem, ProjectRaw } from '@/features/Projects/types/projects.d';
 import ShareModal from '@/features/ResultList/components/ShareModal/ShareModal';
 import { getTypeIDFromType } from '@/features/Projects/utils/utilities';
+import { Link } from 'react-router-dom';
 
 interface ProjectModalsProps {
   modals: Record<string, boolean>;
@@ -100,7 +101,7 @@ const ProjectModals = ({
           onConfirm={handleConfirmDeleteProjects}
           onCancel={handleCancelDeleteProjects}
           heading={`${projectCount > 1 ? `Delete ${projectCount} Projects` : 'Delete Project'}?`}
-          content={`Queries in this project, along with any bookmarks or notes associated with them, will not be deleted and will still be available from your Query History.`}
+          content={<p>Queries in this project, along with any bookmarks or notes associated with them, will not be deleted and will still be available from your <Link to="/queries" target="_blank">Query History</Link>.</p>}
           cancelButtonText="Cancel"
           confirmButtonText={`${projectCount > 1 ? `Delete ${projectCount} Projects` : 'Delete Project'}`}
           setStorageKeyFn={deletePrompts.deleteProjects?.setHideDeletePrompt}

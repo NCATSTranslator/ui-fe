@@ -4,12 +4,13 @@
   position: relative;
   .createNewProjectButton {
     position: absolute;
-    top: 0;
+    top: $xxs;
     right: $xl;
     z-index: 10;
     padding: 0;
     span {
       padding: 0;
+      font-size: $captionSize;
     }
   }
 }

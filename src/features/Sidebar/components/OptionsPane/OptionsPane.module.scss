@@ -28,6 +28,7 @@
       font-size: $bodyTwoSize !important;
       font-weight: 400 !important;
       white-space: nowrap;
+      transition: $defaultAnim;
     }
     svg {
       path {
@@ -36,6 +37,9 @@
     }
     &:hover {
       background-color: $palePurple;
+      span {
+        color: $purpleOne;
+      }
       svg {
         path {
           fill: $purpleOne;

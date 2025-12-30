@@ -9,6 +9,7 @@
   transition: $defaultAnim;
   background-color: $lightGray;
   position: relative;
+  font-weight: 400;
   &.activeQuery, &.projectCard.activeProject {
     background-color: $lightPurpleTwo;
     .leftSection svg path, .count svg path {
@@ -38,6 +39,7 @@
   }
   &:hover {
     background-color: $lightPurpleTwo;
+    text-decoration: none;
     .title, .title span, .title mark, .count {
       color: $purpleOne;
     }
@@ -46,6 +48,9 @@
     }
     .optionsButton {
       opacity: 1;
+    }
+    .title, .title span, .title mark {
+      text-decoration: underline;
     }
   }
   .optionsButton {
@@ -105,6 +110,9 @@
       -webkit-line-clamp: 2;
       line-clamp: 2;
       overflow: hidden;
+      span {
+        display: inline;
+      }
     }
   }
   .titleMatch {

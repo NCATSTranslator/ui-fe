@@ -6,7 +6,6 @@ import { cloneDeep } from 'lodash';
 import { isEntityFilter, makeEntitySearch } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import FacetTag from '@/features/ResultFiltering/components/FacetTag/FacetTag';
-import FacetHeading from '@/features/ResultFiltering/components/FacetHeading/FacetHeading';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 
 interface EntitySearchProps {
@@ -60,11 +59,6 @@ const EntitySearch: FC<EntitySearchProps> = ({
 
   return (
     <div className={`${styles.entitySearch} ${!!className && className}`}>
-      <FacetHeading
-        title="Text Filter"
-        tagFamily="txt"
-        activeFilters={activeFilters}
-      />
       <p className={`${styles.caption} caption`}>Include or exclude results or paths containing a word or phrase in the result name, description, or paths</p>
       <span className={styles.inputContainer}>
         <input
