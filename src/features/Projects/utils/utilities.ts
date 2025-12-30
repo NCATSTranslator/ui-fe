@@ -235,7 +235,7 @@ export const getQueryStatusIndicatorStatus = (
   status: 'complete' | 'running' | 'error' | 'unknown';
 } => {
   // Error states take highest priority
-  if(arsStatus?.status === 'error' || resultStatus === 'error') {
+  if(arsStatus?.status === 'error' || resultStatus === 'error' || (!isFetchingARAStatus && !isFetchingResults && arsStatus === null)) {
     return { label: 'Error', status: 'error' };
   }
   

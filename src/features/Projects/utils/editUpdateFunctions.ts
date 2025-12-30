@@ -1,8 +1,10 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { Project, ProjectEditingItem, ProjectRaw, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
-import { useUpdateProjects, useUpdateQuery, useDeleteProjects, useRestoreProjects, useDeleteQueries, useRestoreQueries, useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
-import { errorToast, projectUpdatedToast, queryUpdatedToast, projectRestoredToast, projectDeletedToast, queryRestoredToast, queryDeletedToast } from '../../Core/utils/toastMessages';
+import { Project, ProjectEditingItem, QueryEditingItem, UserQueryObject } from '@/features/Projects/types/projects.d';
+import { useUpdateProjects, useUpdateQuery, useDeleteProjects, useRestoreProjects, useDeleteQueries,
+ useRestoreQueries, useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
+import { errorToast, projectUpdatedToast, queryUpdatedToast, projectRestoredToast, projectDeletedToast,
+ queryRestoredToast, queryDeletedToast } from '@/features/Core/utils/toastMessages';
 
 export interface EditProjectState {
   isEditing: boolean;

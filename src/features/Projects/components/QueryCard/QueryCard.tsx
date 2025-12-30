@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC, MouseEvent, useMemo } from "react";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import { getQueryLink } from "@/features/Projects/utils/utilities";
@@ -52,6 +52,12 @@ const QueryCard: FC<QueryCardProps> = ({
       togglePanel('queries');
     }
   };
+  const handleShareQuery = () => {
+    openShareQueryModal(query);
+  };
+  const handleDeleteQuery = () => {
+    openDeleteQueriesModal([query]);
+  };
 
   const handleRemoveFromProject = () => {
     if(!projectId) return;
@@ -71,8 +77,8 @@ const QueryCard: FC<QueryCardProps> = ({
           <Button handleClick={handleRemoveFromProject} iconLeft={<FolderEmptyIcon className={styles.folderPlusIcon} />} className={styles.removeFromProjectButton}>Remove from this Project</Button>
         )
       }
-      <Button handleClick={() => openShareQueryModal(query)} iconLeft={<ShareIcon />}>Share Link</Button>
-      <Button handleClick={() => openDeleteQueriesModal([query])} iconLeft={<TrashIcon />}>Delete Query</Button>
+      <Button handleClick={handleShareQuery} iconLeft={<ShareIcon />}>Share Link</Button>
+      <Button handleClick={handleDeleteQuery} iconLeft={<TrashIcon />}>Delete Query</Button>
     </>
   );
 

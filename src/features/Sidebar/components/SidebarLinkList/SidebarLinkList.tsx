@@ -27,18 +27,20 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
           ? 
             <SidebarLink
               key={item.id}
+              id={item.id}
               to={item.to}
               icon={icon}
               tooltipText={isGrayedOut ? noUserTooltipText : tooltipText}
               ariaLabel={ariaLabel}
               isGrayedOut={isGrayedOut}
-              onClick={onClick}
+              onClick={item.onClick}
               hasRedDot={hasRedDot}
               className={item.className}
             />
           : 
             <SidebarLink
               key={item.id}
+              id={item.id}
               onClick={onClick}
               icon={icon}
               tooltipText={isGrayedOut ? noUserTooltipText : tooltipText}

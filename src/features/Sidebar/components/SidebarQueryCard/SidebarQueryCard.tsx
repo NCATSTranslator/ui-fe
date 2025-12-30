@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC, MouseEvent, useMemo } from "react";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
@@ -69,12 +69,18 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
       togglePanel('queries');
     }
   };
+  const handleShareQuery = () => {
+    openShareQueryModal(query);
+  };
+  const handleDeleteQuery = () => {
+    openDeleteQueriesModal([query]);
+  };
 
   const options = (
     <>
       <Button handleClick={handleAddToProject} iconLeft={<FolderPlusIcon className={styles.folderPlusIcon} />} className={styles.addToProjectButton}>Add to Project</Button>
-      <Button handleClick={() => openShareQueryModal(query)} iconLeft={<ShareIcon />}>Share Link</Button>
-      <Button handleClick={() => openDeleteQueriesModal([query])} iconLeft={<TrashIcon />}>Delete Query</Button>
+      <Button handleClick={handleShareQuery} iconLeft={<ShareIcon />}>Share Link</Button>
+      <Button handleClick={handleDeleteQuery} iconLeft={<TrashIcon />}>Delete Query</Button>
     </>
   );
 

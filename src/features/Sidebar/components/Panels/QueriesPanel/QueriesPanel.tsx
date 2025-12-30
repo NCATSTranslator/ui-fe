@@ -16,6 +16,7 @@ import Button from "@/features/Core/components/Button/Button";
 import ChevLeftIcon from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ProjectsPanel from "@/features/Sidebar/components/Panels/ProjectsPanel/ProjectsPanel";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
+import DropLabel from "@/features/Projects/components/DropLabel/DropLabel";
 
 const QueriesPanel = () => {
   const location = useLocation();
@@ -34,6 +35,9 @@ const QueriesPanel = () => {
     clearAddToProjectMode();
     setSelectedProjectMode(false);
   };
+  const showDropLabel = useMemo(() => {
+    return location.pathname.includes('project');
+  }, [location.pathname]);
 
   return (
     <div className={styles.queriesPanel}>
@@ -46,6 +50,10 @@ const QueriesPanel = () => {
           placeholder="Search Queries"
         />
       </div>
+      <DropLabel
+        show={showDropLabel}
+        label="Drag to drop queries into projects."
+      />
       <div className={styles.list}>
         {
           !user ? (

@@ -8,7 +8,7 @@ import QueriesTableHeader from "@/features/Projects/components/TableHeader/Queri
 import QueryCard from "@/features/Projects/components/QueryCard/QueryCard";
 import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
 import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
-import { useFilteredQueries } from "@/features/Sidebar/hooks/sidebarHooks";
+import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
 import Tabs from "@/features/Common/components/Tabs/Tabs";
 import Tab from "@/features/Common/components/Tabs/Tab";
@@ -22,6 +22,7 @@ import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInt
 import EmptyArea from "@/features/Projects/components/EmptyArea/EmptyArea";
 import { joinClasses } from "@/features/Common/utils/utilities";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
+import DropLabel from "@/features/Projects/components/DropLabel/DropLabel";
 
 const QueryList = () => {
   const location = useLocation();
@@ -30,7 +31,7 @@ const QueryList = () => {
   const { searchTerm, handleSearch } = useSimpleSearch();
   const sortSearchState = useSortSearchState();
   const filteredQueries = useFilteredQueries(queries, false, sortSearchState, searchTerm);
-
+  const { activePanelId } = useSidebar();
   const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
 
   const handleRefetch = () => {
@@ -40,6 +41,10 @@ const QueryList = () => {
   const queriesTabHeading = useMemo(() => {
     return `${filteredQueries.length} Quer${filteredQueries.length === 1 ? 'y' : 'ies'}`;
   }, [filteredQueries]);
+
+  const showDropLabel = useMemo(() => {
+    return activePanelId === 'projects';
+  }, [activePanelId]);
 
   return (
     <div className={styles.queriesPanel}>
@@ -90,7 +95,11 @@ const QueryList = () => {
                         submissionCallback={handleRefetch}
                       />
                     </AnimateHeight>
-                    <CardList> 
+                    <CardList>
+                      <DropLabel
+                        show={showDropLabel}
+                        label="Drag to drop queries into projects."
+                      />
                       <QueriesTableHeader
                         sortField={sortSearchState.sortField}
                         sortDirection={sortSearchState.sortDirection}
