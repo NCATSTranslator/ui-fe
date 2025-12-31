@@ -14,7 +14,7 @@ import BookmarkConfirmationModal from '@/features/ResultItem/components/Bookmark
 import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { handleBookmarkClick as handleBookmarkClickUtil, handleNotesClick as handleNotesClickUtil, BookmarkFunctionParams } from '@/features/ResultItem/utils/bookmarkFunctions';
 import { useSelector } from 'react-redux';
-import { getResultSetById, getNodeById } from '@/features/ResultList/slices/resultsSlice';
+import { getResultSetById, getNodeById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { displayScore, generateScore } from '@/features/ResultList/utils/scoring';
 import { QueryType } from '@/features/Query/types/querySubmission';
@@ -175,7 +175,7 @@ const ResultItem: FC<ResultItemProps> = ({
   const subjectNode = (!!result) ? getNodeById(resultSet, result.subject) : undefined;
   const objectNode = (!!result) ? getNodeById(resultSet, result.object) : undefined;
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
-  const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, subjectNode.species) : '';
+  const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
   const resultDescription = subjectNode?.descriptions[0];
 
   const handleEdgeSpecificEvidence = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
@@ -211,8 +211,8 @@ const ResultItem: FC<ResultItemProps> = ({
     handleBookmarkError,
     updateUserSaves,
     shouldUpdateResultsAfterBookmark
-  }), [result, resultSet, queryNodeID, queryNodeLabel, queryNodeDescription, queryType, currentQueryID, user, 
-       setIsBookmarked, setItemHasNotes, bookmarkRemovedToast, bookmarkAddedToast, handleBookmarkError, 
+  }), [result, resultSet, queryNodeID, queryNodeLabel, queryNodeDescription, queryType, currentQueryID, user,
+       setIsBookmarked, setItemHasNotes, bookmarkRemovedToast, bookmarkAddedToast, handleBookmarkError,
        updateUserSaves, shouldUpdateResultsAfterBookmark]);
 
   const handleBookmarkClick = useCallback(async (): Promise<string | false> => {
@@ -264,11 +264,11 @@ const ResultItem: FC<ResultItemProps> = ({
     return null;
 
   return (
-    <div 
-      key={key} 
-      className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} 
-      ref={sharedItemRef} 
-      data-result-curie={result.subject} 
+    <div
+      key={key}
+      className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`}
+      ref={sharedItemRef}
+      data-result-curie={result.subject}
       data-result-name={nameString}
       data-aras={result.tags ? getARATagsFromResultTags(result.tags).toString() : ''}>
       <div className={styles.top}>
@@ -388,13 +388,13 @@ const ResultItem: FC<ResultItemProps> = ({
             }
           </div>
         </div>
-        <Tabs 
-          isOpen 
-          className={styles.resultTabs} 
+        <Tabs
+          isOpen
+          className={styles.resultTabs}
           handleTabSelection={(heading)=>{
               if(heading === "Graph")
                 setGraphActive(true);
-              else 
+              else
                 setGraphActive(false);
             }}
           >

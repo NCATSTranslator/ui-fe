@@ -1,5 +1,7 @@
 import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject,
   Provenance, PublicationSupport } from "@/features/Evidence/types/evidence";
+import * as tc from "@/features/Common/types/checkers";
+import { isProvenance } from "@/features/Evidence/types/checkers";
 
 export type ResultSet = {
   status: "error" | "running" | "success",
@@ -70,6 +72,12 @@ export type PathRank = {
   support: PathRank[];
 }
 
+export type EdgeMetadata = {
+  edge_bindings: string[],
+  inverted_id: string | null,
+  is_root: boolean,
+}
+
 export interface ResultEdge {
   // array of ARA names
   aras: string[];
@@ -77,11 +85,7 @@ export interface ResultEdge {
   compressed_edges?: ResultEdge[];
   id: string;
   knowledge_level: KnowledgeLevel;
-  metadata: {
-    edge_bindings: string[],
-    inverted_id: string | null,
-    is_root: boolean,
-  };
+  metadata: EdgeMetadata;
   // nodeID
   object: string;
   predicate: string;
@@ -93,16 +97,52 @@ export interface ResultEdge {
   subject: string;
   // array of path ids or Path objects
   support: string[] | Path[];
-  trials: string[];
   tags: Tags;
+  trials: string[];
 }
 
 export interface RankedEdge extends ResultEdge {
   support: RankedPath[];
 }
 
+export type Species = "Zebrafish" | "Mouse" | "Rat" | null;
+export type Tdl = "Tclin" | "Tchem" | "Tbio" | "Tdark" | null;
+
+export type Annotation = {
+  chemical: ChemicalAnnotation;
+  disease: DiseaseAnnotation;
+  gene: GeneAnnotation;
+}
+
+export type ChebiRole = {
+  id: string;
+  name: string;
+}
+
+export type ChemicalAnnotation = {
+  approval: number | null;
+  clinical_trials: {title: string, url: string}[] | null;
+  descriptions: string[] | null;
+  indications: string[] | null;
+  otc_status: number | null;
+  other_names: {commercial: string[], generic: string[]} | null;
+  roles: ChebiRole[] | null;
+}
+
+export type DiseaseAnnotation = {
+  curies: string[] | null;
+  descriptions: string[] | null;
+}
+
+export type GeneAnnotation = {
+  descriptions: string[] | null;
+  name: string | null;
+  species: Species;
+  tdl: Tdl;
+}
 
 export type ResultNode = {
+  annotations: Annotation;
   aras: string[];
   curies: string[];
   descriptions: string[];
@@ -111,7 +151,6 @@ export type ResultNode = {
   other_names: {[key: string]: string[]};
   // link to relevant info about node
   provenance: string;
-  species: "Zebrafish" | "Mouse" | "Rat" | null;
   tags: Tags;
   // array of biolink types
   types: string[];
@@ -181,52 +220,92 @@ export type HoverTarget = { id: string; type: 'node' | 'edge' } | null;
 
 export const isResultEdge = (obj: unknown): obj is ResultEdge => {
   return (
-    obj &&
-    Array.isArray(obj.aras) &&
-    obj.aras.every((item: unknown) => typeof item === "string") &&
-    typeof obj.is_root === "boolean" &&
-    typeof obj.knowledge_level === "string" &&
-    typeof obj.metadata === "object" &&
-    Array.isArray(obj.metadata.edge_bindings) &&
-    obj.metadata.edge_bindings.every((item: unknown) => typeof item === "string") &&
-    (typeof obj.metadata.inverted_id === "string" || obj.metadata.inverted_id === null) &&
-    typeof obj.metadata.is_root === "boolean" &&
-    typeof obj.object === "string" &&
-    typeof obj.predicate === "string" &&
-    typeof obj.predicate_url === "string" &&
-    (typeof obj.description === "string" || obj.description === null || obj.description === undefined) &&
-    Array.isArray(obj.provenance) &&
-    obj.provenance.every((prov: unknown) => typeof prov === "object") &&
-    typeof obj.publications === "object" &&
-    typeof obj.subject === "string" &&
-    typeof obj.tags === "object" &&
-    Array.isArray(obj.support) &&
-    obj.support.every((item: unknown) => typeof item === "string")
+    tc.isObject(obj) &&
+    tc.isStringArray(obj.aras) &&
+    tc.missable(obj.description, tc.isString) &&
+    tc.isString(obj.id) &&
+    tc.isBoolean(obj.is_root) &&
+    tc.isString(obj.knowledge_level) &&
+    __isEdgeMetadata(obj.metadata) &&
+    tc.isString(obj.object) &&
+    tc.isString(obj.predicate) &&
+    tc.isString(obj.predicate_url) &&
+    tc.makeIsHomogeneousArray(isProvenance)(obj.provenance) &&
+    tc.isObject(obj.publications) &&
+    tc.isString(obj.subject) &&
+    //tc.isObject(obj.tags) &&
+    tc.isStringArray(obj.support) &&
+    tc.isString(obj.type)
   );
+
+  function __isEdgeMetadata(obj: unknown): obj is EdgeMetadata {
+    return (
+      tc.isObject(obj) &&
+      tc.isStringArray(obj.edge_bindings) &&
+      tc.nullable(obj.inverted_id, tc.isString) &&
+      tc.isBoolean(obj.is_root)
+    );
+  }
 }
 
 export const isResultNode = (obj: unknown): obj is ResultNode => {
   return (
-    obj &&
-    Array.isArray(obj.aras) &&
-    obj.aras.every((item: unknown) => typeof item === "string") &&
-    Array.isArray(obj.curies) &&
-    obj.curies.every((item: unknown) => typeof item === "string") &&
-    Array.isArray(obj.descriptions) &&
-    obj.descriptions.every((item: unknown) => typeof item === "string") &&
-    Array.isArray(obj.names) &&
-    obj.names.every((item: unknown) => typeof item === "string") &&
-    Array.isArray(obj.provenance) &&
-    obj.provenance.every((item: unknown) => typeof item === "string") &&
-    (obj.species === "Zebrafish" ||
-      obj.species === "Mouse" ||
-      obj.species === "Rat" ||
-      obj.species === null) &&
-    typeof obj.tags === "object" &&
-    Array.isArray(obj.types) &&
-    obj.types.every((type: unknown) => typeof type === "string")
+    tc.isObject(obj) &&
+    __isAnnotation(obj.annotations) &&
+    tc.isStringArray(obj.aras) &&
+    tc.isStringArray(obj.curies) &&
+    tc.isStringArray(obj.descriptions) &&
+    tc.isString(obj.id) &&
+    tc.isStringArray(obj.names) &&
+    tc.isStringArray(obj.provenance) &&
+    tc.isStringArray(obj.synonyms) &&
+    tc.isStringArray(obj.types)
   );
+
+  function __isAnnotation(obj: unknown): obj is Annotation {
+    return (
+      tc.isObject (obj) &&
+      __isChemicalAnnotation(obj.chemical) &&
+      __isDiseaseAnnotation(obj.disease) &&
+      __isGeneAnnotation(obj.gene)
+    );
+  }
+
+  function __isChemicalAnnotation(obj: unknown): obj is ChemicalAnnotation {
+    return (
+      tc.isObject (obj) &&
+      tc.nullable(obj.approval, tc.isNumber) &&
+      tc.nullable(obj.clinical_trials,
+        tc.makeIsHomogeneousArray(e => tc.isObject(e) && tc.isString(e.title) && tc.isString(e.url))) &&
+      tc.nullable(obj.descriptions, tc.isStringArray) &&
+      tc.nullable(obj.indications, tc.isStringArray) &&
+      tc.nullable(obj.otc_status, tc.isNumber) &&
+      tc.nullable(obj.other_names,
+        e => tc.isObject(e) && tc.isStringArray(e.commercial) && tc.isStringArray(e.generic)) &&
+      tc.nullable(obj.roles,
+        tc.makeIsHomogeneousArray(e => tc.isObject(e) && tc.isString(e.id) && tc.isString(e.name)))
+    );
+  }
+
+  function __isDiseaseAnnotation(obj: unknown): obj is DiseaseAnnotation {
+    return (
+      tc.isObject(obj) &&
+      tc.nullable(obj.curies, tc.isStringArray) &&
+      tc.nullable(obj.descriptions, tc.isStringArray)
+    );
+  }
+
+  function __isGeneAnnotation(obj: unknown): obj is GeneAnnotation {
+    return (
+      tc.isObject(obj) &&
+      tc.nullable(obj.descriptions, tc.isStringArray) &&
+      tc.nullable(obj.name, tc.isString) &&
+      tc.nullable(obj.species, tc.isString) &&
+      tc.nullable(obj.tdl, tc.isString)
+    );
+  }
 }
+
 
 export const isPath = (obj: unknown): obj is Path => {
   return (

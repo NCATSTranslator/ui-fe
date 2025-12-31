@@ -51,7 +51,9 @@ export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNod
     return undefined;
   }
   return node;
-
+}
+export const getNodeSpecies = (node: ResultNode): string | null => {
+  return node.annotations.gene.species;
 }
 export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
   let edge: ResultEdge | undefined = (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
@@ -63,7 +65,7 @@ export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdg
   // Temporary fix to not display the "treats" predicate in the UI
   if(edge.predicate.includes("treat")) {
     let newEdge = cloneDeep(edge);
-    
+
     newEdge.predicate = (newEdge.metadata.inverted_id === null) ? TREATS_REPLACEMENT : INVERTED_TREATS_REPLACEMENT;
     newEdge.predicate_url = "";
     return newEdge;
@@ -74,7 +76,7 @@ export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdg
 export const getEdgesByIds = (resultSet: ResultSet | null, ids:string[]): ResultEdge[] => {
   if(!resultSet)
     return [];
-  const edges: ResultEdge[] = []; 
+  const edges: ResultEdge[] = [];
   for(const edgeID of ids) {
     const edge = getEdgeById(resultSet, edgeID)
     if(!!edge)

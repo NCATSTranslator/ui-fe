@@ -9,7 +9,7 @@ import Predicate from '@/features/ResultItem/components/Predicate/Predicate';
 import { Path, PathFilterState, isResultNode, ResultNode, isResultEdge } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useSelector } from 'react-redux';
-import { getEdgeById, getNodeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
+import { getEdgeById, getNodeById, getNodeSpecies, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { HoverContext } from '@/features/ResultItem/components/PathView/PathView';
@@ -72,7 +72,7 @@ const PathObject: FC<PathObjectProps> = ({
   let nameString = '';
   let typeString = '';
   if(isNode) {
-    nameString = formatBiolinkNode(pathObject.names[0], type, pathObject.species);
+    nameString = formatBiolinkNode(pathObject.names[0], type, getNodeSpecies(pathObject));
     typeString = formatBiolinkEntity(type);
   }
   const hoverContext = useContext(HoverContext);

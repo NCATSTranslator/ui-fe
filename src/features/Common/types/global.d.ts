@@ -1,4 +1,3 @@
-
 export type CustomFile = {
   file: File;
   thumbnailURL: string;
