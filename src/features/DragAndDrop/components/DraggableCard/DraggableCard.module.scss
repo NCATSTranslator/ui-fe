@@ -22,3 +22,7 @@
 .disableDraggingOnly {
   cursor: default;
 }
+
+.draggable, .draggable a, .draggable button {
+  cursor: grab !important;
+}
