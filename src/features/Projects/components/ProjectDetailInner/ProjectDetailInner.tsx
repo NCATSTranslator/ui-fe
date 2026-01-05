@@ -128,8 +128,8 @@ const ProjectDetailInner = () => {
   }, [sortedData.sortedQueries]);
 
   const showDropLabel = useMemo(() => {
-    return activePanelId === 'projects';
-  }, [activePanelId]);
+    return activePanelId === 'projects' && sortedData.sortedQueries.length > 0;
+  }, [activePanelId, sortedData.sortedQueries.length]);
 
   return (
     <div className={styles.projectDetail}>
