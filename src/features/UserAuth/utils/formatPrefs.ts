@@ -8,6 +8,9 @@ export const formatPrefs = (prefs: Preferences) => {
 
   for(const key of Object.keys(prefs)) {
     const checkedKey = checkOldPrefKey(key);
+    if(!newPrefs[checkedKey])
+      newPrefs[checkedKey] = { name: "", pref_value: "", possible_values: [] };
+    
     newPrefs[checkedKey].name = getPrefName(checkedKey);
     newPrefs[checkedKey].possible_values = getPrefPossibleValues(checkedKey);
   }
