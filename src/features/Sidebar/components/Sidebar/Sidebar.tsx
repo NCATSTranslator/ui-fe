@@ -7,22 +7,15 @@ import SidebarLinkList from "@/features/Sidebar/components/SidebarLinkList/Sideb
 import ContextPanel from "@/features/Sidebar/components/ContextPanel/ContextPanel";
 
 const Sidebar = () => {
-  const { collapsed, activePanelId, dynamicSidebarItems, getContextPanel, getButtonComponent, addToProjectQuery, isSelectedProjectMode, closePanel } = useSidebar();
+  const { collapsed, activePanelId, dynamicSidebarItems, getContextPanel, getButtonComponent, closePanel } = useSidebar();
   const allSidebarItems = useMemo(() => [...topItems, ...dynamicSidebarItems, ...bottomItems], [dynamicSidebarItems]);
   const activeSidebarItem = useMemo(() => allSidebarItems.find(item => item.id === activePanelId), [allSidebarItems, activePanelId]);
   
   const activeTitle = useMemo(() => {
     if (!activeSidebarItem) return '';
-    
-    // Special case for projects panel - dynamic title based on mode
-    // if (activeSidebarItem.id === 'projects' && addToProjectQuery)
-    //   return 'Add to Project';
-
-    // if (activeSidebarItem.id === 'projects' && isSelectedProjectMode)
-    //   return 'Select Project';
 
     return activeSidebarItem.label;
-  }, [activeSidebarItem, addToProjectQuery, isSelectedProjectMode]);
+  }, [activeSidebarItem]);
 
   // when the sidebar mounts, if the active panel doesn't exist, close the sidebar
   useEffect(() => {
