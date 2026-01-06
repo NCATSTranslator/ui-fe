@@ -8,7 +8,7 @@ import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
 import Button from '@/features/Core/components/Button/Button';
 import FacetHeading from '@/features/ResultFiltering/components/FacetHeading/FacetHeading';
 import { getFilterLabel } from '@/features/ResultFiltering/utils/filterFunctions';
-import ChevLeft from "@/assets/icons/directional/Chevron/Chevron Left.svg?react";
+import SidebarBackButton from '@/features/Sidebar/components/SidebarBackButton/SidebarBackButton';
 
 interface ResultsFilterProps {
   activeFilters: Filter[];
@@ -144,10 +144,9 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
           activeFilterFamily !== null && (
             <div className={styles.activeFilterFamily}>
               <div className={styles.top}>
-                <Button
+                <SidebarBackButton
                   handleClick={()=>handleSetActiveFilterFamily(null)}
-                  className={`${styles.facetButton} ${styles.backButton}`}
-                  iconLeft={<ChevLeft />}
+                  className={styles.backButton}
                 >
                   <FacetHeading
                     activeFilters={activeFilters}
@@ -155,7 +154,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                     title={getFilterLabel(activeFilterFamily as FilterFamily)}
                     includeArrow={false}
                   />
-                </Button>
+                </SidebarBackButton>
               </div>
               {
                 activeFilterFamily === 'txt'

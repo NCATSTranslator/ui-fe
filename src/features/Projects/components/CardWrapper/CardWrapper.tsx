@@ -6,7 +6,7 @@ interface CardWrapperProps {
   className?: string;
   linkTo?: string;
   linkTarget?: string;
-  onClick?: (e: MouseEvent<HTMLDivElement>) => void;
+  onClick?: (e: MouseEvent<HTMLElement>) => void;
   testId?: string;
 }
 
@@ -19,6 +19,14 @@ const CardWrapper: FC<CardWrapperProps> = ({
   testId
 }) => {
 
+  const handleClick = (e: MouseEvent<HTMLElement>) => {
+    if(onClick){
+      e.preventDefault();
+      e.stopPropagation();
+      onClick(e);
+    }
+  };
+
   if(linkTo)
     return (
       <Link
@@ -26,15 +34,16 @@ const CardWrapper: FC<CardWrapperProps> = ({
         target={linkTarget}
         className={className}
         data-testid={testId}
+        onClick={handleClick}
       >
         {children}
       </Link>
     );
-  else
+
     return (
       <div 
         className={className}
-        onClick={onClick}
+        onClick={handleClick}
         data-testid={testId}
       >
         {children}

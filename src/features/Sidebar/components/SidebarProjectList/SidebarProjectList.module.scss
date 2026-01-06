@@ -1,0 +1,14 @@
+@use "@/assets/styles/variables" as *;
+
+.sidebarProjectList {
+  .projectsList {
+    display: flex;
+    flex-direction: column;
+    gap: $xs;
+  }
+  .createNewProjectButton {
+    svg path {
+      stroke: $white;
+    }
+  }
+}
