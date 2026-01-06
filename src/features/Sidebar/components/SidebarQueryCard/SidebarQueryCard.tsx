@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useMemo } from "react";
+import { FC, useMemo } from "react";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';

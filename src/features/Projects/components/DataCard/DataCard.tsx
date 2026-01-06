@@ -18,7 +18,7 @@ interface DataCardProps {
   searchTerm?: string;
   linkTo?: string;
   linkTarget?: string;
-  onClick?: (event: MouseEvent<HTMLDivElement>) => void;
+  onClick?: (e: MouseEvent<HTMLElement>) => void;
   className?: string;
   'data-testid'?: string;
   options?: ReactNode;
@@ -79,7 +79,7 @@ const DataCard: FC<DataCardProps> = ({
   };
 
   return (
-    <CardWrapper 
+    <CardWrapper
       className={cardClassName}
       onClick={onClick}
       linkTo={linkTo}

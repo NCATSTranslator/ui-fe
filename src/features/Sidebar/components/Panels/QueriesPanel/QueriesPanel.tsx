@@ -12,11 +12,11 @@ import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingW
 import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
-import Button from "@/features/Core/components/Button/Button";
-import ChevLeftIcon from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
-import ProjectsPanel from "@/features/Sidebar/components/Panels/ProjectsPanel/ProjectsPanel";
+import SidebarProjectList from "@/features/Sidebar/components/SidebarProjectList/SidebarProjectList";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
 import DropLabel from "@/features/Projects/components/DropLabel/DropLabel";
+import SidebarBackButton from "@/features/Sidebar/components/SidebarBackButton/SidebarBackButton";
+import { joinClasses } from "@/features/Common/utils/utilities";
 
 const QueriesPanel = () => {
   const location = useLocation();
@@ -96,11 +96,8 @@ const QueriesPanel = () => {
       {
         (addToProjectQuery || isSelectedProjectMode) && (
           <div className={styles.projectListContainer}>
-            <Button iconLeft={<ChevLeftIcon />} variant="textOnly" handleClick={handleCloseProjectList} className={styles.closeProjectListButton}>Select Project</Button>
-            <ProjectsPanel
-              className={styles.projectsList}
-              selectProjectMode 
-            />
+            <SidebarBackButton label="Select Project" handleClick={handleCloseProjectList} />
+            <SidebarProjectList className={joinClasses(styles.projectsList, "scrollable")} />
           </div>
         )
       }
