@@ -25,16 +25,6 @@
     margin: 0 $s;
     border-bottom: 1px solid $midGray;
     text-align: left;
-    &.backButton {
-      padding: 12px 12px 12px $xs;
-      margin: 0;
-      justify-content: flex-start;
-      gap: $xxs;
-      & > span {
-        width: auto;
-        text-align: left;
-      }
-    }
     & > span {
       width: 100%;
       color: $darkGray;
@@ -47,6 +37,15 @@
       & > span {
         text-decoration: underline;
       }
+    }
+  }
+  &.backButton {
+    margin: 0;
+    justify-content: flex-start;
+    gap: $xxs;
+    & > span {
+      width: auto;
+      text-align: left;
     }
   }
   .entitySearch {
