@@ -1,16 +1,18 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import styles from "./SidebarBackButton.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import ChevLeftIcon from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface SidebarBackButtonProps {
+  children?: ReactNode;
   className?: string;
-  label: string;
+  label?: string;
   handleClick: () => void;
 }
 
 const SidebarBackButton: FC<SidebarBackButtonProps> = ({
+  children,
   className,
   label,
   handleClick
@@ -22,7 +24,7 @@ const SidebarBackButton: FC<SidebarBackButtonProps> = ({
       handleClick={handleClick}
       className={joinClasses(styles.button, styles.sidebarBackButton, className)}
     >
-      {label}
+      {children || label}
     </Button>
   );
 };
