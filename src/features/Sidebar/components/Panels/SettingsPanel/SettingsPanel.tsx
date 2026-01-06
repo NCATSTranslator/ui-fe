@@ -16,6 +16,7 @@ import { updateUserPreferences } from '@/features/UserAuth/utils/userApi';
 import { cloneDeep } from 'lodash';
 import { getPrettyPrefValue } from '@/features/UserAuth/utils/formatPrefs';
 import { preferencesSavedToast } from '@/features/Core/utils/toastMessages';
+import SidebarBackButton from '@/features/Sidebar/components/SidebarBackButton/SidebarBackButton';
 
 const SettingsPanel = () => {
   const location = useLocation();
@@ -115,14 +116,7 @@ const SettingsPanel = () => {
             {
               activePrefTypeId && 
               <div className={`${styles.activePrefType} ${styles.coverPanel}`}>
-                <Button
-                  handleClick={()=>setActivePrefTypeId(null)}
-                  className={`${styles.prefButton} ${styles.backButton}`}
-                  iconLeft={<ChevLeft />}
-                  variant="textOnly"
-                  >
-                    {activePrefTypeId && capitalizeFirstLetter(activePrefTypeId)}    
-                </Button>
+                <SidebarBackButton label={capitalizeFirstLetter(activePrefTypeId)} handleClick={()=>setActivePrefTypeId(null)} />
                 <div className={styles.activePrefTypeContent}>
                   {
                     prefsToDisplay && Object.entries(prefsToDisplay).map(([key, pref]) => (
