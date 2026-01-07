@@ -4,14 +4,18 @@ import StatusIndicator from "@/features/Projects/components/StatusIndicator/Stat
 import Button from "@/features/Core/components/Button/Button";
 import CloseIcon from "@/assets/icons/buttons/Close/Close.svg?react";
 import Checkbox from "@/features/Core/components/Checkbox/Checkbox";
+import { ARAStatusResponse } from "@/features/ResultList/types/results";
+import { getQueryStatusPercentage } from "@/features/Projects/utils/utilities";
 
 interface StatusSidebarIconProps {
+  arsStatus: ARAStatusResponse | null;
   hasFreshResults: boolean;
   setShowQueryStatusToast: (show: boolean) => void;
   showQueryStatusToast: boolean;
   status: 'running' | 'complete' | 'error' | 'unknown';
 }
 const StatusSidebarIcon: FC<StatusSidebarIconProps> = ({
+  arsStatus,
   hasFreshResults,
   setShowQueryStatusToast,
   showQueryStatusToast,
@@ -20,6 +24,7 @@ const StatusSidebarIcon: FC<StatusSidebarIconProps> = ({
 
   const localStorageKey = 'showQueryStatusToast';
   const showToast = showQueryStatusToast && localStorage.getItem(localStorageKey) !== 'false';
+  const percentage = arsStatus ? getQueryStatusPercentage(arsStatus) : 5;
 
   const handleCloseToast = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     e.stopPropagation();
@@ -35,6 +40,11 @@ const StatusSidebarIcon: FC<StatusSidebarIconProps> = ({
   return (
     <div className={styles.statusSidebarIcon}>
       <StatusIndicator status={status} inSidebar redDot={hasFreshResults} className={styles.statusIndicator}/>
+      {
+        (status !== 'complete') && (
+          <span className={styles.loadPercentage}>{percentage}%</span>
+        )
+      }
       {
         showToast && (
           <div className={`${styles.freshResultsToast} freshResultsToast`} onClick={(e) => e.stopPropagation()}>
