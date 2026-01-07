@@ -22,8 +22,8 @@
     text-transform: none;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 12;
-    line-clamp: 12;
+    -webkit-line-clamp: 12 !important;
+    line-clamp: 12 !important;
     -webkit-box-orient: vertical;
     color: $white;
     white-space: normal;
