@@ -41,7 +41,7 @@ const StatusSidebarIcon: FC<StatusSidebarIconProps> = ({
     <div className={styles.statusSidebarIcon}>
       <StatusIndicator status={status} inSidebar redDot={hasFreshResults} className={styles.statusIndicator}/>
       {
-        (status !== 'complete') && (
+        (status !== 'complete' && status !== 'error') && (
           <span className={styles.loadPercentage}>{percentage}%</span>
         )
       }
