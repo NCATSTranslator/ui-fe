@@ -680,7 +680,7 @@ const ResultList = () => {
     ariaLabel: "Query Status",
     className: styles.statusSidebarIcon,
     onClick: handleQueryStatusClick,
-    icon: () => <StatusSidebarIcon status={statusIndicatorStatus} hasFreshResults={hasFreshResults} showQueryStatusToast={showQueryStatusToast} setShowQueryStatusToast={setShowQueryStatusToast} />,
+    icon: () => <StatusSidebarIcon arsStatus={arsStatus} status={statusIndicatorStatus} hasFreshResults={hasFreshResults} showQueryStatusToast={showQueryStatusToast} setShowQueryStatusToast={setShowQueryStatusToast} />,
     id: 'queryStatus',
     label: "Status",
     panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} resultStatus={resultStatus} resultCount={formattedResults.length || 0} />,

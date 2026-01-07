@@ -1,7 +1,6 @@
 @use "@/assets/styles/variables" as *;
 
 .statusSidebarIcon {
-  padding: 3px 0;
   .freshResultsToast {
     position: absolute;
     top: 0;
@@ -64,5 +63,12 @@
         }
       }
     }
+  }
+  .loadPercentage {
+    display: block;
+    font-size: $captionSize;
+    font-weight: 400;
+    color: $darkGray;
+    margin-top: $xxxs;
   }
 }
