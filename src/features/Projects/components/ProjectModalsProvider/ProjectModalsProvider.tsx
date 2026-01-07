@@ -6,6 +6,8 @@ import { useDeleteProjects, useDeleteQueries } from '@/features/Projects/hooks/c
 import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectModals';
 import { projectDeletedToast, queryDeletedToast, errorToast } from '@/features/Core/utils/toastMessages';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
 
 interface EditQueryModalData {
   currentEditingQueryItem?: QueryEditingItem;
@@ -50,6 +52,8 @@ export const ProjectModalsProvider: FC<ProjectModalsProviderProps> = ({ children
   });
 
   const deletePrompts = useAllDeletePrompts();
+  const location = useLocation();
+  const navigate = useNavigate();
   
   // Mutation hooks
   const deleteProjectsMutation = useDeleteProjects();
@@ -147,6 +151,11 @@ export const ProjectModalsProvider: FC<ProjectModalsProviderProps> = ({ children
         onSuccess: () => {
           queryDeletedToast();
           modals.closeModal('deleteQueries');
+          // if viewing current query (i.e. qid is in the URL), navigate to queries page
+          const currentQid = getDataFromQueryVar('q', location.search);
+          if(currentQid && queries.some(q => q.data.qid === currentQid)) {
+            navigate('/queries');
+          }
           setSelectedQueries([]);
         },
         onError: () => errorToast('Failed to delete queries')
