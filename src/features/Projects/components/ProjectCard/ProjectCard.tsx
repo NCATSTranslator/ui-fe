@@ -1,5 +1,5 @@
 import { FC, useCallback, useMemo } from "react";
-import { Project } from "@/features/Projects/types/projects";
+import { Project, UserQueryObject } from "@/features/Projects/types/projects";
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import styles from "@/features/Projects/components/DataCard/DataCard.module.scss";
 import Button from "@/features/Core/components/Button/Button";
@@ -16,23 +16,28 @@ import { isDraggedQueryInProject } from "@/features/Projects/utils/dragDropUtils
 import { useDndContext } from "@dnd-kit/core";
 import DataCard from "@/features/Projects/components/DataCard/DataCard";
 import { useRenameProject } from "@/features/Projects/hooks/useRenameProject";
+import { getProjectQueryCount } from "@/features/Projects/utils/utilities";
 
 interface ProjectCardProps {
+  activeQueries: UserQueryObject[];
   allProjects?: Project[];
   onRename?: (project: Project) => void;
   project: Project;
+  queriesLoading: boolean;
   searchTerm?: string;
   startRenaming?: boolean;
 }
 
 const ProjectCard: FC<ProjectCardProps> = ({
+  activeQueries,
+  allProjects,
+  onRename,
   project,
+  queriesLoading,
   searchTerm,
   startRenaming = false,
-  onRename,
-  allProjects
 }) => {
-  const queryCount = project.data.pks.length;
+  const queryCount = useMemo(() => getProjectQueryCount(project, activeQueries), [project, activeQueries]);
   const { openDeleteProjectModal } = useProjectModals();
   const { handleUpdateProject } = useEditProjectHandlers();
   const className = styles.projectCard;
@@ -98,6 +103,7 @@ const ProjectCard: FC<ProjectCardProps> = ({
           textInputRef={textInputRef}
           type="project"
           queryCount={queryCount}
+          queriesLoading={queriesLoading}
           bookmarksCount={project.bookmark_count}
           notesCount={project.note_count}
           date={date}
