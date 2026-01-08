@@ -32,6 +32,7 @@ const SidebarProjectList: FC<SidebarProjectListProps> = ({
   const sortSearchState = useSortSearchState();
   const data = useProjectListData(sortSearchState);
   const projects = useMemo(() => data.formatted.active || [], [data.formatted.active]);
+  const activeQueries = useMemo(() => data.filtered.active.queries || [], [data.filtered.active.queries]);
   const projectsLoading = data.loading.projectsLoading;
   const createProjectMutation = useCreateProject();
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
@@ -103,6 +104,7 @@ const SidebarProjectList: FC<SidebarProjectListProps> = ({
                   searchTerm={sortSearchState.searchTerm}
                   startRenaming={newProjectId === project.id}
                   onRename={handleRenameProject}
+                  activeQueries={activeQueries}
                 />
               ))}
             </LoadingWrapper>

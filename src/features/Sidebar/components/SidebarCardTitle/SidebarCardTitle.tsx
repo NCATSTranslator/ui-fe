@@ -30,8 +30,8 @@ const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
   textInputRef,
   title,
 }) => {
-  const { addToProjectQuery } = useSidebar();
-  const isAddToProjectMode = !!addToProjectQuery;
+  const { addToProjectQuery, isSelectedProjectMode } = useSidebar();
+  const isAddToProjectMode = !!addToProjectQuery || isSelectedProjectMode;
   const titleMatches = title.toLowerCase().includes(searchTerm?.toLowerCase() || '');
   const titleContent = (
     isRenaming && onTitleChange && onFormSubmit ? (

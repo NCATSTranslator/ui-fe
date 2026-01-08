@@ -26,7 +26,7 @@ export const projectUpdatedToast = (projectTitle?: string, queryTitle?: string, 
     return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Removed from ${projectTitle}` } });
 
   if(projectTitle)
-    return toast(AppToast, { data: { topText: `${projectTitle} updated` } });
+    return toast(AppToast, { data: { topText: `Updated ${projectTitle}` } });
 
   if(queryTitle && action === 'add')
     return toast(AppToast, { data: { topText: `${queryTitle} added to project` } });

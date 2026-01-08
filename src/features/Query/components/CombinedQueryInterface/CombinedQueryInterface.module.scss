@@ -13,6 +13,13 @@
     display: flex;
     align-items: center;
     gap: $xxs;
+    .addingToProject {
+      opacity: 0.5;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: $xxs;
+    }
     .label, .button, .projectName {
       font-size: $bodyTwoSize;
       font-weight: 800;

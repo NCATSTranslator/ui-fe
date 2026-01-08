@@ -1,5 +1,5 @@
 import { FC, useCallback, useMemo } from "react";
-import { Project } from "@/features/Projects/types/projects";
+import { Project, UserQueryObject } from "@/features/Projects/types/projects";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
@@ -23,6 +23,7 @@ import { queryAlreadyInProjectToast } from "@/features/Core/utils/toastMessages"
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 
 interface SidebarProjectCardProps {
+  activeQueries: UserQueryObject[];
   allProjects?: Project[];
   isActiveProject?: boolean;
   onRename?: (project: Project) => void;
@@ -32,6 +33,7 @@ interface SidebarProjectCardProps {
 }
 
 const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
+  activeQueries,
   allProjects,
   isActiveProject = false,
   onRename,
@@ -39,7 +41,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
   searchTerm,
   startRenaming = false,
 }) => {
-  const queryCount = project.data.pks.length;
+  const queryCount = useMemo(()=> project.data.pks.filter(pk => activeQueries.find(q => q.data.qid === pk)).length, [project.data.pks, activeQueries]);
   const { openDeleteProjectModal } = useProjectModals();
   const { handleUpdateProject } = useEditProjectHandlers();
   const { addToProjectQuery, clearAddToProjectMode, isSelectedProjectMode, setSelectedProject, setSelectedProjectMode, closePanel } = useSidebar();
