@@ -110,12 +110,12 @@ export const getProjectDetailHeaderSubtitle = (project: Project | undefined, que
 /**
  * Get the query count for the project
  * @param {Project} project - The project to get the query count for
- * @param {UserQueryObject[]} queries - The queries to get the query count from
+ * @param {UserQueryObject[]} activeQueries - The active queries to get the query count from (deleted queries should be excluded)
  * @returns {number} The query count
  */
-export const getProjectQueryCount = (project: Project | ProjectRaw | undefined, queries: UserQueryObject[]) => {
+export const getProjectQueryCount = (project: Project | ProjectRaw | undefined, activeQueries: UserQueryObject[]) => {
   const projectPks = project?.data.pks || [];
-  return projectPks.filter(pk => !queries.find(q => q.data.qid === pk)?.data.deleted).length;
+  return projectPks.filter(pk => activeQueries.find(q => q.data.qid === pk)).length;
 }
 
 /**

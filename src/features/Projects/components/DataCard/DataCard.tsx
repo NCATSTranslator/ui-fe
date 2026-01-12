@@ -31,6 +31,7 @@ interface DataCardProps {
   notesCount: number;
   queryCount?: number;
   queryType?: QueryTypeString;
+  queriesLoading?: boolean;
   date: string;
 }
 
@@ -54,6 +55,7 @@ const DataCard: FC<DataCardProps> = ({
   notesCount,
   queryCount,
   queryType,
+  queriesLoading,
   date
 }) => {
 
@@ -111,7 +113,7 @@ const DataCard: FC<DataCardProps> = ({
           {
             type === 'project' ? (
               <>
-                {`${queryCount || 0} Quer${queryCount === 1 ? 'y' : 'ies'}`}
+                {`${queriesLoading ? '-' : queryCount || '0'} Quer${queryCount === 1 ? 'y' : 'ies'}`}
               </>
             ) : (
               !!queryType && queryTypeLabel
