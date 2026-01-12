@@ -24,22 +24,22 @@ const getAttachedProjects = (projects: ProjectRaw[], queryId?: string) => {
 }
 
 interface EditQueryModalProps {
+  activeQueries: UserQueryObject[];
   currentEditingQueryItem?: QueryEditingItem;
   handleClose?: () => void;
   isOpen: boolean;
   loading: boolean;
   mode: 'edit' | 'add';
-  queries: UserQueryObject[];
   projects: ProjectRaw[];
   setSelectedProject?: (projects: ProjectRaw) => void;
 }
 
 const EditQueryModal: FC<EditQueryModalProps> = ({
+  activeQueries,
   handleClose = () => {},
   isOpen,
   loading,
   mode = 'edit',
-  queries,
   projects,
   currentEditingQueryItem,
   setSelectedProject,
@@ -54,7 +54,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   const createProjectMutation = useCreateProject();
 
   const { handleUpdateProject } = useEditProjectHandlers();
-  const { handleDeleteQuery } = useEditQueryHandlers(undefined, queries);
+  const { handleDeleteQuery } = useEditQueryHandlers(undefined, activeQueries);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isDeleteQueryPromptOpen, setIsDeleteQueryPromptOpen] = useState(false);
@@ -145,7 +145,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
   }
 
   const findAndCallDeleteQuery = () => {
-    const query = queries.find(q => q.data.qid === currentEditingQueryItem?.pk);
+    const query = activeQueries.find(q => q.data.qid === currentEditingQueryItem?.pk);
     if(query)
       handleDeleteQuery(query);
     else 
@@ -252,7 +252,7 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
                     filteredProjects.length > 0 ? filteredProjects.map((project) => {
                       const projectName = project.label || project.data.title;
                       const isSelected = mode === "edit" && localSelectedProjects.some(p => p.id === project.id);
-                      const queryCount = getProjectQueryCount(project, queries);
+                      const queryCount = getProjectQueryCount(project, activeQueries);
                       return(
                         <div
                           className={`${styles.projectItem} ${isSelected ? styles.selected : ''}`}

@@ -200,7 +200,7 @@ const ProjectModals = ({
           loading={editQueryModal.loading}
           mode={editQueryModal.mode}
           projects={editQueryModal.projects}
-          queries={editQueryModal.queries}
+          activeQueries={editQueryModal.queries}
           setSelectedProject={editQueryModal.setSelectedProject}
         />
       )}

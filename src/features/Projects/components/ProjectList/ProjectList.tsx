@@ -27,9 +27,11 @@ const ProjectList = () => {
   const data = useProjectListData(sortSearchState);
   const projects = useMemo(() => data.formatted.active, [data.formatted.active]);
   const projectsLoading = data.loading.projectsLoading;
+  const queriesLoading = data.loading.queriesLoading;
   const createProjectMutation = useCreateProject();
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
   const { togglePanel, activePanelId, closePanel } = useSidebar();
+  const activeQueries = useMemo(() => data.filtered.active.queries || [], [data.filtered.active.queries]);
 
   const handleCreateNewProjectClick = () => {
     const newProject = {
@@ -125,6 +127,8 @@ const ProjectList = () => {
                             projects.map((project) => (
                               <ProjectCard
                                 key={project.id}
+                                activeQueries={activeQueries}
+                                queriesLoading={queriesLoading}
                                 project={project}
                                 allProjects={projects}
                                 searchTerm={sortSearchState.searchTerm}

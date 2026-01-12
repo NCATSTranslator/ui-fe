@@ -34,6 +34,7 @@ const SidebarProjectList: FC<SidebarProjectListProps> = ({
   const projects = useMemo(() => data.formatted.active || [], [data.formatted.active]);
   const activeQueries = useMemo(() => data.filtered.active.queries || [], [data.filtered.active.queries]);
   const projectsLoading = data.loading.projectsLoading;
+  const queriesLoading = data.loading.queriesLoading;
   const createProjectMutation = useCreateProject();
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
   const { addToProjectQuery, clearAddToProjectMode } = useSidebar();
@@ -105,6 +106,7 @@ const SidebarProjectList: FC<SidebarProjectListProps> = ({
                   startRenaming={newProjectId === project.id}
                   onRename={handleRenameProject}
                   activeQueries={activeQueries}
+                  queriesLoading={queriesLoading}
                 />
               ))}
             </LoadingWrapper>
