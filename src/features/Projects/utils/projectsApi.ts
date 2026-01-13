@@ -209,3 +209,21 @@ export const updateQuery = async (
     isUserQueryObject
   );
 };
+
+/**
+ * PUT /api/v1/users/me/queries/touch
+ * Updates the last_seen timestamp for a query.
+ */
+export const touchQuery = async (
+  sid: string,
+  httpErrorHandler?: ErrorHandler,
+  fetchErrorHandler?: ErrorHandler
+): Promise<{ sid: string; data: { last_seen: Date } }> => {
+  const url = `${API_PATH_PREFIX}/users/me/queries/touch`;
+  return fetchWithErrorHandling<{ sid: string; data: { last_seen: Date } }>(
+    () => put(url, { sid }),
+    httpErrorHandler,
+    fetchErrorHandler,
+    (data: unknown): data is { sid: string; data: { last_seen: Date } } => 
+      typeof data === 'object' && data !== null && 'sid' in data && 'data' in data );
+};
