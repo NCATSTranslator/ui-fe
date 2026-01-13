@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, useCallback } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
-  restoreProjects, restoreQueries, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
+  restoreProjects, restoreQueries, touchQuery, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
 import { fetcNodeNameFromCurie, generateQueryTitle, findAllCuriesInTitle } from '@/features/Projects/utils/utilities';
 import { getBaseTitle, extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, createUpdatedQueryWithTitle } from '@/features/Projects/utils/queryTitleUtils';
@@ -400,4 +400,32 @@ export const useGetQueriesUpdatedTitles = (queries: UserQueryObject[]): { querie
   }, [queries, baseTitles, allCuries, resolvedNames, updateQueryMutation]);
   
   return { queries: updatedQueries, isLoading };
+};
+
+/**
+ * Hook to update the query last_seen timestamp
+ * 
+ * @param sid - The query save ID
+ */
+export const useUpdateQueryLastSeen = (sid?: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      if (!sid) {
+        console.log("No query save ID provided, skipping query last_seen timestamp update");
+        return;
+      }
+      await touchQuery(
+        sid, 
+        () => console.warn('http error updating query last_seen timestamp'), 
+        () => console.warn('fetch error updating query last_seen timestamp')
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userQueries'] });
+    },
+    onError: (error) => {
+      console.error('Error updating query last_seen timestamp:', error);
+    },
+  });
 };

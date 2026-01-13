@@ -5,6 +5,7 @@ import { fetchWithErrorHandling } from "@/features/Common/utils/web";
 import { handleResultsError } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { ARAStatusResponse, Result, ResultSet } from "@/features/ResultList/types/results.d";
 import { queryStatusResultsCompleteToast } from "@/features/Core/utils/toastMessages";
+import { useUpdateQueryLastSeen } from "@/features/Projects/hooks/customHooks";
 
 // Constants
 const STATUS_CHECK_TIMEOUT = 120; // 20 minutes (120 * 10 second intervals)
@@ -177,7 +178,8 @@ const processResultsData = (
   handleNewResults: (resultSet: ResultSet) => void,
   numberOfStatusChecks: RefObject<number>,
   isFetchingARAStatus: RefObject<boolean | null>,
-  isFetchingResults: RefObject<boolean>
+  isFetchingResults: RefObject<boolean>,
+  updateQueryLastSeen: () => void
 ): void => {
   console.log('New results:', data);
   
@@ -195,6 +197,9 @@ const processResultsData = (
   }
 
   isFetchingResults.current = false;
+
+  // call out to queries/touch endpoint to update the query last_seen timestamp
+  updateQueryLastSeen();
 };
 
 /**
@@ -239,8 +244,10 @@ export const useResultsDataQuery = (
   numberOfStatusChecks: RefObject<number>,
   isFetchingARAStatus: RefObject<boolean | null>,
   setIsError: (value: boolean) => void,
-  setIsLoading: (value: boolean) => void
+  setIsLoading: (value: boolean) => void,
+  sid?: string
 ) => {
+  const { mutate: updateQueryLastSeen } = useUpdateQueryLastSeen(sid);
   return useQuery({
     queryKey: ['resultsData', currentQueryID],
     queryFn: async (): Promise<void> => {
@@ -266,7 +273,8 @@ export const useResultsDataQuery = (
           handleNewResults,
           numberOfStatusChecks,
           isFetchingARAStatus,
-          isFetchingResults
+          isFetchingResults,
+          updateQueryLastSeen
         );
       } catch (error) {
         handleResultsDataError(
@@ -285,6 +293,12 @@ export const useResultsDataQuery = (
   });
 };
 
+/**
+ * Hook to show the results complete toast
+ * 
+ * @param arsStatus - The ARA status response
+ * @param isFetchingResults - Whether results are being fetched
+ */
 export const useResultsCompleteToast = (arsStatus: ARAStatusResponse | null, isFetchingResults: boolean) => {
   const hasShownToast = useRef(false);
   useEffect(() => {

@@ -8,7 +8,6 @@ import { cloneDeep, isEqual } from "lodash";
 import { useSelector, useDispatch } from 'react-redux';
 import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
   sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh,
   sortByNamePathfinderHighLow, filterCompare } from "@/features/Common/utils/sortingFunctions";
@@ -41,6 +40,8 @@ import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/Filt
 import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from "@/features/Core/utils/toastMessages";
 import { getQueryStatusIndicatorStatus } from "@/features/Projects/utils/utilities";
 import StatusSidebarIcon from "@/features/ResultList/components/StatusSidebarIcon/StatusSidebarIcon";
+import { useUserQueries } from "@/features/Projects/hooks/customHooks";
+import { UserQueryObject } from "@/features/Projects/types/projects";
 
 const ResultList = () => {
 
@@ -58,6 +59,9 @@ const ResultList = () => {
   let presetTypeObject = (!!presetTypeID)
     ? queryTypes.find(type => type.id === parseInt(presetTypeID)) ?? null
     : null;
+
+  const { data: queries = [] } = useUserQueries();
+  const currentQuerySid: string | undefined = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID)?.sid, [queries, currentQueryID]);
 
   const nodeLabelParam = getDataFromQueryVar("l", decodedParams);
   const nodeIdParam = getDataFromQueryVar("i", decodedParams);
@@ -244,7 +248,6 @@ const ResultList = () => {
   // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
   const numberOfStatusChecks = useRef(0);
   // Initialize queryClient for React Query to fetch results
-  const queryClient = new QueryClient();
 
   // Handles direct page click
   const handlePageClick = useCallback((event: { selected: number}, newItemsPerPage: number | false = false, resultsLength = formattedResults.length, currentNumItemsPerPage = itemsPerPage ) => {
@@ -424,7 +427,8 @@ const ResultList = () => {
     numberOfStatusChecks,
     isFetchingARAStatus,
     setIsError,
-    setIsLoading
+    setIsLoading,
+    currentQuerySid
   );
 
   // Handle the sorting
@@ -713,7 +717,7 @@ const ResultList = () => {
   });
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <ResultListModals
         shareResultID={shareResultID.current ? shareResultID.current : ""}
         presetTypeID={presetTypeID ? presetTypeID : ""}
@@ -888,7 +892,7 @@ const ResultList = () => {
           }
         </div>
       </div>
-    </QueryClientProvider>
+    </>
   );
 }
 
