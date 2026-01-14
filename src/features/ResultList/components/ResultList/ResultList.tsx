@@ -31,8 +31,8 @@ import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARASt
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
-import { useResultsStatusQuery, useResultsDataQuery, useResultsCompleteToast } from "@/features/ResultList/hooks/resultListHooks";
-import { getDecodedParams } from '@/features/Common/utils/web';
+import { useResultsStatusQuery, useResultsDataQuery, useResultsCompleteToast, useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
+import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useSidebarRegistration, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
 import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
@@ -50,10 +50,12 @@ const ResultList = () => {
   const dispatch = useDispatch();
   const { togglePanel } = useSidebar();
 
-  // URL search params
-  const decodedParams = useMemo(() => getDecodedParams(), []);
+  // URL search params - reactive to URL changes
+  const decodedParams = useDecodedParams();
   const loadingParam = getDataFromQueryVar("loading", decodedParams);
   const currentQueryID = getDataFromQueryVar("q", decodedParams);
+  // Track previous query ID to detect changes
+  const prevQueryID = useRef<string | null>(currentQueryID);
   const presetTypeID = getDataFromQueryVar("t", decodedParams);
   const isPathfinder = (presetTypeID === "p");
   let presetTypeObject = (!!presetTypeID)
@@ -65,6 +67,7 @@ const ResultList = () => {
 
   const nodeLabelParam = getDataFromQueryVar("l", decodedParams);
   const nodeIdParam = getDataFromQueryVar("i", decodedParams);
+  console.log("nodeIdParam", nodeIdParam, "nodeLabelParam", nodeLabelParam);
   const [resultIdParam, setResultIdParam] = useState(getDataFromQueryVar("r", decodedParams));
   const firstLoad = useRef(true);
   const [nodeDescription, setNodeDescription] = useState("");
@@ -72,6 +75,7 @@ const ResultList = () => {
   const setShareResultID = (newID: string | null) => shareResultID.current = newID;
 
   let resultSet = useSelector(getResultSetById(currentQueryID));
+  console.log("resultSet", resultSet);
   // Bool, did the results return an error
   const [isError, setIsError] = useState(false);
   const loading = (loadingParam === 'true') ? true : false;
@@ -82,6 +86,8 @@ const ResultList = () => {
   const isFetchingARAStatus = useRef<boolean | null>(presetIsLoading);
   // Bool, should results be fetched
   const isFetchingResults = useRef(false);
+  // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
+  const numberOfStatusChecks = useRef(0);
 
   const [arsStatus, setArsStatus] = useState<ARAStatusResponse | null>(null);
   const [resultStatus, setResultStatus] = useState<"error" | "running" | "success" | "unknown">("unknown");
@@ -172,6 +178,49 @@ const ResultList = () => {
   const [showQueryStatusToast, setShowQueryStatusToast] = useState(true);
   const hasFreshResults = useMemo(() => freshRawResults !== null, [freshRawResults]);
 
+  // Reset state when the query ID changes (e.g., navigating to a different query)
+  useQueryChangeReset({
+    currentQueryID,
+    decodedParams,
+    itemsPerPage,
+    prevQueryID,
+    rawResults,
+    prevRawResults,
+    originalResults,
+    isFetchingARAStatus,
+    isFetchingResults,
+    numberOfStatusChecks,
+    currentPage,
+    firstLoad,
+    shareResultID,
+    setIsLoading,
+    setIsError,
+    setFormattedResults,
+    setFreshRawResults,
+    setActiveFilters,
+    setActiveEntityFilters,
+    setAvailableFilters,
+    setPathFilterState,
+    setArsStatus,
+    setResultStatus,
+    setItemOffset,
+    setEndResultIndex,
+    setSelectedResult,
+    setSelectedEdge,
+    setSelectedPath,
+    setSelectedPathKey,
+    setEvidenceModalOpen,
+    setNotesModalOpen,
+    setFocusModalOpen,
+    setShareModalOpen,
+    setSharedItem,
+    setAutoScrollToResult,
+    setExpandSharedResult,
+    setUserSaves,
+    setResultIdParam,
+    setNodeDescription,
+  });
+
   useEffect(() => {
     setShowQueryStatusToast(hasFreshResults);
   }, [hasFreshResults]);
@@ -244,10 +293,6 @@ const ResultList = () => {
       setAutoScrollToResult(false);
     }
   }, [autoScrollToResult]);
-
-  // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
-  const numberOfStatusChecks = useRef(0);
-  // Initialize queryClient for React Query to fetch results
 
   // Handles direct page click
   const handlePageClick = useCallback((event: { selected: number}, newItemsPerPage: number | false = false, resultsLength = formattedResults.length, currentNumItemsPerPage = itemsPerPage ) => {
