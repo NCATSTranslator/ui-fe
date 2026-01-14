@@ -43,6 +43,13 @@ export type AutocompleteFunctions = {
   format: (items: any, formatData: any) => Promise<any[]>;
 }
 
+export type AutocompleteConfig = {
+  functions: AutocompleteFunctions;
+  limitTypes: string[];
+  limitPrefixes: string[];
+  excludePrefixes?: string[];
+}
+
 export type AutocompleteContext = {
   id: string;
   event?: KeyboardEvent;
