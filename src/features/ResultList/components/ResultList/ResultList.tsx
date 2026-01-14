@@ -67,7 +67,6 @@ const ResultList = () => {
 
   const nodeLabelParam = getDataFromQueryVar("l", decodedParams);
   const nodeIdParam = getDataFromQueryVar("i", decodedParams);
-  console.log("nodeIdParam", nodeIdParam, "nodeLabelParam", nodeLabelParam);
   const [resultIdParam, setResultIdParam] = useState(getDataFromQueryVar("r", decodedParams));
   const firstLoad = useRef(true);
   const [nodeDescription, setNodeDescription] = useState("");
@@ -75,7 +74,6 @@ const ResultList = () => {
   const setShareResultID = (newID: string | null) => shareResultID.current = newID;
 
   let resultSet = useSelector(getResultSetById(currentQueryID));
-  console.log("resultSet", resultSet);
   // Bool, did the results return an error
   const [isError, setIsError] = useState(false);
   const loading = (loadingParam === 'true') ? true : false;
