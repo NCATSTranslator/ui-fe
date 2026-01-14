@@ -98,7 +98,6 @@ export const getResultSetById = (id: string | null | undefined) => (state: {resu
     return null;
   }
   if(!state?.resultSets[id]) {
-    console.warn(`Unable to find result set with pk: ${id}.`);
     return null;
   }
   return state.resultSets[id];
