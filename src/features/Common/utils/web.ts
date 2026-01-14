@@ -143,16 +143,18 @@ export const fetchWithErrorHandling = async <T>(
 };
 
 /**
- * Retrieves the decoded query parameters from the URL.
+ * Decodes query parameters from a search string.
  * Automatically detects and decodes base64 encoded portions while preserving other parameters.
  *
+ * @param {string} search - The search string (e.g., "?param=value" or "param=value").
  * @returns {string} The decoded query parameters.
  */
-export const getDecodedParams = (): string => {
-  if (!window.location.search)
+export const getDecodedParamsFromSearch = (search: string): string => {
+  if (!search)
     return "";
 
-  const searchParams = window.location.search.slice(1);
+  // Remove leading ? if present
+  const searchParams = search.startsWith('?') ? search.slice(1) : search;
   
   // Split by & to handle individual parameter segments
   const segments = searchParams.split('&');
@@ -188,6 +190,16 @@ export const getDecodedParams = (): string => {
   }
 
   return decodedSegments.join('&');
+}
+
+/**
+ * Retrieves the decoded query parameters from the URL.
+ * Automatically detects and decodes base64 encoded portions while preserving other parameters.
+ *
+ * @returns {string} The decoded query parameters.
+ */
+export const getDecodedParams = (): string => {
+  return getDecodedParamsFromSearch(window.location.search);
 }
 
 /**
