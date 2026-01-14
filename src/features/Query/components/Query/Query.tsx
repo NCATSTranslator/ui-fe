@@ -4,9 +4,8 @@ import { useLocation } from "react-router-dom";
 import { AutocompleteItem, QueryItem, QueryType } from "@/features/Query/types/querySubmission";
 import { Result } from "@/features/ResultList/types/results.d";
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
-import { useQueryState, useAutocomplete, useQuerySubmission, useExampleQueries } from "@/features/Query/hooks/customQueryHooks";
+import { useQueryItem, useAutocompleteConfig, useAutocomplete, useQuerySubmission, useExampleQueries } from "@/features/Query/hooks/customQueryHooks";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
-import cloneDeep from "lodash/cloneDeep";
 import styles from './Query.module.scss';
 import QueryResultsView from '@/features/Query/components/QueryResultsView/QueryResultsView';
 import QueryInputView from '@/features/Query/components/QueryInputView/QueryInputView';
@@ -58,14 +57,12 @@ const Query: FC<QueryProps> = ({
   const {
     queryItem,
     setQueryItem,
-    clearQueryItem,
+    clear: clearQueryItem,
     inputText,
     setInputText,
-    prevQueryItems,
-    autocompleteFunctions,
-    limitPrefixes,
-    limitTypes
-  } = useQueryState(initPresetTypeObject, initNodeLabelParam, initNodeIdParam);
+  } = useQueryItem(initPresetTypeObject, initNodeLabelParam, initNodeIdParam);
+
+  const autocompleteConfig = useAutocompleteConfig(queryItem.type);
 
   const {
     autocompleteItems,
@@ -74,7 +71,7 @@ const Query: FC<QueryProps> = ({
     delayedQuery,
     setAutocompleteVisibility,
     clearAutocompleteItems
-  } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes);
+  } = useAutocomplete(autocompleteConfig, nameResolverEndpoint);
 
   const { isLoading, setIsLoading, submitQuery } = useQuerySubmission('single', shouldNavigate, submissionCallback);
 
@@ -102,9 +99,6 @@ const Query: FC<QueryProps> = ({
     setIsError(false);
     const newQueryType = queryTypes.find((type) => type.id === parseInt(value));
     if (newQueryType) {
-      autocompleteFunctions.current = newQueryType.functions;
-      limitTypes.current = [newQueryType.filterType];
-      limitPrefixes.current = newQueryType.limitPrefixes;
       clearAutocompleteItems();
 
       if (resetInputText) {
@@ -114,7 +108,7 @@ const Query: FC<QueryProps> = ({
         setQueryItem((prev) => ({ ...prev, type: newQueryType }));
       }
     }
-  }, [autocompleteFunctions, limitTypes, limitPrefixes, clearAutocompleteItems, setQueryItem, setInputText]);
+  }, [clearAutocompleteItems, setQueryItem, setInputText]);
 
   const handleItemSelection = useCallback((item: AutocompleteItem) => {
     setIsError(false);
@@ -122,15 +116,9 @@ const Query: FC<QueryProps> = ({
       item.label += ` (${item.match})`;
     }
     setInputText(item.label);
-    setQueryItem((prev) => {
-      const newQueryItem = { type: prev.type, node: item };
-      const newPrevItems = cloneDeep(prevQueryItems.current);
-      newPrevItems.push(newQueryItem);
-      prevQueryItems.current = newPrevItems;
-      return newQueryItem;
-    });
+    setQueryItem((prev) => ({ type: prev.type, node: item }));
     setAutocompleteVisibility(false);
-  }, [setInputText, setQueryItem, prevQueryItems]);
+  }, [setInputText, setQueryItem, setAutocompleteVisibility]);
 
   const validateSubmission = useCallback((item: QueryItem | null) => {
     if (!item?.node || !item.node.id) {
