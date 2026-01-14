@@ -70,7 +70,7 @@ const FacetHeading: FC<FacetHeadingProps> = ({
           { matchingActiveFacets > 0 && <span className={styles.filterCount}>{matchingActiveFacets}</span>}
           {
             tooltipMarkup !== null &&
-            <Tooltip id={`${tagFamily}-type-tooltip`}>
+            <Tooltip id={`${tagFamily}-type-tooltip`} place="bottom">
               {
                 tooltipMarkup
               }

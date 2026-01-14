@@ -1,16 +1,14 @@
-import { useMemo, useState, useCallback, useRef, RefObject  } from 'react';
-import { useDispatch } from 'react-redux';
+import { useMemo, useState, useCallback, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash';
-import { Example, QueryItem } from '@/features/Query/types/querySubmission';
+import { Example, QueryItem, AutocompleteItem, AutocompleteConfig, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
 import { incrementHistory } from '@/features/History/slices/historySlice';
 import { filterAndSortExamples, getAutocompleteTerms } from '@/features/Query/utils/autocompleteFunctions';
 import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '@/features/Common/utils/web';
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
-import { AutocompleteItem, AutocompleteFunctions, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
-import { useSelector } from 'react-redux';
 import { errorToast } from '@/features/Core/utils/toastMessages';
 
 /**
@@ -198,46 +196,49 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
  * loading states, and autocomplete item management. Provides a 750ms debounced
  * query function to reduce API calls during user typing.
  *
- * @param {RefObject<AutocompleteFunctions | null>} autocompleteFunctions - Mutable ref containing autocomplete filter functions
- * @param {RefObject<string[]>} limitTypes - Mutable ref containing array of type filters for autocomplete
- * @param {RefObject<string[] | null>} limitPrefixes - Mutable ref containing array of prefix filters for autocomplete
+ * @param {AutocompleteConfig} config - Configuration object containing functions, types, and prefixes
  * @param {string} nameResolverEndpoint - API endpoint URL for name resolution
  * @returns Object containing:
  *   - autocompleteItems: Array of autocomplete suggestions or null
  *   - loadingAutocomplete: Boolean indicating if autocomplete is loading
  *   - delayedQuery: Debounced function to trigger autocomplete search
  *   - clearAutocompleteItems: Function to clear autocomplete suggestions
+ *   - autocompleteVisibility: Boolean controlling visibility of autocomplete dropdown
+ *   - setAutocompleteVisibility: Function to control autocomplete visibility
  */
 export const useAutocomplete = (
-  autocompleteFunctions: RefObject<AutocompleteFunctions | null>,
-  nameResolverEndpoint: string,
-  limitTypes?: RefObject<string[]>,
-  limitPrefixes?: RefObject<string[] | null>,
-  excludePrefixes?: RefObject<string[] | null>
+  config: AutocompleteConfig,
+  nameResolverEndpoint: string
 ) => {
   const [autocompleteItems, setAutoCompleteItems] = useState<AutocompleteItem[] | null>(null);
   const [autocompleteVisibility, setAutocompleteVisibility] = useState<boolean>(true);
   const [loadingAutocomplete, setLoadingAutocomplete] = useState<boolean>(false);
 
+  // Internal ref to capture latest config for debounced callback
+  // This prevents stale closures while avoiding debounce recreation
+  const configRef = useRef(config);
+  configRef.current = config;
+
   const delayedQuery = useMemo(
     () => debounce(
       (inputText: string) => {
-        if (autocompleteFunctions.current) {
+        const { functions, limitTypes, limitPrefixes, excludePrefixes } = configRef.current;
+        if (functions) {
           getAutocompleteTerms(
             inputText,
             setLoadingAutocomplete,
             setAutoCompleteItems,
-            autocompleteFunctions.current,
-            limitTypes?.current || [],
-            limitPrefixes?.current || [],
-            excludePrefixes?.current || [],
+            functions,
+            limitTypes || [],
+            limitPrefixes || [],
+            excludePrefixes || [],
             nameResolverEndpoint
           );
         }
       },
       750
     ),
-    [autocompleteFunctions, limitTypes, limitPrefixes, nameResolverEndpoint]
+    [nameResolverEndpoint]
   );
 
   const clearAutocompleteItems = useCallback(() => setAutoCompleteItems(null), []);
@@ -253,9 +254,24 @@ export const useAutocomplete = (
 };
 
 /**
- * Custom hook that manages the main query state including query item, input text,
- * and related configuration refs. Initializes state based on provided parameters
- * and maintains history of previous query items.
+ * Custom hook that derives autocomplete configuration from a QueryType.
+ * Returns a memoized config object that stays in sync with the query type.
+ *
+ * @param {QueryType} queryType - The query type to derive config from
+ * @returns {AutocompleteConfig} Memoized configuration object for useAutocomplete
+ */
+export const useAutocompleteConfig = (queryType: QueryType): AutocompleteConfig => {
+  return useMemo(() => ({
+    functions: queryType.functions,
+    limitTypes: queryType.filterType ? [queryType.filterType] : [],
+    limitPrefixes: queryType.limitPrefixes,
+    excludePrefixes: queryType.excludePrefixes,
+  }), [queryType.functions, queryType.filterType, queryType.limitPrefixes, queryType.excludePrefixes]);
+};
+
+/**
+ * Custom hook that manages query item state with proper prop synchronization.
+ * When props change, state automatically resets to reflect the new values.
  *
  * @param {QueryType | null} initPresetTypeObject - Initial query type object or null to use default
  * @param {string | null} initNodeLabelParam - Initial node label parameter from URL or props
@@ -265,17 +281,14 @@ export const useAutocomplete = (
  *   - setQueryItem: Function to update the current query item
  *   - inputText: Current input text value
  *   - setInputText: Function to update input text
- *   - prevQueryItems: Ref containing history of previous query items
- *   - autocompleteFunctions: Ref containing current autocomplete functions
- *   - limitPrefixes: Ref containing current prefix limits
- *   - limitTypes: Ref containing current type limits
- *   - clearQueryItem: Function to clear the query item back to initial state
+ *   - clear: Function to reset state to initial values
  */
-export const useQueryState = (
+export const useQueryItem = (
   initPresetTypeObject: QueryType | null,
   initNodeLabelParam: string | null,
   initNodeIdParam: string | null
 ) => {
+  // Compute derived initial query item
   const initQueryItem = useMemo((): QueryItem => {
     const initPresetType = initPresetTypeObject || queryTypes[0];
     const initSelectedNode = initNodeIdParam && initNodeLabelParam
@@ -288,15 +301,22 @@ export const useQueryState = (
     };
   }, [initPresetTypeObject, initNodeIdParam, initNodeLabelParam]);
 
+  // State
   const [queryItem, setQueryItem] = useState<QueryItem>(initQueryItem);
   const [inputText, setInputText] = useState<string>(initNodeLabelParam || "");
-  const prevQueryItems = useRef<QueryItem[]>([initQueryItem]);
 
-  const autocompleteFunctions = useRef(initQueryItem.type.functions);
-  const limitPrefixes = useRef(initQueryItem.type.limitPrefixes);
-  const limitTypes = useRef(initQueryItem.type.filterType ? [initQueryItem.type.filterType] : []);
+  // Track previous initQueryItem to detect prop changes (React 19 recommended pattern)
+  const [prevInitQueryItem, setPrevInitQueryItem] = useState<QueryItem>(initQueryItem);
 
-  const clearQueryItem = useCallback(() => {
+  // Adjust state during render when props change (avoids extra useEffect render cycle)
+  if (prevInitQueryItem !== initQueryItem) {
+    setPrevInitQueryItem(initQueryItem);
+    setQueryItem(initQueryItem);
+    setInputText(initNodeLabelParam || "");
+  }
+
+  // Clear function to reset state
+  const clear = useCallback(() => {
     setQueryItem(initQueryItem);
     setInputText(initNodeLabelParam || "");
   }, [initQueryItem, initNodeLabelParam]);
@@ -306,10 +326,6 @@ export const useQueryState = (
     setQueryItem,
     inputText,
     setInputText,
-    prevQueryItems,
-    autocompleteFunctions,
-    limitPrefixes,
-    limitTypes,
-    clearQueryItem
+    clear
   };
 };
