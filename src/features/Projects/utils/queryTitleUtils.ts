@@ -1,14 +1,37 @@
+import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
-import { generateQueryTitle, findAllCuriesInTitle } from '@/features/Projects/utils/utilities';
-
+import { queryTypes } from '@/features/Query/utils/queryTypes';
 /**
- * Generates a base title for a query, using existing title or generating one
- * @param {UserQueryObject} query - The query object
- * @returns {string} The base title
+ * Generates the title of a query based on the query type and direction
+ * @param {UserQueryObject} query - The query to generate the title for
+ * @returns {string} The title of the query
  */
-export const getBaseTitle = (query: UserQueryObject): string => {
-  return query.data.title || generateQueryTitle(query);
-};
+export const generateQueryTitle = (query: UserQueryObject): string => {
+  if(query.data.title)
+    return query.data.title;
+
+  let title = 'No title available';
+
+  if(query.data.query.type === 'pathfinder') {
+    // TODO: add constraint and nodes to title when Gus adds them to the query object
+    const constraint = query.data.query.constraint || null;
+    const nodeOne = query.data.query.node_one_label || query.data.query.subject?.id || 'nodeOne';
+    const nodeTwo = query.data.query.node_two_label || query.data.query.object?.id || 'nodeTwo';
+
+    title = constraint
+      ? `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)} — ${capitalizeFirstLetter(constraint)} Connections`
+      : `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)}`;
+  } else {
+    const queryType = queryTypes.find(type => type.targetType === query.data.query.type);
+    const label = query.data.query.node_one_label || query.data.query.curie;
+    if(queryType) {
+      // TODO: update curie to node label when Gus adds it to the query object
+      title = `${label} — ${capitalizeFirstLetter(queryType.targetType)}s`;
+    }
+  }
+
+  return title;
+}
 
 /**
  * Extracts all unique curies from an array of titles
@@ -23,6 +46,17 @@ export const extractAllCuriesFromTitles = (titles: string[]): string[] => {
   });
   return Array.from(curieSet);
 };
+
+/**
+ * Find all curies in the query title
+ * @param {string} title - The title to check
+ * @returns {string[]} Array of all curies found in the title
+ */
+export const findAllCuriesInTitle = (title: string): string[] => {
+  const curieRegex = /\b[A-Za-z][A-Za-z0-9_]*:[A-Za-z0-9_-]+\b/g;
+  const matches = title.match(curieRegex);
+  return matches || [];
+}
 
 /**
  * Replaces curies in a title with their resolved names

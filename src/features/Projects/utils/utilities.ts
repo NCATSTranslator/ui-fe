@@ -1,10 +1,8 @@
 import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/Common/utils/web";
 import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
-import { queryTypes } from "@/features/Query/utils/queryTypes";
 import { unableToReachLinkToast } from "@/features/Core/utils/toastMessages";
 import { ARAStatusResponse } from "@/features/ResultList/types/results.d";
-import { capitalizeFirstLetter } from "@/features/Common/utils/utilities";
 
 /**
  * Get the status of a project based on the most recent query's status
@@ -35,38 +33,6 @@ export const getProjectStatus = (project: Project, queries: UserQueryObject[]): 
   }, null);
 
   return mostRecentQuery?.status || 'unknown';
-}
-
-/**
- * Generates the title of a query based on the query type and direction
- * @param {UserQueryObject} query - The query to generate the title for
- * @returns {string} The title of the query
- */
-export const generateQueryTitle = (query: UserQueryObject): string => {
-  if(query.data.title)
-    return query.data.title;
-
-  let title = 'No title available';
-
-  if(query.data.query.type === 'pathfinder') {
-    // TODO: add constraint and nodes to title when Gus adds them to the query object
-    const constraint = query.data.query.constraint || null;
-    const nodeOne = query.data.query.node_one_label || query.data.query.subject?.id || 'nodeOne';
-    const nodeTwo = query.data.query.node_two_label || query.data.query.object?.id || 'nodeTwo';
-
-    title = constraint
-      ? `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)} — ${capitalizeFirstLetter(constraint)} Connections`
-      : `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)}`;
-  } else {
-    const queryType = queryTypes.find(type => type.targetType === query.data.query.type);
-    const label = query.data.query.node_one_label || query.data.query.curie;
-    if(queryType) {
-      // TODO: update curie to node label when Gus adds it to the query object
-      title = `${label} — ${capitalizeFirstLetter(queryType.targetType)}s`;
-    }
-  }
-
-  return title;
 }
 
 /**
@@ -131,27 +97,18 @@ export const fetcNodeNameFromCurie = async (curie: string): Promise<string> => {
 }
 
 /**
- * Find all curies in the query title
- * @param {string} title - The title to check
- * @returns {string[]} Array of all curies found in the title
- */
-export const findAllCuriesInTitle = (title: string): string[] => {
-  const curieRegex = /\b[A-Za-z][A-Za-z0-9_]*:[A-Za-z0-9_-]+\b/g;
-  const matches = title.match(curieRegex);
-  return matches || [];
-}
-
-/**
  * Formats biolink type strings by removing the biolink: prefix,
- * replacing underscores with spaces, and capitalizing each word.
+ * replacing underscores with spaces, splitting PascalCase, and capitalizing each word.
  * E.g., "biolink:Chemical_Entity" becomes "Chemical Entity"
+ * E.g., "biolink:ChemicalEntity" becomes "Chemical Entity"
  * @param {string} text - The text to format
  * @returns {string} The formatted text
  */
 export const formatBiolinkTypes = (text: string): string => {
   return text.replace(/[Bb]iolink:(\w+)/g, (_, typeName) => {
     return typeName
-      .replace(/_/g, ' ')
+      .replace(/_/g, ' ')  // Replace underscores with spaces
+      .replace(/([a-z])([A-Z])/g, '$1 $2')  // Split PascalCase
       .split(' ')
       .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
