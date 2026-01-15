@@ -71,6 +71,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
       linkTo={linkTo}
       linkTarget={linkTarget}
       testId={testId}
+      title={title}
     >
       <div className={styles.leftSection}>
         {leftIcon}

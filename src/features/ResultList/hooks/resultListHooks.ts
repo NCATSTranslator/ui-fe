@@ -8,7 +8,6 @@ import { Filter } from "@/features/ResultFiltering/types/filters";
 import { queryStatusResultsCompleteToast } from "@/features/Core/utils/toastMessages";
 import { useUpdateQueryLastSeen } from "@/features/Projects/hooks/customHooks";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
-import { useDispatch } from "react-redux";
 
 // Constants
 const STATUS_CHECK_TIMEOUT = 120; // 20 minutes (120 * 10 second intervals)
@@ -411,8 +410,6 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     setResultIdParam,
     setNodeDescription,
   } = config;
-
-  const dispatch = useDispatch();
 
   useEffect(() => {
     // Only reset if the query ID actually changed

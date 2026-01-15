@@ -31,7 +31,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
   query,
   searchTerm
 }) => {
-  const { title } = useGetQueryCardTitle(query);  
+  const { title } = useGetQueryCardTitle(query);
   const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
   const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
   const combinedClassName = joinClasses(className, isActiveQuery && styles.activeQuery);

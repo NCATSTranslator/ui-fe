@@ -2,9 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, useCallback } from 'react';
 import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
   restoreProjects, restoreQueries, touchQuery, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
-import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
-import { fetcNodeNameFromCurie, generateQueryTitle, findAllCuriesInTitle } from '@/features/Projects/utils/utilities';
-import { getBaseTitle, extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, createUpdatedQueryWithTitle } from '@/features/Projects/utils/queryTitleUtils';
+import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, 
+  SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
+import { fetcNodeNameFromCurie } from '@/features/Projects/utils/utilities';
+import { extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, generateQueryTitle,
+  createUpdatedQueryWithTitle, findAllCuriesInTitle } from '@/features/Projects/utils/queryTitleUtils';
 import { useSelector } from 'react-redux';
 import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 import { filterAndSortProjects } from '@/features/Projects/utils/filterAndSortingFunctions';
@@ -314,41 +316,14 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
  * @returns { title: string; isLoading: boolean } Object with title and loading state
  */
 export const useGetQueryCardTitle = (query: UserQueryObject | null): { title: string; isLoading: boolean } => {
+  const baseTitle = useMemo(() => query ? generateQueryTitle(query) : '', [query]);
   
-  const updateQueryMutation = useUpdateQuery();
-  const baseTitle = useMemo(() => 
-    query ? getBaseTitle(query) : '', 
-    [query]
-  );
-  
-  const curies = useMemo(() => 
-    query ? findAllCuriesInTitle(baseTitle) : [], 
-    [baseTitle]
-  );
-  
-  const { data: resolvedNames, isLoading } = useMultipleResolvedCurieNames(
-    curies,
-    curies.length > 0
-  );
+  const curies = useMemo(() => findAllCuriesInTitle(baseTitle), [baseTitle]);
+  const { data: resolvedNames, isLoading } = useMultipleResolvedCurieNames(curies, curies.length > 0);
   
   const title = useMemo(() => {
-    if(query === null)
-      return baseTitle;
-      
-    const updatedTitle = replaceCuriesInTitle(baseTitle, resolvedNames);
-    
-    // Only update if we actually made replacements
-    if (hasTitleBeenUpdated(baseTitle, updatedTitle)) {
-      // call update query endpoint
-      // updateQueryMutation.mutate({
-      //   id: query.sid,
-      //   title: updatedTitle
-      // });
-      return updatedTitle;
-    }
-    
-    return baseTitle;
-  }, [curies, resolvedNames, baseTitle, updateQueryMutation, query?.sid]);
+    return replaceCuriesInTitle(baseTitle, resolvedNames);
+  }, [baseTitle, resolvedNames]);
   
   return { title, isLoading };
 };
@@ -363,7 +338,7 @@ export const useGetQueriesUpdatedTitles = (queries: UserQueryObject[]): { querie
   
   const baseTitles = useMemo(() => 
     queries.reduce((acc, query) => {
-      acc[query.data.qid] = getBaseTitle(query);
+      acc[query.data.qid] = generateQueryTitle(query);
       return acc;
     }, {} as Record<string, string>), 
     [queries]
