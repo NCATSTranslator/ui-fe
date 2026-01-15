@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
+import { capitalizeFirstLetter, formatBiolinkTypeString } from '@/features/Common/utils/utilities';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 /**
@@ -19,7 +19,7 @@ export const generateQueryTitle = (query: UserQueryObject): string => {
     const nodeTwo = query.data.query.node_two_label || query.data.query.object?.id || 'nodeTwo';
 
     title = constraint
-      ? `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)} — ${capitalizeFirstLetter(constraint)} Connections`
+      ? `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)} — ${formatBiolinkTypeString(constraint)} Connections`
       : `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)}`;
   } else {
     const queryType = queryTypes.find(type => type.targetType === query.data.query.type);

@@ -97,25 +97,6 @@ export const fetcNodeNameFromCurie = async (curie: string): Promise<string> => {
 }
 
 /**
- * Formats biolink type strings by removing the biolink: prefix,
- * replacing underscores with spaces, splitting PascalCase, and capitalizing each word.
- * E.g., "biolink:Chemical_Entity" becomes "Chemical Entity"
- * E.g., "biolink:ChemicalEntity" becomes "Chemical Entity"
- * @param {string} text - The text to format
- * @returns {string} The formatted text
- */
-export const formatBiolinkTypes = (text: string): string => {
-  return text.replace(/[Bb]iolink:(\w+)/g, (_, typeName) => {
-    return typeName
-      .replace(/_/g, ' ')  // Replace underscores with spaces
-      .replace(/([a-z])([A-Z])/g, '$1 $2')  // Split PascalCase
-      .split(' ')
-      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  });
-};
-
-/**
  * Get the link for a query
  * @param {UserQueryObject} query - The query to get the link for
  * @returns {string} The link for the query

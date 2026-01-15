@@ -5,7 +5,7 @@ import styles from './QueryPathfinder.module.scss';
 import Button from '@/features/Core/components/Button/Button';
 import { AutocompleteItem, AutocompleteContext, AutocompleteConfig } from '@/features/Query/types/querySubmission';
 import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
-import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { formatBiolinkTypeString, getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "@/assets/icons/directional/Pathfinder/Pathfinder.svg?react";
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
@@ -72,7 +72,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   const labelTwo = getDataFromQueryVar("ltwo", decodedParams);
   const idOne = getDataFromQueryVar("ione", decodedParams);
   const idTwo = getDataFromQueryVar("itwo", decodedParams);
-  const constraintText = getDataFromQueryVar("c", decodedParams);
+  const constraintText = formatBiolinkTypeString(getDataFromQueryVar("c", decodedParams) || "");
 
   const autocompleteConfig = useMemo<AutocompleteConfig>(() => ({
     functions: {

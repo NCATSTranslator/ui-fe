@@ -4,7 +4,7 @@ import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQ
   restoreProjects, restoreQueries, touchQuery, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, 
   SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
-import { fetcNodeNameFromCurie, formatBiolinkTypes } from '@/features/Projects/utils/utilities';
+import { fetcNodeNameFromCurie } from '@/features/Projects/utils/utilities';
 import { extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, generateQueryTitle,
   createUpdatedQueryWithTitle, findAllCuriesInTitle } from '@/features/Projects/utils/queryTitleUtils';
 import { useSelector } from 'react-redux';
@@ -322,8 +322,7 @@ export const useGetQueryCardTitle = (query: UserQueryObject | null): { title: st
   const { data: resolvedNames, isLoading } = useMultipleResolvedCurieNames(curies, curies.length > 0);
   
   const title = useMemo(() => {
-    const resolvedTitle = replaceCuriesInTitle(baseTitle, resolvedNames);
-    return formatBiolinkTypes(resolvedTitle);
+    return replaceCuriesInTitle(baseTitle, resolvedNames);
   }, [baseTitle, resolvedNames]);
   
   return { title, isLoading };
