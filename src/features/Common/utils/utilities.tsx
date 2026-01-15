@@ -132,6 +132,28 @@ export const capitalizeFirstLetter = (string: string): string => {
 }
 
 /**
+ * Formats a biolink type string by removing the biolink: prefix,
+ * replacing underscores with spaces, splitting PascalCase, and capitalizing each word.
+ * E.g., "biolink:Chemical_Entity" becomes "Chemical Entity"
+ * E.g., "biolink:ChemicalEntity" becomes "Chemical Entity"
+ * E.g., "ChemicalEntity" becomes "Chemical Entity"
+ * @param {string} text - The text to format
+ * @returns {string} The formatted text
+ */
+export const formatBiolinkTypeString = (text: string): string => {
+  // Remove biolink: prefix if present
+  const withoutPrefix = text.replace(/[Bb]iolink:/g, '');
+  
+  // Format the text: replace underscores, split PascalCase, capitalize
+  return withoutPrefix
+    .replace(/_/g, ' ')  // Replace underscores with spaces
+    .replace(/([a-z])([A-Z])/g, '$1 $2')  // Split PascalCase
+    .split(' ')
+    .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+/**
  * Checks if a word is a Roman numeral.
  *
  * @param {string} word - The word to check.
