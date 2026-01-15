@@ -13,7 +13,7 @@ import { useUserProjects, useUserQueries } from '@/features/Projects/hooks/custo
 import { useSelector } from 'react-redux';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
-import { generateQueryTitle } from '@/features/Projects/utils/utilities';
+import { generateQueryTitle } from '@/features/Projects/utils/queryTitleUtils';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 
 const generatePathfinderSubheading = (idOne: string, labelOne: string, idTwo: string, labelTwo: string, constraintText?: string, searchedTermClassName?: string) => {
