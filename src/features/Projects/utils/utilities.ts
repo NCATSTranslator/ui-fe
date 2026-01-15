@@ -142,6 +142,23 @@ export const findAllCuriesInTitle = (title: string): string[] => {
 }
 
 /**
+ * Formats biolink type strings by removing the biolink: prefix,
+ * replacing underscores with spaces, and capitalizing each word.
+ * E.g., "biolink:Chemical_Entity" becomes "Chemical Entity"
+ * @param {string} text - The text to format
+ * @returns {string} The formatted text
+ */
+export const formatBiolinkTypes = (text: string): string => {
+  return text.replace(/[Bb]iolink:(\w+)/g, (_, typeName) => {
+    return typeName
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  });
+};
+
+/**
  * Get the link for a query
  * @param {UserQueryObject} query - The query to get the link for
  * @returns {string} The link for the query
