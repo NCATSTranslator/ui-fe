@@ -8,6 +8,11 @@
     flex-direction: column;
     overflow-y: hidden;
     margin: 0 10px;
+  .head {
+    &.snippet .headSpan, &.knowledgeLevel .headSpan {
+      cursor: default;
+    }
+  }
   .tableItems {
     display: flex;
     flex-direction: column;
