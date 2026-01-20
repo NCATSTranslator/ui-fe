@@ -26,8 +26,9 @@ const OutsideClickHandler = forwardRef<HTMLDivElement, OutsideClickHandlerProps>
         onOutsideClick();
       }
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+    // Use capture phase (true) so the handler runs before stopPropagation() can prevent it
+    document.addEventListener("click", handleClickOutside, true);
+    return () => document.removeEventListener("click", handleClickOutside, true);
   }, [onOutsideClick, finalRef]);
 
   return (

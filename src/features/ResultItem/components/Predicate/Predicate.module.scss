@@ -247,7 +247,7 @@
   margin-top: $xs;
   .count {
     background-color: $palePurple;
-    color: $black;
+    color: $black !important;
     font-size: $captionSize;
     font-weight: 400;
     padding: $xxs;

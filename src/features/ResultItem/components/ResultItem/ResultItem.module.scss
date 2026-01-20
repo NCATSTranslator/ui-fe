@@ -227,32 +227,4 @@
       }
     }
   }
-  .needHelp {
-    font-size: $captionSize;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: $purpleOne;
-    margin: 0 0 $xxs;
-    svg {
-      path {
-        fill: $purpleOne;
-      }
-    }
-    button {
-      padding: 0;
-      color: $purpleOne;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: $captionSize;
-      box-shadow: none;
-      margin: 0 0 0 $xxs;
-      background-color: transparent;
-      &:hover {
-        box-shadow: none;
-        text-decoration: underline;
-      }
-    }
-  }
 }

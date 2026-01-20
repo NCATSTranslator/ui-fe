@@ -5,6 +5,8 @@
   top: 12px;
   left: 12px;
   z-index: 1500;
+  // TEMPORARILY HIDING FOR TESTING
+  display: none;
   span {
     font-size: $captionSize !important;
     overflow: hidden;

@@ -26,6 +26,7 @@ const App = ({children}: {children?: ReactNode}) => {
   const location = useLocation();
   const minScreenWidth = 1024;
   const {width} = useWindowSize();
+  const isSmallScreen = width && width < minScreenWidth;
 
   const [gaID, setGaID] = useState<string | null>(null);
   useGoogleAnalytics(gaID ?? undefined);
@@ -86,15 +87,15 @@ const App = ({children}: {children?: ReactNode}) => {
             <AppToastContainer />
             <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />
             <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-              <div className='layout'>
-                <Sidebar />
+              <div className="layout">
+                <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
                 <main className='content scrollable'>
                   <Header />
                   {
                     children && children
                   }
                   {
-                    (width && width < minScreenWidth) && <SmallScreenOverlay /> 
+                    isSmallScreen && <SmallScreenOverlay /> 
                   }
                   <Outlet context={setFeedbackModalOpen}/>
                   <Footer>

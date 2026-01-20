@@ -154,7 +154,7 @@ export const ProjectModalsProvider: FC<ProjectModalsProviderProps> = ({ children
           // if viewing current query (i.e. qid is in the URL), navigate to previous page
           const currentQid = getDataFromQueryVar('q', location.search);
           if(currentQid && queries.some(q => q.data.qid === currentQid)) {
-            navigate(-1);
+            navigate('/queries', { replace: true });
           }
           setSelectedQueries([]);
         },

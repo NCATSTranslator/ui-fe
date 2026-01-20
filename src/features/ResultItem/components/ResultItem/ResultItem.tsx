@@ -428,9 +428,6 @@ const ResultItem: FC<ResultItemProps> = ({
               </Suspense>
             </Tab>
         </Tabs>
-        <p className={styles.needHelp}>
-          <Button handleClick={()=>togglePanel('feedback')} iconLeft={<Feedback/>}>Send Feedback</Button>
-        </p>
       </AnimateHeight>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}

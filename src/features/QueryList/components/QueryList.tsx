@@ -43,8 +43,8 @@ const QueryList = () => {
   }, [filteredQueries]);
 
   const showDropLabel = useMemo(() => {
-    return activePanelId === 'projects';
-  }, [activePanelId]);
+    return activePanelId === 'projects' && filteredQueries.length > 0 && !queriesLoading;
+  }, [activePanelId, filteredQueries.length, queriesLoading]);
 
   return (
     <div className={styles.queriesPanel}>
