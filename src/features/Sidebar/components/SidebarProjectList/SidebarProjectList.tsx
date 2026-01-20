@@ -63,7 +63,8 @@ const SidebarProjectList: FC<SidebarProjectListProps> = ({
     if (!addToProjectQuery || !project) return;
 
     // If in add-to-project mode and this was the new project being named
-    queryAddedToProjectToast(queryTitle, project.data.title);
+    // REMOVING FOR NOW TO AVOID DOUBLE TOASTS
+    // queryAddedToProjectToast(queryTitle, project.data.title);
     clearAddToProjectMode();
   };
 
