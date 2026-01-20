@@ -33,6 +33,10 @@ const ProjectList = () => {
   const { togglePanel, activePanelId, closePanel } = useSidebar();
   const activeQueries = useMemo(() => data.filtered.active.queries || [], [data.filtered.active.queries]);
 
+  const shouldShowErrorState = useMemo(() => {
+    return !user?.id && !projectsLoading && projects.length === 0;
+  }, [user?.id, projectsLoading, projects]);
+
   const handleCreateNewProjectClick = () => {
     const newProject = {
       title: '',
@@ -75,7 +79,7 @@ const ProjectList = () => {
       />
       <div className={styles.list}>
         {
-          !user ? (
+          shouldShowErrorState ? (
             <EmptyArea>
               <p>
                 <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your saved projects.
