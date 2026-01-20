@@ -5,7 +5,7 @@ import '@/index.css';
 import App from '@/App';
 import Page from '@/features/Page/components/Page/Page';
 import FAQPage from '@/features/Page/components/Page/FAQPage';
-import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
+import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper';
 import { Provider } from 'react-redux';
 import { store } from '@/redux/store';
 const Home = lazy(() => import('@/pageRoutes/Home/Home'));

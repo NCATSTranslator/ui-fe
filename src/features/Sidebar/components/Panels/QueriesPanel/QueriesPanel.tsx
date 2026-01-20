@@ -8,7 +8,7 @@ import TextInput from "@/features/Core/components/TextInput/TextInput";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import SidebarQueryCard from "@/features/Sidebar/components/SidebarQueryCard/SidebarQueryCard";
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
 import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";

@@ -1,5 +1,5 @@
 import styles from './ResultListLoadingArea.module.scss';
-import LoadingBar from "@/features/Common/components/LoadingBar/LoadingBar"
+import LoadingBar from "@/features/Core/components/LoadingBar/LoadingBar"
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
 import { Link } from 'react-router-dom';

@@ -14,7 +14,7 @@ import TextInput from '@/features/Core/components/TextInput/TextInput';
 import { cloneDeep } from 'lodash';
 import UserSave from '@/features/WorkspaceV1/components/UserSave/UserSave';
 import LoginWarning from '@/features/UserAuth/components/LoginWarning/LoginWarning';
-import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper'
+import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper'
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import { debounce } from 'lodash';
 import { Path, Result, ResultEdge, ResultSet } from '@/features/ResultList/types/results';

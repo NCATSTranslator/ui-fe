@@ -1,6 +1,6 @@
 import { FC, useEffect, useState, ReactNode } from 'react';
 import styles from './LoadingWrapper.module.scss';
-import LoadingIcon from '@/features/Common/components/LoadingIcon/LoadingIcon';
+import LoadingIcon from '@/features/Core/components/LoadingIcon/LoadingIcon';
 import { Timeout } from '@/features/Common/types/global';
 
 interface LoadingWrapperProps {
