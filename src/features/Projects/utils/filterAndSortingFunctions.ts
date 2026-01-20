@@ -56,7 +56,7 @@ export const filterProjects = (projects: Project[] | ProjectRaw[], searchTerm: s
       foundMatch = true;
     }
     // check if any of the project's queries match the search term
-    if (queries && project.data.pks.some(pk => queries.find(q => q.data.qid === pk)?.data.title?.toLowerCase().includes(formattedSearchTerm))) {
+    if (queries && project.data.pks.some(pk => queries.find(q => (q.data.qid === pk && !q.data.deleted))?.data.title?.toLowerCase().includes(formattedSearchTerm))) {
       foundMatch = true;
     }
     return foundMatch;

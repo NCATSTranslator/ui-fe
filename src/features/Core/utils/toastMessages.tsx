@@ -10,23 +10,23 @@ export const projectDeletedToast = () => {
   return toast(AppToast, { data: { topText: 'Project deleted' } });
 };
 export const queryAddedToProjectToast = (queryTitle: string, projectTitle: string) => {
-  return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Added to ${projectTitle}` } });
+  return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Added to ${projectTitle || 'Project'}` } });
 };
 export const queryAlreadyInProjectToast = (queryTitle: string, projectTitle: string) => {
-  return toast.error(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Already in ${projectTitle}` } });
+  return toast.error(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Already in ${projectTitle || 'Project'}` } });
 };
 export const projectCreatedToast = () => {
   return toast(AppToast, { data: { topText: 'Project created' } });
 };
 export const projectUpdatedToast = (projectTitle?: string, queryTitle?: string, action?: 'add' | 'remove') => {
   if(projectTitle && queryTitle && action === 'add')
-    return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Added to ${projectTitle}` } });
+    return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Added to ${projectTitle || 'Project'}` } });
 
   if(projectTitle && action === 'remove')
-    return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Removed from ${projectTitle}` } });
+    return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Removed from ${projectTitle || 'Project'}` } });
 
   if(projectTitle)
-    return toast(AppToast, { data: { topText: `Updated ${projectTitle}` } });
+    return toast(AppToast, { data: { topText: `Updated ${projectTitle || 'Project'}` } });
 
   if(queryTitle && action === 'add')
     return toast(AppToast, { data: { topText: `${queryTitle} added to project` } });
