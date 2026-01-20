@@ -4,7 +4,7 @@ import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features
 import { getARATagsFromResultTags, isNotesEmpty } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
-import LoadingBar from '@/features/Common/components/LoadingBar/LoadingBar';
+import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
 import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';

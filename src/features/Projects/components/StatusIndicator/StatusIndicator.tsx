@@ -1,6 +1,6 @@
 import { FC, useId } from "react";
 import styles from './StatusIndicator.module.scss';
-import LoadingIcon from "@/features/Common/components/LoadingIcon/LoadingIcon";
+import LoadingIcon from "@/features/Core/components/LoadingIcon/LoadingIcon";
 import CheckIcon from "@/assets/icons/buttons/Checkmark/Checkmark.svg?react";
 import ErrorIcon from "@/assets/icons/buttons/Close/Close.svg?react";
 import CloseIcon from "@/assets/icons/buttons/Close/Close.svg?react";

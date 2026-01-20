@@ -6,7 +6,7 @@ import { currentUser } from "@/features/UserAuth/slices/userSlice";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import SidebarProjectCard from "@/features/Sidebar/components/SidebarProjectCard/SidebarProjectCard";
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
 import { useProjectListData } from "@/features/Projects/hooks/useProjectListData";
 import Button from "@/features/Core/components/Button/Button";
 import PlusIcon from '@/assets/icons/buttons/Add/Add.svg?react';

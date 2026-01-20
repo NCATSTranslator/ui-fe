@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useMemo, FC, Dispatch, SetStateAction } from 'react';
-import LoadingBar from "@/features/Common/components/LoadingBar/LoadingBar";
+import LoadingBar from "@/features/Core/components/LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import { handleEvidenceSort, getInitItemsPerPage } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { Preferences } from '@/features/UserAuth/types/user';

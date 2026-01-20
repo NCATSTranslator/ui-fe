@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import styles from './SettingsPanel.module.scss';
 import Button from "@/features/Core/components/Button/Button";
 import UserIcon from '@/assets/icons/projects/user.svg?react';
-import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
+import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper';
 import { getFormattedLoginURL, useUser } from '@/features/UserAuth/utils/userApi';
 import { PrefKey, PrefObject, PrefType } from '@/features/UserAuth/types/user';
 import ChevRight from "@/assets/icons/directional/Chevron/Chevron Right.svg?react";
