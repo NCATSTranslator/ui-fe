@@ -6,7 +6,7 @@ import { currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useSortSearchState, useUserQueries } from "@/features/Projects/hooks/customHooks";
 import QueriesTableHeader from "@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader";
 import QueryCard from "@/features/Projects/components/QueryCard/QueryCard";
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
 import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
@@ -33,6 +33,10 @@ const QueryList = () => {
   const filteredQueries = useFilteredQueries(queries, false, sortSearchState, searchTerm);
   const { activePanelId } = useSidebar();
   const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
+
+  const shouldShowErrorState = useMemo(() => {
+    return !user?.id && !queriesLoading && queries.length === 0;
+  }, [user?.id, queriesLoading, queries]);
 
   const handleRefetch = () => {
     refetchQueries();
@@ -67,7 +71,7 @@ const QueryList = () => {
           Add New Query
         </Button>
         {
-          !user ? (
+          shouldShowErrorState ? (
             <EmptyArea>
               <p>
                 <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your saved queries.

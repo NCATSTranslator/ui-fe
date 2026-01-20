@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import styles from "./ProjectList.module.scss";
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
 import { useProjectListData } from "@/features/Projects/hooks/useProjectListData";
 import Button from "@/features/Core/components/Button/Button";
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';

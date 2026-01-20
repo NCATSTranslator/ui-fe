@@ -131,7 +131,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer}`}>
       {result?.drug_name &&
         <div className={styles.top}>
-          <h5 className={styles.title}>{isInferred ? "Indirect" : "Direct"} Path {pathKey} Evidence</h5>
+          <h5 className={styles.title}>{isInferred ? "Indirect" : pathKey.length > 1 ? "Supporting" : "Direct"} Path {pathKey} Evidence</h5>
           <div className={styles.labelContainer}>
             {
               edgeLabel &&
