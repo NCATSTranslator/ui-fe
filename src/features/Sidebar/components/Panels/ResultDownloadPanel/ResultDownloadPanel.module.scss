@@ -1,0 +1,6 @@
+@use '@/assets/styles/variables' as *;
+
+// Minimal styles for the wrapper - main styles are in ResultDownloadPanelInner
+.resultDownloadPanel {
+  height: 100%;
+}

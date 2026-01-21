@@ -35,8 +35,10 @@ import { useResultsStatusQuery, useResultsDataQuery, useResultsCompleteToast, us
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useSidebarRegistration, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
+import DownloadIcon from '@/assets/icons/buttons/Export.svg?react';
 import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
 import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/FiltersPanel";
+import ResultDownloadPanel from "@/features/Sidebar/components/Panels/ResultDownloadPanel/ResultDownloadPanel";
 import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from "@/features/Core/utils/toastMessages";
 import { getQueryStatusIndicatorStatus } from "@/features/Projects/utils/utilities";
 import StatusSidebarIcon from "@/features/ResultList/components/StatusSidebarIcon/StatusSidebarIcon";
@@ -757,6 +759,26 @@ const ResultList = () => {
       isPathfinder
     ],
     // autoOpen: true // Uncomment to auto-open when landing on Results
+  });
+
+  // Register the download sidebar item
+  useSidebarRegistration({
+    ariaLabel: "Download Results",
+    disabled: isLoading || formattedResults.length === 0,
+    icon: <DownloadIcon />,
+    id: 'download',
+    label: "Download",
+    panelComponent: () => (
+      <ResultDownloadPanel
+        resultSet={resultSet as ResultSet}
+        filteredResults={formattedResults}
+        allResults={resultSet?.data?.results || []}
+        userSaves={userSaves}
+        isPathfinder={isPathfinder}
+      />
+    ),
+    tooltipText: "Download Results",
+    dependencies: [resultSet, formattedResults, userSaves, isLoading, isPathfinder]
   });
 
   return (
