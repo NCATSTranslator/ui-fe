@@ -122,13 +122,6 @@ export const flattenResultForCSV = (
   const subjectNode = exportedResultSet.nodes[result.subject];
   const objectNode = exportedResultSet.nodes[result.object];
 
-  // Get scores (use first score object or defaults)
-  const score = result.scores?.[0] || {
-    confidence: 0,
-    novelty: 0,
-    clinical_evidence: 0,
-  };
-
   return {
     result_id: result.id,
     result_name: result.drug_name,
@@ -138,9 +131,6 @@ export const flattenResultForCSV = (
     object_id: result.object,
     object_name: objectNode?.names?.[0] || '',
     object_types: joinArrayForCSV(objectNode?.types),
-    score_confidence: score.confidence,
-    score_novelty: score.novelty,
-    score_clinical: score.clinical_evidence,
     path_count: result.paths.length,
     publication_count: countPublications(resultId, exportedResultSet, resultSet),
     trial_count: countTrials(resultId, exportedResultSet),
@@ -164,9 +154,6 @@ export const exportToCSV = (
     'object_id',
     'object_name',
     'object_types',
-    'score_confidence',
-    'score_novelty',
-    'score_clinical',
     'path_count',
     'publication_count',
     'trial_count',

@@ -14,6 +14,7 @@ interface ResultDownloadPanelInnerProps {
   allResults: Result[];
   userSaves: SaveGroup | null;
   isPathfinder?: boolean;
+  queryTitle?: string;
 }
 
 const ResultDownloadPanelInner: FC<ResultDownloadPanelInnerProps> = ({
@@ -22,6 +23,7 @@ const ResultDownloadPanelInner: FC<ResultDownloadPanelInnerProps> = ({
   allResults,
   userSaves,
   isPathfinder = false,
+  queryTitle,
 }) => {
   const [scope, setScope] = useState<DownloadScope>('filtered');
   const [format, setFormat] = useState<ExportFormat>('json');
@@ -46,14 +48,14 @@ const ResultDownloadPanelInner: FC<ResultDownloadPanelInnerProps> = ({
     };
 
     try {
-      downloadResults(resultSet, allResults, filteredResults, userSaves, options);
+      downloadResults(resultSet, allResults, filteredResults, userSaves, options, queryTitle);
     } catch (error) {
       console.error('Error downloading results:', error);
     } finally {
       // Small delay to show downloading state
       setTimeout(() => setIsDownloading(false), 500);
     }
-  }, [scope, format, resultSet, allResults, filteredResults, userSaves, hasResults]);
+  }, [scope, format, resultSet, allResults, filteredResults, userSaves, hasResults, queryTitle]);
 
   const currentCount = useMemo(() => {
     switch (scope) {

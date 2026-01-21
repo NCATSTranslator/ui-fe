@@ -42,7 +42,7 @@ import ResultDownloadPanel from "@/features/Sidebar/components/Panels/ResultDown
 import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from "@/features/Core/utils/toastMessages";
 import { getQueryStatusIndicatorStatus } from "@/features/Projects/utils/utilities";
 import StatusSidebarIcon from "@/features/ResultList/components/StatusSidebarIcon/StatusSidebarIcon";
-import { useUserQueries } from "@/features/Projects/hooks/customHooks";
+import { useUserQueries, useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 
 const ResultList = () => {
@@ -66,12 +66,25 @@ const ResultList = () => {
 
   const { data: queries = [] } = useUserQueries();
   const currentQuerySid: string | undefined = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID)?.sid, [queries, currentQueryID]);
+  const currentQueryObject = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID) || null, [queries, currentQueryID]);
+  const { title: resolvedQueryTitle } = useGetQueryCardTitle(currentQueryObject);
 
   const nodeLabelParam = getDataFromQueryVar("l", decodedParams);
   const nodeIdParam = getDataFromQueryVar("i", decodedParams);
   const [resultIdParam, setResultIdParam] = useState(getDataFromQueryVar("r", decodedParams));
   const firstLoad = useRef(true);
   const [nodeDescription, setNodeDescription] = useState("");
+
+  // Build query title for downloads - use resolved title if available, otherwise build from URL params
+  const queryTitle = useMemo(() => {
+    if (resolvedQueryTitle) return resolvedQueryTitle;
+    // Fallback: construct title from URL parameters
+    if (nodeLabelParam) {
+      const typeLabel = isPathfinder ? 'Pathfinder' : (presetTypeObject?.targetType || 'Query');
+      return `${nodeLabelParam} — ${typeLabel}s`;
+    }
+    return '';
+  }, [resolvedQueryTitle, nodeLabelParam, isPathfinder, presetTypeObject]);
   const shareResultID = useRef<string | null>(null);
   const setShareResultID = (newID: string | null) => shareResultID.current = newID;
 
@@ -775,10 +788,11 @@ const ResultList = () => {
         allResults={resultSet?.data?.results || []}
         userSaves={userSaves}
         isPathfinder={isPathfinder}
+        queryTitle={queryTitle}
       />
     ),
     tooltipText: "Download Results",
-    dependencies: [resultSet, formattedResults, userSaves, isLoading, isPathfinder]
+    dependencies: [resultSet, formattedResults, userSaves, isLoading, isPathfinder, queryTitle]
   });
 
   return (

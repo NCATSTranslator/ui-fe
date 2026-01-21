@@ -203,7 +203,6 @@ const cleanResult = (result: Result): ExportedResult => ({
   subject: result.subject,
   object: result.object,
   paths: result.paths.map(p => (typeof p === 'string' ? p : p.id || '')),
-  scores: result.scores,
 });
 
 /**
@@ -329,11 +328,31 @@ export const triggerDownload = (content: string, filename: string, mimeType: str
 };
 
 /**
+ * Sanitizes a string for use in a filename
+ * - Removes or replaces special characters
+ * - Limits length
+ * - Converts spaces to underscores
+ */
+export const sanitizeForFilename = (str: string, maxLength: number = 50): string => {
+  if (!str) return '';
+  
+  return str
+    .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
+    .replace(/\s+/g, '_')            // Replace spaces with underscores
+    .replace(/-+/g, '-')             // Collapse multiple hyphens
+    .replace(/_+/g, '_')             // Collapse multiple underscores
+    .slice(0, maxLength)             // Limit length
+    .replace(/[_-]+$/, '');          // Remove trailing underscores/hyphens
+};
+
+/**
  * Generates a filename for the export
  */
-export const generateFilename = (qid: string, scope: DownloadScope, format: ExportFormat): string => {
+export const generateFilename = (scope: DownloadScope, format: ExportFormat, queryTitle?: string): string => {
   const date = new Date().toISOString().split('T')[0];
-  return `results_${qid}_${scope}_${date}.${format}`;
+  const sanitizedTitle = queryTitle ? sanitizeForFilename(queryTitle) : '';
+  const titlePart = sanitizedTitle ? `${sanitizedTitle}` : '';
+  return `results_${titlePart}_${scope}_${date}.${format}`;
 };
 
 /**
@@ -344,7 +363,8 @@ export const downloadResults = (
   allResults: Result[],
   filteredResults: Result[],
   userSaves: SaveGroup | null,
-  options: DownloadOptions
+  options: DownloadOptions,
+  queryTitle?: string
 ): void => {
   // Get results based on scope
   const scopedResults = getResultsByScope(options.scope, allResults, filteredResults, userSaves);
@@ -361,7 +381,7 @@ export const downloadResults = (
   const cleanedResultSet = cleanResultSet(scopedResults, entities, resultSet, options);
 
   // Generate filename
-  const filename = generateFilename(resultSet.data.meta.qid, options.scope, options.format);
+  const filename = generateFilename(options.scope, options.format, queryTitle);
 
   if (options.format === 'json') {
     const jsonContent = exportToJSON(cleanedResultSet);

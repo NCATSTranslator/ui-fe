@@ -45,13 +45,6 @@ export interface ExportedResult {
   subject: string;
   object: string;
   paths: string[];
-  scores: {
-    clinical_evidence: number;
-    confidence: number;
-    main: number;
-    novelty: number;
-    normalized_score: number;
-  }[];
 }
 
 export interface ExportedPath {
@@ -117,9 +110,6 @@ export interface CSVRow {
   object_id: string;
   object_name: string;
   object_types: string;
-  score_confidence: number;
-  score_novelty: number;
-  score_clinical: number;
   path_count: number;
   publication_count: number;
   trial_count: number;
