@@ -338,7 +338,7 @@ export const sanitizeForFilename = (str: string, maxLength: number = 50): string
   
   return str
     .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
-    .replace(/\s+/g, '_')            // Replace spaces with underscores
+    .replace(/\s+/g, '-')            // Replace spaces with dashes
     .replace(/-+/g, '-')             // Collapse multiple hyphens
     .replace(/_+/g, '_')             // Collapse multiple underscores
     .slice(0, maxLength)             // Limit length
@@ -352,7 +352,7 @@ export const generateFilename = (scope: DownloadScope, format: ExportFormat, que
   const date = new Date().toISOString().split('T')[0];
   const sanitizedTitle = queryTitle ? sanitizeForFilename(queryTitle) : '';
   const titlePart = sanitizedTitle ? `${sanitizedTitle}` : '';
-  return `results_${titlePart}_${scope}_${date}.${format}`;
+  return `${titlePart}_${scope}_results_${date}.${format}`;
 };
 
 /**
