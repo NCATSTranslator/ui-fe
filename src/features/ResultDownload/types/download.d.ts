@@ -80,7 +80,7 @@ export interface ExportMeta {
   aras: string[];
   qid: string;
   timestamp: string;
-  exportedAt: string;
+  export_time: string;
   scope: DownloadScope;
   format: ExportFormat;
   resultCount: number;

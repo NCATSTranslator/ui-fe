@@ -1,19 +1,14 @@
 @use '@/assets/styles/variables' as *;
 
 .resultDownloadPanelInner {
-  display: grid;
-  align-content: space-between;
+  display: flex;
+  flex-direction: column;
+  gap: $s;
   height: 100%;
-  gap: $l;
-  .top {
-    display: flex;
-    flex-direction: column;
-    gap: $m;
-  }
   .description {
     font-size: $captionSize;
     color: $darkGray;
-    margin: 0;
+    margin: 0 0 $s;
   }
   .section {
     display: flex;
@@ -22,49 +17,45 @@
   }
   .sectionSubtitle {
     font-size: $bodyOneSize;
-    font-weight: 600;
+    font-weight: 800;
     color: $black;
-    margin: 0;
-  }
-  .sectionDescription {
-    font-size: $captionSize;
-    color: $darkGray;
-    margin: 0;
+    margin: 0 (-$s) $s;
+    padding: $s;
+    border-bottom: 1px solid $midGray;
   }
   .radioGroup {
     display: flex;
     flex-direction: column;
-    gap: $xxs;
-    margin-top: $xs;
-    // Remove default bottom margin from Radio component
-    label {
-      margin-bottom: 0;
-    }
+    gap: $s;
+    padding: 0 $xs;
+  }
+  .radioComponent {
+    margin-bottom: 0;
+    width: 100%;
+    padding: 6px 0;
   }
   .radioLabel {
     display: flex;
-    flex-direction: column;
-    margin-left: $xs;
+    align-items: center;
     font-size: $bodyTwoSize;
+    width: 100%;
+    justify-content: space-between;
     .count {
       font-size: $captionSize;
       color: $darkGray;
-      margin-left: $xxs;
+      font-weight: 800;
     }
   }
   .disabled {
     opacity: 0.5;
     pointer-events: none;
   }
-  .bottom {
-    display: flex;
-    flex-direction: column;
-    gap: $s;
-    padding-top: $m;
-    border-top: 1px solid $lightGray;
-  }
   .downloadButton {
     width: 100%;
     justify-content: center;
+    margin: $s 0 0;
+    svg {
+      transform: rotate(180deg);
+    }
   }
 }

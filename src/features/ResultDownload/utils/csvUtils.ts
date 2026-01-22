@@ -582,7 +582,7 @@ export const exportToCSV = (
   const { meta } = exportedResultSet;
 
   // Add metadata section header row
-  const metaHeaders = ['aras', 'qid', 'timestamp', 'exportedAt', 'scope', 'format', 'resultCount'];
+  const metaHeaders = ['aras', 'qid', 'timestamp', 'export_time', 'scope', 'format', 'resultCount'];
   rows.push(metaHeaders.join(','));
 
   // Add metadata values row
@@ -590,7 +590,7 @@ export const exportToCSV = (
     escapeCSVValue(meta.aras.join('; ')),
     escapeCSVValue(meta.qid),
     escapeCSVValue(meta.timestamp),
-    escapeCSVValue(meta.exportedAt),
+    escapeCSVValue(meta.export_time),
     escapeCSVValue(meta.scope),
     escapeCSVValue(meta.format),
     escapeCSVValue(meta.resultCount),

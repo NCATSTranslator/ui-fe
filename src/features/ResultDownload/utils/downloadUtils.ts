@@ -310,7 +310,7 @@ export const cleanResultSet = (
       aras: resultSet.data.meta.aras,
       qid: resultSet.data.meta.qid,
       timestamp: resultSet.data.meta.timestamp,
-      exportedAt: new Date().toISOString(),
+      export_time: new Date().toISOString(),
       scope: options.scope,
       format: options.format,
       resultCount: results.length,

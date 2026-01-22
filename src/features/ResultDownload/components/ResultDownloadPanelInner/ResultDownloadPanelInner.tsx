@@ -74,33 +74,32 @@ const ResultDownloadPanelInner: FC<ResultDownloadPanelInnerProps> = ({
     <div className={styles.resultDownloadPanelInner}>
       <div className={styles.top}>
         <p className={styles.description}>
-          Export your results as JSON or CSV files for further analysis or sharing.
+          Data and relationships included in this result set can be downloaded for further analysis.
         </p>
         <div className={styles.section}>
-          <h4 className={styles.sectionSubtitle}>Scope:</h4>
-          <p className={styles.sectionDescription}>Choose which results to include</p>
+          <h4 className={styles.sectionSubtitle}>Export</h4>
           <div className={styles.radioGroup}>
             <Radio
               name="downloadScope"
               value="full"
               checked={scope === 'full'}
               handleClick={() => setScope('full')}
+              labelClassName={styles.radioLabel}
+              className={styles.radioComponent}
             >
-              <span className={styles.radioLabel}>
-                Full Results
-                <span className={styles.count}>({scopeCounts.full})</span>
-              </span>
+              All Results
+              <span className={styles.count}>{scopeCounts.full}</span>
             </Radio>
             <Radio
               name="downloadScope"
               value="filtered"
               checked={scope === 'filtered'}
               handleClick={() => setScope('filtered')}
+              labelClassName={styles.radioLabel}
+              className={styles.radioComponent}
             >
-              <span className={styles.radioLabel}>
-                Filtered Results
-                <span className={styles.count}>({scopeCounts.filtered})</span>
-              </span>
+              Filtered Results
+              <span className={styles.count}>{scopeCounts.filtered}</span>
             </Radio>
             {!isPathfinder && (
               <div className={!hasBookmarks ? styles.disabled : ''}>
@@ -109,54 +108,50 @@ const ResultDownloadPanelInner: FC<ResultDownloadPanelInnerProps> = ({
                   value="bookmarked"
                   checked={scope === 'bookmarked'}
                   handleClick={() => hasBookmarks && setScope('bookmarked')}
+                  labelClassName={styles.radioLabel}
+                  className={styles.radioComponent}
                 >
-                  <span className={styles.radioLabel}>
-                    Bookmarked Results
-                    <span className={styles.count}>({scopeCounts.bookmarked})</span>
-                  </span>
+                  Bookmarks Only
+                  <span className={styles.count}>{scopeCounts.bookmarked}</span>
                 </Radio>
               </div>
             )}
           </div>
         </div>
         <div className={styles.section}>
-          <h4 className={styles.sectionSubtitle}>Format:</h4>
-          <p className={styles.sectionDescription}>Select export format</p>
+          <h4 className={styles.sectionSubtitle}>Format</h4>
           <div className={styles.radioGroup}>
             <Radio
               name="downloadFormat"
               value="json"
               checked={format === 'json'}
               handleClick={() => setFormat('json')}
+              labelClassName={styles.radioLabel}
+              className={styles.radioComponent}
             >
-              <span className={styles.radioLabel}>
-                JSON
-              </span>
+              JSON
             </Radio>
             <Radio
               name="downloadFormat"
               value="csv"
               checked={format === 'csv'}
               handleClick={() => setFormat('csv')}
+              labelClassName={styles.radioLabel}
+              className={styles.radioComponent}
             >
-              <span className={styles.radioLabel}>
-                CSV
-              </span>
+              CSV
             </Radio>
           </div>
         </div>
       </div>
-      <div className={styles.bottom}>
         <Button
           handleClick={handleDownload}
           disabled={!hasResults || currentCount === 0 || isDownloading}
           iconLeft={<ExportIcon />}
           className={styles.downloadButton}
-          variant="secondary"
         >
           {isDownloading ? 'Downloading...' : `Download ${currentCount} Results`}
         </Button>
-      </div>
     </div>
   );
 };

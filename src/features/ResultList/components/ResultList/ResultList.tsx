@@ -779,7 +779,7 @@ const ResultList = () => {
   useSidebarRegistration({
     ariaLabel: "Download Results",
     disabled: isLoading || formattedResults.length === 0,
-    icon: <DownloadIcon />,
+    icon: <DownloadIcon className={styles.downloadIcon} />,
     id: 'download',
     title: <BetaTag heading="Download" />,
     panelComponent: () => (
