@@ -31,7 +31,7 @@ export type SidebarItem = {
   className?: string;
   disabled?: boolean;
   id: SidebarItemId;
-  label: string;
+  title: string | ReactNode;
   type: 'link' | 'panel';
   to?: string;
   href?: string;
@@ -55,7 +55,7 @@ export type SidebarRegistrationOptions = {
   buttonComponent?: ReactNode | (() => ReactNode);
   icon: ReactNode | (() => ReactNode);
   tooltipText: string;
-  label: string;
+  title: string | ReactNode;
   ariaLabel?: string;
   autoOpen?: boolean;
   dependencies?: readonly unknown[];

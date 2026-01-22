@@ -12,8 +12,10 @@ label.radio {
     display: grid;
     place-content: center;
     content: "";
-    width: 16px;
-    height: 16px;
+    width: $s;
+    min-width: $s;
+    height: $s;
+    min-height: $s;
     border-radius: 50%;
     transition: .5s transform ease-in-out;
     box-shadow: inset 1em 1em var(--form-control-color);

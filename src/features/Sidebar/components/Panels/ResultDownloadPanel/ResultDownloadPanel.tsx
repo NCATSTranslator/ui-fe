@@ -9,6 +9,7 @@ interface ResultDownloadPanelProps {
   allResults: Result[];
   userSaves: SaveGroup | null;
   isPathfinder?: boolean;
+  queryTitle?: string;
 }
 
 const ResultDownloadPanel: FC<ResultDownloadPanelProps> = ({
@@ -17,6 +18,7 @@ const ResultDownloadPanel: FC<ResultDownloadPanelProps> = ({
   allResults,
   userSaves,
   isPathfinder = false,
+  queryTitle,
 }) => {
   return (
     <ResultDownloadPanelInner
@@ -25,6 +27,7 @@ const ResultDownloadPanel: FC<ResultDownloadPanelProps> = ({
       allResults={allResults}
       userSaves={userSaves}
       isPathfinder={isPathfinder}
+      queryTitle={queryTitle}
     />
   );
 };

@@ -14,7 +14,7 @@ const Sidebar: FC<{ className?: string }> = ({ className = '' }) => {
   const activeTitle = useMemo(() => {
     if (!activeSidebarItem) return '';
 
-    return activeSidebarItem.label;
+    return activeSidebarItem.title;
   }, [activeSidebarItem]);
 
   // when the sidebar mounts, if the active panel doesn't exist, close the sidebar
