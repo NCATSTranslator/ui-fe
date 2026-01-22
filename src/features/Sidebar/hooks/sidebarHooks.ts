@@ -38,7 +38,7 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
 
   // Update the item content on initial registration and whenever dependencies change
   useEffect(() => {
-    const { id, to, onClick, panelComponent, buttonComponent, icon, tooltipText, ariaLabel, autoOpen, label, className, disabled } = options;
+    const { id, to, onClick, panelComponent, buttonComponent, icon, tooltipText, ariaLabel, autoOpen, title, className, disabled } = options;
     // Determine the type based on whether it has a panel component or navigation
     const type: 'link' | 'panel' = panelComponent ? 'panel' : 'link';
     
@@ -54,7 +54,7 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
       disabled,
       icon,
       id,
-      label,
+      title,
       onClick,
       panelComponent: resolvedPanelComponent.static,
       panelComponentFactory: resolvedPanelComponent.factory,

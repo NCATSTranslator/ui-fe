@@ -579,8 +579,35 @@ export const exportToCSV = (
   _resultSet: ResultSet
 ): string => {
   const rows: string[] = [];
+  const { meta } = exportedResultSet;
 
-  // Add header row
+  // Add metadata section header row
+  const metaHeaders = ['aras', 'qid', 'timestamp', 'exportedAt', 'scope', 'format', 'resultCount'];
+  rows.push(metaHeaders.join(','));
+
+  // Add metadata values row
+  rows.push([
+    escapeCSVValue(meta.aras.join('; ')),
+    escapeCSVValue(meta.qid),
+    escapeCSVValue(meta.timestamp),
+    escapeCSVValue(meta.exportedAt),
+    escapeCSVValue(meta.scope),
+    escapeCSVValue(meta.format),
+    escapeCSVValue(meta.resultCount),
+  ].join(','));
+
+  // Blank separator row
+  rows.push('');
+
+  // Column explanations section
+  rows.push('Column,Description');
+  rows.push('path_index,' + escapeCSVValue("Hierarchical path index: '1' = top-level path 1, '1.2.1' = support path 1 for edge 2 in path 1"));
+  rows.push('support_level,' + escapeCSVValue("0 = top-level path, 1+ = nested support depth (1 = first-level support, 2 = support of support, etc.)"));
+
+  // Blank separator row
+  rows.push('');
+
+  // Add data header row
   rows.push(CSV_HEADERS.join(','));
 
   // Generate denormalized rows for each result

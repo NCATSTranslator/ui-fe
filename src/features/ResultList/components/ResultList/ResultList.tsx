@@ -39,6 +39,7 @@ import DownloadIcon from '@/assets/icons/buttons/Export.svg?react';
 import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
 import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/FiltersPanel";
 import ResultDownloadPanel from "@/features/Sidebar/components/Panels/ResultDownloadPanel/ResultDownloadPanel";
+import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
 import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from "@/features/Core/utils/toastMessages";
 import { getQueryStatusIndicatorStatus } from "@/features/Projects/utils/utilities";
 import StatusSidebarIcon from "@/features/ResultList/components/StatusSidebarIcon/StatusSidebarIcon";
@@ -744,7 +745,7 @@ const ResultList = () => {
     onClick: handleQueryStatusClick,
     icon: () => <StatusSidebarIcon arsStatus={arsStatus} status={statusIndicatorStatus} hasFreshResults={hasFreshResults} showQueryStatusToast={showQueryStatusToast} setShowQueryStatusToast={setShowQueryStatusToast} />,
     id: 'queryStatus',
-    label: "Status",
+    title: "Status",
     panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} resultStatus={resultStatus} resultCount={formattedResults.length || 0} />,
     tooltipText: "",
     dependencies: [arsStatus, loadingButtonData, resultStatus, formattedResults.length, showQueryStatusToast, hasFreshResults, statusIndicatorStatus, setShowQueryStatusToast]
@@ -755,7 +756,7 @@ const ResultList = () => {
     ariaLabel: "Filters",
     icon: <FilterIcon />,
     id: 'filters',
-    label: "Filters",
+    title: "Filters",
     panelComponent: () => (
       <FiltersPanel
         activeFilters={activeFilters}
@@ -780,7 +781,7 @@ const ResultList = () => {
     disabled: isLoading || formattedResults.length === 0,
     icon: <DownloadIcon />,
     id: 'download',
-    label: "Download",
+    title: <BetaTag heading="Download" />,
     panelComponent: () => (
       <ResultDownloadPanel
         resultSet={resultSet as ResultSet}
