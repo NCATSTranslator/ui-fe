@@ -9,7 +9,7 @@ interface ContextPanelProps {
   activePanelId: SidebarItemId | 'none';
   buttonComponent?: ReactNode;
   panel: ReactNode;
-  title: string;
+  title: ReactNode;
 }
 
 const ContextPanel: FC<ContextPanelProps> = ({

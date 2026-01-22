@@ -149,3 +149,7 @@
   min-height: $xxl;
   max-width: $xl;
 }
+
+.downloadIcon {
+  transform: rotate(180deg);
+}
