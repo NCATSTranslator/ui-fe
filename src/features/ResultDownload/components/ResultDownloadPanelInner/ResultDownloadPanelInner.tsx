@@ -25,7 +25,7 @@ const ResultDownloadPanelInner: FC<ResultDownloadPanelInnerProps> = ({
   isPathfinder = false,
   queryTitle,
 }) => {
-  const [scope, setScope] = useState<DownloadScope>('filtered');
+  const [scope, setScope] = useState<DownloadScope>('full');
   const [format, setFormat] = useState<ExportFormat>('json');
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -131,7 +131,6 @@ const ResultDownloadPanelInner: FC<ResultDownloadPanelInnerProps> = ({
             >
               <span className={styles.radioLabel}>
                 JSON
-                <span className={styles.formatDesc}>Full data with relationships</span>
               </span>
             </Radio>
             <Radio
@@ -142,7 +141,6 @@ const ResultDownloadPanelInner: FC<ResultDownloadPanelInnerProps> = ({
             >
               <span className={styles.radioLabel}>
                 CSV
-                <span className={styles.formatDesc}>Flattened for spreadsheets</span>
               </span>
             </Radio>
           </div>

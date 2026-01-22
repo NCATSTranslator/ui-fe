@@ -117,11 +117,15 @@ export const collectRelatedEntities = (
           edges[elementId] = edge;
 
           // Collect publications from edge
+          // edge.publications structure: { [groupingKey]: Array<{id: string, support: ...}> }
+          // The actual publication IDs are in the nested array elements
           if (edge.publications) {
-            Object.keys(edge.publications).forEach(pubKey => {
-              if (resultSet.data.publications[pubKey]) {
-                publications[pubKey] = resultSet.data.publications[pubKey];
-              }
+            Object.values(edge.publications).forEach(pubArray => {
+              pubArray.forEach(pubRef => {
+                if (pubRef.id && resultSet.data.publications[pubRef.id]) {
+                  publications[pubRef.id] = resultSet.data.publications[pubRef.id];
+                }
+              });
             });
           }
 
@@ -130,6 +134,18 @@ export const collectRelatedEntities = (
             edge.trials.forEach(trialId => {
               if (resultSet.data.trials[trialId]) {
                 trials[trialId] = resultSet.data.trials[trialId];
+              }
+            });
+          }
+
+          // Recursively collect support paths and their entities
+          if (edge.support && Array.isArray(edge.support)) {
+            edge.support.forEach(supportPathOrId => {
+              const supportPathId = typeof supportPathOrId === 'string'
+                ? supportPathOrId
+                : supportPathOrId.id;
+              if (supportPathId) {
+                collectFromPath(supportPathId);
               }
             });
           }
@@ -162,9 +178,11 @@ export const collectRelatedEntities = (
 
 /**
  * Cleans a node by removing internal fields
+ * @param node The node object
+ * @param nodeId The node ID (from dictionary key, used if node.id is undefined)
  */
-const cleanNode = (node: ResultNode): ExportedNode => ({
-  id: node.id,
+const cleanNode = (node: ResultNode, nodeId: string): ExportedNode => ({
+  id: node.id || nodeId,
   names: node.names,
   types: node.types,
   curies: node.curies,
@@ -176,9 +194,11 @@ const cleanNode = (node: ResultNode): ExportedNode => ({
 
 /**
  * Cleans an edge by removing internal fields
+ * @param edge The edge object
+ * @param edgeId The edge ID (from dictionary key, used if edge.id is undefined)
  */
-const cleanEdge = (edge: ResultEdge): ExportedEdge => ({
-  id: edge.id,
+const cleanEdge = (edge: ResultEdge, edgeId: string): ExportedEdge => ({
+  id: edge.id || edgeId,
   subject: edge.subject,
   object: edge.object,
   predicate: edge.predicate,
@@ -216,25 +236,24 @@ const cleanPath = (path: Path, pathId: string): ExportedPath => ({
 
 /**
  * Cleans a publication by removing internal fields
+ * @param pub The publication object
+ * @param pubId The publication ID (from dictionary key, used if pub.id is undefined)
  */
-const cleanPublication = (pub: PublicationObject): ExportedPublication => ({
-  id: pub.id,
-  title: pub.title,
-  journal: pub.journal,
-  pubdate: pub.pubdate,
+const cleanPublication = (pub: PublicationObject, pubId: string): ExportedPublication => ({
+  id: pub.id || pubId,
   url: pub.url,
-  type: pub.type,
   source: pub.source,
-  snippet: pub.snippet,
   support: pub.support,
   knowledgeLevel: pub.knowledgeLevel,
 });
 
 /**
  * Cleans a trial by removing internal fields
+ * @param trial The trial object
+ * @param trialId The trial ID (from dictionary key, used if trial.id is undefined)
  */
-const cleanTrial = (trial: TrialObject): ExportedTrial => ({
-  id: trial.id || 'unknown',
+const cleanTrial = (trial: TrialObject, trialId: string): ExportedTrial => ({
+  id: trial.id || trialId,
   title: trial.title,
   url: trial.url,
   phase: trial.phase,
@@ -262,13 +281,13 @@ export const cleanResultSet = (
   // Clean nodes (excluding specified types if configured)
   Object.entries(entities.nodes).forEach(([id, node]) => {
     if (!options.excludeNodeTypes?.includes(node.types[0])) {
-      cleanedNodes[id] = cleanNode(node);
+      cleanedNodes[id] = cleanNode(node, id);
     }
   });
 
   // Clean edges
   Object.entries(entities.edges).forEach(([id, edge]) => {
-    cleanedEdges[id] = cleanEdge(edge);
+    cleanedEdges[id] = cleanEdge(edge, id);
   });
 
   // Clean paths
@@ -278,12 +297,12 @@ export const cleanResultSet = (
 
   // Clean publications
   Object.entries(entities.publications).forEach(([id, pub]) => {
-    cleanedPublications[id] = cleanPublication(pub);
+    cleanedPublications[id] = cleanPublication(pub, id);
   });
 
   // Clean trials
   Object.entries(entities.trials).forEach(([id, trial]) => {
-    cleanedTrials[id] = cleanTrial(trial);
+    cleanedTrials[id] = cleanTrial(trial, id);
   });
 
   return {

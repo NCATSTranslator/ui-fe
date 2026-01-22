@@ -66,17 +66,12 @@ export interface ExportedTrial {
 
 export interface ExportedPublication {
   id?: string;
-  title?: string;
-  journal?: string;
-  pubdate?: string;
   url: string;
-  type: string;
   source: {
     knowledge_level: string;
     name: string;
     url: string;
   };
-  snippet?: string;
   support: PublicationSupport | null;
   knowledgeLevel?: string;
 }
@@ -101,6 +96,72 @@ export interface ExportedResultSet {
   trials: { [key: string]: ExportedTrial };
 }
 
+/**
+ * Denormalized CSV row - one row per edge in each path
+ * All array fields are semicolon-separated strings
+ */
+export interface DenormalizedCSVRow {
+  // Result context (repeated per row)
+  result_id: string;
+  result_name: string;
+  result_subject_id: string;
+  result_object_id: string;
+
+  // Path context
+  path_id: string;
+  path_index: string;  // Hierarchical index: "1" for top-level, "1.2" for support of edge 2 in path 1, etc.
+  path_aras: string;
+
+  // Edge data
+  edge_id: string;
+  edge_index: number;
+  edge_predicate: string;
+  edge_knowledge_level: string;
+  edge_provenance: string;
+  edge_aras: string;
+
+  // Edge source node
+  source_node_id: string;
+  source_node_name: string;
+  source_node_types: string;
+  source_node_curies: string;
+  source_node_descriptions: string;
+  source_node_species: string;
+  source_node_provenance: string;
+
+  // Edge target node
+  target_node_id: string;
+  target_node_name: string;
+  target_node_types: string;
+  target_node_curies: string;
+  target_node_descriptions: string;
+  target_node_species: string;
+  target_node_provenance: string;
+
+  // Publications (semicolon-separated lists)
+  publication_ids: string;
+  publication_urls: string;
+
+  // Trials (semicolon-separated lists)
+  trial_ids: string;
+  trial_titles: string;
+  trial_urls: string;
+  trial_phases: string;
+  trial_sizes: string;
+  trial_start_dates: string;
+  trial_statuses: string;
+
+  // Support path hierarchy
+  support_level: number;           // 0 = top-level path, 1+ = nested support depth
+  parent_path_id: string;          // Path ID of parent (empty for top-level)
+  parent_edge_id: string;          // Edge ID this support path supports (empty for top-level)
+  edge_support_path_ids: string;   // Semicolon-separated support path IDs for this edge
+}
+
+/**
+ * @deprecated Use DenormalizedCSVRow instead
+ * Legacy CSV row format - one row per result (summary only)
+ */
 export interface CSVRow {
   result_id: string;
   result_name: string;
