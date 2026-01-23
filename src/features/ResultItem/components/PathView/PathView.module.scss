@@ -3,6 +3,7 @@
 .pathView {
   padding: 0;
   position: relative;
+  overflow: auto;
   .paths {
     &.inModal {
       padding: 0 $l;
