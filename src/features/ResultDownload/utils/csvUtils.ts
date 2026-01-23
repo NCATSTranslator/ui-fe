@@ -22,18 +22,6 @@ const escapeCSVValue = (value: string | number | null | undefined): string => {
   return stringValue;
 };
 
-/**
- * Escapes an ID value for CSV to prevent Excel from interpreting it as scientific notation.
- * Uses the ="value" formula syntax which forces Excel to treat the value as text.
- * Examples: "1e10" stays as "1e10", "2E5" stays as "2E5"
- */
-const escapeCSVIdValue = (value: string | number | null | undefined): string => {
-  if (value === null || value === undefined) return '';
-  const stringValue = String(value);
-  if (stringValue === '') return '';
-  // Wrap in ="value" to force Excel to treat as text, escape any internal quotes
-  return `"=""${stringValue.replace(/"/g, '""')}"""`;
-};
 
 /**
  * Joins array values with semicolon for CSV
@@ -550,27 +538,6 @@ const CSV_HEADERS: (keyof DenormalizedCSVRow)[] = [
 ];
 
 /**
- * ID columns that need special escaping to prevent Excel scientific notation interpretation.
- * These columns contain alphanumeric IDs that could be misinterpreted (e.g., "1e10", "2E5").
- */
-const ID_COLUMNS: Set<keyof DenormalizedCSVRow> = new Set([
-  'result_id',
-  'result_subject_id',
-  'result_object_id',
-  'path_id',
-  'parent_path_id',
-  'parent_edge_id',
-  'edge_support_path_ids',
-  'edge_id',
-  'source_node_id',
-  'source_node_curies',
-  'target_node_id',
-  'target_node_curies',
-  'publication_ids',
-  'trial_ids',
-]);
-
-/**
  * Converts the exported result set to denormalized CSV format
  * One row per edge in each path
  */
@@ -579,33 +546,33 @@ export const exportToCSV = (
   _resultSet: ResultSet
 ): string => {
   const rows: string[] = [];
-  const { meta } = exportedResultSet;
+  // const { meta } = exportedResultSet;
 
-  // Add metadata section header row
-  const metaHeaders = ['aras', 'qid', 'timestamp', 'export_time', 'scope', 'format', 'resultCount'];
-  rows.push(metaHeaders.join(','));
+  // // Add metadata section header row
+  // const metaHeaders = ['aras', 'qid', 'timestamp', 'export_time', 'scope', 'format', 'resultCount'];
+  // rows.push(metaHeaders.join(','));
 
-  // Add metadata values row
-  rows.push([
-    escapeCSVValue(meta.aras.join('; ')),
-    escapeCSVValue(meta.qid),
-    escapeCSVValue(meta.timestamp),
-    escapeCSVValue(meta.export_time),
-    escapeCSVValue(meta.scope),
-    escapeCSVValue(meta.format),
-    escapeCSVValue(meta.resultCount),
-  ].join(','));
+  // // Add metadata values row
+  // rows.push([
+  //   escapeCSVValue(meta.aras.join('; ')),
+  //   escapeCSVValue(meta.qid),
+  //   escapeCSVValue(meta.timestamp),
+  //   escapeCSVValue(meta.export_time),
+  //   escapeCSVValue(meta.scope),
+  //   escapeCSVValue(meta.format),
+  //   escapeCSVValue(meta.resultCount),
+  // ].join(','));
 
-  // Blank separator row
-  rows.push('');
+  // // Blank separator row
+  // rows.push('');
 
-  // Column explanations section
-  rows.push('Column,Description');
-  rows.push('path_index,' + escapeCSVValue("Hierarchical path index: '1' = top-level path 1, '1.2.1' = support path 1 for edge 2 in path 1"));
-  rows.push('support_level,' + escapeCSVValue("0 = top-level path, 1+ = nested support depth (1 = first-level support, 2 = support of support, etc.)"));
+  // // Column explanations section
+  // rows.push('Column,Description');
+  // rows.push('path_index,' + escapeCSVValue("Hierarchical path index: '1' = top-level path 1, '1.2.1' = support path 1 for edge 2 in path 1"));
+  // rows.push('support_level,' + escapeCSVValue("0 = top-level path, 1+ = nested support depth (1 = first-level support, 2 = support of support, etc.)"));
 
-  // Blank separator row
-  rows.push('');
+  // // Blank separator row
+  // rows.push('');
 
   // Add data header row
   rows.push(CSV_HEADERS.join(','));
@@ -615,10 +582,6 @@ export const exportToCSV = (
     const denormalizedRows = generateDenormalizedRows(result.id, exportedResultSet);
     denormalizedRows.forEach(csvRow => {
       const rowValues = CSV_HEADERS.map(header => {
-        // Use special ID escaping for ID columns to prevent Excel scientific notation
-        if (ID_COLUMNS.has(header)) {
-          return escapeCSVIdValue(csvRow[header]);
-        }
         return escapeCSVValue(csvRow[header]);
       });
       rows.push(rowValues.join(','));
