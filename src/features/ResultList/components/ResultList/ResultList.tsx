@@ -106,20 +106,20 @@ const ResultList = () => {
   const [arsStatus, setArsStatus] = useState<ARAStatusResponse | null>(null);
   const [resultStatus, setResultStatus] = useState<"error" | "running" | "success" | "unknown">("unknown");
 
-  // set to not sort by score for Pathfinder, set to false to sort score high low for MVP queries
-  const initSortByScore = (isPathfinder) ? null : false;
-  // set to sort by name for Pathfinder, set to null for MVP queries
-  const initSortByName = (isPathfinder) ? true : null;
   // ALSO REQUIRED TO SET INITSORTSTRING BELOW, along with useEffect for catching changes to prefs
 
   // Bool, are the results currently sorted by name (true/false for asc/desc, null for not set)
-  const [isSortedByName, setIsSortedByName] = useState<boolean | null>(initSortByName);
+  const [isSortedByName, setIsSortedByName] = useState<boolean | null>(null);
   // Bool, are the results currently sorted by evidence count (true/false for asc/desc, null for not set)
   const [isSortedByEvidence, setIsSortedByEvidence] = useState<boolean | null>(null);
   // Bool, are the results currently sorted by path count (true/false for asc/desc, null for not set)
   const [isSortedByPaths, setIsSortedByPaths] = useState<boolean | null>(null);
-  // Bool, are the results currently sorted by score
-  const [isSortedByScore, setIsSortedByScore] = useState<boolean | null>(initSortByScore);
+  // Bool, are the results currently sorted by score (true/false for asc/desc, null for not set)
+  const [isSortedByScore, setIsSortedByScore] = useState<boolean | null>(false);
+  // start with user pref or default to score high low as default sort
+  const initSortString: string = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
+  const currentSortString = useRef(initSortString);
+
   // Bool, is evidence modal open?
   const [evidenceModalOpen, setEvidenceModalOpen] = useState(false);
   const [notesModalOpen, setNotesModalOpen] = useState(false);
@@ -164,10 +164,6 @@ const ResultList = () => {
   const [formattedResults, setFormattedResults] = useState<Result[]>([]);
   // Array, results meant to display based on the pagination
   const displayedResults: Result[] = useMemo(()=>formattedResults.slice(itemOffset, endResultIndex), [formattedResults, itemOffset, endResultIndex]);
-  const initSortString: string = (isPathfinder)
-    ? 'nameLowHigh'
-    : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
-  const currentSortString = useRef(initSortString);
   // Int, number of pages
   const pageCount = Math.ceil(formattedResults.length / itemsPerPage);
   // Array, currently active filters
@@ -242,11 +238,11 @@ const ResultList = () => {
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
   useEffect(() => {
-    currentSortString.current = (isPathfinder) ? 'nameLowHigh' : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
+    currentSortString.current = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
     const tempItemsPerPage = calculateItemsPerPage(prefs.results_per_page.pref_value);
     setItemsPerPage(tempItemsPerPage);
     setEndResultIndex(tempItemsPerPage);
-  }, [prefs, isPathfinder, calculateItemsPerPage]);
+  }, [prefs, calculateItemsPerPage]);
 
   useEffect(() => {
     const handleKeyDown = (ev: KeyboardEvent) => {
