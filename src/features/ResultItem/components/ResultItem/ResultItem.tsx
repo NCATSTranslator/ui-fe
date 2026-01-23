@@ -322,14 +322,11 @@ const ResultItem: FC<ResultItemProps> = ({
             <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
           </span>
         </div>
-        {
-          !isPathfinder &&
-          <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-            <span className={styles.score}>
-              <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score) : "Processing..." }</span>
-            </span>
-          </div>
-        }
+        <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
+          <span className={styles.score}>
+            <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score) : "Processing..." }</span>
+          </span>
+        </div>
         {/* <CSVLink
           className={styles.downloadButton}
           data={csvData}
