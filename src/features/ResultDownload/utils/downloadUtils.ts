@@ -406,7 +406,7 @@ export const downloadResults = (
     const jsonContent = exportToJSON(cleanedResultSet);
     triggerDownload(jsonContent, filename, 'application/json');
   } else {
-    const csvContent = exportToCSV(cleanedResultSet, resultSet);
+    const csvContent = exportToCSV(cleanedResultSet);
     triggerDownload(csvContent, filename, 'text/csv');
   }
 };

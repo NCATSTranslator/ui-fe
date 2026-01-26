@@ -10,17 +10,15 @@ interface ResultListTableHeadProps {
   isSortedByEvidence: boolean | null;
   isSortedByPaths: boolean | null;
   isSortedByScore: boolean | null;
-  isPathfinder: boolean;
   handleUpdateResults: () => void
 }
 
 const ResultListTableHead: FC<ResultListTableHeadProps> = ({ 
-  currentSortString, 
+  currentSortString,
   handleUpdateResults,
-  isPathfinder, 
-  isSortedByName, 
-  isSortedByEvidence, 
-  isSortedByPaths, 
+  isSortedByName,
+  isSortedByEvidence,
+  isSortedByPaths,
   isSortedByScore,
   parentStyles }) => {
 
