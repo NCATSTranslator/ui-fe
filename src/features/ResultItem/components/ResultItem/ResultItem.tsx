@@ -14,9 +14,9 @@ import BookmarkConfirmationModal from '@/features/ResultItem/components/Bookmark
 import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { handleBookmarkClick as handleBookmarkClickUtil, handleNotesClick as handleNotesClickUtil, BookmarkFunctionParams } from '@/features/ResultItem/utils/bookmarkFunctions';
 import { useSelector } from 'react-redux';
-import { getResultSetById, getNodeById } from '@/features/ResultList/slices/resultsSlice';
+import { getResultSetById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
-import { displayScore, generateScore } from '@/features/ResultList/utils/scoring';
+import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Result, PathFilterState, Path, ResultBookmark } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
@@ -121,7 +121,8 @@ const ResultItem: FC<ResultItemProps> = ({
 
   let resultSet = useSelector(getResultSetById(pk));
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
-  const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
+  const firstPath = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0] as string) : result.paths[0];
+  const score = (isPathfinder && firstPath) ? getPathfinderMetapathScore(firstPath) : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
   const user = useSelector(currentUser);
 
   let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
@@ -320,7 +321,7 @@ const ResultItem: FC<ResultItemProps> = ({
         </div>
         <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
           <span className={styles.score}>
-            <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score) : "Processing..." }</span>
+            <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score, 2) : "Processing..." }</span>
           </span>
         </div>
         {/* <CSVLink

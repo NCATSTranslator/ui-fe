@@ -10,7 +10,7 @@ import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
   sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh,
-  sortByNamePathfinderHighLow, filterCompare } from "@/features/Common/utils/sortingFunctions";
+  sortByNamePathfinderHighLow, filterCompare, sortScorePathfinderLowHigh, sortScorePathfinderHighLow } from "@/features/Common/utils/sortingFunctions";
 import {
   applyFilters,
   injectDynamicFilters,
@@ -29,7 +29,7 @@ import ResultListModals from "@/features/ResultList/components/ResultListModals/
 import ResultListBottomPagination from "@/features/ResultList/components/ResultListBottomPagination/ResultListBottomPagination";
 import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARAStatusResponse, ResultListLoadingData } from "@/features/ResultList/types/results.d";
 import { Filter } from "@/features/ResultFiltering/types/filters";
-import { generateScore } from "@/features/ResultList/utils/scoring";
+import { generatePathfinderScore, generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import { useResultsStatusQuery, useResultsDataQuery, useResultsCompleteToast, useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
@@ -289,8 +289,8 @@ const ResultList = () => {
 
     shouldUpdateResultsAfterBookmark.current = false;
     const tempUserSaves = cloneDeep(userSaves)
-    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current, tempUserSaves);
-  }, [userSaves, activeFilters, activeEntityFilters, prevRawResults, currentSortString])
+    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current, isPathfinder, tempUserSaves);
+  }, [userSaves, activeFilters, activeEntityFilters, prevRawResults, currentSortString, isPathfinder])
 
   useEffect(() => {
     if (!autoScrollToResult)
@@ -323,6 +323,7 @@ const ResultList = () => {
     or: Result[] = [],
     justSort = false,
     sortType: string,
+    isPathfinder: boolean = false,
     userSavesGroup: SaveGroup | null = null,
     pfState: PathFilterState | null = null,
     fr: Result[] = [],
@@ -388,7 +389,7 @@ const ResultList = () => {
     }
 
     // Sorting
-    newFormattedResults = getSortedResults(summary, newFormattedResults, sortType);
+    newFormattedResults = getSortedResults(summary, newFormattedResults, sortType, isPathfinder);
 
     // State assignment
     setFormattedResults(newFormattedResults);
@@ -437,7 +438,9 @@ const ResultList = () => {
     for(const result of newResultSet.data.results) {
       result.evidenceCount = getEvidenceCounts(newResultSet, result);
       result.pathCount = getPathCount(newResultSet, result.paths);
-      result.score = generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
+      result.score = (isPathfinder) 
+        ? generatePathfinderScore(newResultSet, result.paths[0]) 
+        : generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
     }
     // assign ids to edges
     for(const [id, edge] of Object.entries(newResultSet.data.edges))
@@ -448,7 +451,7 @@ const ResultList = () => {
 
     dispatch(setResultSet({pk: currentQueryID || "", resultSet: newResultSet}));
 
-    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current, userSaves);
+    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current, isPathfinder, userSaves);
 
     // we have results to show, set isLoading to false
     if (newFormattedResults.length > 0)
@@ -487,7 +490,7 @@ const ResultList = () => {
   );
 
   // Handle the sorting
-  const getSortedResults = useCallback((summary: ResultSet, resultsToSort: Result[], sortName: string) => {
+  const getSortedResults = useCallback((summary: ResultSet, resultsToSort: Result[], sortName: string, isPathfinder: boolean = false) => {
     if(!summary) {
       console.warn("No result set provided to getSortedResults");
       return summary;
@@ -524,14 +527,14 @@ const ResultList = () => {
         setIsSortedByPaths(null);
         break;
       case 'scoreLowHigh':
-        newSortedResults = sortScoreLowHigh(newSortedResults, scoreWeights);
+        newSortedResults = (isPathfinder) ? sortScorePathfinderLowHigh(summary, newSortedResults) : sortScoreLowHigh(newSortedResults, scoreWeights);
         setIsSortedByScore(true)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         setIsSortedByPaths(null);
         break;
       case 'scoreHighLow':
-        newSortedResults = sortScoreHighLow(newSortedResults, scoreWeights);
+        newSortedResults = (isPathfinder) ? sortScorePathfinderHighLow(summary,newSortedResults) : sortScoreHighLow(newSortedResults, scoreWeights);
         setIsSortedByScore(false)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
@@ -615,6 +618,7 @@ const ResultList = () => {
         rawResults.current,
         originalResults.current,
         currentSortString.current,
+        isPathfinder,
         userSaves
       );
       return;
@@ -647,21 +651,22 @@ const ResultList = () => {
       rawResults.current,
       originalResults.current,
       currentSortString.current,
+      isPathfinder,
       userSaves
     );
   };
 
-  const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string, userSaves: SaveGroup | null = null) => {
+  const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string, isPathfinder: boolean = false, userSaves: SaveGroup | null = null) => {
     if(!rawResults)
       return;
 
     setActiveFilters(filtersToActivate);
-    let newFormattedResults = handleUpdateResults(filtersToActivate, activeEntityFilters, rawResults, originalResults, false, sortString, userSaves);
+    let newFormattedResults = handleUpdateResults(filtersToActivate, activeEntityFilters, rawResults, originalResults, false, sortString, isPathfinder, userSaves);
     handlePageReset(false, newFormattedResults.length);
   }
 
   const handleClearAllFilters = () => {
-    handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current, userSaves);
+    handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current, isPathfinder, userSaves);
   }
 
   useEffect(() => {
@@ -885,7 +890,7 @@ const ResultList = () => {
                         isSortedByName={isSortedByName}
                         isSortedByPaths={isSortedByPaths}
                         isSortedByScore={isSortedByScore}
-                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current as ResultSet, originalResults.current, true, currentSortString.current, userSaves, pathFilterState, formattedResults)}
+                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current as ResultSet, originalResults.current, true, currentSortString.current, isPathfinder, userSaves, pathFilterState, formattedResults)}
                       />
                       {
                         isError &&
