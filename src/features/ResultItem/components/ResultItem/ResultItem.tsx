@@ -24,12 +24,9 @@ import { useTurnstileEffect } from '@/features/Common/hooks/customHooks';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
-import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import { resultToCytoscape } from '@/features/ResultItem/utils/graphFunctions';
-import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
-import Button from '@/features/Core/components/Button/Button';
 import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 const GraphView = lazy(() => import("@/features/ResultItem/components/GraphView/GraphView"));
@@ -122,7 +119,6 @@ const ResultItem: FC<ResultItemProps> = ({
     zoomKeyDown
   }) => {
 
-  const {togglePanel} = useSidebar();
   let resultSet = useSelector(getResultSetById(pk));
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
   const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);

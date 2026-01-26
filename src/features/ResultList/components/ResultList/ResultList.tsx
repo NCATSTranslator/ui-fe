@@ -881,7 +881,6 @@ const ResultList = () => {
                       <ResultListTableHead
                         parentStyles={styles}
                         currentSortString={currentSortString}
-                        isPathfinder={isPathfinder}
                         isSortedByEvidence={isSortedByEvidence}
                         isSortedByName={isSortedByName}
                         isSortedByPaths={isSortedByPaths}

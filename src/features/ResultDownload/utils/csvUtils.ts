@@ -1,4 +1,3 @@
-import { ResultSet } from "@/features/ResultList/types/results.d";
 import { 
   ExportedResultSet, 
   DenormalizedCSVRow,
@@ -541,10 +540,7 @@ const CSV_HEADERS: (keyof DenormalizedCSVRow)[] = [
  * Converts the exported result set to denormalized CSV format
  * One row per edge in each path
  */
-export const exportToCSV = (
-  exportedResultSet: ExportedResultSet,
-  _resultSet: ResultSet
-): string => {
+export const exportToCSV = (exportedResultSet: ExportedResultSet): string => {
   const rows: string[] = [];
   // const { meta } = exportedResultSet;
 
