@@ -131,9 +131,9 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
         currentEditingQueryItem={currentEditingQueryItem}
       /> */}
       <div className={styles.showingResultsContainer}>
-        <h2 className={styles.subHeading}>
+        <h5 className={styles.subHeading}>
           {subHeading}
-        </h2>
+        </h5>
         <div className={styles.buttons}>
           {
             showAddToProjectButton && (

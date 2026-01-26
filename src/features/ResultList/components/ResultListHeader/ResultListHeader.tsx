@@ -35,7 +35,7 @@ const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
     <div className={styles.resultsHeader}>
       <div className={styles.top}>
         <div>
-          <h4 className={styles.heading}>Results</h4>
+          <h5 className={styles.heading}>Results</h5>
           {
             data.formattedResultsLength !== 0 &&
             <p className={styles.resultsCount}>
