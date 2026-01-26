@@ -25,7 +25,7 @@ export interface Result {
   pathCount?: number;
   // array of path IDs
   paths: string[] | Path[];
-  score?: { main: number, secondary: number };
+  score?: { main: number, secondary: number } | number;
   scores: Score[];
   // node ID
   subject: string;
@@ -54,6 +54,7 @@ export interface Path {
   compressedSubgraph?: (string | string[])[] | null;
   highlighted?: boolean;
   id?: string;
+  score?: number;
   // Original subgraph
   subgraph: string[];
   tags: Tags;
@@ -178,6 +179,12 @@ export type ARAStatusResponse = {
 }
 
 export type HoverTarget = { id: string; type: 'node' | 'edge' } | null;
+
+export type ScoreWeights = {
+  confidenceWeight: number;
+  noveltyWeight: number;
+  clinicalWeight: number;
+}
 
 export const isResultEdge = (obj: unknown): obj is ResultEdge => {
   return (
