@@ -5,9 +5,14 @@ export const generateScore = (scoreComponents, confidenceWeight, noveltyWeight, 
   return maxSugenoScore(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight);
 }
 
-export const generatePathfinderScore = (resultSet, path) => {
-  const pathObj = (typeof path === 'string') ? getPathById(resultSet, path) : path;
-  return (pathObj) ? getPathfinderMetapathScore(pathObj) : 0;
+export const generatePathfinderScore = (resultSet, result) => {
+  const pathObjOne = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0]) : result.paths[0];
+  const pathObjTwo = (result.paths.length > 1) ? (typeof result.paths[1] === 'string') ? getPathById(resultSet, result.paths[1]) : result.paths[1] : null;
+  const score = {
+    main: (pathObjOne) ? getPathfinderMetapathScore(pathObjOne) : 0,
+    secondary: (pathObjTwo) ? getPathfinderMetapathScore(pathObjTwo) : 0
+  }
+  return score;
 }
 
 export const displayScore = (score, decimalPlaces = 2) => {
