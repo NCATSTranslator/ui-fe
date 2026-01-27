@@ -439,7 +439,7 @@ const ResultList = () => {
       result.evidenceCount = getEvidenceCounts(newResultSet, result);
       result.pathCount = getPathCount(newResultSet, result.paths);
       result.score = (isPathfinder) 
-        ? generatePathfinderScore(newResultSet, result.paths[0]) 
+        ? generatePathfinderScore(newResultSet, result) 
         : generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
     }
     // assign ids to edges
