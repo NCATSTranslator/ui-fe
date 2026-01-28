@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { PathFilterState, Path, ResultNode } from '@/features/ResultList/types/results.d';

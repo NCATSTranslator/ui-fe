@@ -6,7 +6,7 @@ import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
 import BookmarkFilled from "@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react";
 import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"
 import NotesFilled from "@/assets/icons/buttons/Notes/Filled Notes.svg?react"
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import MenuIcon from '@/assets/icons/buttons/Dot Menu/Horizontal Dot Menu.svg?react';
 import { useWindowSize } from "@/features/Common/hooks/customHooks";
 import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';

@@ -1,6 +1,6 @@
 import styles from './PathObject.module.scss';
 import { FC, RefObject, useContext, useId } from 'react';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getIcon, joinClasses } from '@/features/Common/utils/utilities';

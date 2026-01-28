@@ -1,7 +1,7 @@
 import styles from './UserSave.module.scss';
 import { RefObject, Dispatch, SetStateAction, FC, useCallback, useMemo } from 'react';
 import Highlighter from 'react-highlight-words';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ResultItem from '@/features/ResultItem/components/ResultItem/ResultItem';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { getResultsShareURLPath } from "@/features/Common/utils/web";

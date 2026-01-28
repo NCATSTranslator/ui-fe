@@ -1,6 +1,6 @@
 import styles from './PathView.module.scss';
 import { useState, useMemo, useCallback, useRef, FC, Dispatch, SetStateAction, RefObject, createContext } from "react";
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';

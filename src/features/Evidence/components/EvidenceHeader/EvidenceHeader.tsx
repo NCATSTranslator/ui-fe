@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import styles from '@/features/Evidence/components/EvidenceModal/EvidenceModal.module.scss';
 
 interface EvidenceHeaderProps {

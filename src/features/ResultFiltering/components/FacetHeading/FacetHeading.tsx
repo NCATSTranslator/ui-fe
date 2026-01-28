@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
 import styles from "./FacetHeading.module.scss";
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import Alert from '@/assets/icons/status/Alerts/Info.svg?react';
 import ChevRight from "@/assets/icons/directional/Chevron/Chevron Right.svg?react";
 import { Filter } from "@/features/ResultFiltering/types/filters";

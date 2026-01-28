@@ -2,7 +2,7 @@ import { FC, useCallback, useMemo } from "react";
 import styles from "./ResultsSummaryModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
 import LoadingBar from "@/features/Core/components/LoadingBar/LoadingBar";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import Feedback from '@/assets/icons/navigation/Feedback.svg?react';

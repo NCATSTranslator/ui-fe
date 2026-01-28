@@ -9,7 +9,7 @@ import { getResultsShareURLPath } from "@/features/Common/utils/web";
 import { QueryHistoryItem } from "@/features/History/types/history";
 import ShareModal from "@/features/ResultList/components/ShareModal/ShareModal";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import Button from "@/features/Core/components/Button/Button";
 import Close from '@/assets/icons/buttons/Close/Close.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';

@@ -6,7 +6,7 @@ import { isResultEdge, Path, Result, ResultEdge, ResultNode, ResultSet } from "@
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
 import { useSelector } from 'react-redux';
 import { currentPrefs } from "@/features/UserAuth/slices/userSlice";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import { useSeenStatus } from "@/features/ResultItem/hooks/resultHooks";
 import { useEvidenceData } from "@/features/Evidence/hooks/evidenceHooks";
 import PathViewSection from "@/features/Evidence/components/PathViewSection/PathViewSection";

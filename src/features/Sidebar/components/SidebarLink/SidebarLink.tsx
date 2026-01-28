@@ -1,7 +1,7 @@
 import { FC, ReactNode } from "react";
 import styles from "./SidebarLink.module.scss";
 import Button from "@/features/Core/components/Button/Button";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import { joinClasses } from "@/features/Common/utils/utilities";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 

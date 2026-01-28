@@ -12,7 +12,7 @@ import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice
 import { QueryType } from "@/features/Query/types/querySubmission";
 import { ProjectRaw } from "@/features/Projects/types/projects.d";
 import { joinClasses } from "@/features/Common/utils/utilities";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";

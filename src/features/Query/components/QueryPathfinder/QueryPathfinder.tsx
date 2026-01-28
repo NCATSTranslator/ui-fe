@@ -12,7 +12,7 @@ import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Select from '@/features/Common/components/Select/Select';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import { Result } from "@/features/ResultList/types/results.d";
 import { useAutocomplete, useQuerySubmission } from '@/features/Query/hooks/customQueryHooks';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';

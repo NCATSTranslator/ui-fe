@@ -4,7 +4,7 @@ import Button from "@/features/Core/components/Button/Button";
 import SparkleIcon from '@/assets/icons/buttons/Sparkles.svg?react';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-purple.png';
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import ResultsSummaryModal from "@/features/ResultList/components/ResultsSummaryModal/ResultsSummaryModal";
 import { genTopNResultsContext } from "@/features/ResultList/utils/llm";
 import { Result } from "@/features/ResultList/types/results.d";

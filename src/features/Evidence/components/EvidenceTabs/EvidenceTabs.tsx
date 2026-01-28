@@ -4,7 +4,7 @@ import Tab from '@/features/Common/components/Tabs/Tab';
 import PublicationsTable from '@/features/Evidence/components/PublicationsTable/PublicationsTable';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import { getUrlByType } from '@/features/Evidence/utils/utilities';
 import { PublicationObject, Provenance, TrialObject } from '@/features/Evidence/types/evidence.d';
 import { ResultEdge } from '@/features/ResultList/types/results.d';

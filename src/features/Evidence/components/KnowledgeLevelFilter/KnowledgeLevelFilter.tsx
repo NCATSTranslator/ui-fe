@@ -2,7 +2,7 @@ import { FC } from "react";
 import { KnowledgeLevelFilterType } from "@/features/Evidence/types/evidence";
 import styles from "@/features/Evidence/components/PublicationsTable/PublicationsTable.module.scss";
 import Info from "@/assets/icons/status/Alerts/Info.svg?react";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 
 const KnowledgeLevelFilter: FC<{
   filter: KnowledgeLevelFilterType;

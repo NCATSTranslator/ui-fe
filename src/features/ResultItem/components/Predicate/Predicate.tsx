@@ -9,7 +9,7 @@ import InferredBorder from '@/assets/icons/connectors/Double Lines.svg?react';
 import Highlighter from 'react-highlight-words';
 import { getCompressedEdge, hasSupport, joinClasses } from '@/features/Common/utils/utilities';
 import { checkEdgesForClinicalTrials, checkEdgesForPubs, getEvidenceFromEdge } from '@/features/Evidence/utils/utilities';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import SupportPathGroup from '@/features/ResultItem/components/SupportPathGroup/SupportPathGroup';
 import { Path, PathFilterState, ResultEdge, ResultNode } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';

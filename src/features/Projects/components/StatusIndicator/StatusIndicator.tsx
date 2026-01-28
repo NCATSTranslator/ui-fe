@@ -6,7 +6,7 @@ import ErrorIcon from "@/assets/icons/buttons/Close/Close.svg?react";
 import CloseIcon from "@/assets/icons/buttons/Close/Close.svg?react";
 import WarningIcon from "@/assets/icons/status/Alerts/Warning.svg?react";
 import { Fade } from "react-awesome-reveal";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface StatusIndicatorProps {

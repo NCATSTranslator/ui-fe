@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { QueryItem } from '@/features/Query/types/querySubmission';
 import { Result } from '@/features/ResultList/types/results';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { getEntityLink } from '@/features/Common/utils/utilities';
 import styles from '@/features/Query/components/Query/Query.module.scss';

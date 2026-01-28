@@ -1,5 +1,5 @@
 import { FC } from "react";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 
 interface EmphasizeWordProps {
   objectName: string | boolean;

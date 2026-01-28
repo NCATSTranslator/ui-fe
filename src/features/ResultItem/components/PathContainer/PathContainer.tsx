@@ -1,6 +1,6 @@
 import { createContext, FC, useId, useRef, useState } from 'react';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
