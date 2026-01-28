@@ -1,0 +1,55 @@
+@use "@/assets/styles/variables" as *;
+
+.tooltip {
+  color: $white;
+  border-radius: $defaultBorderRadius;
+  padding: 12px !important;
+  max-width: 340px !important;
+  z-index: 1000;
+  text-align: left;
+  box-shadow: $dropShadowHover;
+
+  p {
+    margin-bottom: 8px;
+  }
+
+  .heading {
+    font-size: 14px;
+    line-height: 17.5px;
+  }
+
+  .text,
+  span,
+  a,
+  i,
+  p,
+  label {
+    font-size: 12px !important;
+    line-height: 1.2;
+    font-weight: 400;
+    text-transform: none;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 12 !important;
+    line-clamp: 12 !important;
+    -webkit-box-orient: vertical;
+    color: $white !important;
+    white-space: normal;
+
+    svg {
+      width: $s;
+      height: $s;
+    }
+  }
+
+  i {
+    display: inline;
+  }
+
+  a {
+    font-weight: 800;
+    text-decoration: underline;
+    display: inline-flex;
+    align-items: center;
+  }
+}
