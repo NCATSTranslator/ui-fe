@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ResultNode, ResultEdge, Path, ResultSet, Result } from "@/features/ResultList/types/results.d";
+import { ResultNode, ResultEdge, Path, ResultSet, Result, Species } from "@/features/ResultList/types/results.d";
 import { PublicationObject, TrialObject } from "@/features/Evidence/types/evidence";
 import { cloneDeep } from "lodash";
 
@@ -52,7 +52,7 @@ export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNod
   }
   return node;
 }
-export const getNodeSpecies = (node: ResultNode): string | null => {
+export const getNodeSpecies = (node: ResultNode): Species => {
   return node.annotations.gene.species;
 }
 export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {

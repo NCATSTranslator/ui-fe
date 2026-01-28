@@ -1,4 +1,5 @@
 import { ResultSet, Result, ResultNode, ResultEdge, Path } from "@/features/ResultList/types/results.d";
+import { getNodeSpecies } from "@/features/ResultList/slices/resultsSlice";
 import { PublicationObject, TrialObject } from "@/features/Evidence/types/evidence";
 import { SaveGroup, Save } from "@/features/UserAuth/utils/userApi";
 import {
@@ -187,7 +188,7 @@ const cleanNode = (node: ResultNode, nodeId: string): ExportedNode => ({
   types: node.types,
   curies: node.curies,
   descriptions: node.descriptions,
-  species: node.species,
+  species: getNodeSpecies(node),
   provenance: node.provenance,
   aras: node.aras,
 });
@@ -354,7 +355,7 @@ export const triggerDownload = (content: string, filename: string, mimeType: str
  */
 export const sanitizeForFilename = (str: string, maxLength: number = 50): string => {
   if (!str) return '';
-  
+
   return str
     .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
     .replace(/\s+/g, '-')            // Replace spaces with dashes
