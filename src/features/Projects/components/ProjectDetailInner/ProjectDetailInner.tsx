@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, MouseEvent } from 'react';
 import styles from './ProjectDetailInner.module.scss';
 import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
-import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
+import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper';
 import { useSortSearchState } from '@/features/Projects/hooks/customHooks';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
@@ -39,6 +39,13 @@ const ProjectDetailInner = () => {
   const [optionsOpen, setOptionsOpen] = useState(false);
   const projectsLoading = data.loading.projectsLoading;
   const queriesLoading = data.loading.queriesLoading;
+
+  const shouldShowProjectErrorState = useMemo(() => {
+    return data.errors.projectsError && !data.project?.id;
+  }, [data.errors.projectsError, data.project?.id]);
+  const shouldShowQueriesErrorState = useMemo(() => {
+    return data.errors.queriesError && data.projectQueries.length === 0;
+  }, [data.errors.queriesError, data.projectQueries.length]);
 
   useDynamicPageTitle(data.project?.data.title || "Project");
 
@@ -130,13 +137,13 @@ const ProjectDetailInner = () => {
   }, [sortedData.sortedQueries]);
 
   const showDropLabel = useMemo(() => {
-    return activePanelId === 'projects' && sortedData.sortedQueries.length > 0;
-  }, [activePanelId, sortedData.sortedQueries.length]);
+    return activePanelId === 'projects' && sortedData.sortedQueries.length > 0 && !queriesLoading;
+  }, [activePanelId, sortedData.sortedQueries.length, queriesLoading]);
 
   return (
     <div className={styles.projectDetail}>
       {
-        data.errors.projectsError
+        shouldShowProjectErrorState
         ? 
           (
             <ProjectDetailErrorStates
@@ -220,7 +227,7 @@ const ProjectDetailInner = () => {
                             />
                           )}
                           {
-                            data.errors.queriesError  
+                            shouldShowQueriesErrorState
                             ?
                               (
                                 <ProjectDetailErrorStates

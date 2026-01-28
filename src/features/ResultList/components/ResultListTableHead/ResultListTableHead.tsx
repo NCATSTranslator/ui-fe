@@ -10,17 +10,15 @@ interface ResultListTableHeadProps {
   isSortedByEvidence: boolean | null;
   isSortedByPaths: boolean | null;
   isSortedByScore: boolean | null;
-  isPathfinder: boolean;
   handleUpdateResults: () => void
 }
 
 const ResultListTableHead: FC<ResultListTableHeadProps> = ({ 
-  currentSortString, 
+  currentSortString,
   handleUpdateResults,
-  isPathfinder, 
-  isSortedByName, 
-  isSortedByEvidence, 
-  isSortedByPaths, 
+  isSortedByName,
+  isSortedByEvidence,
+  isSortedByPaths,
   isSortedByScore,
   parentStyles }) => {
 
@@ -65,25 +63,22 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
           <span className={parentStyles.scoreSpan}>Number of paths that support the result.</span>
         </Tooltip>
       </div>
-      {
-        !isPathfinder &&
-        <div
-          className={`${parentStyles.head} ${parentStyles.scoreHead} ${isSortedByScore ? parentStyles.true : (isSortedByScore === null) ? '': parentStyles.false}`}
-          onClick={()=>{
-            let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
-            currentSortString.current = sortString;
-            handleUpdateResults();
-          }}
-          data-tooltip-id="score-tooltip"
-        >
-          Score
-          <Alert/>
-          <ArrowUp className={parentStyles.chev}/>
-          <Tooltip id="score-tooltip" place="bottom">
-            <span className={parentStyles.scoreSpan}>A result's score is a multimodal calculation considering the strength of relationships supporting it. Scores range from 0 to 5 and are shown once all results are synced.</span>
-          </Tooltip>
-        </div>
-      }
+      <div
+        className={`${parentStyles.head} ${parentStyles.scoreHead} ${isSortedByScore ? parentStyles.true : (isSortedByScore === null) ? '': parentStyles.false}`}
+        onClick={()=>{
+          let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
+          currentSortString.current = sortString;
+          handleUpdateResults();
+        }}
+        data-tooltip-id="score-tooltip"
+      >
+        Score
+        <Alert/>
+        <ArrowUp className={parentStyles.chev}/>
+        <Tooltip id="score-tooltip" place="bottom">
+          <span className={parentStyles.scoreSpan}>A result's score is a multimodal calculation considering the strength of relationships supporting it. Scores range from 0 to 5 and are shown once all results are synced.</span>
+        </Tooltip>
+      </div>
       <div></div>
     </div>
   )

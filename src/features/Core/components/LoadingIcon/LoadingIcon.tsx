@@ -1,5 +1,6 @@
 import styles from './LoadingIcon.module.scss';
 import { FC } from "react";
+import loadingIcon from '@/assets/images/loading/loading-purple.png';
 
 type LoadingIconProps = {
   className?: string;
@@ -9,7 +10,7 @@ type LoadingIconProps = {
 const LoadingIcon: FC<LoadingIconProps> = ({className = "", size = "medium"}) => {
 
   return (
-    <div className={`${className} ${styles.spinner} ${styles[size]}`}></div>
+    <img src={loadingIcon} alt="" className={`${className} ${styles.spinner} ${styles[size]}`}/>
   )
 }
 

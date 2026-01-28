@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import { ProjectRaw, UserQueryObject } from '@/features/Projects/types/projects';
 
-type SidebarItemId = 'newQuery' | 'queries' | 'projects' | 'filters' | 'queryStatus' | 'settings' | 'feedback' | 'help';
+type SidebarItemId = 'newQuery' | 'queries' | 'projects' | 'filters' | 'queryStatus' 
+  | 'settings' | 'feedback' | 'help' | 'download';
 
 export type SidebarContextValue = {
   collapsed: boolean;
@@ -28,8 +29,9 @@ export type SidebarContextValue = {
 export type SidebarItem = {
   ariaLabel?: string;
   className?: string;
+  disabled?: boolean;
   id: SidebarItemId;
-  label: string;
+  title: string | ReactNode;
   type: 'link' | 'panel';
   to?: string;
   href?: string;
@@ -45,6 +47,7 @@ export type SidebarItem = {
 
 export type SidebarRegistrationOptions = {
   className?: string;
+  disabled?: boolean;
   id: SidebarItemId;
   to?: string;
   onClick?: () => void;
@@ -52,7 +55,7 @@ export type SidebarRegistrationOptions = {
   buttonComponent?: ReactNode | (() => ReactNode);
   icon: ReactNode | (() => ReactNode);
   tooltipText: string;
-  label: string;
+  title: string | ReactNode;
   ariaLabel?: string;
   autoOpen?: boolean;
   dependencies?: readonly unknown[];

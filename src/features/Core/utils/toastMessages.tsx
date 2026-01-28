@@ -10,23 +10,23 @@ export const projectDeletedToast = () => {
   return toast(AppToast, { data: { topText: 'Project deleted' } });
 };
 export const queryAddedToProjectToast = (queryTitle: string, projectTitle: string) => {
-  return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Added to ${projectTitle}` } });
+  return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Added to ${projectTitle || 'Project'}` } });
 };
 export const queryAlreadyInProjectToast = (queryTitle: string, projectTitle: string) => {
-  return toast.error(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Already in ${projectTitle}` } });
+  return toast.error(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Already in ${projectTitle || 'Project'}` } });
 };
 export const projectCreatedToast = () => {
   return toast(AppToast, { data: { topText: 'Project created' } });
 };
 export const projectUpdatedToast = (projectTitle?: string, queryTitle?: string, action?: 'add' | 'remove') => {
   if(projectTitle && queryTitle && action === 'add')
-    return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Added to ${projectTitle}` } });
+    return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Added to ${projectTitle || 'Project'}` } });
 
   if(projectTitle && action === 'remove')
-    return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Removed from ${projectTitle}` } });
+    return toast(AppToast, { data: { topText: `${queryTitle}`, bottomText: `Removed from ${projectTitle || 'Project'}` } });
 
   if(projectTitle)
-    return toast(AppToast, { data: { topText: `Updated ${projectTitle}` } });
+    return toast(AppToast, { data: { topText: `Updated ${projectTitle || 'Project'}` } });
 
   if(queryTitle && action === 'add')
     return toast(AppToast, { data: { topText: `${queryTitle} added to project` } });
@@ -56,21 +56,21 @@ export const errorToast = (message: string) => {
   return toast.error(AppToast, { data: { topText: message } });
 };
 export const unableToReachLinkToast = () => {
-  return toast.error(AppToast, { data: { topText: 'Unable to reach link' } });
+  return toast.error(AppToast, { toastId: 'unableToReachLinkToast', data: { topText: 'Unable to reach link' } });
 };
 
 // Authentication
 export const unauthorizedErrorToast = (location?: Location) => {
-  return toast.error(AppToast, { data: { topText: 'Your login has expired or is invalid.', bottomText: <>Please try logging in again.<br/><a href={getFormattedLoginURL(location)}>Log In</a></> } });
+  return toast.error(AppToast, { toastId: 'unauthorizedErrorToast', data: { topText: 'Your login has expired or is invalid.', bottomText: <>Please try logging in again.<br/><a href={getFormattedLoginURL(location)}>Log In</a></> } });
 };
 export const forbiddenErrorToast = (location?: Location) => {
-  return toast.error(AppToast, { data: { topText: 'You do not have permission to access this resource. Please contact support if you believe this is an error.', bottomText: <a href={getFormattedLoginURL(location)}>Log In</a> } });
+  return toast.error(AppToast, { toastId: 'forbiddenErrorToast', data: { topText: 'You do not have permission to access this resource. Please contact support if you believe this is an error.', bottomText: <a href={getFormattedLoginURL(location)}>Log In</a> } });
 };
 export const notFoundErrorToast = () => {
-  return toast.error(AppToast, { data: { topText: 'The requested resource was not found.', bottomText: 'Please contact support if you believe this is an error.' } });
+  return toast.error(AppToast, { toastId: 'notFoundErrorToast', data: { topText: 'The requested resource was not found.', bottomText: 'Please contact support if you believe this is an error.' } });
 };
 export const internalServerErrorToast = () => {
-  return toast.error(AppToast, { data: { topText: 'An internal server error occurred.', bottomText: 'Please try again later or contact support if the problem persists.' } });
+  return toast.error(AppToast, { toastId: 'internalServerErrorToast', data: { topText: 'An internal server error occurred.', bottomText: 'Please try again later or contact support if the problem persists.' } });
 };
 export const preferencesSavedToast = () => {
   return toast(AppToast, { data: { topText: 'Preferences Saved' } });

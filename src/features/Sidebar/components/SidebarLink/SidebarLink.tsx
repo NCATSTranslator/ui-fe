@@ -8,11 +8,11 @@ import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 interface SidebarLinkProps {
   ariaLabel?: string;
   className?: string;
+  disabled?: boolean;
   href?: string;
   hasRedDot?: boolean;
   icon: ReactNode | (() => ReactNode);
   id: string;
-  isGrayedOut?: boolean;
   onClick?: () => void;
   to?: string;
   tooltipText: string;
@@ -21,11 +21,11 @@ interface SidebarLinkProps {
 const SidebarLink: FC<SidebarLinkProps> = ({
   ariaLabel,
   className = "",
+  disabled = false,
   href,
   hasRedDot = false,
   icon,
   id,
-  isGrayedOut = false,
   onClick,
   to,
   tooltipText
@@ -35,7 +35,7 @@ const SidebarLink: FC<SidebarLinkProps> = ({
   const classNames = joinClasses(
     styles.sidebarLink,
     styles.link,
-    isGrayedOut && styles.grayedOut,
+    disabled && styles.disabled,
     hasRedDot && styles.redDot,
     activePanelId === id && styles.active,
     className

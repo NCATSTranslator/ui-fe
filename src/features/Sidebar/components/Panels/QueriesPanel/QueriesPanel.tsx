@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 import styles from "./QueriesPanel.module.scss";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useSortSearchState, useUserQueries } from "@/features/Projects/hooks/customHooks";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import SidebarQueryCard from "@/features/Sidebar/components/SidebarQueryCard/SidebarQueryCard";
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
 import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
 import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
@@ -36,8 +36,8 @@ const QueriesPanel = () => {
     setSelectedProjectMode(false);
   };
   const showDropLabel = useMemo(() => {
-    return location.pathname.includes('project');
-  }, [location.pathname]);
+    return location.pathname.includes('project') && filteredQueries.length > 0 && !queriesLoading;
+  }, [location.pathname, filteredQueries.length, queriesLoading]);
 
   return (
     <div className={styles.queriesPanel}>
@@ -65,28 +65,27 @@ const QueriesPanel = () => {
           ) : (
             <LoadingWrapper loading={queriesLoading} contentClassName={styles.queriesList}>
               {
-                queries.length === 0 ? (
+                filteredQueries.length === 0 ? (
                   <div className={styles.empty}>
-                    <p>No queries found.</p>
-                  </div>
-                ) : 
-                (
-                  filteredQueries.length === 0 ? (
-                    <div className={styles.empty}>
-                      <p>No queries found matching your search.</p>
-                    </div>
-                  ) : (
-                    filteredQueries.map((query) => {
-                      return (
-                        <SidebarQueryCard
-                          key={query.data.qid}
-                          query={query}
-                          searchTerm={searchTerm}
-                          isActiveQuery={activeQueryId === query.data.qid}
-                        />
+                    {
+                      searchTerm.length === 0 ? (
+                        <p>No queries found. <Link to="/new-query">Submit a new query</Link> to add it to your query history.</p>
+                      ) : (
+                        <p>No queries found matching your search.</p>
                       )
-                    })
-                  )
+                    }
+                  </div>
+                ) : (
+                  filteredQueries.map((query) => {
+                    return (
+                      <SidebarQueryCard
+                        key={query.data.qid}
+                        query={query}
+                        searchTerm={searchTerm}
+                        isActiveQuery={activeQueryId === query.data.qid}
+                      />
+                    )
+                  })
                 )
               }
             </LoadingWrapper>

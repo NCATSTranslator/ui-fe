@@ -20,15 +20,16 @@ $statusSize: 18px;
       stroke: $white;
     }
   }
-  div.loadingIcon {
-    width: 14px;
-    height: 14px;
-    min-height: 14px;
-    min-width: 14px;
+  img.loadingIcon {
+    width: calc($m - 2px);
+    height: calc($m - 2px);
+    padding: 1px;
     margin-bottom: 0;
   }
 }
 .statusRunning {
+  width: $m;
+  height: $m;
   > div {
     margin-bottom: 0;
   }

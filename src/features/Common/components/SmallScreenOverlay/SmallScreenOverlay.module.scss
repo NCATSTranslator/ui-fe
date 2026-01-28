@@ -11,12 +11,12 @@
   .container {
     text-align: center;
     margin: 0 auto;
-    padding: $xl 20px $xl $s;
+    padding: calc($xl * 3) 20px $xl $s;
     max-width: $maxwidth;
     h4 {
       font-size: 18px;
       @media (min-width: $small) {
-        font-size: 24px;
+        font-size: $m;
       }
     }
   }

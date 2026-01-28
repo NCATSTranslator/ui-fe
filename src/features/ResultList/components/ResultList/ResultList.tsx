@@ -8,10 +8,9 @@ import { cloneDeep, isEqual } from "lodash";
 import { useSelector, useDispatch } from 'react-redux';
 import { setResultSet, getResultSetById, getResultById, getNodeById, getEdgeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
   sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh,
-  sortByNamePathfinderHighLow, filterCompare } from "@/features/Common/utils/sortingFunctions";
+  sortByNamePathfinderHighLow, filterCompare, sortScorePathfinderLowHigh, sortScorePathfinderHighLow } from "@/features/Common/utils/sortingFunctions";
 import {
   applyFilters,
   injectDynamicFilters,
@@ -30,17 +29,22 @@ import ResultListModals from "@/features/ResultList/components/ResultListModals/
 import ResultListBottomPagination from "@/features/ResultList/components/ResultListBottomPagination/ResultListBottomPagination";
 import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARAStatusResponse, ResultListLoadingData } from "@/features/ResultList/types/results.d";
 import { Filter } from "@/features/ResultFiltering/types/filters";
-import { generateScore } from "@/features/ResultList/utils/scoring";
+import { generatePathfinderScore, generateScore } from "@/features/ResultList/utils/scoring";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
-import { useResultsStatusQuery, useResultsDataQuery, useResultsCompleteToast } from "@/features/ResultList/hooks/resultListHooks";
-import { getDecodedParams } from '@/features/Common/utils/web';
+import { useResultsStatusQuery, useResultsDataQuery, useResultsCompleteToast, useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
+import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useSidebarRegistration, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
+import DownloadIcon from '@/assets/icons/buttons/Export.svg?react';
 import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
 import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/FiltersPanel";
+import ResultDownloadPanel from "@/features/Sidebar/components/Panels/ResultDownloadPanel/ResultDownloadPanel";
+import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
 import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from "@/features/Core/utils/toastMessages";
 import { getQueryStatusIndicatorStatus } from "@/features/Projects/utils/utilities";
 import StatusSidebarIcon from "@/features/ResultList/components/StatusSidebarIcon/StatusSidebarIcon";
+import { useUserQueries, useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
+import { UserQueryObject } from "@/features/Projects/types/projects";
 
 const ResultList = () => {
 
@@ -49,21 +53,39 @@ const ResultList = () => {
   const dispatch = useDispatch();
   const { togglePanel } = useSidebar();
 
-  // URL search params
-  const decodedParams = useMemo(() => getDecodedParams(), []);
+  // URL search params - reactive to URL changes
+  const decodedParams = useDecodedParams();
   const loadingParam = getDataFromQueryVar("loading", decodedParams);
   const currentQueryID = getDataFromQueryVar("q", decodedParams);
+  // Track previous query ID to detect changes
+  const prevQueryID = useRef<string | null>(currentQueryID);
   const presetTypeID = getDataFromQueryVar("t", decodedParams);
   const isPathfinder = (presetTypeID === "p");
   let presetTypeObject = (!!presetTypeID)
     ? queryTypes.find(type => type.id === parseInt(presetTypeID)) ?? null
     : null;
 
+  const { data: queries = [] } = useUserQueries();
+  const currentQuerySid: string | undefined = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID)?.sid, [queries, currentQueryID]);
+  const currentQueryObject = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID) || null, [queries, currentQueryID]);
+  const { title: resolvedQueryTitle } = useGetQueryCardTitle(currentQueryObject);
+
   const nodeLabelParam = getDataFromQueryVar("l", decodedParams);
   const nodeIdParam = getDataFromQueryVar("i", decodedParams);
   const [resultIdParam, setResultIdParam] = useState(getDataFromQueryVar("r", decodedParams));
   const firstLoad = useRef(true);
   const [nodeDescription, setNodeDescription] = useState("");
+
+  // Build query title for downloads - use resolved title if available, otherwise build from URL params
+  const queryTitle = useMemo(() => {
+    if (resolvedQueryTitle) return resolvedQueryTitle;
+    // Fallback: construct title from URL parameters
+    if (nodeLabelParam) {
+      const typeLabel = isPathfinder ? 'Pathfinder' : (presetTypeObject?.targetType || 'Query');
+      return `${nodeLabelParam} — ${typeLabel}s`;
+    }
+    return '';
+  }, [resolvedQueryTitle, nodeLabelParam, isPathfinder, presetTypeObject]);
   const shareResultID = useRef<string | null>(null);
   const setShareResultID = (newID: string | null) => shareResultID.current = newID;
 
@@ -78,24 +100,26 @@ const ResultList = () => {
   const isFetchingARAStatus = useRef<boolean | null>(presetIsLoading);
   // Bool, should results be fetched
   const isFetchingResults = useRef(false);
+  // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
+  const numberOfStatusChecks = useRef(0);
 
   const [arsStatus, setArsStatus] = useState<ARAStatusResponse | null>(null);
   const [resultStatus, setResultStatus] = useState<"error" | "running" | "success" | "unknown">("unknown");
 
-  // set to not sort by score for Pathfinder, set to false to sort score high low for MVP queries
-  const initSortByScore = (isPathfinder) ? null : false;
-  // set to sort by name for Pathfinder, set to null for MVP queries
-  const initSortByName = (isPathfinder) ? true : null;
   // ALSO REQUIRED TO SET INITSORTSTRING BELOW, along with useEffect for catching changes to prefs
 
   // Bool, are the results currently sorted by name (true/false for asc/desc, null for not set)
-  const [isSortedByName, setIsSortedByName] = useState<boolean | null>(initSortByName);
+  const [isSortedByName, setIsSortedByName] = useState<boolean | null>(null);
   // Bool, are the results currently sorted by evidence count (true/false for asc/desc, null for not set)
   const [isSortedByEvidence, setIsSortedByEvidence] = useState<boolean | null>(null);
   // Bool, are the results currently sorted by path count (true/false for asc/desc, null for not set)
   const [isSortedByPaths, setIsSortedByPaths] = useState<boolean | null>(null);
-  // Bool, are the results currently sorted by score
-  const [isSortedByScore, setIsSortedByScore] = useState<boolean | null>(initSortByScore);
+  // Bool, are the results currently sorted by score (true/false for asc/desc, null for not set)
+  const [isSortedByScore, setIsSortedByScore] = useState<boolean | null>(false);
+  // start with user pref or default to score high low as default sort
+  const initSortString: string = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
+  const currentSortString = useRef(initSortString);
+
   // Bool, is evidence modal open?
   const [evidenceModalOpen, setEvidenceModalOpen] = useState(false);
   const [notesModalOpen, setNotesModalOpen] = useState(false);
@@ -140,10 +164,6 @@ const ResultList = () => {
   const [formattedResults, setFormattedResults] = useState<Result[]>([]);
   // Array, results meant to display based on the pagination
   const displayedResults: Result[] = useMemo(()=>formattedResults.slice(itemOffset, endResultIndex), [formattedResults, itemOffset, endResultIndex]);
-  const initSortString: string = (isPathfinder)
-    ? 'nameLowHigh'
-    : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
-  const currentSortString = useRef(initSortString);
   // Int, number of pages
   const pageCount = Math.ceil(formattedResults.length / itemsPerPage);
   // Array, currently active filters
@@ -168,6 +188,49 @@ const ResultList = () => {
   const [showQueryStatusToast, setShowQueryStatusToast] = useState(true);
   const hasFreshResults = useMemo(() => freshRawResults !== null, [freshRawResults]);
 
+  // Reset state when the query ID changes (e.g., navigating to a different query)
+  useQueryChangeReset({
+    currentQueryID,
+    decodedParams,
+    itemsPerPage,
+    prevQueryID,
+    rawResults,
+    prevRawResults,
+    originalResults,
+    isFetchingARAStatus,
+    isFetchingResults,
+    numberOfStatusChecks,
+    currentPage,
+    firstLoad,
+    shareResultID,
+    setIsLoading,
+    setIsError,
+    setFormattedResults,
+    setFreshRawResults,
+    setActiveFilters,
+    setActiveEntityFilters,
+    setAvailableFilters,
+    setPathFilterState,
+    setArsStatus,
+    setResultStatus,
+    setItemOffset,
+    setEndResultIndex,
+    setSelectedResult,
+    setSelectedEdge,
+    setSelectedPath,
+    setSelectedPathKey,
+    setEvidenceModalOpen,
+    setNotesModalOpen,
+    setFocusModalOpen,
+    setShareModalOpen,
+    setSharedItem,
+    setAutoScrollToResult,
+    setExpandSharedResult,
+    setUserSaves,
+    setResultIdParam,
+    setNodeDescription,
+  });
+
   useEffect(() => {
     setShowQueryStatusToast(hasFreshResults);
   }, [hasFreshResults]);
@@ -175,11 +238,11 @@ const ResultList = () => {
   // update defaults when prefs change, including when they're loaded from the db since the call for new prefs
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
   useEffect(() => {
-    currentSortString.current = (isPathfinder) ? 'nameLowHigh' : (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
+    currentSortString.current = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
     const tempItemsPerPage = calculateItemsPerPage(prefs.results_per_page.pref_value);
     setItemsPerPage(tempItemsPerPage);
     setEndResultIndex(tempItemsPerPage);
-  }, [prefs, isPathfinder, calculateItemsPerPage]);
+  }, [prefs, calculateItemsPerPage]);
 
   useEffect(() => {
     const handleKeyDown = (ev: KeyboardEvent) => {
@@ -226,8 +289,8 @@ const ResultList = () => {
 
     shouldUpdateResultsAfterBookmark.current = false;
     const tempUserSaves = cloneDeep(userSaves)
-    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current, tempUserSaves);
-  }, [userSaves, activeFilters, activeEntityFilters, prevRawResults, currentSortString])
+    handleUpdateResults(activeFilters, activeEntityFilters, prevRawResults.current, [], false, currentSortString.current, isPathfinder, tempUserSaves);
+  }, [userSaves, activeFilters, activeEntityFilters, prevRawResults, currentSortString, isPathfinder])
 
   useEffect(() => {
     if (!autoScrollToResult)
@@ -240,11 +303,6 @@ const ResultList = () => {
       setAutoScrollToResult(false);
     }
   }, [autoScrollToResult]);
-
-  // Int, number of times we've checked for ARA status. Used to determine how much time has elapsed for a timeout on ARA status.
-  const numberOfStatusChecks = useRef(0);
-  // Initialize queryClient for React Query to fetch results
-  const queryClient = new QueryClient();
 
   // Handles direct page click
   const handlePageClick = useCallback((event: { selected: number}, newItemsPerPage: number | false = false, resultsLength = formattedResults.length, currentNumItemsPerPage = itemsPerPage ) => {
@@ -265,6 +323,7 @@ const ResultList = () => {
     or: Result[] = [],
     justSort = false,
     sortType: string,
+    isPathfinder: boolean = false,
     userSavesGroup: SaveGroup | null = null,
     pfState: PathFilterState | null = null,
     fr: Result[] = [],
@@ -330,7 +389,7 @@ const ResultList = () => {
     }
 
     // Sorting
-    newFormattedResults = getSortedResults(summary, newFormattedResults, sortType);
+    newFormattedResults = getSortedResults(summary, newFormattedResults, sortType, isPathfinder);
 
     // State assignment
     setFormattedResults(newFormattedResults);
@@ -379,7 +438,9 @@ const ResultList = () => {
     for(const result of newResultSet.data.results) {
       result.evidenceCount = getEvidenceCounts(newResultSet, result);
       result.pathCount = getPathCount(newResultSet, result.paths);
-      result.score = generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
+      result.score = (isPathfinder) 
+        ? generatePathfinderScore(newResultSet, result) 
+        : generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
     }
     // assign ids to edges
     for(const [id, edge] of Object.entries(newResultSet.data.edges))
@@ -390,7 +451,7 @@ const ResultList = () => {
 
     dispatch(setResultSet({pk: currentQueryID || "", resultSet: newResultSet}));
 
-    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current, userSaves);
+    const newFormattedResults = handleUpdateResults(activeFilters, activeEntityFilters, newResultSet, [], false, currentSortString.current, isPathfinder, userSaves);
 
     // we have results to show, set isLoading to false
     if (newFormattedResults.length > 0)
@@ -424,11 +485,12 @@ const ResultList = () => {
     numberOfStatusChecks,
     isFetchingARAStatus,
     setIsError,
-    setIsLoading
+    setIsLoading,
+    currentQuerySid
   );
 
   // Handle the sorting
-  const getSortedResults = useCallback((summary: ResultSet, resultsToSort: Result[], sortName: string) => {
+  const getSortedResults = useCallback((summary: ResultSet, resultsToSort: Result[], sortName: string, isPathfinder: boolean = false) => {
     if(!summary) {
       console.warn("No result set provided to getSortedResults");
       return summary;
@@ -465,14 +527,14 @@ const ResultList = () => {
         setIsSortedByPaths(null);
         break;
       case 'scoreLowHigh':
-        newSortedResults = sortScoreLowHigh(newSortedResults, scoreWeights);
+        newSortedResults = (isPathfinder) ? sortScorePathfinderLowHigh(summary, newSortedResults) : sortScoreLowHigh(newSortedResults, scoreWeights);
         setIsSortedByScore(true)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
         setIsSortedByPaths(null);
         break;
       case 'scoreHighLow':
-        newSortedResults = sortScoreHighLow(newSortedResults, scoreWeights);
+        newSortedResults = (isPathfinder) ? sortScorePathfinderHighLow(summary,newSortedResults) : sortScoreHighLow(newSortedResults, scoreWeights);
         setIsSortedByScore(false)
         setIsSortedByEvidence(null);
         setIsSortedByName(null);
@@ -556,6 +618,7 @@ const ResultList = () => {
         rawResults.current,
         originalResults.current,
         currentSortString.current,
+        isPathfinder,
         userSaves
       );
       return;
@@ -588,21 +651,22 @@ const ResultList = () => {
       rawResults.current,
       originalResults.current,
       currentSortString.current,
+      isPathfinder,
       userSaves
     );
   };
 
-  const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string, userSaves: SaveGroup | null = null) => {
+  const handleApplyFilterAndCleanup = (filtersToActivate: Filter[], activeEntityFilters: string[], rawResults: ResultSet | null, originalResults: Result[], sortString: string, isPathfinder: boolean = false, userSaves: SaveGroup | null = null) => {
     if(!rawResults)
       return;
 
     setActiveFilters(filtersToActivate);
-    let newFormattedResults = handleUpdateResults(filtersToActivate, activeEntityFilters, rawResults, originalResults, false, sortString, userSaves);
+    let newFormattedResults = handleUpdateResults(filtersToActivate, activeEntityFilters, rawResults, originalResults, false, sortString, isPathfinder, userSaves);
     handlePageReset(false, newFormattedResults.length);
   }
 
   const handleClearAllFilters = () => {
-    handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current, userSaves);
+    handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current, isPathfinder, userSaves);
   }
 
   useEffect(() => {
@@ -682,7 +746,7 @@ const ResultList = () => {
     onClick: handleQueryStatusClick,
     icon: () => <StatusSidebarIcon arsStatus={arsStatus} status={statusIndicatorStatus} hasFreshResults={hasFreshResults} showQueryStatusToast={showQueryStatusToast} setShowQueryStatusToast={setShowQueryStatusToast} />,
     id: 'queryStatus',
-    label: "Status",
+    title: "Status",
     panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} resultStatus={resultStatus} resultCount={formattedResults.length || 0} />,
     tooltipText: "",
     dependencies: [arsStatus, loadingButtonData, resultStatus, formattedResults.length, showQueryStatusToast, hasFreshResults, statusIndicatorStatus, setShowQueryStatusToast]
@@ -693,7 +757,7 @@ const ResultList = () => {
     ariaLabel: "Filters",
     icon: <FilterIcon />,
     id: 'filters',
-    label: "Filters",
+    title: "Filters",
     panelComponent: () => (
       <FiltersPanel
         activeFilters={activeFilters}
@@ -712,8 +776,29 @@ const ResultList = () => {
     // autoOpen: true // Uncomment to auto-open when landing on Results
   });
 
+  // Register the download sidebar item
+  useSidebarRegistration({
+    ariaLabel: "Download Results",
+    disabled: isLoading || formattedResults.length === 0,
+    icon: <DownloadIcon className={styles.downloadIcon} />,
+    id: 'download',
+    title: <BetaTag heading="Download" />,
+    panelComponent: () => (
+      <ResultDownloadPanel
+        resultSet={resultSet as ResultSet}
+        filteredResults={formattedResults}
+        allResults={resultSet?.data?.results || []}
+        userSaves={userSaves}
+        isPathfinder={isPathfinder}
+        queryTitle={queryTitle}
+      />
+    ),
+    tooltipText: "Download Results",
+    dependencies: [resultSet, formattedResults, userSaves, isLoading, isPathfinder, queryTitle]
+  });
+
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <ResultListModals
         shareResultID={shareResultID.current ? shareResultID.current : ""}
         presetTypeID={presetTypeID ? presetTypeID : ""}
@@ -801,12 +886,11 @@ const ResultList = () => {
                       <ResultListTableHead
                         parentStyles={styles}
                         currentSortString={currentSortString}
-                        isPathfinder={isPathfinder}
                         isSortedByEvidence={isSortedByEvidence}
                         isSortedByName={isSortedByName}
                         isSortedByPaths={isSortedByPaths}
                         isSortedByScore={isSortedByScore}
-                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current as ResultSet, originalResults.current, true, currentSortString.current, userSaves, pathFilterState, formattedResults)}
+                        handleUpdateResults={()=>handleUpdateResults(activeFilters, activeEntityFilters, rawResults.current as ResultSet, originalResults.current, true, currentSortString.current, isPathfinder, userSaves, pathFilterState, formattedResults)}
                       />
                       {
                         isError &&
@@ -888,7 +972,7 @@ const ResultList = () => {
           }
         </div>
       </div>
-    </QueryClientProvider>
+    </>
   );
 }
 

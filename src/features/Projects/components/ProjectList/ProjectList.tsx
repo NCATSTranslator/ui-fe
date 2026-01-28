@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import styles from "./ProjectList.module.scss";
 import { useSelector } from "react-redux";
 import { currentUser } from "@/features/UserAuth/slices/userSlice";
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
 import { useProjectListData } from "@/features/Projects/hooks/useProjectListData";
 import Button from "@/features/Core/components/Button/Button";
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
@@ -32,6 +32,10 @@ const ProjectList = () => {
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
   const { togglePanel, activePanelId, closePanel } = useSidebar();
   const activeQueries = useMemo(() => data.filtered.active.queries || [], [data.filtered.active.queries]);
+
+  const shouldShowErrorState = useMemo(() => {
+    return !user?.id && !projectsLoading && projects.length === 0;
+  }, [user?.id, projectsLoading, projects]);
 
   const handleCreateNewProjectClick = () => {
     const newProject = {
@@ -75,7 +79,7 @@ const ProjectList = () => {
       />
       <div className={styles.list}>
         {
-          !user ? (
+          shouldShowErrorState ? (
             <EmptyArea>
               <p>
                 <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your saved projects.

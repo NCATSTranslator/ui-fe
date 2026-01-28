@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 import styles from "./Sidebar.module.scss";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { topItems, bottomItems } from "@/features/Sidebar/utils/sidebarItems";
@@ -6,7 +6,7 @@ import { joinClasses } from "@/features/Common/utils/utilities";
 import SidebarLinkList from "@/features/Sidebar/components/SidebarLinkList/SidebarLinkList";
 import ContextPanel from "@/features/Sidebar/components/ContextPanel/ContextPanel";
 
-const Sidebar = () => {
+const Sidebar: FC<{ className?: string }> = ({ className = '' }) => {
   const { collapsed, activePanelId, dynamicSidebarItems, getContextPanel, getButtonComponent, closePanel } = useSidebar();
   const allSidebarItems = useMemo(() => [...topItems, ...dynamicSidebarItems, ...bottomItems], [dynamicSidebarItems]);
   const activeSidebarItem = useMemo(() => allSidebarItems.find(item => item.id === activePanelId), [allSidebarItems, activePanelId]);
@@ -14,7 +14,7 @@ const Sidebar = () => {
   const activeTitle = useMemo(() => {
     if (!activeSidebarItem) return '';
 
-    return activeSidebarItem.label;
+    return activeSidebarItem.title;
   }, [activeSidebarItem]);
 
   // when the sidebar mounts, if the active panel doesn't exist, close the sidebar
@@ -24,7 +24,7 @@ const Sidebar = () => {
   }, [activeSidebarItem, closePanel]);
 
   return (
-    <aside className={joinClasses(styles.sidebar, collapsed && styles.collapsed)} aria-label="Sidebar">
+    <aside className={joinClasses(styles.sidebar, collapsed && styles.collapsed, className)} aria-label="Sidebar">
       <div className={styles.linkList}>
         <nav className={styles.top} aria-label="Global navigation">
           <SidebarLinkList items={topItems} />

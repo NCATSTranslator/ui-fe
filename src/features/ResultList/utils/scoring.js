@@ -1,11 +1,22 @@
 import { equal, larger, format, polynomialRoot, largerEq, min, max, round, Complex } from 'mathjs';
+import { getPathById } from '@/features/ResultList/slices/resultsSlice';
 
 export const generateScore = (scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) => {
   return maxSugenoScore(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight);
 }
 
+export const generatePathfinderScore = (resultSet, result) => {
+  const pathObjOne = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0]) : result.paths[0];
+  const pathObjTwo = (result.paths.length > 1) ? (typeof result.paths[1] === 'string') ? getPathById(resultSet, result.paths[1]) : result.paths[1] : null;
+  const score = {
+    main: (pathObjOne) ? getPathfinderMetapathScore(pathObjOne) : 0,
+    secondary: (pathObjTwo) ? getPathfinderMetapathScore(pathObjTwo) : 0
+  }
+  return score;
+}
+
 export const displayScore = (score, decimalPlaces = 2) => {
-  return format(score.main, {notation: 'fixed', precision: decimalPlaces});
+  return format((typeof score === "number") ? score || 0 : score.main || 0, {notation: 'fixed', precision: decimalPlaces});
 }
 
 export const maxNormalizedScore = (scoreComponents) => {
@@ -201,4 +212,9 @@ const swap = (array, i, j) => {
 const computeWeightedMean = (confidence, novelty, clinical,
     confidenceWeight, noveltyWeight, clinicalWeight) => {
   return (confidence * confidenceWeight) + (novelty * noveltyWeight) + (clinical * clinicalWeight);
+}
+
+export const getPathfinderMetapathScore = (path) => {
+  // Pathfinder score is scaled to 0-5, original score is 0-1
+  return path.score ? path.score * 5 : 0;
 }

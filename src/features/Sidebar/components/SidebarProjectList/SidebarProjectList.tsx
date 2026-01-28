@@ -6,15 +6,14 @@ import { currentUser } from "@/features/UserAuth/slices/userSlice";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import SidebarProjectCard from "@/features/Sidebar/components/SidebarProjectCard/SidebarProjectCard";
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
 import { useProjectListData } from "@/features/Projects/hooks/useProjectListData";
 import Button from "@/features/Core/components/Button/Button";
 import PlusIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useCreateProject, useSortSearchState } from "@/features/Projects/hooks/customHooks";
-import { queryAddedToProjectToast } from "@/features/Core/utils/toastMessages";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
-import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
+// import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { Project } from "@/features/Projects/types/projects";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 import { joinClasses } from "@/features/Common/utils/utilities";
@@ -38,7 +37,7 @@ const SidebarProjectList: FC<SidebarProjectListProps> = ({
   const createProjectMutation = useCreateProject();
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
   const { addToProjectQuery, clearAddToProjectMode } = useSidebar();
-  const { title: queryTitle } = useGetQueryCardTitle(addToProjectQuery || null);
+  // const { title: queryTitle } = useGetQueryCardTitle(addToProjectQuery || null);
   const { projectId } = useParams<{ projectId: string }>();
   const activeProjectId = projectId ? Number(projectId) : null;
 
@@ -63,7 +62,8 @@ const SidebarProjectList: FC<SidebarProjectListProps> = ({
     if (!addToProjectQuery || !project) return;
 
     // If in add-to-project mode and this was the new project being named
-    queryAddedToProjectToast(queryTitle, project.data.title);
+    // REMOVING FOR NOW TO AVOID DOUBLE TOASTS
+    // queryAddedToProjectToast(queryTitle, project.data.title);
     clearAddToProjectMode();
   };
 

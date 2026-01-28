@@ -3,10 +3,9 @@ import { useSelector } from 'react-redux';
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
 import Button from '@/features/Core/components/Button/Button';
-import { AutocompleteItem, AutocompleteContext } from '@/features/Query/types/querySubmission';
-import { AutocompleteFunctions } from "@/features/Query/types/querySubmission";
+import { AutocompleteItem, AutocompleteContext, AutocompleteConfig } from '@/features/Query/types/querySubmission';
 import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
-import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { formatBiolinkTypeString, getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "@/assets/icons/directional/Pathfinder/Pathfinder.svg?react";
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
@@ -73,16 +72,18 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   const labelTwo = getDataFromQueryVar("ltwo", decodedParams);
   const idOne = getDataFromQueryVar("ione", decodedParams);
   const idTwo = getDataFromQueryVar("itwo", decodedParams);
-  const constraintText = getDataFromQueryVar("c", decodedParams);
+  const constraintText = formatBiolinkTypeString(getDataFromQueryVar("c", decodedParams) || "");
 
-  const autocompleteFunctions = useRef<AutocompleteFunctions>( {
-    filter: defaultQueryFilterFactory,
-    annotate: queryTypeAnnotator,
-    format: combinedQueryFormatter
-  });
-  const limitPrefixes = useRef([]);
-  const limitTypes = useRef(["Drug", "ChemicalEntity", "Disease", "Gene", "SmallMolecule", "PhenotypicFeature"]);
-  const excludePrefixes = useRef(["UMLS"]);
+  const autocompleteConfig = useMemo<AutocompleteConfig>(() => ({
+    functions: {
+      filter: defaultQueryFilterFactory,
+      annotate: queryTypeAnnotator,
+      format: combinedQueryFormatter
+    },
+    limitTypes: ["Drug", "ChemicalEntity", "Disease", "Gene", "SmallMolecule", "PhenotypicFeature"],
+    limitPrefixes: [],
+    excludePrefixes: ["UMLS"],
+  }), []);
 
   const {
     autocompleteItems: autocompleteItemsOne,
@@ -90,7 +91,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     delayedQuery: delayedQueryOne,
     autocompleteVisibility: autocompleteVisibilityOne,
     setAutocompleteVisibility: setAutocompleteVisibilityOne,
-  } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes, excludePrefixes);
+  } = useAutocomplete(autocompleteConfig, nameResolverEndpoint);
 
   const {
     autocompleteItems: autocompleteItemsTwo,
@@ -98,7 +99,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     delayedQuery: delayedQueryTwo,
     autocompleteVisibility: autocompleteVisibilityTwo,
     setAutocompleteVisibility: setAutocompleteVisibilityTwo,
-  } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes, excludePrefixes);
+  } = useAutocomplete(autocompleteConfig, nameResolverEndpoint);
 
   const { isLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder', shouldNavigate, submissionCallback);
 

@@ -15,7 +15,7 @@ import Close from '@/assets/icons/buttons/Close/Close.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import RefreshIcon from '@/assets/icons/buttons/Refresh.svg?react';
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 
 const QueryHistoryList = ({ loading }: { loading: boolean }) => {

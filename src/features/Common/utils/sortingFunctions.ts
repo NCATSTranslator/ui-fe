@@ -1,7 +1,7 @@
 import { equal } from 'mathjs';
 import { getPathCount, hasSupport, isPathIndirectEdge, getStringNameFromPath, getDefaultEdge } from '@/features/Common/utils/utilities';
 import { getEvidenceCounts, isPublicationObjectArray, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
-import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
+import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore } from '@/features/ResultList/utils/scoring';
@@ -80,7 +80,7 @@ export const sortPathsHighLow = (resultSet: ResultSet, items: Result[]) => {
     return bCount - aCount;
   });}
 
-export const sortScoreLowHigh = (items: Result[], scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number }) => {
+export const sortScoreLowHigh = (items: Result[], scoreWeights: ScoreWeights) => {
   return items.sort((a: Result, b: Result) => {
     const aScore = (!!a?.score) ? a.score : generateScore(a.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
     const bScore = (!!b?.score) ? b.score : generateScore(b.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
@@ -91,7 +91,15 @@ export const sortScoreLowHigh = (items: Result[], scoreWeights: {confidenceWeigh
   });
 }
 
-export const sortScoreHighLow = (items: Result[], scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number }) => {
+export const sortScorePathfinderLowHigh = (resultSet: ResultSet, items: Result[]) => {
+  return items.sort((a: Result, b: Result) => {
+    const aScore = (!!a?.score) ? a.score : 0;
+    const bScore = (!!b?.score) ? b.score : 0;
+    return (typeof aScore === "number" ? aScore : aScore.main) - (typeof bScore === "number" ? bScore : bScore.main);
+  });
+}
+
+export const sortScoreHighLow = (items: Result[], scoreWeights: ScoreWeights) => {
   return items.sort((a: Result, b: Result) => {
     const aScore = (!!a?.score) ? a.score : generateScore(a.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
     const bScore = (!!b?.score) ? b.score : generateScore(b.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
@@ -99,6 +107,14 @@ export const sortScoreHighLow = (items: Result[], scoreWeights: {confidenceWeigh
       return bScore.secondary - aScore.secondary;
 
     return bScore.main - aScore.main;
+  });
+}
+
+export const sortScorePathfinderHighLow = (resultSet: ResultSet, items: Result[]) => {
+  return items.sort((a: Result, b: Result) => {
+    const aScore = (!!a?.score) ? a.score : 0;
+    const bScore = (!!b?.score) ? b.score : 0;
+    return (typeof bScore === "number" ? bScore : bScore.main) - (typeof aScore === "number" ? aScore : aScore.main);
   });
 }
 

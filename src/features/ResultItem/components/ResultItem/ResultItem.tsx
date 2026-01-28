@@ -4,7 +4,7 @@ import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features
 import { getARATagsFromResultTags, isNotesEmpty } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
-import LoadingBar from '@/features/Common/components/LoadingBar/LoadingBar';
+import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
 import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
 import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
@@ -14,9 +14,9 @@ import BookmarkConfirmationModal from '@/features/ResultItem/components/Bookmark
 import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { handleBookmarkClick as handleBookmarkClickUtil, handleNotesClick as handleNotesClickUtil, BookmarkFunctionParams } from '@/features/ResultItem/utils/bookmarkFunctions';
 import { useSelector } from 'react-redux';
-import { getResultSetById, getNodeById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
+import { getResultSetById, getNodeById, getPathById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
-import { displayScore, generateScore } from '@/features/ResultList/utils/scoring';
+import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Result, PathFilterState, Path, ResultBookmark } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
@@ -24,12 +24,9 @@ import { useTurnstileEffect } from '@/features/Common/hooks/customHooks';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
-import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import { resultToCytoscape } from '@/features/ResultItem/utils/graphFunctions';
-import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
-import Button from '@/features/Core/components/Button/Button';
 import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 const GraphView = lazy(() => import("@/features/ResultItem/components/GraphView/GraphView"));
@@ -122,10 +119,10 @@ const ResultItem: FC<ResultItemProps> = ({
     zoomKeyDown
   }) => {
 
-  const {togglePanel} = useSidebar();
   let resultSet = useSelector(getResultSetById(pk));
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
-  const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
+  const firstPath = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0] as string) : result.paths[0];
+  const score = (isPathfinder && firstPath) ? getPathfinderMetapathScore(firstPath) : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
   const user = useSelector(currentUser);
 
   let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
@@ -322,14 +319,11 @@ const ResultItem: FC<ResultItemProps> = ({
             <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
           </span>
         </div>
-        {
-          !isPathfinder &&
-          <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-            <span className={styles.score}>
-              <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score) : "Processing..." }</span>
-            </span>
-          </div>
-        }
+        <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
+          <span className={styles.score}>
+            <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score, 2) : "Processing..." }</span>
+          </span>
+        </div>
         {/* <CSVLink
           className={styles.downloadButton}
           data={csvData}
@@ -428,9 +422,6 @@ const ResultItem: FC<ResultItemProps> = ({
               </Suspense>
             </Tab>
         </Tabs>
-        <p className={styles.needHelp}>
-          <Button handleClick={()=>togglePanel('feedback')} iconLeft={<Feedback/>}>Send Feedback</Button>
-        </p>
       </AnimateHeight>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}

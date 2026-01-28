@@ -19,9 +19,9 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
         const tooltipText = item.tooltipText || '';
         const noUserTooltipText = item.noUserTooltipText || '';
         const icon = item.icon;
-        const isGrayedOut = (item.id === 'projects' || item.id === 'queries') && !user;
+        const disabled = ((item.id === 'projects' || item.id === 'queries') && !user) || item.disabled;
         const hasRedDot = item.id === 'settings' && !user;
-        const onClick = isGrayedOut ? undefined : item.onClick ? item.onClick : () => togglePanel(item.id);
+        const onClick = disabled ? undefined : item.onClick ? item.onClick : () => togglePanel(item.id);
 
         return item.type === 'link'
           ? 
@@ -30,9 +30,9 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
               id={item.id}
               to={item.to}
               icon={icon}
-              tooltipText={isGrayedOut ? noUserTooltipText : tooltipText}
+              tooltipText={disabled ? noUserTooltipText : tooltipText}
               ariaLabel={ariaLabel}
-              isGrayedOut={isGrayedOut}
+              disabled={disabled}
               onClick={item.onClick}
               hasRedDot={hasRedDot}
               className={item.className}
@@ -43,9 +43,9 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
               id={item.id}
               onClick={onClick}
               icon={icon}
-              tooltipText={isGrayedOut ? noUserTooltipText : tooltipText}
+              tooltipText={disabled ? noUserTooltipText : tooltipText}
               ariaLabel={ariaLabel}
-              isGrayedOut={isGrayedOut}
+              disabled={disabled}
               hasRedDot={hasRedDot}
               className={item.className}
             />
