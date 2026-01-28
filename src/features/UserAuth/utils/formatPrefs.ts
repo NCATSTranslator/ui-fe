@@ -8,6 +8,9 @@ export const formatPrefs = (prefs: Preferences) => {
 
   for(const key of Object.keys(prefs)) {
     const checkedKey = checkOldPrefKey(key);
+    if(!newPrefs[checkedKey])
+      newPrefs[checkedKey] = { name: "", pref_value: prefs[key].pref_value, possible_values: [] };
+
     newPrefs[checkedKey].name = getPrefName(checkedKey);
     newPrefs[checkedKey].possible_values = getPrefPossibleValues(checkedKey);
   }
@@ -16,7 +19,7 @@ export const formatPrefs = (prefs: Preferences) => {
 }
 
 const checkOldPrefKey = (key: string) => {
-  if(key === "results_per_screen") return "results_per_page";
+  if(key === "results_per_screen" || key === "result_per_screen") return "results_per_page";
   if(key === "evidence_per_screen") return "evidence_per_page";
   return key;
 }

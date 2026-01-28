@@ -17,7 +17,7 @@ interface SidebarCardProps {
   linkTo?: string;
   linkTarget?: string;
   // onClick overrides linkTo
-  onClick?: (event: MouseEvent<HTMLDivElement>) => void;
+  onClick?: (e: MouseEvent<HTMLElement>) => void;
   // Bottom content (metadata, counts, etc.)
   bottomLeft?: ReactNode;
   bottomRight?: ReactNode;

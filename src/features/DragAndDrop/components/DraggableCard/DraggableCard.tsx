@@ -53,7 +53,8 @@ export const DraggableCard: FC<DraggableCardProps> = ({
     className,
     isDragging && styles.dragging,
     disabled && styles.disabled,
-    disableDraggingOnly && styles.disableDraggingOnly
+    disableDraggingOnly && styles.disableDraggingOnly,
+    (!disableDraggingOnly && !disabled) && styles.draggable
   );
 
   return (

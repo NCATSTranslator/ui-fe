@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useMemo } from "react";
+import { FC, useMemo } from "react";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import { getQueryLink } from "@/features/Projects/utils/utilities";
@@ -48,8 +48,8 @@ const QueryCard: FC<QueryCardProps> = ({
 
   const handleAddToProject = () => {
     setAddToProjectMode(query);
-    if (activePanelId !== 'queries') {
-      togglePanel('queries');
+    if (activePanelId !== 'projects') {
+      togglePanel('projects');
     }
   };
   const handleShareQuery = () => {

@@ -17,6 +17,7 @@ import SidebarQueryCard from '@/features/Sidebar/components/SidebarQueryCard/Sid
 import { createPortal } from 'react-dom';
 import Header from '@/features/Page/components/Header/Header';
 import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
+import DraggableQueryCardWrapper from '@/features/Projects/components/DraggableQueryCardWrapper/DraggableQueryCardWrapper';
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -117,7 +118,7 @@ const App = ({children}: {children?: ReactNode}) => {
               </div>
               {createPortal(
                 <DragOverlay>
-                  {activeQuery && <SidebarQueryCard query={activeQuery} />}
+                  {activeQuery && <DraggableQueryCardWrapper><SidebarQueryCard query={activeQuery} className="dragOverlayQueryCard" /></DraggableQueryCardWrapper>}
                 </DragOverlay>,
                 document.body,
               )}

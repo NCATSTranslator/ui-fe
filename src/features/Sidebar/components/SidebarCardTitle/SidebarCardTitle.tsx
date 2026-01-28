@@ -3,6 +3,7 @@ import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module
 import { Link } from "react-router-dom";
 import Highlighter from "react-highlight-words";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
+import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 
 interface SidebarCardTitleProps {
   ignoreTitleMatch?: boolean;
@@ -29,6 +30,8 @@ const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
   textInputRef,
   title,
 }) => {
+  const { addToProjectQuery, isSelectedProjectMode } = useSidebar();
+  const isAddToProjectMode = !!addToProjectQuery || isSelectedProjectMode;
   const titleMatches = title.toLowerCase().includes(searchTerm?.toLowerCase() || '');
   const titleContent = (
     isRenaming && onTitleChange && onFormSubmit ? (
@@ -58,7 +61,7 @@ const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
     )
   );
 
-  if (linkTo && !isRenaming) {
+  if (linkTo && !isRenaming && !isAddToProjectMode) {
     return (
       <Link 
         className={styles.title} 

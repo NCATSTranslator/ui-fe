@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect, useMemo, RefObject } from "re
 import styles from './ResultList.module.scss';
 import Query from "@/features/Query/components/Query/Query";
 import ResultItem from "@/features/ResultItem/components/ResultItem/ResultItem";
-import LoadingBar from "@/features/Common/components/LoadingBar/LoadingBar";
+import ResultListLoadingArea from "@/features/ResultList/components/ResultListLoadingArea/ResultListLoadingArea";
 import ResultListHeader from "@/features/ResultList/components/ResultListHeader/ResultListHeader";
 import { cloneDeep, isEqual } from "lodash";
 import { useSelector, useDispatch } from 'react-redux';
@@ -680,7 +680,7 @@ const ResultList = () => {
     ariaLabel: "Query Status",
     className: styles.statusSidebarIcon,
     onClick: handleQueryStatusClick,
-    icon: () => <StatusSidebarIcon status={statusIndicatorStatus} hasFreshResults={hasFreshResults} showQueryStatusToast={showQueryStatusToast} setShowQueryStatusToast={setShowQueryStatusToast} />,
+    icon: () => <StatusSidebarIcon arsStatus={arsStatus} status={statusIndicatorStatus} hasFreshResults={hasFreshResults} showQueryStatusToast={showQueryStatusToast} setShowQueryStatusToast={setShowQueryStatusToast} />,
     id: 'queryStatus',
     label: "Status",
     panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} resultStatus={resultStatus} resultCount={formattedResults.length || 0} />,
@@ -769,13 +769,7 @@ const ResultList = () => {
         <div className={`${styles.resultsContainer} container`}>
           {
             isLoading &&
-            <LoadingBar
-              useIcon
-              disclaimerText={<>
-                <p className={styles.loadingText}>We will start showing you results as soon as we have them. You'll be prompted to refresh the page as we load more results. <strong>Please note that refreshing the results page may cause the order of answers to change.</strong></p>
-                <p className={styles.loadingText}>Navigating away from this page will cancel your search.</p></>
-              }
-            />
+            <ResultListLoadingArea />
           }
           {
             !isLoading &&

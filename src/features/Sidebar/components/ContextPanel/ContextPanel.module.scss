@@ -31,8 +31,11 @@
   .content {
     padding: $s 15px $s $s;
     position: relative;
-    width: calc(($panelWidth - ($s*2)) + 1px);
+    width: calc($panelWidth - ($s*2));
     overflow: hidden auto;
+    &:has(:global(.selectionModeActive)) {
+      overflow: hidden;
+    }
   }
   &.reduceSpacing {
     .content {

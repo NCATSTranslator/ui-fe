@@ -37,6 +37,8 @@ const ProjectDetailInner = () => {
   // Data management
   const data = useProjectDetailData();
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const projectsLoading = data.loading.projectsLoading;
+  const queriesLoading = data.loading.queriesLoading;
 
   useDynamicPageTitle(data.project?.data.title || "Project");
 
@@ -124,12 +126,12 @@ const ProjectDetailInner = () => {
   )
 
   const queriesTabHeading = useMemo(() => {
-    return `${sortedData.sortedQueries.length} Quer${sortedData.sortedQueries.length === 1 ? 'y' : 'ies'}`;
+    return `${queriesLoading ? '-' : sortedData.sortedQueries.length} Quer${sortedData.sortedQueries.length === 1 ? 'y' : 'ies'}`;
   }, [sortedData.sortedQueries]);
 
   const showDropLabel = useMemo(() => {
-    return activePanelId === 'projects';
-  }, [activePanelId]);
+    return activePanelId === 'projects' && sortedData.sortedQueries.length > 0;
+  }, [activePanelId, sortedData.sortedQueries.length]);
 
   return (
     <div className={styles.projectDetail}>
@@ -146,7 +148,7 @@ const ProjectDetailInner = () => {
           (
             <>
               <div className={styles.projectHeaderContainer}>
-                <LoadingWrapper loading={data.loading.projectsLoading} >
+                <LoadingWrapper loading={projectsLoading} >
                   <ListHeader
                     heading={localTitle}
                     searchPlaceholder="Search Queries"
@@ -208,7 +210,7 @@ const ProjectDetailInner = () => {
                         show={showDropLabel}
                         label="Drag to drop queries into projects."
                       />
-                      <LoadingWrapper loading={data.loading.queriesLoading}>
+                      <LoadingWrapper loading={queriesLoading}>
                         <CardList className={styles.cardList}>
                           {sortedData.sortedQueries.length > 0 && (
                             <QueriesTableHeader
@@ -218,7 +220,7 @@ const ProjectDetailInner = () => {
                             />
                           )}
                           {
-                            data.errors.queriesError
+                            data.errors.queriesError  
                             ?
                               (
                                 <ProjectDetailErrorStates

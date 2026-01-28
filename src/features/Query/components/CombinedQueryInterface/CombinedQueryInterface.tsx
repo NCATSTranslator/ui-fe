@@ -98,15 +98,29 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
     <div className={classNames}>
       {showAddToProject && (
         <div className={styles.addToProject} data-tooltip-id="add-to-project-tooltip">
-          <span className={styles.label}>Add to</span>
-          <Button
-            className={styles.button}
-            handleClick={handleAddToProject}
-            iconLeft={<FolderIcon/>}
-          >
-            <span className={styles.projectName}>{selectedProject?.data.title || 'Select Project'}</span>
-          </Button>
-          {selectedProject && (
+          {
+            (projectPage && defaultProject && selectedProject)
+              ? (
+                <div className={styles.addingToProject}>
+                  <span className={styles.label}>Adding to</span>
+                  <span className={styles.projectName}>{selectedProject?.data.title}</span>
+                </div>
+              )
+              : (
+                <>
+                  <span className={styles.label}>Add to</span>
+                  <Button
+                    className={styles.button}
+                    handleClick={handleAddToProject}
+                    iconLeft={<FolderIcon/>}
+                  >
+                    <span className={styles.projectName}>{selectedProject?.data.title || 'Select Project'}</span>
+                  </Button>
+                </>
+              )
+          }
+
+          {(!projectPage && selectedProject) && (
             <Button
               className={`${styles.removeSelectedProject} ${styles.button}`}
               handleClick={() => clearSelectedProject()}

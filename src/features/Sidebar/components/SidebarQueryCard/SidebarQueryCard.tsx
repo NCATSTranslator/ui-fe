@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useMemo } from "react";
+import { FC, useMemo } from "react";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
@@ -19,12 +19,14 @@ import { useLocation } from "react-router-dom";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 
 interface SidebarQueryCardProps {
+  className?: string;
   isActiveQuery?: boolean;
   query: UserQueryObject;
   searchTerm?: string;
 }
 
 const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
+  className,
   isActiveQuery = false,
   query,
   searchTerm
@@ -32,7 +34,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
   const { title } = useGetQueryCardTitle(query);  
   const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
   const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
-  const className = joinClasses(isActiveQuery && styles.activeQuery);
+  const combinedClassName = joinClasses(className, isActiveQuery && styles.activeQuery);
 
   const currentPage = useLocation().pathname.replace('/', '');
   const disableDragging = useMemo(() => {
@@ -91,7 +93,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
   return (
     <DraggableCard id={query.data.qid} data={draggableData} disableDraggingOnly={disableDragging}>
       <SidebarCard
-        className={className}
+        className={combinedClassName}
         leftIcon={leftIcon}
         title={title}
         searchTerm={searchTerm}
