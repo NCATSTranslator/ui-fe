@@ -38,6 +38,7 @@ const SidebarLink: FC<SidebarLinkProps> = ({
     disabled && styles.disabled,
     hasRedDot && styles.redDot,
     activePanelId === id && styles.active,
+    styles[id as keyof typeof styles],
     className
   );
   const isLink = !!to;

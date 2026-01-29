@@ -1,6 +1,6 @@
 import { SidebarItem } from "@/features/Sidebar/types/sidebar";
 import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
-import FolderIcon from '@/assets/icons/projects/folder.svg?react';
+import FolderEmptyIcon from '@/assets/icons/projects/folderempty.svg?react';
 import HistoryIcon from '@/assets/icons/navigation/History.svg?react';
 import UserIcon from '@/assets/icons/projects/user.svg?react';
 import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
@@ -27,7 +27,7 @@ const HelpButton = () => {
 
 export const topItems: SidebarItem[] = [
   { id: 'newQuery', title: 'New Query', type: 'link', to: '/new-query', icon: <SearchPlusIcon />, tooltipText: 'New Query' },
-  { id: 'projects', title: 'Projects', type: 'panel', icon: <FolderIcon />, tooltipText: 'Projects', noUserTooltipText: 'Log In to Access Projects', panelComponent: <ProjectsPanel />, buttonComponent: <ViewProjectsButton /> },
+  { id: 'projects', title: 'Projects', type: 'panel', icon: <FolderEmptyIcon />, tooltipText: 'Projects', noUserTooltipText: 'Log In to Access Projects', panelComponent: <ProjectsPanel />, buttonComponent: <ViewProjectsButton /> },
   { id: 'queries', title: 'Query History', type: 'panel', icon: <HistoryIcon />, tooltipText: 'Query History', noUserTooltipText: 'Log In to Access Query History', panelComponent: <QueriesPanel />, buttonComponent: <ViewAllQueriesButton /> },
 ];
 

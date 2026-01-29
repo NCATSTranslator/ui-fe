@@ -1,16 +1,28 @@
 @use "@/assets/styles/variables" as *;
 
 .link.sidebarLink {
-  padding: 20px 12px;
+  padding: $s $xs;
   margin-right: 1px;
   background-color: $lightGray;
   border-radius: 0;
   transition: $defaultAnim;
+  &.projects {
+    svg path {
+      fill: none;
+    }
+    &:hover, &.active {
+      svg path {
+        fill: none;
+        stroke: $purpleOne;
+      }
+    }
+  }
   svg {
-    height: $m;
-    width: $m;
+    height: $l;
+    width: $l;
     path {
       fill: $darkGray;
+      transition: $defaultAnim;
     }
   }
   &.disabled {
@@ -33,7 +45,7 @@
     }
   }
   &:hover, &.active {
-    background-color: $lightPurpleTwo;
+    background-color: $sidebarLinkHover;
     svg {
       path {
         fill: $purpleOne;

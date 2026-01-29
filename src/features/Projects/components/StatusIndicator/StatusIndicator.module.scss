@@ -1,6 +1,6 @@
 @use '@/assets/styles/variables' as *;
 
-$statusSize: 18px;
+$statusSize: $m;
 
 .status {
   position: relative;
@@ -28,8 +28,6 @@ $statusSize: 18px;
   }
 }
 .statusRunning {
-  width: $m;
-  height: $m;
   > div {
     margin-bottom: 0;
   }

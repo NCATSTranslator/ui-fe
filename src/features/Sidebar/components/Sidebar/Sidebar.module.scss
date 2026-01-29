@@ -15,7 +15,7 @@
   }
   .top {
     & > *:first-child {
-      padding: 20px 12px;
+      padding: $s $xs;
       background-color: $purpleTwo;
       margin-right: 0;
       svg path {
