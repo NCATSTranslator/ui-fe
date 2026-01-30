@@ -2,14 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ResultNode, ResultEdge, Path, ResultSet, Result } from "@/features/ResultList/types/results.d";
 import { PublicationObject, TrialObject } from "@/features/Evidence/types/evidence";
 import { cloneDeep } from "lodash";
+import { replaceTreatWithImpact } from "@/features/Common/utils/utilities";
 
 type ResultState = {
   [key: string]: ResultSet
 };
 
 const initialState: ResultState = {};
-export const TREATS_REPLACEMENT = "impacts";
-export const INVERTED_TREATS_REPLACEMENT = "impacted by";
 
 const resultSetsSlice = createSlice({
   name: "resultSets",
@@ -63,8 +62,7 @@ export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdg
   // Temporary fix to not display the "treats" predicate in the UI
   if(edge.predicate.includes("treat")) {
     let newEdge = cloneDeep(edge);
-    
-    newEdge.predicate = (newEdge.metadata.inverted_id === null) ? TREATS_REPLACEMENT : INVERTED_TREATS_REPLACEMENT;
+    newEdge.predicate = replaceTreatWithImpact(newEdge.predicate);
     newEdge.predicate_url = "";
     return newEdge;
   }
