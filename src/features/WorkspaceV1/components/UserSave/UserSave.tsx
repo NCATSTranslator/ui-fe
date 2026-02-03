@@ -5,8 +5,7 @@ import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultItem from '@/features/ResultItem/components/ResultItem/ResultItem';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { getResultsShareURLPath } from "@/features/Common/utils/web";
-import { findInSet, getCompressedEdge, getFormattedDate } from '@/features/Common/utils/utilities';
-import { isNotesEmpty } from '@/features/ResultItem/utils/utilities';
+import { getCompressedEdge, getFormattedDate } from '@/features/Common/utils/utilities';
 import { Path, Result, ResultEdge } from '@/features/ResultList/types/results';
 import AnimateHeight from 'react-animate-height';
 import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react"
@@ -90,8 +89,8 @@ const UserSave: FC<UserSaveProps> = ({
           
         </div>
         {
-          queryObject.saves && Array.from(queryObject.saves).length > 0 &&
-          <p className={styles.numSaves}>{Array.from(queryObject.saves).length} Saved Result{(Array.from(queryObject.saves).length > 1) && "s"}</p>
+          queryObject.saves && queryObject.saves.size > 0 &&
+          <p className={styles.numSaves}>{queryObject.saves.size} Saved Result{(queryObject.saves.size > 1) && "s"}</p>
         }
         <button className={`${styles.accordionButton} accordionButton ${isExpanded ? 'open' : 'closed' }`} onClick={handleToggle}>
           <ChevDown/>
@@ -186,17 +185,16 @@ const UserSave: FC<UserSaveProps> = ({
           </div>
           <div></div>
         </div>
-        {queryObject.saves && Array.from(queryObject.saves).sort((a, b) => a.label.localeCompare(b.label)).map((save, i) => {
+        {queryObject.saves && Array.from(queryObject.saves.values()).sort((a, b) => a.label.localeCompare(b.label)).map((save, i) => {
           const queryType = save.data.query.type;
           const queryItem = save.data.item;
           const queryNodeID = save.data.query.nodeId;
           const queryNodeLabel = save.data.query.nodeLabel;
           const queryNodeDescription = save.data.query.nodeDescription;
-          queryItem.hasNotes = !isNotesEmpty(save.notes) ? false : true;
           if ('compressedPaths' in (save?.data?.item || {}))
             return null;
 
-          let bookmarkItem = queryObject.saves ? findInSet(queryObject.saves, save => save.id === save.id) : undefined;
+          const bookmarkItem = queryObject.saves.get(save.object_ref) ?? null;
           return (
             <div key={save.id} className={styles.result}>
               <ResultItem

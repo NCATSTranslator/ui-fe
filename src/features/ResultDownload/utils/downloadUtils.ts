@@ -1,6 +1,6 @@
 import { ResultSet, Result, ResultNode, ResultEdge, Path } from "@/features/ResultList/types/results.d";
 import { PublicationObject, TrialObject } from "@/features/Evidence/types/evidence";
-import { SaveGroup, Save } from "@/features/UserAuth/utils/userApi";
+import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import {
   DownloadScope,
   DownloadOptions,
@@ -32,11 +32,12 @@ export const getResultsByScope = (
     case 'bookmarked': {
       if (!userSaves?.saves) return [];
       const bookmarkedIds = new Set<string>();
-      userSaves.saves.forEach((save: Save) => {
+      // Iterate over Map values
+      for (const save of userSaves.saves.values()) {
         if (save.object_ref) {
           bookmarkedIds.add(save.object_ref);
         }
-      });
+      }
       return allResults.filter(result => bookmarkedIds.has(result.id));
     }
     default:
@@ -55,11 +56,12 @@ export const getScopeCounts = (
   let bookmarkedCount = 0;
   if (userSaves?.saves) {
     const bookmarkedIds = new Set<string>();
-    userSaves.saves.forEach((save: Save) => {
+    // Iterate over Map values
+    for (const save of userSaves.saves.values()) {
       if (save.object_ref) {
         bookmarkedIds.add(save.object_ref);
       }
-    });
+    }
     bookmarkedCount = allResults.filter(result => bookmarkedIds.has(result.id)).length;
   }
 

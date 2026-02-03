@@ -4,6 +4,7 @@ import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBook
 import { Result, ResultBookmark, ResultSet } from '@/features/ResultList/types/results';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import type { User } from '@/features/UserAuth/types/user.d.ts';
+import { isNotesEmpty } from '@/features/ResultItem/utils/utilities';
 
 export interface BookmarkFunctionParams {
   result: Result | ResultBookmark;
@@ -14,9 +15,8 @@ export interface BookmarkFunctionParams {
   queryType: QueryType | null;
   currentQueryID: string | null;
   user: User | null;
-  itemBookmarkID: RefObject<string | null>;
-  setIsBookmarked: Dispatch<SetStateAction<boolean>>;
-  setItemHasNotes: Dispatch<SetStateAction<boolean>>;
+  objectRef: string;
+  bookmarkId: string | null;
   bookmarkRemovedToast: () => void;
   bookmarkAddedToast: () => void;
   handleBookmarkError: () => void;
@@ -25,42 +25,49 @@ export interface BookmarkFunctionParams {
 }
 
 /**
- * Updates the user saves state by adding or removing a bookmark
+ * Updates the user saves state by adding or removing a bookmark.
+ * Uses Map operations for O(1) lookups by objectRef (result ID).
  */
 export const updateUserSavesState = (
   saveOperation: 'add' | 'remove' | 'updateNote',
   updateUserSaves: Dispatch<SetStateAction<SaveGroup | null>> | undefined,
-  itemBookmarkID: RefObject<string | null>,
+  objectRef: string,
   saveItem?: Save
 ) => {
   updateUserSaves?.((prev) => {
+    // Handle case where no saves exist yet (first bookmark for this query)
     if (!prev) {
+      if (saveOperation === 'add' && saveItem) {
+        // Create a new SaveGroup with the first bookmark
+        const newSaves = new Map<string, Save>();
+        newSaves.set(saveItem.object_ref, saveItem);
+        return {
+          saves: newSaves,
+          query: saveItem.data.query,
+        };
+      }
+      // Can't remove or update notes if no saves exist
       console.warn("No user saves found, unable to update userSaves");
-      return null;
+      return prev;
     }
-    
-    const updatedSaves = cloneDeep(prev.saves);
-    
+
+    const updatedSaves = new Map(prev.saves);
+
     if (saveOperation === 'add' && saveItem) {
-      updatedSaves.add(saveItem);
+      updatedSaves.set(saveItem.object_ref, saveItem);
     } else if (saveOperation === 'remove') {
-      const saveToDelete = Array.from(updatedSaves).find(
-        (save) => save.id?.toString() === itemBookmarkID.current
-      );
-      if (!saveToDelete) {
+      if (!updatedSaves.has(objectRef)) {
         console.warn("No save found to delete, unable to update userSaves");
-        return null;
+        return prev;
       }
-      updatedSaves.delete(saveToDelete);
+      updatedSaves.delete(objectRef);
     } else if (saveOperation === 'updateNote' && saveItem) {
-      for(const save of updatedSaves) {
-        if(save.id?.toString() === itemBookmarkID.current) {
-          save.notes = saveItem.notes;
-          break;
-        }
+      const existing = updatedSaves.get(objectRef);
+      if (existing) {
+        updatedSaves.set(objectRef, { ...existing, notes: saveItem.notes });
       }
     }
-    
+
     return { ...prev, saves: updatedSaves };
   });
 };
@@ -118,27 +125,23 @@ export const createBookmarkObject = (params: {
  */
 export const handleBookmarkRemoval = async (params: BookmarkFunctionParams): Promise<string | false> => {
   const {
-    itemBookmarkID,
-    setIsBookmarked,
-    setItemHasNotes,
+    objectRef,
+    bookmarkId,
     bookmarkRemovedToast,
     updateUserSaves,
     shouldUpdateResultsAfterBookmark
   } = params;
 
-  if (!itemBookmarkID.current) return false;
+  if (!bookmarkId) return false;
   
-  const deleted = await deleteUserSave(itemBookmarkID.current);
+  const deleted = await deleteUserSave(bookmarkId);
   if (!deleted) {
     console.warn("Unable to delete bookmark, unable to update userSaves");
     return false;
   }
   
-  setIsBookmarked(false);
-  setItemHasNotes(false);
   bookmarkRemovedToast();
-  updateUserSavesState('remove', updateUserSaves, itemBookmarkID);
-  itemBookmarkID.current = null;
+  updateUserSavesState('remove', updateUserSaves, objectRef);
   
   if (shouldUpdateResultsAfterBookmark)
     shouldUpdateResultsAfterBookmark.current = true;
@@ -159,8 +162,7 @@ export const handleBookmarkCreation = async (params: BookmarkFunctionParams): Pr
     queryType,
     currentQueryID,
     user,
-    itemBookmarkID,
-    setIsBookmarked,
+    objectRef,
     bookmarkAddedToast,
     handleBookmarkError,
     updateUserSaves,
@@ -188,10 +190,8 @@ export const handleBookmarkCreation = async (params: BookmarkFunctionParams): Pr
   if (!bookmarkedItem) return false;
   
   const newBookmarkedItem = bookmarkedItem as unknown as Save;
-  setIsBookmarked(true);
-  itemBookmarkID.current = newBookmarkedItem.id?.toString() || null;
   bookmarkAddedToast();
-  updateUserSavesState('add', updateUserSaves, itemBookmarkID, newBookmarkedItem);
+  updateUserSavesState('add', updateUserSaves, objectRef, newBookmarkedItem);
   
   if (shouldUpdateResultsAfterBookmark)
     shouldUpdateResultsAfterBookmark.current = true;
@@ -209,7 +209,7 @@ export const handleBookmarkClick = async (
   params: BookmarkFunctionParams
 ): Promise<string | false> => {
   if (isBookmarked) {
-    if (bookmarkRemovalApproved.current && params.itemBookmarkID.current) {
+    if (bookmarkRemovalApproved.current && params.bookmarkId) {
       return await handleBookmarkRemoval(params);
     } else if (!bookmarkRemovalApproved.current) {
       setBookmarkRemovalConfirmationModalOpen(true);
@@ -225,12 +225,12 @@ export const handleBookmarkClick = async (
  */
 export const handleNotesClick = async (
   isBookmarked: boolean,
-  itemBookmarkID: RefObject<string | null>,
+  bookmarkId: string | null,
   nameString: string,
   activateNotes: (nameString: string, id: string) => void,
   handleBookmarkClickFn: () => Promise<string | false>
 ): Promise<void> => {
-  let tempBookmarkID: string | null = itemBookmarkID.current;
+  let tempBookmarkID: string | null = bookmarkId;
   
   if (!isBookmarked) {
     console.log("no bookmark exists for this item, creating one...");
@@ -242,3 +242,40 @@ export const handleNotesClick = async (
   if (tempBookmarkID)
     activateNotes(nameString, tempBookmarkID);
 };
+
+/**
+ * Checks if the given bookmarkID exists in the bookmarks set and if it has notes attached.
+ *
+ * Note: This function uses O(n) iteration since the Map is keyed by object_ref (result ID),
+ * not by bookmark ID. When possible, prefer using the Map directly with object_ref for O(1) lookup.
+ *
+ * @param {string | null} bookmarkID - The ID of the bookmark to check.
+ * @param {SaveGroup | null} bookmarkSet - The set of bookmark objects to search in.
+ * @returns {boolean} Returns true if the matching item is found in bookmarksSet and has notes, otherwise returns false.
+ */
+export const checkBookmarkIDForNotes = (bookmarkID: string | null, bookmarkSet: SaveGroup | null): boolean => {
+  if (bookmarkID === null)
+    return false;
+
+  if (bookmarkSet && bookmarkSet.saves.size > 0) {
+    for (const save of bookmarkSet.saves.values()) {
+      if (String(save.id) === bookmarkID)
+        return !isNotesEmpty(save.notes);
+    }
+  }
+  return false;
+}
+
+/**
+ * Checks if the given itemID exists in the bookmarks set and returns its bookmark ID if found.
+ * Uses O(1) Map lookup by itemID (object_ref).
+ *
+ * @param {string} itemID - The ID of the item to check.
+ * @param {SaveGroup} bookmarksSet - The Map of bookmark objects to search in.
+ * @returns {string|null} Returns the bookmark ID of the matching item if found, otherwise returns null.
+ */
+export const checkBookmarksForItem = (itemID: string, bookmarksSet: SaveGroup): string | null => {
+  const save = bookmarksSet.saves.get(itemID);
+  if (!save) return null;
+  return save.id != null ? save.id.toString() : null;
+}

@@ -350,7 +350,7 @@ export interface QueryChangeResetConfig {
   setSelectedPath: Dispatch<SetStateAction<Path | null>>;
   setSelectedPathKey: Dispatch<SetStateAction<string>>;
   setEvidenceModalOpen: Dispatch<SetStateAction<boolean>>;
-  setNotesModalOpen: Dispatch<SetStateAction<boolean>>;
+  closeNotesModal: () => void;
   setFocusModalOpen: Dispatch<SetStateAction<boolean>>;
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
   setSharedItem: Dispatch<SetStateAction<SharedItem>>;
@@ -400,7 +400,7 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     setSelectedPath,
     setSelectedPathKey,
     setEvidenceModalOpen,
-    setNotesModalOpen,
+    closeNotesModal,
     setFocusModalOpen,
     setShareModalOpen,
     setSharedItem,
@@ -460,7 +460,7 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     setSelectedPath(null);
     setSelectedPathKey("");
     setEvidenceModalOpen(false);
-    setNotesModalOpen(false);
+    closeNotesModal();
     setFocusModalOpen(false);
     setShareModalOpen(false);
     setSharedItem({index: 0, page: 0, name: '', type: ''});
