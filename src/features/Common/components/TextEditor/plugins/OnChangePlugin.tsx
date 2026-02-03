@@ -6,11 +6,12 @@ import { CLEAR_EDITOR_COMMAND, LexicalEditor, SerializedEditorState, SerializedL
 interface OnChangePluginProps {
   onChange: (editorStateJSON: SerializedEditorState<SerializedLexicalNode>) => void;
   bookmarkID: string | null;
+  isOpen?: boolean;
   shouldClearEditor?: boolean;
   onClearEditorComplete?: () => void;
 }
 
-const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditorComplete }: OnChangePluginProps): ReactNode | null => {
+const OnChangePlugin = ({ onChange, bookmarkID, isOpen, shouldClearEditor, onClearEditorComplete }: OnChangePluginProps): ReactNode | null => {
   const [editor] = useLexicalComposerContext();
 
   const clearEditor = (editor: LexicalEditor) => {
@@ -18,10 +19,14 @@ const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditor
   }
 
   useEffect(() => {
+    let isCurrent = true;
+
     const getNotesFromBookmark = async (bookmarkID: string | null) => {
       let shouldClearEditor = false;
       if(bookmarkID) {
         let save = await getUserSave(bookmarkID, ()=>{ return false; });
+        if (!isCurrent) return; // Stale request, ignore
+
         let initialNotes: string | false = false;
 
         if(!save){
@@ -29,11 +34,12 @@ const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditor
         } else {
           if(save.notes.length > 0)
             initialNotes = save.notes;
-  
+
           if(initialNotes !== false) {
             const editorStateJSON = initialNotes;
             const initialEditorState = editor.parseEditorState(editorStateJSON);
-            editor.setEditorState(initialEditorState)
+            editor.setEditorState(initialEditorState);
+            editor.focus();
           } else {
             shouldClearEditor = true;
           }
@@ -44,12 +50,16 @@ const OnChangePlugin = ({ onChange, bookmarkID, shouldClearEditor, onClearEditor
 
       if(shouldClearEditor) {
         clearEditor(editor);
+        editor.focus();
       }
     }
-    
-    getNotesFromBookmark(bookmarkID);
 
-  }, [bookmarkID, editor])
+    // Only fetch when modal is open (or isOpen is undefined for backwards compatibility)
+    if (isOpen !== false)
+      getNotesFromBookmark(bookmarkID);
+
+    return () => { isCurrent = false; };
+  }, [bookmarkID, isOpen, editor])
 
   // register listener for onChange
   useEffect(() => {
