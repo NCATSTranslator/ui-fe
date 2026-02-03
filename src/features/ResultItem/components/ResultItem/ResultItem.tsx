@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction, useMemo } from 'react';
 import styles from './ResultItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
-import { getARATagsFromResultTags, isNotesEmpty } from '@/features/ResultItem/utils/utilities';
+import { getARATagsFromResultTags } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
@@ -12,7 +12,7 @@ import BookmarkConfirmationModal from '@/features/ResultItem/components/Bookmark
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '@/features/ResultItem/utils/csvGeneration';
 import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
-import { handleBookmarkClick as handleBookmarkClickUtil, handleNotesClick as handleNotesClickUtil, BookmarkFunctionParams } from '@/features/ResultItem/utils/bookmarkFunctions';
+import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
@@ -123,21 +123,41 @@ const ResultItem: FC<ResultItemProps> = ({
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
   const firstPath = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0] as string) : result.paths[0];
   const score = (isPathfinder && firstPath) ? getPathfinderMetapathScore(firstPath) : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
-  const user = useSelector(currentUser);
 
   let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
-  const [isBookmarked, setIsBookmarked] = useState<boolean>(!!bookmarkItem);
-  const itemBookmarkID = useRef<string | null>(bookmarkItem?.id ? bookmarkItem.id.toString() : null);
-  const [itemHasNotes, setItemHasNotes] = useState<boolean>(!isNotesEmpty(bookmarkItem?.notes || null));
+  const user = useSelector(currentUser);
+  
+  const {
+    isBookmarked,
+    hasNotes: itemHasNotes,
+    confirmModalOpen: bookmarkRemovalConfirmationModalOpen,
+    setConfirmModalOpen: setBookmarkRemovalConfirmationModalOpen,
+    handleBookmarkClick,
+    handleNotesClick: handleNotesClickHook,
+    handleRemovalApproval: handleBookmarkRemovalApproval,
+    resetRemovalApproval,
+  } = useBookmarkItem({
+    bookmarkItem: bookmarkItem ?? null,
+    result,
+    resultSet,
+    queryNodeID,
+    queryNodeLabel,
+    queryNodeDescription,
+    queryType,
+    currentQueryID,
+    bookmarkAddedToast,
+    bookmarkRemovedToast,
+    handleBookmarkError,
+    updateUserSaves,
+    shouldUpdateResultsAfterBookmark,
+  });
+  
   const { height, isOpen: isExpanded, toggle: handleToggle, setIsOpen: setIsExpanded } = useAnimateHeight({ initialOpen: startExpanded });
   const [graphActive, setGraphActive] = useState<boolean>(false);
   const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
   const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
-  // const [csvData, setCsvData] = useState([]);
-  const bookmarkRemovalApproved = useRef<boolean>(false);
-  const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState<boolean>(false);
   const graph = useMemo(()=> {
     if(!resultSet)
       return {nodes:[], edges: []};
@@ -191,45 +211,9 @@ const ResultItem: FC<ResultItemProps> = ({
     setSelectedPaths(null);
   },[]);
 
-  const bookmarkParams: BookmarkFunctionParams = useMemo(() => ({
-    result,
-    resultSet: resultSet!,
-    queryNodeID,
-    queryNodeLabel,
-    queryNodeDescription,
-    queryType,
-    currentQueryID,
-    user: user || null,
-    itemBookmarkID,
-    setIsBookmarked,
-    setItemHasNotes,
-    bookmarkRemovedToast,
-    bookmarkAddedToast,
-    handleBookmarkError,
-    updateUserSaves,
-    shouldUpdateResultsAfterBookmark
-  }), [result, resultSet, queryNodeID, queryNodeLabel, queryNodeDescription, queryType, currentQueryID, user, 
-       setIsBookmarked, setItemHasNotes, bookmarkRemovedToast, bookmarkAddedToast, handleBookmarkError, 
-       updateUserSaves, shouldUpdateResultsAfterBookmark]);
-
-  const handleBookmarkClick = useCallback(async (): Promise<string | false> => {
-    return await handleBookmarkClickUtil(
-      isBookmarked,
-      bookmarkRemovalApproved,
-      setBookmarkRemovalConfirmationModalOpen,
-      bookmarkParams
-    );
-  }, [isBookmarked, bookmarkParams]);
-
   const handleNotesClick = useCallback(async () => {
-    await handleNotesClickUtil(
-      isBookmarked,
-      itemBookmarkID,
-      nameString,
-      activateNotes,
-      handleBookmarkClick
-    );
-  }, [isBookmarked, nameString, activateNotes, handleBookmarkClick]);
+    await handleNotesClickHook(activateNotes, nameString);
+  }, [handleNotesClickHook, activateNotes, nameString]);
 
   const handleTagClick = (filterID: string, filter: Filter) => {
     let newObj: Filter = {
@@ -241,21 +225,11 @@ const ResultItem: FC<ResultItemProps> = ({
     handleFilter(newObj);
   }
 
-  const handleBookmarkRemovalApproval = () => {
-    bookmarkRemovalApproved.current = true;
-    handleBookmarkClick();
-  }
 
   const handleOpenResultShare = () => {
     setShareResultID(result.id);
     setShareModalOpen(true);
   }
-
-  useEffect(() => {
-    itemBookmarkID.current = bookmarkItem?.id ? bookmarkItem.id.toString() : null;
-    setIsBookmarked(!!bookmarkItem);
-    setItemHasNotes(!isNotesEmpty(bookmarkItem?.notes || null));
-  }, [bookmarkItem]);
 
   if(!resultSet)
     return null;
@@ -428,7 +402,7 @@ const ResultItem: FC<ResultItemProps> = ({
         onApprove={handleBookmarkRemovalApproval}
         onClose={()=>{
           setBookmarkRemovalConfirmationModalOpen(false);
-          bookmarkRemovalApproved.current = false;
+          resetRemovalApproval();
         }}
       />
     </div>
