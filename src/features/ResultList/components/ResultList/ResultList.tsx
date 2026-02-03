@@ -16,10 +16,9 @@ import {
   injectDynamicFilters,
   genPathFilterState,
   areEntityFiltersEqual,
-  calculateFacetCounts,
-  checkBookmarksForItem
+  calculateFacetCounts
 } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { getDataFromQueryVar, getPathCount, getCompressedEdge, findInSet } from "@/features/Common/utils/utilities";
+import { getDataFromQueryVar, getPathCount, getCompressedEdge } from "@/features/Common/utils/utilities";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import { getSaves, SaveGroup } from "@/features/UserAuth/utils/userApi";
@@ -33,6 +32,7 @@ import { generatePathfinderScore, generateScore } from "@/features/ResultList/ut
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import { useResultsStatusQuery, useResultsDataQuery, useResultsCompleteToast, useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
+import { useNotesModal } from '@/features/ResultItem/hooks/useNotesModal';
 import { useSidebarRegistration, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
 import DownloadIcon from '@/assets/icons/buttons/Export.svg?react';
@@ -122,14 +122,21 @@ const ResultList = () => {
 
   // Bool, is evidence modal open?
   const [evidenceModalOpen, setEvidenceModalOpen] = useState(false);
-  const [notesModalOpen, setNotesModalOpen] = useState(false);
   const [focusModalOpen, setFocusModalOpen] = useState(false);
   const [sharedItem, setSharedItem] = useState<SharedItem>({index: 0, page: 0, name: '', type: ''});
   const [autoScrollToResult, setAutoScrollToResult] = useState(false);
   const [expandSharedResult, setExpandSharedResult] = useState(false);
   const sharedItemRef = useRef<HTMLDivElement | null>(null);
-  const noteLabel = useRef("");
-  const currentBookmarkID = useRef<string | null>(null);
+  
+  // Notes modal state management via hook
+  const {
+    isOpen: notesModalOpen,
+    noteLabel,
+    currentBookmarkID,
+    openNotes: activateNotes,
+    closeNotes,
+  } = useNotesModal();
+  
   // Result, the currently selected item
   const [selectedResult, setSelectedResult] = useState<Result | null>(null);
 
@@ -220,7 +227,7 @@ const ResultList = () => {
     setSelectedPath,
     setSelectedPathKey,
     setEvidenceModalOpen,
-    setNotesModalOpen,
+    closeNotesModal: closeNotes,
     setFocusModalOpen,
     setShareModalOpen,
     setSharedItem,
@@ -588,12 +595,6 @@ const ResultList = () => {
     }
   },[resultSet])
 
-  const activateNotes = (label: string, bookmarkID: string) => {
-    noteLabel.current = label;
-    currentBookmarkID.current = bookmarkID;
-    setNotesModalOpen(true);
-  }
-
   const handlePageReset = (newItemsPerPage: number | false, resultsLength: number) => {
     handlePageClick({selected: 0}, newItemsPerPage, resultsLength);
   }
@@ -806,8 +807,8 @@ const ResultList = () => {
         shareModalOpen={shareModalOpen}
         setShareModalOpen={setShareModalOpen}
         notesModalOpen={notesModalOpen}
-        setNotesModalOpen={setNotesModalOpen}
-        noteLabel={noteLabel.current}
+        onCloseNotesModal={closeNotes}
+        noteLabel={noteLabel}
         currentBookmarkID={currentBookmarkID}
         pk={currentQueryID ? currentQueryID : ""}
         focusModalOpen={focusModalOpen}
@@ -911,8 +912,7 @@ const ResultList = () => {
                           if(!result || !pathFilterState)
                             return null;
 
-                          let bookmarkID = (userSaves === null) ? null : checkBookmarksForItem(item.id, userSaves);
-                          let bookmarkItem = userSaves?.saves ? findInSet(userSaves.saves, save => save.id ? save.id.toString() === bookmarkID : false) : undefined;
+                          const bookmarkItem = userSaves?.saves.get(item.id) ?? null;
                           return (
                             <ResultItem
                               isEven={i % 2 !== 0}
