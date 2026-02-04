@@ -28,7 +28,7 @@ const ReviewIdentify = lazy(() => import('@/pageRoutes/Articles/ReviewIdentify')
 const WorkspaceHelp = lazy(() => import('@/pageRoutes/Articles/Workspace').then(m => ({ default: m.WorkspaceHelp })));
 const UserPreferences = lazy(() => import('@/pageRoutes/Articles/UserPreferences').then(m => ({ default: m.UserPreferences })));
 const NewQuery = lazy(() => import('@/pageRoutes/NewQuery/NewQuery'));
-
+const GraphViewPage = lazy(() => import('@/pageRoutes/Temp/GraphViewPage').then(m => ({ default: m.GraphViewPage })));
 const container = document.getElementById('root');
 if (!container) {
   throw new Error('Root element not found');
@@ -115,6 +115,10 @@ const routes = [
   {
     path: "new-query",
     element: <Page title="New Query"><Suspense fallback={<LoadingWrapper />}><NewQuery /></Suspense></Page>
+  },
+  {
+    path: "graph-view",
+    element: <Page title="Graph View"><Suspense fallback={<LoadingWrapper />}><GraphViewPage /></Suspense></Page>
   },
   {
     path: "*",
