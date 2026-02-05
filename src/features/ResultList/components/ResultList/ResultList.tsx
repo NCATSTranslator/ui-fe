@@ -759,6 +759,7 @@ const ResultList = () => {
     icon: <FilterIcon />,
     id: 'filters',
     title: "Filters",
+    reduceSpacing: true,
     panelComponent: () => (
       <FiltersPanel
         activeFilters={activeFilters}
