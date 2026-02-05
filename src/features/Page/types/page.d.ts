@@ -1,12 +1,12 @@
-export interface FAQSubArticle {
+export interface HelpSubArticle {
   title: string;
   link?: string;
   slug?: string;
 }
 
-export interface FAQArticle {
+export interface HelpArticle {
   title: string;
   link?: string;
   slug?: string;
-  subArticles?: FAQSubArticle[];
+  subArticles?: HelpSubArticle[];
 }
