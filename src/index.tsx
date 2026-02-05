@@ -4,7 +4,7 @@ import { lazy, Suspense } from 'react';
 import '@/index.css';
 import App from '@/App';
 import Page from '@/features/Page/components/Page/Page';
-import FAQPage from '@/features/Page/components/Page/FAQPage';
+import HelpPage from '@/features/Page/components/Page/HelpPage';
 import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper';
 import { Provider } from 'react-redux';
 import { store } from '@/redux/store';
@@ -46,47 +46,47 @@ const routes = [
   },
   {
     path: "help",
-    element: <FAQPage title="Frequently Asked Questions"><Suspense fallback={<LoadingWrapper />}><Help /></Suspense></FAQPage>
+    element: <HelpPage title="Frequently Asked Questions"><Suspense fallback={<LoadingWrapper />}><Help /></Suspense></HelpPage>
   },
   {
     path: "logging-in",
-    element: <FAQPage title="Frequently Asked Questions"><Suspense fallback={<LoadingWrapper  />}><LoggingIn /></Suspense></FAQPage>
+    element: <HelpPage title="Logging In"><Suspense fallback={<LoadingWrapper />}><LoggingIn /></Suspense></HelpPage>
   },
   {
     path: "overview",
-    element: <FAQPage title="Overview"><Suspense fallback={<LoadingWrapper />}><Overview /></Suspense></FAQPage>
+    element: <HelpPage title="Overview"><Suspense fallback={<LoadingWrapper />}><Overview /></Suspense></HelpPage>
   },
   {
     path: 'exploring-relationships',
-    element: <FAQPage title="Exploring Relationships"><Suspense fallback={<LoadingWrapper />}><ExploringRelationships/></Suspense></FAQPage>
+    element: <HelpPage title="Exploring Relationships"><Suspense fallback={<LoadingWrapper />}><ExploringRelationships/></Suspense></HelpPage>
   },
   {
     path: 'review-and-identify',
-    element: <FAQPage title="Review and Identify Favorite Results"><Suspense fallback={<LoadingWrapper />}><ReviewIdentify/></Suspense></FAQPage>
+    element: <HelpPage title="Review and Identify Favorite Results"><Suspense fallback={<LoadingWrapper />}><ReviewIdentify/></Suspense></HelpPage>
   },
   {
     path: 'workspace-help',
-    element: <FAQPage title="Workspace"><Suspense fallback={<LoadingWrapper />}><WorkspaceHelp/></Suspense></FAQPage>
+    element: <HelpPage title="Workspace"><Suspense fallback={<LoadingWrapper />}><WorkspaceHelp/></Suspense></HelpPage>
   },
   {
     path: 'user-preferences',
-    element: <FAQPage title="User Preferences"><Suspense fallback={<LoadingWrapper />}><UserPreferences/></Suspense></FAQPage>
+    element: <HelpPage title="User Preferences"><Suspense fallback={<LoadingWrapper />}><UserPreferences/></Suspense></HelpPage>
   },
   {
     path: "what-is-translational-science",
-    element: <FAQPage title="What is Translational Science"><Suspense fallback={<LoadingWrapper />}><WhatIs /></Suspense></FAQPage>
+    element: <HelpPage title="What is Translational Science"><Suspense fallback={<LoadingWrapper />}><WhatIs /></Suspense></HelpPage>
   },
   {
     path: "funding-information",
-    element: <FAQPage title="Funding Information"><Suspense fallback={<LoadingWrapper />}><Affiliates /></Suspense></FAQPage>
+    element: <HelpPage title="Funding Information"><Suspense fallback={<LoadingWrapper />}><Affiliates /></Suspense></HelpPage>
   },
   {
     path: "search-history",
-    element: <FAQPage title="Search History"><Suspense fallback={<LoadingWrapper />}><SearchHistoryArticle /></Suspense></FAQPage>
+    element: <HelpPage title="Search History"><Suspense fallback={<LoadingWrapper />}><SearchHistoryArticle /></Suspense></HelpPage>
   },
   {
     path: "send-feedback-help",
-    element: <FAQPage title="Send Feedback"><Suspense fallback={<LoadingWrapper />}><SendFeedbackArticle /></Suspense></FAQPage>
+    element: <HelpPage title="Send Feedback"><Suspense fallback={<LoadingWrapper />}><SendFeedbackArticle /></Suspense></HelpPage>
   },
   {
     path: "results",
