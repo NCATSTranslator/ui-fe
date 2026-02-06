@@ -1,26 +1,43 @@
-import { equal, larger, format, polynomialRoot, largerEq, min, max, round, Complex } from 'mathjs';
+import { equal, larger, format, polynomialRoot, largerEq, min, max, round, isComplex, type Complex } from 'mathjs';
 import { getPathById } from '@/features/ResultList/slices/resultsSlice';
+import { Path, Result, ResultSet, Score } from '@/features/ResultList/types/results.d';
 
-export const generateScore = (scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) => {
-  return maxSugenoScore(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight);
+export interface ScorePair {
+  main: number;
+  secondary: number;
 }
 
-export const generatePathfinderScore = (resultSet, result) => {
-  const pathObjOne = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0]) : result.paths[0];
-  const pathObjTwo = (result.paths.length > 1) ? (typeof result.paths[1] === 'string') ? getPathById(resultSet, result.paths[1]) : result.paths[1] : null;
-  const score = {
+type WeightSets = Record<string, number>;
+
+export const generateScore = (
+  scoreComponents: Score[],
+  confidenceWeight: number,
+  noveltyWeight: number,
+  clinicalWeight: number
+): ScorePair => {
+  return maxSugenoScore(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight);
+};
+
+export const generatePathfinderScore = (resultSet: ResultSet | null, result: Result): ScorePair => {
+  const pathObjOne: Path | null = (typeof result.paths[0] === 'string')
+    ? getPathById(resultSet, result.paths[0])
+    : result.paths[0];
+  const pathObjTwo: Path | null = (result.paths.length > 1)
+    ? (typeof result.paths[1] === 'string') ? getPathById(resultSet, result.paths[1]) : result.paths[1]
+    : null;
+  const score: ScorePair = {
     main: (pathObjOne) ? getPathfinderMetapathScore(pathObjOne) : 0,
     secondary: (pathObjTwo) ? getPathfinderMetapathScore(pathObjTwo) : 0
-  }
+  };
   return score;
-}
+};
 
-export const displayScore = (score, decimalPlaces = 2) => {
+export const displayScore = (score: ScorePair | number, decimalPlaces: number = 2): string => {
   return format((typeof score === "number") ? score || 0 : score.main || 0, {notation: 'fixed', precision: decimalPlaces});
-}
+};
 
-export const maxNormalizedScore = (scoreComponents) => {
-  const normalizedScorePairs = scoreComponents.map((s) => {
+export const maxNormalizedScore = (scoreComponents: Score[]): ScorePair => {
+  const normalizedScorePairs: ScorePair[] = scoreComponents.map((s) => {
     const scaledNormalizedScore = 5 * s.normalized_score / 100;
     return {
       main: scaledNormalizedScore,
@@ -29,10 +46,15 @@ export const maxNormalizedScore = (scoreComponents) => {
   });
 
   return maxScorePair(normalizedScorePairs);
-}
+};
 
-const maxSugenoScore = (scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight) => {
-  const sugenoPairs = scoreComponents.map((s) => {
+const maxSugenoScore = (
+  scoreComponents: Score[],
+  confidenceWeight: number,
+  noveltyWeight: number,
+  clinicalWeight: number
+): ScorePair => {
+  const sugenoPairs: ScorePair[] = scoreComponents.map((s) => {
     const scaledSugenoScore = 5 * computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
       confidenceWeight, noveltyWeight, clinicalWeight);
     return {
@@ -43,10 +65,10 @@ const maxSugenoScore = (scoreComponents, confidenceWeight, noveltyWeight, clinic
   });
 
   return maxScorePair(sugenoPairs);
-}
+};
 
-const maxScorePair = (scorePairs) => {
-  let maxScore = scorePairs[0];
+const maxScorePair = (scorePairs: ScorePair[]): ScorePair => {
+  let maxScore: ScorePair = scorePairs[0];
   for (let i = 1; i < scorePairs.length; i++) {
     if (larger(scorePairs[i].main, maxScore.main) ||
         (equal(scorePairs[i].main, maxScore.main) &&
@@ -56,27 +78,36 @@ const maxScorePair = (scorePairs) => {
   }
 
   return maxScore;
-}
+};
 
-const computeSugeno = (confidence, novelty, clinical,
-    confidenceWeight, noveltyWeight, clinicalWeight) => {
+const computeSugeno = (
+  confidence: number,
+  novelty: number,
+  clinical: number,
+  confidenceWeight: number,
+  noveltyWeight: number,
+  clinicalWeight: number
+): number => {
   const a = confidenceWeight;
   const b = noveltyWeight;
   const c = clinicalWeight;
   const solutions = polynomialRoot(a+b+c-1, a*b+a*c+b*c, a*b*c);
-  let lambda = 0;
+  let lambda: number = 0;
   solutions.forEach((s) => {
+    let val: number;
     if (isComplex(s)) {
-      s = s.re;
+      val = (s as Complex).re;
+    } else {
+      val = s as number;
     }
 
-    if (!(equal(s, 0)) && largerEq(s, -1)) {
-      lambda = s;
+    if (!(equal(val, 0)) && largerEq(val, -1)) {
+      lambda = val;
     }
   });
 
   const weightSets = computeWeightSets(lambda, a, b, c, 3);
-  const allScores = [
+  const allScores: { id: string; score: number }[] = [
     {id: 'co', score: confidence},
     {id: 'no', score: novelty},
     {id: 'cl', score: clinical}
@@ -86,7 +117,7 @@ const computeSugeno = (confidence, novelty, clinical,
     return b.score - a.score;
   });
 
-  const weightsSorted = {};
+  const weightsSorted: WeightSets = {};
   let k = '';
   for (const score of allScores) {
     k = `${k}${score.id}`;
@@ -94,21 +125,23 @@ const computeSugeno = (confidence, novelty, clinical,
   }
 
   const weightKeys = Object.keys(weightsSorted);
-  const mins = [];
+  const mins: number[] = [];
   for (let i = 0; i < weightKeys.length; ++i) {
     mins.push(min(allScores[i].score, weightsSorted[weightKeys[i]]));
   }
 
   // Sugeno score
   return max(...mins);
-}
+};
 
-const isComplex = (x) => {
-  return (x instanceof Complex);
-}
-
-const computeWeightSets = (lambda, confidenceWeight, noveltyWeight, clinicalWeight, n=2) => {
-  const ws = {
+const computeWeightSets = (
+  lambda: number,
+  confidenceWeight: number,
+  noveltyWeight: number,
+  clinicalWeight: number,
+  n: number = 2
+): WeightSets => {
+  const ws: WeightSets = {
     'co': confidenceWeight,
     'no': noveltyWeight,
     'cl': clinicalWeight
@@ -130,27 +163,27 @@ const computeWeightSets = (lambda, confidenceWeight, noveltyWeight, clinicalWeig
           tf = `${tf}${p[j]}`;
         }
       }
-      ws[t] = round(ws[tl] + ws[tf] + (lambda * ws[tl] * ws[tf]), 2);
+      ws[t] = round(ws[tl] + ws[tf] + (lambda * ws[tl] * ws[tf]), 2) as number;
     }
   }
 
   return ws;
-}
+};
 
-const getPermutations = (array, n) => {
-  const permutations = [];
+const getPermutations = (array: string[], n: number): string[][] => {
+  const permutations: string[][] = [];
   const ss = subsets(array, n);
   for (const subset of ss) {
     permutations.push(...permute(subset));
   }
   return permutations;
-}
+};
 
 // Get all subsets of length n from array
-const subsets = (array, n) => {
+const subsets = (array: string[], n: number): string[][] => {
   const m = array.length;
   const totalSubsets = 1 << m;
-  const subsets = [];
+  const result: string[][] = [];
   for (let bitmask = 0; bitmask < totalSubsets; ++bitmask) {
     let count = 0;
     let temp = bitmask;
@@ -160,23 +193,23 @@ const subsets = (array, n) => {
     }
 
     if (count === n) {
-      const subset = [];
+      const subset: string[] = [];
       for (let i = 0; i < m; ++i) {
         if (bitmask & (1 << i)) {
           subset.push(array[i]);
         }
       }
 
-      subsets.push(subset)
+      result.push(subset);
     }
   }
 
-  return subsets;
-}
+  return result;
+};
 
 // Heap's algorithm
-const permute = (array) => {
-  const permutations = [];
+const permute = (array: string[]): string[][] => {
+  const permutations: string[][] = [];
   const arr = [...array];
   const n = array.length;
   const c = new Array(n).fill(0);
@@ -201,20 +234,26 @@ const permute = (array) => {
   }
 
   return permutations;
-}
+};
 
-const swap = (array, i, j) => {
+const swap = (array: string[], i: number, j: number): void => {
   const temp = array[i];
   array[i] = array[j];
   array[j] = temp;
-}
+};
 
-const computeWeightedMean = (confidence, novelty, clinical,
-    confidenceWeight, noveltyWeight, clinicalWeight) => {
+const computeWeightedMean = (
+  confidence: number,
+  novelty: number,
+  clinical: number,
+  confidenceWeight: number,
+  noveltyWeight: number,
+  clinicalWeight: number
+): number => {
   return (confidence * confidenceWeight) + (novelty * noveltyWeight) + (clinical * clinicalWeight);
-}
+};
 
-export const getPathfinderMetapathScore = (path) => {
+export const getPathfinderMetapathScore = (path: Path): number => {
   // Pathfinder score is scaled to 0-5, original score is 0-1
   return path.score ? path.score * 5 : 0;
-}
+};
