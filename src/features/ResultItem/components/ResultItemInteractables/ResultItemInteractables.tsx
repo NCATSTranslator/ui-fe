@@ -1,23 +1,19 @@
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useState, useMemo } from "react";
 import styles from './ResultItemInteractables.module.scss';
-import { Link } from 'react-router-dom';
-import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
-import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
-import BookmarkFilled from "@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react";
-import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"
-import NotesFilled from "@/assets/icons/buttons/Notes/Filled Notes.svg?react"
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import MenuIcon from '@/assets/icons/buttons/Dot Menu/Horizontal Dot Menu.svg?react';
-import SummaryIcon from '@/assets/icons/buttons/Sparkles.svg?react';
-import { useWindowSize } from "@/features/Common/hooks/customHooks";
 import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
-import Button from "@/features/Core/components/Button/Button";
 import { Result } from "@/features/ResultList/types/results";
 import { useSelector } from "react-redux";
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
-import { useResultSummary } from "../../hooks/resultSummaryHooks";
-import ResultItemSummaryModal from "../ResultItemSummaryModal/ResultItemSummaryModal";
+import ResultItemSummaryModal from "@/features/ResultItem/components/ResultItemSummaryModal/ResultItemSummaryModal";
 import { useQueryClient } from "@tanstack/react-query";
+import { sanitizeNameString } from "@/features/ResultItem/hooks/useResultItemInteractables";
+import { useResponsiveBreakpoint } from "@/features/Common/hooks/customHooks";
+import SummaryButton from "@/features/ResultItem/components/ResultItemInteractables/SummaryButton";
+import BookmarkButton from "@/features/ResultItem/components/ResultItemInteractables/BookmarkButton";
+import NotesButton from "@/features/ResultItem/components/ResultItemInteractables/NotesButton";
+import ShareButton from "@/features/ResultItem/components/ResultItemInteractables/ShareButton";
+import { useStreamingSummaryState } from "@/features/ResultItem/hooks/resultSummaryHooks";
 
 interface ResultItemInteractablesProps {
   handleBookmarkClick: () => Promise<string | number | false | null>;
@@ -57,145 +53,113 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
   diseaseDescription,
 }) => {
   const resultSet = useSelector(getResultSetById(pk));
-  const queryClient = useQueryClient()
-
-  const { isLoading, error, refetch: fetchSummary } = useResultSummary(resultSet, result, diseaseId, diseaseName, diseaseDescription);
-
-  const screenWidth = useWindowSize();
-  const breakpoint = 1240;
-  const belowBreakpoint = !!screenWidth?.width && screenWidth.width < breakpoint;
-  const nameStringNoApostrophes = nameString.replaceAll("'", "");
+  const queryClient = useQueryClient();
+  const belowBreakpoint = useResponsiveBreakpoint();
+  const nameStringNoApostrophes = useMemo(() => sanitizeNameString(nameString), [nameString]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [summary, setSummary] = useState<string | null>(null);
+  
+  const {
+    summaryState,
+    isLoading,
+    fetchAndUpdateSummary,
+    clearAndRefetchSummary,
+    streamedText,
+    isStreaming,
+    isError
+  } = useStreamingSummaryState(
+    resultSet,
+    'https://transltr-bma-ui-dev.ncats.io/summarizer/summary-streaming',
+    result,
+    diseaseId,
+    diseaseName,
+    diseaseDescription,
+    () => console.log("summary generation complete"),
+    () => console.log("summary generation cancelled")
+  );
 
   const handleOutsideClick = useCallback(() => {
-    if(isOpen)
-      setIsOpen(false); 
+    if (isOpen) {
+      setIsOpen(false);
+    }
   }, [isOpen]);
 
   const handleGenerateSummary = useCallback(() => {
-    fetchSummary().then((res) => {
-      setSummary(res?.data?.response_text || null);
-    });
     setIsModalOpen(true);
-  }, [fetchSummary]);
+
+    if (summaryState.content) {
+      return;
+    }
+
+    fetchAndUpdateSummary();
+  }, [summaryState.content, fetchAndUpdateSummary]);
+
+  const handleClearAndRefetchSummary = useCallback(() => {
+    clearAndRefetchSummary();
+  }, [clearAndRefetchSummary]);
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
-    setSummary(null);
     queryClient.cancelQueries({ queryKey: ["resultSummary"] });
-  }, []);
+  }, [queryClient]);
 
-  return(
+  return (
     <>
       <OutsideClickHandler 
         className={`${styles.interactables} ${!!isEven && styles.even}`}
-        onOutsideClick={handleOutsideClick}>
-        {
-          !!belowBreakpoint &&
-          <button className={`${styles.icon}`} onClick={()=>setIsOpen(prev=>!prev)}>
+        onOutsideClick={handleOutsideClick}
+      >
+        {belowBreakpoint && (
+          <button className={styles.icon} onClick={() => setIsOpen(prev => !prev)}>
             <MenuIcon/>
           </button>
-        }
-        <div className={`${styles.interactablesContainer} ${!!belowBreakpoint && styles.belowBreakpoint} ${!!isOpen && styles.isOpen}`}>
-          {
-            !!hasSummary &&
-            <Button
-              className={`${styles.icon}`}
-              variant="secondary"
-              handleClick={handleGenerateSummary}
-              dataTooltipId={`summary-tooltip-${nameStringNoApostrophes}`}
-              small
-            >
-              <SummaryIcon
-                aria-describedby={`summary-tooltip-${nameStringNoApostrophes}`}
-              />
-              <Tooltip id={`summary-tooltip-${nameStringNoApostrophes}`}>
-                <span className={styles.tooltip}>Generate a summary of this result.</span>
-              </Tooltip>
-              <span className={styles.label}>Summary</span>
-            </Button>
-          }
-          {
-            (!!hasUser && !isPathfinder) &&
-              <>
-                <Button 
-                  className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}
-                  handleClick={handleBookmarkClick}
-                  dataTooltipId={`bookmark-tooltip-${nameStringNoApostrophes}`}
-                  variant="secondary"
-                  small
-                  >
-                  <BookmarkFilled 
-                    className={styles.bookmarkFilledSVG}
-                    data-result-name={nameString}
-                    aria-describedby={`bookmark-tooltip-${nameStringNoApostrophes}`} 
-                  />
-                  <Bookmark 
-                    data-result-name={nameString}
-                    aria-describedby={`bookmark-tooltip-${nameStringNoApostrophes}`} 
-                  />
-                  <Tooltip id={`bookmark-tooltip-${nameStringNoApostrophes}`}>
-                    <span className={styles.tooltip}>
-                      {
-                        isBookmarked
-                        ? <>Remove this result from your bookmarks.</>
-                        : <>Bookmark this result to review it later in your <Link to="/projects" target='_blank'>Projects</Link>.</>
-                      }
-                    </span>
-                  </Tooltip>
-                  <span className={styles.label}>Bookmark</span>
-                </Button>
-                <Button 
-                  className={`${styles.icon} ${styles.notesIcon} ${hasNotes ? styles.filled : ''}`}
-                  handleClick={handleNotesClick}
-                  dataTooltipId={`notes-tooltip-${nameStringNoApostrophes}`}
-                  variant="secondary"
-                  small
-                  >
-                  <NotesFilled 
-                    className={styles.notesFilledSVG}
-                    data-result-name={nameString}
-                    aria-describedby={`notes-tooltip-${nameStringNoApostrophes}`}
-                  />
-                  <Notes 
-                    className='note-icon'
-                    data-result-name={nameString}
-                    aria-describedby={`notes-tooltip-${nameStringNoApostrophes}`}
-                  />
-                  <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
-                    <span className={styles.tooltip}>Add your own custom notes to this result. You can also view and edit notes on your bookmarked results in your <Link to="/projects" target='_blank'>Projects</Link>.</span>
-                  </Tooltip>
-                  <span className={styles.label}>Notes</span>
-                </Button>
-              </>
-          }
-          <Button
-            className={`${styles.icon} ${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`}
-            handleClick={handleOpenResultShare}
-            dataTooltipId={`share-tooltip-${nameStringNoApostrophes}`}
-            variant="secondary"
-            small
-            >
-            <ShareIcon/>
-            <Tooltip id={`share-tooltip-${nameStringNoApostrophes}`}>
-              <span className={styles.tooltip}>Generate a sharable link for this result.</span>
-            </Tooltip>
-            <span className={styles.label}>Share</span>
-          </Button>
+        )}
+        
+        <div className={`${styles.interactablesContainer} ${belowBreakpoint && styles.belowBreakpoint} ${isOpen && styles.isOpen}`}>
+          <SummaryButton
+            hasSummary={hasSummary}
+            hasCachedSummary={summaryState.hasCached}
+            onGenerateSummary={handleGenerateSummary}
+            nameStringNoApostrophes={nameStringNoApostrophes}
+          />
+          
+          <BookmarkButton
+            hasUser={hasUser}
+            isPathfinder={isPathfinder}
+            isBookmarked={isBookmarked}
+            onBookmarkClick={handleBookmarkClick}
+            nameStringNoApostrophes={nameStringNoApostrophes}
+          />
+          
+          <NotesButton
+            hasUser={hasUser}
+            isPathfinder={isPathfinder}
+            hasNotes={hasNotes}
+            onNotesClick={handleNotesClick}
+            nameStringNoApostrophes={nameStringNoApostrophes}
+          />
+          
+          <ShareButton
+            isExpanded={isExpanded}
+            onShareClick={handleOpenResultShare}
+            nameStringNoApostrophes={nameStringNoApostrophes}
+          />
         </div>
       </OutsideClickHandler>
+      
       <ResultItemSummaryModal
         isOpen={isModalOpen}
         isLoading={isLoading}
-        isError={!!error}
-        summary={summary}
+        isStreaming={isStreaming}
+        isError={isError}
+        summary={isStreaming ? streamedText : summaryState.content}
         onClose={handleCloseModal}
+        onClearAndRefetchSummary={handleClearAndRefetchSummary}
+        result={result}
       />
     </>
-  )
-}
+  );
+};
 
 export default ResultItemInteractables;

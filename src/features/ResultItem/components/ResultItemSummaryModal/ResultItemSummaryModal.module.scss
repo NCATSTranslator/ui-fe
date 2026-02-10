@@ -26,4 +26,28 @@
     margin: 0 0 $xs;
     color: $purpleOne;
   }
+  .resultName {
+    font-weight: 400;
+    color: $black;
+    font-size: $h4Size;
+  }
+}
+
+.clearButton {
+  margin-top: $s;
+  width: 100%;
+}
+
+.streamingIcon {
+  margin: 0 auto;
+}
+
+.reasoning, .functionCall {
+  color: $purpleOne;
+  font-style: italic;
+  font-size: $captionSize;
+  padding: $s;
+  border-radius: $defaultBorderRadius;
+  background-color: $palePurple;
+  margin-bottom: $s;
 }

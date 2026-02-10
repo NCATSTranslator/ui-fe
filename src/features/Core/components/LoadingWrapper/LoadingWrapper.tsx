@@ -5,6 +5,7 @@ import { Timeout } from '@/features/Common/types/global';
 
 interface LoadingWrapperProps {
   loading?: boolean;
+  loadingText?: string;
   children?: ReactNode;
   wrapperClassName?: string;
   contentClassName?: string;
@@ -12,8 +13,9 @@ interface LoadingWrapperProps {
   size?: 'small' | 'medium' | 'large';
 }
 
-const LoadingWrapper: FC<LoadingWrapperProps> = ({ 
+const LoadingWrapper: FC<LoadingWrapperProps> = ({
   loading = false,
+  loadingText,
   children,
   wrapperClassName = "",
   contentClassName = "",
@@ -28,6 +30,9 @@ const LoadingWrapper: FC<LoadingWrapperProps> = ({
     let timer: Timeout | null = null;
     if (!loading) {
       timer = setTimeout(() => {setShowContent(true); setIsLoading(false);}, showDelay);
+    } else {
+      setIsLoading(true);
+      setShowContent(false);
     }
     return () => {
       if(!!timer)

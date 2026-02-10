@@ -1,18 +1,24 @@
 import { Result, ResultSet, Path } from "@/features/ResultList/types/results";
 import { getPathById, getNodeById, getEdgeById } from "@/features/ResultList/slices/resultsSlice";
 import { getAllSupportPathIDs } from "./utilities";
-import { PublicationSupport } from "@/features/Evidence/types/evidence";
+import { SummaryPayload, SummaryResult, SummaryPathObject, SummaryNodeObject, SummaryEdgeObject } from "../types/summarization";
 
 /**
  * Converts a Result and its context into the summary endpoint spec.
- * @param result The Result object
- * @param resultSet The full ResultSet containing all nodes, edges, and paths
- * @param diseaseId The disease curie string
- * @param diseaseName The disease name
- * @param diseaseDescription The disease description
- * @returns The summary payload object
+ * @param {Result} result The Result object
+ * @param {ResultSet} resultSet The full ResultSet containing all nodes, edges, and paths
+ * @param {string} diseaseId The disease curie string
+ * @param {string} diseaseName The disease name
+ * @param {string} diseaseDescription The disease description
+ * @returns {SummaryPayload} The summary payload object
  */
-export function resultToSummarySpec(resultSet: ResultSet, result: Result, diseaseId: string, diseaseName: string, diseaseDescription: string) {
+export function resultToSummarySpec(
+  resultSet: ResultSet,
+  result: Result,
+  diseaseId: string,
+  diseaseName: string,
+  diseaseDescription: string
+): SummaryPayload {
 
   // Get initial Path objects from result.paths
   const initialPaths: Path[] = result.paths
@@ -40,8 +46,8 @@ export function resultToSummarySpec(resultSet: ResultSet, result: Result, diseas
     }
   });
 
-  // Build the results array (single element)
-  const summaryResult = {
+  // Build the summary result object
+  const summaryResult: SummaryResult = {
     id: result.id,
     subject: result.subject,
     object: result.object,
@@ -50,7 +56,7 @@ export function resultToSummarySpec(resultSet: ResultSet, result: Result, diseas
   };
 
   // Build the paths object
-  const summaryPaths: Record<string, { subgraph: string[] }> = {};
+  const summaryPaths: SummaryPathObject = {};
   allPathIDs.forEach(pid => {
     const path = getPathById(resultSet, pid);
     if (path) {
@@ -59,7 +65,7 @@ export function resultToSummarySpec(resultSet: ResultSet, result: Result, diseas
   });
 
   // Build the nodes object
-  const summaryNodes: Record<string, { names: string[]; types: string[] }> = {};
+  const summaryNodes: SummaryNodeObject = {};
   nodeIds.forEach(nid => {
     const node = getNodeById(resultSet, nid);
     if (node) {
@@ -68,7 +74,8 @@ export function resultToSummarySpec(resultSet: ResultSet, result: Result, diseas
   });
 
   // Build the edges object
-  const summaryEdges: Record<string, { subject: string; predicate: string; object: string; support: (string | Path)[]; publications: {[key: string]: {id: string; support: PublicationSupport}[]} }> = {};
+  const summaryEdges: SummaryEdgeObject = {};
+
   edgeIds.forEach(eid => {
     const edge = getEdgeById(resultSet, eid);
     if (edge) {
@@ -78,6 +85,7 @@ export function resultToSummarySpec(resultSet: ResultSet, result: Result, diseas
         object: edge.object,
         support: edge.support,
         publications: edge.publications,
+        trials: edge.trials,
       };
     }
   });
