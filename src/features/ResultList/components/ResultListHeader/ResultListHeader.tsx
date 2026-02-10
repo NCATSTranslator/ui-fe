@@ -1,7 +1,7 @@
 import styles from './ResultListHeader.module.scss';
 import ReactPaginate from 'react-paginate';
 import SelectedFilterTag from '@/features/ResultFiltering/components/SelectedFilterTag/SelectedFilterTag';
-import Toggle from '@/features/Common/components/Toggle/Toggle';
+import Toggle from '@/features/Core/components/Toggle/Toggle';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import { Filter } from '@/features/ResultFiltering/types/filters';
