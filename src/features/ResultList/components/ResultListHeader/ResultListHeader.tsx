@@ -1,3 +1,6 @@
+import { FC } from 'react';
+import { useSelector } from 'react-redux';
+import { currentConfig }from "@/features/UserAuth/slices/userSlice";
 import styles from './ResultListHeader.module.scss';
 import ReactPaginate from 'react-paginate';
 import SelectedFilterTag from '@/features/ResultFiltering/components/SelectedFilterTag/SelectedFilterTag';
@@ -5,7 +8,6 @@ import Toggle from '@/features/Core/components/Toggle/Toggle';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { FC } from 'react';
 
 interface ResultListHeaderData {
   formattedResultsLength: number;
@@ -34,6 +36,9 @@ interface ResultListHeaderProps {
 
 const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
 
+  const config = useSelector(currentConfig);
+  const showNoveltyBoost = config?.show_novelty_boost;
+
   return(
     <div className={styles.resultsHeader}>
       <div className={styles.top}>
@@ -57,13 +62,16 @@ const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
           }
         </div>
         <div className={styles.controls}>
-          <Toggle
-            className={styles.noveltyToggle}
-            active={data.noveltyBoost}
-            setActive={data.onToggleNoveltyBoost}
-            labelOne="Default"
-            labelTwo="Novelty"
-          />
+          {
+            showNoveltyBoost &&
+            <Toggle
+              className={styles.noveltyToggle}
+              active={data.noveltyBoost}
+              setActive={data.onToggleNoveltyBoost}
+              labelOne="Default"
+              labelTwo="Novelty"
+            />
+          }
           <ReactPaginate
             breakLabel="..."
             nextLabel={<ChevRight/>}

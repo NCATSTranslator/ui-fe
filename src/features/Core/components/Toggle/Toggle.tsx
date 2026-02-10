@@ -1,4 +1,4 @@
-import { FC, useRef, useCallback } from "react";
+import { FC, useRef } from "react";
 import styles from './Toggle.module.scss';
 import { uniqueId } from "lodash";
 

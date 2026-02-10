@@ -70,6 +70,7 @@ export type Config = {
     endpoint: string;
   };
   social_providers: Record<string, SocialProvider>;
+  show_novelty_boost: boolean;
 }
 
 export type SocialProvider = {
