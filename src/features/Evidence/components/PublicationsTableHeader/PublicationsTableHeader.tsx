@@ -18,13 +18,13 @@ const PublicationsTableHeader: FC<{
       ].map(({ key, label, sortKey }) => (
         <th
           key={key}
-          className={`head ${styles[key]} ${
+          className={`head ${styles.head} ${styles[key]} ${
             sortKey ? (sortingState[sortKey as keyof SortingState] ? 'true' : 
               sortingState[sortKey as keyof SortingState] === null ? '' : 'false') : ''
           }`}
           onClick={sortKey ? () => onSort(sortKey) : undefined}
         >
-          <span className="head-span">
+          <span className={`head-span ${styles.headSpan}`}>
             {label}
             {sortKey && <ChevUp className='chev'/>}
           </span>

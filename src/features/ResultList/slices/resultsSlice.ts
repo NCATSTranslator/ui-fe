@@ -2,13 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ResultNode, ResultEdge, Path, ResultSet, Result } from "@/features/ResultList/types/results.d";
 import { PublicationObject, TrialObject } from "@/features/Evidence/types/evidence";
 import { cloneDeep } from "lodash";
+import { replaceTreatWithImpact } from "@/features/Common/utils/utilities";
 
 type ResultState = {
   [key: string]: ResultSet
 };
 
 const initialState: ResultState = {};
-const TREATS_REPLACEMENT = "impacts";
 
 const resultSetsSlice = createSlice({
   name: "resultSets",
@@ -43,7 +43,15 @@ export const getPathsByIds = (resultSet: ResultSet | undefined | null, pathIDs: 
 
   return pathIDs.map(pathID => getPathById(resultSet, pathID)).filter((path): path is Path => path !== undefined)
 }
-export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNode | undefined => (resultSet === null || !id) ? undefined : resultSet.data.nodes[id];
+export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNode | undefined => {
+  let node: ResultNode | undefined = (resultSet === null || !id) ? undefined : resultSet.data.nodes[id];
+  if(!node) {
+    console.warn(`Unable to find node with id: ${id} within result set.`);
+    return undefined;
+  }
+  return node;
+
+}
 export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
   let edge: ResultEdge | undefined = (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
   if(!edge) {
@@ -54,7 +62,7 @@ export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdg
   // Temporary fix to not display the "treats" predicate in the UI
   if(edge.predicate.includes("treat")) {
     let newEdge = cloneDeep(edge);
-    newEdge.predicate = TREATS_REPLACEMENT;
+    newEdge.predicate = replaceTreatWithImpact(newEdge.predicate);
     newEdge.predicate_url = "";
     return newEdge;
   }
@@ -88,7 +96,6 @@ export const getResultSetById = (id: string | null | undefined) => (state: {resu
     return null;
   }
   if(!state?.resultSets[id]) {
-    console.warn(`Unable to find result set with pk: ${id}.`);
     return null;
   }
   return state.resultSets[id];

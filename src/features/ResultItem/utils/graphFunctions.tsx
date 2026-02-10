@@ -1,11 +1,12 @@
 import { createRoot } from 'react-dom/client';
 import { Core, EventObject } from 'cytoscape';
 import { debounce } from 'lodash';
-import { capitalizeFirstLetter, hasSupport } from '@/features/Common/utils/utilities';
+import { capitalizeFirstLetter, hasSupport, replaceTreatWithImpact } from '@/features/Common/utils/utilities';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { Result, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import { GraphLayoutList, RenderableGraph, RenderableNode, RenderableEdge } from '@/features/ResultItem/types/graph.d';
 import { RefObject } from 'react';
+import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
 export const layoutList: GraphLayoutList = {
   klay: {
@@ -51,7 +52,7 @@ export const resultToCytoscape = (
     if (path) {
       supportStack.push(pathID);
       path.subgraph.forEach((elemID, i) => {
-        if (i % 2 === 0) nodeCollection.add(elemID);
+        if (isNodeIndex(i)) nodeCollection.add(elemID);
         else {
           edgeCollection.add(elemID);
           const edge = edgesArray[elemID];
@@ -381,13 +382,15 @@ export function convertResultEdgeToRenderable(
 ): RenderableEdge {
   const sourceLabel = nodes[e.subject]?.names[0] ?? "unknown node";
   const targetLabel = nodes[e.object]?.names[0] ?? "unknown node";
+  // Temporary fix to not display the "treats" predicate in the UI
+  const label = e.predicate.includes("treat") ? replaceTreatWithImpact(e.predicate) : e.predicate;
   return {
     id: e.id,
     source: e.subject,
     target: e.object,
     sourceLabel,
     targetLabel,
-    label: e.predicate,
+    label: label,
     inferred: Array.isArray(e.support) && e.support.length > 0
   };
 }

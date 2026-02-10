@@ -1,0 +1,59 @@
+@use '@/assets/styles/variables' as *;
+
+.tableHeader {
+  margin-bottom: 0;
+  padding: 0 $xs;
+}
+
+.tableRow {
+  display: grid;
+  gap: $dataCardGap;
+  align-items: center;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  &.projectCardRow {
+    grid-template-columns: $projectCardColumns;
+  }
+  &.queryCardRow {
+    grid-template-columns: $queryCardColumns;
+  }
+  > div {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: 1px;
+    color: $purpleOne;
+  }
+  .bookmarksColumn, .notesColumn {
+    svg path {
+      fill: $purpleOne;
+    }
+  }
+}
+
+.nameColumn {
+  font-weight: 600;
+}
+
+// .lastSeenColumn,
+// .dateAddedColumn {
+//   // text-align: center;
+// }
+
+// .bookmarksColumn,
+// .notesColumn {
+//   // text-align: center;
+// }
+
+// .statusColumn {
+//   // text-align: center;
+// }
+
+// .actionsColumn {
+//   // text-align: center;
+// }
+
+.indeterminate {
+  opacity: 0.7;
+}

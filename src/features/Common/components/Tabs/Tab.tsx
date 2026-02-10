@@ -1,10 +1,11 @@
-import { ReactNode, KeyboardEvent, forwardRef, useImperativeHandle, useRef, RefObject } from 'react';
+import { ReactNode, KeyboardEvent, forwardRef, useImperativeHandle, useRef, RefObject, MouseEvent } from 'react';
 import styles from './Tab.module.scss';
+import { joinClasses } from '@/features/Common/utils/utilities';
 
 export interface TabProps {
   heading: string;
   headingOverride?: ReactNode;
-  onClick?: (heading: string) => void;
+  onClick?: (heading: string, event?: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => void;
   activeTabHeading?: string;
   tooltipIcon?: ReactNode;
   dataTooltipId?: string;
@@ -30,14 +31,14 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(({
 
   const isActive = activeTabHeading === heading;
   
-  const handleClick = () => onClick(heading);
+  const handleClick = (event?: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => onClick(heading, event);
   
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     switch (e.key) {
       case 'Enter':
       case ' ':
         e.preventDefault();
-        onClick(heading);
+        onClick(heading, e);
         break;
       case 'ArrowRight':
       case 'ArrowDown':
@@ -50,7 +51,7 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(({
     }
   };
 
-  const classes = `${className} ${styles.tabListItem} ${isActive ? styles.active : ''}`;
+  const classes = joinClasses(className, styles.tabListItem, isActive && styles.active);
 
   // Set ref in parent component for focus management
   const handleRef = (element: HTMLDivElement | null) => {

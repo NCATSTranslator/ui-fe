@@ -1,19 +1,20 @@
-import { FC } from 'react';
-import Button from '@/features/Common/components/Button/Button';
+import { FC, useMemo } from 'react';
+import Button from '@/features/Core/components/Button/Button';
 import ResultsSummaryButton from '@/features/ResultList/components/ResultsSummaryButton/ResultsSummaryButton';
 import { Result } from '@/features/ResultList/types/results';
 import { generateEntityLink } from '@/features/Common/utils/utilities';
-import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
+import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import styles from './QueryResultsHeader.module.scss';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
-
-const generatePathfinderQuestionText = (labelOne: string, labelTwo: string, constraintText?: string) => {
-  if(!!constraintText) {
-    return `What paths begin with ${labelOne} and end with ${labelTwo} and include a ${constraintText}?`;
-  } else {
-    return `What paths begin with ${labelOne} and end with ${labelTwo}?`;
-  }
-}
+import { generatePathfinderQuestionText } from '@/features/Query/utils/queryTypes';
+import { useUser } from '@/features/UserAuth/utils/userApi';
+import { useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
+import { useSelector } from 'react-redux';
+import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
+import { generateQueryTitle } from '@/features/Projects/utils/queryTitleUtils';
+import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 
 const generatePathfinderSubheading = (idOne: string, labelOne: string, idTwo: string, labelTwo: string, constraintText?: string, searchedTermClassName?: string) => {
   const linkOne = generateEntityLink(idOne, `${styles.searchedTerm} ${searchedTermClassName || ""}`, () => labelOne, true);
@@ -80,6 +81,22 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
   isPathfinder = false,
   constraintText
 }) => {
+  const config = useSelector(currentConfig);
+  const [user, userLoading] = useUser();
+  const { isLoading: projectsLoading, error: projectsError } = useUserProjects();
+  const { data: queries = [], isLoading: queriesLoading, error: queriesError } = useUserQueries();
+  const query = useMemo(() => queries.find(q => q.data.qid === pk), [queries, pk]);
+
+  const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
+
+  const handleAddToProject = () => {
+    if(!query) return;
+
+    setAddToProjectMode(query);
+    if (activePanelId !== 'projects')
+      togglePanel('projects');
+  };
+  
   const subHeading = isPathfinder 
   ? generatePathfinderSubheading(
       entityId || '', 
@@ -90,21 +107,55 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
       searchedTermClassName
     )
   : generateSmartQuerySubheading(questionText, entityId || '', entityLabel || '', searchedTermClassName);
+  const showAddToProjectButton = 
+    !!user &&
+    !userLoading &&
+    !projectsLoading &&
+    !projectsError &&
+    !queriesLoading &&
+    !queriesError &&
+    config?.include_projects;
+
+  const queryTitle = query ? generateQueryTitle(query) : '';  
+  useDynamicPageTitle(queryTitle);
 
   return(
     <div className={`${styles.resultsHeader} ${className}`}>
+      {/* <EditQueryModal
+        isOpen={isEditQueryModalOpen}
+        handleClose={() => setIsEditQueryModalOpen(false)}
+        loading={projectsLoading}
+        mode="edit"
+        projects={projects}
+        queries={queries}
+        currentEditingQueryItem={currentEditingQueryItem}
+      /> */}
       <div className={styles.showingResultsContainer}>
-        <h2 className={styles.subHeading}>
+        <h5 className={styles.subHeading}>
           {subHeading}
-        </h2>
+        </h5>
         <div className={styles.buttons}>
+          {
+            showAddToProjectButton && (
+              <Button 
+                variant="secondary"
+                handleClick={handleAddToProject}
+                className={`${styles.addButton}`}
+                small
+                iconLeft={<FolderIcon/>}
+              >
+              Add to Project
+            </Button>
+            )
+          }
           <Button 
-            isSecondary
+            variant="secondary"
             handleClick={onShare}
             className={`${styles.shareButton} ${shareButtonClassName}`}
-            smallFont
+            small
+            iconLeft={<ShareIcon/>}
           >
-            <ShareIcon/>Share Result Set
+            Share Result Set
           </Button>
           {!loading && results && onResultMatchClick && pk && (
             <ResultsSummaryButton

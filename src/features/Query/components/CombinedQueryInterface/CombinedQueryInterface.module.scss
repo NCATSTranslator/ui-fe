@@ -1,21 +1,87 @@
-   @use "@/assets/styles/variables" as *;
+@use "@/assets/styles/variables" as *;
 
 .combinedQueryInterface {
-  max-width: $mediumLarge;
+  max-width: $desktop;
   margin: 0 auto;
   padding: 0 $m;
-  
+  position: relative;
+  .addToProject {
+    position: absolute;
+    top: 10px;
+    right: calc($m + $s);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: $xxs;
+    .addingToProject {
+      opacity: 0.5;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: $xxs;
+    }
+    .label, .button, .projectName {
+      font-size: $bodyTwoSize;
+      font-weight: 800;
+    }
+    .projectName {
+      color: $purpleOne;
+      max-width: 200px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      display: block;
+    }
+    .label {
+      color: $black;
+    }
+    .button {
+      background-color: transparent;
+      color: $purpleOne;
+      position: relative;
+      padding: 0;
+      .underline {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: $purpleOne;
+        opacity: 0;
+        transition: $defaultAnim;
+      }
+      svg {
+        height: $m;
+        width: $m;
+        path {
+          fill: $purpleOne;
+        }
+      }
+      &:hover {
+        background-color: transparent;
+        text-decoration: underline;
+        .underline {
+          opacity: 1;
+        }
+      }
+    }
+  }
   .tabsContainer {
     margin: 0 auto $xxl;
     border-radius: $largeBorderRadius;
     border: 1px solid $lightPurpleTwo;
     background-color: $palePurple;
   }
-  
+  .tabListWrapper {
+    padding: 0;
+    & > div {
+      width: auto;
+    }
+  }
   .queryTab,
   .pathfinderTab {
     overflow: visible;
-    padding: $m;
+    padding: $xs $m $m;
   }
   
   .tabList {
@@ -24,8 +90,42 @@
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     padding: 0 12px;
+    width: auto;
     & ~ div {
       overflow-y: visible;
+    }
+  }
+  .tooltipText {
+    margin: 0;
+  }
+  &.projectPage {
+    position: relative;
+    z-index: 10;
+    .queryTab, .pathfinderTab {
+      padding: 0;
+    }
+    .tabsContainer {
+      border: none;
+      margin: 0;
+      padding: $s 0 $l;
+    }
+    .tabListWrapper, .queryBarContainer {
+      margin: 0;
+      border: none;
+    }
+    .tabList {
+      background-color: transparent;
+    }
+    .examples, p {
+      display: none;
+    }
+    .betaTag {
+      background-color: $lightPurpleTwo;
+      color: $darkGray;
+    }
+    .addToProject {
+      top: $m;
+      right: $m;
     }
   }
 }

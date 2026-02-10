@@ -1,67 +1,76 @@
 import { useEffect, useState, FC } from "react";
 import styles from "./ShareModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
-import Button from "@/features/Common/components/Button/Button";
-import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import Button from "@/features/Core/components/Button/Button";
+import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/Common/utils/web";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
+import { getDecodedParams } from "@/features/Common/utils/web";
+import { currentConfig } from "@/features/UserAuth/slices/userSlice";
+import { useSelector } from "react-redux";
 
 interface ShareModalProps {
   isOpen: boolean;
-  onClose: () => void; 
+  onClose: () => void;
   qid: string;
-  label?: string | null; 
-  nodeID?: string | null; 
-  typeID?: string | null; 
+  label?: string | null;
+  nodeID?: string | null;
+  typeID?: string | null;
   shareResultID?: string;
 }
 
 const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, nodeID = null, typeID = null, shareResultID = null}) => {
-  const sharedQueryLabel = (label) ? label : getDataFromQueryVar("l");
-  const sharedQueryType = (typeID) ? typeID : getDataFromQueryVar("t");
-  const sharedQueryItemID = (nodeID) ? nodeID : getDataFromQueryVar("i");
-  const initSharedQueryResultID = (shareResultID != null) ? shareResultID : getDataFromQueryVar("r");
+  const config = useSelector(currentConfig);
+  const decodedParams = getDecodedParams();
+  const sharedQueryLabel = (label) ? label : getDataFromQueryVar("l", decodedParams);
+  const sharedQueryType = (typeID) ? typeID : getDataFromQueryVar("t", decodedParams);
+  const sharedQueryItemID = (nodeID) ? nodeID : getDataFromQueryVar("i", decodedParams);
+  const initSharedQueryResultID = (shareResultID != null) ? shareResultID : getDataFromQueryVar("r", decodedParams);
   const [sharedQueryResultID, setSharedQueryResultID] = useState(initSharedQueryResultID);
 
   useEffect(() => {
     setSharedQueryResultID(shareResultID)
   }, [shareResultID]);
 
-  const queryLabel = (sharedQueryLabel) 
-    ? sharedQueryLabel 
+  const queryLabel = (sharedQueryLabel)
+    ? sharedQueryLabel
     : '';
-  const queryItemID = (sharedQueryItemID) 
-    ? sharedQueryItemID 
+  const queryItemID = (sharedQueryItemID)
+    ? sharedQueryItemID
     : '';
-  const queryTypeID = (sharedQueryType) 
-    ? sharedQueryType 
+  const queryTypeID = (sharedQueryType)
+    ? sharedQueryType
     : '';
   const queryResultID = sharedQueryResultID || '0';
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
   var modalIsOpen = startOpen;
   const isPathfinder = sharedQueryType === 'p';
-  let qidPath = null;  
+  let qidPath = null;
   if(isPathfinder) {
     const itemOne: AutocompleteItem = {
-      id: getDataFromQueryVar('ione') || "",
-      label: getDataFromQueryVar('lone') || ""
+      id: getDataFromQueryVar('ione', decodedParams) || "",
+      label: getDataFromQueryVar('lone', decodedParams) || "",
+      isExact: false,
+      score: Infinity
     }
     const itemTwo = {
-      id: getDataFromQueryVar('itwo') || "",
-      label: getDataFromQueryVar('ltwo') || ""
+      id: getDataFromQueryVar('itwo', decodedParams) || "",
+      label: getDataFromQueryVar('ltwo', decodedParams) || "",
+      isExact: false,
+      score: Infinity
     }
-    const constraint = getDataFromQueryVar('c') || "";
-    qidPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid);
+    const constraint = getDataFromQueryVar('c', decodedParams) || "";
+    qidPath = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid, config?.include_hashed_parameters);
   } else {
-    qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid);
+    qidPath = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid, config?.include_hashed_parameters);
   }
   const qidURL = encodeURI(`${window.location.origin}/${qidPath}`);
 
   return (
-    <Modal 
-      isOpen={modalIsOpen} 
-      onClose={onClose} 
+    <Modal
+      isOpen={modalIsOpen}
+      onClose={onClose}
       className={styles.feedbackModal}
       containerClass={styles.feedbackContainer}
       >

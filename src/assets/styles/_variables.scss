@@ -4,12 +4,14 @@ $red: #CC2E46;
 $lightRed: #F5D5DA;
 
 $yellow: #EBA400;
+$yellowHover: #d59501;
 $lightYellow: #FFF2C2;
 
 $green: #669F38;
 
 $blueOne: #3562AC;
 $lightBlueOne: #84A3DC;
+$blueTwo: #528FFF;
 
 $purpleOne: #662E6B;
 $lightPurpleOne: #C2ABC4;
@@ -46,6 +48,9 @@ $edgeConnectorSelected: #5D4E778C;
 $edgeConnectorSelectedHover: #3F2E5E59;
 
 $tooltipBackground: rgba(32, 33, 36, .8);
+$droppableOverlayBackground: linear-gradient(0deg, rgba(139, 171, 230, 0.2), rgba(139, 171, 230, 0.2)),
+linear-gradient(0deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6));
+$droppableOverlayBackgroundError: rgba(242, 244, 247, .6);
 
 $grayPathObject: $lightGray;
 $grayPathObjectHover: #CECCDA;
@@ -86,14 +91,21 @@ $m: 24px;
 $l: 32px;
 $xl: 48px;
 $xxl: 64px;
+$interiorContainerWidth: 920px;
 $maxwidth: 1250px;
+$panelWidth: 292px;
+
+// Grids //
+$projectCardColumns: 1fr $xl $xl 85px 110px 14px;
+$dataCardGap: $l;
+$queryCardColumns: 1fr $xl $xl 120px 110px 14px;
 
 // Screens //
 $small: 425px;
 $medium: 768px;
 $mediumLarge: 928px;
 $large: 1024px;
-$desktop: 1250px;
+$desktop: 1200px;
 
 $defaultBorderRadius: 4px;
 $largeBorderRadius: 8px;

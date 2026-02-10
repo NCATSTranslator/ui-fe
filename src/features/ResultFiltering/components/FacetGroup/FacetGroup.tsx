@@ -1,13 +1,10 @@
-import { FC, useState, useEffect, useMemo, ReactNode } from "react";
+import { FC, useState, useMemo, ReactNode } from "react";
 import { Filter, GroupedFilters, FilterFamily } from "@/features/ResultFiltering/types/filters";
 import styles from './FacetGroup.module.scss';
-import AnimateHeight, { Height } from "react-animate-height";
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { pivotSort } from '@/features/Common/utils/sortingFunctions';
-import FacetHeading from "@/features/ResultFiltering/components/FacetHeading/FacetHeading";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import FacetTag from "@/features/ResultFiltering/components/FacetTag/FacetTag";
-import TextInput from "@/features/Common/components/TextInput/TextInput";
+import TextInput from "@/features/Core/components/TextInput/TextInput";
 import { debounce } from "lodash";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 
@@ -53,48 +50,16 @@ const getTdlCaption = (): ReactNode => {
   )
 }
 
-const getTagHeadingMarkup = (tagFamily: string, activeFilters: Filter[]): ReactNode | null => {
-  let headingToReturn;
-  switch(tagFamily) {
-    case 'cc':
-      headingToReturn =
-        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Development Stage">
-          <p className={styles.tooltipParagraph}>Drug is a substance intended for use in the diagnosis, cure, mitigation, treatment, or the prevention of a disease.</p>
-          <p className={styles.tooltipParagraph}>Phase 1-3 Drugs are chemicals that are part of a clinical trial and do not yet have FDA approval.</p>
-          <p className={styles.tooltipParagraph}>Other includes all other chemicals.</p>
-        </FacetHeading>;
-      break;
-    case 'pc':
-      headingToReturn =
-        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Objects within Paths">
-          <span className={styles.fdaSpan}>Click <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}> here <ExternalLink/></a> to learn more about the Biolink Model.</span>
-        </FacetHeading>;
-      break;
-    case 'role':
-      headingToReturn =
-        <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Chemical Classification">
-          <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more <ExternalLink/></a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
-        </FacetHeading>;
-      break;
-    case 'ara':
-      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Reasoning Agent" />;
-      break;
-    case 'di':
-      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Clinical Trial Indications" />;
-      break;
-    case 'pt':
-      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Path Length" />;
-      break;
-    case 'otc':
-      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Availability" />;
-      break;
-    case 'tdl':
-      headingToReturn = <FacetHeading tagFamily={tagFamily} activeFilters={activeFilters} title="Target Development Level" />
-      break;
-    default:
-      headingToReturn = null;
-  }
-  return headingToReturn;
+const getBookmarkNotesCaption = (): ReactNode => {
+  return(
+    <p className={styles.caption}>Include or exclude results based on whether they have bookmarks or notes added to them</p>
+  )
+}
+
+const getPathEvidenceCaption = (): ReactNode => {
+  return(
+    <p className={styles.caption}>Include or exclude paths from results based on the types of evidence supporting the path</p>
+  )
 }
 
 const getTagCaptionMarkup = (tagFamily: string): ReactNode | null => {
@@ -123,6 +88,12 @@ const getTagCaptionMarkup = (tagFamily: string): ReactNode | null => {
       break;
     case 'tdl':
       captionToReturn = getTdlCaption();
+      break;
+    case 'sv':
+      captionToReturn = getBookmarkNotesCaption();
+      break;
+    case 'ev':
+      captionToReturn = getPathEvidenceCaption();
       break;
     default:
       captionToReturn = null;
@@ -191,74 +162,50 @@ type FacetGroupProps = {
 
 const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCompare, groupedFilters, onFilter }) => {
 
-  const familyHeadingMarkup = getTagHeadingMarkup(filterFamily, activeFilters);
   const familyCaptionMarkup = getTagCaptionMarkup(filterFamily);
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [height, setHeight] = useState<Height>(0);
   const [chemicalCategorySearchTerm, setChemicalCategorySearchTerm] = useState("");
 
   // Ensures that selected facets come first
   let sortedFacets = useMemo(() => getSortedFacets(filterFamily, activeFilters, facetCompare, groupedFilters, chemicalCategorySearchTerm), [filterFamily, activeFilters, facetCompare, groupedFilters, chemicalCategorySearchTerm]);
 
-  useEffect(() => {
-    if(isExpanded === false)
-      setHeight(0);
-    else
-      setHeight('auto');
-  }, [isExpanded])
-
   const handleChemicalCategorySearch = useMemo(() =>debounce((value: string) => { setChemicalCategorySearchTerm(value) }, 500),[]);
 
   return (
-    (groupedFilters[filterFamily] && Object.keys(groupedFilters[filterFamily]!).length > 0 && familyHeadingMarkup !== null )
-      ?
-        <div className={styles.facetGroup}>
-            <button
-              className={`${styles.facetButton} ${isExpanded ? styles.isExpanded : ''}`}
-              onClick={()=>setIsExpanded(prev=>!prev)}
-            >
-              {
-                familyHeadingMarkup
-              }
-            </button>
-          <AnimateHeight
-            className={`${styles.facetPanel}`}
-            duration={500}
-            height={height}
-          >
-            {
-              familyCaptionMarkup
+    <div className={styles.facetGroup}>
+      {
+        familyCaptionMarkup
+      }
+      {
+        filterFamily === "role" &&
+        <TextInput
+          iconLeft={<SearchIcon/>}
+          placeholder="Search"
+          handleChange={(val)=> handleChemicalCategorySearch(val)}
+          className={styles.roleFilter}
+        />
+      }
+      {
+        <div className={`${styles.section} ${Object.keys(sortedFacets).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
+          {
+            sortedFacets.length === 0 
+            ? 
+              <p className={styles.noResults}>No matches found for <span className={styles.searchTerm}>"{chemicalCategorySearchTerm}"</span></p>
+            :
+              sortedFacets.map((tag: [string, Filter]) => {
+                return(
+                  <FacetTag
+                    key={tag[1].id}
+                    activeFilters={activeFilters}
+                    family={filterFamily}
+                    onFilter={onFilter}
+                    filterObject={tag}
+                  />
+                )
+              })
             }
-            {
-              filterFamily === "role" &&
-              <TextInput
-                iconLeft={<SearchIcon/>}
-                placeholder="Search"
-                handleChange={(val)=> handleChemicalCategorySearch(val)}
-                className={styles.roleFilter}
-              />
-            }
-            {
-              <div className={`${styles.section} ${Object.keys(sortedFacets).length > 5 ? styles['role'] + ' scrollable' : ''}`}>
-                {
-                  sortedFacets.map((tag: [string, Filter]) => {
-                    return(
-                      <FacetTag
-                        key={tag[1].id}
-                        activeFilters={activeFilters}
-                        family={filterFamily}
-                        onFilter={onFilter}
-                        filterObject={tag}
-                      />
-                    )
-                  })
-                }
-              </div>
-            }
-          </AnimateHeight>
         </div>
-      :
-        <></>
+      }
+    </div>
   );
 }
 

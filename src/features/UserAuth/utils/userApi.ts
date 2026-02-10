@@ -1,53 +1,24 @@
 import { useState, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
-import { get, post, put, remove } from '@/features/Common/utils/web';
+import { get, post, put, remove, fetchWithErrorHandling } from '@/features/Common/utils/web';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
-import { PreferencesContainer, PrefObject, SessionStatus, User } from '@/features/UserAuth/types/user';
+import { Preferences, PreferencesContainer, PrefObject, SessionStatus, User, Config, isConfig } from '@/features/UserAuth/types/user.d';
 import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
-import { handleFetchErrors } from '@/features/Common/utils/utilities';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { getEdgeById, getNodeById, getPathById, getPubById } from '@/features/ResultList/slices/resultsSlice';
 import { PublicationObject } from '@/features/Evidence/types/evidence';
+import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
+import { formatPrefs } from '@/features/UserAuth/utils/formatPrefs';
+import { getFullPathname } from '@/features/Common/utils/utilities';
+import { Location as RouterLocation } from 'react-router-dom';
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';
 // API path for user-related endpoints.
 const userApiPath = `${API_PATH_PREFIX}/users/me`;
-
-// Default user preferences for application settings such as result sorting and visibility options.
-export const defaultPrefs: PreferencesContainer = {
-  result_sort: {
-    pref_value: "scoreHighLow",
-    possible_values:["scoreHighLow", "scoreLowHigh", "nameLowHigh", "nameHighLow", "evidenceLowHigh", "evidenceHighLow"]
-  },
-  result_per_screen: {
-    pref_value: 10,
-    possible_values:[5, 10, 20]
-  },
-  graph_visibility: {
-    pref_value: "never",
-    possible_values:["always", "never", "sometimes"]
-  },
-  graph_layout: {
-    pref_value: "vertical",
-    possible_values:["vertical", "horizontal", "concentric"]
-  },
-  path_show_count: {
-    pref_value: 10,
-    possible_values:[5, 10, 20, -1]
-  },
-  evidence_sort: {
-    pref_value: "dateHighLow",
-    possible_values:["titleLowHigh", "titleHighLow", "sourceLowHigh", "sourceHighLow", "dateLowHigh", "dateHighLow"]
-  },
-  evidence_per_screen: {
-    pref_value: 5,
-    possible_values:[5, 10, 20, 50]
-  },
-}
 
 /**
  * Converts preference keys to user-friendly strings for display purposes.
@@ -59,7 +30,7 @@ export const prefKeyToString = (prefKey: string): string => {
   switch (prefKey) {
     case "result_sort":
       return "Sort results by";
-    case "result_per_screen":
+    case "results_per_page":
       return "Results to show per page";
     case "graph_visibility":
       return "Graph visibility";
@@ -69,15 +40,13 @@ export const prefKeyToString = (prefKey: string): string => {
       return "Number of paths to show";
     case "evidence_sort":
       return "Sort evidence by";
-    case "evidence_per_screen":
+    case "evidence_per_page":
       return "Publications to show per page";
     default: 
       return `No label provided for ${prefKey}`;
   }
 }
 
-// A constant representing an empty editor state, used to initialize editors with no content.
-export const emptyEditor = '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
 
 interface QueryObject {
   type: QueryType | null; 
@@ -107,7 +76,7 @@ export interface Save {
 }
 
 export interface SaveGroup {
-  saves: Set<Save>;
+  saves: Map<string, Save>;
   query: QueryObject;
 }
 
@@ -146,11 +115,11 @@ const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
 
     if(!Object.prototype.hasOwnProperty.call(newSaves, save.ars_pkey)) {
       newSaves[save.ars_pkey] = {
-        saves: new Set([save]),
+        saves: new Map([[save.object_ref, save]]),
         query: save.data.query
       };
     } else {
-      newSaves[save.ars_pkey].saves.add(save);
+      newSaves[save.ars_pkey].saves.set(save.object_ref, save);
     }
   }
   // return only saves from after Jan 1, 2024
@@ -302,13 +271,13 @@ export const getUserSave = async (
 /**
  * Updates the current user's preferences.
  * 
- * @param {PreferencesContainer} preferences - The new preferences to be updated.
+ * @param {Preferences} preferences - The new preferences to be updated.
  * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - Custom handler for HTTP errors.
  * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - Custom handler for fetch errors.
  * @returns {Promise<boolean>} Indicates success or failure of the update operation.
  */
 export const updateUserPreferences = async (
-    preferences: PreferencesContainer,
+    preferences: Preferences,
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler, 
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
   ) => {
@@ -347,7 +316,7 @@ export const updateUserSave = async (
     httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
   ) => {
-    saveObj.id = saveId;
+    saveObj.id = parseInt(saveId);
     return putUserData(`${userApiPath}/saves/${saveId}`, saveObj, httpErrorHandler, fetchErrorHandler);
 }
 
@@ -498,10 +467,17 @@ const deleteUserData = async (
     httpErrorHandler: ErrorHandler, 
     fetchErrorHandler: ErrorHandler
   ): Promise<boolean> => {
-    const response = await fetchUserData<Promise<boolean>>(async () => await remove(url), httpErrorHandler, fetchErrorHandler);
+    const response = await fetchUserData<boolean>(
+      async () => await remove(url), 
+      httpErrorHandler, 
+      fetchErrorHandler,
+      async (resp: Response): Promise<boolean> => {
+        return resp.ok;
+      }
+    );
 
     if(response === undefined || response === null) 
-      throw new Error('Failed to put user data.');
+      throw new Error('Failed to delete user data.');
   
     return response;
 }
@@ -646,42 +622,63 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
 
   useEffect(() => {
     const fetchPrefs = async (hasUser: boolean) => {
-      let prefs: PreferencesContainer | undefined;
+      let formattedPrefs: Preferences | undefined;
       if(!hasUser) {
-        prefs = defaultPrefs;
+        formattedPrefs = defaultPrefs;
         console.warn("no user available, setting to default prefs.");
       } else {
-        prefs = await getUserPreferences(() => {
+        const prefs = await getUserPreferences(() => {
           console.warn("no prefs found for this user, setting to default prefs.");
         });
         console.log("initial fetch of user prefs: ", prefs);
         if(prefs === undefined) {
-          prefs = defaultPrefs;
+          formattedPrefs = defaultPrefs;
+        } else {
+          formattedPrefs = formatPrefs(prefs.preferences);
         }
       }
-      if(isPreferencesContainer(prefs?.preferences)) 
-        dispatch(setCurrentPrefs(prefs.preferences));
+      if(!!formattedPrefs) 
+        dispatch(setCurrentPrefs(formattedPrefs));
     };
 
     const fetchConfig = async () => {
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      };
-      let config = await fetch(`${API_PATH_PREFIX}/config`, requestOptions)
-        .then(response => handleFetchErrors(response))
-        .then(response => response.json());
+      try {
+        let config = await fetchWithErrorHandling<Config>(
+          () => fetch(`${API_PATH_PREFIX}/config`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          }),
+          (error: Error) => console.warn("Failed to fetch config:", error.message),
+          (error: Error) => console.warn("Fetch error while getting config:", error.message),
+          isConfig
+        );
 
-      if(config?.gaID) {
-        setGaID(config.gaID);
-      }
-      if(config?.gtmID) {
-        setGtmID(config.gtmID);
-      }
-      config.buildInfo = import.meta.env.VITE_BUILD_INFO;
+        if(config?.gaID)
+          setGaID(config.gaID);
 
-      console.log("setting config", config);
-      dispatch(setCurrentConfig(config));
+        const configWithBuildInfo = {
+          ...config,
+          buildInfo: import.meta.env.VITE_BUILD_INFO
+        };
+
+        console.log("setting config", configWithBuildInfo);
+        dispatch(setCurrentConfig(configWithBuildInfo as unknown as Config));
+      } catch {
+        console.warn("Config fetch failed, using default config");
+        const defaultConfig: Config = {
+          cached_queries: [],
+          gaID: '',
+          include_hashed_parameters: false,
+          include_pathfinder: false,
+          include_projects: false,
+          include_query_status_polling: false,
+          include_summarization: false,
+          name_resolver: {endpoint: ''},
+          social_providers: {},
+          show_novelty_boost: false,
+        };
+        dispatch(setCurrentConfig(defaultConfig));
+      }
     };
 
     if(typeof userFound === 'boolean') {
@@ -838,24 +835,24 @@ export const mergeResultSets = (resultSetOne: ResultSet, resultSetTwo: ResultSet
 }
 
 /**
- * Type guard to check if an object is a PreferencesContainer.
+ * Type guard to check if an object is a Preferences.
  *
  * @param obj - The object to check.
- * @returns {boolean} True if the object is a PreferencesContainer, otherwise false.
+ * @returns {boolean} True if the object is a Preferences, otherwise false.
  */
-export const isPreferencesContainer = (obj: unknown): obj is PreferencesContainer => {
+export const isPreferences = (obj: unknown): obj is Preferences => {
   let isPrefContainer;
   if (typeof obj !== 'object' || obj === null) {
     isPrefContainer = false;
   } else {
-    const requiredKeys: Array<keyof PreferencesContainer> = [
+    const requiredKeys: Array<keyof Preferences> = [
       'result_sort',
-      'result_per_screen',
+      'results_per_page',
       'graph_visibility',
       'graph_layout',
       'path_show_count',
       'evidence_sort',
-      'evidence_per_screen',
+      'evidence_per_page',
     ];
 
     isPrefContainer = requiredKeys.every(key => key in obj && isPrefObject((obj as unknown as Record<string, unknown>)[key])) && Object.values(obj).every(isPrefObject);
@@ -885,3 +882,16 @@ const isPrefObject = (obj: unknown): obj is PrefObject => {
 
   return isAPrefObject;
 };
+
+/**
+ * Generates a formatted login URL with the current pathname encoded.
+ *
+ * @param {RouterLocation | Location} location - Optional location object from React Router or browser. If not provided, uses window.location.
+ * @returns {string} The formatted login URL.
+ */
+export const getFormattedLoginURL = (location?: RouterLocation | Location): string => {
+  const currentLocation = location || window.location;
+  const pathname = getFullPathname(currentLocation as Location);
+  let url = `/login?path=${encodeURIComponent(pathname)}`;
+  return url;
+}

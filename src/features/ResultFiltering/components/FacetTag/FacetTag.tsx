@@ -1,12 +1,14 @@
 import styles from './FacetTag.module.scss';
 import { FC } from "react";
 import { Filter } from "@/features/ResultFiltering/types/filters";
-import Checkbox from "@/features/Common/components/Checkbox/Checkbox";
-import { formatBiolinkEntity } from "@/features/Common/utils/utilities";
+import FacetCheckbox from "@/features/ResultFiltering/components/FacetCheckbox/FacetCheckbox";
+import { formatBiolinkEntity, joinClasses } from "@/features/Common/utils/utilities";
 import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { cloneDeep } from 'lodash';
+import { getTagType } from '@/features/ResultFiltering/utils/filterFunctions';
+import { CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 
 interface FacetTagProps {
   activeFilters: Filter[];
@@ -67,10 +69,19 @@ const FacetTag: FC<FacetTagProps> = ({
   let tagName: string = generateTagName(isEntitySearch, filter, family);
   let positiveChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, false, filter);
   let negativeChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, true, filter);
+  const type = getTagType(tagKey);
+  const shouldShowCount = !isEntitySearch && type !== CONSTANTS.PATH;
+
+  const classNames = joinClasses(
+    styles.facetContainer,
+    positiveChecked ? styles.containerPositiveChecked : "",
+    negativeChecked ? styles.containerNegativeChecked : "",
+    family === 'role' ? styles.roleFacet : ""
+  );
 
   return (
-    <div className={`facet-container ${styles.facetContainer} ${positiveChecked ? styles.containerPositiveChecked : ""} ${negativeChecked ? styles.containerNegativeChecked : ""}`} key={tagKey} data-facet-name={tagName}>
-      <Checkbox
+    <div className={classNames} key={tagKey} data-facet-name={tagName}>
+      <FacetCheckbox
         handleClick={
           isEntitySearch && !!handleInteractExistingEntity
           ? () => handleInteractExistingEntity(filter, positiveChecked, true)
@@ -87,7 +98,7 @@ const FacetTag: FC<FacetTagProps> = ({
           {tagName}
         </span>
         {
-          !isEntitySearch &&
+          shouldShowCount &&
           <span className={styles.facetCount}>
             {(filter.count) ? filter.count : 0}
             {
@@ -98,8 +109,8 @@ const FacetTag: FC<FacetTagProps> = ({
             }
           </span>
         }
-      </Checkbox>
-      <Checkbox
+      </FacetCheckbox>
+      <FacetCheckbox
         handleClick={
           isEntitySearch && !!handleInteractExistingEntity
           ? () => handleInteractExistingEntity(filter, negativeChecked, true)
@@ -111,7 +122,7 @@ const FacetTag: FC<FacetTagProps> = ({
         icon={<Exclude/>}
         labelLeft
         title="Exclude"
-      ></Checkbox>
+      ></FacetCheckbox>
     </div>
   )
 }

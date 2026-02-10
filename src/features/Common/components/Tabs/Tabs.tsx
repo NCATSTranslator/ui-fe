@@ -1,15 +1,21 @@
 import { useState, useEffect, FC, ReactElement, Children, isValidElement,
-  useMemo, useCallback, useRef, KeyboardEvent } from "react";
+  useMemo, useCallback, useRef } from "react";
 import Tab, { TabProps } from "./Tab";
 import { Fade } from 'react-awesome-reveal';
 import styles from './Tabs.module.scss';
+import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
+import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface TabsProps {
   children: (ReactElement<TabProps> | null)[];
   className?: string;
+  fadeClassName?: string;
   tabListClassName?: string;
+  tabListWrapperClassName?: string;
+  tabClassName?: string;
   isOpen: boolean;
   handleTabSelection?: (heading: string) => void;
+  handleOutsideTabListClick?: () => void;
   defaultActiveTab?: string;
   controlled?: boolean;
   activeTab?: string;
@@ -18,9 +24,13 @@ interface TabsProps {
 const Tabs: FC<TabsProps> = ({ 
   children, 
   className, 
-  tabListClassName,
+  fadeClassName = "",
+  tabListClassName = "",
+  tabListWrapperClassName = "",
+  tabClassName = "",
   isOpen, 
   handleTabSelection = () => {}, 
+  handleOutsideTabListClick = () => {},
   defaultActiveTab,
   controlled = false,
   activeTab: controlledActiveTab
@@ -73,48 +83,6 @@ const Tabs: FC<TabsProps> = ({
     handleTabSelection(heading);
   }, [controlled, handleTabSelection]);
 
-  // Keyboard navigation handler
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
-    if (!activeTabHeading) return;
-
-    const currentIndex = tabHeadings.indexOf(activeTabHeading);
-    if (currentIndex === -1) return;
-
-    let nextIndex: number;
-
-    switch (e.key) {
-      case 'ArrowRight':
-        e.preventDefault();
-        nextIndex = (currentIndex + 1) % tabHeadings.length;
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        nextIndex = (currentIndex - 1 + tabHeadings.length) % tabHeadings.length;
-        break;
-      case 'Home':
-        e.preventDefault();
-        nextIndex = 0;
-        break;
-      case 'End':
-        e.preventDefault();
-        nextIndex = tabHeadings.length - 1;
-        break;
-      default:
-        return;
-    }
-
-    const nextHeading = tabHeadings[nextIndex];
-    handleTabClick(nextHeading);
-    
-    // Focus the next tab after a brief delay to ensure state update
-    setTimeout(() => {
-      const nextTabRef = tabRefs.current[nextHeading];
-      if (nextTabRef) {
-        nextTabRef.focus();
-      }
-    }, 0);
-  }, [activeTabHeading, tabHeadings, handleTabClick]);
-
   // Set tab ref
   const setTabRef = useCallback((heading: string, element: HTMLDivElement | null) => {
     tabRefs.current[heading] = element;
@@ -122,39 +90,49 @@ const Tabs: FC<TabsProps> = ({
 
   if (!isOpen) return null;
 
+  const tabsClasses = joinClasses(className, styles.tabs);
+  const tabListWrapperClasses = joinClasses(tabListWrapperClassName, styles.tabListWrapper);
+  const tabListClasses = joinClasses(tabListClassName, styles.tabList);
+
+
   return (
     <div 
-      className={`${styles.tabs} ${className || ''}`} 
+      className={tabsClasses} 
       role="tablist"
       ref={tabsContainerRef}
-      onKeyDown={handleKeyDown}
     >
-      <div className={`${styles.tabList} ${tabListClassName || ''}`}>
-        {validChildren.map((child, i) => {
-          const { heading, headingOverride, tooltipIcon, dataTooltipId = "" } = child.props;
-          return (
-            <Tab
-              key={`${heading}-${i}`}
-              activeTabHeading={activeTabHeading}
-              heading={heading}
-              headingOverride={headingOverride}
-              tooltipIcon={tooltipIcon}
-              onClick={handleTabClick}
-              dataTooltipId={dataTooltipId}
-              setTabRef={setTabRef}
-            />
-          );
-        })}
+      <div className={tabListWrapperClasses}>
+        <OutsideClickHandler onOutsideClick={handleOutsideTabListClick} className={styles.outsideClickHandler}>
+          <div className={tabListClasses}>
+            {validChildren.map((child, i) => {
+              const { heading, headingOverride, tooltipIcon, dataTooltipId = "" } = child.props;
+              return (
+                <Tab
+                  key={`${heading}-${i}`}
+                  activeTabHeading={activeTabHeading}
+                  heading={heading}
+                  headingOverride={headingOverride}
+                  tooltipIcon={tooltipIcon}
+                  onClick={handleTabClick}
+                  dataTooltipId={dataTooltipId}
+                  setTabRef={setTabRef}
+                  className={tabClassName}
+                />
+              );
+            })}
+          </div>
+        </OutsideClickHandler>
       </div>
       
       {validChildren.map((child, i) => {
         const { heading, className: childClassName = "" } = child.props;
         const isActive = activeTabHeading === heading;
-        
+        const fadeClasses = joinClasses(fadeClassName, styles.fade, isActive ? '' : styles.inactive);
+        const tabContentClasses = joinClasses(styles.tabContent, childClassName, isActive ? '' : styles.inactive);
         return (
-          <Fade key={`${heading}-${i}`} className={`${styles.fade} ${isActive ? '' : styles.inactive}`}>
+          <Fade key={`${heading}-${i}`} className={fadeClasses}>
             <div 
-              className={`${styles.tabContent} ${childClassName} ${isActive ? '' : styles.inactive}`}
+              className={tabContentClasses}
               role="tabpanel"
               aria-labelledby={`tab-${heading}`}
               id={`tabpanel-${heading}`}

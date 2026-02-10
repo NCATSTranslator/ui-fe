@@ -2,8 +2,9 @@ import { FC, ReactNode, useState, useEffect, useRef, DragEvent, ChangeEvent } fr
 import ExportIcon from '@/assets/icons/buttons/Export.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import styles from './FileInput.module.scss';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import { CustomFile } from '@/features/Common/types/global';
+import InputLabel from '@/features/Core/components/InputLabel/InputLabel';
 
 type FileDropInputProps = {
   handleChange: (files: CustomFile[] ) => void;
@@ -11,6 +12,7 @@ type FileDropInputProps = {
   disabled?: boolean;
   testId?: string;
   label?: string | ReactNode;
+  subtitle?: string;
   buttonLabel?: string;
   fileTypes?: string;
 };
@@ -20,6 +22,7 @@ const FileInput: FC<FileDropInputProps> = ({
   multiple = false,
   disabled = false,
   label = "File Input",
+  subtitle,
   testId,
   buttonLabel = "Browse Files",
   fileTypes = ".png,.jpg,.jpeg"
@@ -120,9 +123,10 @@ const FileInput: FC<FileDropInputProps> = ({
       data-testid={testId}
       htmlFor={`file-upload`}
       >
-      <span className="input-label-container">
-        {label && <span className="input-label">{label}</span>}
-      </span>
+      <InputLabel
+        label={label}
+        subtitle={subtitle}
+      />
       <div className={styles.container}>
         <div className={styles.top}>
           <input
@@ -140,14 +144,16 @@ const FileInput: FC<FileDropInputProps> = ({
               <span className={styles.dropText}>Drop file here...</span>
             :
               <>
-                <span className={styles.dropText}>Drag & Drop to Upload or</span>
                 <Button 
                   handleClick={!disabled ? handleClick : undefined}
-                  className={styles.buttonLabel} 
-                  isSecondary
+                  className={styles.buttonLabel}
+                  variant="secondary"
+                  iconLeft={<ExportIcon/>}
+                  small
                   >
-                  <ExportIcon/>{buttonLabel}
+                  {buttonLabel}
                 </Button>
+                <span className={styles.dropText}>or Drag and Drop to Upload</span>
               </>
           }
         </div>

@@ -1,4 +1,4 @@
-import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject, 
+import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject,
   Provenance, PublicationSupport } from "@/features/Evidence/types/evidence";
 
 export type ResultSet = {
@@ -25,7 +25,7 @@ export interface Result {
   pathCount?: number;
   // array of path IDs
   paths: string[] | Path[];
-  score?: { main: number, secondary: number };
+  score?: { main: number, secondary: number } | number;
   scores: Score[];
   // node ID
   subject: string;
@@ -39,7 +39,7 @@ export type SharedItem = {
   type: string;
 }
 
-export interface ResultBookmark extends Result { 
+export interface ResultBookmark extends Result {
   description?: string;
   bookmarkID?: number | boolean;
   bookmarked?: boolean;
@@ -54,6 +54,7 @@ export interface Path {
   compressedSubgraph?: (string | string[])[] | null;
   highlighted?: boolean;
   id?: string;
+  score?: number;
   // Original subgraph
   subgraph: string[];
   tags: Tags;
@@ -77,10 +78,16 @@ export interface ResultEdge {
   compressed_edges?: ResultEdge[];
   id: string;
   knowledge_level: KnowledgeLevel;
+  metadata: {
+    edge_bindings: string[],
+    inverted_id: string | null,
+    is_root: boolean,
+  };
   // nodeID
   object: string;
   predicate: string;
   predicate_url: string;
+  description?: string | null;
   provenance: Provenance[];
   publications: {[key: string]: {id: string; support: PublicationSupport}[]};
   // nodeID
@@ -88,6 +95,7 @@ export interface ResultEdge {
   // array of path ids or Path objects
   support: string[] | Path[];
   trials: string[];
+  tags: Tags;
 }
 
 export interface RankedEdge extends ResultEdge {
@@ -137,8 +145,9 @@ export type ResultGraph = {
 }
 
 export type Tags = {
-  [key:string]: {name: string, value: string}
+  [key:string]: {name: string, value: string} | null;
 }
+
 export type PathFilterState = {
   [pid: string]: boolean;
 }
@@ -161,8 +170,21 @@ export type Errors = {
   "biothings-annotator": string[];
   unknown: string[];
 }
+export type ARAStatusResponse = {
+  status: string;
+  data: {
+    aras: string[];
+    status: string;
+  };
+}
 
 export type HoverTarget = { id: string; type: 'node' | 'edge' } | null;
+
+export type ScoreWeights = {
+  confidenceWeight: number;
+  noveltyWeight: number;
+  clinicalWeight: number;
+}
 
 export const isResultEdge = (obj: unknown): obj is ResultEdge => {
   return (
@@ -170,14 +192,21 @@ export const isResultEdge = (obj: unknown): obj is ResultEdge => {
     Array.isArray(obj.aras) &&
     obj.aras.every((item: unknown) => typeof item === "string") &&
     typeof obj.is_root === "boolean" &&
-    typeof obj.knowledge_level === "string" && 
+    typeof obj.knowledge_level === "string" &&
+    typeof obj.metadata === "object" &&
+    Array.isArray(obj.metadata.edge_bindings) &&
+    obj.metadata.edge_bindings.every((item: unknown) => typeof item === "string") &&
+    (typeof obj.metadata.inverted_id === "string" || obj.metadata.inverted_id === null) &&
+    typeof obj.metadata.is_root === "boolean" &&
     typeof obj.object === "string" &&
     typeof obj.predicate === "string" &&
     typeof obj.predicate_url === "string" &&
+    (typeof obj.description === "string" || obj.description === null || obj.description === undefined) &&
     Array.isArray(obj.provenance) &&
-    obj.provenance.every((prov: unknown) => typeof prov === "object") && 
+    obj.provenance.every((prov: unknown) => typeof prov === "object") &&
     typeof obj.publications === "object" &&
     typeof obj.subject === "string" &&
+    typeof obj.tags === "object" &&
     Array.isArray(obj.support) &&
     obj.support.every((item: unknown) => typeof item === "string")
   );
@@ -245,8 +274,6 @@ export interface ResultListLoadingData {
   isFetchingARAStatus: boolean | null;
   isFetchingResults: boolean | null;
   showDisclaimer: boolean;
-  containerClassName: string;
-  buttonClassName: string;
   hasFreshResults: boolean;
   currentInterval?: number;
   status?: string;

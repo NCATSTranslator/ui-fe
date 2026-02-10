@@ -76,7 +76,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
 
   // Updated handleSelectedEdge to use the hook and mark edge as seen
   const handleSelectedEdge = (resultSet: ResultSet, selEdge: ResultEdge) => {
-    if (selEdge === null || selEdge === undefined)
+    if (selEdge === null || selEdge === undefined || selEdge.id === selectedEdge?.id)
       return;
 
     setSelectedEdge(selEdge);
@@ -105,7 +105,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
       return false;
     }
     let edge;
-    if(compressedSubgraph) 
+    if(compressedSubgraph)
       edge = getEdgeFromSubgraph(edgeIDs[0], compressedSubgraph)
     else
       edge = getCompressedEdge(resultSet, edgeIDs);
@@ -131,7 +131,7 @@ const EvidenceModal: FC<EvidenceModalProps> = ({
     <Modal isOpen={isOpen} onClose={handleClose} className={`${styles.evidenceModal} evidence-modal`} containerClass={`${styles.evidenceContainer}`}>
       {result?.drug_name &&
         <div className={styles.top}>
-          <h5 className={styles.title}>{isInferred ? "Indirect" : "Direct"} Path {pathKey} Evidence</h5>
+          <h5 className={styles.title}>{isInferred ? "Indirect" : pathKey.length > 1 ? "Supporting" : "Direct"} Path {pathKey} Evidence</h5>
           <div className={styles.labelContainer}>
             {
               edgeLabel &&

@@ -1,12 +1,16 @@
-import { FC, useState, useEffect } from 'react';
+import { FC } from 'react';
 import styles from './ExampleQueryList.module.scss';
-import { getResultsShareURLPath } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { getResultsShareURLPath } from '@/features/Common/utils/web';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
-import AnimateHeight, { Height } from 'react-animate-height';
-import Button from '@/features/Common/components/Button/Button';
+import AnimateHeight from 'react-animate-height';
+import Button from '@/features/Core/components/Button/Button';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { Example } from '@/features/Query/types/querySubmission';
 import QueryTypeIcon from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
+import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { useSelector } from 'react-redux';
+import { joinClasses } from '@/features/Common/utils/utilities';
+import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 type ExampleQueryListProps = {
   examples: Example[] | null;
@@ -20,27 +24,18 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
   className = ""
 }) => {
   const minHeight = 32;
-  const [height, setHeight] = useState<Height>(minHeight);
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const { height, isOpen: isExpanded, toggle: handleToggle } = useAnimateHeight({ closedHeight: minHeight });
+  const config = useSelector(currentConfig);
 
-  const handleToggle = () => {
-    setIsExpanded(!isExpanded);
-  }
-
-  useEffect(() => {
-    if(isExpanded === false)
-      setHeight(minHeight);
-    else
-      setHeight('auto');
-  }, [isExpanded])
+  const classNames = joinClasses(styles.examplesContainer, className, isExpanded && styles.expanded);
 
   return (
-    <div className={`${styles.examplesContainer} ${className} ${isExpanded && styles.expanded}`}>
+    <div className={classNames}>
       <div>
         {
           (!!examples && examples?.length > 0 && examples[0].type === "drug") 
           ?
-            <Button handleClick={handleToggle} className={styles.expandButton}><ChevDown/>Examples</Button>
+            <Button handleClick={handleToggle} className={styles.expandButton} iconLeft={<ChevDown/>}>Examples</Button>
           : 
             <p className={styles.exampleHeading}>Examples</p>
         }
@@ -65,18 +60,18 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
                           el.targetType.toLowerCase() === item.type.toLowerCase()
                       );
                 return (
-                  <button
+                  <Button
                     className={`${styles.button} example-query`}
-                    onClick={() => setPresetURL(getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid))}
+                    handleClick={() => setPresetURL(getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid, config?.include_hashed_parameters))}
                     data-testid={item.name}
-                    data-url={getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid)}
+                    data-url={getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid, config?.include_hashed_parameters)}
                     key={item.id}
+                    iconLeft={<QueryTypeIcon type={queryTypes[typeID].searchTypeString}/>}
+                    smallFont
+                    variant="secondary"
                   >
-                    <QueryTypeIcon
-                      type={queryTypes[typeID].searchTypeString}
-                    />
                     {item.name}
-                  </button>
+                  </Button>
                 );
               })}
             </AnimateHeight>

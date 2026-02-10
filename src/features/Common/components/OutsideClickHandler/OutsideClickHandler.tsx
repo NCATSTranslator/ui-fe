@@ -22,17 +22,19 @@ const OutsideClickHandler = forwardRef<HTMLDivElement, OutsideClickHandlerProps>
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (finalRef && typeof finalRef === 'object' && finalRef.current && !finalRef.current.contains(e.target as Node))
+      if (finalRef && typeof finalRef === 'object' && finalRef.current && !finalRef.current.contains(e.target as Node)) {
         onOutsideClick();
+      }
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+    // Use capture phase (true) so the handler runs before stopPropagation() can prevent it
+    document.addEventListener("click", handleClickOutside, true);
+    return () => document.removeEventListener("click", handleClickOutside, true);
   }, [onOutsideClick, finalRef]);
 
   return (
-    <div 
-      ref={finalRef} 
-      className={className} 
+    <div
+      ref={finalRef}
+      className={className}
       onKeyDown={onKeyDown}
       tabIndex={tabIndex}
     >

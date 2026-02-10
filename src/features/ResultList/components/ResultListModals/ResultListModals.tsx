@@ -1,21 +1,21 @@
-import { FC, Dispatch, SetStateAction } from "react";
+import { FC, Dispatch, SetStateAction, RefObject } from "react";
 import EvidenceModal from "@/features/Evidence/components/EvidenceModal/EvidenceModal";
 import NotesModal from "@/features/ResultItem/components/NotesModal/NotesModal";
 import ShareModal from "@/features/ResultList/components/ShareModal/ShareModal";
 import ResultFocusModal from "@/features/ResultList/components/ResultFocusModal/ResultFocusModal";
-import { ToastContainer, Slide } from 'react-toastify';
 import { handleEvidenceModalClose } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { Path, Result, ResultEdge, SharedItem } from "@/features/ResultList/types/results.d";
+import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 
 interface ResultListModalsProps {
-  currentBookmarkID: string | null | undefined;
+  currentBookmarkID: string | null;
   evidenceModalOpen: boolean;
   focusModalOpen: boolean;
   formattedResultsLength: number;
-  handleClearNotesEditor: () => Promise<void>;
   handlePageClick: (event: {selected: number}, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   noteLabel: string;
   notesModalOpen: boolean;
+  onCloseNotesModal: () => void;
   pk: string;
   presetTypeID: string;
   selectedEdge: ResultEdge | null; 
@@ -26,11 +26,12 @@ interface ResultListModalsProps {
   setExpandSharedResult: Dispatch<SetStateAction<boolean>>;
   setEvidenceModalOpen: Dispatch<SetStateAction<boolean>>;
   setFocusModalOpen: Dispatch<SetStateAction<boolean>>;
-  setNotesModalOpen: Dispatch<SetStateAction<boolean>>;
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
   sharedItem: SharedItem; 
   shareModalOpen: boolean;
   shareResultID: string;
+  shouldUpdateResultsAfterBookmark: RefObject<boolean>;
+  updateUserSaves: Dispatch<SetStateAction<SaveGroup | null>>;
 }
 
 const ResultListModals: FC<ResultListModalsProps> = ({
@@ -38,10 +39,10 @@ const ResultListModals: FC<ResultListModalsProps> = ({
   evidenceModalOpen,
   focusModalOpen,
   formattedResultsLength,
-  handleClearNotesEditor,
   handlePageClick,
   noteLabel,
   notesModalOpen,
+  onCloseNotesModal,
   pk,
   presetTypeID,
   selectedEdge,
@@ -52,26 +53,15 @@ const ResultListModals: FC<ResultListModalsProps> = ({
   setExpandSharedResult,
   setEvidenceModalOpen,
   setFocusModalOpen,
-  setNotesModalOpen,
   setShareModalOpen,
   sharedItem,
   shareModalOpen,
   shareResultID,
+  shouldUpdateResultsAfterBookmark,
+  updateUserSaves,
 }) => {
-
   return (
     <>
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        theme="light"
-        transition={Slide}
-        pauseOnFocusLoss={false}
-        hideProgressBar
-        className="toastContainer"
-        closeOnClick={false}
-        closeButton={false}
-      />
       <ShareModal
         isOpen={shareModalOpen}
         onClose={()=>setShareModalOpen(false)}
@@ -80,10 +70,11 @@ const ResultListModals: FC<ResultListModalsProps> = ({
       />
       <NotesModal
         isOpen={notesModalOpen}
-        onClose={()=>(setNotesModalOpen(false))}
-        handleClearNotesEditor={handleClearNotesEditor}
+        onClose={onCloseNotesModal}
         noteLabel={noteLabel}
-        bookmarkID={currentBookmarkID}
+        currentBookmarkID={currentBookmarkID}
+        updateUserSaves={updateUserSaves}
+        shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
       />
       <EvidenceModal
         isOpen={evidenceModalOpen}

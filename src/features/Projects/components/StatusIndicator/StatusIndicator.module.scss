@@ -1,0 +1,97 @@
+@use '@/assets/styles/variables' as *;
+
+$statusSize: 18px;
+
+.status {
+  position: relative;
+  display: flex;
+  height: $statusSize;
+  width: $statusSize;
+  border-radius: 100%;
+  color: $white;
+  svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: $statusSize;
+    height: $statusSize;
+    path {
+      stroke: $white;
+    }
+  }
+  img.loadingIcon {
+    width: calc($m - 2px);
+    height: calc($m - 2px);
+    padding: 1px;
+    margin-bottom: 0;
+  }
+}
+.statusRunning {
+  width: $m;
+  height: $m;
+  > div {
+    margin-bottom: 0;
+  }
+}
+.statusSuccess {
+  background: $green;
+  &.status {
+    svg path {
+      fill: transparent !important;
+    }
+  }
+}
+.statusError {
+  background: $red;
+}
+.statusWarning {
+  background: $yellow;
+  svg {
+    path {
+      stroke: transparent;
+      fill: $white;
+    }
+  }
+}
+.statusNoQueries, .statusNoResults {
+  background: $lightPurpleTwo;
+}
+.statusUnknown {
+  background: $midGray;
+}
+div.statusIndicator {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 3px 0;
+  &.redDot {
+    &::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 100%;
+      border: 1.5px solid $lightGray;
+      background-color: $red;
+      z-index: 10;
+    }
+  }
+  .tooltip {
+    span.tooltipHeading, span {
+      color: $white !important;
+      text-decoration: none !important;
+    }
+    span.tooltipHeading {
+      font-size: $bodyTwoSize !important;
+      font-weight: 800 !important;
+      margin: 0 0 $xxs !important;
+    }
+    span {
+      font-weight: 400 !important;
+      font-size: $captionSize !important;
+    }
+  }
+}

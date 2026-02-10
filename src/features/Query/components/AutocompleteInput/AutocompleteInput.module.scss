@@ -12,19 +12,47 @@
     input::-webkit-input-placeholder {
       color: $purpleOne;
       font-weight: 800;
+      opacity: 0;
     }
     input::-ms-input-placeholder{
       color: $purpleOne;
       font-weight: 800;
+      opacity: 0;
     }
     input::placeholder {
       color: $purpleOne;
       font-weight: 800;
+      opacity: 0;
     }
     input::-moz-placeholder {
       color: $purpleOne;
       font-weight: 800;
       opacity: 1;
+      opacity: 0;
+    }
+    .clickablePlaceholder {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      left: 40px;
+      color: $purpleOne;
+      font-weight: 800;
+      cursor: pointer;
+    }
+  }
+  &.swapTerms {
+    .iconLeft {
+      display: flex;
+      width: 68px;
+      height: 32px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .input input {
+      padding-left: 88px;
+    }
+    .clickablePlaceholder {
+      left: 88px;
     }
   }
 }

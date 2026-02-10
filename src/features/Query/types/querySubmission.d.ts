@@ -1,3 +1,5 @@
+import { KeyboardEvent } from 'react';
+
 export type Example = {
   id: string;
   name: string;
@@ -22,14 +24,16 @@ export type QueryType = {
 }
 
 export type QueryItem = {
-  type: QueryType; 
-  node: AutocompleteItem | null; 
+  type: QueryType;
+  node: AutocompleteItem | null;
 }
 
 export type AutocompleteItem = {
   id:string,
   label: string,
   match?: string,
+  isExact: boolean,
+  score: number,
   types?: string[]
 }
 
@@ -37,6 +41,18 @@ export type AutocompleteFunctions = {
   filter: (type: any) => (item: any) => any;
   annotate: (normalizedNodes: any) => Promise<any>;
   format: (items: any, formatData: any) => Promise<any[]>;
+}
+
+export type AutocompleteConfig = {
+  functions: AutocompleteFunctions;
+  limitTypes: string[];
+  limitPrefixes: string[];
+  excludePrefixes?: string[];
+}
+
+export type AutocompleteContext = {
+  id: string;
+  event?: KeyboardEvent;
 }
 
 export type GeneAnnotation = {

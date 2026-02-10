@@ -1,8 +1,8 @@
 import { useEffect, useCallback, useMemo, FC, Dispatch, SetStateAction } from 'react';
-import LoadingBar from "@/features/Common/components/LoadingBar/LoadingBar";
+import LoadingBar from "@/features/Core/components/LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import { handleEvidenceSort, getInitItemsPerPage } from "@/features/Evidence/utils/evidenceModalFunctions";
-import { PreferencesContainer } from '@/features/UserAuth/types/user';
+import { Preferences } from '@/features/UserAuth/types/user';
 import { PublicationObject, EvidenceSortState, KnowledgeLevelFilterType } from '@/features/Evidence/types/evidence';
 import { ResultEdge } from '@/features/ResultList/types/results';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
@@ -16,7 +16,7 @@ import PublicationPaginationControls from '@/features/Evidence/components/Public
 interface PublicationsTableProps {
   isOpen: boolean;
   pk: string;
-  prefs: PreferencesContainer;
+  prefs: Preferences;
   publications: PublicationObject[];
   selectedEdge: ResultEdge | null;
   setPublications: Dispatch<SetStateAction<PublicationObject[]>>
@@ -32,7 +32,6 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
 }) => {
   const resultSet = useSelector(getResultSetById(pk));
   const selectedEdgeId = selectedEdge?.id || null;
-  
   const [state, updateState] = usePubTableState(prefs);
   usePubmedDataFetch(
     isOpen,
@@ -103,7 +102,6 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     );
   }, [state.sortingState, publications, handlePageClick, updateState, setPublications]);
 
-  // Effects
   useEffect(() => {
     const value = getInitItemsPerPage(prefs, DEFAULT_ITEMS_PER_PAGE);
     updateState({ itemsPerPage: value });

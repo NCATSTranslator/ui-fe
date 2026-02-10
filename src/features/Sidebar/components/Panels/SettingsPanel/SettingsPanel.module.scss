@@ -1,0 +1,138 @@
+@use "@/assets/styles/variables" as *;
+
+.settingsPanel {
+  .top {
+    display: flex;
+    flex-direction: column;
+    gap: $xxs;
+  }
+  .iconText {
+    display: grid;
+    grid-template-columns: $m auto;
+    gap: $xs;
+    margin: 0 0 $s;
+    p {
+      margin: 0;
+      font-size: $bodyTwoSize;
+    }
+    a {
+      margin-top: $xxs;
+      span {
+        font-size: $captionSize;
+      }
+    }
+    .userIcon {
+      font-size: $bodyTwoSize;
+      font-weight: 400;
+      border-radius: 50%;
+      background-color: $blueTwo;
+      height: $m;
+      width: $m;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $white;
+      cursor: default;
+      user-select: none;
+    }
+  }
+  .title {
+    // border bottom, but inset
+    box-shadow: inset 0px -1px 0 0 $midGray;
+    margin-bottom: 0;
+    white-space: nowrap;
+    color: $black;
+    font-weight: 800;
+    padding: $s;
+    margin: 0 (-$s) $s;
+  }
+  .helpText, .helpText a {
+    font-size: $captionSize;
+    color: $darkGray;
+  }
+  .coverPanel {
+    position: absolute;
+    inset: 0 1px 0 0;
+    background-color: $lightGray;
+    z-index: 10;
+  }
+  .prefButton {
+    padding: $s 0;
+    border-bottom: 1px solid $midGray;
+    width: 100%;
+    justify-content: space-between;
+    border-radius: 0;
+    &:last-of-type {
+      border-bottom: none;
+    }
+    span {
+      font-size: $bodyTwoSize;
+      color: $darkGray;
+      padding: 0;
+      text-align: left;
+    }
+    svg {
+      path {
+        fill: white;
+        stroke: $darkGray;
+      }
+    }
+    &:hover {
+      span {
+        text-decoration: underline;
+      }
+      svg {
+        path {
+          stroke: $purpleOne;
+        }
+      }
+    }
+  }
+  .activePrefTypeContent {
+    padding: $s $s 0;
+    .activePref {
+      margin-bottom: $l;
+    }
+  }
+  .prefLabel {
+    font-size: $bodyTwoSize;
+    color: $darkGray;
+    font-weight: 800;
+    margin-bottom: $xxs;
+  }
+  .prefValueButton {
+    width: 100%;
+    background-color: $white;
+    border: 1px solid $midGray;
+    padding: 12px;
+    justify-content: space-between;
+    span {
+      font-weight: 400;
+      padding: 0;
+      text-align: left;
+    }
+    svg {
+      path {
+        fill: transparent;
+        stroke: $darkGray;
+      }
+    }
+  }
+  .prefValueSelectorButton {
+    border-radius: 0;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 15px 12px;
+    span {
+      font-weight: 400;
+      padding: 0;
+      font-size: $bodyTwoSize;
+    }
+    &.active {
+      background-color: $lightPurpleTwo;
+      &:hover {
+        background-color: $grayHover;
+      }
+    }
+  }
+}

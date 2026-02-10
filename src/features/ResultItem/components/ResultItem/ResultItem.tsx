@@ -1,34 +1,33 @@
 import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction, useMemo } from 'react';
 import styles from './ResultItem.module.scss';
-import { formatBiolinkEntity, formatBiolinkNode, getPathCount, isStringArray } from '@/features/Common/utils/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
 import { getARATagsFromResultTags } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
-import LoadingBar from '@/features/Common/components/LoadingBar/LoadingBar';
+import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
 import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
-import AnimateHeight, { Height } from "react-animate-height";
+import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
-import { Link } from 'react-router-dom';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '@/features/ResultItem/utils/csvGeneration';
-import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject, Save } from '@/features/UserAuth/utils/userApi';
+import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
+import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
 import { useSelector } from 'react-redux';
-import { getResultSetById, getNodeById, getPathById, getPathsByIds, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
+import { getResultSetById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
-import { displayScore, generateScore } from '@/features/ResultList/utils/scoring';
+import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
 import { QueryType } from '@/features/Query/types/querySubmission';
-import { Result, PathFilterState, Path, ResultBookmark, ResultSet } from '@/features/ResultList/types/results';
+import { Result, PathFilterState, Path, ResultBookmark } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useTurnstileEffect } from '@/features/Common/hooks/customHooks';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
-import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
-import { cloneDeep } from 'lodash';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import { resultToCytoscape } from '@/features/ResultItem/utils/graphFunctions';
+import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 const GraphView = lazy(() => import("@/features/ResultItem/components/GraphView/GraphView"));
 
@@ -55,11 +54,9 @@ type ResultItemProps = {
   availableFilters: {[key: string]: Filter};
   bookmarkAddedToast?: () => void;
   bookmarkRemovedToast?: () => void;
-  bookmarked?: boolean;
-  bookmarkID?: string | null;
+  bookmarkItem?: Save | null;
   handleBookmarkError?: () => void;
   handleFilter: (filter: Filter) => void;
-  hasNotes: boolean;
   isEven: boolean;
   isInUserSave?: boolean;
   isPathfinder?: boolean;
@@ -79,7 +76,9 @@ type ResultItemProps = {
   setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   sharedItemRef: RefObject<HTMLDivElement> | null;
   showHiddenPaths: boolean;
+  shouldUpdateResultsAfterBookmark?: RefObject<boolean>;
   startExpanded: boolean;
+  updateUserSaves?: Dispatch<SetStateAction<SaveGroup | null>>;
   zoomKeyDown: boolean;
 }
 
@@ -91,12 +90,10 @@ const ResultItem: FC<ResultItemProps> = ({
     availableFilters: availableTags,
     bookmarkAddedToast = () => {},
     bookmarkRemovedToast = () => {},
-    bookmarked = false,
-    bookmarkID = null,
+    bookmarkItem,
     pk: currentQueryID,
     handleBookmarkError = () => {},
     handleFilter = () => {},
-    hasNotes = false,
     key,
     isEven = false,
     isInUserSave = false,
@@ -117,28 +114,50 @@ const ResultItem: FC<ResultItemProps> = ({
     sharedItemRef,
     showHiddenPaths,
     startExpanded = false,
+    updateUserSaves,
+    shouldUpdateResultsAfterBookmark,
     zoomKeyDown
   }) => {
 
   const resultSet = useSelector(getResultSetById(pk));
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
-  const score = (!!result?.score) ? result.score : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
-  const user = useSelector(currentUser);
+  const firstPath = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0] as string) : result.paths[0];
+  const score = (isPathfinder && firstPath) ? getPathfinderMetapathScore(firstPath) : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
 
   const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
-  const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
-  const itemBookmarkID = useRef<string | null>(bookmarkID);
-  const [itemHasNotes, setItemHasNotes] = useState<boolean>(hasNotes);
-  const [isExpanded, setIsExpanded] = useState<boolean>(startExpanded);
+  const user = useSelector(currentUser);
+  
+  const {
+    isBookmarked,
+    hasNotes: itemHasNotes,
+    confirmModalOpen: bookmarkRemovalConfirmationModalOpen,
+    setConfirmModalOpen: setBookmarkRemovalConfirmationModalOpen,
+    handleBookmarkClick,
+    handleNotesClick: handleNotesClickHook,
+    handleRemovalApproval: handleBookmarkRemovalApproval,
+    resetRemovalApproval,
+  } = useBookmarkItem({
+    bookmarkItem: bookmarkItem ?? null,
+    result,
+    resultSet,
+    queryNodeID,
+    queryNodeLabel,
+    queryNodeDescription,
+    queryType,
+    currentQueryID,
+    bookmarkAddedToast,
+    bookmarkRemovedToast,
+    handleBookmarkError,
+    updateUserSaves,
+    shouldUpdateResultsAfterBookmark,
+  });
+  
+  const { height, isOpen: isExpanded, toggle: handleToggle, setIsOpen: setIsExpanded } = useAnimateHeight({ initialOpen: startExpanded });
   const [graphActive, setGraphActive] = useState<boolean>(false);
-  const [height, setHeight] = useState<Height>(0);
   const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
   const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
-  // const [csvData, setCsvData] = useState([]);
-  const bookmarkRemovalApproved = useRef<boolean>(false);
-  const [bookmarkRemovalConfirmationModalOpen, setBookmarkRemovalConfirmationModalOpen] = useState<boolean>(false);
   const graph = useMemo(()=> {
     if(!resultSet)
       return {nodes:[], edges: []};
@@ -176,10 +195,6 @@ const ResultItem: FC<ResultItemProps> = ({
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, subjectNode.species) : '';
   const resultDescription = subjectNode?.descriptions[0];
 
-  const handleToggle = () => {
-    setIsExpanded(prev => !prev);
-  }
-
   const handleEdgeSpecificEvidence = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
     if(!result)
       return;
@@ -192,124 +207,13 @@ const ResultItem: FC<ResultItemProps> = ({
       activateEvidence(result, [path.subgraph[1]], path, pathKey);
   }, [result, activateEvidence])
 
-  useEffect(() => {
-    if(isExpanded === false)
-      setHeight(0);
-    else
-      setHeight('auto');
-  }, [isExpanded])
-
   const handleClearSelectedPaths = useCallback(() => {
     setSelectedPaths(null);
   },[]);
 
-  const handleGraphNodeClick = useCallback((nodeSequences: Set<string[]>) => {
-    if(!nodeSequences)
-      return;
-
-    let newSelectedPaths: Set<Path> = new Set();
-    let paths = (isStringArray(newPaths)) ? getPathsByIds(resultSet, newPaths) : newPaths;
-
-    const extractNodeSequence = (subgraph: string[]): string[] => {
-      let nodeSequence: string[] = [];
-      for(let i = 0; i < subgraph.length; i+=2)
-        nodeSequence.push(subgraph[i]);
-
-      return nodeSequence;
-    };
-
-    const checkForNodeMatches = (nodeSequence: string[], path: Path) => {
-      let pathNodeSequence = extractNodeSequence(path.subgraph);
-      return pathNodeSequence === nodeSequence;
-    }
-
-    for(const sequence of nodeSequences) {
-      for(const path of paths) {
-        // check edges for support
-        for(let i = 1; i < path.subgraph.length; i+=2) {
-          let edge = getEdgeById(resultSet, path.subgraph[i]);
-          // check support for matches
-          if(!!edge && edge.support.length > 0) {
-            for(const pathID of edge.support) {
-              let supportPath = (typeof pathID === "string") ? getPathById(resultSet, pathID) : pathID;
-              if(!!supportPath && checkForNodeMatches(sequence, supportPath))
-                newSelectedPaths.add(supportPath);
-            }
-          }
-        }
-
-        // include all 1 hops, bc they're unselectable otherwise
-        if(path.subgraph.length === 3) {
-          newSelectedPaths.add(path);
-          continue;
-        }
-
-        // check base path for matches
-        if(checkForNodeMatches(sequence, path))
-          newSelectedPaths.add(path);
-      }
-    }
-    setSelectedPaths(newSelectedPaths)
-
-  },[newPaths, resultSet]);
-
-  const handleBookmarkClick = async () => {
-    if(isBookmarked) {
-      if(bookmarkRemovalApproved.current && itemBookmarkID.current) {
-        console.log("remove bookmark");
-        deleteUserSave(itemBookmarkID.current);
-        setIsBookmarked(false);
-        setItemHasNotes(false);
-        itemBookmarkID.current = null;
-        bookmarkRemovedToast();
-      }
-      if(!bookmarkRemovalApproved.current) {
-        setBookmarkRemovalConfirmationModalOpen(true);
-      }
-      return false;
-    } else {
-      if(!resultSet) {
-        console.warn("Unable to create bookmark, no resultSet available");
-        return false;
-      }
-      let bookmarkResult: ResultBookmark = cloneDeep(result);
-      const safeQueryNodeID = (!!queryNodeID) ? queryNodeID : "";
-      const safeQueryNodeLabel = (!!queryNodeLabel) ? queryNodeLabel : "";
-      const safeQueryNodeDescription = (!!queryNodeDescription) ? queryNodeDescription : "";
-      const safeCurrentQueryID = (!!currentQueryID) ? currentQueryID : "";
-      const safeResultSet: ResultSet = generateSafeResultSet(resultSet, bookmarkResult);
-      let bookmarkObject = getFormattedBookmarkObject("result", bookmarkResult.drug_name, "", safeQueryNodeID,
-        safeQueryNodeLabel, safeQueryNodeDescription, queryType, result, safeCurrentQueryID, safeResultSet);
-      
-      bookmarkObject.user_id = (user?.id) ? user.id : null;
-      bookmarkObject.time_created = new Date().toDateString();
-      bookmarkObject.time_updated = new Date().toDateString();
-
-      let bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
-      if(bookmarkedItem) {
-        let newBookmarkedItem = bookmarkedItem as unknown as Save;
-        setIsBookmarked(true);
-        itemBookmarkID.current = newBookmarkedItem.id?.toString() || null;
-        bookmarkAddedToast();
-        return newBookmarkedItem.id;
-      }
-      return false;
-    }
-  }
-
-  const handleNotesClick = async () => {
-    let tempBookmarkID: string | null = itemBookmarkID.current;
-    if(!isBookmarked) {
-      console.log("no bookmark exists for this item, creating one...")
-      let replacementID = await handleBookmarkClick();
-      console.log("new id: ", replacementID);
-      tempBookmarkID = (replacementID) ? replacementID.toString() : tempBookmarkID;
-    }
-    if(tempBookmarkID) {
-      activateNotes(nameString, tempBookmarkID);
-      setItemHasNotes(true);
-    }
-  }
+  const handleNotesClick = useCallback(async () => {
+    await handleNotesClickHook(activateNotes, nameString);
+  }, [handleNotesClickHook, activateNotes, nameString]);
 
   const handleTagClick = (filterID: string, filter: Filter) => {
     let newObj: Filter = {
@@ -321,23 +225,11 @@ const ResultItem: FC<ResultItemProps> = ({
     handleFilter(newObj);
   }
 
-  const handleBookmarkRemovalApproval = () => {
-    bookmarkRemovalApproved.current = true;
-    handleBookmarkClick();
-  }
 
   const handleOpenResultShare = () => {
     setShareResultID(result.id);
     setShareModalOpen(true);
   }
-
-  useEffect(() => {
-    itemBookmarkID.current = bookmarkID;
-  }, [bookmarkID]);
-
-  useEffect(() => {
-    setItemHasNotes(hasNotes);
-  }, [result, hasNotes]);
 
   if(!resultSet)
     return null;
@@ -407,14 +299,11 @@ const ResultItem: FC<ResultItemProps> = ({
             <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
           </span>
         </div>
-        {
-          !isPathfinder &&
-          <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-            <span className={styles.score}>
-              <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score) : "Processing..." }</span>
-            </span>
-          </div>
-        }
+        <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
+          <span className={styles.score}>
+            <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score, 2) : "Processing..." }</span>
+          </span>
+        </div>
         {/* <CSVLink
           className={styles.downloadButton}
           data={csvData}
@@ -506,7 +395,6 @@ const ResultItem: FC<ResultItemProps> = ({
                   graph={graph}
                   result={result}
                   resultSet={resultSet}
-                  onNodeClick={handleGraphNodeClick}
                   clearSelectedPaths={handleClearSelectedPaths}
                   active={graphActive}
                   zoomKeyDown={zoomKeyDown}
@@ -514,17 +402,13 @@ const ResultItem: FC<ResultItemProps> = ({
               </Suspense>
             </Tab>
         </Tabs>
-        <p className={styles.needHelp}>
-          <Feedback/>
-          <Link to={`/send-feedback?q=${pk}`} target={'_blank'}>Send Feedback</Link>
-        </p>
       </AnimateHeight>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}
         onApprove={handleBookmarkRemovalApproval}
         onClose={()=>{
           setBookmarkRemovalConfirmationModalOpen(false);
-          bookmarkRemovalApproved.current = false;
+          resetRemovalApproval();
         }}
       />
     </div>

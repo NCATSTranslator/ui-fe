@@ -5,7 +5,6 @@ import HomeThree from "@/assets/images/home/home3.svg?react";
 import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
 
 const Home = () => {
-
   return (
     <div>
       <h1 className={styles.pageHeading}>Explore Translator</h1>

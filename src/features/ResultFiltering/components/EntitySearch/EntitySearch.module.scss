@@ -3,8 +3,7 @@
 .entitySearch {
   display: block;
   border-bottom: 1px solid $midGray;
-  padding: $s 0 $s 0;
-  min-width: calc(300px - 16px);
+  padding: $s;
   .activeFilters {
     padding: $xs 0 0 0;
   }
@@ -15,13 +14,12 @@
     left: 8px;
   }
   .textInput {
-    width: calc(100% - 58px);
+    width: calc(100% - 138px);
     color: $black;
     font-size: 12px;
     font-weight: 800;
     padding: 9px 12px 9px 44px;
-    border-radius: $largeBorderRadius;
-    border: 1px solid $midGray;
+    border: none;
     text-overflow: ellipsis;
     overflow: hidden;
     outline-width: 0px;
@@ -63,6 +61,9 @@
   .inputContainer {
     position: relative;
     display: block;
+    border-radius: $largeBorderRadius;
+    border: 1px solid $midGray;
+    background-color: $white;
   }
   .checkboxContainer {
     position: absolute;

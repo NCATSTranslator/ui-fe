@@ -14,12 +14,12 @@ import { handleResetView, handleDeselectAllNodes, handleZoomByInterval, handleSe
 import { RenderableGraph, RenderableNode, RenderableEdge } from '@/features/ResultItem/types/graph';
 import { Result, ResultSet } from '@/features/ResultList/types/results';
 import GraphLayoutButtons from '@/features/ResultItem/components/GraphLayoutButtons/GraphLayoutButtons';
-import Button from '@/features/Common/components/Button/Button';
+import Button from '@/features/Core/components/Button/Button';
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
 import Minus from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import styles from './GraphView.module.scss';
 import { debounce } from 'lodash';
-import { PreferencesContainer } from '@/features/UserAuth/types/user';
+import { Preferences } from '@/features/UserAuth/types/user';
 
 cytoscape.use(klay);
 cytoscape.use(avsdf);
@@ -28,7 +28,7 @@ cytoscape.use(navigator);
 cytoscape.use(cytoscapePopper(createPopper));
 cytoscape.warnings(false);
 
-const getInitialLayout = (prefs: PreferencesContainer) => {
+const getInitialLayout = (prefs: Preferences) => {
   const layoutPref = prefs?.graph_layout?.pref_value || 'vertical';
   switch (layoutPref) {
     case 'horizontal':
@@ -44,7 +44,6 @@ interface GraphViewProps {
   graph: RenderableGraph;
   result: Result;
   resultSet: ResultSet | null;
-  onNodeClick: (nodes: Set<string[]>) => void;
   clearSelectedPaths: () => void;
   active: boolean;
   zoomKeyDown: boolean;
@@ -54,7 +53,6 @@ const GraphView = ({
   graph,
   result,
   resultSet,
-  onNodeClick,
   clearSelectedPaths,
   active,
   zoomKeyDown

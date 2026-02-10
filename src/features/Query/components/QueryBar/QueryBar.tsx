@@ -1,10 +1,10 @@
-import { FC } from 'react';
+import { FC, FormEvent, useRef } from 'react';
 import styles from './QueryBar.module.scss';
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import loadingIcon from '@/assets/images/loading/loading-white.png';
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import { cloneDeep } from 'lodash';
-import { AutocompleteItem, QueryItem, QueryType } from '@/features/Query/types/querySubmission';
+import { AutocompleteItem, AutocompleteContext, QueryItem, QueryType } from '@/features/Query/types/querySubmission';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 
 type QueryBarProps = {
@@ -16,11 +16,12 @@ type QueryBarProps = {
   autocompleteItems: AutocompleteItem[] | null;
   autocompleteLoading: boolean;
   handleItemClick: (item: AutocompleteItem) => void;
-  onClearAutocomplete: () => void;
+  autocompleteVisibility: boolean;
+  setAutocompleteVisibility: (state: boolean) => void;
   onClearQueryItem: () => void;
   disabled?: boolean;
   isLoading?: boolean;
-  placeholderText?: string; 
+  placeholderText?: string;
 }
 
 const QueryBar: FC<QueryBarProps> = ({
@@ -34,34 +35,60 @@ const QueryBar: FC<QueryBarProps> = ({
   handleItemClick,
   disabled = false,
   isLoading = false,
-  onClearAutocomplete,
+  autocompleteVisibility,
+  setAutocompleteVisibility,
   onClearQueryItem,
   placeholderText
 }) => {
-  const placeholder = (!!placeholderText) ? placeholderText : (queryType) ? queryType.placeholder : '';
+  const autocompleteId = 'ac';
+  const autocompleteInputRef = useRef<HTMLInputElement>(null);
+  const submitRef = useRef<HTMLButtonElement>(null);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const validAutocompleteItems = autocompleteItems && autocompleteItems.length > 0;
+    const validSubmission = queryItem && (queryItem.node !== null || validAutocompleteItems);
+    if (!validSubmission) {
+      handleSubmission(null);
+      return;
+    }
+    if (queryItem.node === null && validAutocompleteItems) {
+      handleItemClick(autocompleteItems[0]);
+      const newQueryItem = cloneDeep(queryItem);
+      newQueryItem.node = autocompleteItems[0];
+      handleSubmission(newQueryItem);
+    } else {
+      handleSubmission(queryItem);
+    }
+  }
+
+  const handleAutocompleteSelect = () => submitRef?.current?.focus();
+  const handleInputSubmit = (cxt: AutocompleteContext) => {
+    if (cxt.event === undefined || cxt.event === null) {
+      throw Error(`Developer Error in QueryBar.tsx: \n  In handleInputSubmit cxt.event is required but is ${cxt.event}`);
+    }
+    if (queryItem?.node) {
+      cxt.event.preventDefault();
+      cxt.event.stopPropagation();
+      submitRef.current?.click();
+    }
+  }
+
+  let placeholder = '';
+  if (!!placeholderText) {
+    placeholder = placeholderText;
+  } else if (queryType) {
+    placeholder = queryType.placeholder;
+  }
 
   return (
-    <form 
-      onSubmit={(e) => {
-        e.preventDefault();
-        if(!queryItem  || (queryItem.node === null && (!autocompleteItems || autocompleteItems.length === 0))) {
-          handleSubmission(null);
-          return;
-        }
-
-        if(queryItem.node === null && !!autocompleteItems &&autocompleteItems.length > 0) {
-          handleItemClick(autocompleteItems[0]);
-          let newQueryItem = cloneDeep(queryItem);
-          newQueryItem.node = autocompleteItems[0];
-          handleSubmission(newQueryItem);
-        } else {
-          handleSubmission(queryItem);
-        }
-      }} 
+    <form
+      onSubmit={handleSubmit}
       className={styles.form}
     >
       <div className={`${disabled && styles.disabled} ${styles.inputContainer}`}>
         <AutocompleteInput
+          id={autocompleteId}
           placeholder={placeholder}
           value={value}
           onChange={handleChange}
@@ -70,13 +97,24 @@ const QueryBar: FC<QueryBarProps> = ({
           loadingAutocomplete={autocompleteLoading}
           selectedItem={queryItem?.node || null}
           className={styles.autocompleteInput}
-          onClearAutocomplete={onClearAutocomplete}
+          autocompleteVisibility={autocompleteVisibility}
+          setAutocompleteVisibility={setAutocompleteVisibility}
           onClear={onClearQueryItem}
+          disabled={disabled}
+          handleSelect={handleAutocompleteSelect}
+          handleSubmit={handleInputSubmit}
+          inputRef={autocompleteInputRef}
         />
-        <Button type='submit' className={styles.submitButton} iconOnly disabled={isLoading}>
+        <Button
+          ref={submitRef}
+          type='submit'
+          className={styles.submitButton}
+          iconOnly
+          disabled={isLoading || disabled}
+        >
           {
             isLoading
-            ? 
+            ?
               <img
                 src={loadingIcon}
                 className={`loadingIcon`}

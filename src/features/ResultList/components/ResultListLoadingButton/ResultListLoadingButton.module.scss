@@ -3,16 +3,24 @@
 .loadingButtonContainer {
   width: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: $s;
   span {
     white-space: nowrap;
   }
+  .refreshDisclaimer, .loadingButton {
+    opacity: 0;
+    transition: $defaultAnim;
+    pointer-events: none;
+    &.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
   .refreshDisclaimer {
-    font-size: 12px;
-    margin: 0 $xs 0 0;
+    font-size: $captionSize;
+    margin: 0;
     color: $darkGray;
-    text-align: right;
   }
   .left {
     display: grid;
@@ -25,8 +33,8 @@
     white-space: normal;
     .bold {
       font-weight: 800;
-      font-size: 14px;
-      margin-bottom: 4px;
+      font-size: $bodyTwoSize;
+      margin-bottom: $xxs;
     }
   }
   .checkbox {
@@ -47,12 +55,12 @@
   }
 }
 .loadPercentage {
-  font-size: 12px;
+  font-size: $captionSize;
   font-weight: 800;
   color: $lightPurpleOne;
 }
 .resultsAvailable {
-  font-size: 12px;
+  font-size: $captionSize;
   font-weight: 800;
   color: $purpleOne;
 }
@@ -67,10 +75,10 @@
   cursor: default;
   span {
     text-align: center;
-    font-size: 16px;
+    font-size: $bodyOneSize;
     color: $purpleOne;
     line-height: 1;
-    padding: 4px;
+    padding: $xxs;
     font-weight: 800;
   }
   svg path {
@@ -88,8 +96,8 @@
   box-shadow: none;
   cursor: default;
   margin-bottom: 0;
-  padding: 4px 8px;
-  font-size: 12px;
+  padding: $xs;
+  font-size: $captionSize;
   background-color: $purpleOne;
   position: relative;
   &.active {

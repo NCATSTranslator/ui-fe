@@ -6,16 +6,22 @@
   padding-left: 0;
   margin: $xs auto $m;
   position: relative;
+  .tabListWrapper {
+    border-bottom: 1px solid $midGray;
+    margin: 0 0 $s;
+    padding: 0 $xl;
+  }
+  .outsideClickHandler {
+    width: fit-content;
+  }
   .tabList {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 $s $s;
-    border-bottom: 1px solid $midGray;
+    width: fit-content;
   }
   .tabContent {
     padding: 0px;
     display: grid;
-    overflow-y: hidden;
     &.inactive {
       opacity: 0;
       pointer-events: none;
@@ -25,7 +31,6 @@
   }
   .fade {
     display: grid;
-    overflow-y: hidden;
     &.inactive {
       pointer-events: none;
       height: 0;

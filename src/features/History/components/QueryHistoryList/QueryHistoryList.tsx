@@ -5,23 +5,25 @@ import { useNavigate } from "react-router-dom";
 import { getDifferenceInDays } from "@/features/Common/utils/utilities";
 import { pastQueryState, setHistory } from "@/features/History/slices/historySlice";
 import { cloneDeep, debounce } from "lodash";
-import { getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { getResultsShareURLPath } from "@/features/Common/utils/web";
 import { QueryHistoryItem } from "@/features/History/types/history";
 import ShareModal from "@/features/ResultList/components/ShareModal/ShareModal";
-import TextInput from "@/features/Common/components/TextInput/TextInput";
+import TextInput from "@/features/Core/components/TextInput/TextInput";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
-import Button from "@/features/Common/components/Button/Button";
+import Button from "@/features/Core/components/Button/Button";
 import Close from '@/assets/icons/buttons/Close/Close.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
-import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import RefreshIcon from '@/assets/icons/buttons/Refresh.svg?react';
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
+import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 
 const QueryHistoryList = ({ loading }: { loading: boolean }) => {
   let previousTimeName: string | undefined;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const config = useSelector(currentConfig);
 
   const tempQueryHistory = useSelector(pastQueryState) as QueryHistoryItem[];
   // query history stored from oldest -> newest, so we must reverse it to display the most recent first
@@ -51,7 +53,7 @@ const QueryHistoryList = ({ loading }: { loading: boolean }) => {
     const nodeLabel = (!!query.item?.node) ? query.item.node.label : "";
     const nodeID = (!!query.item?.node) ? query.item.node.id : "";
     const typeID = (!!query.item?.type) ?  query.item.type.id : "";
-    navigate(`/${getResultsShareURLPath(nodeLabel, nodeID, typeID, '0', query.id)}`);
+    navigate(`/${getResultsShareURLPath(nodeLabel, nodeID, typeID, '0', query.id, config?.include_hashed_parameters)}`);
   };
 
   const handleSearch = useCallback((value: string, setIsLoading: Dispatch<SetStateAction<boolean>>, setFilteredQueryHistoryState: Dispatch<SetStateAction<QueryHistoryItem[]>>) => {
@@ -128,7 +130,7 @@ const QueryHistoryList = ({ loading }: { loading: boolean }) => {
           />
         </form>
       </div>
-      <LoadingWrapper loading={loading} className={`container ${styles.historyContainer}`}>
+      <LoadingWrapper loading={loading} contentClassName={`container ${styles.historyContainer}`}>
         <ul className={styles.historyList}>
           {filteredQueryHistoryState.map((query, i) => {
             // hide past queries with old formatting
@@ -166,7 +168,7 @@ const QueryHistoryList = ({ loading }: { loading: boolean }) => {
                         handleClick={(e) => handleExportClick(e, query)}
                         iconOnly
                         dataTooltipId={`query-history-share-button-${query.id}`}
-                        isSecondary
+                        variant="secondary"
                       >
                         <ShareIcon />
                       </Button>

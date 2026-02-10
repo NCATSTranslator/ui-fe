@@ -1,10 +1,12 @@
-import { FC, MouseEvent, ReactNode } from "react";
+import { CSSProperties, FC, MouseEvent, ReactNode, RefObject } from "react";
 import styles from './Button.module.scss';
 import { Link } from "react-router-dom";
 import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface ButtonProps {
-  variant?: "secondary";
+  ariaLabel?: string;
+  variant?: "secondary" | "textOnly";
+  inline?: boolean;
   handleClick?: (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   href?: string;
   link?: boolean;
@@ -15,15 +17,22 @@ interface ButtonProps {
   type?: "button" | "submit" | "reset";
   rel?: string;
   small?: boolean;
+  smallFont?: boolean;
   children?: ReactNode;
   disabled?: boolean;
   testId?: string;
   className?: string;
   dataTooltipId?: string;
+  title?: string;
+  ref?: RefObject<HTMLButtonElement | null>;
+  style?: CSSProperties;
 }
 
 const Button: FC<ButtonProps> = ({
+  title,
+  ariaLabel,
   variant,
+  inline,
   handleClick,
   href,
   iconOnly = false,
@@ -32,48 +41,56 @@ const Button: FC<ButtonProps> = ({
   _blank = false,
   link = false,
   small = false,
+  smallFont = false,
   type = 'button',
   rel = '',
   children,
   disabled = false,
   testId,
   className = "",
-  dataTooltipId = ""
+  dataTooltipId = "",
+  ref,
+  style
 }) => {
   const buttonStyle = joinClasses(
     'button',
     styles.button,
     variant === "secondary" && styles.secondary,
+    variant === "textOnly" && styles.textOnly,
     iconOnly && styles.iconOnly,
     small && styles.small,
     !!iconLeft && styles.iconLeft,
     !!iconRight && styles.iconRight,
+    smallFont && styles.smallFont,
+    inline && styles.inline,
     className
   )
 
   const commonProps = {
+    title: title,
     className: buttonStyle,
     onClick: handleClick,
     'data-testid': testId,
-    'data-tooltip-id': dataTooltipId
+    'data-tooltip-id': dataTooltipId,
+    style: style
   };
 
   if (href) {
     const linkProps = {
       ...commonProps,
-      to: href,
       rel: rel,
+      'aria-label': ariaLabel || '',
       ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
     };
-    return link 
-    ? <Link {...linkProps}>
+    return link
+    ? <Link {...linkProps} to={href}>
         {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
-        {!iconOnly && <span className={styles.label}>{children}</span>}
+        {iconOnly ? children : <span className={styles.label}>{children}</span>}
         {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
-      </Link> 
-    : <a {...linkProps}>
+      </Link>
+    : <a {...linkProps} href={href}>
         {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
-        {!iconOnly && <span className={styles.label}>{children}</span>}
+        {iconOnly ? children : <span className={styles.label}>{children}</span>}
         {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
       </a>;
   }
@@ -81,11 +98,12 @@ const Button: FC<ButtonProps> = ({
   return (
     <button
       {...commonProps}
+      ref={ref}
       type={type}
       disabled={disabled}
     >
       {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
-      {!iconOnly && <span className={styles.label}>{children}</span>}
+      {iconOnly ? children : <span className={styles.label}>{children}</span>}
       {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
     </button>
   );

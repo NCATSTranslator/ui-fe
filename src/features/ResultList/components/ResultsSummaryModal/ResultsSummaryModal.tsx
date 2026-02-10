@@ -1,12 +1,13 @@
 import { FC, useCallback, useMemo } from "react";
 import styles from "./ResultsSummaryModal.module.scss";
 import Modal from "@/features/Common/components/Modal/Modal";
-import LoadingBar from "@/features/Common/components/LoadingBar/LoadingBar";
+import LoadingBar from "@/features/Core/components/LoadingBar/LoadingBar";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
-import { Link } from "react-router-dom";
 import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
+import Button from "@/features/Core/components/Button/Button";
+import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 
 interface ResultsSummaryModalProps {
   handleResultMatchClick: (match: ResultContextObject) => void;
@@ -14,7 +15,6 @@ interface ResultsSummaryModalProps {
   isOpen?: boolean;
   isSummaryLoading: boolean;
   onClose?: () => void;
-  pk: string;
   resultContext: ResultContextObject[];
   streamedText: string;
 }
@@ -25,13 +25,12 @@ const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({
   isOpen = false,
   isSummaryLoading,
   onClose = ()=>{},
-  pk,
   streamedText,
   resultContext
 }) => {
 
   const startOpen = (isOpen === undefined) ? false : isOpen;
-
+  const {togglePanel} = useSidebar();
   const handleMatchedNameClick = useCallback((match: ResultContextObject) => {
     handleResultMatchClick(match);
   }, [handleResultMatchClick]);
@@ -112,7 +111,7 @@ const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({
           {
             !isSummaryLoading &&
             <div className={styles.linkContainer}>
-              <Link to={`/send-feedback?q=${pk}`} className={styles.sendFeedbackLink} reloadDocument target={'_blank'}><Feedback/><span className={styles.linkSpan}>Send Feedback</span></Link>
+              <Button handleClick={()=>togglePanel('feedback')} iconLeft={<Feedback/>}>Send Feedback</Button>
             </div>
           }
         </div>

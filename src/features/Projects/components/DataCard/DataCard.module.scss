@@ -1,0 +1,174 @@
+@use '@/assets/styles/variables' as *;
+
+.dataCard {
+  background-color: $white;
+  border-radius: $defaultBorderRadius;
+  transition: $defaultAnim;
+  display: block;
+  font-weight: 400;
+  .container {
+    display: grid;
+    gap: $dataCardGap;
+    padding: 12px $xs;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  &.projectCard {
+    border: 1px solid $lightPurpleTwo;
+    background: $white;
+    .container {
+      grid-template-columns: $projectCardColumns;
+    }
+  }
+  &.queryCard {
+    background: $lightGray;
+    .container {
+      grid-template-columns: $queryCardColumns;
+    }
+  }
+  &:hover {
+    background-color: $whiteHover;
+    cursor: pointer;
+    text-decoration: none;
+    .title, .title span, .title mark, .count,.bookmarksColumn, .notesColumn, .queriesColumn, .date, .icon  {
+      color: $purpleOne;
+      svg path {
+        fill: $purpleOne;
+      }
+    }
+    .optionsButton {
+      opacity: 1;
+    }
+    .title, .title span, .title mark {
+      text-decoration: underline;
+    }
+  }
+  
+  .icon {
+    display: flex;
+    margin-right: $xxs;
+    svg {
+      height: $m;
+      width: $m;
+      path {
+        fill: $black;
+        transition: $defaultAnim;
+      }
+    }
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    min-height: $m;
+    span {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+      span {
+        display: inline;
+      }
+    }
+  }
+  .titleForm {
+    width: 100%;
+  }
+  .titleMatch {
+    margin-left: $xxxs;
+  }
+  .title, .title span, .title mark {
+    margin-bottom: 0;
+    font-size: $bodyTwoSize;
+    font-weight: 800;
+    color: $black;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .titleInput {
+    margin-bottom: 0;
+    input {
+      font-size: $bodyTwoSize;
+      font-weight: 800;
+      color: $black;
+      text-decoration: none;
+      background-color: $lightGray;
+      border: none;
+      outline: none;
+      padding: $xxxs $xxs;
+    }
+    &:hover {
+      text-decoration: none;
+    }
+  }
+  .optionsButton {
+    opacity: 0;
+    transition: $defaultAnim;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    height: $m;
+    width: $s;
+    svg {
+      path {
+        fill: $purpleOne;
+      }
+    }
+  }
+  &.isRenaming {
+    .optionsButton {
+      display: none;
+    }
+  }
+
+  .bookmarksColumn, .notesColumn, .queriesColumn, .date {
+    font-size: $bodyTwoSize;
+    color: $darkGray;
+    transition: $defaultAnim;
+    svg path {
+      fill: $darkGray;
+    }
+  }
+
+  .bookmarksColumn, .notesColumn, .optionsColumn  {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  .optionsColumn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .addToProjectButton {
+    svg path {
+      stroke: $white;
+      fill: $darkGray;
+    }
+    &:hover {
+      svg path {
+        stroke: $white;
+        fill: $purpleOne;
+      }
+    }
+  }
+  .removeFromProjectButton {
+    svg path {
+      stroke: $darkGray;
+      fill: $white;
+    }
+    &:hover {
+      svg path {
+        stroke: $purpleOne;
+        fill: $purpleOne;
+      }
+    }
+  }
+}

@@ -1,0 +1,146 @@
+import { FC, ReactNode, MouseEvent, useState, useMemo, FormEvent, RefObject } from "react";
+import styles from "./DataCard.module.scss";
+import { joinClasses } from "@/features/Common/utils/utilities";
+import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
+import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
+import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
+import CardName from "@/features/Projects/components/CardName/CardName";
+import Button from "@/features/Core/components/Button/Button";
+import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
+import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
+import { QueryTypeString } from "@/features/Projects/types/projects";
+import CardWrapper from "@/features/Projects/components/CardWrapper/CardWrapper";
+
+interface DataCardProps {
+  icon: ReactNode;
+  ignoreTitleMatch?: boolean;
+  title: string;
+  searchTerm?: string;
+  linkTo?: string;
+  linkTarget?: string;
+  onClick?: (e: MouseEvent<HTMLElement>) => void;
+  className?: string;
+  'data-testid'?: string;
+  options?: ReactNode;
+  isRenaming?: boolean;
+  onTitleChange?: (value: string) => void;
+  onFormSubmit?: (e: FormEvent<HTMLFormElement>) => void;
+  textInputRef?: RefObject<HTMLInputElement | null>;
+  type: 'project' | 'query';
+  bookmarksCount: number;
+  notesCount: number;
+  queryCount?: number;
+  queryType?: QueryTypeString;
+  queriesLoading?: boolean;
+  date: string;
+}
+
+const DataCard: FC<DataCardProps> = ({
+  icon,
+  ignoreTitleMatch = false,
+  title,
+  searchTerm,
+  linkTo,
+  linkTarget,
+  onClick,
+  className,
+  'data-testid': testId,
+  options,
+  isRenaming,
+  onTitleChange,
+  onFormSubmit,
+  textInputRef,
+  type,
+  bookmarksCount,
+  notesCount,
+  queryCount,
+  queryType,
+  queriesLoading,
+  date
+}) => {
+
+  const cardClassName = joinClasses(styles.dataCard, className, isRenaming && styles.isRenaming, type === 'project' && styles.projectCard, type === 'query' && styles.queryCard);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+
+  const queryTypeLabel = useMemo(() => {
+    if(queryType === 'drug' || queryType === 'gene' || queryType === 'chemical') return 'Smart Query';
+    if(queryType === 'pathfinder') return 'Pathfinder Query';
+    return 'Unknown Query Type';
+  }, [queryType]);
+
+  const onOptionsClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOptionsOpen(prev => !prev);
+  };
+
+  const onOptionItemClick = (e: MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOptionsOpen(false);
+  };
+
+  return (
+    <CardWrapper
+      className={cardClassName}
+      onClick={onClick}
+      linkTo={linkTo}
+      linkTarget={linkTarget}
+      testId={testId}
+    >
+      <div className={styles.container}>
+        <CardName
+          ignoreTitleMatch={ignoreTitleMatch}
+          title={title}
+          searchTerm={searchTerm}
+          linkTo={linkTo}
+          linkTarget={linkTarget}
+          isRenaming={isRenaming}
+          onTitleChange={onTitleChange}
+          onFormSubmit={onFormSubmit}
+          textInputRef={textInputRef}
+          icon={icon}
+        />
+        <div className={styles.bookmarksColumn}>
+          <BookmarkIcon />
+          {bookmarksCount}
+        </div>
+        <div className={styles.notesColumn}>
+          <NoteIcon />
+          {notesCount}
+        </div>
+        <div className={styles.queriesColumn}>
+          {
+            type === 'project' ? (
+              <>
+                {`${queriesLoading ? '-' : queryCount || '0'} Quer${queryCount === 1 ? 'y' : 'ies'}`}
+              </>
+            ) : (
+              !!queryType && queryTypeLabel
+            )
+          }
+        </div>
+        <div className={styles.date}>
+          {date}
+        </div>
+        {
+          options &&
+          (        
+            <div className={styles.optionsColumn}>
+              <OutsideClickHandler onOutsideClick={()=>setOptionsOpen(false)}>
+                <Button className={styles.optionsButton} handleClick={onOptionsClick}>
+                  <OptionsIcon />
+                </Button>
+              </OutsideClickHandler>
+              <OptionsPane open={optionsOpen} onOptionItemClick={onOptionItemClick}>
+                {options && options}
+              </OptionsPane>
+            </div>
+          )
+        }
+      </div>
+    </CardWrapper>
+  );
+};
+
+export default DataCard;

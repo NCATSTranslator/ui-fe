@@ -1,14 +1,13 @@
-import { useCallback, FormEvent, useState } from "react";
+import { useCallback, FormEvent, useState, ReactNode } from "react";
 import styles from "./SendFeedbackForm.module.scss";
-import Button from "@/features/Common/components/Button/Button";
-import TextInput from "@/features/Common/components/TextInput/TextInput";
+import Button from "@/features/Core/components/Button/Button";
+import TextInput from "@/features/Core/components/TextInput/TextInput";
 import FileInput from "@/features/Common/components/FileInput/FileInput";
 import Select from "@/features/Common/components/Select/Select";
 import { Fade } from "react-awesome-reveal";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
 import { useFeedbackForm } from "@/features/Common/hooks/customHooks";
 import { CustomFile } from "@/features/Common/types/global";
-import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
 import Feedback from "@/assets/icons/navigation/Feedback.svg?react";
 
 const SendFeedbackForm = () => {
@@ -27,7 +26,7 @@ const SendFeedbackForm = () => {
   } = useFeedbackForm();
 
   const [createdIssueURL, setCreatedIssueURL] = useState<string | null>(null);
-  const currentARSpk = (getDataFromQueryVar("q") !== null) ? getDataFromQueryVar("q") : "";
+  const currentARSpk = (getDataFromQueryVar("q", window.location.search) !== null) ? getDataFromQueryVar("q", window.location.search) : "";
 
   const errorMessages = {
     category: "Please select a category.",
@@ -93,7 +92,7 @@ const SendFeedbackForm = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url: encodeURI(decodeURIComponent(getDataFromQueryVar("link") as string)),
+          url: encodeURI(decodeURIComponent(getDataFromQueryVar("link", window.location.search) as string)),
           ars_pk: currentARSpk,
           description: form.comments,
           reproduction_steps: form.steps,
@@ -121,23 +120,30 @@ const SendFeedbackForm = () => {
     errors: { category: boolean; comments: boolean; steps: boolean }; 
     errorMessages: Record<string, string> 
   }) => (
-    <div className={styles.errorContainer}>
+    <div>
       {errors.category && <p className={styles.errorText} role="alert">{errorMessages.category}</p>}
       {errors.comments && <p className={styles.errorText} role="alert">{errorMessages.comments}</p>}
       {errors.steps && <p className={styles.errorText} role="alert">{errorMessages.steps}</p>}
     </div>
   );
 
+  const fileInputLabel: ReactNode = <>Add Files <span className="fw-normal">- Optional</span></> as ReactNode;
+
   return (
     <div className={styles.sendFeedbackFormContainer}>
       {createdIssueURL ? (
         <div className={styles.issueCreatedContainer}>
-          <h5 className={styles.title}>Thanks for your feedback!</h5>
-          <p>Comments like yours help us improve and further develop the Translator interface.</p>
-          <p>You can view this ticket on Github and subscribe to receive updates from our team. You may also leave additional comments or feedback on the ticket.</p>
+          <h5 className={styles.title}>Thanks for helping us improve Translator!</h5>
+          <p>We really appreciate you sharing your valuable feedback with our team.</p>
           <div className={styles.buttonContainer}>
-            <Button isSecondary handleClick={() => setCreatedIssueURL(null)} className={styles.newIssue}><Feedback/> Send More Feedback</Button>
-            <Button link href={createdIssueURL} _blank rel="noopener noreferrer" className={styles.viewIssue}>View Ticket on GitHub <ExternalLink/></Button>
+            <Button 
+              variant="secondary" 
+              handleClick={() => setCreatedIssueURL(null)} 
+              className={styles.newIssue}
+              iconLeft={<Feedback/>}
+            >
+              Send More Feedback
+            </Button>
           </div>
         </div>
       ) : (
@@ -154,9 +160,9 @@ const SendFeedbackForm = () => {
                   <p className={styles.errorText} role="alert">{submitError}</p>
                 </div>
               )}
-              
+
               <ErrorDisplay errors={errors} errorMessages={errorMessages} />
-              
+
               <Select
                 label="Category *"
                 name="category"
@@ -174,13 +180,13 @@ const SendFeedbackForm = () => {
                 <option value="Bug Report" key="1">Bug Report</option>
                 <option value="Other Comment" key="2">Other Comment</option>
               </Select>
-              
+
               {showFieldError('category') && (
                 <div id="category-error" className={styles.errorText} role="alert">
                   {errorMessages.category}
                 </div>
               )}
-              
+
               {form.category === 'Bug Report' && (
                 <>
                   <TextInput
@@ -204,7 +210,7 @@ const SendFeedbackForm = () => {
                   )}
                 </>
               )}
-              
+
               <TextInput
                 label="Comments *"
                 rows={5}
@@ -218,28 +224,28 @@ const SendFeedbackForm = () => {
                 errorText={errorMessages.comments}
                 testId="comments"
               />
-              
+
               {showFieldError('comments') && (
                 <div id="comments-error" className={styles.errorText} role="alert">
                   {errorMessages.comments}
                 </div>
               )}
-              
+
               <FileInput
-                label={<>Add Files <span className="fw-normal">- Optional</span></>}
+                label={fileInputLabel}
                 buttonLabel="Browse Files"
                 fileTypes=".png,.jpg,.jpeg"
                 handleChange={handleFileChange}
                 multiple
               />
-              
+
               <Button 
-                type="submit" 
-                disabled={isSubmitting} 
+                type="submit"
+                disabled={isSubmitting}
                 className={styles.submitButton}
                 aria-describedby={isSubmitting ? 'submitting-status' : undefined}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
+                {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
               </Button>
               
               {isSubmitting && (

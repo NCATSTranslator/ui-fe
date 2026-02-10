@@ -1,0 +1,7 @@
+@use '@/assets/styles/variables' as *;
+
+.draggableQueryCardWrapper {
+  width: 260px;
+  box-shadow: $dropShadowHover;
+  border-radius: $defaultBorderRadius;
+}

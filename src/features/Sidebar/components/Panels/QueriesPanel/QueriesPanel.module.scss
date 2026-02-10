@@ -1,0 +1,24 @@
+@use "@/assets/styles/variables" as *;
+
+.queriesPanel {
+  .queriesList {
+    display: flex;
+    flex-direction: column;
+    gap: $xs;
+  }
+  .projectListContainer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+  }
+  .projectsList {
+    padding: $s 15px calc($xl *2) $s;
+    background-color: $lightGray;
+    height: -webkit-fill-available;
+    height: -moz-available;
+    height: fill-available;
+  }
+}

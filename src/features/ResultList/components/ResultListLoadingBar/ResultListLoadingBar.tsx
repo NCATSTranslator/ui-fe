@@ -25,7 +25,7 @@ const ResultListLoadingBar: FC<ResultListLoadingBarProps> = ({
   const currentInterval = data.currentInterval ?? 1;
   const isComplete = useMemo(() => {
     return currentInterval >= totalIntervals || 
-           data.status === "success" || 
+           data.status === "complete" || 
            (!data.hasFreshResults && !data.isFetchingARAStatus && !data.isFetchingResults);
   }, [currentInterval, totalIntervals, data.status, data.hasFreshResults, data.isFetchingARAStatus, data.isFetchingResults]);
 
@@ -82,8 +82,9 @@ const ResultListLoadingBar: FC<ResultListLoadingBarProps> = ({
     <div className={styles.ResultListLoadingBar}>
       <div className={styles.top}>
         <ResultListLoadingButton 
-          data={data} 
-          currentPercentage={barWidthPercentage}
+          hasFreshResults={data.hasFreshResults}
+          showDisclaimer={data.showDisclaimer}
+          handleResultsRefresh={data.handleResultsRefresh}
         />
       </div>
       <div className={styles.loadingBarContainer}>

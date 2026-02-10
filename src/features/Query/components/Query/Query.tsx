@@ -4,15 +4,14 @@ import { useLocation } from "react-router-dom";
 import { AutocompleteItem, QueryItem, QueryType } from "@/features/Query/types/querySubmission";
 import { Result } from "@/features/ResultList/types/results.d";
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
-import { useQueryState, useAutocomplete, useQuerySubmission, useExampleQueries } from "@/features/Query/hooks/customQueryHooks";
+import { useQueryItem, useAutocompleteConfig, useAutocomplete, useQuerySubmission, useExampleQueries } from "@/features/Query/hooks/customQueryHooks";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
-import cloneDeep from "lodash/cloneDeep";
 import styles from './Query.module.scss';
-import { AppToastContainer } from '@/features/Common/components/AppToastContainer/AppToastContainer';
 import QueryResultsView from '@/features/Query/components/QueryResultsView/QueryResultsView';
 import QueryInputView from '@/features/Query/components/QueryInputView/QueryInputView';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
 import { User } from "@/features/UserAuth/types/user";
+import { ProjectRaw } from "@/features/Projects/types/projects";
 
 interface QueryProps {
   isResults?: boolean;
@@ -25,6 +24,10 @@ interface QueryProps {
   results?: Result[];
   handleResultMatchClick?: (match: ResultContextObject) => void;
   pk?: string;
+  selectedProject?: ProjectRaw | null;
+  combinedStyles?: { [key: string]: string };
+  shouldNavigate?: boolean;
+  submissionCallback?: () => void;
 }
 
 const Query: FC<QueryProps> = ({
@@ -37,36 +40,40 @@ const Query: FC<QueryProps> = ({
   setShareModalFunction = () => {},
   results = [],
   handleResultMatchClick,
-  pk = ""
+  pk = "",
+  selectedProject = null,
+  combinedStyles,
+  shouldNavigate = true,
+  submissionCallback = () => {}
 }) => {
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser) as User | null;
-  
-  const nameResolverEndpoint = config?.name_resolver 
-    ? `${config.name_resolver}/lookup` 
+
+  const nameResolverEndpoint = config?.name_resolver.endpoint
+    ? `${config.name_resolver.endpoint}/lookup`
     : 'https://name-lookup.transltr.io/lookup';
 
   const {
     queryItem,
     setQueryItem,
-    clearQueryItem,
+    clear: clearQueryItem,
     inputText,
     setInputText,
-    prevQueryItems,
-    autocompleteFunctions,
-    limitPrefixes,
-    limitTypes
-  } = useQueryState(initPresetTypeObject, initNodeLabelParam, initNodeIdParam);
+  } = useQueryItem(initPresetTypeObject, initNodeLabelParam, initNodeIdParam);
+
+  const autocompleteConfig = useAutocompleteConfig(queryItem.type);
 
   const {
     autocompleteItems,
     loadingAutocomplete,
+    autocompleteVisibility,
     delayedQuery,
+    setAutocompleteVisibility,
     clearAutocompleteItems
-  } = useAutocomplete(autocompleteFunctions, nameResolverEndpoint, limitTypes, limitPrefixes);
+  } = useAutocomplete(autocompleteConfig, nameResolverEndpoint);
 
-  const { isLoading, setIsLoading, submitQuery } = useQuerySubmission();
+  const { isLoading, setIsLoading, submitQuery } = useQuerySubmission('single', shouldNavigate, submissionCallback);
 
   const exampleQueries = useExampleQueries(config?.cached_queries);
 
@@ -92,11 +99,8 @@ const Query: FC<QueryProps> = ({
     setIsError(false);
     const newQueryType = queryTypes.find((type) => type.id === parseInt(value));
     if (newQueryType) {
-      autocompleteFunctions.current = newQueryType.functions;
-      limitTypes.current = [newQueryType.filterType];
-      limitPrefixes.current = newQueryType.limitPrefixes;
       clearAutocompleteItems();
-      
+
       if (resetInputText) {
         setQueryItem({ node: null, type: newQueryType });
         setInputText("");
@@ -104,7 +108,7 @@ const Query: FC<QueryProps> = ({
         setQueryItem((prev) => ({ ...prev, type: newQueryType }));
       }
     }
-  }, [autocompleteFunctions, limitTypes, limitPrefixes, clearAutocompleteItems, setQueryItem, setInputText]);
+  }, [clearAutocompleteItems, setQueryItem, setInputText]);
 
   const handleItemSelection = useCallback((item: AutocompleteItem) => {
     setIsError(false);
@@ -112,15 +116,9 @@ const Query: FC<QueryProps> = ({
       item.label += ` (${item.match})`;
     }
     setInputText(item.label);
-    setQueryItem((prev) => {
-      const newQueryItem = { type: prev.type, node: item };
-      const newPrevItems = cloneDeep(prevQueryItems.current);
-      newPrevItems.push(newQueryItem);
-      prevQueryItems.current = newPrevItems;
-      return newQueryItem;
-    });
-    clearAutocompleteItems();
-  }, [setInputText, setQueryItem, prevQueryItems, clearAutocompleteItems]);
+    setQueryItem((prev) => ({ type: prev.type, node: item }));
+    setAutocompleteVisibility(false);
+  }, [setInputText, setQueryItem, setAutocompleteVisibility]);
 
   const validateSubmission = useCallback((item: QueryItem | null) => {
     if (!item?.node || !item.node.id) {
@@ -135,8 +133,8 @@ const Query: FC<QueryProps> = ({
     }
     if(!submitQuery)
       return;
-    submitQuery(item);
-  }, [submitQuery]);
+    submitQuery(item, selectedProject?.id?.toString() || undefined);
+  }, [submitQuery, selectedProject]);
 
   const handleSubmission = useCallback((item: QueryItem | null) => {
     validateSubmission(item || queryItem);
@@ -154,7 +152,6 @@ const Query: FC<QueryProps> = ({
   return (
     <>
       <div className={`${styles.query} ${isResults ? styles.results : ''}`}>
-        <AppToastContainer />
         <div className={styles.container}>
           {isResults ? (
             <QueryResultsView
@@ -182,7 +179,9 @@ const Query: FC<QueryProps> = ({
               onItemSelection={handleItemSelection}
               onSubmission={handleSubmission}
               onClearQueryItem={clearQueryItem}
-              onClearAutocomplete={clearAutocompleteItems}
+              autocompleteVisibility={autocompleteVisibility}
+              setAutocompleteVisibility={setAutocompleteVisibility}
+              combinedStyles={combinedStyles}
             />
           )}
         </div>

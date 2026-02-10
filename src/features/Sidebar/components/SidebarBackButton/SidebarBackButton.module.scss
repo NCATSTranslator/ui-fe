@@ -1,0 +1,18 @@
+@use "@/assets/styles/variables" as *;
+
+.button.sidebarBackButton {
+  background-color: $white;
+  border-bottom: 1px solid $midGray;
+  padding: 12px $xs 12px;
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: 0;
+  span {
+    color: $darkGray;
+    font-size: $bodyTwoSize;
+  }
+  svg path {
+    fill: $white;
+    stroke: $darkGray;
+  }
+}

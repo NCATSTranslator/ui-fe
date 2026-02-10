@@ -1,0 +1,29 @@
+@use '@/assets/styles/variables' as *;
+
+.queryStatusPanel {
+  display: grid;
+  align-content: space-between;
+  height: 100%;
+  .top {
+    display: grid;
+    gap: $s;
+  }
+  p, a {
+    margin: 0;
+    font-size: $bodyTwoSize;
+  }
+  .statusIndicator {
+    display: flex;
+    align-items: center;
+    gap: $xxs;
+    .percentage {
+      color: $darkGray;
+      font-size: $captionSize;
+    }
+  }
+  .statusLabel {
+    font-weight: 800;
+    font-size: $subOneSize;
+    color: $black;
+  }
+}

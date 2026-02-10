@@ -1,7 +1,7 @@
 import { FC, useCallback, useState } from "react";
 import styles from './ResultItemInteractables.module.scss';
 import { Link } from 'react-router-dom';
-import ShareIcon from '@/assets/icons/buttons/Link.svg?react';
+import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
 import BookmarkFilled from "@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react";
 import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"
@@ -141,8 +141,8 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
                     <span className={styles.tooltip}>
                       {
                         isBookmarked
-                        ? <>Remove this bookmark.</>
-                        : <>Bookmark this result to review it later in the <Link to="/workspace" target='_blank'>Workspace</Link>.</>
+                        ? <>Remove this result from your bookmarks.</>
+                        : <>Bookmark this result to review it later in your <Link to="/projects" target='_blank'>Projects</Link>.</>
                       }
                     </span>
                   </Tooltip>
@@ -165,8 +165,8 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
                     data-result-name={nameString}
                     aria-describedby={`notes-tooltip-${nameStringNoApostrophes}`}
                   />
-                  <Tooltip id={`notes-tooltip-${nameStringNoApostrophes}`}>
-                    <span className={styles.tooltip}>Add your own custom notes to this result. <br/> (You can also view and edit notes on your<br/> bookmarked results in the <Link to="/workspace" target='_blank'>Workspace</Link>).</span>
+                  <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
+                    <span className={styles.tooltip}>Add your own custom notes to this result. You can also view and edit notes on your bookmarked results in your <Link to="/projects" target='_blank'>Projects</Link>.</span>
                   </Tooltip>
                   <span className={styles.label}>Notes</span>
                 </Button>

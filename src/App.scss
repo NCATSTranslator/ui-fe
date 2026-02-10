@@ -1,23 +1,8 @@
 @use "@/assets/styles" as *;
 
-
 .app {
-  display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  min-height: 100vh;
-}
-
-.header-disclaimer {
-  padding: $xs;
-  background-color: $red;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  p {
-    text-align: center;
-    margin: 0;
-    color: $white;
-    font-weight: 800;
-    font-size: $captionSize;
-  }
+  .layout { display: flex; height: 100vh; justify-content: stretch; }
+  .smallScreen { width: 0; }
+  .content { flex: 1; display: flex; flex-direction: column; }
+  .content > footer { margin-top: auto; }
 }

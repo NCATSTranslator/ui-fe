@@ -1,11 +1,12 @@
    @use "@/assets/styles/variables" as *;
 
 .facetGroup {
-  padding: 15px 0;
-  border-bottom: 1px solid $midGray;
-  &:last-of-type {
-    border-bottom: none;
-  }
+  padding: $s;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  max-height: -webkit-fill-available;
+  max-height: -moz-available;
+  max-height: fill-available;
   .underline {
     text-decoration: underline;
   }
@@ -20,9 +21,6 @@
     width: 100%;
     &:hover {
       box-shadow: none;
-    }
-    &>div {
-      min-width: 298px;
     }
     svg {
       transition: all .35s ease;
@@ -88,16 +86,23 @@
     }
   }
   .section {
+    padding-bottom: $l;
     &::-webkit-scrollbar-track {
       background-color: $white;
     }
-    &.role {
-      max-height: 250px;
-      overflow-y: auto;
+    .noResults {
+      font-size: $captionSize;
+      font-weight: 400;
+      color: $darkGray;
+      margin: 0;
+      padding: 0;
+      .searchTerm {
+        font-size: $captionSize;
+        font-weight: 800;
+      }
     }
   }
   .roleFilter {
-    width: calc(100% - 11px);
     margin-bottom: 8px;
     input {
       color: #202124;

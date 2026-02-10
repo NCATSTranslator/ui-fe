@@ -10,8 +10,6 @@ interface WindowSize {
   height: number | undefined;
 }
 
-
-
 interface DeepDifference {
   path: string;
   from: unknown;
@@ -408,7 +406,6 @@ export const useDisclaimersApproved = (title: string): [boolean, Dispatch<SetSta
     }
 
     setIsDisclaimerApproved(initDisclaimerApproval);
-    document.title = `${title} - NCATS Biomedical Data Translator`;
   }, [title]);
 
   return [isDisclaimerApproved, setIsDisclaimerApproved];

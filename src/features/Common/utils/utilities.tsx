@@ -15,8 +15,9 @@ import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { isResultEdge, Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
-import { Location } from 'react-router-dom';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
+import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { Location as RouterLocation } from 'react-router-dom';
 
 /**
  * Retrieves an icon based on a category.
@@ -129,6 +130,28 @@ export const capitalizeFirstLetter = (string: string): string => {
   let newString = string.toLowerCase();
   return newString.charAt(0).toUpperCase() + newString.slice(1);
 }
+
+/**
+ * Formats a biolink type string by removing the biolink: prefix,
+ * replacing underscores with spaces, splitting PascalCase, and capitalizing each word.
+ * E.g., "biolink:Chemical_Entity" becomes "Chemical Entity"
+ * E.g., "biolink:ChemicalEntity" becomes "Chemical Entity"
+ * E.g., "ChemicalEntity" becomes "Chemical Entity"
+ * @param {string} text - The text to format
+ * @returns {string} The formatted text
+ */
+export const formatBiolinkTypeString = (text: string): string => {
+  // Remove biolink: prefix if present
+  const withoutPrefix = text.replace(/[Bb]iolink:/g, '');
+  
+  // Format the text: replace underscores, split PascalCase, capitalize
+  return withoutPrefix
+    .replace(/_/g, ' ')  // Replace underscores with spaces
+    .replace(/([a-z])([A-Z])/g, '$1 $2')  // Split PascalCase
+    .split(' ')
+    .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
 
 /**
  * Checks if a word is a Roman numeral.
@@ -385,8 +408,8 @@ export const getLastItemInArray = <T,>(arr: T[]): T | undefined => {
  * @param {string} varID - The ID of the query variable to retrieve.
  * @returns {string | null} - The value of the query variable, or null if the variable is not found.
  */
-export const getDataFromQueryVar = (varID: string) => {
-  const dataValue = new URLSearchParams(window.location.search).get(varID);
+export const getDataFromQueryVar = (varID: string, decodedParams: string) => {
+  const dataValue = new URLSearchParams(decodedParams).get(varID);
   const valueToReturn = (dataValue) ? dataValue : null;
   return valueToReturn;
 }
@@ -408,7 +431,7 @@ export const isValidDate = (date: string | number | Date): boolean => {
  * @param {Date} date - The date object to format.
  * @returns {string | boolean} - The formatted date string, or false if the date is invalid.
  */
-export const getFormattedDate = (date: Date): string | boolean => {
+export const getFormattedDate = (date: Date, includeTime: boolean = true): string | boolean => {
   if (!isValidDate(date))
     return false;
 
@@ -417,9 +440,62 @@ export const getFormattedDate = (date: Date): string | boolean => {
   const formattedDate = new Intl.DateTimeFormat('en-US', dateFormatOptions).format(date);
   const formattedTime = new Intl.DateTimeFormat('en-US', timeFormatOptions).format(date);
 
-  return `${formattedDate} (${formattedTime})`;
+  return `${formattedDate}${includeTime ? ` (${formattedTime})` : ''}`;
 };
 
+
+/**
+ * Formats a date relative to the current date.
+ * - Returns time (e.g., "8:59am") if the date is today
+ * - Returns brief date (e.g., "Oct 14") if the date is in the current year
+ * - Returns numerical date (e.g., "6/10/24") if the date is from a previous year
+ *
+ * @param {Date} date - The date to format.
+ * @returns {string} - The formatted date string.
+ */
+export const getTimeRelativeDate = (date: Date): string => {
+  if (!isValidDate(date)) {
+    return '';
+  }
+
+  const now = new Date();
+  const inputDate = new Date(date);
+
+  // Check if it's today
+  const isToday = now.getFullYear() === inputDate.getFullYear() &&
+                  now.getMonth() === inputDate.getMonth() &&
+                  now.getDate() === inputDate.getDate();
+
+  if (isToday) {
+    // Return time in format like "8:59am"
+    const timeFormatOptions: Intl.DateTimeFormatOptions = {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    };
+    return new Intl.DateTimeFormat('en-US', timeFormatOptions).format(inputDate).toLowerCase();
+  }
+
+  // Check if it's in the current year
+  const isCurrentYear = now.getFullYear() === inputDate.getFullYear();
+
+  if (isCurrentYear) {
+    // Return brief date like "Oct 14"
+    const briefDateOptions: Intl.DateTimeFormatOptions = {
+      month: 'short',
+      day: 'numeric'
+    };
+    return new Intl.DateTimeFormat('en-US', briefDateOptions).format(inputDate);
+  }
+
+  // Return numerical date like "6/10/24" for older years
+  const numericalDateOptions: Intl.DateTimeFormatOptions = {
+    month: 'numeric',
+    day: 'numeric',
+    year: '2-digit'
+  };
+  return new Intl.DateTimeFormat('en-US', numericalDateOptions).format(inputDate);
+}
 /**
  * Generates a link to the feedback form with the current page URL encoded.
  *
@@ -469,10 +545,10 @@ export const combineObjectArrays = <T extends Record<string, unknown>,>(arr1: T[
 /**
  * Utility function that returns a full pathname plus any search and hash params.
  *
- * @param location - The Location object to check.
+ * @param {RouterLocation | Location} location - The Location or RouterLocation object to check.
  * @returns {string} String containing the full pathname.
  */
-export const getFullPathname = (location: Location): string => {
+export const getFullPathname = (location: RouterLocation | Location): string => {
   let fullPath = location.pathname;
   if(!!location.search)
     fullPath += location.search;
@@ -548,7 +624,7 @@ export const intToNumeral = (num: number): string => {
       num -= value;
     }
   }
-  
+
   return result.toLowerCase();
 };
 
@@ -566,7 +642,7 @@ export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): nu
     if(!path)
       continue;
     for(const [i, subgraphItemID] of path.subgraph.entries()) {
-      if(i % 2 === 0)
+      if(isNodeIndex(i))
         continue;
       const edge = getEdgeById(resultSet, subgraphItemID);
       if(isResultEdge(edge) && edge.support.length > 0) {
@@ -579,20 +655,25 @@ export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): nu
 
 /**
  * Takes a ResultEdge object and returns a boolean value based on whether the edge has any support paths.
- * 
+ *
  * @param {ResultEdge | null | undefined} item - ResultEdge Object.
- * @returns {boolean} - Does the edge have support paths attached. 
+ * @returns {boolean} - Does the edge have support paths attached.
  */
 export const hasSupport = (item: ResultEdge | null | undefined): boolean => {
   return !!item && Array.isArray(item.support) && item.support.length > 0;
 };
 
+export const isPathIndirectEdge = (resultSet: ResultSet, path: Path): boolean => {
+  if (!(path.subgraph && path.subgraph.length === 3)) return false;
+  const edge = getEdgeById(resultSet, path.subgraph[1]);
+  return hasSupport(edge);
+}
 /**
  * Generates a single compressed edge based on a provided list of edge IDs.
- * 
+ *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {string[]} edgeIDs - An array of edge IDs.
- * @returns {ResultEdge} - A compressed edge. 
+ * @returns {ResultEdge} - A compressed edge.
  */
 export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): ResultEdge => {
   const edges = edgeIDs.map(edgeID => getEdgeById(resultSet, edgeID)).filter(edge => !!edge);
@@ -663,7 +744,7 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
           }
         }
       } else {
-        // handle inferred edges that have different predicates 
+        // handle inferred edges that have different predicates
         if(currentEdge.support.length > 0 && baseEdge.support.length > 0)
           mergeSupport(baseEdge, currentEdge);
         // Add as a new compressed edge
@@ -677,15 +758,15 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
 
 /**
  * Generates an array of compressed edges based on a provided array of edges.
- * 
+ *
  * For use primarily in the evidence modal.
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {ResultEdge[]} edges - An array of edges.
- * @returns {ResultEdge[]} - An array of compressed edges. 
+ * @returns {ResultEdge[]} - An array of compressed edges.
  */
 export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): ResultEdge[] => {
-  const compressedEdges: ResultEdge[] = []; 
+  const compressedEdges: ResultEdge[] = [];
   // sort edges by predicate alphabetically
   edges.sort((a,b)=> a.predicate.localeCompare(b.predicate));
   let edgeIDsToCompress: Set<string> = new Set<string>([]);
@@ -693,7 +774,7 @@ export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): R
     let edge = edges[i];
     let nextEdge: undefined | ResultEdge = edges[i+1];
     // compress edges if predicates match and support status is the same
-    if(!!nextEdge 
+    if(!!nextEdge
       && nextEdge.predicate === edge.predicate
       && hasSupport(nextEdge) === hasSupport(edge)
     ) {
@@ -717,18 +798,18 @@ export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): R
 
 /**
  * Generates a compressed subgraph based on a provided subgraph.
- * 
+ *
  * For use primarily in the evidence modal.
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string | string)[]} subgraph - The initial subgraph (an array of node/edge ids).
- * @returns {(ResultNode | ResultEdge | ResultEdge[])[]} - The compressed subgraph with nodes and edges fetched from the ResultSet. 
+ * @returns {(ResultNode | ResultEdge | ResultEdge[])[]} - The compressed subgraph with nodes and edges fetched from the ResultSet.
  */
 export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | string[])[]): (ResultNode | ResultEdge | ResultEdge[])[] => {
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] = [];
   for(const [i, ID] of subgraph.entries()) {
     // handle nodes
-    if(i % 2 === 0) {
+    if(isNodeIndex(i)) {
       if(Array.isArray(ID))
         continue;
       const node = getNodeById(resultSet, ID);
@@ -743,7 +824,7 @@ export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | 
           compressedSubgraph.push(edge);
       // compressed edges
       } else {
-        const edges: ResultEdge[] = getEdgesByIds(resultSet, ID); 
+        const edges: ResultEdge[] = getEdgesByIds(resultSet, ID);
         const compressedEdges = getCompressedEdges(resultSet, edges);
         // add the compressed edges to the subgraph
         compressedSubgraph.push(compressedEdges);
@@ -758,7 +839,7 @@ export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | 
  * Returns a formatted name for pathfinder results based on a provided string.
  *
  * @param {string} name - The pathfinder result name to format
- * @returns {string} - The formatted result name. 
+ * @returns {string} - The formatted result name.
  */
 export const getFormattedPathfinderName = (name: string) => {
   const formattedName = name.replace(/([A-Z])/g, '$1').trim()
@@ -770,13 +851,13 @@ export const getFormattedPathfinderName = (name: string) => {
  *
  * @param {ResultSet} resultSet - ResultSet object.
  * @param {Path} path - Path object.
- * @returns {string} - Represents a user-readable version of the path. 
+ * @returns {string} - Represents a user-readable version of the path.
  *
  */
 export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string => {
   let stringName = "";
   for(const [i, id] of path.subgraph.entries()) {
-    if(i % 2 !== 0) {
+    if(isNodeIndex(i)) {
       const node = getNodeById(resultSet, id);
       stringName += node?.names[0];
     } else {
@@ -791,7 +872,7 @@ export const getStringNameFromPath = (resultSet: ResultSet, path: Path): string 
  * Type guard to check if a provided value is a string array
  *
  * @param {unknown} value - Arbitrary value.
- * @returns {boolean} - True if the value is a string array, otherwise false. 
+ * @returns {boolean} - True if the value is a string array, otherwise false.
  *
  */
 export const isStringArray = (value: unknown): value is string[] => {
@@ -800,10 +881,10 @@ export const isStringArray = (value: unknown): value is string[] => {
 
 /**
  * Returns a result edge object with either the properties of an optionally provided result edge object, or
- * a blank result edge object. 
+ * a blank result edge object.
  *
  * @param {ResultEdge | undefined} edge - An optional edge object used to fill out the returned default edge.
- * @returns {ResultEdge} - The default result edge object. 
+ * @returns {ResultEdge} - The default result edge object.
  *
  */
 export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
@@ -812,14 +893,21 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   is_root: edge?.is_root || false,
   compressed_edges: edge?.compressed_edges || [],
   knowledge_level: edge?.knowledge_level || "unknown",
+  metadata: edge?.metadata || {
+    edge_bindings: [],
+    inverted_id: null,
+    is_root: false,
+  },
   object: edge?.object || "",
   predicate: edge?.predicate || "",
   predicate_url: edge?.predicate_url || "",
+  description: edge?.description || "",
   provenance: edge?.provenance || [],
   publications: edge?.publications || {},
   subject: edge?.subject || "",
   support: edge?.support || [],
   trials: edge?.trials || [],
+  tags: edge?.tags || {}
 });
 
 /**
@@ -838,10 +926,55 @@ export const joinClasses = (...classes: (string | false | null | undefined)[]) =
  * Scrolls to a provided element reference.
  *
  * @param {RefObject<HTMLElement | null>} elementRef - The element reference to scroll to.
- */ 
+ */
 export const scrollToRef = (elementRef: RefObject<HTMLElement | null>) => {
   if (elementRef.current)
     elementRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   else
     console.warn("Could not scroll to element, element ref is not set");
+};
+
+/**
+ * Finds an item in a set based on a provided predicate.
+ *
+ * @param {Set<T>} set - The set to search in.
+ * @param {function} predicate - The predicate function to use.
+ * @returns {T | undefined} - The item found in the set, or undefined if no item is found.
+ */
+export const findInSet = <T,>(set: Set<T>, predicate: (obj: T)=>boolean): T | undefined => {
+  for (const item of set) {
+    if(predicate(item)) {
+      return item;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Common query client options for all queries.
+ *
+ * @returns {QueryClientConfig} - The common query client options.
+ */
+/**
+ * Replaces occurrences of "treats" or "treat" in a predicate string
+ * with "impacts" or "impact" respectively.
+ *
+ * @param {string} predicate - The predicate string to transform.
+ * @returns {string} - The transformed predicate string.
+ */
+export const replaceTreatWithImpact = (predicate: string): string => {
+  return predicate.replace(/treats/gi, "impacts").replace(/treat/gi, "impact");
+}
+
+export const commonQueryClientOptions = {
+  defaultOptions: {
+    queries: {
+      staleTime: 2 * 60 * 1000, // 2 min
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
 };

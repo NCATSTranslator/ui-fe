@@ -1,10 +1,10 @@
 import styles from './UserSave.module.scss';
-import { useState, useEffect, RefObject, Dispatch, SetStateAction, FC, useCallback, useMemo } from 'react';
+import { RefObject, Dispatch, SetStateAction, FC, useCallback, useMemo } from 'react';
 import Highlighter from 'react-highlight-words';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultItem from '@/features/ResultItem/components/ResultItem/ResultItem';
-import { emptyEditor, SaveGroup } from '@/features/UserAuth/utils/userApi';
-import { getResultsShareURLPath } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { SaveGroup } from '@/features/UserAuth/utils/userApi';
+import { getResultsShareURLPath } from "@/features/Common/utils/web";
 import { getCompressedEdge, getFormattedDate } from '@/features/Common/utils/utilities';
 import { Path, Result, ResultEdge } from '@/features/ResultList/types/results';
 import AnimateHeight from 'react-animate-height';
@@ -13,6 +13,8 @@ import ChevUp from "@/assets/icons/directional/Chevron/Chevron Up.svg?react";
 import Alert from "@/assets/icons/status/Alerts/Info.svg?react";
 import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
+import { currentConfig } from '@/features/UserAuth/slices/userSlice';
+import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 interface UserSaveProps {
   activateEvidence?: (item: Result, edge: ResultEdge, path: Path, pathKey: string, pk: string) => void;
@@ -45,7 +47,7 @@ const UserSave: FC<UserSaveProps> = ({
   showHiddenPaths,
   zoomKeyDown }) => {
 
-    
+  const config = useSelector(currentConfig);
   let key = save[0];
   let queryObject = save[1];
   const arspk = useMemo(() => save[1].query.pk, [save]);
@@ -53,21 +55,9 @@ const UserSave: FC<UserSaveProps> = ({
   let typeString = (!!queryObject.query.type) ? `What ${queryObject.query.type.targetType}s ${queryObject.query.type.pathString}` : "";
   let queryNodeString = queryObject.query.nodeLabel;
   let queryTypeID = (!!queryObject.query.type) ? queryObject.query.type.id : 'p';
-  let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryTypeID, "", key);
+  let shareURL = getResultsShareURLPath(queryNodeString, queryObject.query.nodeId, queryTypeID, "", key, config?.include_hashed_parameters);
   let submittedDate = (queryObject?.query?.submitted_time) ? getFormattedDate(new Date(queryObject.query.submitted_time)) : '';
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [height, setHeight] = useState<number | "auto">(0);
-
-  useEffect(() => {
-    if(isExpanded === false)
-      setHeight(0);
-    else
-      setHeight('auto');
-  }, [isExpanded])
-
-  const handleToggle = () => {
-    setIsExpanded(!isExpanded);
-  }
+  const { height, isOpen: isExpanded, toggle: handleToggle } = useAnimateHeight();
 
   const handleActivateEvidence = useCallback((item: Result, edgeIDs: string[], path: Path, pathKey: string) => {
     if(!resultSet)
@@ -99,8 +89,8 @@ const UserSave: FC<UserSaveProps> = ({
           
         </div>
         {
-          queryObject.saves && Array.from(queryObject.saves).length > 0 &&
-          <p className={styles.numSaves}>{Array.from(queryObject.saves).length} Saved Result{(Array.from(queryObject.saves).length > 1) && "s"}</p>
+          queryObject.saves && queryObject.saves.size > 0 &&
+          <p className={styles.numSaves}>{queryObject.saves.size} Saved Result{(queryObject.saves.size > 1) && "s"}</p>
         }
         <button className={`${styles.accordionButton} accordionButton ${isExpanded ? 'open' : 'closed' }`} onClick={handleToggle}>
           <ChevDown/>
@@ -195,16 +185,16 @@ const UserSave: FC<UserSaveProps> = ({
           </div>
           <div></div>
         </div>
-        {queryObject.saves && Array.from(queryObject.saves).sort((a, b) => a.label.localeCompare(b.label)).map((save, i) => {
+        {queryObject.saves && Array.from(queryObject.saves.values()).sort((a, b) => a.label.localeCompare(b.label)).map((save, i) => {
           const queryType = save.data.query.type;
           const queryItem = save.data.item;
           const queryNodeID = save.data.query.nodeId;
           const queryNodeLabel = save.data.query.nodeLabel;
           const queryNodeDescription = save.data.query.nodeDescription;
-          queryItem.hasNotes = (save.notes.length === 0 || JSON.stringify(save.notes) === emptyEditor) ? false : true;
           if ('compressedPaths' in (save?.data?.item || {}))
             return null;
 
+          const bookmarkItem = queryObject.saves.get(save.object_ref) ?? null;
           return (
             <div key={save.id} className={styles.result}>
               <ResultItem
@@ -219,9 +209,7 @@ const UserSave: FC<UserSaveProps> = ({
                 queryNodeID={(typeof queryNodeID === "string") ? queryNodeID : queryNodeID.toString()}
                 queryNodeLabel={queryNodeLabel}
                 queryNodeDescription={queryNodeDescription}
-                bookmarked={true}
-                bookmarkID={(typeof save.id === "string") ? save.id : (save.id === null) ? "" : save.id.toString()}
-                hasNotes={queryItem.hasNotes}
+                bookmarkItem={bookmarkItem}
                 handleBookmarkError={handleBookmarkError}
                 bookmarkAddedToast={bookmarkAddedToast}
                 bookmarkRemovedToast={bookmarkRemovedToast}

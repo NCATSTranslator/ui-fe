@@ -1,0 +1,180 @@
+@use "@/assets/styles/variables" as *;
+
+.sidebarCard {
+  padding: $xs;
+  display: grid;
+  gap: $xxs;
+  grid-template-columns: auto 1fr;
+  border-radius: $defaultBorderRadius;
+  transition: $defaultAnim;
+  background-color: $lightGray;
+  position: relative;
+  font-weight: 400;
+  &.activeQuery, &.projectCard.activeProject {
+    background-color: $lightPurpleTwo;
+    .leftSection svg path, .count svg path {
+      fill: $purpleOne;
+    }
+    .title, .title span, .title mark, .count {
+      color: $purpleOne;
+    }
+  }
+  &.projectCard {
+    background-color: $white;
+    border: 1px solid $midGray;
+    &.activeProject {
+      border: 1px solid $midPurpleTwo;
+    }
+    &:hover  {
+      background-color: $whiteHover;
+      border: 1px solid $lightPurpleTwo;
+      .leftSection svg path, .count svg path {
+        fill: $purpleOne;
+      }
+    }
+    .leftSection svg path {
+      fill: $black;
+      transition: $defaultAnim;
+    }
+  }
+  &:hover {
+    background-color: $lightPurpleTwo;
+    text-decoration: none;
+    .title, .title span, .title mark, .count {
+      color: $purpleOne;
+    }
+    svg path {
+      fill: $purpleOne;
+    }
+    .optionsButton {
+      opacity: 1;
+    }
+    .title, .title span, .title mark {
+      text-decoration: underline;
+    }
+  }
+  .optionsButton {
+    opacity: 0;
+    transition: $defaultAnim;
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    top: $xxs;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    svg {
+      path {
+        fill: $purpleOne;
+      }
+    }
+  }
+  &.isRenaming {
+    .optionsButton {
+      display: none;
+    }
+  }
+  .folderPlusIcon {
+    path {
+      stroke: $white;
+    }
+  }
+  .leftSection {
+    display: flex;
+    align-items: flex-start;
+    padding-top: $xxxs;
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+  .content {
+    min-width: 0;
+  }
+  .title {
+    display: flex;
+    min-height: $m;
+    align-items: center;
+    cursor: pointer;
+    max-width: 196px;
+    .rightIcon {
+      margin-left: $xxs;
+      svg {
+        height: 18px;
+        width: 18px;
+      }
+    }
+    span {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+      span {
+        display: inline;
+      }
+    }
+  }
+  .titleMatch {
+    margin-left: $xxxs;
+  }
+  .title, .title span, .title mark {
+    margin-bottom: 0;
+    font-size: $bodyTwoSize;
+    font-weight: 800;
+    color: $black;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .titleInput {
+    margin-bottom: 0;
+    input {
+      font-size: $bodyTwoSize;
+      font-weight: 800;
+      color: $black;
+      text-decoration: none;
+      background-color: $lightGray;
+      border: none;
+      outline: none;
+      padding: $xxxs $xxs;
+    }
+    &:hover {
+      text-decoration: none;
+    }
+  }
+  .bottom {
+    display: flex;
+    align-items: center;
+    margin-top: $xxxs;
+    gap: $xs;
+  }
+}
+
+.count {
+  font-size: $captionSize;
+  font-weight: 400;
+  color: $darkGray;
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  min-width: 40px;
+  pointer-events: none;
+  svg {
+    width: 15px;
+    height: 15px;
+    path {
+      fill: $darkGray;
+    }
+  }
+}
+.type {
+  font-size: $captionSize;
+  font-weight: 400;
+  color: $darkGray;
+}
+.sidebarDropIndicator {
+  font-size: $bodyOneSize !important;
+}

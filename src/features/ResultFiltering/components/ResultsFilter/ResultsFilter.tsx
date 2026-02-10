@@ -1,39 +1,34 @@
-import { useState, useEffect, useMemo, FC, SetStateAction, Dispatch } from 'react';
+import { useMemo, FC, useState } from 'react';
 import styles from './ResultsFilter.module.scss';
 import { Filter, FilterType, GroupedFilters, FilterFamily } from '@/features/ResultFiltering/types/filters';
 import { cloneDeep } from 'lodash';
 import FacetGroup from '@/features/ResultFiltering/components/FacetGroup/FacetGroup';
 import EntitySearch from '@/features/ResultFiltering/components/EntitySearch/EntitySearch';
-import Button from '@/features/Common/components/Button/Button';
-import FilterIcon from '@/assets/icons/navigation/Filter.svg?react';
-import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
+import Button from '@/features/Core/components/Button/Button';
+import FacetHeading from '@/features/ResultFiltering/components/FacetHeading/FacetHeading';
+import { getFilterLabel } from '@/features/ResultFiltering/utils/filterFunctions';
+import SidebarBackButton from '@/features/Sidebar/components/SidebarBackButton/SidebarBackButton';
 
 interface ResultsFilterProps {
   activeFilters: Filter[];
   availableFilters: {[key: string]: Filter};
-  expanded?: boolean;
   isPathfinder?: boolean;
   onFilter: (arg0: Filter) => void;
   onClearAll: () => void;
-  setExpanded?: Dispatch<SetStateAction<boolean>>;
 }
 
 const ResultsFilter: FC<ResultsFilterProps> = ({
   activeFilters,
   availableFilters,
-  expanded = false,
   isPathfinder = false,
   onFilter,
-  onClearAll,
-  setExpanded = () => {} }) => {
+  onClearAll
+}) => {
 
-  const [isExpanded, setIsExpanded] = useState(expanded);
-  const toggleIsExpanded = () => {
-    setIsExpanded(prev => {
-      setExpanded(!prev);
-      return !prev;
-    });
+  const [activeFilterFamily, setActiveFilterFamily] = useState<FilterFamily | null>(null);
+  const handleSetActiveFilterFamily = (family: FilterFamily | null) => {
+    setActiveFilterFamily(family);
   }
 
   // returns a new object with each tag grouped by its type
@@ -72,41 +67,46 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
     // pt: (a: [string, Filter], b: [string, Filter]) => -(a[1].name.localeCompare(b[1].name))
   };
 
-  useEffect(() => { 
-    setIsExpanded(expanded); 
-  }, [expanded]);
-
   return (
-    <div className={`${styles.resultsFilter} ${isExpanded ? styles.expanded : styles.collapsed}`} onClick={()=>(!isExpanded) ? toggleIsExpanded() : ()=>{}}>
-      <div className={styles.top}>
-        <p className={styles.heading} onClick={()=>(isExpanded) ? toggleIsExpanded() : ()=>{}} ><FilterIcon/><span>Filters</span></p>
+    <div className={`${styles.resultsFilter}`}>
+      {/* <div className={styles.top}>
         <div className={styles.right}>
           <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
-          <Button className={styles.closeButton} iconOnly><CloseIcon onClick={toggleIsExpanded}/></Button>
         </div>
-      </div>
+      </div> */}
       <div className={styles.bottom}>
-        <EntitySearch
-          activeFilters={activeFilters}
-          className={styles.entitySearch}
-          onFilter={onFilter}
-        />
+        <Button
+          handleClick={()=>handleSetActiveFilterFamily('txt')}
+          className={styles.facetButton}
+        >
+          <FacetHeading
+            activeFilters={activeFilters}
+            tagFamily="txt"
+            title={getFilterLabel("txt")}
+          />
+        </Button>
         <div>
           {
-            groupHasFilters(resultFilters) && !isPathfinder && 
+            groupHasFilters(resultFilters) && !isPathfinder &&
             <>
-              <h5 className={styles.typeHeading}> Results </h5>
+              <h5 className={styles.heading}>Results</h5>
               {
                 Object.keys(resultFilters).map((filterFamily) => {
+                  if(!resultFilters[filterFamily as FilterFamily] || !(Object.keys(resultFilters[filterFamily as FilterFamily]!).length > 0) ) 
+                    return null;
+
                   return (
-                    <FacetGroup
+                    <Button
                       key={filterFamily}
-                      filterFamily={filterFamily as FilterFamily}
-                      activeFilters={activeFilters}
-                      facetCompare={filterCompare[filterFamily]}
-                      groupedFilters={resultFilters}
-                      onFilter={onFilter}
-                    />
+                      handleClick={()=>handleSetActiveFilterFamily(filterFamily as FilterFamily)}
+                      className={styles.facetButton}
+                    >
+                      <FacetHeading
+                        activeFilters={activeFilters}
+                        tagFamily={filterFamily as FilterFamily}
+                        title={getFilterLabel(filterFamily as FilterFamily)}
+                      />
+                    </Button>
                   )
                 })
               }
@@ -117,24 +117,66 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
           {
             groupHasFilters(pathFilters) &&
             <>
-              <h5 className={styles.typeHeading}> Paths </h5>
+              <h5 className={styles.heading}>Paths</h5>
               {
-                Object.keys(pathFilters).map((tagFamily) => {
+                Object.keys(pathFilters).map((filterFamily) => {
+                  if(!pathFilters[filterFamily as FilterFamily] || !(Object.keys(pathFilters[filterFamily as FilterFamily]!).length > 0) ) 
+                    return null;
                   return (
-                    <FacetGroup
-                      key={tagFamily}
-                      filterFamily={tagFamily as FilterFamily}
-                      activeFilters={activeFilters}
-                      facetCompare={filterCompare[tagFamily]}
-                      groupedFilters={pathFilters}
-                      onFilter={onFilter}
-                    />
+                    <Button
+                      key={filterFamily}
+                      handleClick={()=>handleSetActiveFilterFamily(filterFamily as FilterFamily)}
+                      className={styles.facetButton}
+                    >
+                      <FacetHeading
+                        activeFilters={activeFilters}
+                        tagFamily={filterFamily as FilterFamily}
+                        title={getFilterLabel(filterFamily as FilterFamily)}
+                      />
+                    </Button>
                   )
                 })
               }
             </>
           }
         </div>
+        {
+          activeFilterFamily !== null && (
+            <div className={styles.activeFilterFamily}>
+              <div className={styles.top}>
+                <SidebarBackButton
+                  handleClick={()=>handleSetActiveFilterFamily(null)}
+                  className={styles.backButton}
+                >
+                  <FacetHeading
+                    activeFilters={activeFilters}
+                    tagFamily={activeFilterFamily as FilterFamily}
+                    title={getFilterLabel(activeFilterFamily as FilterFamily)}
+                    includeArrow={false}
+                  />
+                </SidebarBackButton>
+              </div>
+              {
+                activeFilterFamily === 'txt'
+                ?
+                  <EntitySearch
+                    activeFilters={activeFilters}
+                    className={styles.entitySearch}
+                    onFilter={onFilter}
+                  />
+                :
+                  <FacetGroup
+                    key={activeFilterFamily}
+                    filterFamily={activeFilterFamily as FilterFamily}
+                    activeFilters={activeFilters}
+                    facetCompare={filterCompare[activeFilterFamily]}
+                    groupedFilters={ resultFilters[activeFilterFamily] ? resultFilters : pathFilters}
+                    onFilter={onFilter}
+                  />
+              }
+            </div>
+          )
+        }
       </div>
     </div>
   );

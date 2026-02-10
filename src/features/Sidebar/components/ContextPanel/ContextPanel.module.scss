@@ -1,0 +1,49 @@
+@use "@/assets/styles/variables" as *;
+
+.contextPanel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  overflow-x: hidden;
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $s;
+    // border bottom, but inset
+    box-shadow: inset 0px -1px 0 0 $midGray;
+    .title {
+      margin-bottom: 0;
+      white-space: nowrap;
+      color: $black;
+      font-weight: 800;
+    }
+  }
+  .buttonContainer {
+    display: flex;
+    align-items: center;
+    gap: $s;
+    max-height: $l;
+    button, a {
+      margin: 0;
+    }
+  }
+  .content {
+    padding: $s 15px $s $s;
+    position: relative;
+    width: calc($panelWidth - ($s*2));
+    overflow: hidden auto;
+    &:has(:global(.selectionModeActive)) {
+      overflow: hidden;
+    }
+  }
+  &.reduceSpacing {
+    .content {
+      padding: 0;
+      width: $panelWidth;
+    }
+    .header {
+      margin-bottom: 0;
+    }
+  }
+}

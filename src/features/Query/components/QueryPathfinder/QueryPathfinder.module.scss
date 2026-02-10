@@ -4,7 +4,7 @@
   height: 100%;
   position: relative;
   &.results {
-    padding: $l $m;
+    padding: $l;
     background-color: $palePurple;
   }
   &.disabled {
@@ -32,6 +32,9 @@
     }
   }
   .buttons {
+    display: flex;
+    gap: $s;
+    margin-bottom: $s;
     .button {
       font-size: $captionSize;
       padding: $xxs $xs;
@@ -73,23 +76,22 @@
 }
 .form {
   display: grid;
-  grid-template-columns: 1fr 18px 1fr 40px;
-  column-gap: $xs;
+  grid-template-columns: 1fr $m $l $m 1fr 40px;
+  gap: $xs;
   align-items: center;
   box-shadow: $dropShadow;
   border-radius: $largeBorderRadius;
   padding: $xs;
   background-color: $white;
   margin-bottom: 0;
-  max-width: 910px;
   position: relative;
   &.hasMiddleType {
-    grid-template-columns: 1fr 18px 140px 18px 1fr 40px;
+    grid-template-columns: 1fr $m $l 140px $m 1fr 40px;
   }
   .middleTypeSelector {
     margin: 0;
     select {
-      padding: $xs 12px;
+      padding: $xs 12px $xs 0;
     }
     & > div {
       border: none;
@@ -101,10 +103,6 @@
         scrollbar-width: none;
       }
     }
-  }
-  .inputContainer {
-    position: relative;
-    display: flex;
   }
   .input {
     margin: 0;
@@ -126,7 +124,7 @@
   .submitButton {
     margin: 0;
     border: none;
-    background-color: $purpleOne;
+    padding: $xs;
     svg {
       height: 24px;
       width: 24px;

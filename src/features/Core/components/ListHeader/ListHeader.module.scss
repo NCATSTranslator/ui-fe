@@ -1,0 +1,48 @@
+@use '@/assets/styles/variables' as *;
+
+.listHeader {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $m;
+  margin-bottom: 0;
+  padding: $xl $xl 0 $xl;
+  
+  .title, .titleInput, .titleInput input {
+    font-size: $h5Size;
+    color: $purpleTwo;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .title {
+    padding: 3.5px 0;
+    &.titleClickable {
+      cursor: pointer;
+      transition: $defaultAnim;
+      display: inline-flex;
+      &:hover {
+        color: $purpleOne;
+      }
+    }
+  }
+  
+  .titleInput {
+    margin-left: -13px;
+    margin-top: 0;
+    margin-bottom: -6px;
+    input {
+      padding: 2.5px 12px;
+      outline: none;
+    }
+  }
+  .searchSection {
+    .searchInput {
+      margin: 0;
+      input {
+        padding: 9px 12px 9px 40px;
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+@use "@/assets/styles/variables" as *;
+
+.statusSidebarIcon {
+  .freshResultsToast {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background-color: $white;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: $defaultBorderRadius;
+    border-bottom-right-radius: $defaultBorderRadius;
+    padding: $m 36px $m $m;
+    box-shadow: $dropShadow;
+    z-index: 10;
+    border-left: 1px solid $midGray;
+    cursor: default;
+    .toastText, .toastHeading {
+      display: block;
+      color: $black;
+      text-align: left;
+    }
+    .toastHeading {
+      font-size: $bodyOneSize;
+      font-weight: 800;
+      margin-bottom: $xxs;
+      white-space: nowrap;
+    }
+    .toastText {
+      font-size: $bodyTwoSize;
+      font-weight: 400;
+    }
+    .checkboxContainer {
+      font-size: $captionSize;
+      display: flex;
+      align-items: center;
+      gap: $xxs;
+      font-weight: 400;
+      color: $darkGray;
+      margin-top: $xxs;
+      padding-top: $xs;
+      .checkbox {
+        margin: 0;
+        height: 18px;
+      }
+    }
+    .closeButton {
+      position: absolute;
+      top: $xxs;
+      right: $xxs;
+      width: auto;
+      cursor: pointer;
+      svg {
+        path {
+          stroke: $midGray;
+        }
+      }
+      &:hover {
+        svg {
+          path {
+            stroke: $purpleOne;
+          }
+        }
+      }
+    }
+  }
+  .loadPercentage {
+    display: block;
+    font-size: $captionSize;
+    font-weight: 400;
+    color: $darkGray;
+    margin-top: $xxxs;
+  }
+}

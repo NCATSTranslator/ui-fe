@@ -1,0 +1,61 @@
+@use '@/assets/styles/variables' as *;
+
+.resultDownloadPanelInner {
+  display: flex;
+  flex-direction: column;
+  gap: $s;
+  height: 100%;
+  .description {
+    font-size: $captionSize;
+    color: $darkGray;
+    margin: 0 0 $s;
+  }
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: $xxs;
+  }
+  .sectionSubtitle {
+    font-size: $bodyOneSize;
+    font-weight: 800;
+    color: $black;
+    margin: 0 (-$s) $s;
+    padding: $s;
+    border-bottom: 1px solid $midGray;
+  }
+  .radioGroup {
+    display: flex;
+    flex-direction: column;
+    gap: $s;
+    padding: 0 $xs;
+  }
+  .radioComponent {
+    margin-bottom: 0;
+    width: 100%;
+    padding: 6px 0;
+  }
+  .radioLabel {
+    display: flex;
+    align-items: center;
+    font-size: $bodyTwoSize;
+    width: 100%;
+    justify-content: space-between;
+    .count {
+      font-size: $captionSize;
+      color: $darkGray;
+      font-weight: 800;
+    }
+  }
+  .disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .downloadButton {
+    width: 100%;
+    justify-content: center;
+    margin: $s 0 0;
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+}

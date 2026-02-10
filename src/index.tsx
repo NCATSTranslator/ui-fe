@@ -5,17 +5,17 @@ import '@/index.css';
 import App from '@/App';
 import Page from '@/features/Page/components/Page/Page';
 import FAQPage from '@/features/Page/components/Page/FAQPage';
-import LoadingWrapper from '@/features/Common/components/LoadingWrapper/LoadingWrapper';
+import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper';
 import { Provider } from 'react-redux';
 import { store } from '@/redux/store';
 const Home = lazy(() => import('@/pageRoutes/Home/Home'));
 const Results = lazy(() => import('@/pageRoutes/Results/Results'));
 const History = lazy(() => import('@/pageRoutes/History/History'));
 const Terms = lazy(() => import('@/pageRoutes/Terms/Terms'));
-const UserPrefs = lazy(() => import('@/pageRoutes/UserPrefs/UserPrefs'));
 const Workspace = lazy(() => import('@/pageRoutes/Workspace/Workspace'));
-const SendFeedbackPage = lazy(() => import('@/pageRoutes/SendFeedback/SendFeedback'));
-
+const Projects = lazy(() => import('@/pageRoutes/Projects/Projects'));
+const ProjectDetail = lazy(() => import('@/pageRoutes/ProjectDetail/ProjectDetail'));
+const Queries = lazy(() => import('@/pageRoutes/Queries/Queries'));
 const Help = lazy(() => import('@/pageRoutes/Articles/Help').then(m => ({ default: m.Help })));
 const LoggingIn = lazy(() => import('@/pageRoutes/Articles/LoggingIn').then(m => ({ default: m.LoggingIn })));
 const WhatIs = lazy(() => import('@/pageRoutes/Articles/WhatIs').then(m => ({ default: m.WhatIs })));
@@ -27,6 +27,7 @@ const ExploringRelationships = lazy(() => import('@/pageRoutes/Articles/Explorin
 const ReviewIdentify = lazy(() => import('@/pageRoutes/Articles/ReviewIdentify').then(m => ({ default: m.ReviewIdentify })));
 const WorkspaceHelp = lazy(() => import('@/pageRoutes/Articles/Workspace').then(m => ({ default: m.WorkspaceHelp })));
 const UserPreferences = lazy(() => import('@/pageRoutes/Articles/UserPreferences').then(m => ({ default: m.UserPreferences })));
+const NewQuery = lazy(() => import('@/pageRoutes/NewQuery/NewQuery'));
 
 const container = document.getElementById('root');
 if (!container) {
@@ -96,16 +97,24 @@ const routes = [
     element: <Page title="History"><Suspense fallback={<LoadingWrapper />}><History /></Suspense></Page>
   },
   {
-    path: "preferences",
-    element: <Page title="User Preferences"><Suspense fallback={<LoadingWrapper />}><UserPrefs /></Suspense></Page>
-  },
-  {
     path: "workspace",
     element: <Page title="User Workspace"><Suspense fallback={<LoadingWrapper />}><Workspace /></Suspense></Page>
   },
   {
-    path: "send-feedback",
-    element: <Page title="Send Feedback"><Suspense fallback={<LoadingWrapper />}><SendFeedbackPage /></Suspense></Page>
+    path: "projects",
+    element: <Page title="Projects"><Suspense fallback={<LoadingWrapper />}><Projects /></Suspense></Page>
+  },
+  {
+    path: "projects/:projectId",
+    element: <Page title="Project"><Suspense fallback={<LoadingWrapper />}><ProjectDetail /></Suspense></Page>
+  },
+  {
+    path: "queries",
+    element: <Page title="Queries"><Suspense fallback={<LoadingWrapper />}><Queries /></Suspense></Page>
+  },
+  {
+    path: "new-query",
+    element: <Page title="New Query"><Suspense fallback={<LoadingWrapper />}><NewQuery /></Suspense></Page>
   },
   {
     path: "*",

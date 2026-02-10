@@ -6,6 +6,19 @@
 body {
   overflow-x: hidden !important;
 }
+:root {
+  --toastify-toast-top: 72px;
+  --toastify-toast-right: 0;
+  --toastify-toast-bd-radius: 8px 0 0 8px;
+  --toastify-toast-shadow: 0px 3px 10px #20212433;
+}
+.Toastify__toast {
+  margin-bottom: 10px;
+}
+.Toastify__toast-icon {
+  margin: $m -12px 0 $m;
+  align-self: flex-start;
+}
 
 .italic {
   font-style: italic;
@@ -117,6 +130,7 @@ body {
   text-decoration: none;
   font-weight: 800;
   padding: 0;
+  cursor: pointer;
   &:hover {
     text-decoration: underline;
     box-shadow: none;
@@ -354,23 +368,6 @@ input {
 
 .cursor-default {
   cursor: default;
-}
-
-.input-label-container {
-  display: grid;
-  margin-bottom: $xxs;
-}
-.input-label, .input-label span {
-  font-size: $subTwoSize;
-  margin-bottom: 0;
-  font-weight: 800;
-  color: $darkGray;
-}
-.input-subtitle {
-  font-size: $captionSize;
-  margin-bottom: $xxs;
-  font-weight: 400;
-  color: $darkGray;
 }
 
 .input-row {

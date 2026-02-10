@@ -27,6 +27,9 @@
     grid-template-rows: auto 1fr;
     overflow-y: auto;
   }
+  .tableHead {
+    padding-right: 0;
+  }
   .tableBody {
     box-shadow: $dropShadow;
     font-size: $bodyTwoSize;
@@ -59,9 +62,25 @@
       }
     }
     &.clinicalTrials {
-      .tableHead, .evidenceItem {
+      .tableHead, .tableItem {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr .5fr .5fr .5fr .5fr;
+        .head, .link, .cell {
+          justify-content: flex-start;
+        }
+        .cell, .link a {
+          align-items: flex-start;
+        }
+        .link a {
+          display: inline;
+        }
+        svg {
+          height: 16px;
+          width: 16px;
+          margin-bottom: 0;
+          display: inline;
+          vertical-align: text-top;
+        }
       }
     }
     &.misc {
@@ -321,5 +340,8 @@
 
 .infoIcon {
   margin-left: 4px;
+}
+.fade {
+  overflow-y: hidden;
 }
 

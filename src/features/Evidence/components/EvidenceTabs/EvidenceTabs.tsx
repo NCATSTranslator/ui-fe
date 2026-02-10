@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction, useMemo } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useMemo, useState } from 'react';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import PublicationsTable from '@/features/Evidence/components/PublicationsTable/PublicationsTable';
@@ -8,8 +8,9 @@ import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import { getUrlByType } from '@/features/Evidence/utils/utilities';
 import { PublicationObject, Provenance, TrialObject } from '@/features/Evidence/types/evidence.d';
 import { ResultEdge } from '@/features/ResultList/types/results.d';
-import { PreferencesContainer } from '@/features/UserAuth/types/user';
+import { Preferences } from '@/features/UserAuth/types/user';
 import styles from '@/features/Evidence/components/EvidenceModal/EvidenceModal.module.scss';
+import { getFormattedDate } from '@/features/Common/utils/utilities';
 
 interface EvidenceTabsProps {
   isOpen: boolean;
@@ -20,7 +21,7 @@ interface EvidenceTabsProps {
   sources: Provenance[];
   selectedEdge: ResultEdge | null;
   pk: string;
-  prefs: PreferencesContainer;
+  prefs: Preferences;
 }
 
 const EvidenceTabs: FC<EvidenceTabsProps> = ({
@@ -39,8 +40,34 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
     [clinicalTrials.length, publications.length, sources.length]
   );
 
+  const [activeTab, setActiveTab] = useState<'Publications' | 'Clinical Trials' | 'Miscellaneous' | 'Knowledge Sources'>('Publications');
+  const firstTabHeading = publications.length > 0 ? 'Publications' : clinicalTrials.length > 0 ? 'Clinical Trials' : sources.length > 0 ? 'Knowledge Sources' : 'Miscellaneous';
+  const handleTabSelection = (tabName: string) => {
+    setActiveTab(tabName as 'Publications' | 'Clinical Trials' | 'Miscellaneous' | 'Knowledge Sources');
+  };
+
+  // reset active tab when component is closed
+  useEffect(() => {
+    if (!isOpen)
+      setActiveTab(firstTabHeading);
+  }, [isOpen, firstTabHeading]);
+
+  // reset active tab when selected edge changes
+  useEffect(() => {
+    if(selectedEdge)
+      setActiveTab(firstTabHeading);
+  }, [selectedEdge]);
+
   return (
-    <Tabs isOpen={isOpen} className={styles.tabs}>
+    <Tabs
+      isOpen={isOpen}
+      className={styles.tabs}
+      controlled={true}
+      activeTab={activeTab}
+      defaultActiveTab={firstTabHeading}
+      handleTabSelection={handleTabSelection}
+      fadeClassName={styles.fade}
+    >
       {publications.length > 0 ? (
         <Tab heading="Publications" className={`${styles.tab} scrollable`}>
           <PublicationsTable
@@ -58,22 +85,44 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
         <Tab heading="Clinical Trials" className={`${styles.tab} scrollable`}>
           <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
             <div className={`table-head ${styles.tableHead}`}>
-              <div className={`head ${styles.head} ${styles.link}`}>Link</div>
+              <div className={`head ${styles.head}`}>Title</div>
+              <div className={`head ${styles.head}`}>Start Date</div>
+              <div className={`head ${styles.head}`}>Phase</div>
+              <div className={`head ${styles.head}`}>Status</div>
+              <div className={`head ${styles.head}`}>Participants</div>
             </div>
             <div className={`table-items ${styles.tableItems} scrollable`}>
               {clinicalTrials.map((item, i) => {
                 let url = item.url;
+                let title = item.title;
+                let startDate = item.start_date;
+                let phase = item.phase;
+                let participants = item.size;
+                let type = item.type;
+                let status = item.status;
                 if (!item.url && item.id) {
-                  url = getUrlByType(item.id, item.type);
+                  url = getUrlByType(item.id, "NCT");
                 }
                 return (
                   <div className={styles.tableItem} key={i}>
                     <div className={`table-cell ${styles.cell} ${styles.link} link`}>
                       {url && (
                         <a href={url} rel="noreferrer" target="_blank">
-                          {url} <ExternalLink />
+                          {title || url} <ExternalLink />
                         </a>
                       )}
+                    </div>
+                    <div className={`table-cell ${styles.cell}`}>
+                      {startDate ? getFormattedDate(new Date(startDate), false) : ''}
+                    </div>
+                    <div className={`table-cell ${styles.cell}`}>
+                      {phase}
+                    </div>
+                    <div className={`table-cell ${styles.cell}`}>
+                      {status}
+                    </div>
+                    <div className={`table-cell ${styles.cell}`}>
+                      {participants} {type || ''}
                     </div>
                   </div>
                 );

@@ -1,17 +1,53 @@
-   @use "@/assets/styles/variables" as *;
+@use "@/assets/styles/variables" as *;
 
 .resultsFilter {
-  padding: $s $s 0;
-  background-color: $lightGray;
-  border-radius: $defaultBorderRadius;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  box-shadow: $dropShadow;
   transition: $defaultAnim;
   overflow: hidden;
   position: relative;
-  left: -24px;
-  margin-right: -24px;
+  height: 100%;
+  .activeFilterFamily {
+    position: absolute;
+    inset: 0 1px 0 0;
+    background-color: $lightGray;
+    z-index: 1000;
+  }
+  .facetButton {
+    background-color: $white;
+    border: none;
+    border-radius: 0;
+    color: $darkGray;
+    font-size: $bodyTwoSize;
+    width: -webkit-fill-available;
+    justify-content: space-between;
+    padding: $s 0;
+    margin: 0 $s;
+    border-bottom: 1px solid $midGray;
+    text-align: left;
+    & > span {
+      width: 100%;
+      color: $darkGray;
+      padding: 0;
+      white-space: nowrap;
+      text-align: right;
+      font-size: $subTwoSize;
+    }
+    &:hover {
+      & > span {
+        text-decoration: underline;
+      }
+    }
+  }
+  &.backButton {
+    margin: 0;
+    justify-content: flex-start;
+    gap: $xxs;
+    & > span {
+      width: auto;
+      text-align: left;
+    }
+  }
   .entitySearch {
     span {
       overflow: hidden;
@@ -20,53 +56,19 @@
    .closeButton, .clearAll, .bottom {
     transition: $defaultAnim;
   }
-  .typeHeading {
-    margin-top: 10px;
-    margin-bottom: 0px;
-  }
-  &.expanded {
-    width: calc(330px - $s*2);
-    .bottom {
-      opacity: 1;
-      pointer-events: all;
-    }
-    .heading span {
-      width: auto;
-    }
-    .heading span, .bottom, .closeButton, .clearAll, .entitySearch {
-      opacity: 1;
-      pointer-events: all;
-    }
-  }
-  &.collapsed {
-    width: calc(56px - $s*2);
-    cursor: pointer;
-    .bottom {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .heading span, .bottom, .closeButton, .entitySearch, .clearAll {
-      opacity: 0;
-      pointer-events: none;
-    }
-  }
   .bottom {
+    height: 100%;
     position: relative;
   }
   .heading {
-    font-size: 20px;
-    line-height: 25px;
+    font-size: $bodyOneSize;
     font-weight: 800;
     color: $black;
     margin: 0;
+    padding: $s;
     display: flex;
     align-items: center;
-    cursor: pointer;
-    svg {
-      margin-right: 8px;
-      width: 24px;
-      height: 24px;
-    }
+    border-bottom: 1px solid $midGray;
     span {
       user-select: none;
       -webkit-user-select: none;
@@ -77,7 +79,6 @@
   .top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     .right {
       display: flex;
       align-items: center;
@@ -100,11 +101,5 @@
     &:hover {
       text-decoration: underline;
     }
-  }
-  .closeButton {
-    background-color: transparent;
-    border: none;
-    margin: 0;
-    padding: 0;
   }
 }

@@ -1,7 +1,7 @@
-import { useState, useEffect, FC, useRef, useMemo, createContext } from 'react';
+import { FC, useState, useRef, useMemo, createContext, useEffect } from 'react';
 import styles from './SupportPathGroup.module.scss';
 import SupportPath from '@/features/ResultItem/components/SupportPath/SupportPath';
-import AnimateHeight from '@/features/Common/components/AnimateHeight/AnimateHeight';
+import AnimateHeight from 'react-animate-height';
 import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
@@ -9,11 +9,12 @@ import { sortSupportByEntityStrings, sortSupportByLength } from '@/features/Comm
 import { Path, PathFilterState, ResultNode } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { intToChar, isStringArray, intToNumeral } from '@/features/Common/utils/utilities';
-import { getPathsWithSelectionsSet, getFilteredPathCount, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
+import { getPathsWithSelectionsSet, getFilteredPathCount, getIsPathFiltered, getPathIdSet } from '@/features/ResultItem/utils/utilities';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSupportPathDepth, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import { SupportPathDepthContext } from '@/features/ResultItem/components/PathView/PathView';
+import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 export const SupportPathKeyContext = createContext<string>("");
 
@@ -67,10 +68,18 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
     })
   }, [formattedPaths, pathFilterState, showHiddenPaths]);
 
-  const initHeight = (isExpanded) ? 'auto' : 0;
-  const [height, setHeight] = useState<number | string>(initHeight);
-
+  const { height, setIsOpen } = useAnimateHeight({ initialOpen: isExpanded });
+  const fullPathCount = useMemo(() => getPathIdSet(formattedPaths, true, resultSet).size, [formattedPaths, resultSet]);
   const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
+  const currentPathCount = useMemo(() => {
+    return showHiddenPaths ? fullPathCount : fullPathCount - filteredPathCount;
+  }, [filteredPathCount, formattedPaths, showHiddenPaths]);
+
+  // Sync with parent's isExpanded prop
+  useEffect(() => {
+    setIsOpen(isExpanded);
+  }, [isExpanded, setIsOpen]);
+
   const itemsPerPage: number = 10;
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0);
@@ -99,23 +108,23 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
     ? filteredPaths.slice(itemOffset, endResultIndex.current)
     : [];
 
-  useEffect(() => {
-    if(isExpanded === false)
-      setHeight(0);
-    else
-      setHeight('auto');
-  }, [isExpanded])
-
   return(
     <AnimateHeight
       className={`${!!pathViewStyles && pathViewStyles.support} ${styles.support} ${!isExpanded && styles.closed } ${currentDepth > 1 && styles.nested}`}
       duration={500}
       height={typeof height === "number" ? height : 'auto'}
+      animateOpacity
     >
       <SupportPathDepthContext.Provider value={currentDepth}>
         <SupportPathKeyContext.Provider value={currentKey}>
           <div className={`${!!pathViewStyles && pathViewStyles.supportGroupContainer} scrollable-support`}>
-            <p className={styles.supportLabel}>Supporting Paths</p>
+            <p className={styles.supportLabel}>
+              {currentPathCount} Supporting Path{currentPathCount === 1 ? '' : 's'} <span className={styles.outOfText}>{filteredPathCount > 0 && `(out of ${fullPathCount})`}</span>
+            </p>
+            {
+              (!showHiddenPaths && filteredPathCount >= fullPathCount) &&
+              <p className={styles.filteredDisclaimer}>Try modifying or removing filters to broaden your search.</p>
+            }
             {
               displayedPaths.map((supportPath) => {
                 if(!supportPath)
