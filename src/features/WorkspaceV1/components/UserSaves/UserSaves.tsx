@@ -21,6 +21,7 @@ import { Path, Result, ResultEdge, ResultSet } from '@/features/ResultList/types
 import { useDispatch } from 'react-redux';
 import { setResultSets } from '@/features/ResultList/slices/resultsSlice';
 import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from '@/features/Core/utils/toastMessages';
+import { DEFAULT_SCORE_WEIGHTS } from '@/features/ResultList/hooks/useScoreWeights';
 
 const UserSaves = () => {
 
@@ -45,12 +46,6 @@ const UserSaves = () => {
   // dummy var for now
   const shouldUpdateResultsAfterBookmark = useRef(false);
 
-  const [confidenceWeight] = useState(1.0);
-  const [noveltyWeight] = useState(0.1);
-  const [clinicalWeight] = useState(1.0);
-
-  const scoreWeights = useMemo(()=> { return {confidenceWeight: confidenceWeight, noveltyWeight: noveltyWeight, clinicalWeight: clinicalWeight}}, [confidenceWeight, noveltyWeight, clinicalWeight]);
-  
   const {
     isOpen: notesOpen,
     noteLabel,
@@ -62,7 +57,7 @@ const UserSaves = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const [showHiddenPaths, setShowHiddenPaths] = useState(false);
 
-  const queryClient = new QueryClient();
+  const [queryClient] = useState(() => new QueryClient());
 
   // Memoize sorted saves to avoid re-sorting on every render
   const sortedUserSaves = useMemo(() => {
@@ -305,7 +300,7 @@ const UserSaves = () => {
                               bookmarkRemovedToast={bookmarkRemovedToast}
                               setShareModalOpen={setShareModalOpen}
                               setShareResultID={setShareResultID}
-                              scoreWeights={scoreWeights}
+                              scoreWeights={DEFAULT_SCORE_WEIGHTS}
                               showHiddenPaths={showHiddenPaths}
                               setShowHiddenPaths={setShowHiddenPaths}
                             />

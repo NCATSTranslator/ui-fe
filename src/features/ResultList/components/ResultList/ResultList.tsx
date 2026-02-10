@@ -26,9 +26,10 @@ import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPa
 import ResultListTableHead from "@/features/ResultList/components/ResultListTableHead/ResultListTableHead";
 import ResultListModals from "@/features/ResultList/components/ResultListModals/ResultListModals";
 import ResultListBottomPagination from "@/features/ResultList/components/ResultListBottomPagination/ResultListBottomPagination";
-import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARAStatusResponse, ResultListLoadingData } from "@/features/ResultList/types/results.d";
+import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARAStatusResponse, ResultListLoadingData, ScoreWeights } from "@/features/ResultList/types/results.d";
 import { Filter } from "@/features/ResultFiltering/types/filters";
-import { generatePathfinderScore, generateScore } from "@/features/ResultList/utils/scoring";
+import { generatePathfinderScore, generateScore, recalculateResultSetScores } from "@/features/ResultList/utils/scoring";
+import useScoreWeights from "@/features/ResultList/hooks/useScoreWeights";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import { useResultsStatusQuery, useResultsDataQuery, useResultsCompleteToast, useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
@@ -127,6 +128,16 @@ const ResultList = () => {
   const [autoScrollToResult, setAutoScrollToResult] = useState(false);
   const [expandSharedResult, setExpandSharedResult] = useState(false);
   const sharedItemRef = useRef<HTMLDivElement | null>(null);
+
+  const { scoreWeights, noveltyBoost, handleToggleNoveltyBoost } = useScoreWeights({
+    onWeightsChange: (newWeights: ScoreWeights) => {
+      recalculateScores(newWeights);
+    }
+  });
+
+  // Ref to always access the latest scoreWeights in callbacks without stale closures
+  const scoreWeightsRef = useRef(scoreWeights);
+  scoreWeightsRef.current = scoreWeights;
   
   // Notes modal state management via hook
   const {
@@ -156,7 +167,7 @@ const ResultList = () => {
     return ((!!prefValue) ? (typeof prefValue === "string") ? parseInt(prefValue) : prefValue : 10) as number;
   }, []);
   // number, how many items per page
-  const [itemsPerPage, setItemsPerPage] = useState<number>(calculateItemsPerPage(prefs.results_per_page.pref_value));
+  const [itemsPerPage, setItemsPerPage] = useState<number>(calculateItemsPerPage(prefs.results_per_page.pref_value as string | number));
   // number, last result item index
   const [endResultIndex, setEndResultIndex] = useState<number>(itemsPerPage);
   // ResultSet, original raw result set from the BE
@@ -182,13 +193,6 @@ const ResultList = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   // Bool, is the shift key being held down
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
-  // Float, weight for confidence score
-  const [confidenceWeight] = useState(1.0);
-  // Float, weight for novelty score
-  const [noveltyWeight] = useState(0.1);
-  // Float, weight for clinical score
-  const [clinicalWeight] = useState(1.0);
-  const scoreWeights = useMemo(()=> { return {confidenceWeight: confidenceWeight, noveltyWeight: noveltyWeight, clinicalWeight: clinicalWeight}}, [confidenceWeight, noveltyWeight, clinicalWeight]);
   const [userSaves, setUserSaves] = useState<SaveGroup | null>(null);
   const [showHiddenPaths, setShowHiddenPaths] = useState(false);
   const shouldUpdateResultsAfterBookmark = useRef(false);
@@ -246,7 +250,7 @@ const ResultList = () => {
   // comes asynchronously in useEffect (which is at the end of the render cycle) in App.js
   useEffect(() => {
     currentSortString.current = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
-    const tempItemsPerPage = calculateItemsPerPage(prefs.results_per_page.pref_value);
+    const tempItemsPerPage = calculateItemsPerPage(prefs.results_per_page.pref_value as string | number);
     setItemsPerPage(tempItemsPerPage);
     setEndResultIndex(tempItemsPerPage);
   }, [prefs, calculateItemsPerPage]);
@@ -323,7 +327,85 @@ const ResultList = () => {
     setEndResultIndex(endOffset);
   }, [formattedResults.length, itemsPerPage]);
 
-  const handleUpdateResults = (
+  // Handle the sorting
+  const getSortedResults = useCallback((summary: ResultSet, resultsToSort: Result[], sortName: string, isPathfinder: boolean = false) => {
+    if(!summary) {
+      console.warn("No result set provided to getSortedResults");
+      return summary;
+    }
+
+    let newSortedResults = cloneDeep(resultsToSort);
+    switch (sortName) {
+      case 'nameLowHigh':
+        newSortedResults = (isPathfinder) ? sortByNamePathfinderLowHigh(newSortedResults) as Result[] : sortNameLowHigh(newSortedResults) as Result[];
+        setIsSortedByName(true);
+        setIsSortedByScore(null)
+        setIsSortedByEvidence(null);
+        setIsSortedByPaths(null);
+        break;
+      case 'nameHighLow':
+        newSortedResults = (isPathfinder) ? sortByNamePathfinderHighLow(newSortedResults) as Result[] : sortNameHighLow(newSortedResults) as Result[];
+        setIsSortedByName(false);
+        setIsSortedByScore(null)
+        setIsSortedByEvidence(null);
+        setIsSortedByPaths(null);
+        break;
+      case 'evidenceLowHigh':
+        newSortedResults = sortEvidenceLowHigh(summary, newSortedResults);
+        setIsSortedByEvidence(true);
+        setIsSortedByScore(null)
+        setIsSortedByName(null);
+        setIsSortedByPaths(null);
+        break;
+      case 'evidenceHighLow':
+        newSortedResults = sortEvidenceHighLow(summary, newSortedResults);
+        setIsSortedByEvidence(false);
+        setIsSortedByScore(null)
+        setIsSortedByName(null);
+        setIsSortedByPaths(null);
+        break;
+      case 'scoreLowHigh':
+        newSortedResults = (isPathfinder) ? sortScorePathfinderLowHigh(summary, newSortedResults) : sortScoreLowHigh(newSortedResults, scoreWeights);
+        setIsSortedByScore(true)
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
+        setIsSortedByPaths(null);
+        break;
+      case 'scoreHighLow':
+        newSortedResults = (isPathfinder) ? sortScorePathfinderHighLow(summary,newSortedResults) : sortScoreHighLow(newSortedResults, scoreWeights);
+        setIsSortedByScore(false)
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
+        setIsSortedByPaths(null);
+        break;
+      case 'pathsLowHigh':
+        newSortedResults = sortPathsLowHigh(summary, newSortedResults);
+        setIsSortedByPaths(true)
+        setIsSortedByScore(null)
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
+        break;
+      case 'pathsHighLow':
+        newSortedResults = sortPathsHighLow(summary, newSortedResults);
+        setIsSortedByPaths(false)
+        setIsSortedByScore(null)
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
+        break;
+      case 'entityString':
+        newSortedResults = sortByEntityStrings(newSortedResults, activeEntityFilters);
+        setIsSortedByPaths(null);
+        setIsSortedByEvidence(null);
+        setIsSortedByName(null);
+        break;
+      default:
+        break;
+    }
+
+    return newSortedResults;
+  }, [activeEntityFilters, isPathfinder, scoreWeights]);
+
+  const handleUpdateResults = useCallback((
     filters: Filter[],
     asFilters: string[],
     summary: ResultSet | null,
@@ -423,8 +505,7 @@ const ResultList = () => {
 
     rawResults.current = summary;
     return newFormattedResults;
-  };
-
+  }, [itemsPerPage, resultIdParam, handlePageClick, getSortedResults]);
 
   const handleNewResults = (resultSet: ResultSet) => {
     
@@ -447,7 +528,7 @@ const ResultList = () => {
       result.pathCount = getPathCount(newResultSet, result.paths);
       result.score = (isPathfinder) 
         ? generatePathfinderScore(newResultSet, result) 
-        : generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
+        : generateScore(result.scores, scoreWeightsRef.current.confidenceWeight, scoreWeightsRef.current.noveltyWeight, scoreWeightsRef.current.clinicalWeight)
     }
     // assign ids to edges
     for(const [id, edge] of Object.entries(newResultSet.data.edges))
@@ -468,6 +549,25 @@ const ResultList = () => {
     if(newResultSet && newResultSet.data.results && newResultSet.data.results.length === 0 && !isFetchingARAStatus.current)
       setIsLoading(false);
   }
+
+  const recalculateScores = useCallback((newWeights: ScoreWeights) => {
+    if (!rawResults.current || !rawResults.current.data?.results?.length) return;
+
+    const resultSetData = recalculateResultSetScores(rawResults.current, newWeights, isPathfinder);
+    rawResults.current = resultSetData;
+
+    // Full re-process from rawResults (or=[] triggers fresh clone + filter + sort)
+    handleUpdateResults(
+      activeFilters,
+      activeEntityFilters,
+      resultSetData,
+      [],
+      false,
+      currentSortString.current,
+      isPathfinder,
+      userSaves
+    );
+  }, [isPathfinder, userSaves, activeFilters, activeEntityFilters, handleUpdateResults]);
 
   // React Query call for status of results
   useResultsStatusQuery(
@@ -495,84 +595,6 @@ const ResultList = () => {
     setIsLoading,
     currentQuerySid
   );
-
-  // Handle the sorting
-  const getSortedResults = useCallback((summary: ResultSet, resultsToSort: Result[], sortName: string, isPathfinder: boolean = false) => {
-    if(!summary) {
-      console.warn("No result set provided to getSortedResults");
-      return summary;
-    }
-
-    let newSortedResults = cloneDeep(resultsToSort);
-    switch (sortName) {
-      case 'nameLowHigh':
-        newSortedResults = (isPathfinder) ? sortByNamePathfinderLowHigh(newSortedResults) as Result[] : sortNameLowHigh(newSortedResults) as Result[];
-        setIsSortedByName(true);
-        setIsSortedByScore(null)
-        setIsSortedByEvidence(null);
-        setIsSortedByPaths(null);
-        break;
-      case 'nameHighLow':
-        newSortedResults = (isPathfinder) ? sortByNamePathfinderHighLow(newSortedResults) as Result[] : sortNameHighLow(newSortedResults) as Result[];
-        setIsSortedByName(false);
-        setIsSortedByScore(null)
-        setIsSortedByEvidence(null);
-        setIsSortedByPaths(null);
-        break;
-      case 'evidenceLowHigh':
-        newSortedResults = sortEvidenceLowHigh(summary, newSortedResults);
-        setIsSortedByEvidence(true);
-        setIsSortedByScore(null)
-        setIsSortedByName(null);
-        setIsSortedByPaths(null);
-        break;
-      case 'evidenceHighLow':
-        newSortedResults = sortEvidenceHighLow(summary, newSortedResults);
-        setIsSortedByEvidence(false);
-        setIsSortedByScore(null)
-        setIsSortedByName(null);
-        setIsSortedByPaths(null);
-        break;
-      case 'scoreLowHigh':
-        newSortedResults = (isPathfinder) ? sortScorePathfinderLowHigh(summary, newSortedResults) : sortScoreLowHigh(newSortedResults, scoreWeights);
-        setIsSortedByScore(true)
-        setIsSortedByEvidence(null);
-        setIsSortedByName(null);
-        setIsSortedByPaths(null);
-        break;
-      case 'scoreHighLow':
-        newSortedResults = (isPathfinder) ? sortScorePathfinderHighLow(summary,newSortedResults) : sortScoreHighLow(newSortedResults, scoreWeights);
-        setIsSortedByScore(false)
-        setIsSortedByEvidence(null);
-        setIsSortedByName(null);
-        setIsSortedByPaths(null);
-        break;
-      case 'pathsLowHigh':
-        newSortedResults = sortPathsLowHigh(summary, newSortedResults);
-        setIsSortedByPaths(true)
-        setIsSortedByScore(null)
-        setIsSortedByEvidence(null);
-        setIsSortedByName(null);
-        break;
-      case 'pathsHighLow':
-        newSortedResults = sortPathsHighLow(summary, newSortedResults);
-        setIsSortedByPaths(false)
-        setIsSortedByScore(null)
-        setIsSortedByEvidence(null);
-        setIsSortedByName(null);
-        break;
-      case 'entityString':
-        newSortedResults = sortByEntityStrings(newSortedResults, activeEntityFilters);
-        setIsSortedByPaths(null);
-        setIsSortedByEvidence(null);
-        setIsSortedByName(null);
-        break;
-      default:
-        break;
-    }
-
-    return newSortedResults;
-  }, [activeEntityFilters, isPathfinder, scoreWeights]);
 
   /**
    * Sets the evidence information and opens the evidence modal
@@ -879,6 +901,8 @@ const ResultList = () => {
                     ResultListStyles: styles,
                     pageCount: pageCount,
                     handlePageClick: handlePageClick,
+                    noveltyBoost: noveltyBoost,
+                    onToggleNoveltyBoost: handleToggleNoveltyBoost,
                   }}
                 />
                 <div className={`${styles.resultsTableContainer} ${isPathfinder ? styles.pathfinder : ''}`}>
