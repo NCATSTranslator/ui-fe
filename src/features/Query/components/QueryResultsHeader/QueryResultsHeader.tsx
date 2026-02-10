@@ -1,13 +1,11 @@
 import { FC, useMemo } from 'react';
 import Button from '@/features/Core/components/Button/Button';
-import ResultsSummaryButton from '@/features/ResultList/components/ResultsSummaryButton/ResultsSummaryButton';
 import { Result } from '@/features/ResultList/types/results';
 import { generateEntityLink } from '@/features/Common/utils/utilities';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import styles from './QueryResultsHeader.module.scss';
 import { ResultContextObject } from '@/features/ResultList/utils/llm';
-import { generatePathfinderQuestionText } from '@/features/Query/utils/queryTypes';
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import { useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
 import { useSelector } from 'react-redux';
@@ -71,9 +69,6 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
   entityLabel,
   entityLabelTwo,
   onShare,
-  results,
-  loading,
-  onResultMatchClick,
   pk,
   className = '',
   searchedTermClassName = '',
@@ -157,14 +152,6 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
           >
             Share Result Set
           </Button>
-          {!loading && results && onResultMatchClick && pk && (
-            <ResultsSummaryButton
-              results={results}
-              queryString={isPathfinder ? generatePathfinderQuestionText(entityLabel!, entityLabelTwo!, constraintText) : questionText}
-              handleResultMatchClick={onResultMatchClick}
-              pk={pk}
-            />
-          )}
         </div>
       </div>
     </div>

@@ -1,9 +1,8 @@
    @use "@/assets/styles/variables" as *;
 
 .interactablesContainer {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  display: flex;
+  gap: $xs;
   transition: $defaultAnim;
   z-index: 10;
   &.belowBreakpoint {

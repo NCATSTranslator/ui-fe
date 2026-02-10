@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Dispatch, SetStateAction, RefObject } from 'react';
+import { useState, useEffect, useRef, Dispatch, SetStateAction, RefObject, useMemo } from 'react';
 import { isEqual } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
@@ -501,3 +501,11 @@ export const useFeedbackForm = () => {
     setSubmitError,
   };
 };
+
+export const useResponsiveBreakpoint = (breakpoint: number = 1240) => {
+  const screenWidth = useWindowSize();
+  return useMemo(() => 
+    !!screenWidth?.width && screenWidth.width < breakpoint, 
+    [screenWidth?.width, breakpoint]
+  );
+}; 
