@@ -1,6 +1,6 @@
 import { equal, larger, format, polynomialRoot, largerEq, min, max, round, isComplex, type Complex } from 'mathjs';
 import { getPathById } from '@/features/ResultList/slices/resultsSlice';
-import { Path, Result, ResultSet, Score } from '@/features/ResultList/types/results.d';
+import { Path, Result, ResultSet, Score, ScoreWeights } from '@/features/ResultList/types/results.d';
 
 export interface ScorePair {
   main: number;
@@ -251,6 +251,25 @@ const computeWeightedMean = (
   clinicalWeight: number
 ): number => {
   return (confidence * confidenceWeight) + (novelty * noveltyWeight) + (clinical * clinicalWeight);
+};
+
+export const recalculateResultSetScores = (
+  resultSet: ResultSet,
+  weights: ScoreWeights,
+  isPathfinder: boolean
+): ResultSet => {
+  return {
+    ...resultSet,
+    data: {
+      ...resultSet.data,
+      results: resultSet.data.results.map(result => ({
+        ...result,
+        score: isPathfinder
+          ? generatePathfinderScore(resultSet, result)
+          : generateScore(result.scores, weights.confidenceWeight, weights.noveltyWeight, weights.clinicalWeight),
+      })),
+    },
+  };
 };
 
 export const getPathfinderMetapathScore = (path: Path): number => {

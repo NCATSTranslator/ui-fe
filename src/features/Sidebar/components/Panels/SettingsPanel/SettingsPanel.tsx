@@ -150,7 +150,7 @@ const SettingsPanel = () => {
                   <div className={styles.activePrefContent}>
                     {activePrefObject.prefObject.possible_values.map((value) => (
                       <Button
-                        key={value}
+                        key={String(value)}
                         className={`${styles.prefValueSelectorButton} ${userPrefs[activePrefObject.prefKey].pref_value === value ? styles.active : ''}`}
                         variant="secondary"
                         handleClick={()=>handlePrefValueClick(activePrefObject.prefKey, value)}
