@@ -15,7 +15,7 @@ import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
-import { currentUser } from '@/features/UserAuth/slices/userSlice';
+import { currentUser, currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Result, PathFilterState, Path, ResultBookmark } from '@/features/ResultList/types/results';
@@ -120,6 +120,7 @@ const ResultItem: FC<ResultItemProps> = ({
   }) => {
 
   const resultSet = useSelector(getResultSetById(pk));
+  const config = useSelector(currentConfig);
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
   const firstPath = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0] as string) : result.paths[0];
   const score = (isPathfinder && firstPath) ? getPathfinderMetapathScore(firstPath) : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
@@ -194,6 +195,7 @@ const ResultItem: FC<ResultItemProps> = ({
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, subjectNode.species) : '';
   const resultDescription = subjectNode?.descriptions[0];
+  const hasSummary = (queryType?.id === 0 && config?.include_summarization) || false;
 
   const handleEdgeSpecificEvidence = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
     if(!result)
@@ -266,7 +268,7 @@ const ResultItem: FC<ResultItemProps> = ({
           isPathfinder={isPathfinder}
           nameString={nameString}
           result={result}
-          hasSummary={queryType?.id === 0}
+          hasSummary={hasSummary}
           pk={pk}
           diseaseId={objectNode?.id || ""}
           diseaseName={objectNode?.names[0] || ""}

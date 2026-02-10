@@ -5,7 +5,6 @@ import { Timeout } from '@/features/Common/types/global';
 
 interface LoadingWrapperProps {
   loading?: boolean;
-  loadingText?: string;
   children?: ReactNode;
   wrapperClassName?: string;
   contentClassName?: string;
@@ -15,7 +14,6 @@ interface LoadingWrapperProps {
 
 const LoadingWrapper: FC<LoadingWrapperProps> = ({
   loading = false,
-  loadingText,
   children,
   wrapperClassName = "",
   contentClassName = "",

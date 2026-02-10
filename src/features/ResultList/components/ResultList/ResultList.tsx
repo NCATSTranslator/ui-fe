@@ -30,7 +30,6 @@ import { ResultSet, Result, ResultEdge, Path, PathFilterState, SharedItem, ARASt
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { generatePathfinderScore, generateScore, recalculateResultSetScores } from "@/features/ResultList/utils/scoring";
 import useScoreWeights from "@/features/ResultList/hooks/useScoreWeights";
-import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import { useResultsStatusQuery, useResultsDataQuery, useResultsCompleteToast, useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useNotesModal } from '@/features/ResultItem/hooks/useNotesModal';
@@ -705,29 +704,6 @@ const ResultList = () => {
 
   },[formattedResults, nodeIdParam]);
 
-  const handleResultMatchClick = useCallback((match: ResultContextObject) => {
-    if(!match)
-      return;
-
-    let sharedItemIndex = formattedResults.findIndex(result => result.id === match.id);
-    if(sharedItemIndex === -1)
-      return;
-
-    setResultIdParam(match.id);
-    const newPage = Math.floor(sharedItemIndex / itemsPerPage);
-    const resultSubjectNode = getNodeById(resultSet, formattedResults[sharedItemIndex].id);
-    const resultSubjectType = (resultSubjectNode?.types[0]) ? resultSubjectNode?.types[0] : "";
-    setSharedItem({
-      index: sharedItemIndex,
-      page: newPage,
-      name: formattedResults[sharedItemIndex].drug_name,
-      type: resultSubjectType
-    });
-    handlePageClick({selected: newPage}, false, formattedResults.length);
-    setExpandSharedResult(true);
-    setAutoScrollToResult(true);
-  }, [formattedResults, itemsPerPage, handlePageClick, resultSet]);
-
   const handleResultsRefresh = useCallback(() => {
     // Update rawResults with the fresh data
     if(!!freshRawResults)
@@ -854,23 +830,17 @@ const ResultList = () => {
           ?
             <QueryPathfinder
               isResults
-              loading={isLoading}
               setShareModalFunction={setShareModalOpen}
-              results={formattedResults}
-              handleResultMatchClick={handleResultMatchClick}
               pk={!!currentQueryID ? currentQueryID : ""}
             />
           :
             <Query
               isResults
-              loading={isLoading}
               initPresetTypeObject={presetTypeObject}
               initNodeIdParam={nodeIdParam}
               initNodeLabelParam={nodeLabelParam}
               nodeDescription={nodeDescription}
               setShareModalFunction={setShareModalOpen}
-              results={formattedResults}
-              handleResultMatchClick={handleResultMatchClick}
               pk={!!currentQueryID ? currentQueryID : ""}
             />
         }

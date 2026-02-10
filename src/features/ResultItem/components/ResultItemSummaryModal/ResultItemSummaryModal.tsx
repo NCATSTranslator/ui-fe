@@ -1,9 +1,9 @@
 import { FC, ReactNode } from "react";
-import LoadingWrapper from "@/features/Common/components/LoadingWrapper/LoadingWrapper";
+import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
 import Modal from "@/features/Common/components/Modal/Modal";
 import styles from "./ResultItemSummaryModal.module.scss";
 import Button from "@/features/Core/components/Button/Button";
-import LoadingIcon from "@/features/Common/components/LoadingIcon/LoadingIcon";
+import LoadingIcon from "@/features/Core/components/LoadingIcon/LoadingIcon";
 import { Result } from "@/features/ResultList/types/results";
 
 interface ResultItemSummaryModalProps {
@@ -33,7 +33,7 @@ const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
     >
-      <LoadingWrapper loading={isLoading && !isStreaming} size="medium" loadingText="Results may take up to a minute to generate.">
+      <LoadingWrapper loading={isLoading && !isStreaming} size="medium">
         <div>
           <div className={styles.content}>
             <div className={styles.header}>
