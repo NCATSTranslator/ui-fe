@@ -42,7 +42,7 @@ const UserSaves = () => {
   // eslint-disable-next-line
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const shareResultID = useRef<null | string>(null);
-  const setShareResultID = (newID: string) => shareResultID.current = newID;
+  const setShareResultID = (newID: string | null) => shareResultID.current = newID;
   // dummy var for now
   const shouldUpdateResultsAfterBookmark = useRef(false);
 

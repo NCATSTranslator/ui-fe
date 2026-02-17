@@ -1,12 +1,13 @@
 import styles from './UserSave.module.scss';
-import { RefObject, Dispatch, SetStateAction, FC, useCallback, useMemo } from 'react';
+import { RefObject, Dispatch, SetStateAction, FC, useCallback, useMemo, useRef } from 'react';
 import Highlighter from 'react-highlight-words';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultItem from '@/features/ResultItem/components/ResultItem/ResultItem';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { getResultsShareURLPath } from "@/features/Common/utils/web";
 import { getCompressedEdge, getFormattedDate } from '@/features/Common/utils/utilities';
-import { Path, Result, ResultEdge } from '@/features/ResultList/types/results';
+import { Path, Result, ResultEdge, ScoreWeights } from '@/features/ResultList/types/results';
+import { ResultListProvider, ResultListContextValue } from '@/features/ResultList/context/ResultListContext';
 import AnimateHeight from 'react-animate-height';
 import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react"
 import ChevUp from "@/assets/icons/directional/Chevron/Chevron Up.svg?react";
@@ -24,9 +25,9 @@ interface UserSaveProps {
   currentSearchString: RefObject<string>;
   handleBookmarkError?: () => void;
   save: [string, SaveGroup];
-  scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number}
+  scoreWeights: ScoreWeights;
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
-  setShareResultID: (state: string) => void;
+  setShareResultID: (state: string | null) => void;
   setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   showHiddenPaths: boolean;
   zoomKeyDown: boolean;
@@ -48,6 +49,7 @@ const UserSave: FC<UserSaveProps> = ({
   zoomKeyDown }) => {
 
   const config = useSelector(currentConfig);
+  const shouldUpdateRef = useRef(false) as RefObject<boolean>;
   let key = save[0];
   let queryObject = save[1];
   const arspk = useMemo(() => save[1].query.pk, [save]);
@@ -71,6 +73,48 @@ const UserSave: FC<UserSaveProps> = ({
     if(!!edge && !!activateEvidence)
       activateEvidence(item, edge, path, pathKey, arspk);
   }, [resultSet, arspk, activateEvidence]);
+
+  // Stable no-op callbacks to avoid creating new function references each render
+  const noopFilter = useCallback(() => {}, []);
+  const noopSetExpand = useCallback(() => {}, []);
+  const noopUpdateSaves = useCallback(() => {}, []) as unknown as Dispatch<SetStateAction<SaveGroup | null>>;
+  const stableActivateNotes = useMemo(() => activateNotes ?? (() => {}), [activateNotes]);
+  const stableBookmarkAdded = useMemo(() => bookmarkAddedToast ?? (() => {}), [bookmarkAddedToast]);
+  const stableBookmarkRemoved = useMemo(() => bookmarkRemovedToast ?? (() => {}), [bookmarkRemovedToast]);
+  const stableBookmarkError = useMemo(() => handleBookmarkError ?? (() => {}), [handleBookmarkError]);
+
+  // Memoized base context value with all shared (non-per-item) properties.
+  // activeEntityFilters reflects the search string at render time; parent re-renders from setFilteredUserSaves keep it up to date.
+  const baseContextValue = useMemo((): Omit<ResultListContextValue, 'queryNodeID' | 'queryNodeLabel' | 'queryNodeDescription' | 'queryType'> => ({
+    activateEvidence: handleActivateEvidence,
+    activateNotes: stableActivateNotes,
+    activeEntityFilters: [currentSearchString.current],
+    activeFilters: [],
+    availableFilters: {},
+    handleFilter: noopFilter,
+    bookmarkAddedToast: stableBookmarkAdded,
+    bookmarkRemovedToast: stableBookmarkRemoved,
+    handleBookmarkError: stableBookmarkError,
+    isPathfinder: false,
+    pathFilterState: null,
+    pk: arspk,
+    resultsComplete: true,
+    scoreWeights,
+    setExpandSharedResult: noopSetExpand,
+    setShareModalOpen,
+    setShareResultID,
+    showHiddenPaths,
+    setShowHiddenPaths,
+    shouldUpdateResultsAfterBookmark: shouldUpdateRef,
+    updateUserSaves: noopUpdateSaves,
+    zoomKeyDown,
+  }), [
+    handleActivateEvidence, stableActivateNotes, currentSearchString,
+    noopFilter, stableBookmarkAdded, stableBookmarkRemoved, stableBookmarkError,
+    arspk, scoreWeights, noopSetExpand, setShareModalOpen, setShareResultID,
+    showHiddenPaths, setShowHiddenPaths, shouldUpdateRef, noopUpdateSaves, zoomKeyDown,
+  ]);
+
   return (
     <div key={key} className={styles.query}>
       <div className={styles.topBar}>
@@ -195,41 +239,26 @@ const UserSave: FC<UserSaveProps> = ({
             return null;
 
           const bookmarkItem = queryObject.saves.get(save.object_ref) ?? null;
+          const contextValue: ResultListContextValue = {
+            ...baseContextValue,
+            queryNodeID: (typeof queryNodeID === "string") ? queryNodeID : queryNodeID.toString(),
+            queryNodeLabel,
+            queryNodeDescription: queryNodeDescription ?? null,
+            queryType,
+          };
           return (
             <div key={save.id} className={styles.result}>
-              <ResultItem
-                isEven={i % 2 !== 0}
-                key={queryItem.id}
-                queryType={queryType}
-                activateEvidence={handleActivateEvidence}
-                activateNotes={activateNotes}
-                activeEntityFilters={[currentSearchString.current]}
-                zoomKeyDown={zoomKeyDown}
-                pk={arspk}
-                queryNodeID={(typeof queryNodeID === "string") ? queryNodeID : queryNodeID.toString()}
-                queryNodeLabel={queryNodeLabel}
-                queryNodeDescription={queryNodeDescription}
-                bookmarkItem={bookmarkItem}
-                handleBookmarkError={handleBookmarkError}
-                bookmarkAddedToast={bookmarkAddedToast}
-                bookmarkRemovedToast={bookmarkRemovedToast}
-                setShareModalOpen={setShareModalOpen}
-                setShareResultID={setShareResultID}
-                isInUserSave={true}
-                resultsComplete={true}
-                isPathfinder={false}
-                result={queryItem}
-                pathFilterState={{}}
-                availableFilters={{}}
-                handleFilter={()=>{}}
-                activeFilters={[]}
-                sharedItemRef={ null}
-                startExpanded={false}
-                setExpandSharedResult={()=>{}}
-                scoreWeights={scoreWeights}
-                showHiddenPaths={showHiddenPaths}
-                setShowHiddenPaths={setShowHiddenPaths}
-              />
+              <ResultListProvider value={contextValue}>
+                <ResultItem
+                  key={queryItem.id}
+                  result={queryItem}
+                  isEven={i % 2 !== 0}
+                  bookmarkItem={bookmarkItem}
+                  sharedItemRef={null}
+                  startExpanded={false}
+                  isInUserSave={true}
+                />
+              </ResultListProvider>
             </div>
           )
         })}
