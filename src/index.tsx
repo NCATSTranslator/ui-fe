@@ -109,8 +109,8 @@ const routes = [
     element: <Page title="Project"><Suspense fallback={<LoadingWrapper />}><ProjectDetail /></Suspense></Page>
   },
   {
-    path: "queries",
-    element: <Page title="Queries"><Suspense fallback={<LoadingWrapper />}><Queries /></Suspense></Page>
+    path: "query-history",
+    element: <Page title="Query History"><Suspense fallback={<LoadingWrapper />}><Queries /></Suspense></Page>
   },
   {
     path: "new-query",
