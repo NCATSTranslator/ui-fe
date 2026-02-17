@@ -6,7 +6,7 @@ import { createStreamingRequest, logHTTPError } from "@/features/Common/utils/ht
 
 const API_URL = `https://transltr-bma-ui-dev.ncats.io/summarizer/summary-streaming`;
 
-// old, non-streaming summary hook
+// old, non-streaming summary hook (not used anymore)
 export const useResultSummary = (resultSet: ResultSet | null, result: Result, diseaseId: string, diseaseName: string, diseaseDescription: string) => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["resultSummary", result, diseaseId, diseaseName, diseaseDescription],
@@ -92,8 +92,28 @@ export const useStreamingSummaryState = (
   const storageKey = `resultSummary_${result.id}`;
   const body = JSON.stringify(resultToSummarySpec(resultSet!, result, diseaseId, diseaseName, diseaseDescription));
 
+  const linkifyReferences = (text: string): string => {
+    // Link PMC IDs (e.g., PMC4163991, PMC 4163991) to PubMed Central
+    text = text.replace(
+      /\bPMC[:\s]?(\d+)\b/g,
+      '<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC$1/" target="_blank" rel="noopener noreferrer">PMC$1</a>'
+    );
+    // Link PMID IDs (e.g., PMID:14974815, PMID 14974815, PMID14974815) to PubMed
+    text = text.replace(
+      /\bPMID[:\s]?(\d+)\b/g,
+      '<a href="https://pubmed.ncbi.nlm.nih.gov/$1/" target="_blank" rel="noopener noreferrer">PMID:$1</a>'
+    );
+    // Link NCT IDs (e.g., NCT00977977) to ClinicalTrials.gov
+    text = text.replace(
+      /\bNCT(\d+)\b/g,
+      '<a href="https://clinicaltrials.gov/ct2/show/NCT$1" target="_blank" rel="noopener noreferrer">NCT$1</a>'
+    );
+    return text;
+  };
+
   const formatOutputText = (text: string) => {
-    return text.replace(/\n/g, '<br />').replace(/\.\*\*/g, '.<br /><br />**').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    const formatted = text.replace(/\n/g, '<br />').replace(/\.\*\*/g, '.<br /><br />**').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    return linkifyReferences(formatted);
   }
 
   const updateSummary = useCallback((content: ReactNode | null) => {
