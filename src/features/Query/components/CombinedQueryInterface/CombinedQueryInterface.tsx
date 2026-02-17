@@ -1,6 +1,5 @@
 import { FC, Dispatch, SetStateAction, useEffect } from "react";
 import styles from './CombinedQueryInterface.module.scss';
-import { Result } from "@/features/ResultList/types/results.d";
 import Tabs from "@/features/Common/components/Tabs/Tabs";
 import Tab from "@/features/Common/components/Tabs/Tab";
 import Query from "@/features/Query/components/Query/Query";
@@ -22,8 +21,6 @@ interface CombinedQueryInterfaceProps {
   className?: string;
   defaultProject?: ProjectRaw | null;
   isResults?: boolean;
-  loading?: boolean;
-  results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   pk?: string;
   projectPage?: boolean;  
@@ -39,8 +36,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   className = '',
   defaultProject = null,
   isResults = false,
-  loading = false,
-  results = [],
   setShareModalFunction = () => {},
   pk = "",
   projectPage = false,
@@ -144,13 +139,11 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
         <Tab heading="Smart Query" className={styles.queryTab}>
           <Query
             isResults={isResults}
-            loading={loading}
             initPresetTypeObject={initPresetTypeObject}
             initNodeLabelParam={initNodeLabelParam}
             initNodeIdParam={initNodeIdParam}
             nodeDescription={nodeDescription}
             setShareModalFunction={setShareModalFunction}
-            results={results}
             pk={pk}
             selectedProject={selectedProject}
             combinedStyles={styles}
@@ -166,8 +159,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             className={styles.pathfinderTab}>
             <QueryPathfinder
               isResults={isResults}
-              loading={loading}
-              results={results}
               setShareModalFunction={setShareModalFunction}
               pk={pk}
               selectedProject={selectedProject}

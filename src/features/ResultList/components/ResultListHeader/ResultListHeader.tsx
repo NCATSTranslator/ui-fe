@@ -7,21 +7,13 @@ import SelectedFilterTag from '@/features/ResultFiltering/components/SelectedFil
 import Toggle from '@/features/Core/components/Toggle/Toggle';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
-import { Filter } from '@/features/ResultFiltering/types/filters';
+import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 
 interface ResultListHeaderData {
   formattedResultsLength: number;
   originalResultsLength: number;
   itemOffset: number;
   endResultIndex: number;
-  activeFilters: Filter[];
-  handleFilter: (filter: Filter) => void;
-  shareModalOpen: boolean;
-  setShareModalOpen: (open: boolean) => void;
-  shareResultID: string | null;
-  setShareResultID: (id: string | null) => void;
-  currentQueryID: string | null;
-  isError: boolean;
   currentPage: number;
   ResultListStyles: { [key: string]: string };
   pageCount: number;
@@ -38,6 +30,7 @@ const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
 
   const config = useSelector(currentConfig);
   const showNoveltyBoost = config?.show_novelty_boost;
+  const { activeFilters, handleFilter } = useResultListContext();
 
   return(
     <div className={styles.resultsHeader}>
@@ -93,10 +86,10 @@ const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
       </div>
       <div className={styles.activeFilters}>
         {
-          data.activeFilters.length > 0 &&
-          data.activeFilters.map((activeFilter, i)=> {
+          activeFilters.length > 0 &&
+          activeFilters.map((activeFilter, i)=> {
             return(
-              <SelectedFilterTag key={activeFilter?.id || i.toString()} filter={activeFilter} handleFilter={data.handleFilter}/>
+              <SelectedFilterTag key={activeFilter?.id || i.toString()} filter={activeFilter} handleFilter={handleFilter}/>
             )
           })
         }

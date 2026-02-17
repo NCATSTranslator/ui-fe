@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { ScoreWeights } from '@/features/ResultList/types/results';
 
 export const DEFAULT_SCORE_WEIGHTS: ScoreWeights = {
@@ -37,7 +37,7 @@ const useScoreWeights = (options: UseScoreWeightsOptions = {}): UseScoreWeightsR
   const onWeightsChangeRef = useRef(options.onWeightsChange);
   onWeightsChangeRef.current = options.onWeightsChange;
 
-  const scoreWeights = noveltyBoost ? NOVELTY_SCORE_WEIGHTS : DEFAULT_SCORE_WEIGHTS;
+  const scoreWeights = useMemo(() => noveltyBoost ? NOVELTY_SCORE_WEIGHTS : DEFAULT_SCORE_WEIGHTS, [noveltyBoost]);
 
   const handleToggleNoveltyBoost = useCallback((active: boolean) => {
     // Update state immediately so derived scoreWeights and refs stay consistent
