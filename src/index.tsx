@@ -109,6 +109,10 @@ const routes = [
     element: <Page title="Project"><Suspense fallback={<LoadingWrapper />}><ProjectDetail /></Suspense></Page>
   },
   {
+    path: "queries",
+    element: <Navigate to="/query-history" replace />
+  },
+  {
     path: "query-history",
     element: <Page title="Query History"><Suspense fallback={<LoadingWrapper />}><Queries /></Suspense></Page>
   },
