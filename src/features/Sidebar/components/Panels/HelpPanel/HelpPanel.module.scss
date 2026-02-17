@@ -10,4 +10,7 @@
       margin: 0;
     }
   }
+  .activePanel .activePanelContent {
+    padding: $s;
+  }
 }

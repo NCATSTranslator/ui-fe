@@ -44,7 +44,9 @@ const HelpPanel = () => {
           handleBack={() => setActivePanel(null)}
           backButtonLabel={activePanel.title}
         >
-          {activePanel.component}
+          <div className={styles.activePanelContent}>
+            {activePanel.component}
+          </div>
         </InteriorPanelContainer>
       )}
     </div>
