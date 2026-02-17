@@ -39,7 +39,6 @@ interface UseResultsDataReturn {
   setArsStatus: Dispatch<SetStateAction<ARAStatusResponse | null>>;
   resultStatus: "error" | "running" | "success" | "unknown";
   setResultStatus: Dispatch<SetStateAction<"error" | "running" | "success" | "unknown">>;
-  freshRawResults: ResultSet | null;
   setFreshRawResults: Dispatch<SetStateAction<ResultSet | null>>;
   nodeDescription: string;
   setNodeDescription: Dispatch<SetStateAction<string>>;
@@ -240,7 +239,6 @@ const useResultsData = ({
     setArsStatus,
     resultStatus,
     setResultStatus,
-    freshRawResults,
     setFreshRawResults,
     nodeDescription,
     setNodeDescription,

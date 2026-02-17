@@ -131,7 +131,7 @@ const ResultList = () => {
     formattedResults, setFormattedResults,
     isLoading, setIsLoading, isError, setIsError,
     arsStatus, setArsStatus, resultStatus, setResultStatus,
-    freshRawResults, setFreshRawResults,
+    setFreshRawResults,
     nodeDescription, setNodeDescription,
     hasFreshResults, resultsComplete,
     rawResults, originalResults, prevRawResults,
@@ -416,7 +416,6 @@ const ResultList = () => {
     handlePageClick,
     noveltyBoost,
     onToggleNoveltyBoost: handleToggleNoveltyBoost,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [formattedResults, itemOffset, endResultIndex, pageCount, handlePageClick, noveltyBoost, handleToggleNoveltyBoost]);
 
   const resultListContextValue: ResultListContextValue = useMemo(() => ({
