@@ -2,61 +2,59 @@ import { HelpArticle } from "@/features/Page/types/page";
 
 export const helpArticles: HelpArticle[] = [
   {
-    title: 'About Translator', 
-    link:'https://ncats.nih.gov/translator/about',
-    subArticles: [
-      {
-        title: 'What is Translational Science?', 
-        link: 'https://ncats.nih.gov/training-education/translational-science-principles',
-      },
-      {
-        title: 'The National Center for Advancing Translational Sciences', 
-        link: 'https://ncats.nih.gov/about'
-      },
-      {
-        title: 'Funding Information', 
-        slug: 'funding-information'
-      },
-    ]
+    title: 'About Translator',
+    slug: 'about-translator'
   },
   {
-    title: 'Logging In', 
-    slug: 'logging-in',
+    title: 'How to Use Translator',
+    slug: 'how-to-use-translator'
   },
   {
-    title: 'Overview', 
-    slug: 'overview',
+    title: 'Submitting Queries',
+    slug: 'submitting-queries'
   },
   {
-    title: 'Exploring Relationships', 
-    slug: 'exploring-relationships',
+    title: 'Loading and Syncing',
+    slug: 'loading-and-syncing'
   },
   {
-    title: 'Review and Identify Favorite Results', 
-    slug: 'review-and-identify',
+    title: 'Paths and Graphs',
+    slug: 'paths-and-graphs'
   },
   {
-    title: 'Workspace', 
-    slug: 'workspace-help',
+    title: 'Relationship Evidence',
+    slug: 'relationship-evidence'
   },
   {
-    title: 'User Preferences', 
-    slug: 'user-preferences',
+    title: 'Sorting and Filtering', 
+    slug:'sorting-and-filtering'
+  },
+  {
+    title: 'Bookmarks and Notes',
+    slug: 'bookmarks-and-notes'
+  },
+  {
+    title: 'Sharing Results',
+    slug: 'sharing-results'
+  },
+  {
+    title: 'Projects',
+    slug: 'projects-article'
+  },
+  {
+    title: 'Query History',
+    slug: 'query-history-article'
+  },
+  {
+    title: 'Account and Settings',
+    slug: 'account-and-settings'
   },
   {
     title: 'Frequently Asked Questions', 
-    slug:'help'
-  },
-  {
-    title: 'Search History', 
-    slug:'search-history'
-  },
-  {
-    title: 'Send Feedback', 
-    slug:'send-feedback-help'
+    slug:'frequently-asked-questions'
   },
   {
     title: 'Security and Privacy', 
-    link:'https://ncats.nih.gov/privacy'
+    slug:'security-and-privacy'
   },
 ];
