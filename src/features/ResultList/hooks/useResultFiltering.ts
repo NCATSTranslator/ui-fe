@@ -1,4 +1,4 @@
-import { useState, useCallback, Dispatch, SetStateAction, RefObject, MutableRefObject } from 'react';
+import { useState, useCallback, Dispatch, SetStateAction, RefObject } from 'react';
 import { filterCompare } from '@/features/Common/utils/sortingFunctions';
 import { Result, ResultSet, PathFilterState } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
@@ -38,7 +38,7 @@ interface UseResultFilteringArgs {
   currentSortString: RefObject<string>;
   isPathfinder: boolean;
   userSavesRef: RefObject<SaveGroup | null>;
-  handleUpdateResultsRef: MutableRefObject<HandleUpdateResultsFn | null>;
+  handleUpdateResultsRef: RefObject<HandleUpdateResultsFn | null>;
 }
 
 const useResultFiltering = ({

@@ -13,23 +13,18 @@ import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Select from '@/features/Common/components/Select/Select';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
-import { Result } from "@/features/ResultList/types/results.d";
 import { useAutocomplete, useQuerySubmission } from '@/features/Query/hooks/customQueryHooks';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 import QueryResultsHeader from '@/features/Query/components/QueryResultsHeader/QueryResultsHeader';
 import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
-import { ResultContextObject } from '@/features/ResultList/utils/llm';
 import { ProjectRaw } from '@/features/Projects/types/projects';
 import { User } from '@/features/UserAuth/types/user';
 import { getDecodedParams } from '@/features/Common/utils/web';
 
 type QueryPathfinderProps = {
-  handleResultMatchClick?: (match: ResultContextObject) => void;
   isResults?: boolean;
-  loading?: boolean;
   pk?: string;
-  results?: Result[];
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   selectedProject?: ProjectRaw | null;
   shouldNavigate?: boolean;
@@ -38,11 +33,8 @@ type QueryPathfinderProps = {
 }
 
 const QueryPathfinder: FC<QueryPathfinderProps> = ({
-  loading = false,
-  handleResultMatchClick,
   isResults = false,
   pk,
-  results = [],
   setShareModalFunction = ()=>{},
   selectedProject = null,
   shouldNavigate = true,
@@ -227,9 +219,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
             entityIdTwo={idTwo || undefined}
             entityLabelTwo={labelTwo || undefined}
             onShare={() => setShareModalFunction(true)}
-            results={results}
-            loading={loading}
-            onResultMatchClick={handleResultMatchClick}
             pk={pk || ""}
             className={styles.resultsHeader}
             searchedTermClassName={styles.searchedTerm}

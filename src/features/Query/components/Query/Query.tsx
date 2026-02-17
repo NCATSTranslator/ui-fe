@@ -2,14 +2,12 @@ import { useState, useEffect, useCallback, FC, Dispatch, SetStateAction } from "
 import { useSelector } from 'react-redux';
 import { useLocation } from "react-router-dom";
 import { AutocompleteItem, QueryItem, QueryType } from "@/features/Query/types/querySubmission";
-import { Result } from "@/features/ResultList/types/results.d";
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useQueryItem, useAutocompleteConfig, useAutocomplete, useQuerySubmission, useExampleQueries } from "@/features/Query/hooks/customQueryHooks";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import styles from './Query.module.scss';
 import QueryResultsView from '@/features/Query/components/QueryResultsView/QueryResultsView';
 import QueryInputView from '@/features/Query/components/QueryInputView/QueryInputView';
-import { ResultContextObject } from '@/features/ResultList/utils/llm';
 import { User } from "@/features/UserAuth/types/user";
 import { ProjectRaw } from "@/features/Projects/types/projects";
 
@@ -21,8 +19,6 @@ interface QueryProps {
   initNodeIdParam?: string | null;
   nodeDescription?: string | null;
   setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
-  results?: Result[];
-  handleResultMatchClick?: (match: ResultContextObject) => void;
   pk?: string;
   selectedProject?: ProjectRaw | null;
   combinedStyles?: { [key: string]: string };
@@ -38,8 +34,6 @@ const Query: FC<QueryProps> = ({
   initNodeIdParam = null,
   nodeDescription = null,
   setShareModalFunction = () => {},
-  results = [],
-  handleResultMatchClick,
   pk = "",
   selectedProject = null,
   combinedStyles,
@@ -157,11 +151,8 @@ const Query: FC<QueryProps> = ({
             <QueryResultsView
               queryItem={queryItem}
               nodeDescription={nodeDescription}
-              results={results}
-              loading={loading}
               pk={pk}
               setShareModalFunction={setShareModalFunction}
-              handleResultMatchClick={handleResultMatchClick}
             />
           ) : (
             <QueryInputView
