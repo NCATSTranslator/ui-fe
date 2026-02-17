@@ -1,10 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useState, RefObject, useRef } from "react";
 import { useQuery } from '@tanstack/react-query';
-import { API_PATH_PREFIX, SaveGroup } from "@/features/UserAuth/utils/userApi";
+import { API_PATH_PREFIX } from "@/features/UserAuth/utils/userApi";
 import { fetchWithErrorHandling } from "@/features/Common/utils/web";
 import { handleResultsError } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { ARAStatusResponse, Result, ResultSet, ResultEdge, Path, PathFilterState, SharedItem } from "@/features/ResultList/types/results.d";
-import { Filter } from "@/features/ResultFiltering/types/filters";
+import { ARAStatusResponse, Result, ResultSet } from "@/features/ResultList/types/results.d";
 import { queryStatusResultsCompleteToast } from "@/features/Core/utils/toastMessages";
 import { useUpdateQueryLastSeen } from "@/features/Projects/hooks/customHooks";
 import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
@@ -69,14 +68,12 @@ const handleStatusError = (
   formattedResults: Result[],
   setIsError: (value: boolean) => void,
   setIsLoading: (value: boolean) => void,
-  isFetchingARAStatus: RefObject<boolean | null>
+  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>
 ): void => {
   if (formattedResults.length <= 0) {
     handleResultsError(true, setIsError, setIsLoading);
-    isFetchingARAStatus.current = null;
-  } else {
-    isFetchingARAStatus.current = null;
   }
+  setIsFetchingARAStatus(null);
   console.error('ARA Status Error:', error);
 };
 
@@ -84,23 +81,27 @@ const handleStatusError = (
  * Custom hook for fetching ARA status using React Query
  * 
  * @param currentQueryID - The current query ID
- * @param isFetchingARAStatus - Ref to track if ARA status is being fetched
+ * @param isFetchingARAStatus - Whether ARA status is being fetched
+ * @param setIsFetchingARAStatus - Setter for ARA status fetching state
  * @param numberOfStatusChecks - Ref to track number of status checks
  * @param formattedResults - Array of formatted results
  * @param setIsError - Function to set error state
  * @param setIsLoading - Function to set loading state
- * @param isFetchingResults - Ref to track if results are being fetched
- * @param arsStatus - Ref to track ARA status
+ * @param isFetchingResults - Whether results are being fetched
+ * @param setIsFetchingResults - Setter for results fetching state
+ * @param arsStatus - ARA status response
  * @param setArsStatus - Function to set query status
  */
 export const useResultsStatusQuery = (
   currentQueryID: string | null,
-  isFetchingARAStatus: RefObject<boolean | null>,
+  isFetchingARAStatus: boolean | null,
+  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>,
   numberOfStatusChecks: RefObject<number>,
   formattedResults: Result[],
   setIsError: (value: boolean) => void,
   setIsLoading: (value: boolean) => void,
-  isFetchingResults: RefObject<boolean>,
+  isFetchingResults: boolean,
+  setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
   arsStatus: ARAStatusResponse | null,
   setArsStatus: (value: ARAStatusResponse) => void
 ) => {
@@ -131,7 +132,7 @@ export const useResultsStatusQuery = (
         
         if (hasNewARAData) {
           console.log(`Old ARAs: ${arsStatus?.data.aras}, New ARAs: ${data.data.aras}`);
-          isFetchingResults.current = true;
+          setIsFetchingResults(true);
         } else {
           console.log(`No new ARAs have returned data. Current status is: '${data.status}'`);
         }
@@ -139,18 +140,18 @@ export const useResultsStatusQuery = (
         // Check if status polling should stop
         if (shouldStopStatusPolling(data.status, numberOfStatusChecks.current)) {
           console.log(`Stopping ARA status polling. Status: ${data.status}, Checks: ${numberOfStatusChecks.current}`);
-          isFetchingARAStatus.current = false;
-          isFetchingResults.current = true;
+          setIsFetchingARAStatus(false);
+          setIsFetchingResults(true);
         }
 
         // Set ars status
         setArsStatus(data);
       } catch (error) {
-        handleStatusError(error, formattedResults, setIsError, setIsLoading, isFetchingARAStatus);
+        handleStatusError(error, formattedResults, setIsError, setIsLoading, setIsFetchingARAStatus);
       }
     },
     refetchInterval: REFETCH_INTERVAL,
-    enabled: isFetchingARAStatus.current === null ? false : isFetchingARAStatus.current,
+    enabled: isFetchingARAStatus === null ? false : isFetchingARAStatus,
     refetchOnWindowFocus: false,
     retry: false,
   });
@@ -179,8 +180,8 @@ const processResultsData = (
   setFreshRawResults: (results: ResultSet | null) => void,
   handleNewResults: (resultSet: ResultSet) => void,
   numberOfStatusChecks: RefObject<number>,
-  isFetchingARAStatus: RefObject<boolean | null>,
-  isFetchingResults: RefObject<boolean>,
+  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>,
+  setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
   updateQueryLastSeen: () => void
 ): void => {
   console.log('New results:', data);
@@ -195,10 +196,10 @@ const processResultsData = (
 
   // The ARS can rarely report that it is done in the status check when it is not done
   if (shouldResumeStatusPolling(data.status, numberOfStatusChecks.current)) {
-    isFetchingARAStatus.current = true;
+    setIsFetchingARAStatus(true);
   }
 
-  isFetchingResults.current = false;
+  setIsFetchingResults(false);
 
   // call out to queries/touch endpoint to update the query last_seen timestamp
   updateQueryLastSeen();
@@ -210,14 +211,14 @@ const processResultsData = (
 const handleResultsDataError = (
   error: unknown,
   formattedResults: Result[],
-  isFetchingARAStatus: RefObject<boolean | null>,
-  isFetchingResults: RefObject<boolean>,
+  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>,
+  setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
   setIsError: (value: boolean) => void,
   setIsLoading: (value: boolean) => void
 ): void => {
   console.error('Results Data Error:', error);
-  isFetchingARAStatus.current = false;
-  isFetchingResults.current = false;
+  setIsFetchingARAStatus(false);
+  setIsFetchingResults(false);
   
   if (formattedResults.length <= 0) {
     handleResultsError(true, setIsError, setIsLoading);
@@ -228,25 +229,29 @@ const handleResultsDataError = (
  * Custom hook for fetching results data using React Query
  * 
  * @param currentQueryID - The current query ID
- * @param isFetchingResults - Ref to track if results are being fetched
+ * @param isFetchingResults - Whether results are being fetched
  * @param formattedResults - Array of formatted results
  * @param setFreshRawResults - Function to set fresh raw results
  * @param handleNewResults - Function to handle new results
  * @param numberOfStatusChecks - Ref to track number of status checks
- * @param isFetchingARAStatus - Ref to track if ARA status is being fetched
+ * @param isFetchingARAStatus - Whether ARA status is being fetched (unused in queryFn but for enabled)
+ * @param setIsFetchingARAStatus - Setter for ARA status fetching state
  * @param setIsError - Function to set error state
  * @param setIsLoading - Function to set loading state
+ * @param setIsFetchingResults - Setter for results fetching state
  */
 export const useResultsDataQuery = (
   currentQueryID: string | null,
-  isFetchingResults: RefObject<boolean>,
+  isFetchingResults: boolean,
   formattedResults: Result[],
   setFreshRawResults: (results: ResultSet | null) => void,
   handleNewResults: (resultSet: ResultSet) => void,
   numberOfStatusChecks: RefObject<number>,
-  isFetchingARAStatus: RefObject<boolean | null>,
+  isFetchingARAStatus: boolean | null,
+  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>,
   setIsError: (value: boolean) => void,
   setIsLoading: (value: boolean) => void,
+  setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
   sid?: string
 ) => {
   const { mutate: updateQueryLastSeen } = useUpdateQueryLastSeen(sid);
@@ -274,22 +279,22 @@ export const useResultsDataQuery = (
           setFreshRawResults,
           handleNewResults,
           numberOfStatusChecks,
-          isFetchingARAStatus,
-          isFetchingResults,
+          setIsFetchingARAStatus,
+          setIsFetchingResults,
           updateQueryLastSeen
         );
       } catch (error) {
         handleResultsDataError(
           error,
           formattedResults,
-          isFetchingARAStatus,
-          isFetchingResults,
+          setIsFetchingARAStatus,
+          setIsFetchingResults,
           setIsError,
           setIsLoading
         );
       }
     },
-    enabled: isFetchingResults.current,
+    enabled: isFetchingResults,
     refetchOnWindowFocus: false,
     retry: false,
   });
@@ -317,46 +322,35 @@ export const useResultsCompleteToast = (arsStatus: ARAStatusResponse | null, isF
 export interface QueryChangeResetConfig {
   // Current state
   currentQueryID: string | null;
-  decodedParams: string;
-  itemsPerPage: number;
-  
+  decodedParamsRef: RefObject<string>;
+  itemsPerPageRef: RefObject<number>;
+
   // Refs to reset
   prevQueryID: RefObject<string | null>;
   rawResults: RefObject<ResultSet | null>;
   prevRawResults: RefObject<ResultSet | null>;
   originalResults: RefObject<Result[]>;
-  isFetchingARAStatus: RefObject<boolean | null>;
-  isFetchingResults: RefObject<boolean>;
   numberOfStatusChecks: RefObject<number>;
   currentPage: RefObject<number>;
   firstLoad: RefObject<boolean>;
-  shareResultID: RefObject<string | null>;
-  
+  // Setters for fetching state
+  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>;
+  setIsFetchingResults: Dispatch<SetStateAction<boolean>>;
+
   // State setters
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   setIsError: Dispatch<SetStateAction<boolean>>;
   setFormattedResults: Dispatch<SetStateAction<Result[]>>;
   setFreshRawResults: Dispatch<SetStateAction<ResultSet | null>>;
-  setActiveFilters: Dispatch<SetStateAction<Filter[]>>;
-  setActiveEntityFilters: Dispatch<SetStateAction<string[]>>;
-  setAvailableFilters: Dispatch<SetStateAction<{[key: string]: Filter}>>;
-  setPathFilterState: Dispatch<SetStateAction<PathFilterState | null>>;
+  resetFilters: () => void;
   setArsStatus: Dispatch<SetStateAction<ARAStatusResponse | null>>;
   setResultStatus: Dispatch<SetStateAction<"error" | "running" | "success" | "unknown">>;
   setItemOffset: Dispatch<SetStateAction<number>>;
   setEndResultIndex: Dispatch<SetStateAction<number>>;
-  setSelectedResult: Dispatch<SetStateAction<Result | null>>;
-  setSelectedEdge: Dispatch<SetStateAction<ResultEdge | null>>;
-  setSelectedPath: Dispatch<SetStateAction<Path | null>>;
-  setSelectedPathKey: Dispatch<SetStateAction<string>>;
-  setEvidenceModalOpen: Dispatch<SetStateAction<boolean>>;
+  resetEvidenceModal: () => void;
   closeNotesModal: () => void;
-  setFocusModalOpen: Dispatch<SetStateAction<boolean>>;
-  setShareModalOpen: Dispatch<SetStateAction<boolean>>;
-  setSharedItem: Dispatch<SetStateAction<SharedItem>>;
-  setAutoScrollToResult: Dispatch<SetStateAction<boolean>>;
-  setExpandSharedResult: Dispatch<SetStateAction<boolean>>;
-  setUserSaves: Dispatch<SetStateAction<SaveGroup | null>>;
+  resetShareState: () => void;
+  resetBookmarks: () => void;
   setResultIdParam: Dispatch<SetStateAction<string | null>>;
   setNodeDescription: Dispatch<SetStateAction<string>>;
 }
@@ -371,42 +365,30 @@ export interface QueryChangeResetConfig {
 export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
   const {
     currentQueryID,
-    decodedParams,
-    itemsPerPage,
+    decodedParamsRef,
+    itemsPerPageRef,
     prevQueryID,
     rawResults,
     prevRawResults,
     originalResults,
-    isFetchingARAStatus,
-    isFetchingResults,
     numberOfStatusChecks,
     currentPage,
     firstLoad,
-    shareResultID,
+    setIsFetchingARAStatus,
+    setIsFetchingResults,
     setIsLoading,
     setIsError,
     setFormattedResults,
     setFreshRawResults,
-    setActiveFilters,
-    setActiveEntityFilters,
-    setAvailableFilters,
-    setPathFilterState,
+    resetFilters,
     setArsStatus,
     setResultStatus,
     setItemOffset,
     setEndResultIndex,
-    setSelectedResult,
-    setSelectedEdge,
-    setSelectedPath,
-    setSelectedPathKey,
-    setEvidenceModalOpen,
+    resetEvidenceModal,
     closeNotesModal,
-    setFocusModalOpen,
-    setShareModalOpen,
-    setSharedItem,
-    setAutoScrollToResult,
-    setExpandSharedResult,
-    setUserSaves,
+    resetShareState,
+    resetBookmarks,
     setResultIdParam,
     setNodeDescription,
   } = config;
@@ -432,14 +414,11 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     originalResults.current = [];
     
     // Reset filter state
-    setActiveFilters([]);
-    setActiveEntityFilters([]);
-    setAvailableFilters({});
-    setPathFilterState(null);
+    resetFilters();
     
-    // Reset fetching refs
-    isFetchingARAStatus.current = true;
-    isFetchingResults.current = false;
+    // Reset fetching state
+    setIsFetchingARAStatus(true);
+    setIsFetchingResults(false);
     numberOfStatusChecks.current = 0;
     
     // Reset ARA status
@@ -449,30 +428,21 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     // Reset pagination
     currentPage.current = 0;
     setItemOffset(0);
-    setEndResultIndex(itemsPerPage);
+    setEndResultIndex(itemsPerPageRef.current);
     
     // Reset first load flag to handle shared result modal
     firstLoad.current = true;
     
     // Reset modal and selection state
-    setSelectedResult(null);
-    setSelectedEdge(null);
-    setSelectedPath(null);
-    setSelectedPathKey("");
-    setEvidenceModalOpen(false);
+    resetEvidenceModal();
     closeNotesModal();
-    setFocusModalOpen(false);
-    setShareModalOpen(false);
-    setSharedItem({index: 0, page: 0, name: '', type: ''});
-    setAutoScrollToResult(false);
-    setExpandSharedResult(false);
-    shareResultID.current = null;
+    resetShareState();
     
     // Reset user saves for new query
-    setUserSaves(null);
+    resetBookmarks();
     
     // Update result ID param from URL for new query
-    setResultIdParam(getDataFromQueryVar("r", decodedParams));
-    setNodeDescription("");
-  }, [currentQueryID, decodedParams, itemsPerPage]);
+    setResultIdParam(getDataFromQueryVar("r", decodedParamsRef.current));
+    setNodeDescription(""); 
+  }, [currentQueryID]);
 };

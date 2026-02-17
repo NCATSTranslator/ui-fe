@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, Dispatch, SetStateAction, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, useMemo, memo } from 'react';
 import styles from './ResultItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
 import { getARATagsFromResultTags } from '@/features/ResultItem/utils/utilities';
@@ -11,15 +11,15 @@ import Highlighter from 'react-highlight-words';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 // import { CSVLink } from 'react-csv';
 // import { generateCsvFromItem } from '@/features/ResultItem/utils/csvGeneration';
-import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
+import { Save } from '@/features/UserAuth/utils/userApi';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser, currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
-import { QueryType } from '@/features/Query/types/querySubmission';
-import { Result, PathFilterState, Path, ResultBookmark } from '@/features/ResultList/types/results';
+import { Result, Path, ResultBookmark } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
+import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { useTurnstileEffect } from '@/features/Common/hooks/customHooks';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
@@ -47,77 +47,52 @@ const sortTagsBySelected = (
 };
 
 type ResultItemProps = {
-  activateEvidence?: (item: Result, edgeIDs: string[], path: Path, pathKey: string) => void;
-  activateNotes?: (nameString: string, id: string) => void;
-  activeEntityFilters: string[];
-  activeFilters: Filter[];
-  availableFilters: {[key: string]: Filter};
-  bookmarkAddedToast?: () => void;
-  bookmarkRemovedToast?: () => void;
   bookmarkItem?: Save | null;
-  handleBookmarkError?: () => void;
-  handleFilter: (filter: Filter) => void;
   isEven: boolean;
   isInUserSave?: boolean;
-  isPathfinder?: boolean;
-  key: string;
-  pathFilterState: PathFilterState;
-  pk: string | null;
-  queryNodeDescription: string | null;
-  queryNodeID: string | null;
-  queryNodeLabel: string | null;
-  queryType: QueryType | null;
   result: Result | ResultBookmark;
-  resultsComplete: boolean;
-  scoreWeights: {confidenceWeight: number, noveltyWeight: number, clinicalWeight: number };
-  setExpandSharedResult: (state: boolean) => void;
-  setShareModalOpen: (state: boolean) => void;
-  setShareResultID: (state: string) => void;
-  setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   sharedItemRef: RefObject<HTMLDivElement> | null;
-  showHiddenPaths: boolean;
-  shouldUpdateResultsAfterBookmark?: RefObject<boolean>;
   startExpanded: boolean;
-  updateUserSaves?: Dispatch<SetStateAction<SaveGroup | null>>;
-  zoomKeyDown: boolean;
 }
 
 const ResultItem: FC<ResultItemProps> = ({
-    activateEvidence = () => {},
-    activateNotes = () => {},
+    bookmarkItem,
+    isEven = false,
+    isInUserSave = false,
+    result,
+    sharedItemRef,
+    startExpanded = false,
+  }) => {
+
+  const {
+    activateEvidence,
+    activateNotes,
     activeEntityFilters,
     activeFilters,
     availableFilters: availableTags,
-    bookmarkAddedToast = () => {},
-    bookmarkRemovedToast = () => {},
-    bookmarkItem,
-    pk: currentQueryID,
-    handleBookmarkError = () => {},
-    handleFilter = () => {},
-    key,
-    isEven = false,
-    isInUserSave = false,
-    isPathfinder = false,
-    queryNodeDescription,
-    queryNodeID,
-    queryNodeLabel,
-    queryType,
+    handleFilter,
+    bookmarkAddedToast,
+    bookmarkRemovedToast,
+    handleBookmarkError,
+    isPathfinder,
     pathFilterState,
     pk,
-    result,
-    resultsComplete = false,
+    queryNodeID,
+    queryNodeLabel,
+    queryNodeDescription,
+    queryType,
+    resultsComplete,
     scoreWeights,
-    setExpandSharedResult = () => {},
-    setShareModalOpen = () => {},
-    setShareResultID = () => {},
-    setShowHiddenPaths,
-    sharedItemRef,
+    setExpandSharedResult,
+    setShareModalOpen,
+    setShareResultID,
     showHiddenPaths,
-    startExpanded = false,
-    updateUserSaves,
+    setShowHiddenPaths,
     shouldUpdateResultsAfterBookmark,
-    zoomKeyDown
-  }) => {
+    updateUserSaves,
+    zoomKeyDown,
+  } = useResultListContext();
+  const currentQueryID = pk;
 
   const resultSet = useSelector(getResultSetById(pk));
   const config = useSelector(currentConfig);
@@ -237,8 +212,7 @@ const ResultItem: FC<ResultItemProps> = ({
     return null;
 
   return (
-    <div 
-      key={key} 
+    <div
       className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`} 
       ref={sharedItemRef} 
       data-result-curie={result.subject} 
@@ -383,7 +357,7 @@ const ResultItem: FC<ResultItemProps> = ({
                 handleActivateEvidence={handleActivateEvidence}
                 isEven={isEven}
                 pathArray={result?.paths}
-                pathFilterState={pathFilterState}
+                pathFilterState={pathFilterState ?? {}}
                 pk={pk ? pk : ""}
                 resultID={result.id}
                 selectedPaths={selectedPaths}
@@ -417,4 +391,4 @@ const ResultItem: FC<ResultItemProps> = ({
   );
 }
 
-export default ResultItem;
+export default memo(ResultItem);

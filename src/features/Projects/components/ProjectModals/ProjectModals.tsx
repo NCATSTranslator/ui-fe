@@ -101,7 +101,7 @@ const ProjectModals = ({
           onConfirm={handleConfirmDeleteProjects}
           onCancel={handleCancelDeleteProjects}
           heading={`${projectCount > 1 ? `Delete ${projectCount} Projects` : 'Delete Project'}?`}
-          content={<p>Queries in this project, along with any bookmarks or notes associated with them, will not be deleted and will still be available from your <Link to="/queries" target="_blank">Query History</Link>.</p>}
+          content={<p>Queries in this project, along with any bookmarks or notes associated with them, will not be deleted and will still be available from your <Link to="/query-history" target="_blank">Query History</Link>.</p>}
           cancelButtonText="Cancel"
           confirmButtonText={`${projectCount > 1 ? `Delete ${projectCount} Projects` : 'Delete Project'}`}
           setStorageKeyFn={deletePrompts.deleteProjects?.setHideDeletePrompt}

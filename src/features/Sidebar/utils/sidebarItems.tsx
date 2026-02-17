@@ -18,7 +18,7 @@ const ViewProjectsButton = () => {
 };
 
 const ViewAllQueriesButton = () => {
-  return <Button iconLeft={<ExternalLink />} iconOnly href="/queries" link small variant="textOnly" title="View All Queries" />;
+  return <Button iconLeft={<ExternalLink />} iconOnly href="/query-history" link small variant="textOnly" title="View All Queries" />;
 };
 
 const HelpButton = () => {
