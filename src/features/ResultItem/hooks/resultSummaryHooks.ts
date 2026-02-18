@@ -112,7 +112,7 @@ export const useStreamingSummaryState = (
   };
 
   const formatOutputText = (text: string) => {
-    const formatted = text.replace(/\n/g, '<br />').replace(/\.\*\*/g, '.<br /><br />**').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    const formatted = text.replace(/\.\*\*/g, '.<br />**').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     return linkifyReferences(formatted);
   }
 
