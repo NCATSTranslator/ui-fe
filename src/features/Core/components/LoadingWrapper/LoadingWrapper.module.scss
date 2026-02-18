@@ -33,6 +33,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
   z-index: 1000;
 }
 
@@ -43,4 +44,10 @@
 .fadeExitActive {
   opacity: 0;
   pointer-events: none;
+}
+
+.loadingText {
+  font-size: $bodyTwoSize;
+  font-weight: 400;
+  color: $darkGray;
 }

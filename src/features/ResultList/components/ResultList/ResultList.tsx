@@ -493,7 +493,6 @@ const ResultList = () => {
           :
             <Query
               isResults
-              loading={isLoading}
               initPresetTypeObject={presetTypeObject}
               initNodeIdParam={nodeIdParam}
               initNodeLabelParam={nodeLabelParam}

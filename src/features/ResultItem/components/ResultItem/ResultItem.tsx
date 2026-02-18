@@ -15,7 +15,7 @@ import { Save } from '@/features/UserAuth/utils/userApi';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
-import { currentUser } from '@/features/UserAuth/slices/userSlice';
+import { currentUser, currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
 import { Result, Path, ResultBookmark } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
@@ -94,12 +94,13 @@ const ResultItem: FC<ResultItemProps> = ({
   } = useResultListContext();
   const currentQueryID = pk;
 
-  let resultSet = useSelector(getResultSetById(pk));
+  const resultSet = useSelector(getResultSetById(pk));
+  const config = useSelector(currentConfig);
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
   const firstPath = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0] as string) : result.paths[0];
   const score = (isPathfinder && firstPath) ? getPathfinderMetapathScore(firstPath) : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
 
-  let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
+  const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
   const user = useSelector(currentUser);
@@ -169,6 +170,7 @@ const ResultItem: FC<ResultItemProps> = ({
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, subjectNode.species) : '';
   const resultDescription = subjectNode?.descriptions[0];
+  const hasSummary = (queryType?.id === 0 && config?.include_summarization) || false;
 
   const handleEdgeSpecificEvidence = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
     if(!result)
@@ -239,6 +241,12 @@ const ResultItem: FC<ResultItemProps> = ({
           isExpanded={isExpanded}
           isPathfinder={isPathfinder}
           nameString={nameString}
+          result={result}
+          hasSummary={hasSummary}
+          pk={pk}
+          diseaseId={objectNode?.id || ""}
+          diseaseName={objectNode?.names[0] || ""}
+          diseaseDescription={objectNode?.descriptions[0] || ""}
         />
         <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
           <span className={styles.evidenceLink}>

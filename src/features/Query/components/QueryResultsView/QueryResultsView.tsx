@@ -17,7 +17,7 @@ const QueryResultsView: FC<QueryResultsViewProps> = ({
   queryItem,
   nodeDescription,
   pk,
-  setShareModalFunction,
+  setShareModalFunction
 }) => {
   const resultsPaneQuestionText = queryItem.type.label
     .replaceAll("a disease?", "")
