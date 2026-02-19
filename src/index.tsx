@@ -17,7 +17,6 @@ const Workspace = lazy(() => import('@/pageRoutes/Workspace/Workspace'));
 const Projects = lazy(() => import('@/pageRoutes/Projects/Projects'));
 const ProjectDetail = lazy(() => import('@/pageRoutes/ProjectDetail/ProjectDetail'));
 const Queries = lazy(() => import('@/pageRoutes/Queries/Queries'));
-const Help = lazy(() => import('@/pageRoutes/Articles/Help').then(m => ({ default: m.Help })));
 const LoggingIn = lazy(() => import('@/pageRoutes/Articles/LoggingIn').then(m => ({ default: m.LoggingIn })));
 const QueryHistoryArticle = lazy(() => import('@/pageRoutes/Articles/QueryHistoryArticle').then(m => ({ default: m.QueryHistoryArticle })));
 const WhatIs = lazy(() => import('@/pageRoutes/Articles/WhatIs').then(m => ({ default: m.WhatIs })));
@@ -59,8 +58,9 @@ const routes = [
     element: <Page title="Terms of Use"><Suspense fallback={<LoadingWrapper />}><Terms /></Suspense></Page>
   },
   {
+    // old help page, redirect to frequently asked questions
     path: "help",
-    element: <HelpPage title="Old Frequently Asked Questions"><Suspense fallback={<LoadingWrapper />}><Help /></Suspense></HelpPage>
+    element: <Navigate to="/frequently-asked-questions" replace /> 
   },
   {
     path: "about-translator",

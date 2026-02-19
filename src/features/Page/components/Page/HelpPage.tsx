@@ -39,11 +39,11 @@ const HelpPage: FC<HelpPageProps> = ({ title, children }) => {
   return (
     <>
       <div className={`container help-container ${styles.helpContainer}`}>
-        <HelpSidebar />
-        <div className="right">
+        <div className="left">
           <h1 className="h5">{title}</h1>
           {children}
         </div>
+        <HelpSidebar />
       </div>
       <DisclaimerModal
         isOpen={!isDisclaimerApproved}
