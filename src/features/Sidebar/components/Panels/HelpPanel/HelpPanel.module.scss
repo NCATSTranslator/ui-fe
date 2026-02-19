@@ -10,7 +10,13 @@
       margin: 0;
     }
   }
-  .activePanel .activePanelContent {
-    padding: $s;
+  .activePanel {
+    .activePanelContent {
+      padding: $s;
+      p, a, span, mark, strong {
+        font-size: $bodyTwoSize;
+      }
+    }
   }
+
 }

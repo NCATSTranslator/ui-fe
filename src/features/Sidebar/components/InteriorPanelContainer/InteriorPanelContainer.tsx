@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useRef, useEffect } from "react";
 import styles from './InteriorPanelContainer.module.scss';
 import { joinClasses } from "@/features/Common/utils/utilities";
 import SidebarBackButton from "@/features/Sidebar/components/SidebarBackButton/SidebarBackButton";
@@ -11,9 +11,17 @@ interface InteriorPanelContainerProps {
 }
 
 const InteriorPanelContainer: FC<InteriorPanelContainerProps> = ( { children, className, handleBack, backButtonLabel } ) => {
-  
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollParent = containerRef.current?.closest('.scrollable');
+    if (scrollParent) {
+      scrollParent.scrollTop = 0;
+    }
+  }, []);
+
   return (
-    <div className={joinClasses(styles.interiorPanelContainer, className)}>
+    <div ref={containerRef} className={joinClasses(styles.interiorPanelContainer, className)} data-interior-panel>
       <div className={styles.top}>
         <SidebarBackButton
           handleClick={handleBack}
@@ -22,7 +30,9 @@ const InteriorPanelContainer: FC<InteriorPanelContainerProps> = ( { children, cl
           {backButtonLabel}
         </SidebarBackButton>
       </div>
-      {children}
+      <div className={`${styles.scrollableContent} scrollable`}>
+        {children}
+      </div>
     </div>
   );
 };
