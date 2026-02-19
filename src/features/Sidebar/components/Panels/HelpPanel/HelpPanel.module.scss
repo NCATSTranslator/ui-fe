@@ -13,7 +13,7 @@
   .activePanel {
     .activePanelContent {
       padding: $s;
-      p, a, span, mark, strong {
+      p, a, span, mark, strong, em, li {
         font-size: $bodyTwoSize;
       }
     }
