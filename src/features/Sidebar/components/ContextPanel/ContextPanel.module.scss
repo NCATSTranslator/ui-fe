@@ -33,7 +33,8 @@
     position: relative;
     width: calc($panelWidth - ($s*2));
     overflow: hidden auto;
-    &:has(:global(.selectionModeActive)) {
+    &:has(:global(.selectionModeActive)),
+    &:has([data-interior-panel]) {
       overflow: hidden;
     }
   }

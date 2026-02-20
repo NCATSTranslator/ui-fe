@@ -5,6 +5,7 @@
     display: flex;
     flex-direction: column;
     gap: $xxs;
+    padding: $s $s 0 $s;
   }
   .iconText {
     display: grid;
@@ -49,44 +50,6 @@
   .helpText, .helpText a {
     font-size: $captionSize;
     color: $darkGray;
-  }
-  .coverPanel {
-    position: absolute;
-    inset: 0 1px 0 0;
-    background-color: $lightGray;
-    z-index: 10;
-  }
-  .prefButton {
-    padding: $s 0;
-    border-bottom: 1px solid $midGray;
-    width: 100%;
-    justify-content: space-between;
-    border-radius: 0;
-    &:last-of-type {
-      border-bottom: none;
-    }
-    span {
-      font-size: $bodyTwoSize;
-      color: $darkGray;
-      padding: 0;
-      text-align: left;
-    }
-    svg {
-      path {
-        fill: white;
-        stroke: $darkGray;
-      }
-    }
-    &:hover {
-      span {
-        text-decoration: underline;
-      }
-      svg {
-        path {
-          stroke: $purpleOne;
-        }
-      }
-    }
   }
   .activePrefTypeContent {
     padding: $s $s 0;
