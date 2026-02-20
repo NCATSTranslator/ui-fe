@@ -27,7 +27,8 @@ export type Preferences = {
 }
 
 export type PrefType = "results" | "evidence" | "graphs";
-export type PrefKey = "result_sort" | "results_per_page" | "graph_visibility" | "graph_layout" | "path_show_count" | "evidence_sort" | "evidence_per_page";
+export type PrefKey = "result_sort" | "results_per_page" | "graph_visibility" | "graph_layout" 
+| "path_show_count" | "evidence_sort" | "evidence_per_page";
 
 export type User = {
   data: null;
@@ -69,6 +70,7 @@ export type Config = {
     endpoint: string;
   };
   social_providers: Record<string, SocialProvider>;
+  show_novelty_boost: boolean;
 }
 
 export type SocialProvider = {
