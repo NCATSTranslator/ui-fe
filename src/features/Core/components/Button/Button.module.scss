@@ -82,6 +82,7 @@
   }
   .iconLeft, .iconRight {
     display: flex;
+    width: auto;
   }
   &.inline {
     display: inline;
