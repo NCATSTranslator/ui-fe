@@ -100,7 +100,7 @@ const useSidebarPanels = ({
     ariaLabel: "Query Status",
     className: styles.statusSidebarIcon,
     onClick: handleQueryStatusClick,
-    icon: () => <StatusSidebarIcon arsStatus={arsStatus} status={statusIndicatorStatus} hasFreshResults={hasFreshResults} showQueryStatusToast={showQueryStatusToast} setShowQueryStatusToast={setShowQueryStatusToast} />,
+    icon: () => <StatusSidebarIcon data={loadingButtonData} arsStatus={arsStatus} status={statusIndicatorStatus} hasFreshResults={hasFreshResults} showQueryStatusToast={showQueryStatusToast} setShowQueryStatusToast={setShowQueryStatusToast} />,
     id: 'queryStatus',
     title: "Status",
     panelComponent: () => <QueryStatusPanel arsStatus={arsStatus} data={loadingButtonData} resultStatus={resultStatus} resultCount={formattedResults.length || 0} />,
@@ -123,6 +123,7 @@ const useSidebarPanels = ({
         isPathfinder={isPathfinder}
       />
     ),
+    reduceSpacing: true,
     tooltipText: "Filters",
     dependencies: [
       activeFilters,
