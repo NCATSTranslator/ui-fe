@@ -8,13 +8,14 @@ import { Path, Result, ResultEdge, SharedItem } from "@/features/ResultList/type
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 
 interface ResultListModalsProps {
-  currentBookmarkID: RefObject<string | null>;
+  currentBookmarkID: string | null;
   evidenceModalOpen: boolean;
   focusModalOpen: boolean;
   formattedResultsLength: number;
   handlePageClick: (event: {selected: number}, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   noteLabel: string;
   notesModalOpen: boolean;
+  onCloseNotesModal: () => void;
   pk: string;
   presetTypeID: string;
   selectedEdge: ResultEdge | null; 
@@ -25,7 +26,6 @@ interface ResultListModalsProps {
   setExpandSharedResult: Dispatch<SetStateAction<boolean>>;
   setEvidenceModalOpen: Dispatch<SetStateAction<boolean>>;
   setFocusModalOpen: Dispatch<SetStateAction<boolean>>;
-  setNotesModalOpen: Dispatch<SetStateAction<boolean>>;
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
   sharedItem: SharedItem; 
   shareModalOpen: boolean;
@@ -42,6 +42,7 @@ const ResultListModals: FC<ResultListModalsProps> = ({
   handlePageClick,
   noteLabel,
   notesModalOpen,
+  onCloseNotesModal,
   pk,
   presetTypeID,
   selectedEdge,
@@ -52,7 +53,6 @@ const ResultListModals: FC<ResultListModalsProps> = ({
   setExpandSharedResult,
   setEvidenceModalOpen,
   setFocusModalOpen,
-  setNotesModalOpen,
   setShareModalOpen,
   sharedItem,
   shareModalOpen,
@@ -60,11 +60,6 @@ const ResultListModals: FC<ResultListModalsProps> = ({
   shouldUpdateResultsAfterBookmark,
   updateUserSaves,
 }) => {
-
-  const handleNotesModalClose = () => {
-    setNotesModalOpen(false);
-  }
-
   return (
     <>
       <ShareModal
@@ -75,7 +70,7 @@ const ResultListModals: FC<ResultListModalsProps> = ({
       />
       <NotesModal
         isOpen={notesModalOpen}
-        onClose={handleNotesModalClose}
+        onClose={onCloseNotesModal}
         noteLabel={noteLabel}
         currentBookmarkID={currentBookmarkID}
         updateUserSaves={updateUserSaves}

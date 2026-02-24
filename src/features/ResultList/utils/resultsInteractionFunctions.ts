@@ -1,7 +1,7 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
 import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
-import { findInSet, hasSupport } from "@/features/Common/utils/utilities";
+import { hasSupport } from "@/features/Common/utils/utilities";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import { cloneDeep } from "lodash";
@@ -391,16 +391,13 @@ export const injectDynamicFilters = (
   originalResults: Result[],
   bookmarkSet: SaveGroup | null): [ResultSet, Result[], Result[]] => {
   if (bookmarkSet === null || bookmarkSet.saves.size === 0) return [summary, formattedResults, originalResults];
-  // If this becomes slow due to many bookmarks and results then look into making bookmarkSet and results maps keyed on the result ID
   const tagsAdded = [];
   for (let i = 0; i < formattedResults.length; i++) {
-    const result = formattedResults[i];
-    for (const save of bookmarkSet.saves) {
-      if (save.object_ref === result.id) {
-        tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.BOOKMARK});
-        if (!isNotesEmpty(save.notes)) {
-          tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.NOTE});
-        }
+    const save = bookmarkSet.saves.get(formattedResults[i].id);
+    if (save) {
+      tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.BOOKMARK});
+      if (!isNotesEmpty(save.notes)) {
+        tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.NOTE});
       }
     }
   }
@@ -557,44 +554,6 @@ export const areEntityFiltersEqual = (a: string[], b: string[]): boolean => {
   const setA = new Set(a);
   return b.every((val) => setA.has(val));
 };
-
-/**
- * Checks if the given bookmarkID exists in the bookmarks set and if it has notes attached.
- *
- * @param {string | null} itemID - The ID of the item to check.
- * @param {SaveGroup | null} bookmarkSet - The set of bookmark objects to search in.
- * @returns {boolean} Returns true if the matching item is found in bookmarksSet and has notes, otherwise returns false.
- */
-export const checkBookmarkIDForNotes = (bookmarkID: string | null, bookmarkSet: SaveGroup | null): boolean => {
-  if(bookmarkID === null)
-    return false;
-
-  if(!!bookmarkSet && bookmarkSet.saves.size > 0) {
-    let save = findInSet(bookmarkSet.saves, save => String(save.id) === bookmarkID);
-    if(!!save)
-      return (save.notes.length > 0) ? true : false;
-  }
-  return false;
-}
-
-/**
- * Checks if the given itemID exists in the bookmarks set and returns its ID if found.
- *
- * @param {string} itemID - The ID of the item to check.
- * @param {any} bookmarksSet - The set of bookmark objects to search in.
- * @returns {string|null} Returns the ID of the matching item if found in bookmarksSet, otherwise returns null.
- */
-export const checkBookmarksForItem = (itemID: string, bookmarksSet: SaveGroup): string | null => {
-  if(bookmarksSet && bookmarksSet.saves.size > 0) {
-    for(let save of bookmarksSet.saves) {
-      if(save.object_ref === itemID) {
-        let bookmarkID = (typeof save.id === "string") ? save.id : (!!save.id) ? save.id.toString() : null;
-        return bookmarkID;
-      }
-    }
-  }
-  return null;
-}
 
 /**
  * Checks if the given index is for a node in a path.

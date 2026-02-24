@@ -53,7 +53,7 @@ const QueryList = () => {
   return (
     <div className={styles.queriesPanel}>
       <ListHeader
-        heading="Queries"
+        heading="Query History"
         searchPlaceholder="Search Queries"
         searchTerm={searchTerm}
         handleSearch={handleSearch}

@@ -1,13 +1,12 @@
 import { createRoot } from 'react-dom/client';
 import { Core, EventObject } from 'cytoscape';
 import { debounce } from 'lodash';
-import { capitalizeFirstLetter, hasSupport } from '@/features/Common/utils/utilities';
+import { capitalizeFirstLetter, hasSupport, replaceTreatWithImpact } from '@/features/Common/utils/utilities';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { Result, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import { GraphLayoutList, RenderableGraph, RenderableNode, RenderableEdge } from '@/features/ResultItem/types/graph.d';
 import { RefObject } from 'react';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
-import { INVERTED_TREATS_REPLACEMENT, TREATS_REPLACEMENT } from '@/features/ResultList/slices/resultsSlice';
 
 export const layoutList: GraphLayoutList = {
   klay: {
@@ -384,7 +383,7 @@ export function convertResultEdgeToRenderable(
   const sourceLabel = nodes[e.subject]?.names[0] ?? "unknown node";
   const targetLabel = nodes[e.object]?.names[0] ?? "unknown node";
   // Temporary fix to not display the "treats" predicate in the UI
-  const label = e.predicate.includes("treat") ? (e.metadata.inverted_id === null) ? TREATS_REPLACEMENT : INVERTED_TREATS_REPLACEMENT : e.predicate;
+  const label = e.predicate.includes("treat") ? replaceTreatWithImpact(e.predicate) : e.predicate;
   return {
     id: e.id,
     source: e.subject,

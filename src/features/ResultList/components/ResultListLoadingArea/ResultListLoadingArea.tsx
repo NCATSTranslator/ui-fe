@@ -19,7 +19,7 @@ const ResultListLoadingArea = () => {
     return (
       <>
         <p className={styles.loadingText}>Translator results are loaded incrementally due to the complexity of our reasoning systems. As more results become available, you'll be prompted to refresh the page to view them. <span className="bold">Please note that refreshing the page may reorder the results.</span></p>
-        <p className={styles.loadingText}>While you wait for results to load, you can <Link to="/new-query">run another query</Link> or explore the results, bookmarks, and notes from your past queries in your <Link to="/projects">Projects</Link> or <Link to="/queries">Query History</Link>.</p>
+        <p className={styles.loadingText}>While you wait for results to load, you can <Link to="/new-query">run another query</Link> or explore the results, bookmarks, and notes from your past queries in your <Link to="/projects">Projects</Link> or <Link to="/query-history">Query History</Link>.</p>
       </>
     )
   }

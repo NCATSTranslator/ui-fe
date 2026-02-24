@@ -39,7 +39,7 @@ export const defaultPrefs: Preferences = {
     name: "Default Publications Shown per Page",
     pref_value: 5,
     possible_values:[5, 10, 20, 50]
-  },
+  }
 };
 
 // A constant representing an empty editor state, used to initialize editors with no content.

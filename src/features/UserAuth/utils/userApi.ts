@@ -76,7 +76,7 @@ export interface Save {
 }
 
 export interface SaveGroup {
-  saves: Set<Save>;
+  saves: Map<string, Save>;
   query: QueryObject;
 }
 
@@ -115,11 +115,11 @@ const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
 
     if(!Object.prototype.hasOwnProperty.call(newSaves, save.ars_pkey)) {
       newSaves[save.ars_pkey] = {
-        saves: new Set([save]),
+        saves: new Map([[save.object_ref, save]]),
         query: save.data.query
       };
     } else {
-      newSaves[save.ars_pkey].saves.add(save);
+      newSaves[save.ars_pkey].saves.set(save.object_ref, save);
     }
   }
   // return only saves from after Jan 1, 2024
@@ -675,6 +675,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
           include_summarization: false,
           name_resolver: {endpoint: ''},
           social_providers: {},
+          show_novelty_boost: false,
         };
         dispatch(setCurrentConfig(defaultConfig));
       }

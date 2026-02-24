@@ -52,6 +52,7 @@ const Sidebar: FC<{ className?: string }> = ({ className = '' }) => {
             buttonComponent={activeSidebarItem && getButtonComponent(activeSidebarItem)}
             panel={activeSidebarItem && getContextPanel(activeSidebarItem)}
             title={activeTitle}
+            reduceSpacing={activeSidebarItem?.reduceSpacing}
           />
         }
       </div>

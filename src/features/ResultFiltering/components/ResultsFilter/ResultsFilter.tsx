@@ -5,10 +5,10 @@ import { cloneDeep } from 'lodash';
 import FacetGroup from '@/features/ResultFiltering/components/FacetGroup/FacetGroup';
 import EntitySearch from '@/features/ResultFiltering/components/EntitySearch/EntitySearch';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
-import Button from '@/features/Core/components/Button/Button';
 import FacetHeading from '@/features/ResultFiltering/components/FacetHeading/FacetHeading';
 import { getFilterLabel } from '@/features/ResultFiltering/utils/filterFunctions';
-import SidebarBackButton from '@/features/Sidebar/components/SidebarBackButton/SidebarBackButton';
+import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
+import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';
 
 interface ResultsFilterProps {
   activeFilters: Filter[];
@@ -23,13 +23,10 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
   availableFilters,
   isPathfinder = false,
   onFilter,
-  onClearAll
+  onClearAll = () => console.log("No clear all function specified in ResultsFilter.")
 }) => {
 
   const [activeFilterFamily, setActiveFilterFamily] = useState<FilterFamily | null>(null);
-  const handleSetActiveFilterFamily = (family: FilterFamily | null) => {
-    setActiveFilterFamily(family);
-  }
 
   // returns a new object with each tag grouped by its type
   const groupFilters = (filters: {[key: string]: Filter}, type: FilterType): GroupedFilters => {
@@ -61,7 +58,6 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
   const resultFilters = useMemo(() => groupFilters(availableFilters, filtering.CONSTANTS.RESULT), [availableFilters]);
   const pathFilters = useMemo(() => groupFilters(availableFilters, filtering.CONSTANTS.PATH), [availableFilters]);
 
-  onClearAll = (!onClearAll) ? () => console.log("No clear all function specified in ResultsFilter.") : onClearAll;
   const filterCompare: {[key: string]: (a: [string, Filter], b: [string, Filter]) => number} = {
     // add custom filterCompare functions for a given family here, like so:
     // pt: (a: [string, Filter], b: [string, Filter]) => -(a[1].name.localeCompare(b[1].name))
@@ -69,22 +65,24 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
 
   return (
     <div className={`${styles.resultsFilter}`}>
-      {/* <div className={styles.top}>
+      {/* 
+      TODO: Add clear all button back in
+      <div className={styles.top}>
         <div className={styles.right}>
           <button onClick={()=>onClearAll()} className={styles.clearAll}>Clear All</button>
         </div>
-      </div> */}
+      </div> 
+      */}
       <div className={styles.bottom}>
-        <Button
-          handleClick={()=>handleSetActiveFilterFamily('txt')}
-          className={styles.facetButton}
+        <SidebarTransitionButton
+          handleClick={() => setActiveFilterFamily('txt')}
         >
           <FacetHeading
             activeFilters={activeFilters}
             tagFamily="txt"
             title={getFilterLabel("txt")}
           />
-        </Button>
+        </SidebarTransitionButton>
         <div>
           {
             groupHasFilters(resultFilters) && !isPathfinder &&
@@ -96,17 +94,16 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                     return null;
 
                   return (
-                    <Button
+                    <SidebarTransitionButton
                       key={filterFamily}
-                      handleClick={()=>handleSetActiveFilterFamily(filterFamily as FilterFamily)}
-                      className={styles.facetButton}
+                      handleClick={() => setActiveFilterFamily(filterFamily as FilterFamily)}
                     >
                       <FacetHeading
                         activeFilters={activeFilters}
                         tagFamily={filterFamily as FilterFamily}
                         title={getFilterLabel(filterFamily as FilterFamily)}
                       />
-                    </Button>
+                    </SidebarTransitionButton>
                   )
                 })
               }
@@ -123,9 +120,9 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                   if(!pathFilters[filterFamily as FilterFamily] || !(Object.keys(pathFilters[filterFamily as FilterFamily]!).length > 0) ) 
                     return null;
                   return (
-                    <Button
+                    <SidebarTransitionButton
                       key={filterFamily}
-                      handleClick={()=>handleSetActiveFilterFamily(filterFamily as FilterFamily)}
+                      handleClick={() => setActiveFilterFamily(filterFamily as FilterFamily)}
                       className={styles.facetButton}
                     >
                       <FacetHeading
@@ -133,7 +130,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                         tagFamily={filterFamily as FilterFamily}
                         title={getFilterLabel(filterFamily as FilterFamily)}
                       />
-                    </Button>
+                    </SidebarTransitionButton>
                   )
                 })
               }
@@ -142,20 +139,15 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
         </div>
         {
           activeFilterFamily !== null && (
-            <div className={styles.activeFilterFamily}>
-              <div className={styles.top}>
-                <SidebarBackButton
-                  handleClick={()=>handleSetActiveFilterFamily(null)}
-                  className={styles.backButton}
-                >
-                  <FacetHeading
-                    activeFilters={activeFilters}
-                    tagFamily={activeFilterFamily as FilterFamily}
-                    title={getFilterLabel(activeFilterFamily as FilterFamily)}
-                    includeArrow={false}
-                  />
-                </SidebarBackButton>
-              </div>
+            <InteriorPanelContainer 
+              handleBack={() => setActiveFilterFamily(null)}
+              backButtonLabel={<FacetHeading
+                activeFilters={activeFilters}
+                tagFamily={activeFilterFamily as FilterFamily}
+                title={getFilterLabel(activeFilterFamily as FilterFamily)}
+                includeArrow={false}
+              />}
+            >
               {
                 activeFilterFamily === 'txt'
                 ?
@@ -174,7 +166,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                     onFilter={onFilter}
                   />
               }
-            </div>
+            </InteriorPanelContainer>
           )
         }
       </div>

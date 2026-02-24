@@ -20,6 +20,16 @@
   }
 }
 
+.controls {
+  display: flex;
+  align-items: center;
+  gap: $s;
+}
+
+.noveltyToggle {
+  white-space: nowrap;
+}
+
 .activeFilters {
   margin: $s 0 0;
   display: flex;

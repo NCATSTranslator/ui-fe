@@ -4,7 +4,7 @@ import { getEvidenceCounts, isPublicationObjectArray, calculateTotalEvidence } f
 import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
-import { generateScore } from '@/features/ResultList/utils/scoring';
+import { generateScore, type ScorePair } from '@/features/ResultList/utils/scoring';
 import { getFilterFamily, getTagFamily, isEvidenceFilter, CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 import { getEdgeById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
@@ -82,8 +82,8 @@ export const sortPathsHighLow = (resultSet: ResultSet, items: Result[]) => {
 
 export const sortScoreLowHigh = (items: Result[], scoreWeights: ScoreWeights) => {
   return items.sort((a: Result, b: Result) => {
-    const aScore = (!!a?.score) ? a.score : generateScore(a.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
-    const bScore = (!!b?.score) ? b.score : generateScore(b.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
+    const aScore: ScorePair = (!!a?.score) ? a.score as ScorePair : generateScore(a.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
+    const bScore: ScorePair = (!!b?.score) ? b.score as ScorePair : generateScore(b.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
     if (equal(aScore.main, bScore.main))
       return aScore.secondary - bScore.secondary;
 
@@ -101,8 +101,8 @@ export const sortScorePathfinderLowHigh = (resultSet: ResultSet, items: Result[]
 
 export const sortScoreHighLow = (items: Result[], scoreWeights: ScoreWeights) => {
   return items.sort((a: Result, b: Result) => {
-    const aScore = (!!a?.score) ? a.score : generateScore(a.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
-    const bScore = (!!b?.score) ? b.score : generateScore(b.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
+    const aScore: ScorePair = (!!a?.score) ? a.score as ScorePair : generateScore(a.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
+    const bScore: ScorePair = (!!b?.score) ? b.score as ScorePair : generateScore(b.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
     if (equal(aScore.main, bScore.main))
       return bScore.secondary - aScore.secondary;
 

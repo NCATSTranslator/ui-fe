@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from "react";
+import { FC, useRef } from "react";
 import styles from './Toggle.module.scss';
 import { uniqueId } from "lodash";
 
@@ -11,36 +11,28 @@ type ToggleProps = {
 }
 
 const Toggle: FC<ToggleProps> = ({className = "", active = false, setActive, labelOne, labelTwo}) => {
-  const id = uniqueId();
-  const [isActive, setIsActive] = useState(active);
-
-  useEffect(() => {
-    setIsActive(active);
-  }, [active]);
+  const id = useRef(uniqueId()).current;
 
   const handleToggle = () => {
-    setIsActive(prev => !prev);
-    if (setActive) {
-      setActive(!isActive);
-    }
-  };
+    setActive?.(!active);
+  }
 
   return (
     <div className={`${className} ${styles.toggle}`}>
       <input 
         type="checkbox" 
         id={`checkbox-${id}`} 
-        checked={isActive}
+        checked={active}
         onChange={handleToggle}
       />
-      {labelOne && <span className={`${styles.label} ${styles.labelOne} ${isActive ? styles.active : styles.inactive}`}>{labelOne}</span>}
+      {labelOne && <span className={`${styles.label} ${styles.labelOne} ${active ? styles.active : styles.inactive}`}>{labelOne}</span>}
       <label 
         htmlFor={`checkbox-${id}`} 
-        className={`${styles.container} ${isActive ? styles.active : styles.inactive}`}
+        className={`${styles.container} ${active ? styles.active : styles.inactive}`}
       >
         <span className={styles.ball}></span>
       </label>
-      {labelTwo && <span className={`${styles.label} ${styles.labelTwo} ${isActive ? styles.active : styles.inactive}`}>{labelTwo}</span>}
+      {labelTwo && <span className={`${styles.label} ${styles.labelTwo} ${active ? styles.active : styles.inactive}`}>{labelTwo}</span>}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo, Dispatch, SetStateAction, FormEvent } from 'react';
 import { getSaves, mergeResultSets, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { handleEvidenceModalClose } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { useNotesModal } from '@/features/ResultItem/hooks/useNotesModal';
 import styles from './UserSaves.module.scss';
 import EvidenceModal from '@/features/Evidence/components/EvidenceModal/EvidenceModal';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -11,7 +12,6 @@ import { getFormattedDate } from '@/features/Common/utils/utilities';
 import { ToastContainer, Slide } from 'react-toastify';
 import NotesModal from '@/features/ResultItem/components/NotesModal/NotesModal';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
-import { cloneDeep } from 'lodash';
 import UserSave from '@/features/WorkspaceV1/components/UserSave/UserSave';
 import LoginWarning from '@/features/UserAuth/components/LoginWarning/LoginWarning';
 import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper'
@@ -21,6 +21,7 @@ import { Path, Result, ResultEdge, ResultSet } from '@/features/ResultList/types
 import { useDispatch } from 'react-redux';
 import { setResultSets } from '@/features/ResultList/slices/resultsSlice';
 import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from '@/features/Core/utils/toastMessages';
+import { DEFAULT_SCORE_WEIGHTS } from '@/features/ResultList/hooks/useScoreWeights';
 
 const UserSaves = () => {
 
@@ -38,26 +39,25 @@ const UserSaves = () => {
   const [selectedPathKey, setSelectedPathKey] = useState<string>("");
   const [selectedPK, setSelectedPK] = useState<string | null>(null);
   const [zoomKeyDown, setZoomKeyDown] = useState(false);
-  const [notesOpen, setNotesOpen] = useState(false);
   // eslint-disable-next-line
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const shareResultID = useRef<null | string>(null);
-  const setShareResultID = (newID: string) => shareResultID.current = newID;
+  const setShareResultID = (newID: string | null) => shareResultID.current = newID;
   // dummy var for now
   const shouldUpdateResultsAfterBookmark = useRef(false);
 
-  const [confidenceWeight] = useState(1.0);
-  const [noveltyWeight] = useState(0.1);
-  const [clinicalWeight] = useState(1.0);
-
-  const scoreWeights = useMemo(()=> { return {confidenceWeight: confidenceWeight, noveltyWeight: noveltyWeight, clinicalWeight: clinicalWeight}}, [confidenceWeight, noveltyWeight, clinicalWeight]);
+  const {
+    isOpen: notesOpen,
+    noteLabel,
+    currentBookmarkID,
+    openNotes: activateNotes,
+    closeNotes,
+  } = useNotesModal();
   
-  const noteLabel = useRef("");
-  const currentBookmarkID = useRef<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [showHiddenPaths, setShowHiddenPaths] = useState(false);
 
-  const queryClient = new QueryClient();
+  const [queryClient] = useState(() => new QueryClient());
 
   // Memoize sorted saves to avoid re-sorting on every render
   const sortedUserSaves = useMemo(() => {
@@ -84,11 +84,6 @@ const UserSaves = () => {
     }
   }, []);
 
-  const activateNotes = (label: string, bookmarkID: string) => {
-    noteLabel.current = label;
-    currentBookmarkID.current = bookmarkID;
-    setNotesOpen(true);
-  }
 
   const initSaves = useCallback( async () => {
     let resultSetsToAdd: {[key:string]: ResultSet} = {};
@@ -97,7 +92,8 @@ const UserSaves = () => {
     let saveGroupsToRemove = new Set<string>();
     for(const [key, saveGroup] of Object.entries(newSaves)) {
       let newResultSet;
-      for(const save of saveGroup.saves) {
+      // Iterate over saves
+      for(const save of saveGroup.saves.values()) {
         if(newResultSet === undefined)
           newResultSet = save.data.query.resultSet;
         else 
@@ -114,7 +110,7 @@ const UserSaves = () => {
 
     dispatch(setResultSets(resultSetsToAdd))
     setSavesLoaded(true);
-    setFilteredUserSaves(cloneDeep(newSaves));
+    setFilteredUserSaves({ ...newSaves });
   }, [dispatch])
 
   const handleSearch = useCallback((
@@ -123,7 +119,7 @@ const UserSaves = () => {
     setFilteredUserSaves: Dispatch<SetStateAction<{[key: string]: SaveGroup;} | null>>
   ) => {
     if(!value) {
-      setFilteredUserSaves(cloneDeep(userSaves));
+      setFilteredUserSaves({ ...userSaves });
       currentSearchString.current = "";
       return;
     }
@@ -150,8 +146,8 @@ const UserSaves = () => {
       )
         include = true;
       
-        // check saves for match
-      for(const save of Array.from(item.saves)) {
+      // check saves for match - iterate over saves
+      for(const save of item.saves.values()) {
         if(
           save.label.toLowerCase().includes(tempValue) ||
           save.notes.toLowerCase().includes(tempValue) ||
@@ -236,8 +232,8 @@ const UserSaves = () => {
             />
             <NotesModal
               isOpen={notesOpen}
-              onClose={()=>(setNotesOpen(false))}
-              noteLabel={noteLabel.current}
+              onClose={closeNotes}
+              noteLabel={noteLabel}
               currentBookmarkID={currentBookmarkID}
               shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
               // TODO: update user saves
@@ -304,7 +300,7 @@ const UserSaves = () => {
                               bookmarkRemovedToast={bookmarkRemovedToast}
                               setShareModalOpen={setShareModalOpen}
                               setShareResultID={setShareResultID}
-                              scoreWeights={scoreWeights}
+                              scoreWeights={DEFAULT_SCORE_WEIGHTS}
                               showHiddenPaths={showHiddenPaths}
                               setShowHiddenPaths={setShowHiddenPaths}
                             />

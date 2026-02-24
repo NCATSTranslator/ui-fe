@@ -60,7 +60,7 @@ const QueryStatusPanel: FC<QueryStatusPanelProps> = ({
             <p>Translator results are loaded incrementally due to the complexity of our reasoning systems. As more results become available, you'll be prompted to refresh the page to view them.</p>
           )
         }
-        <p>You can <Link to="/new-query">run another query</Link> or explore the results, bookmarks, and notes from your past queries in your <Link to="/projects">Projects</Link> or <Link to="/queries">Query History</Link> while you wait for results to load.</p>
+        <p>You can <Link to="/new-query">run another query</Link> or explore the results, bookmarks, and notes from your past queries in your <Link to="/projects">Projects</Link> or <Link to="/query-history">Query History</Link> while you wait for results to load.</p>
       </div>
       <div className={styles.bottom}>
         <ResultListLoadingButton 

@@ -955,6 +955,17 @@ export const findInSet = <T,>(set: Set<T>, predicate: (obj: T)=>boolean): T | un
  *
  * @returns {QueryClientConfig} - The common query client options.
  */
+/**
+ * Replaces occurrences of "treats" or "treat" in a predicate string
+ * with "impacts" or "impact" respectively.
+ *
+ * @param {string} predicate - The predicate string to transform.
+ * @returns {string} - The transformed predicate string.
+ */
+export const replaceTreatWithImpact = (predicate: string): string => {
+  return predicate.replace(/treats/gi, "impacts").replace(/treat/gi, "impact");
+}
+
 export const commonQueryClientOptions = {
   defaultOptions: {
     queries: {
