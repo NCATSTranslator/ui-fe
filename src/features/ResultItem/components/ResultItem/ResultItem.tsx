@@ -211,16 +211,9 @@ const ResultItem: FC<ResultItemProps> = ({
 
   return (
     <div
-<<<<<<< HEAD
-      key={key}
       className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`}
       ref={sharedItemRef}
       data-result-curie={result.subject}
-=======
-      className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`}
-      ref={sharedItemRef}
-      data-result-curie={result.subject}
->>>>>>> develop
       data-result-name={nameString}
       data-aras={result.tags ? getARATagsFromResultTags(result.tags).toString() : ''}>
       <div className={styles.top}>
