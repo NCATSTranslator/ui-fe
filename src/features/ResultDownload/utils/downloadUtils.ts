@@ -14,6 +14,7 @@ import {
   ExportFormat,
 } from "@/features/ResultDownload/types/download.d";
 import { exportToCSV } from "@/features/ResultDownload/utils/csvUtils";
+import { replaceTreatWithImpact } from "@/features/Common/utils/utilities";
 
 /**
  * Returns results based on the specified scope
@@ -290,6 +291,8 @@ export const cleanResultSet = (
   // Clean edges
   Object.entries(entities.edges).forEach(([id, edge]) => {
     cleanedEdges[id] = cleanEdge(edge, id);
+    // replace any instances of "treats" or "treat" with "impacts" or "impact" in the predicate
+    cleanedEdges[id].predicate = replaceTreatWithImpact(cleanedEdges[id].predicate);
   });
 
   // Clean paths
