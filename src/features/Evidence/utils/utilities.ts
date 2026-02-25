@@ -61,7 +61,8 @@ export const getEvidenceFromEdge = (
     }
 
     // Process sources
-    if(edgeToProcess.provenance) {
+    // don't process sources for inferred edges, only for direct edges
+    if(edgeToProcess.provenance && !hasSupport(edgeToProcess)) { 
       for(const source of edgeToProcess.provenance)
         sources.add(source.name);
     }
