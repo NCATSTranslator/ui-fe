@@ -59,13 +59,13 @@ const useSidebarPanels = ({
   userSaves,
   queryTitle,
 }: UseSidebarPanelsArgs): void => {
-  const { togglePanel } = useSidebar();
+  const { togglePanel, activePanelId } = useSidebar();
 
   // Toast state — only used by sidebar status icon
   const [showQueryStatusToast, setShowQueryStatusToast] = useState(true);
 
   useEffect(() => {
-    setShowQueryStatusToast(hasFreshResults);
+    setShowQueryStatusToast(hasFreshResults && activePanelId !== 'queryStatus');
   }, [hasFreshResults]);
 
   // Data for the loading button in the Query Status panel
