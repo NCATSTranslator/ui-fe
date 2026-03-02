@@ -192,6 +192,7 @@ const cleanNode = (node: ResultNode, nodeId: string): ExportedNode => ({
   descriptions: node.descriptions,
   species: getNodeSpecies(node),
   provenance: node.provenance,
+  synonyms: node.synonyms,
   aras: node.aras,
 });
 
@@ -215,6 +216,7 @@ const cleanEdge = (edge: ResultEdge, edgeId: string): ExportedEdge => ({
     : [],
   aras: edge.aras,
   description: edge.description,
+  type: edge.type,
 });
 
 /**

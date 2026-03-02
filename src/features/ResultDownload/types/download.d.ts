@@ -21,7 +21,8 @@ export interface ExportedNode {
   curies: string[];
   descriptions: string[];
   species: Species;
-  provenance: string;
+  provenance: string[];
+  synonyms: string[];
   aras: string[];
 }
 
@@ -38,6 +39,7 @@ export interface ExportedEdge {
   support: string[];
   aras: string[];
   description?: string | null;
+  type: string;
 }
 
 export interface ExportedResult {
