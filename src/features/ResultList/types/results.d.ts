@@ -100,6 +100,7 @@ export interface ResultEdge {
   support: string[] | Path[];
   tags: Tags;
   trials: string[];
+  type: string;
 }
 
 export interface RankedEdge extends ResultEdge {
@@ -108,6 +109,9 @@ export interface RankedEdge extends ResultEdge {
 
 export type Species = "Zebrafish" | "Mouse" | "Rat" | null;
 export type Tdl = "Tclin" | "Tchem" | "Tbio" | "Tdark" | null;
+
+const isSpecies = tc.makeIsOneOf(["Zebrafish", "Mouse", "Rat"] as const);
+const isTdl = tc.makeIsOneOf(["Tclin", "Tchem", "Tbio", "Tdark"] as const);
 
 export type Annotation = {
   chemical: ChemicalAnnotation;
@@ -151,7 +155,8 @@ export type ResultNode = {
   names: string[];
   other_names: {[key: string]: string[]};
   // link to relevant info about node
-  provenance: string;
+  provenance: string[];
+  synonyms: string[];
   tags: Tags;
   // array of biolink types
   types: string[];
@@ -240,7 +245,6 @@ export const isResultEdge = (obj: unknown): obj is ResultEdge => {
     tc.makeIsHomogeneousArray(isProvenance)(obj.provenance) &&
     tc.isObject(obj.publications) &&
     tc.isString(obj.subject) &&
-    //tc.isObject(obj.tags) &&
     tc.isStringArray(obj.support) &&
     tc.isString(obj.type)
   );
@@ -307,8 +311,8 @@ export const isResultNode = (obj: unknown): obj is ResultNode => {
       tc.isObject(obj) &&
       tc.nullable(obj.descriptions, tc.isStringArray) &&
       tc.nullable(obj.name, tc.isString) &&
-      tc.nullable(obj.species, tc.isString) &&
-      tc.nullable(obj.tdl, tc.isString)
+      tc.nullable(obj.species, isSpecies) &&
+      tc.nullable(obj.tdl, isTdl)
     );
   }
 }
@@ -316,35 +320,27 @@ export const isResultNode = (obj: unknown): obj is ResultNode => {
 
 export const isPath = (obj: unknown): obj is Path => {
   return (
-    obj &&
-    Array.isArray(obj.aras) &&
-    Array.isArray(obj.compressedIDs) &&
-    obj.compressedIDs.every((item: unknown) => typeof item === "string") &&
-    Array.isArray(obj.compressedSubgraph) &&
-    obj.compressedSubgraph.every((item: unknown) => typeof item === "string" || (Array.isArray(item) && item.every(subItem => typeof subItem === "string"))) &&
-    typeof obj.highlighted === "boolean" &&
-    typeof obj.id === "string" &&
-    Array.isArray(obj.subgraph) &&
-    obj.subgraph.every((item: unknown) => typeof item === "string") &&
+    tc.isObject(obj) &&
+    tc.isStringArray(obj.aras) &&
+    tc.missable(obj.compressedIDs, tc.isStringArray) &&
+    tc.missable(obj.compressedSubgraph,
+      tc.makeIsHomogeneousArray((e: unknown) => tc.isString(e) || tc.isStringArray(e))) &&
+    tc.missable(obj.highlighted, tc.isBoolean) &&
+    tc.missable(obj.id, tc.isString) &&
+    tc.missable(obj.score, tc.isNumber) &&
+    tc.isStringArray(obj.subgraph) &&
     isTags(obj.tags)
   );
 }
 
 export const isTags = (obj: unknown): obj is Tags => {
-  if (typeof obj !== "object" || obj === null) return false;
-
+  if (!tc.isObject(obj)) return false;
   for (const key in obj) {
-    const tag = (obj as Tags)[key];
-    if (
-      typeof tag !== "object" ||
-      tag === null ||
-      typeof tag.name !== "string" ||
-      typeof tag.value !== "string"
-    ) {
+    const tag = (obj as Record<string, unknown>)[key];
+    if (!tc.nullable(tag, (t) => tc.isObject(t) && tc.isString(t.name) && tc.isString(t.value))) {
       return false;
     }
   }
-
   return true;
 };
 

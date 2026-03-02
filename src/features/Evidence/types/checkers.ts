@@ -1,6 +1,7 @@
 import * as tc from "@/features/Common/types/checkers";
+import { Provenance } from "./evidence";
 
-export const isProvenance = (obj: any): boolean => {
+export const isProvenance = (obj: unknown): obj is Provenance => {
   return (
     tc.isObject(obj) &&
     tc.isString(obj.infores) &&

@@ -52,7 +52,7 @@ export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNod
   return node;
 }
 export const getNodeSpecies = (node: ResultNode): Species => {
-  return node.annotations.gene.species;
+  return node.annotations?.gene?.species || null;
 }
 export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
   let edge: ResultEdge | undefined = (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
