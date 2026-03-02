@@ -405,7 +405,8 @@ export const convertPathToRankedPath = (resultSet: ResultSet, path: Path): Ranke
     id: "",
     names: [],
     other_names: {},
-    provenance: "",
+    provenance: [""],
+    synonyms: [],
     annotations: {
       chemical: {
         approval: null,

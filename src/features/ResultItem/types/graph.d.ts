@@ -24,7 +24,7 @@ export interface RenderableNode {
   id: string;
   label: string;
   type: string;
-  provenance: string | null;
+  provenance: string[];
   isTargetCount: number;
   isSourceCount: number;
   isTargetEdges: RenderableEdge[];

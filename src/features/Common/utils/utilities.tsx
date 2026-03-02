@@ -907,7 +907,8 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   subject: edge?.subject || "",
   support: edge?.support || [],
   trials: edge?.trials || [],
-  tags: edge?.tags || {}
+  tags: edge?.tags || {},
+  type: edge?.type || "",
 });
 
 /**
