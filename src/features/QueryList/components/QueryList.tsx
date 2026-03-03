@@ -80,7 +80,6 @@ const QueryList = () => {
           ) : (
             <LoadingWrapper loading={queriesLoading} contentClassName={styles.queriesList}>
               <Tabs
-                isOpen={true}
                 handleTabSelection={() => {}}
                 defaultActiveTab={queriesTabHeading}
                 className={styles.queryTabs}

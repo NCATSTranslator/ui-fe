@@ -182,7 +182,6 @@ const ProjectDetailInner = () => {
                   Add New Query
                 </Button>
                 <Tabs 
-                  isOpen={true}
                   handleOutsideTabListClick={handleOutsideTabListClick}
                   defaultActiveTab={queriesTabHeading}
                   className={styles.projectTabs}
