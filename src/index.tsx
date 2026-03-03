@@ -13,7 +13,6 @@ const Home = lazy(() => import('@/pageRoutes/Home/Home'));
 const Results = lazy(() => import('@/pageRoutes/Results/Results'));
 const History = lazy(() => import('@/pageRoutes/History/History'));
 const Terms = lazy(() => import('@/pageRoutes/Terms/Terms'));
-const Workspace = lazy(() => import('@/pageRoutes/Workspace/Workspace'));
 const Projects = lazy(() => import('@/pageRoutes/Projects/Projects'));
 const ProjectDetail = lazy(() => import('@/pageRoutes/ProjectDetail/ProjectDetail'));
 const Queries = lazy(() => import('@/pageRoutes/Queries/Queries'));
@@ -165,10 +164,6 @@ const routes = [
   {
     path: "history",
     element: <Page title="History"><Suspense fallback={<LoadingWrapper />}><History /></Suspense></Page>
-  },
-  {
-    path: "workspace",
-    element: <Page title="User Workspace"><Suspense fallback={<LoadingWrapper />}><Workspace /></Suspense></Page>
   },
   {
     path: "projects",
