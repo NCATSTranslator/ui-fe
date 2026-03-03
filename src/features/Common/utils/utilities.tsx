@@ -25,7 +25,7 @@ import { Location as RouterLocation } from 'react-router-dom';
  * @param {string} category - The category to retrieve an icon for.
  * @returns {ReactNode} - The icon for the category.
  */
-export const getIcon = (category: string): ReactNode => {
+export const getNodeIcon = (category: string): ReactNode => {
   var icon = <Chemical/>;
   switch(category) {
     case 'biolink:Gene':

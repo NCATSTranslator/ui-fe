@@ -1,7 +1,7 @@
 import { FC, ReactNode } from "react";
 import styles from './ResultItemName.module.scss';
 import { Result, ResultNode } from "@/features/ResultList/types/results.d";
-import { formatBiolinkNode, getIcon, getFormattedPathfinderName } from "@/features/Common/utils/utilities";
+import { formatBiolinkNode, getNodeIcon, getFormattedPathfinderName } from "@/features/Common/utils/utilities";
 import Highlighter from "react-highlight-words";
 import ArrowIcon from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 
@@ -22,10 +22,10 @@ const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subject
     return null;
   }
 
-  const icon: ReactNode = getIcon(subjectNode.types[0]);
+  const icon: ReactNode = getNodeIcon(subjectNode.types[0]);
   const pathfinderNameArray = (isPathfinder) ? item.drug_name.split("/") : null;
   const subjectIcon: ReactNode | null = subjectNode?.types.length > 0 ? icon : null;
-  const objectIcon: ReactNode | null = objectNode?.types.length > 0 ? getIcon(objectNode.types[0]) : null;
+  const objectIcon: ReactNode | null = objectNode?.types.length > 0 ? getNodeIcon(objectNode.types[0]) : null;
 
   const getPFNameString = (index: number, isNotLastItem: boolean, name: string, subject: ResultNode, object: ResultNode ) => {
     let pfNameString = "";
@@ -61,7 +61,7 @@ const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subject
                     }
                     {
                       i !== 0 && isNotLastItem &&
-                      getIcon(originalBiolinkName)
+                      getNodeIcon(originalBiolinkName)
                     }
                     <Highlighter
                       highlightClassName="highlight"

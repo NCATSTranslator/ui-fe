@@ -3,7 +3,7 @@ import { FC, RefObject, useContext, useId } from 'react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
-import { formatBiolinkEntity, formatBiolinkNode, getIcon, joinClasses } from '@/features/Common/utils/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getNodeIcon, joinClasses } from '@/features/Common/utils/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from '@/features/ResultItem/components/Predicate/Predicate';
 import { Path, PathFilterState, isResultNode, ResultNode, isResultEdge } from '@/features/ResultList/types/results.d';
@@ -121,7 +121,7 @@ const PathObject: FC<PathObjectProps> = ({
                 <div className={`${styles.background} ${pathViewStyles && pathViewStyles.background}`}></div>
               </div>
               <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
-                {getIcon(pathObject?.types[0])}
+                {getNodeIcon(pathObject?.types[0])}
                 <span className={styles.text}>
                   <Highlighter
                     highlightClassName="highlight"
