@@ -147,7 +147,7 @@ export const getFilterLabel = (filter: Filter | FilterFamily): string => {
   switch(typeof filter === 'string' ? filter as FilterFamily : getFilterFamily(filter)) {
     case "cc":   return "Development Stage";
     case "pc":   return "Objects within Paths";
-    case "di":   return "CT Indications";
+    case "di":   return "Clinical Trial Indications";
     case "ara":  return "Reasoning Agent";
     case "role": return "Chemical Classification";
     case "pt":   return "Path Length";
