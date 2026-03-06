@@ -340,7 +340,7 @@ const ResultItem: FC<ResultItemProps> = ({
                 setGraphActive(false);
             }}
           >
-            <Tab heading="Paths">
+            <Tab heading="Paths" className={styles.pathsTabContent}>
               <PathView
                 active={isExpanded}
                 activeEntityFilters={activeEntityFilters}
