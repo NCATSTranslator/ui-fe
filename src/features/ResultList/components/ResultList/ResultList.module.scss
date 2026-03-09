@@ -3,6 +3,7 @@
 .resultList {
   margin-bottom: $s;
   padding: 0 0 $s;
+  position: relative;
   .resultsContainer {
     display: grid;
     column-gap: $l;

@@ -35,6 +35,7 @@ import useSidebarPanels from "@/features/ResultList/hooks/useSidebarPanels";
 import { useUserQueries, useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import { ResultListProvider, ResultListContextValue } from "@/features/ResultList/context/ResultListContext";
+import NodeInformationView from "@/features/NodeInformationView/components/NodeInformationView/NodeInformationView";
 
 const ResultList = () => {
 
@@ -137,7 +138,7 @@ const ResultList = () => {
     rawResults, originalResults, prevRawResults,
     isFetchingARAStatus, setIsFetchingARAStatus, isFetchingResults, setIsFetchingResults,
     numberOfStatusChecks, firstLoad,
-    recalculateScores, handleResultsRefresh,
+    recalculateScores, handleResultsRefresh
   } = useResultsData({
     currentQueryID, currentQuerySid, isPathfinder,
     presetIsLoading, initialResultSet: resultSet, nodeIdParam,
@@ -450,7 +451,7 @@ const ResultList = () => {
     availableFilters, handleFilter, isPathfinder, pathFilterState,
     currentQueryID, nodeIdParam, nodeLabelParam, nodeDescription,
     presetTypeObject, resultsComplete, scoreWeights,
-    showHiddenPaths, zoomKeyDown,
+    showHiddenPaths, zoomKeyDown
   ]);
 
   return (
@@ -576,6 +577,11 @@ const ResultList = () => {
             </ResultListProvider>
           }
         </div>
+        <NodeInformationView
+          backFunction={() => {}}
+          backLabel="Back to Results"
+          node={null}
+        />
       </div>
     </>
   );
