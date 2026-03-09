@@ -6,7 +6,7 @@ import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import { formatBiolinkEntity, formatBiolinkNode, getNodeIcon, joinClasses } from '@/features/Common/utils/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from '@/features/ResultItem/components/Predicate/Predicate';
-import { Path, PathFilterState, isResultNode, ResultNode, isResultEdge } from '@/features/ResultList/types/results.d';
+import { Path, PathFilterState, isResultNode, isResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getNodeSpecies, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
@@ -21,7 +21,6 @@ export interface PathObjectProps {
   className?: string;
   handleActivateEvidence?: (path: Path, pathKey: string) => void;
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleNodeClick: (name: ResultNode) => void;
   id: string | string[];
   index: number;
   inModal?: boolean;
@@ -43,7 +42,6 @@ const PathObject: FC<PathObjectProps> = ({
   className = "",
   handleActivateEvidence = ()=>{},
   handleEdgeClick,
-  handleNodeClick,
   id,
   index,
   inModal = false,
@@ -105,6 +103,12 @@ const PathObject: FC<PathObjectProps> = ({
     isHighlighted && styles.highlighted
   );
 
+
+  const handleNodeClick = (node: ResultNode ) => {
+    if(Array.isArray(node.provenance) && node.provenance[0].length > 0 && node.provenance[0].includes("http"))
+      window.open(node.provenance[0], '_blank');
+  }
+
   return (
     <>
       {
@@ -160,7 +164,6 @@ const PathObject: FC<PathObjectProps> = ({
                   uid={uid}
                   handleActivateEvidence={handleActivateEvidence}
                   handleEdgeClick={handleEdgeClick}
-                  handleNodeClick={handleNodeClick}
                   hoverHandlers={hoverHandlers}
                   parentClass={styles.predicateContainer}
                   inModal={inModal}

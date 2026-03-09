@@ -29,7 +29,6 @@ interface PathContainerProps {
   compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
   handleActivateEvidence: (path: Path, pathKey: string) => void;
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleNodeClick: (name: ResultNode) => void;
   activeEntityFilters: string[];
   selectedPaths: Set<Path> | null;
   pathFilterState: PathFilterState;
@@ -52,7 +51,6 @@ const PathContainer: FC<PathContainerProps> = ({
   compressedSubgraph,
   handleActivateEvidence,
   handleEdgeClick,
-  handleNodeClick,
   activeEntityFilters,
   selectedPaths,
   pathFilterState,
@@ -184,7 +182,6 @@ const PathContainer: FC<PathContainerProps> = ({
                             parentPathKey={(indexInFullCollection + 1).toString()}
                             id={edge.id}
                             key={key}
-                            handleNodeClick={() => { console.log("evidence modal node clicked!") }}
                             handleEdgeClick={handleEdgeClick}
                             pathFilterState={{}}
                             activeFilters={[]}
@@ -228,7 +225,6 @@ const PathContainer: FC<PathContainerProps> = ({
                     parentPathKey={(indexInFullCollection + 1).toString()}
                     id={key}
                     key={key}
-                    handleNodeClick={() => { console.log("evidence modal node clicked!") }}
                     handleEdgeClick={handleEdgeClick}
                     pathFilterState={{}}
                     activeFilters={[]}
@@ -272,7 +268,6 @@ const PathContainer: FC<PathContainerProps> = ({
                     key={key}
                     handleActivateEvidence={handleActivateEvidence}
                     handleEdgeClick={handleEdgeClick}
-                    handleNodeClick={handleNodeClick}
                     activeEntityFilters={activeEntityFilters}
                     selectedPaths={selectedPaths}
                     pathFilterState={pathFilterState}

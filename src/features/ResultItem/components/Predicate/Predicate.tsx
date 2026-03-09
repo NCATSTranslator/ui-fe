@@ -11,7 +11,7 @@ import { getCompressedEdge, hasSupport, joinClasses } from '@/features/Common/ut
 import { checkEdgesForClinicalTrials, checkEdgesForPubs, getEvidenceFromEdge } from '@/features/Evidence/utils/utilities';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import SupportPathGroup from '@/features/ResultItem/components/SupportPathGroup/SupportPathGroup';
-import { Path, PathFilterState, ResultEdge, ResultNode } from '@/features/ResultList/types/results';
+import { Path, PathFilterState, ResultEdge } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
@@ -26,7 +26,6 @@ interface PredicateProps {
   className?: string;
   handleActivateEvidence: (path: Path, pathKey: string) => void;
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleNodeClick: (name: ResultNode) => void;
   hoverHandlers?: {
     onMouseEnter: () => void;
     onMouseLeave: () => void;
@@ -59,7 +58,6 @@ const Predicate: FC<PredicateProps> = ({
   edgeIds,
   handleActivateEvidence,
   handleEdgeClick,
-  handleNodeClick,
   hoverHandlers,
   inModal = false,
   isEven = false,
@@ -276,7 +274,6 @@ const Predicate: FC<PredicateProps> = ({
           pathViewStyles={pathViewStyles}
           handleActivateEvidence={handleActivateEvidence}
           handleEdgeClick={handleEdgeClick}
-          handleNodeClick={handleNodeClick}
           selectedPaths={selectedPaths}
           activeEntityFilters={activeEntityFilters}
           activeFilters={activeFilters}

@@ -95,12 +95,6 @@ const PathView: FC<PathViewProps> = ({
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
 
-  const handleNodeClick = useCallback((name: ResultNode ) => {
-    console.log("handle name click", name);
-    if(Array.isArray(name.provenance) && name.provenance[0].length > 0 && name.provenance[0].includes("http"))
-      window.open(name.provenance[0], '_blank');
-  },[]);
-
   const handleEdgeClick = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
     setLastViewedPathID(path?.id || null);
     handleEdgeSpecificEvidence(edgeIDs, path, pathKey);
@@ -165,7 +159,6 @@ const PathView: FC<PathViewProps> = ({
                           compressedSubgraph={compressedSubgraph}
                           handleActivateEvidence={handleActivateEvidence}
                           handleEdgeClick={handleEdgeClick}
-                          handleNodeClick={handleNodeClick}
                           activeEntityFilters={activeEntityFilters}
                           selectedPaths={selectedPaths}
                           pathFilterState={pathFilterState}

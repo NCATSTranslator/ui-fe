@@ -3,7 +3,7 @@ import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { PathFilterState, Path, ResultNode } from '@/features/ResultList/types/results.d';
+import { PathFilterState, Path } from '@/features/ResultList/types/results.d';
 import { joinClasses, numberToWords } from '@/features/Common/utils/utilities';
 import { extractEdgeIDsFromSubgraph, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
@@ -16,7 +16,6 @@ interface SupportPathProps {
   activeFilters: Filter[];
   character: string;
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleNodeClick: (name: ResultNode) => void;
   handleActivateEvidence: (path: Path, pathKey: string) => void;
   isEven: boolean;
   path: Path;
@@ -31,13 +30,12 @@ const SupportPath: FC<SupportPathProps> = ({
   activeEntityFilters, 
   activeFilters, 
   character,
-  handleEdgeClick, 
-  handleNodeClick, 
+  handleEdgeClick,
   handleActivateEvidence,
   isEven = false,
   path,
-  pathFilterState, 
-  pathViewStyles, 
+  pathFilterState,
+  pathViewStyles,
   pk,
   selectedPaths,
   showHiddenPaths }) => {
@@ -129,7 +127,6 @@ const SupportPath: FC<SupportPathProps> = ({
                           key={key}
                           handleActivateEvidence={handleActivateEvidence}
                           handleEdgeClick={handleEdgeClick}
-                          handleNodeClick={handleNodeClick}
                           activeEntityFilters={activeEntityFilters}
                           selectedPaths={selectedPaths}
                           pathFilterState={pathFilterState}
@@ -156,7 +153,6 @@ const SupportPath: FC<SupportPathProps> = ({
                           key={subgraphItemID}
                           handleActivateEvidence={handleActivateEvidence}
                           handleEdgeClick={handleEdgeClick}
-                          handleNodeClick={handleNodeClick}
                           activeEntityFilters={activeEntityFilters}
                           selectedPaths={selectedPaths}
                           pathFilterState={pathFilterState}

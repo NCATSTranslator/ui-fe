@@ -6,7 +6,7 @@ import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import { sortSupportByEntityStrings, sortSupportByLength } from '@/features/Common/utils/sortingFunctions';
-import { Path, PathFilterState, ResultNode } from '@/features/ResultList/types/results';
+import { Path, PathFilterState } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { intToChar, isStringArray, intToNumeral } from '@/features/Common/utils/utilities';
 import { getPathsWithSelectionsSet, getFilteredPathCount, getIsPathFiltered, getPathIdSet } from '@/features/ResultItem/utils/utilities';
@@ -23,7 +23,6 @@ interface SupportPathGroupProps {
   activeEntityFilters: string[];
   handleActivateEvidence: (path: Path, pathKey: string) => void;
   handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleNodeClick: (name: ResultNode) => void;
   isExpanded: boolean;
   isEven: boolean;
   parentPathKey: string;
@@ -40,7 +39,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   activeEntityFilters, 
   handleActivateEvidence, 
   handleEdgeClick, 
-  handleNodeClick, 
   isExpanded,
   isEven = false,
   parentPathKey,
@@ -138,7 +136,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                     pathFilterState={pathFilterState}
                     path={supportPath}
                     handleEdgeClick={handleEdgeClick}
-                    handleNodeClick={handleNodeClick}
                     handleActivateEvidence={handleActivateEvidence}
                     selectedPaths={selectedPaths}
                     pathViewStyles={pathViewStyles}
