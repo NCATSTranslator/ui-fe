@@ -4,7 +4,7 @@ import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQ
   restoreProjects, restoreQueries, touchQuery, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, 
   SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
-import { fetcNodeNameFromCurie } from '@/features/Projects/utils/utilities';
+import { fetchNodeNameFromCurie } from '@/features/Projects/utils/utilities';
 import { extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, generateQueryTitle,
   createUpdatedQueryWithTitle, findAllCuriesInTitle } from '@/features/Projects/utils/queryTitleUtils';
 import { useSelector } from 'react-redux';
@@ -289,7 +289,7 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
       await Promise.all(
         curies.map(async (curie) => {
           try {
-            const name = await fetcNodeNameFromCurie(curie);
+            const name = await fetchNodeNameFromCurie(curie);
             results[curie] = name;
           } catch (error) {
             console.error(`Failed to resolve curie ${curie}:`, error);
