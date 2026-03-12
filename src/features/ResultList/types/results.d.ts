@@ -126,10 +126,10 @@ export type ChebiRole = {
 
 export type ChemicalAnnotation = {
   approval: number | null;
-  clinical_trials: {title: string, url: string}[] | null;
+  clinical_trials: string[] | null;
   descriptions: string[] | null;
   indications: string[] | null;
-  otc_status: number | null;
+  otc_status: {code: number, label: string} | null;
   other_names: {commercial: string[], generic: string[]} | null;
   roles: ChebiRole[] | null;
 }
@@ -286,11 +286,10 @@ export const isResultNode = (obj: unknown): obj is ResultNode => {
     return (
       tc.isObject (obj) &&
       tc.nullable(obj.approval, tc.isNumber) &&
-      tc.nullable(obj.clinical_trials,
-        tc.makeIsHomogeneousArray(e => tc.isObject(e) && tc.isString(e.title) && tc.isString(e.url))) &&
+      tc.nullable(obj.clinical_trials, tc.isStringArray) &&
       tc.nullable(obj.descriptions, tc.isStringArray) &&
       tc.nullable(obj.indications, tc.isStringArray) &&
-      tc.nullable(obj.otc_status, tc.isNumber) &&
+      tc.nullable(obj.otc_status, (e) => tc.isObject(e) && tc.isNumber(e.code) && tc.isString(e.label)) &&
       tc.nullable(obj.other_names,
         e => tc.isObject(e) && tc.isStringArray(e.commercial) && tc.isStringArray(e.generic)) &&
       tc.nullable(obj.roles,
