@@ -3,7 +3,7 @@ import { useCallback, useState, useRef, useEffect, Dispatch, SetStateAction, use
 import { PublicationObject, SortPreference, TableState, Provenance, TrialObject } from "@/features/Evidence/types/evidence";
 import { Preferences } from "@/features/UserAuth/types/user";
 import { PubmedMetadataMap } from "@/features/Evidence/types/evidence";
-import { cloneDeep, chunk } from "lodash";
+import { cloneDeep, chunk, isEqual } from "lodash";
 import { useQuery } from "@tanstack/react-query";
 import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateTitle,
   isPublication, getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";
@@ -551,4 +551,44 @@ export const useEvidenceModalState = ({ edge, pk }: UseEvidenceModalStateProps) 
     setEdgeLabel,
     setIsPathViewMinimized,
   };
-}; 
+};
+
+interface UseEdgeInitializationProps {
+  edgeId: string | undefined;
+  resolvedEdge: ResultEdge | null;
+  resultSet: ResultSet | null | undefined;
+  setSelectedEdge: (edge: ResultEdge) => void;
+  handleEvidenceData: (resultSet: ResultSet, edge: ResultEdge) => void;
+  markEdgeSeen: (id: string) => void;
+}
+
+/**
+ * Custom hook to initialize and sync the selected edge when the edgeId param changes.
+ * Prevents re-initialization for the same edgeId by tracking the last processed value.
+ * @param {string | undefined} edgeId - The edge ID to initialize.
+ * @param {ResultEdge | null} resolvedEdge - The resolved edge object.
+ * @param {ResultSet | null | undefined} resultSet - The result set containing the edge data.
+ * @param {Function} setSelectedEdge - Function to set the selected edge.
+ * @param {Function} handleEvidenceData - Function to handle the evidence data.
+ * @param {Function} markEdgeSeen - Function to mark the edge as seen.
+ * @returns {void} - This function does not return a value but updates the state directly.
+ */
+export const useEdgeInitialization = ({
+  edgeId,
+  resolvedEdge,
+  resultSet,
+  setSelectedEdge,
+  handleEvidenceData,
+  markEdgeSeen,
+}: UseEdgeInitializationProps) => {
+  const lastInitEdge = useRef<ResultEdge | null>(null);
+
+  useEffect(() => {
+    if ((resolvedEdge && resultSet) && !isEqual(lastInitEdge.current, resolvedEdge)) {
+      setSelectedEdge(resolvedEdge);
+      handleEvidenceData(resultSet, resolvedEdge);
+      markEdgeSeen(resolvedEdge.id);
+      lastInitEdge.current = resolvedEdge;
+    }
+  }, [edgeId, resolvedEdge, resultSet, setSelectedEdge, handleEvidenceData, markEdgeSeen]);
+};

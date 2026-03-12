@@ -1,0 +1,50 @@
+@use "@/assets/styles/variables" as *;
+
+.evidenceView {
+  padding: 0 $m $m;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+}
+
+.title {
+  margin-bottom: 0;
+  font-weight: 800;
+}
+
+.labelContainer {
+  display: flex;
+  align-items: center;
+}
+
+.subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: $black;
+  margin-bottom: 0;
+}
+
+.sep {
+  margin: 0 8px;
+  font-size: 14px;
+  color: $darkGray;
+  font-weight: 800;
+}
+
+.toggleSeen {
+  color: $purpleOne;
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 0;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.inferredDisclaimer {
+  text-align: center;
+  display: grid;
+  align-content: center;
+  padding: $l;
+}
