@@ -1,15 +1,12 @@
 import { FC, Dispatch, SetStateAction, RefObject } from "react";
-import EvidenceModal from "@/features/Evidence/components/EvidenceModal/EvidenceModal";
 import NotesModal from "@/features/ResultItem/components/NotesModal/NotesModal";
 import ShareModal from "@/features/ResultList/components/ShareModal/ShareModal";
 import ResultFocusModal from "@/features/ResultList/components/ResultFocusModal/ResultFocusModal";
-import { handleEvidenceModalClose } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { Path, Result, ResultEdge, SharedItem } from "@/features/ResultList/types/results.d";
+import { SharedItem } from "@/features/ResultList/types/results.d";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 
 interface ResultListModalsProps {
   currentBookmarkID: string | null;
-  evidenceModalOpen: boolean;
   focusModalOpen: boolean;
   formattedResultsLength: number;
   handlePageClick: (event: {selected: number}, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
@@ -18,16 +15,11 @@ interface ResultListModalsProps {
   onCloseNotesModal: () => void;
   pk: string;
   presetTypeID: string;
-  selectedEdge: ResultEdge | null; 
-  selectedPath: Path | null;
-  selectedPathKey: string;
-  selectedResult: Result | null; 
   setAutoScrollToResult: Dispatch<SetStateAction<boolean>>;
   setExpandSharedResult: Dispatch<SetStateAction<boolean>>;
-  setEvidenceModalOpen: Dispatch<SetStateAction<boolean>>;
   setFocusModalOpen: Dispatch<SetStateAction<boolean>>;
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
-  sharedItem: SharedItem; 
+  sharedItem: SharedItem;
   shareModalOpen: boolean;
   shareResultID: string;
   shouldUpdateResultsAfterBookmark: RefObject<boolean>;
@@ -36,7 +28,6 @@ interface ResultListModalsProps {
 
 const ResultListModals: FC<ResultListModalsProps> = ({
   currentBookmarkID,
-  evidenceModalOpen,
   focusModalOpen,
   formattedResultsLength,
   handlePageClick,
@@ -45,13 +36,8 @@ const ResultListModals: FC<ResultListModalsProps> = ({
   onCloseNotesModal,
   pk,
   presetTypeID,
-  selectedEdge,
-  selectedPath,
-  selectedPathKey,
-  selectedResult,
   setAutoScrollToResult,
   setExpandSharedResult,
-  setEvidenceModalOpen,
   setFocusModalOpen,
   setShareModalOpen,
   sharedItem,
@@ -75,15 +61,6 @@ const ResultListModals: FC<ResultListModalsProps> = ({
         currentBookmarkID={currentBookmarkID}
         updateUserSaves={updateUserSaves}
         shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
-      />
-      <EvidenceModal
-        isOpen={evidenceModalOpen}
-        onClose={()=>handleEvidenceModalClose(setEvidenceModalOpen)}
-        result={selectedResult}
-        edge={selectedEdge}
-        path={selectedPath}
-        pathKey={selectedPathKey}
-        pk={pk}
       />
       <ResultFocusModal
         isOpen={focusModalOpen}

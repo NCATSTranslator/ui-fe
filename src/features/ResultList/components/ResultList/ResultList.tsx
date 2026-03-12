@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, useMemo, RefObject } from "react";
+import { useRef, useCallback, useEffect, useMemo, FC, ReactNode } from "react";
 import styles from './ResultList.module.scss';
 import Query from "@/features/Query/components/Query/Query";
 import ResultItem from "@/features/ResultItem/components/ResultItem/ResultItem";
@@ -21,7 +21,6 @@ import { Filter } from "@/features/ResultFiltering/types/filters";
 import useScoreWeights from "@/features/ResultList/hooks/useScoreWeights";
 import { useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
 import useZoomKey from "@/features/ResultList/hooks/useZoomKey";
-import useEvidenceModal from "@/features/ResultList/hooks/useEvidenceModal";
 import useSortState from "@/features/ResultList/hooks/useSortState";
 import usePagination from "@/features/ResultList/hooks/usePagination";
 import useShareState from "@/features/ResultList/hooks/useShareState";
@@ -35,9 +34,16 @@ import useSidebarPanels from "@/features/ResultList/hooks/useSidebarPanels";
 import { useUserQueries, useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import { ResultListProvider, ResultListContextValue } from "@/features/ResultList/context/ResultListContext";
-import NodeInformationView from "@/features/NodeInformationView/components/NodeInformationView/NodeInformationView";
+import useEvidenceViewNavigation from "@/features/ResultList/hooks/useEvidenceViewNavigation";
+import { useResultsNavigate } from "@/features/Navigation/hooks/useResultsNavigate";
+import { useParams } from "react-router-dom";
 
-const ResultList = () => {
+interface ResultListProps {
+  children?: ReactNode;
+  hidden?: boolean;
+}
+
+const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
 
   const user = useSelector(currentUser);
   const prefs = useSelector(currentPrefs);
@@ -80,17 +86,14 @@ const ResultList = () => {
   // start with user pref or default to score high low as default sort
   const initSortString: string = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
 
-  // Evidence modal state management via hook
+  // Route params and navigation available to child components via context
+  const { resultId } = useParams();
+  const resultsNavigate = useResultsNavigate();
+
+  // Evidence navigation via hook
   const {
-    evidenceModalOpen,
-    setEvidenceModalOpen,
-    selectedResult,
-    selectedEdge,
-    selectedPath,
-    selectedPathKey,
-    activateEvidence,
-    resetEvidenceModal,
-  } = useEvidenceModal(resultSet);
+    navigateToEvidenceView,
+  } = useEvidenceViewNavigation();
 
   const { scoreWeights, noveltyBoost, handleToggleNoveltyBoost } = useScoreWeights({
     onWeightsChange: (newWeights: ScoreWeights) => {
@@ -125,7 +128,6 @@ const ResultList = () => {
   const activeFiltersRef = useRef<Filter[]>([]);
   const resultIdParamRef = useRef<string | null>(null);
   const itemsPerPageRef = useRef<number>(0);
-  const decodedParamsRef = useRef<string>(decodedParams);
 
   // Data lifecycle hook — state, refs, fetching, and data processing
   const {
@@ -170,15 +172,12 @@ const ResultList = () => {
     sharedItem,
     setSharedItem,
     setAutoScrollToResult,
-    expandSharedResult,
     setExpandSharedResult,
-    sharedItemRef,
     shareModalOpen,
     setShareModalOpen,
     focusModalOpen,
     setFocusModalOpen,
     resultIdParam,
-    setResultIdParam,
     resetShareState,
   } = useShareState({
     initialResultIdParam: getDataFromQueryVar("r", decodedParams),
@@ -234,12 +233,10 @@ const ResultList = () => {
   activeFiltersRef.current = activeFilters;
   resultIdParamRef.current = resultIdParam;
   itemsPerPageRef.current = itemsPerPage;
-  decodedParamsRef.current = decodedParams;
 
   // Reset state when the query ID changes (e.g., navigating to a different query)
   useQueryChangeReset({
     currentQueryID,
-    decodedParamsRef,
     itemsPerPageRef,
     prevQueryID,
     rawResults,
@@ -259,11 +256,9 @@ const ResultList = () => {
     setResultStatus,
     setItemOffset,
     setEndResultIndex,
-    resetEvidenceModal,
     closeNotesModal: closeNotes,
     resetShareState,
     resetBookmarks,
-    setResultIdParam,
     setNodeDescription,
   });
 
@@ -420,7 +415,7 @@ const ResultList = () => {
   }), [formattedResults, itemOffset, endResultIndex, pageCount, handlePageClick, noveltyBoost, handleToggleNoveltyBoost]);
 
   const resultListContextValue: ResultListContextValue = useMemo(() => ({
-    activateEvidence,
+    navigateToEvidenceView,
     activateNotes,
     activeEntityFilters,
     activeFilters,
@@ -432,6 +427,8 @@ const ResultList = () => {
     isPathfinder,
     pathFilterState,
     pk: currentQueryID,
+    resultId,
+    resultsNavigate,
     queryNodeID: nodeIdParam,
     queryNodeLabel: nodeLabelParam,
     queryNodeDescription: nodeDescription,
@@ -447,143 +444,132 @@ const ResultList = () => {
     updateUserSaves: setUserSaves,
     zoomKeyDown,
   }), [
-    activateEvidence, activateNotes, activeEntityFilters, activeFilters,
-    availableFilters, handleFilter, isPathfinder, pathFilterState,
-    currentQueryID, nodeIdParam, nodeLabelParam, nodeDescription,
+    activateNotes, activeEntityFilters, activeFilters, availableFilters,
+    handleFilter, isPathfinder, pathFilterState, currentQueryID,
+    resultId, resultsNavigate, navigateToEvidenceView,
+    nodeIdParam, nodeLabelParam, nodeDescription,
     presetTypeObject, resultsComplete, scoreWeights,
     showHiddenPaths, zoomKeyDown
   ]);
 
   return (
-    <>
-      <ResultListModals
-        shareResultID={shareResultID.current ? shareResultID.current : ""}
-        presetTypeID={presetTypeID ? presetTypeID : ""}
-        handlePageClick={handlePageClick}
-        shareModalOpen={shareModalOpen}
-        setShareModalOpen={setShareModalOpen}
-        notesModalOpen={notesModalOpen}
-        onCloseNotesModal={closeNotes}
-        noteLabel={noteLabel}
-        currentBookmarkID={currentBookmarkID}
-        pk={currentQueryID ? currentQueryID : ""}
-        focusModalOpen={focusModalOpen}
-        setFocusModalOpen={setFocusModalOpen}
-        evidenceModalOpen={evidenceModalOpen}
-        setEvidenceModalOpen={setEvidenceModalOpen}
-        selectedEdge={selectedEdge}
-        selectedResult={selectedResult}
-        selectedPath={selectedPath}
-        selectedPathKey={selectedPathKey}
-        sharedItem={sharedItem}
-        formattedResultsLength={formattedResults.length}
-        setExpandSharedResult={setExpandSharedResult}
-        setAutoScrollToResult={setAutoScrollToResult}
-        shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
-        updateUserSaves={setUserSaves}
-      />
-      <div className={styles.resultList}>
-        {
-          isPathfinder
-          ?
-            <QueryPathfinder
-              isResults
-              setShareModalFunction={setShareModalOpen}
-              pk={!!currentQueryID ? currentQueryID : ""}
-            />
-          :
-            <Query
-              isResults
-              loading={isLoading}
-              initPresetTypeObject={presetTypeObject}
-              initNodeIdParam={nodeIdParam}
-              initNodeLabelParam={nodeLabelParam}
-              nodeDescription={nodeDescription}
-              setShareModalFunction={setShareModalOpen}
-              pk={!!currentQueryID ? currentQueryID : ""}
-            />
-        }
-        <div className={`${styles.resultsContainer} container`}>
-          {
-            isLoading &&
-            <ResultListLoadingArea />
-          }
-          {
-            !isLoading &&
-            <ResultListProvider value={resultListContextValue}>
-              <div>
-                <ResultListHeader data={headerData} />
-                <div className={`${styles.resultsTableContainer} ${isPathfinder ? styles.pathfinder : ''}`}>
-                  <div className={styles.resultsTable}>
-                    <div className={styles.tableBody}>
-                      <ResultListTableHead
-                        parentStyles={styles}
-                        currentSortString={currentSortString}
-                        isSortedByEvidence={isSortedByEvidence}
-                        isSortedByName={isSortedByName}
-                        isSortedByPaths={isSortedByPaths}
-                        isSortedByScore={isSortedByScore}
-                        handleUpdateResults={handleSortUpdate}
-                      />
-                      {
-                        isError &&
-                        <h5 className={styles.errorText}>There was an error when processing your query. Please try again.</h5>
-                      }
-                      {
-                        !isLoading &&
-                        !isError &&
-                        displayedResults.length === 0 &&
-                        <h5 className={styles.errorText}>No results available.</h5>
-                      }
-                      {
-                        !isLoading &&
-                        !isError &&
-                        displayedResults.length > 0 &&
-                        displayedResults.map((item, i) => {
-                          const result = getResultById(resultSet, item.id);
-                          if(!result || !pathFilterState)
-                            return null;
-
-                          const bookmarkItem = userSaves?.saves.get(item.id) ?? null;
-                          return (
-                            <ResultItem
-                              key={item.id}
-                              result={result}
-                              isEven={i % 2 !== 0}
-                              bookmarkItem={bookmarkItem}
-                              sharedItemRef={item.id === resultIdParam ? sharedItemRef as RefObject<HTMLDivElement> : null}
-                              startExpanded={item.id === resultIdParam && expandSharedResult}
-                            />
-                          )
-                        })
-                      }
-                    </div>
-                  </div>
-                  {
-                    formattedResults.length > 0 &&
-                    <ResultListBottomPagination
-                      parentStyles={styles}
-                      itemsPerPage={itemsPerPage}
-                      setItemsPerPage={setItemsPerPage}
-                      handlePageReset={handlePageReset}
-                      handlePageClick={handlePageClick}
-                      formattedResultsLength={formattedResults.length}
-                      pageCount={pageCount}
-                      currentPage={currentPage.current}
-                    />
-                  }
-                </div>
-              </div>
-            </ResultListProvider>
-          }
-        </div>
-        <NodeInformationView
-          backFunction={() => {}}
-          backLabel="Back to Results"
-          node={null}
+    <ResultListProvider value={resultListContextValue}>
+      <div className={hidden ? styles.hidden : ''}>
+        <ResultListModals
+          shareResultID={shareResultID.current ? shareResultID.current : ""}
+          presetTypeID={presetTypeID ? presetTypeID : ""}
+          handlePageClick={handlePageClick}
+          shareModalOpen={shareModalOpen}
+          setShareModalOpen={setShareModalOpen}
+          notesModalOpen={notesModalOpen}
+          onCloseNotesModal={closeNotes}
+          noteLabel={noteLabel}
+          currentBookmarkID={currentBookmarkID}
+          pk={currentQueryID ? currentQueryID : ""}
+          focusModalOpen={focusModalOpen}
+          setFocusModalOpen={setFocusModalOpen}
+          sharedItem={sharedItem}
+          formattedResultsLength={formattedResults.length}
+          setExpandSharedResult={setExpandSharedResult}
+          setAutoScrollToResult={setAutoScrollToResult}
+          shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
+          updateUserSaves={setUserSaves}
         />
+        <div className={styles.resultList}>
+          {
+            isPathfinder
+            ?
+              <QueryPathfinder
+                isResults
+                setShareModalFunction={setShareModalOpen}
+                pk={!!currentQueryID ? currentQueryID : ""}
+              />
+            :
+              <Query
+                isResults
+                loading={isLoading}
+                initPresetTypeObject={presetTypeObject}
+                initNodeIdParam={nodeIdParam}
+                initNodeLabelParam={nodeLabelParam}
+                nodeDescription={nodeDescription}
+                setShareModalFunction={setShareModalOpen}
+                pk={!!currentQueryID ? currentQueryID : ""}
+              />
+          }
+          <div className={`${styles.resultsContainer} container`}>
+            {
+              isLoading &&
+              <ResultListLoadingArea />
+            }
+            {
+              !isLoading &&
+                <div>
+                  <ResultListHeader data={headerData} />
+                  <div className={`${styles.resultsTableContainer} ${isPathfinder ? styles.pathfinder : ''}`}>
+                    <div className={styles.resultsTable}>
+                      <div className={styles.tableBody}>
+                        <ResultListTableHead
+                          parentStyles={styles}
+                          currentSortString={currentSortString}
+                          isSortedByEvidence={isSortedByEvidence}
+                          isSortedByName={isSortedByName}
+                          isSortedByPaths={isSortedByPaths}
+                          isSortedByScore={isSortedByScore}
+                          handleUpdateResults={handleSortUpdate}
+                        />
+                        {
+                          isError &&
+                          <h5 className={styles.errorText}>There was an error when processing your query. Please try again.</h5>
+                        }
+                        {
+                          !isLoading &&
+                          !isError &&
+                          displayedResults.length === 0 &&
+                          <h5 className={styles.errorText}>No results available.</h5>
+                        }
+                        {
+                          !isLoading &&
+                          !isError &&
+                          displayedResults.length > 0 &&
+                          displayedResults.map((item, i) => {
+                            const result = getResultById(resultSet, item.id);
+                            if(!result || !pathFilterState)
+                              return null;
+
+                            const bookmarkItem = userSaves?.saves.get(item.id) ?? null;
+                            return (
+                              <ResultItem
+                                key={item.id}
+                                result={result}
+                                isEven={i % 2 !== 0}
+                                bookmarkItem={bookmarkItem}
+                              />
+                            )
+                          })
+                        }
+                      </div>
+                    </div>
+                    {
+                      formattedResults.length > 0 &&
+                      <ResultListBottomPagination
+                        parentStyles={styles}
+                        itemsPerPage={itemsPerPage}
+                        setItemsPerPage={setItemsPerPage}
+                        handlePageReset={handlePageReset}
+                        handlePageClick={handlePageClick}
+                        formattedResultsLength={formattedResults.length}
+                        pageCount={pageCount}
+                        currentPage={currentPage.current}
+                      />
+                    }
+                  </div>
+                </div>
+            }
+          </div>
+        </div>
       </div>
-    </>
+      {children}
+    </ResultListProvider>
   );
 }
 

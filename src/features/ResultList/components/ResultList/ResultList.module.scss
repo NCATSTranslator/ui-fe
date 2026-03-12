@@ -1,5 +1,9 @@
    @use "@/assets/styles/variables" as *;
 
+.hidden {
+  display: none;
+}
+
 .resultList {
   margin-bottom: $s;
   padding: 0 0 $s;

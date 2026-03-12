@@ -5,7 +5,6 @@ import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { QueryType } from '@/features/Query/types/querySubmission';
 
 export interface ResultListContextValue {
-  activateEvidence: (item: Result, edgeIDs: string[], path: Path, pathKey: string) => void;
   activateNotes: (label: string, bookmarkId: string) => void;
   activeEntityFilters: string[];
   activeFilters: Filter[];
@@ -15,8 +14,11 @@ export interface ResultListContextValue {
   bookmarkRemovedToast: () => void;
   handleBookmarkError: () => void;
   isPathfinder: boolean;
+  navigateToEvidenceView: (item: Result, edgeIDs: string[], path: Path) => void;
   pathFilterState: PathFilterState | null;
   pk: string | null;
+  resultId: string | undefined;
+  resultsNavigate: (path: string, extraParams?: Record<string, string>) => void;
   queryNodeID: string | null;
   queryNodeLabel: string | null;
   queryNodeDescription: string | null;
